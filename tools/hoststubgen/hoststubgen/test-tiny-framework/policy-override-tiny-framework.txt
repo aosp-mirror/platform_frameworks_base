@@ -15,8 +15,3 @@ class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	stub
 
 # Class load hook
 class com/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy	~com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded
-
-
-class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithInitializer stubclass
-  # Testing 'throw' on a static initializer. This should be handled as 'keep'.
-  method <clinit>	()V	 throw

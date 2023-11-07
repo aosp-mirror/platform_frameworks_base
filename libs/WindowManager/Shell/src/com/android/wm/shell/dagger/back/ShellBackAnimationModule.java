@@ -38,6 +38,7 @@ public interface ShellBackAnimationModule {
         return new ShellBackAnimationRegistry(
                 crossActivity,
                 crossTask,
+                /* dialogCloseAnimation */ null,
                 customizeActivity,
                 /* defaultBackToHomeAnimation= */ null);
     }

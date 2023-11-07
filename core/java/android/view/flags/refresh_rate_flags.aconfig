@@ -15,6 +15,14 @@ flag {
 }
 
 flag {
+    name: "toolkit_set_frame_rate_read_only"
+    namespace: "toolkit"
+    description: "Feature flag for toolkit to set frame rate"
+    bug: "293512962"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "expected_presentation_time_api"
     namespace: "toolkit"
     description: "Feature flag for using expected presentation time of the Choreographer"

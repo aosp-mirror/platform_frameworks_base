@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,16 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
 }
 
+val androidTop : String = File(rootDir, "../../../../..").canonicalPath
+
 allprojects {
+    extra["androidTop"] = androidTop
     extra["jetpackComposeVersion"] = "1.6.0-alpha08"
 }
 
 subprojects {
+    layout.buildDirectory.set(file("$androidTop/out/gradle-spa/$name"))
+
     plugins.withType<AndroidBasePlugin> {
         configure<BaseExtension> {
             compileSdkVersion(34)
@@ -38,10 +43,11 @@ subprojects {
                 minSdk = 21
                 targetSdk = 34
             }
+        }
 
-            compileOptions {
-                sourceCompatibility = JavaVersion.VERSION_17
-                targetCompatibility = JavaVersion.VERSION_17
+        configure<JavaPluginExtension> {
+            toolchain {
+                languageVersion.set(JavaLanguageVersion.of(libs.versions.jvm.get()))
             }
         }
     }
@@ -60,7 +66,7 @@ subprojects {
 
     tasks.withType<KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "17"
+            jvmTarget = libs.versions.jvm.get()
             freeCompilerArgs = listOf("-Xjvm-default=all")
         }
     }

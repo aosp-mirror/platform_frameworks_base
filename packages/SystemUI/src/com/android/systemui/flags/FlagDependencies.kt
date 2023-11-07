@@ -28,7 +28,6 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
     FlagDependenciesBase(featureFlags, handler) {
     override fun defineDependencies() {
         FooterViewRefactor.token dependsOn NotificationIconContainerRefactor.token
-        NotificationIconContainerRefactor.token dependsOn Classic.NOTIFICATION_SHELF_REFACTOR
 
         // These two flags are effectively linked. We should migrate them to a single aconfig flag.
         Classic.MIGRATE_NSSL dependsOn Classic.MIGRATE_KEYGUARD_STATUS_VIEW

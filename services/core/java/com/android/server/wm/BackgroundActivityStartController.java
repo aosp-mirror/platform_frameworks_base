@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.START_ACTIVITIES_FROM_BACKGROUND;
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
@@ -53,6 +54,7 @@ import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.Preconditions;
 import com.android.server.UiThread;
 import com.android.server.am.PendingIntentRecord;
 
@@ -261,7 +263,13 @@ public class BackgroundActivityStartController {
             mIsCallingUidPersistentSystemProcess =
                     mCallingUidProcState <= ActivityManager.PROCESS_STATE_PERSISTENT_UI;
             mCallingUidHasAnyVisibleWindow = mService.hasActiveVisibleWindow(callingUid);
-            if (callingUid == realCallingUid) {
+            if (realCallingUid == NO_PROCESS_UID) {
+                // no process provided
+                mRealCallingUidProcState = PROCESS_STATE_NONEXISTENT;
+                mRealCallingUidHasAnyVisibleWindow = false;
+                mRealCallerApp = null;
+                mIsRealCallingUidPersistentSystemProcess = false;
+            } else if (callingUid == realCallingUid) {
                 mRealCallingUidProcState = mCallingUidProcState;
                 mRealCallingUidHasAnyVisibleWindow = mCallingUidHasAnyVisibleWindow;
                 // In the PendingIntent case callerApp is not passed in, so resolve it ourselves.
@@ -293,43 +301,64 @@ public class BackgroundActivityStartController {
             return name + "[debugOnly]";
         }
 
+        private boolean isPendingIntent() {
+            return mRealCallingUid != NO_PROCESS_UID;
+        }
+
+        private String dump(BalVerdict resultIfPiCreatorAllowsBal) {
+            Preconditions.checkState(!isPendingIntent());
+            return dump(resultIfPiCreatorAllowsBal, null);
+        }
+
         private boolean callerIsRealCaller() {
             return mCallingUid == mRealCallingUid;
         }
 
         private String dump(BalVerdict resultIfPiCreatorAllowsBal,
-                           BalVerdict resultIfPiSenderAllowsBal) {
-            return " [callingPackage: " + getDebugPackageName(mCallingPackage, mCallingUid)
-                    + "; callingUid: " + mCallingUid
-                    + "; appSwitchState: " + mAppSwitchState
-                    + "; callingUidHasAnyVisibleWindow: " + mCallingUidHasAnyVisibleWindow
-                    + "; callingUidProcState: " + DebugUtils.valueToString(
-                        ActivityManager.class, "PROCESS_STATE_", mCallingUidProcState)
-                    + "; isCallingUidPersistentSystemProcess: "
-                        + mIsCallingUidPersistentSystemProcess
-                    + "; balAllowedByPiCreator: " + mBalAllowedByPiCreator
-                    + "; balAllowedByPiSender: " + mBalAllowedByPiSender
-                    + "; realCallingPackage: "
-                        + getDebugPackageName(mRealCallingPackage, mRealCallingUid)
-                    + "; realCallingUid: " + mRealCallingUid
-                    + "; realCallingPid: " + mRealCallingPid
-                    + "; realCallingUidHasAnyVisibleWindow: " + mRealCallingUidHasAnyVisibleWindow
-                    + "; realCallingUidProcState: " + DebugUtils.valueToString(
-                        ActivityManager.class, "PROCESS_STATE_", mRealCallingUidProcState)
-                    + "; isRealCallingUidPersistentSystemProcess: "
-                        + mIsRealCallingUidPersistentSystemProcess
-                    + "; originatingPendingIntent: " + mOriginatingPendingIntent
-                    + "; backgroundStartPrivileges: " + mBackgroundStartPrivileges
-                    + "; intent: " + mIntent
-                    + "; callerApp: " + mCallerApp
-                    + "; realCallerApp: " + mRealCallerApp
-                    + "; inVisibleTask: "
-                        + (mCallerApp != null && mCallerApp.hasActivityInVisibleTask())
-                    + "; realInVisibleTask: "
-                        + (mRealCallerApp != null && mRealCallerApp.hasActivityInVisibleTask())
-                    + "; resultIfPiSenderAllowsBal: " + resultIfPiSenderAllowsBal
-                    + "; resultIfPiCreatorAllowsBal: " + resultIfPiCreatorAllowsBal
-                    + "]";
+                            BalVerdict resultIfPiSenderAllowsBal) {
+            StringBuilder sb = new StringBuilder(2048);
+            sb.append("[callingPackage: ")
+                    .append(getDebugPackageName(mCallingPackage, mCallingUid));
+            sb.append("; callingUid: ").append(mCallingUid);
+            sb.append("; callingPid: ").append(mCallingPid);
+            sb.append("; appSwitchState: ").append(mAppSwitchState);
+            sb.append("; callingUidHasAnyVisibleWindow: ").append(mCallingUidHasAnyVisibleWindow);
+            sb.append("; callingUidProcState: ").append(DebugUtils.valueToString(
+                    ActivityManager.class, "PROCESS_STATE_", mCallingUidProcState));
+            sb.append("; isCallingUidPersistentSystemProcess: ")
+                    .append(mIsCallingUidPersistentSystemProcess);
+            sb.append("; balAllowedByPiCreator: ").append(mBalAllowedByPiCreator);
+            if (!isPendingIntent()) {
+                sb.append("; balAllowedByPiSender: ").append(mBalAllowedByPiSender);
+                sb.append("; realCallingPackage: ")
+                        .append(getDebugPackageName(mRealCallingPackage, mRealCallingUid));
+                sb.append("; realCallingUid: ").append(mRealCallingUid);
+                sb.append("; realCallingPid: ").append(mRealCallingPid);
+                sb.append("; realCallingUidHasAnyVisibleWindow: ")
+                        .append(mRealCallingUidHasAnyVisibleWindow);
+                sb.append("; realCallingUidProcState: ").append(DebugUtils.valueToString(
+                        ActivityManager.class, "PROCESS_STATE_", mRealCallingUidProcState));
+                sb.append("; isRealCallingUidPersistentSystemProcess: ")
+                        .append(mIsRealCallingUidPersistentSystemProcess);
+            }
+            sb.append("; originatingPendingIntent: ").append(mOriginatingPendingIntent);
+            sb.append("; backgroundStartPrivileges: ").append(mBackgroundStartPrivileges);
+            sb.append("; intent: ").append(mIntent);
+            sb.append("; callerApp: ").append(mCallerApp);
+            sb.append("; realCallerApp: ").append(mRealCallerApp);
+            if (mCallerApp != null) {
+                sb.append("; inVisibleTask: ").append(mCallerApp.hasActivityInVisibleTask());
+            }
+            if (!isPendingIntent()) {
+                if (mRealCallerApp != null) {
+                    sb.append("; realInVisibleTask: ")
+                            .append(mRealCallerApp.hasActivityInVisibleTask());
+                }
+                sb.append("; resultIfPiSenderAllowsBal: ").append(resultIfPiSenderAllowsBal);
+            }
+            sb.append("; resultIfPiCreatorAllowsBal: ").append(resultIfPiCreatorAllowsBal);
+            sb.append("]");
+            return sb.toString();
         }
     }
 
@@ -428,9 +457,31 @@ public class BackgroundActivityStartController {
         }
 
         BalVerdict resultForCaller = checkBackgroundActivityStartAllowedByCaller(state);
+
+        if (!state.isPendingIntent()) {
+            if (resultForCaller.allows()) {
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Background activity start allowed. "
+                            + state.dump(resultForCaller));
+                }
+                return statsLog(resultForCaller, state);
+            }
+            // anything that has fallen through would currently be aborted
+            Slog.w(TAG, "Background activity launch blocked! "
+                    + state.dump(resultForCaller));
+            showBalToast("BAL blocked", state);
+            return statsLog(BalVerdict.BLOCK, state);
+        }
+
+        // The realCaller result is only calculated for PendingIntents (indicated by a valid
+        // realCallingUid). If caller and realCaller are same UID and we are already allowed based
+        // on the caller (i.e. creator of the PendingIntent) there is no need to calculate this
+        // again, but if the result is block it is possible that there are additional exceptions
+        // that allow based on the realCaller (i.e. sender of the PendingIntent), e.g. if the
+        // realCallerApp process is allowed to start (in the creator path the callerApp for
+        // PendingIntents is null).
         BalVerdict resultForRealCaller = state.callerIsRealCaller() && resultForCaller.allows()
-                ? resultForCaller // no need to calculate again
-                // otherwise we might need to recalculate because the logic is not the same
+                ? resultForCaller
                 : checkBackgroundActivityStartAllowedBySender(state, checkedOptions);
 
         if (resultForCaller.allows()
@@ -493,26 +544,10 @@ public class BackgroundActivityStartController {
                     + state.dump(resultForCaller, resultForRealCaller));
             // fall through
         }
-        showBalToast("BAL blocked", state);
         // anything that has fallen through would currently be aborted
-        Slog.w(TAG, "Background activity launch blocked"
+        Slog.w(TAG, "Background activity launch blocked! "
                 + state.dump(resultForCaller, resultForRealCaller));
-        // log aborted activity start to TRON
-        if (mService.isActivityStartsLoggingEnabled()) {
-            mSupervisor
-                    .getActivityMetricsLogger()
-                    .logAbortedBgActivityStart(
-                            intent,
-                            callerApp,
-                            callingUid,
-                            callingPackage,
-                            state.mCallingUidProcState,
-                            state.mCallingUidHasAnyVisibleWindow,
-                            realCallingUid,
-                            state.mRealCallingUidProcState,
-                            state.mRealCallingUidHasAnyVisibleWindow,
-                            (originatingPendingIntent != null));
-        }
+        showBalToast("BAL blocked", state);
         return statsLog(BalVerdict.BLOCK, state);
     }
 
@@ -1239,7 +1274,24 @@ public class BackgroundActivityStartController {
                 /* defaultValue= */ true);
     }
 
-    private static BalVerdict statsLog(BalVerdict finalVerdict, BalState state) {
+    private BalVerdict statsLog(BalVerdict finalVerdict, BalState state) {
+        if (finalVerdict.blocks() && mService.isActivityStartsLoggingEnabled()) {
+            // log aborted activity start to TRON
+            mSupervisor
+                    .getActivityMetricsLogger()
+                    .logAbortedBgActivityStart(
+                            state.mIntent,
+                            state.mCallerApp,
+                            state.mCallingUid,
+                            state.mCallingPackage,
+                            state.mCallingUidProcState,
+                            state.mCallingUidHasAnyVisibleWindow,
+                            state.mRealCallingUid,
+                            state.mRealCallingUidProcState,
+                            state.mRealCallingUidHasAnyVisibleWindow,
+                            (state.mOriginatingPendingIntent != null));
+        }
+
         @BalCode int code = finalVerdict.getCode();
         int callingUid = state.mCallingUid;
         int realCallingUid = state.mRealCallingUid;

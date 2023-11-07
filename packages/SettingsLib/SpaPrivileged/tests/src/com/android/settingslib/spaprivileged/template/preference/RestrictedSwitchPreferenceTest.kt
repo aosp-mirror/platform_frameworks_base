@@ -49,8 +49,9 @@ class RestrictedSwitchPreferenceTest {
 
     private val switchPreferenceModel = object : SwitchPreferenceModel {
         override val title = TITLE
-        override val checked = mutableStateOf(true)
-        override val onCheckedChange: (Boolean) -> Unit = { checked.value = it }
+        private val checkedState = mutableStateOf(true)
+        override val checked = { checkedState.value }
+        override val onCheckedChange: (Boolean) -> Unit = { checkedState.value = it }
     }
 
     @Test

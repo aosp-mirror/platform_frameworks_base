@@ -196,8 +196,7 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"ফেচ আনলক সুবিধা উপলব্ধ নহয়"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ব্লুটুথ সংযোগ হ’ল।"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"ব্লুটুথ ডিভাইচৰ চিহ্ন"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"ডিভাইচৰ সবিশেষ কনফিগাৰ কৰিবলৈ ক্লিক কৰক"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"বেটাৰীৰ চাৰ্জৰ শতাংশ অজ্ঞাত।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g>ৰ লগত সংযোগ কৰা হ’ল।"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g>ত সংযোগ হ’ল।"</string>
@@ -250,8 +249,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"অসুবিধা নিদিব"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ব্লুটুথ"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"কোনো যোৰা লগোৱা ডিভাইচ উপলব্ধ নহয়।"</string>
-    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
-    <skip />
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"এটা ডিভাইচৰ সংযোগ কৰিবলৈ অথবা ডিভাইচটোৰ সৈতে সংযোগ বিচ্ছিন্ন কৰিবলৈ টিপক"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"নতুন ডিভাইচ পেয়াৰ কৰক"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"আটাইবোৰ চাওক"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ব্লুটুথ ব্যৱহাৰ কৰক"</string>
@@ -1182,8 +1180,7 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"কেমেৰা আৰু মাইক্ৰ’ফ’ন অৱৰোধ কৰা আছে"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"মাইক্ৰ’ফ’ন অৱৰোধ কৰা আছে"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"অগ্ৰাধিকাৰ দিয়া ম’ড অন আছে"</string>
-    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
-    <skip />
+    <string name="assistant_attention_content_description" msgid="4166330881435263596">"ব্যৱহাৰকাৰীৰ উপস্থিতি চিনাক্ত কৰা হৈছে"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"ছেটিঙত টোকাৰ ডিফ’ল্ট এপ্ ছেট কৰক"</string>
     <string name="install_app" msgid="5066668100199613936">"এপ্‌টো ইনষ্টল কৰক"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"বাহ্যিক ডিছপ্লে’লৈ মিৰ’ৰ কৰিবনে?"</string>

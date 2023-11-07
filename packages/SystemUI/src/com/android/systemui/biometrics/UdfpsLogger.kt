@@ -42,4 +42,8 @@ class UdfpsLogger @Inject constructor(@UdfpsLog private val logBuffer: LogBuffer
     fun log(tag: String, @CompileTimeConstant msg: String, level: LogLevel) {
         logBuffer.log(tag, level, msg)
     }
+
+    fun requestMaxRefreshRate(request: Boolean) {
+        logBuffer.log("RefreshRate", LogLevel.DEBUG, { bool1 = request }, { "Request max: $bool1" })
+    }
 }

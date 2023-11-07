@@ -97,8 +97,12 @@
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Aktibo. Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Aktibo. Ezk. gailuaren bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>. Esk- gailuaren bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Ezk. gailuaren bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>. Esk- gailuaren bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"Ezkerrekoa: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"Eskuinekoa: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Aktibo"</string>
+    <string name="bluetooth_saved_device" msgid="4895871321722311428">"Gordeta"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"Aktibo, ezkerrekoa soilik"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"Aktibo, eskuinekoa soilik"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"Aktibo, ezkerreko eta eskuineko audifonoak"</string>
@@ -115,9 +119,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Kalitate handiko audioa: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Kalitate handiko audioa"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="2607867572569689732">"Audifonoak"</string>
-    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"Kontsumo txikiko Bluetooth bidezko audioa"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"Kontsumo txikiko audioa"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="5757754050938807276">"Audifonoetara konektatuta"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE audio-ra konektatuta"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Kontsumo txikiko audiora konektatuta"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Euskarriaren audiora konektatuta"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Telefonoaren audiora konektatuta"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Fitxategi-transferentziako zerbitzarira konektatuta"</string>
@@ -432,6 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"Arduratu aplikazioek formatu modernoak onartzeaz"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Erakutsi transkodetze-jakinarazpenak"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Desgaitu transkodetze-cachea"</string>
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine-ren ezarpenak"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Behartu L3 ordezko aukera"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Hautatu L3 ordezko aukera behartu nahi duzun"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Abian diren zerbitzuak"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ikusi eta kontrolatu une honetan abian diren zerbitzuak"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView inplementazioa"</string>
@@ -542,6 +549,8 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Oraintxe"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Telefono hau"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Tableta hau"</string>
+    <!-- no translation found for media_transfer_this_device_name (8899776297775466649) -->
+    <skip />
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Oinarri bozgorailuduna"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Kanpoko gailua"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Konektatutako gailua"</string>
@@ -553,6 +562,22 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Aktibatu gailua hemen erreproduzitzeko"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Gailua ez dago erreproduzitzeko onartuta"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Ezin da erreproduzitu multimedia-eduki hau hemen"</string>
+    <!-- no translation found for tv_media_transfer_connected (5145011475885290725) -->
+    <skip />
+    <!-- no translation found for tv_media_transfer_arc_fallback_title (3674360098755328601) -->
+    <skip />
+    <!-- no translation found for tv_media_transfer_earc_fallback_title (3098685494578519940) -->
+    <skip />
+    <!-- no translation found for tv_media_transfer_arc_subtitle (1040017851325069082) -->
+    <skip />
+    <!-- no translation found for tv_media_transfer_earc_subtitle (645191413103303077) -->
+    <skip />
+    <!-- no translation found for tv_media_transfer_default (38102257053315304) -->
+    <skip />
+    <!-- no translation found for tv_media_transfer_hdmi (2229000864416329818) -->
+    <skip />
+    <!-- no translation found for tv_media_transfer_internal_speakers (2433193551482972117) -->
+    <skip />
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Arazo bat izan da konektatzean. Itzali gailua eta pitz ezazu berriro."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio-gailu kableduna"</string>
     <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritziak"</string>

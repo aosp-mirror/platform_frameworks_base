@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalCoroutinesApi::class)
-
 package com.android.systemui.statusbar.notification.shelf.ui.viewmodel
 
 import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.SysUITestComponent
 import com.android.SysUITestModule
 import com.android.TestMocksModule
+import com.android.collectLastValue
+import com.android.runTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -34,111 +34,105 @@ import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runTest
-import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class NotificationShelfViewModelTest : SysuiTestCase() {
 
-    @Rule @JvmField val mockitoRule: MockitoRule = MockitoJUnit.rule()
+    @Component(modules = [SysUITestModule::class, ActivatableNotificationViewModelModule::class])
+    @SysUISingleton
+    interface TestComponent : SysUITestComponent<NotificationShelfViewModel> {
 
-    @Mock private lateinit var keyguardTransitionController: LockscreenShadeTransitionController
-    @Mock private lateinit var screenOffAnimationController: ScreenOffAnimationController
-    @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
+        val deviceEntryFaceAuthRepository: FakeDeviceEntryFaceAuthRepository
+        val keyguardRepository: FakeKeyguardRepository
+        val powerRepository: FakePowerRepository
 
-    private lateinit var testComponent: TestComponent
-
-    @Before
-    fun setUp() {
-        whenever(screenOffAnimationController.allowWakeUpIfDozing()).thenReturn(true)
-        testComponent =
-            DaggerNotificationShelfViewModelTest_TestComponent.factory()
-                .create(
-                    test = this,
-                    mocks =
-                        TestMocksModule(
-                            lockscreenShadeTransitionController = keyguardTransitionController,
-                            screenOffAnimationController = screenOffAnimationController,
-                            statusBarStateController = statusBarStateController,
-                        )
-                )
+        @Component.Factory
+        interface Factory {
+            fun create(
+                @BindsInstance test: SysuiTestCase,
+                mocks: TestMocksModule,
+            ): TestComponent
+        }
     }
+
+    private val keyguardTransitionController: LockscreenShadeTransitionController = mock()
+    private val screenOffAnimationController: ScreenOffAnimationController = mock {
+        whenever(allowWakeUpIfDozing()).thenReturn(true)
+    }
+    private val statusBarStateController: SysuiStatusBarStateController = mock()
+
+    private val testComponent: TestComponent =
+        DaggerNotificationShelfViewModelTest_TestComponent.factory()
+            .create(
+                test = this,
+                mocks =
+                    TestMocksModule(
+                        lockscreenShadeTransitionController = keyguardTransitionController,
+                        screenOffAnimationController = screenOffAnimationController,
+                        statusBarStateController = statusBarStateController,
+                    )
+            )
 
     @Test
     fun canModifyColorOfNotifications_whenKeyguardNotShowing() =
-        with(testComponent) {
-            testScope.runTest {
-                val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
+        testComponent.runTest {
+            val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
 
-                keyguardRepository.setKeyguardShowing(false)
+            keyguardRepository.setKeyguardShowing(false)
 
-                assertThat(canModifyNotifColor).isTrue()
-            }
+            assertThat(canModifyNotifColor).isTrue()
         }
 
     @Test
     fun canModifyColorOfNotifications_whenKeyguardShowingAndNotBypass() =
-        with(testComponent) {
-            testScope.runTest {
-                val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
+        testComponent.runTest {
+            val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
 
-                keyguardRepository.setKeyguardShowing(true)
-                deviceEntryFaceAuthRepository.isBypassEnabled.value = false
+            keyguardRepository.setKeyguardShowing(true)
+            deviceEntryFaceAuthRepository.isBypassEnabled.value = false
 
-                assertThat(canModifyNotifColor).isTrue()
-            }
+            assertThat(canModifyNotifColor).isTrue()
         }
 
     @Test
     fun cannotModifyColorOfNotifications_whenBypass() =
-        with(testComponent) {
-            testScope.runTest {
-                val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
+        testComponent.runTest {
+            val canModifyNotifColor by collectLastValue(underTest.canModifyColorOfNotifications)
 
-                keyguardRepository.setKeyguardShowing(true)
-                deviceEntryFaceAuthRepository.isBypassEnabled.value = true
+            keyguardRepository.setKeyguardShowing(true)
+            deviceEntryFaceAuthRepository.isBypassEnabled.value = true
 
-                assertThat(canModifyNotifColor).isFalse()
-            }
+            assertThat(canModifyNotifColor).isFalse()
         }
 
     @Test
     fun isClickable_whenKeyguardShowing() =
-        with(testComponent) {
-            testScope.runTest {
-                val isClickable by collectLastValue(underTest.isClickable)
+        testComponent.runTest {
+            val isClickable by collectLastValue(underTest.isClickable)
 
-                keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setKeyguardShowing(true)
 
-                assertThat(isClickable).isTrue()
-            }
+            assertThat(isClickable).isTrue()
         }
 
     @Test
     fun isNotClickable_whenKeyguardNotShowing() =
-        with(testComponent) {
-            testScope.runTest {
-                val isClickable by collectLastValue(underTest.isClickable)
+        testComponent.runTest {
+            val isClickable by collectLastValue(underTest.isClickable)
 
-                keyguardRepository.setKeyguardShowing(false)
+            keyguardRepository.setKeyguardShowing(false)
 
-                assertThat(isClickable).isFalse()
-            }
+            assertThat(isClickable).isFalse()
         }
 
     @Test
@@ -152,23 +146,4 @@ class NotificationShelfViewModelTest : SysuiTestCase() {
             assertThat(powerRepository.lastWakeReason).isEqualTo(PowerManager.WAKE_REASON_GESTURE)
             verify(keyguardTransitionController).goToLockedShade(Mockito.isNull(), eq(true))
         }
-
-    @Component(modules = [SysUITestModule::class, ActivatableNotificationViewModelModule::class])
-    @SysUISingleton
-    interface TestComponent {
-
-        val underTest: NotificationShelfViewModel
-        val deviceEntryFaceAuthRepository: FakeDeviceEntryFaceAuthRepository
-        val keyguardRepository: FakeKeyguardRepository
-        val powerRepository: FakePowerRepository
-        val testScope: TestScope
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                mocks: TestMocksModule,
-            ): TestComponent
-        }
-    }
 }

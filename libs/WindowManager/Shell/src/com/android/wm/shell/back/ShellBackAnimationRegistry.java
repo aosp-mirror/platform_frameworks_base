@@ -33,17 +33,22 @@ public class ShellBackAnimationRegistry {
     public ShellBackAnimationRegistry(
             @ShellBackAnimation.CrossActivity @Nullable ShellBackAnimation crossActivityAnimation,
             @ShellBackAnimation.CrossTask @Nullable ShellBackAnimation crossTaskAnimation,
+            @ShellBackAnimation.DialogClose @Nullable ShellBackAnimation dialogCloseAnimation,
             @ShellBackAnimation.CustomizeActivity @Nullable
                     ShellBackAnimation customizeActivityAnimation,
             @ShellBackAnimation.ReturnToHome @Nullable
                     ShellBackAnimation defaultBackToHomeAnimation) {
         if (crossActivityAnimation != null) {
             mAnimationDefinition.set(
+                    BackNavigationInfo.TYPE_CROSS_ACTIVITY, crossActivityAnimation.getRunner());
+        }
+        if (crossTaskAnimation != null) {
+            mAnimationDefinition.set(
                     BackNavigationInfo.TYPE_CROSS_TASK, crossTaskAnimation.getRunner());
         }
-        if (crossActivityAnimation != null) {
+        if (dialogCloseAnimation != null) {
             mAnimationDefinition.set(
-                    BackNavigationInfo.TYPE_CROSS_ACTIVITY, crossActivityAnimation.getRunner());
+                    BackNavigationInfo.TYPE_DIALOG_CLOSE, dialogCloseAnimation.getRunner());
         }
         if (defaultBackToHomeAnimation != null) {
             mAnimationDefinition.set(

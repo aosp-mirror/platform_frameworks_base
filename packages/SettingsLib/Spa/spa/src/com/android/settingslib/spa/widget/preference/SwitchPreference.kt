@@ -25,13 +25,11 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AirplanemodeActive
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.util.EntryHighlight
@@ -67,15 +65,15 @@ interface SwitchPreferenceModel {
      *
      * This can be `null` during the data loading before the data is available.
      */
-    val checked: State<Boolean?>
+    val checked: () -> Boolean?
 
     /**
      * Indicates whether this [SwitchPreference] is changeable.
      *
      * Not changeable [SwitchPreference] will be displayed in disabled style.
      */
-    val changeable: State<Boolean>
-        get() = stateOf(true)
+    val changeable: () -> Boolean
+        get() = { true }
 
     /**
      * The switch change handler of this [SwitchPreference].
@@ -97,8 +95,8 @@ fun SwitchPreference(model: SwitchPreferenceModel) {
             title = model.title,
             summary = model.summary,
             icon = model.icon,
-            checked = model.checked.value,
-            changeable = model.changeable.value,
+            checked = model.checked(),
+            changeable = model.changeable(),
             onCheckedChange = model.onCheckedChange,
         )
     }

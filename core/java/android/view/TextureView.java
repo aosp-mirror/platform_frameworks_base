@@ -424,11 +424,13 @@ public class TextureView extends View {
 
             TextureLayer layer = getTextureLayer();
             if (layer != null) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "TextureView#draw()");
                 applyUpdate();
                 applyTransformMatrix();
 
                 mLayer.setLayerPaint(mLayerPaint); // ensure layer paint is up to date
                 recordingCanvas.drawTextureLayer(layer);
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
             }
         }
     }

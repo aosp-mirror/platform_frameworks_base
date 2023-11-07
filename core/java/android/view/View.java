@@ -19,6 +19,8 @@ package android.view;
 import static android.content.res.Resources.ID_NULL;
 import static android.os.Trace.TRACE_TAG_APP;
 import static android.view.ContentInfo.SOURCE_DRAG_AND_DROP;
+import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
+import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
 import static android.view.accessibility.AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_INVALID_BOUNDS;
 import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ERROR_MISSING_WINDOW;
@@ -27,6 +29,7 @@ import static android.view.displayhash.DisplayHashResultCallback.DISPLAY_HASH_ER
 import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH;
 import static android.view.displayhash.DisplayHashResultCallback.EXTRA_DISPLAY_HASH_ERROR_CODE;
 import static android.view.flags.Flags.FLAG_VIEW_VELOCITY_API;
+import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 import static android.view.flags.Flags.viewVelocityApi;
 
 import static com.android.internal.util.FrameworkStatsLog.TOUCH_GESTURE_CLASSIFIED__CLASSIFICATION__DEEP_PRESS;
@@ -114,6 +117,7 @@ import android.sysprop.DisplayProperties;
 import android.text.InputType;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.FloatProperty;
 import android.util.LayoutDirection;
 import android.util.Log;
@@ -2300,6 +2304,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected static final int[] PRESSED_ENABLED_FOCUSED_SELECTED_WINDOW_FOCUSED_STATE_SET;
 
+    private static boolean sToolkitSetFrameRateReadOnlyFlagValue;
+
     static {
         EMPTY_STATE_SET = StateSet.get(0);
 
@@ -2381,6 +2387,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 StateSet.VIEW_STATE_WINDOW_FOCUSED | StateSet.VIEW_STATE_SELECTED
                         | StateSet.VIEW_STATE_FOCUSED| StateSet.VIEW_STATE_ENABLED
                         | StateSet.VIEW_STATE_PRESSED);
+
+        sToolkitSetFrameRateReadOnlyFlagValue = toolkitSetFrameRateReadOnly();
     }
 
     /**
@@ -5507,6 +5515,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @Nullable
 
     private ViewTranslationResponse mViewTranslationResponse;
+
+    /**
+     * A threshold value to determine the frame rate category of the View based on the size.
+     */
+    private static final float FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD = 0.07f;
 
     /**
      * Simple constructor to use when creating a view from code.
@@ -20183,6 +20196,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return;
         }
 
+        // For VRR to vote the preferred frame rate
+        votePreferredFrameRate();
+
         // Reset content capture caches
         mPrivateFlags4 &= ~PFLAG4_CONTENT_CAPTURE_IMPORTANCE_MASK;
         mContentCaptureSessionCached = false;
@@ -20285,6 +20301,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     protected void damageInParent() {
         if (mParent != null && mAttachInfo != null) {
+            // For VRR to vote the preferred frame rate
+            votePreferredFrameRate();
             mParent.onDescendantInvalidated(this, this);
         }
     }
@@ -32979,6 +32997,41 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
           return mAttachInfo.getRootSurfaceControl();
         }
         return null;
+    }
+
+    private float getSizePercentage() {
+        if (mResources == null || getAlpha() == 0 || getVisibility() != VISIBLE) {
+            return 0;
+        }
+
+        DisplayMetrics displayMetrics = mResources.getDisplayMetrics();
+        int screenSize = displayMetrics.widthPixels
+                * displayMetrics.heightPixels;
+        int viewSize = getWidth() * getHeight();
+
+        if (screenSize == 0 || viewSize == 0) {
+            return 0f;
+        }
+        return (float) viewSize / screenSize;
+    }
+
+    private int calculateFrameRateCategory() {
+        float sizePercentage = getSizePercentage();
+
+        if (sizePercentage <= FRAME_RATE_SIZE_PERCENTAGE_THRESHOLD) {
+            return FRAME_RATE_CATEGORY_LOW;
+        } else {
+            return FRAME_RATE_CATEGORY_NORMAL;
+        }
+    }
+
+    private void votePreferredFrameRate() {
+        // use toolkitSetFrameRate flag to gate the change
+        ViewRootImpl viewRootImpl = getViewRootImpl();
+        if (sToolkitSetFrameRateReadOnlyFlagValue && viewRootImpl != null
+                && getSizePercentage() > 0) {
+            viewRootImpl.votePreferredFrameRateCategory(calculateFrameRateCategory());
+        }
     }
 
     /**

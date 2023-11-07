@@ -179,6 +179,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             options.substituteAnnotations,
             options.nativeSubstituteAnnotations,
             options.classLoadHookAnnotations,
+            options.stubStaticInitializerAnnotations,
             filter
         )
 

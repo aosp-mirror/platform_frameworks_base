@@ -17,7 +17,6 @@
 package com.android.settingslib.spa.screenshot.widget.preference
 
 import androidx.compose.foundation.layout.Column
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.screenshot.util.SettingsScreenshotTestRule
 import com.android.settingslib.spa.widget.preference.MainSwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
@@ -51,14 +50,14 @@ class MainSwitchPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
                 MainSwitchPreference(
                     object : SwitchPreferenceModel {
                         override val title = "MainSwitchPreference"
-                        override val checked = stateOf(false)
+                        override val checked = { false }
                         override val onCheckedChange = null
                     })
 
                 MainSwitchPreference(object : SwitchPreferenceModel {
                     override val title = "Not changeable"
-                    override val changeable = stateOf(false)
-                    override val checked = stateOf(true)
+                    override val changeable = { false }
+                    override val checked = { true }
                     override val onCheckedChange = null
                 })
             }

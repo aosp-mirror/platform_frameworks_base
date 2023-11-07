@@ -381,8 +381,9 @@ public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
             boolean topActivityBoundsLetterboxed) {
         ActivityManager.RunningTaskInfo taskInfo = new ActivityManager.RunningTaskInfo();
         taskInfo.taskId = TASK_ID;
-        taskInfo.topActivityEligibleForUserAspectRatioButton = eligibleForUserAspectRatioButton;
-        taskInfo.topActivityBoundsLetterboxed = topActivityBoundsLetterboxed;
+        taskInfo.appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton =
+                eligibleForUserAspectRatioButton;
+        taskInfo.appCompatTaskInfo.topActivityBoundsLetterboxed = topActivityBoundsLetterboxed;
         taskInfo.configuration.uiMode &= ~Configuration.UI_MODE_TYPE_DESK;
         taskInfo.realActivity = new ComponentName("com.mypackage.test", "TestActivity");
         return taskInfo;

@@ -318,6 +318,8 @@ class FullMobileConnectionRepository(
                 activeRepo.value.hasPrioritizedNetworkCapabilities.value,
             )
 
+    override suspend fun isInEcmMode(): Boolean = activeRepo.value.isInEcmMode()
+
     class Factory
     @Inject
     constructor(

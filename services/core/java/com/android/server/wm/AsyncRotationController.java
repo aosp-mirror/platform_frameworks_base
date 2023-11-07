@@ -465,6 +465,12 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         return op != null && op.mAction == Operation.ACTION_FADE;
     }
 
+    /** Returns {@code true} if the window is un-rotated to original rotation. */
+    boolean hasSeamlessOperation(WindowToken token) {
+        final Operation op = mTargetWindowTokens.get(token);
+        return op != null && op.mAction == Operation.ACTION_SEAMLESS;
+    }
+
     /**
      * Whether the insets animation leash should use previous position when running fade animation
      * or seamless transformation in a rotated display.

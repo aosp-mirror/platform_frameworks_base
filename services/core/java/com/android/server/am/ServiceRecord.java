@@ -246,7 +246,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     int getFgsAllowStart() {
         return mAllowStartForegroundNoBinding != REASON_DENIED
                 ? mAllowStartForegroundNoBinding
-                : mAllowStartInBindService;
+                : (mAllowStartByBindings != REASON_DENIED
+                ? mAllowStartByBindings
+                : mAllowStartInBindService);
     }
 
     boolean isFgsAllowedStart() {

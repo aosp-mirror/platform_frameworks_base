@@ -47,6 +47,7 @@ class HostStubGenOptions(
         var substituteAnnotations: MutableSet<String> = mutableSetOf(),
         var nativeSubstituteAnnotations: MutableSet<String> = mutableSetOf(),
         var classLoadHookAnnotations: MutableSet<String> = mutableSetOf(),
+        var stubStaticInitializerAnnotations: MutableSet<String> = mutableSetOf(),
 
         var defaultClassLoadHook: String? = null,
         var defaultMethodCallHook: String? = null,
@@ -150,7 +151,11 @@ class HostStubGenOptions(
 
                     "--class-load-hook-annotation" ->
                         ret.classLoadHookAnnotations +=
-                            ensureUniqueAnnotation(ai.nextArgRequired(arg))
+                                ensureUniqueAnnotation(ai.nextArgRequired(arg))
+
+                    "--stub-static-initializer-annotation" ->
+                        ret.stubStaticInitializerAnnotations +=
+                                ensureUniqueAnnotation(ai.nextArgRequired(arg))
 
                     "--default-class-load-hook" ->
                         ret.defaultClassLoadHook = ai.nextArgRequired(arg)

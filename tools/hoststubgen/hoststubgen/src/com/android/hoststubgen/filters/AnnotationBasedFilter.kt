@@ -20,6 +20,8 @@ import com.android.hoststubgen.HostStubGenErrors
 import com.android.hoststubgen.HostStubGenInternalException
 import com.android.hoststubgen.InvalidAnnotationException
 import com.android.hoststubgen.addNonNullElement
+import com.android.hoststubgen.asm.CLASS_INITIALIZER_DESC
+import com.android.hoststubgen.asm.CLASS_INITIALIZER_NAME
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.findAnnotationValueAsString
 import com.android.hoststubgen.asm.findAnyAnnotation
@@ -48,6 +50,7 @@ class AnnotationBasedFilter(
         substituteAnnotations_: Set<String>,
         nativeSubstituteAnnotations_: Set<String>,
         classLoadHookAnnotations_: Set<String>,
+        stubStaticInitializerAnnotations_: Set<String>,
         fallback: OutputFilter,
 ) : DelegatingFilter(fallback) {
     private var stubAnnotations = convertToInternalNames(stubAnnotations_)
@@ -59,6 +62,7 @@ class AnnotationBasedFilter(
     private var substituteAnnotations = convertToInternalNames(substituteAnnotations_)
     private var nativeSubstituteAnnotations = convertToInternalNames(nativeSubstituteAnnotations_)
     private var classLoadHookAnnotations = convertToInternalNames(classLoadHookAnnotations_)
+    private var stubStaticInitializerAnnotations = convertToInternalNames(stubStaticInitializerAnnotations_)
 
     /** Annotations that control API visibility. */
     private var visibilityAnnotations: Set<String> = convertToInternalNames(
@@ -158,6 +162,7 @@ class AnnotationBasedFilter(
         findAnyAnnotation(removeAnnotations, visibles, invisibles)?.let {
             return FilterPolicy.Remove.withReason(reasonAnnotation)
         }
+
         return null
     }
 
@@ -207,6 +212,13 @@ class AnnotationBasedFilter(
             descriptor: String
     ): FilterPolicyWithReason {
         val cn = classes.getClass(className)
+
+        if (methodName == CLASS_INITIALIZER_NAME && descriptor == CLASS_INITIALIZER_DESC) {
+            findAnyAnnotation(stubStaticInitializerAnnotations,
+                    cn.visibleAnnotations, cn.invisibleAnnotations)?.let {
+                return FilterPolicy.Stub.withReason(reasonAnnotation)
+            }
+        }
 
         cn.methods?.firstOrNull { it.name == methodName && it.desc == descriptor }?.let { mn ->
             // @SubstituteWith is going to complicate the policy here, so we ask helper

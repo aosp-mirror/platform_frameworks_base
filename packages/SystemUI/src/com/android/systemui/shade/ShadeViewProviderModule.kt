@@ -22,16 +22,15 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewStub
 import androidx.constraintlayout.motion.widget.MotionLayout
-import com.android.systemui.res.R
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.biometrics.AuthRippleView
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.privacy.OngoingPrivacyChip
+import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
@@ -41,10 +40,6 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationInsetsController
-import com.android.systemui.statusbar.NotificationShelf
-import com.android.systemui.statusbar.NotificationShelfController
-import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent
-import com.android.systemui.statusbar.notification.shelf.ui.viewbinder.NotificationShelfViewBinderWrapperControllerImpl
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
@@ -116,32 +111,6 @@ abstract class ShadeViewProviderModule {
             notificationShadeWindowView: NotificationShadeWindowView,
         ): NotificationStackScrollLayout {
             return notificationShadeWindowView.requireViewById(R.id.notification_stack_scroller)
-        }
-
-        @Provides
-        @SysUISingleton
-        fun providesNotificationShelfController(
-            featureFlags: FeatureFlags,
-            newImpl: Provider<NotificationShelfViewBinderWrapperControllerImpl>,
-            notificationShelfComponentBuilder: NotificationShelfComponent.Builder,
-            layoutInflater: LayoutInflater,
-            notificationStackScrollLayout: NotificationStackScrollLayout,
-        ): NotificationShelfController {
-            return if (featureFlags.isEnabled(Flags.NOTIFICATION_SHELF_REFACTOR)) {
-                newImpl.get()
-            } else {
-                val shelfView =
-                    layoutInflater.inflate(
-                        R.layout.status_bar_notification_shelf,
-                        notificationStackScrollLayout,
-                        false
-                    ) as NotificationShelf
-                val component =
-                    notificationShelfComponentBuilder.notificationShelf(shelfView).build()
-                val notificationShelfController = component.notificationShelfController
-                notificationShelfController.init()
-                notificationShelfController
-            }
         }
 
         // TODO(b/277762009): Only allow this view's controller to inject the view. See above.

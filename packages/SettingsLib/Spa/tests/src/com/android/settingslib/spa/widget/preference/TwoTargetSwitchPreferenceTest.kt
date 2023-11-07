@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package com.android.settingslib.spa.widget.preference
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
@@ -28,7 +30,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -41,9 +42,8 @@ class TwoTargetSwitchPreferenceTest {
 
     @Test
     fun title_displayed() {
-        val checked = mutableStateOf(false)
         composeTestRule.setContent {
-            TestTwoTargetSwitchPreference(checked = checked, changeable = true)
+            TestTwoTargetSwitchPreference(changeable = true)
         }
 
         composeTestRule.onNodeWithText("TwoTargetSwitchPreference").assertIsDisplayed()
@@ -51,9 +51,8 @@ class TwoTargetSwitchPreferenceTest {
 
     @Test
     fun toggleable_initialStateIsCorrect() {
-        val checked = mutableStateOf(false)
         composeTestRule.setContent {
-            TestTwoTargetSwitchPreference(checked = checked, changeable = true)
+            TestTwoTargetSwitchPreference(changeable = true)
         }
 
         composeTestRule.onNode(isToggleable()).assertIsOff()
@@ -61,9 +60,8 @@ class TwoTargetSwitchPreferenceTest {
 
     @Test
     fun toggleable_changeable_withEffect() {
-        val checked = mutableStateOf(false)
         composeTestRule.setContent {
-            TestTwoTargetSwitchPreference(checked = checked, changeable = true)
+            TestTwoTargetSwitchPreference(changeable = true)
         }
 
         composeTestRule.onNode(isToggleable()).performClick()
@@ -72,9 +70,8 @@ class TwoTargetSwitchPreferenceTest {
 
     @Test
     fun toggleable_notChangeable_noEffect() {
-        val checked = mutableStateOf(false)
         composeTestRule.setContent {
-            TestTwoTargetSwitchPreference(checked = checked, changeable = false)
+            TestTwoTargetSwitchPreference(changeable = false)
         }
 
         composeTestRule.onNode(isToggleable()).performClick()
@@ -83,10 +80,9 @@ class TwoTargetSwitchPreferenceTest {
 
     @Test
     fun clickable_canBeClick() {
-        val checked = mutableStateOf(false)
         var clicked = false
         composeTestRule.setContent {
-            TestTwoTargetSwitchPreference(checked = checked, changeable = false) {
+            TestTwoTargetSwitchPreference(changeable = false) {
                 clicked = true
             }
         }
@@ -98,17 +94,17 @@ class TwoTargetSwitchPreferenceTest {
 
 @Composable
 private fun TestTwoTargetSwitchPreference(
-    checked: MutableState<Boolean>,
     changeable: Boolean,
     onClick: () -> Unit = {},
 ) {
+    var checked by rememberSaveable { mutableStateOf(false) }
     TwoTargetSwitchPreference(
         model = remember {
             object : SwitchPreferenceModel {
                 override val title = "TwoTargetSwitchPreference"
-                override val checked = checked
-                override val changeable = stateOf(changeable)
-                override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
+                override val checked = { checked }
+                override val changeable = { changeable }
+                override val onCheckedChange = { newChecked: Boolean -> checked = newChecked }
             }
         },
         onClick = onClick,

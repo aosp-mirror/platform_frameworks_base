@@ -13,6 +13,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
@@ -46,6 +47,7 @@ class ShadeHeaderViewModelTest : SysuiTestCase() {
                 AirplaneModeInteractor(
                     FakeAirplaneModeRepository(),
                     FakeConnectivityRepository(),
+                    FakeMobileConnectionsRepository(),
                 ),
             constants = mock(),
             flags,

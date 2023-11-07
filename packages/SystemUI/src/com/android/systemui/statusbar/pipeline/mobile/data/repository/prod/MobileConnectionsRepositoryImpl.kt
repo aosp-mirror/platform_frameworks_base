@@ -342,6 +342,15 @@ constructor(
             }
             .flowOn(bgDispatcher)
 
+    override suspend fun isInEcmMode(): Boolean {
+        if (telephonyManager.emergencyCallbackMode) {
+            return true
+        }
+        return with(subscriptions.value) {
+            any { getOrCreateRepoForSubId(it.subscriptionId).isInEcmMode() }
+        }
+    }
+
     private fun isValidSubId(subId: Int): Boolean = checkSub(subId, subscriptions.value)
 
     @VisibleForTesting fun getSubIdRepoCache() = subIdRepositoryCache

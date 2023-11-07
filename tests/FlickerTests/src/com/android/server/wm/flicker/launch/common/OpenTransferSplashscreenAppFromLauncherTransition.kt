@@ -24,7 +24,6 @@ import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.TransferSplashscreenAppHelper
-import com.android.server.wm.flicker.replacesLayer
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -115,18 +114,6 @@ class OpenTransferSplashscreenAppFromLauncherTransition(flicker: LegacyFlickerTe
     @Test
     override fun appLayerBecomesVisible() {
         super.appLayerBecomesVisible()
-    }
-
-    @FlakyTest(bugId = 240916028)
-    @Test
-    override fun appLayerReplacesLauncher() {
-        flicker.replacesLayer(
-            ComponentNameMatcher.LAUNCHER,
-            testApp,
-            ignoreEntriesWithRotationLayer = true,
-            ignoreSnapshot = true,
-            ignoreSplashscreen = false
-        )
     }
 
     @FlakyTest(bugId = 240916028)

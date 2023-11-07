@@ -2008,6 +2008,33 @@ public class BroadcastQueueTest {
     }
 
     @Test
+    public void testReplacePending_sameProcess_diffReceivers() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+        final BroadcastFilter receiverGreenA = makeRegisteredReceiver(receiverGreenApp);
+        final BroadcastFilter receiverGreenB = makeRegisteredReceiver(receiverGreenApp);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED)
+                .addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(receiverGreenA, 5))));
+        enqueueBroadcast(makeBroadcastRecord(airplane, callerApp, List.of(
+                withPriority(receiverGreenB, 10),
+                withPriority(receiverGreenA, 5))));
+
+        waitForIdle();
+        if (mImpl == Impl.DEFAULT) {
+            verifyScheduleRegisteredReceiver(times(2), receiverGreenApp, airplane);
+        } else {
+            // In the modern queue, we don't end up replacing the old broadcast to
+            // avoid creating priority inversion and so the process will receive
+            // both the old and new broadcasts.
+            verifyScheduleRegisteredReceiver(times(3), receiverGreenApp, airplane);
+        }
+    }
+
+    @Test
     public void testIdleAndBarrier() throws Exception {
         final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
         final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);

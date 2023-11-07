@@ -350,6 +350,13 @@ class BroadcastProcessQueue {
             final BroadcastRecord testRecord = (BroadcastRecord) args.arg1;
             final int testRecordIndex = args.argi1;
             final Object testReceiver = testRecord.receivers.get(testRecordIndex);
+            // If we come across the record that's being enqueued in the queue, then that means
+            // we already enqueued it for a receiver in this process and trying to insert a new
+            // one past this could create priority inversion in the queue, so bail out.
+            if (record == testRecord && record.blockedUntilBeyondCount[recordIndex]
+                    > testRecord.blockedUntilBeyondCount[testRecordIndex]) {
+                break;
+            }
             if ((record.callingUid == testRecord.callingUid)
                     && (record.userId == testRecord.userId)
                     && record.intent.filterEquals(testRecord.intent)

@@ -18,17 +18,18 @@ package com.android.settingslib.spa.gallery.preference
 
 import android.os.Bundle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.framework.compose.navigator
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
@@ -89,32 +90,32 @@ object TwoTargetSwitchPreferencePageProvider : SettingsPageProvider {
 
 @Composable
 private fun SampleTwoTargetSwitchPreference() {
-    val checked = rememberSaveable { mutableStateOf(false) }
+    var checked by rememberSaveable { mutableStateOf(false) }
     TwoTargetSwitchPreference(remember {
         object : SwitchPreferenceModel {
             override val title = "TwoTargetSwitchPreference"
-            override val checked = checked
-            override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
+            override val checked = { checked }
+            override val onCheckedChange = { newChecked: Boolean -> checked = newChecked }
         }
     }) {}
 }
 
 @Composable
 private fun SampleTwoTargetSwitchPreferenceWithSummary() {
-    val checked = rememberSaveable { mutableStateOf(true) }
+    var checked by rememberSaveable { mutableStateOf(true) }
     TwoTargetSwitchPreference(remember {
         object : SwitchPreferenceModel {
             override val title = "TwoTargetSwitchPreference"
             override val summary = { "With summary" }
-            override val checked = checked
-            override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
+            override val checked = { checked }
+            override val onCheckedChange = { newChecked: Boolean -> checked = newChecked }
         }
     }) {}
 }
 
 @Composable
 private fun SampleTwoTargetSwitchPreferenceWithAsyncSummary() {
-    val checked = rememberSaveable { mutableStateOf(true) }
+    var checked by rememberSaveable { mutableStateOf(true) }
     val summary = produceState(initialValue = " ") {
         delay(1000L)
         value = "Async summary"
@@ -123,22 +124,22 @@ private fun SampleTwoTargetSwitchPreferenceWithAsyncSummary() {
         object : SwitchPreferenceModel {
             override val title = "TwoTargetSwitchPreference"
             override val summary = { summary.value }
-            override val checked = checked
-            override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
+            override val checked = { checked }
+            override val onCheckedChange = { newChecked: Boolean -> checked = newChecked }
         }
     }) {}
 }
 
 @Composable
 private fun SampleNotChangeableTwoTargetSwitchPreference() {
-    val checked = rememberSaveable { mutableStateOf(true) }
+    var checked by rememberSaveable { mutableStateOf(true) }
     TwoTargetSwitchPreference(remember {
         object : SwitchPreferenceModel {
             override val title = "TwoTargetSwitchPreference"
             override val summary = { "Not changeable" }
-            override val changeable = stateOf(false)
-            override val checked = checked
-            override val onCheckedChange = { newChecked: Boolean -> checked.value = newChecked }
+            override val changeable = { false }
+            override val checked = { checked }
+            override val onCheckedChange = { newChecked: Boolean -> checked = newChecked }
         }
     }) {}
 }

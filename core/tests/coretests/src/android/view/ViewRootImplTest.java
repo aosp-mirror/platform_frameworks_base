@@ -17,6 +17,11 @@
 package android.view;
 
 import static android.view.accessibility.Flags.FLAG_FORCE_INVERT_COLOR;
+import static android.view.flags.Flags.FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY;
+import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
+import static android.view.Surface.FRAME_RATE_CATEGORY_LOW;
+import static android.view.Surface.FRAME_RATE_CATEGORY_NORMAL;
+import static android.view.Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
@@ -53,6 +58,7 @@ import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
@@ -445,6 +451,129 @@ public class ViewRootImplTest {
                 HapticFeedbackConstants.CONTEXT_CLICK, true);
 
         assertThat(result).isFalse();
+    }
+
+    /**
+     * Test the default values are properly set
+     */
+    @UiThreadTest
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_getDefaultValues() {
+        ViewRootImpl viewRootImpl = new ViewRootImpl(sContext,
+                sContext.getDisplayNoVerify());
+        assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                FRAME_RATE_CATEGORY_NO_PREFERENCE);
+        assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
+    }
+
+    /**
+     * Test the value of the frame rate cateogry based on the visibility of a view
+     * Invsible: FRAME_RATE_CATEGORY_NO_PREFERENCE
+     * Visible: FRAME_RATE_CATEGORY_NORMAL
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRateCategory_visibility() {
+        View view = new View(sContext);
+        attachViewToWindow(view);
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        sInstrumentation.runOnMainSync(() -> {
+            view.setVisibility(View.INVISIBLE);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+        });
+
+        sInstrumentation.runOnMainSync(() -> {
+            view.setVisibility(View.VISIBLE);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NORMAL);
+        });
+    }
+
+    /**
+     * Test the value of the frame rate cateogry based on the size of a view.
+     * The current threshold value is 7% of the screen size
+     * <7%: FRAME_RATE_CATEGORY_LOW
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRateCategory_smallSize() {
+        View view = new View(sContext);
+        WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+        wmlp.width = 1;
+        wmlp.height = 1;
+
+        sInstrumentation.runOnMainSync(() -> {
+            WindowManager wm = sContext.getSystemService(WindowManager.class);
+            wm.addView(view, wmlp);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        sInstrumentation.runOnMainSync(() -> {
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_LOW);
+        });
+    }
+
+    /**
+     * Test the value of the frame rate cateogry based on the size of a view.
+     * The current threshold value is 7% of the screen size
+     * >=7% : FRAME_RATE_CATEGORY_NORMAL
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRateCategory_normalSize() {
+        View view = new View(sContext);
+        WindowManager.LayoutParams wmlp = new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        wmlp.token = new Binder(); // Set a fake token to bypass 'is your activity running' check
+
+        sInstrumentation.runOnMainSync(() -> {
+            WindowManager wm = sContext.getSystemService(WindowManager.class);
+            Display display = wm.getDefaultDisplay();
+            DisplayMetrics metrics = new DisplayMetrics();
+            display.getMetrics(metrics);
+            wmlp.width = (int) (metrics.widthPixels * 0.9);
+            wmlp.height = (int) (metrics.heightPixels * 0.9);
+            wm.addView(view, wmlp);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        sInstrumentation.runOnMainSync(() -> {
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_NORMAL);
+        });
+    }
+
+    /**
+     * Test how values of the frame rate cateogry are aggregated.
+     * It should take the max value among all of the voted categories per frame.
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRateCategory_aggregate() {
+        View view = new View(sContext);
+        attachViewToWindow(view);
+        sInstrumentation.runOnMainSync(() -> {
+            ViewRootImpl viewRootImpl = view.getViewRootImpl();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_LOW);
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_LOW);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_NORMAL);
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_NORMAL);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_HIGH);
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_NORMAL);
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+            viewRootImpl.votePreferredFrameRateCategory(FRAME_RATE_CATEGORY_LOW);
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+        });
     }
 
     @Test

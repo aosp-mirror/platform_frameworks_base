@@ -62,6 +62,7 @@ class android.util.ArrayMap             stubclass
 # Used by ArrayMap. No need to put them in the stub, but we need them in impl.
 class android.util.MapCollections         keepclass
 class android.util.ContainerHelpers       keepclass
+class android.util.EmptyArray             stubclass
 class com.android.internal.util.XmlUtils  keepclass
 class com.android.internal.util.FastMath  keepclass
 class android.util.MathUtils              keepclass

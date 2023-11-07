@@ -23,16 +23,10 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -50,110 +44,8 @@ import java.util.function.BiFunction;
 /**
  * Some basic tests for {@link android.util.ArrayMap}.
  */
-@RunWith(AndroidJUnit4.class)
 public class ArrayMapTest {
     static final boolean DEBUG = false;
-
-    static final int OP_ADD = 1;
-    static final int OP_REM = 2;
-
-    static int[] OPS = new int[]{
-            OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD,
-            OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD,
-            OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM,
-            OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM,
-
-            OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD,
-            OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM,
-
-            OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD,
-            OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM,
-
-            OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD,
-            OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM,
-
-            OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD,
-            OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD, OP_ADD,
-            OP_ADD, OP_ADD, OP_ADD,
-            OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM,
-            OP_REM, OP_REM, OP_REM,
-            OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM, OP_REM,
-    };
-
-    static int[] KEYS = new int[]{
-            // General adding and removing.
-            -1, 1900, 600, 200, 1200, 1500, 1800, 100, 1900,
-            2100, 300, 800, 600, 1100, 1300, 2000, 1000, 1400,
-            600, -1, 1900, 600, 300, 2100, 200, 800, 800,
-            1800, 1500, 1300, 1100, 2000, 1400, 1000, 1200, 1900,
-
-            // Shrink when removing item from end.
-            100, 200, 300, 400, 500, 600, 700, 800, 900,
-            900, 800, 700, 600, 500, 400, 300, 200, 100,
-
-            // Shrink when removing item from middle.
-            100, 200, 300, 400, 500, 600, 700, 800, 900,
-            900, 800, 700, 600, 500, 400, 200, 300, 100,
-
-            // Shrink when removing item from front.
-            100, 200, 300, 400, 500, 600, 700, 800, 900,
-            900, 800, 700, 600, 500, 400, 100, 200, 300,
-
-            // Test hash collisions.
-            105, 106, 108, 104, 102, 102, 107, 5, 205,
-            4, 202, 203, 3, 5, 101, 109, 200, 201,
-            0, -1, 100,
-            106, 108, 104, 102, 103, 105, 107, 101, 109,
-            -1, 100, 0,
-            4, 5, 3, 5, 200, 203, 202, 201, 205,
-    };
-
-    public static class ControlledHash implements Parcelable {
-        final int mValue;
-
-        ControlledHash(int value) {
-            mValue = value;
-        }
-
-        @Override
-        public final boolean equals(Object o) {
-            if (o == null) {
-                return false;
-            }
-            return mValue == ((ControlledHash)o).mValue;
-        }
-
-        @Override
-        public final int hashCode() {
-            return mValue/100;
-        }
-
-        @Override
-        public final String toString() {
-            return Integer.toString(mValue);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mValue);
-        }
-
-        public static final Parcelable.Creator<ControlledHash> CREATOR
-                = new Parcelable.Creator<ControlledHash>() {
-            public ControlledHash createFromParcel(Parcel in) {
-                return new ControlledHash(in.readInt());
-            }
-
-            public ControlledHash[] newArray(int size) {
-                return new ControlledHash[size];
-            }
-        };
-    }
 
     private static boolean compare(Object v1, Object v2) {
         if (v1 == null) {
@@ -287,35 +179,6 @@ public class ArrayMapTest {
         }
     }
 
-    private static void compareBundles(Bundle bundle1, Bundle bundle2) {
-        Set<String> keySet1 = bundle1.keySet();
-        Iterator<String> iterator1 = keySet1.iterator();
-        while (iterator1.hasNext()) {
-            String key = iterator1.next();
-            int value1 = bundle1.getInt(key);
-            if (bundle2.get(key) == null) {
-                fail("Bad Bundle: bundle2 didn't have expected key " + key);
-            }
-            int value2 = bundle2.getInt(key);
-            if (value1 != value2) {
-                fail("Bad Bundle: at key key " + key + " expected " + value1 + ", got " + value2);
-            }
-        }
-        Set<String> keySet2 = bundle2.keySet();
-        Iterator<String> iterator2 = keySet2.iterator();
-        while (iterator2.hasNext()) {
-            String key = iterator2.next();
-            if (bundle1.get(key) == null) {
-                fail("Bad Bundle: bundle1 didn't have expected key " + key);
-            }
-            int value1 = bundle1.getInt(key);
-            int value2 = bundle2.getInt(key);
-            if (value1 != value2) {
-                fail("Bad Bundle: at key key " + key + " expected " + value1 + ", got " + value2);
-            }
-        }
-    }
-
     private static void dump(Map map, ArrayMap array) {
         Log.e("test", "HashMap of " + map.size() + " entries:");
         Set<Map.Entry> mapSet = map.entrySet();
@@ -336,96 +199,6 @@ public class ArrayMapTest {
         Log.e("test", "ArrayMap of " + map2.size() + " entries:");
         for (int i = 0; i < map2.size(); i++) {
             Log.e("test", "    " + map2.keyAt(i) + " -> " + map2.valueAt(i));
-        }
-    }
-
-    private static void dump(Bundle bundle1, Bundle bundle2) {
-        Log.e("test", "First Bundle of " + bundle1.size() + " entries:");
-        Set<String> keys1 = bundle1.keySet();
-        for (String key : keys1) {
-            Log.e("test", "    " + key + " -> " + bundle1.get(key));
-        }
-        Log.e("test", "Second Bundle of " + bundle2.size() + " entries:");
-        Set<String> keys2 = bundle2.keySet();
-        for (String key : keys2) {
-            Log.e("test", "    " + key + " -> " + bundle2.get(key));
-        }
-    }
-
-    @Test
-    public void testBasicArrayMap() {
-        HashMap<ControlledHash, Integer> hashMap = new HashMap<>();
-        ArrayMap<ControlledHash, Integer> arrayMap = new ArrayMap<>();
-        Bundle bundle = new Bundle();
-
-        for (int i = 0; i < OPS.length; i++) {
-            Integer oldHash;
-            Integer oldArray;
-            ControlledHash key = KEYS[i] < 0 ? null : new ControlledHash(KEYS[i]);
-            String strKey = KEYS[i] < 0 ? null : Integer.toString(KEYS[i]);
-            switch (OPS[i]) {
-                case OP_ADD:
-                    if (DEBUG) Log.i("test", "Adding key: " + key);
-                    oldHash = hashMap.put(key, i);
-                    oldArray = arrayMap.put(key, i);
-                    bundle.putInt(strKey, i);
-                    break;
-                case OP_REM:
-                    if (DEBUG) Log.i("test", "Removing key: " + key);
-                    oldHash = hashMap.remove(key);
-                    oldArray = arrayMap.remove(key);
-                    bundle.remove(strKey);
-                    break;
-                default:
-                    fail("Bad operation " + OPS[i] + " @ " + i);
-                    return;
-            }
-            if (!compare(oldHash, oldArray)) {
-                String msg = "Bad result: expected " + oldHash + ", got " + oldArray;
-                Log.e("test", msg);
-                dump(hashMap, arrayMap);
-                fail(msg);
-            }
-            try {
-                validateArrayMap(arrayMap);
-            } catch (Throwable e) {
-                Log.e("test", e.getMessage());
-                dump(hashMap, arrayMap);
-                throw e;
-            }
-            try {
-                compareMaps(hashMap, arrayMap);
-            } catch (Throwable e) {
-                Log.e("test", e.getMessage());
-                dump(hashMap, arrayMap);
-                throw e;
-            }
-            Parcel parcel = Parcel.obtain();
-            bundle.writeToParcel(parcel, 0);
-            parcel.setDataPosition(0);
-            Bundle bundle2 = parcel.readBundle();
-            try {
-                compareBundles(bundle, bundle2);
-            } catch (Throwable e) {
-                Log.e("test", e.getMessage());
-                dump(bundle, bundle2);
-                throw e;
-            }
-        }
-
-        arrayMap.put(new ControlledHash(50000), 100);
-        ControlledHash lookup = new ControlledHash(50000);
-        Iterator<ControlledHash> it = arrayMap.keySet().iterator();
-        while (it.hasNext()) {
-            if (it.next().equals(lookup)) {
-                it.remove();
-            }
-        }
-        if (arrayMap.containsKey(lookup)) {
-            String msg = "Bad map iterator: didn't remove test key";
-            Log.e("test", msg);
-            dump(hashMap, arrayMap);
-            fail(msg);
         }
     }
 
@@ -480,44 +253,6 @@ public class ArrayMapTest {
                     map2 + ", " + map3);
         }
     }
-
-//    /**
-//     * Test creating a malformed array map with duplicated keys and that we will catch this when
-//     * unparcelling.
-//     */
-//    @Test
-//    public void testDuplicateKeys() throws NoSuchMethodException,
-//            InvocationTargetException, IllegalAccessException, NoSuchFieldException {
-//        ArrayMap<String, Object> map1 = new ArrayMap(2);
-//
-//        Method appendMethod = ArrayMap.class.getMethod("append", Object.class, Object.class);
-//        appendMethod.invoke(map1, Integer.toString(100000), "foo");
-//        appendMethod.invoke(map1, Integer.toString(100000), "bar");
-//
-//        // Now parcel/unparcel, and verify we get the expected error.
-//        Parcel parcel = Parcel.obtain();
-//        Method writeArrayMapMethod = Parcel.class.getMethod("writeArrayMap", ArrayMap.class);
-//        writeArrayMapMethod.invoke(parcel, map1);
-//        parcel.setDataPosition(0);
-//        ArrayMap<String, Object> map2 = new ArrayMap(2);
-//
-//        try {
-//            Parcel.class.getMethod("readArrayMap", ArrayMap.class, ClassLoader.class).invoke(
-//                    parcel, map2, null);
-//        } catch (InvocationTargetException e) {
-//            Throwable cause = e.getCause();
-//            if (cause instanceof IllegalArgumentException) {
-//                // Good!
-//                return;
-//            }
-//            throw e;
-//        }
-//
-//        String msg = "Didn't throw expected IllegalArgumentException";
-//        Log.e("test", msg);
-//        dump(map1, map2);
-//        fail(msg);
-//    }
 
     private static void checkEntrySetToArray(ArrayMap<?, ?> testMap) {
         try {

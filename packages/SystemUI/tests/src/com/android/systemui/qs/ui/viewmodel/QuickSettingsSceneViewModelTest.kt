@@ -29,6 +29,7 @@ import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
@@ -62,6 +63,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 AirplaneModeInteractor(
                     FakeAirplaneModeRepository(),
                     FakeConnectivityRepository(),
+                    FakeMobileConnectionsRepository(),
                 ),
             constants = mock(),
             flags,

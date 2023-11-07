@@ -84,6 +84,26 @@ RuntimeVisibleAnnotations:
     java.lang.annotation.Retention(
       value=Ljava/lang/annotation/RetentionPolicy;.CLASS
     )
+## Class: android/hosttest/annotation/HostSideTestStaticInitializerStub.class
+  Compiled from "HostSideTestStaticInitializerStub.java"
+public interface android.hosttest.annotation.HostSideTestStaticInitializerStub extends java.lang.annotation.Annotation
+  minor version: 0
+  major version: 61
+  flags: (0x2601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT, ACC_ANNOTATION
+  this_class: #x                          // android/hosttest/annotation/HostSideTestStaticInitializerStub
+  super_class: #x                         // java/lang/Object
+  interfaces: 1, fields: 0, methods: 0, attributes: 2
+}
+SourceFile: "HostSideTestStaticInitializerStub.java"
+RuntimeVisibleAnnotations:
+  x: #x(#x=[e#x.#x,e#x.#x,e#x.#x,e#x.#x])
+    java.lang.annotation.Target(
+      value=[Ljava/lang/annotation/ElementType;.TYPE,Ljava/lang/annotation/ElementType;.FIELD,Ljava/lang/annotation/ElementType;.METHOD,Ljava/lang/annotation/ElementType;.CONSTRUCTOR]
+    )
+  x: #x(#x=e#x.#x)
+    java.lang.annotation.Retention(
+      value=Ljava/lang/annotation/RetentionPolicy;.CLASS
+    )
 ## Class: android/hosttest/annotation/HostSideTestStub.class
   Compiled from "HostSideTestStub.java"
 public interface android.hosttest.annotation.HostSideTestStub extends java.lang.annotation.Annotation
@@ -745,20 +765,30 @@ SourceFile: "TinyFrameworkClassLoadHook.java"
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
-## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializer.class
-  Compiled from "TinyFrameworkClassWithInitializer.java"
-public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithInitializer
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerDefault.class
+  Compiled from "TinyFrameworkClassWithInitializerDefault.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithInitializerDefault
   minor version: 0
   major version: 61
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
-  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializer
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerDefault
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 2, attributes: 2
+  interfaces: 0, fields: 2, methods: 2, attributes: 2
   public static boolean sInitialized;
     descriptor: Z
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
 
-  public com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithInitializer();
+  public static java.lang.Object sObject;
+    descriptor: Ljava/lang/Object;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithInitializerDefault();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
     Code:
@@ -769,26 +799,86 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
       LineNumberTable:
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
-            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializer;
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerDefault;
 
   static {};
     descriptor: ()V
     flags: (0x0008) ACC_STATIC
     Code:
-      stack=1, locals=0, args_size=0
+      stack=2, locals=0, args_size=0
          x: iconst_1
          x: putstatic     #x                  // Field sInitialized:Z
-         x: return
+         x: new           #x                  // class java/lang/Object
+         x: dup
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+        x: putstatic     #x                 // Field sObject:Ljava/lang/Object;
+        x: return
       LineNumberTable:
 }
-SourceFile: "TinyFrameworkClassWithInitializer.java"
+SourceFile: "TinyFrameworkClassWithInitializerDefault.java"
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestStub
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerStub.class
+  Compiled from "TinyFrameworkClassWithInitializerStub.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithInitializerStub
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerStub
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 2, methods: 2, attributes: 2
+  public static boolean sInitialized;
+    descriptor: Z
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static java.lang.Object sObject;
+    descriptor: Ljava/lang/Object;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithInitializerStub();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         x: aload_0
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+         x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerStub;
+
+  static {};
+    descriptor: ()V
+    flags: (0x0008) ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: iconst_1
+         x: putstatic     #x                  // Field sInitialized:Z
+         x: new           #x                  // class java/lang/Object
+         x: dup
+         x: invokespecial #x                  // Method java/lang/Object."<init>":()V
+        x: putstatic     #x                 // Field sObject:Ljava/lang/Object;
+        x: return
+      LineNumberTable:
+}
+SourceFile: "TinyFrameworkClassWithInitializerStub.java"
 RuntimeInvisibleAnnotations:
   x: #x(#x=s#x)
     android.hosttest.annotation.HostSideTestClassLoadHook(
       value="com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook.onClassLoaded"
     )
   x: #x()
-    android.hosttest.annotation.HostSideTestWholeClassStub
+    android.hosttest.annotation.HostSideTestStub
+  x: #x()
+    android.hosttest.annotation.HostSideTestStaticInitializerStub
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkExceptionTester.class
   Compiled from "TinyFrameworkExceptionTester.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkExceptionTester

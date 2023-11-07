@@ -83,10 +83,6 @@ object Flags {
     @JvmField
     val NOTIFICATION_INLINE_REPLY_ANIMATION = releasedFlag("notification_inline_reply_animation")
 
-    // TODO(b/277338665): Tracking Bug
-    @JvmField
-    val NOTIFICATION_SHELF_REFACTOR = releasedFlag("notification_shelf_refactor")
-
     // TODO(b/288326013): Tracking Bug
     @JvmField
     val NOTIFICATION_ASYNC_HYBRID_VIEW_INFLATION =

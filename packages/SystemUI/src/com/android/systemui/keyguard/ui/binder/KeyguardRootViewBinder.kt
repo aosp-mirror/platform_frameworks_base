@@ -224,16 +224,10 @@ object KeyguardRootViewBinder {
                             deviceEntryHapticsInteractor.playSuccessHaptic
                                 .filter { it }
                                 .collect {
-                                    if (
-                                        featureFlags.isEnabled(Flags.ONE_WAY_HAPTICS_API_MIGRATION)
-                                    ) {
-                                        vibratorHelper.performHapticFeedback(
-                                            view,
-                                            HapticFeedbackConstants.CONFIRM,
-                                        )
-                                    } else {
-                                        vibratorHelper.vibrateAuthSuccess("device-entry::success")
-                                    }
+                                    vibratorHelper.performHapticFeedback(
+                                        view,
+                                        HapticFeedbackConstants.CONFIRM,
+                                    )
                                     deviceEntryHapticsInteractor.handleSuccessHaptic()
                                 }
                         }
@@ -242,16 +236,10 @@ object KeyguardRootViewBinder {
                             deviceEntryHapticsInteractor.playErrorHaptic
                                 .filter { it }
                                 .collect {
-                                    if (
-                                        featureFlags.isEnabled(Flags.ONE_WAY_HAPTICS_API_MIGRATION)
-                                    ) {
-                                        vibratorHelper.performHapticFeedback(
-                                            view,
-                                            HapticFeedbackConstants.REJECT,
-                                        )
-                                    } else {
-                                        vibratorHelper.vibrateAuthSuccess("device-entry::error")
-                                    }
+                                    vibratorHelper.performHapticFeedback(
+                                        view,
+                                        HapticFeedbackConstants.REJECT,
+                                    )
                                     deviceEntryHapticsInteractor.handleErrorHaptic()
                                 }
                         }

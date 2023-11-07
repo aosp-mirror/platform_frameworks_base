@@ -18,9 +18,17 @@ package com.android.settingslib.spa.testutils
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.withTimeoutOrNull
 
 suspend fun <T> Flow<T>.firstWithTimeoutOrNull(timeMillis: Long = 500): T? =
     withTimeoutOrNull(timeMillis) {
         first()
     }
+
+suspend fun <T> Flow<T>.toListWithTimeout(timeMillis: Long = 500): List<T> {
+    val list = mutableListOf<T>()
+    return withTimeoutOrNull(timeMillis) {
+        toList(list)
+    } ?: list
+}

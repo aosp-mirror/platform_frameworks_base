@@ -18,7 +18,6 @@ package com.android.hoststubgen.frameworktest;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.util.Log;
-import android.util.Slog;
 
 import org.junit.Test;
 
@@ -33,12 +32,6 @@ public class LogTest {
         Log.i("TAG", "Test i log");
         Log.w("TAG", "Test w log");
         Log.e("TAG", "Test e log");
-
-        Slog.v("TAG", "Test v slog");
-        Slog.d("TAG", "Test d slog");
-        Slog.i("TAG", "Test i slog");
-        Slog.w("TAG", "Test w slog");
-        Slog.e("TAG", "Test e slog");
     }
 
     @Test

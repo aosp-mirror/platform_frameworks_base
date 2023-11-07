@@ -17,9 +17,11 @@
 package com.android.settingslib.spa.gallery.itemList
 
 import android.os.Bundle
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.core.os.bundleOf
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -79,13 +81,13 @@ object ItemOperatePageProvider : SettingsPageProvider {
         entryList.add(
             SettingsEntryBuilder.create("ItemOp", owner)
                 .setUiLayoutFn {
-                    val checked = rememberSaveable { mutableStateOf(false) }
+                    var checked by rememberSaveable { mutableStateOf(false) }
                     SwitchPreference(remember {
                         object : SwitchPreferenceModel {
                             override val title = "Item operation: $opName"
-                            override val checked = checked
+                            override val checked = { checked }
                             override val onCheckedChange =
-                                { newChecked: Boolean -> checked.value = newChecked }
+                                { newChecked: Boolean -> checked = newChecked }
                         }
                     })
                 }.build(),

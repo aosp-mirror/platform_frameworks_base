@@ -73,7 +73,6 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -571,36 +570,32 @@ public class TaskTests extends WindowTestsBase {
                 .setWindowingMode(WINDOWING_MODE_FULLSCREEN).setDisplay(display).build();
         final Task task = rootTask.getBottomMostTask();
         final ActivityRecord root = task.getTopNonFinishingActivity();
-        final PackageManager pm = mContext.getPackageManager();
-        spyOn(pm);
         spyOn(mWm.mLetterboxConfiguration);
         spyOn(root);
         spyOn(root.mLetterboxUiController);
 
         doReturn(true).when(root.mLetterboxUiController)
                 .shouldEnableUserAspectRatioSettings();
-        doReturn(new Intent()).when(pm).getLaunchIntentForPackage(anyString());
         doReturn(false).when(root).inSizeCompatMode();
         doReturn(task).when(root).getOrganizedTask();
 
         // The button should be eligible to be displayed
-        assertTrue(task.getTaskInfo().topActivityEligibleForUserAspectRatioButton);
+        assertTrue(task.getTaskInfo()
+                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
 
         // When shouldApplyUserMinAspectRatioOverride is disable the button is not enabled
         doReturn(false).when(root.mLetterboxUiController)
                 .shouldEnableUserAspectRatioSettings();
-        assertFalse(task.getTaskInfo().topActivityEligibleForUserAspectRatioButton);
+        assertFalse(task.getTaskInfo()
+                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
         doReturn(true).when(root.mLetterboxUiController)
                 .shouldEnableUserAspectRatioSettings();
 
         // When in size compat mode the button is not enabled
         doReturn(true).when(root).inSizeCompatMode();
-        assertFalse(task.getTaskInfo().topActivityEligibleForUserAspectRatioButton);
+        assertFalse(task.getTaskInfo()
+                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
         doReturn(false).when(root).inSizeCompatMode();
-
-        // When app doesn't have any launchable activities the button is not enabled
-        doReturn(null).when(pm).getLaunchIntentForPackage(anyString());
-        assertFalse(task.getTaskInfo().topActivityEligibleForUserAspectRatioButton);
     }
 
     /**

@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
-import android.os.PowerManager
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import android.view.MotionEvent
@@ -16,7 +15,6 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.ExpandHelper
 import com.android.systemui.Gefingerpoken
-import com.android.systemui.res.R
 import com.android.systemui.biometrics.UdfpsKeyguardViewControllerLegacy
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.FalsingCollector
@@ -30,6 +28,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -51,11 +50,11 @@ private const val SPRING_BACK_ANIMATION_LENGTH_MS = 375L
 private const val RUBBERBAND_FACTOR_STATIC = 0.15f
 private const val RUBBERBAND_FACTOR_EXPANDABLE = 0.5f
 
-/**
- * A class that controls the lockscreen to shade transition
- */
+/** A class that controls the lockscreen to shade transition */
 @SysUISingleton
-class LockscreenShadeTransitionController @Inject constructor(
+class LockscreenShadeTransitionController
+@Inject
+constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val logger: LSShadeTransitionLogger,
     private val keyguardBypassController: KeyguardBypassController,
@@ -65,7 +64,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     private val mediaHierarchyManager: MediaHierarchyManager,
     private val scrimTransitionController: LockscreenShadeScrimTransitionController,
     private val keyguardTransitionControllerFactory:
-    LockscreenShadeKeyguardTransitionController.Factory,
+        LockscreenShadeKeyguardTransitionController.Factory,
     private val depthController: NotificationShadeDepthController,
     private val context: Context,
     private val splitShadeOverScrollerFactory: SplitShadeLockScreenOverScroller.Factory,
@@ -92,31 +91,19 @@ class LockscreenShadeTransitionController @Inject constructor(
     lateinit var centralSurfaces: CentralSurfaces
     lateinit var qS: QS
 
-    /**
-     * A handler that handles the next keyguard dismiss animation.
-     */
+    /** A handler that handles the next keyguard dismiss animation. */
     private var animationHandlerOnKeyguardDismiss: ((Long) -> Unit)? = null
 
-    /**
-     * The entry that was just dragged down on.
-     */
+    /** The entry that was just dragged down on. */
     private var draggedDownEntry: NotificationEntry? = null
 
-    /**
-     * The current animator if any
-     */
-    @VisibleForTesting
-    internal var dragDownAnimator: ValueAnimator? = null
+    /** The current animator if any */
+    @VisibleForTesting internal var dragDownAnimator: ValueAnimator? = null
 
-    /**
-     * The current pulse height animator if any
-     */
-    @VisibleForTesting
-    internal var pulseHeightAnimator: ValueAnimator? = null
+    /** The current pulse height animator if any */
+    @VisibleForTesting internal var pulseHeightAnimator: ValueAnimator? = null
 
-    /**
-     * Distance that the full shade transition takes in order to complete.
-     */
+    /** Distance that the full shade transition takes in order to complete. */
     private var fullTransitionDistance = 0
 
     /**
@@ -150,36 +137,26 @@ class LockscreenShadeTransitionController @Inject constructor(
     private var statusBarTransitionDistance = 0
 
     /**
-     * Flag to make sure that the dragDownAmount is applied to the listeners even when in the
-     * locked down shade.
+     * Flag to make sure that the dragDownAmount is applied to the listeners even when in the locked
+     * down shade.
      */
     private var forceApplyAmount = false
 
-    /**
-     * A flag to suppress the default animation when unlocking in the locked down shade.
-     */
+    /** A flag to suppress the default animation when unlocking in the locked down shade. */
     private var nextHideKeyguardNeedsNoAnimation = false
 
-    /**
-     * Are we currently waking up to the shade locked
-     */
+    /** Are we currently waking up to the shade locked */
     var isWakingToShadeLocked: Boolean = false
         private set
 
-    /**
-     * The distance until we're showing the notifications when pulsing
-     */
+    /** The distance until we're showing the notifications when pulsing */
     val distanceUntilShowingPulsingNotifications
         get() = fullTransitionDistance
 
-    /**
-     * The udfpsKeyguardViewController if it exists.
-     */
+    /** The udfpsKeyguardViewController if it exists. */
     var mUdfpsKeyguardViewControllerLegacy: UdfpsKeyguardViewControllerLegacy? = null
 
-    /**
-     * The touch helper responsible for the drag down animation.
-     */
+    /** The touch helper responsible for the drag down animation. */
     val touchHelper = DragDownHelper(falsingManager, falsingCollector, this, context)
 
     private val splitShadeOverScroller: SplitShadeLockScreenOverScroller by lazy {
@@ -198,12 +175,12 @@ class LockscreenShadeTransitionController @Inject constructor(
 
     private val callbacks = mutableListOf<Callback>()
 
-    /** See [LockscreenShadeQsTransitionController.qsTransitionFraction].*/
+    /** See [LockscreenShadeQsTransitionController.qsTransitionFraction]. */
     @get:FloatRange(from = 0.0, to = 1.0)
     val qSDragProgress: Float
         get() = qsTransitionController.qsTransitionFraction
 
-    /** See [LockscreenShadeQsTransitionController.qsSquishTransitionFraction].*/
+    /** See [LockscreenShadeQsTransitionController.qsSquishTransitionFraction]. */
     @get:FloatRange(from = 0.0, to = 1.0)
     val qsSquishTransitionFraction: Float
         get() = qsTransitionController.qsSquishTransitionFraction
@@ -223,54 +200,71 @@ class LockscreenShadeTransitionController @Inject constructor(
 
     init {
         updateResources()
-        configurationController.addCallback(object : ConfigurationController.ConfigurationListener {
-            override fun onConfigChanged(newConfig: Configuration?) {
-                updateResources()
-                touchHelper.updateResources(context)
+        configurationController.addCallback(
+            object : ConfigurationController.ConfigurationListener {
+                override fun onConfigChanged(newConfig: Configuration?) {
+                    updateResources()
+                    touchHelper.updateResources(context)
+                }
             }
-        })
+        )
         dumpManager.registerDumpable(this)
-        statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
-            override fun onExpandedChanged(isExpanded: Boolean) {
-                // safeguard: When the panel is fully collapsed, let's make sure to reset.
-                // See b/198098523
-                if (!isExpanded) {
-                    if (dragDownAmount != 0f && dragDownAnimator?.isRunning != true) {
-                        logger.logDragDownAmountResetWhenFullyCollapsed()
-                        dragDownAmount = 0f
-                    }
-                    if (pulseHeight != 0f && pulseHeightAnimator?.isRunning != true) {
-                        logger.logPulseHeightNotResetWhenFullyCollapsed()
-                        setPulseHeight(0f, animate = false)
+        statusBarStateController.addCallback(
+            object : StatusBarStateController.StateListener {
+                override fun onExpandedChanged(isExpanded: Boolean) {
+                    // safeguard: When the panel is fully collapsed, let's make sure to reset.
+                    // See b/198098523
+                    if (!isExpanded) {
+                        if (dragDownAmount != 0f && dragDownAnimator?.isRunning != true) {
+                            logger.logDragDownAmountResetWhenFullyCollapsed()
+                            dragDownAmount = 0f
+                        }
+                        if (pulseHeight != 0f && pulseHeightAnimator?.isRunning != true) {
+                            logger.logPulseHeightNotResetWhenFullyCollapsed()
+                            setPulseHeight(0f, animate = false)
+                        }
                     }
                 }
             }
-        })
-        wakefulnessLifecycle.addObserver(object : WakefulnessLifecycle.Observer {
-            override fun onPostFinishedWakingUp() {
-                // when finishing waking up, the UnlockedScreenOffAnimation has another attempt
-                // to reset keyguard. Let's do it in post
-                isWakingToShadeLocked = false
+        )
+        wakefulnessLifecycle.addObserver(
+            object : WakefulnessLifecycle.Observer {
+                override fun onPostFinishedWakingUp() {
+                    // when finishing waking up, the UnlockedScreenOffAnimation has another attempt
+                    // to reset keyguard. Let's do it in post
+                    isWakingToShadeLocked = false
+                }
             }
-        })
+        )
     }
 
     private fun updateResources() {
-        fullTransitionDistance = context.resources.getDimensionPixelSize(
-            R.dimen.lockscreen_shade_full_transition_distance)
-        fullTransitionDistanceByTap = context.resources.getDimensionPixelSize(
-            R.dimen.lockscreen_shade_transition_by_tap_distance)
-        notificationShelfTransitionDistance = context.resources.getDimensionPixelSize(
-            R.dimen.lockscreen_shade_notif_shelf_transition_distance)
-        depthControllerTransitionDistance = context.resources.getDimensionPixelSize(
-            R.dimen.lockscreen_shade_depth_controller_transition_distance)
-        udfpsTransitionDistance = context.resources.getDimensionPixelSize(
-            R.dimen.lockscreen_shade_udfps_keyguard_transition_distance)
-        statusBarTransitionDistance = context.resources.getDimensionPixelSize(
-            R.dimen.lockscreen_shade_status_bar_transition_distance)
+        fullTransitionDistance =
+            context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_full_transition_distance
+            )
+        fullTransitionDistanceByTap =
+            context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_transition_by_tap_distance
+            )
+        notificationShelfTransitionDistance =
+            context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_notif_shelf_transition_distance
+            )
+        depthControllerTransitionDistance =
+            context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_depth_controller_transition_distance
+            )
+        udfpsTransitionDistance =
+            context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_udfps_keyguard_transition_distance
+            )
+        statusBarTransitionDistance =
+            context.resources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_status_bar_transition_distance
+            )
 
-        useSplitShade = splitShadeStateController
-                .shouldUseSplitNotificationShade(context.resources)
+        useSplitShade = splitShadeStateController.shouldUseSplitNotificationShade(context.resources)
     }
 
     fun setStackScroller(nsslController: NotificationStackScrollLayoutController) {
@@ -278,31 +272,13 @@ class LockscreenShadeTransitionController @Inject constructor(
         touchHelper.expandCallback = nsslController.expandHelperCallback
     }
 
-    /**
-     * Initialize the shelf controller such that clicks on it will expand the shade
-     */
-    fun bindController(notificationShelfController: NotificationShelfController) {
-        // Bind the click listener of the shelf to go to the full shade
-        notificationShelfController.setOnClickListener {
-            if (statusBarStateController.state == StatusBarState.KEYGUARD) {
-                powerInteractor.wakeUpIfDozing("SHADE_CLICK", PowerManager.WAKE_REASON_GESTURE)
-                goToLockedShade(it)
-            }
-        }
-    }
-
-    /**
-     * @return true if the interaction is accepted, false if it should be cancelled
-     */
+    /** @return true if the interaction is accepted, false if it should be cancelled */
     internal fun canDragDown(): Boolean {
         return (statusBarStateController.state == StatusBarState.KEYGUARD ||
-            nsslController.isInLockedDownShade()) &&
-            (qS.isFullyCollapsed || useSplitShade)
+            nsslController.isInLockedDownShade()) && (qS.isFullyCollapsed || useSplitShade)
     }
 
-    /**
-     * Called by the touch helper when when a gesture has completed all the way and released.
-     */
+    /** Called by the touch helper when when a gesture has completed all the way and released. */
     internal fun onDraggedDown(startingChild: View?, dragLengthY: Int) {
         if (canDragDown()) {
             val cancelRunnable = Runnable {
@@ -318,8 +294,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                         false
                     },
                     cancelRunnable,
-                    /* afterKeyguardGone= */
-                    false,
+                    /* afterKeyguardGone= */ false,
                 )
             } else {
                 logger.logDraggedDown(startingChild, dragLengthY)
@@ -334,12 +309,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                         }
                         shadeViewController.transitionToExpandedShade(delay)
                         callbacks.forEach {
-                            it.setTransitionToFullShadeAmount(
-                                0f,
-                                /* animated= */
-                                true,
-                                delay
-                            )
+                            it.setTransitionToFullShadeAmount(0f, /* animated= */ true, delay)
                         }
 
                         // Let's reset ourselves, ready for the next animation
@@ -361,16 +331,12 @@ class LockscreenShadeTransitionController @Inject constructor(
         }
     }
 
-    /**
-     * Called by the touch helper when the drag down was aborted and should be reset.
-     */
+    /** Called by the touch helper when the drag down was aborted and should be reset. */
     internal fun onDragDownReset() {
         logger.logDragDownAborted()
         nsslController.setDimmed(
-            /* dimmed= */
-            true,
-            /* animate= */
-            true,
+            /* dimmed= */ true,
+            /* animate= */ true,
         )
         nsslController.resetScrollPosition()
         nsslController.resetCheckSnoozeLeavebehind()
@@ -379,20 +345,17 @@ class LockscreenShadeTransitionController @Inject constructor(
 
     /**
      * The user has dragged either above or below the threshold which changes the dimmed state.
+     *
      * @param above whether they dragged above it
      */
     internal fun onCrossedThreshold(above: Boolean) {
         nsslController.setDimmed(
-            /* dimmed= */
-            !above,
-            /* animate= */
-            true,
+            /* dimmed= */ !above,
+            /* animate= */ true,
         )
     }
 
-    /**
-     * Called by the touch helper when the drag down was started
-     */
+    /** Called by the touch helper when the drag down was started */
     internal fun onDragDownStarted(startingChild: ExpandableView?) {
         logger.logDragDownStarted(startingChild)
         nsslController.cancelLongPress()
@@ -405,14 +368,13 @@ class LockscreenShadeTransitionController @Inject constructor(
         }
     }
 
-    /**
-     * Do we need a falsing check currently?
-     */
+    /** Do we need a falsing check currently? */
     internal val isFalsingCheckNeeded: Boolean
         get() = statusBarStateController.state == StatusBarState.KEYGUARD
 
     /**
      * Is dragging down enabled on a given view
+     *
      * @param view The view to check or `null` to check if it's enabled at all
      */
     internal fun isDragDownEnabledForView(view: ExpandableView?): Boolean {
@@ -432,17 +394,14 @@ class LockscreenShadeTransitionController @Inject constructor(
         return false
     }
 
-    /**
-     * @return if drag down is enabled anywhere, not just on selected views.
-     */
+    /** @return if drag down is enabled anywhere, not just on selected views. */
     internal val isDragDownAnywhereEnabled: Boolean
-        get() = (statusBarStateController.getState() == StatusBarState.KEYGUARD &&
-            !keyguardBypassController.bypassEnabled &&
-            (qS.isFullyCollapsed || useSplitShade))
+        get() =
+            (statusBarStateController.getState() == StatusBarState.KEYGUARD &&
+                !keyguardBypassController.bypassEnabled &&
+                (qS.isFullyCollapsed || useSplitShade))
 
-    /**
-     * The amount in pixels that the user has dragged down.
-     */
+    /** The amount in pixels that the user has dragged down. */
     internal var dragDownAmount = 0f
         set(value) {
             if (field != value || forceApplyAmount) {
@@ -458,10 +417,8 @@ class LockscreenShadeTransitionController @Inject constructor(
                     callbacks.forEach {
                         it.setTransitionToFullShadeAmount(
                             field,
-                            /* animate= */
-                            false,
-                            /* delay= */
-                            0,
+                            /* animate= */ false,
+                            /* delay= */ 0,
                         )
                     }
 
@@ -507,19 +464,19 @@ class LockscreenShadeTransitionController @Inject constructor(
             dragDownAnimator.startDelay = delay
         }
         if (endlistener != null) {
-            dragDownAnimator.addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    endlistener.invoke()
+            dragDownAnimator.addListener(
+                object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        endlistener.invoke()
+                    }
                 }
-            })
+            )
         }
         dragDownAnimator.start()
         this.dragDownAnimator = dragDownAnimator
     }
 
-    /**
-     * Animate appear the drag down amount.
-     */
+    /** Animate appear the drag down amount. */
     private fun animateAppear(delay: Long = 0) {
         // changing to shade locked will make isInLockDownShade true, so let's override
         // that
@@ -541,20 +498,20 @@ class LockscreenShadeTransitionController @Inject constructor(
     }
 
     /**
-     * Ask this controller to go to the locked shade, changing the state change and doing
-     * an animation, where the qs appears from 0 from the top
+     * Ask this controller to go to the locked shade, changing the state change and doing an
+     * animation, where the qs appears from 0 from the top
      *
-     * If secure with redaction: Show bouncer, go to unlocked shade.
-     * If secure without redaction or no security: Go to [StatusBarState.SHADE_LOCKED].
+     * If secure with redaction: Show bouncer, go to unlocked shade. If secure without redaction or
+     * no security: Go to [StatusBarState.SHADE_LOCKED].
      *
-     * Split shade is special case and [needsQSAnimation] will be always overridden to true.
-     * That's because handheld shade will automatically follow notifications animation, but that's
-     * not the case for split shade.
+     * Split shade is special case and [needsQSAnimation] will be always overridden to true. That's
+     * because handheld shade will automatically follow notifications animation, but that's not the
+     * case for split shade.
      *
      * @param expandView The view to expand after going to the shade
      * @param needsQSAnimation if this needs the quick settings to slide in from the top or if
-     *                         that's already handled separately. This argument will be ignored on
-     *                         split shade as there QS animation can't be handled separately.
+     *   that's already handled separately. This argument will be ignored on split shade as there QS
+     *   animation can't be handled separately.
      */
     @JvmOverloads
     fun goToLockedShade(expandedView: View?, needsQSAnimation: Boolean = true) {
@@ -571,11 +528,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                     shadeViewController.transitionToExpandedShade(delay)
                 }
             }
-            goToLockedShadeInternal(
-                expandedView,
-                animationHandler,
-                cancelAction = null
-            )
+            goToLockedShadeInternal(expandedView, animationHandler, cancelAction = null)
         }
     }
 
@@ -586,11 +539,10 @@ class LockscreenShadeTransitionController @Inject constructor(
      *
      * @param expandView The view to expand after going to the shade.
      * @param animationHandler The handler which performs the go to full shade animation. If null,
-     *                         the default handler will do the animation, otherwise the caller is
-     *                         responsible for the animation. The input value is a Long for the
-     *                         delay for the animation.
+     *   the default handler will do the animation, otherwise the caller is responsible for the
+     *   animation. The input value is a Long for the delay for the animation.
      * @param cancelAction The runnable to invoke when the transition is aborted. This happens if
-     *                     the user goes to the bouncer and goes back.
+     *   the user goes to the bouncer and goes back.
      */
     private fun goToLockedShadeInternal(
         expandView: View?,
@@ -607,18 +559,16 @@ class LockscreenShadeTransitionController @Inject constructor(
         if (expandView is ExpandableNotificationRow) {
             entry = expandView.entry
             entry.setUserExpanded(
-                /* userExpanded= */
-                true,
-                /* allowChildExpansion= */
-                true,
+                /* userExpanded= */ true,
+                /* allowChildExpansion= */ true,
             )
             // Indicate that the group expansion is changing at this time -- this way the group
             // and children backgrounds / divider animations will look correct.
             entry.setGroupExpansionChanging(true)
             userId = entry.sbn.userId
         }
-        var fullShadeNeedsBouncer = (
-            !lockScreenUserManager.shouldShowLockscreenNotifications() ||
+        var fullShadeNeedsBouncer =
+            (!lockScreenUserManager.shouldShowLockscreenNotifications() ||
                 falsingCollector.shouldEnforceBouncer())
         if (keyguardBypassController.bypassEnabled) {
             fullShadeNeedsBouncer = false
@@ -638,8 +588,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                 draggedDownEntry?.apply {
                     setUserLocked(false)
                     notifyHeightChanged(
-                        /* needsAnimation= */
-                        false,
+                        /* needsAnimation= */ false,
                     )
                     draggedDownEntry = null
                 }
@@ -659,8 +608,7 @@ class LockscreenShadeTransitionController @Inject constructor(
             // the scrimstate resets too early
             if (animationHandler != null) {
                 animationHandler.invoke(
-                    /* delay= */
-                    0,
+                    /* delay= */ 0,
                 )
             } else {
                 performDefaultGoToFullShadeAnimation(0)
@@ -669,8 +617,8 @@ class LockscreenShadeTransitionController @Inject constructor(
     }
 
     /**
-     * Notify this handler that the keyguard was just dismissed and that a animation to
-     * the full shade should happen.
+     * Notify this handler that the keyguard was just dismissed and that a animation to the full
+     * shade should happen.
      *
      * @param delay the delay to do the animation with
      * @param previousState which state were we in when we hid the keyguard?
@@ -695,8 +643,8 @@ class LockscreenShadeTransitionController @Inject constructor(
     }
 
     /**
-     * Perform the default appear animation when going to the full shade. This is called when
-     * not triggered by gestures, e.g. when clicking on the shelf or expand button.
+     * Perform the default appear animation when going to the full shade. This is called when not
+     * triggered by gestures, e.g. when clicking on the shelf or expand button.
      */
     private fun performDefaultGoToFullShadeAnimation(delay: Long) {
         logger.logDefaultGoToFullShadeAnimation(delay)
@@ -733,6 +681,7 @@ class LockscreenShadeTransitionController @Inject constructor(
 
     /**
      * Finish the pulse animation when the touch interaction finishes
+     *
      * @param cancelled was the interaction cancelled and this is a reset?
      */
     fun finishPulseAnimation(cancelled: Boolean) {
@@ -745,9 +694,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         }
     }
 
-    /**
-     * Notify this class that a pulse expansion is starting
-     */
+    /** Notify this class that a pulse expansion is starting */
     fun onPulseExpansionStarted() {
         logger.logPulseExpansionStarted()
         pulseHeightAnimator?.apply {
@@ -781,16 +728,14 @@ class LockscreenShadeTransitionController @Inject constructor(
         }
     }
 
-    /**
-     * Callback for authentication events.
-     */
+    /** Callback for authentication events. */
     interface Callback {
-        /** TODO: comment here  */
+        /** TODO: comment here */
         fun onPulseExpansionFinished() {}
 
         /**
-         * Sets the amount of pixels we have currently dragged down if we're transitioning
-         * to the full shade. 0.0f means we're not transitioning yet.
+         * Sets the amount of pixels we have currently dragged down if we're transitioning to the
+         * full shade. 0.0f means we're not transitioning yet.
          */
         fun setTransitionToFullShadeAmount(pxAmount: Float, animate: Boolean, delay: Long) {}
     }
@@ -838,8 +783,8 @@ class DragDownHelper(
     }
 
     fun updateResources(context: Context) {
-        minDragDistance = context.resources.getDimensionPixelSize(
-            R.dimen.keyguard_drag_down_min_distance)
+        minDragDistance =
+            context.resources.getDimensionPixelSize(R.dimen.keyguard_drag_down_min_distance)
         val configuration = ViewConfiguration.get(context)
         touchSlop = configuration.scaledTouchSlop.toFloat()
         slopMultiplier = configuration.scaledAmbiguousGestureMultiplier
@@ -856,7 +801,6 @@ class DragDownHelper(
                 initialTouchY = y
                 initialTouchX = x
             }
-
             MotionEvent.ACTION_MOVE -> {
                 val h = y - initialTouchY
                 // Adjust the touch slop if another gesture may be being performed.
@@ -907,20 +851,22 @@ class DragDownHelper(
                 }
                 return true
             }
-
-            MotionEvent.ACTION_UP -> if (!falsingManager.isUnlockingDisabled && !isFalseTouch &&
-                dragDownCallback.canDragDown()) {
-                dragDownCallback.onDraggedDown(startingChild, (y - initialTouchY).toInt())
-                if (startingChild != null) {
-                    expandCallback.setUserLockedChild(startingChild, false)
-                    startingChild = null
+            MotionEvent.ACTION_UP ->
+                if (
+                    !falsingManager.isUnlockingDisabled &&
+                        !isFalseTouch &&
+                        dragDownCallback.canDragDown()
+                ) {
+                    dragDownCallback.onDraggedDown(startingChild, (y - initialTouchY).toInt())
+                    if (startingChild != null) {
+                        expandCallback.setUserLockedChild(startingChild, false)
+                        startingChild = null
+                    }
+                    isDraggingDown = false
+                } else {
+                    stopDragging()
+                    return false
                 }
-                isDraggingDown = false
-            } else {
-                stopDragging()
-                return false
-            }
-
             MotionEvent.ACTION_CANCEL -> {
                 stopDragging()
                 return false
@@ -948,11 +894,12 @@ class DragDownHelper(
             hDelta = 0f
         }
         val expandable = child.isContentExpandable
-        val rubberbandFactor = if (expandable) {
-            RUBBERBAND_FACTOR_EXPANDABLE
-        } else {
-            RUBBERBAND_FACTOR_STATIC
-        }
+        val rubberbandFactor =
+            if (expandable) {
+                RUBBERBAND_FACTOR_EXPANDABLE
+            } else {
+                RUBBERBAND_FACTOR_STATIC
+            }
         var rubberband = hDelta * rubberbandFactor
         if (expandable && rubberband + child.collapsedHeight > child.maxContentHeight) {
             var overshoot = rubberband + child.collapsedHeight - child.maxContentHeight
@@ -978,11 +925,13 @@ class DragDownHelper(
             // don't use reflection, because the `actualHeight` field may be obfuscated
             child.actualHeight = animation.animatedValue as Int
         }
-        anim.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                expandCallback.setUserLockedChild(child, false)
+        anim.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    expandCallback.setUserLockedChild(child, false)
+                }
             }
-        })
+        )
         anim.start()
     }
 

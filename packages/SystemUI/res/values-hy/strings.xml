@@ -196,8 +196,7 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Դեմքով ապակողպումն անհասանելի է"</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth-ը միացված է:"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Bluetooth սարքի պատկերակ"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Սեղմեք՝ սարքի մանրամասները կազմաձևելու համար"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Մարտկոցի լիցքի մակարդակն անհայտ է։"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Միացված է <xliff:g id="BLUETOOTH">%s</xliff:g>-ին:"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Միացված է <xliff:g id="CAST">%s</xliff:g>-ին:"</string>
@@ -250,8 +249,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Չանհանգստացնել"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Զուգակցված սարքեր չկան"</string>
-    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
-    <skip />
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Հպեք՝ սարք միացնելու կամ անջատելու համար"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Նոր սարքի զուգակցում"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Տեսնել բոլորը"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Միացնել Bluetooth-ը"</string>
@@ -1124,7 +1122,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Պատկերի նախադիտում"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"փոփոխել"</string>
     <string name="add" msgid="81036585205287996">"Ավելացնել"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Օգտատերերի կառավարում"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Կառավարել"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Այս ծանուցումը հնարավոր չէ քաշել տրոհված էկրանի մեկ հատվածից մյուսը"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi-ը հասանելի չէ"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Առաջնահերթության ռեժիմ"</string>
@@ -1182,8 +1180,7 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Տեսախցիկն ու խոսափողը արգելափակված են"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Խոսափողն արգելափակված է"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Առաջնահերթության ռեժիմը միացված է"</string>
-    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
-    <skip />
+    <string name="assistant_attention_content_description" msgid="4166330881435263596">"Հայտնաբերվել է օգտատեր"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Կարգավորեք նշումների կանխադրված հավելված Կարգավորումներում"</string>
     <string name="install_app" msgid="5066668100199613936">"Տեղադրել հավելվածը"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Հայելապատճենե՞լ արտաքին էկրանին"</string>

@@ -79,6 +79,19 @@ public class FooterView extends StackScrollerDecorView {
         return findViewById(R.id.dismiss_text);
     }
 
+    /** Whether the "Clear all" button is currently visible. */
+    public boolean isClearAllButtonVisible() {
+        return isSecondaryVisible();
+    }
+
+    /**
+     * Set the visibility of the "Clear all" button to {@code visible}. Animate the change if
+     * {@code animate} is true.
+     */
+    public void setClearAllButtonVisible(boolean visible, boolean animate) {
+        setSecondaryVisible(visible, animate);
+    }
+
     @Override
     public void dump(PrintWriter pwOriginal, String[] args) {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
@@ -293,7 +306,7 @@ public class FooterView extends StackScrollerDecorView {
             super.applyToView(view);
             if (view instanceof FooterView) {
                 FooterView footerView = (FooterView) view;
-                footerView.setContentVisible(!hideContent);
+                footerView.setContentVisibleAnimated(!hideContent);
             }
         }
     }

@@ -14,7 +14,11 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import androidx.test.filters.SmallTest
+import com.android.SysUITestComponent
 import com.android.SysUITestModule
+import com.android.collectLastValue
+import com.android.runCurrent
+import com.android.runTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
@@ -22,7 +26,6 @@ import com.android.systemui.statusbar.notification.data.repository.FakeNotificat
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -30,60 +33,48 @@ import org.junit.Test
 @SmallTest
 class NotificationsKeyguardInteractorTest : SysuiTestCase() {
 
-    private val testComponent: TestComponent =
-        DaggerNotificationsKeyguardInteractorTest_TestComponent.factory().create(test = this)
-
-    @Test
-    fun areNotifsFullyHidden_reflectsRepository() =
-        with(testComponent) {
-            testScope.runTest {
-                repository.setNotificationsFullyHidden(false)
-                val notifsFullyHidden by collectLastValue(underTest.areNotificationsFullyHidden)
-                runCurrent()
-
-                assertThat(notifsFullyHidden).isFalse()
-
-                repository.setNotificationsFullyHidden(true)
-                runCurrent()
-
-                assertThat(notifsFullyHidden).isTrue()
-            }
-        }
-
-    @Test
-    fun isPulseExpanding_reflectsRepository() =
-        with(testComponent) {
-            testScope.runTest {
-                repository.setPulseExpanding(false)
-                val isPulseExpanding by collectLastValue(underTest.isPulseExpanding)
-                runCurrent()
-
-                assertThat(isPulseExpanding).isFalse()
-
-                repository.setPulseExpanding(true)
-                runCurrent()
-
-                assertThat(isPulseExpanding).isTrue()
-            }
-        }
-
     @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-            ]
-    )
-    interface TestComponent {
-
-        val underTest: NotificationsKeyguardInteractor
+    @Component(modules = [SysUITestModule::class])
+    interface TestComponent : SysUITestComponent<NotificationsKeyguardInteractor> {
 
         val repository: FakeNotificationsKeyguardViewStateRepository
-        val testScope: TestScope
 
         @Component.Factory
         interface Factory {
             fun create(@BindsInstance test: SysuiTestCase): TestComponent
         }
     }
+
+    private val testComponent: TestComponent =
+        DaggerNotificationsKeyguardInteractorTest_TestComponent.factory().create(test = this)
+
+    @Test
+    fun areNotifsFullyHidden_reflectsRepository() =
+        testComponent.runTest {
+            repository.setNotificationsFullyHidden(false)
+            val notifsFullyHidden by collectLastValue(underTest.areNotificationsFullyHidden)
+            runCurrent()
+
+            assertThat(notifsFullyHidden).isFalse()
+
+            repository.setNotificationsFullyHidden(true)
+            runCurrent()
+
+            assertThat(notifsFullyHidden).isTrue()
+        }
+
+    @Test
+    fun isPulseExpanding_reflectsRepository() =
+        testComponent.runTest {
+            repository.setPulseExpanding(false)
+            val isPulseExpanding by collectLastValue(underTest.isPulseExpanding)
+            runCurrent()
+
+            assertThat(isPulseExpanding).isFalse()
+
+            repository.setPulseExpanding(true)
+            runCurrent()
+
+            assertThat(isPulseExpanding).isTrue()
+        }
 }

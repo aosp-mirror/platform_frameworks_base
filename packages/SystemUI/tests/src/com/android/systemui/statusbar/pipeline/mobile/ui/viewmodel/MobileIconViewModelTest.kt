@@ -113,6 +113,7 @@ class MobileIconViewModelTest : SysuiTestCase() {
             AirplaneModeInteractor(
                 airplaneModeRepository,
                 connectivityRepository,
+                FakeMobileConnectionsRepository(),
             )
 
         iconsInteractor =

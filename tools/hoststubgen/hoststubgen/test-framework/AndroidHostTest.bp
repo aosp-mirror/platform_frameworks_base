@@ -42,3 +42,16 @@ java_test_host {
     ],
     test_suites: ["general-tests"],
 }
+
+// "Productionized" build rule.
+android_ravenwood_test {
+    name: "HostStubGenTest-framework-test",
+    srcs: [
+        "src/**/*.java",
+    ],
+    static_libs: [
+        "junit",
+        "truth",
+        "mockito",
+    ],
+}

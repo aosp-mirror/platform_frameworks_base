@@ -34,6 +34,7 @@ android_test {
 
     static_libs: [
         "PlatformComposeSceneTransitionLayout",
+        "PlatformComposeSceneTransitionLayoutTestsUtils",
 
         "androidx.test.runner",
         "androidx.test.ext.junit",

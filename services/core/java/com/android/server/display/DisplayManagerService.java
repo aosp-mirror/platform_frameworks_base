@@ -3225,6 +3225,10 @@ public final class DisplayManagerService extends SystemService {
         if (mSmallAreaDetectionController != null) {
             mSmallAreaDetectionController.dump(pw);
         }
+
+        pw.println();
+        mFlags.dump(pw);
+
     }
 
     private static float[] getFloatArray(TypedArray array) {
