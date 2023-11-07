@@ -63,6 +63,7 @@ aconfig_srcjars = [
     ":android.view.contentcapture.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.usb.flags-aconfig-java{.generated_srcjars}",
     ":android.tracing.flags-aconfig-java{.generated_srcjars}",
+    ":android.appwidget.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -720,5 +721,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.tracing.flags-aconfig-java",
     aconfig_declarations: "android.tracing.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// App Widgets
+aconfig_declarations {
+    name: "android.appwidget.flags-aconfig",
+    package: "android.appwidget.flags",
+    srcs: ["core/java/android/appwidget/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.appwidget.flags-aconfig-java",
+    aconfig_declarations: "android.appwidget.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
