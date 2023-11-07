@@ -65,6 +65,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.transition.Scene;
@@ -181,6 +182,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             (1 << FEATURE_ACTION_MODE_OVERLAY);
 
     private static final Transition USE_DEFAULT_TRANSITION = new TransitionSet();
+
+    /**
+     * Since which target SDK version this window should be edge-to-edge by default.
+     */
+    private static final int DEFAULT_EDGE_TO_EDGE_SDK_VERSION =
+            SystemProperties.getInt("persist.wm.debug.default_e2e_since_sdk", Integer.MAX_VALUE);
 
     /**
      * Simple callback used by the context menu and its submenus. The options
@@ -359,6 +366,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     boolean mDecorFitsSystemWindows = true;
 
+    private final boolean mDefaultEdgeToEdge;
+
     private final ProxyOnBackInvokedDispatcher mProxyOnBackInvokedDispatcher;
 
     static class WindowManagerHolder {
@@ -377,6 +386,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mProxyOnBackInvokedDispatcher = new ProxyOnBackInvokedDispatcher(context);
         mAllowFloatingWindowsFillScreen = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowFloatingWindowsFillScreen);
+        mDefaultEdgeToEdge =
+                context.getApplicationInfo().targetSdkVersion >= DEFAULT_EDGE_TO_EDGE_SDK_VERSION;
+        if (mDefaultEdgeToEdge) {
+            mDecorFitsSystemWindows = false;
+        }
     }
 
     /**
@@ -2527,7 +2541,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         final boolean targetPreQ = targetSdk < Build.VERSION_CODES.Q;
 
         if (!mForcedStatusBarColor) {
-            mStatusBarColor = a.getColor(R.styleable.Window_statusBarColor, Color.BLACK);
+            final int statusBarCompatibleColor = context.getColor(R.color.status_bar_compatible);
+            final int statusBarDefaultColor = context.getColor(R.color.status_bar_default);
+            final int statusBarColor = a.getColor(R.styleable.Window_statusBarColor,
+                    statusBarDefaultColor);
+
+            mStatusBarColor = statusBarColor == statusBarDefaultColor && !mDefaultEdgeToEdge
+                    ? statusBarCompatibleColor
+                    : statusBarColor;
         }
         if (!mForcedNavigationBarColor) {
             final int navBarCompatibleColor = context.getColor(R.color.navigation_bar_compatible);
@@ -2541,6 +2562,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                                     && Flags.navBarTransparentByDefault())
                             && !context.getResources().getBoolean(
                                     R.bool.config_navBarDefaultTransparent)
+                            && !mDefaultEdgeToEdge
                     ? navBarCompatibleColor
                     : navBarColor;
 

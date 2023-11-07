@@ -568,6 +568,10 @@
     <color name="side_fps_button_color">#00677E</color>
 
     <!-- Color for system bars -->
+    <color name="status_bar_compatible">@android:color/black</color>
+    <!-- This uses non-regular transparent intentionally. It is used to tell if the transparent
+         color is set by the framework or not. -->
+    <color name="status_bar_default">#00808080</color>
     <color name="navigation_bar_compatible">@android:color/black</color>
     <!-- This uses non-regular transparent intentionally. It is used to tell if the transparent
          color is set by the framework or not. -->
