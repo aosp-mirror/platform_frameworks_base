@@ -553,8 +553,9 @@ public class BubbleController implements ConfigurationChangeListener,
      * Hides the current input method, wherever it may be focused, via InputMethodManagerInternal.
      */
     void hideCurrentInputMethod() {
+        int displayId = mWindowManager.getDefaultDisplay().getDisplayId();
         try {
-            mBarService.hideCurrentInputMethodForBubbles();
+            mBarService.hideCurrentInputMethodForBubbles(displayId);
         } catch (RemoteException e) {
             e.printStackTrace();
         }

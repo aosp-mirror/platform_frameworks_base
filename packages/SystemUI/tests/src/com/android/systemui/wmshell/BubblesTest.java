@@ -78,6 +78,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.view.Display;
 import android.view.IWindowManager;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -336,6 +337,8 @@ public class BubblesTest extends SysuiTestCase {
     private NotifPipelineFlags mNotifPipelineFlags;
     @Mock
     private Icon mAppBubbleIcon;
+    @Mock
+    private Display mDefaultDisplay;
 
     private final SceneTestUtils mUtils = new SceneTestUtils(this);
     private final TestScope mTestScope = mUtils.getTestScope();
@@ -377,6 +380,7 @@ public class BubblesTest extends SysuiTestCase {
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
         when(mNotificationShadeWindowView.getViewTreeObserver())
                 .thenReturn(mock(ViewTreeObserver.class));
+        when(mWindowManager.getDefaultDisplay()).thenReturn(mDefaultDisplay);
 
 
         FakeDeviceProvisioningRepository deviceProvisioningRepository =

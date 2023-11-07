@@ -90,7 +90,7 @@ interface IStatusBarService
     void onNotificationSettingsViewed(String key);
     void onNotificationBubbleChanged(String key, boolean isBubble, int flags);
     void onBubbleMetadataFlagChanged(String key, int flags);
-    void hideCurrentInputMethodForBubbles();
+    void hideCurrentInputMethodForBubbles(int displayId);
     void grantInlineReplyUriPermission(String key, in Uri uri, in UserHandle user, String packageName);
     oneway void clearInlineReplyUriPermissions(String key);
     void onNotificationFeedbackReceived(String key, in Bundle feedback);

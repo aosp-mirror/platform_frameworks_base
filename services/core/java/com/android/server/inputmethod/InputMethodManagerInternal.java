@@ -56,9 +56,13 @@ public abstract class InputMethodManagerInternal {
     public abstract void setInteractive(boolean interactive);
 
     /**
-     * Hides the current input method, if visible.
+     * Hides the input methods for all the users, if visible.
+     *
+     * @param reason               the reason for hiding the current input method
+     * @param originatingDisplayId the display ID the request is originated
      */
-    public abstract void hideCurrentInputMethod(@SoftInputShowHideReason int reason);
+    public abstract void hideAllInputMethods(@SoftInputShowHideReason int reason,
+            int originatingDisplayId);
 
     /**
      * Returns the list of installed input methods for the specified user.
@@ -210,7 +214,8 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void hideCurrentInputMethod(@SoftInputShowHideReason int reason) {
+                public void hideAllInputMethods(@SoftInputShowHideReason int reason,
+                        int originatingDisplayId) {
                 }
 
                 @Override

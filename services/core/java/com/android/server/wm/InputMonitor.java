@@ -435,8 +435,10 @@ final class InputMonitor {
                         final InputMethodManagerInternal inputMethodManagerInternal =
                                 LocalServices.getService(InputMethodManagerInternal.class);
                         if (inputMethodManagerInternal != null) {
-                            inputMethodManagerInternal.hideCurrentInputMethod(
-                                    SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
+                            // TODO(b/308479256): Check if hiding "all" IMEs is OK or not.
+                            inputMethodManagerInternal.hideAllInputMethods(
+                                    SoftInputShowHideReason.HIDE_RECENTS_ANIMATION,
+                                    mDisplayContent.getDisplayId());
                         }
                         // Ensure removing the IME snapshot when the app no longer to show on the
                         // task snapshot (also taking the new task snaphot to update the overview).
