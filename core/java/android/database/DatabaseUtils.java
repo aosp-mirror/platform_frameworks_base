@@ -47,6 +47,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Static utility methods for dealing with databases and {@link Cursor}s.
@@ -1585,6 +1587,38 @@ public class DatabaseUtils {
     }
 
     /**
+     * A regular expression that matches the first three characters in a SQL statement, after
+     * skipping past comments and whitespace.  PREFIX_GROUP_NUM is the regex group that contains
+     * the matching prefix string.  If PREFIX_REGEX is changed, PREFIX_GROUP_NUM may require an
+     * update too.
+     */
+    private static final String PREFIX_REGEX =
+            "("                                         // Zero-or more...
+            + "\\s+"                                    //   Leading space
+            + "|"
+            + "--.*?\n"                                 //   Line comment
+            + "|"
+            + "/\\*[\\w\\W]*?\\*/"                      //   Block comment
+            + ")*"
+            + "(\\w\\w\\w)";                            // Three word-characters
+    private static final int PREFIX_GROUP_NUM = 2;
+    private static final Pattern sPrefixPattern = Pattern.compile(PREFIX_REGEX);
+
+    /**
+     * Return the three-letter prefix of a SQL statement, skipping past whitespace and comments.
+     * Comments either start with "--" and run to the end of the line or are C-style block
+     * comments.  The function returns null if a prefix could not be found.
+     */
+    private static String getSqlStatementPrefixExtended(String sql) {
+        Matcher m = sPrefixPattern.matcher(sql);
+        if (m.lookingAt()) {
+            return m.group(PREFIX_GROUP_NUM).toUpperCase(Locale.ROOT);
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Return the extended statement type for the SQL statement.  This is not a public API and it
      * can return values that are not publicly visible.
      * @hide
@@ -1630,6 +1664,9 @@ public class DatabaseUtils {
      */
     public static int getSqlStatementTypeExtended(@NonNull String sql) {
         int type = categorizeStatement(getSqlStatementPrefixSimple(sql), sql);
+        if (type == STATEMENT_COMMENT) {
+            type = categorizeStatement(getSqlStatementPrefixExtended(sql), sql);
+        }
         return type;
     }
 
