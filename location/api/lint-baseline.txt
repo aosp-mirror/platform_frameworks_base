@@ -9,13 +9,9 @@ RequiresPermission: android.location.LocationManager#addNmeaListener(java.util.c
     Method 'addNmeaListener' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.location.LocationManager#addProximityAlert(double, double, float, long, android.app.PendingIntent):
     Method 'addProximityAlert' documentation mentions permissions already declared by @RequiresPermission
-RequiresPermission: android.location.LocationManager#injectGnssMeasurementCorrections(android.location.GnssMeasurementCorrections):
-    Method 'injectGnssMeasurementCorrections' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.location.LocationManager#registerGnssMeasurementsCallback(android.location.GnssMeasurementRequest, java.util.concurrent.Executor, android.location.GnssMeasurementsEvent.Callback):
     Method 'registerGnssMeasurementsCallback' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.location.LocationManager#registerGnssMeasurementsCallback(android.location.GnssMeasurementsEvent.Callback, android.os.Handler):
-    Method 'registerGnssMeasurementsCallback' documentation mentions permissions already declared by @RequiresPermission
-RequiresPermission: android.location.LocationManager#registerGnssMeasurementsCallback(android.location.GnssRequest, java.util.concurrent.Executor, android.location.GnssMeasurementsEvent.Callback):
     Method 'registerGnssMeasurementsCallback' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.location.LocationManager#registerGnssMeasurementsCallback(java.util.concurrent.Executor, android.location.GnssMeasurementsEvent.Callback):
     Method 'registerGnssMeasurementsCallback' documentation mentions permissions already declared by @RequiresPermission
@@ -29,21 +25,3 @@ RequiresPermission: android.location.LocationManager#registerGnssStatusCallback(
     Method 'registerGnssStatusCallback' documentation mentions permissions already declared by @RequiresPermission
 RequiresPermission: android.location.LocationManager#registerGnssStatusCallback(java.util.concurrent.Executor, android.location.GnssStatus.Callback):
     Method 'registerGnssStatusCallback' documentation mentions permissions already declared by @RequiresPermission
-
-
-SamShouldBeLast: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):
-    SAM-compatible parameters (such as parameter 1, "listener", in android.location.LocationManager.addNmeaListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 4, "listener", in android.location.LocationManager.requestLocationUpdates) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(String, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.location.LocationManager.requestSingleUpdate) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-
-
-UnflaggedApi: android.location.GnssMeasurementRequest#getWorkSource():
-    New API must be flagged with @FlaggedApi: method android.location.GnssMeasurementRequest.getWorkSource()
-UnflaggedApi: android.location.GnssMeasurementRequest.Builder#setWorkSource(android.os.WorkSource):
-    New API must be flagged with @FlaggedApi: method android.location.GnssMeasurementRequest.Builder.setWorkSource(android.os.WorkSource)
