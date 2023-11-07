@@ -194,4 +194,9 @@ public class TinyFrameworkClassTest {
         m.invoke(fd, 0);
         assertThat(f.get(fd)).isEqualTo(0);
     }
+
+    @Test
+    public void testPackageRedirect() throws Exception {
+        assertThat(TinyFrameworkPackageRedirect.foo(1)).isEqualTo(1);
+    }
 }

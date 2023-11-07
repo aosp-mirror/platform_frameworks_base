@@ -49,6 +49,8 @@ class HostStubGenOptions(
         var classLoadHookAnnotations: MutableSet<String> = mutableSetOf(),
         var stubStaticInitializerAnnotations: MutableSet<String> = mutableSetOf(),
 
+        var packageRedirects: MutableList<Pair<String, String>> = mutableListOf(),
+
         var defaultClassLoadHook: String? = null,
         var defaultMethodCallHook: String? = null,
 
@@ -76,6 +78,15 @@ class HostStubGenOptions(
                 throw InputFileNotFoundException(this)
             }
             return this
+        }
+
+        private fun parsePackageRedirect(fromColonTo: String): Pair<String, String> {
+            val colon = fromColonTo.indexOf(':')
+            if ((colon < 1) || (colon + 1 >= fromColonTo.length)) {
+                throw ArgumentsException("--package-redirect must be a colon-separated string")
+            }
+            // TODO check for duplicates
+            return Pair(fromColonTo.substring(0, colon), fromColonTo.substring(colon + 1))
         }
 
         fun parseArgs(args: Array<String>): HostStubGenOptions {
@@ -156,6 +167,9 @@ class HostStubGenOptions(
                     "--stub-static-initializer-annotation" ->
                         ret.stubStaticInitializerAnnotations +=
                                 ensureUniqueAnnotation(ai.nextArgRequired(arg))
+
+                    "--package-redirect" ->
+                        ret.packageRedirects += parsePackageRedirect(ai.nextArgRequired(arg))
 
                     "--default-class-load-hook" ->
                         ret.defaultClassLoadHook = ai.nextArgRequired(arg)
@@ -299,6 +313,7 @@ class HostStubGenOptions(
               substituteAnnotations=$substituteAnnotations,
               nativeSubstituteAnnotations=$nativeSubstituteAnnotations,
               classLoadHookAnnotations=$classLoadHookAnnotations,
+              packageRedirects=$packageRedirects,
               defaultClassLoadHook=$defaultClassLoadHook,
               defaultMethodCallHook=$defaultMethodCallHook,
               intersectStubJars=$intersectStubJars,

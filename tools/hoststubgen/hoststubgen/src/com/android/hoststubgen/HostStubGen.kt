@@ -17,9 +17,9 @@ package com.android.hoststubgen
 
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.filters.AnnotationBasedFilter
-import com.android.hoststubgen.filters.DefaultHookInjectingFilter
 import com.android.hoststubgen.filters.ClassWidePolicyPropagatingFilter
 import com.android.hoststubgen.filters.ConstantFilter
+import com.android.hoststubgen.filters.DefaultHookInjectingFilter
 import com.android.hoststubgen.filters.FilterPolicy
 import com.android.hoststubgen.filters.ImplicitOutputFilter
 import com.android.hoststubgen.filters.KeepAllClassesFilter
@@ -28,6 +28,7 @@ import com.android.hoststubgen.filters.StubIntersectingFilter
 import com.android.hoststubgen.filters.createFilterFromTextPolicyFile
 import com.android.hoststubgen.filters.printAsTextPolicy
 import com.android.hoststubgen.visitors.BaseAdapter
+import com.android.hoststubgen.visitors.PackageRedirectRemapper
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
@@ -238,6 +239,8 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         val start = System.currentTimeMillis()
 
+        val packageRedirector = PackageRedirectRemapper(options.packageRedirects)
+
         log.withIndent {
             // Open the input jar file and process each entry.
             ZipFile(inJar).use { inZip ->
@@ -247,7 +250,7 @@ class HostStubGen(val options: HostStubGenOptions) {
                         while (inEntries.hasMoreElements()) {
                             val entry = inEntries.nextElement()
                             convertSingleEntry(inZip, entry, stubOutStream, implOutStream,
-                                    filter, enableChecker, classes, errors)
+                                    filter, packageRedirector, enableChecker, classes, errors)
                         }
                         log.i("Converted all entries.")
                     }
@@ -269,6 +272,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             stubOutStream: ZipOutputStream,
             implOutStream: ZipOutputStream,
             filter: OutputFilter,
+            packageRedirector: PackageRedirectRemapper,
             enableChecker: Boolean,
             classes: ClassNodes,
             errors: HostStubGenErrors,
@@ -285,7 +289,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             // If it's a class, convert it.
             if (name.endsWith(".class")) {
                 processSingleClass(inZip, entry, stubOutStream, implOutStream, filter,
-                        enableChecker, classes, errors)
+                        packageRedirector, enableChecker, classes, errors)
                 return
             }
 
@@ -335,37 +339,40 @@ class HostStubGen(val options: HostStubGenOptions) {
             stubOutStream: ZipOutputStream,
             implOutStream: ZipOutputStream,
             filter: OutputFilter,
+            packageRedirector: PackageRedirectRemapper,
             enableChecker: Boolean,
             classes: ClassNodes,
             errors: HostStubGenErrors,
             ) {
-        val className = entry.name.replaceFirst("\\.class$".toRegex(), "")
-        val classPolicy = filter.getPolicyForClass(className)
+        val classInternalName = entry.name.replaceFirst("\\.class$".toRegex(), "")
+        val classPolicy = filter.getPolicyForClass(classInternalName)
         if (classPolicy.policy == FilterPolicy.Remove) {
-            log.d("Removing class: %s %s", className, classPolicy)
+            log.d("Removing class: %s %s", classInternalName, classPolicy)
             return
         }
         // Generate stub first.
         if (classPolicy.policy.needsInStub) {
-            log.v("Creating stub class: %s Policy: %s", className, classPolicy)
+            log.v("Creating stub class: %s Policy: %s", classInternalName, classPolicy)
             log.withIndent {
                 BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
                     val newEntry = ZipEntry(entry.name)
                     stubOutStream.putNextEntry(newEntry)
-                    convertClass(/*forImpl=*/false, bis, stubOutStream, filter, enableChecker,
-                            classes, errors)
+                    convertClass(classInternalName, /*forImpl=*/false, bis,
+                            stubOutStream, filter, packageRedirector, enableChecker, classes,
+                            errors)
                     stubOutStream.closeEntry()
                 }
             }
         }
-        log.v("Creating impl class: %s Policy: %s", className, classPolicy)
+        log.v("Creating impl class: %s Policy: %s", classInternalName, classPolicy)
         if (classPolicy.policy.needsInImpl) {
             log.withIndent {
                 BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
                     val newEntry = ZipEntry(entry.name)
                     implOutStream.putNextEntry(newEntry)
-                    convertClass(/*forImpl=*/true, bis, implOutStream, filter, enableChecker,
-                            classes, errors)
+                    convertClass(classInternalName, /*forImpl=*/true, bis,
+                            implOutStream, filter, packageRedirector, enableChecker, classes,
+                            errors)
                     implOutStream.closeEntry()
                 }
             }
@@ -376,14 +383,16 @@ class HostStubGen(val options: HostStubGenOptions) {
      * Convert a single class to either "stub" or "impl".
      */
     private fun convertClass(
-        forImpl: Boolean,
-        input: InputStream,
-        out: OutputStream,
-        filter: OutputFilter,
-        enableChecker: Boolean,
-        classes: ClassNodes,
-        errors: HostStubGenErrors,
-        ) {
+            classInternalName: String,
+            forImpl: Boolean,
+            input: InputStream,
+            out: OutputStream,
+            filter: OutputFilter,
+            packageRedirector: PackageRedirectRemapper,
+            enableChecker: Boolean,
+            classes: ClassNodes,
+            errors: HostStubGenErrors,
+            ) {
         val cr = ClassReader(input)
 
         // COMPUTE_FRAMES wouldn't be happy if code uses
@@ -398,11 +407,11 @@ class HostStubGen(val options: HostStubGenOptions) {
         val visitorOptions = BaseAdapter.Options(
                 enablePreTrace = options.enablePreTrace,
                 enablePostTrace = options.enablePostTrace,
-                enableMethodLogging = options.enablePreTrace,
                 enableNonStubMethodCallDetection = options.enableNonStubMethodCallDetection,
                 errors = errors,
         )
-        outVisitor = BaseAdapter.getVisitor(classes, outVisitor, filter, forImpl, visitorOptions)
+        outVisitor = BaseAdapter.getVisitor(classInternalName, classes, outVisitor, filter,
+                packageRedirector, forImpl, visitorOptions)
 
         cr.accept(outVisitor, ClassReader.EXPAND_FRAMES)
         val data = cw.toByteArray()

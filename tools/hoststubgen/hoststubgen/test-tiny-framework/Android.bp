@@ -24,7 +24,8 @@ java_genrule_host {
     defaults: ["hoststubgen-command-defaults"],
     cmd: hoststubgen_common_options +
         "--in-jar $(location :hoststubgen-test-tiny-framework) " +
-        "--policy-override-file $(location policy-override-tiny-framework.txt) ",
+        "--policy-override-file $(location policy-override-tiny-framework.txt) " +
+        "--package-redirect com.unsupported:com.supported ",
     srcs: [
         ":hoststubgen-test-tiny-framework",
         "policy-override-tiny-framework.txt",
@@ -61,6 +62,7 @@ java_genrule_host {
     cmd: hoststubgen_common_options +
         "--in-jar $(location :hoststubgen-test-tiny-framework) " +
         "--policy-override-file $(location policy-override-tiny-framework.txt) " +
+        "--package-redirect com.unsupported:com.supported " +
 
         // More options.
         "--default-method-call-hook com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall " +
