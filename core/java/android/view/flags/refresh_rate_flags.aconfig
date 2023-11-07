@@ -43,10 +43,3 @@ flag {
   description: "Enable the `setFrameRate` callback"
   bug: "299946220"
 }
-
-flag {
-    name: "wm_display_refresh_rate_test"
-    namespace: "core_graphics"
-    description: "Adds WindowManager display refresh rate fields to test API"
-    bug: "304475199"
-}
