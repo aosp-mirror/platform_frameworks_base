@@ -90,10 +90,10 @@ public abstract class StackScrollerDecorView extends ExpandableView {
                 } else {
                     setWillBeGone(true);
                 }
-                setContentVisible(visible, true /* animate */, null /* runAfter */);
+                setContentVisible(visible, true /* animate */, null /* onAnimationEnded */);
             } else {
                 setVisibility(visible ? VISIBLE : GONE);
-                setContentVisible(visible, false /* animate */, null /* runAfter */);
+                setContentVisible(visible, false /* animate */, null /* onAnimationEnded */);
                 setWillBeGone(false);
                 notifyHeightChanged(false /* needsAnimation */);
             }
@@ -108,7 +108,7 @@ public abstract class StackScrollerDecorView extends ExpandableView {
      * Change content visibility to {@code visible}, animated.
      */
     public void setContentVisibleAnimated(boolean visible) {
-        setContentVisible(visible, true /* animate */, null /* runAfter */);
+        setContentVisible(visible, true /* animate */, null /* onAnimationEnded */);
     }
 
     /**
