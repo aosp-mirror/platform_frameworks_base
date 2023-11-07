@@ -30,7 +30,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.settingslib.spa.framework.compose.stateOf
 import com.android.settingslib.spa.widget.ui.SpinnerOption
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.model.app.AppEntry
@@ -140,7 +139,7 @@ class AppListTest {
                 matchAnyUserForAdmin = false,
             ),
             listModel = TestAppListModel(enableGrouping = enableGrouping),
-            state = AppListState(showSystem = stateOf(false), searchQuery = stateOf("")),
+            state = AppListState(showSystem = { false }, searchQuery = { "" }),
             header = header,
             bottomPadding = 0.dp,
         )

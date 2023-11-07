@@ -65,8 +65,8 @@ data class AppListConfig(
 )
 
 data class AppListState(
-    val showSystem: State<Boolean>,
-    val searchQuery: State<String>,
+    val showSystem: () -> Boolean,
+    val searchQuery: () -> String,
 )
 
 data class AppListInput<T : AppRecord>(
