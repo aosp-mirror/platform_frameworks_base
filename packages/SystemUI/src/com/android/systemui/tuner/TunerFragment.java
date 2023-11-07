@@ -35,6 +35,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.res.R;
 import com.android.systemui.shared.plugins.PluginPrefs;
+import com.android.tools.r8.keepanno.annotations.KeepTarget;
+import com.android.tools.r8.keepanno.annotations.UsesReflection;
 
 public class TunerFragment extends PreferenceFragment {
 
@@ -77,6 +79,13 @@ public class TunerFragment extends PreferenceFragment {
         getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
+    // aapt doesn't generate keep rules for android:fragment references in <Preference> tags, so
+    // explicitly declare references per usage in `R.xml.tuner_prefs`. See b/120445169.
+    @UsesReflection({
+        @KeepTarget(classConstant = LockscreenFragment.class),
+        @KeepTarget(classConstant = NavBarTuner.class),
+        @KeepTarget(classConstant = PluginFragment.class),
+    })
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         addPreferencesFromResource(R.xml.tuner_prefs);
