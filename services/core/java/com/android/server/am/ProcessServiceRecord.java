@@ -27,6 +27,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.wm.WindowProcessController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -414,19 +415,21 @@ final class ProcessServiceRecord {
         return mConnections.size();
     }
 
-    void addBoundClientUid(int clientUid) {
+    void addBoundClientUid(int clientUid, String clientPackageName, int bindFlags) {
         mBoundClientUids.add(clientUid);
-        mApp.getWindowProcessController().setBoundClientUids(mBoundClientUids);
+        mApp.getWindowProcessController()
+                .addBoundClientUid(clientUid, clientPackageName, bindFlags);
     }
 
     void updateBoundClientUids() {
+        clearBoundClientUids();
         if (mServices.isEmpty()) {
-            clearBoundClientUids();
             return;
         }
         // grab a set of clientUids of all mConnections of all services
         final ArraySet<Integer> boundClientUids = new ArraySet<>();
         final int serviceCount = mServices.size();
+        WindowProcessController controller = mApp.getWindowProcessController();
         for (int j = 0; j < serviceCount; j++) {
             final ArrayMap<IBinder, ArrayList<ConnectionRecord>> conns =
                     mServices.valueAt(j).getConnections();
@@ -434,12 +437,13 @@ final class ProcessServiceRecord {
             for (int conni = 0; conni < size; conni++) {
                 ArrayList<ConnectionRecord> c = conns.valueAt(conni);
                 for (int i = 0; i < c.size(); i++) {
-                    boundClientUids.add(c.get(i).clientUid);
+                    ConnectionRecord cr = c.get(i);
+                    boundClientUids.add(cr.clientUid);
+                    controller.addBoundClientUid(cr.clientUid, cr.clientPackageName, cr.flags);
                 }
             }
         }
         mBoundClientUids = boundClientUids;
-        mApp.getWindowProcessController().setBoundClientUids(mBoundClientUids);
     }
 
     void addBoundClientUidsOfNewService(ServiceRecord sr) {
@@ -450,15 +454,18 @@ final class ProcessServiceRecord {
         for (int conni = conns.size() - 1; conni >= 0; conni--) {
             ArrayList<ConnectionRecord> c = conns.valueAt(conni);
             for (int i = 0; i < c.size(); i++) {
-                mBoundClientUids.add(c.get(i).clientUid);
+                ConnectionRecord cr = c.get(i);
+                mBoundClientUids.add(cr.clientUid);
+                mApp.getWindowProcessController()
+                        .addBoundClientUid(cr.clientUid, cr.clientPackageName, cr.flags);
+
             }
         }
-        mApp.getWindowProcessController().setBoundClientUids(mBoundClientUids);
     }
 
     void clearBoundClientUids() {
         mBoundClientUids.clear();
-        mApp.getWindowProcessController().setBoundClientUids(mBoundClientUids);
+        mApp.getWindowProcessController().clearBoundClientUids();
     }
 
     @GuardedBy("mService")
