@@ -362,6 +362,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        packageFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
         packageFilter.addDataScheme("package");
         mContext.registerReceiverAsUser(mBroadcastReceiver, UserHandle.ALL,
                 packageFilter, null, mCallbackHandler);
@@ -402,6 +403,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         boolean added = false;
         boolean changed = false;
         boolean componentsModified = false;
+        int clearedUid = -1;
 
         final String pkgList[];
         switch (action) {
@@ -415,6 +417,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 // Follow through
             case Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE:
                 pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                break;
+            case Intent.ACTION_PACKAGE_DATA_CLEARED:
+                pkgList = null;
+                clearedUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                 break;
             default: {
                 Uri uri = intent.getData();
@@ -430,7 +436,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 changed = Intent.ACTION_PACKAGE_CHANGED.equals(action);
             }
         }
-        if (pkgList == null || pkgList.length == 0) {
+        if ((pkgList == null || pkgList.length == 0) && clearedUid == -1) {
             return;
         }
 
@@ -461,6 +467,8 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                         }
                     }
                 }
+            } else if (clearedUid != -1) {
+                componentsModified |= clearPreviewsForUidLocked(clearedUid);
             } else {
                 // If the package is being updated, we'll receive a PACKAGE_ADDED
                 // shortly, otherwise it is removed permanently.
@@ -484,6 +492,19 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                 mBackupRestoreController.widgetComponentsChanged(userId);
             }
         }
+    }
+
+    @GuardedBy("mLock")
+    private boolean clearPreviewsForUidLocked(int clearedUid) {
+        boolean changed = false;
+        final int providerCount = mProviders.size();
+        for (int i = 0; i < providerCount; i++) {
+            Provider provider = mProviders.get(i);
+            if (provider.id.uid == clearedUid) {
+                changed |= provider.clearGeneratedPreviewsLocked();
+            }
+        }
+        return changed;
     }
 
     /**
@@ -3904,6 +3925,124 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
+    @Override
+    @Nullable
+    public RemoteViews getWidgetPreview(@NonNull String callingPackage,
+            @NonNull ComponentName providerComponent, int profileId,
+            @AppWidgetProviderInfo.CategoryFlags int widgetCategory) {
+        final int callingUserId = UserHandle.getCallingUserId();
+        if (DEBUG) {
+            Slog.i(TAG, "getWidgetPreview() " + callingUserId);
+        }
+        mSecurityPolicy.enforceCallFromPackage(callingPackage);
+        ensureWidgetCategoryCombinationIsValid(widgetCategory);
+
+        synchronized (mLock) {
+            ensureGroupStateLoadedLocked(profileId);
+            final int providerCount = mProviders.size();
+            for (int i = 0; i < providerCount; i++) {
+                Provider provider = mProviders.get(i);
+                final ComponentName componentName = provider.id.componentName;
+                if (provider.zombie || !providerComponent.equals(componentName)) {
+                    continue;
+                }
+
+                final AppWidgetProviderInfo info = provider.getInfoLocked(mContext);
+                final int providerProfileId = info.getProfile().getIdentifier();
+                if (providerProfileId != profileId) {
+                    continue;
+                }
+
+                // Allow access to this provider if it is from the calling package or the caller has
+                // BIND_APPWIDGET permission.
+                final int callingUid = Binder.getCallingUid();
+                final String providerPackageName = componentName.getPackageName();
+                final boolean providerIsInCallerProfile =
+                        mSecurityPolicy.isProviderInCallerOrInProfileAndWhitelListed(
+                                providerPackageName, providerProfileId);
+                final boolean shouldFilterAppAccess = mPackageManagerInternal.filterAppAccess(
+                        providerPackageName, callingUid, providerProfileId);
+                final boolean providerIsInCallerPackage =
+                        mSecurityPolicy.isProviderInPackageForUid(provider, callingUid,
+                                callingPackage);
+                final boolean hasBindAppWidgetPermission =
+                        mSecurityPolicy.hasCallerBindPermissionOrBindWhiteListedLocked(
+                                callingPackage);
+                if (providerIsInCallerProfile && !shouldFilterAppAccess
+                        && (providerIsInCallerPackage || hasBindAppWidgetPermission)) {
+                    return provider.getGeneratedPreviewLocked(widgetCategory);
+                }
+            }
+        }
+        throw new IllegalArgumentException(
+                providerComponent + " is not a valid AppWidget provider");
+    }
+
+    @Override
+    public void setWidgetPreview(@NonNull ComponentName providerComponent,
+            @AppWidgetProviderInfo.CategoryFlags int widgetCategories,
+            @NonNull RemoteViews preview) {
+        final int userId = UserHandle.getCallingUserId();
+        if (DEBUG) {
+            Slog.i(TAG, "setWidgetPreview() " + userId);
+        }
+
+        // Make sure callers only set previews for their own package.
+        mSecurityPolicy.enforceCallFromPackage(providerComponent.getPackageName());
+
+        ensureWidgetCategoryCombinationIsValid(widgetCategories);
+
+        synchronized (mLock) {
+            ensureGroupStateLoadedLocked(userId);
+
+            final ProviderId providerId = new ProviderId(Binder.getCallingUid(), providerComponent);
+            final Provider provider = lookupProviderLocked(providerId);
+            if (provider == null) {
+                throw new IllegalArgumentException(
+                        providerComponent + " is not a valid AppWidget provider");
+            }
+            provider.setGeneratedPreviewLocked(widgetCategories, preview);
+            scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+        }
+    }
+
+    @Override
+    public void removeWidgetPreview(@NonNull ComponentName providerComponent,
+            @AppWidgetProviderInfo.CategoryFlags int widgetCategories) {
+        final int userId = UserHandle.getCallingUserId();
+        if (DEBUG) {
+            Slog.i(TAG, "removeWidgetPreview() " + userId);
+        }
+
+        // Make sure callers only remove previews for their own package.
+        mSecurityPolicy.enforceCallFromPackage(providerComponent.getPackageName());
+
+        ensureWidgetCategoryCombinationIsValid(widgetCategories);
+        synchronized (mLock) {
+            ensureGroupStateLoadedLocked(userId);
+
+            final ProviderId providerId = new ProviderId(Binder.getCallingUid(), providerComponent);
+            final Provider provider = lookupProviderLocked(providerId);
+            if (provider == null) {
+                throw new IllegalArgumentException(
+                        providerComponent + " is not a valid AppWidget provider");
+            }
+            final boolean changed = provider.removeGeneratedPreviewLocked(widgetCategories);
+            if (changed) scheduleNotifyGroupHostsForProvidersChangedLocked(userId);
+        }
+    }
+
+    private static void ensureWidgetCategoryCombinationIsValid(int widgetCategories) {
+        int validCategories = AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN
+                | AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
+                | AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX;
+        int invalid = ~validCategories;
+        if ((widgetCategories & invalid) != 0) {
+            throw new IllegalArgumentException(widgetCategories
+                    + " is not a valid widget category combination");
+        }
+    }
+
     private final class CallbackHandler extends Handler {
         public static final int MSG_NOTIFY_UPDATE_APP_WIDGET = 1;
         public static final int MSG_NOTIFY_PROVIDER_CHANGED = 2;
@@ -4201,6 +4340,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         ArrayList<Widget> widgets = new ArrayList<>();
         PendingIntent broadcast;
         String infoTag;
+        SparseArray<RemoteViews> generatedPreviews = new SparseArray<>(3);
+        private static final int[] WIDGET_CATEGORY_FLAGS = new int[]{
+                AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN,
+                AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD,
+                AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX,
+        };
 
         boolean zombie; // if we're in safe mode, don't prune this just because nobody references it
 
@@ -4234,7 +4379,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             return false;
         }
 
-        @GuardedBy("AppWidgetServiceImpl.mLock")
+        @GuardedBy("this.mLock")
         public AppWidgetProviderInfo getInfoLocked(Context context) {
             if (!mInfoParsed) {
                 // parse
@@ -4250,6 +4395,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     }
                     if (newInfo != null) {
                         info = newInfo;
+                        updateGeneratedPreviewCategoriesLocked();
                     }
                 }
                 mInfoParsed = true;
@@ -4277,6 +4423,62 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         public void setInfoLocked(AppWidgetProviderInfo info) {
             this.info = info;
             mInfoParsed = true;
+        }
+
+        @GuardedBy("this.mLock")
+        @Nullable
+        public RemoteViews getGeneratedPreviewLocked(
+                @AppWidgetProviderInfo.CategoryFlags int widgetCategories) {
+            for (int i = 0; i < generatedPreviews.size(); i++) {
+                if ((widgetCategories & generatedPreviews.keyAt(i)) != 0) {
+                    return generatedPreviews.valueAt(i);
+                }
+            }
+            return null;
+        }
+
+        @GuardedBy("this.mLock")
+        public void setGeneratedPreviewLocked(
+                @AppWidgetProviderInfo.CategoryFlags int widgetCategories,
+                @NonNull RemoteViews preview) {
+            for (int flag : WIDGET_CATEGORY_FLAGS) {
+                if ((widgetCategories & flag) != 0) {
+                    generatedPreviews.put(flag, preview);
+                }
+            }
+            updateGeneratedPreviewCategoriesLocked();
+        }
+
+        @GuardedBy("this.mLock")
+        public boolean removeGeneratedPreviewLocked(int widgetCategories) {
+            boolean changed = false;
+            for (int flag : WIDGET_CATEGORY_FLAGS) {
+                if ((widgetCategories & flag) != 0) {
+                    changed |= generatedPreviews.removeReturnOld(flag) != null;
+                }
+            }
+            if (changed) {
+                updateGeneratedPreviewCategoriesLocked();
+            }
+            return changed;
+        }
+
+        @GuardedBy("this.mLock")
+        public boolean clearGeneratedPreviewsLocked() {
+            if (generatedPreviews.size() > 0) {
+                generatedPreviews.clear();
+                updateGeneratedPreviewCategoriesLocked();
+                return true;
+            }
+            return false;
+        }
+
+        @GuardedBy("this.mLock")
+        private void updateGeneratedPreviewCategoriesLocked() {
+            info.generatedPreviewCategories = 0;
+            for (int i = 0; i < generatedPreviews.size(); i++) {
+                info.generatedPreviewCategories |= generatedPreviews.keyAt(i);
+            }
         }
 
         @Override
