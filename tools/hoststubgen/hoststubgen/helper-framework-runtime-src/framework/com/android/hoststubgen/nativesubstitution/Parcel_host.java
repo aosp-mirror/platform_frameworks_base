@@ -20,6 +20,7 @@ import android.os.IBinder;
 import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -197,9 +198,9 @@ public class Parcel_host {
         if (b == null) {
             nativeWriteInt(nativePtr, -1);
         } else {
-            final var alignedSize = align4(b.length);
+            final var alignedSize = align4(len);
 
-            nativeWriteInt(nativePtr, b.length);
+            nativeWriteInt(nativePtr, len);
 
             p.ensureMoreCapacity(alignedSize);
 
@@ -280,6 +281,7 @@ public class Parcel_host {
                     + data.length + " given=" + destLen);
             return false;
         }
+        System.arraycopy(data, 0, dest, 0, data.length);
         return true;
     }
 
@@ -289,7 +291,12 @@ public class Parcel_host {
             return null;
         }
         var p = getInstance(nativePtr);
-        p.ensureDataAvailable(size);
+        try {
+            p.ensureDataAvailable(align4(size));
+        } catch (Exception e) {
+            System.err.println(e.toString());
+            return null;
+        }
 
         var bytes = new byte[size];
         System.arraycopy(p.mBuffer, p.mPos, bytes, 0, size);
@@ -301,7 +308,10 @@ public class Parcel_host {
     public static int nativeReadInt(long nativePtr) {
         var p = getInstance(nativePtr);
 
-        p.ensureDataAvailable(Integer.BYTES);
+        if (p.mSize - p.mPos < 4) {
+            // Match native impl that returns "0" when not enough data
+            return 0;
+        }
 
         var ret = (((p.mBuffer[p.mPos++] & 0xff) << 24)
                 | ((p.mBuffer[p.mPos++] & 0xff) << 16)
@@ -341,11 +351,16 @@ public class Parcel_host {
     }
 
     public static byte[] nativeMarshall(long nativePtr) {
-        throw new RuntimeException("Not implemented yet");
+        var p = getInstance(nativePtr);
+        return Arrays.copyOf(p.mBuffer, p.mSize);
     }
     public static void nativeUnmarshall(
             long nativePtr, byte[] data, int offset, int length) {
-        throw new RuntimeException("Not implemented yet");
+        var p = getInstance(nativePtr);
+        p.ensureMoreCapacity(length);
+        System.arraycopy(data, offset, p.mBuffer, p.mPos, length);
+        p.mPos += length;
+        p.updateSize();
     }
     public static int nativeCompareData(long thisNativePtr, long otherNativePtr) {
         throw new RuntimeException("Not implemented yet");
