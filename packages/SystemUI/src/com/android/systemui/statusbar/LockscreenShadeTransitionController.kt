@@ -340,6 +340,7 @@ constructor(
         )
         nsslController.resetScrollPosition()
         nsslController.resetCheckSnoozeLeavebehind()
+        shadeRepository.setLegacyLockscreenShadeTracking(false)
         setDragDownAmountAnimated(0f)
     }
 
@@ -366,6 +367,7 @@ constructor(
                 cancel()
             }
         }
+        shadeRepository.setLegacyLockscreenShadeTracking(true)
     }
 
     /** Do we need a falsing check currently? */

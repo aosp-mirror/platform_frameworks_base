@@ -59,6 +59,8 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     private val _legacyIsQsExpanded = MutableStateFlow(false)
     @Deprecated("Use ShadeInteractor instead") override val legacyIsQsExpanded = _legacyIsQsExpanded
 
+    override val legacyLockscreenShadeTracking = MutableStateFlow(false)
+
     @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyIsQsExpanded(legacyIsQsExpanded: Boolean) {
         _legacyIsQsExpanded.value = legacyIsQsExpanded
@@ -79,6 +81,11 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     @Deprecated("Should only be called by NPVC and tests")
     override fun setLegacyShadeTracking(tracking: Boolean) {
         _legacyShadeTracking.value = tracking
+    }
+
+    @Deprecated("Should only be called by NPVC and tests")
+    override fun setLegacyLockscreenShadeTracking(tracking: Boolean) {
+        legacyLockscreenShadeTracking.value = tracking
     }
 
     fun setShadeModel(model: ShadeModel) {

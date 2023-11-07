@@ -1483,14 +1483,14 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void updateMaxDisplayedNotifications(boolean recompute) {
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+            return;
+        }
+
         if (recompute) {
             setMaxDisplayedNotifications(Math.max(computeMaxKeyguardNotifications(), 1));
         } else {
             if (SPEW_LOGCAT) Log.d(TAG, "Skipping computeMaxKeyguardNotifications() by request");
-        }
-
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
-            return;
         }
 
         if (isKeyguardShowing() && !mKeyguardBypassController.getBypassEnabled()) {

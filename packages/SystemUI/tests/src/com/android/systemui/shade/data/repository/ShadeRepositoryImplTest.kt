@@ -158,6 +158,15 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun updateLegacyLockscreenShadeTracking() =
+        testScope.runTest {
+            assertThat(underTest.legacyLockscreenShadeTracking.value).isEqualTo(false)
+
+            underTest.setLegacyLockscreenShadeTracking(true)
+            assertThat(underTest.legacyLockscreenShadeTracking.value).isEqualTo(true)
+        }
+
+    @Test
     fun updateLegacyQsTracking() =
         testScope.runTest {
             assertThat(underTest.legacyQsTracking.value).isEqualTo(false)
