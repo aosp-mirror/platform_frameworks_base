@@ -62,6 +62,7 @@ aconfig_srcjars = [
     ":surfaceflinger_flags_java_lib{.generated_srcjars}",
     ":android.view.contentcapture.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.usb.flags-aconfig-java{.generated_srcjars}",
+    ":android.tracing.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -693,5 +694,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.hardware.usb.flags-aconfig-java",
     aconfig_declarations: "android.hardware.usb.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// WindowingTools
+aconfig_declarations {
+    name: "android.tracing.flags-aconfig",
+    package: "android.tracing",
+    srcs: ["core/java/android/tracing/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.tracing.flags-aconfig-java",
+    aconfig_declarations: "android.tracing.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
