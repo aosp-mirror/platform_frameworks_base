@@ -19,24 +19,25 @@ package com.android.settingslib.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
-import android.widget.Switch;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.TwoStatePreference;
 
+import com.android.settingslib.widget.mainswitch.R;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.android.settingslib.widget.mainswitch.R;
 
 /**
  * MainSwitchPreference is a Preference with a customized Switch.
  * This component is used as the main switch of the page
  * to enable or disable the prefereces on the page.
  */
-public class MainSwitchPreference extends TwoStatePreference implements OnMainSwitchChangeListener {
+public class MainSwitchPreference extends TwoStatePreference implements OnCheckedChangeListener {
 
-    private final List<OnMainSwitchChangeListener> mSwitchChangeListeners = new ArrayList<>();
+    private final List<OnCheckedChangeListener> mSwitchChangeListeners = new ArrayList<>();
 
     private MainSwitchBar mMainSwitchBar;
 
@@ -120,7 +121,7 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
     }
 
     @Override
-    public void onSwitchChanged(Switch switchView, boolean isChecked) {
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         super.setChecked(isChecked);
     }
 
@@ -138,7 +139,7 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
     /**
      * Adds a listener for switch changes
      */
-    public void addOnSwitchChangeListener(OnMainSwitchChangeListener listener) {
+    public void addOnSwitchChangeListener(OnCheckedChangeListener listener) {
         if (!mSwitchChangeListeners.contains(listener)) {
             mSwitchChangeListeners.add(listener);
         }
@@ -151,7 +152,7 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
     /**
      * Remove a listener for switch changes
      */
-    public void removeOnSwitchChangeListener(OnMainSwitchChangeListener listener) {
+    public void removeOnSwitchChangeListener(OnCheckedChangeListener listener) {
         mSwitchChangeListeners.remove(listener);
         if (mMainSwitchBar != null) {
             mMainSwitchBar.removeOnSwitchChangeListener(listener);
@@ -159,7 +160,7 @@ public class MainSwitchPreference extends TwoStatePreference implements OnMainSw
     }
 
     private void registerListenerToSwitchBar() {
-        for (OnMainSwitchChangeListener listener : mSwitchChangeListeners) {
+        for (OnCheckedChangeListener listener : mSwitchChangeListeners) {
             mMainSwitchBar.addOnSwitchChangeListener(listener);
         }
     }
