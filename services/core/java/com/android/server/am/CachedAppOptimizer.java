@@ -2583,7 +2583,7 @@ public final class CachedAppOptimizer {
 
         // Do nothing if the binder error callback is not enabled.
         // That means the frozen apps in a wrong state will be killed when they are unfrozen later.
-        if (!mFreezerBinderCallbackEnabled) {
+        if (!mUseFreezer || !mFreezerBinderCallbackEnabled) {
             return;
         }
 
