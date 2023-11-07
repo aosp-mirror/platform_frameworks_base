@@ -23,6 +23,16 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+filegroup {
+    name: "FlickerTestsImeCommon-src",
+    srcs: ["src/**/common/*"],
+}
+
+filegroup {
+    name: "FlickerTestsIme1-src",
+    srcs: ["src/**/Close*"],
+}
+
 android_test {
     name: "FlickerTestsIme",
     defaults: ["FlickerTestsDefault"],
@@ -30,4 +40,39 @@ android_test {
     test_config_template: "AndroidTestTemplate.xml",
     srcs: ["src/**/*"],
     static_libs: ["FlickerTestsBase"],
+}
+
+java_library {
+    name: "FlickerTestsImeCommon",
+    defaults: ["FlickerTestsDefault"],
+    srcs: [":FlickerTestsImeCommon-src"],
+    static_libs: ["FlickerTestsBase"],
+}
+
+android_test {
+    name: "FlickerTestsIme1",
+    defaults: ["FlickerTestsDefault"],
+    manifest: "AndroidManifest.xml",
+    test_config_template: "AndroidTestTemplate.xml",
+    srcs: [":FlickerTestsIme1-src"],
+    static_libs: [
+        "FlickerTestsBase",
+        "FlickerTestsImeCommon",
+    ],
+}
+
+android_test {
+    name: "FlickerTestsIme2",
+    defaults: ["FlickerTestsDefault"],
+    manifest: "AndroidManifest.xml",
+    test_config_template: "AndroidTestTemplate.xml",
+    srcs: ["src/**/*"],
+    exclude_srcs: [
+        ":FlickerTestsIme1-src",
+        ":FlickerTestsImeCommon-src",
+    ],
+    static_libs: [
+        "FlickerTestsBase",
+        "FlickerTestsImeCommon",
+    ],
 }

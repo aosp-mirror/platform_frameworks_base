@@ -121,7 +121,7 @@ constructor(
                     else -> null
                 }
             if (matcher != null && matcher.find()) {
-                return matcher.group(1).equals("VISIBLE")
+                return matcher.group(1) == "VISIBLE"
             }
         }
         return false
