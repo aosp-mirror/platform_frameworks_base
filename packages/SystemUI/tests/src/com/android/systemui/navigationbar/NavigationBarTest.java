@@ -27,6 +27,7 @@ import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.WindowInsets.Type.ime;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.HOME_BUTTON_LONG_PRESS_DURATION_MS;
+import static com.android.systemui.assist.AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS;
 import static com.android.systemui.navigationbar.NavigationBar.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 
@@ -42,6 +43,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -86,6 +88,7 @@ import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.buttons.ButtonDispatcher;
 import com.android.systemui.navigationbar.buttons.DeadZone;
+import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.recents.OverviewProxyService;
@@ -120,6 +123,7 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -142,6 +146,8 @@ public class NavigationBarTest extends SysuiTestCase {
     NavigationBarFrame mNavigationBarFrame;
     @Mock
     ButtonDispatcher mHomeButton;
+    @Mock
+    KeyButtonView mHomeButtonView;
     @Mock
     ButtonDispatcher mRecentsButton;
     @Mock
@@ -294,11 +300,38 @@ public class NavigationBarTest extends SysuiTestCase {
 
     @Test
     public void testHomeLongPress() {
+        when(mAssistManager.shouldOverrideAssist(INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS))
+                .thenReturn(false);
+
         mNavigationBar.init();
         mNavigationBar.onViewAttached();
-        mNavigationBar.onHomeLongClick(mNavigationBar.getView());
+        mNavigationBar.onHomeLongClick(mHomeButtonView);
 
         verify(mUiEventLogger, times(1)).log(NAVBAR_ASSIST_LONGPRESS);
+        verify(mAssistManager).startAssist(any());
+    }
+
+    @Test
+    public void testHomeLongPressOverride() {
+        when(mAssistManager.shouldOverrideAssist(INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS))
+                .thenReturn(true);
+
+        mNavigationBar.init();
+        mNavigationBar.onViewAttached();
+        mNavigationBar.onHomeLongClick(mHomeButtonView);
+
+        verify(mUiEventLogger, times(1)).log(NAVBAR_ASSIST_LONGPRESS);
+
+        ArgumentCaptor<Runnable> onRippleInvisibleRunnableCaptor = ArgumentCaptor.forClass(
+                Runnable.class);
+        // startAssist is not called initially
+        verify(mAssistManager, never()).startAssist(any());
+        // but a Runnable is added for when the ripple is invisible
+        verify(mHomeButtonView).setOnRippleInvisibleRunnable(
+                onRippleInvisibleRunnableCaptor.capture());
+        // and when that runs, startAssist is called
+        onRippleInvisibleRunnableCaptor.getValue().run();
+        verify(mAssistManager).startAssist(any());
     }
 
     @Test
