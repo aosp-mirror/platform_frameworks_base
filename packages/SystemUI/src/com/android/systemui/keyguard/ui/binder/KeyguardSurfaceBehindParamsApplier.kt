@@ -51,6 +51,11 @@ constructor(
     private val interactor: KeyguardSurfaceBehindInteractor,
 ) {
     private var surfaceBehind: RemoteAnimationTarget? = null
+        set(value) {
+            field = value
+            interactor.setSurfaceRemoteAnimationTargetAvailable(value != null)
+        }
+
     private val surfaceTransactionApplier: SyncRtSurfaceTransactionApplier
         get() = SyncRtSurfaceTransactionApplier(keyguardViewController.viewRootImpl.view)
 
@@ -66,7 +71,7 @@ constructor(
                     dampingRatio = 1f
                 }
             addUpdateListener { _, _, _ -> applyToSurfaceBehind() }
-            addEndListener { _, _, _, _ -> 
+            addEndListener { _, _, _, _ ->
                 try {
                     updateIsAnimatingSurface()
                 } catch (e: NullPointerException) {
@@ -112,6 +117,7 @@ constructor(
     fun applyParamsToSurface(surface: RemoteAnimationTarget) {
         this.surfaceBehind = surface
         startOrUpdateAnimators()
+        applyToSurfaceBehind()
     }
 
     /**

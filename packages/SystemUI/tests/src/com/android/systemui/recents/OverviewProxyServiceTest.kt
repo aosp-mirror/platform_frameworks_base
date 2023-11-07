@@ -30,8 +30,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager
 import com.android.systemui.model.SysUiState
 import com.android.systemui.navigationbar.NavigationBarController
 import com.android.systemui.navigationbar.NavigationModeController
@@ -100,6 +102,9 @@ class OverviewProxyServiceTest : SysuiTestCase() {
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var uiEventLogger: UiEventLogger
     @Mock private lateinit var sysuiUnlockAnimationController: KeyguardUnlockAnimationController
+    @Mock
+    private lateinit var inWindowLauncherUnlockAnimationManager:
+        InWindowLauncherUnlockAnimationManager
     @Mock private lateinit var assistUtils: AssistUtils
     @Mock
     private lateinit var unfoldTransitionProgressForwarder:
@@ -126,6 +131,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
         whenever(packageManager.resolveServiceAsUser(any(), anyInt(), anyInt()))
             .thenReturn(mock(ResolveInfo::class.java))
 
+        featureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
         subject =
             OverviewProxyService(
                 context,
@@ -144,6 +150,7 @@ class OverviewProxyServiceTest : SysuiTestCase() {
                 uiEventLogger,
                 displayTracker,
                 sysuiUnlockAnimationController,
+                inWindowLauncherUnlockAnimationManager,
                 assistUtils,
                 featureFlags,
                 FakeSceneContainerFlags(),

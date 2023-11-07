@@ -38,6 +38,7 @@ import com.android.systemui.model.SysUiState
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.NotificationListener
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
@@ -66,6 +67,7 @@ import java.util.Optional
 @Module(includes = [TestMocksModule.Bindings::class])
 data class TestMocksModule(
     @get:Provides val activityStarter: ActivityStarter = mock(),
+    @get:Provides val activityManagerWrapper: ActivityManagerWrapper = mock(),
     @get:Provides val ambientState: AmbientState = mock(),
     @get:Provides val bubbles: Optional<Bubbles> = Optional.of(mock()),
     @get:Provides val darkIconDispatcher: DarkIconDispatcher = mock(),
