@@ -23,21 +23,24 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 import kotlinx.coroutines.flow.Flow
 
-fun Context.settingsGlobalBoolean(name: String): ReadWriteProperty<Any?, Boolean> =
-    SettingsGlobalBooleanDelegate(this, name)
+fun Context.settingsGlobalBoolean(name: String, defaultValue: Boolean = false):
+    ReadWriteProperty<Any?, Boolean> = SettingsGlobalBooleanDelegate(this, name, defaultValue)
 
-fun Context.settingsGlobalBooleanFlow(name: String): Flow<Boolean> {
-    val value by settingsGlobalBoolean(name)
+fun Context.settingsGlobalBooleanFlow(name: String, defaultValue: Boolean = false): Flow<Boolean> {
+    val value by settingsGlobalBoolean(name, defaultValue)
     return settingsGlobalFlow(name) { value }
 }
 
-private class SettingsGlobalBooleanDelegate(context: Context, private val name: String) :
-    ReadWriteProperty<Any?, Boolean> {
+private class SettingsGlobalBooleanDelegate(
+    context: Context,
+    private val name: String,
+    private val defaultValue: Boolean = false,
+) : ReadWriteProperty<Any?, Boolean> {
 
     private val contentResolver: ContentResolver = context.contentResolver
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean =
-        Settings.Global.getInt(contentResolver, name, 0) != 0
+        Settings.Global.getInt(contentResolver, name, if (defaultValue) 1 else 0) != 0
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
         Settings.Global.putInt(contentResolver, name, if (value) 1 else 0)
