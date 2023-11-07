@@ -56,6 +56,7 @@ android_test {
         "platform-test-annotations",
         "service-blobstore",
         "service-jobscheduler",
+        "service-jobscheduler-job.flags-aconfig-java",
         "service-permission.impl",
         "service-sdksandbox.impl",
         "services.backup",
