@@ -23,6 +23,8 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.device.helpers.wakeUpAndGoToHomeScreen
+import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.statusBarLayerPositionAtEnd
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -45,16 +47,16 @@ open class OpenAppFromNotificationColdTest(flicker: LegacyFlickerTest) :
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this)
-
             setup {
-                // Close the app that posted the notification to trigger a cold start next time
-                // it is open - can't just kill it because that would remove the notification.
-                tapl.setExpectedRotationCheckEnabled(false)
-                tapl.goHome()
-                tapl.workspace.switchToOverview()
-                tapl.overview.dismissAllTasks()
+                device.wakeUpAndGoToHomeScreen()
+                this.setRotation(flicker.scenario.startRotation)
+                launchAppAndPostNotification()
+                clearOverview()
             }
+
+            transitions { openAppFromNotification() }
+
+            teardown { testApp.exit(wmHelper) }
         }
 
     @Presubmit @Test override fun appWindowBecomesVisible() = appWindowBecomesVisible_coldStart()

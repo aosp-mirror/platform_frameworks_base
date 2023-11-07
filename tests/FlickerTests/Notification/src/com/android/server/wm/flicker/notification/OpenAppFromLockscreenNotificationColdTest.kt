@@ -25,6 +25,7 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import android.tools.device.helpers.wakeUpAndGoToHomeScreen
 import androidx.test.filters.RequiresDevice
 import org.junit.ClassRule
 import org.junit.FixMethodOrder
@@ -49,21 +50,23 @@ import org.junit.runners.Parameterized
 open class OpenAppFromLockscreenNotificationColdTest(flicker: LegacyFlickerTest) :
     OpenAppFromNotificationColdTest(flicker) {
 
-    override val openingNotificationsFromLockScreen = true
-
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            // Needs to run at start of transition,
-            // so before the transition defined in super.transition
-            transitions { device.wakeUp() }
-
-            super.transition(this)
+            transitions {
+                device.wakeUp()
+                openAppFromLockNotification()
+            }
 
             // Needs to run at the end of the setup, so after the setup defined in super.transition
             setup {
+                device.wakeUpAndGoToHomeScreen()
+                launchAppAndPostNotification()
+                clearOverview()
                 device.sleep()
                 wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
             }
+
+            teardown { testApp.exit(wmHelper) }
         }
 
     /** {@inheritDoc} */

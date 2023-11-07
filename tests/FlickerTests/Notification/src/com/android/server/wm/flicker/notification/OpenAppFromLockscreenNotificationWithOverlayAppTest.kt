@@ -51,21 +51,21 @@ class OpenAppFromLockscreenNotificationWithOverlayAppTest(flicker: LegacyFlicker
     OpenAppFromLockscreenNotificationColdTest(flicker) {
     private val showWhenLockedApp = ShowWhenLockedAppHelper(instrumentation)
 
-    // Although we are technically still locked here, the overlay app means we should open the
-    // notification shade as if we were unlocked.
-    override val openingNotificationsFromLockScreen = false
-
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this)
-
             transitions {
+                device.wakeUp()
+                // Although we are technically still locked here, the overlay app means we should
+                // open the
+                // notification shade as if we were unlocked.
+                openAppFromNotification()
                 wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
             }
 
             setup {
                 device.wakeUpAndGoToHomeScreen()
-
+                launchAppAndPostNotification()
+                clearOverview()
                 // Launch an activity that is shown when the device is locked
                 showWhenLockedApp.launchViaIntent(wmHelper)
                 wmHelper.StateSyncBuilder().withFullScreenApp(showWhenLockedApp).waitForAndVerify()
@@ -74,7 +74,10 @@ class OpenAppFromLockscreenNotificationWithOverlayAppTest(flicker: LegacyFlicker
                 wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
             }
 
-            teardown { showWhenLockedApp.exit(wmHelper) }
+            teardown {
+                testApp.exit(wmHelper)
+                showWhenLockedApp.exit(wmHelper)
+            }
         }
 
     @Test
