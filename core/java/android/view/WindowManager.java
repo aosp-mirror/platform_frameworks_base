@@ -3906,6 +3906,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
         @TestApi
         public float preferredMinDisplayRefreshRate;
 
@@ -3915,6 +3916,7 @@ public interface WindowManager extends ViewManager {
          * This value is ignored if {@link #preferredDisplayModeId} is set.
          * @hide
          */
+        @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
         @TestApi
         public float preferredMaxDisplayRefreshRate;
 
