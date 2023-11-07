@@ -111,7 +111,6 @@ public class NavigationBarControllerImplTest extends SysuiTestCase {
                         TaskStackChangeListeners.getTestInstance(),
                         Optional.of(mock(Pip.class)),
                         Optional.of(mock(BackAnimation.class)),
-                        mock(FeatureFlags.class),
                         mock(SecureSettings.class),
                         mDisplayTracker));
         initializeNavigationBars();
