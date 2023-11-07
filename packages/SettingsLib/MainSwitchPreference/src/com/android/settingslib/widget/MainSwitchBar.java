@@ -24,8 +24,8 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
@@ -41,9 +41,9 @@ import java.util.List;
  * This component is used as the main switch of the page
  * to enable or disable the prefereces on the page.
  */
-public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListener {
+public class MainSwitchBar extends LinearLayout implements CompoundButton.OnCheckedChangeListener {
 
-    private final List<OnCheckedChangeListener> mSwitchChangeListeners = new ArrayList<>();
+    private final List<OnMainSwitchChangeListener> mSwitchChangeListeners = new ArrayList<>();
 
     @ColorInt
     private int mBackgroundColor;
@@ -51,8 +51,8 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
     private int mBackgroundActivatedColor;
 
     protected TextView mTextView;
-    protected CompoundButton mSwitch;
-    private final View mFrameView;
+    protected Switch mSwitch;
+    private View mFrameView;
 
     public MainSwitchBar(Context context) {
         this(context, null);
@@ -84,8 +84,8 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
         setClickable(true);
 
         mFrameView = findViewById(R.id.frame);
-        mTextView = findViewById(R.id.switch_text);
-        mSwitch = findViewById(android.R.id.switch_widget);
+        mTextView = (TextView) findViewById(R.id.switch_text);
+        mSwitch = (Switch) findViewById(android.R.id.switch_widget);
         addOnSwitchChangeListener((switchView, isChecked) -> setChecked(isChecked));
 
         if (mSwitch.getVisibility() == VISIBLE) {
@@ -133,6 +133,13 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
      */
     public boolean isChecked() {
         return mSwitch.isChecked();
+    }
+
+    /**
+     * Return the Switch
+     */
+    public final Switch getSwitch() {
+        return mSwitch;
     }
 
     /**
@@ -185,7 +192,7 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
     /**
      * Adds a listener for switch changes
      */
-    public void addOnSwitchChangeListener(OnCheckedChangeListener listener) {
+    public void addOnSwitchChangeListener(OnMainSwitchChangeListener listener) {
         if (!mSwitchChangeListeners.contains(listener)) {
             mSwitchChangeListeners.add(listener);
         }
@@ -194,7 +201,7 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
     /**
      * Remove a listener for switch changes
      */
-    public void removeOnSwitchChangeListener(OnCheckedChangeListener listener) {
+    public void removeOnSwitchChangeListener(OnMainSwitchChangeListener listener) {
         mSwitchChangeListeners.remove(listener);
     }
 
@@ -216,8 +223,9 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
     private void propagateChecked(boolean isChecked) {
         setBackground(isChecked);
 
-        for (OnCheckedChangeListener changeListener : mSwitchChangeListeners) {
-            changeListener.onCheckedChanged(mSwitch, isChecked);
+        final int count = mSwitchChangeListeners.size();
+        for (int n = 0; n < count; n++) {
+            mSwitchChangeListeners.get(n).onSwitchChanged(mSwitch, isChecked);
         }
     }
 
