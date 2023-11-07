@@ -321,6 +321,7 @@ public class BackgroundActivityStartController {
                     .append(getDebugPackageName(mCallingPackage, mCallingUid));
             sb.append("; callingUid: ").append(mCallingUid);
             sb.append("; callingPid: ").append(mCallingPid);
+            sb.append("; isPendingIntent: ").append(isPendingIntent());
             sb.append("; appSwitchState: ").append(mAppSwitchState);
             sb.append("; callingUidHasAnyVisibleWindow: ").append(mCallingUidHasAnyVisibleWindow);
             sb.append("; callingUidProcState: ").append(DebugUtils.valueToString(
@@ -328,7 +329,7 @@ public class BackgroundActivityStartController {
             sb.append("; isCallingUidPersistentSystemProcess: ")
                     .append(mIsCallingUidPersistentSystemProcess);
             sb.append("; balAllowedByPiCreator: ").append(mBalAllowedByPiCreator);
-            if (!isPendingIntent()) {
+            if (isPendingIntent()) {
                 sb.append("; balAllowedByPiSender: ").append(mBalAllowedByPiSender);
                 sb.append("; realCallingPackage: ")
                         .append(getDebugPackageName(mRealCallingPackage, mRealCallingUid));
@@ -340,16 +341,18 @@ public class BackgroundActivityStartController {
                         ActivityManager.class, "PROCESS_STATE_", mRealCallingUidProcState));
                 sb.append("; isRealCallingUidPersistentSystemProcess: ")
                         .append(mIsRealCallingUidPersistentSystemProcess);
+                sb.append("; originatingPendingIntent: ").append(mOriginatingPendingIntent);
             }
-            sb.append("; originatingPendingIntent: ").append(mOriginatingPendingIntent);
             sb.append("; backgroundStartPrivileges: ").append(mBackgroundStartPrivileges);
             sb.append("; intent: ").append(mIntent);
             sb.append("; callerApp: ").append(mCallerApp);
-            sb.append("; realCallerApp: ").append(mRealCallerApp);
+            if (isPendingIntent()) {
+                sb.append("; realCallerApp: ").append(mRealCallerApp);
+            }
             if (mCallerApp != null) {
                 sb.append("; inVisibleTask: ").append(mCallerApp.hasActivityInVisibleTask());
             }
-            if (!isPendingIntent()) {
+            if (isPendingIntent()) {
                 if (mRealCallerApp != null) {
                     sb.append("; realInVisibleTask: ")
                             .append(mRealCallerApp.hasActivityInVisibleTask());
