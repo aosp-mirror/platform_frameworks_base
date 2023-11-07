@@ -857,7 +857,7 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * Get the operation handle associated with this object or 0 if none.
          */
         @FlaggedApi(FLAG_GET_OP_ID_CRYPTO_OBJECT)
-        public long getOpId() {
+        public long getOperationHandle() {
             return super.getOpId();
         }
     }
