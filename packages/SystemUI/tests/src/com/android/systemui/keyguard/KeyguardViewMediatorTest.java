@@ -194,6 +194,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Captor ArgumentCaptor<KeyguardUpdateMonitorCallback>
             mKeyguardUpdateMonitorCallbackCaptor;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
+    private FakeExecutor mUiMainExecutor = new FakeExecutor(new FakeSystemClock());
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
     private FalsingCollectorFake mFalsingCollector;
@@ -247,6 +248,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mConfigurationController,
                 mViewMediator,
                 mKeyguardBypassController,
+                mUiMainExecutor,
                 mUiBgExecutor,
                 mColorExtractor,
                 mDumpManager,
@@ -255,7 +257,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mAuthController,
                 () -> mShadeInteractor,
                 mShadeWindowLogger,
-                () -> mSelectedUserInteractor);
+                () -> mSelectedUserInteractor,
+                mUserTracker);
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
         mFeatureFlags.set(Flags.REFACTOR_GETCURRENTUSER, true);

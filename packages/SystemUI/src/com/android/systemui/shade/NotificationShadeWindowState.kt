@@ -40,6 +40,7 @@ class NotificationShadeWindowState(
     @JvmField var qsExpanded: Boolean = false,
     @JvmField var headsUpNotificationShowing: Boolean = false,
     @JvmField var lightRevealScrimOpaque: Boolean = false,
+    @JvmField var isSwitchingUsers: Boolean = false,
     @JvmField var forceWindowCollapsed: Boolean = false,
     @JvmField var forceDozeBrightness: Boolean = false,
     // TODO: forceUserActivity seems to be unused, delete?
@@ -78,6 +79,7 @@ class NotificationShadeWindowState(
             qsExpanded.toString(),
             headsUpNotificationShowing.toString(),
             lightRevealScrimOpaque.toString(),
+            isSwitchingUsers.toString(),
             forceWindowCollapsed.toString(),
             forceDozeBrightness.toString(),
             forceUserActivity.toString(),
@@ -117,6 +119,7 @@ class NotificationShadeWindowState(
             qsExpanded: Boolean,
             headsUpShowing: Boolean,
             lightRevealScrimOpaque: Boolean,
+            isSwitchingUsers: Boolean,
             forceCollapsed: Boolean,
             forceDozeBrightness: Boolean,
             forceUserActivity: Boolean,
@@ -145,6 +148,7 @@ class NotificationShadeWindowState(
                 this.qsExpanded = qsExpanded
                 this.headsUpNotificationShowing = headsUpShowing
                 this.lightRevealScrimOpaque = lightRevealScrimOpaque
+                this.isSwitchingUsers = isSwitchingUsers
                 this.forceWindowCollapsed = forceCollapsed
                 this.forceDozeBrightness = forceDozeBrightness
                 this.forceUserActivity = forceUserActivity
@@ -191,6 +195,7 @@ class NotificationShadeWindowState(
                 "qsExpanded",
                 "headsUpShowing",
                 "lightRevealScrimOpaque",
+                "isSwitchingUsers",
                 "forceCollapsed",
                 "forceDozeBrightness",
                 "forceUserActivity",
