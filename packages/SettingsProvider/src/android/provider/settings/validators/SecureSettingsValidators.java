@@ -19,11 +19,13 @@ package android.provider.settings.validators;
 import static android.provider.settings.validators.SettingsValidators.ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_INTEGER_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.ANY_STRING_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.AUTOFILL_SERVICE_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.BOOLEAN_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COLON_SEPARATED_COMPONENT_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COLON_SEPARATED_PACKAGE_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COMMA_SEPARATED_COMPONENT_LIST_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.COMPONENT_NAME_VALIDATOR;
+import static android.provider.settings.validators.SettingsValidators.CREDENTIAL_SERVICE_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.JSON_OBJECT_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.LOCALE_VALIDATOR;
 import static android.provider.settings.validators.SettingsValidators.NONE_NEGATIVE_LONG_VALIDATOR;
@@ -62,7 +64,6 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.ADAPTIVE_CHARGING_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ADAPTIVE_SLEEP, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.CAMERA_AUTOROTATE, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Secure.AUTOFILL_SERVICE, NULLABLE_COMPONENT_NAME_VALIDATOR);
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
                 new InclusiveFloatRangeValidator(1.0f, Float.MAX_VALUE));
@@ -398,5 +399,8 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.STYLUS_HANDWRITING_ENABLED,
                 new DiscreteValueValidator(new String[] {"-1", "0", "1"}));
         VALIDATORS.put(Secure.DEFAULT_NOTE_TASK_PROFILE, NON_NEGATIVE_INTEGER_VALIDATOR);
+        VALIDATORS.put(Secure.CREDENTIAL_SERVICE, CREDENTIAL_SERVICE_VALIDATOR);
+        VALIDATORS.put(Secure.CREDENTIAL_SERVICE_PRIMARY, NULLABLE_COMPONENT_NAME_VALIDATOR);
+        VALIDATORS.put(Secure.AUTOFILL_SERVICE, AUTOFILL_SERVICE_VALIDATOR);
     }
 }
