@@ -35,6 +35,7 @@ android_app {
         "androidx.compose.ui_ui",
         "androidx.compose.ui_ui-tooling",
         "androidx.core_core-ktx",
+        "androidx.hilt_hilt-navigation-compose",
         "androidx.lifecycle_lifecycle-extensions",
         "androidx.lifecycle_lifecycle-livedata",
         "androidx.lifecycle_lifecycle-runtime-ktx",
