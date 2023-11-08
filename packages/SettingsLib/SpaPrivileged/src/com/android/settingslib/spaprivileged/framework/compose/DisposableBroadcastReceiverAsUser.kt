@@ -17,14 +17,14 @@
 package com.android.settingslib.spaprivileged.framework.compose
 
 import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.UserHandle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import com.android.settingslib.spa.framework.compose.LifecycleEffect
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import com.android.settingslib.spa.framework.util.collectLatestWithLifecycle
+import com.android.settingslib.spaprivileged.framework.common.broadcastReceiverAsUserFlow
 
 /**
  * A [BroadcastReceiver] which registered when on start and unregistered when on stop.
@@ -35,27 +35,6 @@ fun DisposableBroadcastReceiverAsUser(
     userHandle: UserHandle,
     onReceive: (Intent) -> Unit,
 ) {
-    val context = LocalContext.current
-    val broadcastReceiver = remember {
-        object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                onReceive(intent)
-            }
-        }
-    }
-    LifecycleEffect(
-        onStart = {
-            context.registerReceiverAsUser(
-                broadcastReceiver,
-                userHandle,
-                intentFilter,
-                null,
-                null,
-                Context.RECEIVER_NOT_EXPORTED,
-            )
-        },
-        onStop = {
-            context.unregisterReceiver(broadcastReceiver)
-        },
-    )
+    LocalContext.current.broadcastReceiverAsUserFlow(intentFilter, userHandle)
+        .collectLatestWithLifecycle(LocalLifecycleOwner.current, action = onReceive)
 }

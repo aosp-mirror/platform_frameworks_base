@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spaprivileged.framework.compose
+package com.android.settingslib.spaprivileged.framework.common
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.UserHandle
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.settingslib.spa.testutils.firstWithTimeoutOrNull
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -40,9 +37,7 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 
 @RunWith(AndroidJUnit4::class)
-class DisposableBroadcastReceiverAsUserTest {
-    @get:Rule
-    val composeTestRule = createComposeRule()
+class BroadcastReceiverAsUserFlowTest {
 
     private var registeredBroadcastReceiver: BroadcastReceiver? = null
 
@@ -63,33 +58,25 @@ class DisposableBroadcastReceiverAsUserTest {
     }
 
     @Test
-    fun broadcastReceiver_registered() {
-        composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalContext provides context,
-                LocalLifecycleOwner provides TestLifecycleOwner(),
-            ) {
-                DisposableBroadcastReceiverAsUser(INTENT_FILTER, USER_HANDLE) {}
-            }
-        }
+    fun broadcastReceiverAsUserFlow_registered() = runBlocking {
+        val flow = context.broadcastReceiverAsUserFlow(INTENT_FILTER, USER_HANDLE)
+
+        flow.firstWithTimeoutOrNull()
 
         assertThat(registeredBroadcastReceiver).isNotNull()
     }
 
     @Test
-    fun broadcastReceiver_isCalledOnReceive() = runBlocking {
+    fun broadcastReceiverAsUserFlow_isCalledOnReceive() = runBlocking {
         var onReceiveIsCalled = false
-        composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalContext provides context,
-                LocalLifecycleOwner provides TestLifecycleOwner(),
-            ) {
-                DisposableBroadcastReceiverAsUser(INTENT_FILTER, USER_HANDLE) {
-                    onReceiveIsCalled = true
-                }
+        launch {
+            context.broadcastReceiverAsUserFlow(INTENT_FILTER, USER_HANDLE).first {
+                onReceiveIsCalled = true
+                true
             }
         }
 
+        delay(100)
         registeredBroadcastReceiver!!.onReceive(context, Intent())
         delay(100)
 
