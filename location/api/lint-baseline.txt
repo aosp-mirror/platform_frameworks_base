@@ -1,0 +1,27 @@
+// Baseline format: 1.0
+RequiresPermission: android.location.LocationManager#addGpsStatusListener(android.location.GpsStatus.Listener):
+    Method 'addGpsStatusListener' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener):
+    Method 'addNmeaListener' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):
+    Method 'addNmeaListener' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#addNmeaListener(java.util.concurrent.Executor, android.location.OnNmeaMessageListener):
+    Method 'addNmeaListener' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#addProximityAlert(double, double, float, long, android.app.PendingIntent):
+    Method 'addProximityAlert' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#registerGnssMeasurementsCallback(android.location.GnssMeasurementRequest, java.util.concurrent.Executor, android.location.GnssMeasurementsEvent.Callback):
+    Method 'registerGnssMeasurementsCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#registerGnssMeasurementsCallback(android.location.GnssMeasurementsEvent.Callback, android.os.Handler):
+    Method 'registerGnssMeasurementsCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#registerGnssMeasurementsCallback(java.util.concurrent.Executor, android.location.GnssMeasurementsEvent.Callback):
+    Method 'registerGnssMeasurementsCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#registerGnssNavigationMessageCallback(android.location.GnssNavigationMessage.Callback, android.os.Handler):
+    Method 'registerGnssNavigationMessageCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#registerGnssNavigationMessageCallback(java.util.concurrent.Executor, android.location.GnssNavigationMessage.Callback):
+    Method 'registerGnssNavigationMessageCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#registerGnssStatusCallback(android.location.GnssStatus.Callback):
+    Method 'registerGnssStatusCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#registerGnssStatusCallback(android.location.GnssStatus.Callback, android.os.Handler):
+    Method 'registerGnssStatusCallback' documentation mentions permissions already declared by @RequiresPermission
+RequiresPermission: android.location.LocationManager#registerGnssStatusCallback(java.util.concurrent.Executor, android.location.GnssStatus.Callback):
+    Method 'registerGnssStatusCallback' documentation mentions permissions already declared by @RequiresPermission

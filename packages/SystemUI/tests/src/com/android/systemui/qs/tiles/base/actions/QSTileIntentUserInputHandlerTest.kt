@@ -41,7 +41,7 @@ class QSTileIntentUserInputHandlerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        underTest = QSTileIntentUserInputHandler(activityStarted)
+        underTest = QSTileIntentUserInputHandlerImpl(activityStarted)
     }
 
     @Test

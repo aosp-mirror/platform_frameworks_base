@@ -70,8 +70,8 @@ class HandleMenu {
     private int mMarginMenuStart;
     private int mMenuHeight;
     private int mMenuWidth;
-
     private final int mCaptionHeight;
+    private HandleMenuAnimator mHandleMenuAnimator;
 
 
     HandleMenu(WindowDecoration parentDecor, int layoutResId, int captionX, int captionY,
@@ -111,20 +111,19 @@ class HandleMenu {
         mHandleMenuWindow = mParentDecor.addWindow(
                 R.layout.desktop_mode_window_decor_handle_menu, "Handle Menu",
                 t, ssg, x, y, mMenuWidth, mMenuHeight);
+        final View handleMenuView = mHandleMenuWindow.mWindowViewHost.getView();
+        mHandleMenuAnimator = new HandleMenuAnimator(handleMenuView, mMenuWidth, mCaptionHeight);
     }
 
     /**
      * Animates the appearance of the handle menu and its three pills.
      */
     private void animateHandleMenu() {
-        final View handleMenuView = mHandleMenuWindow.mWindowViewHost.getView();
-        final HandleMenuAnimator handleMenuAnimator = new HandleMenuAnimator(handleMenuView,
-                mMenuWidth, mCaptionHeight);
         if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                 || mTaskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW) {
-            handleMenuAnimator.animateCaptionHandleExpandToOpen();
+            mHandleMenuAnimator.animateCaptionHandleExpandToOpen();
         } else {
-            handleMenuAnimator.animateOpen();
+            mHandleMenuAnimator.animateOpen();
         }
     }
 
@@ -328,8 +327,16 @@ class HandleMenu {
     }
 
     void close() {
-        mHandleMenuWindow.releaseView();
-        mHandleMenuWindow = null;
+        final Runnable after = () -> {
+            mHandleMenuWindow.releaseView();
+            mHandleMenuWindow = null;
+        };
+        if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                || mTaskInfo.getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW) {
+            mHandleMenuAnimator.animateCollapseIntoHandleClose(after);
+        } else {
+            mHandleMenuAnimator.animateClose(after);
+        }
     }
 
     static final class Builder {

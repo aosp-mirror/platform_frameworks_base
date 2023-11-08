@@ -23,6 +23,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_PIP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_UNOCCLUDING;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
@@ -37,11 +38,13 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.os.IBinder;
+import android.util.ArrayMap;
 import android.util.Pair;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.common.ProtoLog;
@@ -61,7 +64,9 @@ import com.android.wm.shell.unfold.UnfoldTransitionHandler;
 import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * A handler for dealing with transitions involving multiple other handlers. For example: an
@@ -79,7 +84,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     private UnfoldTransitionHandler mUnfoldHandler;
     private ActivityEmbeddingController mActivityEmbeddingController;
 
-    private static class MixedTransition {
+    private class MixedTransition {
         static final int TYPE_ENTER_PIP_FROM_SPLIT = 1;
 
         /** Both the display and split-state (enter/exit) is changing */
@@ -94,14 +99,17 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         /** Keyguard exit/occlude/unocclude transition. */
         static final int TYPE_KEYGUARD = 5;
 
+        /** Recents transition on top of the lock screen. */
+        static final int TYPE_RECENTS_DURING_KEYGUARD = 6;
+
         /** Recents Transition while in desktop mode. */
-        static final int TYPE_RECENTS_DURING_DESKTOP = 6;
+        static final int TYPE_RECENTS_DURING_DESKTOP = 7;
 
         /** Fold/Unfold transition. */
-        static final int TYPE_UNFOLD = 7;
+        static final int TYPE_UNFOLD = 8;
 
         /** Enter pip from one of the Activity Embedding windows. */
-        static final int TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING = 8;
+        static final int TYPE_ENTER_PIP_FROM_ACTIVITY_EMBEDDING = 9;
 
         /** The default animation for this mixed transition. */
         static final int ANIM_TYPE_DEFAULT = 0;
@@ -117,7 +125,10 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         final IBinder mTransition;
 
         Transitions.TransitionHandler mLeftoversHandler = null;
+        TransitionInfo mInfo = null;
         WindowContainerTransaction mFinishWCT = null;
+        SurfaceControl.Transaction mFinishT = null;
+        Transitions.TransitionFinishCallback mFinishCB = null;
 
         /**
          * Whether the transition has request for remote transition while mLeftoversHandler
@@ -136,6 +147,37 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         MixedTransition(int type, IBinder transition) {
             mType = type;
             mTransition = transition;
+        }
+
+        boolean startSubAnimation(Transitions.TransitionHandler handler, TransitionInfo info,
+                SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT) {
+            if (mInfo != null) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                        "startSubAnimation #%d.%d", mInfo.getDebugId(), info.getDebugId());
+            }
+            mInFlightSubAnimations++;
+            if (!handler.startAnimation(
+                    mTransition, info, startT, finishT, wct -> onSubAnimationFinished(info, wct))) {
+                mInFlightSubAnimations--;
+                return false;
+            }
+            return true;
+        }
+
+        void onSubAnimationFinished(TransitionInfo info, WindowContainerTransaction wct) {
+            mInFlightSubAnimations--;
+            if (mInfo != null) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                        "onSubAnimationFinished #%d.%d remaining=%d",
+                        mInfo.getDebugId(), info.getDebugId(), mInFlightSubAnimations);
+            }
+
+            joinFinishArgs(wct);
+
+            if (mInFlightSubAnimations == 0) {
+                mActiveTransitions.remove(MixedTransition.this);
+                mFinishCB.onTransitionFinished(mFinishWCT);
+            }
         }
 
         void joinFinishArgs(WindowContainerTransaction wct) {
@@ -271,39 +313,46 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     }
 
     @Override
-    public Transitions.TransitionHandler handleRecentsRequest(WindowContainerTransaction outWCT) {
+    public Consumer<IBinder> handleRecentsRequest(WindowContainerTransaction outWCT) {
         if (mRecentsHandler != null) {
             if (mSplitHandler.isSplitScreenVisible()) {
-                return this;
+                return this::setRecentsTransitionDuringSplit;
+            } else if (mKeyguardHandler.isKeyguardShowing()) {
+                return this::setRecentsTransitionDuringKeyguard;
             } else if (mDesktopTasksController != null
                     // Check on the default display. Recents/gesture nav is only available there
                     && mDesktopTasksController.getVisibleTaskCount(DEFAULT_DISPLAY) > 0) {
-                return this;
+                return this::setRecentsTransitionDuringDesktop;
             }
         }
         return null;
     }
 
-    @Override
-    public void setRecentsTransition(IBinder transition) {
-        if (mSplitHandler.isSplitScreenVisible()) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a recents request while "
-                    + "Split-Screen is foreground, so treat it as Mixed.");
-            final MixedTransition mixed = new MixedTransition(
-                    MixedTransition.TYPE_RECENTS_DURING_SPLIT, transition);
-            mixed.mLeftoversHandler = mRecentsHandler;
-            mActiveTransitions.add(mixed);
-        } else if (DesktopModeStatus.isEnabled()) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a recents request while "
-                    + "desktop mode is active, so treat it as Mixed.");
-            final MixedTransition mixed = new MixedTransition(
-                    MixedTransition.TYPE_RECENTS_DURING_DESKTOP, transition);
-            mixed.mLeftoversHandler = mRecentsHandler;
-            mActiveTransitions.add(mixed);
-        } else {
-            throw new IllegalStateException("Accepted a recents transition but don't know how to"
-                    + " handle it");
-        }
+    private void setRecentsTransitionDuringSplit(IBinder transition) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a recents request while "
+                + "Split-Screen is foreground, so treat it as Mixed.");
+        final MixedTransition mixed = new MixedTransition(
+                MixedTransition.TYPE_RECENTS_DURING_SPLIT, transition);
+        mixed.mLeftoversHandler = mRecentsHandler;
+        mActiveTransitions.add(mixed);
+    }
+
+    private void setRecentsTransitionDuringKeyguard(IBinder transition) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a recents request while "
+                + "keyguard is visible, so treat it as Mixed.");
+        final MixedTransition mixed = new MixedTransition(
+                MixedTransition.TYPE_RECENTS_DURING_KEYGUARD, transition);
+        mixed.mLeftoversHandler = mRecentsHandler;
+        mActiveTransitions.add(mixed);
+    }
+
+    private void setRecentsTransitionDuringDesktop(IBinder transition) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a recents request while "
+                + "desktop mode is active, so treat it as Mixed.");
+        final MixedTransition mixed = new MixedTransition(
+                MixedTransition.TYPE_RECENTS_DURING_DESKTOP, transition);
+        mixed.mLeftoversHandler = mRecentsHandler;
+        mActiveTransitions.add(mixed);
     }
 
     private TransitionInfo subCopy(@NonNull TransitionInfo info,
@@ -409,6 +458,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                     finishCallback);
         } else if (mixed.mType == MixedTransition.TYPE_KEYGUARD) {
             return animateKeyguard(mixed, info, startTransaction, finishTransaction,
+                    finishCallback);
+        } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_KEYGUARD) {
+            return animateRecentsDuringKeyguard(mixed, info, startTransaction, finishTransaction,
                     finishCallback);
         } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_DESKTOP) {
             return animateRecentsDuringDesktop(mixed, info, startTransaction, finishTransaction,
@@ -764,24 +816,28 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        final Transitions.TransitionFinishCallback finishCB = (wct) -> {
-            mixed.mInFlightSubAnimations--;
-            if (mixed.mInFlightSubAnimations == 0) {
-                mActiveTransitions.remove(mixed);
-                finishCallback.onTransitionFinished(wct);
-            }
-        };
-        mixed.mInFlightSubAnimations++;
+        if (mixed.mFinishT == null) {
+            mixed.mFinishT = finishTransaction;
+            mixed.mFinishCB = finishCallback;
+        }
         // Sync pip state.
         if (mPipHandler != null) {
             mPipHandler.syncPipSurfaceState(info, startTransaction, finishTransaction);
         }
-        if (!mKeyguardHandler.startAnimation(
-                mixed.mTransition, info, startTransaction, finishTransaction, finishCB)) {
-            mixed.mInFlightSubAnimations--;
-            return false;
+        return mixed.startSubAnimation(mKeyguardHandler, info, startTransaction, finishTransaction);
+    }
+
+    private boolean animateRecentsDuringKeyguard(@NonNull final MixedTransition mixed,
+            @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        if (mixed.mInfo == null) {
+            mixed.mInfo = info;
+            mixed.mFinishT = finishTransaction;
+            mixed.mFinishCB = finishCallback;
         }
-        return true;
+        return mixed.startSubAnimation(mRecentsHandler, info, startTransaction, finishTransaction);
     }
 
     private boolean animateRecentsDuringDesktop(@NonNull final MixedTransition mixed,
@@ -905,6 +961,15 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                         finishCallback);
             } else if (mixed.mType == MixedTransition.TYPE_KEYGUARD) {
                 mKeyguardHandler.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
+            } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_KEYGUARD) {
+                if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_UNOCCLUDING) != 0) {
+                    handoverTransitionLeashes(mixed, info, t, mixed.mFinishT);
+                    if (animateKeyguard(mixed, info, t, mixed.mFinishT, mixed.mFinishCB)) {
+                        finishCallback.onTransitionFinished(null);
+                    }
+                }
+                mixed.mLeftoversHandler.mergeAnimation(transition, info, t, mergeTarget,
+                        finishCallback);
             } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_DESKTOP) {
                 mixed.mLeftoversHandler.mergeAnimation(transition, info, t, mergeTarget,
                         finishCallback);
@@ -945,6 +1010,40 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         }
         if (mixed.mHasRequestToRemote) {
             mPlayer.getRemoteTransitionHandler().onTransitionConsumed(transition, aborted, finishT);
+        }
+    }
+
+    /**
+     * Update an incoming {@link TransitionInfo} with the leashes from an ongoing
+     * {@link MixedTransition} so that it can take over some parts of the animation without
+     * reparenting to new transition roots.
+     */
+    private static void handoverTransitionLeashes(@NonNull MixedTransition mixed,
+            @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT) {
+
+        // Show the roots in case they contain new changes not present in the original transition.
+        for (int j = info.getRootCount() - 1; j >= 0; --j) {
+            startT.show(info.getRoot(j).getLeash());
+        }
+
+        // Find all of the leashes from the original transition.
+        Map<WindowContainerToken, TransitionInfo.Change> originalChanges = new ArrayMap<>();
+        for (TransitionInfo.Change oldChange : mixed.mInfo.getChanges()) {
+            if (oldChange.getContainer() != null) {
+                originalChanges.put(oldChange.getContainer(), oldChange);
+            }
+        }
+
+        // Merge the animation leashes by re-using the original ones if we see the same container
+        // in the new transition and the old.
+        for (TransitionInfo.Change newChange : info.getChanges()) {
+            if (originalChanges.containsKey(newChange.getContainer())) {
+                final TransitionInfo.Change oldChange = originalChanges.get(newChange.getContainer());
+                startT.reparent(newChange.getLeash(), null);
+                newChange.setLeash(oldChange.getLeash());
+            }
         }
     }
 }

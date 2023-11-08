@@ -17,6 +17,7 @@ package com.android.systemui.display.ui.viewmodel
 
 import android.app.Dialog
 import android.content.Context
+import com.android.systemui.biometrics.Utils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -74,7 +75,8 @@ constructor(
                         scope.launch(bgDispatcher) { pendingDisplay.ignore() }
                         hideDialog()
                     },
-                    configurationController
+                    navbarBottomInsetsProvider = { Utils.getNavbarInsets(context).bottom },
+                    configurationController,
                 )
                 .apply { show() }
     }

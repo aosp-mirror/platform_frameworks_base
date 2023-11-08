@@ -251,7 +251,7 @@ object NotificationIconContainerViewBinder {
 
             val replacingIcons =
                 iconsDiff.groupReplacements.mapValuesNotNullTo(ArrayMap()) { (_, v) ->
-                    viewStore.iconView(v.notifKey)?.statusBarIcon
+                    viewStore.iconView(v.notifKey).statusBarIcon
                 }
             view.setReplacingIcons(replacingIcons)
 
@@ -264,7 +264,7 @@ object NotificationIconContainerViewBinder {
                 .mapNotNull { key -> childrenByNotifKey[key] }
                 .forEach { child -> view.removeView(child) }
 
-            val toAdd = iconsDiff.added.mapNotNull { viewStore.iconView(it.notifKey) }
+            val toAdd = iconsDiff.added.map { viewStore.iconView(it.notifKey) }
             for ((i, sbiv) in toAdd.withIndex()) {
                 // The view might still be transiently added if it was just removed
                 // and added again
@@ -277,7 +277,7 @@ object NotificationIconContainerViewBinder {
             val childCount = view.childCount
             for (i in 0 until childCount) {
                 val actual = view.getChildAt(i)
-                val expected = viewStore.iconView(iconsData.visibleKeys[i].notifKey)!!
+                val expected = viewStore.iconView(iconsData.visibleKeys[i].notifKey)
                 if (actual === expected) {
                     continue
                 }
@@ -314,7 +314,7 @@ object NotificationIconContainerViewBinder {
 
     /** External storage for [StatusBarIconView] instances. */
     fun interface IconViewStore {
-        fun iconView(key: String): StatusBarIconView?
+        fun iconView(key: String): StatusBarIconView
     }
 
     @ColorInt private val DEFAULT_AOD_ICON_COLOR = Color.WHITE
@@ -326,8 +326,10 @@ class ShelfNotificationIconViewStore
 constructor(
     private val notifCollection: NotifCollection,
 ) : IconViewStore {
-    override fun iconView(key: String): StatusBarIconView? =
-        notifCollection.getEntry(key)?.icons?.shelfIcon
+    override fun iconView(key: String): StatusBarIconView {
+        val entry = notifCollection.getEntry(key) ?: error("No entry found for key: $key")
+        return entry.icons.shelfIcon ?: error("No shelf IconView found for key: $key")
+    }
 }
 
 /** [IconViewStore] for the always-on display. */
@@ -336,8 +338,10 @@ class AlwaysOnDisplayNotificationIconViewStore
 constructor(
     private val notifCollection: NotifCollection,
 ) : IconViewStore {
-    override fun iconView(key: String): StatusBarIconView? =
-        notifCollection.getEntry(key)?.icons?.aodIcon
+    override fun iconView(key: String): StatusBarIconView {
+        val entry = notifCollection.getEntry(key) ?: error("No entry found for key: $key")
+        return entry.icons.aodIcon ?: error("No AOD IconView found for key: $key")
+    }
 }
 
 /** [IconViewStore] for the status bar. */
@@ -346,8 +350,10 @@ class StatusBarNotificationIconViewStore
 constructor(
     private val notifCollection: NotifCollection,
 ) : IconViewStore {
-    override fun iconView(key: String): StatusBarIconView? =
-        notifCollection.getEntry(key)?.icons?.statusBarIcon
+    override fun iconView(key: String): StatusBarIconView {
+        val entry = notifCollection.getEntry(key) ?: error("No entry found for key: $key")
+        return entry.icons.statusBarIcon ?: error("No status bar IconView found for key: $key")
+    }
 }
 
 private val View.viewBounds: Rect

@@ -2436,13 +2436,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // AppBounds at the root level should mirror the app screen size.
         outConfig.windowConfiguration.setAppBounds(info.mNonDecorFrame);
         outConfig.windowConfiguration.setRotation(rotation);
-        outConfig.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
 
         final float density = mDisplayMetrics.density;
         outConfig.screenWidthDp = (int) (info.mConfigFrame.width() / density + 0.5f);
         outConfig.screenHeightDp = (int) (info.mConfigFrame.height() / density + 0.5f);
         outConfig.compatScreenWidthDp = (int) (outConfig.screenWidthDp / mCompatibleScreenScale);
         outConfig.compatScreenHeightDp = (int) (outConfig.screenHeightDp / mCompatibleScreenScale);
+        outConfig.orientation = (outConfig.screenWidthDp <= outConfig.screenHeightDp)
+                ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
         outConfig.screenLayout = computeScreenLayout(
                 Configuration.resetScreenLayout(outConfig.screenLayout),
                 outConfig.screenWidthDp, outConfig.screenHeightDp);

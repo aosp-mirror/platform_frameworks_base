@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * Copyright 2018 Google Inc. All Rights Reserved.
+ -->
+<configuration description="Runs WindowManager {MODULE}">
+    <option name="test-tag" value="FlickerTests"/>
+    <!-- Needed for storing the perfetto trace files in the sdcard/test_results-->
+    <option name="isolated-storage" value="false"/>
+
+    <target_preparer class="com.android.tradefed.targetprep.DeviceSetup">
+        <!-- keeps the screen on during tests -->
+        <option name="screen-always-on" value="on"/>
+        <!-- prevents the phone from restarting -->
+        <option name="force-skip-system-props" value="true"/>
+        <!-- set WM tracing verbose level to all -->
+        <option name="run-command" value="cmd window tracing level all"/>
+        <!-- set WM tracing to frame (avoid incomplete states) -->
+        <option name="run-command" value="cmd window tracing frame"/>
+        <!-- ensure lock screen mode is swipe -->
+        <option name="run-command" value="locksettings set-disabled false"/>
+        <!-- disable betterbug as it's log collection dialogues cause flakes in e2e tests -->
+        <option name="run-command" value="pm disable com.google.android.internal.betterbug"/>
+        <!-- restart launcher to activate TAPL -->
+        <option name="run-command"
+                value="setprop ro.test_harness 1 ; am force-stop com.google.android.apps.nexuslauncher"/>
+        <!-- Increase trace size: 20mb for WM and 80mb for SF -->
+        <option name="run-command" value="cmd window tracing size 20480"/>
+        <option name="run-command" value="su root service call SurfaceFlinger 1029 i32 81920"/>
+        <!-- b/307664397 - Ensure camera has the correct permissions and doesn't show a dialog -->
+        <option name="run-command"
+                value="pm grant com.google.android.GoogleCamera android.permission.CAMERA"/>
+        <option name="run-command"
+                value="pm grant com.google.android.GoogleCamera android.permission.RECORD_AUDIO"/>
+        <option name="run-command"
+                value="pm grant com.google.android.GoogleCamera android.permission.ACCESS_FINE_LOCATION"/>
+        <option name="run-command"
+                value="pm grant com.google.android.GoogleCamera android.permission.ACCESS_COARSE_LOCATION"/>
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="test-user-token" value="%TEST_USER%"/>
+        <option name="run-command" value="rm -rf /data/user/%TEST_USER%/files/*"/>
+        <option name="run-command" value="settings put secure show_ime_with_hard_keyboard 1"/>
+        <option name="run-command" value="settings put system show_touches 1"/>
+        <option name="run-command" value="settings put system pointer_location 1"/>
+        <option name="teardown-command"
+                value="settings delete secure show_ime_with_hard_keyboard"/>
+        <option name="teardown-command" value="settings delete system show_touches"/>
+        <option name="teardown-command" value="settings delete system pointer_location"/>
+        <option name="teardown-command"
+                value="cmd overlay enable com.android.internal.systemui.navbar.gestural"/>
+    </target_preparer>
+    <target_preparer class="com.android.tradefed.targetprep.suite.SuiteApkInstaller">
+        <option name="cleanup-apks" value="true"/>
+        <option name="test-file-name" value="{MODULE}.apk"/>
+        <option name="test-file-name" value="FlickerTestApp.apk"/>
+    </target_preparer>
+    <!-- Needed for pushing the trace config file -->
+    <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>
+    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+        <option name="push-file"
+                key="trace_config.textproto"
+                value="/data/misc/perfetto-traces/trace_config.textproto"
+        />
+        <!--Install the content provider automatically when we push some file in sdcard folder.-->
+        <!--Needed to avoid the installation during the test suite.-->
+        <option name="push-file" key="trace_config.textproto" value="/sdcard/sample.textproto"/>
+    </target_preparer>
+    <test class="com.android.tradefed.testtype.AndroidJUnitTest">
+        <option name="package" value="{PACKAGE}"/>
+        <option name="shell-timeout" value="6600s"/>
+        <option name="test-timeout" value="6600s"/>
+        <option name="hidden-api-checks" value="false"/>
+        <option name="device-listeners" value="android.device.collectors.PerfettoListener"/>
+        <!-- PerfettoListener related arguments -->
+        <option name="instrumentation-arg" key="perfetto_config_text_proto" value="true"/>
+        <option name="instrumentation-arg"
+                key="perfetto_config_file"
+                value="trace_config.textproto"
+        />
+        <option name="instrumentation-arg" key="per_run" value="true"/>
+    </test>
+    <!-- Needed for pulling the collected trace config on to the host -->
+    <metrics_collector class="com.android.tradefed.device.metric.FilePullerLogCollector">
+        <option name="pull-pattern-keys" value="perfetto_file_path"/>
+        <option name="directory-keys"
+                value="/data/user/0/com.android.server.wm.flicker.service/files"/>
+        <option name="collect-on-run-ended-only" value="true"/>
+        <option name="clean-up" value="true"/>
+    </metrics_collector>
+</configuration>

@@ -30,7 +30,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.LookaheadScope
@@ -131,15 +130,19 @@ class SceneTransitionLayoutImpl(
     }
 
     @Composable
-    @OptIn(ExperimentalComposeUiApi::class)
     internal fun Content(modifier: Modifier) {
+        val horizontalGestureHandler =
+            rememberSceneGestureHandler(layoutImpl = this, Orientation.Horizontal)
+        val verticalGestureHandler =
+            rememberSceneGestureHandler(layoutImpl = this, Orientation.Vertical)
+
         Box(
             modifier
                 // Handle horizontal and vertical swipes on this layout.
                 // Note: order here is important and will give a slight priority to the vertical
                 // swipes.
-                .swipeToScene(layoutImpl = this, Orientation.Horizontal)
-                .swipeToScene(layoutImpl = this, Orientation.Vertical)
+                .swipeToScene(horizontalGestureHandler)
+                .swipeToScene(verticalGestureHandler)
                 .onSizeChanged { size = it }
         ) {
             LookaheadScope {

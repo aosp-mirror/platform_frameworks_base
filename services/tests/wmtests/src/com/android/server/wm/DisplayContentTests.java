@@ -970,6 +970,13 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(
                 "Screen orientation must be defined by the window even on close-to-square display.",
                 window.mAttrs.screenOrientation, dc.getOrientation());
+
+        // Assume that a decor window occupies the display height, so the configuration orientation
+        // should be landscape.
+        dc.getDisplayPolicy().getDecorInsetsInfo(ROTATION_0, dc.mBaseDisplayHeight,
+                dc.mBaseDisplayWidth).mConfigFrame.set(0, 0, 1000, 990);
+        dc.computeScreenConfiguration(config, ROTATION_0);
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE, config.orientation);
     }
 
     @Test

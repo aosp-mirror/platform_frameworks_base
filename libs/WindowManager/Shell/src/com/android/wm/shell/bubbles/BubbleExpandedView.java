@@ -57,6 +57,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
@@ -470,6 +471,17 @@ public class BubbleExpandedView extends LinearLayout {
                     R.layout.bubble_manage_button, this /* parent */, false /* attach */);
             addView(mManageButton);
             mManageButton.setVisibility(visibility);
+            post(() -> {
+                int touchAreaHeight =
+                        getResources().getDimensionPixelSize(
+                                R.dimen.bubble_manage_button_touch_area_height);
+                Rect r = new Rect();
+                mManageButton.getHitRect(r);
+                int extraTouchArea = (touchAreaHeight - r.height()) / 2;
+                r.top -= extraTouchArea;
+                r.bottom += extraTouchArea;
+                setTouchDelegate(new TouchDelegate(r, mManageButton));
+            });
         }
     }
 

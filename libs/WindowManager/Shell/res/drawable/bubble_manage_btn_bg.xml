@@ -21,7 +21,7 @@
     <solid
         android:color="?androidprv:attr/materialColorSurfaceContainerHigh"
         />
-    <corners android:radius="20dp" />
+    <corners android:radius="18sp" />
 
     <padding
         android:left="20dp"

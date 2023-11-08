@@ -16,14 +16,31 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import com.android.systemui.dagger.SysUISingleton
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeKeyguardSurfaceBehindRepository : KeyguardSurfaceBehindRepository {
+@SysUISingleton
+class FakeKeyguardSurfaceBehindRepository @Inject constructor() : KeyguardSurfaceBehindRepository {
     private val _isAnimatingSurface = MutableStateFlow(false)
     override val isAnimatingSurface = _isAnimatingSurface.asStateFlow()
+
+    private val _isSurfaceAvailable = MutableStateFlow(false)
+    override val isSurfaceRemoteAnimationTargetAvailable = _isSurfaceAvailable.asStateFlow()
 
     override fun setAnimatingSurface(animating: Boolean) {
         _isAnimatingSurface.value = animating
     }
+
+    override fun setSurfaceRemoteAnimationTargetAvailable(available: Boolean) {
+        _isSurfaceAvailable.value = available
+    }
+}
+
+@Module
+interface FakeKeyguardSurfaceBehindRepositoryModule {
+    @Binds fun bindFake(fake: FakeKeyguardSurfaceBehindRepository): KeyguardSurfaceBehindRepository
 }

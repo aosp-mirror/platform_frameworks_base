@@ -1,11 +1,91 @@
 # Ravenwood "policy" file for framework-minus-apex.
 
+# Collections
 class android.util.ArrayMap stubclass
+class android.util.ArraySet stubclass
+class android.util.LongSparseArray stubclass
+class android.util.SparseArrayMap stubclass
+class android.util.SparseArray stubclass
+class android.util.SparseBooleanArray stubclass
+class android.util.SparseIntArray stubclass
+class android.util.SparseLongArray stubclass
 class android.util.ContainerHelpers stubclass
 class android.util.EmptyArray stubclass
 class android.util.MapCollections stubclass
 
+# Logging
 class android.util.Log stubclass
 class android.util.Log !com.android.hoststubgen.nativesubstitution.Log_host
+class android.util.LogPrinter stubclass
 
+# String Manipulation
+class android.util.Printer stubclass
+class android.util.PrintStreamPrinter stubclass
+class android.util.PrintWriterPrinter stubclass
+class android.util.StringBuilderPrinter stubclass
+
+# Properties
+class android.util.Property stubclass
+class android.util.FloatProperty stubclass
+class android.util.IntProperty stubclass
+class android.util.NoSuchPropertyException stubclass
+class android.util.ReflectiveProperty stubclass
+
+# Exceptions
+class android.util.AndroidException stubclass
+class android.util.AndroidRuntimeException stubclass
+
+# JSON
+class android.util.JsonReader stubclass
+class android.util.JsonWriter stubclass
+class android.util.MalformedJsonException stubclass
+
+# Base64
+class android.util.Base64 stubclass
+class android.util.Base64DataException stubclass
+class android.util.Base64InputStream stubclass
+class android.util.Base64OutputStream stubclass
+
+# Data Holders
+class android.util.MutableFloat stubclass
+class android.util.MutableShort stubclass
+class android.util.MutableBoolean stubclass
+class android.util.MutableByte stubclass
+class android.util.MutableChar stubclass
+class android.util.MutableDouble stubclass
+class android.util.Pair stubclass
+class android.util.Range stubclass
+class android.util.Rational stubclass
+class android.util.Size stubclass
+class android.util.SizeF stubclass
+
+# Proto
+class android.util.proto.EncodedBuffer stubclass
+class android.util.proto.ProtoInputStream stubclass
+class android.util.proto.ProtoOutputStream stubclass
+class android.util.proto.ProtoParseException stubclass
+class android.util.proto.ProtoStream stubclass
+class android.util.proto.ProtoUtils stubclass
+class android.util.proto.WireTypeMismatchException stubclass
+
+# Misc
+class android.util.Dumpable stubclass
+class android.util.DebugUtils stubclass
+class android.util.UtilConfig stubclass
+class android.util.Patterns stubclass
+
+# Internals
+class com.android.internal.util.ArrayUtils stubclass
+    method newUnpaddedByteArray (I)[B @newUnpaddedByteArray$ravenwood
+    method newUnpaddedCharArray (I)[C @newUnpaddedCharArray$ravenwood
+    method newUnpaddedIntArray (I)[I @newUnpaddedIntArray$ravenwood
+    method newUnpaddedBooleanArray (I)[Z @newUnpaddedBooleanArray$ravenwood
+    method newUnpaddedLongArray (I)[J @newUnpaddedLongArray$ravenwood
+    method newUnpaddedFloatArray (I)[F @newUnpaddedFloatArray$ravenwood
+    method newUnpaddedObjectArray (I)[Ljava/lang/Object; @newUnpaddedObjectArray$ravenwood
+    method newUnpaddedArray (Ljava/lang/Class;I)[Ljava/lang/Object; @newUnpaddedArray$ravenwood
+
+class com.android.internal.util.GrowingArrayUtils stubclass
 class com.android.internal.util.LineBreakBufferedWriter stubclass
+class com.android.internal.util.Preconditions stubclass
+class com.android.internal.util.StringPool stubclass

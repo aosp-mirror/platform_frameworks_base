@@ -94,7 +94,19 @@ class MenuAnimationController {
         mFadeOutAnimator.setDuration(FADE_OUT_DURATION_MS);
         mFadeOutAnimator.addUpdateListener(
                 (animation) -> menuView.setAlpha((float) animation.getAnimatedValue()));
-        mRadiiAnimator = new RadiiAnimator(mMenuViewAppearance.getMenuRadii(), mMenuView::setRadii);
+        mRadiiAnimator = new RadiiAnimator(mMenuViewAppearance.getMenuRadii(),
+                new IRadiiAnimationListener() {
+                    @Override
+                    public void onRadiiAnimationUpdate(float[] radii) {
+                        mMenuView.setRadii(radii);
+                    }
+
+                    @Override
+                    public void onRadiiAnimationStart() {}
+
+                    @Override
+                    public void onRadiiAnimationStop() {}
+                });
     }
 
     void moveToPosition(PointF position) {

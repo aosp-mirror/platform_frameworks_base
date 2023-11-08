@@ -56,7 +56,7 @@ import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupAnnotations.OperationType;
 import android.app.compat.CompatChanges;
 import android.app.sdksandbox.sandboxactivity.ActivityContextInfo;
-import android.app.sdksandbox.sandboxactivity.SdkSandboxActivityAuthority;
+import android.app.sdksandbox.sandboxactivity.ActivityContextInfoProvider;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -2272,8 +2272,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     case DUMP_HEAP: return "DUMP_HEAP";
                     case DUMP_ACTIVITY: return "DUMP_ACTIVITY";
                     case SET_CORE_SETTINGS: return "SET_CORE_SETTINGS";
-                    case UPDATE_PACKAGE_COMPATIBILITY_INFO:
-                        return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
+                    case UPDATE_PACKAGE_COMPATIBILITY_INFO: return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
                     case DUMP_PROVIDER: return "DUMP_PROVIDER";
                     case UNSTABLE_PROVIDER_DIED: return "UNSTABLE_PROVIDER_DIED";
                     case REQUEST_ASSIST_CONTEXT_EXTRAS: return "REQUEST_ASSIST_CONTEXT_EXTRAS";
@@ -3777,10 +3776,8 @@ public final class ActivityThread extends ClientTransactionHandler
                     r.activityInfo.targetActivity);
         }
 
-        boolean isSandboxActivityContext =
-                sandboxActivitySdkBasedContext()
-                        && SdkSandboxActivityAuthority.isSdkSandboxActivity(
-                                mSystemContext, r.intent);
+        boolean isSandboxActivityContext = sandboxActivitySdkBasedContext()
+                && r.intent.isSandboxActivity(mSystemContext);
         boolean isSandboxedSdkContextUsed = false;
         ContextImpl activityBaseContext;
         if (isSandboxActivityContext) {
@@ -4025,12 +4022,11 @@ public final class ActivityThread extends ClientTransactionHandler
      */
     @Nullable
     private ContextImpl createBaseContextForSandboxActivity(@NonNull ActivityClientRecord r) {
-        SdkSandboxActivityAuthority sdkSandboxActivityAuthority =
-                SdkSandboxActivityAuthority.getInstance();
+        ActivityContextInfoProvider contextInfoProvider = ActivityContextInfoProvider.getInstance();
 
         ActivityContextInfo contextInfo;
         try {
-            contextInfo = sdkSandboxActivityAuthority.getActivityContextInfo(r.intent);
+            contextInfo = contextInfoProvider.getActivityContextInfo(r.intent);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "Passed intent does not match an expected sandbox activity", e);
             return null;

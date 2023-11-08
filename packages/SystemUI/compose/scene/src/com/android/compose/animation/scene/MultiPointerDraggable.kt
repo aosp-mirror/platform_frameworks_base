@@ -23,11 +23,11 @@ import androidx.compose.foundation.gestures.awaitHorizontalTouchSlopOrCancellati
 import androidx.compose.foundation.gestures.awaitVerticalTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.horizontalDrag
 import androidx.compose.foundation.gestures.verticalDrag
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerId
@@ -56,7 +56,6 @@ import androidx.compose.ui.util.fastForEach
  * change in the future.
  */
 // TODO(b/291055080): Migrate to the Modifier.Node API.
-@Composable
 internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
     enabled: Boolean,
@@ -64,7 +63,7 @@ internal fun Modifier.multiPointerDraggable(
     onDragStarted: (startedPosition: Offset, pointersDown: Int) -> Unit,
     onDragDelta: (Float) -> Unit,
     onDragStopped: (velocity: Float) -> Unit,
-): Modifier {
+): Modifier = composed {
     val onDragStarted by rememberUpdatedState(onDragStarted)
     val onDragStopped by rememberUpdatedState(onDragStopped)
     val onDragDelta by rememberUpdatedState(onDragDelta)
@@ -77,7 +76,7 @@ internal fun Modifier.multiPointerDraggable(
             Velocity(maxF, maxF)
         }
 
-    return this.pointerInput(enabled, orientation, maxFlingVelocity) {
+    pointerInput(enabled, orientation, maxFlingVelocity) {
         if (!enabled) {
             return@pointerInput
         }
