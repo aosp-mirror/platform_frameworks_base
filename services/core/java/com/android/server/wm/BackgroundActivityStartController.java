@@ -195,6 +195,10 @@ public class BackgroundActivityStartController {
         return activity != null && packageName.equals(activity.getPackageName());
     }
 
+    /**
+     * @see #checkBackgroundActivityStart(int, int, String, int, int, WindowProcessController,
+     *      PendingIntentRecord, BackgroundStartPrivileges, Intent, ActivityOptions)
+     */
     boolean shouldAbortBackgroundActivityStart(
             int callingUid,
             int callingPid,
@@ -203,13 +207,13 @@ public class BackgroundActivityStartController {
             int realCallingPid,
             WindowProcessController callerApp,
             PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges backgroundStartPrivileges,
+            BackgroundStartPrivileges forcedBalByPiSender,
             Intent intent,
             ActivityOptions checkedOptions) {
         return checkBackgroundActivityStart(callingUid, callingPid, callingPackage,
                 realCallingUid, realCallingPid,
                 callerApp, originatingPendingIntent,
-                backgroundStartPrivileges, intent, checkedOptions).blocks();
+                forcedBalByPiSender, intent, checkedOptions).blocks();
     }
 
     private class BalState {
@@ -230,7 +234,7 @@ public class BackgroundActivityStartController {
         private final @ActivityManager.ProcessState int mRealCallingUidProcState;
         private final boolean mIsRealCallingUidPersistentSystemProcess;
         private final PendingIntentRecord mOriginatingPendingIntent;
-        private final BackgroundStartPrivileges mBackgroundStartPrivileges;
+        private final BackgroundStartPrivileges mForcedBalByPiSender;
         private final Intent mIntent;
         private final WindowProcessController mCallerApp;
         private final WindowProcessController mRealCallerApp;
@@ -239,7 +243,7 @@ public class BackgroundActivityStartController {
                  int realCallingUid, int realCallingPid,
                  WindowProcessController callerApp,
                  PendingIntentRecord originatingPendingIntent,
-                 BackgroundStartPrivileges backgroundStartPrivileges,
+                 BackgroundStartPrivileges forcedBalByPiSender,
                  Intent intent,
                  ActivityOptions checkedOptions) {
             this.mCallingPackage = callingPackage;
@@ -248,7 +252,7 @@ public class BackgroundActivityStartController {
             mRealCallingUid = realCallingUid;
             mRealCallingPid = realCallingPid;
             mCallerApp = callerApp;
-            mBackgroundStartPrivileges = backgroundStartPrivileges;
+            mForcedBalByPiSender = forcedBalByPiSender;
             mOriginatingPendingIntent = originatingPendingIntent;
             mIntent = intent;
             mRealCallingPackage = mService.getPackageNameIfUnique(realCallingUid, realCallingPid);
@@ -344,7 +348,7 @@ public class BackgroundActivityStartController {
                         .append(mIsRealCallingUidPersistentSystemProcess);
                 sb.append("; originatingPendingIntent: ").append(mOriginatingPendingIntent);
             }
-            sb.append("; backgroundStartPrivileges: ").append(mBackgroundStartPrivileges);
+            sb.append("; mForcedBalByPiSender: ").append(mForcedBalByPiSender);
             sb.append("; intent: ").append(mIntent);
             sb.append("; callerApp: ").append(mCallerApp);
             if (isPendingIntent()) {
@@ -422,8 +426,26 @@ public class BackgroundActivityStartController {
     }
 
     /**
-     * @return A code denoting which BAL rule allows an activity to be started,
-     * or {@link #BAL_BLOCK} if the launch should be blocked
+     * Check if a (background) activity start is allowed.
+     *
+     * @param callingUid The UID that wants to start the activity.
+     * @param callingPid The PID that wants to start the activity.
+     * @param callingPackage The package name that wants to start the activity.
+     * @param realCallingUid The UID that actually calls this method (only if this handles a
+     *      PendingIntent, otherwise -1)
+     * @param realCallingPid The PID that actually calls this method (only if this handles a
+     *      *      PendingIntent, otherwise -1)
+     * @param callerApp The process that calls this method (only if not a PendingIntent)
+     * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
+     *        null if not originated by PendingIntent
+     * @param forcedBalByPiSender If set to allow, the
+     *        PendingIntent's sender will try to force allow background activity starts.
+     *        This is only possible if the sender of the PendingIntent is a system process.
+     * @param intent Intent that should be started.
+     * @param checkedOptions ActivityOptions to allow specific opt-ins/opt outs.
+     *
+     * @return A verdict denoting which BAL rule allows an activity to be started,
+     *        or if the launch should be blocked.
      */
     BalVerdict checkBackgroundActivityStart(
             int callingUid,
@@ -433,7 +455,7 @@ public class BackgroundActivityStartController {
             int realCallingPid,
             WindowProcessController callerApp,
             PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges backgroundStartPrivileges,
+            BackgroundStartPrivileges forcedBalByPiSender,
             Intent intent,
             ActivityOptions checkedOptions) {
 
@@ -444,7 +466,7 @@ public class BackgroundActivityStartController {
 
         BalState state = new BalState(callingUid, callingPid, callingPackage,
                 realCallingUid, realCallingPid, callerApp, originatingPendingIntent,
-                backgroundStartPrivileges, intent, checkedOptions);
+                forcedBalByPiSender, intent, checkedOptions);
 
         // In the case of an SDK sandbox calling uid, check if the corresponding app uid has a
         // visible window.
@@ -708,12 +730,12 @@ public class BackgroundActivityStartController {
         }
         // if the realCallingUid is a persistent system process, abort if the IntentSender
         // wasn't allowed to start an activity
-        if (state.mIsRealCallingUidPersistentSystemProcess
-                && state.mBackgroundStartPrivileges.allowsBackgroundActivityStarts()) {
+        if (state.mForcedBalByPiSender.allowsBackgroundActivityStarts()
+                && state.mIsRealCallingUidPersistentSystemProcess) {
             return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
                     /*background*/ false,
                     "realCallingUid is persistent system process AND intent "
-                            + "sender allowed (allowBackgroundActivityStart = true).");
+                            + "sender forced to allow.");
         }
         // don't abort if the realCallingUid is an associated companion app
         if (mService.isAssociatedCompanionApp(
