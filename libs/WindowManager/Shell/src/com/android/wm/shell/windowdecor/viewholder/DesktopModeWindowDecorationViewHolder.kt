@@ -17,9 +17,9 @@ internal abstract class DesktopModeWindowDecorationViewHolder(rootView: View) {
    */
   abstract fun bindData(taskInfo: RunningTaskInfo)
 
-    /** Callback when the handle menu is opened. */
-    abstract fun onHandleMenuOpened()
+  /** Callback when the handle menu is opened. */
+  abstract fun onHandleMenuOpened()
 
-    /** Callback when the handle menu is closed. */
-    abstract fun onHandleMenuClosed()
+  /** Callback when the handle menu is closed. */
+  abstract fun onHandleMenuClosed()
 }

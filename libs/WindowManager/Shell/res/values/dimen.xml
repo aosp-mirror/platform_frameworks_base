@@ -413,6 +413,9 @@
     <!-- Height of desktop mode caption for fullscreen tasks. -->
     <dimen name="desktop_mode_fullscreen_decor_caption_height">36dp</dimen>
 
+    <!-- Width of desktop mode caption for fullscreen tasks. -->
+    <dimen name="desktop_mode_fullscreen_decor_caption_width">128dp</dimen>
+
     <!-- Required empty space to be visible for partially offscreen tasks. -->
     <dimen name="freeform_required_visible_empty_space_in_header">48dp</dimen>
 

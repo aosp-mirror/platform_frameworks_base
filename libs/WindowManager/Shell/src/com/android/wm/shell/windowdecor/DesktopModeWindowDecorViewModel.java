@@ -726,7 +726,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private void handleEventOutsideFocusedCaption(MotionEvent ev,
             DesktopModeWindowDecoration relevantDecor) {
         // Returns if event occurs within caption
-        if (relevantDecor == null || relevantDecor.checkTouchEventInCaption(ev)) {
+        if (relevantDecor == null || relevantDecor.checkTouchEventInCaptionHandle(ev)) {
             return;
         }
 
@@ -761,7 +761,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                                 || windowingMode == WINDOWING_MODE_MULTI_WINDOW;
                     }
 
-                    if (dragFromStatusBarAllowed && relevantDecor.checkTouchEventInHandle(ev)) {
+                    if (dragFromStatusBarAllowed
+                            && relevantDecor.checkTouchEventInCaptionHandle(ev)) {
                         mTransitionDragActive = true;
                     }
                 }
