@@ -736,6 +736,8 @@
     <!-- Whether the communal service should be enabled -->
     <bool name="config_communalServiceEnabled">false</bool>
 
+    <!-- Name of the database that stores info of widgets shown on glanceable hub -->
+    <string name="config_communalDatabase" translatable="false">communal_db</string>
     <!-- Component names of allowed communal widgets -->
     <string-array name="config_communalWidgetAllowlist" translatable="false" />
 
