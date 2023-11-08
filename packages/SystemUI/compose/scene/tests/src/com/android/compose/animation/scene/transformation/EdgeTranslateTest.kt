@@ -48,7 +48,7 @@ class EdgeTranslateTest {
         rule.testTransition(
             // The layout under test is 300dp x 300dp.
             layoutModifier = Modifier.size(300.dp),
-            fromSceneContent = {},
+            fromSceneContent = { Box(Modifier.fillMaxSize()) },
             toSceneContent = {
                 // Foo is 100dp x 100dp in the center of the layout, so at offset = (100dp, 100dp)
                 Box(Modifier.fillMaxSize()) {
