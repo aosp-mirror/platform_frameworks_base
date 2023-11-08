@@ -1682,8 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"删除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要将音量调高到建议的音量以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"继续以较高的音量聆听？\n\n耳机音量保持较高的时间超过了建议时长，可能会损害您的听力"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"检测到较高音量\n\n耳机音量水平超过了建议值，可能会损害您的听力"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"继续以高音量聆听？\n\n您以高音量使用耳机的时长超过了建议值，可能会损害您的听力"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"检测到高音量\n\n耳机音量水平超过了建议值，可能会损害您的听力"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用无障碍快捷方式吗？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"启用这项快捷方式后，同时按下两个音量按钮 3 秒钟即可启动无障碍功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"要开启无障碍功能快捷方式吗？"</string>
