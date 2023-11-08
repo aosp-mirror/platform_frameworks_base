@@ -936,6 +936,7 @@ void CanvasContext::buildLayer(RenderNode* node) {
     // buildLayer() will leave the tree in an unknown state, so we must stop drawing
     stopDrawing();
 
+    ScopedActiveContext activeContext(this);
     TreeInfo info(TreeInfo::MODE_FULL, *this);
     info.damageAccumulator = &mDamageAccumulator;
     info.layerUpdateQueue = &mLayerUpdateQueue;
