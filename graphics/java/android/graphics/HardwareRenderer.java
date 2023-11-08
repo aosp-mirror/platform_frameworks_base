@@ -182,7 +182,7 @@ public class HardwareRenderer {
     /** @hide */
     protected RenderNode mRootNode;
     private boolean mOpaque = true;
-    private boolean mForceDark = false;
+    private int mForceDark = ForceDarkType.NONE;
     private @ActivityInfo.ColorMode int mColorMode = ActivityInfo.COLOR_MODE_DEFAULT;
     private float mDesiredSdrHdrRatio = 1f;
 
@@ -571,10 +571,10 @@ public class HardwareRenderer {
      * Whether or not the force-dark feature should be used for this renderer.
      * @hide
      */
-    public boolean setForceDark(boolean enable) {
-        if (mForceDark != enable) {
-            mForceDark = enable;
-            nSetForceDark(mNativeProxy, enable);
+    public boolean setForceDark(@ForceDarkType.ForceDarkTypeDef int type) {
+        if (mForceDark != type) {
+            mForceDark = type;
+            nSetForceDark(mNativeProxy, type);
             return true;
         }
         return false;
@@ -1597,7 +1597,7 @@ public class HardwareRenderer {
 
     private static native void nAllocateBuffers(long nativeProxy);
 
-    private static native void nSetForceDark(long nativeProxy, boolean enabled);
+    private static native void nSetForceDark(long nativeProxy, int type);
 
     private static native void nSetDisplayDensityDpi(int densityDpi);
 
