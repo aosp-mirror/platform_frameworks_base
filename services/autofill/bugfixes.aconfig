@@ -20,3 +20,10 @@ flag {
   description: "Mitigation for relayout issue"
   bug: "294330426"
 }
+
+flag {
+  name: "ignore_view_state_reset_to_empty"
+  namespace: "autofill"
+  description: "Mitigation for view state reset to empty causing no save dialog to show issue"
+  bug: "297976948"
+}
