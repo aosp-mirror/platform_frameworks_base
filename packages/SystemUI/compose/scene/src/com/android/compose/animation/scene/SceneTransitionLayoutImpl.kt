@@ -48,6 +48,7 @@ class SceneTransitionLayoutImpl(
     internal val state: SceneTransitionLayoutState,
     density: Density,
     edgeDetector: EdgeDetector,
+    transitionInterceptionThreshold: Float,
     coroutineScope: CoroutineScope,
 ) {
     internal val scenes = SnapshotStateMap<SceneKey, Scene>()
@@ -60,6 +61,7 @@ class SceneTransitionLayoutImpl(
     internal var transitions by mutableStateOf(transitions)
     internal var density: Density by mutableStateOf(density)
     internal var edgeDetector by mutableStateOf(edgeDetector)
+    internal var transitionInterceptionThreshold by mutableStateOf(transitionInterceptionThreshold)
 
     private val horizontalGestureHandler: SceneGestureHandler
     private val verticalGestureHandler: SceneGestureHandler

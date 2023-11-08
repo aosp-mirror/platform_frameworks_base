@@ -38,13 +38,13 @@ import kotlinx.coroutines.launch
 
 @VisibleForTesting
 class SceneGestureHandler(
-    private val layoutImpl: SceneTransitionLayoutImpl,
+    internal val layoutImpl: SceneTransitionLayoutImpl,
     internal val orientation: Orientation,
     private val coroutineScope: CoroutineScope,
 ) {
     val draggable: DraggableHandler = SceneDraggableHandler(this)
 
-    private var transitionState
+    internal var transitionState
         get() = layoutImpl.state.transitionState
         set(value) {
             layoutImpl.state.transitionState = value
@@ -57,7 +57,7 @@ class SceneGestureHandler(
      * Note: the initialScene here does not matter, it's only used for initializing the transition
      * and will be replaced when a drag event starts.
      */
-    private val swipeTransition = SwipeTransition(initialScene = currentScene)
+    internal val swipeTransition = SwipeTransition(initialScene = currentScene)
 
     internal val currentScene: Scene
         get() = layoutImpl.scene(transitionState.currentScene)
@@ -414,7 +414,7 @@ class SceneGestureHandler(
         }
     }
 
-    private class SwipeTransition(initialScene: Scene) : TransitionState.Transition {
+    internal class SwipeTransition(initialScene: Scene) : TransitionState.Transition {
         var _currentScene by mutableStateOf(initialScene)
         override val currentScene: SceneKey
             get() = _currentScene.key
@@ -597,9 +597,29 @@ class SceneNestedScrollHandler(
         return PriorityNestedScrollConnection(
             canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
                 canChangeScene = offsetBeforeStart == Offset.Zero
-                gestureHandler.isDrivingTransition &&
+
+                val canInterceptSwipeTransition =
                     canChangeScene &&
-                    offsetAvailable.toAmount() != 0f
+                        gestureHandler.isDrivingTransition &&
+                        offsetAvailable.toAmount() != 0f
+                if (!canInterceptSwipeTransition) return@PriorityNestedScrollConnection false
+
+                val progress = gestureHandler.swipeTransition.progress
+                val threshold = gestureHandler.layoutImpl.transitionInterceptionThreshold
+                fun isProgressCloseTo(value: Float) = (progress - value).absoluteValue <= threshold
+
+                // The transition is always between 0 and 1. If it is close to either of these
+                // intervals, we want to go directly to the TransitionState.Idle.
+                // The progress value can go beyond this range in the case of overscroll.
+                val shouldSnapToIdle = isProgressCloseTo(0f) || isProgressCloseTo(1f)
+                if (shouldSnapToIdle) {
+                    gestureHandler.swipeTransition.stopOffsetAnimation()
+                    gestureHandler.transitionState =
+                        TransitionState.Idle(gestureHandler.swipeTransition.currentScene)
+                }
+
+                // Start only if we cannot consume this event
+                !shouldSnapToIdle
             },
             canStartPostScroll = { offsetAvailable, offsetBeforeStart ->
                 val amount = offsetAvailable.toAmount()

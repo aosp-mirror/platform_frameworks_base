@@ -68,6 +68,8 @@ class SceneGestureHandlerTest {
             scene(SceneC) { Text("SceneC") }
         }
 
+        val transitionInterceptionThreshold = 0.05f
+
         val sceneGestureHandler =
             SceneGestureHandler(
                 layoutImpl =
@@ -78,6 +80,7 @@ class SceneGestureHandlerTest {
                             state = layoutState,
                             density = Density(1f),
                             edgeDetector = DefaultEdgeDetector,
+                            transitionInterceptionThreshold = transitionInterceptionThreshold,
                             coroutineScope = coroutineScope,
                         )
                         .also { it.size = IntSize(SCREEN_SIZE.toInt(), SCREEN_SIZE.toInt()) },
@@ -299,6 +302,64 @@ class SceneGestureHandlerTest {
         assertScene(currentScene = SceneA, isIdle = false)
     }
 
+    private suspend fun TestGestureScope.preScrollAfterSceneTransition(
+        firstScroll: Float,
+        secondScroll: Float
+    ) {
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithOverscroll)
+        // start scene transition
+        nestedScroll.scroll(available = Offset(0f, SCREEN_SIZE * firstScroll))
+
+        // stop scene transition (start the "stop animation")
+        nestedScroll.onPreFling(available = Velocity.Zero)
+
+        // a pre scroll event, that could be intercepted by SceneGestureHandler
+        nestedScroll.onPreScroll(Offset(0f, SCREEN_SIZE * secondScroll), NestedScrollSource.Drag)
+    }
+
+    // Float tolerance for comparisons
+    private val tolerance = 0.00001f
+
+    @Test
+    fun scrollAndFling_scrollLessThanInterceptable_goToIdleOnCurrentScene() = runGestureTest {
+        val first = transitionInterceptionThreshold - tolerance
+        val second = 0.01f
+
+        preScrollAfterSceneTransition(firstScroll = first, secondScroll = second)
+
+        assertScene(SceneA, isIdle = true)
+    }
+
+    @Test
+    fun scrollAndFling_scrollMinInterceptable_interceptPreScrollEvents() = runGestureTest {
+        val first = transitionInterceptionThreshold + tolerance
+        val second = 0.01f
+
+        preScrollAfterSceneTransition(firstScroll = first, secondScroll = second)
+
+        assertThat((transitionState as Transition).progress).isWithin(tolerance).of(first + second)
+    }
+
+    @Test
+    fun scrollAndFling_scrollMaxInterceptable_interceptPreScrollEvents() = runGestureTest {
+        val first = 1f - transitionInterceptionThreshold - tolerance
+        val second = 0.01f
+
+        preScrollAfterSceneTransition(firstScroll = first, secondScroll = second)
+
+        assertThat((transitionState as Transition).progress).isWithin(tolerance).of(first + second)
+    }
+
+    @Test
+    fun scrollAndFling_scrollMoreThanInterceptable_goToIdleOnNextScene() = runGestureTest {
+        val first = 1f - transitionInterceptionThreshold + tolerance
+        val second = 0.01f
+
+        preScrollAfterSceneTransition(firstScroll = first, secondScroll = second)
+
+        assertScene(SceneC, isIdle = true)
+    }
+
     @Test
     fun onPreFling_velocityLowerThanThreshold_remainSameScene() = runGestureTest {
         val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithOverscroll)
@@ -421,6 +482,7 @@ class SceneGestureHandlerTest {
         draggable.onDelta(deltaInPixels10)
         assertScene(currentScene = SceneA, isIdle = true)
     }
+
     @Test
     fun beforeDraggableStart_stop_shouldBeIgnored() = runGestureTest {
         draggable.onDragStopped(velocityThreshold)
