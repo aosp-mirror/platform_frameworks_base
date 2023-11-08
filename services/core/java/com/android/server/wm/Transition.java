@@ -59,6 +59,7 @@ import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.FLAG_WILL_IME_SHOWN;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT;
 
+import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_SPLASH_SCREEN;
@@ -1272,17 +1273,22 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
         }
         // Commit wallpaper visibility after activity, because usually the wallpaper target token is
-        // an activity, and wallpaper's visibility is depends on activity's visibility.
+        // an activity, and wallpaper's visibility depends on activity's visibility.
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
             if (wt == null) continue;
             final WindowState target = wt.mDisplayContent.mWallpaperController.getWallpaperTarget();
             final boolean isTargetInvisible = target == null || !target.mToken.isVisible();
-            if (isTargetInvisible || (!wt.isVisibleRequested()
-                    && !mVisibleAtTransitionEndTokens.contains(wt))) {
+            final boolean isWallpaperVisibleAtEnd =
+                    wt.isVisibleRequested() || mVisibleAtTransitionEndTokens.contains(wt);
+            if (isTargetInvisible || !isWallpaperVisibleAtEnd) {
                 ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                         "  Commit wallpaper becoming invisible: %s", wt);
                 wt.commitVisibility(false /* visible */);
+            }
+            if (isTargetInvisible) {
+                // Our original target went invisible, so we should look for a new target.
+                wt.mDisplayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             }
         }
         if (committedSomeInvisible) {
