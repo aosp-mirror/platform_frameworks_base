@@ -65,7 +65,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class WindowMagnificationTest extends SysuiTestCase {
+public class MagnificationTest extends SysuiTestCase {
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
     @Mock
@@ -82,7 +82,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
 
     private CommandQueue mCommandQueue;
-    private WindowMagnification mWindowMagnification;
+    private Magnification mMagnification;
     private OverviewProxyListener mOverviewProxyListener;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
@@ -107,12 +107,12 @@ public class WindowMagnificationTest extends SysuiTestCase {
         when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
 
         doAnswer(invocation -> {
-            mWindowMagnification.mMagnificationSettingsControllerCallback
+            mMagnification.mMagnificationSettingsControllerCallback
                     .onSettingsPanelVisibilityChanged(TEST_DISPLAY, /* shown= */ true);
             return null;
         }).when(mMagnificationSettingsController).toggleSettingsPanelVisibility();
         doAnswer(invocation -> {
-            mWindowMagnification.mMagnificationSettingsControllerCallback
+            mMagnification.mMagnificationSettingsControllerCallback
                     .onSettingsPanelVisibilityChanged(TEST_DISPLAY, /* shown= */ false);
             return null;
         }).when(mMagnificationSettingsController).closeMagnificationSettings();
@@ -120,15 +120,15 @@ public class WindowMagnificationTest extends SysuiTestCase {
         when(mWindowMagnificationController.isActivated()).thenReturn(true);
 
         mCommandQueue = new CommandQueue(getContext(), mDisplayTracker);
-        mWindowMagnification = new WindowMagnification(getContext(),
+        mMagnification = new Magnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
                 mSysUiState, mOverviewProxyService, mSecureSettings, mDisplayTracker,
                 getContext().getSystemService(DisplayManager.class), mA11yLogger);
-        mWindowMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
+        mMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mWindowMagnificationController);
-        mWindowMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
+        mMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
                 mContext.getSystemService(DisplayManager.class), mMagnificationSettingsController);
-        mWindowMagnification.start();
+        mMagnification.start();
 
         final ArgumentCaptor<OverviewProxyListener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(OverviewProxyListener.class);
@@ -156,7 +156,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mCommandQueue.requestWindowMagnificationConnection(true);
         waitForIdleSync();
 
-        mWindowMagnification.mWindowMagnifierCallback
+        mMagnification.mWindowMagnifierCallback
                 .onWindowMagnifierBoundsChanged(TEST_DISPLAY, testBounds);
 
         verify(mConnectionCallback).onWindowMagnifierBoundsChanged(TEST_DISPLAY, testBounds);
@@ -169,7 +169,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mCommandQueue.requestWindowMagnificationConnection(true);
         waitForIdleSync();
 
-        mWindowMagnification.mWindowMagnifierCallback
+        mMagnification.mWindowMagnifierCallback
                 .onPerformScaleAction(TEST_DISPLAY, newScale, updatePersistence);
 
         verify(mConnectionCallback).onPerformScaleAction(
@@ -181,7 +181,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mCommandQueue.requestWindowMagnificationConnection(true);
         waitForIdleSync();
 
-        mWindowMagnification.mWindowMagnifierCallback
+        mMagnification.mWindowMagnifierCallback
                 .onAccessibilityActionPerformed(TEST_DISPLAY);
 
         verify(mConnectionCallback).onAccessibilityActionPerformed(TEST_DISPLAY);
@@ -192,14 +192,14 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mCommandQueue.requestWindowMagnificationConnection(true);
         waitForIdleSync();
 
-        mWindowMagnification.mWindowMagnifierCallback.onMove(TEST_DISPLAY);
+        mMagnification.mWindowMagnifierCallback.onMove(TEST_DISPLAY);
 
         verify(mConnectionCallback).onMove(TEST_DISPLAY);
     }
 
     @Test
     public void onClickSettingsButton_enabled_showPanelForWindowMode() {
-        mWindowMagnification.mWindowMagnifierCallback.onClickSettingsButton(TEST_DISPLAY);
+        mMagnification.mWindowMagnifierCallback.onClickSettingsButton(TEST_DISPLAY);
         waitForIdleSync();
 
         verify(mMagnificationSettingsController).toggleSettingsPanelVisibility();
@@ -212,7 +212,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
     @Test
     public void onSetMagnifierSize_delegateToMagnifier() {
         final @MagnificationSize int index = MagnificationSize.SMALL;
-        mWindowMagnification.mMagnificationSettingsControllerCallback.onSetMagnifierSize(
+        mMagnification.mMagnificationSettingsControllerCallback.onSetMagnifierSize(
                 TEST_DISPLAY, index);
         waitForIdleSync();
 
@@ -225,7 +225,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
 
     @Test
     public void onSetDiagonalScrolling_delegateToMagnifier() {
-        mWindowMagnification.mMagnificationSettingsControllerCallback.onSetDiagonalScrolling(
+        mMagnification.mMagnificationSettingsControllerCallback.onSetDiagonalScrolling(
                 TEST_DISPLAY, /* enable= */ true);
         waitForIdleSync();
 
@@ -235,7 +235,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
     @Test
     public void onEditMagnifierSizeMode_windowActivated_delegateToMagnifier() {
         when(mWindowMagnificationController.isActivated()).thenReturn(true);
-        mWindowMagnification.mMagnificationSettingsControllerCallback.onEditMagnifierSizeMode(
+        mMagnification.mMagnificationSettingsControllerCallback.onEditMagnifierSizeMode(
                 TEST_DISPLAY, /* enable= */ true);
         waitForIdleSync();
 
@@ -243,7 +243,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
         verify(mA11yLogger).log(
                 eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_SIZE_EDITING_ACTIVATED));
 
-        mWindowMagnification.mMagnificationSettingsControllerCallback.onEditMagnifierSizeMode(
+        mMagnification.mMagnificationSettingsControllerCallback.onEditMagnifierSizeMode(
                 TEST_DISPLAY, /* enable= */ false);
         waitForIdleSync();
         verify(mA11yLogger).log(
@@ -258,7 +258,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
         waitForIdleSync();
         final float scale = 3.0f;
         final boolean updatePersistence = false;
-        mWindowMagnification.mMagnificationSettingsControllerCallback.onMagnifierScale(
+        mMagnification.mMagnificationSettingsControllerCallback.onMagnifierScale(
                 TEST_DISPLAY, scale, updatePersistence);
 
         verify(mConnectionCallback).onPerformScaleAction(
@@ -274,7 +274,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mCommandQueue.requestWindowMagnificationConnection(true);
         waitForIdleSync();
 
-        mWindowMagnification.mMagnificationSettingsControllerCallback.onModeSwitch(
+        mMagnification.mMagnificationSettingsControllerCallback.onModeSwitch(
                 TEST_DISPLAY, ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         waitForIdleSync();
 
@@ -292,7 +292,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mCommandQueue.requestWindowMagnificationConnection(true);
         waitForIdleSync();
 
-        mWindowMagnification.mMagnificationSettingsControllerCallback.onModeSwitch(
+        mMagnification.mMagnificationSettingsControllerCallback.onModeSwitch(
                 TEST_DISPLAY, ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
         waitForIdleSync();
 
@@ -305,7 +305,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
     public void onSettingsPanelVisibilityChanged_windowActivated_delegateToMagnifier() {
         when(mWindowMagnificationController.isActivated()).thenReturn(true);
         final boolean shown = false;
-        mWindowMagnification.mMagnificationSettingsControllerCallback
+        mMagnification.mMagnificationSettingsControllerCallback
                 .onSettingsPanelVisibilityChanged(TEST_DISPLAY, shown);
         waitForIdleSync();
 
@@ -325,9 +325,9 @@ public class WindowMagnificationTest extends SysuiTestCase {
     @Test
     public void overviewProxyIsConnected_controllerIsAvailable_updateSysUiStateFlag() {
         final WindowMagnificationController mController = mock(WindowMagnificationController.class);
-        mWindowMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
+        mMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mController);
-        mWindowMagnification.mMagnificationControllerSupplier.get(TEST_DISPLAY);
+        mMagnification.mMagnificationControllerSupplier.get(TEST_DISPLAY);
 
         mOverviewProxyListener.onConnectionChanged(true);
 

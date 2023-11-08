@@ -22,7 +22,7 @@ import com.android.systemui.LatencyTester
 import com.android.systemui.ScreenDecorations
 import com.android.systemui.SliceBroadcastRelayHandler
 import com.android.systemui.accessibility.SystemActions
-import com.android.systemui.accessibility.WindowMagnification
+import com.android.systemui.accessibility.Magnification
 import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.biometrics.BiometricNotificationService
@@ -254,11 +254,11 @@ abstract class SystemUICoreStartableModule {
     @ClassKey(VolumeUI::class)
     abstract fun bindVolumeUI(sysui: VolumeUI): CoreStartable
 
-    /** Inject into WindowMagnification.  */
+    /** Inject into Magnification.  */
     @Binds
     @IntoMap
-    @ClassKey(WindowMagnification::class)
-    abstract fun bindWindowMagnification(sysui: WindowMagnification): CoreStartable
+    @ClassKey(Magnification::class)
+    abstract fun bindMagnification(sysui: Magnification): CoreStartable
 
     /** Inject into WMShell.  */
     @Binds
