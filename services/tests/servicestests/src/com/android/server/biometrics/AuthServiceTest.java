@@ -41,6 +41,8 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.Flags;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
@@ -53,6 +55,7 @@ import android.hardware.iris.IIrisService;
 import android.os.Binder;
 import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -83,6 +86,8 @@ public class AuthServiceTest {
 
     @Rule
     public MockitoRule mockitorule = MockitoJUnit.rule();
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private Context mContext;
@@ -416,6 +421,37 @@ public class AuthServiceTest {
         waitForIdle();
         verify(mBiometricService).registerEnabledOnKeyguardCallback(
                 eq(callback));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testGetLastAuthenticationTime_flaggedOff_throwsUnsupportedOperationException()
+            throws Exception {
+        mSetFlagsRule.disableFlags(Flags.FLAG_LAST_AUTHENTICATION_TIME);
+        setInternalAndTestBiometricPermissions(mContext, true /* hasPermission */);
+
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        mAuthService.mImpl.getLastAuthenticationTime(0,
+                BiometricManager.Authenticators.BIOMETRIC_STRONG);
+    }
+
+    @Test
+    public void testGetLastAuthenticationTime_flaggedOn_callsBiometricService()
+            throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_LAST_AUTHENTICATION_TIME);
+        setInternalAndTestBiometricPermissions(mContext, true /* hasPermission */);
+
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        final int userId = 0;
+        final int authenticators = BiometricManager.Authenticators.BIOMETRIC_STRONG;
+
+        mAuthService.mImpl.getLastAuthenticationTime(userId, authenticators);
+
+        waitForIdle();
+        verify(mBiometricService).getLastAuthenticationTime(eq(userId), eq(authenticators));
     }
 
     private static void setInternalAndTestBiometricPermissions(
