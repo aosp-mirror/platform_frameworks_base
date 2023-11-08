@@ -24,8 +24,13 @@ namespace android {
 class BigBufferInputStream : public KnownSizeInputStream {
  public:
   inline explicit BigBufferInputStream(const BigBuffer* buffer)
-      : buffer_(buffer), iter_(buffer->begin()) {
+      : owning_buffer_(0), buffer_(buffer), iter_(buffer->begin()) {
   }
+
+  inline explicit BigBufferInputStream(android::BigBuffer&& buffer)
+      : owning_buffer_(std::move(buffer)), buffer_(&owning_buffer_), iter_(buffer_->begin()) {
+  }
+
   virtual ~BigBufferInputStream() = default;
 
   bool Next(const void** data, size_t* size) override;
@@ -47,6 +52,7 @@ class BigBufferInputStream : public KnownSizeInputStream {
  private:
   DISALLOW_COPY_AND_ASSIGN(BigBufferInputStream);
 
+  android::BigBuffer owning_buffer_;
   const BigBuffer* buffer_;
   BigBuffer::const_iterator iter_;
   size_t offset_ = 0;
