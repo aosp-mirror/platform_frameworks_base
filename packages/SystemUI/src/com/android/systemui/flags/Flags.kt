@@ -244,15 +244,6 @@ object Flags {
 
     /** Keyguard Migration */
 
-    /**
-     * Migrate the bottom area to the new keyguard root view. Because there is no such thing as a
-     * "bottom area" after this, this also breaks it up into many smaller, modular pieces.
-     */
-    // TODO(b/290652751): Tracking bug.
-    @JvmField
-    val MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA =
-        unreleasedFlag("migrate_split_keyguard_bottom_area")
-
     // TODO(b/297037052): Tracking bug.
     @JvmField
     val REMOVE_NPVC_BOTTOM_AREA_USAGE = unreleasedFlag("remove_npvc_bottom_area_usage")
@@ -263,10 +254,6 @@ object Flags {
 
     // TODO(b/287268101): Tracking bug.
     @JvmField val TRANSIT_CLOCK = releasedFlag("lockscreen_custom_transit_clock")
-
-    /** Migrate the lock icon view to the new keyguard root view. */
-    // TODO(b/286552209): Tracking bug.
-    @JvmField val MIGRATE_LOCK_ICON = unreleasedFlag("migrate_lock_icon")
 
     // TODO(b/288276738): Tracking bug.
     @JvmField val WIDGET_ON_KEYGUARD = unreleasedFlag("widget_on_keyguard")

@@ -41,6 +41,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isInvisible
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.animation.view.LaunchableImageView
 import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -156,7 +157,7 @@ constructor(
     private val shortcutsBindings = mutableSetOf<KeyguardQuickAffordanceViewBinder.Binding>()
 
     init {
-        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             keyguardRootViewModel.enablePreviewMode()
             quickAffordancesCombinedViewModel.enablePreviewMode(
                 initiallySelectedSlotId =
@@ -199,7 +200,7 @@ constructor(
 
             setupKeyguardRootView(previewContext, rootView)
 
-            if (!featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+            if (!keyguardBottomAreaRefactor()) {
                 setUpBottomArea(rootView)
             }
 
@@ -243,7 +244,7 @@ constructor(
     }
 
     fun onSlotSelected(slotId: String) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             quickAffordancesCombinedViewModel.onPreviewSlotSelected(slotId = slotId)
         } else {
             bottomAreaViewModel.onPreviewSlotSelected(slotId = slotId)
@@ -254,7 +255,7 @@ constructor(
         isDestroyed = true
         lockscreenSmartspaceController.disconnect()
         disposables.forEach { it.dispose() }
-        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             shortcutsBindings.forEach { it.destroy() }
         }
     }
@@ -363,7 +364,7 @@ constructor(
 
         disposables.add(
             PreviewKeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel) {
-                if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+                if (keyguardBottomAreaRefactor()) {
                     setupShortcuts(keyguardRootView)
                 }
                 setUpUdfps(previewContext, rootView)

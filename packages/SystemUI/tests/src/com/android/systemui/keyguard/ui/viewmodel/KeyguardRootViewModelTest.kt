@@ -32,6 +32,7 @@ import com.android.systemui.common.ui.data.repository.FakeConfigurationRepositor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
 import com.android.systemui.flags.Flags
@@ -106,9 +107,10 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         testScope = TestScope(testDispatcher)
         MockitoAnnotations.initMocks(this)
 
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
+
         val featureFlags =
             FakeFeatureFlagsClassic().apply {
-                set(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA, true)
                 set(Flags.FACE_AUTH_REFACTOR, true)
             }
 
@@ -351,7 +353,6 @@ class KeyguardRootViewModelTestWithFakes : SysuiTestCase() {
                 featureFlags =
                     FakeFeatureFlagsClassicModule {
                         setDefault(Flags.NEW_AOD_TRANSITION)
-                        set(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA, true)
                         set(Flags.FACE_AUTH_REFACTOR, true)
                     },
                 mocks =

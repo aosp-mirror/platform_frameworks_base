@@ -21,7 +21,6 @@ import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
 import static com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
-import static com.android.systemui.flags.Flags.MIGRATE_LOCK_ICON;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -39,6 +38,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthRippleController;
@@ -148,9 +148,10 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
         when(mStatusBarStateController.isDozing()).thenReturn(false);
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
 
+        mSetFlagsRule.disableFlags(Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
+
         mFeatureFlags = new FakeFeatureFlags();
         mFeatureFlags.set(FACE_AUTH_REFACTOR, false);
-        mFeatureFlags.set(MIGRATE_LOCK_ICON, false);
         mFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
         mFeatureFlags.set(LOCKSCREEN_ENABLE_LANDSCAPE, false);
 
