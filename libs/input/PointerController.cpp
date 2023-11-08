@@ -404,6 +404,10 @@ MousePointerController::MousePointerController(const sp<PointerControllerPolicyI
     PointerController::setPresentation(Presentation::POINTER);
 }
 
+MousePointerController::~MousePointerController() {
+    MousePointerController::fade(Transition::IMMEDIATE);
+}
+
 // --- TouchPointerController ---
 
 TouchPointerController::TouchPointerController(const sp<PointerControllerPolicyInterface>& policy,
@@ -413,6 +417,10 @@ TouchPointerController::TouchPointerController(const sp<PointerControllerPolicyI
     PointerController::setPresentation(Presentation::SPOT);
 }
 
+TouchPointerController::~TouchPointerController() {
+    TouchPointerController::clearSpots();
+}
+
 // --- StylusPointerController ---
 
 StylusPointerController::StylusPointerController(const sp<PointerControllerPolicyInterface>& policy,
@@ -420,6 +428,10 @@ StylusPointerController::StylusPointerController(const sp<PointerControllerPolic
                                                  SpriteController& spriteController, bool enabled)
       : PointerController(policy, looper, spriteController, enabled) {
     PointerController::setPresentation(Presentation::STYLUS_HOVER);
+}
+
+StylusPointerController::~StylusPointerController() {
+    StylusPointerController::fade(Transition::IMMEDIATE);
 }
 
 } // namespace android

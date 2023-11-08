@@ -143,6 +143,8 @@ public:
                            const sp<Looper>& looper, SpriteController& spriteController,
                            bool enabled);
 
+    ~MousePointerController() override;
+
     void setPresentation(Presentation) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
@@ -160,6 +162,8 @@ public:
     TouchPointerController(const sp<PointerControllerPolicyInterface>& policy,
                            const sp<Looper>& looper, SpriteController& spriteController,
                            bool enabled);
+
+    ~TouchPointerController() override;
 
     std::optional<FloatRect> getBounds() const override {
         LOG_ALWAYS_FATAL("Should not be called");
@@ -204,6 +208,8 @@ public:
     StylusPointerController(const sp<PointerControllerPolicyInterface>& policy,
                             const sp<Looper>& looper, SpriteController& spriteController,
                             bool enabled);
+
+    ~StylusPointerController() override;
 
     void setPresentation(Presentation) override {
         LOG_ALWAYS_FATAL("Should not be called");
