@@ -60,6 +60,7 @@ import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore;
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker;
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -192,6 +193,7 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
                 mSmartspaceController,
                 mock(ConfigurationController.class),
                 mock(ScreenOffAnimationController.class),
+                mock(StatusBarIconViewBindingFailureTracker.class),
                 mKeyguardUnlockAnimationController,
                 mSecureSettings,
                 mExecutor,

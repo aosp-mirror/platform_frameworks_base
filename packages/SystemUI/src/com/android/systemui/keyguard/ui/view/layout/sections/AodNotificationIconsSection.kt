@@ -34,9 +34,9 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
-import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -49,8 +49,8 @@ constructor(
     private val context: Context,
     private val configurationState: ConfigurationState,
     private val configurationController: ConfigurationController,
-    private val dozeParameters: DozeParameters,
     private val featureFlags: FeatureFlagsClassic,
+    private val iconBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
     private val notificationIconAreaController: NotificationIconAreaController,
@@ -94,6 +94,7 @@ constructor(
                     nicAodViewModel,
                     configurationState,
                     configurationController,
+                    iconBindingFailureTracker,
                     nicAodIconViewStore,
                 )
         } else {
