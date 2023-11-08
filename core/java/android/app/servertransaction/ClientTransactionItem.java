@@ -75,7 +75,7 @@ public abstract class ClientTransactionItem implements BaseClientRequest, Parcel
     /**
      * Whether this is a {@link ActivityLifecycleItem}.
      */
-    boolean isActivityLifecycleItem() {
+    public boolean isActivityLifecycleItem() {
         return false;
     }
 

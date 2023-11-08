@@ -59,7 +59,7 @@ public abstract class ActivityLifecycleItem extends ActivityTransactionItem {
     }
 
     @Override
-    boolean isActivityLifecycleItem() {
+    public boolean isActivityLifecycleItem() {
         return true;
     }
 
