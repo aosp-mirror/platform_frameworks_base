@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,20 +16,12 @@
 
 package com.android.systemui.qs
 
-import com.android.internal.logging.InstanceId
-import com.android.internal.logging.UiEventLogger
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.InstanceIdSequenceFake
+import com.android.systemui.kosmos.Kosmos
 
-class QsEventLoggerFake(
-    uiEventLogger: UiEventLoggerFake,
-    private val instanceIdSequence: InstanceIdSequenceFake,
-) : QsEventLogger, UiEventLogger by uiEventLogger {
-
-    val lastInstanceId: Int
-        get() = instanceIdSequence.lastInstanceId
-
-    override fun getNewInstanceId(): InstanceId {
-        return instanceIdSequence.newInstanceId()
-    }
-}
+val Kosmos.instanceIdSequenceFake: InstanceIdSequenceFake by
+    Kosmos.Fixture { InstanceIdSequenceFake(0) }
+val Kosmos.uiEventLogger: UiEventLoggerFake by Kosmos.Fixture { UiEventLoggerFake() }
+val Kosmos.qsEventLogger: QsEventLoggerFake by
+    Kosmos.Fixture { QsEventLoggerFake(uiEventLogger, instanceIdSequenceFake) }
