@@ -28,9 +28,9 @@ import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
 
+import com.android.internal.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.pkg.PackageState;
-import com.android.server.pm.pkg.component.ParsedPermission;
 
 import libcore.util.EmptyArray;
 

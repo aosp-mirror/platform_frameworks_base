@@ -26,6 +26,8 @@ import android.os.Bundle
 import android.util.ArrayMap
 import android.util.SparseArray
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.internal.pm.pkg.component.ParsedPermission
+import com.android.internal.pm.pkg.component.ParsedPermissionGroup
 import com.android.modules.utils.testing.ExtendedMockitoRule
 import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.permission.access.MutableAccessState
@@ -39,8 +41,6 @@ import com.android.server.pm.parsing.PackageInfoUtils
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageState
 import com.android.server.pm.pkg.PackageUserState
-import com.android.server.pm.pkg.component.ParsedPermission
-import com.android.server.pm.pkg.component.ParsedPermissionGroup
 import com.android.server.testutils.any
 import com.android.server.testutils.mock
 import com.android.server.testutils.whenever

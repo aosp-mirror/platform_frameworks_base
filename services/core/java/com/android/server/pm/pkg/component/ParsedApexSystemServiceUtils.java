@@ -25,6 +25,8 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.text.TextUtils;
 
+import com.android.internal.pm.pkg.component.ParsedApexSystemService;
+
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;

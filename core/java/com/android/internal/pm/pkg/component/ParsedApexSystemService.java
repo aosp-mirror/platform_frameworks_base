@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,27 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.component;
+package com.android.internal.pm.pkg.component;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 /** @hide */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface ParsedInstrumentation extends ParsedComponent {
+public interface ParsedApexSystemService {
+
+    @NonNull
+    String getName();
 
     @Nullable
-    String getTargetPackage();
+    String getJarPath();
 
     @Nullable
-    String getTargetProcesses();
+    String getMinSdkVersion();
 
-    boolean isFunctionalTest();
+    @Nullable
+    String getMaxSdkVersion();
 
-    boolean isHandleProfiling();
+    int getInitOrder();
+
 }

@@ -22,8 +22,8 @@ import android.content.pm.SigningDetails;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
+import com.android.internal.pm.pkg.component.ParsedProcess;
 import com.android.server.pm.permission.LegacyPermissionState;
-import com.android.server.pm.pkg.component.ParsedProcess;
 
 import java.util.List;
 

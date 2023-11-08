@@ -30,9 +30,9 @@ import android.os.Parcelable;
 import android.util.Pair;
 import android.util.Slog;
 
+import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.internal.util.Parcelling;
 import com.android.internal.util.XmlUtils;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
 import com.android.server.pm.pkg.component.ParsedIntentInfoImpl;
 
 import org.xmlpull.v1.XmlPullParserException;

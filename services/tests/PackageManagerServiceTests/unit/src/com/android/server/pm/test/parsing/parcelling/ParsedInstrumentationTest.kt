@@ -16,7 +16,7 @@
 
 package com.android.server.pm.test.parsing.parcelling
 
-import com.android.server.pm.pkg.component.ParsedInstrumentation
+import com.android.internal.pm.pkg.component.ParsedInstrumentation
 import com.android.server.pm.pkg.component.ParsedInstrumentationImpl
 import kotlin.contracts.ExperimentalContracts
 

@@ -26,6 +26,7 @@ import android.os.Parcelable;
 import android.text.TextUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.component.ParsedInstrumentation;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 

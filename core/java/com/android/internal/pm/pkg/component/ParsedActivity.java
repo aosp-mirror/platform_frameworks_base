@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.component;
+package com.android.internal.pm.pkg.component;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -25,19 +25,6 @@ import java.util.Set;
 /** @hide **/
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface ParsedActivity extends ParsedMainComponent {
-
-    /**
-     * Generate activity object that forwards user to App Details page automatically.
-     * This activity should be invisible to user and user should not know or see it.
-     * @hide
-     */
-    @NonNull
-    static ParsedActivity makeAppDetailsActivity(String packageName, String processName,
-            int uiOptions, String taskAffinity, boolean hardwareAccelerated) {
-        // Proxy method since ParsedActivityImpl is supposed to be package visibility
-        return ParsedActivityImpl.makeAppDetailsActivity(packageName, processName, uiOptions,
-                taskAffinity, hardwareAccelerated);
-    }
 
     int getColorMode();
 

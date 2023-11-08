@@ -14,19 +14,32 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.component;
+package com.android.internal.pm.pkg.component;
+
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
+import java.util.Set;
 
 /** @hide */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface ParsedPermissionGroup extends ParsedComponent {
+public interface ParsedPermission extends ParsedComponent {
 
-    int getBackgroundRequestDetailRes();
+    @Nullable
+    String getBackgroundPermission();
 
-    int getBackgroundRequestRes();
+    @Nullable
+    String getGroup();
 
-    int getPriority();
+    @NonNull
+    Set<String> getKnownCerts();
 
-    int getRequestDetailRes();
+    @Nullable
+    ParsedPermissionGroup getParsedPermissionGroup();
+
+    int getProtectionLevel();
 
     int getRequestRes();
+
+    boolean isTree();
 }

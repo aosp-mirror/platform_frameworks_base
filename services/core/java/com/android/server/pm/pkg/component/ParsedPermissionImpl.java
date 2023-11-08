@@ -24,6 +24,8 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.component.ParsedPermission;
+import com.android.internal.pm.pkg.component.ParsedPermissionGroup;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
@@ -118,8 +120,8 @@ public class ParsedPermissionImpl extends ParsedComponentImpl implements ParsedP
         this.requestRes = in.readInt();
         this.protectionLevel = in.readInt();
         this.tree = in.readBoolean();
-        this.parsedPermissionGroup = in.readParcelable(ParsedPermissionGroup.class.getClassLoader(),
-                ParsedPermissionGroupImpl.class);
+        this.parsedPermissionGroup = in.readParcelable(
+                ParsedPermissionGroupImpl.class.getClassLoader(), ParsedPermissionGroupImpl.class);
         this.knownCerts = sForStringSet.unparcel(in);
     }
 

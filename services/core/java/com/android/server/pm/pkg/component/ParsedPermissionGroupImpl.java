@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.component.ParsedPermissionGroup;
 import com.android.internal.util.DataClass;
 
 /**
@@ -174,7 +175,7 @@ public class ParsedPermissionGroupImpl extends ParsedComponentImpl implements
             time = 1642132854167L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/component/ParsedPermissionGroupImpl.java",
-            inputSignatures = "private  int requestDetailRes\nprivate  int backgroundRequestRes\nprivate  int backgroundRequestDetailRes\nprivate  int requestRes\nprivate  int priority\npublic  java.lang.String toString()\npublic @java.lang.Override @com.android.internal.util.DataClass.Generated.Member void writeToParcel(android.os.Parcel,int)\nclass ParsedPermissionGroupImpl extends com.android.server.pm.pkg.component.ParsedComponentImpl implements [com.android.server.pm.pkg.component.ParsedPermissionGroup, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=true, genAidl=false)")
+            inputSignatures = "private  int requestDetailRes\nprivate  int backgroundRequestRes\nprivate  int backgroundRequestDetailRes\nprivate  int requestRes\nprivate  int priority\npublic  java.lang.String toString()\npublic @java.lang.Override @com.android.internal.util.DataClass.Generated.Member void writeToParcel(android.os.Parcel,int)\nclass ParsedPermissionGroupImpl extends com.android.server.pm.pkg.component.ParsedComponentImpl implements [com.android.internal.pm.pkg.component.ParsedPermissionGroup, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genSetters=true, genBuilder=false, genParcelable=true, genAidl=false)")
     @Deprecated
     private void __metadata() {}
 

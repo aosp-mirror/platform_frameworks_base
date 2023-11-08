@@ -14,35 +14,19 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.component;
-
-import android.annotation.NonNull;
-import android.annotation.Nullable;
+package com.android.internal.pm.pkg.component;
 
 /** @hide */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface ParsedMainComponent extends ParsedComponent {
+public interface ParsedPermissionGroup extends ParsedComponent {
 
-    @NonNull
-    String[] getAttributionTags();
+    int getBackgroundRequestDetailRes();
 
-    /**
-     * A main component's name is a class name. This makes code slightly more readable.
-     */
-    @NonNull
-    String getClassName();
+    int getBackgroundRequestRes();
 
-    boolean isDirectBootAware();
+    int getPriority();
 
-    boolean isEnabled();
+    int getRequestDetailRes();
 
-    boolean isExported();
-
-    int getOrder();
-
-    @Nullable
-    String getProcessName();
-
-    @Nullable
-    String getSplitName();
+    int getRequestRes();
 }

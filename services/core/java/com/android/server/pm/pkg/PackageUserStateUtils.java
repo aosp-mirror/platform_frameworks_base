@@ -27,7 +27,7 @@ import android.os.Debug;
 import android.util.DebugUtils;
 import android.util.Slog;
 
-import com.android.server.pm.pkg.component.ParsedMainComponent;
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
 
 /** @hide */
 public class PackageUserStateUtils {

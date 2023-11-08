@@ -16,7 +16,7 @@
 
 package com.android.server.pm.test.parsing.parcelling
 
-import com.android.server.pm.pkg.component.ParsedAttribution
+import com.android.internal.pm.pkg.component.ParsedAttribution
 import com.android.server.pm.pkg.component.ParsedAttributionImpl
 import kotlin.contracts.ExperimentalContracts
 

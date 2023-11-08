@@ -16,8 +16,8 @@
 
 package com.android.server.pm.test.parsing.parcelling
 
-import com.android.server.pm.pkg.component.ParsedPermission
-import com.android.server.pm.pkg.component.ParsedPermissionGroup
+import com.android.internal.pm.pkg.component.ParsedPermission
+import com.android.internal.pm.pkg.component.ParsedPermissionGroup
 import com.android.server.pm.pkg.component.ParsedPermissionGroupImpl
 import com.android.server.pm.pkg.component.ParsedPermissionImpl
 import kotlin.contracts.ExperimentalContracts

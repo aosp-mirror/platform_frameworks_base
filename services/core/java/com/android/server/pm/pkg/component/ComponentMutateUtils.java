@@ -19,6 +19,14 @@ package com.android.server.pm.pkg.component;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedComponent;
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
+import com.android.internal.pm.pkg.component.ParsedPermission;
+import com.android.internal.pm.pkg.component.ParsedPermissionGroup;
+import com.android.internal.pm.pkg.component.ParsedProcess;
+import com.android.internal.pm.pkg.component.ParsedProvider;
+
 /**
  * Contains mutation methods so that code doesn't have to cast to the Impl. Meant to eventually
  * be removed once all post-parsing mutation is moved to parsing.

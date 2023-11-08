@@ -43,6 +43,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
+import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
@@ -54,7 +55,6 @@ import com.android.server.pm.permission.LegacyPermissionSettings;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.SharedUserApi;
-import com.android.server.pm.pkg.component.ParsedMainComponent;
 import com.android.server.pm.pkg.mutate.PackageStateMutator;
 import com.android.server.pm.snapshot.PackageDataSnapshot;
 

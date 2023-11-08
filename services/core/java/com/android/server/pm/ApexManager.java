@@ -45,11 +45,11 @@ import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.component.ParsedApexSystemService;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.build.UnboundedSdkLevel;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedApexSystemService;
 import com.android.server.utils.TimingsTraceAndSlog;
 
 import com.google.android.collect.Lists;

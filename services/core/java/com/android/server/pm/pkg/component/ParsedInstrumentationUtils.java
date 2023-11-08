@@ -26,6 +26,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 
 import com.android.internal.R;
+import com.android.internal.pm.pkg.component.ParsedInstrumentation;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
 
 import org.xmlpull.v1.XmlPullParserException;

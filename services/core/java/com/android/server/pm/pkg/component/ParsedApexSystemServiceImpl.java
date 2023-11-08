@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.os.Parcelable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.component.ParsedApexSystemService;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling;
 
@@ -250,7 +251,7 @@ public class ParsedApexSystemServiceImpl implements ParsedApexSystemService, Par
             time = 1643723578605L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/component/ParsedApexSystemServiceImpl.java",
-            inputSignatures = "private @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) @android.annotation.NonNull java.lang.String name\nprivate @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) @android.annotation.Nullable java.lang.String jarPath\nprivate @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) @android.annotation.Nullable java.lang.String minSdkVersion\nprivate @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) @android.annotation.Nullable java.lang.String maxSdkVersion\nprivate  int initOrder\nclass ParsedApexSystemServiceImpl extends java.lang.Object implements [com.android.server.pm.pkg.component.ParsedApexSystemService, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genAidl=false, genSetters=true, genParcelable=true)")
+            inputSignatures = "private @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) @android.annotation.NonNull java.lang.String name\nprivate @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) @android.annotation.Nullable java.lang.String jarPath\nprivate @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) @android.annotation.Nullable java.lang.String minSdkVersion\nprivate @com.android.internal.util.DataClass.ParcelWith(com.android.internal.util.Parcelling.BuiltIn.ForInternedString.class) @android.annotation.Nullable java.lang.String maxSdkVersion\nprivate  int initOrder\nclass ParsedApexSystemServiceImpl extends java.lang.Object implements [com.android.internal.pm.pkg.component.ParsedApexSystemService, android.os.Parcelable]\n@com.android.internal.util.DataClass(genGetters=true, genAidl=false, genSetters=true, genParcelable=true)")
     @Deprecated
     private void __metadata() {}
 
