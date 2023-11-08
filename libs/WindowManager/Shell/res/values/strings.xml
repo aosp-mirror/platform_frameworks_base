@@ -72,7 +72,7 @@
     <!-- Warning message when we try to dock a non-resizeable task and launch it in fullscreen instead  [CHAR LIMIT=NONE] -->
     <string name="dock_non_resizeble_failed_to_dock_text">App does not support split screen</string>
     <!-- Warning message when we try to dock an app not supporting multiple instances split into multiple sides [CHAR LIMIT=NONE] -->
-    <string name="dock_multi_instances_not_supported_text">This app can only be opened in 1 window.</string>
+    <string name="dock_multi_instances_not_supported_text">This app can only be opened in 1 window</string>
     <!-- Text that gets shown on top of current activity to inform the user that the system force-resized the current activity to be displayed on a secondary display and that things might crash/not work properly [CHAR LIMIT=NONE] -->
     <string name="forced_resizable_secondary_display">App may not work on a secondary display.</string>
     <!-- Warning message when we try to launch a non-resizeable activity on a secondary display and launch it on the primary instead. -->
