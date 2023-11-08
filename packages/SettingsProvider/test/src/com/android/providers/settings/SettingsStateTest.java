@@ -15,6 +15,9 @@
  */
 package com.android.providers.settings;
 
+import android.aconfig.Aconfig;
+import android.aconfig.Aconfig.parsed_flag;
+import android.aconfig.Aconfig.parsed_flags;
 import android.os.Looper;
 import android.test.AndroidTestCase;
 import android.util.Xml;
@@ -82,6 +85,86 @@ public class SettingsStateTest extends AndroidTestCase {
             mSettingsFile.delete();
         }
         super.tearDown();
+    }
+
+    public void testLoadValidAconfigProto() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        parsed_flags flags = parsed_flags
+                .newBuilder()
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setPackage("com.android.flags")
+                        .setName("flag1")
+                        .setNamespace("test_namespace")
+                        .setDescription("test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.DISABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setPackage("com.android.flags")
+                        .setName("flag2")
+                        .setNamespace("test_namespace")
+                        .setDescription("another test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.ENABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .build();
+
+        synchronized (lock) {
+            settingsState.loadAconfigDefaultValues(flags.toByteArray());
+            settingsState.persistSettingsLocked();
+        }
+        settingsState.waitForHandler();
+
+        synchronized (lock) {
+            assertEquals("false",
+                    settingsState.getSettingLocked(
+                        "test_namespace/com.android.flags.flag1").getValue());
+            assertEquals("true",
+                    settingsState.getSettingLocked(
+                        "test_namespace/com.android.flags.flag2").getValue());
+        }
+    }
+
+    public void testSkipLoadingAconfigFlagWithMissingFields() {
+        int configKey = SettingsState.makeKey(SettingsState.SETTINGS_TYPE_CONFIG, 0);
+        Object lock = new Object();
+        SettingsState settingsState = new SettingsState(
+                getContext(), lock, mSettingsFile, configKey,
+                SettingsState.MAX_BYTES_PER_APP_PACKAGE_UNLIMITED, Looper.getMainLooper());
+
+        parsed_flags flags = parsed_flags
+                .newBuilder()
+                .addParsedFlag(parsed_flag
+                    .newBuilder()
+                        .setDescription("test flag")
+                        .addBug("12345678")
+                        .setState(Aconfig.flag_state.DISABLED)
+                        .setPermission(Aconfig.flag_permission.READ_WRITE))
+                .build();
+
+        synchronized (lock) {
+            settingsState.loadAconfigDefaultValues(flags.toByteArray());
+            settingsState.persistSettingsLocked();
+        }
+        settingsState.waitForHandler();
+
+        synchronized (lock) {
+            assertEquals(null,
+                    settingsState.getSettingLocked(
+                        "test_namespace/com.android.flags.flag1").getValue());
+        }
+    }
+
+    public void testInvalidAconfigProtoDoesNotCrash() {
+        SettingsState settingsState = getSettingStateObject();
+        settingsState.loadAconfigDefaultValues("invalid protobuf".getBytes());
     }
 
     public void testIsBinary() {
