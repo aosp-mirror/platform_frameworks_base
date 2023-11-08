@@ -217,29 +217,31 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     @Test
     fun testShouldPeek_defaultLegacySuppressor() {
         ensurePeekState()
-        provider.addLegacySuppressor(neverSuppresses)
-        assertShouldHeadsUp(buildPeekEntry())
+        withLegacySuppressor(neverSuppresses) { assertShouldHeadsUp(buildPeekEntry()) }
     }
 
     @Test
     fun testShouldNotPeek_legacySuppressInterruptions() {
         ensurePeekState()
-        provider.addLegacySuppressor(alwaysSuppressesInterruptions)
-        assertShouldNotHeadsUp(buildPeekEntry())
+        withLegacySuppressor(alwaysSuppressesInterruptions) {
+            assertShouldNotHeadsUp(buildPeekEntry())
+        }
     }
 
     @Test
     fun testShouldNotPeek_legacySuppressAwakeInterruptions() {
         ensurePeekState()
-        provider.addLegacySuppressor(alwaysSuppressesAwakeInterruptions)
-        assertShouldNotHeadsUp(buildPeekEntry())
+        withLegacySuppressor(alwaysSuppressesAwakeInterruptions) {
+            assertShouldNotHeadsUp(buildPeekEntry())
+        }
     }
 
     @Test
     fun testShouldNotPeek_legacySuppressAwakeHeadsUp() {
         ensurePeekState()
-        provider.addLegacySuppressor(alwaysSuppressesAwakeHeadsUp)
-        assertShouldNotHeadsUp(buildPeekEntry())
+        withLegacySuppressor(alwaysSuppressesAwakeHeadsUp) {
+            assertShouldNotHeadsUp(buildPeekEntry())
+        }
     }
 
     @Test
@@ -251,29 +253,31 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     @Test
     fun testShouldPulse_defaultLegacySuppressor() {
         ensurePulseState()
-        provider.addLegacySuppressor(neverSuppresses)
-        assertShouldHeadsUp(buildPulseEntry())
+        withLegacySuppressor(neverSuppresses) { assertShouldHeadsUp(buildPulseEntry()) }
     }
 
     @Test
     fun testShouldNotPulse_legacySuppressInterruptions() {
         ensurePulseState()
-        provider.addLegacySuppressor(alwaysSuppressesInterruptions)
-        assertShouldNotHeadsUp(buildPulseEntry())
+        withLegacySuppressor(alwaysSuppressesInterruptions) {
+            assertShouldNotHeadsUp(buildPulseEntry())
+        }
     }
 
     @Test
     fun testShouldPulse_legacySuppressAwakeInterruptions() {
         ensurePulseState()
-        provider.addLegacySuppressor(alwaysSuppressesAwakeInterruptions)
-        assertShouldHeadsUp(buildPulseEntry())
+        withLegacySuppressor(alwaysSuppressesAwakeInterruptions) {
+            assertShouldHeadsUp(buildPulseEntry())
+        }
     }
 
     @Test
     fun testShouldPulse_legacySuppressAwakeHeadsUp() {
         ensurePulseState()
-        provider.addLegacySuppressor(alwaysSuppressesAwakeHeadsUp)
-        assertShouldHeadsUp(buildPulseEntry())
+        withLegacySuppressor(alwaysSuppressesAwakeHeadsUp) {
+            assertShouldHeadsUp(buildPulseEntry())
+        }
     }
 
     @Test
@@ -439,29 +443,31 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     @Test
     fun testShouldBubble_defaultLegacySuppressor() {
         ensureBubbleState()
-        provider.addLegacySuppressor(neverSuppresses)
-        assertShouldBubble(buildBubbleEntry())
+        withLegacySuppressor(neverSuppresses) { assertShouldBubble(buildBubbleEntry()) }
     }
 
     @Test
     fun testShouldNotBubble_legacySuppressInterruptions() {
         ensureBubbleState()
-        provider.addLegacySuppressor(alwaysSuppressesInterruptions)
-        assertShouldNotBubble(buildBubbleEntry())
+        withLegacySuppressor(alwaysSuppressesInterruptions) {
+            assertShouldNotBubble(buildBubbleEntry())
+        }
     }
 
     @Test
     fun testShouldNotBubble_legacySuppressAwakeInterruptions() {
         ensureBubbleState()
-        provider.addLegacySuppressor(alwaysSuppressesAwakeInterruptions)
-        assertShouldNotBubble(buildBubbleEntry())
+        withLegacySuppressor(alwaysSuppressesAwakeInterruptions) {
+            assertShouldNotBubble(buildBubbleEntry())
+        }
     }
 
     @Test
     fun testShouldBubble_legacySuppressAwakeHeadsUp() {
         ensureBubbleState()
-        provider.addLegacySuppressor(alwaysSuppressesAwakeHeadsUp)
-        assertShouldBubble(buildBubbleEntry())
+        withLegacySuppressor(alwaysSuppressesAwakeHeadsUp) {
+            assertShouldBubble(buildBubbleEntry())
+        }
     }
 
     @Test
@@ -583,6 +589,15 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         isInteractive = true
         statusBarState = KEYGUARD
         run(block)
+    }
+
+    protected fun withLegacySuppressor(
+        suppressor: NotificationInterruptSuppressor,
+        block: () -> Unit
+    ) {
+        provider.addLegacySuppressor(suppressor)
+        block()
+        provider.removeLegacySuppressor(suppressor)
     }
 
     protected fun assertShouldHeadsUp(entry: NotificationEntry) =
