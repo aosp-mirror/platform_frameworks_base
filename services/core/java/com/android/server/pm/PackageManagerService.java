@@ -4729,6 +4729,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 throw new SecurityException("Cannot clear data for a protected package: "
                         + packageName);
             }
+            final int callingPid = Binder.getCallingPid();
+            EventLog.writeEvent(EventLogTags.PM_CLEAR_APP_DATA_CALLER, callingPid, callingUid,
+                    packageName);
 
             // Queue up an async operation since the package deletion may take a little while.
             mHandler.post(new Runnable() {
@@ -4861,6 +4864,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                     /* checkShell= */ false, "delete application cache files");
             final int hasAccessInstantApps = mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.ACCESS_INSTANT_APPS);
+            final int callingPid = Binder.getCallingPid();
+            EventLog.writeEvent(EventLogTags.PM_CLEAR_APP_DATA_CALLER, callingPid, callingUid,
+                    packageName);
 
             // Queue up an async operation since the package deletion may take a little while.
             mHandler.post(() -> {

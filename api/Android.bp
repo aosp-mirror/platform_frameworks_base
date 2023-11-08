@@ -262,6 +262,155 @@ java_genrule {
     cmd: "cat $(in) | md5sum | cut -d' ' -f1 > $(out)",
 }
 
+packages_to_document = [
+    "android",
+    "dalvik",
+    "java",
+    "javax",
+    "junit",
+    "org.apache.http",
+    "org.json",
+    "org.w3c.dom",
+    "org.xml.sax",
+    "org.xmlpull",
+]
+
+// Defaults for all stubs that include the non-updatable framework. These defaults do not include
+// module symbols, so will not compile correctly on their own. Users must add module APIs to the
+// classpath (or sources) somehow.
+stubs_defaults {
+    name: "android-non-updatable-stubs-defaults",
+    srcs: [":android-non-updatable-stub-sources"],
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
+    arg_files: [":frameworks-base-core-AndroidManifest.xml"],
+    aidl: {
+        include_dirs: [
+            "frameworks/av/aidl",
+            "frameworks/base/media/aidl",
+            "frameworks/base/telephony/java",
+            "frameworks/native/libs/permission/aidl",
+            "packages/modules/Bluetooth/framework/aidl-export",
+            "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
+            "hardware/interfaces/biometrics/common/aidl",
+            "hardware/interfaces/biometrics/fingerprint/aidl",
+            "hardware/interfaces/graphics/common/aidl",
+            "hardware/interfaces/keymaster/aidl",
+            "system/hardware/interfaces/media/aidl",
+        ],
+    },
+    // These are libs from framework-internal-utils that are required (i.e. being referenced)
+    // from framework-non-updatable-sources. Add more here when there's a need.
+    // DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
+    // dependencies gets bigger.
+    libs: [
+        "android.hardware.cas-V1.2-java",
+        "android.hardware.health-V1.0-java-constants",
+        "android.hardware.radio-V1.5-java",
+        "android.hardware.radio-V1.6-java",
+        "android.hardware.thermal-V1.0-java-constants",
+        "android.hardware.thermal-V2.0-java",
+        "android.hardware.tv.input-V1.0-java-constants",
+        "android.hardware.usb-V1.0-java-constants",
+        "android.hardware.usb-V1.1-java-constants",
+        "android.hardware.usb.gadget-V1.0-java",
+        "android.hardware.vibrator-V1.3-java",
+        "framework-protos",
+    ],
+    flags: [
+        "--api-lint-ignore-prefix android.icu.",
+        "--api-lint-ignore-prefix java.",
+        "--api-lint-ignore-prefix junit.",
+        "--api-lint-ignore-prefix org.",
+        "--error NoSettingsProvider",
+        "--error UnhiddenSystemApi",
+        "--error UnflaggedApi",
+        "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*",
+        "--hide BroadcastBehavior",
+        "--hide CallbackInterface",
+        "--hide DeprecationMismatch",
+        "--hide HiddenSuperclass",
+        "--hide MissingPermission",
+        "--hide RequiresPermission",
+        "--hide SdkConstant",
+        "--hide Todo",
+        "--hide-package android.audio.policy.configuration.V7_0",
+        "--hide-package com.android.server",
+        "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",
+    ],
+    filter_packages: packages_to_document,
+    high_mem: true, // Lots of sources => high memory use, see b/170701554
+    installable: false,
+    annotations_enabled: true,
+    previous_api: ":android.api.public.latest",
+    merge_annotations_dirs: ["metalava-manual"],
+    defaults_visibility: ["//frameworks/base/api"],
+    visibility: ["//frameworks/base/api"],
+}
+
+// We resolve dependencies on APIs in modules by depending on a prebuilt of the whole
+// platform (sdk_system_current_android). That prebuilt does not include module-lib APIs,
+// so use the prebuilt module-lib stubs for modules that export module-lib stubs that the
+// non-updatable part depends on.
+non_updatable_api_deps_on_modules = [
+    "sdk_module-lib_current_framework-tethering",
+    "sdk_module-lib_current_framework-connectivity-t",
+    "sdk_system_current_android",
+]
+
+// Defaults with module APIs in the classpath (mostly from prebuilts).
+// Suitable for compiling android-non-updatable.
+stubs_defaults {
+    name: "module-classpath-stubs-defaults",
+    aidl: {
+        include_dirs: [
+            "packages/modules/Bluetooth/framework/aidl-export",
+            "packages/modules/Connectivity/framework/aidl-export",
+            "packages/modules/Media/apex/aidl/stable",
+        ],
+    },
+    libs: non_updatable_api_deps_on_modules,
+}
+
+// Defaults for the java_sdk_libraries of unbundled jars from framework.
+// java_sdk_libraries using these defaults should also add themselves to the
+// non_updatable_modules list in frameworks/base/api/api.go
+java_defaults {
+    name: "framework-non-updatable-unbundled-defaults",
+    defaults: [
+        "framework-non-updatable-lint-defaults",
+        "non-updatable-framework-module-defaults",
+    ],
+    public: {
+        libs: ["android_module_lib_stubs_current"],
+    },
+    system: {
+        libs: ["android_module_lib_stubs_current"],
+    },
+    module_lib: {
+        libs: ["android_module_lib_stubs_current"],
+    },
+    test: {
+        libs: ["android_test_frameworks_core_stubs_current"],
+    },
+    sdk_version: "core_platform",
+    stub_only_libs: ["framework-protos"],
+    impl_only_libs: ["framework-minus-apex-headers"], // the framework, including hidden API
+    impl_library_visibility: ["//frameworks/base"],
+    defaults_visibility: ["//frameworks/base/location"],
+    plugins: ["error_prone_android_framework"],
+    errorprone: {
+        javacflags: [
+            "-Xep:AndroidFrameworkCompatChange:ERROR",
+            "-Xep:AndroidFrameworkUid:ERROR",
+        ],
+    },
+    // Include manual annotations in API txt files
+    merge_annotations_dirs: ["metalava-manual"],
+}
+
 build = [
     "ApiDocs.bp",
     "StubLibraries.bp",
