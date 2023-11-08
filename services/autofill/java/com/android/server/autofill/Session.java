@@ -141,6 +141,7 @@ import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillEventHistory.Event.NoSaveReason;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
+import android.service.autofill.Flags;
 import android.service.autofill.InlinePresentation;
 import android.service.autofill.InternalSanitizer;
 import android.service.autofill.InternalValidator;
@@ -575,6 +576,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Nullable
     @GuardedBy("mLock")
     private AutofillId[] mLastFillDialogTriggerIds;
+
+    private boolean mIgnoreViewStateResetToEmpty;
 
     void onSwitchInputMethodLocked() {
         // One caveat is that for the case where the focus is on a field for which regular autofill
@@ -1430,6 +1433,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mSessionCommittedEventLogger.maybeSetComponentPackageUid(uid);
         mSaveEventLogger = SaveEventLogger.forSessionId(sessionId);
         mIsPrimaryCredential = isPrimaryCredential;
+        mIgnoreViewStateResetToEmpty = Flags.ignoreViewStateResetToEmpty();
 
         synchronized (mLock) {
             mSessionFlags = new SessionFlags();
@@ -4391,6 +4395,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @GuardedBy("mLock")
     private void updateViewStateAndUiOnValueChangedLocked(AutofillId id, AutofillValue value,
             ViewState viewState, int flags) {
+        if (mIgnoreViewStateResetToEmpty && (value == null || value.isEmpty())
+                && viewState.getCurrentValue() != null && viewState.getCurrentValue().isText()
+                && viewState.getCurrentValue().getTextValue() != null
+                && viewState.getCurrentValue().getTextValue().length() > 1) {
+            if (sVerbose) {
+                Slog.v(TAG, "Ignoring view state reset to empty on id " + id);
+            }
+            return;
+        }
         final String textValue;
         if (value == null || !value.isText()) {
             textValue = null;
