@@ -81,8 +81,6 @@ public class SnoozeHelperTest extends UiServiceTestCase {
     private static final String XML_SNOOZED_NOTIFICATION_TIME = "time";
     private static final String XML_SNOOZED_NOTIFICATION_CONTEXT_ID = "id";
     private static final String XML_SNOOZED_NOTIFICATION_VERSION_LABEL = "version";
-    private static final String XML_SNOOZED_NOTIFICATION_PKG = "pkg";
-    private static final String XML_SNOOZED_NOTIFICATION_USER_ID = "user-id";
 
     @Mock SnoozeHelper.Callback mCallback;
     @Mock AlarmManager mAm;
@@ -344,9 +342,6 @@ public class SnoozeHelperTest extends UiServiceTestCase {
             } else {
                 serializer.startTag(null, XML_SNOOZED_NOTIFICATION_CONTEXT);
             }
-            serializer.attribute(null, XML_SNOOZED_NOTIFICATION_PKG, "pkg");
-            serializer.attributeInt(null, XML_SNOOZED_NOTIFICATION_USER_ID,
-                UserHandle.USER_SYSTEM);
             serializer.attributeInt(null, XML_SNOOZED_NOTIFICATION_VERSION_LABEL, 1);
             serializer.attribute(null, XML_SNOOZED_NOTIFICATION_KEY, "key" + i);
             if (timedNotification) {
