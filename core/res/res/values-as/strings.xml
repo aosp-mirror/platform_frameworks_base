@@ -1933,8 +1933,8 @@
     <string name="importance_from_user" msgid="2782756722448800447">"এই জাননীবোৰৰ গুৰুত্ব আপুনি ছেট কৰব লাগিব।"</string>
     <string name="importance_from_person" msgid="4235804979664465383">"এই কার্যৰ সৈতে জড়িত থকা লোকসকলক ভিত্তি কৰি এইয়া গুৰুত্বপূর্ণ বুলি বিবেচনা কৰা হৈছ।"</string>
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"কাষ্টম এপৰ জাননী"</string>
-    <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g>ক <xliff:g id="ACCOUNT">%2$s</xliff:g>ৰ (এই একাউণ্টটোৰ এজন ব্যৱহাৰকাৰী ইতিমধ্যে আছে) জৰিয়তে এজন নতুন ব্যৱহাৰকাৰী সৃষ্টি কৰিবলৈ অনুমতি দিবনে ?"</string>
-    <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g>ক <xliff:g id="ACCOUNT">%2$s</xliff:g>ৰ জৰিয়তে এজন নতুন ব্যৱহাৰকাৰী সৃষ্টি কৰিবলৈ অনুমতি দিবনে?"</string>
+    <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g>ক <xliff:g id="ACCOUNT">%2$s</xliff:g>ৰ (এই একাউণ্টটোৰ এগৰাকী ব্যৱহাৰকাৰী ইতিমধ্যে আছে) জৰিয়তে এগৰাকী নতুন ব্যৱহাৰকাৰী সৃষ্টি কৰিবলৈ অনুমতি দিবনে ?"</string>
+    <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g>ক <xliff:g id="ACCOUNT">%2$s</xliff:g>ৰ জৰিয়তে এগৰাকী নতুন ব্যৱহাৰকাৰী সৃষ্টি কৰিবলৈ অনুমতি দিবনে?"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"নিৰীক্ষণত থকা ব্যৱহাৰকাৰী যোগ দিয়ক"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ভাষা যোগ কৰক"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"অঞ্চলৰ অগ্ৰাধিকাৰ"</string>
