@@ -92,9 +92,9 @@ public class DisplayManagerFlags {
             Flags.FLAG_BRIGHTNESS_INT_RANGE_USER_PERCEPTION,
             Flags::brightnessIntRangeUserPerception);
 
-    private final FlagState mVsyncProximityVote = new FlagState(
-            Flags.FLAG_ENABLE_EXTERNAL_VSYNC_PROXIMITY_VOTE,
-            Flags::enableExternalVsyncProximityVote);
+    private final FlagState mRestrictDisplayModes = new FlagState(
+            Flags.FLAG_ENABLE_RESTRICT_DISPLAY_MODES,
+            Flags::enableRestrictDisplayModes);
 
     private final FlagState mVsyncLowPowerVote = new FlagState(
             Flags.FLAG_ENABLE_VSYNC_LOW_POWER_VOTE,
@@ -233,8 +233,8 @@ public class DisplayManagerFlags {
         return mBrightnessIntRangeUserPerceptionFlagState.isEnabled();
     }
 
-    public boolean isVsyncProximityVoteEnabled() {
-        return mVsyncProximityVote.isEnabled();
+    public boolean isRestrictDisplayModesEnabled() {
+        return mRestrictDisplayModes.isEnabled();
     }
 
     public boolean isVsyncLowPowerVoteEnabled() {
@@ -294,7 +294,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mPowerThrottlingClamperFlagState);
         pw.println(" " + mSmallAreaDetectionFlagState);
         pw.println(" " + mBrightnessIntRangeUserPerceptionFlagState);
-        pw.println(" " + mVsyncProximityVote);
+        pw.println(" " + mRestrictDisplayModes);
         pw.println(" " + mBrightnessWearBedtimeModeClamperFlagState);
         pw.println(" " + mAutoBrightnessModesFlagState);
         pw.println(" " + mFastHdrTransitions);

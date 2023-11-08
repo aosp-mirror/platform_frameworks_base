@@ -22,6 +22,7 @@ import static android.Manifest.permission.CAPTURE_SECURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_DISPLAYS;
+import static android.Manifest.permission.RESTRICT_DISPLAY_MODES;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_CACHED;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_GONE;
 import static android.hardware.display.DisplayManager.EventsMask;
@@ -4529,6 +4530,14 @@ public final class DisplayManagerService extends SystemService {
         public void disableConnectedDisplay(int displayId) {
             disableConnectedDisplay_enforcePermission();
             DisplayManagerService.this.enableConnectedDisplay(displayId, false);
+        }
+
+        @EnforcePermission(RESTRICT_DISPLAY_MODES)
+        @Override // Binder call
+        public void requestDisplayModes(IBinder token, int displayId, @Nullable int[] modeIds) {
+            requestDisplayModes_enforcePermission();
+            DisplayManagerService.this.mDisplayModeDirector.requestDisplayModes(
+                    token, displayId, modeIds);
         }
     }
 

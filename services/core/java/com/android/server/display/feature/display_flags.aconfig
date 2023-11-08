@@ -130,9 +130,9 @@ flag {
 }
 
 flag {
-    name: "enable_external_vsync_proximity_vote"
+    name: "enable_restrict_display_modes"
     namespace: "display_manager"
-    description: "Feature flag for external vsync proximity vote"
+    description: "Feature flag for restriction display modes api"
     bug: "284866750"
     is_fixed_read_only: true
 }
