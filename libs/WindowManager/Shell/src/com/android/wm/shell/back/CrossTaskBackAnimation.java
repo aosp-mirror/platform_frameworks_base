@@ -89,7 +89,6 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
 
     private final PointF mInitialTouchPos = new PointF();
     private final Interpolator mPostAnimationInterpolator = Interpolators.EMPHASIZED;
-    private final Interpolator mYMovementInterpolator = Interpolators.DECELERATE;
     private final Interpolator mProgressInterpolator = new DecelerateInterpolator();
     private final Matrix mTransformMatrix = new Matrix();
 
@@ -164,7 +163,7 @@ public class CrossTaskBackAnimation extends ShellBackAnimation {
         float yDirection = rawYDelta < 0 ? -1 : 1;
         // limit yDelta interpretation to 1/2 of screen height in either direction
         float deltaYRatio = Math.min(height / 2f, Math.abs(rawYDelta)) / (height / 2f);
-        float interpolatedYRatio = mYMovementInterpolator.getInterpolation(deltaYRatio);
+        float interpolatedYRatio = mProgressInterpolator.getInterpolation(deltaYRatio);
         // limit y-shift so surface never passes 8dp screen margin
         float deltaY = yDirection * interpolatedYRatio * Math.max(0f,
                 (height - scaledHeight) / 2f - mVerticalMargin);

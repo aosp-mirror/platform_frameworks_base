@@ -45,9 +45,12 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
+import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository;
+import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository;
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor;
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.InWindowLauncherUnlockAnimationInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -68,6 +71,7 @@ import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.transition.ShadeTransitionController;
+import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
@@ -241,7 +245,16 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 keyguardInteractor,
                 featureFlags,
                 mShadeRepository,
-                powerInteractor);
+                powerInteractor,
+                () ->
+                        new InWindowLauncherUnlockAnimationInteractor(
+                                new InWindowLauncherUnlockAnimationRepository(),
+                                mTestScope.getBackgroundScope(),
+                                keyguardTransitionInteractor,
+                                () -> new FakeKeyguardSurfaceBehindRepository(),
+                                mock(ActivityManagerWrapper.class)
+                        )
+                );
 
         mFromPrimaryBouncerTransitionInteractor = new FromPrimaryBouncerTransitionInteractor(
                 keyguardTransitionRepository,

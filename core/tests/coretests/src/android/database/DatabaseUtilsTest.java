@@ -96,13 +96,28 @@ public class DatabaseUtilsTest {
         assertEquals(othr, getSqlStatementType("-- cmt\n SE"));
         assertEquals(othr, getSqlStatementType("WITH"));
 
-        // Test the extended statement types.
+        // Verify that leading line-comments are skipped.
+        assertEquals(sel, getSqlStatementType("-- cmt\n SELECT"));
+        assertEquals(sel, getSqlStatementType("-- line 1\n-- line 2\n SELECT"));
+        assertEquals(sel, getSqlStatementType("-- line 1\nSELECT"));
+        // Verify that embedded comments do not confuse the scanner.
+        assertEquals(sel, getSqlStatementType("-- line 1\nSELECT\n-- line 3\n"));
 
-        final int wit = STATEMENT_WITH;
-        assertEquals(wit, getSqlStatementTypeExtended("WITH"));
+        // Verify that leading block-comments are skipped.
+        assertEquals(sel, getSqlStatementType("/* foo */SELECT"));
+        assertEquals(sel, getSqlStatementType("/* line 1\n line 2\n*/\nSELECT"));
+        assertEquals(sel, getSqlStatementType("/* UPDATE\nline 2*/\nSELECT"));
+        // Verify that embedded comment characters do not confuse the scanner.
+        assertEquals(sel, getSqlStatementType("/* Foo /* /* // ** */SELECT"));
 
-        final int cmt = STATEMENT_COMMENT;
-        assertEquals(cmt, getSqlStatementTypeExtended("-- cmt\n SELECT"));
+        // Mix it up with comment types
+        assertEquals(sel, getSqlStatementType("/* foo */ -- bar\n SELECT"));
+
+        // Test the extended statement types.  Note that the STATEMENT_COMMENT type is not possible,
+        // since leading comments are skipped.
+
+        final int with = STATEMENT_WITH;
+        assertEquals(with, getSqlStatementTypeExtended("WITH"));
 
         final int cre = STATEMENT_CREATE;
         assertEquals(cre, getSqlStatementTypeExtended("CREATE TABLE t1 (i int)"));

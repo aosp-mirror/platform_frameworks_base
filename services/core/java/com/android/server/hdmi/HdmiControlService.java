@@ -3610,7 +3610,7 @@ public class HdmiControlService extends SystemService {
         }
     }
 
-    private boolean isEarcEnabled() {
+    public boolean isEarcEnabled() {
         synchronized (mLock) {
             return mEarcEnabled;
         }

@@ -30,6 +30,7 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
+import org.objectweb.asm.commons.ClassRemapper
 import org.objectweb.asm.util.TraceClassVisitor
 import java.io.PrintWriter
 
@@ -49,9 +50,8 @@ abstract class BaseAdapter (
             val errors: HostStubGenErrors,
             val enablePreTrace: Boolean,
             val enablePostTrace: Boolean,
-            val enableMethodLogging: Boolean,
             val enableNonStubMethodCallDetection: Boolean,
-    )
+            )
 
     protected lateinit var currentPackageName: String
     protected lateinit var currentClassName: String
@@ -219,9 +219,11 @@ abstract class BaseAdapter (
 
     companion object {
         fun getVisitor(
+                classInternalName: String,
                 classes: ClassNodes,
                 nextVisitor: ClassVisitor,
                 filter: OutputFilter,
+                packageRedirector: PackageRedirectRemapper,
                 forImpl: Boolean,
                 options: Options,
         ): ClassVisitor {
@@ -229,12 +231,27 @@ abstract class BaseAdapter (
 
             val verbosePrinter = PrintWriter(log.getVerbosePrintStream())
 
-            // TODO: This doesn't work yet.
-
             // Inject TraceClassVisitor for debugging.
             if (options.enablePostTrace) {
                 next = TraceClassVisitor(next, verbosePrinter)
             }
+
+            // Handle --package-redirect
+            if (!packageRedirector.isEmpty) {
+                // Don't apply the remapper on redirect-from classes.
+                // Otherwise, if the target jar actually contains the "from" classes (which
+                // may or may not be the case) they'd be renamed.
+                // But we update all references in other places, so, a method call to a "from" class
+                // would be replaced with the "to" class. All type references (e.g. variable types)
+                // will be updated too.
+                if (!packageRedirector.isTarget(classInternalName)) {
+                    next = ClassRemapper(next, packageRedirector)
+                } else {
+                    log.v("Class $classInternalName is a redirect-from class, not applying" +
+                            " --package-redirect")
+                }
+            }
+
             var ret: ClassVisitor
             if (forImpl) {
                 ret = ImplGeneratingAdapter(classes, next, filter, options)

@@ -1326,7 +1326,10 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(NewDeviceAction.class);
         removeAction(AbsoluteVolumeAudioStatusAction.class);
 
-        disableSystemAudioIfExist();
+        // Keep SAM enabled if eARC is enabled, unless we're going to Standby.
+        if (initiatedByCec || !mService.isEarcEnabled()){
+            disableSystemAudioIfExist();
+        }
         disableArcIfExist();
 
         super.disableDevice(initiatedByCec, callback);

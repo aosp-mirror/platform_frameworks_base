@@ -55,8 +55,8 @@ class AppListPageTest {
         val inputState by setContent()
 
         val state = inputState!!.state
-        assertThat(state.showSystem.value).isFalse()
-        assertThat(state.searchQuery.value).isEqualTo("")
+        assertThat(state.showSystem()).isFalse()
+        assertThat(state.searchQuery()).isEqualTo("")
     }
 
     @Test
@@ -67,7 +67,7 @@ class AppListPageTest {
         composeTestRule.onNodeWithText(context.getString(R.string.menu_show_system)).performClick()
 
         val state = inputState!!.state
-        assertThat(state.showSystem.value).isTrue()
+        assertThat(state.showSystem()).isTrue()
     }
 
     @Test
@@ -94,7 +94,7 @@ class AppListPageTest {
         val inputState by setContent(noMoreOptions = true)
 
         val state = inputState!!.state
-        assertThat(state.showSystem.value).isFalse()
+        assertThat(state.showSystem()).isFalse()
     }
 
     private fun setContent(

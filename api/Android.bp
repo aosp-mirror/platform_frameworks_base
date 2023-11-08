@@ -334,6 +334,16 @@ stubs_defaults {
     visibility: ["//frameworks/base/api"],
 }
 
+// We resolve dependencies on APIs in modules by depending on a prebuilt of the whole
+// platform (sdk_system_current_android). That prebuilt does not include module-lib APIs,
+// so use the prebuilt module-lib stubs for modules that export module-lib stubs that the
+// non-updatable part depends on.
+non_updatable_api_deps_on_modules = [
+    "sdk_module-lib_current_framework-tethering",
+    "sdk_module-lib_current_framework-connectivity-t",
+    "sdk_system_current_android",
+]
+
 // Defaults with module APIs in the classpath (mostly from prebuilts).
 // Suitable for compiling android-non-updatable.
 stubs_defaults {
@@ -345,19 +355,7 @@ stubs_defaults {
             "packages/modules/Media/apex/aidl/stable",
         ],
     },
-    libs: [
-        "art.module.public.api",
-        "sdk_module-lib_current_framework-tethering",
-        "sdk_module-lib_current_framework-connectivity-t",
-        "sdk_public_current_framework-bluetooth",
-        // There are a few classes from modules used by the core that
-        // need to be resolved by metalava. We use a prebuilt stub of the
-        // full sdk to ensure we can resolve them. If a new class gets added,
-        // the prebuilts/sdk/current needs to be updated.
-        "sdk_system_current_android",
-        // NOTE: The below can be removed once the prebuilt stub contains IKE.
-        "sdk_system_current_android.net.ipsec.ike",
-    ],
+    libs: non_updatable_api_deps_on_modules,
 }
 
 // Defaults for the java_sdk_libraries of unbundled jars from framework.

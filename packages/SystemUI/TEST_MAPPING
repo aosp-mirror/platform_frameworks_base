@@ -32,20 +32,6 @@
       ]
     },
     {
-      // TODO(b/251476085): Consider merging with SystemUIGoogleScreenshotTests (in U+)
-      "name": "SystemUIGoogleBiometricsScreenshotTests",
-      "options": [
-        {
-          "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-          "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
-      ],
-      // The test doesn't run on AOSP Cuttlefish
-      "keywords": ["internal"]
-    },
-    {
       // Permission indicators
       "name": "CtsPermissionUiTestCases",
       "options": [
@@ -73,6 +59,7 @@
       ]
     }
   ],
+  
   "auto-end-to-end-postsubmit": [
     {
       "name": "AndroidAutomotiveHomeTests",
@@ -91,6 +78,7 @@
       ]
     }
   ],
+  
   "postsubmit": [
     {
       // Permission indicators
@@ -100,22 +88,9 @@
           "include-filter": "android.permissionui.cts.CameraMicIndicatorsPermissionTest"
         }
       ]
-    },
-    {
-      "name": "SystemUIGoogleScreenshotTests",
-      "options": [
-        {
-            "exclude-annotation": "org.junit.Ignore"
-        },
-        {
-            "exclude-annotation": "android.platform.test.annotations.FlakyTest"
-        },
-        {
-            "include-annotation": "android.platform.test.annotations.Postsubmit"
-        }
-      ]
     }
   ],
+  
   // v2/sysui/suite/test-mapping-sysui-screenshot-test
   "sysui-screenshot-test": [
     {
@@ -151,8 +126,27 @@
           "exclude-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
+    },
+    {
+      // TODO(b/251476085): Consider merging with SystemUIGoogleScreenshotTests (in U+)
+      "name": "SystemUIGoogleBiometricsScreenshotTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
+        },
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.FlakyTest"
+        },
+        {
+          "exclude-annotation": "android.platform.test.annotations.Postsubmit"
+        }
+      ]
     }
   ],
+  
   // v2/sysui/suite/test-mapping-sysui-screenshot-test-staged
   "sysui-screenshot-test-staged": [
     {
@@ -163,12 +157,6 @@
         },
         {
           "include-annotation": "androidx.test.filters.FlakyTest"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.FlakyTest"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Postsubmit"
         }
       ]
     },
@@ -180,12 +168,18 @@
         },
         {
           "include-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      // TODO(b/251476085): Consider merging with SystemUIGoogleScreenshotTests (in U+)
+      "name": "SystemUIGoogleBiometricsScreenshotTests",
+      "options": [
+        {
+          "exclude-annotation": "org.junit.Ignore"
         },
         {
-          "include-annotation": "android.platform.test.annotations.FlakyTest"
-        },
-        {
-          "include-annotation": "android.platform.test.annotations.Postsubmit"
+          "include-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
     }

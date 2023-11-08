@@ -18,23 +18,34 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.SysUITestModule
+import com.android.TestMocksModule
+import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.data.repository.InWindowLauncherUnlockAnimationRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
-import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.keyguard.util.mockTopActivityClassName
+import com.android.systemui.shared.system.ActivityManagerWrapper
+import dagger.BindsInstance
+import dagger.Component
 import dagger.Lazy
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import junit.framework.Assert.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -49,20 +60,30 @@ class FromLockscreenTransitionInteractorTest : KeyguardTransitionInteractorTestC
             underTest
         }
 
+    private lateinit var testComponent: TestComponent
+    @Mock private lateinit var activityManagerWrapper: ActivityManagerWrapper
+
+    private var topActivityClassName = "launcher"
+
     @Before
     override fun setUp() {
         super.setUp()
+        MockitoAnnotations.initMocks(this)
 
-        underTest =
-            FromLockscreenTransitionInteractor(
-                transitionRepository = super.transitionRepository,
-                transitionInteractor = super.transitionInteractor,
-                scope = super.testScope.backgroundScope,
-                keyguardInteractor = super.keyguardInteractor,
-                flags = FakeFeatureFlags(),
-                shadeRepository = FakeShadeRepository(),
-                powerInteractor = PowerInteractorFactory.create().powerInteractor,
-            )
+        testComponent =
+            DaggerFromLockscreenTransitionInteractorTest_TestComponent.factory()
+                .create(
+                    test = this,
+                    mocks =
+                        TestMocksModule(
+                            activityManagerWrapper = activityManagerWrapper,
+                        ),
+                )
+        underTest = testComponent.underTest
+        testScope = testComponent.testScope
+        transitionRepository = testComponent.transitionRepository
+
+        activityManagerWrapper.mockTopActivityClassName(topActivityClassName)
     }
 
     @Test
@@ -189,4 +210,73 @@ class FromLockscreenTransitionInteractorTest : KeyguardTransitionInteractorTestC
                 fail("surfaceBehindModel was unexpectedly null.")
             }
         }
+
+    @Test
+    fun testSurfaceBehindModel_alpha1_whenTransitioningWithInWindowAnimation() =
+        testScope.runTest {
+            testComponent.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
+                topActivityClassName
+            )
+            runCurrent()
+
+            val values by collectValues(underTest.surfaceBehindModel)
+            runCurrent()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
+            )
+            runCurrent()
+
+            assertEquals(1f, values[values.size - 1]?.alpha)
+        }
+
+    @Test
+    fun testSurfaceBehindModel_alphaZero_whenNotTransitioningWithInWindowAnimation() =
+        testScope.runTest {
+            testComponent.inWindowLauncherUnlockAnimationRepository.setLauncherActivityClass(
+                "not_launcher"
+            )
+            runCurrent()
+
+            val values by collectValues(underTest.surfaceBehindModel)
+            runCurrent()
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    transitionState = TransitionState.STARTED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
+            )
+            runCurrent()
+
+            assertEquals(0f, values[values.size - 1]?.alpha)
+        }
+
+    @SysUISingleton
+    @Component(
+        modules =
+            [
+                SysUITestModule::class,
+            ]
+    )
+    interface TestComponent {
+        val underTest: FromLockscreenTransitionInteractor
+        val testScope: TestScope
+        val transitionRepository: FakeKeyguardTransitionRepository
+        val surfaceBehindRepository: FakeKeyguardSurfaceBehindRepository
+        val inWindowLauncherUnlockAnimationRepository: InWindowLauncherUnlockAnimationRepository
+
+        @Component.Factory
+        interface Factory {
+            fun create(
+                @BindsInstance test: SysuiTestCase,
+                mocks: TestMocksModule,
+            ): TestComponent
+        }
+    }
 }

@@ -29,12 +29,18 @@ import javax.inject.Inject
  * Provides a shortcut to start an activity from [QSTileUserActionInteractor]. It supports keyguard
  * dismissing and tile from-view animations.
  */
-@SysUISingleton
-class QSTileIntentUserInputHandler
-@Inject
-constructor(private val activityStarter: ActivityStarter) {
+interface QSTileIntentUserInputHandler {
 
-    fun handle(view: View?, intent: Intent) {
+    fun handle(view: View?, intent: Intent)
+    fun handle(view: View?, pendingIntent: PendingIntent)
+}
+
+@SysUISingleton
+class QSTileIntentUserInputHandlerImpl
+@Inject
+constructor(private val activityStarter: ActivityStarter) : QSTileIntentUserInputHandler {
+
+    override fun handle(view: View?, intent: Intent) {
         val animationController: ActivityLaunchAnimator.Controller? =
             view?.let {
                 ActivityLaunchAnimator.Controller.fromView(
@@ -46,7 +52,7 @@ constructor(private val activityStarter: ActivityStarter) {
     }
 
     // TODO(b/249804373): make sure to allow showing activities over the lockscreen. See b/292112939
-    fun handle(view: View?, pendingIntent: PendingIntent) {
+    override fun handle(view: View?, pendingIntent: PendingIntent) {
         if (!pendingIntent.isActivity) {
             return
         }

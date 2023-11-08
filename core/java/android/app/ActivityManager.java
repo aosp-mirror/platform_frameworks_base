@@ -73,7 +73,6 @@ import android.os.PowerExemptionManager.ReasonCode;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -4261,6 +4260,33 @@ public class ActivityManager {
     public @RunningAppProcessInfo.Importance int getUidImportance(int uid) {
         try {
             int procState = getService().getUidProcessState(uid,
+                    mContext.getOpPackageName());
+            return RunningAppProcessInfo.procStateToImportanceForClient(procState, mContext);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Same as {@link #getUidImportance(int)}, but it only works on UIDs that currently
+     * have a service binding, or provider reference, to the calling UID, even if the target UID
+     * belong to another android user or profile.
+     *
+     * <p>This will return {@link RunningAppProcessInfo#IMPORTANCE_GONE} on all other UIDs,
+     * regardless of if they're valid or not.
+     *
+     * <p>Privileged system apps may prefer this API to {@link #getUidImportance(int)} to
+     * avoid requesting the permission {@link Manifest.permission#PACKAGE_USAGE_STATS}, which
+     * would allow access to APIs that return more senstive information.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_GET_BINDING_UID_IMPORTANCE)
+    @SystemApi
+    @RequiresPermission(Manifest.permission.GET_BINDING_UID_IMPORTANCE)
+    public @RunningAppProcessInfo.Importance int getBindingUidImportance(int uid) {
+        try {
+            int procState = getService().getBindingUidProcessState(uid,
                     mContext.getOpPackageName());
             return RunningAppProcessInfo.procStateToImportanceForClient(procState, mContext);
         } catch (RemoteException e) {

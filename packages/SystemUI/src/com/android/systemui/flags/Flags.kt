@@ -68,9 +68,6 @@ object Flags {
             "notification_drag_to_contents"
         )
 
-    // TODO(b/254512538): Tracking Bug
-    val INSTANT_VOICE_REPLY = unreleasedFlag("instant_voice_reply")
-
     /**
      * This flag controls whether we register a listener for StatsD notification memory reports.
      * For statsd to actually call the listener however, a server-side toggle needs to be
@@ -394,7 +391,7 @@ object Flags {
     @JvmField val SIGNAL_CALLBACK_DEPRECATION = releasedFlag("signal_callback_deprecation")
 
     // TODO(b/301610137): Tracking bug
-    @JvmField val NEW_NETWORK_SLICE_UI = unreleasedFlag("new_network_slice_ui", teamfood = true)
+    @JvmField val NEW_NETWORK_SLICE_UI = releasedFlag("new_network_slice_ui")
 
     // TODO(b/308138154): Tracking bug
     val FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS =
@@ -790,11 +787,7 @@ object Flags {
 
     /** Enable the share wifi button in Quick Settings internet dialog. */
     @JvmField
-    val SHARE_WIFI_QS_BUTTON = unreleasedFlag("share_wifi_qs_button", teamfood = true)
-
-    /** Enable haptic slider component in the brightness slider */
-    @JvmField
-    val HAPTIC_BRIGHTNESS_SLIDER = unreleasedFlag("haptic_brightness_slider", teamfood = true)
+    val SHARE_WIFI_QS_BUTTON = releasedFlag("share_wifi_qs_button")
 
     // TODO(b/287205379): Tracking bug
     @JvmField
@@ -802,7 +795,7 @@ object Flags {
 
     /** Enable showing a dialog when clicking on Quick Settings bluetooth tile. */
     @JvmField
-    val BLUETOOTH_QS_TILE_DIALOG = unreleasedFlag("bluetooth_qs_tile_dialog", teamfood = true)
+    val BLUETOOTH_QS_TILE_DIALOG = unreleasedFlag("bluetooth_qs_tile_dialog")
 
     // TODO(b/300995746): Tracking Bug
     /** A resource flag for whether the communal service is enabled. */

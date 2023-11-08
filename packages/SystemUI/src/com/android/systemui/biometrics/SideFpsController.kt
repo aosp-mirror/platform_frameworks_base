@@ -91,7 +91,8 @@ constructor(
     @Main private val handler: Handler,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     @Application private val scope: CoroutineScope,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    fpsUnlockTracker: FpsUnlockTracker
 ) : Dumpable {
     private val requests: HashSet<SideFpsUiRequestSource> = HashSet()
 
@@ -167,6 +168,7 @@ constructor(
             }
 
     init {
+        fpsUnlockTracker.startTracking()
         fingerprintManager?.setSidefpsController(
             object : ISidefpsController.Stub() {
                 override fun show(
