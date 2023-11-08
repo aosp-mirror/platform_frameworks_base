@@ -2122,8 +2122,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         // actions.
         TaskFragmentOrganizerToken organizerToken = creationParams.getOrganizer();
         taskFragment.setTaskFragmentOrganizer(organizerToken,
-                ownerActivity.getUid(), ownerActivity.info.processName,
-                mTaskFragmentOrganizerController.isSystemOrganizer(organizerToken.asBinder()));
+                ownerActivity.getUid(), ownerActivity.info.processName);
         final int position;
         if (creationParams.getPairedPrimaryFragmentToken() != null) {
             // When there is a paired primary TaskFragment, we want to place the new TaskFragment

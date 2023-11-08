@@ -274,11 +274,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     boolean mClearedForReorderActivityToFront;
 
     /**
-     * Whether the TaskFragment surface is managed by a system {@link TaskFragmentOrganizer}.
-     */
-    boolean mIsSurfaceManagedBySystemOrganizer = false;
-
-    /**
      * When we are in the process of pausing an activity, before starting the
      * next one, this variable holds the activity that is currently being paused.
      *
@@ -453,21 +448,13 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     void setTaskFragmentOrganizer(@NonNull TaskFragmentOrganizerToken organizer, int uid,
             @NonNull String processName) {
-        setTaskFragmentOrganizer(organizer, uid, processName,
-                false /* isSurfaceManagedBySystemOrganizer */);
-    }
-
-    void setTaskFragmentOrganizer(@NonNull TaskFragmentOrganizerToken organizer, int uid,
-            @NonNull String processName, boolean isSurfaceManagedBySystemOrganizer) {
         mTaskFragmentOrganizer = ITaskFragmentOrganizer.Stub.asInterface(organizer.asBinder());
         mTaskFragmentOrganizerUid = uid;
         mTaskFragmentOrganizerProcessName = processName;
-        mIsSurfaceManagedBySystemOrganizer = isSurfaceManagedBySystemOrganizer;
     }
 
     void onTaskFragmentOrganizerRemoved() {
         mTaskFragmentOrganizer = null;
-        mIsSurfaceManagedBySystemOrganizer = false;
     }
 
     /** Whether this TaskFragment is organized by the given {@code organizer}. */
@@ -2452,9 +2439,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
      */
     void updateOrganizedTaskFragmentSurface() {
         if (mDelayOrganizedTaskFragmentSurfaceUpdate || mTaskFragmentOrganizer == null) {
-            return;
-        }
-        if (mIsSurfaceManagedBySystemOrganizer) {
             return;
         }
         if (mTransitionController.isShellTransitionsEnabled()
