@@ -69,6 +69,14 @@ flag {
 }
 
 flag {
+    name: "device_entry_udfps_refactor"
+    namespace: "systemui"
+    description: "Refactoring device entry UDFPS icon to use modern architecture and "
+        "consolidating it with the lock/unlock icon to create a combined DeviceEntryIconView"
+    bug: "279440316"
+}
+
+flag {
     name: "visual_interruptions_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the code to decide when notifications "
