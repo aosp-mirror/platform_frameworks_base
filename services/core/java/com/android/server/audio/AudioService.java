@@ -2900,7 +2900,7 @@ public class AudioService extends IAudioService.Stub
     // IPC methods
     ///////////////////////////////////////////////////////////////////////////
     /**
-     * @see AudioManager#setPreferredDevicesForStrategy(AudioProductStrategy, AudioDeviceAttributes)
+     * @see AudioManager#setPreferredDeviceForStrategy(AudioProductStrategy, AudioDeviceAttributes)
      * @see AudioManager#setPreferredDevicesForStrategy(AudioProductStrategy,
      *                                                  List<AudioDeviceAttributes>)
      */
