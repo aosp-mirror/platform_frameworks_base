@@ -22,6 +22,7 @@ import android.hardware.power.stats.EnergyConsumerType;
 import android.os.BatteryConsumer;
 import android.os.Handler;
 import android.os.PersistableBundle;
+import android.os.Process;
 import android.power.PowerStatsInternal;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -67,6 +68,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private final CpuScalingPolicies mCpuScalingPolicies;
     private final PowerProfile mPowerProfile;
     private final KernelCpuStatsReader mKernelCpuStatsReader;
+    private final PowerStatsUidResolver mUidResolver;
     private final Supplier<PowerStatsInternal> mPowerStatsSupplier;
     private final IntSupplier mVoltageSupplier;
     private final int mDefaultCpuPowerBrackets;
@@ -247,27 +249,28 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     }
 
     public CpuPowerStatsCollector(CpuScalingPolicies cpuScalingPolicies, PowerProfile powerProfile,
-            IntSupplier voltageSupplier, Handler handler, long throttlePeriodMs) {
-        this(cpuScalingPolicies, powerProfile, handler, new KernelCpuStatsReader(),
+            PowerStatsUidResolver uidResolver, IntSupplier voltageSupplier, Handler handler,
+            long throttlePeriodMs) {
+        this(cpuScalingPolicies, powerProfile, handler, new KernelCpuStatsReader(), uidResolver,
                 () -> LocalServices.getService(PowerStatsInternal.class), voltageSupplier,
                 throttlePeriodMs, Clock.SYSTEM_CLOCK, DEFAULT_CPU_POWER_BRACKETS,
                 DEFAULT_CPU_POWER_BRACKETS_PER_ENERGY_CONSUMER);
     }
 
     public CpuPowerStatsCollector(CpuScalingPolicies cpuScalingPolicies, PowerProfile powerProfile,
-                                  Handler handler, KernelCpuStatsReader kernelCpuStatsReader,
-            Supplier<PowerStatsInternal> powerStatsSupplier,
+            Handler handler, KernelCpuStatsReader kernelCpuStatsReader,
+            PowerStatsUidResolver uidResolver, Supplier<PowerStatsInternal> powerStatsSupplier,
             IntSupplier voltageSupplier, long throttlePeriodMs, Clock clock,
             int defaultCpuPowerBrackets, int defaultCpuPowerBracketsPerEnergyConsumer) {
         super(handler, throttlePeriodMs, clock);
         mCpuScalingPolicies = cpuScalingPolicies;
         mPowerProfile = powerProfile;
         mKernelCpuStatsReader = kernelCpuStatsReader;
+        mUidResolver = uidResolver;
         mPowerStatsSupplier = powerStatsSupplier;
         mVoltageSupplier = voltageSupplier;
         mDefaultCpuPowerBrackets = defaultCpuPowerBrackets;
         mDefaultCpuPowerBracketsPerEnergyConsumer = defaultCpuPowerBracketsPerEnergyConsumer;
-
     }
 
     /**
@@ -638,7 +641,21 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
             uidStats.timeByPowerBracket[bracket] = timeByPowerBracket[bracket];
         }
         if (nonzero) {
-            mCpuPowerStats.uidStats.put(uid, uidStats.stats);
+            int ownerUid;
+            if (Process.isSdkSandboxUid(uid)) {
+                ownerUid = Process.getAppUidForSdkSandboxUid(uid);
+            } else {
+                ownerUid = mUidResolver.mapUid(uid);
+            }
+
+            long[] ownerStats = mCpuPowerStats.uidStats.get(ownerUid);
+            if (ownerStats == null) {
+                mCpuPowerStats.uidStats.put(ownerUid, uidStats.stats);
+            } else {
+                for (int i = 0; i < ownerStats.length; i++) {
+                    ownerStats[i] += uidStats.stats[i];
+                }
+            }
         }
     }
 

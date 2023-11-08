@@ -128,6 +128,7 @@ import com.android.server.power.stats.PowerStatsAggregator;
 import com.android.server.power.stats.PowerStatsExporter;
 import com.android.server.power.stats.PowerStatsScheduler;
 import com.android.server.power.stats.PowerStatsStore;
+import com.android.server.power.stats.PowerStatsUidResolver;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 import com.android.server.power.stats.wakeups.CpuWakeupStats;
 
@@ -184,6 +185,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private final BatteryUsageStatsProvider mBatteryUsageStatsProvider;
     private final AtomicFile mConfigFile;
     private final BatteryStats.BatteryStatsDumpHelper mDumpHelper;
+    private final PowerStatsUidResolver mPowerStatsUidResolver;
 
     private volatile boolean mMonitorEnabled = true;
 
@@ -411,9 +413,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                         .setResetOnUnplugAfterSignificantCharge(resetOnUnplugAfterSignificantCharge)
                         .setPowerStatsThrottlePeriodCpu(powerStatsThrottlePeriodCpu)
                         .build();
+        mPowerStatsUidResolver = new PowerStatsUidResolver();
         mStats = new BatteryStatsImpl(mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
                 systemDir, handler, this, this, mUserManagerUserInfoProvider, mPowerProfile,
-                mCpuScalingPolicies);
+                mCpuScalingPolicies, mPowerStatsUidResolver);
         mWorker = new BatteryExternalStatsWorker(context, mStats);
         mStats.setExternalStatsSyncLocked(mWorker);
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
@@ -784,25 +787,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     void addIsolatedUid(final int isolatedUid, final int appUid) {
-        synchronized (mLock) {
-            final long elapsedRealtime = SystemClock.elapsedRealtime();
-            final long uptime = SystemClock.uptimeMillis();
-            mHandler.post(() -> {
-                synchronized (mStats) {
-                    mStats.addIsolatedUidLocked(isolatedUid, appUid, elapsedRealtime, uptime);
-                }
-            });
-        }
+        mPowerStatsUidResolver.noteIsolatedUidAdded(isolatedUid, appUid);
+        FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, appUid, isolatedUid,
+                FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
     }
 
     void removeIsolatedUid(final int isolatedUid, final int appUid) {
-        synchronized (mLock) {
-            mHandler.post(() -> {
-                synchronized (mStats) {
-                    mStats.scheduleRemoveIsolatedUidLocked(isolatedUid, appUid);
-                }
-            });
-        }
+        mPowerStatsUidResolver.noteIsolatedUidRemoved(isolatedUid, appUid);
+        FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, -1, isolatedUid,
+                FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__REMOVED);
     }
 
     void noteProcessStart(final String name, final int uid) {
@@ -3020,7 +3013,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                         mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
                                         null, mStats.mHandler, null, null,
                                         mUserManagerUserInfoProvider, mPowerProfile,
-                                        mCpuScalingPolicies);
+                                        mCpuScalingPolicies, null);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
                                 checkinStats.dumpProtoLocked(mContext, fd, apps, flags,
@@ -3062,7 +3055,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                         mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
                                         null, mStats.mHandler, null, null,
                                         mUserManagerUserInfoProvider, mPowerProfile,
-                                        mCpuScalingPolicies);
+                                        mCpuScalingPolicies, null);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
                                 checkinStats.dumpCheckin(mContext, pw, apps, flags,

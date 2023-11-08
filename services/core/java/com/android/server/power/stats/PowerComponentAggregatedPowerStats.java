@@ -175,7 +175,6 @@ class PowerComponentAggregatedPowerStats {
     }
 
     private UidStats getUidStats(int uid) {
-        // TODO(b/292247660): map isolated and sandbox UIDs
         UidStats uidStats = mUidStats.get(uid);
         if (uidStats == null) {
             uidStats = new UidStats();

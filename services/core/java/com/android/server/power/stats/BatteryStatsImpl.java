@@ -779,13 +779,10 @@ public class BatteryStatsImpl extends BatteryStats {
     private BatteryCallback mCallback;
 
     /**
-     * Mapping isolated uids to the actual owning app uid.
+     * Mapping child uids to their parent uid.
      */
-    private final SparseIntArray mIsolatedUids = new SparseIntArray();
-    /**
-     * Internal reference count of isolated uids.
-     */
-    private final SparseIntArray mIsolatedUidRefCounts = new SparseIntArray();
+    @VisibleForTesting
+    protected final PowerStatsUidResolver mPowerStatsUidResolver;
 
     /**
      * The statistics we have collected organized by uids.
@@ -1718,10 +1715,12 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     @VisibleForTesting
-    public BatteryStatsImpl(Clock clock, File historyDirectory) {
+    public BatteryStatsImpl(Clock clock, File historyDirectory, @NonNull Handler handler,
+            @NonNull PowerStatsUidResolver powerStatsUidResolver) {
         init(clock);
         mBatteryStatsConfig = new BatteryStatsConfig.Builder().build();
-        mHandler = null;
+        mHandler = handler;
+        mPowerStatsUidResolver = powerStatsUidResolver;
         mConstants = new Constants(mHandler);
         mStartClockTimeMs = clock.currentTimeMillis();
         mDailyFile = null;
@@ -4271,92 +4270,51 @@ public class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    @GuardedBy("this")
-    public void addIsolatedUidLocked(int isolatedUid, int appUid) {
-        addIsolatedUidLocked(isolatedUid, appUid,
-                mClock.elapsedRealtime(), mClock.uptimeMillis());
+    private void onIsolatedUidAdded(int isolatedUid, int parentUid) {
+        long realtime = mClock.elapsedRealtime();
+        long uptime = mClock.uptimeMillis();
+        synchronized (this) {
+            getUidStatsLocked(parentUid, realtime, uptime).addIsolatedUid(isolatedUid);
+        }
     }
 
-    @GuardedBy("this")
-    @SuppressWarnings("GuardedBy")   // errorprone false positive on u.addIsolatedUid
-    public void addIsolatedUidLocked(int isolatedUid, int appUid,
-            long elapsedRealtimeMs, long uptimeMs) {
-        mIsolatedUids.put(isolatedUid, appUid);
-        mIsolatedUidRefCounts.put(isolatedUid, 1);
-        final Uid u = getUidStatsLocked(appUid, elapsedRealtimeMs, uptimeMs);
-        u.addIsolatedUid(isolatedUid);
+    private void onBeforeIsolatedUidRemoved(int isolatedUid, int parentUid) {
+        long realtime = mClock.elapsedRealtime();
+        mPowerStatsUidResolver.retainIsolatedUid(isolatedUid);
+        synchronized (this) {
+            mPendingRemovedUids.add(new UidToRemove(isolatedUid, realtime));
+        }
+        if (mExternalSync != null) {
+            mExternalSync.scheduleCpuSyncDueToRemovedUid(isolatedUid);
+        }
     }
 
-    /**
-     * Schedules a read of the latest cpu times before removing the isolated UID.
-     * @see #removeIsolatedUidLocked(int, int, int)
-     */
-    public void scheduleRemoveIsolatedUidLocked(int isolatedUid, int appUid) {
-        int curUid = mIsolatedUids.get(isolatedUid, -1);
-        if (curUid == appUid) {
-            if (mExternalSync != null) {
-                mExternalSync.scheduleCpuSyncDueToRemovedUid(isolatedUid);
-            }
+    private void onAfterIsolatedUidRemoved(int isolatedUid, int parentUid) {
+        long realtime = mClock.elapsedRealtime();
+        long uptime = mClock.uptimeMillis();
+        synchronized (this) {
+            getUidStatsLocked(parentUid, realtime, uptime).removeIsolatedUid(isolatedUid);
         }
     }
 
     /**
      * Isolated uid should only be removed after all wakelocks associated with the uid are stopped
      * and the cpu time-in-state has been read one last time for the uid.
-     *
-     * @see #scheduleRemoveIsolatedUidLocked(int, int)
-     *
-     * @return true if the isolated uid is actually removed.
      */
     @GuardedBy("this")
-    public boolean maybeRemoveIsolatedUidLocked(int isolatedUid, long elapsedRealtimeMs,
-            long uptimeMs) {
-        final int refCount = mIsolatedUidRefCounts.get(isolatedUid, 0) - 1;
-        if (refCount > 0) {
-            // Isolated uid is still being tracked
-            mIsolatedUidRefCounts.put(isolatedUid, refCount);
-            return false;
-        }
-
-        final int idx = mIsolatedUids.indexOfKey(isolatedUid);
-        if (idx >= 0) {
-            final int ownerUid = mIsolatedUids.valueAt(idx);
-            final Uid u = getUidStatsLocked(ownerUid, elapsedRealtimeMs, uptimeMs);
-            u.removeIsolatedUid(isolatedUid);
-            mIsolatedUids.removeAt(idx);
-            mIsolatedUidRefCounts.delete(isolatedUid);
-        } else {
-            Slog.w(TAG, "Attempted to remove untracked isolated uid (" + isolatedUid + ")");
-        }
-        mPendingRemovedUids.add(new UidToRemove(isolatedUid, elapsedRealtimeMs));
-
-        return true;
-    }
-
-    /**
-     * Increment the ref count for an isolated uid.
-     * call #maybeRemoveIsolatedUidLocked to decrement.
-     */
-    public void incrementIsolatedUidRefCount(int uid) {
-        final int refCount = mIsolatedUidRefCounts.get(uid, 0);
-        if (refCount <= 0) {
-            // Uid is not mapped or referenced
-            Slog.w(TAG,
-                    "Attempted to increment ref counted of untracked isolated uid (" + uid + ")");
-            return;
-        }
-        mIsolatedUidRefCounts.put(uid, refCount + 1);
+    public void releaseIsolatedUidLocked(int isolatedUid, long elapsedRealtimeMs, long uptimeMs) {
+        mPowerStatsUidResolver.releaseIsolatedUid(isolatedUid);
     }
 
     private int mapUid(int uid) {
         if (Process.isSdkSandboxUid(uid)) {
             return Process.getAppUidForSdkSandboxUid(uid);
         }
-        return mapIsolatedUid(uid);
+        return mPowerStatsUidResolver.mapUid(uid);
     }
 
     private int mapIsolatedUid(int uid) {
-        return mIsolatedUids.get(/*key=*/uid, /*valueIfKeyNotFound=*/uid);
+        return mPowerStatsUidResolver.mapUid(uid);
     }
 
     @GuardedBy("this")
@@ -4738,7 +4696,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mappedUid != uid) {
                 // Prevent the isolated uid mapping from being removed while the wakelock is
                 // being held.
-                incrementIsolatedUidRefCount(uid);
+                mPowerStatsUidResolver.retainIsolatedUid(uid);
             }
             if (mOnBatteryScreenOffTimeBase.isRunning()) {
                 // We only update the cpu time when a wake lock is acquired if the screen is off.
@@ -4818,7 +4776,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
             if (mappedUid != uid) {
                 // Decrement the ref count for the isolated uid and delete the mapping if uneeded.
-                maybeRemoveIsolatedUidLocked(uid, elapsedRealtimeMs, uptimeMs);
+                releaseIsolatedUidLocked(uid, elapsedRealtimeMs, uptimeMs);
             }
         }
     }
@@ -4989,7 +4947,7 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mappedUid != uid) {
             // Prevent the isolated uid mapping from being removed while the wakelock is
             // being held.
-            incrementIsolatedUidRefCount(uid);
+            mPowerStatsUidResolver.retainIsolatedUid(uid);
         }
     }
 
@@ -5041,7 +4999,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 historyName, mappedUid);
         if (mappedUid != uid) {
             // Decrement the ref count for the isolated uid and delete the mapping if uneeded.
-            maybeRemoveIsolatedUidLocked(uid, elapsedRealtimeMs, uptimeMs);
+            releaseIsolatedUidLocked(uid, elapsedRealtimeMs, uptimeMs);
         }
     }
 
@@ -8208,7 +8166,9 @@ public class BatteryStatsImpl extends BatteryStats {
             return mProportionalSystemServiceUsage;
         }
 
-        @GuardedBy("mBsi")
+        /**
+         * Adds isolated UID to the list of children.
+         */
         public void addIsolatedUid(int isolatedUid) {
             if (mChildUids == null) {
                 mChildUids = new SparseArray<>();
@@ -8218,6 +8178,9 @@ public class BatteryStatsImpl extends BatteryStats {
             mChildUids.put(isolatedUid, new ChildUid());
         }
 
+        /**
+         * Removes isolated UID from the list of children.
+         */
         public void removeIsolatedUid(int isolatedUid) {
             final int idx = mChildUids == null ? -1 : mChildUids.indexOfKey(isolatedUid);
             if (idx < 0) {
@@ -10921,7 +10884,8 @@ public class BatteryStatsImpl extends BatteryStats {
             @NonNull Handler handler, @Nullable PlatformIdleStateCallback cb,
             @Nullable EnergyStatsRetriever energyStatsCb,
             @NonNull UserInfoProvider userInfoProvider, @NonNull PowerProfile powerProfile,
-            @NonNull CpuScalingPolicies cpuScalingPolicies) {
+            @NonNull CpuScalingPolicies cpuScalingPolicies,
+            @NonNull PowerStatsUidResolver powerStatsUidResolver) {
         init(clock);
 
         mBatteryStatsConfig = config;
@@ -10931,6 +10895,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         mPowerProfile = powerProfile;
         mCpuScalingPolicies = cpuScalingPolicies;
+        mPowerStatsUidResolver = powerStatsUidResolver;
 
         initPowerProfile();
 
@@ -10949,7 +10914,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         mCpuPowerStatsCollector = new CpuPowerStatsCollector(mCpuScalingPolicies, mPowerProfile,
-                () -> mBatteryVoltageMv, mHandler,
+                mPowerStatsUidResolver, () -> mBatteryVoltageMv, mHandler,
                 mBatteryStatsConfig.getPowerStatsThrottlePeriodCpu());
         mCpuPowerStatsCollector.addConsumer(this::recordPowerStats);
 
@@ -10965,6 +10930,23 @@ public class BatteryStatsImpl extends BatteryStats {
         mPlatformIdleStateCallback = cb;
         mEnergyConsumerRetriever = energyStatsCb;
         mUserInfoProvider = userInfoProvider;
+
+        mPowerStatsUidResolver.addListener(new PowerStatsUidResolver.Listener() {
+            @Override
+            public void onIsolatedUidAdded(int isolatedUid, int parentUid) {
+                BatteryStatsImpl.this.onIsolatedUidAdded(isolatedUid, parentUid);
+            }
+
+            @Override
+            public void onBeforeIsolatedUidRemoved(int isolatedUid, int parentUid) {
+                BatteryStatsImpl.this.onBeforeIsolatedUidRemoved(isolatedUid, parentUid);
+            }
+
+            @Override
+            public void onAfterIsolatedUidRemoved(int isolatedUid, int parentUid) {
+                BatteryStatsImpl.this.onAfterIsolatedUidRemoved(isolatedUid, parentUid);
+            }
+        });
 
         // Notify statsd that the system is initially not in doze.
         mDeviceIdleMode = DEVICE_IDLE_MODE_OFF;
@@ -15182,6 +15164,7 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mKernelSingleUidTimeReader != null) {
                 mKernelSingleUidTimeReader.removeUidsInRange(startUid, endUid);
             }
+            mPowerStatsUidResolver.releaseUidsInRange(startUid, endUid);
             // Treat as one. We don't know how many uids there are in between.
             mNumUidsRemoved++;
         } else {
@@ -17049,15 +17032,7 @@ public class BatteryStatsImpl extends BatteryStats {
             pw.print("UIDs removed since the later of device start or stats reset: ");
             pw.println(mNumUidsRemoved);
 
-            pw.println("Currently mapped isolated uids:");
-            final int numIsolatedUids = mIsolatedUids.size();
-            for (int i = 0; i < numIsolatedUids; i++) {
-                final int isolatedUid = mIsolatedUids.keyAt(i);
-                final int ownerUid = mIsolatedUids.valueAt(i);
-                final int refCount = mIsolatedUidRefCounts.get(isolatedUid);
-                pw.println(
-                        "  " + isolatedUid + "->" + ownerUid + " (ref count = " + refCount + ")");
-            }
+            mPowerStatsUidResolver.dump(pw);
 
             pw.println();
             dumpConstantsLocked(pw);

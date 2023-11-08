@@ -65,7 +65,12 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     MockBatteryStatsImpl(Clock clock, File historyDirectory, Handler handler) {
-        super(clock, historyDirectory);
+        this(clock, historyDirectory, handler, new PowerStatsUidResolver());
+    }
+
+    MockBatteryStatsImpl(Clock clock, File historyDirectory, Handler handler,
+            PowerStatsUidResolver powerStatsUidResolver) {
+        super(clock, historyDirectory, handler, powerStatsUidResolver);
         initTimersAndCounters();
         setMaxHistoryBuffer(128 * 1024);
 

@@ -44,10 +44,7 @@ import android.util.SparseLongArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.power.EnergyConsumerStats;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
-
-import libcore.util.EmptyArray;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -126,9 +123,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
 
     @GuardedBy("this")
     private boolean mUseLatestStates = true;
-
-    @GuardedBy("this")
-    private final IntArray mUidsToRemove = new IntArray();
 
     @GuardedBy("this")
     private Future<?> mWakelockChangesUpdate;
@@ -260,7 +254,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
 
     @Override
     public synchronized Future<?> scheduleCpuSyncDueToRemovedUid(int uid) {
-        mUidsToRemove.add(uid);
         return scheduleSyncLocked("remove-uid", UPDATE_CPU);
     }
 
@@ -459,7 +452,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
             // Capture a snapshot of the state we are meant to process.
             final int updateFlags;
             final String reason;
-            final int[] uidsToRemove;
             final boolean onBattery;
             final boolean onBatteryScreenOff;
             final int screenState;
@@ -468,7 +460,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
             synchronized (BatteryExternalStatsWorker.this) {
                 updateFlags = mUpdateFlags;
                 reason = mCurrentReason;
-                uidsToRemove = mUidsToRemove.size() > 0 ? mUidsToRemove.toArray() : EmptyArray.INT;
                 onBattery = mOnBattery;
                 onBatteryScreenOff = mOnBatteryScreenOff;
                 screenState = mScreenState;
@@ -476,7 +467,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
                 useLatestStates = mUseLatestStates;
                 mUpdateFlags = 0;
                 mCurrentReason = null;
-                mUidsToRemove.clear();
                 mCurrentFuture = null;
                 mUseLatestStates = true;
                 if ((updateFlags & UPDATE_ALL) == UPDATE_ALL) {
@@ -512,12 +502,6 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
 
                 // Clean up any UIDs if necessary.
                 synchronized (mStats) {
-                    for (int uid : uidsToRemove) {
-                        FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, -1, uid,
-                                FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__REMOVED);
-                        mStats.maybeRemoveIsolatedUidLocked(uid, SystemClock.elapsedRealtime(),
-                                SystemClock.uptimeMillis());
-                    }
                     mStats.clearPendingRemovedUidsLocked();
                 }
             } catch (Exception e) {

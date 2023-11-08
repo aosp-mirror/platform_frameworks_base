@@ -19,6 +19,7 @@ package com.android.server.power.stats;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -56,12 +57,17 @@ import java.util.concurrent.TimeUnit;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class CpuPowerStatsCollectorTest {
+    private static final int ISOLATED_UID = 99123;
+    private static final int UID_1 = 42;
+    private static final int UID_2 = 99;
     private Context mContext;
     private final MockClock mMockClock = new MockClock();
     private final HandlerThread mHandlerThread = new HandlerThread("test");
     private Handler mHandler;
     private PowerStats mCollectedStats;
     private PowerProfile mPowerProfile;
+    @Mock
+    private PowerStatsUidResolver mUidResolver;
     @Mock
     private CpuPowerStatsCollector.KernelCpuStatsReader mMockKernelCpuStatsReader;
     @Mock
@@ -76,6 +82,14 @@ public class CpuPowerStatsCollectorTest {
         mHandlerThread.start();
         mHandler = mHandlerThread.getThreadHandler();
         when(mMockKernelCpuStatsReader.nativeIsSupportedFeature()).thenReturn(true);
+        when(mUidResolver.mapUid(anyInt())).thenAnswer(invocation -> {
+            int uid = invocation.getArgument(0);
+            if (uid == ISOLATED_UID) {
+                return UID_2;
+            } else {
+                return uid;
+            }
+        });
     }
 
     @Test
@@ -201,8 +215,9 @@ public class CpuPowerStatsCollectorTest {
 
         mockKernelCpuStats(new long[]{1111, 2222, 3333},
                 new SparseArray<>() {{
-                    put(42, new long[]{100, 200});
-                    put(99, new long[]{300, 600});
+                    put(UID_1, new long[]{100, 200});
+                    put(UID_2, new long[]{100, 150});
+                    put(ISOLATED_UID, new long[]{200, 450});
                 }}, 0, 1234);
 
         mMockClock.uptime = 1000;
@@ -219,19 +234,19 @@ public class CpuPowerStatsCollectorTest {
         assertThat(layout.getConsumedEnergy(mCollectedStats.stats, 0)).isEqualTo(0);
         assertThat(layout.getConsumedEnergy(mCollectedStats.stats, 1)).isEqualTo(0);
 
-        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(42), 0))
+        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_1), 0))
                 .isEqualTo(100);
-        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(42), 1))
+        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_1), 1))
                 .isEqualTo(200);
-        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(99), 0))
+        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_2), 0))
                 .isEqualTo(300);
-        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(99), 1))
+        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_2), 1))
                 .isEqualTo(600);
 
         mockKernelCpuStats(new long[]{5555, 4444, 3333},
                 new SparseArray<>() {{
-                    put(42, new long[]{123, 234});
-                    put(99, new long[]{345, 678});
+                    put(UID_1, new long[]{123, 234});
+                    put(ISOLATED_UID, new long[]{245, 528});
                 }}, 1234, 3421);
 
         mMockClock.uptime = 2000;
@@ -249,13 +264,13 @@ public class CpuPowerStatsCollectorTest {
         // 700 * 1000 / 3500
         assertThat(layout.getConsumedEnergy(mCollectedStats.stats, 1)).isEqualTo(200);
 
-        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(42), 0))
+        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_1), 0))
                 .isEqualTo(23);
-        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(42), 1))
+        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_1), 1))
                 .isEqualTo(34);
-        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(99), 0))
+        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_2), 0))
                 .isEqualTo(45);
-        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(99), 1))
+        assertThat(layout.getUidTimeByPowerBracket(mCollectedStats.uidStats.get(UID_2), 1))
                 .isEqualTo(78);
     }
 
@@ -282,9 +297,9 @@ public class CpuPowerStatsCollectorTest {
     private CpuPowerStatsCollector createCollector(int defaultCpuPowerBrackets,
             int defaultCpuPowerBracketsPerEnergyConsumer) {
         CpuPowerStatsCollector collector = new CpuPowerStatsCollector(mCpuScalingPolicies,
-                mPowerProfile, mHandler, mMockKernelCpuStatsReader, () -> mPowerStatsInternal,
-                () -> 3500, 60_000, mMockClock, defaultCpuPowerBrackets,
-                defaultCpuPowerBracketsPerEnergyConsumer);
+                mPowerProfile, mHandler, mMockKernelCpuStatsReader, mUidResolver,
+                () -> mPowerStatsInternal, () -> 3500, 60_000, mMockClock,
+                defaultCpuPowerBrackets, defaultCpuPowerBracketsPerEnergyConsumer);
         collector.addConsumer(stats -> mCollectedStats = stats);
         collector.setEnabled(true);
         return collector;
