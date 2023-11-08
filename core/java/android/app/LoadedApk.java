@@ -342,7 +342,9 @@ public final class LoadedApk {
      */
     public void updateApplicationInfo(@NonNull ApplicationInfo aInfo,
             @Nullable List<String> oldPaths) {
-        setApplicationInfo(aInfo);
+        if (!setApplicationInfo(aInfo)) {
+            return;
+        }
 
         final List<String> newPaths = new ArrayList<>();
         makePaths(mActivityThread, aInfo, newPaths);
@@ -387,7 +389,13 @@ public final class LoadedApk {
         mAppComponentFactory = createAppFactory(aInfo, mDefaultClassLoader);
     }
 
-    private void setApplicationInfo(ApplicationInfo aInfo) {
+    private boolean setApplicationInfo(ApplicationInfo aInfo) {
+        if (mApplicationInfo != null && mApplicationInfo.createTimestamp > aInfo.createTimestamp) {
+            Slog.w(TAG, "New application info for package " + aInfo.packageName
+                    + " is out of date with TS " + aInfo.createTimestamp + " < the current TS "
+                    + mApplicationInfo.createTimestamp);
+            return false;
+        }
         final int myUid = Process.myUid();
         aInfo = adjustNativeLibraryPaths(aInfo);
         mApplicationInfo = aInfo;
@@ -410,6 +418,7 @@ public final class LoadedApk {
         if (aInfo.requestsIsolatedSplitLoading() && !ArrayUtils.isEmpty(mSplitNames)) {
             mSplitLoader = new SplitDependencyLoaderImpl(aInfo.splitDependencies);
         }
+        return true;
     }
 
     void setSdkSandboxStorage(@Nullable String sdkSandboxClientAppVolumeUuid,
