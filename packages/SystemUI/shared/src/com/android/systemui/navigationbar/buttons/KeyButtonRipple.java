@@ -28,6 +28,7 @@ import android.graphics.PixelFormat;
 import android.graphics.RecordingCanvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Trace;
 import android.view.RenderNodeAnimator;
 import android.view.View;
@@ -48,6 +49,7 @@ public class KeyButtonRipple extends Drawable {
     private static final float GLOW_MAX_ALPHA_DARK = 0.1f;
     private static final int ANIMATION_DURATION_SCALE = 350;
     private static final int ANIMATION_DURATION_FADE = 450;
+    private static final int ANIMATION_DURATION_FADE_FAST = 80;
     private static final Interpolator ALPHA_OUT_INTERPOLATOR =
             new PathInterpolator(0f, 0f, 0.8f, 1f);
 
@@ -71,6 +73,9 @@ public class KeyButtonRipple extends Drawable {
     private boolean mLastDark;
     private boolean mDark;
     private boolean mDelayTouchFeedback;
+    private boolean mSpeedUpNextFade;
+    // When non-null, this runs the next time this ripple is drawn invisibly.
+    private Runnable mOnInvisibleRunnable;
 
     private final Interpolator mInterpolator = new LogInterpolator();
     private boolean mSupportHardware;
@@ -110,6 +115,18 @@ public class KeyButtonRipple extends Drawable {
 
     public void setDelayTouchFeedback(boolean delay) {
         mDelayTouchFeedback = delay;
+    }
+
+    /** Next time we fade out (pressed==false), use a shorter duration than the standard. */
+    public void speedUpNextFade() {
+        mSpeedUpNextFade = true;
+    }
+
+    /**
+     *  @param onInvisibleRunnable run after we are next drawn invisibly. Only used once.
+     */
+    void setOnInvisibleRunnable(Runnable onInvisibleRunnable) {
+        mOnInvisibleRunnable = onInvisibleRunnable;
     }
 
     public void setType(Type type) {
@@ -160,6 +177,11 @@ public class KeyButtonRipple extends Drawable {
             drawHardware((RecordingCanvas) canvas);
         } else {
             drawSoftware(canvas);
+        }
+
+        if (!mPressed && !mVisible && mOnInvisibleRunnable != null) {
+            new Handler(Looper.getMainLooper()).post(mOnInvisibleRunnable);
+            mOnInvisibleRunnable = null;
         }
     }
 
@@ -270,7 +292,7 @@ public class KeyButtonRipple extends Drawable {
         return true;
     }
 
-    public void setPressed(boolean pressed) {
+    private void setPressed(boolean pressed) {
         if (mDark != mLastDark && pressed) {
             mRipplePaint = null;
             mLastDark = mDark;
@@ -350,7 +372,7 @@ public class KeyButtonRipple extends Drawable {
     private void exitSoftware() {
         ObjectAnimator alphaAnimator = ObjectAnimator.ofFloat(this, "glowAlpha", mGlowAlpha, 0f);
         alphaAnimator.setInterpolator(ALPHA_OUT_INTERPOLATOR);
-        alphaAnimator.setDuration(ANIMATION_DURATION_FADE);
+        alphaAnimator.setDuration(getFadeDuration());
         alphaAnimator.addListener(mAnimatorListener);
         alphaAnimator.start();
         mRunningAnimations.add(alphaAnimator);
@@ -414,6 +436,12 @@ public class KeyButtonRipple extends Drawable {
         return Math.min(size, mMaxWidth);
     }
 
+    private int getFadeDuration() {
+        int duration = mSpeedUpNextFade ? ANIMATION_DURATION_FADE_FAST : ANIMATION_DURATION_FADE;
+        mSpeedUpNextFade = false;
+        return duration;
+    }
+
     private void enterHardware() {
         endAnimations("enterHardware", true /* cancel */);
         mVisible = true;
@@ -471,7 +499,7 @@ public class KeyButtonRipple extends Drawable {
         mPaintProp = CanvasProperty.createPaint(getRipplePaint());
         final RenderNodeAnimator opacityAnim = new RenderNodeAnimator(mPaintProp,
                 RenderNodeAnimator.PAINT_ALPHA, 0);
-        opacityAnim.setDuration(ANIMATION_DURATION_FADE);
+        opacityAnim.setDuration(getFadeDuration());
         opacityAnim.setInterpolator(ALPHA_OUT_INTERPOLATOR);
         opacityAnim.addListener(mAnimatorListener);
         opacityAnim.addListener(mExitHwTraceAnimator);

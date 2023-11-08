@@ -58,8 +58,9 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
-import com.android.systemui.res.R;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.system.QuickStepContract;
 
 public class KeyButtonView extends ImageView implements ButtonInterface {
@@ -439,9 +440,20 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         if (mCode != KeyEvent.KEYCODE_UNKNOWN) {
             sendEvent(KeyEvent.ACTION_UP, KeyEvent.FLAG_CANCELED);
         }
+        // When aborting long-press home and Launcher has requested to override it, fade out the
+        // ripple more quickly.
+        if (mCode == KeyEvent.KEYCODE_HOME && Dependency.get(AssistManager.class)
+                .shouldOverrideAssist(AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS)) {
+            mRipple.speedUpNextFade();
+        }
         setPressed(false);
         mRipple.abortDelayedRipple();
         mGestureAborted = true;
+    }
+
+    /** Run when the ripple for this button is next invisible. Only used once. */
+    public void setOnRippleInvisibleRunnable(Runnable onRippleInvisibleRunnable) {
+        mRipple.setOnInvisibleRunnable(onRippleInvisibleRunnable);
     }
 
     @Override
