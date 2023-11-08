@@ -195,6 +195,8 @@ public class ActivityRecordTests extends WindowTestsBase {
         setBooted(mAtm);
         // Because the booted state is set, avoid starting real home if there is no task.
         doReturn(false).when(mRootWindowContainer).resumeHomeActivity(any(), anyString(), any());
+        // Do not execute the transaction, because we can't verify the parameter after it recycles.
+        doNothing().when(mClientLifecycleManager).scheduleTransaction(any());
     }
 
     private TestStartingWindowOrganizer registerTestStartingWindowOrganizer() {
@@ -262,7 +264,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 pauseFound.value = true;
             }
             return null;
-        }).when(activity.app.getThread()).scheduleTransaction(any());
+        }).when(mClientLifecycleManager).scheduleTransaction(any());
 
         activity.setState(STOPPED, "testPausingWhenVisibleFromStopped");
 
@@ -477,7 +479,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .build();
         final Task task = activity.getTask();
         activity.setState(DESTROYED, "Testing");
-        clearInvocations(mAtm.getLifecycleManager());
+        clearInvocations(mClientLifecycleManager);
 
         final Configuration newConfig = new Configuration(task.getConfiguration());
         newConfig.orientation = newConfig.orientation == ORIENTATION_PORTRAIT
@@ -487,7 +489,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         ensureActivityConfiguration(activity);
 
-        verify(mAtm.getLifecycleManager(), never())
+        verify(mClientLifecycleManager, never())
                 .scheduleTransaction(any(), isA(ActivityConfigurationChangeItem.class));
     }
 
@@ -500,7 +502,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // test properly.
         activity.finishRelaunching();
         // Clear out any calls to scheduleTransaction from launching the activity.
-        reset(mAtm.getLifecycleManager());
+        reset(mClientLifecycleManager);
 
         final Task task = activity.getTask();
         activity.setState(RESUMED, "Testing");
@@ -517,7 +519,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // The configuration change is still sent to the activity, even if it doesn't relaunch.
         final ActivityConfigurationChangeItem expected =
                 ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
-        verify(mAtm.getLifecycleManager()).scheduleTransaction(
+        verify(mClientLifecycleManager).scheduleTransaction(
                 eq(activity.app.getThread()), eq(expected));
     }
 
@@ -558,19 +560,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.setLastReportedConfiguration(new MergedConfiguration(new Configuration(),
                 activity.getConfiguration()));
 
-        clearInvocations(mAtm.getLifecycleManager());
-        final Configuration newConfig = new Configuration(activity.getConfiguration());
-        final int shortSide = Math.min(newConfig.screenWidthDp, newConfig.screenHeightDp);
-        final int longSide = Math.max(newConfig.screenWidthDp, newConfig.screenHeightDp);
-        if (newConfig.orientation == ORIENTATION_PORTRAIT) {
-            newConfig.orientation = ORIENTATION_LANDSCAPE;
-            newConfig.screenWidthDp = longSide;
-            newConfig.screenHeightDp = shortSide;
-        } else {
-            newConfig.orientation = ORIENTATION_PORTRAIT;
-            newConfig.screenWidthDp = shortSide;
-            newConfig.screenHeightDp = longSide;
-        }
+        clearInvocations(mClientLifecycleManager);
 
         // Mimic the behavior that display doesn't handle app's requested orientation.
         final DisplayContent dc = activity.getTask().getDisplayContent();
@@ -578,12 +568,15 @@ public class ActivityRecordTests extends WindowTestsBase {
         doReturn(false).when(dc).handlesOrientationChangeFromDescendant(anyInt());
 
         final int requestedOrientation;
-        switch (newConfig.orientation) {
-            case ORIENTATION_LANDSCAPE:
-                requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE;
-                break;
+        final int expectedOrientation;
+        switch (activity.getConfiguration().orientation) {
             case ORIENTATION_PORTRAIT:
+                requestedOrientation = SCREEN_ORIENTATION_LANDSCAPE;
+                expectedOrientation = ORIENTATION_LANDSCAPE;
+                break;
+            case ORIENTATION_LANDSCAPE:
                 requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                expectedOrientation = ORIENTATION_PORTRAIT;
                 break;
             default:
                 throw new IllegalStateException("Orientation in new config should be either"
@@ -595,11 +588,11 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         activity.setRequestedOrientation(requestedOrientation);
 
+        final Configuration currentConfig = activity.getConfiguration();
+        assertEquals(expectedOrientation, currentConfig.orientation);
         final ActivityConfigurationChangeItem expected =
-                ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
-        verify(mAtm.getLifecycleManager()).scheduleTransaction(eq(activity.app.getThread()),
-                eq(expected));
-
+                ActivityConfigurationChangeItem.obtain(activity.token, currentConfig);
+        verify(mClientLifecycleManager).scheduleTransaction(activity.app.getThread(), expected);
         verify(displayRotation).onSetRequestedOrientation();
     }
 
@@ -788,7 +781,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         try {
-            clearInvocations(mAtm.getLifecycleManager());
+            clearInvocations(mClientLifecycleManager);
             doReturn(false).when(stack).isTranslucent(any());
             assertTrue(task.shouldBeVisible(null /* starting */));
 
@@ -796,7 +789,10 @@ public class ActivityRecordTests extends WindowTestsBase {
                     activity.getConfiguration()));
 
             final Configuration newConfig = new Configuration(activity.getConfiguration());
-            final int shortSide = Math.min(newConfig.screenWidthDp, newConfig.screenHeightDp);
+            final int shortSide = newConfig.screenWidthDp == newConfig.screenHeightDp
+                    // To avoid the case where it is always portrait because of width == height.
+                    ? newConfig.screenWidthDp - 1
+                    : Math.min(newConfig.screenWidthDp, newConfig.screenHeightDp);
             final int longSide = Math.max(newConfig.screenWidthDp, newConfig.screenHeightDp);
             if (newConfig.orientation == ORIENTATION_PORTRAIT) {
                 newConfig.orientation = ORIENTATION_LANDSCAPE;
@@ -811,12 +807,12 @@ public class ActivityRecordTests extends WindowTestsBase {
             task.onConfigurationChanged(newConfig);
 
             activity.ensureActivityConfiguration(0 /* globalChanges */,
-                    false /* preserveWindow */, true /* ignoreStopState */);
+                    false /* preserveWindow */, true /* ignoreVisibility */);
 
             final ActivityConfigurationChangeItem expected =
-                    ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
-            verify(mAtm.getLifecycleManager()).scheduleTransaction(
-                    eq(activity.app.getThread()), eq(expected));
+                    ActivityConfigurationChangeItem.obtain(activity.token,
+                            activity.getConfiguration());
+            verify(mClientLifecycleManager).scheduleTransaction(activity.app.getThread(), expected);
         } finally {
             stack.getDisplayArea().removeChild(stack);
         }
@@ -1259,12 +1255,12 @@ public class ActivityRecordTests extends WindowTestsBase {
         targetActivity.resultTo = sourceActivity;
         targetActivity.setForceSendResultForMediaProjection();
 
-        clearInvocations(mAtm.getLifecycleManager());
+        clearInvocations(mClientLifecycleManager);
 
         targetActivity.finishIfPossible(0, new Intent(), null, "test", false /* oomAdj */);
 
         try {
-            verify(mAtm.getLifecycleManager(), atLeastOnce()).scheduleTransaction(
+            verify(mClientLifecycleManager, atLeastOnce()).scheduleTransaction(
                     any(ClientTransaction.class));
         } catch (RemoteException ignored) {
         }
@@ -1283,7 +1279,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         targetActivity.setState(RESUMED, "test");
         targetActivity.resultTo = resultToActivity;
 
-        clearInvocations(mAtm.getLifecycleManager());
+        clearInvocations(mClientLifecycleManager);
         targetActivity.finishIfPossible(0, new Intent(), null, "test", false /* oomAdj */);
         waitUntilHandlersIdle();
 
@@ -1786,10 +1782,10 @@ public class ActivityRecordTests extends WindowTestsBase {
             final ActivityRecord activity = createActivityWithTask();
             final WindowProcessController wpc = activity.app;
             setup.accept(activity);
-            clearInvocations(mAtm.getLifecycleManager());
+            clearInvocations(mClientLifecycleManager);
             activity.getTask().removeImmediately("test");
             try {
-                verify(mAtm.getLifecycleManager()).scheduleTransaction(any(),
+                verify(mClientLifecycleManager).scheduleTransaction(any(),
                         isA(DestroyActivityItem.class));
             } catch (RemoteException ignored) {
             }

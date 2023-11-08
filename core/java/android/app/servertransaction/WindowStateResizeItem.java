@@ -77,10 +77,10 @@ public class WindowStateResizeItem extends ClientTransactionItem {
             instance = new WindowStateResizeItem();
         }
         instance.mWindow = requireNonNull(window);
-        instance.mFrames = requireNonNull(frames);
+        instance.mFrames = new ClientWindowFrames(frames);
         instance.mReportDraw = reportDraw;
-        instance.mConfiguration = requireNonNull(configuration);
-        instance.mInsetsState = requireNonNull(insetsState);
+        instance.mConfiguration = new MergedConfiguration(configuration);
+        instance.mInsetsState = new InsetsState(insetsState);
         instance.mForceLayout = forceLayout;
         instance.mAlwaysConsumeSystemBars = alwaysConsumeSystemBars;
         instance.mDisplayId = displayId;

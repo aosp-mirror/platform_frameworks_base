@@ -202,8 +202,7 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 any() /* starting */, anyInt() /* configChanges */,
                 anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
         doReturn(app).when(mAtm).getProcessController(eq(recentActivity.processName), anyInt());
-        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
-        doNothing().when(lifecycleManager).scheduleTransaction(any());
+        doNothing().when(mClientLifecycleManager).scheduleTransaction(any());
 
         startRecentsActivity();
 

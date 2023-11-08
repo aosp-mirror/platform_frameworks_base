@@ -64,7 +64,7 @@ public class ConfigurationChangeItem extends ClientTransactionItem {
         if (instance == null) {
             instance = new ConfigurationChangeItem();
         }
-        instance.mConfiguration = config;
+        instance.mConfiguration = new Configuration(config);
         instance.mDeviceId = deviceId;
 
         return instance;

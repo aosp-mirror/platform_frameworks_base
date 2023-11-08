@@ -152,6 +152,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     ActivityTaskManagerService mAtm;
     RootWindowContainer mRootWindowContainer;
     ActivityTaskSupervisor mSupervisor;
+    ClientLifecycleManager mClientLifecycleManager;
     WindowManagerService mWm;
     private final IWindow mIWindow = new TestIWindow();
     private Session mTestSession;
@@ -215,6 +216,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         mAtm = mSystemServicesTestRule.getActivityTaskManagerService();
         mSupervisor = mAtm.mTaskSupervisor;
         mRootWindowContainer = mAtm.mRootWindowContainer;
+        mClientLifecycleManager = mAtm.getLifecycleManager();
         mWm = mSystemServicesTestRule.getWindowManagerService();
         mOriginalPerDisplayFocusEnabled = mWm.mPerDisplayFocusEnabled;
         SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);

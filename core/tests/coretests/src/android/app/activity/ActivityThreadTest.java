@@ -227,8 +227,7 @@ public class ActivityThreadTest {
         try {
             // Send process level config change.
             ClientTransaction transaction = newTransaction(activityThread);
-            transaction.addCallback(ConfigurationChangeItem.obtain(
-                    new Configuration(newConfig), DEVICE_ID_INVALID));
+            transaction.addCallback(ConfigurationChangeItem.obtain(newConfig, DEVICE_ID_INVALID));
             appThread.scheduleTransaction(transaction);
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
@@ -245,7 +244,7 @@ public class ActivityThreadTest {
             newConfig.smallestScreenWidthDp++;
             transaction = newTransaction(activityThread);
             transaction.addCallback(ActivityConfigurationChangeItem.obtain(
-                    activity.getActivityToken(), new Configuration(newConfig)));
+                    activity.getActivityToken(), newConfig));
             appThread.scheduleTransaction(transaction);
             InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 

@@ -32,6 +32,7 @@ import android.os.Trace;
 
 import com.android.internal.content.ReferrerIntent;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -71,7 +72,7 @@ public class NewIntentItem extends ActivityTransactionItem {
             instance = new NewIntentItem();
         }
         instance.setActivityToken(activityToken);
-        instance.mIntents = intents;
+        instance.mIntents = new ArrayList<>(intents);
         instance.mResume = resume;
 
         return instance;
