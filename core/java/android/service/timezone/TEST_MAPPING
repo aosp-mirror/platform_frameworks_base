@@ -2,10 +2,10 @@
   // TODO(b/182461754): Change to "presubmit" when go/test-mapping-slo-guide allows.
   "postsubmit": [
     {
-      "name": "FrameworksCoreTests",
+      "name": "FrameworksTimeCoreTests",
       "options": [
         {
-          "include-filter": "android.service.timezone."
+          "include-filter": "android.service."
         }
       ]
     },

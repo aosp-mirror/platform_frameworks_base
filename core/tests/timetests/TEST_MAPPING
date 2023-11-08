@@ -1,0 +1,8 @@
+{
+  // TODO(b/182461754): Change to "presubmit" when go/test-mapping-slo-guide allows.
+  "postsubmit": [
+    {
+      "name": "FrameworksTimeCoreTests"
+    }
+  ]
+}
