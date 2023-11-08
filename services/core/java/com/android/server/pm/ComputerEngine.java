@@ -1525,6 +1525,7 @@ public class ComputerEngine implements Computer {
             ai.volumeUuid = ps.getVolumeUuid();
             ai.storageUuid = StorageManager.convert(ai.volumeUuid);
             ai.setVersionCode(ps.getVersionCode());
+            ai.targetSdkVersion = ps.getTargetSdkVersion();
             ai.flags = ps.getFlags();
             ai.privateFlags = ps.getPrivateFlags();
             pi.applicationInfo = PackageInfoUtils.generateDelegateApplicationInfo(
