@@ -237,7 +237,6 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11054,7 +11053,9 @@ public class AudioService extends IAudioService.Stub
 
         final String addr = Objects.requireNonNull(address);
 
-        AdiDeviceState deviceState = mDeviceBroker.findBtDeviceStateForAddress(addr, isBle);
+        AdiDeviceState deviceState = mDeviceBroker.findBtDeviceStateForAddress(addr,
+                (isBle ? AudioSystem.DEVICE_OUT_BLE_HEADSET
+                        : AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
 
         int internalType = !isBle ? DEVICE_OUT_BLUETOOTH_A2DP
                 : ((btAudioDeviceCategory == AUDIO_DEVICE_CATEGORY_HEADPHONES)
@@ -11070,7 +11071,7 @@ public class AudioService extends IAudioService.Stub
         deviceState.setAudioDeviceCategory(btAudioDeviceCategory);
 
         mDeviceBroker.addOrUpdateBtAudioDeviceCategoryInInventory(deviceState);
-        mDeviceBroker.persistAudioDeviceSettings();
+        mDeviceBroker.postPersistAudioDeviceSettings();
 
         mSpatializerHelper.refreshDevice(deviceState.getAudioDeviceAttributes());
         mSoundDoseHelper.setAudioDeviceCategory(addr, internalType,
@@ -11084,7 +11085,8 @@ public class AudioService extends IAudioService.Stub
         super.getBluetoothAudioDeviceCategory_enforcePermission();
 
         final AdiDeviceState deviceState = mDeviceBroker.findBtDeviceStateForAddress(
-                Objects.requireNonNull(address), isBle);
+                Objects.requireNonNull(address), (isBle ? AudioSystem.DEVICE_OUT_BLE_HEADSET
+                        : AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP));
         if (deviceState == null) {
             return AUDIO_DEVICE_CATEGORY_UNKNOWN;
         }
@@ -13596,8 +13598,8 @@ public class AudioService extends IAudioService.Stub
         return activeAssistantUids;
     }
 
-    UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
-        return mDeviceBroker.getDeviceSensorUuid(device);
+    List<String> getDeviceAddresses(AudioDeviceAttributes device) {
+        return mDeviceBroker.getDeviceAddresses(device);
     }
 
     //======================
