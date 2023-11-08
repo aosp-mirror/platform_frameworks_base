@@ -495,7 +495,7 @@
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Нивото на силата на звука на слушалките е било високо по-дълго, отколкото е препоръчително"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Нивото на силата на звука на слушалките е надвишило безопасния лимит за тази седмица"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Продължете да слушате"</string>
-    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Намаляване на силата на звука"</string>
+    <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Намаляване на звука"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Приложението е фиксирано"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Екранът ще се показва, докато не го освободите с докосване и задържане на бутона за връщане назад и този за общ преглед."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Екранът ще се показва, докато не го освободите с докосване и задържане на бутона за връщане назад и „Начало“."</string>

@@ -275,7 +275,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Đảo màu"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Chỉnh màu"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Cỡ chữ"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Quản lý người dùng"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Quản lý ng.dùng"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Xong"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Đóng"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Đã kết nối"</string>
@@ -1110,7 +1110,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Bản xem trước hình ảnh"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"sửa"</string>
     <string name="add" msgid="81036585205287996">"Thêm"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Quản lý người dùng"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Quản lý ng.dùng"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Thông báo này không hỗ trợ thao tác kéo để chia đôi màn hình"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Không có Wi‑Fi"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Chế độ ưu tiên"</string>
