@@ -21,6 +21,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR;
 import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
 import static com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen;
+import static com.android.wm.shell.Flags.enableTaskbarNavbarUnification;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -49,8 +50,6 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.settings.DisplayTracker;
@@ -83,7 +82,6 @@ public class NavigationBarControllerImpl implements
     private final Context mContext;
     private final Handler mHandler;
     private final NavigationBarComponent.Factory mNavigationBarComponentFactory;
-    private FeatureFlags mFeatureFlags;
     private final SecureSettings mSecureSettings;
     private final DisplayTracker mDisplayTracker;
     private final DisplayManager mDisplayManager;
@@ -118,13 +116,11 @@ public class NavigationBarControllerImpl implements
             TaskStackChangeListeners taskStackChangeListeners,
             Optional<Pip> pipOptional,
             Optional<BackAnimation> backAnimation,
-            FeatureFlags featureFlags,
             SecureSettings secureSettings,
             DisplayTracker displayTracker) {
         mContext = context;
         mHandler = mainHandler;
         mNavigationBarComponentFactory = navigationBarComponentFactory;
-        mFeatureFlags = featureFlags;
         mSecureSettings = secureSettings;
         mDisplayTracker = displayTracker;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
@@ -248,8 +244,8 @@ public class NavigationBarControllerImpl implements
     /** @return {@code true} if taskbar is enabled, false otherwise */
     private boolean initializeTaskbarIfNecessary() {
         // Enable for large screens or (phone AND flag is set); assuming phone = !mIsLargeScreen
-        boolean taskbarEnabled = (mIsLargeScreen || mFeatureFlags.isEnabled(
-                Flags.HIDE_NAVBAR_WINDOW)) && shouldCreateNavBarAndTaskBar(mContext.getDisplayId());
+        boolean taskbarEnabled = (mIsLargeScreen || enableTaskbarNavbarUnification())
+                && shouldCreateNavBarAndTaskBar(mContext.getDisplayId());
 
         if (taskbarEnabled) {
             Trace.beginSection("NavigationBarController#initializeTaskbarIfNecessary");

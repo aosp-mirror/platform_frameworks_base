@@ -481,12 +481,6 @@ object Flags {
             namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
         )
 
-    // TODO(b/254512674): Tracking Bug
-    @Keep
-    @JvmField
-    val HIDE_NAVBAR_WINDOW =
-        sysPropBooleanFlag("persist.wm.debug.hide_navbar_window", default = false)
-
     @Keep
     @JvmField
     val WM_CAPTION_ON_SHELL =
