@@ -117,7 +117,7 @@ class QSTileLoggerTest : SysuiTestCase() {
         underTest.logUserActionPipeline(
             TileSpec.create("test_spec"),
             QSTileUserAction.Click(null),
-            QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {},
+            QSTileState.build({ Icon.Resource(0, ContentDescription.Resource(0)) }, "") {},
             "test_data",
         )
 
@@ -143,7 +143,7 @@ class QSTileLoggerTest : SysuiTestCase() {
     fun testLogStateUpdate() {
         underTest.logStateUpdate(
             TileSpec.create("test_spec"),
-            QSTileState.build(Icon.Resource(0, ContentDescription.Resource(0)), "") {},
+            QSTileState.build({ Icon.Resource(0, ContentDescription.Resource(0)) }, "") {},
             "test_data",
         )
 

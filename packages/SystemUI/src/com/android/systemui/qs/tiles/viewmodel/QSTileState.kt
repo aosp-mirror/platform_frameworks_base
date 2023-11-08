@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
+import android.content.Context
 import android.service.quicksettings.Tile
 import com.android.systemui.common.shared.model.Icon
 
@@ -41,11 +42,19 @@ data class QSTileState(
 
     companion object {
 
+        fun build(
+            context: Context,
+            config: QSTileUIConfig,
+            build: Builder.() -> Unit
+        ): QSTileState =
+            build(
+                { Icon.Resource(config.iconRes, null) },
+                context.getString(config.labelRes),
+                build,
+            )
+
         fun build(icon: () -> Icon, label: CharSequence, build: Builder.() -> Unit): QSTileState =
             Builder(icon, label).apply(build).build()
-
-        fun build(icon: Icon, label: CharSequence, build: Builder.() -> Unit): QSTileState =
-            build({ icon }, label, build)
     }
 
     enum class ActivationState(val legacyState: Int) {
