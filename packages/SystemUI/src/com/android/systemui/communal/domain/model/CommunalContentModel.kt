@@ -53,4 +53,15 @@ sealed interface CommunalContentModel {
     ) : CommunalContentModel {
         override val key = "smartspace_$smartspaceTargetId"
     }
+
+    class Umo(
+        override val size: CommunalContentSize,
+    ) : CommunalContentModel {
+        override val key = UMO_KEY
+    }
+
+    companion object {
+        /** Key for the [Umo] in CommunalContentModel. There should only ever be one UMO. */
+        const val UMO_KEY = "umo"
+    }
 }

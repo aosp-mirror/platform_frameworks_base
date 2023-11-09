@@ -19,6 +19,7 @@ package com.android.systemui.communal.domain.interactor
 import android.app.smartspace.SmartspaceTarget
 import android.appwidget.AppWidgetHost
 import android.content.ComponentName
+import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
@@ -37,12 +38,14 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 
 /** Encapsulates business-logic related to communal mode. */
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class CommunalInteractor
 @Inject
 constructor(
     private val communalRepository: CommunalRepository,
     private val widgetRepository: CommunalWidgetRepository,
+    mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
     tutorialInteractor: CommunalTutorialInteractor,
     private val appWidgetHost: AppWidgetHost,
@@ -87,8 +90,8 @@ constructor(
             if (isTutorialMode) {
                 return@flatMapLatest flowOf(tutorialContent)
             }
-            combine(smartspaceContent, widgetContent) { smartspace, widgets ->
-                smartspace + widgets
+            combine(smartspaceContent, umoContent, widgetContent) { smartspace, umo, widgets ->
+                smartspace + umo + widgets
             }
         }
 
@@ -138,4 +141,13 @@ constructor(
             CommunalContentModel.Tutorial(id = 6, CommunalContentSize.HALF),
             CommunalContentModel.Tutorial(id = 7, CommunalContentSize.HALF),
         )
+
+    private val umoContent: Flow<List<CommunalContentModel.Umo>> =
+        mediaRepository.mediaPlaying.flatMapLatest { mediaPlaying ->
+            if (mediaPlaying) {
+                flowOf(listOf(CommunalContentModel.Umo(CommunalContentSize.THIRD)))
+            } else {
+                flowOf(emptyList())
+            }
+        }
 }
