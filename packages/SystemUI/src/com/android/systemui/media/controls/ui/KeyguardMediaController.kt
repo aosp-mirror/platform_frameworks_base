@@ -23,11 +23,14 @@ import android.net.Uri
 import android.os.Handler
 import android.os.UserHandle
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.media.dagger.MediaModule.KEYGUARD
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
@@ -36,7 +39,11 @@ import com.android.systemui.statusbar.notification.stack.MediaContainerView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.println
 import com.android.systemui.util.settings.SecureSettings
+import com.android.systemui.util.withIncreasedIndent
+import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -55,13 +62,18 @@ constructor(
     private val secureSettings: SecureSettings,
     @Main private val handler: Handler,
     configurationController: ConfigurationController,
-    private val splitShadeStateController: SplitShadeStateController
-) {
+    private val splitShadeStateController: SplitShadeStateController,
+    dumpManager: DumpManager,
+) : Dumpable {
+    /** It's added for debugging purpose to directly see last received StatusBarState. */
+    private var lastReceivedStatusBarState = -1
 
     init {
+        dumpManager.registerDumpable(this)
         statusBarStateController.addCallback(
             object : StatusBarStateController.StateListener {
                 override fun onStateChanged(newState: Int) {
+                    lastReceivedStatusBarState = newState
                     refreshMediaPosition()
                 }
 
@@ -206,7 +218,17 @@ constructor(
     }
 
     fun refreshMediaPosition() {
-        val keyguardOrUserSwitcher = (statusBarStateController.state == StatusBarState.KEYGUARD)
+        val currentState = statusBarStateController.state
+        if (lastReceivedStatusBarState != -1 && currentState != lastReceivedStatusBarState) {
+            Log.wtfStack(
+                TAG,
+                "currentState[${StatusBarState.toString(currentState)}] is " +
+                    "different from the last " +
+                    "received one[${StatusBarState.toString(lastReceivedStatusBarState)}]."
+            )
+        }
+
+        val keyguardOrUserSwitcher = (currentState == StatusBarState.KEYGUARD)
         // mediaHost.visible required for proper animations handling
         visible =
             mediaHost.visible &&
@@ -262,5 +284,35 @@ constructor(
         if (previousVisibility != newVisibility) {
             visibilityChangedListener?.invoke(newVisibility == View.VISIBLE)
         }
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.asIndenting().run {
+            println("KeyguardMediaController")
+            withIncreasedIndent {
+                println("Self", this@KeyguardMediaController)
+                println("visible", visible)
+                println("useSplitShade", useSplitShade)
+                println("allowMediaPlayerOnLockScreen", allowMediaPlayerOnLockScreen)
+                println("bypassController.bypassEnabled", bypassController.bypassEnabled)
+                println("isDozeWakeUpAnimationWaiting", isDozeWakeUpAnimationWaiting)
+                println("singlePaneContainer", singlePaneContainer)
+                println("splitShadeContainer", splitShadeContainer)
+                if (lastReceivedStatusBarState != -1) {
+                    println(
+                        "lastReceivedStatusBarState",
+                        StatusBarState.toString(lastReceivedStatusBarState)
+                    )
+                }
+                println(
+                    "statusBarStateController.state",
+                    StatusBarState.toString(statusBarStateController.state)
+                )
+            }
+        }
+    }
+
+    private companion object {
+        private const val TAG = "KeyguardMediaController"
     }
 }
