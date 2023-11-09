@@ -396,7 +396,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     // an APK targeting <R that doesn't contain an <application> tag. That code would be skipped
     // and never assign this, so initialize this to true for those cases.
     private long mBooleans = Booleans.ENABLED;
-    private long mBooleans2;
+    private long mBooleans2 = Booleans2.UPDATABLE_SYSTEM;
     @NonNull
     private Set<String> mKnownActivityEmbeddingCerts = emptySet();
     // Derived fields
@@ -3450,6 +3450,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     }
 
     @Override
+    public boolean isUpdatableSystem() {
+        return getBoolean2(Booleans2.UPDATABLE_SYSTEM);
+    }
+
+    @Override
     public boolean isFactoryTest() {
         return getBoolean(Booleans.FACTORY_TEST);
     }
@@ -3518,6 +3523,11 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     public PackageImpl setSystem(boolean value) {
         setBoolean(Booleans.SYSTEM, value);
         return this;
+    }
+
+    @Override
+    public PackageImpl setUpdatableSystem(boolean value) {
+        return setBoolean2(Booleans2.UPDATABLE_SYSTEM, value);
     }
 
     @Override
@@ -3731,10 +3741,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
         @LongDef({
                 STUB,
                 APEX,
+                UPDATABLE_SYSTEM,
         })
         public @interface Flags {}
 
         private static final long STUB = 1L;
         private static final long APEX = 1L << 1;
+        private static final long UPDATABLE_SYSTEM = 1L << 2;
     }
 }

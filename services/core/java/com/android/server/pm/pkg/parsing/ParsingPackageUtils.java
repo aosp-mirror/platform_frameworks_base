@@ -1001,12 +1001,16 @@ public class ParsingPackageUtils {
             return sharedUserResult;
         }
 
+        final boolean updatableSystem = parser.getAttributeBooleanValue(null /*namespace*/,
+                "updatableSystem", true);
+
         pkg.setInstallLocation(anInteger(PARSE_DEFAULT_INSTALL_LOCATION,
                         R.styleable.AndroidManifest_installLocation, sa))
                 .setTargetSandboxVersion(anInteger(PARSE_DEFAULT_TARGET_SANDBOX,
                         R.styleable.AndroidManifest_targetSandboxVersion, sa))
                 /* Set the global "on SD card" flag */
-                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0);
+                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0)
+                .setUpdatableSystem(updatableSystem);
 
         boolean foundApp = false;
         final int depth = parser.getDepth();

@@ -73,6 +73,8 @@ public interface ParsedPackage extends AndroidPackage {
 
     ParsedPackage setApex(boolean isApex);
 
+    ParsedPackage setUpdatableSystem(boolean value);
+
     ParsedPackage markNotActivitiesAsNotExportedIfSingleUser();
 
     ParsedPackage setOdm(boolean odm);
