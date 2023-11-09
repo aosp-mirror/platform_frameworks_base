@@ -77,10 +77,17 @@ android_ravenwood_libgroup {
         "framework-minus-apex.ravenwood",
         "hoststubgen-helper-runtime.ravenwood",
         "hoststubgen-helper-framework-runtime.ravenwood",
+        "junit",
+        "truth",
+        "ravenwood-junit",
     ],
 }
 
 android_ravenwood_libgroup {
     name: "ravenwood-utils",
-    libs: [],
+    libs: [
+        "junit",
+        "truth",
+        "ravenwood-junit",
+    ],
 }

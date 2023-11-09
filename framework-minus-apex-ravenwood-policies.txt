@@ -71,8 +71,9 @@ class android.util.proto.WireTypeMismatchException stubclass
 # Misc
 class android.util.Dumpable stubclass
 class android.util.DebugUtils stubclass
-class android.util.UtilConfig stubclass
+class android.util.MathUtils stubclass
 class android.util.Patterns stubclass
+class android.util.UtilConfig stubclass
 
 # Internals
 class com.android.internal.util.ArrayUtils stubclass
@@ -89,3 +90,26 @@ class com.android.internal.util.GrowingArrayUtils stubclass
 class com.android.internal.util.LineBreakBufferedWriter stubclass
 class com.android.internal.util.Preconditions stubclass
 class com.android.internal.util.StringPool stubclass
+
+# Parcel
+class android.os.Parcel stubclass
+    method writeException (Ljava/lang/Exception;)V @writeException$ravenwood
+    method writeNoException ()V @writeNoException$ravenwood
+class android.os.Parcel !com.android.hoststubgen.nativesubstitution.Parcel_host
+
+class android.os.Parcelable stubclass
+class android.os.ParcelFormatException stubclass
+class android.os.BadParcelableException stubclass
+class android.os.BadTypeParcelableException stubclass
+
+# Binder: just enough to construct, no further functionality
+class android.os.Binder stub
+    method <init> ()V stub
+    method <init> (Ljava/lang/String;)V stub
+    method isDirectlyHandlingTransaction ()Z stub
+    method isDirectlyHandlingTransactionNative ()Z @isDirectlyHandlingTransactionNative$ravenwood
+    method getNativeBBinderHolder ()J @getNativeBBinderHolder$ravenwood
+
+# Containers
+class android.os.BaseBundle stubclass
+class android.os.Bundle stubclass

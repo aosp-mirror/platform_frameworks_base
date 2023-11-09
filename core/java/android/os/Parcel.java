@@ -1558,7 +1558,7 @@ public final class Parcel {
         ensureWithinMemoryLimit(typeSize, totalObjects);
     }
 
-    private void ensureWithinMemoryLimit(int typeSize, @NonNull int length) {
+    private void ensureWithinMemoryLimit(int typeSize, int length) {
         int estimatedAllocationSize = 0;
         try {
             estimatedAllocationSize = Math.multiplyExact(typeSize, length);
@@ -2957,6 +2957,14 @@ public final class Parcel {
     }
 
     /** @hide */
+    public final void writeException$ravenwood(@NonNull Exception e) {
+        // Ravenwood doesn't support IPC, no transaction headers needed
+        writeInt(getExceptionCode(e));
+        writeString(e.getMessage());
+        writeInt(0);
+    }
+
+    /** @hide */
     public static int getExceptionCode(@NonNull Throwable e) {
         int code = 0;
         if (e instanceof Parcelable
@@ -3037,6 +3045,12 @@ public final class Parcel {
         } else {
             writeInt(0);
         }
+    }
+
+    /** @hide */
+    public final void writeNoException$ravenwood() {
+        // Ravenwood doesn't support IPC, no transaction headers needed
+        writeInt(0);
     }
 
     /**
