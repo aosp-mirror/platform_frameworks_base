@@ -1579,6 +1579,35 @@ public class TaskTests extends WindowTestsBase {
                 task.getTopChild());
     }
 
+    @Test
+    public void testSetDragResizing() {
+        final Task task = createTask(mDisplayContent);
+
+        // Allowed for freeform.
+        task.setWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        task.setDragResizing(true);
+        assertTrue(task.isDragResizing());
+        task.setDragResizing(false);
+        assertFalse(task.isDragResizing());
+
+        // Allowed for multi-window.
+        task.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+
+        task.setDragResizing(true);
+        assertTrue(task.isDragResizing());
+        task.setDragResizing(false);
+        assertFalse(task.isDragResizing());
+
+        // Disallowed for fullscreen.
+        task.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        task.setDragResizing(true);
+        assertFalse(task.isDragResizing());
+        task.setDragResizing(false);
+        assertFalse(task.isDragResizing());
+    }
+
     private Task getTestTask() {
         return new TaskBuilder(mSupervisor).setCreateActivity(true).build();
     }

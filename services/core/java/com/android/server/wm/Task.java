@@ -2914,7 +2914,7 @@ class Task extends TaskFragment {
         if (mDragResizing != dragResizing) {
             // No need to check if allowed if it's leaving dragResize
             if (dragResizing
-                    && !(getRootTask().getWindowingMode() == WINDOWING_MODE_FREEFORM)) {
+                    && !(getRootTask().getWindowConfiguration().canResizeTask())) {
                 Slog.e(TAG, "Drag resize isn't allowed for root task id=" + getRootTaskId());
                 return;
             }
