@@ -5431,6 +5431,7 @@
         <item>1,1,1.0,.15,15</item>
         <item>0,0,0.7,0,1</item>
         <item>0,0,0.83333,0,1</item>
+        <item>0,0,1.1667,0,1</item>
     </string-array>
 
     <!-- The integer index of the selected option in config_udfps_touch_detection_options -->
