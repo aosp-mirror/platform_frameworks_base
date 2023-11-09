@@ -3513,7 +3513,8 @@ class Task extends TaskFragment {
         }
         appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton = top != null
                 && !appCompatTaskInfo.topActivityInSizeCompat
-                && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings();
+                && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings()
+                && !info.isTopActivityTransparent;
         appCompatTaskInfo.topActivityBoundsLetterboxed = top != null  && top.areBoundsLetterboxed();
     }
 
