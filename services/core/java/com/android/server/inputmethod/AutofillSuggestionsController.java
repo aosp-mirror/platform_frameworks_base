@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
 import android.view.inputmethod.InlineSuggestionsRequest;
@@ -40,7 +39,6 @@ final class AutofillSuggestionsController {
     private static final String TAG = AutofillSuggestionsController.class.getSimpleName();
 
     @NonNull private final InputMethodManagerService mService;
-    @NonNull private final ArrayMap<String, InputMethodInfo> mMethodMap;
     @NonNull private final InputMethodUtils.InputMethodSettings mSettings;
 
     private static final class CreateInlineSuggestionsRequest {
@@ -78,7 +76,6 @@ final class AutofillSuggestionsController {
 
     AutofillSuggestionsController(@NonNull InputMethodManagerService service) {
         mService = service;
-        mMethodMap = mService.mMethodMap;
         mSettings = mService.mSettings;
     }
 
@@ -88,7 +85,8 @@ final class AutofillSuggestionsController {
             boolean touchExplorationEnabled) {
         clearPendingInlineSuggestionsRequest();
         mInlineSuggestionsRequestCallback = callback;
-        final InputMethodInfo imi = mMethodMap.get(mService.getSelectedMethodIdLocked());
+        final InputMethodInfo imi = mService.queryInputMethodForCurrentUserLocked(
+                mService.getSelectedMethodIdLocked());
         try {
             if (userId == mSettings.getCurrentUserId()
                     && imi != null && isInlineSuggestionsEnabled(imi, touchExplorationEnabled)) {
