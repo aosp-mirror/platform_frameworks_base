@@ -83,6 +83,9 @@
                 }
             ],
             "file_patterns": ["VpnManagerService\\.java"]
+        },
+        {
+            "name": "FrameworksNetTests"
         }
     ],
     "presubmit-large": [
@@ -124,9 +127,6 @@
         },
         {
             "name": "CtsSuspendAppsTestCases"
-        },
-        {
-            "name": "FrameworksNetTests"
         }
     ]
 }
