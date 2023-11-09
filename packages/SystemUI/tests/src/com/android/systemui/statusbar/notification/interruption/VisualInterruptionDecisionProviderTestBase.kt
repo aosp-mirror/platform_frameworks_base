@@ -47,6 +47,7 @@ import android.os.PowerManager
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
 import android.provider.Settings.Global.HEADS_UP_OFF
 import android.provider.Settings.Global.HEADS_UP_ON
+import com.android.internal.logging.UiEventLogger.UiEventEnum
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.LogBuffer
@@ -63,6 +64,10 @@ import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.MAX_HUN_WHEN_AGE_MS
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.HUN_SUPPRESSED_OLD_WHEN
 import com.android.systemui.statusbar.policy.FakeDeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.FakeEventLog
@@ -149,18 +154,21 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     fun testShouldPeek() {
         ensurePeekState()
         assertShouldHeadsUp(buildPeekEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPeek_settingDisabled() {
         ensurePeekState { hunSettingEnabled = false }
         assertShouldNotHeadsUp(buildPeekEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPeek_packageSnoozed_withoutFsi() {
         ensurePeekState { hunSnoozed = true }
         assertShouldNotHeadsUp(buildPeekEntry())
+        assertNoEventsLogged()
     }
 
     @Test
@@ -169,6 +177,13 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         forEachPeekableFsiState {
             ensurePeekState { hunSnoozed = true }
             assertShouldHeadsUp(entry)
+
+            // The old code logs a UiEvent when a HUN snooze is bypassed because the notification
+            // has an FSI, but that doesn't fit into the new code's suppressor-based logic, so we're
+            // not reimplementing it.
+            if (provider !is NotificationInterruptStateProviderWrapper) {
+                assertNoEventsLogged()
+            }
         }
     }
 
@@ -176,42 +191,49 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     fun testShouldNotPeek_alreadyBubbled() {
         ensurePeekState { statusBarState = SHADE }
         assertShouldNotHeadsUp(buildPeekEntry { isBubble = true })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldPeek_isBubble_shadeLocked() {
         ensurePeekState { statusBarState = SHADE_LOCKED }
         assertShouldHeadsUp(buildPeekEntry { isBubble = true })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldPeek_isBubble_keyguard() {
         ensurePeekState { statusBarState = KEYGUARD }
         assertShouldHeadsUp(buildPeekEntry { isBubble = true })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPeek_dnd() {
         ensurePeekState()
         assertShouldNotHeadsUp(buildPeekEntry { suppressedVisualEffects = SUPPRESSED_EFFECT_PEEK })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPeek_notImportant() {
         ensurePeekState()
         assertShouldNotHeadsUp(buildPeekEntry { importance = IMPORTANCE_DEFAULT })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPeek_screenOff() {
         ensurePeekState { isScreenOn = false }
         assertShouldNotHeadsUp(buildPeekEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPeek_dreaming() {
         ensurePeekState { isDreaming = true }
         assertShouldNotHeadsUp(buildPeekEntry())
+        assertNoEventsLogged()
     }
 
     @Test
@@ -221,33 +243,56 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     @Test
+    fun testLogsHunOldWhen() {
+        assertNoEventsLogged()
+
+        ensurePeekState()
+        val entry = buildPeekEntry { whenMs = whenAgo(MAX_HUN_WHEN_AGE_MS) }
+
+        // The old code logs the "old when" UiEvent unconditionally, so don't expect that it hasn't.
+        if (provider !is NotificationInterruptStateProviderWrapper) {
+            provider.makeUnloggedHeadsUpDecision(entry)
+            assertNoEventsLogged()
+        }
+
+        provider.makeAndLogHeadsUpDecision(entry)
+        assertUiEventLogged(HUN_SUPPRESSED_OLD_WHEN, entry.sbn.uid, entry.sbn.packageName)
+        assertNoSystemEventLogged()
+    }
+
+    @Test
     fun testShouldPeek_oldWhen_now() {
         ensurePeekState()
         assertShouldHeadsUp(buildPeekEntry { whenMs = whenAgo(0) })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldPeek_oldWhen_notOldEnough() {
         ensurePeekState()
         assertShouldHeadsUp(buildPeekEntry { whenMs = whenAgo(MAX_HUN_WHEN_AGE_MS - 1) })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldPeek_oldWhen_zeroWhen() {
         ensurePeekState()
         assertShouldHeadsUp(buildPeekEntry { whenMs = 0L })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldPeek_oldWhen_negativeWhen() {
         ensurePeekState()
         assertShouldHeadsUp(buildPeekEntry { whenMs = -1L })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldPeek_oldWhen_fullScreenIntent() {
         ensurePeekState()
         assertShouldHeadsUp(buildFsiEntry { whenMs = whenAgo(MAX_HUN_WHEN_AGE_MS) })
+        assertNoEventsLogged()
     }
 
     @Test
@@ -259,6 +304,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                 isForegroundService = true
             }
         )
+        assertNoEventsLogged()
     }
 
     @Test
@@ -270,18 +316,21 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                 isUserInitiatedJob = true
             }
         )
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPeek_hiddenOnKeyguard() {
         ensurePeekState({ keyguardShouldHideNotification = true })
         assertShouldNotHeadsUp(buildPeekEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldPeek_defaultLegacySuppressor() {
         ensurePeekState()
         withLegacySuppressor(neverSuppresses) { assertShouldHeadsUp(buildPeekEntry()) }
+        assertNoEventsLogged()
     }
 
     @Test
@@ -290,6 +339,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         withLegacySuppressor(alwaysSuppressesInterruptions) {
             assertShouldNotHeadsUp(buildPeekEntry())
         }
+        assertNoEventsLogged()
     }
 
     @Test
@@ -298,6 +348,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         withLegacySuppressor(alwaysSuppressesAwakeInterruptions) {
             assertShouldNotHeadsUp(buildPeekEntry())
         }
+        assertNoEventsLogged()
     }
 
     @Test
@@ -306,24 +357,28 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         withLegacySuppressor(alwaysSuppressesAwakeHeadsUp) {
             assertShouldNotHeadsUp(buildPeekEntry())
         }
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldPulse() {
         ensurePulseState()
         assertShouldHeadsUp(buildPulseEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPulse_disabled() {
         ensurePulseState { pulseOnNotificationsEnabled = false }
         assertShouldNotHeadsUp(buildPulseEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPulse_batterySaver() {
         ensurePulseState { isAodPowerSave = true }
         assertShouldNotHeadsUp(buildPulseEntry())
+        assertNoEventsLogged()
     }
 
     @Test
@@ -332,30 +387,35 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         assertShouldNotHeadsUp(
             buildPulseEntry { suppressedVisualEffects = SUPPRESSED_EFFECT_AMBIENT }
         )
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPulse_visibilityOverridePrivate() {
         ensurePulseState()
         assertShouldNotHeadsUp(buildPulseEntry { visibilityOverride = VISIBILITY_PRIVATE })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPulse_importanceLow() {
         ensurePulseState()
         assertShouldNotHeadsUp(buildPulseEntry { importance = IMPORTANCE_LOW })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotPulse_hiddenOnKeyguard() {
         ensurePulseState({ keyguardShouldHideNotification = true })
         assertShouldNotHeadsUp(buildPulseEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldPulse_defaultLegacySuppressor() {
         ensurePulseState()
         withLegacySuppressor(neverSuppresses) { assertShouldHeadsUp(buildPulseEntry()) }
+        assertNoEventsLogged()
     }
 
     @Test
@@ -364,6 +424,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         withLegacySuppressor(alwaysSuppressesInterruptions) {
             assertShouldNotHeadsUp(buildPulseEntry())
         }
+        assertNoEventsLogged()
     }
 
     @Test
@@ -372,6 +433,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         withLegacySuppressor(alwaysSuppressesAwakeInterruptions) {
             assertShouldHeadsUp(buildPulseEntry())
         }
+        assertNoEventsLogged()
     }
 
     @Test
@@ -380,6 +442,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         withLegacySuppressor(alwaysSuppressesAwakeHeadsUp) {
             assertShouldHeadsUp(buildPulseEntry())
         }
+        assertNoEventsLogged()
     }
 
     private fun withPeekAndPulseEntry(
@@ -401,6 +464,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             groupAlertBehavior = GROUP_ALERT_SUMMARY
         }) {
             assertShouldNotHeadsUp(it)
+            assertNoEventsLogged()
         }
     }
 
@@ -412,6 +476,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             groupAlertBehavior = GROUP_ALERT_CHILDREN
         }) {
             assertShouldHeadsUp(it)
+            assertNoEventsLogged()
         }
     }
 
@@ -423,24 +488,30 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             groupAlertBehavior = GROUP_ALERT_SUMMARY
         }) {
             assertShouldHeadsUp(it)
+            assertNoEventsLogged()
         }
     }
 
     @Test
     fun testShouldNotHeadsUp_justLaunchedFsi() {
-        withPeekAndPulseEntry({ hasJustLaunchedFsi = true }) { assertShouldNotHeadsUp(it) }
+        withPeekAndPulseEntry({ hasJustLaunchedFsi = true }) {
+            assertShouldNotHeadsUp(it)
+            assertNoEventsLogged()
+        }
     }
 
     @Test
     fun testShouldBubble_withIntentAndIcon() {
         ensureBubbleState()
         assertShouldBubble(buildBubbleEntry { bubbleIsShortcut = false })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldBubble_withShortcut() {
         ensureBubbleState()
         assertShouldBubble(buildBubbleEntry { bubbleIsShortcut = true })
+        assertNoEventsLogged()
     }
 
     @Test
@@ -453,6 +524,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                 groupAlertBehavior = GROUP_ALERT_SUMMARY
             }
         )
+        assertNoEventsLogged()
     }
 
     @Test
@@ -464,24 +536,28 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                 hasBubbleMetadata = false
             }
         )
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotBubble_missingBubbleMetadata() {
         ensureBubbleState()
         assertShouldNotBubble(buildBubbleEntry { hasBubbleMetadata = false })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotBubble_notAllowedToBubble() {
         ensureBubbleState()
         assertShouldNotBubble(buildBubbleEntry { canBubble = false })
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldBubble_defaultLegacySuppressor() {
         ensureBubbleState()
         withLegacySuppressor(neverSuppresses) { assertShouldBubble(buildBubbleEntry()) }
+        assertNoEventsLogged()
     }
 
     @Test
@@ -490,6 +566,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         withLegacySuppressor(alwaysSuppressesInterruptions) {
             assertShouldNotBubble(buildBubbleEntry())
         }
+        assertNoEventsLogged()
     }
 
     @Test
@@ -498,6 +575,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         withLegacySuppressor(alwaysSuppressesAwakeInterruptions) {
             assertShouldNotBubble(buildBubbleEntry())
         }
+        assertNoEventsLogged()
     }
 
     @Test
@@ -506,17 +584,22 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         withLegacySuppressor(alwaysSuppressesAwakeHeadsUp) {
             assertShouldBubble(buildBubbleEntry())
         }
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotBubble_hiddenOnKeyguard() {
         ensureBubbleState({ keyguardShouldHideNotification = true })
         assertShouldNotBubble(buildBubbleEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldNotFsi_noFullScreenIntent() {
-        forEachFsiState { assertShouldNotFsi(buildFsiEntry { hasFsi = false }) }
+        forEachFsiState {
+            assertShouldNotFsi(buildFsiEntry { hasFsi = false })
+            assertNoEventsLogged()
+        }
     }
 
     @Test
@@ -528,6 +611,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                     isStickyAndNotDemoted = true
                 }
             )
+            assertNoEventsLogged()
         }
     }
 
@@ -538,12 +622,16 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                 buildFsiEntry { suppressedVisualEffects = SUPPRESSED_EFFECT_FULL_SCREEN_INTENT },
                 expectWouldInterruptWithoutDnd = true
             )
+            assertNoEventsLogged()
         }
     }
 
     @Test
     fun testShouldNotFsi_notImportantEnough() {
-        forEachFsiState { assertShouldNotFsi(buildFsiEntry { importance = IMPORTANCE_DEFAULT }) }
+        forEachFsiState {
+            assertShouldNotFsi(buildFsiEntry { importance = IMPORTANCE_DEFAULT })
+            assertNoEventsLogged()
+        }
     }
 
     @Test
@@ -556,6 +644,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                 },
                 expectWouldInterruptWithoutDnd = false
             )
+            assertNoEventsLogged()
         }
     }
 
@@ -573,6 +662,27 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     @Test
+    fun testLogsFsiSuppressiveGroupAlertBehavior() {
+        ensureNotInteractiveFsiState()
+        val entry = buildFsiEntry {
+            isGrouped = true
+            isGroupSummary = true
+            groupAlertBehavior = GROUP_ALERT_CHILDREN
+        }
+
+        val decision = provider.makeUnloggedFullScreenIntentDecision(entry)
+        assertNoEventsLogged()
+
+        provider.logFullScreenIntentDecision(decision)
+        assertUiEventLogged(
+            FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR,
+            entry.sbn.uid,
+            entry.sbn.packageName
+        )
+        assertSystemEventLogged("231322873", entry.sbn.uid, "groupAlertBehavior")
+    }
+
+    @Test
     fun testShouldFsi_suppressiveGroupAlertBehavior_notGrouped() {
         forEachFsiState {
             assertShouldFsi(
@@ -582,6 +692,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
                     groupAlertBehavior = GROUP_ALERT_CHILDREN
                 }
             )
+            assertNoEventsLogged()
         }
     }
 
@@ -611,26 +722,52 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     @Test
+    fun testLogsFsiSuppressiveBubbleMetadata() {
+        ensureNotInteractiveFsiState()
+        val entry = buildFsiEntry {
+            hasBubbleMetadata = true
+            bubbleSuppressesNotification = true
+        }
+
+        val decision = provider.makeUnloggedFullScreenIntentDecision(entry)
+        assertNoEventsLogged()
+
+        provider.logFullScreenIntentDecision(decision)
+        assertUiEventLogged(
+            FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA,
+            entry.sbn.uid,
+            entry.sbn.packageName
+        )
+        assertSystemEventLogged("274759612", entry.sbn.uid, "bubbleMetadata")
+    }
+
+    @Test
     fun testShouldNotFsi_packageSuspended() {
-        forEachFsiState { assertShouldNotFsi(buildFsiEntry { packageSuspended = true }) }
+        forEachFsiState {
+            assertShouldNotFsi(buildFsiEntry { packageSuspended = true })
+            assertNoEventsLogged()
+        }
     }
 
     @Test
     fun testShouldFsi_notInteractive() {
         ensureNotInteractiveFsiState()
         assertShouldFsi(buildFsiEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldFsi_dreaming() {
         ensureDreamingFsiState()
         assertShouldFsi(buildFsiEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldFsi_keyguard() {
         ensureKeyguardFsiState()
         assertShouldFsi(buildFsiEntry())
+        assertNoEventsLogged()
     }
 
     @Test
@@ -638,6 +775,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         forEachPeekableFsiState {
             ensurePeekState()
             assertShouldNotFsi(buildFsiEntry())
+            assertNoEventsLogged()
         }
     }
 
@@ -646,6 +784,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         forEachPeekableFsiState {
             ensurePeekState { hunSnoozed = true }
             assertShouldNotFsi(buildFsiEntry())
+            assertNoEventsLogged()
         }
     }
 
@@ -653,18 +792,21 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     fun testShouldFsi_lockedShade() {
         ensureLockedShadeFsiState()
         assertShouldFsi(buildFsiEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldFsi_keyguardOccluded() {
         ensureKeyguardOccludedFsiState()
         assertShouldFsi(buildFsiEntry())
+        assertNoEventsLogged()
     }
 
     @Test
     fun testShouldFsi_deviceNotProvisioned() {
         ensureDeviceNotProvisionedFsiState()
         assertShouldFsi(buildFsiEntry())
+        assertNoEventsLogged()
     }
 
     @Test
@@ -674,9 +816,23 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     @Test
+    fun testLogsFsiNoHunOrKeyguard() {
+        ensureNoHunOrKeyguardFsiState()
+        val entry = buildFsiEntry()
+
+        val decision = provider.makeUnloggedFullScreenIntentDecision(entry)
+        assertNoEventsLogged()
+
+        provider.logFullScreenIntentDecision(decision)
+        assertUiEventLogged(FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD, entry.sbn.uid, entry.sbn.packageName)
+        assertSystemEventLogged("231322873", entry.sbn.uid, "no hun or keyguard")
+    }
+
+    @Test
     fun testShouldFsi_defaultLegacySuppressor() {
         forEachFsiState {
             withLegacySuppressor(neverSuppresses) { assertShouldFsi(buildFsiEntry()) }
+            assertNoEventsLogged()
         }
     }
 
@@ -684,6 +840,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     fun testShouldFsi_suppressInterruptions() {
         forEachFsiState {
             withLegacySuppressor(alwaysSuppressesInterruptions) { assertShouldFsi(buildFsiEntry()) }
+            assertNoEventsLogged()
         }
     }
 
@@ -693,6 +850,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
             withLegacySuppressor(alwaysSuppressesAwakeInterruptions) {
                 assertShouldFsi(buildFsiEntry())
             }
+            assertNoEventsLogged()
         }
     }
 
@@ -700,6 +858,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     fun testShouldFsi_suppressAwakeHeadsUp() {
         forEachFsiState {
             withLegacySuppressor(alwaysSuppressesAwakeHeadsUp) { assertShouldFsi(buildFsiEntry()) }
+            assertNoEventsLogged()
         }
     }
 
@@ -1080,6 +1239,45 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
         importance = IMPORTANCE_HIGH
         hasFsi = true
         run(block)
+    }
+
+    private fun assertNoEventsLogged() {
+        assertNoUiEventLogged()
+        assertNoSystemEventLogged()
+    }
+
+    private fun assertNoUiEventLogged() {
+        assertEquals(0, uiEventLogger.numLogs())
+    }
+
+    private fun assertUiEventLogged(uiEventId: UiEventEnum, uid: Int, packageName: String) {
+        assertEquals(1, uiEventLogger.numLogs())
+
+        val event = uiEventLogger.get(0)
+        assertEquals(uiEventId.id, event.eventId)
+        assertEquals(uid, event.uid)
+        assertEquals(packageName, event.packageName)
+    }
+
+    private fun assertNoSystemEventLogged() {
+        assertEquals(0, eventLog.events.size)
+    }
+
+    private fun assertSystemEventLogged(number: String, uid: Int, description: String) {
+        assertEquals(1, eventLog.events.size)
+
+        val event = eventLog.events[0]
+        assertEquals(0x534e4554, event.tag)
+
+        val value = event.value
+        assertTrue(value is Array<*>)
+
+        if (value is Array<*>) {
+            assertEquals(3, value.size)
+            assertEquals(number, value[0])
+            assertEquals(uid, value[1])
+            assertEquals(description, value[2])
+        }
     }
 
     private fun whenAgo(whenAgeMs: Long) = systemClock.currentTimeMillis() - whenAgeMs
