@@ -2018,6 +2018,8 @@ public final class MediaDrm implements AutoCloseable {
      * {@link #HDCP_V2_1},
      * {@link #HDCP_V2_2},
      * {@link #HDCP_V2_3}
+     *
+     * @removed mistakenly exposed previously
      */
     @Deprecated
     @Retention(RetentionPolicy.SOURCE)
@@ -2121,6 +2123,8 @@ public final class MediaDrm implements AutoCloseable {
      * {@link #SECURITY_LEVEL_HW_SECURE_CRYPTO},
      * {@link #SECURITY_LEVEL_HW_SECURE_DECODE},
      * {@link #SECURITY_LEVEL_HW_SECURE_ALL}
+     *
+     * @removed mistakenly exposed previously
      */
     @Deprecated
     @Retention(RetentionPolicy.SOURCE)
