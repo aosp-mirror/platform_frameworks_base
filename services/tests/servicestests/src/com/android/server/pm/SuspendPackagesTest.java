@@ -30,7 +30,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.app.AppGlobals;
-import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
@@ -282,16 +281,12 @@ public class SuspendPackagesTest {
         };
         iAppOps.startWatchingMode(code, TEST_APP_PACKAGE_NAME, watcher);
         final int testPackageUid = mPackageManager.getPackageUid(TEST_APP_PACKAGE_NAME, 0);
-        AttributionSource attributionSource =
-                new AttributionSource.Builder(testPackageUid)
-                        .setPackageName(TEST_APP_PACKAGE_NAME)
-                        .build();
-        int opMode = iAppOps.checkOperationWithState(code, attributionSource.asState());
+        int opMode = iAppOps.checkOperation(code, testPackageUid, TEST_APP_PACKAGE_NAME);
         assertEquals("Op " + opToName(code) + " disallowed for unsuspended package", MODE_ALLOWED,
                 opMode);
         suspendTestPackage(null, null, null);
         assertTrue("AppOpsWatcher did not callback", latch.await(5, TimeUnit.SECONDS));
-        opMode = iAppOps.checkOperationWithState(code, attributionSource.asState());
+        opMode = iAppOps.checkOperation(code, testPackageUid, TEST_APP_PACKAGE_NAME);
         assertEquals("Op " + opToName(code) + " allowed for suspended package", MODE_IGNORED,
                 opMode);
         iAppOps.stopWatchingMode(watcher);

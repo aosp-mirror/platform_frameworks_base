@@ -42,22 +42,18 @@ import com.android.internal.app.MessageSamplingConfig;
 // frameworks/native/libs/permission/include/binder/IAppOpsService.h must match the order here.
 // Please be careful to respect both these issues when modifying this file.
 interface IAppOpsService {
-    // Deprecated, use checkOperationWithState instead.
+    // These methods are also called by native code, so please be careful that the number in
+    // frameworks/native/libs/permission/include/binder/IAppOpsService.h matches the ordering here.
     int checkOperation(int code, int uid, String packageName);
-    // Deprecated, use noteOperationWithState instead.
     SyncNotedAppOp noteOperation(int code, int uid, String packageName, @nullable String attributionTag,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage);
-    // Deprecated, use startOperationWithState instead.
     SyncNotedAppOp startOperation(IBinder clientId, int code, int uid, String packageName,
             @nullable String attributionTag, boolean startIfModeDefault,
             boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
             int attributionFlags, int attributionChainId);
-    // Deprecated, use finishOperationWithState instead.
     @UnsupportedAppUsage
     void finishOperation(IBinder clientId, int code, int uid, String packageName,
             @nullable String attributionTag);
-    // These methods are also called by native code, so please be careful that the number in
-    // frameworks/native/libs/permission/include/binder/IAppOpsService.h matches the ordering here.
     void startWatchingMode(int op, String packageName, IAppOpsCallback callback);
     void stopWatchingMode(IAppOpsCallback callback);
     int permissionToOpCode(String permission);
@@ -138,33 +134,20 @@ interface IAppOpsService {
     void stopWatchingAsyncNoted(String packageName, IAppOpsAsyncNotedCallback callback);
     List<AsyncNotedAppOp> extractAsyncOps(String packageName);
 
-    // Deprecated, use checkOperationWithStateRaw instead.
     int checkOperationRaw(int code, int uid, String packageName, @nullable String attributionTag);
     void reloadNonHistoricalState();
 
     void collectNoteOpCallsForValidation(String stackTrace, int op, String packageName, long version);
-    // These methods are also called by native code, so please be careful that the number in
-    // frameworks/native/libs/permission/include/binder/IAppOpsService.h matches the ordering here.
-    int checkOperationWithState(int code, in AttributionSourceState attributionSourceState);
-    int checkOperationWithStateRaw(int code, in AttributionSourceState attributionSourceState);
-    SyncNotedAppOp noteOperationWithState(int code, in AttributionSourceState attributionSourceState,
-            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage);
-    SyncNotedAppOp startOperationWithState(IBinder clientId, int code,
-            in AttributionSourceState attributionSourceState, boolean startIfModeDefault,
-            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-            int attributionFlags, int attributionChainId);
-    void finishOperationWithState(IBinder clientId, int code, in AttributionSourceState attributionSourceState);
-    // End of methods also called by native code (there may be more blocks like this of native
-    // methods later in this file).
+
     SyncNotedAppOp noteProxyOperationWithState(int code,
-            in AttributionSourceState attributionSourceStateState,
-            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-            boolean skipProxyOperation);
+                in AttributionSourceState attributionSourceStateState,
+                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+                boolean skipProxyOperation);
     SyncNotedAppOp startProxyOperationWithState(IBinder clientId, int code,
-            in AttributionSourceState attributionSourceStateState, boolean startIfModeDefault,
-            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
-            boolean skipProxyOperation, int proxyAttributionFlags, int proxiedAttributionFlags,
-            int attributionChainId);
+                in AttributionSourceState attributionSourceStateState, boolean startIfModeDefault,
+                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+                boolean skipProxyOperation, int proxyAttributionFlags, int proxiedAttributionFlags,
+                int attributionChainId);
     void finishProxyOperationWithState(IBinder clientId, int code,
-            in AttributionSourceState attributionSourceStateState, boolean skipProxyOperation);
+                in AttributionSourceState attributionSourceStateState, boolean skipProxyOperation);
 }

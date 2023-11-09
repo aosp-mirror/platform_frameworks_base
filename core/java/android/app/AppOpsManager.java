@@ -8357,9 +8357,7 @@ public class AppOpsManager {
      */
     public int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName) {
         try {
-            final AttributionSource attributionSource =
-                    new AttributionSource.Builder(uid).setPackageName(packageName).build();
-            return mService.checkOperationWithStateRaw(op, attributionSource.asState());
+            return mService.checkOperationRaw(op, uid, packageName, null);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8522,12 +8520,7 @@ public class AppOpsManager {
                 }
             }
 
-            final AttributionSource attributionSource =
-                    new AttributionSource.Builder(uid)
-                            .setPackageName(packageName)
-                            .setAttributionTag(attributionTag)
-                            .build();
-            SyncNotedAppOp syncOp = mService.noteOperationWithState(op, attributionSource.asState(),
+            SyncNotedAppOp syncOp = mService.noteOperation(op, uid, packageName, attributionTag,
                     collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
 
             if (syncOp.getOpMode() == MODE_ALLOWED) {
@@ -8767,9 +8760,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public int checkOp(int op, int uid, String packageName) {
         try {
-            final AttributionSource attributionSource =
-                    new AttributionSource.Builder(uid).setPackageName(packageName).build();
-            int mode = mService.checkOperationWithState(op, attributionSource.asState());
+            int mode = mService.checkOperation(op, uid, packageName);
             if (mode == MODE_ERRORED) {
                 throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
             }
@@ -8790,9 +8781,7 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public int checkOpNoThrow(int op, int uid, String packageName) {
         try {
-            final AttributionSource attributionSource =
-                    new AttributionSource.Builder(uid).setPackageName(packageName).build();
-            int mode = mService.checkOperationWithState(op, attributionSource.asState());
+            int mode = mService.checkOperation(op, uid, packageName);
             return mode == AppOpsManager.MODE_FOREGROUND ? AppOpsManager.MODE_ALLOWED : mode;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -9037,14 +9026,8 @@ public class AppOpsManager {
                 }
             }
 
-            final AttributionSource attributionSource =
-                    new AttributionSource.Builder(uid)
-                            .setPackageName(packageName)
-                            .setAttributionTag(attributionTag)
-                            .build();
-            SyncNotedAppOp syncOp = mService.startOperationWithState(token, op,
-                    attributionSource.asState(), startIfModeDefault,
-                    collectionMode == COLLECT_ASYNC, message,
+            SyncNotedAppOp syncOp = mService.startOperation(token, op, uid, packageName,
+                    attributionTag, startIfModeDefault, collectionMode == COLLECT_ASYNC, message,
                     shouldCollectMessage, attributionFlags, attributionChainId);
 
             if (syncOp.getOpMode() == MODE_ALLOWED) {
@@ -9257,12 +9240,7 @@ public class AppOpsManager {
     public void finishOp(IBinder token, int op, int uid, @NonNull String packageName,
             @Nullable String attributionTag) {
         try {
-            final AttributionSource attributionSource =
-                    new AttributionSource.Builder(uid)
-                            .setPackageName(packageName)
-                            .setAttributionTag(attributionTag)
-                            .build();
-            mService.finishOperationWithState(token, op, attributionSource.asState());
+            mService.finishOperation(token, op, uid, packageName, attributionTag);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

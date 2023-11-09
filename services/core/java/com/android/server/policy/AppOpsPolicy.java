@@ -50,12 +50,11 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintConsumer;
 import com.android.internal.util.function.QuintFunction;
-import com.android.internal.util.function.TriConsumer;
-import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
 import com.android.server.LocalServices;
 
@@ -230,12 +229,10 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     @Override
-    public int checkOperation(int code, AttributionSource attributionSource, boolean raw,
-            TriFunction<Integer, AttributionSource, Boolean, Integer> superImpl) {
-        final int uid = attributionSource.getUid();
-        final AttributionSource resolvedAttributionSource =
-                attributionSource.withUid(resolveUid(code, uid));
-        return superImpl.apply(code, resolvedAttributionSource, raw);
+    public int checkOperation(int code, int uid, String packageName,
+            @Nullable String attributionTag, boolean raw,
+            QuintFunction<Integer, Integer, String, String, Boolean, Integer> superImpl) {
+        return superImpl.apply(code, resolveUid(code, uid), packageName, attributionTag, raw);
     }
 
     @Override
@@ -245,25 +242,21 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     @Override
-    public SyncNotedAppOp noteOperation(int code, AttributionSource attributionSource,
-            boolean shouldCollectAsyncNotedOp, @Nullable
-             String message, boolean shouldCollectMessage,
-            @NonNull QuintFunction<Integer, AttributionSource, Boolean, String, Boolean,
-                    SyncNotedAppOp> superImpl) {
-        final int uid = attributionSource.getUid();
-        final AttributionSource resolvedAttributionSource =
-                attributionSource.withUid(resolveUid(code, uid));
-        return superImpl.apply(resolveDatasourceOp(code, uid, attributionSource.getPackageName(),
-                attributionSource.getAttributionTag()), resolvedAttributionSource,
-                shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+    public SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
+            @Nullable String attributionTag, boolean shouldCollectAsyncNotedOp, @Nullable
+            String message, boolean shouldCollectMessage, @NonNull HeptFunction<Integer, Integer,
+                    String, String, Boolean, String, Boolean, SyncNotedAppOp> superImpl) {
+        return superImpl.apply(resolveDatasourceOp(code, uid, packageName, attributionTag),
+                resolveUid(code, uid), packageName, attributionTag, shouldCollectAsyncNotedOp,
+                message, shouldCollectMessage);
     }
 
     @Override
     public SyncNotedAppOp noteProxyOperation(int code, @NonNull AttributionSource attributionSource,
             boolean shouldCollectAsyncNotedOp, @Nullable String message,
             boolean shouldCollectMessage, boolean skipProxyOperation, @NonNull HexFunction<Integer,
-            AttributionSource, Boolean, String, Boolean, Boolean,
-            SyncNotedAppOp> superImpl) {
+                    AttributionSource, Boolean, String, Boolean, Boolean,
+                    SyncNotedAppOp> superImpl) {
         return superImpl.apply(resolveDatasourceOp(code, attributionSource.getUid(),
                 attributionSource.getPackageName(), attributionSource.getAttributionTag()),
                 attributionSource, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
@@ -271,21 +264,17 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     @Override
-    public SyncNotedAppOp startOperation(IBinder token, int code,
-            AttributionSource attributionSource,
+    public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
+            @Nullable String packageName, @Nullable String attributionTag,
             boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
             boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
-            int attributionChainId,
-            @NonNull NonaFunction<IBinder, Integer, AttributionSource, Boolean, Boolean, String,
-                    Boolean, Integer, Integer,
-                    SyncNotedAppOp> superImpl) {
-        final int uid = attributionSource.getUid();
-        final AttributionSource resolvedAttributionSource =
-                attributionSource.withUid(resolveUid(code, uid));
-        return superImpl.apply(token, resolveDatasourceOp(code, uid,
-                attributionSource.getPackageName(), attributionSource.getAttributionTag()),
-                resolvedAttributionSource, startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                shouldCollectMessage, attributionFlags, attributionChainId);
+            int attributionChainId, @NonNull UndecFunction<IBinder, Integer, Integer, String,
+                    String, Boolean, Boolean, String, Boolean, Integer, Integer,
+            SyncNotedAppOp> superImpl) {
+        return superImpl.apply(token, resolveDatasourceOp(code, uid, packageName, attributionTag),
+                resolveUid(code, uid), packageName, attributionTag, startIfModeDefault,
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage, attributionFlags,
+                attributionChainId);
     }
 
     @Override
@@ -304,14 +293,11 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     }
 
     @Override
-    public void finishOperation(IBinder clientId, int code, AttributionSource attributionSource,
-            @NonNull TriConsumer<IBinder, Integer, AttributionSource> superImpl) {
-        final int uid = attributionSource.getUid();
-        final AttributionSource resolvedAttributionSource =
-                attributionSource.withUid(resolveUid(code, uid));
-        superImpl.accept(clientId, resolveDatasourceOp(code, uid,
-                 attributionSource.getPackageName(), attributionSource.getAttributionTag()),
-                 resolvedAttributionSource);
+    public void finishOperation(IBinder clientId, int code, int uid, String packageName,
+            String attributionTag,
+            @NonNull QuintConsumer<IBinder, Integer, Integer, String, String> superImpl) {
+        superImpl.accept(clientId, resolveDatasourceOp(code, uid, packageName, attributionTag),
+                resolveUid(code, uid), packageName, attributionTag);
     }
 
     @Override
