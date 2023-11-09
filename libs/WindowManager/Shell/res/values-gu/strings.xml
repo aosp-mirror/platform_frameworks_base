@@ -34,7 +34,8 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"બતાવો"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"વિભાજિત સ્ક્રીન સાથે ઍપ કદાચ કામ ન કરે"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ઍપ વિભાજિત સ્ક્રીનને સપોર્ટ કરતી નથી"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"આ ઍપ માત્ર 1 વિન્ડોમાં ખોલી શકાય છે."</string>
+    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
+    <skip />
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ઍપ્લિકેશન ગૌણ ડિસ્પ્લે પર કદાચ કામ ન કરે."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ઍપ્લિકેશન ગૌણ ડિસ્પ્લે પર લૉન્ચનું સમર્થન કરતી નથી."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"સ્ક્રીનને વિભાજિત કરતું વિભાજક"</string>
