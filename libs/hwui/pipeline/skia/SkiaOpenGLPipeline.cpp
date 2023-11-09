@@ -187,11 +187,12 @@ IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(
         dumpResourceCacheUsage();
     }
 
-    return {true, IRenderPipeline::DrawResult::kUnknownTime};
+    return {true, IRenderPipeline::DrawResult::kUnknownTime, android::base::unique_fd{}};
 }
 
-bool SkiaOpenGLPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
-                                     FrameInfo* currentFrameInfo, bool* requireSwap) {
+bool SkiaOpenGLPipeline::swapBuffers(const Frame& frame, IRenderPipeline::DrawResult& drawResult,
+                                     const SkRect& screenDirty, FrameInfo* currentFrameInfo,
+                                     bool* requireSwap) {
     GL_CHECKPOINT(LOW);
 
     // Even if we decided to cancel the frame, from the perspective of jank
@@ -202,7 +203,7 @@ bool SkiaOpenGLPipeline::swapBuffers(const Frame& frame, bool drew, const SkRect
         return false;
     }
 
-    *requireSwap = drew || mEglManager.damageRequiresSwap();
+    *requireSwap = drawResult.success || mEglManager.damageRequiresSwap();
 
     if (*requireSwap && (CC_UNLIKELY(!mEglManager.swapBuffers(frame, screenDirty)))) {
         return false;

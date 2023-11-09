@@ -531,32 +531,21 @@ struct DestroySemaphoreInfo {
     PFN_vkDestroySemaphore mDestroyFunction;
     VkDevice mDevice;
     VkSemaphore mSemaphore;
-    // We need to make sure we don't delete the VkSemaphore until it is done being used by both Skia
-    // (including by the GPU) and inside the VulkanManager. So we always start with two refs, one
-    // owned by Skia and one owned by the VulkanManager. The refs are decremented each time
-    // destroy_semaphore is called with this object. Skia will call destroy_semaphore once it is
-    // done with the semaphore and the GPU has finished work on the semaphore. The VulkanManager
-    // calls destroy_semaphore after sending the semaphore to Skia and exporting it if need be.
-    int mRefs = 2;
 
     DestroySemaphoreInfo(PFN_vkDestroySemaphore destroyFunction, VkDevice device,
                          VkSemaphore semaphore)
             : mDestroyFunction(destroyFunction), mDevice(device), mSemaphore(semaphore) {}
+
+    ~DestroySemaphoreInfo() { mDestroyFunction(mDevice, mSemaphore, nullptr); }
 };
 
 static void destroy_semaphore(void* context) {
     DestroySemaphoreInfo* info = reinterpret_cast<DestroySemaphoreInfo*>(context);
-    --info->mRefs;
-    if (!info->mRefs) {
-        info->mDestroyFunction(info->mDevice, info->mSemaphore, nullptr);
-        delete info;
-    }
+    delete info;
 }
 
-nsecs_t VulkanManager::finishFrame(SkSurface* surface) {
+VulkanManager::VkDrawResult VulkanManager::finishFrame(SkSurface* surface) {
     ATRACE_NAME("Vulkan finish frame");
-    ALOGE_IF(mSwapSemaphore != VK_NULL_HANDLE || mDestroySemaphoreContext != nullptr,
-             "finishFrame already has an outstanding semaphore");
 
     VkExportSemaphoreCreateInfo exportInfo;
     exportInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
@@ -576,11 +565,11 @@ nsecs_t VulkanManager::finishFrame(SkSurface* surface) {
 
     GrFlushInfo flushInfo;
     if (err == VK_SUCCESS) {
-        mDestroySemaphoreContext = new DestroySemaphoreInfo(mDestroySemaphore, mDevice, semaphore);
         flushInfo.fNumSemaphores = 1;
         flushInfo.fSignalSemaphores = &backendSemaphore;
         flushInfo.fFinishedProc = destroy_semaphore;
-        flushInfo.fFinishedContext = mDestroySemaphoreContext;
+        flushInfo.fFinishedContext =
+                new DestroySemaphoreInfo(mDestroySemaphore, mDevice, semaphore);
     } else {
         semaphore = VK_NULL_HANDLE;
     }
@@ -589,10 +578,11 @@ nsecs_t VulkanManager::finishFrame(SkSurface* surface) {
     GrSemaphoresSubmitted submitted = context->flush(
             surface, SkSurfaces::BackendSurfaceAccess::kPresent, flushInfo);
     context->submit();
-    const nsecs_t submissionTime = systemTime();
+    VkDrawResult drawResult{
+            .submissionTime = systemTime(),
+    };
     if (semaphore != VK_NULL_HANDLE) {
         if (submitted == GrSemaphoresSubmitted::kYes) {
-            mSwapSemaphore = semaphore;
             if (mFrameBoundaryANDROID) {
                 // retrieve VkImage used as render target
                 VkImage image = VK_NULL_HANDLE;
@@ -611,45 +601,37 @@ nsecs_t VulkanManager::finishFrame(SkSurface* surface) {
                 }
                 // frameBoundaryANDROID needs to know about mSwapSemaphore, but
                 // it won't wait on it.
-                mFrameBoundaryANDROID(mDevice, mSwapSemaphore, image);
+                mFrameBoundaryANDROID(mDevice, semaphore, image);
             }
-        } else {
-            destroy_semaphore(mDestroySemaphoreContext);
-            mDestroySemaphoreContext = nullptr;
         }
+        VkSemaphoreGetFdInfoKHR getFdInfo;
+        getFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
+        getFdInfo.pNext = nullptr;
+        getFdInfo.semaphore = semaphore;
+        getFdInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+
+        int fenceFd = -1;
+        err = mGetSemaphoreFdKHR(mDevice, &getFdInfo, &fenceFd);
+        ALOGE_IF(VK_SUCCESS != err, "VulkanManager::swapBuffers(): Failed to get semaphore Fd");
+        drawResult.presentFence.reset(fenceFd);
+    } else {
+        ALOGE("VulkanManager::finishFrame(): Semaphore submission failed");
+        mQueueWaitIdle(mGraphicsQueue);
     }
+
     skiapipeline::ShaderCache::get().onVkFrameFlushed(context);
 
-    return submissionTime;
+    return drawResult;
 }
 
-void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect) {
+void VulkanManager::swapBuffers(VulkanSurface* surface, const SkRect& dirtyRect,
+                                android::base::unique_fd&& presentFence) {
     if (CC_UNLIKELY(Properties::waitForGpuCompletion)) {
         ATRACE_NAME("Finishing GPU work");
         mDeviceWaitIdle(mDevice);
     }
 
-    int fenceFd = -1;
-    if (mSwapSemaphore != VK_NULL_HANDLE) {
-        VkSemaphoreGetFdInfoKHR getFdInfo;
-        getFdInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_GET_FD_INFO_KHR;
-        getFdInfo.pNext = nullptr;
-        getFdInfo.semaphore = mSwapSemaphore;
-        getFdInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
-
-        VkResult err = mGetSemaphoreFdKHR(mDevice, &getFdInfo, &fenceFd);
-        ALOGE_IF(VK_SUCCESS != err, "VulkanManager::swapBuffers(): Failed to get semaphore Fd");
-    } else {
-        ALOGE("VulkanManager::swapBuffers(): Semaphore submission failed");
-        mQueueWaitIdle(mGraphicsQueue);
-    }
-    if (mDestroySemaphoreContext) {
-        destroy_semaphore(mDestroySemaphoreContext);
-    }
-
-    surface->presentCurrentBuffer(dirtyRect, fenceFd);
-    mSwapSemaphore = VK_NULL_HANDLE;
-    mDestroySemaphoreContext = nullptr;
+    surface->presentCurrentBuffer(dirtyRect, presentFence.release());
 }
 
 void VulkanManager::destroySurface(VulkanSurface* surface) {
@@ -753,22 +735,17 @@ status_t VulkanManager::createReleaseFence(int* nativeFence, GrDirectContext* gr
     GrBackendSemaphore backendSemaphore;
     backendSemaphore.initVulkan(semaphore);
 
-    DestroySemaphoreInfo* destroyInfo =
-            new DestroySemaphoreInfo(mDestroySemaphore, mDevice, semaphore);
     // Even if Skia fails to submit the semaphore, it will still call the destroy_semaphore callback
-    // which will remove its ref to the semaphore. The VulkanManager must still release its ref,
-    // when it is done with the semaphore.
     GrFlushInfo flushInfo;
     flushInfo.fNumSemaphores = 1;
     flushInfo.fSignalSemaphores = &backendSemaphore;
     flushInfo.fFinishedProc = destroy_semaphore;
-    flushInfo.fFinishedContext = destroyInfo;
+    flushInfo.fFinishedContext = new DestroySemaphoreInfo(mDestroySemaphore, mDevice, semaphore);
     GrSemaphoresSubmitted submitted = grContext->flush(flushInfo);
     grContext->submit();
 
     if (submitted == GrSemaphoresSubmitted::kNo) {
         ALOGE("VulkanManager::createReleaseFence: Failed to submit semaphore");
-        destroy_semaphore(destroyInfo);
         return INVALID_OPERATION;
     }
 
@@ -781,7 +758,6 @@ status_t VulkanManager::createReleaseFence(int* nativeFence, GrDirectContext* gr
     int fenceFd = 0;
 
     err = mGetSemaphoreFdKHR(mDevice, &getFdInfo, &fenceFd);
-    destroy_semaphore(destroyInfo);
     if (VK_SUCCESS != err) {
         ALOGE("VulkanManager::createReleaseFence: Failed to get semaphore Fd");
         return INVALID_OPERATION;
