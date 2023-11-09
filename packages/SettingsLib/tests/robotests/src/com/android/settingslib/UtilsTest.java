@@ -28,6 +28,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.hardware.usb.flags.Flags;
 import android.hardware.usb.UsbManager;
 import android.hardware.usb.UsbPort;
 import android.hardware.usb.UsbPortStatus;
@@ -36,6 +37,7 @@ import android.media.AudioManager;
 import android.os.BatteryManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.telephony.AccessNetworkConstants;
 import android.telephony.NetworkRegistrationInfo;
@@ -44,6 +46,7 @@ import android.text.TextUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
@@ -84,6 +87,8 @@ public class UtilsTest {
     private UsbManager mUsbManager;
     @Mock
     private UsbPortStatus mUsbPortStatus;
+
+    @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Before
     public void setUp() {
@@ -425,8 +430,38 @@ public class UtilsTest {
     }
 
     @Test
-    public void containsIncompatibleChargers_complianeWarningOther_returnTrue() {
+    public void containsIncompatibleChargers_complianeWarningOther_returnTrue_flagDisabled() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_USB_DATA_COMPLIANCE_WARNING);
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_INPUT_POWER_LIMITED_WARNING);
         setupIncompatibleCharging(UsbPortStatus.COMPLIANCE_WARNING_OTHER);
+
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isTrue();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_complianeWarningPower_returnFalse_flagDisabled() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_USB_DATA_COMPLIANCE_WARNING);
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_INPUT_POWER_LIMITED_WARNING);
+        setupIncompatibleCharging(UsbPortStatus.COMPLIANCE_WARNING_INPUT_POWER_LIMITED);
+
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_complianeWarningOther_returnFalse_flagEnabled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_USB_DATA_COMPLIANCE_WARNING);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_INPUT_POWER_LIMITED_WARNING);
+        setupIncompatibleCharging(UsbPortStatus.COMPLIANCE_WARNING_OTHER);
+
+        assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
+    }
+
+    @Test
+    public void containsIncompatibleChargers_complianeWarningPower_returnTrue_flagEnabled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_USB_DATA_COMPLIANCE_WARNING);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_INPUT_POWER_LIMITED_WARNING);
+        setupIncompatibleCharging(UsbPortStatus.COMPLIANCE_WARNING_INPUT_POWER_LIMITED);
+
         assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isTrue();
     }
 
@@ -446,7 +481,6 @@ public class UtilsTest {
     public void containsIncompatibleChargers_emptyComplianceWarnings_returnFalse() {
         setupIncompatibleCharging();
         when(mUsbPortStatus.getComplianceWarnings()).thenReturn(new int[1]);
-
         assertThat(Utils.containsIncompatibleChargers(mContext, TAG)).isFalse();
     }
 
@@ -476,7 +510,7 @@ public class UtilsTest {
     }
 
     private void setupIncompatibleCharging() {
-        setupIncompatibleCharging(UsbPortStatus.COMPLIANCE_WARNING_OTHER);
+        setupIncompatibleCharging(UsbPortStatus.COMPLIANCE_WARNING_DEBUG_ACCESSORY);
     }
 
     private void setupIncompatibleCharging(int complianceWarningType) {
