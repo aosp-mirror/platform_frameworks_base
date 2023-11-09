@@ -11401,17 +11401,16 @@ public class NotificationManagerService extends SystemService {
                             }
                         }
                     }
-                }
 
-                // clean up anything in the disallowed pkgs list
-                for (int i = 0; i < pkgList.length; i++) {
-                    String pkg = pkgList[i];
-                    for (int j = mRequestedNotificationListeners.size() - 1; j >= 0; j--) {
-                        NotificationListenerFilter nlf =
-                                mRequestedNotificationListeners.valueAt(j);
-
-                        VersionedPackage ai = new VersionedPackage(pkg, uidList[i]);
-                        nlf.removePackage(ai);
+                    // Clean up removed package from the disallowed packages list
+                    for (int i = 0; i < pkgList.length; i++) {
+                        String pkg = pkgList[i];
+                        for (int j = mRequestedNotificationListeners.size() - 1; j >= 0; j--) {
+                            NotificationListenerFilter nlf =
+                                    mRequestedNotificationListeners.valueAt(j);
+                            VersionedPackage ai = new VersionedPackage(pkg, uidList[i]);
+                            nlf.removePackage(ai);
+                        }
                     }
                 }
             }
