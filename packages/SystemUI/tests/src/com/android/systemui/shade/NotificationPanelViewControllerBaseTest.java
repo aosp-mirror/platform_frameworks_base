@@ -88,7 +88,8 @@ import com.android.systemui.common.ui.data.repository.FakeConfigurationRepositor
 import com.android.systemui.common.ui.view.LongPressHandlingView;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.FakeFeatureFlagsClassic;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
@@ -228,7 +229,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected ScreenOffAnimationController mScreenOffAnimationController;
     @Mock protected NotificationPanelView mView;
     @Mock protected LayoutInflater mLayoutInflater;
-    @Mock protected FeatureFlags mFeatureFlags;
     @Mock protected DynamicPrivacyController mDynamicPrivacyController;
     @Mock protected StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
     @Mock protected KeyguardStateController mKeyguardStateController;
@@ -335,6 +335,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private KeyguardClockPositionAlgorithm mKeyguardClockPositionAlgorithm;
 
     protected final int mMaxUdfpsBurnInOffsetY = 5;
+    protected FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     protected FakeKeyguardRepository mFakeKeyguardRepository;
     protected KeyguardInteractor mKeyguardInteractor;
@@ -368,6 +369,13 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mFeatureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, false);
+        mFeatureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false);
+        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_VIEW, false);
+        mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
+        mFeatureFlags.set(Flags.MIGRATE_NSSL, false);
+        mFeatureFlags.set(Flags.QS_USER_DETAIL_SHORTCUT, false);
+        mFeatureFlags.set(Flags.ONE_WAY_HAPTICS_API_MIGRATION, false);
         mMainDispatcher = getMainDispatcher();
         KeyguardInteractorFactory.WithDependencies keyguardInteractorDeps =
                 KeyguardInteractorFactory.create();
