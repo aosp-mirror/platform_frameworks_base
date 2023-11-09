@@ -36,6 +36,7 @@ import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -44,7 +45,6 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.never
-import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -59,19 +59,22 @@ class BouncerActionButtonInteractorTest : SysuiTestCase() {
     @Mock private lateinit var tableLogger: TableLogBuffer
     @Mock private lateinit var telecomManager: TelecomManager
 
-    private val utils = SceneTestUtils(this)
-    private val testScope = utils.testScope
+    private lateinit var utils: SceneTestUtils
+    private lateinit var testScope: TestScope
+    private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
+
     private val metricsLogger = FakeMetricsLogger()
     private var currentUserId: Int = 0
     private var needsEmergencyAffordance = true
-
-    private lateinit var mobileConnectionsRepository: FakeMobileConnectionsRepository
 
     private lateinit var underTest: BouncerActionButtonInteractor
 
     @Before
     fun setUp() {
+        utils = SceneTestUtils(this)
+        testScope = utils.testScope
         MockitoAnnotations.initMocks(this)
+
         overrideResource(R.string.lockscreen_emergency_call, MESSAGE_EMERGENCY_CALL)
         overrideResource(R.string.lockscreen_return_to_call, MESSAGE_RETURN_TO_CALL)
         overrideResource(
