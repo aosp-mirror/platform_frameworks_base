@@ -3255,9 +3255,4 @@
     <string name="privacy_dialog_active_app_usage_2">In use by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g> \u2022 <xliff:g id="proxy_label" example="Speech services">%3$s</xliff:g>)</string>
     <!-- Label for recent app usage of a phone sensor with sub-attribution and proxy label in the privacy dialog [CHAR LIMIT=NONE] -->
     <string name="privacy_dialog_recent_app_usage_2">Recently used by <xliff:g id="app_name" example="Gmail">%1$s</xliff:g> (<xliff:g id="attribution_label" example="For Wallet">%2$s</xliff:g> \u2022 <xliff:g id="proxy_label" example="Speech services">%3$s</xliff:g>)</string>
-
-    <!-- Content description for keyboard backlight brightness dialog [CHAR LIMIT=NONE] -->
-    <string name="keyboard_backlight_dialog_title">Keyboard backlight</string>
-    <!-- Content description for keyboard backlight brightness value [CHAR LIMIT=NONE] -->
-    <string name="keyboard_backlight_value">Level %1$d of %2$d</string>
 </resources>
