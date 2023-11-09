@@ -34,7 +34,6 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_VOLUME_CONTROL;
 import static com.android.internal.jank.InteractionJankMonitor.Configuration.Builder;
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.volume.Events.DISMISS_REASON_POSTURE_CHANGED;
 import static com.android.systemui.volume.Events.DISMISS_REASON_SETTINGS_CLICKED;
 
@@ -83,7 +82,6 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
-import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.AccessibilityDelegate;
@@ -120,7 +118,6 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Prefs;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialog;
@@ -304,7 +301,6 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     private final DevicePostureController mDevicePostureController;
     private @DevicePostureController.DevicePostureInt int mDevicePosture;
     private int mOrientation;
-    private final FeatureFlags mFeatureFlags;
     private final Lazy<SecureSettings> mSecureSettings;
     private int mDialogTimeoutMillis;
 
@@ -323,9 +319,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
             DevicePostureController devicePostureController,
             Looper looper,
             DumpManager dumpManager,
-            FeatureFlags featureFlags,
             Lazy<SecureSettings> secureSettings) {
-        mFeatureFlags = featureFlags;
         mContext =
                 new ContextThemeWrapper(context, R.style.volume_dialog_theme);
         mHandler = new H(looper);
@@ -1373,14 +1367,12 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
 
     private void provideTouchFeedbackH(int newRingerMode) {
         VibrationEffect effect = null;
-        int hapticConstant = HapticFeedbackConstants.NO_HAPTICS;
         switch (newRingerMode) {
             case RINGER_MODE_NORMAL:
                 mController.scheduleTouchFeedback();
                 break;
             case RINGER_MODE_SILENT:
                 effect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
-                hapticConstant = HapticFeedbackConstants.TOGGLE_OFF;
                 break;
             case RINGER_MODE_VIBRATE:
                 // Feedback handled by onStateChange, for feedback both when user toggles
@@ -1388,11 +1380,8 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 break;
             default:
                 effect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
-                hapticConstant = HapticFeedbackConstants.TOGGLE_ON;
         }
-        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-            mDialogView.performHapticFeedback(hapticConstant);
-        } else if (effect != null) {
+        if (effect != null) {
             mController.vibrate(effect);
         }
     }
@@ -1820,22 +1809,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
                 && mState.ringerModeInternal != -1
                 && mState.ringerModeInternal != state.ringerModeInternal
                 && state.ringerModeInternal == AudioManager.RINGER_MODE_VIBRATE) {
-
-            if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-                if (mShowing) {
-                    // The dialog view is responsible for triggering haptics in the oneway API
-                    mDialogView.performHapticFeedback(HapticFeedbackConstants.TOGGLE_ON);
-                }
-                /*
-                TODO(b/290642122): If the dialog is not showing, we have the case where haptics is
-                enabled by dragging the volume slider of Settings to a value of 0. This must be
-                handled by view Slices in Settings whilst using the performHapticFeedback API.
-                 */
-
-            } else {
-                // Old behavior only active if the oneway API is not used.
-                mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK));
-            }
+            mController.vibrate(VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK));
         }
         mState = state;
         mDynamic.clear();
