@@ -1684,7 +1684,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Kaldır"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ses seviyesi önerilen düzeyin üzerine yükseltilsin mi?\n\nUzun süre yüksek ses seviyesinde dinlemek işitme duyunuza zarar verebilir."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Yüksek sesle dinlemeye devam edilsin mi?\n\nKulaklığın sesi önerilenden daha uzun süre yüksek düzeyde kaldı ve bu durum işitme kaybına neden olabilir"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Yüksek sesle dinlemeye devam edilsin mi?\n\nKulaklığın sesinin önerilenden uzun süre yüksek düzeyde kalması işitme kaybına neden olabilir"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Yüksek ses algılandı\n\nKulaklığın ses düzeyi önerilenden yüksek. Bu durum işitme kaybına neden olabilir"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Erişilebilirlik Kısayolu Kullanılsın mı?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kısayol açıkken ses düğmelerinin ikisini birden 3 saniyeliğine basılı tutmanız bir erişilebilirlik özelliğini başlatır."</string>
