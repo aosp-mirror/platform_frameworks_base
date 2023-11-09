@@ -129,7 +129,7 @@ public final class ApduServiceInfo implements Parcelable {
     /**
      * State of the service for CATEGORY_OTHER selection
      */
-    private boolean mOtherServiceSelectionState;
+    private boolean mOtherServiceEnabled;
 
     /**
      * @hide
@@ -150,10 +150,10 @@ public final class ApduServiceInfo implements Parcelable {
             List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, int bannerResource, int uid,
             String settingsActivityName, String offHost, String staticOffHost,
-            boolean isSelected) {
+            boolean isEnabled) {
         this(info, onHost, description, staticAidGroups, dynamicAidGroups,
                 requiresUnlock, onHost ? true : false, bannerResource, uid,
-                settingsActivityName, offHost, staticOffHost, isSelected);
+                settingsActivityName, offHost, staticOffHost, isEnabled);
     }
 
     /**
@@ -162,7 +162,7 @@ public final class ApduServiceInfo implements Parcelable {
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
             List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, boolean requiresScreenOn, int bannerResource, int uid,
-            String settingsActivityName, String offHost, String staticOffHost, boolean isSelected) {
+            String settingsActivityName, String offHost, String staticOffHost, boolean isEnabled) {
         this.mService = info;
         this.mDescription = description;
         this.mStaticAidGroups = new HashMap<String, AidGroup>();
@@ -181,7 +181,7 @@ public final class ApduServiceInfo implements Parcelable {
         this.mBannerResourceId = bannerResource;
         this.mUid = uid;
         this.mSettingsActivityName = settingsActivityName;
-        this.mOtherServiceSelectionState = isSelected;
+        this.mOtherServiceEnabled = isEnabled;
 
     }
 
@@ -372,7 +372,7 @@ public final class ApduServiceInfo implements Parcelable {
         // Set uid
         mUid = si.applicationInfo.uid;
 
-        mOtherServiceSelectionState = false;    // support other category
+        mOtherServiceEnabled = false;    // support other category
 
     }
 
@@ -744,7 +744,7 @@ public final class ApduServiceInfo implements Parcelable {
         dest.writeInt(mUid);
         dest.writeString(mSettingsActivityName);
 
-        dest.writeInt(mOtherServiceSelectionState ? 1 : 0);
+        dest.writeInt(mOtherServiceEnabled ? 1 : 0);
     };
 
     @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
@@ -772,11 +772,11 @@ public final class ApduServiceInfo implements Parcelable {
                     int bannerResource = source.readInt();
                     int uid = source.readInt();
                     String settingsActivityName = source.readString();
-                    boolean isSelected = source.readInt() != 0;
+                    boolean isEnabled = source.readInt() != 0;
                     return new ApduServiceInfo(info, onHost, description, staticAidGroups,
                             dynamicAidGroups, requiresUnlock, requiresScreenOn, bannerResource, uid,
                             settingsActivityName, offHostName, staticOffHostName,
-                            isSelected);
+                            isEnabled);
                 }
 
                 @Override
@@ -807,7 +807,7 @@ public final class ApduServiceInfo implements Parcelable {
         pw.println("    Static AID groups:");
         for (AidGroup group : mStaticAidGroups.values()) {
             pw.println("        Category: " + group.getCategory()
-                    + "(selected: " + mOtherServiceSelectionState + ")");
+                    + "(enabled: " + mOtherServiceEnabled + ")");
             for (String aid : group.getAids()) {
                 pw.println("            AID: " + aid);
             }
@@ -815,7 +815,7 @@ public final class ApduServiceInfo implements Parcelable {
         pw.println("    Dynamic AID groups:");
         for (AidGroup group : mDynamicAidGroups.values()) {
             pw.println("        Category: " + group.getCategory()
-                    + "(selected: " + mOtherServiceSelectionState + ")");
+                    + "(enabled: " + mOtherServiceEnabled + ")");
             for (String aid : group.getAids()) {
                 pw.println("            AID: " + aid);
             }
@@ -827,18 +827,24 @@ public final class ApduServiceInfo implements Parcelable {
 
 
     /**
-     * @hide
+     * Enable or disable this CATEGORY_OTHER service.
+     *
+     * @param enabled true to indicate if user has enabled this service
      */
-    public void setOtherServiceState(boolean selected) {
-        mOtherServiceSelectionState = selected;
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public void setOtherServiceEnabled(boolean enabled) {
+        mOtherServiceEnabled = enabled;
     }
 
 
     /**
-     * @hide
+     * Returns whether this CATEGORY_OTHER service is enabled or not.
+     *
+     * @return true to indicate if user has enabled this service
      */
-    public boolean isSelectedOtherService() {
-        return mOtherServiceSelectionState;
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    public boolean isOtherServiceEnabled() {
+        return mOtherServiceEnabled;
     }
 
     /**
