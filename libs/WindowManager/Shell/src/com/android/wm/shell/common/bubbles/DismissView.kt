@@ -167,7 +167,11 @@ class DismissView(context: Context) : FrameLayout(context) {
         animator
             .spring(DynamicAnimation.TRANSLATION_Y, height.toFloat(),
                 spring)
-            .withEndActions({ setVisibility(View.INVISIBLE) })
+            .withEndActions({
+                visibility = View.INVISIBLE
+                circle.scaleX = 1f
+                circle.scaleY = 1f
+            })
             .start()
     }
 
