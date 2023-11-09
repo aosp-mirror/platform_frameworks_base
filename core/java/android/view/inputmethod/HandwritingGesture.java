@@ -86,6 +86,7 @@ public abstract class HandwritingGesture {
      * Granular level on which text should be operated.
      */
     @IntDef({GRANULARITY_CHARACTER, GRANULARITY_WORD})
+    @Retention(RetentionPolicy.SOURCE)
     @interface Granularity {}
 
     /**

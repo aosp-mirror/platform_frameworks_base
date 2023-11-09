@@ -47,6 +47,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -175,6 +177,7 @@ public final class DeviceAdminInfo implements Parcelable {
     public static final int HEADLESS_DEVICE_OWNER_MODE_AFFILIATED = 1;
 
     @IntDef({HEADLESS_DEVICE_OWNER_MODE_UNSUPPORTED, HEADLESS_DEVICE_OWNER_MODE_AFFILIATED})
+    @Retention(RetentionPolicy.SOURCE)
     private @interface HeadlessDeviceOwnerMode {}
 
     /** @hide */

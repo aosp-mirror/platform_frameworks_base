@@ -4762,7 +4762,7 @@ package android.hardware.hdmi {
     method public void onChange(@NonNull String);
   }
 
-  @IntDef({android.hardware.hdmi.HdmiControlManager.RESULT_SUCCESS, android.hardware.hdmi.HdmiControlManager.RESULT_TIMEOUT, android.hardware.hdmi.HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE, android.hardware.hdmi.HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE, android.hardware.hdmi.HdmiControlManager.RESULT_ALREADY_IN_PROGRESS, android.hardware.hdmi.HdmiControlManager.RESULT_EXCEPTION, android.hardware.hdmi.HdmiControlManager.RESULT_INCORRECT_MODE, android.hardware.hdmi.HdmiControlManager.RESULT_COMMUNICATION_FAILED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS) public static @interface HdmiControlManager.ControlCallbackResult {
+  @IntDef({android.hardware.hdmi.HdmiControlManager.RESULT_SUCCESS, android.hardware.hdmi.HdmiControlManager.RESULT_TIMEOUT, android.hardware.hdmi.HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE, android.hardware.hdmi.HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE, android.hardware.hdmi.HdmiControlManager.RESULT_ALREADY_IN_PROGRESS, android.hardware.hdmi.HdmiControlManager.RESULT_EXCEPTION, android.hardware.hdmi.HdmiControlManager.RESULT_INCORRECT_MODE, android.hardware.hdmi.HdmiControlManager.RESULT_COMMUNICATION_FAILED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface HdmiControlManager.ControlCallbackResult {
   }
 
   public static interface HdmiControlManager.HotplugEventListener {

@@ -24,6 +24,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -83,6 +85,7 @@ public final class CallAttributes implements Parcelable {
 
     /** @hide */
     @IntDef(value = {DIRECTION_INCOMING, DIRECTION_OUTGOING})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface Direction {
     }
     /**
@@ -96,6 +99,7 @@ public final class CallAttributes implements Parcelable {
 
     /** @hide */
     @IntDef(value = {AUDIO_CALL, VIDEO_CALL})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface CallType {
     }
     /**
@@ -110,6 +114,7 @@ public final class CallAttributes implements Parcelable {
 
     /** @hide */
     @IntDef(value = {SUPPORTS_SET_INACTIVE, SUPPORTS_STREAM, SUPPORTS_TRANSFER}, flag = true)
+    @Retention(RetentionPolicy.SOURCE)
     public @interface CallCapability {
     }
     /**

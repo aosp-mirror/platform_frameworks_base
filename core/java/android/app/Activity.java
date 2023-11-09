@@ -23,7 +23,9 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
+
 import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
+
 import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.AnimRes;
@@ -1000,6 +1002,7 @@ public class Activity extends ContextThemeWrapper
             FULLSCREEN_MODE_REQUEST_EXIT,
             FULLSCREEN_MODE_REQUEST_ENTER
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface FullscreenModeRequest {}
 
     /** Request type of {@link #requestFullscreenMode(int, OutcomeReceiver)}, to request exiting the
@@ -1016,6 +1019,7 @@ public class Activity extends ContextThemeWrapper
             OVERRIDE_TRANSITION_OPEN,
             OVERRIDE_TRANSITION_CLOSE
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface OverrideTransition {}
 
     /**

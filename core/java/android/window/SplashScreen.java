@@ -33,6 +33,8 @@ import android.util.Log;
 import android.util.Singleton;
 import android.util.Slog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -65,6 +67,7 @@ public interface SplashScreen {
             SPLASH_SCREEN_STYLE_SOLID_COLOR,
             SPLASH_SCREEN_STYLE_ICON
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface SplashScreenStyle {}
 
     /**
