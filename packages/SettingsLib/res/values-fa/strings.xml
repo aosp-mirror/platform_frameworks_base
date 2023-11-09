@@ -97,16 +97,12 @@
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"فعال، <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> شارژ باتری"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"فعال، چپ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> باتری، راست: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> باتری"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> شارژ باتری"</string>
-    <!-- no translation found for tv_bluetooth_battery_level (8786353985605532846) -->
-    <skip />
+    <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"باتری <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"چپ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> باتری، راست: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> باتری"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered_left (2952823007648782646) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right (6525710737740083276) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"چپ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"راست <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"فعال"</string>
-    <!-- no translation found for bluetooth_saved_device (4895871321722311428) -->
-    <skip />
+    <string name="bluetooth_saved_device" msgid="4895871321722311428">"ذخیره‌شده"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"فعال، فقط چپ"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"فعال، فقط راست"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"فعال، چپ و راست"</string>
@@ -440,12 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"فرض شود برنامه‌ها از قالب‌های مدرن پشتیبانی می‌کنند"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"نمایش اعلان‌های تراتبدیل"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"غیرفعال کردن حافظه پنهان تراتبدیل"</string>
-    <!-- no translation found for widevine_settings_title (4023329801172572917) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_title (4987972688770202547) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_summary (3080790841069996016) -->
-    <skip />
+    <string name="widevine_settings_title" msgid="4023329801172572917">"‏تنظیمات Widevine"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"‏اجرای اجباری «بازگشت به L3»"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"‏برای اجرای اجباری «بازگشت به L3»، انتخاب کنید"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"سرویس‌های در حال اجرا"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"مشاهده و کنترل سرویس‌های در حال اجرای فعلی"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"اجرای وب‌نما"</string>
@@ -569,22 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"برای پخش در اینجا، دستگاه را بیدار کنید"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"دستگاه برای پخش تأیید نشده است"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"نمی‌توان این رسانه را اینجا پخش کرد"</string>
-    <!-- no translation found for tv_media_transfer_connected (5145011475885290725) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_fallback_title (3674360098755328601) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_fallback_title (3098685494578519940) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_subtitle (1040017851325069082) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_subtitle (645191413103303077) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_default (38102257053315304) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (2229000864416329818) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (2433193551482972117) -->
-    <skip />
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"متصل"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"‏متصل ازطریق ARC"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"‏متصل ازطریق eARC"</string>
+    <string name="tv_media_transfer_default" msgid="38102257053315304">"پیش‌فرض تلویزیون"</string>
+    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"‏خروجی HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"بلندگوهای داخلی"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"مشکل در اتصال. دستگاه را خاموش و دوباره روشن کنید"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"دستگاه صوتی سیمی"</string>
     <string name="help_label" msgid="3528360748637781274">"راهنما و بازخورد"</string>
