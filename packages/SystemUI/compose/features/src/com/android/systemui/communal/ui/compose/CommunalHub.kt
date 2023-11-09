@@ -16,15 +16,16 @@
 
 package com.android.systemui.communal.ui.compose
 
-import android.appwidget.AppWidgetHostView
 import android.os.Bundle
 import android.util.SizeF
+import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
@@ -44,8 +45,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
-import com.android.systemui.communal.ui.model.CommunalContentUiModel
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.res.R
 
@@ -54,8 +55,7 @@ fun CommunalHub(
     modifier: Modifier = Modifier,
     viewModel: CommunalViewModel,
 ) {
-    val showTutorial by viewModel.showTutorialContent.collectAsState(initial = false)
-    val widgetContent by viewModel.widgetContent.collectAsState(initial = emptyList())
+    val communalContent by viewModel.communalContent.collectAsState(initial = emptyList())
     Box(
         modifier = modifier.fillMaxSize().background(Color.White),
     ) {
@@ -65,31 +65,21 @@ fun CommunalHub(
             horizontalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
             verticalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
         ) {
-            if (showTutorial) {
-                items(
-                    count = tutorialContentSizes.size,
-                    // TODO(b/308148193): a more scalable solution for unique ids.
-                    key = { index -> "tutorial_$index" },
-                    span = { index -> GridItemSpan(tutorialContentSizes[index].span) },
-                ) { index ->
-                    TutorialCard(
-                        modifier =
-                            Modifier.size(Dimensions.CardWidth, tutorialContentSizes[index].dp()),
-                    )
-                }
-            } else {
-                items(
-                    count = widgetContent.size,
-                    key = { index -> widgetContent[index].id },
-                    span = { index -> GridItemSpan(widgetContent[index].size.span) },
-                ) { index ->
-                    val widget = widgetContent[index]
-                    ContentCard(
-                        modifier = Modifier.size(Dimensions.CardWidth, widget.size.dp()),
-                        model = widget,
-                        deleteOnClick = viewModel::onDeleteWidget
-                    )
-                }
+            items(
+                count = communalContent.size,
+                key = { index -> communalContent[index].key },
+                span = { index -> GridItemSpan(communalContent[index].size.span) },
+            ) { index ->
+                CommunalContent(
+                    modifier = Modifier.fillMaxHeight().width(Dimensions.CardWidth),
+                    model = communalContent[index],
+                    deleteOnClick = viewModel::onDeleteWidget,
+                    size =
+                        SizeF(
+                            Dimensions.CardWidth.value,
+                            communalContent[index].size.dp().value,
+                        ),
+                )
             }
         }
         IconButton(onClick = viewModel::onOpenWidgetPicker) {
@@ -101,15 +91,24 @@ fun CommunalHub(
     }
 }
 
-// A placeholder for tutorial content.
 @Composable
-private fun TutorialCard(modifier: Modifier = Modifier) {
-    Card(modifier = modifier, content = {})
+private fun CommunalContent(
+    model: CommunalContentModel,
+    size: SizeF,
+    deleteOnClick: (id: Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    when (model) {
+        is CommunalContentModel.Widget -> WidgetContent(model, size, deleteOnClick, modifier)
+        is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
+        is CommunalContentModel.Tutorial -> TutorialContent(modifier)
+    }
 }
 
 @Composable
-private fun ContentCard(
-    model: CommunalContentUiModel,
+private fun WidgetContent(
+    model: CommunalContentModel.Widget,
+    size: SizeF,
     deleteOnClick: (id: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -117,29 +116,43 @@ private fun ContentCard(
     Box(
         modifier = modifier.fillMaxSize().background(Color.White),
     ) {
-        // TODO(b/308148193): this will be cleaned up soon once the change to convert to
-        // CommunalContentUiModel interface is merged
-        val widgetId = getWidgetId(model.id)
-        widgetId?.let {
-            IconButton(onClick = { deleteOnClick(it) }) {
-                Icon(
-                    Icons.Default.Close,
-                    LocalContext.current.getString(R.string.button_to_remove_widget)
-                )
-            }
+        IconButton(onClick = { deleteOnClick(model.appWidgetId) }) {
+            Icon(
+                Icons.Default.Close,
+                LocalContext.current.getString(R.string.button_to_remove_widget)
+            )
         }
         AndroidView(
             modifier = modifier,
-            factory = {
-                model.view.apply {
-                    if (this is AppWidgetHostView) {
-                        val size = SizeF(Dimensions.CardWidth.value, model.size.dp().value)
-                        updateAppWidgetSize(Bundle.EMPTY, listOf(size))
-                    }
-                }
+            factory = { context ->
+                model.appWidgetHost
+                    .createView(context, model.appWidgetId, model.providerInfo)
+                    .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
             },
+            // For reusing composition in lazy lists.
+            onReset = {}
         )
     }
+}
+
+@Composable
+private fun SmartspaceContent(
+    model: CommunalContentModel.Smartspace,
+    modifier: Modifier = Modifier,
+) {
+    AndroidView(
+        modifier = modifier,
+        factory = { context ->
+            FrameLayout(context).apply { addView(model.remoteViews.apply(context, this)) }
+        },
+        // For reusing composition in lazy lists.
+        onReset = {}
+    )
+}
+
+@Composable
+private fun TutorialContent(modifier: Modifier = Modifier) {
+    Card(modifier = modifier, content = {})
 }
 
 private fun CommunalContentSize.dp(): Dp {
@@ -149,23 +162,6 @@ private fun CommunalContentSize.dp(): Dp {
         CommunalContentSize.THIRD -> Dimensions.CardHeightThird
     }
 }
-
-private fun getWidgetId(id: String): Int? {
-    return if (id.startsWith("widget_")) id.substring("widget_".length).toInt() else null
-}
-
-// Sizes for the tutorial placeholders.
-private val tutorialContentSizes =
-    listOf(
-        CommunalContentSize.FULL,
-        CommunalContentSize.THIRD,
-        CommunalContentSize.THIRD,
-        CommunalContentSize.THIRD,
-        CommunalContentSize.HALF,
-        CommunalContentSize.HALF,
-        CommunalContentSize.HALF,
-        CommunalContentSize.HALF,
-    )
 
 private object Dimensions {
     val CardWidth = 464.dp

@@ -18,13 +18,15 @@ package com.android.systemui.smartspace.dagger
 import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.smartspace.SmartspacePrecondition
 import com.android.systemui.smartspace.SmartspaceTargetFilter
+import com.android.systemui.smartspace.data.repository.SmartspaceRepositoryModule
 import com.android.systemui.smartspace.preconditions.LockscreenPrecondition
 import dagger.Binds
 import dagger.BindsOptionalOf
 import dagger.Module
 import javax.inject.Named
 
-@Module(subcomponents = [SmartspaceViewComponent::class])
+@Module(subcomponents = [SmartspaceViewComponent::class],
+    includes = [SmartspaceRepositoryModule::class])
 abstract class SmartspaceModule {
     @Module
     companion object {

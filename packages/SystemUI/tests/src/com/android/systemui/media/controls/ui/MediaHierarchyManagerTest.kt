@@ -26,8 +26,7 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardViewController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
-import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
-import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
@@ -106,7 +105,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     private val configurationController = FakeConfigurationController()
     private val communalRepository = FakeCommunalRepository(isCommunalEnabled = true)
     private val communalInteractor =
-        CommunalInteractor(communalRepository, FakeCommunalWidgetRepository())
+        CommunalInteractorFactory.create(communalRepository = communalRepository).communalInteractor
     private val notifPanelEvents = ShadeExpansionStateManager()
     private val settings = FakeSettings()
     private lateinit var testableLooper: TestableLooper

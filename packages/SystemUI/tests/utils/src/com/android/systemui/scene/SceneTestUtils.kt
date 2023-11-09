@@ -36,8 +36,8 @@ import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
-import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
@@ -104,9 +104,6 @@ class SceneTestUtils(
     }
 
     val communalRepository: FakeCommunalRepository by lazy { FakeCommunalRepository() }
-    private val communalWidgetRepository: FakeCommunalWidgetRepository by lazy {
-        FakeCommunalWidgetRepository()
-    }
     val keyguardRepository: FakeKeyguardRepository by lazy { FakeKeyguardRepository() }
     val powerRepository: FakePowerRepository by lazy { FakePowerRepository() }
 
@@ -194,10 +191,10 @@ class SceneTestUtils(
     }
 
     fun communalInteractor(): CommunalInteractor {
-        return CommunalInteractor(
-            communalRepository = communalRepository,
-            widgetRepository = communalWidgetRepository,
-        )
+        return CommunalInteractorFactory.create(
+                communalRepository = communalRepository,
+            )
+            .communalInteractor
     }
 
     fun bouncerInteractor(

@@ -16,52 +16,28 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
-import android.appwidget.AppWidgetHost
 import android.content.ComponentName
-import android.content.Context
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
+import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalSceneKey
-import com.android.systemui.communal.ui.model.CommunalContentUiModel
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 
 @SysUISingleton
 class CommunalViewModel
 @Inject
 constructor(
-    @Application private val context: Context,
-    private val appWidgetHost: AppWidgetHost,
     private val communalInteractor: CommunalInteractor,
-    tutorialInteractor: CommunalTutorialInteractor,
 ) {
-    /** Whether communal hub should show tutorial content. */
-    val showTutorialContent: Flow<Boolean> = tutorialInteractor.isTutorialAvailable
-
-    /** List of widgets to be displayed in the communal hub. */
-    val widgetContent: Flow<List<CommunalContentUiModel>> =
-        communalInteractor.widgetContent.map { widgets ->
-            widgets.map Widget@{ widget ->
-                // TODO(b/306406256): As adding and removing widgets functionalities are
-                // supported, cache the host views so they're not recreated each time.
-                val hostView =
-                    appWidgetHost.createView(context, widget.appWidgetId, widget.providerInfo)
-                return@Widget CommunalContentUiModel(
-                    // TODO(b/308148193): a more scalable solution for unique ids.
-                    id = "widget_${widget.appWidgetId}",
-                    view = hostView,
-                )
-            }
-        }
-
     val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene
     fun onSceneChanged(scene: CommunalSceneKey) {
         communalInteractor.onSceneChanged(scene)
     }
+
+    /** A list of all the communal content to be displayed in the communal hub. */
+    val communalContent: Flow<List<CommunalContentModel>> = communalInteractor.communalContent
 
     /** Delete a widget by id. */
     fun onDeleteWidget(id: Int) = communalInteractor.deleteWidget(id)
