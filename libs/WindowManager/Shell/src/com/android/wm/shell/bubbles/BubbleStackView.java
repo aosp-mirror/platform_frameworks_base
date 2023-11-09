@@ -1298,6 +1298,9 @@ public class BubbleStackView extends FrameLayout
         return shouldShow;
     }
 
+    /**
+     * Show manage education if should show and was not showing before.
+     */
     private void maybeShowManageEdu() {
         if (!shouldShowManageEdu()) {
             return;
@@ -1306,7 +1309,16 @@ public class BubbleStackView extends FrameLayout
             mManageEduView = new ManageEducationView(mContext, mPositioner);
             addView(mManageEduView);
         }
-        mManageEduView.show(mExpandedBubble.getExpandedView());
+        showManageEdu();
+    }
+
+    /**
+     * Show manage education if was not showing before.
+     */
+    private void showManageEdu() {
+        if (mExpandedBubble == null || mExpandedBubble.getExpandedView() == null) return;
+        mManageEduView.show(mExpandedBubble.getExpandedView(),
+                mStackAnimationController.isStackOnLeftSide());
     }
 
     @VisibleForTesting
@@ -1386,7 +1398,7 @@ public class BubbleStackView extends FrameLayout
             removeView(mManageEduView);
             mManageEduView = new ManageEducationView(mContext, mPositioner);
             addView(mManageEduView);
-            mManageEduView.show(mExpandedBubble.getExpandedView());
+            showManageEdu();
         }
     }
 
