@@ -57,15 +57,18 @@ fun UserProfilePager(content: @Composable (userGroup: UserGroup) -> Unit) {
 
 private fun UserManager.getUserGroups(): List<UserGroup> {
     val userGroupList = mutableListOf<UserGroup>()
-    val profileToShowInSettingsList = getProfiles(UserHandle.myUserId())
-        .map { userInfo -> userInfo to getUserProperties(userInfo.userHandle).showInSettings }
+    val profileToShowInSettings = getProfiles(UserHandle.myUserId())
+        .map { userInfo -> userInfo to getUserProperties(userInfo.userHandle) }
 
-    profileToShowInSettingsList.filter { it.second == UserProperties.SHOW_IN_SETTINGS_WITH_PARENT }
+    profileToShowInSettings
+        .filter { it.second.showInSettings == UserProperties.SHOW_IN_SETTINGS_WITH_PARENT }
         .takeIf { it.isNotEmpty() }
         ?.map { it.first }
         ?.let { userInfos -> userGroupList += UserGroup(userInfos) }
 
-    profileToShowInSettingsList.filter { it.second == UserProperties.SHOW_IN_LAUNCHER_SEPARATE }
+    profileToShowInSettings
+        .filter { it.second.showInSettings == UserProperties.SHOW_IN_SETTINGS_SEPARATE &&
+                    (!it.second.hideInSettingsInQuietMode || !it.first.isQuietModeEnabled) }
         .forEach { userGroupList += UserGroup(userInfos = listOf(it.first)) }
 
     return userGroupList
