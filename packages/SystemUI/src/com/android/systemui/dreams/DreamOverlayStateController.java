@@ -31,11 +31,15 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.dagger.DreamLog;
 import com.android.systemui.statusbar.policy.CallbackController;
+import com.android.systemui.util.annotations.WeaklyReferencedCallback;
+import com.android.systemui.util.reference.WeakReferenceFactory;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -68,7 +72,10 @@ public class DreamOverlayStateController implements
 
     /**
      * Callback for dream overlay events.
+     * NOTE: Caller should maintain a strong reference to this themselves so the callback does
+     * not get garbage collected.
      */
+    @WeaklyReferencedCallback
     public interface Callback {
         /**
          * Called when the composition of complications changes.
@@ -97,7 +104,7 @@ public class DreamOverlayStateController implements
 
     private final Executor mExecutor;
     private final boolean mOverlayEnabled;
-    private final ArrayList<Callback> mCallbacks = new ArrayList<>();
+    private final ArrayList<WeakReference<Callback>> mCallbacks = new ArrayList<>();
 
     @Complication.ComplicationType
     private int mAvailableComplicationTypes = Complication.COMPLICATION_TYPE_NONE;
@@ -107,6 +114,7 @@ public class DreamOverlayStateController implements
     private final Collection<Complication> mComplications = new HashSet();
 
     private final FeatureFlags mFeatureFlags;
+    private final WeakReferenceFactory mWeakReferenceFactory;
 
     private final int mSupportedTypes;
 
@@ -117,11 +125,13 @@ public class DreamOverlayStateController implements
     public DreamOverlayStateController(@Main Executor executor,
             @Named(DREAM_OVERLAY_ENABLED) boolean overlayEnabled,
             FeatureFlags featureFlags,
-            @DreamLog LogBuffer logBuffer) {
+            @DreamLog LogBuffer logBuffer,
+            WeakReferenceFactory weakReferenceFactory) {
         mExecutor = executor;
         mOverlayEnabled = overlayEnabled;
         mLogger = new DreamLogger(logBuffer, TAG);
         mFeatureFlags = featureFlags;
+        mWeakReferenceFactory = weakReferenceFactory;
         if (mFeatureFlags.isEnabled(Flags.ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS)) {
             mSupportedTypes = Complication.COMPLICATION_TYPE_NONE
                     | Complication.COMPLICATION_TYPE_HOME_CONTROLS;
@@ -143,7 +153,7 @@ public class DreamOverlayStateController implements
         mExecutor.execute(() -> {
             if (mComplications.add(complication)) {
                 mLogger.logAddComplication(complication.toString());
-                mCallbacks.stream().forEach(callback -> callback.onComplicationsChanged());
+                notifyCallbacksLocked(Callback::onComplicationsChanged);
             }
         });
     }
@@ -160,7 +170,7 @@ public class DreamOverlayStateController implements
         mExecutor.execute(() -> {
             if (mComplications.remove(complication)) {
                 mLogger.logRemoveComplication(complication.toString());
-                mCallbacks.stream().forEach(callback -> callback.onComplicationsChanged());
+                notifyCallbacksLocked(Callback::onComplicationsChanged);
             }
         });
     }
@@ -199,22 +209,33 @@ public class DreamOverlayStateController implements
     }
 
     private void notifyCallbacks(Consumer<Callback> callbackConsumer) {
-        mExecutor.execute(() -> {
-            for (Callback callback : mCallbacks) {
+        mExecutor.execute(() -> notifyCallbacksLocked(callbackConsumer));
+    }
+
+    private void notifyCallbacksLocked(Consumer<Callback> callbackConsumer) {
+        final Iterator<WeakReference<Callback>> iterator = mCallbacks.iterator();
+        while (iterator.hasNext()) {
+            final Callback callback = iterator.next().get();
+            // Remove any callbacks which have been GC'd
+            if (callback == null) {
+                iterator.remove();
+            } else {
                 callbackConsumer.accept(callback);
             }
-        });
+        }
     }
 
     @Override
     public void addCallback(@NonNull Callback callback) {
         mExecutor.execute(() -> {
             Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
-            if (mCallbacks.contains(callback)) {
+            final boolean containsCallback = mCallbacks.stream()
+                    .anyMatch(reference -> reference.get() == callback);
+            if (containsCallback) {
                 return;
             }
 
-            mCallbacks.add(callback);
+            mCallbacks.add(mWeakReferenceFactory.create(callback));
 
             if (mComplications.isEmpty()) {
                 return;
@@ -228,7 +249,13 @@ public class DreamOverlayStateController implements
     public void removeCallback(@NonNull Callback callback) {
         mExecutor.execute(() -> {
             Objects.requireNonNull(callback, "Callback must not be null. b/128895449");
-            mCallbacks.remove(callback);
+            final Iterator<WeakReference<Callback>> iterator = mCallbacks.iterator();
+            while (iterator.hasNext()) {
+                final Callback cb = iterator.next().get();
+                if (cb == null || cb == callback) {
+                    iterator.remove();
+                }
+            }
         });
     }
 
@@ -318,7 +345,7 @@ public class DreamOverlayStateController implements
 
         if (isLowLightActive() && !active) {
             // Notify that we're exiting low light only on the transition from active to not active.
-            mCallbacks.forEach(Callback::onExitLowLight);
+            notifyCallbacks(Callback::onExitLowLight);
         }
         modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_LOW_LIGHT_ACTIVE);
     }
@@ -375,7 +402,7 @@ public class DreamOverlayStateController implements
         mExecutor.execute(() -> {
             mLogger.logAvailableComplicationTypes(types);
             mAvailableComplicationTypes = types;
-            mCallbacks.forEach(Callback::onAvailableComplicationTypesChanged);
+            notifyCallbacksLocked(Callback::onAvailableComplicationTypesChanged);
         });
     }
 
@@ -393,7 +420,7 @@ public class DreamOverlayStateController implements
         mExecutor.execute(() -> {
             mLogger.logShouldShowComplications(shouldShowComplications);
             mShouldShowComplications = shouldShowComplications;
-            mCallbacks.forEach(Callback::onAvailableComplicationTypesChanged);
+            notifyCallbacksLocked(Callback::onAvailableComplicationTypesChanged);
         });
     }
 }
