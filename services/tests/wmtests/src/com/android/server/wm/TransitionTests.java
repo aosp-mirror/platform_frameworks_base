@@ -2454,6 +2454,7 @@ public class TransitionTests extends WindowTestsBase {
             spyOn(perfHinter);
             doAnswer(invocation -> {
                 session[0] = (SystemPerformanceHinter.HighPerfSession) invocation.callRealMethod();
+                spyOn(session[0]);
                 return session[0];
             }).when(perfHinter).createSession(anyInt(), anyInt(), anyString());
         }
