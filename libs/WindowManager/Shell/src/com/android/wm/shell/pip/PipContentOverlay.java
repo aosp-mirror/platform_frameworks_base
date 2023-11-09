@@ -180,20 +180,34 @@ public abstract class PipContentOverlay {
         private final Context mContext;
         private final int mAppIconSizePx;
         private final Rect mAppBounds;
+        private final int mOverlayHalfSize;
         private final Matrix mTmpTransform = new Matrix();
         private final float[] mTmpFloat9 = new float[9];
 
         private Bitmap mBitmap;
 
-        public PipAppIconOverlay(Context context, Rect appBounds,
+        public PipAppIconOverlay(Context context, Rect appBounds, Rect destinationBounds,
                 Drawable appIcon, int appIconSizePx) {
             mContext = context;
             final int maxAppIconSizePx = (int) TypedValue.applyDimension(COMPLEX_UNIT_DIP,
                     MAX_APP_ICON_SIZE_DP, context.getResources().getDisplayMetrics());
             mAppIconSizePx = Math.min(maxAppIconSizePx, appIconSizePx);
-            mAppBounds = new Rect(appBounds);
-            mBitmap = Bitmap.createBitmap(appBounds.width(), appBounds.height(),
-                    Bitmap.Config.ARGB_8888);
+
+            final int appWidth = appBounds.width();
+            final int appHeight = appBounds.height();
+
+            // In order to have the overlay always cover the pip window during the transition, the
+            // overlay will be drawn with the max size of the start and end bounds in different
+            // rotation.
+            final int overlaySize = Math.max(Math.max(appWidth, appHeight),
+                    Math.max(destinationBounds.width(), destinationBounds.height())) + 1;
+            mOverlayHalfSize = overlaySize >> 1;
+
+            // When the activity is in the secondary split, make sure the scaling center is not
+            // offset.
+            mAppBounds = new Rect(0, 0, appWidth, appHeight);
+
+            mBitmap = Bitmap.createBitmap(overlaySize, overlaySize, Bitmap.Config.ARGB_8888);
             prepareAppIconOverlay(appIcon);
             mLeash = new SurfaceControl.Builder(new SurfaceSession())
                     .setCallsite(TAG)
@@ -215,12 +229,19 @@ public abstract class PipContentOverlay {
         public void onAnimationUpdate(SurfaceControl.Transaction atomicTx,
                 Rect currentBounds, float fraction) {
             mTmpTransform.reset();
+            // In order for the overlay to always cover the pip window, the overlay may have a
+            // size larger than the pip window. Make sure that app icon is at the center.
+            final int appBoundsCenterX = mAppBounds.centerX();
+            final int appBoundsCenterY = mAppBounds.centerY();
+            mTmpTransform.setTranslate(
+                    appBoundsCenterX - mOverlayHalfSize,
+                    appBoundsCenterY - mOverlayHalfSize);
             // Scale back the bitmap with the pivot point at center.
             mTmpTransform.postScale(
                     (float) mAppBounds.width() / currentBounds.width(),
                     (float) mAppBounds.height() / currentBounds.height(),
-                    mAppBounds.centerX(),
-                    mAppBounds.centerY());
+                    appBoundsCenterX,
+                    appBoundsCenterY);
             atomicTx.setMatrix(mLeash, mTmpTransform, mTmpFloat9)
                     .setAlpha(mLeash, fraction < 0.5f ? 0 : (fraction - 0.5f) * 2);
         }
@@ -253,10 +274,10 @@ public abstract class PipContentOverlay {
                 ta.recycle();
             }
             final Rect appIconBounds = new Rect(
-                    mAppBounds.centerX() - mAppIconSizePx / 2,
-                    mAppBounds.centerY() - mAppIconSizePx / 2,
-                    mAppBounds.centerX() + mAppIconSizePx / 2,
-                    mAppBounds.centerY() + mAppIconSizePx / 2);
+                    mOverlayHalfSize - mAppIconSizePx / 2,
+                    mOverlayHalfSize - mAppIconSizePx / 2,
+                    mOverlayHalfSize + mAppIconSizePx / 2,
+                    mOverlayHalfSize + mAppIconSizePx / 2);
             appIcon.setBounds(appIconBounds);
             appIcon.draw(canvas);
             mBitmap = mBitmap.copy(Bitmap.Config.HARDWARE, false /* mutable */);

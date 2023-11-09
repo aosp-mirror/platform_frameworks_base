@@ -2095,6 +2095,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
 
             final TaskFragment organizedTf = r.getOrganizedTaskFragment();
+            final TaskFragment taskFragment = r.getTaskFragment();
             final boolean singleActivity = task.getNonFinishingActivityCount() == 1;
             if (singleActivity) {
                 rootTask = task;
@@ -2137,7 +2138,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         .setIntent(r.intent)
                         .setDeferTaskAppear(true)
                         .setHasBeenVisible(true)
-                        .setWindowingMode(task.getRequestedOverrideWindowingMode())
+                        // In case the activity is in system split screen, or Activity Embedding
+                        // split, we need to animate the PIP Task from the original TaskFragment
+                        // bounds, so also setting the windowing mode, otherwise the bounds may
+                        // be reset to fullscreen.
+                        .setWindowingMode(taskFragment.getWindowingMode())
                         .build();
                 // Establish bi-directional link between the original and pinned task.
                 r.setLastParentBeforePip(launchIntoPipHostActivity);
@@ -2150,7 +2155,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // current bounds.
                 // Use Task#setBoundsUnchecked to skip checking windowing mode as the windowing mode
                 // will be updated later after this is collected in transition.
-                rootTask.setBoundsUnchecked(r.getTaskFragment().getBounds());
+                rootTask.setBoundsUnchecked(taskFragment.getBounds());
 
                 // Move the last recents animation transaction from original task to the new one.
                 if (task.mLastRecentsAnimationTransaction != null) {
