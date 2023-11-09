@@ -1535,10 +1535,11 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                         next.getTask().mTaskId, next.shortComponentName);
 
                 mAtmService.getAppWarningsLocked().onResumeActivity(next);
-                next.app.setPendingUiCleanAndForceProcessStateUpTo(mAtmService.mTopProcessState);
+                final int topProcessState = mAtmService.mTopProcessState;
+                next.app.setPendingUiCleanAndForceProcessStateUpTo(topProcessState);
                 next.abortAndClearOptionsAnimation();
                 transaction.setLifecycleStateRequest(
-                        ResumeActivityItem.obtain(next.token, next.app.getReportedProcState(),
+                        ResumeActivityItem.obtain(next.token, topProcessState,
                                 dc.isNextTransitionForward(), next.shouldSendCompatFakeFocus()));
                 mAtmService.getLifecycleManager().scheduleTransaction(transaction);
 
