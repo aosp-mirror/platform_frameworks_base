@@ -31,7 +31,12 @@ import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
@@ -49,6 +54,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
@@ -65,6 +71,7 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
     private val testScope = TestScope(testDispatcher)
 
     private lateinit var keyguardBouncerRepository: KeyguardBouncerRepository
+    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
 
     @Mock private lateinit var bouncerLogger: TableLogBuffer
 
@@ -78,6 +85,7 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 testScope.backgroundScope,
                 bouncerLogger,
             )
+        transitionRepository = FakeKeyguardTransitionRepository()
         super.setUp()
     }
 
@@ -107,6 +115,12 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 mock(SystemClock::class.java),
                 mKeyguardUpdateMonitor,
             )
+        mKeyguardTransitionInteractor =
+            KeyguardTransitionInteractorFactory.create(
+                    scope = testScope.backgroundScope,
+                    repository = transitionRepository,
+                )
+                .keyguardTransitionInteractor
         return createUdfpsKeyguardViewController(/* useModernBouncer */ true)
     }
 
@@ -255,6 +269,147 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
 
             // THEN alpha is between 0 and 255
             verify(mView).unpausedAlpha = ((1f - transitionProgress) * 255).toInt()
+
+            job.cancel()
+        }
+
+    @Test
+    fun aodToLockscreen_dozeAmountChanged() =
+        testScope.runTest {
+            // GIVEN view is attached
+            mController.onViewAttached()
+            Mockito.reset(mView)
+
+            val job = mController.listenForLockscreenAodTransitions(this)
+
+            // WHEN transitioning from lockscreen to aod
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                    value = .3f,
+                    transitionState = TransitionState.RUNNING
+                )
+            )
+            runCurrent()
+            // THEN doze amount is updated
+            verify(mView)
+                .onDozeAmountChanged(
+                    eq(.3f),
+                    eq(.3f),
+                    eq(UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN)
+                )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                )
+            )
+            runCurrent()
+            // THEN doze amount is updated
+            verify(mView)
+                .onDozeAmountChanged(
+                    eq(1f),
+                    eq(1f),
+                    eq(UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN)
+                )
+
+            job.cancel()
+        }
+
+    @Test
+    fun lockscreenToAod_dozeAmountChanged() =
+        testScope.runTest {
+            // GIVEN view is attached
+            mController.onViewAttached()
+            Mockito.reset(mView)
+
+            val job = mController.listenForLockscreenAodTransitions(this)
+
+            // WHEN transitioning from lockscreen to aod
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                    value = .3f,
+                    transitionState = TransitionState.RUNNING
+                )
+            )
+            runCurrent()
+            // THEN doze amount is updated
+            verify(mView)
+                .onDozeAmountChanged(
+                    eq(.3f),
+                    eq(.3f),
+                    eq(UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN)
+                )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                )
+            )
+            runCurrent()
+            // THEN doze amount is updated
+            verify(mView)
+                .onDozeAmountChanged(
+                    eq(1f),
+                    eq(1f),
+                    eq(UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN)
+                )
+
+            job.cancel()
+        }
+
+    @Test
+    fun goneToAod_dozeAmountChanged() =
+        testScope.runTest {
+            // GIVEN view is attached
+            mController.onViewAttached()
+            Mockito.reset(mView)
+
+            val job = mController.listenForGoneToAodTransition(this)
+
+            // WHEN transitioning from lockscreen to aod
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    value = .3f,
+                    transitionState = TransitionState.RUNNING
+                )
+            )
+            runCurrent()
+            // THEN doze amount is updated
+            verify(mView)
+                .onDozeAmountChanged(
+                    eq(.3f),
+                    eq(.3f),
+                    eq(UdfpsKeyguardViewLegacy.ANIMATION_UNLOCKED_SCREEN_OFF)
+                )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                )
+            )
+            runCurrent()
+            // THEN doze amount is updated
+            verify(mView)
+                .onDozeAmountChanged(
+                    eq(1f),
+                    eq(1f),
+                    eq(UdfpsKeyguardViewLegacy.ANIMATION_UNLOCKED_SCREEN_OFF)
+                )
 
             job.cancel()
         }
