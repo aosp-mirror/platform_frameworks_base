@@ -127,6 +127,7 @@ import android.os.GraphicsEnvironment;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
+import android.os.IBinderCallback;
 import android.os.ICancellationSignal;
 import android.os.LocaleList;
 import android.os.Looper;
@@ -7096,6 +7097,18 @@ public final class ActivityThread extends ClientTransactionHandler
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+
+        // Set binder transaction callback after finishing bindApplication
+        Binder.setTransactionCallback(new IBinderCallback() {
+            @Override
+            public void onTransactionError(int pid, int code, int flags, int err) {
+                try {
+                    mgr.frozenBinderTransactionDetected(pid, code, flags, err);
+                } catch (RemoteException ex) {
+                    throw ex.rethrowFromSystemServer();
+                }
+            }
+        });
     }
 
     @UnsupportedAppUsage
