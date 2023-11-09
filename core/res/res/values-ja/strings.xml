@@ -1689,7 +1689,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"削除"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"推奨レベルを超えるまで音量を上げますか？\n\n大音量で長時間聞き続けると、聴力を損なう恐れがあります。"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"このまま大音量で聴き続けますか？\n\nおすすめの時間よりも長い時間にわたってヘッドフォンの音量が大きいため、聴力を損なうおそれがあります"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"このまま大音量で聴き続けますか？\n\n推奨時間よりも長くヘッドフォンが大音量に設定されており、聴力を損なうおそれがあります"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"大きな音が検知されました\n\nヘッドフォンの音量がおすすめの音量よりも大きいため、聴力を損なうおそれがあります"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ユーザー補助機能のショートカットの使用"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ショートカットが ON の場合、両方の音量ボタンを 3 秒ほど長押しするとユーザー補助機能が起動します。"</string>
