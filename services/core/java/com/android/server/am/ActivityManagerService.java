@@ -3634,30 +3634,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
 
                     if (succeeded) {
-                        final Intent intent = new Intent(Intent.ACTION_PACKAGE_DATA_CLEARED,
-                                Uri.fromParts("package", packageName, null /* fragment */));
-                        intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
-                                | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-                        intent.putExtra(Intent.EXTRA_UID,
-                                (appInfo != null) ? appInfo.uid : INVALID_UID);
-                        intent.putExtra(Intent.EXTRA_USER_HANDLE, resolvedUserId);
-                        if (isRestore) {
-                            intent.putExtra(Intent.EXTRA_IS_RESTORE, true);
-                        }
-                        if (isInstantApp) {
-                            intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
-                        }
-                        final int[] visibilityAllowList = mPackageManagerInt.getVisibilityAllowList(
-                                packageName, resolvedUserId);
 
-                        broadcastIntentInPackage("android", null /* featureId */,
-                                SYSTEM_UID, uid, pid, intent, null /* resolvedType */,
-                                null /* resultToApp */, null /* resultTo */, 0 /* resultCode */,
-                                null /* resultData */, null /* resultExtras */,
-                                isInstantApp ? permission.ACCESS_INSTANT_APPS : null,
-                                null /* bOptions */, false /* serialized */, false /* sticky */,
-                                resolvedUserId, BackgroundStartPrivileges.NONE,
-                                visibilityAllowList);
+                        mPackageManagerInt.sendPackageDataClearedBroadcast(packageName,
+                                ((appInfo != null) ? appInfo.uid : INVALID_UID), resolvedUserId,
+                                isRestore, isInstantApp);
                     }
 
                     if (observer != null) {
@@ -4178,29 +4158,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             flags = Intent.FLAG_RECEIVER_REGISTERED_ONLY
                     | Intent.FLAG_RECEIVER_FOREGROUND;
         }
-        if (android.content.pm.Flags.stayStopped()) {
-            // Sent async using the PM handler, to maintain ordering with PACKAGE_UNSTOPPED
-            mPackageManagerInt.sendPackageRestartedBroadcast(packageName,
-                    uid, flags);
-        } else {
-            Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
-                    Uri.fromParts("package", packageName, null));
-            intent.addFlags(flags);
-            final int userId = UserHandle.getUserId(uid);
-            final int[] broadcastAllowList =
-                    getPackageManagerInternal().getVisibilityAllowList(packageName, userId);
-            intent.putExtra(Intent.EXTRA_UID, uid);
-            intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-            broadcastIntentLocked(null /* callerApp */, null /* callerPackage */,
-                    null /* callerFeatureId */, intent, null /* resolvedType */,
-                    null /* resultToApp */, null /* resultTo */,
-                    0 /* resultCode */, null /* resultData */, null /* resultExtras */,
-                    null /* requiredPermissions */, null /* excludedPermissions */,
-                    null /* excludedPackages */, OP_NONE, null /* bOptions */, false /* ordered */,
-                    false /* sticky */, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
-                    Binder.getCallingPid(), userId, BackgroundStartPrivileges.NONE,
-                    broadcastAllowList, null /* filterExtrasForReceiver */);
-        }
+        mPackageManagerInt.sendPackageRestartedBroadcast(packageName, uid, flags);
     }
 
     private void cleanupDisabledPackageComponentsLocked(
