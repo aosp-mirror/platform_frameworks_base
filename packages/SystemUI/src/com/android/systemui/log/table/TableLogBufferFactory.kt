@@ -62,7 +62,6 @@ constructor(
                 coroutineScope,
             )
         dumpManager.registerTableLogBuffer(name, tableBuffer)
-        tableBuffer.init()
         return tableBuffer
     }
 
