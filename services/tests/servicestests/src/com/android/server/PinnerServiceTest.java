@@ -22,28 +22,32 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import android.app.ActivityManagerInternal;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.content.res.Resources;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
-import android.testing.AndroidTestingRunner;
+import android.provider.DeviceConfig;
+import android.provider.DeviceConfigInterface;
 import android.testing.TestableContext;
 import android.testing.TestableLooper;
+import android.testing.TestableResources;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.testutils.FakeDeviceConfigInterface;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +65,8 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-@RunWith(AndroidTestingRunner.class)
+@SmallTest
+@RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper
 public class PinnerServiceTest {
     private static final int KEY_CAMERA = 0;
@@ -76,6 +81,8 @@ public class PinnerServiceTest {
 
     private final ArraySet<String> mUpdatedPackages = new ArraySet<>();
     private ResolveInfo mHomePackageResolveInfo;
+    private FakeDeviceConfigInterface mFakeDeviceConfigInterface;
+    private PinnerService.Injector mInjector;
 
     @Before
     public void setUp() {
@@ -85,6 +92,8 @@ public class PinnerServiceTest {
             Looper.prepare();
         }
 
+        // PinnerService.onStart will add itself as a local service, remove to avoid conflicts.
+        LocalServices.removeServiceForTest(PinnerService.class);
         LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
 
@@ -100,6 +109,17 @@ public class PinnerServiceTest {
         doReturn(true).when(mockActivityManagerInternal).isUidActive(anyInt());
         LocalServices.addService(ActivityManagerInternal.class, mockActivityManagerInternal);
 
+        // Configure the default state to disable any pinning.
+        TestableResources resources = mContext.getOrCreateTestableResources();
+        resources.addOverride(
+                com.android.internal.R.array.config_defaultPinnerServiceFiles, new String[0]);
+        resources.addOverride(com.android.internal.R.bool.config_pinnerCameraApp, false);
+        resources.addOverride(com.android.internal.R.bool.config_pinnerHomeApp, false);
+        resources.addOverride(com.android.internal.R.bool.config_pinnerAssistantApp, false);
+
+        mFakeDeviceConfigInterface = new FakeDeviceConfigInterface();
+        setDeviceConfigPinnedAnonSize(0);
+
         mContext = spy(mContext);
 
         // Get HOME (Launcher) package
@@ -107,6 +127,18 @@ public class PinnerServiceTest {
                 PackageManager.MATCH_DEFAULT_ONLY | PackageManager.MATCH_DIRECT_BOOT_AWARE
                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, 0);
         mUpdatedPackages.add(mHomePackageResolveInfo.activityInfo.applicationInfo.packageName);
+
+        mInjector = new PinnerService.Injector() {
+            @Override
+            protected DeviceConfigInterface getDeviceConfigInterface() {
+                return mFakeDeviceConfigInterface;
+            }
+
+            @Override
+            protected void publishBinderService(PinnerService service, Binder binderService) {
+                // Suppress this for testing, it's not needed and causes conflitcs.
+            }
+        };
     }
 
     @After
@@ -122,12 +154,12 @@ public class PinnerServiceTest {
     }
 
     private void unpinAll(PinnerService pinnerService) throws Exception {
-        // unpin all packages
-        Method unpinAppMethod = PinnerService.class.getDeclaredMethod("unpinApp", int.class);
-        unpinAppMethod.setAccessible(true);
-        unpinAppMethod.invoke(pinnerService, KEY_HOME);
-        unpinAppMethod.invoke(pinnerService, KEY_CAMERA);
-        unpinAppMethod.invoke(pinnerService, KEY_ASSISTANT);
+        Method unpinAppsMethod = PinnerService.class.getDeclaredMethod("unpinApps");
+        unpinAppsMethod.setAccessible(true);
+        unpinAppsMethod.invoke(pinnerService);
+        Method unpinAnonRegionMethod = PinnerService.class.getDeclaredMethod("unpinAnonRegion");
+        unpinAnonRegionMethod.setAccessible(true);
+        unpinAnonRegionMethod.invoke(pinnerService);
     }
 
     private void waitForPinnerService(PinnerService pinnerService)
@@ -171,21 +203,37 @@ public class PinnerServiceTest {
     }
 
     private int getPinnedSize(PinnerService pinnerService) throws Exception {
-        final String totalSizeToken = "Total size: ";
+        return getPinnedSizeImpl(pinnerService, "Total size: ");
+    }
+
+    private int getPinnedAnonSize(PinnerService pinnerService) throws Exception {
+        return getPinnedSizeImpl(pinnerService, "Pinned anon region: ");
+    }
+
+    private int getPinnedSizeImpl(PinnerService pinnerService, String sizeToken) throws Exception {
         String dumpOutput = getPinnerServiceDump(pinnerService);
         BufferedReader bufReader = new BufferedReader(new StringReader(dumpOutput));
-        Optional<Integer> size = bufReader.lines().filter(s -> s.contains(totalSizeToken))
-                .map(s -> Integer.valueOf(s.substring(totalSizeToken.length()))).findAny();
+        Optional<Integer> size = bufReader.lines().filter(s -> s.contains(sizeToken))
+                .map(s -> Integer.valueOf(s.substring(sizeToken.length()))).findAny();
         return size.orElse(-1);
     }
 
+    private void setDeviceConfigPinnedAnonSize(long size) {
+        mFakeDeviceConfigInterface.setProperty(
+                DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                "pin_shared_anon_size",
+                String.valueOf(size),
+                /*makeDefault=*/false);
+    }
+
     @Test
+    @Ignore("b/309853498, pinning home app can fail with ENOMEM")
     public void testPinHomeApp() throws Exception {
         // Enable HOME app pinning
-        Resources res = mock(Resources.class);
-        doReturn(true).when(res).getBoolean(com.android.internal.R.bool.config_pinnerHomeApp);
-        when(mContext.getResources()).thenReturn(res);
-        PinnerService pinnerService = new PinnerService(mContext);
+        mContext.getOrCreateTestableResources()
+                .addOverride(com.android.internal.R.bool.config_pinnerHomeApp, true);
+        PinnerService pinnerService = new PinnerService(mContext, mInjector);
+        pinnerService.onStart();
 
         ArraySet<Integer> pinKeys = getPinKeys(pinnerService);
         assertThat(pinKeys.valueAt(0)).isEqualTo(KEY_HOME);
@@ -201,17 +249,17 @@ public class PinnerServiceTest {
         int totalPinnedSizeBytes = getPinnedSize(pinnerService);
         assertThat(totalPinnedSizeBytes).isGreaterThan(0);
 
-        // Make sure pinned files are unmapped
         unpinAll(pinnerService);
     }
 
     @Test
+    @Ignore("b/309853498, pinning home app can fail with ENOMEM")
     public void testPinHomeAppOnBootCompleted() throws Exception {
         // Enable HOME app pinning
-        Resources res = mock(Resources.class);
-        doReturn(true).when(res).getBoolean(com.android.internal.R.bool.config_pinnerHomeApp);
-        when(mContext.getResources()).thenReturn(res);
-        PinnerService pinnerService = new PinnerService(mContext);
+        mContext.getOrCreateTestableResources()
+                .addOverride(com.android.internal.R.bool.config_pinnerHomeApp, true);
+        PinnerService pinnerService = new PinnerService(mContext, mInjector);
+        pinnerService.onStart();
 
         ArraySet<Integer> pinKeys = getPinKeys(pinnerService);
         assertThat(pinKeys.valueAt(0)).isEqualTo(KEY_HOME);
@@ -227,16 +275,14 @@ public class PinnerServiceTest {
         int totalPinnedSizeBytes = getPinnedSize(pinnerService);
         assertThat(totalPinnedSizeBytes).isGreaterThan(0);
 
-        // Make sure pinned files are unmapped
         unpinAll(pinnerService);
     }
 
     @Test
     public void testNothingToPin() throws Exception {
         // No package enabled for pinning
-        Resources res = mock(Resources.class);
-        when(mContext.getResources()).thenReturn(res);
-        PinnerService pinnerService = new PinnerService(mContext);
+        PinnerService pinnerService = new PinnerService(mContext, mInjector);
+        pinnerService.onStart();
 
         ArraySet<Integer> pinKeys = getPinKeys(pinnerService);
         assertThat(pinKeys).isEmpty();
@@ -252,7 +298,51 @@ public class PinnerServiceTest {
         int totalPinnedSizeBytes = getPinnedSize(pinnerService);
         assertThat(totalPinnedSizeBytes).isEqualTo(0);
 
-        // Make sure pinned files are unmapped
+        int pinnedAnonSizeBytes = getPinnedAnonSize(pinnerService);
+        assertThat(pinnedAnonSizeBytes).isEqualTo(-1);
+
+        unpinAll(pinnerService);
+    }
+
+    @Test
+    public void testPinAnonRegion() throws Exception {
+        setDeviceConfigPinnedAnonSize(32768);
+
+        PinnerService pinnerService = new PinnerService(mContext, mInjector);
+        pinnerService.onStart();
+        waitForPinnerService(pinnerService);
+
+        // Ensure the dump reflects the requested anon region.
+        int pinnedAnonSizeBytes = getPinnedAnonSize(pinnerService);
+        assertThat(pinnedAnonSizeBytes).isEqualTo(32768);
+
+        unpinAll(pinnerService);
+    }
+
+    @Test
+    public void testPinAnonRegionUpdatesOnConfigChange() throws Exception {
+        PinnerService pinnerService = new PinnerService(mContext, mInjector);
+        pinnerService.onStart();
+        waitForPinnerService(pinnerService);
+
+        // Ensure the PinnerService updates itself when the associated DeviceConfig changes.
+        setDeviceConfigPinnedAnonSize(65536);
+        waitForPinnerService(pinnerService);
+        int pinnedAnonSizeBytes = getPinnedAnonSize(pinnerService);
+        assertThat(pinnedAnonSizeBytes).isEqualTo(65536);
+
+        // Each update should be reflected in the reported status.
+        setDeviceConfigPinnedAnonSize(32768);
+        waitForPinnerService(pinnerService);
+        pinnedAnonSizeBytes = getPinnedAnonSize(pinnerService);
+        assertThat(pinnedAnonSizeBytes).isEqualTo(32768);
+
+        setDeviceConfigPinnedAnonSize(0);
+        waitForPinnerService(pinnerService);
+        // An empty anon region should clear the associated status entry.
+        pinnedAnonSizeBytes = getPinnedAnonSize(pinnerService);
+        assertThat(pinnedAnonSizeBytes).isEqualTo(-1);
+
         unpinAll(pinnerService);
     }
 
