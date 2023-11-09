@@ -267,8 +267,7 @@ constructor(
     fun isDateWeatherDecoupled(): Boolean {
         execution.assertIsMainThread()
 
-        return featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED) &&
-                datePlugin != null && weatherPlugin != null
+        return datePlugin != null && weatherPlugin != null
     }
 
     fun isWeatherEnabled(): Boolean {
@@ -499,8 +498,8 @@ constructor(
     }
 
     private fun filterSmartspaceTarget(t: SmartspaceTarget): Boolean {
-        if (isDateWeatherDecoupled()) {
-            return t.featureType != SmartspaceTarget.FEATURE_WEATHER
+        if (isDateWeatherDecoupled() && t.featureType == SmartspaceTarget.FEATURE_WEATHER) {
+            return false
         }
         if (!showNotifications) {
             return t.featureType == SmartspaceTarget.FEATURE_WEATHER

@@ -20,10 +20,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.smartspace.config.BcSmartspaceConfigProvider
-import com.android.systemui.util.mockito.whenever
-import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -45,16 +42,7 @@ class BcSmartspaceConfigProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun isDefaultDateWeatherDisabled_flagIsTrue_returnsTrue() {
-        whenever(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(true)
-
+    fun isDefaultDateWeatherDisabled_returnsTrue() {
         assertTrue(configProvider.isDefaultDateWeatherDisabled)
-    }
-
-    @Test
-    fun isDefaultDateWeatherDisabled_flagIsFalse_returnsFalse() {
-        whenever(featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)).thenReturn(false)
-
-        assertFalse(configProvider.isDefaultDateWeatherDisabled)
     }
 }
