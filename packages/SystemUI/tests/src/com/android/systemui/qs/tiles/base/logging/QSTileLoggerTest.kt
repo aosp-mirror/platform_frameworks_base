@@ -133,7 +133,7 @@ class QSTileLoggerTest : SysuiTestCase() {
                     "sd=null, " +
                     "svi=None, " +
                     "enabled=ENABLED, " +
-                    "a11y=null" +
+                    "a11y=android.widget.Switch" +
                     "], " +
                     "data=test_data"
             )
@@ -157,7 +157,7 @@ class QSTileLoggerTest : SysuiTestCase() {
                     "sd=null, " +
                     "svi=None, " +
                     "enabled=ENABLED, " +
-                    "a11y=null], " +
+                    "a11y=android.widget.Switch], " +
                     "data=test_data"
             )
     }

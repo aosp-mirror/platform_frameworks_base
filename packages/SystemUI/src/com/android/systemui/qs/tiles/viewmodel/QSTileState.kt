@@ -17,7 +17,10 @@
 package com.android.systemui.qs.tiles.viewmodel
 
 import android.service.quicksettings.Tile
+import android.view.View
+import android.widget.Switch
 import com.android.systemui.common.shared.model.Icon
+import kotlin.reflect.KClass
 
 /**
  * Represents current a state of the tile to be displayed in on the view. Consider using
@@ -102,7 +105,7 @@ data class QSTileState(
         var stateDescription: CharSequence? = null
         var sideViewIcon: SideViewIcon = SideViewIcon.None
         var enabledState: EnabledState = EnabledState.ENABLED
-        var expandedAccessibilityClassName: String? = null
+        var expandedAccessibilityClass: KClass<out View>? = Switch::class
 
         fun build(): QSTileState =
             QSTileState(
@@ -115,7 +118,7 @@ data class QSTileState(
                 stateDescription,
                 sideViewIcon,
                 enabledState,
-                expandedAccessibilityClassName,
+                expandedAccessibilityClass?.qualifiedName,
             )
     }
 }
