@@ -492,7 +492,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"Үн жана дирилдөө"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Параметрлер"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Үндүн катуулугу коопсуз деңгээлге чейин акырындатылды"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Гарнитуранын үнүн катуу чыгарып, сунушталган убакыттан узагыраак угуп жатасыз"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Гарнитуранын үнүн катуу чыгарып, сунушталгандан узагыраак угуп жатасыз"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Гарнитуранын үнүнүн катуулугу бул аптада коопсуз деңгээлден жогору болду"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Уга берем"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Үнүн акырындатуу"</string>
