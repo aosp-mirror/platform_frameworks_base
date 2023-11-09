@@ -99,6 +99,18 @@ java_binary_host {
     visibility: ["//visibility:public"],
 }
 
+java_test_host {
+    name: "hoststubgentest",
+    // main_class: "com.android.hoststubgen.Main",
+    srcs: ["test/**/*.kt"],
+    static_libs: [
+        "hoststubgen",
+        "truth",
+    ],
+    test_suites: ["general-tests"],
+    visibility: ["//visibility:private"],
+}
+
 // File that contains the standard command line argumetns to hoststubgen.
 // This is only for the prototype. The productionized version is "ravenwood-standard-options".
 filegroup {
