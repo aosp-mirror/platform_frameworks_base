@@ -262,7 +262,7 @@ OverlayData CreateResourceMappingLegacy(const AssetManager2* overlay_am,
 }
 
 struct ResState {
-  std::unique_ptr<ApkAssets> apk_assets;
+  AssetManager2::ApkAssetsPtr apk_assets;
   const LoadedArsc* arsc;
   const LoadedPackage* package;
   std::unique_ptr<AssetManager2> am;
@@ -284,7 +284,7 @@ struct ResState {
     }
 
     state.am = std::make_unique<AssetManager2>();
-    if (!state.am->SetApkAssets({state.apk_assets.get()})) {
+    if (!state.am->SetApkAssets({state.apk_assets})) {
       return Error("failed to create asset manager");
     }
 
