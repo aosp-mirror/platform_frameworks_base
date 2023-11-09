@@ -235,14 +235,18 @@ public final class DeviceConfigService extends Binder {
         for (String aconfigFlag : aconfigFlagNames) {
           String val = allFlags.get(aconfigFlag);
           if (val != null) {
+            // aconfigFlag is in the form of [namespace]/[package].[flag_name]
             int idx = aconfigFlag.indexOf("/");
             if (idx == -1 || idx == aconfigFlag.length() - 1 || idx == 0) {
               log("invalid flag entry in device config: " + aconfigFlag);
               continue;
             }
-            String aconfigFlagNameByPackage = aconfigFlag.substring(idx+1);
+
+            // we intend to print out [package].[flag_name] [namespace]=val
+            String aconfigFlagNameByPackage = aconfigFlag.substring(idx + 1);
             String namespace = aconfigFlag.substring(0, idx);
-            lines.add(aconfigFlagNameByPackage + " " + namespace + "=" + val);
+            lines.add("flag:" + aconfigFlagNameByPackage + " namespace:" + namespace +
+                " value:" + val);
           }
         }
         Collections.sort(lines);
