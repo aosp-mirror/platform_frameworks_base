@@ -22,8 +22,7 @@ import android.view.View
 import androidx.constraintlayout.helper.widget.Layer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import javax.inject.Inject
@@ -33,11 +32,10 @@ class AodBurnInSection
 @Inject
 constructor(
     private val context: Context,
-    private val featureFlags: FeatureFlags,
 ) : KeyguardSection() {
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
 
@@ -53,13 +51,13 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
     }

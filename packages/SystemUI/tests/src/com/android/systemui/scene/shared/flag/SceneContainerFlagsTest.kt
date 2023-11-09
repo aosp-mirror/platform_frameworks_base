@@ -26,6 +26,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.flags.ReleasedFlag
 import com.android.systemui.flags.ResourceBooleanFlag
 import com.android.systemui.flags.UnreleasedFlag
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -68,6 +69,7 @@ internal class SceneContainerFlagsTest(
         listOf(
                 AconfigFlags.FLAG_SCENE_CONTAINER,
                 AconfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
+                KeyguardShadeMigrationNssl.FLAG_NAME,
             )
             .forEach { flagToken ->
                 setFlagsRule.enableFlags(flagToken)

@@ -137,6 +137,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInterac
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.binder.KeyguardLongPressViewBinder;
@@ -1265,7 +1266,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mKeyguardStatusViewController.onDestroy();
         }
 
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (KeyguardShadeMigrationNssl.isEnabled()) {
             // Need a shared controller until mKeyguardStatusViewController can be removed from
             // here, due to important state being set in that controller. Rebind in order to pick
             // up config changes
@@ -1318,7 +1319,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // Reset any left over overscroll state. It is a rare corner case but can happen.
         mQsController.setOverScrollAmount(0);
         mScrimController.setNotificationsOverScrollAmount(0);
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
             mNotificationStackScrollLayoutController.setOverExpansion(0);
             mNotificationStackScrollLayoutController.setOverScrollAmount(0);
         }
@@ -1339,7 +1340,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
         updateClockAppearance();
         mQsController.updateQsState();
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
             mNotificationStackScrollLayoutController.updateFooter();
         }
     }
@@ -1371,7 +1372,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     void reInflateViews() {
         debugLog("reInflateViews");
         // Re-inflate the status view group.
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
             KeyguardStatusView keyguardStatusView =
                     mNotificationContainerParent.findViewById(R.id.keyguard_status_view);
             int statusIndex = mNotificationContainerParent.indexOfChild(keyguardStatusView);
@@ -1483,7 +1484,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void updateMaxDisplayedNotifications(boolean recompute) {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (KeyguardShadeMigrationNssl.isEnabled()) {
             return;
         }
 
@@ -1640,7 +1641,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 mKeyguardStatusViewController.getClockBottom(mStatusBarHeaderHeightKeyguard),
                 mKeyguardStatusViewController.isClockTopAligned());
         mClockPositionAlgorithm.run(mClockPositionResult);
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
             mKeyguardStatusViewController.setLockscreenClockY(
                     mClockPositionAlgorithm.getExpandedPreferredClockY());
         }
@@ -1654,7 +1655,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         boolean animate = mNotificationStackScrollLayoutController.isAddOrRemoveAnimationPending();
         boolean animateClock = (animate || mAnimateNextPositionUpdate) && shouldAnimateClockChange;
 
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
             mKeyguardStatusViewController.updatePosition(
                     mClockPositionResult.clockX, mClockPositionResult.clockY,
                     mClockPositionResult.clockScale, animateClock);
@@ -1727,7 +1728,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void updateKeyguardStatusViewAlignment(boolean animate) {
         boolean shouldBeCentered = shouldKeyguardStatusViewBeCentered();
         ConstraintLayout layout;
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (KeyguardShadeMigrationNssl.isEnabled()) {
             layout = mKeyguardViewConfigurator.getKeyguardRootView();
         } else {
             layout = mNotificationContainerParent;
@@ -1902,7 +1903,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
         float alpha = mClockPositionResult.clockAlpha * mKeyguardOnlyContentAlpha;
         mKeyguardStatusViewController.setAlpha(alpha);
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (KeyguardShadeMigrationNssl.isEnabled()) {
             // TODO (b/296373478) This is for split shade media movement.
         } else {
             mKeyguardStatusViewController
@@ -2482,7 +2483,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     void requestScrollerTopPaddingUpdate(boolean animate) {
         float padding = mQsController.calculateNotificationsTopPadding(mIsExpandingOrCollapsing,
                 getKeyguardNotificationStaticPadding(), mExpandedFraction);
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (KeyguardShadeMigrationNssl.isEnabled()) {
             mSharedNotificationContainerInteractor.setTopPosition(padding);
         } else {
             mNotificationStackScrollLayoutController.updateTopPadding(padding, animate);
@@ -2949,7 +2950,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public void onScreenTurningOn() {
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
             mKeyguardStatusViewController.dozeTimeTick();
         }
     }
@@ -3201,7 +3202,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     public void dozeTimeTick() {
         mLockIconViewController.dozeTimeTick();
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
             mKeyguardStatusViewController.dozeTimeTick();
         }
         if (mInterpolatedDarkAmount > 0) {
@@ -4427,7 +4428,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     && statusBarState == KEYGUARD) {
                 // This means we're doing the screen off animation - position the keyguard status
                 // view where it'll be on AOD, so we can animate it in.
-                if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+                if (!KeyguardShadeMigrationNssl.isEnabled()) {
                     mKeyguardStatusViewController.updatePosition(
                             mClockPositionResult.clockX,
                             mClockPositionResult.clockYFullyDozing,
@@ -4547,7 +4548,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         setDozing(true /* dozing */, false /* animate */);
         mStatusBarStateController.setUpcomingState(KEYGUARD);
 
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (KeyguardShadeMigrationNssl.isEnabled()) {
             mStatusBarStateController.setState(KEYGUARD);
         } else {
             mStatusBarStateListener.onStateChanged(KEYGUARD);
@@ -4608,7 +4609,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             setIsFullWidth(mNotificationStackScrollLayoutController.getWidth() == mView.getWidth());
 
             // Update Clock Pivot (used by anti-burnin transformations)
-            if (!mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            if (!KeyguardShadeMigrationNssl.isEnabled()) {
                 mKeyguardStatusViewController.updatePivot(mView.getWidth(), mView.getHeight());
             }
 
@@ -4718,7 +4719,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private Consumer<Float> setTransitionY(
                 NotificationStackScrollLayoutController stackScroller) {
         return (Float translationY) -> {
-            if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+            if (!KeyguardShadeMigrationNssl.isEnabled()) {
                 mKeyguardStatusViewController.setTranslationY(translationY,
                         /* excludeMedia= */false);
                 stackScroller.setTranslationY(translationY);
@@ -4760,7 +4761,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
          */
         @Override
         public boolean onInterceptTouchEvent(MotionEvent event) {
-            if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL) && !mUseExternalTouch) {
+            if (KeyguardShadeMigrationNssl.isEnabled() && !mUseExternalTouch) {
                 return false;
             }
 
@@ -4926,7 +4927,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
          */
         @Override
         public boolean onTouchEvent(MotionEvent event) {
-            if (mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL) && !mUseExternalTouch) {
+            if (KeyguardShadeMigrationNssl.isEnabled() && !mUseExternalTouch) {
                 return false;
             }
 

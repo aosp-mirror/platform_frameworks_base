@@ -100,6 +100,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteracto
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingTransitionViewModel;
@@ -371,12 +372,14 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mFeatureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, false);
         mFeatureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false);
-        mFeatureFlags.set(Flags.MIGRATE_KEYGUARD_STATUS_VIEW, false);
         mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
-        mFeatureFlags.set(Flags.MIGRATE_NSSL, false);
         mFeatureFlags.set(Flags.QS_USER_DETAIL_SHORTCUT, false);
         mFeatureFlags.set(Flags.ONE_WAY_HAPTICS_API_MIGRATION, false);
         mFeatureFlags.set(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT, false);
+
+        mSetFlagsRule.disableFlags(KeyguardShadeMigrationNssl.FLAG_NAME);
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
+
         mMainDispatcher = getMainDispatcher();
         KeyguardInteractorFactory.WithDependencies keyguardInteractorDeps =
                 KeyguardInteractorFactory.create();
@@ -423,7 +426,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mDozeParameters,
                 mScreenOffAnimationController,
                 mKeyguardLogger,
-                mFeatureFlags,
                 mInteractionJankMonitor,
                 mKeyguardInteractor,
                 mKeyguardTransitionInteractor,
@@ -770,7 +772,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mAccessibilityManager,
                 mLockscreenGestureLogger,
                 mMetricsLogger,
-                mFeatureFlags,
                 mInteractionJankMonitor,
                 mShadeLog,
                 mDumpManager,

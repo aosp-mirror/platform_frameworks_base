@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.phone
 
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import android.os.Handler
 import android.os.PowerManager
 import android.testing.AndroidTestingRunner
@@ -82,14 +80,9 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var handler: Handler
 
-    private lateinit var featureFlags: FakeFeatureFlags
-
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        featureFlags = FakeFeatureFlags().apply {
-            set(Flags.MIGRATE_KEYGUARD_STATUS_VIEW, false)
-        }
         controller = UnlockedScreenOffAnimationController(
                 context,
                 wakefulnessLifecycle,
@@ -102,7 +95,6 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
                 interactionJankMonitor,
                 powerManager,
                 handler = handler,
-                featureFlags,
         )
         controller.initialize(centralSurfaces, shadeViewController, lightRevealScrim)
 

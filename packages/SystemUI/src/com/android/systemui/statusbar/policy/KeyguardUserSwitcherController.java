@@ -39,7 +39,6 @@ import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
@@ -161,7 +160,6 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
             KeyguardStateController keyguardStateController,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
-            FeatureFlags featureFlags,
             DozeParameters dozeParameters,
             ScreenOffAnimationController screenOffAnimationController) {
         super(keyguardUserSwitcherView);
@@ -177,7 +175,7 @@ public class KeyguardUserSwitcherController extends ViewController<KeyguardUserS
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
                 keyguardStateController, dozeParameters,
                 screenOffAnimationController, /* animateYPos= */ false,
-                featureFlags, /* logBuffer= */ null);
+                /* logBuffer= */ null);
         mBackground = new KeyguardUserSwitcherScrim(context);
     }
 

@@ -29,6 +29,7 @@ import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
@@ -62,7 +63,7 @@ constructor(
     private lateinit var nic: NotificationIconContainer
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
         nic =
@@ -81,7 +82,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
 
@@ -102,7 +103,7 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
         val bottomMargin =

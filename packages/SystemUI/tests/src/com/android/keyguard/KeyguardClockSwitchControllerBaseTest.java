@@ -21,7 +21,6 @@ import static android.view.View.INVISIBLE;
 import static com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.flags.Flags.MIGRATE_CLOCKS_TO_BLUEPRINT;
-import static com.android.systemui.flags.Flags.MIGRATE_KEYGUARD_STATUS_VIEW;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
@@ -181,7 +180,6 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         mFakeFeatureFlags = new FakeFeatureFlags();
         mFakeFeatureFlags.set(FACE_AUTH_REFACTOR, false);
         mFakeFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
-        mFakeFeatureFlags.set(MIGRATE_KEYGUARD_STATUS_VIEW, false);
         mFakeFeatureFlags.set(MIGRATE_CLOCKS_TO_BLUEPRINT, false);
         mController = new KeyguardClockSwitchController(
                 mView,

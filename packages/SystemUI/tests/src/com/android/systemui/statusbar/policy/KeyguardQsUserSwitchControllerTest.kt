@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy
 
-import com.android.systemui.flags.FakeFeatureFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.ViewUtils
@@ -78,13 +77,11 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
     private lateinit var view: FrameLayout
     private lateinit var testableLooper: TestableLooper
     private lateinit var keyguardQsUserSwitchController: KeyguardQsUserSwitchController
-    private lateinit var featureFlags: FakeFeatureFlags
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
-        featureFlags = FakeFeatureFlags()
 
         view = LayoutInflater.from(context)
                 .inflate(R.layout.keyguard_qs_user_switch, null) as FrameLayout
@@ -101,7 +98,6 @@ class KeyguardQsUserSwitchControllerTest : SysuiTestCase() {
                 dozeParameters,
                 screenOffAnimationController,
                 userSwitchDialogController,
-                featureFlags,
                 uiEventLogger)
 
         ViewUtils.attachView(view)
