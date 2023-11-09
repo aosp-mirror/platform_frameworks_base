@@ -29,3 +29,10 @@ flag {
     description: "Whether to dispatch window resize through ClientTransaction is enabled"
     bug: "301870955"
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "fullscreen_dim_flag"
+    description: "Whether to allow showing fullscreen dim on ActivityEmbedding split"
+    bug: "253533308"
+}
