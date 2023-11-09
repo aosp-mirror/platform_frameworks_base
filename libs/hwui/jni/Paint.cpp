@@ -1084,10 +1084,39 @@ namespace PaintGlue {
         return obj->getFamilyVariant() == minikin::FamilyVariant::ELEGANT;
     }
 
-    static void setElegantTextHeight(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jboolean aa) {
+    // Note: Following three values must be equal to the ones in Java file: Paint.java.
+    constexpr jint ELEGANT_TEXT_HEIGHT_UNSET = -1;
+    constexpr jint ELEGANT_TEXT_HEIGHT_ENABLED = 0;
+    constexpr jint ELEGANT_TEXT_HEIGHT_DISABLED = 1;
+
+    static jint getElegantTextHeight(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
         Paint* obj = reinterpret_cast<Paint*>(paintHandle);
-        obj->setFamilyVariant(
-                aa ? minikin::FamilyVariant::ELEGANT : minikin::FamilyVariant::DEFAULT);
+        const std::optional<minikin::FamilyVariant>& familyVariant = obj->getFamilyVariant();
+        if (familyVariant.has_value()) {
+            if (familyVariant.value() == minikin::FamilyVariant::ELEGANT) {
+                return ELEGANT_TEXT_HEIGHT_ENABLED;
+            } else {
+                return ELEGANT_TEXT_HEIGHT_DISABLED;
+            }
+        } else {
+            return ELEGANT_TEXT_HEIGHT_UNSET;
+        }
+    }
+
+    static void setElegantTextHeight(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jint value) {
+        Paint* obj = reinterpret_cast<Paint*>(paintHandle);
+        switch (value) {
+            case ELEGANT_TEXT_HEIGHT_ENABLED:
+                obj->setFamilyVariant(minikin::FamilyVariant::ELEGANT);
+                return;
+            case ELEGANT_TEXT_HEIGHT_DISABLED:
+                obj->setFamilyVariant(minikin::FamilyVariant::DEFAULT);
+                return;
+            case ELEGANT_TEXT_HEIGHT_UNSET:
+            default:
+                obj->resetFamilyVariant();
+                return;
+        }
     }
 
     static jfloat getTextSize(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle) {
@@ -1419,7 +1448,8 @@ static const JNINativeMethod methods[] = {
         {"nSetTextLocalesByMinikinLocaleListId", "(JI)V",
          (void*)PaintGlue::setTextLocalesByMinikinLocaleListId},
         {"nIsElegantTextHeight", "(J)Z", (void*)PaintGlue::isElegantTextHeight},
-        {"nSetElegantTextHeight", "(JZ)V", (void*)PaintGlue::setElegantTextHeight},
+        {"nGetElegantTextHeight", "(J)I", (void*)PaintGlue::getElegantTextHeight},
+        {"nSetElegantTextHeight", "(JI)V", (void*)PaintGlue::setElegantTextHeight},
         {"nGetTextSize", "(J)F", (void*)PaintGlue::getTextSize},
         {"nSetTextSize", "(JF)V", (void*)PaintGlue::setTextSize},
         {"nGetTextScaleX", "(J)F", (void*)PaintGlue::getTextScaleX},

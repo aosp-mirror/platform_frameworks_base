@@ -16,12 +16,14 @@
 
 #include "MinikinUtils.h"
 
-#include <string>
-
 #include <log/log.h>
-
+#include <minikin/FamilyVariant.h>
 #include <minikin/MeasuredText.h>
 #include <minikin/Measurement.h>
+
+#include <optional>
+#include <string>
+
 #include "Paint.h"
 #include "SkPathMeasure.h"
 #include "Typeface.h"
@@ -35,17 +37,22 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
 
     minikin::MinikinPaint minikinPaint(resolvedFace->fFontCollection);
     /* Prepare minikin Paint */
-    minikinPaint.size =
-            font.isLinearMetrics() ? font.getSize() : static_cast<int>(font.getSize());
+    minikinPaint.size = font.isLinearMetrics() ? font.getSize() : static_cast<int>(font.getSize());
     minikinPaint.scaleX = font.getScaleX();
     minikinPaint.skewX = font.getSkewX();
     minikinPaint.letterSpacing = paint->getLetterSpacing();
     minikinPaint.wordSpacing = paint->getWordSpacing();
     minikinPaint.fontFlags = MinikinFontSkia::packFontFlags(font);
     minikinPaint.localeListId = paint->getMinikinLocaleListId();
-    minikinPaint.familyVariant = paint->getFamilyVariant();
     minikinPaint.fontStyle = resolvedFace->fStyle;
     minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
+
+    const std::optional<minikin::FamilyVariant>& familyVariant = paint->getFamilyVariant();
+    if (familyVariant.has_value()) {
+        minikinPaint.familyVariant = familyVariant.value();
+    } else {
+        minikinPaint.familyVariant = minikin::FamilyVariant::DEFAULT;
+    }
     return minikinPaint;
 }
 
@@ -79,7 +86,7 @@ void MinikinUtils::getBounds(const Paint* paint, minikin::Bidi bidiFlags, const 
     const minikin::EndHyphenEdit endHyphen = paint->getEndHyphenEdit();
 
     minikin::getBounds(textBuf, minikin::Range(0, textBuf.size()), bidiFlags, minikinPaint,
-        startHyphen, endHyphen, out);
+                       startHyphen, endHyphen, out);
 }
 
 float MinikinUtils::measureText(const Paint* paint, minikin::Bidi bidiFlags,
