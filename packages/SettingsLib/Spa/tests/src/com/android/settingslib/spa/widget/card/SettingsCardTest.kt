@@ -35,8 +35,10 @@ class SettingsCardTest {
     fun settingsCard_titleDisplayed() {
         composeTestRule.setContent {
             SettingsCard(
-                title = TITLE,
-                text = "",
+                CardModel(
+                    title = TITLE,
+                    text = "",
+                )
             )
         }
 
@@ -47,8 +49,10 @@ class SettingsCardTest {
     fun settingsCard_textDisplayed() {
         composeTestRule.setContent {
             SettingsCard(
-                title = "",
-                text = TEXT,
+                CardModel(
+                    title = "",
+                    text = TEXT,
+                )
             )
         }
 
@@ -59,11 +63,13 @@ class SettingsCardTest {
     fun settingsCard_buttonDisplayed() {
         composeTestRule.setContent {
             SettingsCard(
-                title = "",
-                text = "",
-                buttons = listOf(
-                    CardButton(text = TEXT) {}
-                ),
+                CardModel(
+                    title = "",
+                    text = "",
+                    buttons = listOf(
+                        CardButton(text = TEXT) {}
+                    ),
+                )
             )
         }
 
@@ -75,11 +81,13 @@ class SettingsCardTest {
         var buttonClicked = false
         composeTestRule.setContent {
             SettingsCard(
-                title = "",
-                text = "",
-                buttons = listOf(
-                    CardButton(text = TEXT) { buttonClicked = true }
-                ),
+                CardModel(
+                    title = "",
+                    text = "",
+                    buttons = listOf(
+                        CardButton(text = TEXT) { buttonClicked = true }
+                    ),
+                )
             )
         }
 

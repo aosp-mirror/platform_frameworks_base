@@ -18,6 +18,9 @@ package com.android.settingslib.spa.gallery.card
 
 import android.os.Bundle
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Error
+import androidx.compose.material.icons.outlined.PowerOff
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -29,13 +32,15 @@ import com.android.settingslib.spa.framework.compose.navigator
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.gallery.R
 import com.android.settingslib.spa.widget.card.CardButton
+import com.android.settingslib.spa.widget.card.CardModel
 import com.android.settingslib.spa.widget.card.SettingsCard
+import com.android.settingslib.spa.widget.card.SettingsCollapsibleCard
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 
 object CardPageProvider : SettingsPageProvider {
-    override val name = "ActionButton"
+    override val name = "CardPage"
 
     override fun getTitle(arguments: Bundle?) = TITLE
 
@@ -44,18 +49,21 @@ object CardPageProvider : SettingsPageProvider {
         RegularScaffold(title = TITLE) {
             SettingsCardWithIcon()
             SettingsCardWithoutIcon()
+            SampleSettingsCollapsibleCard()
         }
     }
 
     @Composable
     private fun SettingsCardWithIcon() {
         SettingsCard(
-            title = stringResource(R.string.sample_title),
-            text = stringResource(R.string.sample_text),
-            imageVector = Icons.Outlined.WarningAmber,
-            buttons = listOf(
-                CardButton(text = "Action") {},
-                CardButton(text = "Action", isMain = true) {},
+            CardModel(
+                title = stringResource(R.string.sample_title),
+                text = stringResource(R.string.sample_text),
+                imageVector = Icons.Outlined.WarningAmber,
+                buttons = listOf(
+                    CardButton(text = "Action") {},
+                    CardButton(text = "Action", isMain = true) {},
+                )
             )
         )
     }
@@ -63,10 +71,39 @@ object CardPageProvider : SettingsPageProvider {
     @Composable
     private fun SettingsCardWithoutIcon() {
         SettingsCard(
-            title = stringResource(R.string.sample_title),
-            text = stringResource(R.string.sample_text),
-            buttons = listOf(
-                CardButton(text = "Action") {},
+            CardModel(
+                title = stringResource(R.string.sample_title),
+                text = stringResource(R.string.sample_text),
+                buttons = listOf(
+                    CardButton(text = "Action") {},
+                ),
+            )
+        )
+    }
+
+    @Composable
+    fun SampleSettingsCollapsibleCard() {
+        SettingsCollapsibleCard(
+            title = "More alerts",
+            imageVector = Icons.Outlined.Error,
+            models = listOf(
+                CardModel(
+                    title = stringResource(R.string.sample_title),
+                    text = stringResource(R.string.sample_text),
+                    imageVector = Icons.Outlined.PowerOff,
+                    buttons = listOf(
+                        CardButton(text = "Action") {},
+                    )
+                ),
+                CardModel(
+                    title = stringResource(R.string.sample_title),
+                    text = stringResource(R.string.sample_text),
+                    imageVector = Icons.Outlined.Shield,
+                    buttons = listOf(
+                        CardButton(text = "Action") {},
+                        CardButton(text = "Main action", isMain = true) {},
+                    )
+                )
             )
         )
     }

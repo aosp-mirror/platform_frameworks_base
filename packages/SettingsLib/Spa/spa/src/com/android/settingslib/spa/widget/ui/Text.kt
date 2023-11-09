@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,12 +40,16 @@ fun SettingsTitle(title: String, useMediumWeight: Boolean = false) {
     Text(
         text = title,
         color = MaterialTheme.colorScheme.onSurface,
-        style = MaterialTheme.typography.titleMedium.let {
-            when (useMediumWeight) {
-                true -> it.toMediumWeight()
-                else -> it
-            }
-        },
+        style = MaterialTheme.typography.titleMedium.withWeight(useMediumWeight),
+    )
+}
+
+@Composable
+fun SettingsTitleSmall(title: String, useMediumWeight: Boolean = false) {
+    Text(
+        text = title,
+        color = MaterialTheme.colorScheme.onSurface,
+        style = MaterialTheme.typography.titleSmall.withWeight(useMediumWeight),
     )
 }
 
@@ -78,7 +83,9 @@ fun SettingsBody(
 @Composable
 fun PlaceholderTitle(title: String) {
     Box(
-        modifier = Modifier.fillMaxSize().padding(SettingsDimension.itemPadding),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(SettingsDimension.itemPadding),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -87,6 +94,11 @@ fun PlaceholderTitle(title: String) {
             style = MaterialTheme.typography.titleLarge,
         )
     }
+}
+
+private fun TextStyle.withWeight(useMediumWeight: Boolean = false) = when (useMediumWeight) {
+    true -> toMediumWeight()
+    else -> this
 }
 
 @Preview
