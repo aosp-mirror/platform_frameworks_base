@@ -24,7 +24,6 @@ import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.dagger.QSTilesLogBuffers
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.pipeline.shared.TileSpec
-import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.statusbar.StatusBarState
@@ -34,7 +33,7 @@ import javax.inject.Inject
 class QSTileLogger
 @Inject
 constructor(
-    @QSTilesLogBuffers logBuffers: Map<TileSpec, LogBuffer>,
+    @QSTilesLogBuffers logBuffers: Map<String, LogBuffer>,
     private val factory: LogBufferFactory,
     private val mStatusBarStateController: StatusBarStateController,
 ) {
@@ -163,20 +162,13 @@ constructor(
 
     private fun TileSpec.getLogBuffer(): LogBuffer =
         synchronized(logBufferCache) {
-            logBufferCache.getOrPut(this) {
+            logBufferCache.getOrPut(this.spec) {
                 factory.create(
-                    "QSTileLog_${this.getLogTag()}",
+                    this.getLogTag(),
                     BUFFER_MAX_SIZE /* maxSize */,
                     false /* systrace */
                 )
             }
-        }
-
-    private fun DataUpdateTrigger.toLogString(): String =
-        when (this) {
-            is DataUpdateTrigger.ForceUpdate -> "force"
-            is DataUpdateTrigger.InitialRequest -> "init"
-            is DataUpdateTrigger.UserInput<*> -> input.action.toLogString()
         }
 
     private fun QSTileUserAction.toLogString(): String =
@@ -198,7 +190,7 @@ constructor(
             "]"
 
     private companion object {
-        const val TAG_FORMAT_PREFIX = "QSLog"
+        const val TAG_FORMAT_PREFIX = "QSLog_tile_"
         const val DATA_MAX_LENGTH = 50
         const val BUFFER_MAX_SIZE = 25
     }

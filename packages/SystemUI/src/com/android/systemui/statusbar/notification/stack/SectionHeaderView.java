@@ -53,7 +53,7 @@ public class SectionHeaderView extends StackScrollerDecorView {
         mContents = requireViewById(R.id.content);
         bindContents();
         super.onFinishInflate();
-        setVisible(true /* nowVisible */, false /* animate */);
+        setVisible(true /* visible */, false /* animate */);
     }
 
     private void bindContents() {

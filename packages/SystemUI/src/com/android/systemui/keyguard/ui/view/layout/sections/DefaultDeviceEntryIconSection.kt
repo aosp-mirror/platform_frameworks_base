@@ -29,6 +29,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -60,7 +61,7 @@ constructor(
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON) &&
+        if (!keyguardBottomAreaRefactor() &&
                 !featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)
         ) {
             return
@@ -74,7 +75,7 @@ constructor(
             if (featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
                 DeviceEntryIconView(context, null).apply { id = deviceEntryIconViewId }
             } else {
-                // Flags.MIGRATE_LOCK_ICON
+                // keyguardBottomAreaRefactor()
                 LockIconView(context, null).apply { id = R.id.lock_icon_view }
             }
         constraintLayout.addView(view)

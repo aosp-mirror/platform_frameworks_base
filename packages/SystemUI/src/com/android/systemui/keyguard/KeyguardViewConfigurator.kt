@@ -27,6 +27,7 @@ import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
@@ -113,7 +114,7 @@ constructor(
     fun bindIndicationArea() {
         indicationAreaHandle?.dispose()
 
-        if (!featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (!keyguardBottomAreaRefactor()) {
             keyguardRootView.findViewById<View?>(R.id.keyguard_indication_area)?.let {
                 keyguardRootView.removeView(it)
             }
@@ -125,7 +126,6 @@ constructor(
                 keyguardIndicationAreaViewModel,
                 keyguardRootViewModel,
                 indicationController,
-                featureFlags,
             )
     }
 

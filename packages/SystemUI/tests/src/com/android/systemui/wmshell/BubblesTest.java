@@ -334,6 +334,8 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private SelectedUserInteractor mSelectedUserInteractor;
     @Mock
+    private UserTracker mUserTracker;
+    @Mock
     private NotifPipelineFlags mNotifPipelineFlags;
     @Mock
     private Icon mAppBubbleIcon;
@@ -488,6 +490,7 @@ public class BubblesTest extends SysuiTestCase {
                 mKeyguardViewMediator,
                 mKeyguardBypassController,
                 syncExecutor,
+                syncExecutor,
                 mColorExtractor,
                 mDumpManager,
                 mKeyguardStateController,
@@ -495,7 +498,8 @@ public class BubblesTest extends SysuiTestCase {
                 mAuthController,
                 () -> mShadeInteractor,
                 mShadeWindowLogger,
-                () -> mSelectedUserInteractor
+                () -> mSelectedUserInteractor,
+                mUserTracker
         );
         mNotificationShadeWindowController.fetchWindowRootView();
         mNotificationShadeWindowController.attach();

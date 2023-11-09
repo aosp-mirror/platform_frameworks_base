@@ -41,6 +41,8 @@ import com.android.server.accessibility.AccessibilityTraceManager;
 import com.android.server.accessibility.EventStreamTransformation;
 import com.android.server.accessibility.Flags;
 import com.android.server.accessibility.gestures.GestureMatcher;
+import com.android.server.accessibility.gestures.MultiFingerMultiTap;
+import com.android.server.accessibility.gestures.MultiFingerMultiTapAndHold;
 import com.android.server.accessibility.gestures.MultiTap;
 import com.android.server.accessibility.gestures.MultiTapAndHold;
 
@@ -476,6 +478,15 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                         null));
                 mGestureMatchers.add(new TwoFingersDownOrSwipe(context));
 
+                if (mDetectTwoFingerTripleTap) {
+                    mGestureMatchers.add(new MultiFingerMultiTap(context, /* fingers= */ 2,
+                            /* taps= */ 3, MagnificationGestureMatcher.GESTURE_TRIPLE_TAP,
+                            null));
+                    mGestureMatchers.add(new MultiFingerMultiTapAndHold(context, /* fingers= */ 2,
+                            /* taps= */ 3, MagnificationGestureMatcher.GESTURE_TRIPLE_TAP_AND_HOLD,
+                            null));
+                }
+
                 mGesturesObserver = new MagnificationGesturesObserver(this,
                         mGestureMatchers.toArray(new GestureMatcher[mGestureMatchers.size()]));
             } else {
@@ -512,7 +523,9 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
         @Override
         public boolean shouldStopDetection(MotionEvent motionEvent) {
             return !mWindowMagnificationMgr.isWindowMagnifierEnabled(mDisplayId)
-                    && !mDetectSingleFingerTripleTap;
+                    && !mDetectSingleFingerTripleTap
+                    && !(mDetectTwoFingerTripleTap
+                    && Flags.enableMagnificationMultipleFingerMultipleTapGesture());
         }
 
         @Override

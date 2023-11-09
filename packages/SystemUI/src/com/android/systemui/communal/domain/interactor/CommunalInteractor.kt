@@ -16,6 +16,7 @@
 
 package com.android.systemui.communal.domain.interactor
 
+import android.content.ComponentName
 import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
@@ -33,7 +34,7 @@ class CommunalInteractor
 @Inject
 constructor(
     private val communalRepository: CommunalRepository,
-    widgetRepository: CommunalWidgetRepository,
+    private val widgetRepository: CommunalWidgetRepository,
 ) {
 
     /** Whether communal features are enabled. */
@@ -68,4 +69,11 @@ constructor(
     fun onSceneChanged(newScene: CommunalSceneKey) {
         communalRepository.setDesiredScene(newScene)
     }
+
+    /** Add a widget at the specified position. */
+    fun addWidget(componentName: ComponentName, priority: Int) =
+        widgetRepository.addWidget(componentName, priority)
+
+    /** Delete a widget by id. */
+    fun deleteWidget(id: Int) = widgetRepository.deleteWidget(id)
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.scene.shared.flag
 
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.sceneContainer
 import com.android.systemui.compose.ComposeFacade
@@ -57,8 +58,6 @@ constructor(
         @VisibleForTesting
         val classicFlagTokens: List<Flag<Boolean>> =
             listOf(
-                Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA,
-                Flags.MIGRATE_LOCK_ICON,
                 Flags.MIGRATE_NSSL,
                 Flags.MIGRATE_KEYGUARD_STATUS_VIEW,
                 Flags.MIGRATE_KEYGUARD_STATUS_BAR_VIEW,
@@ -71,6 +70,10 @@ constructor(
             AconfigFlagMustBeEnabled(
                 flagName = AConfigFlags.FLAG_SCENE_CONTAINER,
                 flagValue = sceneContainer(),
+            ),
+            AconfigFlagMustBeEnabled(
+                flagName = AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR,
+                flagValue = keyguardBottomAreaRefactor(),
             ),
         ) +
             classicFlagTokens.map { flagToken -> FlagMustBeEnabled(flagToken) } +

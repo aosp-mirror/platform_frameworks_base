@@ -27,8 +27,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.TAG
 import com.android.credentialmanager.activity.StartBalIntentSenderForResultContract
@@ -47,7 +47,7 @@ fun SinglePasswordScreen(
     columnState: ScalingLazyColumnState,
     onCloseApp: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: SinglePasswordScreenViewModel = viewModel(),
+    viewModel: SinglePasswordScreenViewModel = hiltViewModel(),
 ) {
     viewModel.initialize()
 

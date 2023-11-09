@@ -70,7 +70,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 
@@ -172,7 +171,7 @@ public class AudioDeviceBroker {
             @NonNull AudioSystemAdapter audioSystem) {
         mContext = context;
         mAudioService = service;
-        mBtHelper = new BtHelper(this);
+        mBtHelper = new BtHelper(this, context);
         mDeviceInventory = new AudioDeviceInventory(this);
         mSystemServer = SystemServerAdapter.getDefaultAdapter(mContext);
         mAudioSystem = audioSystem;
@@ -188,7 +187,7 @@ public class AudioDeviceBroker {
                       @NonNull AudioSystemAdapter audioSystem) {
         mContext = context;
         mAudioService = service;
-        mBtHelper = new BtHelper(this);
+        mBtHelper = new BtHelper(this, context);
         mDeviceInventory = mockDeviceInventory;
         mSystemServer = mockSystemServer;
         mAudioSystem = audioSystem;
@@ -1392,6 +1391,10 @@ public class AudioDeviceBroker {
         return mAudioService.hasAudioFocusUsers();
     }
 
+    /*package*/ void postInitSpatializerHeadTrackingSensors() {
+        mAudioService.postInitSpatializerHeadTrackingSensors();
+    }
+
     //---------------------------------------------------------------------
     // Message handling on behalf of helper classes.
     // Each of these methods posts a message to mBrokerHandler message queue.
@@ -1473,6 +1476,15 @@ public class AudioDeviceBroker {
 
     /*package*/ void postReceiveBtEvent(Intent intent) {
         sendLMsgNoDelay(MSG_L_RECEIVED_BT_EVENT, SENDMSG_QUEUE, intent);
+    }
+
+    /*package*/ void postUpdateLeAudioGroupAddresses(int groupId) {
+        sendIMsgNoDelay(
+                MSG_I_UPDATE_LE_AUDIO_GROUP_ADDRESSES, SENDMSG_QUEUE, groupId);
+    }
+
+    /*package*/ void postSynchronizeLeDevicesInInventory(AdiDeviceState deviceState) {
+        sendLMsgNoDelay(MSG_L_SYNCHRONIZE_LE_DEVICES_IN_INVENTORY, SENDMSG_QUEUE, deviceState);
     }
 
     /*package*/ static final class CommunicationDeviceInfo {
@@ -1602,6 +1614,14 @@ public class AudioDeviceBroker {
         synchronized (mDeviceStateLock) {
             return mBluetoothA2dpEnabled;
         }
+    }
+
+    /*package*/ int getLeAudioDeviceGroupId(BluetoothDevice device) {
+        return mBtHelper.getLeAudioDeviceGroupId(device);
+    }
+
+    /*package*/ List<String> getLeAudioGroupAddresses(int groupId) {
+        return mBtHelper.getLeAudioGroupAddresses(groupId);
     }
 
     /*package*/ void broadcastStickyIntentToCurrentProfileGroup(Intent intent) {
@@ -1976,6 +1996,22 @@ public class AudioDeviceBroker {
                         onCheckCommunicationRouteClientState(msg.arg1, msg.arg2 == 1);
                     }
                 } break;
+
+                case MSG_I_UPDATE_LE_AUDIO_GROUP_ADDRESSES:
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mDeviceInventory.onUpdateLeAudioGroupAddresses(msg.arg1);
+                        }
+                    } break;
+
+                case MSG_L_SYNCHRONIZE_LE_DEVICES_IN_INVENTORY:
+                    synchronized (mSetModeLock) {
+                        synchronized (mDeviceStateLock) {
+                            mDeviceInventory.onSynchronizeLeDevicesInInventory(
+                                    (AdiDeviceState) msg.obj);
+                        }
+                    } break;
+
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
             }
@@ -2058,6 +2094,10 @@ public class AudioDeviceBroker {
     private static final int MSG_L_RECEIVED_BT_EVENT = 55;
 
     private static final int MSG_CHECK_COMMUNICATION_ROUTE_CLIENT_STATE = 56;
+    private static final int MSG_I_UPDATE_LE_AUDIO_GROUP_ADDRESSES = 57;
+    private static final int MSG_L_SYNCHRONIZE_LE_DEVICES_IN_INVENTORY = 58;
+
+
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {
@@ -2582,9 +2622,9 @@ public class AudioDeviceBroker {
         }
     }
 
-    @Nullable UUID getDeviceSensorUuid(AudioDeviceAttributes device) {
+    List<String> getDeviceAddresses(AudioDeviceAttributes device) {
         synchronized (mDeviceStateLock) {
-            return mDeviceInventory.getDeviceSensorUuid(device);
+            return mDeviceInventory.getDeviceAddresses(device);
         }
     }
 
@@ -2605,15 +2645,19 @@ public class AudioDeviceBroker {
      * in order to be mocked by a test a the same package
      * (see https://code.google.com/archive/p/mockito/issues/127)
      */
-    public void persistAudioDeviceSettings() {
+    public void postPersistAudioDeviceSettings() {
         sendMsg(MSG_PERSIST_AUDIO_DEVICE_SETTINGS, SENDMSG_REPLACE, /*delay*/ 1000);
     }
 
     void onPersistAudioDeviceSettings() {
         final String deviceSettings = mDeviceInventory.getDeviceSettings();
-        Log.v(TAG, "saving AdiDeviceState: " + deviceSettings);
-        final SettingsAdapter settings = mAudioService.getSettings();
-        boolean res = settings.putSecureStringForUser(mAudioService.getContentResolver(),
+        Log.v(TAG, "onPersistAudioDeviceSettings AdiDeviceState: " + deviceSettings);
+        String currentSettings = readDeviceSettings();
+        if (deviceSettings.equals(currentSettings)) {
+            return;
+        }
+        final SettingsAdapter settingsAdapter = mAudioService.getSettings();
+        boolean res = settingsAdapter.putSecureStringForUser(mAudioService.getContentResolver(),
                 Settings.Secure.AUDIO_DEVICE_INVENTORY,
                 deviceSettings, UserHandle.USER_CURRENT);
         if (!res) {
@@ -2621,11 +2665,17 @@ public class AudioDeviceBroker {
         }
     }
 
+    private String readDeviceSettings() {
+        final SettingsAdapter settingsAdapter = mAudioService.getSettings();
+        final ContentResolver contentResolver = mAudioService.getContentResolver();
+        return settingsAdapter.getSecureStringForUser(contentResolver,
+                Settings.Secure.AUDIO_DEVICE_INVENTORY, UserHandle.USER_CURRENT);
+    }
+
     void onReadAudioDeviceSettings() {
         final SettingsAdapter settingsAdapter = mAudioService.getSettings();
         final ContentResolver contentResolver = mAudioService.getContentResolver();
-        String settings = settingsAdapter.getSecureStringForUser(contentResolver,
-                Settings.Secure.AUDIO_DEVICE_INVENTORY, UserHandle.USER_CURRENT);
+        String settings = readDeviceSettings();
         if (settings == null) {
             Log.i(TAG, "reading AdiDeviceState from legacy key"
                     + Settings.Secure.SPATIAL_AUDIO_ENABLED);
@@ -2688,8 +2738,8 @@ public class AudioDeviceBroker {
     }
 
     @Nullable
-    AdiDeviceState findBtDeviceStateForAddress(String address, boolean isBle) {
-        return mDeviceInventory.findBtDeviceStateForAddress(address, isBle);
+    AdiDeviceState findBtDeviceStateForAddress(String address, int deviceType) {
+        return mDeviceInventory.findBtDeviceStateForAddress(address, deviceType);
     }
 
     //------------------------------------------------

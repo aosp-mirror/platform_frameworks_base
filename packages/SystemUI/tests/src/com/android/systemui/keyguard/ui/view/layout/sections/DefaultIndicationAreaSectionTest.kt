@@ -23,12 +23,10 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.statusbar.KeyguardIndicationController
-import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -43,7 +41,6 @@ class DefaultIndicationAreaSectionTest : SysuiTestCase() {
     @Mock private lateinit var keyguardIndicationAreaViewModel: KeyguardIndicationAreaViewModel
     @Mock private lateinit var keyguardRootViewModel: KeyguardRootViewModel
     @Mock private lateinit var indicationController: KeyguardIndicationController
-    @Mock private lateinit var featureFlags: FeatureFlags
 
     private lateinit var underTest: DefaultIndicationAreaSection
 
@@ -56,13 +53,12 @@ class DefaultIndicationAreaSectionTest : SysuiTestCase() {
                 keyguardIndicationAreaViewModel,
                 keyguardRootViewModel,
                 indicationController,
-                featureFlags,
             )
     }
 
     @Test
     fun addViewsConditionally() {
-        whenever(featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)).thenReturn(true)
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
         assertThat(constraintLayout.childCount).isGreaterThan(0)
@@ -70,7 +66,7 @@ class DefaultIndicationAreaSectionTest : SysuiTestCase() {
 
     @Test
     fun addViewsConditionally_migrateFlagOff() {
-        whenever(featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)).thenReturn(false)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
         assertThat(constraintLayout.childCount).isEqualTo(0)

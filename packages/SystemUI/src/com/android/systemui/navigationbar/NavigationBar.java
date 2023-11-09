@@ -1383,7 +1383,17 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         args.putInt(
                 AssistManager.INVOCATION_TYPE_KEY,
                 AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
-        mAssistManagerLazy.get().startAssist(args);
+        // If Launcher has requested to override long press home, add a delay for the ripple.
+        // TODO(b/304146255): Remove this delay once we can exclude 3-button nav from screenshot.
+        boolean delayAssistInvocation = mAssistManagerLazy.get().shouldOverrideAssist(
+                AssistManager.INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS);
+        // In practice, I think v should always be a KeyButtonView, but just being safe.
+        if (delayAssistInvocation && v instanceof KeyButtonView) {
+            ((KeyButtonView) v).setOnRippleInvisibleRunnable(
+                    () -> mAssistManagerLazy.get().startAssist(args));
+        } else {
+            mAssistManagerLazy.get().startAssist(args);
+        }
         mCentralSurfacesOptionalLazy.get().ifPresent(CentralSurfaces::awakenDreams);
         mView.abortCurrentGesture();
         return true;

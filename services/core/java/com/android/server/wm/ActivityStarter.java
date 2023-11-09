@@ -388,7 +388,7 @@ class ActivityStarter {
         WaitResult waitResult;
         int filterCallingUid;
         PendingIntentRecord originatingPendingIntent;
-        BackgroundStartPrivileges backgroundStartPrivileges;
+        BackgroundStartPrivileges forcedBalByPiSender;
 
         final StringBuilder logMessage = new StringBuilder();
 
@@ -451,7 +451,7 @@ class ActivityStarter {
             allowPendingRemoteAnimationRegistryLookup = true;
             filterCallingUid = UserHandle.USER_NULL;
             originatingPendingIntent = null;
-            backgroundStartPrivileges = BackgroundStartPrivileges.NONE;
+            forcedBalByPiSender = BackgroundStartPrivileges.NONE;
             errorCallbackToken = null;
         }
 
@@ -494,7 +494,7 @@ class ActivityStarter {
                     = request.allowPendingRemoteAnimationRegistryLookup;
             filterCallingUid = request.filterCallingUid;
             originatingPendingIntent = request.originatingPendingIntent;
-            backgroundStartPrivileges = request.backgroundStartPrivileges;
+            forcedBalByPiSender = request.forcedBalByPiSender;
             errorCallbackToken = request.errorCallbackToken;
         }
 
@@ -1106,7 +1106,7 @@ class ActivityStarter {
                             realCallingPid,
                             callerApp,
                             request.originatingPendingIntent,
-                            request.backgroundStartPrivileges,
+                            request.forcedBalByPiSender,
                             intent,
                             checkedOptions);
                 balCode = balVerdict.getCode();
@@ -3167,9 +3167,8 @@ class ActivityStarter {
         return this;
     }
 
-    ActivityStarter setBackgroundStartPrivileges(
-            BackgroundStartPrivileges backgroundStartPrivileges) {
-        mRequest.backgroundStartPrivileges = backgroundStartPrivileges;
+    ActivityStarter setBackgroundStartPrivileges(BackgroundStartPrivileges forcedBalByPiSender) {
+        mRequest.forcedBalByPiSender = forcedBalByPiSender;
         return this;
     }
 

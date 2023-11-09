@@ -22,6 +22,7 @@ import static android.hardware.biometrics.BiometricSourceType.FINGERPRINT;
 import static com.android.keyguard.LockIconView.ICON_FINGERPRINT;
 import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
+import static com.android.systemui.Flags.keyguardBottomAreaRefactor;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
@@ -459,7 +460,7 @@ public class LockIconViewController implements Dumpable {
     private void updateLockIconLocation() {
         final float scaleFactor = mAuthController.getScaleFactor();
         final int scaledPadding = (int) (mDefaultPaddingPx * scaleFactor);
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
+        if (keyguardBottomAreaRefactor()) {
             mView.getLockIcon().setPadding(scaledPadding, scaledPadding, scaledPadding,
                     scaledPadding);
         } else {

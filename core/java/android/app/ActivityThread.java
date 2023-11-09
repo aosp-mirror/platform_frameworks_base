@@ -378,6 +378,15 @@ public final class ActivityThread extends ClientTransactionHandler
     /** Maps from activity token to the pending override configuration. */
     @GuardedBy("mPendingOverrideConfigs")
     private final ArrayMap<IBinder, Configuration> mPendingOverrideConfigs = new ArrayMap<>();
+
+    /**
+     * A queue of pending ApplicationInfo updates. In case when we get a concurrent update
+     * this queue allows us to only apply the latest object, and it can be applied on demand
+     * instead of waiting for the handler thread to reach the scheduled callback.
+     */
+    @GuardedBy("mResourcesManager")
+    private final ArrayMap<String, ApplicationInfo> mPendingAppInfoUpdates = new ArrayMap<>();
+
     /** The activities to be truly destroyed (not include relaunch). */
     final Map<IBinder, DestroyActivityItem> mActivitiesToBeDestroyed =
             Collections.synchronizedMap(new ArrayMap<>());
@@ -1326,9 +1335,19 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public void scheduleApplicationInfoChanged(ApplicationInfo ai) {
+            synchronized (mResourcesManager) {
+                var oldAi = mPendingAppInfoUpdates.put(ai.packageName, ai);
+                if (oldAi != null && oldAi.createTimestamp > ai.createTimestamp) {
+                    Slog.w(TAG, "Skipping application info changed for obsolete AI with TS "
+                            + ai.createTimestamp + " < already pending TS "
+                            + oldAi.createTimestamp);
+                    mPendingAppInfoUpdates.put(ai.packageName, oldAi);
+                    return;
+                }
+            }
             mResourcesManager.appendPendingAppInfoUpdate(new String[]{ai.sourceDir}, ai);
-            mH.removeMessages(H.APPLICATION_INFO_CHANGED, ai);
-            sendMessage(H.APPLICATION_INFO_CHANGED, ai);
+            mH.removeMessages(H.APPLICATION_INFO_CHANGED, ai.packageName);
+            sendMessage(H.APPLICATION_INFO_CHANGED, ai.packageName);
         }
 
         public void updateTimeZone() {
@@ -2507,7 +2526,7 @@ public final class ActivityThread extends ClientTransactionHandler
                     break;
                 }
                 case APPLICATION_INFO_CHANGED:
-                    handleApplicationInfoChanged((ApplicationInfo) msg.obj);
+                    applyPendingApplicationInfoChanges((String) msg.obj);
                     break;
                 case RUN_ISOLATED_ENTRY_POINT:
                     handleRunIsolatedEntryPoint((String) ((SomeArgs) msg.obj).arg1,
@@ -4070,7 +4089,8 @@ public final class ActivityThread extends ClientTransactionHandler
             mProfiler.startProfiling();
         }
 
-        // Make sure we are running with the most recent config.
+        // Make sure we are running with the most recent config and resource paths.
+        applyPendingApplicationInfoChanges(r.activityInfo.packageName);
         mConfigurationController.handleConfigurationChanged(null, null);
         updateDeviceIdForNonUIContexts(deviceId);
 
@@ -6438,6 +6458,17 @@ public final class ActivityThread extends ClientTransactionHandler
         r.mLastReportedWindowingMode = newWindowingMode;
     }
 
+    private void applyPendingApplicationInfoChanges(String packageName) {
+        final ApplicationInfo ai;
+        synchronized (mResourcesManager) {
+            ai = mPendingAppInfoUpdates.remove(packageName);
+        }
+        if (ai == null) {
+            return;
+        }
+        handleApplicationInfoChanged(ai);
+    }
+
     /**
      * Updates the application info.
      *
@@ -6463,6 +6494,16 @@ public final class ActivityThread extends ClientTransactionHandler
             apk = ref != null ? ref.get() : null;
             ref = mResourcePackages.get(ai.packageName);
             resApk = ref != null ? ref.get() : null;
+            for (ActivityClientRecord ar : mActivities.values()) {
+                if (ar.activityInfo.applicationInfo.packageName.equals(ai.packageName)) {
+                    ar.activityInfo.applicationInfo = ai;
+                    if (apk != null || resApk != null) {
+                        ar.packageInfo = apk != null ? apk : resApk;
+                    } else {
+                        apk = ar.packageInfo;
+                    }
+                }
+            }
         }
 
         if (apk != null) {

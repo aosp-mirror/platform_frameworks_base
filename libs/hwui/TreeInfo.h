@@ -24,6 +24,7 @@
 #include "Properties.h"
 #include "SkSize.h"
 #include "SkippedFrameInfo.h"
+#include "utils/ForceDark.h"
 #include "utils/Macros.h"
 
 namespace android {
@@ -97,6 +98,7 @@ public:
     bool updateWindowPositions = false;
 
     int disableForceDark;
+    ForceDarkType forceDarkType = ForceDarkType::NONE;
 
     const SkISize screenSize;
 

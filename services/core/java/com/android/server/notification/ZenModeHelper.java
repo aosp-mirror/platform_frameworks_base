@@ -26,6 +26,7 @@ import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
+import android.app.Flags;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
@@ -670,14 +671,37 @@ public class ZenModeHelper {
         if (rule.enabled != automaticZenRule.isEnabled()) {
             rule.snoozing = false;
         }
+        if (Flags.modesApi()) {
+            rule.allowManualInvocation = automaticZenRule.isManualInvocationAllowed();
+            rule.iconResId = automaticZenRule.getIconResId();
+            rule.triggerDescription = automaticZenRule.getTriggerDescription();
+            rule.type = automaticZenRule.getType();
+        }
     }
 
     protected AutomaticZenRule createAutomaticZenRule(ZenRule rule) {
-        AutomaticZenRule azr =  new AutomaticZenRule(rule.name, rule.component,
-                rule.configurationActivity,
-                rule.conditionId, rule.zenPolicy,
-                NotificationManager.zenModeToInterruptionFilter(rule.zenMode),
-                rule.enabled, rule.creationTime);
+        AutomaticZenRule azr;
+        if (Flags.modesApi()) {
+            azr = new AutomaticZenRule.Builder(rule.name, rule.conditionId)
+                    .setManualInvocationAllowed(rule.allowManualInvocation)
+                    .setCreationTime(rule.creationTime)
+                    .setIconResId(rule.iconResId)
+                    .setType(rule.type)
+                    .setZenPolicy(rule.zenPolicy)
+                    .setEnabled(rule.enabled)
+                    .setInterruptionFilter(
+                            NotificationManager.zenModeToInterruptionFilter(rule.zenMode))
+                    .setOwner(rule.component)
+                    .setConfigurationActivity(rule.configurationActivity)
+                    .setTriggerDescription(rule.triggerDescription)
+                    .build();
+        } else {
+            azr = new AutomaticZenRule(rule.name, rule.component,
+                    rule.configurationActivity,
+                    rule.conditionId, rule.zenPolicy,
+                    NotificationManager.zenModeToInterruptionFilter(rule.zenMode),
+                    rule.enabled, rule.creationTime);
+        }
         azr.setPackageName(rule.pkg);
         return azr;
     }
@@ -713,6 +737,9 @@ public class ZenModeHelper {
                 newRule.zenMode = zenMode;
                 newRule.conditionId = conditionId;
                 newRule.enabler = caller;
+                if (Flags.modesApi()) {
+                    newRule.allowManualInvocation = true;
+                }
                 newConfig.manualRule = newRule;
             }
             setConfigLocked(newConfig, reason, null, setRingerMode, callingUid,

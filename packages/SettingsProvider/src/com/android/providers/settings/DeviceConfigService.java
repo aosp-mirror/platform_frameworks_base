@@ -29,6 +29,7 @@ import android.app.ActivityManager;
 import android.content.AttributionSource;
 import android.content.IContentProvider;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -219,14 +220,29 @@ public final class DeviceConfigService extends Binder {
         return lines;
       }
 
+      private static void log(String msg) {
+        if (Build.IS_DEBUGGABLE) {
+            Slog.wtf(TAG, msg);
+        } else {
+            Slog.e(TAG, msg);
+        }
+      }
+
       public static List<String> listAllAconfigFlags(IContentProvider provider) {
         HashMap<String, String> allFlags = getAllFlags(provider);
         HashSet<String> aconfigFlagNames = getAconfigFlagNamesInDeviceConfig();
         final ArrayList<String> lines = new ArrayList<>();
-        for (String key : aconfigFlagNames) {
-          String val = allFlags.get(key);
+        for (String aconfigFlag : aconfigFlagNames) {
+          String val = allFlags.get(aconfigFlag);
           if (val != null) {
-            lines.add(key + "=" + val);
+            int idx = aconfigFlag.indexOf("/");
+            if (idx == -1 || idx == aconfigFlag.length() - 1 || idx == 0) {
+              log("invalid flag entry in device config: " + aconfigFlag);
+              continue;
+            }
+            String aconfigFlagNameByPackage = aconfigFlag.substring(idx+1);
+            String namespace = aconfigFlag.substring(0, idx);
+            lines.add(aconfigFlagNameByPackage + " " + namespace + "=" + val);
           }
         }
         Collections.sort(lines);

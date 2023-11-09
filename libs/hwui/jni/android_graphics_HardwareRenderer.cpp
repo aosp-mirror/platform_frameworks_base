@@ -35,6 +35,7 @@
 #include <gui/TraceUtils.h>
 #include <include/encode/SkPngEncoder.h>
 #include <inttypes.h>
+#include <log/log.h>
 #include <media/NdkImage.h>
 #include <media/NdkImageReader.h>
 #include <nativehelper/JNIPlatformHelp.h>
@@ -53,11 +54,11 @@
 
 #include <algorithm>
 #include <atomic>
-#include <log/log.h>
 #include <vector>
 
 #include "JvmErrorReporter.h"
 #include "android_graphics_HardwareRendererObserver.h"
+#include "utils/ForceDark.h"
 
 namespace android {
 
@@ -824,10 +825,10 @@ static void android_view_ThreadedRenderer_allocateBuffers(JNIEnv* env, jobject c
     proxy->allocateBuffers();
 }
 
-static void android_view_ThreadedRenderer_setForceDark(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jboolean enable) {
+static void android_view_ThreadedRenderer_setForceDark(JNIEnv* env, jobject clazz, jlong proxyPtr,
+                                                       jint type) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setForceDark(enable);
+    proxy->setForceDark(static_cast<ForceDarkType>(type));
 }
 
 static void android_view_ThreadedRenderer_preload(JNIEnv*, jclass) {
@@ -1016,7 +1017,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetIsolatedProcess", "(Z)V", (void*)android_view_ThreadedRenderer_setIsolatedProcess},
         {"nSetContextPriority", "(I)V", (void*)android_view_ThreadedRenderer_setContextPriority},
         {"nAllocateBuffers", "(J)V", (void*)android_view_ThreadedRenderer_allocateBuffers},
-        {"nSetForceDark", "(JZ)V", (void*)android_view_ThreadedRenderer_setForceDark},
+        {"nSetForceDark", "(JI)V", (void*)android_view_ThreadedRenderer_setForceDark},
         {"nSetDisplayDensityDpi", "(I)V",
          (void*)android_view_ThreadedRenderer_setDisplayDensityDpi},
         {"nInitDisplayInfo", "(IIFIJJZZ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},

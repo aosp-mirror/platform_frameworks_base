@@ -36,9 +36,9 @@ data class QSTileConfig(
  */
 sealed interface QSTileUIConfig {
 
-    val tileIconRes: Int
+    val iconRes: Int
         @DrawableRes get
-    val tileLabelRes: Int
+    val labelRes: Int
         @StringRes get
 
     /**
@@ -46,16 +46,16 @@ sealed interface QSTileUIConfig {
      * of [Resource]. Returns [Resources.ID_NULL] for each field.
      */
     data object Empty : QSTileUIConfig {
-        override val tileIconRes: Int
+        override val iconRes: Int
             get() = Resources.ID_NULL
-        override val tileLabelRes: Int
+        override val labelRes: Int
             get() = Resources.ID_NULL
     }
 
     /** Config containing actual icon and label resources. */
     data class Resource(
-        @StringRes override val tileIconRes: Int,
-        @StringRes override val tileLabelRes: Int,
+        @DrawableRes override val iconRes: Int,
+        @StringRes override val labelRes: Int,
     ) : QSTileUIConfig
 }
 

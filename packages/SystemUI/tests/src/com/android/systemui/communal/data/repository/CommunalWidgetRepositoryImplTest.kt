@@ -1,9 +1,26 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.communal.data.repository
 
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.os.UserHandle
 import android.os.UserManager
@@ -11,8 +28,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
-import com.android.systemui.communal.data.model.CommunalWidgetMetadata
-import com.android.systemui.communal.shared.model.CommunalContentSize
+import com.android.systemui.communal.data.db.CommunalItemRank
+import com.android.systemui.communal.data.db.CommunalWidgetDao
+import com.android.systemui.communal.data.db.CommunalWidgetItem
+import com.android.systemui.communal.shared.CommunalWidgetHost
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -28,6 +47,7 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -66,9 +86,9 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
 
     @Mock private lateinit var providerInfoA: AppWidgetProviderInfo
 
-    @Mock private lateinit var providerInfoB: AppWidgetProviderInfo
+    @Mock private lateinit var communalWidgetHost: CommunalWidgetHost
 
-    @Mock private lateinit var providerInfoC: AppWidgetProviderInfo
+    @Mock private lateinit var communalWidgetDao: CommunalWidgetDao
 
     private lateinit var communalRepository: FakeCommunalRepository
 
@@ -101,6 +121,92 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         whenever(stopwatchProviderInfo.loadLabel(any())).thenReturn("Stopwatch")
         whenever(userTracker.userHandle).thenReturn(userHandle)
     }
+
+    @Test
+    fun neverQueryDbForWidgets_whenFeatureIsDisabled() =
+        testScope.runTest {
+            communalEnabled(false)
+            val repository = initCommunalWidgetRepository()
+            collectLastValue(repository.communalWidgets)()
+            runCurrent()
+
+            verify(communalWidgetDao, Mockito.never()).getWidgets()
+        }
+
+    @Test
+    fun neverQueryDbForWidgets_whenFeatureEnabled_andUserLocked() =
+        testScope.runTest {
+            userUnlocked(false)
+            val repository = initCommunalWidgetRepository()
+            collectLastValue(repository.communalWidgets)()
+            runCurrent()
+
+            verify(communalWidgetDao, Mockito.never()).getWidgets()
+        }
+
+    @Test
+    fun communalWidgets_whenUserUnlocked_queryWidgetsFromDb() =
+        testScope.runTest {
+            userUnlocked(false)
+            val repository = initCommunalWidgetRepository()
+            val communalWidgets = collectLastValue(repository.communalWidgets)
+            communalWidgets()
+            runCurrent()
+            val communalItemRankEntry = CommunalItemRank(uid = 1L, rank = 1)
+            val communalWidgetItemEntry = CommunalWidgetItem(uid = 1L, 1, "pk_name/cls_name", 1L)
+            whenever(communalWidgetDao.getWidgets())
+                .thenReturn(flowOf(mapOf(communalItemRankEntry to communalWidgetItemEntry)))
+            whenever(appWidgetManager.getAppWidgetInfo(anyInt())).thenReturn(providerInfoA)
+
+            userUnlocked(true)
+            installedProviders(listOf(stopwatchProviderInfo))
+            broadcastReceiverUpdate()
+            runCurrent()
+
+            verify(communalWidgetDao).getWidgets()
+            assertThat(communalWidgets())
+                .containsExactly(
+                    CommunalWidgetContentModel(
+                        appWidgetId = communalWidgetItemEntry.widgetId,
+                        providerInfo = providerInfoA,
+                        priority = communalItemRankEntry.rank,
+                    )
+                )
+        }
+
+    @Test
+    fun addWidget_allocateId_bindWidget_andAddToDb() =
+        testScope.runTest {
+            userUnlocked(true)
+            val repository = initCommunalWidgetRepository()
+            runCurrent()
+
+            val provider = ComponentName("pkg_name", "cls_name")
+            val id = 1
+            val priority = 1
+            whenever(communalWidgetHost.allocateIdAndBindWidget(any<ComponentName>()))
+                .thenReturn(id)
+            repository.addWidget(provider, priority)
+            runCurrent()
+
+            verify(communalWidgetHost).allocateIdAndBindWidget(provider)
+            verify(communalWidgetDao).addWidget(id, provider, priority)
+        }
+
+    @Test
+    fun deleteWidget_removeWidgetId_andDeleteFromDb() =
+        testScope.runTest {
+            userUnlocked(true)
+            val repository = initCommunalWidgetRepository()
+            runCurrent()
+
+            val id = 1
+            repository.deleteWidget(id)
+            runCurrent()
+
+            verify(communalWidgetDao).deleteWidgetById(id)
+            verify(appWidgetHost).deleteAppWidgetId(id)
+        }
 
     @Test
     fun broadcastReceiver_communalDisabled_doNotRegisterUserUnlockedBroadcastReceiver() =
@@ -183,34 +289,6 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
-    fun appWidgetId_userLockedAgainAfterProviderInfoAvailable_deleteAppWidgetId() =
-        testScope.runTest {
-            whenever(appWidgetHost.allocateAppWidgetId()).thenReturn(123456)
-            userUnlocked(false)
-            val repository = initCommunalWidgetRepository()
-            val lastStopwatchProviderInfo = collectLastValue(repository.stopwatchAppWidgetInfo)
-            assertThat(lastStopwatchProviderInfo()).isNull()
-
-            // User unlocks
-            userUnlocked(true)
-            installedProviders(listOf(stopwatchProviderInfo))
-            broadcastReceiverUpdate()
-
-            // Verify app widget id allocated
-            assertThat(lastStopwatchProviderInfo()?.appWidgetId).isEqualTo(123456)
-            verify(appWidgetHost).allocateAppWidgetId()
-            verify(appWidgetHost, Mockito.never()).deleteAppWidgetId(anyInt())
-
-            // User locked again
-            userUnlocked(false)
-            broadcastReceiverUpdate()
-
-            // Verify app widget id deleted
-            assertThat(lastStopwatchProviderInfo()).isNull()
-            verify(appWidgetHost).deleteAppWidgetId(123456)
-        }
-
-    @Test
     fun appWidgetHost_userUnlocked_startListening() =
         testScope.runTest {
             userUnlocked(false)
@@ -246,95 +324,16 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
             verify(appWidgetHost).stopListening()
         }
 
-    @Test
-    fun getCommunalWidgetAllowList_onInit() {
-        testScope.runTest {
-            val repository = initCommunalWidgetRepository()
-            val communalWidgetAllowlist = repository.communalWidgetAllowlist
-            assertThat(
-                    listOf(
-                        CommunalWidgetMetadata(
-                            componentName = fakeAllowlist[0],
-                            priority = 3,
-                            sizes = listOf(CommunalContentSize.HALF),
-                        ),
-                        CommunalWidgetMetadata(
-                            componentName = fakeAllowlist[1],
-                            priority = 2,
-                            sizes = listOf(CommunalContentSize.HALF),
-                        ),
-                        CommunalWidgetMetadata(
-                            componentName = fakeAllowlist[2],
-                            priority = 1,
-                            sizes = listOf(CommunalContentSize.HALF),
-                        ),
-                    )
-                )
-                .containsExactly(*communalWidgetAllowlist.toTypedArray())
-        }
-    }
-
-    // This behavior is temporary before the local database is set up.
-    @Test
-    fun communalWidgets_withPreviouslyBoundWidgets_removeEachBinding() =
-        testScope.runTest {
-            whenever(appWidgetHost.allocateAppWidgetId()).thenReturn(1, 2, 3)
-            setAppWidgetIds(listOf(1, 2, 3))
-            whenever(appWidgetManager.getAppWidgetInfo(anyInt())).thenReturn(providerInfoA)
-            userUnlocked(true)
-
-            val repository = initCommunalWidgetRepository()
-
-            collectLastValue(repository.communalWidgets)()
-
-            verify(appWidgetHost).deleteAppWidgetId(1)
-            verify(appWidgetHost).deleteAppWidgetId(2)
-            verify(appWidgetHost).deleteAppWidgetId(3)
-        }
-
-    @Test
-    fun communalWidgets_allowlistNotEmpty_bindEachWidgetFromTheAllowlist() =
-        testScope.runTest {
-            whenever(appWidgetHost.allocateAppWidgetId()).thenReturn(0, 1, 2)
-            userUnlocked(true)
-
-            whenever(appWidgetManager.getAppWidgetInfo(0)).thenReturn(providerInfoA)
-            whenever(appWidgetManager.getAppWidgetInfo(1)).thenReturn(providerInfoB)
-            whenever(appWidgetManager.getAppWidgetInfo(2)).thenReturn(providerInfoC)
-
-            val repository = initCommunalWidgetRepository()
-
-            val inventory by collectLastValue(repository.communalWidgets)
-
-            assertThat(
-                    listOf(
-                        CommunalWidgetContentModel(
-                            appWidgetId = 0,
-                            providerInfo = providerInfoA,
-                            priority = 3,
-                        ),
-                        CommunalWidgetContentModel(
-                            appWidgetId = 1,
-                            providerInfo = providerInfoB,
-                            priority = 2,
-                        ),
-                        CommunalWidgetContentModel(
-                            appWidgetId = 2,
-                            providerInfo = providerInfoC,
-                            priority = 1,
-                        ),
-                    )
-                )
-                .containsExactly(*inventory!!.toTypedArray())
-        }
-
     private fun initCommunalWidgetRepository(): CommunalWidgetRepositoryImpl {
         return CommunalWidgetRepositoryImpl(
-            context,
             appWidgetManager,
             appWidgetHost,
+            testScope.backgroundScope,
+            testDispatcher,
             broadcastDispatcher,
             communalRepository,
+            communalWidgetHost,
+            communalWidgetDao,
             packageManager,
             userManager,
             userTracker,

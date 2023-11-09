@@ -125,6 +125,9 @@ public class AutomaticZenRuleTest {
             Field configActivity = Class.forName(CLASS).getDeclaredField("configurationActivity");
             configActivity.setAccessible(true);
             configActivity.set(rule, new ComponentName(longString, longString));
+            Field trigger = Class.forName(CLASS).getDeclaredField("mTriggerDescription");
+            trigger.setAccessible(true);
+            trigger.set(rule, longString);
         } catch (NoSuchFieldException e) {
             fail(e.toString());
         } catch (ClassNotFoundException e) {
@@ -149,5 +152,6 @@ public class AutomaticZenRuleTest {
                 fromParcel.getOwner().getPackageName().length());
         assertEquals(AutomaticZenRule.MAX_STRING_LENGTH,
                 fromParcel.getOwner().getClassName().length());
+        assertEquals(AutomaticZenRule.MAX_DESC_LENGTH, rule.getTriggerDescription().length());
     }
 }

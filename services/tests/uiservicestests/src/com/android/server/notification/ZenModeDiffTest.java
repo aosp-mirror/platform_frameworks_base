@@ -23,6 +23,7 @@ import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
+import android.app.AutomaticZenRule;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.provider.Settings;
@@ -229,6 +230,10 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         rule.name = "name";
         rule.snoozing = true;
         rule.pkg = "a";
+        rule.allowManualInvocation = true;
+        rule.type = AutomaticZenRule.TYPE_SCHEDULE_TIME;
+        rule.iconResId = 123;
+        rule.triggerDescription = "At night";
         return rule;
     }
 

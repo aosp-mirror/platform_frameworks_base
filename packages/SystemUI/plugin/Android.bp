@@ -26,11 +26,18 @@ java_library {
     name: "SystemUIPluginLib",
 
     srcs: [
-        "src/**/*.java",
-        "src/**/*.kt",
         "bcsmartspace/src/**/*.java",
         "bcsmartspace/src/**/*.kt",
+        "src/**/*.java",
+        "src/**/*.kt",
     ],
+
+    optimize: {
+        proguard_flags_files: [
+            "proguard_plugins.flags",
+        ],
+        export_proguard_flags_files: true,
+    },
 
     // If you add a static lib here, you may need to also add the package to the ClassLoaderFilter
     // in PluginInstance. That will ensure that loaded plugins have access to the related classes.
@@ -43,6 +50,7 @@ java_library {
         "SystemUIAnimationLib",
         "SystemUICommon",
         "SystemUILogLib",
+        "androidx.annotation_annotation",
     ],
 
 }
