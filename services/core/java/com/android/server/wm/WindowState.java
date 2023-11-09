@@ -1381,7 +1381,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // This window doesn't provide any insets.
             return;
         }
-        if (mGivenInsetsPending) {
+        if (mGivenInsetsPending && mAttrs.providedInsets == null) {
             // The given insets are pending, and they are not reliable for now. The source frame
             // should be updated after the new given insets are sent to window manager.
             return;
