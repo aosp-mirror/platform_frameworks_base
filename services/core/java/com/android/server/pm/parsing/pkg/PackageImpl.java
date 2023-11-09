@@ -113,21 +113,21 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     private static final SparseArray<int[]> EMPTY_INT_ARRAY_SPARSE_ARRAY = new SparseArray<>();
     private static final Comparator<ParsedMainComponent> ORDER_COMPARATOR =
             (first, second) -> Integer.compare(second.getOrder(), first.getOrder());
-    public static Parcelling.BuiltIn.ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(
+    public static final Parcelling.BuiltIn.ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(
             Parcelling.BuiltIn.ForBoolean.class);
-    public static ForInternedString sForInternedString = Parcelling.Cache.getOrCreate(
+    public static final ForInternedString sForInternedString = Parcelling.Cache.getOrCreate(
             ForInternedString.class);
-    public static Parcelling.BuiltIn.ForInternedStringArray sForInternedStringArray = Parcelling.Cache.getOrCreate(
-            Parcelling.BuiltIn.ForInternedStringArray.class);
-    public static Parcelling.BuiltIn.ForInternedStringList sForInternedStringList = Parcelling.Cache.getOrCreate(
-            Parcelling.BuiltIn.ForInternedStringList.class);
-    public static Parcelling.BuiltIn.ForInternedStringValueMap sForInternedStringValueMap =
+    public static final Parcelling.BuiltIn.ForInternedStringArray sForInternedStringArray =
+            Parcelling.Cache.getOrCreate(Parcelling.BuiltIn.ForInternedStringArray.class);
+    public static final Parcelling.BuiltIn.ForInternedStringList sForInternedStringList =
+            Parcelling.Cache.getOrCreate(Parcelling.BuiltIn.ForInternedStringList.class);
+    public static final Parcelling.BuiltIn.ForInternedStringValueMap sForInternedStringValueMap =
             Parcelling.Cache.getOrCreate(Parcelling.BuiltIn.ForInternedStringValueMap.class);
-    public static Parcelling.BuiltIn.ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(
-            Parcelling.BuiltIn.ForStringSet.class);
-    public static Parcelling.BuiltIn.ForInternedStringSet sForInternedStringSet =
+    public static final Parcelling.BuiltIn.ForStringSet sForStringSet =
+            Parcelling.Cache.getOrCreate(Parcelling.BuiltIn.ForStringSet.class);
+    public static final Parcelling.BuiltIn.ForInternedStringSet sForInternedStringSet =
             Parcelling.Cache.getOrCreate(Parcelling.BuiltIn.ForInternedStringSet.class);
-    protected static ParsingUtils.StringPairListParceler sForIntentInfoPairs =
+    protected static final ParsingUtils.StringPairListParceler sForIntentInfoPairs =
             new ParsingUtils.StringPairListParceler();
     protected int versionCode;
     protected int versionCodeMajor;

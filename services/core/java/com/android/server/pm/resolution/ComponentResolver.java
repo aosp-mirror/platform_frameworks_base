@@ -951,7 +951,7 @@ public class ComponentResolver extends ComponentResolverLocked implements
             extends MimeGroupsAwareIntentResolver<Pair<ParsedActivity, ParsedIntentInfo>, ResolveInfo> {
 
         @NonNull
-        private UserNeedsBadgingCache mUserNeedsBadging;
+        private final UserNeedsBadgingCache mUserNeedsBadging;
 
         // Default constructor
         ActivityIntentResolver(@NonNull UserManagerService userManager,

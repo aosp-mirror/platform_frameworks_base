@@ -2364,7 +2364,7 @@ class PackageManagerShellCommand extends ShellCommand {
         private boolean mSuccess = false;
         private int mErrCode = -1;
         private ParcelFileDescriptor mProfileReadFd = null;
-        private CountDownLatch mDoneSignal = new CountDownLatch(1);
+        private final CountDownLatch mDoneSignal = new CountDownLatch(1);
 
         @Override
         public void onSuccess(ParcelFileDescriptor profileReadFd) {
@@ -5186,7 +5186,7 @@ class PackageManagerShellCommand extends ShellCommand {
     private static class LocalIntentReceiver {
         private final LinkedBlockingQueue<Intent> mResult = new LinkedBlockingQueue<>();
 
-        private IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
+        private final IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
             @Override
             public void send(int code, Intent intent, String resolvedType, IBinder whitelistToken,
                     IIntentReceiver finishedReceiver, String requiredPermission, Bundle options) {

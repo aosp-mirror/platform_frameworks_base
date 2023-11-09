@@ -296,24 +296,26 @@ public class ShortcutService extends IShortcutService.Stub {
     private final Object mNonPersistentUsersLock = new Object();
     private final Object mWtfLock = new Object();
 
-    private static List<ResolveInfo> EMPTY_RESOLVE_INFO = new ArrayList<>(0);
+    private static final List<ResolveInfo> EMPTY_RESOLVE_INFO = new ArrayList<>(0);
 
     // Temporarily reverted to anonymous inner class form due to: b/32554459
-    private static Predicate<ResolveInfo> ACTIVITY_NOT_EXPORTED = new Predicate<ResolveInfo>() {
-        public boolean test(ResolveInfo ri) {
-            return !ri.activityInfo.exported;
-        }
-    };
+    private static final Predicate<ResolveInfo> ACTIVITY_NOT_EXPORTED =
+            new Predicate<ResolveInfo>() {
+                public boolean test(ResolveInfo ri) {
+                    return !ri.activityInfo.exported;
+                }
+            };
 
-    private static Predicate<ResolveInfo> ACTIVITY_NOT_INSTALLED = (ri) ->
+    private static final Predicate<ResolveInfo> ACTIVITY_NOT_INSTALLED = (ri) ->
             !isInstalled(ri.activityInfo);
 
     // Temporarily reverted to anonymous inner class form due to: b/32554459
-    private static Predicate<PackageInfo> PACKAGE_NOT_INSTALLED = new Predicate<PackageInfo>() {
-        public boolean test(PackageInfo pi) {
-            return !isInstalled(pi);
-        }
-    };
+    private static final Predicate<PackageInfo> PACKAGE_NOT_INSTALLED =
+            new Predicate<PackageInfo>() {
+                public boolean test(PackageInfo pi) {
+                    return !isInstalled(pi);
+                }
+            };
 
     private final Handler mHandler;
 
@@ -4656,8 +4658,8 @@ public class ShortcutService extends IShortcutService.Stub {
         private boolean mDumpFiles = false;
 
         private boolean mDumpDetails = true;
-        private List<Pattern> mPackagePatterns = new ArrayList<>();
-        private List<Integer> mUsers = new ArrayList<>();
+        private final List<Pattern> mPackagePatterns = new ArrayList<>();
+        private final List<Integer> mUsers = new ArrayList<>();
 
         void addPackageRegex(String regex) {
             mPackagePatterns.add(Pattern.compile(regex));

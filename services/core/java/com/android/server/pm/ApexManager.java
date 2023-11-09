@@ -410,7 +410,7 @@ public abstract class ApexManager {
          * Map of all apex system services to the jar files they are contained in.
          */
         @GuardedBy("mLock")
-        private List<ApexSystemServiceInfo> mApexSystemServices = new ArrayList<>();
+        private final List<ApexSystemServiceInfo> mApexSystemServices = new ArrayList<>();
 
         /**
          * Contains the list of {@code packageName}s of apks-in-apex for given
@@ -418,14 +418,14 @@ public abstract class ApexManager {
          * difference between {@code packageName} and {@code apexModuleName}.
          */
         @GuardedBy("mLock")
-        private ArrayMap<String, List<String>> mApksInApex = new ArrayMap<>();
+        private final ArrayMap<String, List<String>> mApksInApex = new ArrayMap<>();
 
         /**
          * Contains the list of {@code Exception}s that were raised when installing apk-in-apex
          * inside {@code apexModuleName}.
          */
         @GuardedBy("mLock")
-        private Map<String, String> mErrorWithApkInApex = new ArrayMap<>();
+        private final Map<String, String> mErrorWithApkInApex = new ArrayMap<>();
 
         /**
          * An APEX is a file format that delivers the apex-payload wrapped in an apk container. The

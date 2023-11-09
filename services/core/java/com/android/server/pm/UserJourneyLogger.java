@@ -586,7 +586,7 @@ public class UserJourneyLogger {
         public final long mSessionId;
         @UserJourney
         public final int mJourney;
-        public long mStartTimeInMills;
+        public final long mStartTimeInMills;
 
         @VisibleForTesting
         public UserJourneySession(long sessionId, @UserJourney int journey) {

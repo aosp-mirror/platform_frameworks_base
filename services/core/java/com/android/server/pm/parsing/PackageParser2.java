@@ -96,19 +96,19 @@ public class PackageParser2 implements AutoCloseable {
     private static final boolean LOG_PARSE_TIMINGS = Build.IS_DEBUGGABLE;
     private static final int LOG_PARSE_TIMINGS_THRESHOLD_MS = 100;
 
-    private ThreadLocal<ApplicationInfo> mSharedAppInfo =
+    private final ThreadLocal<ApplicationInfo> mSharedAppInfo =
             ThreadLocal.withInitial(() -> {
                 ApplicationInfo appInfo = new ApplicationInfo();
                 appInfo.uid = -1; // Not a valid UID since the app will not be installed yet
                 return appInfo;
             });
 
-    private ThreadLocal<ParseTypeImpl> mSharedResult;
+    private final ThreadLocal<ParseTypeImpl> mSharedResult;
 
     @Nullable
     protected PackageCacher mCacher;
 
-    private ParsingPackageUtils parsingUtils;
+    private final ParsingPackageUtils parsingUtils;
 
     public PackageParser2(String[] separateProcesses, DisplayMetrics displayMetrics,
             @Nullable File cacheDir, @NonNull Callback callback) {
