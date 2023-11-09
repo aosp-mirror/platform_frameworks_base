@@ -61,6 +61,7 @@ public:
         // submission occurred. -1 if this time is unknown.
         static constexpr nsecs_t kUnknownTime = -1;
         nsecs_t commandSubmissionTime = kUnknownTime;
+        android::base::unique_fd presentFence;
     };
     virtual DrawResult draw(const Frame& frame, const SkRect& screenDirty, const SkRect& dirty,
                             const LightGeometry& lightGeometry, LayerUpdateQueue* layerUpdateQueue,
@@ -68,8 +69,9 @@ public:
                             const std::vector<sp<RenderNode>>& renderNodes,
                             FrameInfoVisualizer* profiler,
                             const HardwareBufferRenderParams& bufferParams) = 0;
-    virtual bool swapBuffers(const Frame& frame, bool drew, const SkRect& screenDirty,
-                             FrameInfo* currentFrameInfo, bool* requireSwap) = 0;
+    virtual bool swapBuffers(const Frame& frame, IRenderPipeline::DrawResult&,
+                             const SkRect& screenDirty, FrameInfo* currentFrameInfo,
+                             bool* requireSwap) = 0;
     virtual DeferredLayerUpdater* createTextureLayer() = 0;
     [[nodiscard]] virtual android::base::unique_fd flush() = 0;
     virtual void setHardwareBuffer(AHardwareBuffer* hardwareBuffer) = 0;

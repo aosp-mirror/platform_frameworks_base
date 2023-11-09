@@ -664,8 +664,8 @@ void CanvasContext::draw(bool solelyTextureViewUpdates) {
     bool didDraw = false;
 
     int error = OK;
-    bool didSwap = mRenderPipeline->swapBuffers(frame, drawResult.success, windowDirty,
-                                                mCurrentFrameInfo, &requireSwap);
+    bool didSwap = mRenderPipeline->swapBuffers(frame, drawResult, windowDirty, mCurrentFrameInfo,
+                                                &requireSwap);
 
     mCurrentFrameInfo->set(FrameInfoIndex::CommandSubmissionCompleted) = std::max(
             drawResult.commandSubmissionTime, mCurrentFrameInfo->get(FrameInfoIndex::SwapBuffers));
