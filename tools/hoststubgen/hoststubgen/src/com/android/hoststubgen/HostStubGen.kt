@@ -27,6 +27,7 @@ import com.android.hoststubgen.filters.OutputFilter
 import com.android.hoststubgen.filters.StubIntersectingFilter
 import com.android.hoststubgen.filters.createFilterFromTextPolicyFile
 import com.android.hoststubgen.filters.printAsTextPolicy
+import com.android.hoststubgen.utils.ClassFilter
 import com.android.hoststubgen.visitors.BaseAdapter
 import com.android.hoststubgen.visitors.PackageRedirectRemapper
 import org.objectweb.asm.ClassReader
@@ -167,6 +168,14 @@ class HostStubGen(val options: HostStubGenOptions) {
             filter
         )
 
+        val annotationAllowedClassesFilter = options.annotationAllowedClassesFile.let { filename ->
+            if (filename == null) {
+                ClassFilter.newNullFilter(true) // Allow all classes
+            } else {
+                ClassFilter.loadFromFile(filename, false)
+            }
+        }
+
         // Next, Java annotation based filter.
         filter = AnnotationBasedFilter(
             errors,
@@ -181,7 +190,8 @@ class HostStubGen(val options: HostStubGenOptions) {
             options.nativeSubstituteAnnotations,
             options.classLoadHookAnnotations,
             options.stubStaticInitializerAnnotations,
-            filter
+            annotationAllowedClassesFilter,
+            filter,
         )
 
         // Next, "text based" filter, which allows to override polices without touching

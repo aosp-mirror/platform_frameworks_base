@@ -25,9 +25,11 @@ import com.android.hoststubgen.asm.CLASS_INITIALIZER_NAME
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.findAnnotationValueAsString
 import com.android.hoststubgen.asm.findAnyAnnotation
+import com.android.hoststubgen.asm.toHumanReadableClassName
 import com.android.hoststubgen.asm.toHumanReadableMethodName
 import com.android.hoststubgen.asm.toJvmClassName
 import com.android.hoststubgen.log
+import com.android.hoststubgen.utils.ClassFilter
 import org.objectweb.asm.tree.AnnotationNode
 import org.objectweb.asm.tree.ClassNode
 
@@ -51,6 +53,7 @@ class AnnotationBasedFilter(
         nativeSubstituteAnnotations_: Set<String>,
         classLoadHookAnnotations_: Set<String>,
         stubStaticInitializerAnnotations_: Set<String>,
+        private val annotationAllowedClassesFilter: ClassFilter,
         fallback: OutputFilter,
 ) : DelegatingFilter(fallback) {
     private var stubAnnotations = convertToInternalNames(stubAnnotations_)
@@ -62,7 +65,8 @@ class AnnotationBasedFilter(
     private var substituteAnnotations = convertToInternalNames(substituteAnnotations_)
     private var nativeSubstituteAnnotations = convertToInternalNames(nativeSubstituteAnnotations_)
     private var classLoadHookAnnotations = convertToInternalNames(classLoadHookAnnotations_)
-    private var stubStaticInitializerAnnotations = convertToInternalNames(stubStaticInitializerAnnotations_)
+    private var stubStaticInitializerAnnotations =
+            convertToInternalNames(stubStaticInitializerAnnotations_)
 
     /** Annotations that control API visibility. */
     private var visibilityAnnotations: Set<String> = convertToInternalNames(
@@ -135,14 +139,21 @@ class AnnotationBasedFilter(
      * name1 - 4 are only used in exception messages.
      */
     private fun findAnnotation(
-        visibles: List<AnnotationNode>?,
-        invisibles: List<AnnotationNode>?,
-        type: String,
-        name1: String,
-        name2: String = "",
-        name3: String = "",
+            className: String,
+            visibles: List<AnnotationNode>?,
+            invisibles: List<AnnotationNode>?,
+            type: String,
+            name1: String,
+            name2: String = "",
+            name3: String = "",
     ): FilterPolicyWithReason? {
         detectInvalidAnnotations(visibles, invisibles, type, name1, name2, name3)
+
+        if (!annotationAllowedClassesFilter.matches(className)) {
+            throw InvalidAnnotationException(
+                    "Class ${className.toHumanReadableClassName()} is not allowed to have " +
+                    "Ravenwood annotations. Contact g/ravenwood for more details.")
+        }
 
         findAnyAnnotation(stubAnnotations, visibles, invisibles)?.let {
             return FilterPolicy.Stub.withReason(reasonAnnotation)
@@ -170,6 +181,7 @@ class AnnotationBasedFilter(
         val cn = classes.getClass(className)
 
         findAnnotation(
+            cn.name,
             cn.visibleAnnotations,
             cn.invisibleAnnotations,
             "class",
@@ -193,6 +205,7 @@ class AnnotationBasedFilter(
 
         cn.fields?.firstOrNull { it.name == fieldName }?.let {fn ->
             findAnnotation(
+                cn.name,
                 fn.visibleAnnotations,
                 fn.invisibleAnnotations,
                 "field",
@@ -229,6 +242,7 @@ class AnnotationBasedFilter(
 
             // If there's no substitution, then we check the annotation.
             findAnnotation(
+                cn.name,
                 mn.visibleAnnotations,
                 mn.invisibleAnnotations,
                 "method",
