@@ -16,15 +16,6 @@ filegroup {
     visibility: ["//visibility:public"],
 }
 
-// File that contains the standard command line arguments to hoststubgen.
-filegroup {
-    name: "ravenwood-standard-options",
-    srcs: [
-        "ravenwood-standard-options.txt",
-    ],
-    visibility: ["//visibility:public"],
-}
-
 java_library {
     name: "ravenwood-annotations-lib",
     srcs: [":ravenwood-annotations"],

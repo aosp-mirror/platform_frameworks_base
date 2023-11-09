@@ -27,7 +27,13 @@ env
 
 # Set up the constants and variables
 
+# Bazel sets $TEST_TMPDIR.
 export TEMP=$TEST_TMPDIR
+
+if [[ "$TEMP" == "" ]] ; then
+  TEMP=./tmp
+  mkdir -p $TEMP
+fi
 
 JAR=hoststubgen-test-tiny-framework.jar
 STUB=$TEMP/stub.jar
@@ -72,6 +78,26 @@ run_hoststubgen() {
       --in-jar $JAR \
       --out-stub-jar $STUB \
       --out-impl-jar $IMPL \
+      --stub-annotation \
+          android.hosttest.annotation.HostSideTestStub \
+      --keep-annotation \
+          android.hosttest.annotation.HostSideTestKeep \
+      --stub-class-annotation \
+          android.hosttest.annotation.HostSideTestWholeClassStub \
+      --keep-class-annotation \
+          android.hosttest.annotation.HostSideTestWholeClassKeep \
+      --throw-annotation \
+          android.hosttest.annotation.HostSideTestThrow \
+      --remove-annotation \
+          android.hosttest.annotation.HostSideTestRemove \
+      --substitute-annotation \
+          android.hosttest.annotation.HostSideTestSubstitute \
+      --native-substitute-annotation \
+          android.hosttest.annotation.HostSideTestNativeSubstitutionClass \
+      --class-load-hook-annotation \
+          android.hosttest.annotation.HostSideTestClassLoadHook \
+      --stub-static-initializer-annotation \
+          android.hosttest.annotation.HostSideTestStaticInitializerStub \
       $filter_arg \
       |& tee $HOSTSTUBGEN_OUT
   HOSTSTUBGEN_RC=${PIPESTATUS[0]}
@@ -154,6 +180,12 @@ run_hoststubgen_for_failure "One specific class disallowed" \
     "TinyFrameworkClassAnnotations is not allowed to have Ravenwood annotations" \
     "
 !com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnotations
+* # All other classes allowed
+"
+
+run_hoststubgen_for_success "One specific class disallowed, but it doesn't use annotations" \
+    "
+!com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPolicy
 * # All other classes allowed
 "
 
