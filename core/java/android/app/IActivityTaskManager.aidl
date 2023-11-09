@@ -269,7 +269,10 @@ interface IActivityTaskManager {
      * task snapshot cache only if requested.
      *
      * @param taskId the id of the task to take a snapshot of
-     * @param updateCache whether to store the new snapshot in the system's task snapshot cache
+     * @param updateCache Whether to store the new snapshot in the system's task snapshot cache.
+     *                    If it is true, the snapshot can be either real content or app-theme mode
+     *                    depending on the attributes of app. Otherwise, the snapshot will be taken
+     *                    with real content.
      * @return a graphic buffer representing a screenshot of a task
      */
     android.window.TaskSnapshot takeTaskSnapshot(int taskId, boolean updateCache);
