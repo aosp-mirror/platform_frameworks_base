@@ -192,6 +192,8 @@ public class CrossActivityAnimation extends ShellBackAnimation {
         // Draw background with task background color.
         mBackground.ensureBackground(mClosingTarget.windowConfiguration.getBounds(),
                 mEnteringTarget.taskInfo.taskDescription.getBackgroundColor(), mTransaction);
+        setEnteringProgress(0);
+        setLeavingProgress(0);
     }
 
     private void applyTransform(SurfaceControl leash, RectF targetRect, float targetAlpha) {
