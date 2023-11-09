@@ -26,6 +26,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
@@ -59,9 +60,11 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
+
         featureFlags =
             FakeFeatureFlagsClassic().apply {
-                set(Flags.MIGRATE_LOCK_ICON, false)
                 set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, false)
                 set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
             }
@@ -81,7 +84,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
 
     @Test
     fun addViewsConditionally_migrateFlagOn() {
-        featureFlags.set(Flags.MIGRATE_LOCK_ICON, true)
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
         assertThat(constraintLayout.childCount).isGreaterThan(0)
@@ -89,7 +92,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
 
     @Test
     fun addViewsConditionally_migrateAndRefactorFlagsOn() {
-        featureFlags.set(Flags.MIGRATE_LOCK_ICON, true)
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
@@ -98,7 +101,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
 
     @Test
     fun addViewsConditionally_migrateFlagOff() {
-        featureFlags.set(Flags.MIGRATE_LOCK_ICON, false)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, false)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)

@@ -187,6 +187,8 @@ android_library {
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
+        "androidx.room_room-runtime",
+        "androidx.room_room-ktx",
         "com.google.android.material_material",
         "kotlinx_coroutines_android",
         "kotlinx_coroutines",
@@ -207,10 +209,16 @@ android_library {
     ],
     manifest: "AndroidManifest.xml",
 
-    javacflags: ["-Adagger.fastInit=enabled"],
+    javacflags: [
+        "-Adagger.fastInit=enabled",
+        "-Aroom.schemaLocation=frameworks/base/packages/SystemUI/schemas",
+    ],
     kotlincflags: ["-Xjvm-default=all"],
 
-    plugins: ["dagger2-compiler"],
+    plugins: [
+        "androidx.room_room-compiler-plugin",
+        "dagger2-compiler",
+    ],
 
     lint: {
         extra_check_modules: ["SystemUILintChecker"],
@@ -466,6 +474,8 @@ android_library {
         "androidx.dynamicanimation_dynamicanimation",
         "androidx-constraintlayout_constraintlayout",
         "androidx.exifinterface_exifinterface",
+        "androidx.room_room-runtime",
+        "androidx.room_room-ktx",
         "kotlinx-coroutines-android",
         "kotlinx-coroutines-core",
         "kotlinx_coroutines_test",
@@ -530,7 +540,10 @@ android_library {
         "--extra-packages",
         "com.android.systemui",
     ],
-    plugins: ["dagger2-compiler"],
+    plugins: [
+        "androidx.room_room-compiler-plugin",
+        "dagger2-compiler",
+    ],
     lint: {
         test: true,
         extra_check_modules: ["SystemUILintChecker"],

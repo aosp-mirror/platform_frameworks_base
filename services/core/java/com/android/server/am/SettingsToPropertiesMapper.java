@@ -166,6 +166,7 @@ public class SettingsToPropertiesMapper {
         "safety_center",
         "sensors",
         "system_performance",
+        "system_sw_usb",
         "test_suites",
         "text",
         "threadnetwork",

@@ -1285,12 +1285,17 @@ public class UsbService extends IUsbManager.Stub {
                 pw.println("  dumpsys usb add-port \"matrix\" dual --compliance-warnings");
                 pw.println("  dumpsys usb set-compliance-reasons \"matrix\" <reason-list>");
                 pw.println("  dumpsys usb clear-compliance-reasons \"matrix\"");
-                pw.println("<reason-list> is expected to be formatted as \"1, ..., 4\"");
+                pw.println("<reason-list> is expected to be formatted as \"1, ..., N\"");
                 pw.println("with reasons that need to be simulated.");
                 pw.println("  1: other");
                 pw.println("  2: debug accessory");
                 pw.println("  3: bc12");
                 pw.println("  4: missing rp");
+                pw.println("  5: input power limited");
+                pw.println("  6: missing data lines");
+                pw.println("  7: enumeration fail");
+                pw.println("  8: flaky connection");
+                pw.println("  9: unreliable io");
                 pw.println();
                 pw.println("Example simulate DisplayPort Alt Mode Changes:");
                 pw.println("  dumpsys usb add-port \"matrix\" dual --displayport");

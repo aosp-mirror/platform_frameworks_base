@@ -28,3 +28,10 @@ flag {
     description: "Enables invoking split contextually"
     bug: "276361926"
 }
+
+flag {
+    name: "enable_taskbar_navbar_unification"
+    namespace: "multitasking"
+    description: "Enables taskbar / navbar unification"
+    bug: "309671494"
+}

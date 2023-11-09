@@ -31,42 +31,60 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /** Tests for {@link RadiiAnimator}. */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class RadiiAnimatorTest extends SysuiTestCase {
     float[] mResultRadii = new float[RadiiAnimator.RADII_COUNT];
+    final AtomicBoolean mAnimationStarted = new AtomicBoolean(false);
+    final AtomicBoolean mAnimationStopped = new AtomicBoolean(false);
+    final IRadiiAnimationListener mRadiiAnimationListener = new IRadiiAnimationListener() {
+        @Override
+        public void onRadiiAnimationUpdate(float[] radii) {
+            mResultRadii = radii;
+        }
+
+        @Override
+        public void onRadiiAnimationStart() {
+            mAnimationStarted.set(true);
+        }
+
+        @Override
+        public void onRadiiAnimationStop() {
+            mAnimationStopped.set(true);
+        }
+    };
 
     @Test
     public void constructor() {
         final float[] radii = generateRadii(0.0f);
-        final RadiiAnimator radiiAnimator = new RadiiAnimator(radii, newRadii -> {});
-
+        final RadiiAnimator radiiAnimator = new RadiiAnimator(radii, mRadiiAnimationListener);
         assertThat(radiiAnimator.evaluate(0.0f)).isEqualTo(radii);
     }
 
     @Test
-    public void skip_updates_to_end() {
+    public void skipAnimation_updatesToEnd() {
         final float[] startRadii = generateRadii(0.0f);
         final float[] endRadii = generateRadii(1.0f);
 
         final RadiiAnimator radiiAnimator = setupAnimator(startRadii);
 
+        mAnimationStarted.set(false);
+        mAnimationStopped.set(false);
         new Handler(Looper.getMainLooper()).post(() -> radiiAnimator.startAnimation(endRadii));
-        TestUtils.waitForCondition(radiiAnimator::isStarted, "Animation did not start.");
+        TestUtils.waitForCondition(mAnimationStarted::get, "Animation did not start.");
         TestUtils.waitForCondition(() -> Arrays.equals(radiiAnimator.evaluate(0.0f), startRadii)
-                                && Arrays.equals(radiiAnimator.evaluate(1.0f), endRadii),
+                        && Arrays.equals(radiiAnimator.evaluate(1.0f), endRadii),
                 "Animator did not initialize to start and end values");
-
         new Handler(Looper.getMainLooper()).post(radiiAnimator::skipAnimationToEnd);
-        TestUtils.waitForCondition(
-                () -> !radiiAnimator.isStarted(), "Animation did not end.");
+        TestUtils.waitForCondition(mAnimationStopped::get, "Animation did not stop.");
         assertThat(mResultRadii).usingTolerance(0.001).containsExactly(endRadii);
     }
 
     @Test
-    public void animation_can_repeat() {
+    public void finishedAnimation_canRepeat() {
         final float[] startRadii = generateRadii(0.0f);
         final float[] midRadii = generateRadii(1.0f);
         final float[] endRadii = generateRadii(2.0f);
@@ -88,15 +106,15 @@ public class RadiiAnimatorTest extends SysuiTestCase {
 
     private RadiiAnimator setupAnimator(float[] startRadii) {
         mResultRadii = new float[RadiiAnimator.RADII_COUNT];
-        return new RadiiAnimator(startRadii,
-                newRadii -> mResultRadii = newRadii);
+        return new RadiiAnimator(startRadii, mRadiiAnimationListener);
     }
 
     private void playAndSkipAnimation(RadiiAnimator animator, float[] endRadii) {
+        mAnimationStarted.set(false);
+        mAnimationStopped.set(false);
         new Handler(Looper.getMainLooper()).post(() -> animator.startAnimation(endRadii));
-        TestUtils.waitForCondition(animator::isStarted, "Animation did not start.");
+        TestUtils.waitForCondition(mAnimationStarted::get, "Animation did not start.");
         new Handler(Looper.getMainLooper()).post(animator::skipAnimationToEnd);
-        TestUtils.waitForCondition(
-                () -> !animator.isStarted(), "Animation did not end.");
+        TestUtils.waitForCondition(mAnimationStopped::get, "Animation did not stop.");
     }
 }

@@ -123,6 +123,7 @@ import android.content.res.TypedArray;
 import android.graphics.BLASTBufferQueue;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ForceDarkType;
 import android.graphics.FrameInfo;
 import android.graphics.HardwareRenderer;
 import android.graphics.HardwareRenderer.FrameDrawingCallback;
@@ -1796,7 +1797,7 @@ public final class ViewRootImpl implements ViewParent,
 
     /** Returns true if force dark should be enabled according to various settings */
     @VisibleForTesting
-    public boolean isForceDarkEnabled() {
+    public @ForceDarkType.ForceDarkTypeDef int determineForceDarkType() {
         if (forceInvertColor()) {
             boolean isForceInvertEnabled = Settings.Secure.getIntForUser(
                     mContext.getContentResolver(),
@@ -1808,7 +1809,7 @@ public final class ViewRootImpl implements ViewParent,
             // for dark mode in configuration.uiMode. Instead, we assume that the force invert
             // setting will be enabled at the same time dark theme is in the Settings app.
             if (isForceInvertEnabled) {
-                return true;
+                return ForceDarkType.FORCE_INVERT_COLOR_DARK;
             }
         }
 
@@ -1822,12 +1823,12 @@ public final class ViewRootImpl implements ViewParent,
                     && a.getBoolean(R.styleable.Theme_forceDarkAllowed, forceDarkAllowedDefault);
             a.recycle();
         }
-        return useAutoDark;
+        return useAutoDark ? ForceDarkType.FORCE_DARK : ForceDarkType.NONE;
     }
 
     private void updateForceDarkMode() {
         if (mAttachInfo.mThreadedRenderer == null) return;
-        if (mAttachInfo.mThreadedRenderer.setForceDark(isForceDarkEnabled())) {
+        if (mAttachInfo.mThreadedRenderer.setForceDark(determineForceDarkType())) {
             // TODO: Don't require regenerating all display lists to apply this setting
             invalidateWorld(mView);
         }

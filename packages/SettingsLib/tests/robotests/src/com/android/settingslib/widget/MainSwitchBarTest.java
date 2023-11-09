@@ -21,30 +21,25 @@ import static android.graphics.text.LineBreakConfig.LINE_BREAK_WORD_STYLE_PHRASE
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.View;
-import android.widget.Switch;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+
+import androidx.test.core.app.ApplicationProvider;
 
 import com.android.settingslib.widget.mainswitch.R;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.robolectric.RobolectricTestRunner;
-import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
 public class MainSwitchBarTest {
 
-    private Context mContext;
-    private MainSwitchBar mBar;
+    private final Context mContext = ApplicationProvider.getApplicationContext();
+    private final MainSwitchBar mBar = new MainSwitchBar(mContext);
 
-    @Before
-    public void setUp() {
-        mContext = RuntimeEnvironment.application;
-        mBar = new MainSwitchBar(mContext);
-    }
+    private final CompoundButton mSwitch = mBar.findViewById(android.R.id.switch_widget);
 
     @Test
     public void setChecked_true_shouldChecked() {
@@ -60,7 +55,7 @@ public class MainSwitchBarTest {
         mBar.setTitle(title);
         final TextView textView = ((TextView) mBar.findViewById(R.id.switch_text));
 
-        assertThat(textView.getText()).isEqualTo(title);
+        assertThat(textView.getText().toString()).isEqualTo(title);
     }
 
     @Test
@@ -69,23 +64,18 @@ public class MainSwitchBarTest {
 
         mBar.setTitle(title);
 
-        final Switch switchObj = mBar.getSwitch();
-        assertThat(TextUtils.isEmpty(switchObj.getContentDescription())).isTrue();
+        assertThat(mSwitch.getContentDescription()).isNull();
     }
 
     @Test
     public void getSwitch_shouldNotNull() {
-        final Switch switchObj = mBar.getSwitch();
-
-        assertThat(switchObj).isNotNull();
+        assertThat(mSwitch).isNotNull();
     }
 
     @Test
     public void getSwitch_shouldNotFocusableAndClickable() {
-        final Switch switchObj = mBar.getSwitch();
-
-        assertThat(switchObj.isFocusable()).isFalse();
-        assertThat(switchObj.isClickable()).isFalse();
+        assertThat(mSwitch.isFocusable()).isFalse();
+        assertThat(mSwitch.isClickable()).isFalse();
     }
 
     @Test

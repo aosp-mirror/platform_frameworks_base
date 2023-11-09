@@ -2030,6 +2030,9 @@ class UserController implements Handler.Callback {
             mTargetUserId = targetUserId;
             userSwitchUiEnabled = mUserSwitchUiEnabled;
         }
+        if (android.multiuser.Flags.useAllCpusDuringUserSwitch()) {
+            mInjector.setHasTopUi(true);
+        }
         if (userSwitchUiEnabled) {
             UserInfo currentUserInfo = getUserInfo(currentUserId);
             Pair<UserInfo, UserInfo> userNames = new Pair<>(currentUserInfo, targetUserInfo);
@@ -2098,6 +2101,9 @@ class UserController implements Handler.Callback {
     }
 
     private void endUserSwitch() {
+        if (android.multiuser.Flags.useAllCpusDuringUserSwitch()) {
+            mInjector.setHasTopUi(false);
+        }
         final int nextUserId;
         synchronized (mLock) {
             nextUserId = ObjectUtils.getOrElse(mPendingTargetUserIds.poll(), UserHandle.USER_NULL);
@@ -3779,6 +3785,15 @@ class UserController implements Handler.Callback {
 
         void onUserStarting(@UserIdInt int userId) {
             getSystemServiceManager().onUserStarting(TimingsTraceAndSlog.newAsyncLog(), userId);
+        }
+
+        void setHasTopUi(boolean hasTopUi) {
+            try {
+                Slogf.i(TAG, "Setting hasTopUi to " + hasTopUi);
+                mService.setHasTopUi(hasTopUi);
+            } catch (RemoteException e) {
+                Slogf.e(TAG, "Failed to allow using all CPU cores", e);
+            }
         }
 
         void onSystemUserVisibilityChanged(boolean visible) {

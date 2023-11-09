@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.AutomaticZenRule.TYPE_BEDTIME;
 import static android.service.notification.ZenPolicy.CONVERSATION_SENDERS_IMPORTANT;
 
 import static junit.framework.TestCase.assertEquals;
@@ -24,9 +25,12 @@ import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
 
+import android.app.Flags;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.net.Uri;
+import android.os.Parcel;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
@@ -41,6 +45,7 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.UiServiceTestCase;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xmlpull.v1.XmlPullParserException;
@@ -54,6 +59,28 @@ import java.io.IOException;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ZenModeConfigTest extends UiServiceTestCase {
+
+    private final String NAME = "name";
+    private final ComponentName OWNER = new ComponentName("pkg", "cls");
+    private final ComponentName CONFIG_ACTIVITY = new ComponentName("pkg", "act");
+    private final ZenPolicy POLICY = new ZenPolicy.Builder().allowAlarms(true).build();
+    private final Uri CONDITION_ID = new Uri.Builder().scheme("scheme")
+            .authority("authority")
+            .appendPath("path")
+            .appendPath("test")
+            .build();
+
+    private final Condition CONDITION = new Condition(CONDITION_ID, "", Condition.STATE_TRUE);
+    private final String TRIGGER_DESC = "Every Night, 10pm to 6am";
+    private final int TYPE = TYPE_BEDTIME;
+    private final boolean ALLOW_MANUAL = true;
+    private final int ICON_RES_ID = 1234;
+    private final int INTERRUPTION_FILTER = Settings.Global.ZEN_MODE_ALARMS;
+    private final boolean ENABLED = true;
+    private final int CREATION_TIME = 123;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void testPriorityOnlyMutingAllNotifications() {
@@ -202,7 +229,59 @@ public class ZenModeConfigTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testRuleXml() throws Exception {
+    public void testWriteToParcel() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+
+        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+        rule.configurationActivity = CONFIG_ACTIVITY;
+        rule.component = OWNER;
+        rule.conditionId = CONDITION_ID;
+        rule.condition = CONDITION;
+        rule.enabled = ENABLED;
+        rule.creationTime = 123;
+        rule.id = "id";
+        rule.zenMode = INTERRUPTION_FILTER;
+        rule.modified = true;
+        rule.name = NAME;
+        rule.snoozing = true;
+        rule.pkg = OWNER.getPackageName();
+        rule.zenPolicy = POLICY;
+
+        rule.allowManualInvocation = ALLOW_MANUAL;
+        rule.type = TYPE;
+        rule.iconResId = ICON_RES_ID;
+        rule.triggerDescription = TRIGGER_DESC;
+
+        Parcel parcel = Parcel.obtain();
+        rule.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        ZenModeConfig.ZenRule parceled = new ZenModeConfig.ZenRule(parcel);
+
+        assertEquals(rule.pkg, parceled.pkg);
+        assertEquals(rule.snoozing, parceled.snoozing);
+        assertEquals(rule.enabler, parceled.enabler);
+        assertEquals(rule.component, parceled.component);
+        assertEquals(rule.configurationActivity, parceled.configurationActivity);
+        assertEquals(rule.condition, parceled.condition);
+        assertEquals(rule.enabled, parceled.enabled);
+        assertEquals(rule.creationTime, parceled.creationTime);
+        assertEquals(rule.modified, parceled.modified);
+        assertEquals(rule.conditionId, parceled.conditionId);
+        assertEquals(rule.name, parceled.name);
+        assertEquals(rule.zenMode, parceled.zenMode);
+
+        assertEquals(rule.allowManualInvocation, parceled.allowManualInvocation);
+        assertEquals(rule.iconResId, parceled.iconResId);
+        assertEquals(rule.type, parceled.type);
+        assertEquals(rule.triggerDescription, parceled.triggerDescription);
+        assertEquals(rule.zenPolicy, parceled.zenPolicy);
+        assertEquals(rule, parceled);
+        assertEquals(rule.hashCode(), parceled.hashCode());
+
+    }
+
+    @Test
+    public void testRuleXml_classic() throws Exception {
         ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
         rule.configurationActivity = new ComponentName("a", "a");
         rule.component = new ComponentName("b", "b");
@@ -236,6 +315,58 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(rule.conditionId, fromXml.conditionId);
         assertEquals(rule.name, fromXml.name);
         assertEquals(rule.zenMode, fromXml.zenMode);
+    }
+
+    @Test
+    public void testRuleXml() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+
+        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+        rule.configurationActivity = CONFIG_ACTIVITY;
+        rule.component = OWNER;
+        rule.conditionId = CONDITION_ID;
+        rule.condition = CONDITION;
+        rule.enabled = ENABLED;
+        rule.creationTime = 123;
+        rule.id = "id";
+        rule.zenMode = INTERRUPTION_FILTER;
+        rule.modified = true;
+        rule.name = NAME;
+        rule.snoozing = true;
+        rule.pkg = OWNER.getPackageName();
+        rule.zenPolicy = POLICY;
+        rule.creationTime = CREATION_TIME;
+
+        rule.allowManualInvocation = ALLOW_MANUAL;
+        rule.type = TYPE;
+        rule.iconResId = ICON_RES_ID;
+        rule.triggerDescription = TRIGGER_DESC;
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writeRuleXml(rule, baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ZenModeConfig.ZenRule fromXml = readRuleXml(bais);
+
+        assertEquals(rule.pkg, fromXml.pkg);
+        // always resets on reboot
+        assertFalse(fromXml.snoozing);
+        //should all match original
+        assertEquals(rule.component, fromXml.component);
+        assertEquals(rule.configurationActivity, fromXml.configurationActivity);
+        assertNull(fromXml.enabler);
+        assertEquals(rule.condition, fromXml.condition);
+        assertEquals(rule.enabled, fromXml.enabled);
+        assertEquals(rule.creationTime, fromXml.creationTime);
+        assertEquals(rule.modified, fromXml.modified);
+        assertEquals(rule.conditionId, fromXml.conditionId);
+        assertEquals(rule.name, fromXml.name);
+        assertEquals(rule.zenMode, fromXml.zenMode);
+        assertEquals(rule.creationTime, fromXml.creationTime);
+
+        assertEquals(rule.allowManualInvocation, fromXml.allowManualInvocation);
+        assertEquals(rule.type, fromXml.type);
+        assertEquals(rule.triggerDescription, fromXml.triggerDescription);
+        assertEquals(rule.iconResId, fromXml.iconResId);
     }
 
     @Test

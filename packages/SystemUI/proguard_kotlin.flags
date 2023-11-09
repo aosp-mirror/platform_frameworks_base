@@ -1,0 +1,37 @@
+# Removes runtime checks added through Kotlin to JVM code genereration to
+# avoid linear growth as more Kotlin code is converted / added to the codebase.
+# These checks are generally applied to Java platform types (values returned
+# from Java code that don't have nullness annotations), but we remove them to
+# avoid code size increases.
+#
+# See also https://kotlinlang.org/docs/reference/java-interop.html
+#
+# TODO(b/199941987): Consider standardizing these rules in a central place as
+# Kotlin gains adoption with other platform targets.
+-assumenosideeffects class kotlin.jvm.internal.Intrinsics {
+    # Remove check for method parameters being null
+    static void checkParameterIsNotNull(java.lang.Object, java.lang.String);
+
+    # When a Java platform type is returned and passed to Kotlin NonNull method,
+    # remove the null check
+    static void checkExpressionValueIsNotNull(java.lang.Object, java.lang.String);
+    static void checkNotNullExpressionValue(java.lang.Object, java.lang.String);
+
+    # Remove check that final value returned from method is null, if passing
+    # back Java platform type.
+    static void checkReturnedValueIsNotNull(java.lang.Object, java.lang.String, java.lang.String);
+    static void checkReturnedValueIsNotNull(java.lang.Object, java.lang.String);
+
+    # Null check for accessing a field from a parent class written in Java.
+    static void checkFieldIsNotNull(java.lang.Object, java.lang.String, java.lang.String);
+    static void checkFieldIsNotNull(java.lang.Object, java.lang.String);
+
+    # Removes code generated from !! operator which converts Nullable type to
+    # NonNull type. These would throw an NPE immediate after on access.
+    static void checkNotNull(java.lang.Object, java.lang.String);
+    static void checkNotNullParameter(java.lang.Object, java.lang.String);
+
+    # Removes lateinit var check being used before being set. Check is applied
+    # on every field access without this.
+    static void throwUninitializedPropertyAccessException(java.lang.String);
+}

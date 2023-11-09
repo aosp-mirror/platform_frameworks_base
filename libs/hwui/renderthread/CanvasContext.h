@@ -46,6 +46,7 @@
 #include "renderstate/RenderState.h"
 #include "renderthread/RenderTask.h"
 #include "renderthread/RenderThread.h"
+#include "utils/ForceDark.h"
 #include "utils/RingBuffer.h"
 
 namespace android {
@@ -194,11 +195,9 @@ public:
         mRenderPipeline->setPictureCapturedCallback(callback);
     }
 
-    void setForceDark(bool enable) { mUseForceDark = enable; }
+    void setForceDark(ForceDarkType type) { mForceDarkType = type; }
 
-    bool useForceDark() {
-        return mUseForceDark;
-    }
+    ForceDarkType getForceDarkType() { return mForceDarkType; }
 
     SkISize getNextFrameSize() const;
 
@@ -321,7 +320,7 @@ private:
     nsecs_t mLastDropVsync = 0;
 
     bool mOpaque;
-    bool mUseForceDark = false;
+    ForceDarkType mForceDarkType = ForceDarkType::NONE;
     LightInfo mLightInfo;
     LightGeometry mLightGeometry = {{0, 0, 0}, 0};
 

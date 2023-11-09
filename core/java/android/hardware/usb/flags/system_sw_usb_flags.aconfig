@@ -1,0 +1,8 @@
+package: "android.hardware.usb.flags"
+
+flag {
+    name: "enable_usb_data_compliance_warning"
+    namespace: "system_sw_usb"
+    description: "Enable USB data compliance warnings when set"
+    bug: "296119135"
+}

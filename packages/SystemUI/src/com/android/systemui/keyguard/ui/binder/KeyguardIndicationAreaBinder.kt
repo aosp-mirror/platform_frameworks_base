@@ -22,9 +22,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.res.R
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardIndicationAreaViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
@@ -54,7 +53,6 @@ object KeyguardIndicationAreaBinder {
         viewModel: KeyguardIndicationAreaViewModel,
         keyguardRootViewModel: KeyguardRootViewModel,
         indicationController: KeyguardIndicationController,
-        featureFlags: FeatureFlags,
     ): DisposableHandle {
         val indicationArea: ViewGroup = view.requireViewById(R.id.keyguard_indication_area)
         indicationController.setIndicationArea(indicationArea)
@@ -71,7 +69,7 @@ object KeyguardIndicationAreaBinder {
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.STARTED) {
                     launch {
-                        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+                        if (keyguardBottomAreaRefactor()) {
                             keyguardRootViewModel.alpha.collect { alpha ->
                                 indicationArea.apply {
                                     this.importantForAccessibility =

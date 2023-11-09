@@ -192,7 +192,7 @@ constructor(
         with(qsTileViewModel.config.uiConfig) {
             when (this) {
                 is QSTileUIConfig.Empty -> qsTileViewModel.currentState?.label ?: ""
-                is QSTileUIConfig.Resource -> context.getString(tileLabelRes)
+                is QSTileUIConfig.Resource -> context.getString(labelRes)
             }
         }
 

@@ -28,6 +28,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import androidx.core.view.isVisible
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.res.R
 import com.android.systemui.animation.view.LaunchableLinearLayout
 import com.android.systemui.dagger.qualifiers.Main
@@ -45,7 +46,6 @@ class DefaultSettingsPopupMenuSection
 @Inject
 constructor(
     @Main private val resources: Resources,
-    private val featureFlags: FeatureFlags,
     private val keyguardSettingsMenuViewModel: KeyguardSettingsMenuViewModel,
     private val vibratorHelper: VibratorHelper,
     private val activityStarter: ActivityStarter,
@@ -53,7 +53,7 @@ constructor(
     private var settingsPopupMenuHandle: DisposableHandle? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (!keyguardBottomAreaRefactor()) {
             return
         }
         val view =
@@ -68,7 +68,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_SPLIT_KEYGUARD_BOTTOM_AREA)) {
+        if (keyguardBottomAreaRefactor()) {
             settingsPopupMenuHandle =
                 KeyguardSettingsViewBinder.bind(
                     constraintLayout.requireViewById<View>(R.id.keyguard_settings_button),
