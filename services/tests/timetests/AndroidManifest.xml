@@ -17,9 +17,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.android.framework.services.tests.time">
 
-    <!-- Required for user checks -->
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
-
     <application>
         <uses-library android:name="android.test.runner" />
     </application>

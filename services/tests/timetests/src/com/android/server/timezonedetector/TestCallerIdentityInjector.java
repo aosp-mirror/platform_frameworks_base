@@ -35,6 +35,11 @@ public class TestCallerIdentityInjector implements CallerIdentityInjector {
     }
 
     @Override
+    public int resolveUserId(int userId, String debugInfo) {
+        return userId;
+    }
+
+    @Override
     public int getCallingUserId() {
         assertNotNull("callingUserId has been cleared", mCurrentCallingUserId);
         return mCurrentCallingUserId;
