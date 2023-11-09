@@ -832,6 +832,13 @@
          is set to true. -->
     <bool name="config_remoteInsetsControllerSystemBarsCanBeShownByUserAction">false</bool>
 
+    <!-- To change the default behavior of how the insets get involved when calculating
+         configuration. This will no longer consider status bar and display cutout, and only
+         exclude navigation bars from the screen sizes. This is useful when the display is close to
+         square and the system bars may cause the orientation with non-preferred value.
+         -->
+    <bool name="config_decoupleStatusBarAndDisplayCutoutFromScreenSize">false</bool>
+
     <!-- HDMI behavior -->
 
     <!-- The number of degrees to rotate the display when the device has HDMI connected

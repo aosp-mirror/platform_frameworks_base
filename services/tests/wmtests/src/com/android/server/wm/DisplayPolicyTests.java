@@ -384,33 +384,36 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertNotEquals(prevScreenHeightDp, mDisplayContent.getConfiguration().screenHeightDp);
         assertFalse(navbar.providesDisplayDecorInsets() && displayPolicy.updateDecorInsetsInfo());
 
-        navbar.removeIfPossible();
-        assertEquals(0, displayPolicy.getDecorInsetsInfo(di.rotation, di.logicalWidth,
-                di.logicalHeight).mNonDecorInsets.bottom);
-
         final WindowState statusBar = createStatusBarWithProvidedInsets(mDisplayContent);
-        assertTrue(statusBar.providesDisplayDecorInsets()
-                && displayPolicy.updateDecorInsetsInfo());
-        assertEquals(STATUS_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(di.rotation,
-                di.logicalWidth, di.logicalHeight).mConfigInsets.top);
+        if (mWm.mConfigTypes == WindowInsets.Type.navigationBars()) {
+            assertFalse(statusBar.providesDisplayDecorInsets()
+                    && displayPolicy.updateDecorInsetsInfo());
+            assertEquals(0, displayPolicy.getDecorInsetsInfo(di.rotation,
+                    di.logicalWidth, di.logicalHeight).mConfigInsets.top);
+        } else {
+            assertTrue(statusBar.providesDisplayDecorInsets()
+                    && displayPolicy.updateDecorInsetsInfo());
+            assertEquals(STATUS_BAR_HEIGHT, displayPolicy.getDecorInsetsInfo(di.rotation,
+                    di.logicalWidth, di.logicalHeight).mConfigInsets.top);
+        }
 
         // Add a window that provides the same insets in current rotation. But it specifies
         // different insets in other rotations.
-        final WindowState bar2 = createWindow(null, statusBar.mAttrs.type, "bar2");
+        final WindowState bar2 = createWindow(null, navbar.mAttrs.type, "bar2");
         bar2.mAttrs.providedInsets = new InsetsFrameProvider[] {
-                new InsetsFrameProvider(bar2, 0, WindowInsets.Type.statusBars())
-                        .setInsetsSize(Insets.of(0, STATUS_BAR_HEIGHT, 0, 0))
+                new InsetsFrameProvider(bar2, 0, WindowInsets.Type.navigationBars())
+                        .setInsetsSize(Insets.of(0, 0, 0, NAV_BAR_HEIGHT))
         };
         bar2.mAttrs.setFitInsetsTypes(0);
         bar2.mAttrs.paramsForRotation = new WindowManager.LayoutParams[4];
-        final int doubleHeightFor90 = STATUS_BAR_HEIGHT * 2;
+        final int doubleHeightFor90 = NAV_BAR_HEIGHT * 2;
         for (int i = ROTATION_0; i <= Surface.ROTATION_270; i++) {
             final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
             params.setFitInsetsTypes(0);
             if (i == Surface.ROTATION_90) {
                 params.providedInsets = new InsetsFrameProvider[] {
-                        new InsetsFrameProvider(bar2, 0, WindowInsets.Type.statusBars())
-                                .setInsetsSize(Insets.of(0, doubleHeightFor90, 0, 0))
+                        new InsetsFrameProvider(bar2, 0, WindowInsets.Type.navigationBars())
+                                .setInsetsSize(Insets.of(0, 0, 0, doubleHeightFor90))
                 };
             } else {
                 params.providedInsets = bar2.mAttrs.providedInsets;
@@ -422,7 +425,12 @@ public class DisplayPolicyTests extends WindowTestsBase {
         assertFalse(displayPolicy.updateDecorInsetsInfo());
         // The insets in other rotations should be still updated.
         assertEquals(doubleHeightFor90, displayPolicy.getDecorInsetsInfo(Surface.ROTATION_90,
-                di.logicalHeight, di.logicalWidth).mConfigInsets.top);
+                di.logicalHeight, di.logicalWidth).mConfigInsets.bottom);
+
+        navbar.removeIfPossible();
+        bar2.removeIfPossible();
+        assertEquals(0, displayPolicy.getDecorInsetsInfo(di.rotation, di.logicalWidth,
+                di.logicalHeight).mNonDecorInsets.bottom);
     }
 
     @SetupWindows(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
