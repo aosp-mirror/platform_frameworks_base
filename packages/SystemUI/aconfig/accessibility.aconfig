@@ -17,6 +17,13 @@ flag {
 }
 
 flag {
+    name: "floating_menu_drag_to_edit"
+    namespace: "accessibility"
+    description: "adds a second drag button to allow the user edit the shortcut."
+    bug: "297583708"
+}
+
+flag {
     name: "floating_menu_ime_displacement_animation"
     namespace: "accessibility"
     description: "Adds an animation for when the FAB is displaced by an IME becoming visible."

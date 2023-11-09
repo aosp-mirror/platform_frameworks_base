@@ -37,7 +37,6 @@ import androidx.dynamicanimation.animation.SpringForce;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.Preconditions;
 import com.android.systemui.Flags;
 
 import java.util.HashMap;
@@ -73,7 +72,6 @@ class MenuAnimationController {
     private final ValueAnimator mFadeOutAnimator;
     private final Handler mHandler;
     private boolean mIsFadeEffectEnabled;
-    private DragToInteractAnimationController.DismissCallback mDismissCallback;
     private Runnable mSpringAnimationsEndAction;
 
     // Cache the animations state of {@link DynamicAnimation.TRANSLATION_X} and {@link
@@ -170,11 +168,6 @@ class MenuAnimationController {
         mSpringAnimationsEndAction = runnable;
     }
 
-    void setDismissCallback(
-            DragToInteractAnimationController.DismissCallback dismissCallback) {
-        mDismissCallback = dismissCallback;
-    }
-
     void moveToTopLeftPosition() {
         mMenuView.updateMenuMoveToTucked(/* isMoveToTucked= */ false);
         final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
@@ -203,13 +196,6 @@ class MenuAnimationController {
         moveToPosition(position);
         mMenuView.onBoundsInParentChanged((int) position.x, (int) position.y);
         constrainPositionAndUpdate(position, /* writeToPosition = */ true);
-    }
-
-    void removeMenu() {
-        Preconditions.checkArgument(mDismissCallback != null,
-                "The dismiss callback should be initialized first.");
-
-        mDismissCallback.onDismiss();
     }
 
     void flingMenuThenSpringToEdge(float x, float velocityX, float velocityY) {
@@ -334,8 +320,6 @@ class MenuAnimationController {
             moveToEdgeAndHide();
             return true;
         }
-
-        fadeOutIfEnabled();
         return false;
     }
 
@@ -452,8 +436,6 @@ class MenuAnimationController {
     private void onSpringAnimationsEnd(PointF position, boolean writeToPosition) {
         mMenuView.onBoundsInParentChanged((int) position.x, (int) position.y);
         constrainPositionAndUpdate(position, writeToPosition);
-
-        fadeOutIfEnabled();
 
         if (mSpringAnimationsEndAction != null) {
             mSpringAnimationsEndAction.run();

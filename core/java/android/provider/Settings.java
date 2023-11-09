@@ -430,6 +430,18 @@ public final class Settings {
             "android.settings.ACCESSIBILITY_DETAILS_SETTINGS";
 
     /**
+     * Activity Action: Show settings to allow configuration of an accessibility
+     * shortcut belonging to an accessibility feature or features.
+     * <p>
+     * Input: ":settings:show_fragment_args" must contain "targets" denoting the services to edit.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     **/
+    public static final String ACTION_ACCESSIBILITY_SHORTCUT_SETTINGS =
+            "android.settings.ACCESSIBILITY_SHORTCUT_SETTINGS";
+
+    /**
      * Activity Action: Show settings to allow configuration of accessibility color and motion.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
