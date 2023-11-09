@@ -20,9 +20,12 @@ import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.AccessibilityDelegate
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.view.accessibility.AccessibilityNodeInfo
+import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.ImageView
 import android.widget.Switch
 import android.widget.TextView
@@ -80,8 +83,8 @@ constructor(
     private lateinit var doneButton: View
     private lateinit var seeAllViewGroup: View
     private lateinit var pairNewDeviceViewGroup: View
-    private lateinit var seeAllText: View
-    private lateinit var pairNewDeviceText: View
+    private lateinit var seeAllRow: View
+    private lateinit var pairNewDeviceRow: View
     private lateinit var deviceListView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -98,8 +101,8 @@ constructor(
         doneButton = requireViewById(R.id.done_button)
         seeAllViewGroup = requireViewById(R.id.see_all_layout_group)
         pairNewDeviceViewGroup = requireViewById(R.id.pair_new_device_layout_group)
-        seeAllText = requireViewById(R.id.see_all_text)
-        pairNewDeviceText = requireViewById(R.id.pair_new_device_text)
+        seeAllRow = requireViewById(R.id.see_all_clickable_row)
+        pairNewDeviceRow = requireViewById(R.id.pair_new_device_clickable_row)
         deviceListView = requireViewById<RecyclerView>(R.id.device_list)
 
         setupToggle()
@@ -107,8 +110,8 @@ constructor(
 
         subtitleTextView.text = context.getString(subtitleResIdInitialValue)
         doneButton.setOnClickListener { dismiss() }
-        seeAllText.setOnClickListener { bluetoothTileDialogCallback.onSeeAllClicked(it) }
-        pairNewDeviceText.setOnClickListener {
+        seeAllRow.setOnClickListener { bluetoothTileDialogCallback.onSeeAllClicked(it) }
+        pairNewDeviceRow.setOnClickListener {
             bluetoothTileDialogCallback.onPairNewDeviceClicked(it)
         }
     }
@@ -194,7 +197,8 @@ constructor(
                         deviceItem1.iconWithDescription?.second ==
                             deviceItem2.iconWithDescription?.second &&
                         deviceItem1.background == deviceItem2.background &&
-                        deviceItem1.isEnabled == deviceItem2.isEnabled
+                        deviceItem1.isEnabled == deviceItem2.isEnabled &&
+                        deviceItem1.actionAccessibilityLabel == deviceItem2.actionAccessibilityLabel
                 }
             }
 
@@ -238,6 +242,21 @@ constructor(
                         mutableDeviceItemClick.tryEmit(item)
                         uiEventLogger.log(BluetoothTileDialogUiEvent.DEVICE_CLICKED)
                     }
+                    accessibilityDelegate =
+                        object : AccessibilityDelegate() {
+                            override fun onInitializeAccessibilityNodeInfo(
+                                host: View,
+                                info: AccessibilityNodeInfo
+                            ) {
+                                super.onInitializeAccessibilityNodeInfo(host, info)
+                                info.addAction(
+                                    AccessibilityAction(
+                                        AccessibilityAction.ACTION_CLICK.id,
+                                        item.actionAccessibilityLabel
+                                    )
+                                )
+                            }
+                        }
                 }
                 nameView.text = item.deviceName
                 summaryView.text = item.connectionSummary

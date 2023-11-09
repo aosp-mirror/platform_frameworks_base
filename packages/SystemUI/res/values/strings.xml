@@ -467,6 +467,10 @@
 
     <!-- Content description of the bluetooth device settings gear icon. [CHAR LIMIT=NONE] -->
     <string name="accessibility_bluetooth_device_settings_gear">Click to configure device detail</string>
+    <!-- Content description of the bluetooth device settings see all. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_bluetooth_device_settings_see_all">Click to see all devices</string>
+    <!-- Content description of the bluetooth device settings pair new device. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_bluetooth_device_settings_pair_new_device">Click to pair new device</string>
 
     <!-- Content description of the battery when battery state is unknown for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_battery_unknown">Battery percentage unknown.</string>
@@ -640,6 +644,10 @@
     <string name="quick_settings_bluetooth_device_connected">Connected</string>
     <!-- QuickSettings: Bluetooth dialog device saved default summary [CHAR LIMIT=NONE]-->
     <string name="quick_settings_bluetooth_device_saved">Saved</string>
+    <!-- QuickSettings: Accessibility label to disconnect a device [CHAR LIMIT=NONE]-->
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect">disconnect</string>
+    <!-- QuickSettings: Accessibility label to activate a device [CHAR LIMIT=NONE]-->
+    <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate">activate</string>
 
     <!-- QuickSettings: Bluetooth secondary label for the battery level of a connected device [CHAR LIMIT=20]-->
     <string name="quick_settings_bluetooth_secondary_label_battery_level"><xliff:g id="battery_level_as_percentage">%s</xliff:g> battery</string>
