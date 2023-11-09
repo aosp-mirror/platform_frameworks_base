@@ -246,7 +246,7 @@ public class UserManager {
     @SystemApi
     public static final int RESTRICTION_SOURCE_PROFILE_OWNER = 0x4;
 
-    /** @hide */
+    /** @removed mistakenly exposed as system-api previously */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, prefix = { "RESTRICTION_" }, value = {
             RESTRICTION_NOT_SET,
@@ -254,7 +254,6 @@ public class UserManager {
             RESTRICTION_SOURCE_DEVICE_OWNER,
             RESTRICTION_SOURCE_PROFILE_OWNER
     })
-    @SystemApi
     public @interface UserRestrictionSource {}
 
     /**

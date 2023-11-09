@@ -112,6 +112,9 @@ package android.content.pm {
     method public abstract boolean setInstantAppCookie(@Nullable byte[]);
   }
 
+  @IntDef(prefix={"FLAG_PERMISSION_"}, value={0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x100, 0x200, 0x2000, 0x1000, 0x800, 0x4000, 0x8000, 0x8, 0x10000, 0x20000}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
+  }
+
   public final class SharedLibraryInfo implements android.os.Parcelable {
     method public boolean isBuiltin();
     method public boolean isDynamic();
@@ -318,6 +321,9 @@ package android.os {
     method public CharSequence getBadgedLabelForUser(CharSequence, android.os.UserHandle);
   }
 
+  @IntDef(flag=true, prefix={"RESTRICTION_"}, value={0x0, 0x1, 0x2, 0x4}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface UserManager.UserRestrictionSource {
+  }
+
 }
 
 package android.os.storage {
@@ -493,6 +499,13 @@ package android.telephony {
 
 }
 
+package android.telephony.euicc {
+
+  @IntDef(prefix={"EUICC_OTA_"}, value={0x1, 0x2, 0x3, 0x4, 0x5}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccManager.OtaStatus {
+  }
+
+}
+
 package android.text.format {
 
   public class DateFormat {
@@ -552,6 +565,9 @@ package android.view {
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     field public static final int TYPE_KEYGUARD = 2004; // 0x7d4
     field public static final int TYPE_STATUS_BAR_PANEL = 2014; // 0x7de
+  }
+
+  @IntDef(flag=true, prefix={"SYSTEM_FLAG_"}, value={0x80000, 0x10}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface WindowManager.LayoutParams.SystemFlags {
   }
 
 }

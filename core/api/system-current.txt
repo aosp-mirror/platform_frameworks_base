@@ -3918,7 +3918,7 @@ package android.content.pm {
     method @Deprecated @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public abstract int getIntentVerificationStatusAsUser(@NonNull String, int);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public int getPackageUidAsUser(@NonNull String, @NonNull android.content.pm.PackageManager.PackageInfoFlags, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public String getPermissionControllerPackageName();
-    method @android.content.pm.PackageManager.PermissionFlags @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, android.Manifest.permission.GET_RUNTIME_PERMISSIONS}) public abstract int getPermissionFlags(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS, android.Manifest.permission.GET_RUNTIME_PERMISSIONS}) public abstract int getPermissionFlags(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @NonNull @RequiresPermission(android.Manifest.permission.SUSPEND_APPS) public String[] getUnsuspendablePackages(@NonNull String[]);
     method @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public abstract void grantRuntimePermission(@NonNull String, @NonNull String, @NonNull android.os.UserHandle);
     method @Deprecated public abstract int installExistingPackage(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -3949,7 +3949,7 @@ package android.content.pm {
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public abstract void setUpdateAvailable(@NonNull String, boolean);
     method @NonNull public boolean shouldShowNewAppInstalledNotification();
     method @Deprecated @RequiresPermission(android.Manifest.permission.SET_PREFERRED_APPLICATIONS) public abstract boolean updateIntentVerificationStatusAsUser(@NonNull String, int, int);
-    method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS}) public abstract void updatePermissionFlags(@NonNull String, @NonNull String, @android.content.pm.PackageManager.PermissionFlags int, @android.content.pm.PackageManager.PermissionFlags int, @NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS, android.Manifest.permission.REVOKE_RUNTIME_PERMISSIONS}) public abstract void updatePermissionFlags(@NonNull String, @NonNull String, int, int, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT) public abstract void verifyIntentFilter(int, int, @NonNull java.util.List<java.lang.String>);
     field public static final String ACTION_REQUEST_PERMISSIONS = "android.content.pm.action.REQUEST_PERMISSIONS";
     field public static final String ACTION_REQUEST_PERMISSIONS_FOR_OTHER = "android.content.pm.action.REQUEST_PERMISSIONS_FOR_OTHER";
@@ -4066,9 +4066,6 @@ package android.content.pm {
 
   public static interface PackageManager.OnPermissionsChangedListener {
     method public void onPermissionsChanged(int);
-  }
-
-  @IntDef(prefix={"FLAG_PERMISSION_"}, value={android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET, android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE, android.content.pm.PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED, android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT, android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION, android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE, android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT, android.content.pm.PackageManager.FLAG_PERMISSION_ONE_TIME, android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PackageManager.PermissionFlags {
   }
 
   public static final class PackageManager.UninstallCompleteCallback implements android.os.Parcelable {
@@ -4564,7 +4561,7 @@ package android.hardware.hdmi {
   }
 
   public static interface HdmiClient.OnDeviceSelectedListener {
-    method public void onDeviceSelected(@android.hardware.hdmi.HdmiControlManager.ControlCallbackResult int, int);
+    method public void onDeviceSelected(int, int);
   }
 
   public final class HdmiControlManager {
@@ -4762,9 +4759,6 @@ package android.hardware.hdmi {
     method public void onChange(@NonNull String);
   }
 
-  @IntDef({android.hardware.hdmi.HdmiControlManager.RESULT_SUCCESS, android.hardware.hdmi.HdmiControlManager.RESULT_TIMEOUT, android.hardware.hdmi.HdmiControlManager.RESULT_SOURCE_NOT_AVAILABLE, android.hardware.hdmi.HdmiControlManager.RESULT_TARGET_NOT_AVAILABLE, android.hardware.hdmi.HdmiControlManager.RESULT_ALREADY_IN_PROGRESS, android.hardware.hdmi.HdmiControlManager.RESULT_EXCEPTION, android.hardware.hdmi.HdmiControlManager.RESULT_INCORRECT_MODE, android.hardware.hdmi.HdmiControlManager.RESULT_COMMUNICATION_FAILED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface HdmiControlManager.ControlCallbackResult {
-  }
-
   public static interface HdmiControlManager.HotplugEventListener {
     method public void onReceived(android.hardware.hdmi.HdmiHotplugEvent);
   }
@@ -4911,7 +4905,7 @@ package android.hardware.hdmi {
   }
 
   public static interface HdmiSwitchClient.OnSelectListener {
-    method public void onSelect(@android.hardware.hdmi.HdmiControlManager.ControlCallbackResult int);
+    method public void onSelect(int);
   }
 
   public class HdmiTimerRecordSources {
@@ -5628,14 +5622,14 @@ package android.hardware.radio {
   }
 
   public final class ProgramSelector implements android.os.Parcelable {
-    ctor public ProgramSelector(@android.hardware.radio.ProgramSelector.ProgramType int, @NonNull android.hardware.radio.ProgramSelector.Identifier, @Nullable android.hardware.radio.ProgramSelector.Identifier[], @Nullable long[]);
-    method @NonNull public static android.hardware.radio.ProgramSelector createAmFmSelector(@android.hardware.radio.RadioManager.Band int, int);
-    method @NonNull public static android.hardware.radio.ProgramSelector createAmFmSelector(@android.hardware.radio.RadioManager.Band int, int, int);
+    ctor public ProgramSelector(int, @NonNull android.hardware.radio.ProgramSelector.Identifier, @Nullable android.hardware.radio.ProgramSelector.Identifier[], @Nullable long[]);
+    method @NonNull public static android.hardware.radio.ProgramSelector createAmFmSelector(int, int);
+    method @NonNull public static android.hardware.radio.ProgramSelector createAmFmSelector(int, int, int);
     method public int describeContents();
-    method @NonNull public android.hardware.radio.ProgramSelector.Identifier[] getAllIds(@android.hardware.radio.ProgramSelector.IdentifierType int);
-    method public long getFirstId(@android.hardware.radio.ProgramSelector.IdentifierType int);
+    method @NonNull public android.hardware.radio.ProgramSelector.Identifier[] getAllIds(int);
+    method public long getFirstId(int);
     method @NonNull public android.hardware.radio.ProgramSelector.Identifier getPrimaryId();
-    method @Deprecated @android.hardware.radio.ProgramSelector.ProgramType public int getProgramType();
+    method @Deprecated public int getProgramType();
     method @NonNull public android.hardware.radio.ProgramSelector.Identifier[] getSecondaryIds();
     method @Deprecated @NonNull public long[] getVendorIds();
     method @NonNull public android.hardware.radio.ProgramSelector withSecondaryPreferred(@NonNull android.hardware.radio.ProgramSelector.Identifier);
@@ -5684,19 +5678,13 @@ package android.hardware.radio {
   }
 
   public static final class ProgramSelector.Identifier implements android.os.Parcelable {
-    ctor public ProgramSelector.Identifier(@android.hardware.radio.ProgramSelector.IdentifierType int, long);
+    ctor public ProgramSelector.Identifier(int, long);
     method public int describeContents();
-    method @android.hardware.radio.ProgramSelector.IdentifierType public int getType();
+    method public int getType();
     method public long getValue();
     method public boolean isCategoryType();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.ProgramSelector.Identifier> CREATOR;
-  }
-
-  @IntDef(prefix={"IDENTIFIER_TYPE_"}, value={android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_INVALID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_AMFM_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_RDS_PI, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_ID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_SUBCHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_NAME, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SIDECC, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_ENSEMBLE, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_SCID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_FREQUENCY, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DRMO_MODULATION, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_SERVICE_ID, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_SXM_CHANNEL, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_DAB_DMB_SID_EXT, android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_HD_STATION_LOCATION}) @IntRange(from=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_START, to=android.hardware.radio.ProgramSelector.IDENTIFIER_TYPE_VENDOR_END) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface ProgramSelector.IdentifierType {
-  }
-
-  @Deprecated @IntDef(prefix={"PROGRAM_TYPE_"}, value={android.hardware.radio.ProgramSelector.PROGRAM_TYPE_INVALID, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_AM, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_FM, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_AM_HD, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_FM_HD, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_DAB, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_DRMO, android.hardware.radio.ProgramSelector.PROGRAM_TYPE_SXM}) @IntRange(from=android.hardware.radio.ProgramSelector.PROGRAM_TYPE_VENDOR_START, to=android.hardware.radio.ProgramSelector.PROGRAM_TYPE_VENDOR_END) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface ProgramSelector.ProgramType {
   }
 
   public class RadioManager {
@@ -5754,9 +5742,6 @@ package android.hardware.radio {
   public static class RadioManager.AmBandDescriptor extends android.hardware.radio.RadioManager.BandDescriptor {
     method public boolean isStereoSupported();
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.AmBandDescriptor> CREATOR;
-  }
-
-  @IntDef(prefix={"BAND_"}, value={android.hardware.radio.RadioManager.BAND_INVALID, android.hardware.radio.RadioManager.BAND_AM, android.hardware.radio.RadioManager.BAND_FM, android.hardware.radio.RadioManager.BAND_AM_HD, android.hardware.radio.RadioManager.BAND_FM_HD}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface RadioManager.Band {
   }
 
   public static class RadioManager.BandConfig implements android.os.Parcelable {
@@ -5829,8 +5814,8 @@ package android.hardware.radio {
     method public boolean isBackgroundScanningSupported();
     method public boolean isCaptureSupported();
     method public boolean isInitializationRequired();
-    method public boolean isProgramIdentifierSupported(@android.hardware.radio.ProgramSelector.IdentifierType int);
-    method public boolean isProgramTypeSupported(@android.hardware.radio.ProgramSelector.ProgramType int);
+    method public boolean isProgramIdentifierSupported(int);
+    method public boolean isProgramTypeSupported(int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.radio.RadioManager.ModuleProperties> CREATOR;
   }
@@ -10514,7 +10499,7 @@ package android.os {
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.os.UserHandle> getUserHandles(boolean);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public android.graphics.Bitmap getUserIcon();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public android.content.pm.UserProperties getUserProperties(@NonNull android.os.UserHandle);
-    method @Deprecated @android.os.UserManager.UserRestrictionSource @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS}) public int getUserRestrictionSource(String, android.os.UserHandle);
+    method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS}) public int getUserRestrictionSource(String, android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS}) public java.util.List<android.os.UserManager.EnforcingUser> getUserRestrictionSources(String, android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public int getUserSwitchability();
     method @NonNull @RequiresPermission(anyOf={"android.permission.INTERACT_ACROSS_USERS", "android.permission.MANAGE_USERS"}) public java.util.Set<android.os.UserHandle> getVisibleUsers();
@@ -10574,12 +10559,9 @@ package android.os {
   public static final class UserManager.EnforcingUser implements android.os.Parcelable {
     method public int describeContents();
     method public android.os.UserHandle getUserHandle();
-    method @android.os.UserManager.UserRestrictionSource public int getUserRestrictionSource();
+    method public int getUserRestrictionSource();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.UserManager.EnforcingUser> CREATOR;
-  }
-
-  @IntDef(flag=true, prefix={"RESTRICTION_"}, value={android.os.UserManager.RESTRICTION_NOT_SET, android.os.UserManager.RESTRICTION_SOURCE_SYSTEM, android.os.UserManager.RESTRICTION_SOURCE_DEVICE_OWNER, android.os.UserManager.RESTRICTION_SOURCE_PROFILE_OWNER}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface UserManager.UserRestrictionSource {
   }
 
   public abstract class Vibrator {
@@ -11889,13 +11871,13 @@ package android.service.euicc {
     method public android.service.carrier.CarrierIdentifier getCarrierIdentifier();
     method public String getIccid();
     method @Nullable public String getNickname();
-    method @android.service.euicc.EuiccProfileInfo.PolicyRule public int getPolicyRules();
-    method @android.service.euicc.EuiccProfileInfo.ProfileClass public int getProfileClass();
+    method public int getPolicyRules();
+    method public int getProfileClass();
     method public String getProfileName();
     method public String getServiceProviderName();
-    method @android.service.euicc.EuiccProfileInfo.ProfileState public int getState();
+    method public int getState();
     method @Nullable public java.util.List<android.telephony.UiccAccessRule> getUiccAccessRules();
-    method public boolean hasPolicyRule(@android.service.euicc.EuiccProfileInfo.PolicyRule int);
+    method public boolean hasPolicyRule(int);
     method public boolean hasPolicyRules();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.euicc.EuiccProfileInfo> CREATOR;
@@ -11916,21 +11898,12 @@ package android.service.euicc {
     method public android.service.euicc.EuiccProfileInfo.Builder setCarrierIdentifier(android.service.carrier.CarrierIdentifier);
     method public android.service.euicc.EuiccProfileInfo.Builder setIccid(String);
     method public android.service.euicc.EuiccProfileInfo.Builder setNickname(String);
-    method public android.service.euicc.EuiccProfileInfo.Builder setPolicyRules(@android.service.euicc.EuiccProfileInfo.PolicyRule int);
-    method public android.service.euicc.EuiccProfileInfo.Builder setProfileClass(@android.service.euicc.EuiccProfileInfo.ProfileClass int);
+    method public android.service.euicc.EuiccProfileInfo.Builder setPolicyRules(int);
+    method public android.service.euicc.EuiccProfileInfo.Builder setProfileClass(int);
     method public android.service.euicc.EuiccProfileInfo.Builder setProfileName(String);
     method public android.service.euicc.EuiccProfileInfo.Builder setServiceProviderName(String);
-    method public android.service.euicc.EuiccProfileInfo.Builder setState(@android.service.euicc.EuiccProfileInfo.ProfileState int);
+    method public android.service.euicc.EuiccProfileInfo.Builder setState(int);
     method public android.service.euicc.EuiccProfileInfo.Builder setUiccAccessRule(@Nullable java.util.List<android.telephony.UiccAccessRule>);
-  }
-
-  @IntDef(flag=true, prefix={"POLICY_RULE_"}, value={android.service.euicc.EuiccProfileInfo.POLICY_RULE_DO_NOT_DISABLE, android.service.euicc.EuiccProfileInfo.POLICY_RULE_DO_NOT_DELETE, android.service.euicc.EuiccProfileInfo.POLICY_RULE_DELETE_AFTER_DISABLING}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccProfileInfo.PolicyRule {
-  }
-
-  @IntDef(prefix={"PROFILE_CLASS_"}, value={android.service.euicc.EuiccProfileInfo.PROFILE_CLASS_TESTING, android.service.euicc.EuiccProfileInfo.PROFILE_CLASS_PROVISIONING, android.service.euicc.EuiccProfileInfo.PROFILE_CLASS_OPERATIONAL, 0xffffffff}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccProfileInfo.ProfileClass {
-  }
-
-  @IntDef(prefix={"PROFILE_STATE_"}, value={android.service.euicc.EuiccProfileInfo.PROFILE_STATE_DISABLED, android.service.euicc.EuiccProfileInfo.PROFILE_STATE_ENABLED, 0xffffffff}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccProfileInfo.ProfileState {
   }
 
   public abstract class EuiccService extends android.app.Service {
@@ -11943,14 +11916,14 @@ package android.service.euicc {
     method @NonNull public android.service.euicc.DownloadSubscriptionResult onDownloadSubscription(int, int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean, @NonNull android.os.Bundle);
     method @Deprecated public int onDownloadSubscription(int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean, boolean);
     method @Deprecated public abstract int onEraseSubscriptions(int);
-    method public int onEraseSubscriptions(int, @android.telephony.euicc.EuiccCardManager.ResetOption int);
+    method public int onEraseSubscriptions(int, int);
     method public abstract android.service.euicc.GetDefaultDownloadableSubscriptionListResult onGetDefaultDownloadableSubscriptionList(int, boolean);
     method public abstract android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, android.telephony.euicc.DownloadableSubscription, boolean);
     method @NonNull public android.service.euicc.GetDownloadableSubscriptionMetadataResult onGetDownloadableSubscriptionMetadata(int, int, @NonNull android.telephony.euicc.DownloadableSubscription, boolean);
     method public abstract String onGetEid(int);
     method @NonNull public abstract android.telephony.euicc.EuiccInfo onGetEuiccInfo(int);
     method @NonNull public abstract android.service.euicc.GetEuiccProfileInfoListResult onGetEuiccProfileInfoList(int);
-    method @android.telephony.euicc.EuiccManager.OtaStatus public abstract int onGetOtaStatus(int);
+    method public abstract int onGetOtaStatus(int);
     method public abstract int onRetainSubscriptionsForFactoryReset(int);
     method public abstract void onStartOtaIfNecessary(int, android.service.euicc.EuiccService.OtaStatusChangedCallback);
     method @Deprecated public abstract int onSwitchToSubscription(int, @Nullable String, boolean);
@@ -12214,7 +12187,7 @@ package android.service.persistentdata {
 
   public class PersistentDataBlockManager {
     method @RequiresPermission(android.Manifest.permission.ACCESS_PDB_STATE) public int getDataBlockSize();
-    method @android.service.persistentdata.PersistentDataBlockManager.FlashLockState @RequiresPermission(anyOf={android.Manifest.permission.READ_OEM_UNLOCK_STATE, "android.permission.OEM_UNLOCK_STATE"}) public int getFlashLockState();
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_OEM_UNLOCK_STATE, "android.permission.OEM_UNLOCK_STATE"}) public int getFlashLockState();
     method public long getMaximumDataBlockSize();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_OEM_UNLOCK_STATE, "android.permission.OEM_UNLOCK_STATE"}) public boolean getOemUnlockEnabled();
     method @NonNull @RequiresPermission(android.Manifest.permission.ACCESS_PDB_STATE) public String getPersistentDataPackageName();
@@ -12225,9 +12198,6 @@ package android.service.persistentdata {
     field public static final int FLASH_LOCK_LOCKED = 1; // 0x1
     field public static final int FLASH_LOCK_UNKNOWN = -1; // 0xffffffff
     field public static final int FLASH_LOCK_UNLOCKED = 0; // 0x0
-  }
-
-  @IntDef(prefix={"FLASH_LOCK_"}, value={android.service.persistentdata.PersistentDataBlockManager.FLASH_LOCK_UNKNOWN, android.service.persistentdata.PersistentDataBlockManager.FLASH_LOCK_LOCKED, android.service.persistentdata.PersistentDataBlockManager.FLASH_LOCK_UNLOCKED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface PersistentDataBlockManager.FlashLockState {
   }
 
 }
@@ -15017,10 +14987,10 @@ package android.telephony.euicc {
 
   public class EuiccCardManager {
     method public void authenticateServer(String, String, byte[], byte[], byte[], byte[], java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<byte[]>);
-    method public void cancelSession(String, byte[], @android.telephony.euicc.EuiccCardManager.CancelReason int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<byte[]>);
+    method public void cancelSession(String, byte[], int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<byte[]>);
     method public void deleteProfile(String, String, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
     method public void disableProfile(String, String, boolean, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
-    method public void listNotifications(String, @android.telephony.euicc.EuiccNotification.Event int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.telephony.euicc.EuiccNotification[]>);
+    method public void listNotifications(String, int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.telephony.euicc.EuiccNotification[]>);
     method public void loadBoundProfilePackage(String, byte[], java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<byte[]>);
     method public void prepareDownload(String, @Nullable byte[], byte[], byte[], byte[], java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<byte[]>);
     method public void removeNotificationFromList(String, int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
@@ -15033,9 +15003,9 @@ package android.telephony.euicc {
     method public void requestProfile(String, String, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.service.euicc.EuiccProfileInfo>);
     method public void requestRulesAuthTable(String, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.telephony.euicc.EuiccRulesAuthTable>);
     method public void requestSmdsAddress(String, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.String>);
-    method public void resetMemory(String, @android.telephony.euicc.EuiccCardManager.ResetOption int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
+    method public void resetMemory(String, int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
     method public void retrieveNotification(String, int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.telephony.euicc.EuiccNotification>);
-    method public void retrieveNotificationList(String, @android.telephony.euicc.EuiccNotification.Event int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.telephony.euicc.EuiccNotification[]>);
+    method public void retrieveNotificationList(String, int, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.telephony.euicc.EuiccNotification[]>);
     method public void setDefaultSmdpAddress(String, String, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
     method public void setNickname(String, String, String, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<java.lang.Void>);
     method @Deprecated public void switchToProfile(String, String, boolean, java.util.concurrent.Executor, android.telephony.euicc.EuiccCardManager.ResultCallback<android.service.euicc.EuiccProfileInfo>);
@@ -15055,12 +15025,6 @@ package android.telephony.euicc {
     field public static final int RESULT_UNKNOWN_ERROR = -1; // 0xffffffff
   }
 
-  @IntDef(prefix={"CANCEL_REASON_"}, value={android.telephony.euicc.EuiccCardManager.CANCEL_REASON_END_USER_REJECTED, android.telephony.euicc.EuiccCardManager.CANCEL_REASON_POSTPONED, android.telephony.euicc.EuiccCardManager.CANCEL_REASON_TIMEOUT, android.telephony.euicc.EuiccCardManager.CANCEL_REASON_PPR_NOT_ALLOWED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccCardManager.CancelReason {
-  }
-
-  @IntDef(flag=true, prefix={"RESET_OPTION_"}, value={android.telephony.euicc.EuiccCardManager.RESET_OPTION_DELETE_OPERATIONAL_PROFILES, android.telephony.euicc.EuiccCardManager.RESET_OPTION_DELETE_FIELD_LOADED_TEST_PROFILES, android.telephony.euicc.EuiccCardManager.RESET_OPTION_RESET_DEFAULT_SMDP_ADDRESS}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccCardManager.ResetOption {
-  }
-
   public static interface EuiccCardManager.ResultCallback<T> {
     method public void onComplete(int, T);
   }
@@ -15068,7 +15032,7 @@ package android.telephony.euicc {
   public class EuiccManager {
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void continueOperation(android.content.Intent, android.os.Bundle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void eraseSubscriptions(@NonNull android.app.PendingIntent);
-    method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void eraseSubscriptions(@android.telephony.euicc.EuiccCardManager.ResetOption int, @NonNull android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void eraseSubscriptions(int, @NonNull android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void getDefaultDownloadableSubscriptionList(android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public void getDownloadableSubscriptionMetadata(android.telephony.euicc.DownloadableSubscription, android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.WRITE_EMBEDDED_SUBSCRIPTIONS) public int getOtaStatus();
@@ -15103,18 +15067,15 @@ package android.telephony.euicc {
     field public static final String EXTRA_SUBSCRIPTION_NICKNAME = "android.telephony.euicc.extra.SUBSCRIPTION_NICKNAME";
   }
 
-  @IntDef(prefix={"EUICC_OTA_"}, value={android.telephony.euicc.EuiccManager.EUICC_OTA_IN_PROGRESS, android.telephony.euicc.EuiccManager.EUICC_OTA_FAILED, android.telephony.euicc.EuiccManager.EUICC_OTA_SUCCEEDED, android.telephony.euicc.EuiccManager.EUICC_OTA_NOT_NEEDED, android.telephony.euicc.EuiccManager.EUICC_OTA_STATUS_UNAVAILABLE}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccManager.OtaStatus {
-  }
-
   public final class EuiccNotification implements android.os.Parcelable {
-    ctor public EuiccNotification(int, String, @android.telephony.euicc.EuiccNotification.Event int, @Nullable byte[]);
+    ctor public EuiccNotification(int, String, int, @Nullable byte[]);
     method public int describeContents();
     method @Nullable public byte[] getData();
-    method @android.telephony.euicc.EuiccNotification.Event public int getEvent();
+    method public int getEvent();
     method public int getSeq();
     method public String getTargetAddr();
     method public void writeToParcel(android.os.Parcel, int);
-    field @android.telephony.euicc.EuiccNotification.Event public static final int ALL_EVENTS = 15; // 0xf
+    field public static final int ALL_EVENTS = 15; // 0xf
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.euicc.EuiccNotification> CREATOR;
     field public static final int EVENT_DELETE = 8; // 0x8
     field public static final int EVENT_DISABLE = 4; // 0x4
@@ -15122,13 +15083,10 @@ package android.telephony.euicc {
     field public static final int EVENT_INSTALL = 1; // 0x1
   }
 
-  @IntDef(flag=true, prefix={"EVENT_"}, value={android.telephony.euicc.EuiccNotification.EVENT_INSTALL, android.telephony.euicc.EuiccNotification.EVENT_ENABLE, android.telephony.euicc.EuiccNotification.EVENT_DISABLE, android.telephony.euicc.EuiccNotification.EVENT_DELETE}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccNotification.Event {
-  }
-
   public final class EuiccRulesAuthTable implements android.os.Parcelable {
     method public int describeContents();
-    method public int findIndex(@android.service.euicc.EuiccProfileInfo.PolicyRule int, android.service.carrier.CarrierIdentifier);
-    method public boolean hasPolicyRuleFlag(int, @android.telephony.euicc.EuiccRulesAuthTable.PolicyRuleFlag int);
+    method public int findIndex(int, android.service.carrier.CarrierIdentifier);
+    method public boolean hasPolicyRuleFlag(int, int);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.euicc.EuiccRulesAuthTable> CREATOR;
     field public static final int POLICY_RULE_FLAG_CONSENT_REQUIRED = 1; // 0x1
@@ -15138,9 +15096,6 @@ package android.telephony.euicc {
     ctor public EuiccRulesAuthTable.Builder(int);
     method public android.telephony.euicc.EuiccRulesAuthTable.Builder add(int, java.util.List<android.service.carrier.CarrierIdentifier>, int);
     method public android.telephony.euicc.EuiccRulesAuthTable build();
-  }
-
-  @IntDef(flag=true, prefix={"POLICY_RULE_FLAG_"}, value={android.telephony.euicc.EuiccRulesAuthTable.POLICY_RULE_FLAG_CONSENT_REQUIRED}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface EuiccRulesAuthTable.PolicyRuleFlag {
   }
 
 }
@@ -17036,7 +16991,7 @@ package android.view {
   }
 
   public abstract class Window {
-    method public void addSystemFlags(@android.view.WindowManager.LayoutParams.SystemFlags int);
+    method public void addSystemFlags(int);
   }
 
   public interface WindowManager extends android.view.ViewManager {
@@ -17053,9 +17008,6 @@ package android.view {
     method public final void setUserActivityTimeout(long);
     field @RequiresPermission(android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS) public static final int SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 524288; // 0x80000
     field @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW) public static final int SYSTEM_FLAG_SHOW_FOR_ALL_USERS = 16; // 0x10
-  }
-
-  @IntDef(flag=true, prefix={"SYSTEM_FLAG_"}, value={android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface WindowManager.LayoutParams.SystemFlags {
   }
 
 }

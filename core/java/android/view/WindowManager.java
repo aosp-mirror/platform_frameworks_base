@@ -3308,9 +3308,8 @@ public interface WindowManager extends ViewManager {
         /**
          * An internal annotation for flags that can be specified to {@link #softInputMode}.
          *
-         * @hide
+         * @removed mistakenly exposed as system-api previously
          */
-        @SystemApi
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(flag = true, prefix = { "SYSTEM_FLAG_" }, value = {
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
