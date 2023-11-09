@@ -33,6 +33,12 @@ abstract class KeyguardBlueprintModule {
 
     @Binds
     @IntoSet
+    abstract fun bindSplitShadeBlueprint(
+        splitShadeBlueprint: SplitShadeKeyguardBlueprint
+    ): KeyguardBlueprint
+
+    @Binds
+    @IntoSet
     abstract fun bindShortcutsBesideUdfpsLockscreenBlueprint(
         shortcutsBesideUdfpsLockscreenBlueprint: ShortcutsBesideUdfpsKeyguardBlueprint
     ): KeyguardBlueprint

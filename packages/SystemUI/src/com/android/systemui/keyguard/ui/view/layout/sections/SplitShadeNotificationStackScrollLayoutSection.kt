@@ -34,8 +34,8 @@ import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificat
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import javax.inject.Inject
 
-/** Single column format for notifications (default for phones) */
-class DefaultNotificationStackScrollLayoutSection
+/** Large-screen format for notifications, shown as two columns on the device */
+class SplitShadeNotificationStackScrollLayoutSection
 @Inject
 constructor(
     context: Context,
@@ -67,12 +67,12 @@ constructor(
                     R.id.nssl_placeholder,
                     TOP,
                     smartspaceViewModel.smartspaceViewId,
-                    BOTTOM,
+                    TOP,
                     bottomMargin
                 )
                 setGoneMargin(R.id.nssl_placeholder, TOP, bottomMargin)
             } else {
-                connect(R.id.nssl_placeholder, TOP, R.id.keyguard_status_view, BOTTOM, bottomMargin)
+                connect(R.id.nssl_placeholder, TOP, R.id.keyguard_status_view, TOP, bottomMargin)
             }
             connect(R.id.nssl_placeholder, START, PARENT_ID, START)
             connect(R.id.nssl_placeholder, END, PARENT_ID, END)

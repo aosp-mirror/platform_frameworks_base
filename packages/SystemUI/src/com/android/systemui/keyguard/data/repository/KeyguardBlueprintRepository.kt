@@ -17,33 +17,29 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.util.Log
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint.Companion.DEFAULT
 import com.android.systemui.keyguard.ui.view.layout.blueprints.KeyguardBlueprintModule
 import java.io.PrintWriter
 import java.util.TreeMap
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.launch
 
 /**
  * Manages blueprint changes for the lockscreen.
  *
  * To add a blueprint, create a class that implements LockscreenBlueprint and bind it to the map in
- * the dagger module:
+ * the dagger module: [KeyguardBlueprintModule]
  *
  * A Blueprint determines how the layout should be constrained on a high level.
  *
  * A Section is a modular piece of code that implements the constraints. The blueprint uses the
  * sections to define the constraints.
- *
- * @see KeyguardBlueprintModule
  */
 @SysUISingleton
 class KeyguardBlueprintRepository
@@ -51,18 +47,16 @@ class KeyguardBlueprintRepository
 constructor(
     configurationRepository: ConfigurationRepository,
     blueprints: Set<@JvmSuppressWildcards KeyguardBlueprint>,
-    @Application private val applicationScope: CoroutineScope,
 ) {
     private val blueprintIdMap: TreeMap<String, KeyguardBlueprint> = TreeMap()
     private val _blueprint: MutableSharedFlow<KeyguardBlueprint> = MutableSharedFlow(replay = 1)
     val blueprint: Flow<KeyguardBlueprint> = _blueprint.asSharedFlow()
 
+    val configurationChange: Flow<Unit> = configurationRepository.onAnyConfigurationChange
+
     init {
         blueprintIdMap.putAll(blueprints.associateBy { it.id })
         applyBlueprint(blueprintIdMap[DEFAULT]!!)
-        applicationScope.launch {
-            configurationRepository.onAnyConfigurationChange.collect { refreshBlueprint() }
-        }
     }
 
     /**
@@ -86,9 +80,18 @@ constructor(
      * @return whether the transition has succeeded.
      */
     fun applyBlueprint(blueprintId: String?): Boolean {
-        val blueprint = blueprintIdMap[blueprintId] ?: return false
-        applyBlueprint(blueprint)
-        return true
+        val blueprint = blueprintIdMap[blueprintId]
+        return if (blueprint != null) {
+            applyBlueprint(blueprint)
+            true
+        } else {
+            Log.e(
+                TAG,
+                "Could not find blueprint with id: $blueprintId. " +
+                    "Perhaps it was not added to KeyguardBlueprintModule?"
+            )
+            false
+        }
     }
 
     /** Emits the blueprint value to the collectors. */
@@ -106,5 +109,9 @@ constructor(
     /** Prints all available blueprints to the PrintWriter. */
     fun printBlueprints(pw: PrintWriter) {
         blueprintIdMap.onEachIndexed { index, entry -> pw.println("$index: ${entry.key}") }
+    }
+
+    companion object {
+        private const val TAG = "KeyguardBlueprintRepository"
     }
 }
