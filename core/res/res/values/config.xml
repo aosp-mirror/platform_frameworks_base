@@ -2712,6 +2712,12 @@
          turned off and the screen off animation has been performed. -->
     <bool name="config_dozeAfterScreenOffByDefault">false</bool>
 
+    <!-- If true, bright policy will be applied when we have entered dozing wakefulness but haven't
+         started doze component. This can be used to suppress the temporary dim state before
+         starting a dream service. This is typically used together with
+         config_maximumScreenDimDuration set to 0 to completely suppress dim effect. -->
+    <bool name="config_brightWhenDozing">false</bool>
+
     <!-- Doze: should the TYPE_PICK_UP_GESTURE sensor be used as a pulse signal. -->
     <bool name="config_dozePulsePickup">false</bool>
 
