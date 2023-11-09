@@ -48,7 +48,6 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper
 class EmergencyButtonControllerTest : SysuiTestCase() {
-    lateinit var underTest: EmergencyButtonController
     @Mock lateinit var emergencyButton: EmergencyButton
     @Mock lateinit var configurationController: ConfigurationController
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
@@ -61,9 +60,12 @@ class EmergencyButtonControllerTest : SysuiTestCase() {
     @Mock lateinit var lockPatternUtils: LockPatternUtils
     @Mock lateinit var packageManager: PackageManager
     @Mock lateinit var mSelectedUserInteractor: SelectedUserInteractor
+
     val fakeSystemClock = FakeSystemClock()
     val mainExecutor = FakeExecutor(fakeSystemClock)
     val backgroundExecutor = FakeExecutor(fakeSystemClock)
+
+    lateinit var underTest: EmergencyButtonController
 
     @Before
     fun setup() {
@@ -73,7 +75,6 @@ class EmergencyButtonControllerTest : SysuiTestCase() {
                 emergencyButton,
                 configurationController,
                 keyguardUpdateMonitor,
-                telephonyManager,
                 powerManager,
                 activityTaskManager,
                 shadeController,

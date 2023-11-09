@@ -45,6 +45,7 @@ class BouncerViewModelTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val authenticationInteractor = utils.authenticationInteractor()
+    private val actionButtonInteractor = utils.bouncerActionButtonInteractor()
     private val deviceEntryInteractor =
         utils.deviceEntryInteractor(
             authenticationInteractor = authenticationInteractor,
@@ -60,6 +61,7 @@ class BouncerViewModelTest : SysuiTestCase() {
         utils.bouncerViewModel(
             bouncerInteractor = bouncerInteractor,
             authenticationInteractor = authenticationInteractor,
+            actionButtonInteractor = actionButtonInteractor,
         )
 
     @Test

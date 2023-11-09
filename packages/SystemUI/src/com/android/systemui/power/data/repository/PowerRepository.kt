@@ -32,12 +32,12 @@ import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessModel
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.util.time.SystemClock
+import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import javax.inject.Inject
 
 /** Defines interface for classes that act as source of truth for power-related data. */
 interface PowerRepository {
@@ -67,15 +67,22 @@ interface PowerRepository {
     /** Wakes up the device. */
     fun wakeUp(why: String, @PowerManager.WakeReason wakeReason: Int)
 
-    /** Notifies the power repository that a user touch happened. */
-    fun userTouch()
+    /**
+     * Notifies the power repository that a user touch happened.
+     *
+     * @param noChangeLights If true, does not cause the keyboard backlight to turn on because of
+     *   this event. This is set when the power key is pressed. We want the device to stay on while
+     *   the button is down, but we're about to turn off the screen so we don't want the keyboard
+     *   backlight to turn on again. Otherwise the lights flash on and then off and it looks weird.
+     */
+    fun userTouch(noChangeLights: Boolean = false)
 
     /** Updates the wakefulness state, keeping previous values by default. */
     fun updateWakefulness(
-            rawState: WakefulnessState = wakefulness.value.internalWakefulnessState,
-            lastWakeReason: WakeSleepReason = wakefulness.value.lastWakeReason,
-            lastSleepReason: WakeSleepReason = wakefulness.value.lastSleepReason,
-            powerButtonLaunchGestureTriggered: Boolean =
+        rawState: WakefulnessState = wakefulness.value.internalWakefulnessState,
+        lastWakeReason: WakeSleepReason = wakefulness.value.lastWakeReason,
+        lastSleepReason: WakeSleepReason = wakefulness.value.lastSleepReason,
+        powerButtonLaunchGestureTriggered: Boolean =
             wakefulness.value.powerButtonLaunchGestureTriggered,
     )
 
@@ -121,10 +128,10 @@ constructor(
     override val wakefulness = _wakefulness.asStateFlow()
 
     override fun updateWakefulness(
-            rawState: WakefulnessState,
-            lastWakeReason: WakeSleepReason,
-            lastSleepReason: WakeSleepReason,
-            powerButtonLaunchGestureTriggered: Boolean,
+        rawState: WakefulnessState,
+        lastWakeReason: WakeSleepReason,
+        lastSleepReason: WakeSleepReason,
+        powerButtonLaunchGestureTriggered: Boolean,
     ) {
         _wakefulness.value =
             WakefulnessModel(
@@ -150,11 +157,11 @@ constructor(
         )
     }
 
-    override fun userTouch() {
+    override fun userTouch(noChangeLights: Boolean) {
         manager.userActivity(
             systemClock.uptimeMillis(),
             PowerManager.USER_ACTIVITY_EVENT_TOUCH,
-            /* flags= */ 0,
+            if (noChangeLights) PowerManager.USER_ACTIVITY_FLAG_NO_CHANGE_LIGHTS else 0,
         )
     }
 
