@@ -427,7 +427,7 @@ class AndroidPackageParsingValidationTest {
     fun parseMetaDataTag() {
         val tag = "meta-data"
         validateTagAttr(tag, "name", R.styleable.AndroidManifestMetaData_name, 1024)
-        validateTagAttr(tag, "value", R.styleable.AndroidManifestMetaData_value, 4000)
+        validateTagAttr(tag, "value", R.styleable.AndroidManifestMetaData_value, 32_768)
     }
 
     @Test

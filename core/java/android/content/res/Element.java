@@ -40,7 +40,7 @@ public class Element {
     private static final int MAX_ATTR_LEN_MIMETYPE = 512;
     public static final int MAX_ATTR_LEN_NAME = 1024;
     public static final int MAX_ATTR_LEN_PATH = 4000;
-    public static final int MAX_ATTR_LEN_DATA_VALUE = 4000;
+    public static final int MAX_ATTR_LEN_VALUE = 32_768;
 
     private static final String BAD_COMPONENT_NAME_CHARS = ";,[](){}:?%^*|/\\";
 
@@ -386,7 +386,7 @@ public class Element {
             case TAG_ATTR_PATH_SUFFIX:
                 return MAX_ATTR_LEN_PATH;
             case TAG_ATTR_VALUE:
-                return MAX_ATTR_LEN_DATA_VALUE;
+                return MAX_ATTR_LEN_VALUE;
             case TAG_ATTR_REQUIRED_SYSTEM_PROPERTY_VALUE:
                 return PROP_VALUE_MAX;
             default:
@@ -566,7 +566,7 @@ public class Element {
             case R.styleable.AndroidManifestMetaData_name:
                 return MAX_ATTR_LEN_NAME;
             case R.styleable.AndroidManifestMetaData_value:
-                return MAX_ATTR_LEN_DATA_VALUE;
+                return MAX_ATTR_LEN_VALUE;
             default:
                 return DEFAULT_MAX_STRING_ATTR_LENGTH;
         }
@@ -636,7 +636,7 @@ public class Element {
             case R.styleable.AndroidManifestProperty_name:
                 return MAX_ATTR_LEN_NAME;
             case R.styleable.AndroidManifestProperty_value:
-                return MAX_ATTR_LEN_DATA_VALUE;
+                return MAX_ATTR_LEN_VALUE;
             default:
                 return DEFAULT_MAX_STRING_ATTR_LENGTH;
         }
