@@ -665,6 +665,32 @@ public class Binder implements IBinder {
      */
     public static final native void blockUntilThreadAvailable();
 
+
+    /**
+     * TODO (b/308179628): Move this to libbinder for non-Java usages.
+     */
+    private static IBinderCallback sBinderCallback = null;
+
+    /**
+     * Set callback function for unexpected binder transaction errors.
+     *
+     * @hide
+     */
+    public static final void setTransactionCallback(IBinderCallback callback) {
+        sBinderCallback = callback;
+    }
+
+    /**
+     * Execute the callback function if it's already set.
+     *
+     * @hide
+     */
+    public static final void transactionCallback(int pid, int code, int flags, int err) {
+        if (sBinderCallback != null) {
+            sBinderCallback.onTransactionError(pid, code, flags, err);
+        }
+    }
+
     /**
      * Default constructor just initializes the object.
      *
