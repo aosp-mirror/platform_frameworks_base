@@ -127,7 +127,7 @@ jobject MediaMetricsJNI::writeMetricsToBundle(
     if (item->getTimestamp() > 0) {
         bh.put(mediametrics::BUNDLE_TIMESTAMP, (int64_t)item->getTimestamp());
     }
-    if (item->getUid() != -1) {
+    if (static_cast<int32_t>(item->getUid()) != -1) {
         bh.put(mediametrics::BUNDLE_UID, (int32_t)item->getUid());
     }
     for (const auto &prop : *item) {

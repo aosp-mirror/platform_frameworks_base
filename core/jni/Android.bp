@@ -43,7 +43,10 @@ cc_library_shared_for_libandroid_runtime {
 
         "-Wall",
         "-Werror",
+        "-Wextra",
+        "-Wthread-safety",
         "-Wno-error=deprecated-declarations",
+        "-Wno-unused-parameter",
         "-Wunused",
         "-Wunreachable-code",
 
