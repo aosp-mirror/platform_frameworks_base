@@ -10228,6 +10228,7 @@ package android.os {
     ctor public ParcelableHolder(int);
     method public int describeContents();
     method @Nullable public <T extends android.os.Parcelable> T getParcelable(@NonNull Class<T>);
+    method public int getStability();
     method public void readFromParcel(@NonNull android.os.Parcel);
     method public void setParcelable(@Nullable android.os.Parcelable);
     method public void writeToParcel(@NonNull android.os.Parcel, int);
