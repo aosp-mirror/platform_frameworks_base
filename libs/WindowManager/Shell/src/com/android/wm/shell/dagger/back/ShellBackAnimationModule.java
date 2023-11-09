@@ -16,7 +16,7 @@
 
 package com.android.wm.shell.dagger.back;
 
-import com.android.wm.shell.back.CrossActivityAnimation;
+import com.android.wm.shell.back.CrossActivityBackAnimation;
 import com.android.wm.shell.back.CrossTaskBackAnimation;
 import com.android.wm.shell.back.CustomizeActivityAnimation;
 import com.android.wm.shell.back.ShellBackAnimation;
@@ -47,7 +47,7 @@ public interface ShellBackAnimationModule {
     @Binds
     @ShellBackAnimation.CrossActivity
     ShellBackAnimation bindCrossActivityShellBackAnimation(
-            CrossActivityAnimation crossActivityAnimation);
+            CrossActivityBackAnimation crossActivityBackAnimation);
 
     /** Default cross task back animation */
     @Binds
