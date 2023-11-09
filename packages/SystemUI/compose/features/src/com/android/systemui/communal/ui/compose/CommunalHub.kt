@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -48,6 +49,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.media.controls.ui.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.res.R
 
 @Composable
@@ -73,6 +76,7 @@ fun CommunalHub(
                 CommunalContent(
                     modifier = Modifier.fillMaxHeight().width(Dimensions.CardWidth),
                     model = communalContent[index],
+                    viewModel = viewModel,
                     deleteOnClick = viewModel::onDeleteWidget,
                     size =
                         SizeF(
@@ -94,6 +98,7 @@ fun CommunalHub(
 @Composable
 private fun CommunalContent(
     model: CommunalContentModel,
+    viewModel: CommunalViewModel,
     size: SizeF,
     deleteOnClick: (id: Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -102,6 +107,7 @@ private fun CommunalContent(
         is CommunalContentModel.Widget -> WidgetContent(model, size, deleteOnClick, modifier)
         is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
+        is CommunalContentModel.Umo -> Umo(viewModel, modifier)
     }
 }
 
@@ -153,6 +159,31 @@ private fun SmartspaceContent(
 @Composable
 private fun TutorialContent(modifier: Modifier = Modifier) {
     Card(modifier = modifier, content = {})
+}
+
+@Composable
+private fun Umo(viewModel: CommunalViewModel, modifier: Modifier = Modifier) {
+    AndroidView(
+        modifier =
+            modifier
+                .width(Dimensions.CardWidth)
+                .height(Dimensions.CardHeightThird)
+                .padding(Dimensions.Spacing),
+        factory = {
+            viewModel.mediaHost.expansion = MediaHostState.EXPANDED
+            viewModel.mediaHost.showsOnlyActiveMedia = false
+            viewModel.mediaHost.falsingProtectionNeeded = false
+            viewModel.mediaHost.init(MediaHierarchyManager.LOCATION_COMMUNAL_HUB)
+            viewModel.mediaHost.hostView.layoutParams =
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.MATCH_PARENT
+                )
+            viewModel.mediaHost.hostView
+        },
+        // For reusing composition in lazy lists.
+        onReset = {},
+    )
 }
 
 private fun CommunalContentSize.dp(): Dp {

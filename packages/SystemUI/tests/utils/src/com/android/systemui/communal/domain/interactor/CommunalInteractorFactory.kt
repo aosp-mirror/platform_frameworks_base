@@ -18,6 +18,7 @@
 package com.android.systemui.communal.domain.interactor
 
 import android.appwidget.AppWidgetHost
+import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
@@ -35,6 +36,7 @@ object CommunalInteractorFactory {
         testScope: TestScope = TestScope(),
         communalRepository: FakeCommunalRepository = FakeCommunalRepository(),
         widgetRepository: FakeCommunalWidgetRepository = FakeCommunalWidgetRepository(),
+        mediaRepository: FakeCommunalMediaRepository = FakeCommunalMediaRepository(),
         smartspaceRepository: FakeSmartspaceRepository = FakeSmartspaceRepository(),
         tutorialRepository: FakeCommunalTutorialRepository = FakeCommunalTutorialRepository(),
         appWidgetHost: AppWidgetHost = mock(),
@@ -48,6 +50,7 @@ object CommunalInteractorFactory {
         return WithDependencies(
             communalRepository,
             widgetRepository,
+            mediaRepository,
             smartspaceRepository,
             tutorialRepository,
             withDeps.keyguardRepository,
@@ -57,6 +60,7 @@ object CommunalInteractorFactory {
             CommunalInteractor(
                 communalRepository,
                 widgetRepository,
+                mediaRepository,
                 smartspaceRepository,
                 withDeps.communalTutorialInteractor,
                 appWidgetHost,
@@ -67,6 +71,7 @@ object CommunalInteractorFactory {
     data class WithDependencies(
         val communalRepository: FakeCommunalRepository,
         val widgetRepository: FakeCommunalWidgetRepository,
+        val mediaRepository: FakeCommunalMediaRepository,
         val smartspaceRepository: FakeSmartspaceRepository,
         val tutorialRepository: FakeCommunalTutorialRepository,
         val keyguardRepository: FakeKeyguardRepository,

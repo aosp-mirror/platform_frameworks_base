@@ -21,7 +21,10 @@ import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.media.dagger.MediaModule
 import javax.inject.Inject
+import javax.inject.Named
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -30,6 +33,7 @@ class CommunalViewModel
 @Inject
 constructor(
     private val communalInteractor: CommunalInteractor,
+    @Named(MediaModule.COMMUNAL_HUB) val mediaHost: MediaHost,
 ) {
     val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene
     fun onSceneChanged(scene: CommunalSceneKey) {

@@ -24,6 +24,7 @@ import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
@@ -58,6 +59,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
     private lateinit var tutorialRepository: FakeCommunalTutorialRepository
     private lateinit var communalRepository: FakeCommunalRepository
+    private lateinit var mediaRepository: FakeCommunalMediaRepository
     private lateinit var widgetRepository: FakeCommunalWidgetRepository
     private lateinit var smartspaceRepository: FakeSmartspaceRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
@@ -74,6 +76,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
         tutorialRepository = withDeps.tutorialRepository
         communalRepository = withDeps.communalRepository
+        mediaRepository = withDeps.mediaRepository
         widgetRepository = withDeps.widgetRepository
         smartspaceRepository = withDeps.smartspaceRepository
         keyguardRepository = withDeps.keyguardRepository
@@ -234,6 +237,66 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(communalContent?.get(0)?.key).isEqualTo("smartspace_target")
             assertThat(communalContent?.get(1)?.key).isEqualTo("widget_0")
             assertThat(communalContent?.get(2)?.key).isEqualTo("widget_1")
+        }
+
+    @Test
+    fun umo_mediaPlaying_showsUmo() =
+        testScope.runTest {
+            // Tutorial completed.
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+
+            // Media is playing.
+            mediaRepository.mediaPlaying.value = true
+
+            val communalContent by collectLastValue(underTest.communalContent)
+
+            assertThat(communalContent?.size).isEqualTo(1)
+            assertThat(communalContent?.get(0)).isInstanceOf(CommunalContentModel.Umo::class.java)
+            assertThat(communalContent?.get(0)?.key).isEqualTo(CommunalContentModel.UMO_KEY)
+        }
+
+    @Test
+    fun contentOrdering() =
+        testScope.runTest {
+            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
+
+            // Widgets available.
+            val widgets =
+                listOf(
+                    CommunalWidgetContentModel(
+                        appWidgetId = 0,
+                        priority = 30,
+                        providerInfo = mock(),
+                    ),
+                    CommunalWidgetContentModel(
+                        appWidgetId = 1,
+                        priority = 20,
+                        providerInfo = mock(),
+                    ),
+                )
+            widgetRepository.setCommunalWidgets(widgets)
+
+            // Smartspace available.
+            val target = mock(SmartspaceTarget::class.java)
+            whenever(target.smartspaceTargetId).thenReturn("target")
+            whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
+            whenever(target.remoteViews).thenReturn(mock(RemoteViews::class.java))
+            smartspaceRepository.setLockscreenSmartspaceTargets(listOf(target))
+
+            // Media playing.
+            mediaRepository.mediaPlaying.value = true
+
+            val communalContent by collectLastValue(underTest.communalContent)
+
+            // Order is smart space, then UMO, then widget content.
+            assertThat(communalContent?.size).isEqualTo(4)
+            assertThat(communalContent?.get(0))
+                .isInstanceOf(CommunalContentModel.Smartspace::class.java)
+            assertThat(communalContent?.get(1)).isInstanceOf(CommunalContentModel.Umo::class.java)
+            assertThat(communalContent?.get(2))
+                .isInstanceOf(CommunalContentModel.Widget::class.java)
+            assertThat(communalContent?.get(3))
+                .isInstanceOf(CommunalContentModel.Widget::class.java)
         }
 
     @Test
