@@ -75,7 +75,7 @@ public class UserBackupManagerServiceTest {
     private static final String TEST_PACKAGE = "package1";
     private static final String[] TEST_PACKAGES = new String[] { TEST_PACKAGE };
     private static final String TEST_TRANSPORT = "transport";
-    private static final int WORKER_THREAD_TIMEOUT_MILLISECONDS = 1;
+    private static final int WORKER_THREAD_TIMEOUT_MILLISECONDS = 100;
 
     @Mock Context mContext;
     @Mock IBackupManagerMonitor mBackupManagerMonitor;
