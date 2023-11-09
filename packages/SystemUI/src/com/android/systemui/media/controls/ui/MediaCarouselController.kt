@@ -271,6 +271,10 @@ constructor(
     private val isReorderingAllowed: Boolean
         get() = visualStabilityProvider.isReorderingAllowed
 
+    /** Size provided by the scene framework container */
+    private var widthInSceneContainerPx = 0
+    private var heightInSceneContainerPx = 0
+
     init {
         dumpManager.registerDumpable(TAG, this)
         mediaFrame = inflateMediaCarousel()
@@ -581,6 +585,15 @@ constructor(
         }
     }
 
+    fun setSceneContainerSize(width: Int, height: Int) {
+        if (width == widthInSceneContainerPx && height == heightInSceneContainerPx) {
+            return
+        }
+        widthInSceneContainerPx = width
+        heightInSceneContainerPx = height
+        updatePlayers(recreateMedia = true)
+    }
+
     private fun reorderAllPlayers(
         previousVisiblePlayerKey: MediaPlayerData.MediaSortKey?,
         key: String? = null
@@ -638,6 +651,11 @@ constructor(
                     .elementAtOrNull(mediaCarouselScrollHandler.visibleMediaIndex)
             if (existingPlayer == null) {
                 val newPlayer = mediaControlPanelFactory.get()
+                if (mediaFlags.isSceneContainerEnabled()) {
+                    newPlayer.mediaViewController.widthInSceneContainerPx = widthInSceneContainerPx
+                    newPlayer.mediaViewController.heightInSceneContainerPx =
+                        heightInSceneContainerPx
+                }
                 newPlayer.attachPlayer(
                     MediaViewHolder.create(LayoutInflater.from(context), mediaContent)
                 )

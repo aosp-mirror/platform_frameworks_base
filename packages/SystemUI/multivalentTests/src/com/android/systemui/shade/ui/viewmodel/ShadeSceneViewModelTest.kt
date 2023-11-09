@@ -23,6 +23,8 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
@@ -35,6 +37,7 @@ import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsVi
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -42,6 +45,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -83,8 +88,12 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
 
     private lateinit var underTest: ShadeSceneViewModel
 
+    @Mock private lateinit var mediaDataManager: MediaDataManager
+    @Mock private lateinit var mediaHost: MediaHost
+
     @Before
     fun setUp() {
+        MockitoAnnotations.initMocks(this)
         shadeHeaderViewModel =
             ShadeHeaderViewModel(
                 applicationScope = testScope.backgroundScope,
@@ -102,6 +111,8 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = utils.notificationsPlaceholderViewModel(),
+                mediaDataManager = mediaDataManager,
+                mediaHost = mediaHost,
             )
     }
 
@@ -173,5 +184,21 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             underTest.onContentClicked()
 
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
+        }
+
+    @Test
+    fun hasActiveMedia_mediaVisible() =
+        testScope.runTest {
+            whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(true)
+
+            assertThat(underTest.isMediaVisible()).isTrue()
+        }
+
+    @Test
+    fun doesNotHaveActiveMedia_mediaNotVisible() =
+        testScope.runTest {
+            whenever(mediaDataManager.hasActiveMediaOrRecommendation()).thenReturn(false)
+
+            assertThat(underTest.isMediaVisible()).isFalse()
         }
 }

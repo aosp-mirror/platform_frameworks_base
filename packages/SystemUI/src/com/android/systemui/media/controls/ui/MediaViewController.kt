@@ -28,6 +28,7 @@ import com.android.systemui.media.controls.ui.MediaCarouselController.Companion.
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.util.animation.MeasurementInput
 import com.android.systemui.util.animation.MeasurementOutput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionLayoutController
@@ -206,6 +207,10 @@ constructor(
     /** Whether the guts are visible for the associated player. */
     var isGutsVisible = false
         private set
+
+    /** Size provided by the scene framework container */
+    var widthInSceneContainerPx = 0
+    var heightInSceneContainerPx = 0
 
     init {
         mediaHostStatesManager.addController(this)
@@ -420,6 +425,10 @@ constructor(
         state: MediaHostState?,
         isGutsAnimation: Boolean = false
     ): TransitionViewState? {
+        if (mediaFlags.isSceneContainerEnabled()) {
+            return obtainSceneContainerViewState()
+        }
+
         if (state == null || state.measurementInput == null) {
             return null
         }
@@ -670,6 +679,24 @@ constructor(
         refreshState()
     }
 
+    /** Get a view state based on the width and height set by the scene */
+    private fun obtainSceneContainerViewState(): TransitionViewState? {
+        logger.logMediaSize("scene container", widthInSceneContainerPx, heightInSceneContainerPx)
+
+        // Similar to obtainViewState: Let's create a new measurement
+        val result =
+            transitionLayout?.calculateViewState(
+                MeasurementInput(widthInSceneContainerPx, heightInSceneContainerPx),
+                expandedLayout,
+                TransitionViewState()
+            )
+        result?.let {
+            // And then ensure the guts visibility is set correctly
+            setGutsViewState(it)
+        }
+        return result
+    }
+
     /**
      * Retrieves the [TransitionViewState] and [MediaHostState] of a [@MediaLocation]. In the event
      * of [location] not being visible, [locationWhenHidden] will be used instead.
@@ -681,6 +708,10 @@ constructor(
      */
     private fun obtainViewStateForLocation(@MediaLocation location: Int): TransitionViewState? {
         val mediaHostState = mediaHostStatesManager.mediaHostStates[location] ?: return null
+        if (mediaFlags.isSceneContainerEnabled()) {
+            return obtainSceneContainerViewState()
+        }
+
         val viewState = obtainViewState(mediaHostState)
         if (viewState != null) {
             // update the size of the viewstate for the location with the override
@@ -708,6 +739,21 @@ constructor(
     /** Clear all existing measurements and refresh the state to match the view. */
     fun refreshState() =
         traceSection("MediaViewController#refreshState") {
+            if (mediaFlags.isSceneContainerEnabled()) {
+                // We don't need to recreate measurements for scene container, since it's a known
+                // size. Just get the view state and update the layout controller
+                obtainSceneContainerViewState()?.let {
+                    // Get scene container state, then setCurrentState
+                    layoutController.setState(
+                        state = it,
+                        applyImmediately = true,
+                        animate = false,
+                        isGuts = false,
+                    )
+                }
+                return
+            }
+
             // Let's clear all of our measurements and recreate them!
             viewStates.clear()
             if (firstRefresh) {

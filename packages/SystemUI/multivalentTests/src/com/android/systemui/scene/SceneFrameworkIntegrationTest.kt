@@ -37,6 +37,8 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.model.SysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
@@ -188,6 +190,9 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private val qsFlexiglassAdapter = FakeQSSceneAdapter(inflateDelegate = { _, _ -> mock<View>() })
 
+    @Mock private lateinit var mediaDataManager: MediaDataManager
+    @Mock private lateinit var mediaHost: MediaHost
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -240,6 +245,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = utils.notificationsPlaceholderViewModel(),
+                mediaDataManager = mediaDataManager,
+                mediaHost = mediaHost,
             )
 
         utils.deviceEntryRepository.setUnlocked(false)
