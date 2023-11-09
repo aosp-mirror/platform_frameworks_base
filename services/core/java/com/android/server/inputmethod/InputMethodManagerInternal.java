@@ -171,17 +171,20 @@ public abstract class InputMethodManagerInternal {
      *
      * @param accessibilityConnectionId the connection id of the accessibility service
      * @param session                   the session passed back from the accessibility service
+     * @param userId                    the user ID to be queried
      */
     public abstract void onSessionForAccessibilityCreated(int accessibilityConnectionId,
-            IAccessibilityInputMethodSession session);
+            IAccessibilityInputMethodSession session, @UserIdInt int userId);
 
     /**
      * Unbind the accessibility service with the specified accessibilityConnectionId from current
      * client.
      *
      * @param accessibilityConnectionId the connection id of the accessibility service
+     * @param userId the user ID to be queried
      */
-    public abstract void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId);
+    public abstract void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId,
+            @UserIdInt int userId);
 
     /**
      * Switch the keyboard layout in response to a keyboard shortcut.
@@ -266,11 +269,12 @@ public abstract class InputMethodManagerInternal {
 
                 @Override
                 public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
-                        IAccessibilityInputMethodSession session) {
+                        IAccessibilityInputMethodSession session, @UserIdInt int userId) {
                 }
 
                 @Override
-                public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId) {
+                public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId,
+                        @UserIdInt int userId) {
                 }
 
                 @Override
