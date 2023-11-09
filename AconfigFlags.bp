@@ -415,6 +415,7 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
     min_sdk_version: "30",
     apex_available: [
+        "//apex_available:platform",
         "com.android.permission",
     ],
 
