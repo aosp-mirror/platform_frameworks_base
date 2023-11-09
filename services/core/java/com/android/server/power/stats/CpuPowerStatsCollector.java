@@ -592,6 +592,10 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     public void dumpCpuPowerBracketsLocked(PrintWriter pw) {
         ensureInitialized();
 
+        if (mLayout == null) {
+            return;
+        }
+
         pw.println("CPU power brackets; cluster/freq in MHz(avg current in mA):");
         for (int bracket = 0; bracket < mLayout.getCpuPowerBracketCount(); bracket++) {
             pw.print("    ");
