@@ -17,6 +17,8 @@
 package com.android.systemui.qs;
 
 
+import static com.android.systemui.Flags.FLAG_QS_NEW_PIPELINE;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -39,6 +41,7 @@ import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.util.SparseArray;
 import android.view.View;
@@ -48,7 +51,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.CollectionUtils;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.nano.SystemUIProtoDump;
@@ -67,6 +69,7 @@ import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.di.NewQSTileFactory;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
@@ -78,9 +81,8 @@ import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
-import dagger.Lazy;
-
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -94,6 +96,8 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Provider;
 
+import dagger.Lazy;
+
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
 public class QSTileHostTest extends SysuiTestCase {
@@ -103,6 +107,9 @@ public class QSTileHostTest extends SysuiTestCase {
             ComponentName.unflattenFromString("TEST_PKG/.TEST_CLS");
     private static final String CUSTOM_TILE_SPEC = CustomTile.toSpec(CUSTOM_TILE);
     private static final String SETTING = QSHost.TILES_SETTING;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Mock
     private PluginManager mPluginManager;
@@ -146,8 +153,7 @@ public class QSTileHostTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mFeatureFlags = new FakeFeatureFlags();
 
-        mFeatureFlags.set(Flags.QS_PIPELINE_NEW_HOST, false);
-        mFeatureFlags.set(Flags.QS_PIPELINE_AUTO_ADD, false);
+        mSetFlagsRule.disableFlags(FLAG_QS_NEW_PIPELINE);
         // TODO(b/299909337): Add test checking the new factory is used when the flag is on
         mFeatureFlags.set(Flags.QS_PIPELINE_NEW_TILES, false);
         mQSPipelineFlagsRepository = new QSPipelineFlagsRepository(mFeatureFlags);
@@ -688,17 +694,6 @@ public class QSTileHostTest extends SysuiTestCase {
         assertEquals("spec1", proto.tiles[0].getSpec());
         assertEquals(CUSTOM_TILE.getPackageName(), proto.tiles[1].getComponentName().packageName);
         assertEquals(CUSTOM_TILE.getClassName(), proto.tiles[1].getComponentName().className);
-    }
-
-    @Test
-    public void testUserChange_flagOn_autoTileManagerNotified() {
-        mFeatureFlags.set(Flags.QS_PIPELINE_NEW_HOST, true);
-        int currentUser = mUserTracker.getUserId();
-        clearInvocations(mAutoTiles);
-        when(mUserTracker.getUserId()).thenReturn(currentUser + 1);
-
-        mQSTileHost.onTuningChanged(SETTING, "a,b");
-        verify(mAutoTiles).changeUser(UserHandle.of(currentUser + 1));
     }
 
     private SharedPreferences getSharedPreferencesForUser(int user) {

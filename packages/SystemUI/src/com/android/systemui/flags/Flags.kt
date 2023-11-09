@@ -358,13 +358,6 @@ object Flags {
             "qs_user_detail_shortcut"
         )
 
-    @JvmField
-    val QS_PIPELINE_NEW_HOST = unreleasedFlag("qs_pipeline_new_host", teamfood = true)
-
-    // TODO(b/278068252): Tracking Bug
-    @JvmField
-    val QS_PIPELINE_AUTO_ADD = unreleasedFlag("qs_pipeline_auto_add", teamfood = true)
-
     // TODO(b/296357483): Tracking Bug
     @JvmField
     val QS_PIPELINE_NEW_TILES = unreleasedFlag("qs_pipeline_new_tiles")

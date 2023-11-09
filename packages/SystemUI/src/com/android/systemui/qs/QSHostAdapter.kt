@@ -35,10 +35,10 @@ import kotlinx.coroutines.launch
 
 /**
  * Adapter to determine what real class to use for classes that depend on [QSHost].
- * * When [QSPipelineFlagsRepository.pipelineHostEnabled] is false, all calls will be routed to
+ * * When [QSPipelineFlagsRepository.pipelineEnabled] is false, all calls will be routed to
  *   [QSTileHost].
- * * When [QSPipelineFlagsRepository.pipelineHostEnabled] is true, calls regarding the current set
- *   of tiles will be routed to [CurrentTilesInteractor]. Other calls (like [createTileView]) will
+ * * When [QSPipelineFlagsRepository.pipelineEnabled] is true, calls regarding the current set of
+ *   tiles will be routed to [CurrentTilesInteractor]. Other calls (like [createTileView]) will
  *   still be routed to [QSTileHost].
  *
  * This routing also includes dumps.
@@ -60,7 +60,7 @@ constructor(
         private const val TAG = "QSTileHost"
     }
 
-    private val useNewHost = flags.pipelineHostEnabled
+    private val useNewHost = flags.pipelineEnabled
 
     @GuardedBy("callbacksMap") private val callbacksMap = mutableMapOf<QSHost.Callback, Job>()
 
