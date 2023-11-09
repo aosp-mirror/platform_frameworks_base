@@ -1,4 +1,40 @@
 // Baseline format: 1.0
+BannedThrow: android.database.sqlite.SQLiteRawStatement#bindBlob(int, byte[]):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#bindBlob(int, byte[], int, int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#bindDouble(int, double):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#bindInt(int, int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#bindLong(int, long):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#bindNull(int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#bindText(int, String):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#getColumnBlob(int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#getColumnDouble(int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#getColumnInt(int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#getColumnLength(int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#getColumnLong(int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#getColumnName(int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#getColumnText(int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#getColumnType(int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#readColumnBlob(int, byte[], int, int, int):
+    Methods must not throw unchecked exceptions
+BannedThrow: android.database.sqlite.SQLiteRawStatement#step():
+    Methods must not throw unchecked exceptions
+
+
 BroadcastBehavior: android.app.AlarmManager#ACTION_NEXT_ALARM_CLOCK_CHANGED:
     Field 'ACTION_NEXT_ALARM_CLOCK_CHANGED' is missing @BroadcastBehavior
 BroadcastBehavior: android.app.AlarmManager#ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED:
