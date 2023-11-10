@@ -23,7 +23,9 @@ import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TaskFragmentOperation.OP_TYPE_CLEAR_ADJACENT_TASK_FRAGMENTS;
 import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_DELETE_TASK_FRAGMENT;
+import static android.window.TaskFragmentOperation.OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_BOTTOM_OF_TASK;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_FRONT;
 import static android.window.TaskFragmentOperation.OP_TYPE_REORDER_TO_TOP_OF_TASK;
@@ -1468,6 +1470,16 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 }
                 break;
             }
+            case OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE: {
+                final Task task = taskFragment.getTask();
+                task.moveOrCreateDecorSurfaceFor(taskFragment);
+                break;
+            }
+            case OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE: {
+                final Task task = taskFragment.getTask();
+                task.removeDecorSurface();
+                break;
+            }
         }
         return effects;
     }
@@ -1501,6 +1513,19 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             final Throwable exception = new SecurityException(
                     "Only a system organizer can perform OP_TYPE_REORDER_TO_BOTTOM_OF_TASK or "
                             + "OP_TYPE_REORDER_TO_TOP_OF_TASK."
+            );
+            sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
+                    opType, exception);
+            return false;
+        }
+
+        // TODO (b/293654166) remove the decor surface checks once we clear security reviews
+        if ((opType == OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE
+                || opType == OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE)
+                && !mTaskFragmentOrganizerController.isSystemOrganizer(organizer.asBinder())) {
+            final Throwable exception = new SecurityException(
+                    "Only a system organizer can perform OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE"
+                            + " or OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE."
             );
             sendTaskFragmentOperationFailure(organizer, errorCallbackToken, taskFragment,
                     opType, exception);

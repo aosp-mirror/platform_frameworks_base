@@ -443,7 +443,8 @@ public class OverlayPresentationTest {
         assertThat(taskContainer.getTaskFragmentContainers()).containsExactly(overlayContainer);
 
         taskContainer.updateTaskFragmentParentInfo(new TaskFragmentParentInfo(Configuration.EMPTY,
-                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */));
+                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                null /* decorSurface */));
 
         mSplitController.updateOverlayContainer(mTransaction, overlayContainer);
 

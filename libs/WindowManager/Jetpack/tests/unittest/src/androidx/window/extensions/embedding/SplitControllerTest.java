@@ -1139,7 +1139,8 @@ public class SplitControllerTest {
     public void testOnTransactionReady_taskFragmentParentInfoChanged() {
         final TaskFragmentTransaction transaction = new TaskFragmentTransaction();
         final TaskFragmentParentInfo parentInfo = new TaskFragmentParentInfo(Configuration.EMPTY,
-                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */);
+                DEFAULT_DISPLAY, true /* visible */, false /* hasDirectActivity */,
+                null /* decorSurface */);
         transaction.addChange(new TaskFragmentTransaction.Change(
                 TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED)
                 .setTaskId(TASK_ID)
