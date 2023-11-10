@@ -31,7 +31,9 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -143,6 +145,15 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         secureWindow.mAttrs.flags |= FLAG_SECURE;
         assertEquals(SNAPSHOT_MODE_APP_THEME,
                 mWm.mTaskSnapshotController.getSnapshotMode(secureWindow.getTask()));
+
+        // Verifies that if the snapshot can be cached, then getSnapshotMode should be respected.
+        // Otherwise a real snapshot can be taken even if the activity disables recents screenshot.
+        spyOn(mWm.mTaskSnapshotController);
+        final int disabledInRecentsTaskId = disabledWindow.getTask().mTaskId;
+        mAtm.takeTaskSnapshot(disabledInRecentsTaskId, true /* updateCache */);
+        verify(mWm.mTaskSnapshotController, never()).prepareTaskSnapshot(any(), any());
+        mAtm.takeTaskSnapshot(disabledInRecentsTaskId, false /* updateCache */);
+        verify(mWm.mTaskSnapshotController).prepareTaskSnapshot(any(), any());
     }
 
     @Test
