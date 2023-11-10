@@ -11830,6 +11830,12 @@ public final class Settings {
         public static final String MEDIA_CONTROLS_LOCK_SCREEN = "media_controls_lock_screen";
 
         /**
+         * Whether to enable camera extensions software fallback.
+         * @hide
+         */
+        public static final String CAMERA_EXTENSIONS_FALLBACK = "camera_extensions_fallback";
+
+        /**
          * Controls whether contextual suggestions can be shown in the media controls.
          * @hide
          */
