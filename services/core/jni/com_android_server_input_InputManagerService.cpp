@@ -1293,6 +1293,11 @@ void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) 
 }
 
 void NativeInputManager::setShowTouches(bool enabled) {
+    if (ENABLE_POINTER_CHOREOGRAPHER) {
+        mInputManager->getChoreographer().setShowTouchesEnabled(enabled);
+        return;
+    }
+
     { // acquire lock
         std::scoped_lock _l(mLock);
 
@@ -1744,6 +1749,11 @@ FloatPoint NativeInputManager::getMouseCursorPosition() {
 }
 
 void NativeInputManager::setStylusPointerIconEnabled(bool enabled) {
+    if (ENABLE_POINTER_CHOREOGRAPHER) {
+        mInputManager->getChoreographer().setStylusPointerIconEnabled(enabled);
+        return;
+    }
+
     { // acquire lock
         std::scoped_lock _l(mLock);
 
