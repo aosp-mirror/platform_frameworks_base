@@ -336,7 +336,6 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.policy.WindowManagerPolicy.ScreenOffListener;
 import com.android.server.power.ShutdownThread;
 import com.android.server.utils.PriorityDump;
-import com.android.window.flags.Flags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -1194,7 +1193,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 .getBoolean(R.bool.config_skipActivityRelaunchWhenDocking);
         final boolean isScreenSizeDecoupledFromStatusBarAndCutout = context.getResources()
                 .getBoolean(R.bool.config_decoupleStatusBarAndDisplayCutoutFromScreenSize)
-                && Flags.closeToSquareConfigIncludesStatusBar();
+                && mFlags.mAllowsScreenSizeDecoupledFromStatusBarAndCutout;
         if (!isScreenSizeDecoupledFromStatusBarAndCutout) {
             mDecorTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.navigationBars();
             mConfigTypes = WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars();
