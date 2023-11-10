@@ -81,6 +81,8 @@ class com.android.internal.util.LineBreakBufferedWriter stubclass
 class com.android.internal.util.Preconditions stubclass
 class com.android.internal.util.StringPool stubclass
 
+class com.android.internal.os.SomeArgs stubclass
+
 # Parcel
 class android.os.Parcel stubclass
     method writeException (Ljava/lang/Exception;)V @writeException$ravenwood
@@ -92,14 +94,16 @@ class android.os.ParcelFormatException stubclass
 class android.os.BadParcelableException stubclass
 class android.os.BadTypeParcelableException stubclass
 
-# Binder: just enough to construct, no further functionality
-class android.os.Binder stub
-    method <init> ()V stub
-    method <init> (Ljava/lang/String;)V stub
-    method isDirectlyHandlingTransaction ()Z stub
-    method isDirectlyHandlingTransactionNative ()Z @isDirectlyHandlingTransactionNative$ravenwood
-    method getNativeBBinderHolder ()J @getNativeBBinderHolder$ravenwood
+# Binder
+class android.os.DeadObjectException stubclass
+class android.os.DeadSystemException stubclass
+class android.os.RemoteException stubclass
+class android.os.TransactionTooLargeException stubclass
 
 # Containers
 class android.os.BaseBundle stubclass
 class android.os.Bundle stubclass
+
+# Misc
+class android.os.PatternMatcher stubclass
+class android.os.ParcelUuid stubclass

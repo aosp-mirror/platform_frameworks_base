@@ -387,13 +387,17 @@ class AnnotationBasedFilter(
                     }
 
                     // This mn has "SubstituteWith". This means,
-                        // 1. Re move the "rename-to" method, so add it to substitutedMethods.
+                    // 1. Re move the "rename-to" method, so add it to substitutedMethods.
                     policiesFromSubstitution[MethodKey(renameTo, mn.desc)] =
                             FilterPolicy.Remove.withReason("substitute-to")
 
+                    // If the policy is "stub", use "stub".
+                    // Otherwise, it must be "keep" or "throw", but there's no point in using
+                    // "throw", so let's use "keep".
+                    val newPolicy = if (policy.needsInStub) policy else FilterPolicy.Keep
                     // 2. We also keep the from-to in the map.
                     policiesFromSubstitution[MethodKey(renameFrom, mn.desc)] =
-                            policy.withReason("substitute-from")
+                            newPolicy.withReason("substitute-from")
                     substituteToMethods[MethodKey(renameFrom, mn.desc)] = renameTo
 
                     log.v("Substitution found: %s%s -> %s", renameFrom, mn.desc, renameTo)

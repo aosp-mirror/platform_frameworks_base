@@ -1,3 +1,9 @@
 # Only classes listed here can use the Ravenwood annotations.
 
 com.android.internal.util.ArrayUtils
+
+android.os.Binder
+android.os.Binder$IdentitySupplier
+android.os.IBinder
+android.os.Process
+android.os.SystemClock
