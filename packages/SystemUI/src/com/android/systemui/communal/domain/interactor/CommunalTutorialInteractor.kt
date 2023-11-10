@@ -17,13 +17,11 @@
 package com.android.systemui.communal.domain.interactor
 
 import android.provider.Settings
+import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalTutorialRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.scene.domain.interactor.SceneInteractor
-import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,9 +44,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val communalTutorialRepository: CommunalTutorialRepository,
     keyguardInteractor: KeyguardInteractor,
-    private val communalInteractor: CommunalInteractor,
-    private val sceneContainerFlags: SceneContainerFlags,
-    private val sceneInteractor: SceneInteractor,
+    private val communalRepository: CommunalRepository,
 ) {
     /** An observable for whether the tutorial is available. */
     val isTutorialAvailable: Flow<Boolean> =
@@ -74,17 +70,11 @@ constructor(
                 if (tutorialSettingState == Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED) {
                     return@flatMapLatest flowOf(null)
                 }
-                if (sceneContainerFlags.isEnabled()) {
-                    sceneInteractor.desiredScene.map { sceneModel ->
-                        nextStateAfterTransition(
-                            tutorialSettingState,
-                            sceneModel.key == SceneKey.Communal
-                        )
-                    }
-                } else {
-                    communalInteractor.isCommunalShowing.map {
-                        nextStateAfterTransition(tutorialSettingState, it)
-                    }
+                communalRepository.isCommunalHubShowing.map { isCommunalShowing ->
+                    nextStateAfterTransition(
+                        tutorialSettingState,
+                        isCommunalShowing,
+                    )
                 }
             }
             .filterNotNull()
@@ -102,7 +92,7 @@ constructor(
 
     private var job: Job? = null
     private fun listenForTransitionToUpdateTutorialState() {
-        if (!communalInteractor.isCommunalEnabled) {
+        if (!communalRepository.isCommunalEnabled) {
             return
         }
         job =

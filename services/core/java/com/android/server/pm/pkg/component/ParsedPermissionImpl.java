@@ -41,7 +41,8 @@ import java.util.Set;
 public class ParsedPermissionImpl extends ParsedComponentImpl implements ParsedPermission,
         Parcelable {
 
-    private static ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(ForStringSet.class);
+    private static final ForStringSet sForStringSet =
+            Parcelling.Cache.getOrCreate(ForStringSet.class);
 
     @Nullable
     private String backgroundPermission;

@@ -15,7 +15,7 @@
  */
 package com.android.hoststubgen.filters
 
-import com.android.hoststubgen.UserErrorException
+import com.android.hoststubgen.ParseException
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.log
 import com.android.hoststubgen.normalizeTextLine
@@ -44,30 +44,6 @@ fun printAsTextPolicy(pw: PrintWriter, cn: ClassNode) {
 /** Return true if [access] is either public or protected. */
 private fun isVisible(access: Int): Boolean {
     return (access and (Opcodes.ACC_PUBLIC or Opcodes.ACC_PROTECTED)) != 0
-}
-
-/**
- * Exception for a parse error.
- */
-private class ParseException : Exception, UserErrorException {
-    val hasSourceInfo: Boolean
-
-    constructor(message: String) : super(message) {
-        hasSourceInfo = false
-    }
-
-    constructor(message: String, file: String, line: Int) :
-            super("$message in file $file line $line") {
-        hasSourceInfo = true
-    }
-
-    fun withSourceInfo(filename: String, lineNo: Int): ParseException {
-        if (hasSourceInfo) {
-            return this // Already has source information.
-        } else {
-            return ParseException(this.message ?: "", filename, lineNo)
-        }
-    }
 }
 
 private const val FILTER_REASON = "file-override"

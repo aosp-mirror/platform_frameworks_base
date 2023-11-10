@@ -49,7 +49,7 @@ public class PackageCacher {
     public static final AtomicInteger sCachedPackageReadCount = new AtomicInteger();
 
     @NonNull
-    private File mCacheDir;
+    private final File mCacheDir;
 
     public PackageCacher(@NonNull File cacheDir) {
         this.mCacheDir = cacheDir;

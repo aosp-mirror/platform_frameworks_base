@@ -1718,7 +1718,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             sourceHintRect = computeRotatedBounds(rotationDelta, direction, destinationBounds,
                     sourceHintRect);
         }
-        Rect baseBounds = direction == TRANSITION_DIRECTION_SNAP_AFTER_RESIZE
+        final Rect baseBounds = direction == TRANSITION_DIRECTION_SNAP_AFTER_RESIZE
                 ? mPipBoundsState.getBounds() : currentBounds;
         final boolean existingAnimatorRunning = mPipAnimationController.getCurrentAnimator() != null
                 && mPipAnimationController.getCurrentAnimator().isRunning();
@@ -1741,7 +1741,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 final boolean hasTopActivityInfo = mTaskInfo.topActivityInfo != null;
                 if (hasTopActivityInfo) {
                     animator.setAppIconContentOverlay(
-                            mContext, currentBounds, mTaskInfo.topActivityInfo,
+                            mContext, currentBounds, destinationBounds, mTaskInfo.topActivityInfo,
                             mPipBoundsState.getLauncherState().getAppIconSizePx());
                 } else {
                     ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,

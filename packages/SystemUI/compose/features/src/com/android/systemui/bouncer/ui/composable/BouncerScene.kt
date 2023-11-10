@@ -25,7 +25,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -68,7 +70,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
@@ -77,7 +78,9 @@ import androidx.compose.ui.unit.times
 import com.android.compose.PlatformButton
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
+import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
@@ -195,6 +198,7 @@ private fun Bouncer(
     val message: BouncerViewModel.MessageViewModel by viewModel.message.collectAsState()
     val dialogMessage: String? by viewModel.throttlingDialogMessage.collectAsState()
     var dialog: Dialog? by remember { mutableStateOf(null) }
+    val actionButton: BouncerActionButtonModel? by viewModel.actionButton.collectAsState()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -221,21 +225,7 @@ private fun Bouncer(
             )
         }
 
-        if (viewModel.isEmergencyButtonVisible) {
-            Button(
-                onClick = viewModel::onEmergencyServicesButtonClicked,
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                    ),
-            ) {
-                Text(
-                    text = stringResource(com.android.internal.R.string.lockscreen_emergency_call),
-                    style = MaterialTheme.typography.bodyMedium,
-                )
-            }
-        }
+        actionButton?.let { BouncerActionButton(viewModel = it) }
 
         if (dialogMessage != null) {
             if (dialog == null) {
@@ -317,6 +307,37 @@ private fun UserInputArea(
                 else -> {}
             }
         else -> Unit
+    }
+}
+
+/**
+ * Renders the action button on the bouncer, which triggers either Return to Call or Emergency Call.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun BouncerActionButton(
+    viewModel: BouncerActionButtonModel,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = viewModel.onClick,
+        modifier =
+            modifier.thenIf(viewModel.onLongClick != null) {
+                Modifier.combinedClickable(
+                    onClick = viewModel.onClick,
+                    onLongClick = viewModel.onLongClick,
+                )
+            },
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            ),
+    ) {
+        Text(
+            text = viewModel.label,
+            style = MaterialTheme.typography.bodyMedium,
+        )
     }
 }
 

@@ -16,9 +16,9 @@
 
 package com.android.settingslib.spa.widget.card
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -37,26 +37,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.tooling.preview.Preview
+import com.android.settingslib.spa.debug.UiModePreviews
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraLarge
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.ui.SettingsBody
 import com.android.settingslib.spa.widget.ui.SettingsTitle
 
-data class CardButton(
-    val text: String,
-    val isMain: Boolean = false,
-    val onClick: () -> Unit,
-)
-
 @Composable
-fun SettingsCard(
-    title: String,
-    text: String,
-    imageVector: ImageVector? = null,
-    buttons: List<CardButton> = emptyList(),
-) {
+fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
     Card(
         shape = CornerExtraLarge,
         colors = CardDefaults.cardColors(
@@ -68,16 +57,27 @@ fun SettingsCard(
                 horizontal = SettingsDimension.itemPaddingEnd,
                 vertical = SettingsDimension.itemPaddingAround,
             ),
+        content = content,
+    )
+}
+
+@Composable
+fun SettingsCard(model: CardModel) {
+    SettingsCard {
+        SettingsCardImpl(model)
+    }
+}
+
+@Composable
+internal fun SettingsCardImpl(model: CardModel) {
+    Column(
+        modifier = Modifier.padding(SettingsDimension.itemPaddingStart),
+        verticalArrangement = Arrangement.spacedBy(SettingsDimension.itemPaddingAround)
     ) {
-        Column(
-            modifier = Modifier.padding(SettingsDimension.itemPaddingStart),
-            verticalArrangement = Arrangement.spacedBy(SettingsDimension.itemPaddingAround)
-        ) {
-            CardIcon(imageVector)
-            SettingsTitle(title)
-            SettingsBody(text)
-            Buttons(buttons)
-        }
+        CardIcon(model.imageVector)
+        SettingsTitle(model.title)
+        SettingsBody(model.text)
+        Buttons(model.buttons)
     }
 }
 
@@ -136,28 +136,19 @@ private fun Button(button: CardButton) {
     }
 }
 
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_NO)
-@Composable
-private fun SettingsCardPreviewLight() {
-    SettingsCardPreview()
-}
-
-@Preview(uiMode = Configuration.UI_MODE_NIGHT_YES)
-@Composable
-private fun SettingsCardPreviewDark() {
-    SettingsCardPreview()
-}
-
+@UiModePreviews
 @Composable
 private fun SettingsCardPreview() {
     SettingsTheme {
         SettingsCard(
-            title = "Lorem ipsum",
-            text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-            imageVector = Icons.Outlined.WarningAmber,
-            buttons = listOf(
-                CardButton(text = "Action") {},
-                CardButton(text = "Action", isMain = true) {},
+            CardModel(
+                title = "Lorem ipsum",
+                text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                imageVector = Icons.Outlined.WarningAmber,
+                buttons = listOf(
+                    CardButton(text = "Action") {},
+                    CardButton(text = "Action", isMain = true) {},
+                )
             )
         )
     }

@@ -266,11 +266,11 @@ static void CreateFrroFile(JNIEnv* env, jclass /*clazz*/, jstring jsFrroFilePath
         auto jsResourceName = reinterpret_cast<jstring>(
                 env->GetObjectField(entry, gFabricatedOverlayInternalEntryOffsets.resourceName));
         const ScopedUtfChars resourceName(env, jsResourceName);
-        const auto dataType =
+        const jint dataType =
                 env->GetIntField(entry, gFabricatedOverlayInternalEntryOffsets.dataType);
 
         // In Java, the data type is int but the maximum value of data Type is less than 0xff.
-        if (dataType >= UCHAR_MAX) {
+        if (dataType >= static_cast<jint>(UCHAR_MAX)) {
             jniThrowException(env, IllegalArgumentException, "Unsupported data type");
             return;
         }

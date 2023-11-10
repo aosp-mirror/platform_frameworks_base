@@ -34,10 +34,10 @@ constructor(
     @UserIdInt
     @JvmOverloads
     fun getSelectedUserId(bypassFlag: Boolean = false): Int {
-        if (bypassFlag || flags.isEnabled(REFACTOR_GETCURRENTUSER)) {
-            return repository.getSelectedUserInfo().id
+        return if (bypassFlag || flags.isEnabled(REFACTOR_GETCURRENTUSER)) {
+            repository.getSelectedUserInfo().id
         } else {
-            return KeyguardUpdateMonitor.getCurrentUser()
+            KeyguardUpdateMonitor.getCurrentUser()
         }
     }
 }

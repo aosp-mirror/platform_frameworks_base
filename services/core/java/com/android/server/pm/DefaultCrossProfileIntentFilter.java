@@ -75,10 +75,10 @@ public final class DefaultCrossProfileIntentFilter {
     }
 
     static final class Builder {
-        private WatchedIntentFilter mFilter = new WatchedIntentFilter();
-        private int mFlags;
-        private @Direction int mDirection;
-        private boolean mLetsPersonalDataIntoProfile;
+        private final WatchedIntentFilter mFilter = new WatchedIntentFilter();
+        private final int mFlags;
+        private final @Direction int mDirection;
+        private final boolean mLetsPersonalDataIntoProfile;
 
         Builder(@Direction int direction, int flags, boolean letsPersonalDataIntoProfile) {
             mDirection = direction;

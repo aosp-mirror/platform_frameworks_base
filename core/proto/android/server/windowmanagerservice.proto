@@ -593,6 +593,7 @@ message InsetsSourceProviderProto {
     optional bool seamless_rotating = 13;
     optional int64 finish_seamless_rotate_frame_number = 14;
     optional bool controllable = 15;
+    optional WindowStateProto source_window_state = 16;
 }
 
 message ImeInsetsSourceProviderProto {

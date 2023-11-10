@@ -33,6 +33,9 @@ MUST_BUILD_MODULES=(
 # First, build all the test / etc modules. This shouldn't fail.
 run m "${MUST_BUILD_MODULES[@]}"
 
+# Run the hoststubgen unittests / etc
+run atest hoststubgentest hoststubgen-invoke-test
+
 # Next, run the golden check. This should always pass too.
 # The following scripts _should_ pass too, but they depend on the internal paths to soong generated
 # files, and they may fail when something changes in the build system.

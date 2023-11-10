@@ -599,7 +599,7 @@ static jint CameraExtensionJpegProcessor_compressJpegFromYUV420p(
             quality, cropLeft, cropTop, cropRight, cropBottom, rot90);
 
     size_t finalJpegSize = actualJpegSize + sizeof(CameraBlob);
-    if (finalJpegSize > outBufCapacity) {
+    if (finalJpegSize > static_cast<size_t>(outBufCapacity)) {
         ALOGE("%s: Final jpeg buffer %zu not large enough for the jpeg blob header with "\
                 "capacity %d", __FUNCTION__, finalJpegSize, outBufCapacity);
         return actualJpegSize;

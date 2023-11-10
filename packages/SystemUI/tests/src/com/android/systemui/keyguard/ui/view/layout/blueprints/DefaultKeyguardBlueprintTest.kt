@@ -86,7 +86,6 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultStatusViewSection,
                 defaultStatusBarViewSection,
                 defaultNSSLSection,
-                splitShadeGuidelines,
                 aodNotificationIconsSection,
                 aodBurnInSection,
                 communalTutorialIndicatorSection,

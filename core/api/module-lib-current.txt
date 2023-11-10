@@ -144,7 +144,6 @@ package android.content.pm {
   }
 
   public abstract class PackageManager {
-    method @NonNull public String getPermissionControllerPackageName();
     method @NonNull public String getSdkSandboxPackageName();
     method @RequiresPermission(android.Manifest.permission.MAKE_UID_VISIBLE) public void makeUidVisible(int, int);
     field public static final String EXTRA_VERIFICATION_ROOT_HASH = "android.content.pm.extra.VERIFICATION_ROOT_HASH";

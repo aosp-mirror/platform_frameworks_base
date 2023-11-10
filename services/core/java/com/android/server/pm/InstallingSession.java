@@ -68,7 +68,7 @@ class InstallingSession {
     final MoveInfo mMoveInfo;
     final IPackageInstallObserver2 mObserver;
     int mInstallFlags;
-    int mDevelopmentInstallFlags;
+    final int mDevelopmentInstallFlags;
     @NonNull
     final InstallSource mInstallSource;
     final String mVolumeUuid;

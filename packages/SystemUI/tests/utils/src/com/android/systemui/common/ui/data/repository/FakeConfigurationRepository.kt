@@ -20,6 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,14 +32,21 @@ class FakeConfigurationRepository @Inject constructor() : ConfigurationRepositor
     private val _onAnyConfigurationChange = MutableSharedFlow<Unit>()
     override val onAnyConfigurationChange: Flow<Unit> = _onAnyConfigurationChange.asSharedFlow()
 
+    private val _onConfigurationChange =
+        MutableSharedFlow<Unit>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
+    override val onConfigurationChange: Flow<Unit> = _onConfigurationChange.asSharedFlow()
+
     private val _scaleForResolution = MutableStateFlow(1f)
     override val scaleForResolution: Flow<Float> = _scaleForResolution.asStateFlow()
 
     private val pixelSizes = mutableMapOf<Int, MutableStateFlow<Int>>()
-    private val colors = mutableMapOf<Int, MutableStateFlow<Int>>()
 
     fun onAnyConfigurationChange() {
         _onAnyConfigurationChange.tryEmit(Unit)
+    }
+
+    fun onConfigurationChange() {
+        _onConfigurationChange.tryEmit(Unit)
     }
 
     fun setScaleForResolution(scale: Float) {

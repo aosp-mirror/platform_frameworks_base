@@ -44,11 +44,15 @@ import kotlinx.coroutines.flow.stateIn
 interface ConfigurationRepository {
     /** Called whenever ui mode, theme or configuration has changed. */
     val onAnyConfigurationChange: Flow<Unit>
+
+    /** Called whenever the configuration has changed. */
+    val onConfigurationChange: Flow<Unit>
+
     val scaleForResolution: Flow<Float>
 
     fun getResolutionScale(): Float
 
-    /** Convience to context.resources.getDimensionPixelSize() */
+    /** Convenience to context.resources.getDimensionPixelSize() */
     fun getDimensionPixelSize(id: Int): Int
 }
 
@@ -87,7 +91,7 @@ constructor(
             awaitClose { configurationController.removeCallback(callback) }
         }
 
-    private val configurationChange: Flow<Unit> =
+    override val onConfigurationChange: Flow<Unit> =
         ConflatedCallbackFlow.conflatedCallbackFlow {
             val callback =
                 object : ConfigurationController.ConfigurationListener {
@@ -100,7 +104,7 @@ constructor(
         }
 
     override val scaleForResolution: StateFlow<Float> =
-        configurationChange
+        onConfigurationChange
             .mapLatest { getResolutionScale() }
             .distinctUntilChanged()
             .stateIn(scope, SharingStarted.WhileSubscribed(), getResolutionScale())

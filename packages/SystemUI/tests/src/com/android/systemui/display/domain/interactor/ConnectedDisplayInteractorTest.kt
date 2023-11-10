@@ -63,7 +63,8 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
         ConnectedDisplayInteractorImpl(
             virtualDeviceManager,
             fakeKeyguardRepository,
-            fakeDisplayRepository
+            fakeDisplayRepository,
+            UnconfinedTestDispatcher(),
         )
     private val testScope = TestScope(UnconfinedTestDispatcher())
 

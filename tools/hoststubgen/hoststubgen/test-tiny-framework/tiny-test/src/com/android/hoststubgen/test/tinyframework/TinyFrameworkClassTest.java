@@ -199,4 +199,43 @@ public class TinyFrameworkClassTest {
     public void testPackageRedirect() throws Exception {
         assertThat(TinyFrameworkPackageRedirect.foo(1)).isEqualTo(1);
     }
+
+    @Test
+    public void testEnumSimple() throws Exception {
+        assertThat(TinyFrameworkEnumSimple.CAT.ordinal()).isEqualTo(0);
+        assertThat(TinyFrameworkEnumSimple.CAT.name()).isEqualTo("CAT");
+
+        assertThat(TinyFrameworkEnumSimple.DOG.ordinal()).isEqualTo(1);
+        assertThat(TinyFrameworkEnumSimple.DOG.name()).isEqualTo("DOG");
+
+        assertThat(TinyFrameworkEnumSimple.valueOf("DOG").ordinal()).isEqualTo(1);
+
+        assertThat(TinyFrameworkEnumSimple.values()).isEqualTo(
+                new TinyFrameworkEnumSimple[] {
+                        TinyFrameworkEnumSimple.CAT,
+                        TinyFrameworkEnumSimple.DOG,
+                }
+        );
+    }
+
+    @Test
+    public void testEnumComplex() throws Exception {
+        assertThat(TinyFrameworkEnumComplex.RED.ordinal()).isEqualTo(0);
+        assertThat(TinyFrameworkEnumComplex.RED.name()).isEqualTo("RED");
+
+        assertThat(TinyFrameworkEnumComplex.RED.getShortName()).isEqualTo("R");
+
+        assertThat(TinyFrameworkEnumComplex.GREEN.ordinal()).isEqualTo(1);
+        assertThat(TinyFrameworkEnumComplex.GREEN.name()).isEqualTo("GREEN");
+
+        assertThat(TinyFrameworkEnumComplex.valueOf("BLUE").ordinal()).isEqualTo(2);
+
+        assertThat(TinyFrameworkEnumComplex.values()).isEqualTo(
+                new TinyFrameworkEnumComplex[] {
+                        TinyFrameworkEnumComplex.RED,
+                        TinyFrameworkEnumComplex.GREEN,
+                        TinyFrameworkEnumComplex.BLUE,
+                }
+        );
+    }
 }

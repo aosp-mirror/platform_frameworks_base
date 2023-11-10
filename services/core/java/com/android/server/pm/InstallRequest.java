@@ -153,7 +153,7 @@ final class InstallRequest {
     private int[] mUpdateBroadcastInstantUserIds = EMPTY_INT_ARRAY;
 
     @NonNull
-    private ArrayList<String> mWarnings = new ArrayList<>();
+    private final ArrayList<String> mWarnings = new ArrayList<>();
 
     // New install
     InstallRequest(InstallingSession params) {

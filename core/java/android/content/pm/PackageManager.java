@@ -6279,9 +6279,9 @@ public abstract class PackageManager {
      * @hide
      */
     @NonNull
-    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi
     @TestApi
-    @UnsupportedAppUsage
+    @SuppressLint("UnflaggedApi") // Promoting from @SystemApi(MODULE_LIBRARIES)
     public String getPermissionControllerPackageName() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }

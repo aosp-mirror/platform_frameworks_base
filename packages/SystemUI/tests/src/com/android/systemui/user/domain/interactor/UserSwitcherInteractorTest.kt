@@ -38,16 +38,14 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.res.R
+import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
-import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
-import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -65,9 +63,6 @@ import junit.framework.Assert.assertNotNull
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -102,17 +97,15 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     @Mock private lateinit var resetOrExitSessionReceiver: GuestResetOrExitSessionReceiver
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
 
-    private lateinit var underTest: UserSwitcherInteractor
-
+    private val utils = SceneTestUtils(this)
+    private val testScope = utils.testScope
     private lateinit var spyContext: Context
-    private lateinit var testScope: TestScope
     private lateinit var userRepository: FakeUserRepository
     private lateinit var keyguardReply: KeyguardInteractorFactory.WithDependencies
     private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var telephonyRepository: FakeTelephonyRepository
-    private lateinit var testDispatcher: TestDispatcher
-    private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var refreshUsersScheduler: RefreshUsersScheduler
+
+    private lateinit var underTest: UserSwitcherInteractor
 
     @Before
     fun setUp() {
@@ -127,22 +120,17 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
             SUPERVISED_USER_CREATION_APP_PACKAGE,
         )
 
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
-                set(Flags.FACE_AUTH_REFACTOR, true)
-            }
+        utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+        utils.featureFlags.set(Flags.FACE_AUTH_REFACTOR, true)
+
         spyContext = spy(context)
-        keyguardReply = KeyguardInteractorFactory.create(featureFlags = featureFlags)
+        keyguardReply = KeyguardInteractorFactory.create(featureFlags = utils.featureFlags)
         keyguardRepository = keyguardReply.repository
         userRepository = FakeUserRepository()
-        telephonyRepository = FakeTelephonyRepository()
-        testDispatcher = StandardTestDispatcher()
-        testScope = TestScope(testDispatcher)
         refreshUsersScheduler =
             RefreshUsersScheduler(
                 applicationScope = testScope.backgroundScope,
-                mainDispatcher = testDispatcher,
+                mainDispatcher = utils.testDispatcher,
                 repository = userRepository,
             )
     }
@@ -372,7 +360,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun actions_deviceUnlocked_fullScreen() {
         createUserInteractor()
         testScope.runTest {
-            featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 2, includeGuest = false)
 
             userRepository.setUserInfos(userInfos)
@@ -456,7 +444,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun actions_deviceLockedAddFromLockscreenSet_fullList_fullScreen() {
         createUserInteractor()
         testScope.runTest {
-            featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
@@ -649,7 +637,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
 
             val refreshUsersCallCount = userRepository.refreshUsersCallCount
 
-            telephonyRepository.setCallState(1)
+            utils.telephonyRepository.setCallState(1)
             runCurrent()
 
             assertThat(userRepository.refreshUsersCallCount).isEqualTo(refreshUsersCallCount + 1)
@@ -801,7 +789,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun userRecordsFullScreen() {
         createUserInteractor()
         testScope.runTest {
-            featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
             val userInfos = createUserInfos(count = 3, includeGuest = false)
             userRepository.setSettings(UserSwitcherSettingsModel(isUserSwitcherEnabled = true))
             userRepository.setUserInfos(userInfos)
@@ -910,7 +898,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
     fun showUserSwitcher_fullScreenEnabled_launchesFullScreenDialog() {
         createUserInteractor()
         testScope.runTest {
-            featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
 
             val expandable = mock<Expandable>()
             underTest.showUserSwitcher(expandable)
@@ -1125,21 +1113,18 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
                 manager = manager,
                 headlessSystemUserMode = headlessSystemUserMode,
                 applicationScope = testScope.backgroundScope,
-                telephonyInteractor =
-                    TelephonyInteractor(
-                        repository = telephonyRepository,
-                    ),
+                telephonyInteractor = utils.telephonyInteractor(),
                 broadcastDispatcher = fakeBroadcastDispatcher,
                 keyguardUpdateMonitor = keyguardUpdateMonitor,
-                backgroundDispatcher = testDispatcher,
+                backgroundDispatcher = utils.testDispatcher,
                 activityManager = activityManager,
                 refreshUsersScheduler = refreshUsersScheduler,
                 guestUserInteractor =
                     GuestUserInteractor(
                         applicationContext = spyContext,
                         applicationScope = testScope.backgroundScope,
-                        mainDispatcher = testDispatcher,
-                        backgroundDispatcher = testDispatcher,
+                        mainDispatcher = utils.testDispatcher,
+                        backgroundDispatcher = utils.testDispatcher,
                         manager = manager,
                         repository = userRepository,
                         deviceProvisionedController = deviceProvisionedController,
@@ -1150,7 +1135,7 @@ class UserSwitcherInteractorTest : SysuiTestCase() {
                         resetOrExitSessionReceiver = resetOrExitSessionReceiver,
                     ),
                 uiEventLogger = uiEventLogger,
-                featureFlags = featureFlags,
+                featureFlags = utils.featureFlags,
                 userRestrictionChecker = mock(),
             )
     }

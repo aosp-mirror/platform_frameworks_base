@@ -159,14 +159,23 @@ class PackageMonitorCallbackHelper {
             }
 
             if (ArrayUtils.isEmpty(instantUserIds)) {
-                doNotifyCallbacks(
+                doNotifyCallbacksByAction(
                         action, pkg, extras, resolvedUserIds, broadcastAllowList, handler);
             } else {
-                doNotifyCallbacks(action, pkg, extras, instantUserIds, broadcastAllowList, handler);
+                doNotifyCallbacksByAction(action, pkg, extras, instantUserIds, broadcastAllowList,
+                        handler);
             }
         } catch (RemoteException e) {
             // do nothing
         }
+    }
+
+    void notifyPackageMonitorWithIntent(Intent intent,
+            int userId, int[] broadcastAllowList, Handler handler) {
+        if (!isAllowedCallbackAction(intent.getAction())) {
+            return;
+        }
+        doNotifyCallbacksByIntent(intent, userId, broadcastAllowList, handler);
     }
 
     private static boolean isAllowedCallbackAction(String action) {
@@ -177,10 +186,21 @@ class PackageMonitorCallbackHelper {
                 || TextUtils.equals(action, Intent.ACTION_PACKAGES_SUSPENDED)
                 || TextUtils.equals(action, Intent.ACTION_PACKAGES_UNSUSPENDED)
                 || TextUtils.equals(action, Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE)
-                || TextUtils.equals(action, Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
+                || TextUtils.equals(action, Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)
+                || TextUtils.equals(action, Intent.ACTION_PACKAGE_DATA_CLEARED)
+                || TextUtils.equals(action, Intent.ACTION_PACKAGE_RESTARTED);
     }
 
-    private void doNotifyCallbacks(String action, String pkg, Bundle extras, int[] userIds,
+    private void doNotifyCallbacksByIntent(Intent intent, int userId,
+            int[] broadcastAllowList, Handler handler) {
+        RemoteCallbackList<IRemoteCallback> callbacks;
+        synchronized (mLock) {
+            callbacks = mCallbacks;
+        }
+        doNotifyCallbacks(callbacks, intent, userId, broadcastAllowList, handler);
+    }
+
+    private void doNotifyCallbacksByAction(String action, String pkg, Bundle extras, int[] userIds,
             SparseArray<int[]> broadcastAllowList, Handler handler) {
         RemoteCallbackList<IRemoteCallback> callbacks;
         synchronized (mLock) {
@@ -200,27 +220,31 @@ class PackageMonitorCallbackHelper {
             intent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
 
             final int[] allowUids =
-                    broadcastAllowList != null ? broadcastAllowList.get(userId) : new int[]{};
-
-            handler.post(() -> callbacks.broadcast((callback, user) -> {
-                RegisterUser registerUser = (RegisterUser) user;
-                if ((registerUser.getUserId() != UserHandle.USER_ALL) && (registerUser.getUserId()
-                        != userId)) {
-                    return;
-                }
-                int registerUid = registerUser.getUid();
-                if (broadcastAllowList != null && registerUid != Process.SYSTEM_UID
-                        && !ArrayUtils.contains(allowUids, registerUid)) {
-                    if (DEBUG) {
-                        Slog.w("PackageMonitorCallbackHelper",
-                                "Skip invoke PackageMonitorCallback for " + action + ", uid "
-                                        + registerUid);
-                    }
-                    return;
-                }
-                invokeCallback(callback, intent);
-            }));
+                    broadcastAllowList != null ? broadcastAllowList.get(userId) : null;
+            doNotifyCallbacks(callbacks, intent, userId, allowUids, handler);
         }
+    }
+
+    private void doNotifyCallbacks(RemoteCallbackList<IRemoteCallback> callbacks,
+            Intent intent, int userId, int[] allowUids, Handler handler) {
+        handler.post(() -> callbacks.broadcast((callback, user) -> {
+            RegisterUser registerUser = (RegisterUser) user;
+            if ((registerUser.getUserId() != UserHandle.USER_ALL) && (registerUser.getUserId()
+                    != userId)) {
+                return;
+            }
+            int registerUid = registerUser.getUid();
+            if (allowUids != null && registerUid != Process.SYSTEM_UID
+                    && !ArrayUtils.contains(allowUids, registerUid)) {
+                if (DEBUG) {
+                    Slog.w("PackageMonitorCallbackHelper",
+                            "Skip invoke PackageMonitorCallback for " + intent.getAction()
+                                    + ", uid " + registerUid);
+                }
+                return;
+            }
+            invokeCallback(callback, intent);
+        }));
     }
 
     private void invokeCallback(IRemoteCallback callback, Intent intent) {

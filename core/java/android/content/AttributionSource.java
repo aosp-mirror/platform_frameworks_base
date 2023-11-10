@@ -235,12 +235,6 @@ public final class AttributionSource implements Parcelable {
     }
 
     /** @hide */
-    public AttributionSource withUid(int uid) {
-        return new AttributionSource(uid, getPid(), getPackageName(), getAttributionTag(),
-                getToken(), mAttributionSourceState.renouncedPermissions, getDeviceId(), getNext());
-    }
-
-    /** @hide */
     public AttributionSource withPid(int pid) {
         return new AttributionSource(getUid(), pid, getPackageName(), getAttributionTag(),
                 getToken(), mAttributionSourceState.renouncedPermissions, getDeviceId(), getNext());

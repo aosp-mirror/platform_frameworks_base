@@ -67,7 +67,8 @@ final class InstallArgs {
     // The list of instruction sets supported by this app. This is currently
     // only used during the rmdex() phase to clean up resources. We can get rid of this
     // if we move dex files under the common app path.
-    @Nullable String[] mInstructionSets;
+    @Nullable
+    final String[] mInstructionSets;
 
     InstallArgs(OriginInfo originInfo, MoveInfo moveInfo, IPackageInstallObserver2 observer,
             int installFlags, int developmentInstallFlags, InstallSource installSource,

@@ -262,7 +262,7 @@ constructor(
                     object : KeyguardUpdateMonitorCallback() {
                         override fun onSimStateChanged(subId: Int, slotId: Int, simState: Int) {
                             logger.logOnSimStateChanged()
-                            trySend(keyguardUpdateMonitor.isSimPinSecure)
+                            trySend(getIsAnySimSecure())
                         }
                     }
                 keyguardUpdateMonitor.registerCallback(callback)
@@ -276,6 +276,8 @@ constructor(
                 initialValue = false,
             )
             .distinctUntilChanged()
+
+    override fun getIsAnySimSecure() = keyguardUpdateMonitor.isSimPinSecure
 
     override fun getRepoForSubId(subId: Int): FullMobileConnectionRepository =
         getOrCreateRepoForSubId(subId)
