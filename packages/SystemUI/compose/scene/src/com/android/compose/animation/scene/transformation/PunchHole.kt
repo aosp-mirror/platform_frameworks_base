@@ -19,9 +19,11 @@ package com.android.compose.animation.scene.transformation
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.toRect
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
@@ -30,6 +32,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.withSaveLayer
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.toSize
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementKey
@@ -43,6 +46,11 @@ internal class PunchHole(
     private val bounds: ElementKey,
     private val shape: Shape,
 ) : ModifierTransformation {
+
+    private var lastSize: Size = Size.Unspecified
+    private var lastLayoutDirection: LayoutDirection = LayoutDirection.Ltr
+    private var lastOutline: Outline? = null
+
     override fun Modifier.transform(
         layoutImpl: SceneTransitionLayoutImpl,
         scene: Scene,
@@ -59,7 +67,6 @@ internal class PunchHole(
                 drawContent()
                 return@drawWithContent
             }
-
             drawIntoCanvas { canvas ->
                 canvas.withSaveLayer(size.toRect(), Paint()) {
                     drawContent()
@@ -78,13 +85,19 @@ internal class PunchHole(
             return
         }
 
-        // TODO(b/290184746): Cache outline if the size of bounds does not change.
+        val outline =
+            if (boundsSize == lastSize && layoutDirection == lastLayoutDirection) {
+                lastOutline!!
+            } else {
+                val newOutline = shape.createOutline(boundsSize, layoutDirection, this)
+                lastSize = boundsSize
+                lastLayoutDirection = layoutDirection
+                lastOutline = newOutline
+                newOutline
+            }
+
         drawOutline(
-            shape.createOutline(
-                boundsSize,
-                layoutDirection,
-                this,
-            ),
+            outline,
             Color.Black,
             blendMode = BlendMode.DstOut,
         )
