@@ -256,7 +256,7 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun contentOrdering() =
+    fun ordering_smartspaceBeforeUmoBeforeWidgets() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
 

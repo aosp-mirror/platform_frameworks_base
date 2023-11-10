@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -164,11 +163,7 @@ private fun TutorialContent(modifier: Modifier = Modifier) {
 @Composable
 private fun Umo(viewModel: CommunalViewModel, modifier: Modifier = Modifier) {
     AndroidView(
-        modifier =
-            modifier
-                .width(Dimensions.CardWidth)
-                .height(Dimensions.CardHeightThird)
-                .padding(Dimensions.Spacing),
+        modifier = modifier,
         factory = {
             viewModel.mediaHost.expansion = MediaHostState.EXPANDED
             viewModel.mediaHost.showsOnlyActiveMedia = false
