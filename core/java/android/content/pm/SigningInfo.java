@@ -190,9 +190,11 @@ public final class SigningInfo implements Parcelable {
         mSigningDetails.writeToParcel(dest, parcelableFlags);
     }
 
-    /* @hide */
+    /**
+     *  @hide
+     */
     @NonNull
-    SigningDetails getSigningDetails() {
+    public SigningDetails getSigningDetails() {
         return mSigningDetails;
     }
 

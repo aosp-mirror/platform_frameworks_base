@@ -60,6 +60,7 @@ import static com.android.server.pm.PackageManagerService.TAG;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatureArrays;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
 import static com.android.server.pm.PackageManagerServiceUtils.isSystemOrRootOrShell;
+import static com.android.server.pm.parsing.PackageInfoUtils.getDeprecatedSignatures;
 import static com.android.server.pm.resolution.ComponentResolver.RESOLVE_PRIORITY_SORTER;
 
 import android.Manifest;
@@ -1531,6 +1532,7 @@ public class ComputerEngine implements Computer {
             pi.applicationInfo = PackageInfoUtils.generateDelegateApplicationInfo(
                     ai, flags, state, userId);
             pi.signingInfo = ps.getSigningInfo();
+            pi.signatures = getDeprecatedSignatures(pi.signingInfo.getSigningDetails(), flags);
 
             if (DEBUG_PACKAGE_INFO) {
                 Log.v(TAG, "ps.pkg is n/a for ["
