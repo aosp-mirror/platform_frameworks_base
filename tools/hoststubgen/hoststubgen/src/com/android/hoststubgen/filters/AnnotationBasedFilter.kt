@@ -133,6 +133,25 @@ class AnnotationBasedFilter(
         }
     }
 
+    fun findAnyAnnotation(
+            className: String,
+            anyAnnotations: Set<String>,
+            visibleAnnotations: List<AnnotationNode>?,
+            invisibleAnnotations: List<AnnotationNode>?,
+    ): AnnotationNode? {
+        val ret = findAnyAnnotation(anyAnnotations, visibleAnnotations, invisibleAnnotations)
+
+        if (ret != null) {
+            if (!annotationAllowedClassesFilter.matches(className)) {
+                throw InvalidAnnotationException(
+                        "Class ${className.toHumanReadableClassName()} is not allowed to have " +
+                                "Ravenwood annotations. Contact g/ravenwood for more details.")
+            }
+        }
+
+        return ret
+    }
+
     /**
      * Find a visibility annotation.
      *
@@ -149,28 +168,22 @@ class AnnotationBasedFilter(
     ): FilterPolicyWithReason? {
         detectInvalidAnnotations(visibles, invisibles, type, name1, name2, name3)
 
-        if (!annotationAllowedClassesFilter.matches(className)) {
-            throw InvalidAnnotationException(
-                    "Class ${className.toHumanReadableClassName()} is not allowed to have " +
-                    "Ravenwood annotations. Contact g/ravenwood for more details.")
-        }
-
-        findAnyAnnotation(stubAnnotations, visibles, invisibles)?.let {
+        findAnyAnnotation(className, stubAnnotations, visibles, invisibles)?.let {
             return FilterPolicy.Stub.withReason(reasonAnnotation)
         }
-        findAnyAnnotation(stubClassAnnotations, visibles, invisibles)?.let {
+        findAnyAnnotation(className, stubClassAnnotations, visibles, invisibles)?.let {
             return FilterPolicy.StubClass.withReason(reasonClassAnnotation)
         }
-        findAnyAnnotation(keepAnnotations, visibles, invisibles)?.let {
+        findAnyAnnotation(className, keepAnnotations, visibles, invisibles)?.let {
             return FilterPolicy.Keep.withReason(reasonAnnotation)
         }
-        findAnyAnnotation(keepClassAnnotations, visibles, invisibles)?.let {
+        findAnyAnnotation(className, keepClassAnnotations, visibles, invisibles)?.let {
             return FilterPolicy.KeepClass.withReason(reasonClassAnnotation)
         }
-        findAnyAnnotation(throwAnnotations, visibles, invisibles)?.let {
+        findAnyAnnotation(className, throwAnnotations, visibles, invisibles)?.let {
             return FilterPolicy.Throw.withReason(reasonAnnotation)
         }
-        findAnyAnnotation(removeAnnotations, visibles, invisibles)?.let {
+        findAnyAnnotation(className, removeAnnotations, visibles, invisibles)?.let {
             return FilterPolicy.Remove.withReason(reasonAnnotation)
         }
 
@@ -227,7 +240,7 @@ class AnnotationBasedFilter(
         val cn = classes.getClass(className)
 
         if (methodName == CLASS_INITIALIZER_NAME && descriptor == CLASS_INITIALIZER_DESC) {
-            findAnyAnnotation(stubStaticInitializerAnnotations,
+            findAnyAnnotation(cn.name, stubStaticInitializerAnnotations,
                     cn.visibleAnnotations, cn.invisibleAnnotations)?.let {
                 return FilterPolicy.Stub.withReason(reasonAnnotation)
             }
