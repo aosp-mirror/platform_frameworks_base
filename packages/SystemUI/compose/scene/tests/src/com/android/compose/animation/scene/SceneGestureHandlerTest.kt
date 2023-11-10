@@ -109,6 +109,9 @@ class SceneGestureHandlerTest {
         val transitionState: TransitionState
             get() = layoutState.transitionState
 
+        val progress: Float
+            get() = (transitionState as Transition).progress
+
         fun advanceUntilIdle() {
             coroutineScope.testScheduler.advanceUntilIdle()
         }
@@ -144,13 +147,12 @@ class SceneGestureHandlerTest {
     fun afterSceneTransitionIsStarted_interceptDragEvents() = runGestureTest {
         draggable.onDragStarted(startedPosition = Offset.Zero)
         assertScene(currentScene = SceneA, isIdle = false)
-        val transition = transitionState as Transition
 
         draggable.onDelta(pixels = deltaInPixels10)
-        assertThat(transition.progress).isEqualTo(0.1f)
+        assertThat(progress).isEqualTo(0.1f)
 
         draggable.onDelta(pixels = deltaInPixels10)
-        assertThat(transition.progress).isEqualTo(0.2f)
+        assertThat(progress).isEqualTo(0.2f)
     }
 
     @Test
@@ -256,8 +258,7 @@ class SceneGestureHandlerTest {
             )
 
         assertScene(currentScene = SceneA, isIdle = false)
-        val transition = transitionState as Transition
-        assertThat(transition.progress).isEqualTo(0.1f)
+        assertThat(progress).isEqualTo(0.1f)
         assertThat(consumed).isEqualTo(offsetY10)
     }
 
@@ -281,13 +282,12 @@ class SceneGestureHandlerTest {
         nestedScroll.scroll(available = offsetY10)
         assertScene(currentScene = SceneA, isIdle = false)
 
-        val transition = transitionState as Transition
-        assertThat(transition.progress).isEqualTo(0.1f)
+        assertThat(progress).isEqualTo(0.1f)
 
         // start intercept preScroll
         val consumed =
             nestedScroll.onPreScroll(available = offsetY10, source = NestedScrollSource.Drag)
-        assertThat(transition.progress).isEqualTo(0.2f)
+        assertThat(progress).isEqualTo(0.2f)
 
         // do nothing on postScroll
         nestedScroll.onPostScroll(
@@ -295,10 +295,10 @@ class SceneGestureHandlerTest {
             available = Offset.Zero,
             source = NestedScrollSource.Drag
         )
-        assertThat(transition.progress).isEqualTo(0.2f)
+        assertThat(progress).isEqualTo(0.2f)
 
         nestedScroll.scroll(available = offsetY10)
-        assertThat(transition.progress).isEqualTo(0.3f)
+        assertThat(progress).isEqualTo(0.3f)
         assertScene(currentScene = SceneA, isIdle = false)
     }
 
@@ -337,7 +337,7 @@ class SceneGestureHandlerTest {
 
         preScrollAfterSceneTransition(firstScroll = first, secondScroll = second)
 
-        assertThat((transitionState as Transition).progress).isWithin(tolerance).of(first + second)
+        assertThat(progress).isWithin(tolerance).of(first + second)
     }
 
     @Test
@@ -347,7 +347,7 @@ class SceneGestureHandlerTest {
 
         preScrollAfterSceneTransition(firstScroll = first, secondScroll = second)
 
-        assertThat((transitionState as Transition).progress).isWithin(tolerance).of(first + second)
+        assertThat(progress).isWithin(tolerance).of(first + second)
     }
 
     @Test
@@ -501,24 +501,23 @@ class SceneGestureHandlerTest {
         val nestedScroll = nestedScrollConnection(nestedScrollBehavior = Always)
         draggable.onDragStarted(Offset.Zero)
         assertScene(currentScene = SceneA, isIdle = false)
-        val transition = transitionState as Transition
 
         draggable.onDelta(deltaInPixels10)
-        assertThat(transition.progress).isEqualTo(0.1f)
+        assertThat(progress).isEqualTo(0.1f)
 
         // now we can intercept the scroll events
         nestedScroll.scroll(available = offsetY10)
-        assertThat(transition.progress).isEqualTo(0.2f)
+        assertThat(progress).isEqualTo(0.2f)
 
         // this should be ignored, we are scrolling now!
         draggable.onDragStopped(velocityThreshold)
         assertScene(currentScene = SceneA, isIdle = false)
 
         nestedScroll.scroll(available = offsetY10)
-        assertThat(transition.progress).isEqualTo(0.3f)
+        assertThat(progress).isEqualTo(0.3f)
 
         nestedScroll.scroll(available = offsetY10)
-        assertThat(transition.progress).isEqualTo(0.4f)
+        assertThat(progress).isEqualTo(0.4f)
 
         nestedScroll.onPreFling(available = Velocity(0f, velocityThreshold))
         assertScene(currentScene = SceneC, isIdle = false)
