@@ -3944,9 +3944,9 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         mDisabledSysPackages.put(name, ps);
     }
 
-    private static int PRE_M_APP_INFO_FLAG_HIDDEN = 1<<27;
-    private static int PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE = 1<<28;
-    private static int PRE_M_APP_INFO_FLAG_PRIVILEGED = 1<<30;
+    private static final int PRE_M_APP_INFO_FLAG_HIDDEN = 1 << 27;
+    private static final int PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE = 1 << 28;
+    private static final int PRE_M_APP_INFO_FLAG_PRIVILEGED = 1 << 30;
 
     private void readPackageLPw(TypedXmlPullParser parser, List<UserInfo> users,
             ArrayMap<String, Long> originalFirstInstallTimes)
@@ -5846,7 +5846,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         @GuardedBy("mLock")
         // Tracking the mutations that haven't yet been written to legacy state.
         // This avoids unnecessary work when writing settings for multiple users.
-        private AtomicBoolean mIsLegacyPermissionStateStale = new AtomicBoolean(false);
+        private final AtomicBoolean mIsLegacyPermissionStateStale = new AtomicBoolean(false);
 
         @GuardedBy("mLock")
         // The mapping keys are user ids.

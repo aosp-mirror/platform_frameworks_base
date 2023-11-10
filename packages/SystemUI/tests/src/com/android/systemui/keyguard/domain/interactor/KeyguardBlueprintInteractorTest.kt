@@ -21,24 +21,77 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
+import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
+import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
+import com.android.systemui.statusbar.policy.SplitShadeStateController
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.whenever
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class KeyguardBlueprintInteractorTest : SysuiTestCase() {
+    private val configurationFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     private lateinit var underTest: KeyguardBlueprintInteractor
+    private lateinit var testScope: TestScope
 
+    @Mock private lateinit var splitShadeStateController: SplitShadeStateController
     @Mock private lateinit var keyguardBlueprintRepository: KeyguardBlueprintRepository
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        underTest = KeyguardBlueprintInteractor(keyguardBlueprintRepository)
+        testScope = TestScope(StandardTestDispatcher())
+        whenever(keyguardBlueprintRepository.configurationChange).thenReturn(configurationFlow)
+
+        underTest =
+            KeyguardBlueprintInteractor(
+                keyguardBlueprintRepository,
+                testScope.backgroundScope,
+                mContext,
+                splitShadeStateController,
+            )
+    }
+
+    @Test
+    fun testAppliesDefaultBlueprint() {
+        testScope.runTest {
+            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
+                .thenReturn(false)
+
+            reset(keyguardBlueprintRepository)
+            configurationFlow.tryEmit(Unit)
+            runCurrent()
+
+            verify(keyguardBlueprintRepository)
+                .applyBlueprint(DefaultKeyguardBlueprint.Companion.DEFAULT)
+        }
+    }
+
+    @Test
+    fun testAppliesSplitShadeBlueprint() {
+        testScope.runTest {
+            whenever(splitShadeStateController.shouldUseSplitNotificationShade(any()))
+                .thenReturn(true)
+
+            reset(keyguardBlueprintRepository)
+            configurationFlow.tryEmit(Unit)
+            runCurrent()
+
+            verify(keyguardBlueprintRepository)
+                .applyBlueprint(SplitShadeKeyguardBlueprint.Companion.ID)
+        }
     }
 
     @Test

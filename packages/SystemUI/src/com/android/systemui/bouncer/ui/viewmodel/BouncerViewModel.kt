@@ -21,14 +21,15 @@ import android.graphics.Bitmap
 import androidx.core.graphics.drawable.toBitmap
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
+import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import com.android.systemui.user.ui.viewmodel.UserViewModel
@@ -59,10 +60,10 @@ class BouncerViewModel(
     private val bouncerInteractor: BouncerInteractor,
     authenticationInteractor: AuthenticationInteractor,
     flags: SceneContainerFlags,
-    private val telephonyInteractor: TelephonyInteractor,
     selectedUser: Flow<UserViewModel>,
     users: Flow<List<UserViewModel>>,
     userSwitcherMenu: Flow<List<UserActionViewModel>>,
+    actionButtonInteractor: BouncerActionButtonInteractor,
 ) {
     val selectedUserImage: StateFlow<Bitmap?> =
         selectedUser
@@ -99,7 +100,8 @@ class BouncerViewModel(
                 initialValue = emptyList(),
             )
 
-    val isUserSwitcherVisible: Boolean = bouncerInteractor.isUserSwitcherVisible
+    val isUserSwitcherVisible: Boolean
+        get() = bouncerInteractor.isUserSwitcherVisible
 
     private val isInputEnabled: StateFlow<Boolean> =
         bouncerInteractor.isThrottled
@@ -150,8 +152,33 @@ class BouncerViewModel(
                     ),
             )
 
-    val isEmergencyButtonVisible: Boolean
-        get() = telephonyInteractor.hasTelephonyRadio
+    /**
+     * The bouncer action button (Return to Call / Emergency Call). If `null`, the button should not
+     * be shown.
+     */
+    val actionButton: StateFlow<BouncerActionButtonModel?> =
+        actionButtonInteractor.actionButton.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = null
+        )
+
+    /**
+     * Whether the "side-by-side" layout is supported.
+     *
+     * When presented on its own, without a user switcher (e.g. not on communal devices like
+     * tablets, for example), some authentication method UIs don't do well if they're shown in the
+     * side-by-side layout; these need to be shown with the standard layout so they can take up as
+     * much width as possible.
+     */
+    val isSideBySideSupported: StateFlow<Boolean> =
+        authMethodViewModel
+            .map { authMethod -> isSideBySideSupported(authMethod) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = isSideBySideSupported(authMethodViewModel.value),
+            )
 
     init {
         if (flags.isEnabled()) {
@@ -176,14 +203,13 @@ class BouncerViewModel(
         }
     }
 
-    /** Notifies that the emergency services button was clicked. */
-    fun onEmergencyServicesButtonClicked() {
-        // TODO(b/280877228): implement this
-    }
-
     /** Notifies that a throttling dialog has been dismissed by the user. */
     fun onThrottlingDialogDismissed() {
         _throttlingDialogMessage.value = null
+    }
+
+    private fun isSideBySideSupported(authMethod: AuthMethodBouncerViewModel?): Boolean {
+        return isUserSwitcherVisible || authMethod !is PasswordBouncerViewModel
     }
 
     private fun toMessageViewModel(
@@ -271,8 +297,8 @@ object BouncerViewModelModule {
         bouncerInteractor: BouncerInteractor,
         authenticationInteractor: AuthenticationInteractor,
         flags: SceneContainerFlags,
-        telephonyInteractor: TelephonyInteractor,
         userSwitcherViewModel: UserSwitcherViewModel,
+        actionButtonInteractor: BouncerActionButtonInteractor,
     ): BouncerViewModel {
         return BouncerViewModel(
             applicationContext = applicationContext,
@@ -281,10 +307,10 @@ object BouncerViewModelModule {
             bouncerInteractor = bouncerInteractor,
             authenticationInteractor = authenticationInteractor,
             flags = flags,
-            telephonyInteractor = telephonyInteractor,
             selectedUser = userSwitcherViewModel.selectedUser,
             users = userSwitcherViewModel.users,
             userSwitcherMenu = userSwitcherViewModel.menu,
+            actionButtonInteractor = actionButtonInteractor,
         )
     }
 }

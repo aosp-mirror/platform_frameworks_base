@@ -68,7 +68,7 @@ public abstract class ComponentResolverBase extends WatchableImpl implements Com
     protected ArrayMap<String, ParsedProvider> mProvidersByAuthority;
 
     @NonNull
-    protected UserManagerService mUserManager;
+    protected final UserManagerService mUserManager;
 
     protected ComponentResolverBase(@NonNull UserManagerService userManager) {
         mUserManager = userManager;

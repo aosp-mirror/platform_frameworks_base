@@ -132,6 +132,10 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         mPersister.persistSnapshot(2, mTestUserId, createSnapshot());
         mPersister.persistSnapshot(3, mTestUserId, createSnapshot());
         mPersister.persistSnapshot(4, mTestUserId, createSnapshot());
+        // Verify there should only keep the latest request when received a duplicated id.
+        mPersister.persistSnapshot(4, mTestUserId, createSnapshot());
+        // Expected 3: One remove obsolete request, two persist request.
+        assertEquals(3, mSnapshotPersistQueue.peekQueueSize());
         mSnapshotPersistQueue.setPaused(false);
         mSnapshotPersistQueue.waitForQueueEmpty();
 

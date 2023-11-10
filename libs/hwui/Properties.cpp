@@ -46,7 +46,7 @@ namespace uirenderer {
 
 #ifndef __ANDROID__ // Layoutlib does not compile HWUIProperties.sysprop as it depends on cutils properties
 std::optional<bool> use_vulkan() {
-    return base::GetBoolProperty("ro.hwui.use_vulkan", false);
+    return base::GetBoolProperty("ro.hwui.use_vulkan", true);
 }
 
 std::optional<std::int32_t> render_ahead() {

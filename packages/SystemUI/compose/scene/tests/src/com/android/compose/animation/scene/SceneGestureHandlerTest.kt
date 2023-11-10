@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
@@ -6,12 +22,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.animation.scene.NestedScrollBehavior.Always
+import com.android.compose.animation.scene.NestedScrollBehavior.DuringTransitionBetweenScenes
+import com.android.compose.animation.scene.NestedScrollBehavior.EdgeNoOverscroll
+import com.android.compose.animation.scene.NestedScrollBehavior.EdgeWithOverscroll
 import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
@@ -57,6 +78,7 @@ class SceneGestureHandlerTest {
                             state = layoutState,
                             density = Density(1f),
                             edgeDetector = DefaultEdgeDetector,
+                            coroutineScope = coroutineScope,
                         )
                         .also { it.size = IntSize(SCREEN_SIZE.toInt(), SCREEN_SIZE.toInt()) },
                 orientation = Orientation.Vertical,
@@ -65,7 +87,13 @@ class SceneGestureHandlerTest {
 
         val draggable = sceneGestureHandler.draggable
 
-        val nestedScroll = sceneGestureHandler.nestedScroll.connection
+        fun nestedScrollConnection(nestedScrollBehavior: NestedScrollBehavior) =
+            SceneNestedScrollHandler(
+                    gestureHandler = sceneGestureHandler,
+                    startBehavior = nestedScrollBehavior,
+                    endBehavior = nestedScrollBehavior,
+                )
+                .connection
 
         val velocityThreshold = sceneGestureHandler.velocityThreshold
 
@@ -194,13 +222,15 @@ class SceneGestureHandlerTest {
     }
 
     @Test
-    fun onInitialPreScroll_doNotChangeState() = runGestureTest {
+    fun onInitialPreScroll_EdgeWithOverscroll_doNotChangeState() = runGestureTest {
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithOverscroll)
         nestedScroll.onPreScroll(available = offsetY10, source = NestedScrollSource.Drag)
         assertScene(currentScene = SceneA, isIdle = true)
     }
 
     @Test
-    fun onPostScrollWithNothingAvailable_doNotChangeState() = runGestureTest {
+    fun onPostScrollWithNothingAvailable_EdgeWithOverscroll_doNotChangeState() = runGestureTest {
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithOverscroll)
         val consumed =
             nestedScroll.onPostScroll(
                 consumed = Offset.Zero,
@@ -214,6 +244,7 @@ class SceneGestureHandlerTest {
 
     @Test
     fun onPostScrollWithSomethingAvailable_startSceneTransition() = runGestureTest {
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithOverscroll)
         val consumed =
             nestedScroll.onPostScroll(
                 consumed = Offset.Zero,
@@ -227,14 +258,14 @@ class SceneGestureHandlerTest {
         assertThat(consumed).isEqualTo(offsetY10)
     }
 
-    private fun TestGestureScope.nestedScrollEvents(
+    private fun NestedScrollConnection.scroll(
         available: Offset,
         consumedByScroll: Offset = Offset.Zero,
     ) {
         val consumedByPreScroll =
-            nestedScroll.onPreScroll(available = available, source = NestedScrollSource.Drag)
+            onPreScroll(available = available, source = NestedScrollSource.Drag)
         val consumed = consumedByPreScroll + consumedByScroll
-        nestedScroll.onPostScroll(
+        onPostScroll(
             consumed = consumed,
             available = available - consumed,
             source = NestedScrollSource.Drag
@@ -243,7 +274,8 @@ class SceneGestureHandlerTest {
 
     @Test
     fun afterSceneTransitionIsStarted_interceptPreScrollEvents() = runGestureTest {
-        nestedScrollEvents(available = offsetY10)
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithOverscroll)
+        nestedScroll.scroll(available = offsetY10)
         assertScene(currentScene = SceneA, isIdle = false)
 
         val transition = transitionState as Transition
@@ -262,14 +294,15 @@ class SceneGestureHandlerTest {
         )
         assertThat(transition.progress).isEqualTo(0.2f)
 
-        nestedScrollEvents(available = offsetY10)
+        nestedScroll.scroll(available = offsetY10)
         assertThat(transition.progress).isEqualTo(0.3f)
         assertScene(currentScene = SceneA, isIdle = false)
     }
 
     @Test
     fun onPreFling_velocityLowerThanThreshold_remainSameScene() = runGestureTest {
-        nestedScrollEvents(available = offsetY10)
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithOverscroll)
+        nestedScroll.scroll(available = offsetY10)
         assertScene(currentScene = SceneA, isIdle = false)
 
         nestedScroll.onPreFling(available = Velocity.Zero)
@@ -280,12 +313,28 @@ class SceneGestureHandlerTest {
         assertScene(currentScene = SceneA, isIdle = true)
     }
 
-    @Test
-    fun onPreFling_velocityAtLeastThreshold_goToNextScene() = runGestureTest {
-        nestedScrollEvents(available = offsetY10)
-        assertScene(currentScene = SceneA, isIdle = false)
+    private suspend fun TestGestureScope.flingAfterScroll(
+        use: NestedScrollBehavior,
+        idleAfterScroll: Boolean,
+    ) {
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = use)
+        nestedScroll.scroll(available = offsetY10)
+        assertScene(currentScene = SceneA, isIdle = idleAfterScroll)
 
         nestedScroll.onPreFling(available = Velocity(0f, velocityThreshold))
+    }
+
+    @Test
+    fun flingAfterScroll_DuringTransitionBetweenScenes_doNothing() = runGestureTest {
+        flingAfterScroll(use = DuringTransitionBetweenScenes, idleAfterScroll = true)
+
+        assertScene(currentScene = SceneA, isIdle = true)
+    }
+
+    @Test
+    fun flingAfterScroll_EdgeNoOverscroll_goToNextScene() = runGestureTest {
+        flingAfterScroll(use = EdgeNoOverscroll, idleAfterScroll = false)
+
         assertScene(currentScene = SceneC, isIdle = false)
 
         // wait for the stop animation
@@ -294,21 +343,77 @@ class SceneGestureHandlerTest {
     }
 
     @Test
-    fun scrollStartedInScene_doOverscrollAnimation() = runGestureTest {
-        // we started the scroll in the scene
-        nestedScrollEvents(available = offsetY10, consumedByScroll = offsetY10)
+    fun flingAfterScroll_EdgeWithOverscroll_goToNextScene() = runGestureTest {
+        flingAfterScroll(use = EdgeWithOverscroll, idleAfterScroll = false)
 
-        // now we can intercept the scroll events
-        nestedScrollEvents(available = offsetY10)
-        assertScene(currentScene = SceneA, isIdle = false)
+        assertScene(currentScene = SceneC, isIdle = false)
+
+        // wait for the stop animation
+        advanceUntilIdle()
+        assertScene(currentScene = SceneC, isIdle = true)
+    }
+
+    @Test
+    fun flingAfterScroll_Always_goToNextScene() = runGestureTest {
+        flingAfterScroll(use = Always, idleAfterScroll = false)
+
+        assertScene(currentScene = SceneC, isIdle = false)
+
+        // wait for the stop animation
+        advanceUntilIdle()
+        assertScene(currentScene = SceneC, isIdle = true)
+    }
+
+    /** we started the scroll in the scene, then fling with the velocityThreshold */
+    private suspend fun TestGestureScope.flingAfterScrollStartedInScene(
+        use: NestedScrollBehavior,
+        idleAfterScroll: Boolean,
+    ) {
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = use)
+        // scroll consumed in child
+        nestedScroll.scroll(available = offsetY10, consumedByScroll = offsetY10)
+
+        // scroll offsetY10 is all available for parents
+        nestedScroll.scroll(available = offsetY10)
+        assertScene(currentScene = SceneA, isIdle = idleAfterScroll)
 
         nestedScroll.onPreFling(available = Velocity(0f, velocityThreshold))
-        // should start an overscroll animation (the gesture started in the scene)
+    }
+
+    @Test
+    fun flingAfterScrollStartedInScene_DuringTransitionBetweenScenes_doNothing() = runGestureTest {
+        flingAfterScrollStartedInScene(use = DuringTransitionBetweenScenes, idleAfterScroll = true)
+
+        assertScene(currentScene = SceneA, isIdle = true)
+    }
+
+    @Test
+    fun flingAfterScrollStartedInScene_EdgeNoOverscroll_doNothing() = runGestureTest {
+        flingAfterScrollStartedInScene(use = EdgeNoOverscroll, idleAfterScroll = true)
+
+        assertScene(currentScene = SceneA, isIdle = true)
+    }
+
+    @Test
+    fun flingAfterScrollStartedInScene_EdgeWithOverscroll_doOverscrollAnimation() = runGestureTest {
+        flingAfterScrollStartedInScene(use = EdgeWithOverscroll, idleAfterScroll = false)
+
         assertScene(currentScene = SceneA, isIdle = false)
 
         // wait for the stop animation
         advanceUntilIdle()
         assertScene(currentScene = SceneA, isIdle = true)
+    }
+
+    @Test
+    fun flingAfterScrollStartedInScene_Always_goToNextScene() = runGestureTest {
+        flingAfterScrollStartedInScene(use = Always, idleAfterScroll = false)
+
+        assertScene(currentScene = SceneC, isIdle = false)
+
+        // wait for the stop animation
+        advanceUntilIdle()
+        assertScene(currentScene = SceneC, isIdle = true)
     }
 
     @Test
@@ -324,12 +429,14 @@ class SceneGestureHandlerTest {
 
     @Test
     fun beforeNestedScrollStart_stop_shouldBeIgnored() = runGestureTest {
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithOverscroll)
         nestedScroll.onPreFling(Velocity(0f, velocityThreshold))
         assertScene(currentScene = SceneA, isIdle = true)
     }
 
     @Test
     fun startNestedScrollWhileDragging() = runGestureTest {
+        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = Always)
         draggable.onDragStarted(Offset.Zero)
         assertScene(currentScene = SceneA, isIdle = false)
         val transition = transitionState as Transition
@@ -338,17 +445,17 @@ class SceneGestureHandlerTest {
         assertThat(transition.progress).isEqualTo(0.1f)
 
         // now we can intercept the scroll events
-        nestedScrollEvents(available = offsetY10)
+        nestedScroll.scroll(available = offsetY10)
         assertThat(transition.progress).isEqualTo(0.2f)
 
         // this should be ignored, we are scrolling now!
         draggable.onDragStopped(velocityThreshold)
         assertScene(currentScene = SceneA, isIdle = false)
 
-        nestedScrollEvents(available = offsetY10)
+        nestedScroll.scroll(available = offsetY10)
         assertThat(transition.progress).isEqualTo(0.3f)
 
-        nestedScrollEvents(available = offsetY10)
+        nestedScroll.scroll(available = offsetY10)
         assertThat(transition.progress).isEqualTo(0.4f)
 
         nestedScroll.onPreFling(available = Velocity(0f, velocityThreshold))

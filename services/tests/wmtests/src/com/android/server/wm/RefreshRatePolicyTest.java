@@ -20,6 +20,7 @@ import static android.view.SurfaceControl.RefreshRateRange.FLOAT_TOLERANCE;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.window.flags.Flags.explicitRefreshRateHints;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -282,6 +283,9 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
 
+        if (explicitRefreshRateHints()) {
+            return;
+        }
         overrideWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
                 overrideWindow.getPendingTransaction(), mock(AnimationAdapter.class),
                 false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
@@ -320,6 +324,9 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(overrideWindow), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(overrideWindow), FLOAT_TOLERANCE);
 
+        if (explicitRefreshRateHints()) {
+            return;
+        }
         overrideWindow.mActivityRecord.mSurfaceAnimator.startAnimation(
                 overrideWindow.getPendingTransaction(), mock(AnimationAdapter.class),
                 false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);
@@ -342,6 +349,9 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
         assertEquals(0, mPolicy.getPreferredMinRefreshRate(window), FLOAT_TOLERANCE);
         assertEquals(0, mPolicy.getPreferredMaxRefreshRate(window), FLOAT_TOLERANCE);
 
+        if (explicitRefreshRateHints()) {
+            return;
+        }
         window.mActivityRecord.mSurfaceAnimator.startAnimation(
                 window.getPendingTransaction(), mock(AnimationAdapter.class),
                 false /* hidden */, ANIMATION_TYPE_APP_TRANSITION);

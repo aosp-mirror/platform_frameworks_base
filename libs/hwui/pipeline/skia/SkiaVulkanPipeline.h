@@ -44,8 +44,9 @@ public:
             const std::vector<sp<RenderNode> >& renderNodes, FrameInfoVisualizer* profiler,
             const renderthread::HardwareBufferRenderParams& bufferParams) override;
     GrSurfaceOrigin getSurfaceOrigin() override { return kTopLeft_GrSurfaceOrigin; }
-    bool swapBuffers(const renderthread::Frame& frame, bool drew, const SkRect& screenDirty,
-                     FrameInfo* currentFrameInfo, bool* requireSwap) override;
+    bool swapBuffers(const renderthread::Frame& frame, IRenderPipeline::DrawResult& drawResult,
+                     const SkRect& screenDirty, FrameInfo* currentFrameInfo,
+                     bool* requireSwap) override;
     DeferredLayerUpdater* createTextureLayer() override;
     [[nodiscard]] android::base::unique_fd flush() override;
 

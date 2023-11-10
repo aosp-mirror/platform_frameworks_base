@@ -1,6 +1,8 @@
 {
     // TODO: Change to presubmit.
     "postsubmit": [
-        { "name": "tiny-framework-dump-test" }
+        { "name": "tiny-framework-dump-test" },
+        { "name": "hoststubgentest" },
+        { "name": "hoststubgen-invoke-test" }
     ]
 }

@@ -26,12 +26,11 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.QuadFunction;
+import com.android.internal.util.function.QuintConsumer;
 import com.android.internal.util.function.QuintFunction;
-import com.android.internal.util.function.TriConsumer;
-import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
 
 /**
@@ -46,13 +45,15 @@ public abstract class AppOpsManagerInternal {
          * Allows overriding check operation behavior.
          *
          * @param code The op code to check.
-         * @param attributionSource the {@link AttributionSource} responsible for data access
+         * @param uid The UID for which to check.
+         * @param packageName The package for which to check.
+         * @param attributionTag The attribution tag for which to check.
          * @param raw Whether to check the raw op i.e. not interpret the mode based on UID state.
          * @param superImpl The super implementation.
          * @return The app op check result.
          */
-        int checkOperation(int code, AttributionSource attributionSource,
-                boolean raw, TriFunction<Integer, AttributionSource, Boolean, Integer>
+        int checkOperation(int code, int uid, String packageName, @Nullable String attributionTag,
+                boolean raw, QuintFunction<Integer, Integer, String, String, Boolean, Integer>
                 superImpl);
 
         /**
@@ -72,23 +73,25 @@ public abstract class AppOpsManagerInternal {
          * Allows overriding note operation behavior.
          *
          * @param code The op code to note.
-         * @param attributionSource the {@link AttributionSource} responsible for data access
+         * @param uid The UID for which to note.
+         * @param packageName The package for which to note. {@code null} for system package.
+         * @param featureId Id of the feature in the package
          * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
          * @param message The message in the async noted op
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
-        SyncNotedAppOp noteOperation(int code, AttributionSource attributionSource,
-                boolean shouldCollectAsyncNotedOp,
+        SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
+                @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
-                @NonNull QuintFunction<Integer, AttributionSource, Boolean, String, Boolean,
+                @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
                         SyncNotedAppOp> superImpl);
 
         /**
          * Allows overriding note proxy operation behavior.
          *
          * @param code The op code to note.
-         * @param attributionSource the {@link AttributionSource} responsible for data access
+         * @param attributionSource The permission identity of the caller.
          * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
          * @param message The message in the async noted op
          * @param shouldCollectMessage whether to collect messages
@@ -107,7 +110,9 @@ public abstract class AppOpsManagerInternal {
          *
          * @param token The client state.
          * @param code The op code to start.
-         * @param attributionSource the {@link AttributionSource} responsible for data access
+         * @param uid The UID for which to note.
+         * @param packageName The package for which to note. {@code null} for system package.
+         * @param attributionTag the attribution tag.
          * @param startIfModeDefault Whether to start the op of the mode is default.
          * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
          * @param message The message in the async noted op
@@ -117,12 +122,12 @@ public abstract class AppOpsManagerInternal {
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
-        SyncNotedAppOp startOperation(IBinder token, int code,
-                AttributionSource attributionSource,
+        SyncNotedAppOp startOperation(IBinder token, int code, int uid,
+                @Nullable String packageName, @Nullable String attributionTag,
                 boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
                 @AttributionFlags int attributionFlags, int attributionChainId,
-                @NonNull NonaFunction<IBinder, Integer, AttributionSource, Boolean,
+                @NonNull UndecFunction<IBinder, Integer, Integer, String, String, Boolean,
                         Boolean, String, Boolean, Integer, Integer, SyncNotedAppOp> superImpl);
 
         /**
@@ -130,7 +135,7 @@ public abstract class AppOpsManagerInternal {
          *
          * @param clientId The client calling start, represented by an IBinder
          * @param code The op code to start.
-         * @param attributionSource the {@link AttributionSource} responsible for data access
+         * @param attributionSource The permission identity of the caller.
          * @param startIfModeDefault Whether to start the op of the mode is default.
          * @param shouldCollectAsyncNotedOp If an {@link AsyncNotedAppOp} should be collected
          * @param message The message in the async noted op
@@ -156,19 +161,21 @@ public abstract class AppOpsManagerInternal {
          *
          * @param clientId The client state.
          * @param code The op code to finish.
-         * @param attributionSource the {@link AttributionSource} responsible for data access
+         * @param uid The UID for which the op was noted.
+         * @param packageName The package for which it was noted. {@code null} for system package.
+         * @param attributionTag the attribution tag.
          */
-        default void finishOperation(IBinder clientId, int code,
-                AttributionSource attributionSource,
-                @NonNull TriConsumer<IBinder, Integer, AttributionSource> superImpl) {
-            superImpl.accept(clientId, code, attributionSource);
+        default void finishOperation(IBinder clientId, int code, int uid, String packageName,
+                String attributionTag,
+                @NonNull QuintConsumer<IBinder, Integer, Integer, String, String> superImpl) {
+            superImpl.accept(clientId, code, uid, packageName, attributionTag);
         }
 
         /**
          * Allows overriding finish proxy op.
          *
          * @param code The op code to finish.
-         * @param attributionSource the {@link AttributionSource} responsible for data access
+         * @param attributionSource The permission identity of the caller.
          * @param skipProxyOperation Whether to skip the proxy in the proxy/proxied operation
          * @param clientId The client calling finishProxyOperation
          * @param superImpl The "standard" implementation to potentially call

@@ -1,0 +1,29 @@
+# Only classes listed here can use the hoststubgen annotations.
+
+# For each class, we check each item in this file, and when a match is found, we
+# either allow it if the line doesn't have a !, or disallow if the line has a !.
+# All the lines after the matching line will be ignored.
+
+
+# To allow a specific class to use annotations:
+# com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnotations
+
+# To disallow a specific class to use annotations:
+# !com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnotations
+
+# To allow a specific package to use annotations:
+# com.android.hoststubgen.test.*
+
+# To disallow a specific package to use annotations:
+# !com.android.hoststubgen.test.*
+
+
+com.android.hoststubgen.test.tinyframework.*
+com.supported.*
+com.unsupported.*
+
+# Use this to allow all packages
+# *
+
+# Use this to allow all packages
+# !*

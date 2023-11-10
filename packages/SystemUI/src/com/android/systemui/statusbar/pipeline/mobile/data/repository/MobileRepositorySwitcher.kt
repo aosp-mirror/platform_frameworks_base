@@ -152,6 +152,7 @@ constructor(
         activeRepo.flatMapLatest { it.defaultMobileIconGroup }
 
     override val isAnySimSecure: Flow<Boolean> = activeRepo.flatMapLatest { it.isAnySimSecure }
+    override fun getIsAnySimSecure(): Boolean = activeRepo.value.getIsAnySimSecure()
 
     override val defaultDataSubId: StateFlow<Int> =
         activeRepo

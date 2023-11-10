@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -76,13 +76,7 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
             contentPadding = contentPadding,
         ) {
             SpinnerText(options.find { it.id == selectedId })
-            Icon(
-                imageVector = when {
-                    expanded -> Icons.Outlined.ExpandLess
-                    else -> Icons.Outlined.ExpandMore
-                },
-                contentDescription = null,
-            )
+            ExpandIcon(expanded)
         }
         DropdownMenu(
             expanded = expanded,
@@ -107,6 +101,17 @@ fun Spinner(options: List<SpinnerOption>, selectedId: Int?, setId: (id: Int) -> 
             }
         }
     }
+}
+
+@Composable
+internal fun ExpandIcon(expanded: Boolean) {
+    Icon(
+        imageVector = when {
+            expanded -> Icons.Outlined.ExpandLess
+            else -> Icons.Outlined.ExpandMore
+        },
+        contentDescription = null,
+    )
 }
 
 @Composable

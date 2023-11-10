@@ -130,7 +130,14 @@ public class BackAnimationBackground {
                     mStartBounds);
             mCustomizer.customizeStatusBarAppearance(region);
         } else {
-            mCustomizer.customizeStatusBarAppearance(null);
+            resetStatusBarCustomization();
         }
+    }
+
+    /**
+     * Resets the statusbar customization
+     */
+    public void resetStatusBarCustomization() {
+        mCustomizer.customizeStatusBarAppearance(null);
     }
 }

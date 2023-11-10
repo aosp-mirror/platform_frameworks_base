@@ -549,6 +549,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLidNavigationAccessibility;
     int mShortPressOnPowerBehavior;
     private boolean mShouldEarlyShortPressOnPower;
+    private boolean mShouldEarlyShortPressOnStemPrimary;
     int mLongPressOnPowerBehavior;
     long mLongPressOnPowerAssistantTimeoutMs;
     int mVeryLongPressOnPowerBehavior;
@@ -2748,6 +2749,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         void onPress(long downTime) {
+            if (mShouldEarlyShortPressOnStemPrimary) {
+                return;
+            }
             stemPrimaryPress(1 /*count*/);
         }
 
@@ -2759,6 +2763,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         @Override
         void onMultiPress(long downTime, int count) {
             stemPrimaryPress(count);
+        }
+
+        @Override
+        void onKeyUp(long eventTime, int count) {
+            if (mShouldEarlyShortPressOnStemPrimary && count == 1) {
+                stemPrimaryPress(1 /*pressCount*/);
+            }
         }
     }
 
@@ -2929,6 +2940,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mShouldEarlyShortPressOnPower =
                     mContext.getResources()
                             .getBoolean(com.android.internal.R.bool.config_shortPressEarlyOnPower);
+            mShouldEarlyShortPressOnStemPrimary = mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_shortPressEarlyOnStemPrimary);
 
             mStylusButtonsEnabled = Settings.Secure.getIntForUser(resolver,
                     Secure.STYLUS_BUTTONS_ENABLED, 1, UserHandle.USER_CURRENT) == 1;

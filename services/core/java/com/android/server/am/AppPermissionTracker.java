@@ -37,7 +37,6 @@ import static com.android.server.am.BaseAppStateTracker.STATE_TYPE_PERMISSION;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
-import android.content.AttributionSource;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.OnPermissionsChangedListener;
@@ -193,11 +192,7 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
         if (DEBUG_PERMISSION_TRACKER) {
             final IAppOpsService appOpsService = mInjector.getIAppOpsService();
             try {
-                final AttributionSource attributionSource = new AttributionSource.Builder(uid)
-                        .setPackageName(packageName)
-                        .build();
-                final int mode =
-                        appOpsService.checkOperationWithState(op, attributionSource.asState());
+                final int mode = appOpsService.checkOperation(op, uid, packageName);
                 Slog.i(TAG, "onOpChanged: " + opToPublicName(op)
                         + " " + UserHandle.formatUid(uid)
                         + " " + packageName + " " + mode);
@@ -312,11 +307,7 @@ final class AppPermissionTracker extends BaseAppStateTracker<AppPermissionPolicy
                 final IAppOpsService appOpsService = mInjector.getIAppOpsService();
                 for (String pkg : packages) {
                     try {
-                        final AttributionSource attributionSource =
-                                new AttributionSource.Builder(mUid).setPackageName(pkg).build();
-                        final int mode =
-                                appOpsService.checkOperationWithState(
-                                        mAppOp, attributionSource.asState());
+                        final int mode = appOpsService.checkOperation(mAppOp, mUid, pkg);
                         if (mode == AppOpsManager.MODE_ALLOWED) {
                             mAppOpAllowed = true;
                             return;

@@ -25,7 +25,7 @@ JTvInputHal::JTvInputHal(JNIEnv* env, jobject thiz, std::shared_ptr<ITvInputWrap
     mThiz = env->NewWeakGlobalRef(thiz);
     mTvInput = tvInput;
     mLooper = looper;
-    mTvInputCallback = ::ndk::SharedRefBase::make<TvInputCallback>(this);
+    mTvInputCallback = std::shared_ptr<TvInputCallbackWrapper>(new TvInputCallbackWrapper(this));
     mTvInput->setCallback(mTvInputCallback);
 }
 
@@ -443,18 +443,23 @@ void JTvInputHal::NotifyTvMessageHandler::handleMessage(const Message& message) 
     }
 }
 
-JTvInputHal::TvInputCallback::TvInputCallback(JTvInputHal* hal) {
+JTvInputHal::TvInputCallbackWrapper::TvInputCallbackWrapper(JTvInputHal* hal) {
+    aidlTvInputCallback = ::ndk::SharedRefBase::make<AidlTvInputCallback>(hal);
+    hidlTvInputCallback = sp<HidlTvInputCallback>::make(hal);
+}
+
+JTvInputHal::AidlTvInputCallback::AidlTvInputCallback(JTvInputHal* hal) {
     mHal = hal;
 }
 
-::ndk::ScopedAStatus JTvInputHal::TvInputCallback::notify(const AidlTvInputEvent& event) {
+::ndk::ScopedAStatus JTvInputHal::AidlTvInputCallback::notify(const AidlTvInputEvent& event) {
     mHal->mLooper->sendMessage(new NotifyHandler(mHal,
                                                  TvInputEventWrapper::createEventWrapper(event)),
                                static_cast<int>(event.type));
     return ::ndk::ScopedAStatus::ok();
 }
 
-::ndk::ScopedAStatus JTvInputHal::TvInputCallback::notifyTvMessageEvent(
+::ndk::ScopedAStatus JTvInputHal::AidlTvInputCallback::notifyTvMessageEvent(
         const AidlTvMessageEvent& event) {
     const std::string DEVICE_ID_SUBTYPE = "device_id";
     ::ndk::ScopedAStatus status = ::ndk::ScopedAStatus::ok();
@@ -487,11 +492,14 @@ JTvInputHal::ITvInputWrapper::ITvInputWrapper(std::shared_ptr<AidlITvInput>& aid
       : mIsHidl(false), mAidlTvInput(aidlTvInput) {}
 
 ::ndk::ScopedAStatus JTvInputHal::ITvInputWrapper::setCallback(
-        const std::shared_ptr<TvInputCallback>& in_callback) {
+        const std::shared_ptr<TvInputCallbackWrapper>& in_callback) {
     if (mIsHidl) {
-        return hidlSetCallback(in_callback);
+        in_callback->aidlTvInputCallback = nullptr;
+        return hidlSetCallback(in_callback == nullptr ? nullptr : in_callback->hidlTvInputCallback);
     } else {
-        return mAidlTvInput->setCallback(in_callback);
+        in_callback->hidlTvInputCallback = nullptr;
+        return mAidlTvInput->setCallback(in_callback == nullptr ? nullptr
+                                                                : in_callback->aidlTvInputCallback);
     }
 }
 

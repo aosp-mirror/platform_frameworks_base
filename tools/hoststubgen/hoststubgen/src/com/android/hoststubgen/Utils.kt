@@ -59,3 +59,28 @@ fun <T> addNonNullElement(a: List<T>, b: T?): List<T> {
     }
     return a + b
 }
+
+
+/**
+ * Exception for a parse error in a file
+ */
+class ParseException : Exception, UserErrorException {
+    val hasSourceInfo: Boolean
+
+    constructor(message: String) : super(message) {
+        hasSourceInfo = false
+    }
+
+    constructor(message: String, file: String, line: Int) :
+            super("$message in file $file line $line") {
+        hasSourceInfo = true
+    }
+
+    fun withSourceInfo(filename: String, lineNo: Int): ParseException {
+        if (hasSourceInfo) {
+            return this // Already has source information.
+        } else {
+            return ParseException(this.message ?: "", filename, lineNo)
+        }
+    }
+}

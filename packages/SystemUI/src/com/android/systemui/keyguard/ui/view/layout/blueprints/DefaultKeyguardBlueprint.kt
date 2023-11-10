@@ -32,7 +32,6 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSec
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
-import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import javax.inject.Inject
 
 /**
@@ -53,7 +52,6 @@ constructor(
     defaultStatusViewSection: DefaultStatusViewSection,
     defaultStatusBarSection: DefaultStatusBarSection,
     defaultNotificationStackScrollLayoutSection: DefaultNotificationStackScrollLayoutSection,
-    splitShadeGuidelines: SplitShadeGuidelines,
     aodNotificationIconsSection: AodNotificationIconsSection,
     aodBurnInSection: AodBurnInSection,
     communalTutorialIndicatorSection: CommunalTutorialIndicatorSection,
@@ -63,7 +61,7 @@ constructor(
     override val id: String = DEFAULT
 
     override val sections =
-        setOf(
+        listOf(
             defaultIndicationAreaSection,
             defaultDeviceEntryIconSection,
             defaultShortcutsSection,
@@ -72,7 +70,6 @@ constructor(
             defaultStatusViewSection,
             defaultStatusBarSection,
             defaultNotificationStackScrollLayoutSection,
-            splitShadeGuidelines,
             aodNotificationIconsSection,
             aodBurnInSection,
             communalTutorialIndicatorSection,

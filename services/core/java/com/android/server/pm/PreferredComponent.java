@@ -48,7 +48,7 @@ public class PreferredComponent {
     public final int mMatch;
     public final ComponentName mComponent;
     // Whether this is to be the one that's always chosen. If false, it's the most recently chosen.
-    public boolean mAlways;
+    public final boolean mAlways;
 
     final String[] mSetPackages;
     final String[] mSetClasses;

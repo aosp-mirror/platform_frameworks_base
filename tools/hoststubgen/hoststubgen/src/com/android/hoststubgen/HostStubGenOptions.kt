@@ -51,6 +51,8 @@ class HostStubGenOptions(
 
         var packageRedirects: MutableList<Pair<String, String>> = mutableListOf(),
 
+        var annotationAllowedClassesFile: String? = null,
+
         var defaultClassLoadHook: String? = null,
         var defaultMethodCallHook: String? = null,
 
@@ -170,6 +172,9 @@ class HostStubGenOptions(
 
                     "--package-redirect" ->
                         ret.packageRedirects += parsePackageRedirect(ai.nextArgRequired(arg))
+
+                    "--annotation-allowed-classes-file" ->
+                        ret.annotationAllowedClassesFile = ai.nextArgRequired(arg)
 
                     "--default-class-load-hook" ->
                         ret.defaultClassLoadHook = ai.nextArgRequired(arg)
@@ -314,6 +319,7 @@ class HostStubGenOptions(
               nativeSubstituteAnnotations=$nativeSubstituteAnnotations,
               classLoadHookAnnotations=$classLoadHookAnnotations,
               packageRedirects=$packageRedirects,
+              $annotationAllowedClassesFile=$annotationAllowedClassesFile,
               defaultClassLoadHook=$defaultClassLoadHook,
               defaultMethodCallHook=$defaultMethodCallHook,
               intersectStubJars=$intersectStubJars,

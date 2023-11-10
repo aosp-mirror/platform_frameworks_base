@@ -37,6 +37,7 @@ import com.android.systemui.biometrics.FingerprintReEnrollNotification;
 import com.android.systemui.biometrics.UdfpsDisplayModeProvider;
 import com.android.systemui.biometrics.dagger.BiometricsModule;
 import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule;
+import com.android.systemui.bouncer.domain.interactor.BouncerInteractorModule;
 import com.android.systemui.bouncer.ui.BouncerViewModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
@@ -129,6 +130,7 @@ import com.android.systemui.user.domain.UserDomainLayerModule;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
 import com.android.systemui.util.dagger.UtilModule;
 import com.android.systemui.util.kotlin.CoroutinesModule;
+import com.android.systemui.util.reference.ReferenceModule;
 import com.android.systemui.util.sensors.SensorModule;
 import com.android.systemui.util.settings.SettingsUtilModule;
 import com.android.systemui.util.time.SystemClock;
@@ -166,6 +168,7 @@ import javax.inject.Named;
         AuthenticationModule.class,
         BiometricsModule.class,
         BiometricsDomainLayerModule.class,
+        BouncerInteractorModule.class,
         BouncerViewModule.class,
         ClipboardOverlayModule.class,
         ClockRegistryModule.class,
@@ -199,6 +202,7 @@ import javax.inject.Named;
         PrivacyModule.class,
         QRCodeScannerModule.class,
         QSFragmentStartableModule.class,
+        ReferenceModule.class,
         RetailModeModule.class,
         ScreenshotModule.class,
         SensorModule.class,

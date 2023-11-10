@@ -2005,9 +2005,9 @@ public class DomainVerificationService extends SystemService
     private static class GetAttachedResult {
 
         @Nullable
-        private DomainVerificationPkgState mPkgState;
+        private final DomainVerificationPkgState mPkgState;
 
-        private int mErrorCode;
+        private final int mErrorCode;
 
         GetAttachedResult(@Nullable DomainVerificationPkgState pkgState, int errorCode) {
             mPkgState = pkgState;

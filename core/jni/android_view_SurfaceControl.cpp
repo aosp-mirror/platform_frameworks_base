@@ -1950,7 +1950,7 @@ public:
 
         jobjectArray jJankDataArray = env->NewObjectArray(jankData.size(),
                 gJankDataClassInfo.clazz, nullptr);
-        for (int i = 0; i < jankData.size(); i++) {
+        for (size_t i = 0; i < jankData.size(); i++) {
             jobject jJankData = env->NewObject(gJankDataClassInfo.clazz,
                     gJankDataClassInfo.ctor, jankData[i].frameVsyncId, jankData[i].jankType);
             env->SetObjectArrayElement(jJankDataArray, i, jJankData);

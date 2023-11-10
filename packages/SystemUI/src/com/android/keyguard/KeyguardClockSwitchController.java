@@ -605,7 +605,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                             mAodIconsViewModel,
                             mConfigurationState,
                             mConfigurationController,
-                            mDozeParameters,
                             mAodIconViewStore);
                     final DisposableHandle visHandle = KeyguardRootViewBinder.bindAodIconVisibility(
                             nic,

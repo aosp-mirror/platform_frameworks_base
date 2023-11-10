@@ -38,7 +38,6 @@ import android.app.tare.EconomyManager;
 import android.app.tare.IEconomyManager;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
-import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -231,11 +230,8 @@ public class InternalResourceService extends SystemService {
         public void opChanged(int op, int uid, String packageName) {
             boolean restricted = false;
             try {
-                final AttributionSource attributionSource = new AttributionSource.Builder(uid)
-                        .setPackageName(packageName)
-                        .build();
-                restricted = mAppOpsService.checkOperationWithState(
-                        AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, attributionSource.asState())
+                restricted = mAppOpsService.checkOperation(
+                        AppOpsManager.OP_RUN_ANY_IN_BACKGROUND, uid, packageName)
                         != AppOpsManager.MODE_ALLOWED;
             } catch (RemoteException e) {
                 // Shouldn't happen

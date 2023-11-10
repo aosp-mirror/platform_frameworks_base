@@ -20,15 +20,18 @@ import android.companion.virtual.VirtualDeviceManager
 import android.companion.virtual.flags.Flags
 import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 /** Provides information about an external connected display. */
@@ -81,6 +84,7 @@ constructor(
     private val virtualDeviceManager: VirtualDeviceManager,
     keyguardRepository: KeyguardRepository,
     displayRepository: DisplayRepository,
+    @Background backgroundCoroutineDispatcher: CoroutineDispatcher,
 ) : ConnectedDisplayInteractor {
 
     override val connectedDisplayState: Flow<State> =
@@ -101,6 +105,7 @@ constructor(
                     State.CONNECTED
                 }
             }
+            .flowOn(backgroundCoroutineDispatcher)
             .distinctUntilChanged()
 
     override val connectedDisplayAddition: Flow<Unit> =
@@ -108,6 +113,7 @@ constructor(
             .filter {
                 it != null && (isExternalDisplay(it) || isVirtualDeviceOwnedMirrorDisplay(it))
             }
+            .flowOn(backgroundCoroutineDispatcher)
             .map {} // map to Unit
 
     // Provides the pending display only if the lockscreen is unlocked

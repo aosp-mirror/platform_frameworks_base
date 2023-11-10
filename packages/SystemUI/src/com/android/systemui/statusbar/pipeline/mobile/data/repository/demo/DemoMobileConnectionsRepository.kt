@@ -136,7 +136,8 @@ constructor(
 
     override val defaultMobileIconGroup = flowOf(TelephonyIcons.THREE_G)
 
-    override val isAnySimSecure: Flow<Boolean> = flowOf(false)
+    override val isAnySimSecure: Flow<Boolean> = flowOf(getIsAnySimSecure())
+    override fun getIsAnySimSecure(): Boolean = false
 
     override val defaultMobileIconMapping = MutableStateFlow(TelephonyIcons.ICON_NAME_TO_ICON)
 

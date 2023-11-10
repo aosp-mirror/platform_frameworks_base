@@ -2501,7 +2501,7 @@ static std::vector<uid_t> convertJIntArrayToUidVector(JNIEnv *env, jintArray jAr
             int *nativeArray = nullptr;
             nativeArray = env->GetIntArrayElements(jArray, 0);
             if (nativeArray != nullptr) {
-                for (size_t i = 0; i < len; i++) {
+                for (size_t i = 0; i < static_cast<size_t>(len); i++) {
                     nativeVector.push_back(nativeArray[i]);
                 }
                 env->ReleaseIntArrayElements(jArray, nativeArray, 0);
@@ -2565,7 +2565,7 @@ static jint android_media_AudioSystem_setSupportedSystemUsages(JNIEnv *env, jobj
 
     if (nativeSystemUsages != nullptr) {
         jsize len = env->GetArrayLength(systemUsages);
-        for (size_t i = 0; i < len; i++) {
+        for (size_t i = 0; i < static_cast<size_t>(len); i++) {
             audio_usage_t nativeAudioUsage =
                     static_cast<audio_usage_t>(nativeSystemUsages[i]);
             nativeSystemUsagesVector.push_back(nativeAudioUsage);
@@ -2776,7 +2776,7 @@ static jint android_media_AudioSystem_getDevicesForAttributes(JNIEnv *env, jobje
         return jStatus;
     }
 
-    if (devices.size() > maxResultSize) {
+    if (devices.size() > static_cast<size_t>(maxResultSize)) {
         return AUDIO_JAVA_INVALID_OPERATION;
     }
     size_t index = 0;

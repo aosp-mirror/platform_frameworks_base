@@ -140,7 +140,7 @@ static jobject createJavaVsyncEventData(JNIEnv* env, VsyncEventData vsyncEventDa
         env->ExceptionClear();
         return NULL;
     }
-    for (int i = 0; i < vsyncEventData.frameTimelinesLength; i++) {
+    for (size_t i = 0; i < vsyncEventData.frameTimelinesLength; i++) {
         VsyncEventData::FrameTimeline frameTimeline = vsyncEventData.frameTimelines[i];
         ScopedLocalRef<jobject>
                 frameTimelineObj(env,
@@ -193,7 +193,7 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
                                                               gDisplayEventReceiverClassInfo
                                                                       .vsyncEventDataClassInfo
                                                                       .frameTimelines)));
-        for (int i = 0; i < vsyncEventData.frameTimelinesLength; i++) {
+        for (size_t i = 0; i < vsyncEventData.frameTimelinesLength; i++) {
             VsyncEventData::FrameTimeline& frameTimeline = vsyncEventData.frameTimelines[i];
             ScopedLocalRef<jobject>
                     frameTimelineObj(env, env->GetObjectArrayElement(frameTimelinesObj.get(), i));

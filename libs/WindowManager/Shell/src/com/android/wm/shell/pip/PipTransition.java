@@ -916,7 +916,7 @@ public class PipTransition extends PipTransitionController {
                 final boolean hasTopActivityInfo = taskInfo.topActivityInfo != null;
                 if (hasTopActivityInfo) {
                     animator.setAppIconContentOverlay(
-                            mContext, currentBounds, taskInfo.topActivityInfo,
+                            mContext, currentBounds, destinationBounds, taskInfo.topActivityInfo,
                             mPipBoundsState.getLauncherState().getAppIconSizePx());
                 } else {
                     ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,

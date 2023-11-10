@@ -36,6 +36,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.FakeLogBuffer;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.reference.FakeWeakReferenceFactory;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
@@ -62,6 +63,8 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
     private final LogBuffer mLogBuffer = FakeLogBuffer.Factory.Companion.create();
 
     final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
+
+    final FakeWeakReferenceFactory mWeakReferenceFactory = new FakeWeakReferenceFactory();
 
     @Before
     public void setup() {
@@ -407,12 +410,36 @@ public class DreamOverlayStateControllerTest extends SysuiTestCase {
         assertThat(stateController.getComplications()).contains(homeControlsComplication);
     }
 
+    @Test
+    public void testCallbacksIgnoredWhenWeakReferenceCleared() {
+        final DreamOverlayStateController.Callback callback1 = Mockito.mock(
+                DreamOverlayStateController.Callback.class);
+        final DreamOverlayStateController.Callback callback2 = Mockito.mock(
+                DreamOverlayStateController.Callback.class);
+
+        final DreamOverlayStateController stateController = getDreamOverlayStateController(true);
+        stateController.addCallback(callback1);
+        stateController.addCallback(callback2);
+        mExecutor.runAllReady();
+
+        // Simulate callback1 getting GC'd by clearing the reference
+        mWeakReferenceFactory.clear(callback1);
+        stateController.setOverlayActive(true);
+        mExecutor.runAllReady();
+
+        // Callback2 should still be called, but never callback1
+        verify(callback1, never()).onStateChanged();
+        verify(callback2).onStateChanged();
+        assertThat(stateController.isOverlayActive()).isTrue();
+    }
+
     private DreamOverlayStateController getDreamOverlayStateController(boolean overlayEnabled) {
         return new DreamOverlayStateController(
                 mExecutor,
                 overlayEnabled,
                 mFeatureFlags,
-                mLogBuffer
+                mLogBuffer,
+                mWeakReferenceFactory
         );
     }
 }

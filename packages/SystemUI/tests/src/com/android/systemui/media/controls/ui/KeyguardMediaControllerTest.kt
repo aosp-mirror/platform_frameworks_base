@@ -24,6 +24,7 @@ import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.widget.FrameLayout
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -32,6 +33,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.utils.os.FakeHandler
@@ -91,7 +93,8 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
                 settings,
                 fakeHandler,
                 configurationController,
-                ResourcesSplitShadeStateController()
+                ResourcesSplitShadeStateController(),
+                mock<DumpManager>()
             )
         keyguardMediaController.attachSinglePaneContainer(mediaContainerView)
         keyguardMediaController.useSplitShade = false

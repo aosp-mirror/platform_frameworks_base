@@ -70,9 +70,6 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
         mPackageFilt = new IntentFilter();
         // Settings app sends the broadcast
         mPackageFilt.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
-        // AMS sends the broadcast
-        mPackageFilt.addAction(Intent.ACTION_PACKAGE_RESTARTED);
-        mPackageFilt.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
         mPackageFilt.addDataScheme("package");
         if (isCore) {
             mPackageFilt.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);

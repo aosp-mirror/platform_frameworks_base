@@ -142,13 +142,22 @@ int main(int argc, char** argv)
             case 'p':
                 png = true;
                 break;
-            case 'd':
-                displayIdOpt = DisplayId::fromValue(atoll(optarg));
+            case 'd': {
+                errno = 0;
+                char* end = nullptr;
+                const uint64_t id = strtoull(optarg, &end, 10);
+                if (!end || *end != '\0' || errno == ERANGE) {
+                    fprintf(stderr, "Invalid display ID: Out of range [0, 2^64).\n");
+                    return 1;
+                }
+
+                displayIdOpt = DisplayId::fromValue(id);
                 if (!displayIdOpt) {
-                    fprintf(stderr, "Invalid display ID: %s\n", optarg);
+                    fprintf(stderr, "Invalid display ID: Incorrect encoding.\n");
                     return 1;
                 }
                 break;
+            }
             case '?':
             case 'h':
                 if (ids.size() == 1) {

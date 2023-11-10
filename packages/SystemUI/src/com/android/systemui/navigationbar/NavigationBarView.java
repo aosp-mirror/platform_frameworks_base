@@ -494,14 +494,9 @@ public class NavigationBarView extends FrameLayout {
     }
 
     public KeyButtonDrawable getBackDrawable() {
-        KeyButtonDrawable drawable = getDrawable(getBackDrawableRes());
+        KeyButtonDrawable drawable = getDrawable(R.drawable.ic_sysbar_back);
         orientBackButton(drawable);
         return drawable;
-    }
-
-    public @DrawableRes int getBackDrawableRes() {
-        return chooseNavigationIconDrawableRes(R.drawable.ic_sysbar_back,
-                R.drawable.ic_sysbar_back_quick_step);
     }
 
     public KeyButtonDrawable getHomeDrawable() {
@@ -541,11 +536,6 @@ public class NavigationBarView extends FrameLayout {
 
     private void orientHomeButton(KeyButtonDrawable drawable) {
         drawable.setRotation(mIsVertical ? 90 : 0);
-    }
-
-    private @DrawableRes int chooseNavigationIconDrawableRes(@DrawableRes int icon,
-            @DrawableRes int quickStepIcon) {
-        return mShowSwipeUpUi ? quickStepIcon : icon;
     }
 
     private KeyButtonDrawable getDrawable(@DrawableRes int icon) {

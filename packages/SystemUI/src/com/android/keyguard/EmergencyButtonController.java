@@ -28,7 +28,6 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telecom.TelecomManager;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -54,21 +53,20 @@ import javax.inject.Inject;
 /** View Controller for {@link com.android.keyguard.EmergencyButton}. */
 @KeyguardBouncerScope
 public class EmergencyButtonController extends ViewController<EmergencyButton> {
-    static final String LOG_TAG = "EmergencyButton";
+    private static final String TAG = "EmergencyButton";
     private final ConfigurationController mConfigurationController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final TelephonyManager mTelephonyManager;
     private final PowerManager mPowerManager;
     private final ActivityTaskManager mActivityTaskManager;
-    private ShadeController mShadeController;
+    private final ShadeController mShadeController;
     private final TelecomManager mTelecomManager;
     private final MetricsLogger mMetricsLogger;
 
     private EmergencyButtonCallback mEmergencyButtonCallback;
-    private LockPatternUtils mLockPatternUtils;
-    private Executor mMainExecutor;
-    private Executor mBackgroundExecutor;
-    private SelectedUserInteractor mSelectedUserInteractor;
+    private final LockPatternUtils mLockPatternUtils;
+    private final Executor mMainExecutor;
+    private final Executor mBackgroundExecutor;
+    private final SelectedUserInteractor mSelectedUserInteractor;
 
     private final KeyguardUpdateMonitorCallback mInfoCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -93,17 +91,18 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
     @VisibleForTesting
     public EmergencyButtonController(@Nullable EmergencyButton view,
             ConfigurationController configurationController,
-            KeyguardUpdateMonitor keyguardUpdateMonitor, TelephonyManager telephonyManager,
-            PowerManager powerManager, ActivityTaskManager activityTaskManager,
+            KeyguardUpdateMonitor keyguardUpdateMonitor,
+            PowerManager powerManager,
+            ActivityTaskManager activityTaskManager,
             ShadeController shadeController,
-            @Nullable TelecomManager telecomManager, MetricsLogger metricsLogger,
+            @Nullable TelecomManager telecomManager,
+            MetricsLogger metricsLogger,
             LockPatternUtils lockPatternUtils,
             Executor mainExecutor, Executor backgroundExecutor,
             SelectedUserInteractor selectedUserInteractor) {
         super(view);
         mConfigurationController = configurationController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mTelephonyManager = telephonyManager;
         mPowerManager = powerManager;
         mActivityTaskManager = activityTaskManager;
         mShadeController = shadeController;
@@ -183,7 +182,7 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
                 } else {
                     mKeyguardUpdateMonitor.reportEmergencyCallAction(true /* bypassHandler */);
                     if (mTelecomManager == null) {
-                        Log.wtf(LOG_TAG, "TelecomManager was null, cannot launch emergency dialer");
+                        Log.wtf(TAG, "TelecomManager was null, cannot launch emergency dialer");
                         return;
                     }
                     Intent emergencyDialIntent =
@@ -212,10 +211,9 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
     public static class Factory {
         private final ConfigurationController mConfigurationController;
         private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-        private final TelephonyManager mTelephonyManager;
         private final PowerManager mPowerManager;
         private final ActivityTaskManager mActivityTaskManager;
-        private ShadeController mShadeController;
+        private final ShadeController mShadeController;
         @Nullable
         private final TelecomManager mTelecomManager;
         private final MetricsLogger mMetricsLogger;
@@ -226,10 +224,12 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
 
         @Inject
         public Factory(ConfigurationController configurationController,
-                KeyguardUpdateMonitor keyguardUpdateMonitor, TelephonyManager telephonyManager,
-                PowerManager powerManager, ActivityTaskManager activityTaskManager,
+                KeyguardUpdateMonitor keyguardUpdateMonitor,
+                PowerManager powerManager,
+                ActivityTaskManager activityTaskManager,
                 ShadeController shadeController,
-                @Nullable TelecomManager telecomManager, MetricsLogger metricsLogger,
+                @Nullable TelecomManager telecomManager,
+                MetricsLogger metricsLogger,
                 LockPatternUtils lockPatternUtils,
                 @Main Executor mainExecutor,
                 @Background Executor backgroundExecutor,
@@ -237,7 +237,6 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
 
             mConfigurationController = configurationController;
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-            mTelephonyManager = telephonyManager;
             mPowerManager = powerManager;
             mActivityTaskManager = activityTaskManager;
             mShadeController = shadeController;
@@ -252,9 +251,9 @@ public class EmergencyButtonController extends ViewController<EmergencyButton> {
         /** Construct an {@link com.android.keyguard.EmergencyButtonController}. */
         public EmergencyButtonController create(EmergencyButton view) {
             return new EmergencyButtonController(view, mConfigurationController,
-                    mKeyguardUpdateMonitor, mTelephonyManager, mPowerManager, mActivityTaskManager,
-                    mShadeController, mTelecomManager, mMetricsLogger, mLockPatternUtils,
-                    mMainExecutor, mBackgroundExecutor, mSelectedUserInteractor);
+                    mKeyguardUpdateMonitor, mPowerManager, mActivityTaskManager, mShadeController,
+                    mTelecomManager, mMetricsLogger, mLockPatternUtils, mMainExecutor,
+                    mBackgroundExecutor, mSelectedUserInteractor);
         }
     }
 }

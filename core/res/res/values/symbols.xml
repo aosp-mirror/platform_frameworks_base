@@ -473,6 +473,7 @@
   <java-symbol type="integer" name="config_doublePressOnStemPrimaryBehavior" />
   <java-symbol type="integer" name="config_triplePressOnStemPrimaryBehavior" />
   <java-symbol type="bool" name="config_shortPressEarlyOnPower" />
+  <java-symbol type="bool" name="config_shortPressEarlyOnStemPrimary" />
   <java-symbol type="string" name="config_doublePressOnPowerTargetActivity" />
   <java-symbol type="integer" name="config_searchKeyBehavior" />
   <java-symbol type="string" name="config_searchKeyTargetActivity" />
@@ -1732,6 +1733,7 @@
   <java-symbol type="bool" name="config_enableLockScreenRotation" />
   <java-symbol type="bool" name="config_remoteInsetsControllerControlsSystemBars" />
   <java-symbol type="bool" name="config_remoteInsetsControllerSystemBarsCanBeShownByUserAction" />
+  <java-symbol type="bool" name="config_decoupleStatusBarAndDisplayCutoutFromScreenSize" />
   <java-symbol type="bool" name="config_lidControlsScreenLock" />
   <java-symbol type="bool" name="config_lidControlsSleep" />
   <java-symbol type="bool" name="config_lockDayNightMode" />
@@ -1955,6 +1957,7 @@
   <java-symbol type="bool" name="config_enableNightMode" />
   <java-symbol type="bool" name="config_tintNotificationActionButtons" />
   <java-symbol type="bool" name="config_dozeAfterScreenOffByDefault" />
+  <java-symbol type="bool" name="config_brightWhenDozing" />
   <java-symbol type="bool" name="config_enableActivityRecognitionHardwareOverlay" />
   <java-symbol type="bool" name="config_defaultAdasGnssLocationEnabled" />
   <java-symbol type="bool" name="config_enableFusedLocationOverlay" />

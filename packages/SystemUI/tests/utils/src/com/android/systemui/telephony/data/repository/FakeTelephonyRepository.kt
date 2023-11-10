@@ -23,6 +23,7 @@ import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 @SysUISingleton
@@ -31,6 +32,9 @@ class FakeTelephonyRepository @Inject constructor() : TelephonyRepository {
     private val _callState = MutableStateFlow(0)
     override val callState: Flow<Int> = _callState.asStateFlow()
 
+    private val _isInCall = MutableStateFlow(false)
+    override val isInCall: StateFlow<Boolean> = _isInCall.asStateFlow()
+
     override var hasTelephonyRadio: Boolean = true
         private set
 
@@ -38,8 +42,12 @@ class FakeTelephonyRepository @Inject constructor() : TelephonyRepository {
         _callState.value = value
     }
 
-    fun setHasRadio(hasRadio: Boolean) {
-        this.hasTelephonyRadio = hasRadio
+    fun setIsInCall(isInCall: Boolean) {
+        _isInCall.value = isInCall
+    }
+
+    fun setHasTelephonyRadio(hasTelephonyRadio: Boolean) {
+        this.hasTelephonyRadio = hasTelephonyRadio
     }
 }
 

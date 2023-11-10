@@ -1,4 +1,8 @@
 // Baseline format: 1.0
+BannedThrow: android.os.vibrator.persistence.VibrationXmlSerializer#serialize(android.os.VibrationEffect, java.io.Writer):
+    Methods must not throw unchecked exceptions
+
+
 BroadcastBehavior: android.app.AlarmManager#ACTION_NEXT_ALARM_CLOCK_CHANGED:
     Field 'ACTION_NEXT_ALARM_CLOCK_CHANGED' is missing @BroadcastBehavior
 BroadcastBehavior: android.app.AlarmManager#ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED:

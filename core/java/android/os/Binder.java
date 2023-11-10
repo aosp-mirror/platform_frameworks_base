@@ -333,6 +333,12 @@ public class Binder implements IBinder {
     @CriticalNative
     public static final native boolean isDirectlyHandlingTransactionNative();
 
+    /** @hide */
+    public static final boolean isDirectlyHandlingTransactionNative$ravenwood() {
+        // Ravenwood doesn't support IPC
+        return false;
+    }
+
     private static boolean sIsHandlingBinderTransaction = false;
 
     /**
@@ -715,7 +721,9 @@ public class Binder implements IBinder {
      */
     public Binder(@Nullable String descriptor) {
         mObject = getNativeBBinderHolder();
-        NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mObject);
+        if (mObject != 0L) {
+            NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mObject);
+        }
 
         if (FIND_POTENTIAL_LEAKS) {
             final Class<? extends Binder> klass = getClass();
@@ -1276,6 +1284,10 @@ public class Binder implements IBinder {
     }
 
     private static native long getNativeBBinderHolder();
+
+    private static long getNativeBBinderHolder$ravenwood() {
+        return 0L;
+    }
 
     /**
      * By default, we use the calling UID since we can always trust it.

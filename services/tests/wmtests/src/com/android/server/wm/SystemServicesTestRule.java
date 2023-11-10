@@ -376,6 +376,9 @@ public class SystemServicesTestRule implements TestRule {
 
         mWmService.onInitReady();
         mAtmService.setWindowManager(mWmService);
+        // Avoid real display events interfering with the test. Also avoid leaking registration.
+        mContext.getSystemService(DisplayManager.class)
+                .unregisterDisplayListener(mAtmService.mRootWindowContainer);
         mWmService.mDisplayEnabled = true;
         mWmService.mDisplayReady = true;
         mAtmService.getTransitionController().mIsWaitingForDisplayEnabled = false;
@@ -411,12 +414,6 @@ public class SystemServicesTestRule implements TestRule {
                     dc.mDisplayRotationCompatPolicy.dispose();
                 }
             }
-        }
-
-        if (mAtmService != null) {
-            // Unregister display listener from root to avoid issues with subsequent tests.
-            mContext.getSystemService(DisplayManager.class)
-                    .unregisterDisplayListener(mAtmService.mRootWindowContainer);
         }
 
         for (int i = mDeviceConfigListeners.size() - 1; i >= 0; i--) {

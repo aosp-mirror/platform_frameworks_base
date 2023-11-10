@@ -446,6 +446,230 @@ RuntimeInvisibleAnnotations:
     android.hosttest.annotation.HostSideTestStub
   x: #x()
     android.hosttest.annotation.HostSideTestStaticInitializerStub
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex.class
+  Compiled from "TinyFrameworkEnumComplex.java"
+public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex extends java.lang.Enum<com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex>
+  minor version: 0
+  major version: 61
+  flags: (0x4031) ACC_PUBLIC, ACC_FINAL, ACC_SUPER, ACC_ENUM
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex
+  super_class: #x                         // java/lang/Enum
+  interfaces: 0, fields: 4, methods: 7, attributes: 4
+  public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex RED;
+    descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
+    flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex GREEN;
+    descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
+    flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex BLUE;
+    descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
+    flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  private static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex[] $VALUES;
+    descriptor: [Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
+    flags: (0x101a) ACC_PRIVATE, ACC_STATIC, ACC_FINAL, ACC_SYNTHETIC
+
+  public static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex[] values();
+    descriptor: ()[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  public static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex valueOf(java.lang.String);
+    descriptor: (Ljava/lang/String;)Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  private com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex(java.lang.String, java.lang.String);
+    descriptor: (Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V
+    flags: (0x0002) ACC_PRIVATE
+    Code:
+      stack=3, locals=5, args_size=5
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    Signature: #x                          // (Ljava/lang/String;Ljava/lang/String;)V
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public java.lang.String getLongName();
+    descriptor: ()Ljava/lang/String;
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public java.lang.String getShortName();
+    descriptor: ()Ljava/lang/String;
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  private static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex[] $values();
+    descriptor: ()[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  static {};
+    descriptor: ()V
+    flags: (0x0008) ACC_STATIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+}
+Signature: #x                           // Ljava/lang/Enum<Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;>;
+SourceFile: "TinyFrameworkEnumComplex.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestStub
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple.class
+  Compiled from "TinyFrameworkEnumSimple.java"
+public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple extends java.lang.Enum<com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple>
+  minor version: 0
+  major version: 61
+  flags: (0x4031) ACC_PUBLIC, ACC_FINAL, ACC_SUPER, ACC_ENUM
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple
+  super_class: #x                         // java/lang/Enum
+  interfaces: 0, fields: 3, methods: 5, attributes: 4
+  public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple CAT;
+    descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
+    flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple DOG;
+    descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
+    flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  private static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple[] $VALUES;
+    descriptor: [Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
+    flags: (0x101a) ACC_PRIVATE, ACC_STATIC, ACC_FINAL, ACC_SYNTHETIC
+
+  public static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple[] values();
+    descriptor: ()[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  public static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple valueOf(java.lang.String);
+    descriptor: (Ljava/lang/String;)Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  private com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple();
+    descriptor: (Ljava/lang/String;I)V
+    flags: (0x0002) ACC_PRIVATE
+    Code:
+      stack=3, locals=3, args_size=3
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    Signature: #x                          // ()V
+
+  private static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple[] $values();
+    descriptor: ()[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  static {};
+    descriptor: ()V
+    flags: (0x0008) ACC_STATIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+}
+Signature: #x                           // Ljava/lang/Enum<Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;>;
+SourceFile: "TinyFrameworkEnumSimple.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestStub
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkExceptionTester.class
   Compiled from "TinyFrameworkExceptionTester.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkExceptionTester

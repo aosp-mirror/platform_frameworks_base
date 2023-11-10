@@ -33,8 +33,8 @@ constructor(
     defaultCommunalWidgetSection: DefaultCommunalWidgetSection,
 ) : KeyguardBlueprint {
     override val id: String = COMMUNAL
-    override val sections: Set<KeyguardSection> =
-        setOf(
+    override val sections: List<KeyguardSection> =
+        listOf(
             defaultCommunalHubSection,
             defaultCommunalWidgetSection,
         )

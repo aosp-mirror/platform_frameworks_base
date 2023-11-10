@@ -1876,7 +1876,8 @@ public class DisplayPolicy {
                 dc.getDisplayPolicy().simulateLayoutDisplay(df);
                 final InsetsState insetsState = df.mInsetsState;
                 final Rect displayFrame = insetsState.getDisplayFrame();
-                final Insets decor = insetsState.calculateInsets(displayFrame, DECOR_TYPES,
+                final Insets decor = insetsState.calculateInsets(displayFrame,
+                        dc.mWmService.mDecorTypes,
                         true /* ignoreVisibility */);
                 final Insets statusBar = insetsState.calculateInsets(displayFrame,
                         Type.statusBars(), true /* ignoreVisibility */);
@@ -1911,15 +1912,6 @@ public class DisplayPolicy {
                         + ", configFrame=" + mConfigFrame.toShortString(tmpSb) + '}';
             }
         }
-
-
-        static final int DECOR_TYPES = Type.displayCutout() | Type.navigationBars();
-
-        /**
-         * The types that may affect display configuration. This excludes cutout because it is
-         * known from display info.
-         */
-        static final int CONFIG_TYPES = Type.statusBars() | Type.navigationBars();
 
         private final DisplayContent mDisplayContent;
         private final Info[] mInfoForRotation = new Info[4];

@@ -3859,10 +3859,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.w(TAG, "takeTaskSnapshot: taskId=" + taskId + " not found or not visible");
                     return null;
                 }
+                // Note that if updateCache is true, ActivityRecord#shouldUseAppThemeSnapshot will
+                // be used to decide whether the task is allowed to be captured because that may
+                // be retrieved by recents. While if updateCache is false, the real snapshot will
+                // always be taken and the snapshot won't be put into SnapshotPersister.
                 if (updateCache) {
                     return mWindowManager.mTaskSnapshotController.recordSnapshot(task);
                 } else {
-                    return mWindowManager.mTaskSnapshotController.captureSnapshot(task);
+                    return mWindowManager.mTaskSnapshotController.snapshot(task);
                 }
             }
         } finally {

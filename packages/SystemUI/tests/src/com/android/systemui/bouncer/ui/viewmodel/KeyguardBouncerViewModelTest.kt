@@ -52,8 +52,7 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardBouncerViewModelTest : SysuiTestCase() {
-    lateinit var underTest: KeyguardBouncerViewModel
-    lateinit var bouncerInteractor: PrimaryBouncerInteractor
+
     @Mock lateinit var bouncerView: BouncerView
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var keyguardSecurityModel: KeyguardSecurityModel
@@ -62,8 +61,12 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
     @Mock private lateinit var dismissCallbackRegistry: DismissCallbackRegistry
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+
+    lateinit var bouncerInteractor: PrimaryBouncerInteractor
     private val mainHandler = FakeHandler(Looper.getMainLooper())
     val repository = FakeKeyguardBouncerRepository()
+
+    lateinit var underTest: KeyguardBouncerViewModel
 
     @Before
     fun setup() {

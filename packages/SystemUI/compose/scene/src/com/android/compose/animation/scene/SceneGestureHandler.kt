@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.compose.animation.scene
 
 import android.util.Log
@@ -25,10 +41,8 @@ class SceneGestureHandler(
     private val layoutImpl: SceneTransitionLayoutImpl,
     internal val orientation: Orientation,
     private val coroutineScope: CoroutineScope,
-) : GestureHandler {
-    override val draggable: DraggableHandler = SceneDraggableHandler(this)
-
-    override val nestedScroll: SceneNestedScrollHandler = SceneNestedScrollHandler(this)
+) {
+    val draggable: DraggableHandler = SceneDraggableHandler(this)
 
     private var transitionState
         get() = layoutImpl.state.transitionState
@@ -521,6 +535,8 @@ private class SceneDraggableHandler(
 @VisibleForTesting
 class SceneNestedScrollHandler(
     private val gestureHandler: SceneGestureHandler,
+    private val startBehavior: NestedScrollBehavior,
+    private val endBehavior: NestedScrollBehavior,
 ) : NestedScrollHandler {
     override val connection: PriorityNestedScrollConnection = nestedScrollConnection()
 
@@ -543,15 +559,9 @@ class SceneNestedScrollHandler(
         }
 
     private fun nestedScrollConnection(): PriorityNestedScrollConnection {
-        // The next potential scene is calculated during the canStart
-        var nextScene: SceneKey? = null
-
-        // This is the scene on which we will have priority during the scroll gesture.
-        var priorityScene: SceneKey? = null
-
         // If we performed a long gesture before entering priority mode, we would have to avoid
         // moving on to the next scene.
-        var gestureStartedOnNestedChild = false
+        var canChangeScene = false
 
         val actionUpOrLeft =
             Swipe(
@@ -573,51 +583,70 @@ class SceneNestedScrollHandler(
                 pointerCount = 1,
             )
 
-        fun findNextScene(amount: Float): SceneKey? {
+        fun hasNextScene(amount: Float): Boolean {
             val fromScene = gestureHandler.currentScene
-            return when {
-                amount < 0f -> fromScene.userActions[actionUpOrLeft]
-                amount > 0f -> fromScene.userActions[actionDownOrRight]
-                else -> null
-            }
+            val nextScene =
+                when {
+                    amount < 0f -> fromScene.userActions[actionUpOrLeft]
+                    amount > 0f -> fromScene.userActions[actionDownOrRight]
+                    else -> null
+                }
+            return nextScene != null
         }
 
         return PriorityNestedScrollConnection(
             canStartPreScroll = { offsetAvailable, offsetBeforeStart ->
-                gestureStartedOnNestedChild = offsetBeforeStart != Offset.Zero
-
-                val canInterceptPreScroll =
-                    gestureHandler.isDrivingTransition &&
-                        !gestureStartedOnNestedChild &&
-                        offsetAvailable.toAmount() != 0f
-
-                if (!canInterceptPreScroll) return@PriorityNestedScrollConnection false
-
-                nextScene = gestureHandler.swipeTransitionToScene.key
-
-                true
+                canChangeScene = offsetBeforeStart == Offset.Zero
+                gestureHandler.isDrivingTransition &&
+                    canChangeScene &&
+                    offsetAvailable.toAmount() != 0f
             },
             canStartPostScroll = { offsetAvailable, offsetBeforeStart ->
                 val amount = offsetAvailable.toAmount()
-                if (amount == 0f) return@PriorityNestedScrollConnection false
+                val behavior: NestedScrollBehavior =
+                    when {
+                        amount > 0 -> startBehavior
+                        amount < 0 -> endBehavior
+                        else -> return@PriorityNestedScrollConnection false
+                    }
 
-                gestureStartedOnNestedChild = offsetBeforeStart != Offset.Zero
-                nextScene = findNextScene(amount)
-                nextScene != null
+                val isZeroOffset = offsetBeforeStart == Offset.Zero
+
+                when (behavior) {
+                    NestedScrollBehavior.DuringTransitionBetweenScenes -> {
+                        canChangeScene = false // unused: added for consistency
+                        false
+                    }
+                    NestedScrollBehavior.EdgeNoOverscroll -> {
+                        canChangeScene = isZeroOffset
+                        isZeroOffset && hasNextScene(amount)
+                    }
+                    NestedScrollBehavior.EdgeWithOverscroll -> {
+                        canChangeScene = isZeroOffset
+                        hasNextScene(amount)
+                    }
+                    NestedScrollBehavior.Always -> {
+                        canChangeScene = true
+                        hasNextScene(amount)
+                    }
+                }
             },
             canStartPostFling = { velocityAvailable ->
                 val amount = velocityAvailable.toAmount()
-                if (amount == 0f) return@PriorityNestedScrollConnection false
+                val behavior: NestedScrollBehavior =
+                    when {
+                        amount > 0 -> startBehavior
+                        amount < 0 -> endBehavior
+                        else -> return@PriorityNestedScrollConnection false
+                    }
 
                 // We could start an overscroll animation
-                gestureStartedOnNestedChild = true
-                nextScene = findNextScene(amount)
-                nextScene != null
+                canChangeScene = false
+                behavior.canStartOnPostFling && hasNextScene(amount)
             },
-            canContinueScroll = { priorityScene == gestureHandler.swipeTransitionToScene.key },
+            canContinueScroll = { true },
             onStart = {
                 gestureHandler.gestureWithPriority = this
-                priorityScene = nextScene
                 gestureHandler.onDragStarted(pointersDown = 1, startedPosition = null)
             },
             onScroll = { offsetAvailable ->
@@ -638,11 +667,9 @@ class SceneNestedScrollHandler(
                     return@PriorityNestedScrollConnection Velocity.Zero
                 }
 
-                priorityScene = null
-
                 gestureHandler.onDragStopped(
                     velocity = velocityAvailable.toAmount(),
-                    canChangeScene = !gestureStartedOnNestedChild
+                    canChangeScene = canChangeScene
                 )
 
                 // The onDragStopped animation consumes any remaining velocity.

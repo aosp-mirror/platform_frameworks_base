@@ -20,7 +20,9 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.platform.LocalDensity
 
 /**
@@ -52,14 +54,16 @@ fun SceneTransitionLayout(
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
+    val coroutineScope = rememberCoroutineScope()
     val layoutImpl = remember {
         SceneTransitionLayoutImpl(
-            onChangeScene,
-            scenes,
-            transitions,
-            state,
-            density,
-            edgeDetector,
+            onChangeScene = onChangeScene,
+            builder = scenes,
+            transitions = transitions,
+            state = state,
+            density = density,
+            edgeDetector = edgeDetector,
+            coroutineScope = coroutineScope,
         )
     }
 
@@ -118,6 +122,20 @@ interface SceneScope {
      *   constraint.
      */
     fun Modifier.element(key: ElementKey): Modifier
+
+    /**
+     * Adds a [NestedScrollConnection] to intercept scroll events not handled by the scrollable
+     * component.
+     *
+     * @param orientation is used to determine if we handle top/bottom or left/right events.
+     * @param startBehavior when we should perform the overscroll animation at the top/left.
+     * @param endBehavior when we should perform the overscroll animation at the bottom/right.
+     */
+    fun Modifier.nestedScrollToScene(
+        orientation: Orientation,
+        startBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoOverscroll,
+        endBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoOverscroll,
+    ): Modifier
 
     /**
      * Create a *movable* element identified by [key].

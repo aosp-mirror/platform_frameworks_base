@@ -92,7 +92,6 @@ import org.mockito.MockitoAnnotations
 // to run the callback and this makes the looper place nicely with TestScope etc.
 @TestableLooper.RunWithLooper
 class MobileConnectionsRepositoryTest : SysuiTestCase() {
-    private lateinit var underTest: MobileConnectionsRepositoryImpl
 
     private lateinit var connectionFactory: MobileConnectionRepositoryImpl.Factory
     private lateinit var carrierMergedFactory: CarrierMergedConnectionRepository.Factory
@@ -101,6 +100,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private lateinit var airplaneModeRepository: FakeAirplaneModeRepository
     private lateinit var wifiRepository: WifiRepository
     private lateinit var carrierConfigRepository: CarrierConfigRepository
+
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
     @Mock private lateinit var telephonyManager: TelephonyManager
@@ -114,6 +114,8 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
     private val dispatcher = StandardTestDispatcher()
     private val testScope = TestScope(dispatcher)
+
+    private lateinit var underTest: MobileConnectionsRepositoryImpl
 
     @Before
     fun setUp() {
@@ -1176,6 +1178,16 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             updateMonitorCallback.value.onSimStateChanged(0, 0, 0)
 
             assertThat(latest).isFalse()
+        }
+
+    @Test
+    fun getIsAnySimSecure_delegatesCallToKeyguardUpdateMonitor() =
+        testScope.runTest {
+            assertThat(underTest.getIsAnySimSecure()).isFalse()
+
+            whenever(updateMonitor.isSimPinSecure).thenReturn(true)
+
+            assertThat(underTest.getIsAnySimSecure()).isTrue()
         }
 
     @Test

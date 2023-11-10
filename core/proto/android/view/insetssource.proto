@@ -30,4 +30,5 @@ message InsetsSourceProto {
     optional .android.graphics.RectProto frame = 2;
     optional .android.graphics.RectProto visible_frame = 3;
     optional bool visible = 4;
+    optional int32 type_number = 5;
 }

@@ -832,6 +832,13 @@
          is set to true. -->
     <bool name="config_remoteInsetsControllerSystemBarsCanBeShownByUserAction">false</bool>
 
+    <!-- To change the default behavior of how the insets get involved when calculating
+         configuration. This will no longer consider status bar and display cutout, and only
+         exclude navigation bars from the screen sizes. This is useful when the display is close to
+         square and the system bars may cause the orientation with non-preferred value.
+         -->
+    <bool name="config_decoupleStatusBarAndDisplayCutoutFromScreenSize">false</bool>
+
     <!-- HDMI behavior -->
 
     <!-- The number of degrees to rotate the display when the device has HDMI connected
@@ -1255,6 +1262,11 @@
         Note that this config has no effect on long press behavior.
     -->
     <bool name="config_shortPressEarlyOnPower">false</bool>
+
+    <!-- Whether a single short press on STEM_PRIMARY should be launched without multi-press delay.
+        This works similarly as config_shortPressEarlyOnPower but for STEM_PRIMARY.
+    -->
+    <bool name="config_shortPressEarlyOnStemPrimary">false</bool>
 
     <!-- Control the behavior of the search key.
             0 - Launch default search activity
@@ -2706,6 +2718,12 @@
     <!-- If true, the doze component is not started until after the screen has been
          turned off and the screen off animation has been performed. -->
     <bool name="config_dozeAfterScreenOffByDefault">false</bool>
+
+    <!-- If true, bright policy will be applied when we have entered dozing wakefulness but haven't
+         started doze component. This can be used to suppress the temporary dim state before
+         starting a dream service. This is typically used together with
+         config_maximumScreenDimDuration set to 0 to completely suppress dim effect. -->
+    <bool name="config_brightWhenDozing">false</bool>
 
     <!-- Doze: should the TYPE_PICK_UP_GESTURE sensor be used as a pulse signal. -->
     <bool name="config_dozePulsePickup">false</bool>

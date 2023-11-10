@@ -30,6 +30,7 @@ import static com.android.server.wm.InsetsSourceProviderProto.PENDING_CONTROL_TA
 import static com.android.server.wm.InsetsSourceProviderProto.SEAMLESS_ROTATING;
 import static com.android.server.wm.InsetsSourceProviderProto.SERVER_VISIBLE;
 import static com.android.server.wm.InsetsSourceProviderProto.SOURCE;
+import static com.android.server.wm.InsetsSourceProviderProto.SOURCE_WINDOW_STATE;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_INSETS_CONTROL;
 
 import android.annotation.NonNull;
@@ -304,7 +305,7 @@ class InsetsSourceProvider {
             return mInsetsHint;
         }
         final WindowState win = mWindowContainer.asWindowState();
-        if (win != null && win.mGivenInsetsPending) {
+        if (win != null && win.mGivenInsetsPending && win.mAttrs.providedInsets == null) {
             return mInsetsHint;
         }
         if (mInsetsHintStale) {
@@ -680,6 +681,9 @@ class InsetsSourceProvider {
         proto.write(SERVER_VISIBLE, mServerVisible);
         proto.write(SEAMLESS_ROTATING, mSeamlessRotating);
         proto.write(CONTROLLABLE, mControllable);
+        if (mWindowContainer != null && mWindowContainer.asWindowState() != null) {
+            mWindowContainer.asWindowState().dumpDebug(proto, SOURCE_WINDOW_STATE, logLevel);
+        }
         proto.end(token);
     }
 

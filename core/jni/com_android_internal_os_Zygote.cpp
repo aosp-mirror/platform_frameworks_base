@@ -1094,8 +1094,8 @@ static std::string getAppDataDirName(std::string_view parent_path, std::string_v
       }
       struct dirent* ent;
       while ((ent = readdir(dir.get()))) {
-        if (ent->d_ino == ce_data_inode) {
-          return ent->d_name;
+        if (static_cast<long long>(ent->d_ino) == ce_data_inode) {
+            return ent->d_name;
         }
       }
     }
@@ -1765,14 +1765,14 @@ static void ReloadBuildJavaConstant(JNIEnv* env, jclass build_class, const char*
 static void ReloadBuildJavaConstants(JNIEnv* env) {
   jclass build_cls = env->FindClass("android/os/Build");
   size_t arr_size = sizeof(build_constants) / sizeof(build_constants[0]);
-  for (int i = 0; i < arr_size; i++) {
+  for (size_t i = 0; i < arr_size; i++) {
     const char* field_name = build_constants[i].first;
     const char* sysprop_name = build_constants[i].second;
     ReloadBuildJavaConstant(env, build_cls, field_name, "Ljava/lang/String;", sysprop_name);
   }
   jclass build_version_cls = env->FindClass("android/os/Build$VERSION");
   arr_size = sizeof(build_version_constants) / sizeof(build_version_constants[0]);
-  for (int i = 0; i < arr_size; i++) {
+  for (size_t i = 0; i < arr_size; i++) {
     const char* field_name = build_version_constants[i].first;
     const char* sysprop_name = build_version_constants[i].second;
     ReloadBuildJavaConstant(env, build_version_cls, field_name, "Ljava/lang/String;", sysprop_name);
@@ -2901,7 +2901,7 @@ static jint com_android_internal_os_Zygote_nativeParseSigChld(JNIEnv* env, jclas
         return -1;
     }
     ScopedByteArrayRO source(env, in);
-    if (source.size() < length) {
+    if (source.size() < static_cast<size_t>(length)) {
         // Invalid parameter
         jniThrowException(env, "java/lang/IllegalArgumentException", nullptr);
         return -1;
