@@ -2747,5 +2747,4 @@ public class AudioDeviceBroker {
     void clearDeviceInventory() {
         mDeviceInventory.clearDeviceInventory();
     }
-
 }
