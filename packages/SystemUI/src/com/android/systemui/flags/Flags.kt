@@ -783,9 +783,4 @@ object Flags {
     @JvmField
     val COMMUNAL_SERVICE_ENABLED = resourceBooleanFlag(R.bool.config_communalServiceEnabled,
         "communal_service_enabled")
-
-    // TODO(b/303131306): Tracking Bug
-    /** Whether communal hub features are enabled. */
-    @JvmField
-    val COMMUNAL_HUB = unreleasedFlag("communal_hub")
 }
