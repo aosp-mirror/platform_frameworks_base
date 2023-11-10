@@ -49,21 +49,22 @@ import org.junit.runners.Parameterized
 class OpenAppFromLockscreenNotificationWarmTest(flicker: LegacyFlickerTest) :
     OpenAppFromNotificationWarmTest(flicker) {
 
-    override val openingNotificationsFromLockScreen = true
-
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            // Needs to run at start of transition,
-            // so before the transition defined in super.transition
-            transitions { device.wakeUp() }
-
-            super.transition(this)
+            transitions {
+                device.wakeUp()
+                openAppFromLockNotification()
+            }
 
             // Needs to run at the end of the setup, so after the setup defined in super.transition
             setup {
+                launchAppAndPostNotification()
+                goHome()
                 device.sleep()
                 wmHelper.StateSyncBuilder().withoutTopVisibleAppWindows().waitForAndVerify()
             }
+
+            teardown { testApp.exit(wmHelper) }
         }
 
     /**

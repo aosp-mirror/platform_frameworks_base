@@ -21,6 +21,7 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
+import android.tools.device.flicker.legacy.FlickerTestData
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.wakeUpAndGoToHomeScreen
@@ -55,63 +56,68 @@ open class OpenAppFromNotificationWarmTest(flicker: LegacyFlickerTest) :
     OpenAppTransition(flicker) {
     override val testApp: NotificationAppHelper = NotificationAppHelper(instrumentation)
 
-    open val openingNotificationsFromLockScreen = false
-
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             setup {
                 device.wakeUpAndGoToHomeScreen()
                 this.setRotation(flicker.scenario.startRotation)
-                testApp.launchViaIntent(wmHelper)
-                wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
-                testApp.postNotification(wmHelper)
-                device.pressHome()
-                wmHelper
-                    .StateSyncBuilder()
-                    .withHomeActivityVisible()
-                    .withWindowSurfaceDisappeared(ComponentNameMatcher.NOTIFICATION_SHADE)
-                    .waitForAndVerify()
+                launchAppAndPostNotification()
+                goHome()
             }
 
-            transitions {
-                var startY = 10
-                var endY = 3 * device.displayHeight / 4
-                var steps = 25
-                if (openingNotificationsFromLockScreen) {
-                    val wm: WindowManager =
-                        instrumentation.context.getSystemService(WindowManager::class.java)
-                            ?: error("Unable to connect to WindowManager service")
-                    val metricInsets = wm.currentWindowMetrics.windowInsets
-                    val insets =
-                        metricInsets.getInsetsIgnoringVisibility(
-                            WindowInsets.Type.statusBars() or WindowInsets.Type.displayCutout()
-                        )
-
-                    startY = insets.top + 100
-                    endY = device.displayHeight / 2
-                    steps = 4
-                }
-
-                // Swipe down to show the notification shade
-                val x = device.displayWidth / 2
-                device.swipe(x, startY, x, endY, steps)
-                device.waitForIdle(2000)
-                instrumentation.uiAutomation.syncInputTransactions()
-
-                // Launch the activity by clicking the notification
-                val notification =
-                    device.wait(Until.findObject(By.text("Flicker Test Notification")), 2000L)
-                notification?.click() ?: error("Notification not found")
-                instrumentation.uiAutomation.syncInputTransactions()
-
-                // Wait for the app to launch
-                wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
-            }
+            transitions { openAppFromNotification() }
 
             teardown { testApp.exit(wmHelper) }
         }
 
+    protected fun FlickerTestData.launchAppAndPostNotification() {
+        testApp.launchViaIntent(wmHelper)
+        wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
+        testApp.postNotification(wmHelper)
+    }
+
+    protected fun FlickerTestData.goHome() {
+        device.pressHome()
+        wmHelper
+            .StateSyncBuilder()
+            .withHomeActivityVisible()
+            .withWindowSurfaceDisappeared(ComponentNameMatcher.NOTIFICATION_SHADE)
+            .waitForAndVerify()
+    }
+    protected fun FlickerTestData.openAppFromNotification() {
+        doOpenAppAndWait(startY = 10, endY = 3 * device.displayHeight / 4, steps = 25)
+    }
+
+    protected fun FlickerTestData.openAppFromLockNotification() {
+        val wm: WindowManager =
+            instrumentation.context.getSystemService(WindowManager::class.java)
+                ?: error("Unable to connect to WindowManager service")
+        val metricInsets = wm.currentWindowMetrics.windowInsets
+        val insets =
+            metricInsets.getInsetsIgnoringVisibility(
+                WindowInsets.Type.statusBars() or WindowInsets.Type.displayCutout()
+            )
+
+        doOpenAppAndWait(startY = insets.top + 100, endY = device.displayHeight / 2, steps = 4)
+    }
+
+    protected fun FlickerTestData.doOpenAppAndWait(startY: Int, endY: Int, steps: Int) {
+        // Swipe down to show the notification shade
+        val x = device.displayWidth / 2
+        device.swipe(x, startY, x, endY, steps)
+        device.waitForIdle(2000)
+        instrumentation.uiAutomation.syncInputTransactions()
+
+        // Launch the activity by clicking the notification
+        val notification =
+            device.wait(Until.findObject(By.text("Flicker Test Notification")), 2000L)
+        notification?.click() ?: error("Notification not found")
+        instrumentation.uiAutomation.syncInputTransactions()
+
+        // Wait for the app to launch
+        wmHelper.StateSyncBuilder().withFullScreenApp(testApp).waitForAndVerify()
+    }
     @Presubmit @Test override fun appWindowBecomesVisible() = appWindowBecomesVisible_warmStart()
 
     @Presubmit @Test override fun appLayerBecomesVisible() = appLayerBecomesVisible_warmStart()
