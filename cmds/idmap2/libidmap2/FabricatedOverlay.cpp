@@ -468,9 +468,9 @@ Result<OverlayData> FabContainer::GetOverlayData(const OverlayManifestInfo& info
                                        entry.name().c_str());
         const auto& res_value = entry.res_value();
         result.pairs.emplace_back(OverlayData::Value{
-            name, TargetValueWithConfig{.config = entry.configuration(), .value = TargetValue{
+            name, TargetValueWithConfig{.value = TargetValue{
                     .data_type = static_cast<uint8_t>(res_value.data_type()),
-                    .data_value = res_value.data_value()}}});
+                    .data_value = res_value.data_value()}, .config = entry.configuration()}});
       }
     }
   }
