@@ -49,14 +49,12 @@
             android:lineBreakWordStyle="phrase"
             style="@style/MainSwitchText.Settingslib" />
 
-        <Switch
+        <include
             android:id="@android:id/switch_widget"
+            layout="@layout/preference_widget_switch_compat"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_gravity="center_vertical"
-            android:focusable="false"
-            android:clickable="false"
-            android:theme="@style/Switch.SettingsLib"/>
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical" />
     </LinearLayout>
 
 </LinearLayout>
