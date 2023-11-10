@@ -376,6 +376,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.MIGRATE_NSSL, false);
         mFeatureFlags.set(Flags.QS_USER_DETAIL_SHORTCUT, false);
         mFeatureFlags.set(Flags.ONE_WAY_HAPTICS_API_MIGRATION, false);
+        mFeatureFlags.set(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT, false);
         mMainDispatcher = getMainDispatcher();
         KeyguardInteractorFactory.WithDependencies keyguardInteractorDeps =
                 KeyguardInteractorFactory.create();
