@@ -377,7 +377,7 @@ class AnnotationBasedFilter(
                         throw HostStubGenInternalException("Policy $policy shouldn't show up here")
                     }
 
-                    val suffix = getAnnotationField(an, "suffix") ?: return@let
+                    val suffix = getAnnotationField(an, "suffix", false) ?: "\$ravenwood"
                     val renameFrom = mn.name + suffix
                     val renameTo = mn.name
 
@@ -405,10 +405,11 @@ class AnnotationBasedFilter(
     /**
      * Return the (String) value of 'value' parameter from an annotation.
      */
-    private fun getAnnotationField(an: AnnotationNode, name: String): String? {
+    private fun getAnnotationField(an: AnnotationNode, name: String,
+                                   required: Boolean = true): String? {
         try {
             val suffix = findAnnotationValueAsString(an, name)
-            if (suffix == null) {
+            if (suffix == null && required) {
                 errors.onErrorFound("Annotation \"${an.desc}\" must have field $name")
             }
             return suffix

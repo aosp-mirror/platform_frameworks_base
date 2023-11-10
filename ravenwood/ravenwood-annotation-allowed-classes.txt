@@ -1,2 +1,3 @@
 # Only classes listed here can use the Ravenwood annotations.
 
+com.android.internal.util.ArrayUtils

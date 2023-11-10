@@ -13,10 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.ravenwood.annotations;
+package android.ravenwood.annotation;
 
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
+import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,7 +33,7 @@ import java.lang.annotation.Target;
  *
  * @hide
  */
-@Target({METHOD, CONSTRUCTOR})
+@Target({TYPE, FIELD, METHOD, CONSTRUCTOR})
 @Retention(RetentionPolicy.CLASS)
-public @interface RavenwoodThrow {
+public @interface RavenwoodKeepWholeClass {
 }

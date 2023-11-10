@@ -76,16 +76,6 @@ class android.util.Patterns stubclass
 class android.util.UtilConfig stubclass
 
 # Internals
-class com.android.internal.util.ArrayUtils stubclass
-    method newUnpaddedByteArray (I)[B @newUnpaddedByteArray$ravenwood
-    method newUnpaddedCharArray (I)[C @newUnpaddedCharArray$ravenwood
-    method newUnpaddedIntArray (I)[I @newUnpaddedIntArray$ravenwood
-    method newUnpaddedBooleanArray (I)[Z @newUnpaddedBooleanArray$ravenwood
-    method newUnpaddedLongArray (I)[J @newUnpaddedLongArray$ravenwood
-    method newUnpaddedFloatArray (I)[F @newUnpaddedFloatArray$ravenwood
-    method newUnpaddedObjectArray (I)[Ljava/lang/Object; @newUnpaddedObjectArray$ravenwood
-    method newUnpaddedArray (Ljava/lang/Class;I)[Ljava/lang/Object; @newUnpaddedArray$ravenwood
-
 class com.android.internal.util.GrowingArrayUtils stubclass
 class com.android.internal.util.LineBreakBufferedWriter stubclass
 class com.android.internal.util.Preconditions stubclass

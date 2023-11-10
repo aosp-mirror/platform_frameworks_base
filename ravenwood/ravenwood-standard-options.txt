@@ -16,22 +16,22 @@
 # Standard annotations.
 # Note, each line is a single argument, so we need newlines after each `--xxx-annotation`.
 --keep-annotation
-    android.ravenwood.annotations.RavenwoodKeep
+    android.ravenwood.annotation.RavenwoodKeep
 
 --keep-class-annotation
-    android.ravenwood.annotations.RavenwoodWholeClassKeep
+    android.ravenwood.annotation.RavenwoodKeepWholeClass
 
 --throw-annotation
-    android.ravenwood.annotations.RavenwoodThrow
+    android.ravenwood.annotation.RavenwoodThrow
 
 --remove-annotation
-    android.ravenwood.annotations.RavenwoodRemove
+    android.ravenwood.annotation.RavenwoodRemove
 
 --substitute-annotation
-    android.ravenwood.annotations.RavenwoodSubstitute
+    android.ravenwood.annotation.RavenwoodReplace
 
 --native-substitute-annotation
-    android.ravenwood.annotations.RavenwoodNativeSubstitutionClass
+    android.ravenwood.annotation.RavenwoodNativeSubstitutionClass
 
 --class-load-hook-annotation
-    android.ravenwood.annotations.RavenwoodClassLoadHook
+    android.ravenwood.annotation.RavenwoodClassLoadHook
