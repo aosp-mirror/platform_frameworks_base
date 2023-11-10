@@ -15,7 +15,6 @@ android_test {
         "frameworks-base-testutils",
         "platform-compat-test-rules",
         "platform-test-annotations",
-        "service-jobscheduler-deviceidle.flags-aconfig-java",
         "services.core",
         "servicestests-utils",
         "testables",

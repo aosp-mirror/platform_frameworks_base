@@ -13,6 +13,10 @@ java_library {
     name: "service-jobscheduler",
     installable: true,
 
+    defaults: [
+        "service-jobscheduler-aconfig-libraries",
+    ],
+
     srcs: [
         "java/**/*.java",
         ":framework-jobscheduler-shared-srcs",
@@ -23,8 +27,6 @@ java_library {
         "app-compat-annotations",
         "framework",
         "services.core",
-        "service-jobscheduler-deviceidle.flags-aconfig-java",
-        "service-jobscheduler-job.flags-aconfig-java",
         "unsupportedappusage",
     ],
 
