@@ -34,7 +34,8 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Chiqarish"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Bu ilovada ekranni ikkiga ajratish rejimi ishlamaydi."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Bu ilovada ekranni ikkiga ajratish ishlamaydi."</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"Bu ilovani faqat 1 ta oynada ochish mumkin."</string>
+    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
+    <skip />
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Bu ilova qo‘shimcha ekranda ishlamasligi mumkin."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Bu ilova qo‘shimcha ekranlarda ishga tushmaydi."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Ekranni ikkiga ajratish chizigʻi"</string>
