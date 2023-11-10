@@ -78,7 +78,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import com.android.compose.PlatformButton
 import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.SceneKey as SceneTransitionLayoutSceneKey
 import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.transitions
 import com.android.compose.modifiers.thenIf
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
@@ -90,6 +93,8 @@ import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.Text.Companion.loadText
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.fold.ui.composable.FoldPosture
+import com.android.systemui.fold.ui.composable.foldPosture
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
@@ -159,28 +164,27 @@ private fun SceneScope.BouncerScene(
 
         when (layout) {
             Layout.STANDARD ->
-                Bouncer(
+                StandardLayout(
                     viewModel = viewModel,
                     dialogFactory = dialogFactory,
-                    userInputAreaVisibility = UserInputAreaVisibility.FULL,
                     modifier = childModifier,
                 )
             Layout.SIDE_BY_SIDE ->
-                SideBySide(
+                SideBySideLayout(
                     viewModel = viewModel,
                     dialogFactory = dialogFactory,
                     isUserSwitcherVisible = isFullScreenUserSwitcherEnabled,
                     modifier = childModifier,
                 )
             Layout.STACKED ->
-                Stacked(
+                StackedLayout(
                     viewModel = viewModel,
                     dialogFactory = dialogFactory,
                     isUserSwitcherVisible = isFullScreenUserSwitcherEnabled,
                     modifier = childModifier,
                 )
             Layout.SPLIT ->
-                Split(
+                SplitLayout(
                     viewModel = viewModel,
                     dialogFactory = dialogFactory,
                     modifier = childModifier,
@@ -194,59 +198,150 @@ private fun SceneScope.BouncerScene(
  * authentication attempt, including all messaging UI (directives, reasoning, errors, etc.).
  */
 @Composable
-private fun Bouncer(
+private fun StandardLayout(
     viewModel: BouncerViewModel,
     dialogFactory: BouncerSceneDialogFactory,
-    userInputAreaVisibility: UserInputAreaVisibility,
+    modifier: Modifier = Modifier,
+    outputOnly: Boolean = false,
+) {
+    val foldPosture: FoldPosture by foldPosture()
+    val isSplitAroundTheFoldRequired by viewModel.isFoldSplitRequired.collectAsState()
+    val isSplitAroundTheFold =
+        foldPosture == FoldPosture.Tabletop && !outputOnly && isSplitAroundTheFoldRequired
+    val currentSceneKey by
+        remember(isSplitAroundTheFold) {
+            mutableStateOf(
+                if (isSplitAroundTheFold) SceneKeys.SplitSceneKey else SceneKeys.ContiguousSceneKey
+            )
+        }
+
+    SceneTransitionLayout(
+        currentScene = currentSceneKey,
+        onChangeScene = {},
+        transitions = SceneTransitions,
+        modifier = modifier,
+    ) {
+        scene(SceneKeys.ContiguousSceneKey) {
+            FoldSplittable(
+                viewModel = viewModel,
+                dialogFactory = dialogFactory,
+                outputOnly = outputOnly,
+                isSplit = false,
+            )
+        }
+
+        scene(SceneKeys.SplitSceneKey) {
+            FoldSplittable(
+                viewModel = viewModel,
+                dialogFactory = dialogFactory,
+                outputOnly = outputOnly,
+                isSplit = true,
+            )
+        }
+    }
+}
+
+/**
+ * Renders the "standard" layout of the bouncer, where the bouncer is rendered on its own (no user
+ * switcher UI) and laid out vertically, centered horizontally.
+ *
+ * If [isSplit] is `true`, the top and bottom parts of the bouncer are split such that they don't
+ * render across the location of the fold hardware when the device is fully or part-way unfolded
+ * with the fold hinge in a horizontal position.
+ *
+ * If [outputOnly] is `true`, only the "output" part of the UI is shown (where the entered PIN
+ * "shapes" appear), if `false`, the entire UI is shown, including the area where the user can enter
+ * their PIN or pattern.
+ */
+@Composable
+private fun SceneScope.FoldSplittable(
+    viewModel: BouncerViewModel,
+    dialogFactory: BouncerSceneDialogFactory,
+    outputOnly: Boolean,
+    isSplit: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val message: BouncerViewModel.MessageViewModel by viewModel.message.collectAsState()
     val dialogMessage: String? by viewModel.throttlingDialogMessage.collectAsState()
     var dialog: Dialog? by remember { mutableStateOf(null) }
     val actionButton: BouncerActionButtonModel? by viewModel.actionButton.collectAsState()
+    val splitRatio =
+        LocalContext.current.resources.getFloat(
+            R.dimen.motion_layout_half_fold_bouncer_height_ratio
+        )
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.padding(start = 32.dp, top = 92.dp, end = 32.dp, bottom = 0.dp)
-    ) {
-        Crossfade(
-            targetState = message,
-            label = "Bouncer message",
-            animationSpec = if (message.isUpdateAnimated) tween() else snap(),
-        ) { message ->
-            Text(
-                text = message.text,
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.bodyLarge,
-            )
-        }
+    Column(modifier = modifier.padding(horizontal = 32.dp)) {
+        // Content above the fold, when split on a foldable device in a "table top" posture:
+        Box(
+            modifier =
+                Modifier.element(SceneElements.AboveFold).fillMaxWidth().thenIf(isSplit) {
+                    Modifier.weight(splitRatio)
+                },
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth().padding(top = 92.dp),
+            ) {
+                Crossfade(
+                    targetState = message,
+                    label = "Bouncer message",
+                    animationSpec = if (message.isUpdateAnimated) tween() else snap(),
+                ) { message ->
+                    Text(
+                        text = message.text,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
 
-        Spacer(Modifier.heightIn(min = 21.dp, max = 48.dp))
+                Spacer(Modifier.heightIn(min = 21.dp, max = 48.dp))
 
-        Box(Modifier.weight(1f)) {
-            UserInputArea(
-                viewModel = viewModel,
-                visibility = userInputAreaVisibility,
-                modifier = Modifier.align(Alignment.Center),
-            )
-        }
-
-        Spacer(Modifier.heightIn(min = 21.dp, max = 48.dp))
-
-        val actionButtonModifier = Modifier.height(56.dp)
-
-        actionButton.let { actionButtonViewModel ->
-            if (actionButtonViewModel != null) {
-                BouncerActionButton(
-                    viewModel = actionButtonViewModel,
-                    modifier = actionButtonModifier,
+                UserInputArea(
+                    viewModel = viewModel,
+                    visibility = UserInputAreaVisibility.OUTPUT_ONLY,
                 )
-            } else {
-                Spacer(modifier = actionButtonModifier)
             }
         }
 
-        Spacer(Modifier.height(48.dp))
+        // Content below the fold, when split on a foldable device in a "table top" posture:
+        Box(
+            modifier =
+                Modifier.element(SceneElements.BelowFold).fillMaxWidth().thenIf(isSplit) {
+                    Modifier.weight(1 - splitRatio)
+                },
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                if (!outputOnly) {
+                    Box(Modifier.weight(1f)) {
+                        UserInputArea(
+                            viewModel = viewModel,
+                            visibility = UserInputAreaVisibility.INPUT_ONLY,
+                            modifier = Modifier.align(Alignment.Center),
+                        )
+                    }
+                }
+
+                Spacer(Modifier.heightIn(min = 21.dp, max = 48.dp))
+
+                val actionButtonModifier = Modifier.height(56.dp)
+
+                actionButton.let { actionButtonViewModel ->
+                    if (actionButtonViewModel != null) {
+                        BouncerActionButton(
+                            viewModel = actionButtonViewModel,
+                            modifier = actionButtonModifier,
+                        )
+                    } else {
+                        Spacer(modifier = actionButtonModifier)
+                    }
+                }
+
+                Spacer(Modifier.height(48.dp))
+            }
+        }
 
         if (dialogMessage != null) {
             if (dialog == null) {
@@ -288,8 +383,8 @@ private fun UserInputArea(
     when (val nonNullViewModel = authMethodViewModel) {
         is PinBouncerViewModel ->
             when (visibility) {
-                UserInputAreaVisibility.FULL ->
-                    PinBouncer(
+                UserInputAreaVisibility.OUTPUT_ONLY ->
+                    PinInputDisplay(
                         viewModel = nonNullViewModel,
                         modifier = modifier,
                     )
@@ -298,34 +393,21 @@ private fun UserInputArea(
                         viewModel = nonNullViewModel,
                         modifier = modifier,
                     )
-                UserInputAreaVisibility.OUTPUT_ONLY ->
-                    PinInputDisplay(
-                        viewModel = nonNullViewModel,
-                        modifier = modifier,
-                    )
-                UserInputAreaVisibility.NONE -> {}
             }
         is PasswordBouncerViewModel ->
-            when (visibility) {
-                UserInputAreaVisibility.FULL,
-                UserInputAreaVisibility.INPUT_ONLY ->
-                    PasswordBouncer(
-                        viewModel = nonNullViewModel,
-                        modifier = modifier,
-                    )
-                else -> {}
+            if (visibility == UserInputAreaVisibility.INPUT_ONLY) {
+                PasswordBouncer(
+                    viewModel = nonNullViewModel,
+                    modifier = modifier,
+                )
             }
         is PatternBouncerViewModel ->
-            when (visibility) {
-                UserInputAreaVisibility.FULL,
-                UserInputAreaVisibility.INPUT_ONLY ->
-                    PatternBouncer(
-                        viewModel = nonNullViewModel,
-                        modifier =
-                            Modifier.aspectRatio(1f, matchHeightConstraintsFirst = false)
-                                .then(modifier)
-                    )
-                else -> {}
+            if (visibility == UserInputAreaVisibility.INPUT_ONLY) {
+                PatternBouncer(
+                    viewModel = nonNullViewModel,
+                    modifier =
+                        Modifier.aspectRatio(1f, matchHeightConstraintsFirst = false).then(modifier)
+                )
             }
         else -> Unit
     }
@@ -492,17 +574,17 @@ private fun UserSwitcherDropdownMenu(
  * by double-tapping on the side.
  */
 @Composable
-private fun Split(
+private fun SplitLayout(
     viewModel: BouncerViewModel,
     dialogFactory: BouncerSceneDialogFactory,
     modifier: Modifier = Modifier,
 ) {
     SwappableLayout(
         startContent = { startContentModifier ->
-            Bouncer(
+            StandardLayout(
                 viewModel = viewModel,
                 dialogFactory = dialogFactory,
-                userInputAreaVisibility = UserInputAreaVisibility.OUTPUT_ONLY,
+                outputOnly = true,
                 modifier = startContentModifier,
             )
         },
@@ -595,7 +677,7 @@ private fun SwappableLayout(
  * rendering of the bouncer will be used instead of the side-by-side layout.
  */
 @Composable
-private fun SideBySide(
+private fun SideBySideLayout(
     viewModel: BouncerViewModel,
     dialogFactory: BouncerSceneDialogFactory,
     isUserSwitcherVisible: Boolean,
@@ -615,10 +697,9 @@ private fun SideBySide(
             }
         },
         endContent = { endContentModifier ->
-            Bouncer(
+            StandardLayout(
                 viewModel = viewModel,
                 dialogFactory = dialogFactory,
-                userInputAreaVisibility = UserInputAreaVisibility.FULL,
                 modifier = endContentModifier,
             )
         },
@@ -628,7 +709,7 @@ private fun SideBySide(
 
 /** Arranges the bouncer contents and user switcher contents one on top of the other, vertically. */
 @Composable
-private fun Stacked(
+private fun StackedLayout(
     viewModel: BouncerViewModel,
     dialogFactory: BouncerSceneDialogFactory,
     isUserSwitcherVisible: Boolean,
@@ -644,10 +725,9 @@ private fun Stacked(
             )
         }
 
-        Bouncer(
+        StandardLayout(
             viewModel = viewModel,
             dialogFactory = dialogFactory,
-            userInputAreaVisibility = UserInputAreaVisibility.FULL,
             modifier = Modifier.fillMaxWidth().weight(1f),
         )
     }
@@ -708,11 +788,6 @@ private enum class Layout {
 /** Enumerates all supported user-input area visibilities. */
 private enum class UserInputAreaVisibility {
     /**
-     * The entire user input area is shown, including where the user enters input and where it's
-     * reflected to the user.
-     */
-    FULL,
-    /**
      * Only the area where the user enters the input is shown; the area where the input is reflected
      * back to the user is not shown.
      */
@@ -722,8 +797,6 @@ private enum class UserInputAreaVisibility {
      * input is entered by the user is not shown.
      */
     OUTPUT_ONLY,
-    /** The entire user input area is hidden. */
-    NONE,
 }
 
 /**
@@ -758,3 +831,17 @@ private fun animatedAlpha(
 private val SelectedUserImageSize = 190.dp
 private val UserSwitcherDropdownWidth = SelectedUserImageSize + 2 * 29.dp
 private val UserSwitcherDropdownHeight = 60.dp
+
+private object SceneKeys {
+    val ContiguousSceneKey = SceneTransitionLayoutSceneKey("default")
+    val SplitSceneKey = SceneTransitionLayoutSceneKey("split")
+}
+
+private object SceneElements {
+    val AboveFold = ElementKey("above_fold")
+    val BelowFold = ElementKey("below_fold")
+}
+
+private val SceneTransitions = transitions {
+    from(SceneKeys.ContiguousSceneKey, to = SceneKeys.SplitSceneKey) { spec = tween() }
+}

@@ -24,14 +24,10 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -69,34 +65,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-internal fun PinBouncer(
+fun PinPad(
     viewModel: PinBouncerViewModel,
     modifier: Modifier = Modifier,
 ) {
     // Report that the UI is shown to let the view-model run some logic.
     LaunchedEffect(Unit) { viewModel.onShown() }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier =
-            modifier.pointerInput(Unit) {
-                awaitEachGesture {
-                    awaitFirstDown()
-                    viewModel.onDown()
-                }
-            }
-    ) {
-        PinInputDisplay(viewModel)
-        Spacer(Modifier.heightIn(min = 34.dp, max = 48.dp))
-        PinPad(viewModel)
-    }
-}
-
-@Composable
-fun PinPad(
-    viewModel: PinBouncerViewModel,
-    modifier: Modifier = Modifier,
-) {
     val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
     val backspaceButtonAppearance by viewModel.backspaceButtonAppearance.collectAsState()
     val confirmButtonAppearance by viewModel.confirmButtonAppearance.collectAsState()
@@ -298,7 +273,8 @@ private fun PinPadButton(
         contentAlignment = Alignment.Center,
         modifier =
             modifier
-                .size(pinButtonSize)
+                .sizeIn(maxWidth = pinButtonSize, maxHeight = pinButtonSize)
+                .aspectRatio(1f)
                 .drawBehind {
                     drawRoundRect(
                         color = containerColor,

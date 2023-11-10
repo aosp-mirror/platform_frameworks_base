@@ -226,6 +226,23 @@ class BouncerViewModelTest : SysuiTestCase() {
             assertThat(isSideBySideSupported).isFalse()
         }
 
+    @Test
+    fun isFoldSplitRequired() =
+        testScope.runTest {
+            val isFoldSplitRequired by collectLastValue(underTest.isFoldSplitRequired)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            assertThat(isFoldSplitRequired).isTrue()
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Password
+            )
+            assertThat(isFoldSplitRequired).isFalse()
+
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Pattern
+            )
+            assertThat(isFoldSplitRequired).isTrue()
+        }
+
     private fun authMethodsToTest(): List<DomainLayerAuthenticationMethodModel> {
         return listOf(
             DomainLayerAuthenticationMethodModel.None,
