@@ -72,14 +72,27 @@ public class RefreshRateSettingsUtilsTest {
 
     @Test
     public void testFindHighestRefreshRateForDefaultDisplay() {
+        when(mDisplayManagerMock.getDisplay(Display.DEFAULT_DISPLAY)).thenReturn(mDisplayMock);
+        assertEquals(120,
+                RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(mContext),
+                /* delta= */ 0);
+    }
+
+    @Test
+    public void testFindHighestRefreshRate() {
+        int displayId = 13;
+        when(mDisplayManagerMock.getDisplay(displayId)).thenReturn(mDisplayMock);
+        assertEquals(120,
+                RefreshRateSettingsUtils.findHighestRefreshRate(mContext, displayId),
+                /* delta= */ 0);
+    }
+
+    @Test
+    public void testFindHighestRefreshRate_DisplayIsNull() {
         when(mDisplayManagerMock.getDisplay(Display.DEFAULT_DISPLAY)).thenReturn(null);
         assertEquals(DEFAULT_REFRESH_RATE,
                 RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(mContext),
                 /* delta= */ 0);
 
-        when(mDisplayManagerMock.getDisplay(Display.DEFAULT_DISPLAY)).thenReturn(mDisplayMock);
-        assertEquals(120,
-                RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(mContext),
-                /* delta= */ 0);
     }
 }
