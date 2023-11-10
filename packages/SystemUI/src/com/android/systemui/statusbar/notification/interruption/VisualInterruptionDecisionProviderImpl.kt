@@ -155,6 +155,7 @@ constructor(
         addFilter(PulseLockscreenVisibilityPrivateSuppressor())
         addFilter(PulseLowImportanceSuppressor())
         addFilter(BubbleNotAllowedSuppressor())
+        addFilter(BubbleAppSuspendedSuppressor())
         addFilter(BubbleNoMetadataSuppressor())
         addFilter(HunGroupAlertBehaviorSuppressor())
         addFilter(HunJustLaunchedFsiSuppressor())

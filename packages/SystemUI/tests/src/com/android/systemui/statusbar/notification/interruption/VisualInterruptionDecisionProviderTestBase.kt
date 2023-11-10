@@ -595,6 +595,13 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     }
 
     @Test
+    fun testShouldNotBubble_bubbleAppSuspended() {
+        ensureBubbleState()
+        assertShouldNotBubble(buildBubbleEntry { packageSuspended = true })
+        assertNoEventsLogged()
+    }
+
+    @Test
     fun testShouldNotFsi_noFullScreenIntent() {
         forEachFsiState {
             assertShouldNotFsi(buildFsiEntry { hasFsi = false })
