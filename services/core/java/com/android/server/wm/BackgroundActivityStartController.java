@@ -545,18 +545,15 @@ public class BackgroundActivityStartController {
         BalVerdict resultForCaller = checkBackgroundActivityStartAllowedByCaller(state);
 
         if (!state.hasRealCaller()) {
+            BalVerdict resultForRealCaller = null; // nothing to compute
             if (resultForCaller.allows()) {
                 if (DEBUG_ACTIVITY_STARTS) {
                     Slog.d(TAG, "Background activity start allowed. "
-                            + state.dump(resultForCaller));
+                            + state.dump(resultForCaller, resultForRealCaller));
                 }
                 return statsLog(resultForCaller, state);
             }
-            // anything that has fallen through would currently be aborted
-            Slog.w(TAG, "Background activity launch blocked! "
-                    + state.dump(resultForCaller));
-            showBalBlockedToast("BAL blocked", state);
-            return statsLog(BalVerdict.BLOCK, state);
+            return abortLaunch(state, resultForCaller, resultForRealCaller);
         }
 
         // The realCaller result is only calculated for PendingIntents (indicated by a valid
@@ -588,11 +585,13 @@ public class BackgroundActivityStartController {
             }
             return statsLog(resultForRealCaller, state);
         }
-        if (resultForCaller.allows() && resultForRealCaller.allows()
+        boolean callerCanAllow = resultForCaller.allows()
                 && checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
-                == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED
+                == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+        boolean realCallerCanAllow = resultForRealCaller.allows()
                 && checkedOptions.getPendingIntentBackgroundActivityStartMode()
-                == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+                == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
+        if (callerCanAllow && realCallerCanAllow) {
             // Both caller and real caller allow with system defined behavior
             if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG,
@@ -608,10 +607,9 @@ public class BackgroundActivityStartController {
                     "Without Android 15 BAL hardening this activity start would be allowed"
                             + " (missing opt in by PI creator or sender)! "
                             + state.dump(resultForCaller, resultForRealCaller));
-            // fall through to abort
-        } else if (resultForCaller.allows()
-                && checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
-                == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+            return abortLaunch(state, resultForCaller, resultForRealCaller);
+        }
+        if (callerCanAllow) {
             // Allowed before V by creator
             if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG,
@@ -626,10 +624,9 @@ public class BackgroundActivityStartController {
                     "Without Android 15 BAL hardening this activity start would be allowed"
                             + " (missing opt in by PI creator)! "
                             + state.dump(resultForCaller, resultForRealCaller));
-            // fall through to abort
-        } else if (resultForRealCaller.allows()
-                && checkedOptions.getPendingIntentBackgroundActivityStartMode()
-                == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+            return abortLaunch(state, resultForCaller, resultForRealCaller);
+        }
+        if (realCallerCanAllow) {
             // Allowed before U by sender
             if (state.mBalAllowedByPiSender.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG,
@@ -643,9 +640,14 @@ public class BackgroundActivityStartController {
             Slog.wtf(TAG, "Without Android 14 BAL hardening this activity start would be allowed"
                     + " (missing opt in by PI sender)! "
                     + state.dump(resultForCaller, resultForRealCaller));
-            // fall through to abort
+            return abortLaunch(state, resultForCaller, resultForRealCaller);
         }
-        // anything that has fallen through would currently be aborted
+        // neither the caller not the realCaller can allow or have explicitly opted out
+        return abortLaunch(state, resultForCaller, resultForRealCaller);
+    }
+
+    private BalVerdict abortLaunch(BalState state, BalVerdict resultForCaller,
+            BalVerdict resultForRealCaller) {
         Slog.w(TAG, "Background activity launch blocked! "
                 + state.dump(resultForCaller, resultForRealCaller));
         showBalBlockedToast("BAL blocked", state);
