@@ -107,6 +107,46 @@ public class TinyFrameworkClassTest {
     }
 
     @Test
+    public void testLambda1() {
+        assertThat(new TinyFrameworkLambdas().mSupplier.get()).isEqualTo(1);
+    }
+
+    @Test
+    public void testLambda2() {
+        assertThat(TinyFrameworkLambdas.sSupplier.get()).isEqualTo(2);
+    }
+
+    @Test
+    public void testLambda3() {
+        assertThat(new TinyFrameworkLambdas().getSupplier().get()).isEqualTo(3);
+    }
+
+    @Test
+    public void testLambda4() {
+        assertThat(TinyFrameworkLambdas.getSupplier_static().get()).isEqualTo(4);
+    }
+
+    @Test
+    public void testLambda5() {
+        assertThat(new TinyFrameworkLambdas.Nested().mSupplier.get()).isEqualTo(5);
+    }
+
+    @Test
+    public void testLambda6() {
+        assertThat(TinyFrameworkLambdas.Nested.sSupplier.get()).isEqualTo(6);
+    }
+
+    @Test
+    public void testLambda7() {
+        assertThat(new TinyFrameworkLambdas.Nested().getSupplier().get()).isEqualTo(7);
+    }
+
+    @Test
+    public void testLambda8() {
+        assertThat(TinyFrameworkLambdas.Nested.getSupplier_static().get()).isEqualTo(8);
+    }
+
+    @Test
     public void testNativeSubstitutionClass() {
         assertThat(TinyFrameworkNative.nativeAddTwo(3)).isEqualTo(5);
     }

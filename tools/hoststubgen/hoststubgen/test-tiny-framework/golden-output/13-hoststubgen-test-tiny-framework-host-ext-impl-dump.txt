@@ -1045,7 +1045,7 @@ RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestStub
   x: #x()
-    android.hosttest.annotation.HostSideTestStaticInitializerStub
+    android.hosttest.annotation.HostSideTestStaticInitializerKeep
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex.class
   Compiled from "TinyFrameworkEnumComplex.java"
 public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex extends java.lang.Enum<com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex>
@@ -1695,6 +1695,411 @@ RuntimeVisibleAnnotations:
     com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
   x: #x()
     com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested.class
+  Compiled from "TinyFrameworkLambdas.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nested
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 2, methods: 8, attributes: 6
+  public final java.util.function.Supplier<java.lang.Integer> mSupplier;
+    descriptor: Ljava/util/function/Supplier;
+    flags: (0x0011) ACC_PUBLIC, ACC_FINAL
+    Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static final java.util.function.Supplier<java.lang.Integer> sSupplier;
+    descriptor: Ljava/util/function/Supplier;
+    flags: (0x0019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nested();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+         x: ldc           #x                 // String <init>
+         x: ldc           #x                 // String ()V
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: aload_0
+        x: invokespecial #x                 // Method java/lang/Object."<init>":()V
+        x: aload_0
+        x: invokedynamic #x,  0             // InvokeDynamic #x:get:()Ljava/util/function/Supplier;
+        x: putfield      #x                 // Field mSupplier:Ljava/util/function/Supplier;
+        x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+           11      14     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public java.util.function.Supplier<java.lang.Integer> getSupplier();
+    descriptor: ()Ljava/util/function/Supplier;
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+         x: ldc           #x                 // String getSupplier
+         x: ldc           #x                 // String ()Ljava/util/function/Supplier;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: invokedynamic #x,  0             // InvokeDynamic #x:get:()Ljava/util/function/Supplier;
+        x: areturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+           11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested;
+    Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static java.util.function.Supplier<java.lang.Integer> getSupplier_static();
+    descriptor: ()Ljava/util/function/Supplier;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+         x: ldc           #x                 // String getSupplier_static
+         x: ldc           #x                 // String ()Ljava/util/function/Supplier;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: invokedynamic #x,  0             // InvokeDynamic #x:get:()Ljava/util/function/Supplier;
+        x: areturn
+      LineNumberTable:
+    Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  private static java.lang.Integer lambda$getSupplier_static$3();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+         x: ldc           #x                 // String lambda$getSupplier_static$3
+         x: ldc           #x                 // String ()Ljava/lang/Integer;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: bipush        8
+        x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        x: areturn
+      LineNumberTable:
+
+  private static java.lang.Integer lambda$getSupplier$2();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+         x: ldc           #x                 // String lambda$getSupplier$2
+         x: ldc           #x                 // String ()Ljava/lang/Integer;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: bipush        7
+        x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        x: areturn
+      LineNumberTable:
+
+  private static java.lang.Integer lambda$static$1();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+         x: ldc           #x                 // String lambda$static$1
+         x: ldc           #x                 // String ()Ljava/lang/Integer;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: bipush        6
+        x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        x: areturn
+      LineNumberTable:
+
+  private static java.lang.Integer lambda$new$0();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+         x: ldc           #x                 // String lambda$new$0
+         x: ldc           #x                 // String ()Ljava/lang/Integer;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iconst_5
+        x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        x: areturn
+      LineNumberTable:
+
+  static {};
+    descriptor: ()V
+    flags: (0x0008) ACC_STATIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+         x: ldc           #x                 // String <clinit>
+         x: ldc           #x                 // String ()V
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+        x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+        x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+        x: invokedynamic #x,  0             // InvokeDynamic #x:get:()Ljava/util/function/Supplier;
+        x: putstatic     #x                // Field sSupplier:Ljava/util/function/Supplier;
+        x: return
+      LineNumberTable:
+}
+InnerClasses:
+  public static #x= #x of #x;            // Nested=class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested of class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+  public static final #x= #x of #x;    // Lookup=class java/lang/invoke/MethodHandles$Lookup of class java/lang/invoke/MethodHandles
+SourceFile: "TinyFrameworkLambdas.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestStub
+  x: #x()
+    android.hosttest.annotation.HostSideTestStaticInitializerKeep
+BootstrapMethods:
+  x: #x REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+    Method arguments:
+      #x ()Ljava/lang/Object;
+      #x REF_invokeStatic com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested.lambda$new$0:()Ljava/lang/Integer;
+      #x ()Ljava/lang/Integer;
+  x: #x REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+    Method arguments:
+      #x ()Ljava/lang/Object;
+      #x REF_invokeStatic com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested.lambda$getSupplier$2:()Ljava/lang/Integer;
+      #x ()Ljava/lang/Integer;
+  x: #x REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+    Method arguments:
+      #x ()Ljava/lang/Object;
+      #x REF_invokeStatic com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested.lambda$getSupplier_static$3:()Ljava/lang/Integer;
+      #x ()Ljava/lang/Integer;
+  x: #x REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+    Method arguments:
+      #x ()Ljava/lang/Object;
+      #x REF_invokeStatic com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested.lambda$static$1:()Ljava/lang/Integer;
+      #x ()Ljava/lang/Integer;
+NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas.class
+  Compiled from "TinyFrameworkLambdas.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 2, methods: 8, attributes: 6
+  public final java.util.function.Supplier<java.lang.Integer> mSupplier;
+    descriptor: Ljava/util/function/Supplier;
+    flags: (0x0011) ACC_PUBLIC, ACC_FINAL
+    Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static final java.util.function.Supplier<java.lang.Integer> sSupplier;
+    descriptor: Ljava/util/function/Supplier;
+    flags: (0x0019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+         x: ldc           #x                 // String <init>
+         x: ldc           #x                 // String ()V
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: aload_0
+        x: invokespecial #x                 // Method java/lang/Object."<init>":()V
+        x: aload_0
+        x: invokedynamic #x,  0             // InvokeDynamic #x:get:()Ljava/util/function/Supplier;
+        x: putfield      #x                 // Field mSupplier:Ljava/util/function/Supplier;
+        x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+           11      14     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public java.util.function.Supplier<java.lang.Integer> getSupplier();
+    descriptor: ()Ljava/util/function/Supplier;
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=1, args_size=1
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+         x: ldc           #x                 // String getSupplier
+         x: ldc           #x                 // String ()Ljava/util/function/Supplier;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: invokedynamic #x,  0             // InvokeDynamic #x:get:()Ljava/util/function/Supplier;
+        x: areturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+           11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas;
+    Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static java.util.function.Supplier<java.lang.Integer> getSupplier_static();
+    descriptor: ()Ljava/util/function/Supplier;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+         x: ldc           #x                 // String getSupplier_static
+         x: ldc           #x                 // String ()Ljava/util/function/Supplier;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: invokedynamic #x,  0             // InvokeDynamic #x:get:()Ljava/util/function/Supplier;
+        x: areturn
+      LineNumberTable:
+    Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  private static java.lang.Integer lambda$getSupplier_static$3();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+         x: ldc           #x                 // String lambda$getSupplier_static$3
+         x: ldc           #x                 // String ()Ljava/lang/Integer;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iconst_4
+        x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        x: areturn
+      LineNumberTable:
+
+  private static java.lang.Integer lambda$getSupplier$2();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+         x: ldc           #x                 // String lambda$getSupplier$2
+         x: ldc           #x                 // String ()Ljava/lang/Integer;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iconst_3
+        x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        x: areturn
+      LineNumberTable:
+
+  private static java.lang.Integer lambda$static$1();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+         x: ldc           #x                 // String lambda$static$1
+         x: ldc           #x                 // String ()Ljava/lang/Integer;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iconst_2
+        x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        x: areturn
+      LineNumberTable:
+
+  private static java.lang.Integer lambda$new$0();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+         x: ldc           #x                 // String lambda$new$0
+         x: ldc           #x                 // String ()Ljava/lang/Integer;
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: iconst_1
+        x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        x: areturn
+      LineNumberTable:
+
+  static {};
+    descriptor: ()V
+    flags: (0x0008) ACC_STATIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+         x: ldc           #x                 // String <clinit>
+         x: ldc           #x                 // String ()V
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+        x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
+        x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
+        x: invokedynamic #x,  0             // InvokeDynamic #x:get:()Ljava/util/function/Supplier;
+        x: putstatic     #x                // Field sSupplier:Ljava/util/function/Supplier;
+        x: return
+      LineNumberTable:
+}
+InnerClasses:
+  public static #x= #x of #x;           // Nested=class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested of class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+  public static final #x= #x of #x;    // Lookup=class java/lang/invoke/MethodHandles$Lookup of class java/lang/invoke/MethodHandles
+SourceFile: "TinyFrameworkLambdas.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestStub
+  x: #x()
+    android.hosttest.annotation.HostSideTestStaticInitializerKeep
+BootstrapMethods:
+  x: #x REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+    Method arguments:
+      #x ()Ljava/lang/Object;
+      #x REF_invokeStatic com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas.lambda$new$0:()Ljava/lang/Integer;
+      #x ()Ljava/lang/Integer;
+  x: #x REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+    Method arguments:
+      #x ()Ljava/lang/Object;
+      #x REF_invokeStatic com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas.lambda$getSupplier$2:()Ljava/lang/Integer;
+      #x ()Ljava/lang/Integer;
+  x: #x REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+    Method arguments:
+      #x ()Ljava/lang/Object;
+      #x REF_invokeStatic com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas.lambda$getSupplier_static$3:()Ljava/lang/Integer;
+      #x ()Ljava/lang/Integer;
+  x: #x REF_invokeStatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;
+    Method arguments:
+      #x ()Ljava/lang/Object;
+      #x REF_invokeStatic com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas.lambda$static$1:()Ljava/lang/Integer;
+      #x ()Ljava/lang/Integer;
+NestMembers:
+  com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNative.class
   Compiled from "TinyFrameworkNative.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative

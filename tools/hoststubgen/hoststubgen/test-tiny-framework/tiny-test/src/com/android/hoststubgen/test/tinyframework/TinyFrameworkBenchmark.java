@@ -22,9 +22,10 @@ import java.text.DecimalFormat;
 /**
  * Contains simple micro-benchmarks.
  */
+@LargeTest
 public class TinyFrameworkBenchmark {
     private static final int MINIMAL_ITERATION = 1000;
-    private static final int MEASURE_SECONDS = 3;
+    private static final int MEASURE_SECONDS = 1;
 
     private static final DecimalFormat sFormatter = new DecimalFormat("#,###");
 

@@ -96,8 +96,8 @@ run_hoststubgen() {
           android.hosttest.annotation.HostSideTestNativeSubstitutionClass \
       --class-load-hook-annotation \
           android.hosttest.annotation.HostSideTestClassLoadHook \
-      --stub-static-initializer-annotation \
-          android.hosttest.annotation.HostSideTestStaticInitializerStub \
+      --keep-static-initializer-annotation \
+          android.hosttest.annotation.HostSideTestStaticInitializerKeep \
       $filter_arg \
       |& tee $HOSTSTUBGEN_OUT
   HOSTSTUBGEN_RC=${PIPESTATUS[0]}
