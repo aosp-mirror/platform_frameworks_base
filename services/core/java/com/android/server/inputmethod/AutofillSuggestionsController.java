@@ -39,7 +39,6 @@ final class AutofillSuggestionsController {
     private static final String TAG = AutofillSuggestionsController.class.getSimpleName();
 
     @NonNull private final InputMethodManagerService mService;
-    @NonNull private final InputMethodUtils.InputMethodSettings mSettings;
 
     private static final class CreateInlineSuggestionsRequest {
         @NonNull final InlineSuggestionsRequestInfo mRequestInfo;
@@ -76,7 +75,6 @@ final class AutofillSuggestionsController {
 
     AutofillSuggestionsController(@NonNull InputMethodManagerService service) {
         mService = service;
-        mSettings = mService.mSettings;
     }
 
     @GuardedBy("ImfLock.class")
@@ -88,7 +86,7 @@ final class AutofillSuggestionsController {
         final InputMethodInfo imi = mService.queryInputMethodForCurrentUserLocked(
                 mService.getSelectedMethodIdLocked());
         try {
-            if (userId == mSettings.getCurrentUserId()
+            if (userId == mService.getCurrentImeUserIdLocked()
                     && imi != null && isInlineSuggestionsEnabled(imi, touchExplorationEnabled)) {
                 mPendingInlineSuggestionsRequest = new CreateInlineSuggestionsRequest(
                         requestInfo, callback, imi.getPackageName());

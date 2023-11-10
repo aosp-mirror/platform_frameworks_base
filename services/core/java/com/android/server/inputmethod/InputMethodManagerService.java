@@ -1727,6 +1727,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         registerDeviceListenerAndCheckStylusSupport();
     }
 
+    @GuardedBy("ImfLock.class")
+    @UserIdInt
+    int getCurrentImeUserIdLocked() {
+        return mSettings.getCurrentUserId();
+    }
+
     private final class InkWindowInitializer implements Runnable {
         public void run() {
             synchronized (ImfLock.class) {
