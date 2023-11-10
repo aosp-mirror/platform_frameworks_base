@@ -75,6 +75,14 @@ public class DisplayNotificationManagerTest {
     }
 
     @Test
+    public void testNotificationOnHighTemperatureExternalDisplayNotAllowed() {
+        var dnm = createDisplayNotificationManager(/*isNotificationManagerAvailable=*/ true,
+                /*isErrorHandlingEnabled=*/ true);
+        dnm.onHighTemperatureExternalDisplayNotAllowed();
+        assertExpectedNotification();
+    }
+
+    @Test
     public void testNotificationOnHotplugConnectionError() {
         var dnm = createDisplayNotificationManager(/*isNotificationManagerAvailable=*/ true,
                 /*isErrorHandlingEnabled=*/ true);
@@ -112,6 +120,7 @@ public class DisplayNotificationManagerTest {
         dnm.onHotplugConnectionError();
         dnm.onDisplayPortLinkTrainingFailure();
         dnm.onCableNotCapableDisplayPort();
+        dnm.onHighTemperatureExternalDisplayNotAllowed();
         verify(mMockedNotificationManager, never()).notify(anyString(), anyInt(), any());
     }
 

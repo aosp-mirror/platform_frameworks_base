@@ -29,7 +29,7 @@ import static android.view.ContentRecordingSession.RECORD_CONTENT_DISPLAY;
 import static android.view.ContentRecordingSession.RECORD_CONTENT_TASK;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
-import static com.android.server.display.DisplayManagerService.ENABLE_ON_CONNECT;
+import static com.android.server.display.ExternalDisplayPolicy.ENABLE_ON_CONNECT;
 import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
 
 import static com.google.common.truth.Truth.assertThat;
