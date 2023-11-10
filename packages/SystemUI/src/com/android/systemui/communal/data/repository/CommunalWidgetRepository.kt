@@ -18,13 +18,11 @@ package com.android.systemui.communal.data.repository
 
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProviderInfo
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.os.UserManager
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -32,13 +30,10 @@ import com.android.systemui.communal.data.db.CommunalItemRank
 import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.data.db.CommunalWidgetItem
 import com.android.systemui.communal.shared.CommunalWidgetHost
-import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.Logger
 import com.android.systemui.log.dagger.CommunalLog
@@ -58,9 +53,6 @@ import kotlinx.coroutines.launch
 
 /** Encapsulates the state of widgets for communal mode. */
 interface CommunalWidgetRepository {
-    /** A flow of provider info for the stopwatch widget, or null if widget is unavailable. */
-    val stopwatchAppWidgetInfo: Flow<CommunalAppWidgetInfo?>
-
     /** A flow of information about active communal widgets stored in database. */
     val communalWidgets: Flow<List<CommunalWidgetContentModel>>
 
@@ -84,24 +76,18 @@ constructor(
     communalRepository: CommunalRepository,
     private val communalWidgetHost: CommunalWidgetHost,
     private val communalWidgetDao: CommunalWidgetDao,
-    private val packageManager: PackageManager,
     private val userManager: UserManager,
     private val userTracker: UserTracker,
     @CommunalLog logBuffer: LogBuffer,
-    featureFlags: FeatureFlagsClassic,
 ) : CommunalWidgetRepository {
     companion object {
         const val TAG = "CommunalWidgetRepository"
-        const val WIDGET_LABEL = "Stopwatch"
     }
 
     private val logger = Logger(logBuffer, TAG)
 
     // Whether the [AppWidgetHost] is listening for updates.
     private var isHostListening = false
-
-    // Widgets that should be rendered in communal mode.
-    private val widgets: HashMap<Int, CommunalAppWidgetInfo> = hashMapOf()
 
     private val isUserUnlocked: Flow<Boolean> =
         callbackFlow {
@@ -147,25 +133,6 @@ constructor(
                 stopListening()
                 false
             }
-        }
-
-    override val stopwatchAppWidgetInfo: Flow<CommunalAppWidgetInfo?> =
-        isHostActive.map { isHostActive ->
-            if (!isHostActive || !featureFlags.isEnabled(Flags.WIDGET_ON_KEYGUARD)) {
-                return@map null
-            }
-
-            val providerInfo =
-                appWidgetManager.installedProviders.find {
-                    it.loadLabel(packageManager).equals(WIDGET_LABEL)
-                }
-
-            if (providerInfo == null) {
-                logger.w("Cannot find app widget: $WIDGET_LABEL")
-                return@map null
-            }
-
-            return@map addStopWatchWidget(providerInfo)
         }
 
     override val communalWidgets: Flow<List<CommunalWidgetContentModel>> =
@@ -225,22 +192,5 @@ constructor(
 
         appWidgetHost.stopListening()
         isHostListening = false
-    }
-
-    // TODO(b/306471933): remove this prototype that shows a stopwatch in the communal blueprint
-    private fun addStopWatchWidget(providerInfo: AppWidgetProviderInfo): CommunalAppWidgetInfo {
-        val existing = widgets.values.firstOrNull { it.providerInfo == providerInfo }
-        if (existing != null) {
-            return existing
-        }
-
-        val appWidgetId = appWidgetHost.allocateAppWidgetId()
-        val widget =
-            CommunalAppWidgetInfo(
-                providerInfo,
-                appWidgetId,
-            )
-        widgets[appWidgetId] = widget
-        return widget
     }
 }
