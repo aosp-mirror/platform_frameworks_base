@@ -41,8 +41,9 @@ class FakeAuthenticationRepository(
     private val currentTime: () -> Long,
 ) : AuthenticationRepository {
 
-    private val _isAutoConfirmEnabled = MutableStateFlow(false)
-    override val isAutoConfirmEnabled: StateFlow<Boolean> = _isAutoConfirmEnabled.asStateFlow()
+    private val _isAutoConfirmFeatureEnabled = MutableStateFlow(false)
+    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
+        _isAutoConfirmFeatureEnabled.asStateFlow()
 
     override val hintedPinLength: Int = HINTING_PIN_LENGTH
 
@@ -98,8 +99,8 @@ class FakeAuthenticationRepository(
         _throttling.value = throttlingModel
     }
 
-    fun setAutoConfirmEnabled(isEnabled: Boolean) {
-        _isAutoConfirmEnabled.value = isEnabled
+    fun setAutoConfirmFeatureEnabled(isEnabled: Boolean) {
+        _isAutoConfirmFeatureEnabled.value = isEnabled
     }
 
     override suspend fun setThrottleDuration(durationMs: Int) {

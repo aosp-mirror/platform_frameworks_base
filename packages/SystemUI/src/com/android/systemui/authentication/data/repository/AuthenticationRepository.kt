@@ -65,7 +65,7 @@ interface AuthenticationRepository {
      * Note that the length of the PIN is also important to take into consideration, please see
      * [hintedPinLength].
      */
-    val isAutoConfirmEnabled: StateFlow<Boolean>
+    val isAutoConfirmFeatureEnabled: StateFlow<Boolean>
 
     /**
      * The exact length a PIN should be for us to enable PIN length hinting.
@@ -152,14 +152,14 @@ class AuthenticationRepositoryImpl
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val getSecurityMode: Function<Int, KeyguardSecurityModel.SecurityMode>,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
+    private val getSecurityMode: Function<Int, KeyguardSecurityModel.SecurityMode>,
     private val userRepository: UserRepository,
     private val lockPatternUtils: LockPatternUtils,
     broadcastDispatcher: BroadcastDispatcher,
 ) : AuthenticationRepository {
 
-    override val isAutoConfirmEnabled: StateFlow<Boolean> =
+    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
         refreshingFlow(
             initialValue = false,
             getFreshValue = lockPatternUtils::isAutoPinConfirmEnabled,
