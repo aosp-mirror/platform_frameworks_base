@@ -465,6 +465,9 @@ private fun IntermediateMeasureScope.place(
 
         element.lastSharedValues.offset = targetOffset
         sceneValues.lastValues.offset = targetOffset
+
+        // TODO(b/291071158): Call placeWithLayer() if offset != IntOffset.Zero and size is not
+        // animated once b/305195729 is fixed. Test that drawing is not invalidated in that case.
         placeable.place((targetOffset - currentOffset).round())
     }
 }
@@ -527,21 +530,17 @@ private inline fun <T> computeValue(
         error("This should not happen, element $element is neither in $fromScene or $toScene")
     }
 
-    // TODO(b/291053278): Handle overscroll correctly. We should probably coerce between [0f, 1f]
-    // here and consume overflows at drawing time, somehow reusing Compose OverflowEffect or some
-    // similar mechanism.
-    val transitionProgress = state.progress
-
     // The element is shared: interpolate between the value in fromScene and the value in toScene.
     // TODO(b/290184746): Support non linear shared paths as well as a way to make sure that shared
     // elements follow the finger direction.
     val isSharedElement = fromValues != null && toValues != null
     if (isSharedElement && isSharedElementEnabled(layoutImpl, state, element.key)) {
-        return lerp(
-            sceneValue(fromValues!!),
-            sceneValue(toValues!!),
-            transitionProgress,
-        )
+        val start = sceneValue(fromValues!!)
+        val end = sceneValue(toValues!!)
+
+        // Make sure we don't read progress if values are the same and we don't need to interpolate,
+        // so we don't invalidate the phase where this is read.
+        return if (start == end) start else lerp(start, end, state.progress)
     }
 
     val transformation =
@@ -576,8 +575,15 @@ private inline fun <T> computeValue(
             idleValue,
         )
 
+    // Make sure we don't read progress if values are the same and we don't need to interpolate, so
+    // we don't invalidate the phase where this is read.
+    if (targetValue == idleValue) {
+        return targetValue
+    }
+
+    val progress = state.progress
     // TODO(b/290184746): Make sure that we don't overflow transformations associated to a range.
-    val rangeProgress = transformation.range?.progress(transitionProgress) ?: transitionProgress
+    val rangeProgress = transformation.range?.progress(progress) ?: progress
 
     // Interpolate between the value at rest and the value before entering/after leaving.
     val isEntering = scene.key == toScene
