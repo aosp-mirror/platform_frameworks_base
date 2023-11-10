@@ -18162,7 +18162,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         private static boolean hasAccountFeatures(AccountManager am, Account account,
                 String[] features) {
             try {
-                return am.hasFeatures(account, features, null, null).getResult();
+                return am.hasFeatures(account, features, null, null)
+                        .getResult(30, TimeUnit.SECONDS);
             } catch (Exception e) {
                 Slogf.w(LOG_TAG, "Failed to get account feature", e);
                 return false;
