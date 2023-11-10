@@ -239,8 +239,7 @@ object Flags {
 
     /** Provide new auth messages on the bouncer. */
     // TODO(b/277961132): Tracking bug.
-    @JvmField val REVAMPED_BOUNCER_MESSAGES = unreleasedFlag("revamped_bouncer_messages",
-            teamfood = true)
+    @JvmField val REVAMPED_BOUNCER_MESSAGES = unreleasedFlag("revamped_bouncer_messages")
 
     /** Keyguard Migration */
 
