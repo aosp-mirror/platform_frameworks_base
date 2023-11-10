@@ -1691,7 +1691,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Usuń"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zwiększyć głośność ponad zalecany poziom?\n\nSłuchanie głośno przez długi czas może uszkodzić Twój słuch."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Słuchać dalej z wysokim poziomem głośności?\n\nGłośność na słuchawkach jest zbyt duża przez czas dłuższy niż zalecany, co może doprowadzić do uszkodzenia słuchu"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Chcesz słuchać dalej z wysokim poziomem głośności?\n\nGłośność na słuchawkach jest zbyt duża przez czas dłuższy niż zalecany, co może doprowadzić do uszkodzenia słuchu"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Wykryto głośny dźwięk\n\nGłośność na słuchawkach przekracza zalecane wartości, co może doprowadzić do uszkodzenia słuchu"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Użyć skrótu ułatwień dostępu?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Gdy skrót jest włączony, jednoczesne naciskanie przez trzy sekundy obu przycisków głośności uruchamia funkcję ułatwień dostępu."</string>

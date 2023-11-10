@@ -1689,7 +1689,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Entfernen"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Lautstärke über den Schwellenwert anheben?\n\nWenn du über einen längeren Zeitraum Musik in hoher Lautstärke hörst, kann dies dein Gehör schädigen."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Weiter mit hoher Lautstärke hören?\n\nDeine Kopfhörer sind schon länger als empfohlen auf hohe Lautstärke eingestellt – das kann deinem Hörvermögen schaden"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Weiter in hoher Lautstärke hören?\n\nDeine Kopfhörer sind schon länger als empfohlen auf hohe Lautstärke eingestellt – das kann deinem Hörvermögen schaden"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Hohe Lautstärke erkannt\n\nDu hast deine Kopfhörer lauter als empfohlen eingestellt – das kann deinem Hörvermögen schaden"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Verknüpfung für Bedienungshilfen verwenden?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Wenn die Verknüpfung aktiviert ist, kannst du die beiden Lautstärketasten drei Sekunden lang gedrückt halten, um eine Bedienungshilfe zu starten."</string>
