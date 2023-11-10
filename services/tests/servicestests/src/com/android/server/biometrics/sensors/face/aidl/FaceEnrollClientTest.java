@@ -28,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.hardware.biometrics.common.OperationContext;
+import android.hardware.biometrics.face.FaceEnrollOptions;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
 import android.os.IBinder;
@@ -123,7 +124,7 @@ public class FaceEnrollClientTest {
 
     @Test
     public void notifyHalWhenContextChanges() throws RemoteException {
-        final FaceEnrollClient client = createClient();
+        final FaceEnrollClient client = createClient(3);
         client.start(mCallback);
 
         final ArgumentCaptor<OperationContext> captor =
@@ -141,6 +142,14 @@ public class FaceEnrollClientTest {
 
         client.stopHalOperation();
         verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));
+    }
+
+    @Test
+    public void enrollWithFaceOptions() throws RemoteException {
+        final FaceEnrollClient client = createClient(4);
+        client.start(mCallback);
+
+        verify(mHal).enrollWithOptions(any());
     }
 
     private FaceEnrollClient createClient() throws RemoteException {
