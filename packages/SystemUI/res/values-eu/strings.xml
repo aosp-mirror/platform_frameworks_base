@@ -396,7 +396,12 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Bizkor kargatzen • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Mantso kargatzen • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Kargatzen • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> guztiz kargatu arte"</string>
-    <string name="communal_tutorial_indicator_text" msgid="700342473477865107">"Tutorial komuna hasteko, sakatu geziaren botoia"</string>
+    <!-- no translation found for communal_tutorial_indicator_text (4503010353591430123) -->
+    <skip />
+    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
+    <skip />
+    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Aldatu erabiltzailea"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"zabaldu menua"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Saioko aplikazio eta datu guztiak ezabatuko dira."</string>
@@ -659,7 +664,7 @@
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Kendu eranskina"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Sistema"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Hasierako pantaila"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Azkenak"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Azkenaldikoak"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Atzera"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Jakinarazpenak"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Lasterbideak"</string>
@@ -1205,4 +1210,8 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) aplikazioak erabili du duela gutxi"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioak darabil (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) aplikazioak erabili du duela gutxi"</string>
+    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
+    <skip />
+    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
+    <skip />
 </resources>

@@ -196,8 +196,7 @@
     <string name="keyguard_face_unlock_unavailable" msgid="1581949044193418736">"Yuz bilan ochilmaydi."</string>
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth ulandi."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Bluetooth qurilma belgisi"</string>
-    <!-- no translation found for accessibility_bluetooth_device_settings_gear (3314916468105272540) -->
-    <skip />
+    <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Qurilma haqida tafsilotlarni oʻzgartirish uchun bosing"</string>
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batareya quvvati foizi nomaʼlum."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Ulangan: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Bunga ulangan: <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -397,7 +396,12 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Tez quvvat olmoqda • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Sekin quvvat olmoqda • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Quvvat olmoqda • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> qoldi"</string>
-    <string name="communal_tutorial_indicator_text" msgid="700342473477865107">"Qoʻllanma bilan tanishish uchun strelka tugmasini bosing"</string>
+    <!-- no translation found for communal_tutorial_indicator_text (4503010353591430123) -->
+    <skip />
+    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
+    <skip />
+    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Foydalanuvchini almashtirish"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"tortib tushiriladigan menyu"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Ushbu seansdagi barcha ilovalar va ma’lumotlar o‘chirib tashlanadi."</string>
@@ -1181,8 +1185,7 @@
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera va mikrofon bloklangan"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon bloklangan"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Imtiyozli rejim yoniq"</string>
-    <!-- no translation found for assistant_attention_content_description (4166330881435263596) -->
-    <skip />
+    <string name="assistant_attention_content_description" msgid="4166330881435263596">"Foydalanuvchi aniqlandi"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Standart qaydlar ilovasini Sozlamalar orqali tanlang"</string>
     <string name="install_app" msgid="5066668100199613936">"Ilovani oʻrnatish"</string>
     <string name="connected_display_dialog_start_mirroring" msgid="6237895789920854982">"Tashqi displeyda aks ettirilsinmi?"</string>
@@ -1207,4 +1210,8 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Yaqinda <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) ishlatgan"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ishlatmoqda"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Yaqinda <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ishlatgan"</string>
+    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
+    <skip />
+    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
+    <skip />
 </resources>

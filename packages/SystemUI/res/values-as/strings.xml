@@ -396,7 +396,11 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • দ্ৰুতগতিৰে চাৰ্জ হৈ আছে • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ত সম্পূৰ্ণ হ’ব"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • লাহে লাহে চাৰ্জ হৈ আছে • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ত সম্পূৰ্ণ হ’ব"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • চাৰ্জ হৈ আছে • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>ত সম্পূৰ্ণ হ’ব"</string>
-    <string name="communal_tutorial_indicator_text" msgid="700342473477865107">"সম্প্ৰদায় সম্পৰ্কীয় নিৰ্দেশনা আৰম্ভ কৰিবলৈ কাঁড়চিহ্নৰ বুটামটোত ক্লিক কৰক"</string>
+    <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"সম্প্ৰদায় সম্পৰ্কীয় নিৰ্দেশনা আৰম্ভ কৰিবলৈ বাওঁফালে ছোৱাইপ কৰক"</string>
+    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
+    <skip />
+    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ব্যৱহাৰকাৰী সলনি কৰক"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"পুল-ডাউনৰ মেনু"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"এই ছেশ্বনৰ আটাইবোৰ এপ্ আৰু ডেটা মচা হ\'ব।"</string>
@@ -1205,4 +1209,8 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"শেহতীয়াকৈ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)এ ব্যৱহাৰ কৰিছে"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)এ ব্যৱহাৰ কৰি আছে"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"শেহতীয়াকৈ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)এ ব্যৱহাৰ কৰিছে"</string>
+    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
+    <skip />
+    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
+    <skip />
 </resources>
