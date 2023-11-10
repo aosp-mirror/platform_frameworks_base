@@ -27,8 +27,6 @@ import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_R
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_HIGH_ZONE;
 import static android.hardware.display.DisplayManager.DeviceConfig.KEY_REFRESH_RATE_IN_LOW_ZONE;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -290,6 +288,7 @@ public class DisplayModeDirectorTest {
     };
 
     private static final int DISPLAY_ID = Display.DEFAULT_DISPLAY;
+    private static final int DISPLAY_ID_2 = Display.DEFAULT_DISPLAY + 1;
     private static final int MODE_ID = 1;
     private static final float TRANSITION_POINT = 0.763f;
 
@@ -1550,23 +1549,39 @@ public class DisplayModeDirectorTest {
     public void testPeakRefreshRate_FlagEnabled() {
         when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
                 .thenReturn(true);
-        float highestRefreshRate = 130;
-        doReturn(highestRefreshRate).when(() ->
-                RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(mContext));
         DisplayModeDirector director =
-                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+                new DisplayModeDirector(mContext, mHandler, mInjector, mDisplayManagerFlags);
         director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        Display.Mode[] modes1 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 130),
+        };
+        Display.Mode[] modes2 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 140),
+        };
+        SparseArray<Display.Mode[]> supportedModesByDisplay = new SparseArray<>();
+        supportedModesByDisplay.put(DISPLAY_ID, modes1);
+        supportedModesByDisplay.put(DISPLAY_ID_2, modes2);
 
         Sensor lightSensor = createLightSensor();
         SensorManager sensorManager = createMockSensorManager(lightSensor);
         director.start(sensorManager);
+        director.injectSupportedModesByDisplay(supportedModesByDisplay);
 
         setPeakRefreshRate(Float.POSITIVE_INFINITY);
 
-        Vote vote = director.getVote(Display.DEFAULT_DISPLAY,
+        Vote vote1 = director.getVote(DISPLAY_ID,
                 Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
-        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 0, /* frameRateHigh= */
-                highestRefreshRate);
+        Vote vote2 = director.getVote(DISPLAY_ID_2,
+                Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 0, /* frameRateHigh= */ 130);
+        assertVoteForRenderFrameRateRange(vote2, /* frameRateLow= */ 0, /* frameRateHigh= */ 140);
     }
 
     @Test
@@ -1584,32 +1599,85 @@ public class DisplayModeDirectorTest {
 
         setPeakRefreshRate(peakRefreshRate);
 
-        Vote vote = director.getVote(Display.DEFAULT_DISPLAY,
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 0,
+                /* frameRateHigh= */ peakRefreshRate);
+    }
+
+    @Test
+    public void testPeakRefreshRate_DisplayChanged() {
+        when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
+                .thenReturn(true);
+        DisplayModeDirector director =
+                new DisplayModeDirector(mContext, mHandler, mInjector, mDisplayManagerFlags);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+        mInjector.mDisplayInfo.supportedModes = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 130),
+        };
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+
+        setPeakRefreshRate(Float.POSITIVE_INFINITY);
+
+        Vote vote = director.getVote(DISPLAY_ID,
                 Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
-        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 0, /* frameRateHigh= */
-                peakRefreshRate);
+        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 0, /* frameRateHigh= */ 130);
+
+        // The highest refresh rate of the display changes
+        mInjector.mDisplayInfo.supportedModes = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 140),
+        };
+        director.getDisplayObserver().onDisplayChanged(DISPLAY_ID);
+
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 0, /* frameRateHigh= */ 140);
     }
 
     @Test
     public void testMinRefreshRate_FlagEnabled() {
         when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
                 .thenReturn(true);
-        float highestRefreshRate = 130;
-        doReturn(highestRefreshRate).when(() ->
-                RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(mContext));
         DisplayModeDirector director =
-                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+                new DisplayModeDirector(mContext, mHandler, mInjector, mDisplayManagerFlags);
         director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        Display.Mode[] modes1 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 130),
+        };
+        Display.Mode[] modes2 = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 140),
+        };
+        SparseArray<Display.Mode[]> supportedModesByDisplay = new SparseArray<>();
+        supportedModesByDisplay.put(DISPLAY_ID, modes1);
+        supportedModesByDisplay.put(DISPLAY_ID_2, modes2);
 
         Sensor lightSensor = createLightSensor();
         SensorManager sensorManager = createMockSensorManager(lightSensor);
         director.start(sensorManager);
+        director.injectSupportedModesByDisplay(supportedModesByDisplay);
 
         setMinRefreshRate(Float.POSITIVE_INFINITY);
 
-        Vote vote = director.getVote(Display.DEFAULT_DISPLAY,
+        Vote vote1 = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        Vote vote2 = director.getVote(DISPLAY_ID_2,
                 Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
-        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ highestRefreshRate,
+        assertVoteForRenderFrameRateRange(vote1, /* frameRateLow= */ 130,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+        assertVoteForRenderFrameRateRange(vote2, /* frameRateLow= */ 140,
                 /* frameRateHigh= */ Float.POSITIVE_INFINITY);
     }
 
@@ -1628,9 +1696,46 @@ public class DisplayModeDirectorTest {
 
         setMinRefreshRate(minRefreshRate);
 
-        Vote vote = director.getVote(Display.DEFAULT_DISPLAY,
-                Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
         assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ minRefreshRate,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+    }
+
+    @Test
+    public void testMinRefreshRate_DisplayChanged() {
+        when(mDisplayManagerFlags.isBackUpSmoothDisplayAndForcePeakRefreshRateEnabled())
+                .thenReturn(true);
+        DisplayModeDirector director =
+                new DisplayModeDirector(mContext, mHandler, mInjector, mDisplayManagerFlags);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+        mInjector.mDisplayInfo.supportedModes = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 130),
+        };
+
+        Sensor lightSensor = createLightSensor();
+        SensorManager sensorManager = createMockSensorManager(lightSensor);
+        director.start(sensorManager);
+
+        setMinRefreshRate(Float.POSITIVE_INFINITY);
+
+        Vote vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 130,
+                /* frameRateHigh= */ Float.POSITIVE_INFINITY);
+
+        // The highest refresh rate of the display changes
+        mInjector.mDisplayInfo.supportedModes = new Display.Mode[] {
+                new Display.Mode(/* modeId= */ 1, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 60),
+                new Display.Mode(/* modeId= */ 2, /* width= */ 1280, /* height= */ 720,
+                        /* refreshRate= */ 140),
+        };
+        director.getDisplayObserver().onDisplayChanged(DISPLAY_ID);
+
+        vote = director.getVote(DISPLAY_ID, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE);
+        assertVoteForRenderFrameRateRange(vote, /* frameRateLow= */ 140,
                 /* frameRateHigh= */ Float.POSITIVE_INFINITY);
     }
 
@@ -3329,7 +3434,7 @@ public class DisplayModeDirectorTest {
     public static class FakesInjector implements DisplayModeDirector.Injector {
         private final FakeDeviceConfig mDeviceConfig;
         private final DisplayInfo mDisplayInfo;
-        private final Display mDisplay;
+        private final Map<Integer, Display> mDisplays;
         private boolean mDisplayInfoValid = true;
         private final DisplayManagerInternal mDisplayManagerInternal;
         private final StatusBarManagerInternal mStatusBarManagerInternal;
@@ -3350,7 +3455,8 @@ public class DisplayModeDirectorTest {
             mDisplayInfo.defaultModeId = MODE_ID;
             mDisplayInfo.supportedModes = new Display.Mode[] {new Display.Mode(MODE_ID,
                     800, 600, /* refreshRate= */ 60)};
-            mDisplay = createDisplay(DISPLAY_ID);
+            mDisplays = Map.of(DISPLAY_ID, createDisplay(DISPLAY_ID),
+                    DISPLAY_ID_2, createDisplay(DISPLAY_ID_2));
             mDisplayManagerInternal = displayManagerInternal;
             mStatusBarManagerInternal = statusBarManagerInternal;
             mSensorManagerInternal = sensorManagerInternal;
@@ -3381,12 +3487,12 @@ public class DisplayModeDirectorTest {
 
         @Override
         public Display getDisplay(int displayId) {
-            return mDisplay;
+            return mDisplays.get(displayId);
         }
 
         @Override
         public Display[] getDisplays() {
-            return new Display[] { mDisplay };
+            return mDisplays.values().toArray(new Display[0]);
         }
 
         @Override
