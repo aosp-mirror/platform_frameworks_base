@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <limits>
+#include <optional>
 
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
@@ -50,7 +51,9 @@ namespace {
 // contiguous block of memory to store both the TypeSpec struct and
 // the Type structs.
 struct TypeSpecBuilder {
-  explicit TypeSpecBuilder(incfs::verified_map_ptr<ResTable_typeSpec> header) : header_(header) {}
+  explicit TypeSpecBuilder(incfs::verified_map_ptr<ResTable_typeSpec> header) : header_(header) {
+    type_entries.reserve(dtohs(header_->typesCount));
+  }
 
   void AddType(incfs::verified_map_ptr<ResTable_type> type) {
     TypeSpec::TypeEntry& entry = type_entries.emplace_back();
@@ -59,6 +62,7 @@ struct TypeSpecBuilder {
   }
 
   TypeSpec Build() {
+    type_entries.shrink_to_fit();
     return {header_, std::move(type_entries)};
   }
 
@@ -499,7 +503,7 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
   // A map of TypeSpec builders, each associated with an type index.
   // We use these to accumulate the set of Types available for a TypeSpec, and later build a single,
   // contiguous block of memory that holds all the Types together with the TypeSpec.
-  std::unordered_map<int, std::unique_ptr<TypeSpecBuilder>> type_builder_map;
+  std::unordered_map<int, std::optional<TypeSpecBuilder>> type_builder_map;
 
   ChunkIterator iter(chunk.data_ptr(), chunk.data_size());
   while (iter.HasNext()) {
@@ -567,14 +571,14 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
           return {};
         }
 
-        if (entry_count * sizeof(uint32_t) > chunk.data_size()) {
+        if (entry_count * sizeof(uint32_t) > child_chunk.data_size()) {
           LOG(ERROR) << "RES_TABLE_TYPE_SPEC_TYPE too small to hold entries.";
           return {};
         }
 
-        std::unique_ptr<TypeSpecBuilder>& builder_ptr = type_builder_map[type_spec->id];
-        if (builder_ptr == nullptr) {
-          builder_ptr = util::make_unique<TypeSpecBuilder>(type_spec.verified());
+        auto& maybe_type_builder = type_builder_map[type_spec->id];
+        if (!maybe_type_builder) {
+          maybe_type_builder.emplace(type_spec.verified());
           loaded_package->resource_ids_.set(type_spec->id, entry_count);
         } else {
           LOG(WARNING) << StringPrintf("RES_TABLE_TYPE_SPEC_TYPE already defined for ID %02x",
@@ -594,9 +598,9 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
         }
 
         // Type chunks must be preceded by their TypeSpec chunks.
-        std::unique_ptr<TypeSpecBuilder>& builder_ptr = type_builder_map[type->id];
-        if (builder_ptr != nullptr) {
-          builder_ptr->AddType(type.verified());
+        auto& maybe_type_builder = type_builder_map[type->id];
+        if (maybe_type_builder) {
+          maybe_type_builder->AddType(type.verified());
         } else {
           LOG(ERROR) << StringPrintf(
               "RES_TABLE_TYPE_TYPE with ID %02x found without preceding RES_TABLE_TYPE_SPEC_TYPE.",

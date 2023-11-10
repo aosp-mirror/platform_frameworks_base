@@ -1401,8 +1401,8 @@ struct ResTable_typeSpec
     
     // Must be 0.
     uint8_t res0;
-    // Must be 0.
-    uint16_t res1;
+    // Used to be reserved, if >0 specifies the number of ResTable_type entries for this spec.
+    uint16_t typesCount;
     
     // Number of uint32_t entry configuration masks that follow.
     uint32_t entryCount;
