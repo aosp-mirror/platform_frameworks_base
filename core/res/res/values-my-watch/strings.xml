@@ -22,9 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="permgrouplab_sensors" msgid="2439544173324807471">"အာရုံခံကိရိယာများ"</string>
     <string name="global_action_emergency" msgid="2097576936362874627">"အရေးပေါ် SOS"</string>
-    <!-- no translation found for reboot_to_update_prepare (4129802024411268230) -->
-    <skip />
+    <string name="reboot_to_update_prepare" msgid="4129802024411268230">"အပ်ဒိတ်လုပ်ရန် ပြင်ဆင်နေသည်"</string>
     <string name="reboot_to_update_title" msgid="8043761242418682803">"Wear OS စနစ် အပ်ဒိတ်လုပ်ခြင်း"</string>
-    <!-- no translation found for select_input_method (1285150113084396451) -->
-    <skip />
+    <string name="select_input_method" msgid="1285150113084396451">"လက်ကွက် ရွေးပါ"</string>
 </resources>
