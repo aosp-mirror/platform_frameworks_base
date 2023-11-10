@@ -26,6 +26,7 @@ import android.view.IDisplayChangeWindowCallback;
 import android.window.DisplayAreaInfo;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 
 import java.util.ArrayList;
@@ -44,16 +45,16 @@ public class RemoteDisplayChangeController {
     private static final int REMOTE_DISPLAY_CHANGE_TIMEOUT_MS = 800;
 
     private final WindowManagerService mService;
-    private final int mDisplayId;
+    private final DisplayContent mDisplayContent;
 
     private final Runnable mTimeoutRunnable = this::onContinueTimedOut;
 
     // all remote changes that haven't finished yet.
     private final List<ContinueRemoteDisplayChangeCallback> mCallbacks = new ArrayList<>();
 
-    public RemoteDisplayChangeController(WindowManagerService service, int displayId) {
-        mService = service;
-        mDisplayId = displayId;
+    RemoteDisplayChangeController(@NonNull DisplayContent displayContent) {
+        mService = displayContent.mWmService;
+        mDisplayContent = displayContent;
     }
 
     /**
@@ -99,8 +100,8 @@ public class RemoteDisplayChangeController {
         try {
             mService.mH.removeCallbacks(mTimeoutRunnable);
             mService.mH.postDelayed(mTimeoutRunnable, REMOTE_DISPLAY_CHANGE_TIMEOUT_MS);
-            mService.mDisplayChangeController.onDisplayChange(mDisplayId, fromRotation, toRotation,
-                    newDisplayAreaInfo, remoteCallback);
+            mService.mDisplayChangeController.onDisplayChange(mDisplayContent.mDisplayId,
+                    fromRotation, toRotation, newDisplayAreaInfo, remoteCallback);
             return true;
         } catch (RemoteException e) {
             Slog.e(TAG, "Exception while dispatching remote display-change", e);
@@ -117,10 +118,23 @@ public class RemoteDisplayChangeController {
                 mCallbacks.get(i).onContinueRemoteDisplayChange(null /* transaction */);
             }
             mCallbacks.clear();
+            onCompleted();
         }
     }
 
-    private void continueDisplayChange(@NonNull ContinueRemoteDisplayChangeCallback callback,
+    /** Called when all remote callbacks are done. */
+    private void onCompleted() {
+        // Because DisplayContent#sendNewConfiguration() will be skipped if there are pending remote
+        // changes, check again when all remote callbacks are done. E.g. callback X is done but
+        // there is a pending callback Y so its invocation is skipped, and when the callback Y is
+        // done, it doesn't call sendNewConfiguration().
+        if (mDisplayContent.mWaitingForConfig) {
+            mDisplayContent.sendNewConfiguration();
+        }
+    }
+
+    @VisibleForTesting
+    void continueDisplayChange(@NonNull ContinueRemoteDisplayChangeCallback callback,
             @Nullable WindowContainerTransaction transaction) {
         synchronized (mService.mGlobalLock) {
             int idx = mCallbacks.indexOf(callback);
@@ -133,11 +147,16 @@ public class RemoteDisplayChangeController {
                 // ordering by continuing everything up until this one with empty transactions.
                 mCallbacks.get(i).onContinueRemoteDisplayChange(null /* transaction */);
             }
+            // The "toIndex" is exclusive, so it needs +1 to clear the current calling callback.
             mCallbacks.subList(0, idx + 1).clear();
-            if (mCallbacks.isEmpty()) {
+            final boolean completed = mCallbacks.isEmpty();
+            if (completed) {
                 mService.mH.removeCallbacks(mTimeoutRunnable);
             }
             callback.onContinueRemoteDisplayChange(transaction);
+            if (completed) {
+                onCompleted();
+            }
         }
     }
 
