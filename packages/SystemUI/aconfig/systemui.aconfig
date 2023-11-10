@@ -105,3 +105,10 @@ flag {
         "keyguard_root_view."
     bug: "278054201"
 }
+
+flag {
+   name: "qs_new_pipeline"
+   namespace: "systemui"
+   description: "Use the new pipeline for Quick Settings. Should have no behavior changes."
+   bug: "241772429"
+}
