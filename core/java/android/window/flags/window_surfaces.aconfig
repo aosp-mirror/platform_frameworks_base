@@ -72,3 +72,11 @@ flag {
     is_fixed_read_only: true
     bug: "295038072"
 }
+
+flag {
+    namespace: "window_surfaces"
+    name: "surface_control_input_receiver"
+    description: "Enable public API to register an InputReceiver for a SurfaceControl"
+    is_fixed_read_only: true
+    bug: "278757236"
+}
