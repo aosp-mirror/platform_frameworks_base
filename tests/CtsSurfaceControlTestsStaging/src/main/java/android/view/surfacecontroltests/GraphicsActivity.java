@@ -78,7 +78,7 @@ public class GraphicsActivity extends Activity {
     // TODO(b/293651105): Unhardcode category fps range mapping
     private static final FpsRange FRAME_RATE_CATEGORY_HIGH = new FpsRange(90, 120);
     private static final FpsRange FRAME_RATE_CATEGORY_NORMAL = new FpsRange(60, 90);
-    private static final FpsRange FRAME_RATE_CATEGORY_LOW = new FpsRange(30, 60);
+    private static final FpsRange FRAME_RATE_CATEGORY_LOW = new FpsRange(30, 30);
 
     private DisplayManager mDisplayManager;
     private SurfaceView mSurfaceView;
