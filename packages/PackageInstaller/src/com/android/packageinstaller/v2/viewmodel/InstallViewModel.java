@@ -81,4 +81,9 @@ public class InstallViewModel extends AndroidViewModel {
     public void cleanupInstall() {
         mRepository.cleanupInstall();
     }
+
+    public void reattemptInstall() {
+        InstallStage stage = mRepository.reattemptInstall();
+        mCurrentInstallStage.setValue(stage);
+    }
 }

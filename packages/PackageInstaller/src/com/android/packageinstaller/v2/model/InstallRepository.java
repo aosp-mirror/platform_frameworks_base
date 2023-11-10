@@ -641,6 +641,32 @@ public class InstallRepository {
         return true;
     }
 
+    /**
+     * Once the user returns from Settings related to installing from unknown sources, reattempt
+     * the installation if the source app is granted permission to install other apps. Abort the
+     * installation if the source app is still not granted installing permission.
+     * @return {@link InstallUserActionRequired} containing data required to ask user confirmation
+     * to proceed with the install.
+     * {@link InstallAborted} if there was an error while recomputing, or the source still
+     * doesn't have install permission.
+     */
+    public InstallStage reattemptInstall() {
+        InstallStage unknownSourceStage = handleUnknownSources(mAppOpRequestInfo);
+        if (unknownSourceStage.getStageCode() == InstallStage.STAGE_READY) {
+            // Source app now has appOp granted.
+            return generateConfirmationSnippet();
+        } else if (unknownSourceStage.getStageCode() == InstallStage.STAGE_ABORTED) {
+            // There was some error in determining the AppOp code for the source app.
+            // Abort installation
+            return unknownSourceStage;
+        } else {
+            // AppOpsManager again returned a MODE_ERRORED or MODE_DEFAULT op code. This was
+            // unexpected while reattempting the install. Let's abort it.
+            Log.e(TAG, "AppOp still not granted.");
+            return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
+        }
+    }
+
     private InstallStage handleUnknownSources(AppOpRequestInfo requestInfo) {
         if (requestInfo.getCallingPackage() == null) {
             Log.i(TAG, "No source found for package " + mNewPackageInfo.packageName);
