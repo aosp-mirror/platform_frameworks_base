@@ -310,7 +310,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     // All known input methods.
     final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
-    final ArrayMap<String, InputMethodInfo> mMethodMap = new ArrayMap<>();
+    private final ArrayMap<String, InputMethodInfo> mMethodMap = new ArrayMap<>();
     final InputMethodSubtypeSwitchingController mSwitchingController;
     final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController =
             new HardwareKeyboardShortcutController();
@@ -498,6 +498,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     private void advanceSequenceNumberLocked() {
         mBindingController.advanceSequenceNumber();
+    }
+
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    InputMethodInfo queryInputMethodForCurrentUserLocked(@NonNull String imeId) {
+        return mMethodMap.get(imeId);
     }
 
     /**

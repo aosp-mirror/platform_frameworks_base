@@ -133,10 +133,11 @@ public class InputMethodBindingControllerTest extends InputMethodManagerServiceT
     }
 
     private void testBindCurrentMethodWithMainConnection() throws Exception {
+        final InputMethodInfo info;
         synchronized (ImfLock.class) {
             mBindingController.setSelectedMethodId(TEST_IME_ID);
+            info = mInputMethodManagerService.queryInputMethodForCurrentUserLocked(TEST_IME_ID);
         }
-        InputMethodInfo info = mInputMethodManagerService.mMethodMap.get(TEST_IME_ID);
         assertThat(info).isNotNull();
         assertThat(info.getId()).isEqualTo(TEST_IME_ID);
         assertThat(info.getServiceName()).isEqualTo(TEST_SERVICE_NAME);
