@@ -58,6 +58,7 @@ aconfig_srcjars = [
     ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
     ":com.android.net.flags-aconfig-java{.generated_srcjars}",
     ":device_policy_aconfig_flags_lib{.generated_srcjars}",
+    ":service-jobscheduler-deviceidle.flags-aconfig-java{.generated_srcjars}",
     ":surfaceflinger_flags_java_lib{.generated_srcjars}",
     ":android.view.contentcapture.flags-aconfig-java{.generated_srcjars}",
     ":android.hardware.usb.flags-aconfig-java{.generated_srcjars}",
