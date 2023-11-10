@@ -39,7 +39,7 @@ import org.mockito.MockitoAnnotations;
 /**
  * Tests for MagnificationConnectionWrapper. We don't test {@code
  * MagnificationConnectionWrapper#linkToDeath(IBinder.DeathRecipient)} since it's tested in
- * {@link WindowMagnificationManagerTest}.
+ * {@link MagnificationConnectionManagerTest}.
  */
 public class MagnificationConnectionWrapperTest {
 

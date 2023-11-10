@@ -60,19 +60,19 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 /**
- * A class to manipulate window magnification through {@link MagnificationConnectionWrapper}
+ * A class to manipulate magnification through {@link MagnificationConnectionWrapper}
  * create by {@link #setConnection(IWindowMagnificationConnection)}. To set the connection with
  * SysUI, call {@code StatusBarManagerInternal#requestWindowMagnificationConnection(boolean)}.
  * The applied magnification scale is constrained by
  * {@link MagnificationScaleProvider#constrainScale(float)}
  */
-public class WindowMagnificationManager implements
+public class MagnificationConnectionManager implements
         PanningScalingHandler.MagnificationDelegate,
         WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks {
 
     private static final boolean DBG = false;
 
-    private static final String TAG = "WindowMagnificationMgr";
+    private static final String TAG = "MagnificationConnectionManager";
 
     /**
      * Indicate that the magnification window is at the magnification center.
@@ -208,7 +208,7 @@ public class WindowMagnificationManager implements
     private final AccessibilityTraceManager mTrace;
     private final MagnificationScaleProvider mScaleProvider;
 
-    public WindowMagnificationManager(Context context, Object lock, @NonNull Callback callback,
+    public MagnificationConnectionManager(Context context, Object lock, @NonNull Callback callback,
             AccessibilityTraceManager trace, MagnificationScaleProvider scaleProvider) {
         mContext = context;
         mLock = lock;
@@ -1040,7 +1040,7 @@ public class WindowMagnificationManager implements
         private float mScale = MagnificationScaleProvider.MIN_SCALE;
         private boolean mEnabled;
 
-        private final WindowMagnificationManager mWindowMagnificationManager;
+        private final MagnificationConnectionManager mMagnificationConnectionManager;
         // Records the bounds of window magnification.
         private final Rect mBounds = new Rect();
         // The magnified bounds on the screen.
@@ -1058,11 +1058,15 @@ public class WindowMagnificationManager implements
                         "mTrackingTypingFocusSumTime");
         private volatile long mTrackingTypingFocusSumTime = 0;
 
-        WindowMagnifier(int displayId, WindowMagnificationManager windowMagnificationManager) {
+        WindowMagnifier(int displayId,
+                MagnificationConnectionManager magnificationConnectionManager) {
             mDisplayId = displayId;
-            mWindowMagnificationManager = windowMagnificationManager;
+            mMagnificationConnectionManager = magnificationConnectionManager;
         }
 
+        // TODO(b/312324808): Investigating whether
+        //  mMagnificationConnectionManager#enableWindowMagnificationInternal requires a sync lock
+        @SuppressWarnings("GuardedBy")
         boolean enableWindowMagnificationInternal(float scale, float centerX, float centerY,
                 @Nullable MagnificationAnimationCallback animationCallback,
                 @WindowPosition int windowPosition, int id) {
@@ -1072,8 +1076,8 @@ public class WindowMagnificationManager implements
             }
             final float normScale = MagnificationScaleProvider.constrainScale(scale);
             setMagnificationFrameOffsetRatioByWindowPosition(windowPosition);
-            if (mWindowMagnificationManager.enableWindowMagnificationInternal(mDisplayId, normScale,
-                    centerX, centerY, mMagnificationFrameOffsetRatio.x,
+            if (mMagnificationConnectionManager.enableWindowMagnificationInternal(mDisplayId,
+                    normScale, centerX, centerY, mMagnificationFrameOffsetRatio.x,
                     mMagnificationFrameOffsetRatio.y, animationCallback)) {
                 mScale = normScale;
                 mEnabled = true;
@@ -1096,12 +1100,15 @@ public class WindowMagnificationManager implements
             }
         }
 
+        // TODO(b/312324808): Investigating whether
+        //  mMagnificationConnectionManager#disableWindowMagnificationInternal requires a sync lock
+        @SuppressWarnings("GuardedBy")
         boolean disableWindowMagnificationInternal(
                 @Nullable MagnificationAnimationCallback animationResultCallback) {
             if (!mEnabled) {
                 return false;
             }
-            if (mWindowMagnificationManager.disableWindowMagnificationInternal(
+            if (mMagnificationConnectionManager.disableWindowMagnificationInternal(
                     mDisplayId, animationResultCallback)) {
                 mEnabled = false;
                 mIdOfLastServiceToControl = INVALID_SERVICE_ID;
@@ -1112,6 +1119,10 @@ public class WindowMagnificationManager implements
             return false;
         }
 
+        // ErrorProne says the access of mMagnificationConnectionManager#setScaleInternal should
+        // be guarded by 'this.mMagnificationConnectionManager.mLock' which is the same one as
+        // 'mLock'. Therefore, we'll put @SuppressWarnings here.
+        @SuppressWarnings("GuardedBy")
         @GuardedBy("mLock")
         void setScale(float scale) {
             if (!mEnabled) {
@@ -1119,7 +1130,7 @@ public class WindowMagnificationManager implements
             }
             final float normScale = MagnificationScaleProvider.constrainScale(scale);
             if (Float.compare(mScale, normScale) != 0
-                    && mWindowMagnificationManager.setScaleInternal(mDisplayId, scale)) {
+                    && mMagnificationConnectionManager.setScaleInternal(mDisplayId, scale)) {
                 mScale = normScale;
             }
         }
@@ -1159,8 +1170,8 @@ public class WindowMagnificationManager implements
         }
 
         void setTrackingTypingFocusEnabled(boolean trackingTypingFocusEnabled) {
-            if (mWindowMagnificationManager.isWindowMagnifierEnabled(mDisplayId)
-                    && mWindowMagnificationManager.isImeVisible(mDisplayId)
+            if (mMagnificationConnectionManager.isWindowMagnifierEnabled(mDisplayId)
+                    && mMagnificationConnectionManager.isImeVisible(mDisplayId)
                     && trackingTypingFocusEnabled) {
                 startTrackingTypingFocusRecord();
             }
@@ -1206,7 +1217,7 @@ public class WindowMagnificationManager implements
                     Slog.d(TAG, "stop and log: session duration = " + duration
                             + ", elapsed = " + elapsed);
                 }
-                mWindowMagnificationManager.logTrackingTypingFocus(duration);
+                mMagnificationConnectionManager.logTrackingTypingFocus(duration);
                 mTrackingTypingFocusStartTime = 0;
                 mTrackingTypingFocusSumTime = 0;
             }
@@ -1216,9 +1227,14 @@ public class WindowMagnificationManager implements
             return mEnabled;
         }
 
+        // ErrorProne says the access of mMagnificationConnectionManager#moveWindowMagnifierInternal
+        // should be guarded by 'this.mMagnificationConnectionManager.mLock' which is the same one
+        // as 'mLock'. Therefore, we'll put @SuppressWarnings here.
+        @SuppressWarnings("GuardedBy")
         @GuardedBy("mLock")
         void move(float offsetX, float offsetY) {
-            mWindowMagnificationManager.moveWindowMagnifierInternal(mDisplayId, offsetX, offsetY);
+            mMagnificationConnectionManager.moveWindowMagnifierInternal(
+                    mDisplayId, offsetX, offsetY);
         }
 
         @GuardedBy("mLock")
