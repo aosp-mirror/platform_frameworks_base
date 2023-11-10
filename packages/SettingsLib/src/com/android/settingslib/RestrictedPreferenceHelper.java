@@ -275,6 +275,10 @@ public class RestrictedPreferenceHelper {
         if (mPreference instanceof PrimarySwitchPreference) {
             ((PrimarySwitchPreference) mPreference).setSwitchEnabled(isEnabled);
         }
+
+        if (!isEnabled && mDisabledByEcm) {
+            mPreference.setSummary(R.string.disabled_by_app_ops_text);
+        }
     }
 
 
