@@ -19,13 +19,13 @@ package com.android.systemui.qs.tiles.impl.custom.di
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
-import com.android.systemui.qs.tiles.impl.custom.CustomTileData
 import com.android.systemui.qs.tiles.impl.custom.CustomTileInteractor
 import com.android.systemui.qs.tiles.impl.custom.CustomTileMapper
 import com.android.systemui.qs.tiles.impl.custom.CustomTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepository
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepositoryImpl
 import com.android.systemui.qs.tiles.impl.custom.di.bound.CustomTileBoundComponent
+import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
 import dagger.Binds
 import dagger.Module
 
@@ -36,15 +36,15 @@ interface CustomTileModule {
     @Binds
     fun bindDataInteractor(
         dataInteractor: CustomTileInteractor
-    ): QSTileDataInteractor<CustomTileData>
+    ): QSTileDataInteractor<CustomTileDataModel>
 
     @Binds
     fun bindUserActionInteractor(
         userActionInteractor: CustomTileUserActionInteractor
-    ): QSTileUserActionInteractor<CustomTileData>
+    ): QSTileUserActionInteractor<CustomTileDataModel>
 
     @Binds
-    fun bindMapper(customTileMapper: CustomTileMapper): QSTileDataToStateMapper<CustomTileData>
+    fun bindMapper(customTileMapper: CustomTileMapper): QSTileDataToStateMapper<CustomTileDataModel>
 
     @Binds
     fun bindCustomTileDefaultsRepository(

@@ -17,15 +17,16 @@
 package com.android.systemui.qs.tiles.impl.custom
 
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
+import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
 import com.android.systemui.qs.tiles.impl.di.QSTileScope
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import javax.inject.Inject
 
 @QSTileScope
-class CustomTileMapper @Inject constructor() : QSTileDataToStateMapper<CustomTileData> {
+class CustomTileMapper @Inject constructor() : QSTileDataToStateMapper<CustomTileDataModel> {
 
-    override fun map(config: QSTileConfig, data: CustomTileData): QSTileState {
+    override fun map(config: QSTileConfig, data: CustomTileDataModel): QSTileState {
         TODO("Not yet implemented")
     }
 }
