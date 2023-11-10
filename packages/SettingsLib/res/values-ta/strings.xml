@@ -97,16 +97,12 @@
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"செயலில் உள்ளது, <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"செயலில் உள்ளது, L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> பேட்டரி, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> பேட்டரி"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி"</string>
-    <!-- no translation found for tv_bluetooth_battery_level (8786353985605532846) -->
-    <skip />
+    <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"பேட்டரி <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> பேட்டரி, R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> பேட்டரி"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered_left (2952823007648782646) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right (6525710737740083276) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"இடதுபுறம்: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"வலதுபுறம்: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"செயலில் உள்ளது"</string>
-    <!-- no translation found for bluetooth_saved_device (4895871321722311428) -->
-    <skip />
+    <string name="bluetooth_saved_device" msgid="4895871321722311428">"சேமிக்கப்பட்டது"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"இடது பக்கம் மட்டும் செயலில் உள்ளது"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"வலது பக்கம் மட்டும் செயலில் உள்ளது"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"வலது மற்றும் இடது பக்கம் செயலில் உள்ளது"</string>
@@ -440,12 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"ஆப்ஸ் மாடர்ன் வடிவங்களை ஆதரிக்கும்படி அமை"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"குறிமாற்ற அறிவிப்புகளைக் காட்டு"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"குறிமாற்றத்திற்கான தற்காலிக சேமிப்பை முடக்குதல்"</string>
-    <!-- no translation found for widevine_settings_title (4023329801172572917) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_title (4987972688770202547) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_summary (3080790841069996016) -->
-    <skip />
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine அமைப்புகள்"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 ஃபால்பேக்கை இயக்குதல்"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 ஃபால்பேக்கை இயக்குவதற்குத் தேர்ந்தெடுக்கலாம்"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"இயங்கும் சேவைகள்"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"தற்போது இயக்கத்தில் இருக்கும் சேவைகளைப் பார்த்து கட்டுப்படுத்து"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView செயல்படுத்தல்"</string>
@@ -569,22 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"இங்கே பிளே செய்ய உங்கள் சாதனத்தைச் சார்ஜ் செய்யுங்கள்"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"பிளே செய்வதற்குச் சாதனம் அனுமதிக்கப்படவில்லை"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"இந்த மீடியாவை இங்கே பிளே செய்ய முடியவில்லை"</string>
-    <!-- no translation found for tv_media_transfer_connected (5145011475885290725) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_fallback_title (3674360098755328601) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_fallback_title (3098685494578519940) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_subtitle (1040017851325069082) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_subtitle (645191413103303077) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_default (38102257053315304) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (2229000864416329818) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (2433193551482972117) -->
-    <skip />
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"இணைக்கப்பட்டுள்ளது"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC மூலம் இணைக்கப்பட்டுள்ளவை"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC மூலம் இணைக்கப்பட்டுள்ளவை"</string>
+    <string name="tv_media_transfer_default" msgid="38102257053315304">"டிவி இயல்புநிலை"</string>
+    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI அவுட்புட்"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"உட்புற ஸ்பீக்கர்கள்"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"இணைப்பதில் சிக்கல். சாதனத்தை ஆஃப் செய்து மீண்டும் ஆன் செய்யவும்"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"வயருடன்கூடிய ஆடியோ சாதனம்"</string>
     <string name="help_label" msgid="3528360748637781274">"உதவியும் கருத்தும்"</string>

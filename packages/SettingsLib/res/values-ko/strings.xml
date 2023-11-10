@@ -97,16 +97,12 @@
     <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"활성, 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"활성, 왼쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <!-- no translation found for tv_bluetooth_battery_level (8786353985605532846) -->
-    <skip />
+    <string name="tv_bluetooth_battery_level" msgid="8786353985605532846">"배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"왼쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, 오른쪽: 배터리 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
-    <!-- no translation found for bluetooth_battery_level_untethered_left (2952823007648782646) -->
-    <skip />
-    <!-- no translation found for bluetooth_battery_level_untethered_right (6525710737740083276) -->
-    <skip />
+    <string name="bluetooth_battery_level_untethered_left" msgid="2952823007648782646">"왼쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_battery_level_untethered_right" msgid="6525710737740083276">"오른쪽 <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"활성"</string>
-    <!-- no translation found for bluetooth_saved_device (4895871321722311428) -->
-    <skip />
+    <string name="bluetooth_saved_device" msgid="4895871321722311428">"저장됨"</string>
     <string name="bluetooth_hearing_aid_left_active" msgid="7084887715570971441">"활성, 왼쪽만"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="8574683234077567230">"활성, 오른쪽만"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="407704460573163973">"활성, 왼쪽 및 오른쪽"</string>
@@ -440,12 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"앱이 최신 형식을 지원하는 것으로 가정"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"트랜스코딩 알림 표시"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"트랜스코딩 캐시 사용 중지"</string>
-    <!-- no translation found for widevine_settings_title (4023329801172572917) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_title (4987972688770202547) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_summary (3080790841069996016) -->
-    <skip />
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine 설정"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 대체 강제"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 대체를 강제하려면 선택하세요."</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"실행 중인 서비스"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"현재 실행 중인 서비스 보기 및 제어"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView 구현"</string>
@@ -569,22 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"기기 절전 모드 해제 후 여기에서 재생"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"기기에서 재생을 승인하지 않음"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"여기에서 이 미디어를 재생할 수 없음"</string>
-    <!-- no translation found for tv_media_transfer_connected (5145011475885290725) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_fallback_title (3674360098755328601) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_fallback_title (3098685494578519940) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_subtitle (1040017851325069082) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_subtitle (645191413103303077) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_default (38102257053315304) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (2229000864416329818) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (2433193551482972117) -->
-    <skip />
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"연결됨"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC를 통해 연결됨"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC를 통해 연결됨"</string>
+    <string name="tv_media_transfer_default" msgid="38102257053315304">"TV 기본값"</string>
+    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI 출력"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"내부 스피커"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"연결 중에 문제가 발생했습니다. 기기를 껐다가 다시 켜 보세요."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"유선 오디오 기기"</string>
     <string name="help_label" msgid="3528360748637781274">"고객센터"</string>

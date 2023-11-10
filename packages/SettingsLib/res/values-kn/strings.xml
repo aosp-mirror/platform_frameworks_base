@@ -436,12 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"ಆ್ಯಪ್‌ಗಳು ಆಧುನಿಕ ಫಾರ್ಮ್ಯಾಟ್‌ಗಳನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ ಎಂದು ಊಹಿಸಿ"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"ಟ್ರಾನ್ಸ್‌ಕೋಡಿಂಗ್ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"ಟ್ರಾನ್ಸ್‌ಕೋಡಿಂಗ್ ಕ್ಯಾಷ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
-    <!-- no translation found for widevine_settings_title (4023329801172572917) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_title (4987972688770202547) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_summary (3080790841069996016) -->
-    <skip />
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Force L3 ಫಾಲ್‌ಬ್ಯಾಕ್"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Force L3 ಫಾಲ್‌ಬ್ಯಾಕ್ ಅನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳು"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ಈಗ ರನ್‌ ಆಗುತ್ತಿರುವ ಸೇವೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ ಮತ್ತು ನಿಯಂತ್ರಿಸಿ"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView ಹೊಂದಿಸಿ"</string>
@@ -565,22 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಸಾಧನವನ್ನು ಎಚ್ಚರಿಸಿ"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ಪ್ಲೇ ಮಾಡಲು ಸಾಧನವನ್ನು ಅನುಮೋದಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ಈ ಮಾಧ್ಯಮವನ್ನು ಇಲ್ಲಿ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <!-- no translation found for tv_media_transfer_connected (5145011475885290725) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_fallback_title (3674360098755328601) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_fallback_title (3098685494578519940) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_subtitle (1040017851325069082) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_subtitle (645191413103303077) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_default (38102257053315304) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (2229000864416329818) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (2433193551482972117) -->
-    <skip />
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC ಮೂಲಕ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC ಮೂಲಕ ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="tv_media_transfer_default" msgid="38102257053315304">"ಟಿವಿ ಡೀಫಾಲ್ಟ್"</string>
+    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI ಔಟ್‌‌ಪುಟ್"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"ಆಂತರಿಕ ಸ್ಪೀಕರ್‌ಗಳು"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ಕನೆಕ್ಟ್ ಮಾಡುವಾಗ ಸಮಸ್ಯೆ ಎದುರಾಗಿದೆ ಸಾಧನವನ್ನು ಆಫ್ ಮಾಡಿ ಹಾಗೂ ನಂತರ ಪುನಃ ಆನ್ ಮಾಡಿ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ವೈರ್ ಹೊಂದಿರುವ ಆಡಿಯೋ ಸಾಧನ"</string>
     <string name="help_label" msgid="3528360748637781274">"ಸಹಾಯ ಮತ್ತು ಪ್ರತಿಕ್ರಿಯೆ"</string>

@@ -436,12 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"Předpokládat, že aplikace podporují moderní formáty"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Zobrazit oznámení o překódování"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Deaktivovat mezipaměť pro překódování"</string>
-    <!-- no translation found for widevine_settings_title (4023329801172572917) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_title (4987972688770202547) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_summary (3080790841069996016) -->
-    <skip />
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Nastavení Widevine"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Vynucení L3 fallback"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Vybrat vynucení L3 fallback"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Spuštěné služby"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Umožňuje zobrazit a ovládat aktuálně spuštěné služby"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementace WebView"</string>
@@ -565,22 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Zařízení je třeba probudit"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Není schváleno k přehrávání"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Tato média zde přehrát nelze"</string>
-    <!-- no translation found for tv_media_transfer_connected (5145011475885290725) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_fallback_title (3674360098755328601) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_fallback_title (3098685494578519940) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_subtitle (1040017851325069082) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_subtitle (645191413103303077) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_default (38102257053315304) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (2229000864416329818) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (2433193551482972117) -->
-    <skip />
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"Připojeno"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Připojeno přes ARC"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Připojeno přes eARC"</string>
+    <string name="tv_media_transfer_default" msgid="38102257053315304">"Výchozí nastavení televize"</string>
+    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"Výstup HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Interní reproduktory"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problém s připojením. Vypněte zařízení a znovu jej zapněte"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Kabelové audiozařízení"</string>
     <string name="help_label" msgid="3528360748637781274">"Nápověda a zpětná vazba"</string>
