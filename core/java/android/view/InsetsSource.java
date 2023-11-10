@@ -49,8 +49,9 @@ public class InsetsSource implements Parcelable {
 
     /** The insets source ID of IME */
     public static final int ID_IME = createId(null, 0, ime());
+
     /** The insets source ID of the IME caption bar ("fake" IME navigation bar). */
-    static final int ID_IME_CAPTION_BAR =
+    public static final int ID_IME_CAPTION_BAR =
             InsetsSource.createId(null /* owner */, 1 /* index */, captionBar());
 
     /**
