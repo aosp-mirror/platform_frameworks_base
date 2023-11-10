@@ -17,7 +17,10 @@
 
 package com.android.compose.ui.util
 
+import androidx.compose.ui.geometry.isSpecified
+import androidx.compose.ui.geometry.lerp
 import androidx.compose.ui.unit.IntSize
+import com.android.compose.animation.scene.Scale
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
@@ -41,5 +44,21 @@ fun lerp(start: IntSize, stop: IntSize, fraction: Float): IntSize {
     return IntSize(
         lerp(start.width, stop.width, fraction),
         lerp(start.height, stop.height, fraction)
+    )
+}
+
+/** Linearly interpolate between [start] and [stop] with [fraction] fraction between them. */
+fun lerp(start: Scale, stop: Scale, fraction: Float): Scale {
+    val pivot =
+        when {
+            start.pivot.isSpecified && stop.pivot.isSpecified ->
+                lerp(start.pivot, stop.pivot, fraction)
+            start.pivot.isSpecified -> start.pivot
+            else -> stop.pivot
+        }
+    return Scale(
+        lerp(start.scaleX, stop.scaleX, fraction),
+        lerp(start.scaleY, stop.scaleY, fraction),
+        pivot
     )
 }
