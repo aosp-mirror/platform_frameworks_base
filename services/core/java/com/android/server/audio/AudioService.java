@@ -16,8 +16,8 @@
 
 package com.android.server.audio;
 
-import static android.app.BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT;
 import static android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED;
+import static android.app.BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT;
 import static android.media.AudioDeviceInfo.TYPE_BLE_HEADSET;
 import static android.media.AudioDeviceInfo.TYPE_BLE_SPEAKER;
 import static android.media.AudioDeviceInfo.TYPE_BLUETOOTH_A2DP;
@@ -29,7 +29,6 @@ import static android.media.AudioManager.DEVICE_OUT_BLUETOOTH_A2DP;
 import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
-import static android.media.AudioManager.STREAM_MUSIC;
 import static android.media.AudioManager.STREAM_SYSTEM;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.INVALID_UID;
@@ -409,7 +408,6 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_RESET_SPATIALIZER = 50;
     private static final int MSG_NO_LOG_FOR_PLAYER_I = 51;
     private static final int MSG_DISPATCH_PREFERRED_MIXER_ATTRIBUTES = 52;
-    private static final int MSG_LOWER_VOLUME_TO_RS1 = 53;
     private static final int MSG_CONFIGURATION_CHANGED = 54;
     private static final int MSG_BROADCAST_MASTER_MUTE = 55;
 
@@ -3536,7 +3534,7 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        mSoundDoseHelper.invalidatPendingVolumeCommand();
+        mSoundDoseHelper.invalidatePendingVolumeCommand();
 
         flags &= ~AudioManager.FLAG_FIXED_VOLUME;
         if (streamTypeAlias == AudioSystem.STREAM_MUSIC && isFixedVolumeDevice(device)) {
@@ -4607,7 +4605,7 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        mSoundDoseHelper.invalidatPendingVolumeCommand();
+        mSoundDoseHelper.invalidatePendingVolumeCommand();
 
         oldIndex = streamState.getIndex(device);
 
@@ -9544,10 +9542,6 @@ public class AudioService extends IAudioService.Stub
                     onDispatchPreferredMixerAttributesChanged(msg.getData(), msg.arg1);
                     break;
 
-                case MSG_LOWER_VOLUME_TO_RS1:
-                    onLowerVolumeToRs1();
-                    break;
-
                 case MSG_CONFIGURATION_CHANGED:
                     onConfigurationChanged();
                     break;
@@ -9562,6 +9556,7 @@ public class AudioService extends IAudioService.Stub
                 case SoundDoseHelper.MSG_PERSIST_MUSIC_ACTIVE_MS:
                 case SoundDoseHelper.MSG_PERSIST_CSD_VALUES:
                 case SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION:
+                case SoundDoseHelper.MSG_LOWER_VOLUME_TO_RS1:
                     mSoundDoseHelper.handleMessage(msg);
                     break;
 
@@ -10946,29 +10941,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     /*package*/ void postLowerVolumeToRs1() {
-        sendMsg(mAudioHandler, MSG_LOWER_VOLUME_TO_RS1, SENDMSG_QUEUE,
+        sendMsg(mAudioHandler, SoundDoseHelper.MSG_LOWER_VOLUME_TO_RS1, SENDMSG_QUEUE,
                 // no params, no delay
                 0, 0, null, 0);
-    }
-
-    /**
-     * Called when handling MSG_LOWER_VOLUME_TO_RS1
-     */
-    private void onLowerVolumeToRs1() {
-        final ArrayList<AudioDeviceAttributes> devices = getDevicesForAttributesInt(
-                new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build(), true);
-        final int nativeDeviceType;
-        final AudioDeviceAttributes ada;
-        if (!devices.isEmpty()) {
-            ada = devices.get(0);
-            nativeDeviceType = ada.getInternalType();
-        } else {
-            nativeDeviceType = AudioSystem.DEVICE_OUT_USB_HEADSET;
-            ada = new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_USB_HEADSET, "");
-        }
-        final int index = mSoundDoseHelper.safeMediaVolumeIndex(nativeDeviceType);
-        setStreamVolumeWithAttributionInt(STREAM_MUSIC, index, /*flags*/ 0, ada,
-                "com.android.server.audio", "AudioService");
     }
 
     @Override
