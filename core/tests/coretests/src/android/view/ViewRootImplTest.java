@@ -577,6 +577,58 @@ public class ViewRootImplTest {
         });
     }
 
+    /**
+     * Test the accurate aggregation of frame rate values as follows:
+     * 1. When values exceed 60Hz, select the maximum value.
+     * 2. If frame rates are less than 60Hz and multiple frame rates are voted,
+     * prioritize 60Hz..
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRate_aggregate() {
+        View view = new View(sContext);
+        attachViewToWindow(view);
+        sInstrumentation.runOnMainSync(() -> {
+            ViewRootImpl viewRootImpl = view.getViewRootImpl();
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 0, 0.1);
+            viewRootImpl.votePreferredFrameRate(24);
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 24, 0.1);
+            viewRootImpl.votePreferredFrameRate(30);
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 60, 0.1);
+            viewRootImpl.votePreferredFrameRate(120);
+            assertEquals(viewRootImpl.getPreferredFrameRate(), 120, 0.1);
+        });
+    }
+
+    /**
+     * Override the frame rate category value with setRequestedFrameRate method.
+     * This function can replace the existing frameRateCategory value and
+     * submit your preferred choice to the ViewRootImpl.
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_voteFrameRate_category() {
+        View view = new View(sContext);
+        attachViewToWindow(view);
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        sInstrumentation.runOnMainSync(() -> {
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(),
+                    FRAME_RATE_CATEGORY_NO_PREFERENCE);
+            view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_LOW);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_LOW);
+            view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_NORMAL);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_NORMAL);
+            view.setRequestedFrameRate(view.REQUESTED_FRAME_RATE_CATEGORY_HIGH);
+            view.invalidate();
+            assertEquals(viewRootImpl.getPreferredFrameRateCategory(), FRAME_RATE_CATEGORY_HIGH);
+        });
+    }
+
+
     @Test
     public void forceInvertOffDarkThemeOff_forceDarkModeDisabled() {
         mSetFlagsRule.enableFlags(FLAG_FORCE_INVERT_COLOR);
