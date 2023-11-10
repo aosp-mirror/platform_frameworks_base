@@ -49,6 +49,7 @@ import android.os.UserManager;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.util.SparseArray;
 
 import androidx.test.filters.SmallTest;
 
@@ -120,6 +121,7 @@ public class NotificationLockscreenUserManagerMainThreadTest extends SysuiTestCa
     private UserInfo mCurrentUser;
     private UserInfo mSecondaryUser;
     private UserInfo mWorkUser;
+    private UserInfo mCommunalUser;
     private FakeSettings mSettings;
     private TestNotificationLockscreenUserManager mLockscreenUserManager;
     private NotificationEntry mCurrentUserNotif;
@@ -142,12 +144,18 @@ public class NotificationLockscreenUserManagerMainThreadTest extends SysuiTestCa
         mSecondaryUser = new UserInfo(currentUserId + 1, "", 0);
         mWorkUser = new UserInfo(currentUserId + 2, "" /* name */, null /* iconPath */, 0,
                 UserManager.USER_TYPE_PROFILE_MANAGED);
+        mCommunalUser = new UserInfo(currentUserId + 3, "" /* name */, null /* iconPath */, 0,
+                UserManager.USER_TYPE_PROFILE_COMMUNAL);
 
         when(mKeyguardManager.getPrivateNotificationsAllowed()).thenReturn(true);
         when(mUserManager.getProfiles(currentUserId)).thenReturn(Lists.newArrayList(
                 mCurrentUser, mWorkUser));
+        when(mUserManager.getProfilesIncludingCommunal(currentUserId)).thenReturn(
+                Lists.newArrayList(mCurrentUser, mWorkUser, mCommunalUser));
         when(mUserManager.getProfiles(mSecondaryUser.id)).thenReturn(Lists.newArrayList(
                 mSecondaryUser));
+        when(mUserManager.getProfilesIncludingCommunal(mSecondaryUser.id)).thenReturn(
+                Lists.newArrayList(mSecondaryUser, mCommunalUser));
         mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
                 Handler.createAsync(Looper.myLooper()));
 
@@ -175,6 +183,26 @@ public class NotificationLockscreenUserManagerMainThreadTest extends SysuiTestCa
         lockScreenUris.add(Settings.Secure.getUriFor(setting));
         mLockscreenUserManager.getLockscreenSettingsObserverForTest().onChange(false,
             lockScreenUris, 0);
+    }
+
+    @Test
+    public void testGetCurrentProfiles() {
+        final SparseArray<UserInfo> expectedCurProfiles = new SparseArray<>();
+        expectedCurProfiles.put(mCurrentUser.id, mCurrentUser);
+        expectedCurProfiles.put(mWorkUser.id, mWorkUser);
+        if (android.multiuser.Flags.supportCommunalProfile()) {
+            expectedCurProfiles.put(mCommunalUser.id, mCommunalUser);
+        }
+        assertTrue(mLockscreenUserManager.getCurrentProfiles().contentEquals(expectedCurProfiles));
+
+        mLockscreenUserManager.mUserChangedCallback.onUserChanging(mSecondaryUser.id, mContext);
+
+        final SparseArray<UserInfo> expectedSecProfiles = new SparseArray<>();
+        expectedSecProfiles.put(mSecondaryUser.id, mSecondaryUser);
+        if (android.multiuser.Flags.supportCommunalProfile()) {
+            expectedSecProfiles.put(mCommunalUser.id, mCommunalUser);
+        }
+        assertTrue(mLockscreenUserManager.getCurrentProfiles().contentEquals(expectedSecProfiles));
     }
 
     @Test
