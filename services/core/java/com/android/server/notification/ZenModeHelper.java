@@ -16,14 +16,19 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ACTIVATED;
+import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DEACTIVATED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DISABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_REMOVED;
+import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_UNKNOWN;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
 import static android.service.notification.NotificationServiceProto.ROOT_CONFIG;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 
+import android.annotation.SuppressLint;
+import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
 import android.app.Flags;
@@ -31,6 +36,9 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.app.PendingIntent;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -51,6 +59,7 @@ import android.media.AudioSystem;
 import android.media.VolumePolicy;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -108,6 +117,13 @@ public class ZenModeHelper {
     // The amount of time rules instances can exist without their owning app being installed.
     private static final int RULE_INSTANCE_GRACE_PERIOD = 1000 * 60 * 60 * 72;
     static final int RULE_LIMIT_PER_PACKAGE = 100;
+
+    /**
+     * Send new activation AutomaticZenRule statuses to apps with a min target SDK version
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    static final long SEND_ACTIVATION_AZR_STATUSES = 308673617L;
 
     // pkg|userId => uid
     @VisibleForTesting protected final ArrayMap<String, Integer> mRulesUidCache = new ArrayMap<>();
@@ -229,7 +245,8 @@ public class ZenModeHelper {
             // was read in via XML, but will initialize zen mode if nothing was read in and the
             // config remains the default.
             updateConfigAndZenModeLocked(mConfig, "init", true /*setRingerMode*/,
-                    Process.SYSTEM_UID /* callingUid */, true /* is system */);
+                    Process.SYSTEM_UID /* callingUid */, true /* is system */,
+                    false /* no broadcasts*/);
         }
     }
 
@@ -407,10 +424,13 @@ public class ZenModeHelper {
                             "Cannot update rules not owned by your condition provider");
                 }
             }
-            if (rule.enabled != automaticZenRule.isEnabled()) {
-                dispatchOnAutomaticRuleStatusChanged(mConfig.user, rule.getPkg(), ruleId,
-                        automaticZenRule.isEnabled()
-                                ? AUTOMATIC_RULE_STATUS_ENABLED : AUTOMATIC_RULE_STATUS_DISABLED);
+            if (!Flags.modesApi()) {
+                if (rule.enabled != automaticZenRule.isEnabled()) {
+                    dispatchOnAutomaticRuleStatusChanged(mConfig.user, rule.getPkg(), ruleId,
+                            automaticZenRule.isEnabled()
+                                    ? AUTOMATIC_RULE_STATUS_ENABLED
+                                    : AUTOMATIC_RULE_STATUS_DISABLED);
+                }
             }
 
             populateZenRule(rule.pkg, automaticZenRule, rule, false);
@@ -651,6 +671,9 @@ public class ZenModeHelper {
 
     private void populateZenRule(String pkg, AutomaticZenRule automaticZenRule, ZenRule rule,
             boolean isNew) {
+        if (rule.enabled != automaticZenRule.isEnabled()) {
+            rule.snoozing = false;
+        }
         rule.name = automaticZenRule.getName();
         rule.condition = null;
         rule.conditionId = automaticZenRule.getConditionId();
@@ -668,9 +691,6 @@ public class ZenModeHelper {
             rule.pkg = pkg;
         }
 
-        if (rule.enabled != automaticZenRule.isEnabled()) {
-            rule.snoozing = false;
-        }
         if (Flags.modesApi()) {
             rule.allowManualInvocation = automaticZenRule.isManualInvocationAllowed();
             rule.iconResId = automaticZenRule.getIconResId();
@@ -704,6 +724,27 @@ public class ZenModeHelper {
         }
         azr.setPackageName(rule.pkg);
         return azr;
+    }
+
+    @SuppressLint("MissingPermission")
+    void scheduleActivationBroadcast(String pkg, @UserIdInt int userId, String ruleId,
+            boolean activated) {
+        if (CompatChanges.isChangeEnabled(
+                SEND_ACTIVATION_AZR_STATUSES, pkg, UserHandle.of(userId))) {
+            dispatchOnAutomaticRuleStatusChanged(userId, pkg, ruleId, activated
+                    ? AUTOMATIC_RULE_STATUS_ACTIVATED
+                    : AUTOMATIC_RULE_STATUS_DEACTIVATED);
+        } else {
+            dispatchOnAutomaticRuleStatusChanged(
+                    userId, pkg, ruleId, AUTOMATIC_RULE_STATUS_UNKNOWN);
+        }
+    }
+
+    void scheduleEnabledBroadcast(String pkg, @UserIdInt int userId, String ruleId,
+            boolean enabled) {
+        dispatchOnAutomaticRuleStatusChanged(userId, pkg, ruleId, enabled
+                ? AUTOMATIC_RULE_STATUS_ENABLED
+                : AUTOMATIC_RULE_STATUS_DISABLED);
     }
 
     public void setManualZenMode(int zenMode, Uri conditionId, String caller, String reason,
@@ -1002,7 +1043,7 @@ public class ZenModeHelper {
                 dispatchOnPolicyChanged();
             }
             updateConfigAndZenModeLocked(config, reason, setRingerMode, callingUid,
-                    fromSystemOrSystemUi);
+                    fromSystemOrSystemUi, true);
             mConditions.evaluateConfig(config, triggeringComponent, true /*processSubscriptions*/);
             return true;
         } catch (SecurityException e) {
@@ -1019,13 +1060,31 @@ public class ZenModeHelper {
      */
     @GuardedBy("mConfigLock")
     private void updateConfigAndZenModeLocked(ZenModeConfig config, String reason,
-            boolean setRingerMode, int callingUid, boolean fromSystemOrSystemUi) {
+            boolean setRingerMode, int callingUid, boolean fromSystemOrSystemUi,
+            boolean sendBroadcasts) {
         final boolean logZenModeEvents = mFlagResolver.isEnabled(
                 SystemUiSystemPropertiesFlags.NotificationFlags.LOG_DND_STATE_EVENTS);
         // Store (a copy of) all config and zen mode info prior to any changes taking effect
         ZenModeEventLogger.ZenModeInfo prevInfo = new ZenModeEventLogger.ZenModeInfo(
                 mZenMode, mConfig, mConsolidatedPolicy);
         if (!config.equals(mConfig)) {
+            // schedule broadcasts
+            if (Flags.modesApi() && sendBroadcasts) {
+                for (ZenRule rule : config.automaticRules.values()) {
+                    ZenRule original = mConfig.automaticRules.get(rule.id);
+                    if (original != null) {
+                        if (original.enabled != rule.enabled) {
+                            scheduleEnabledBroadcast(
+                                    rule.getPkg(), config.user, rule.id, rule.enabled);
+                        }
+                        if (original.isAutomaticActive() != rule.isAutomaticActive()) {
+                            scheduleActivationBroadcast(
+                                    rule.getPkg(), config.user, rule.id, rule.isAutomaticActive());
+                        }
+                    }
+                }
+            }
+
             mConfig = config;
             dispatchOnConfigChanged();
             updateConsolidatedPolicy(reason);
