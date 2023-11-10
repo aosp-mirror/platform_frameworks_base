@@ -25,7 +25,6 @@ import android.util.MathUtils;
 import android.util.TimeUtils;
 
 import com.android.app.animation.Interpolators;
-import com.android.internal.policy.GestureNavigationSettingsObserver;
 import com.android.systemui.Dumpable;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -96,7 +95,6 @@ public class LightBarTransitionsController implements Dumpable {
     private final KeyguardStateController mKeyguardStateController;
     private final StatusBarStateController mStatusBarStateController;
     private final CommandQueue mCommandQueue;
-    private final GestureNavigationSettingsObserver mGestureNavigationSettingsObserver;
 
     private boolean mTransitionDeferring;
     private long mTransitionDeferringStartTime;
@@ -136,8 +134,6 @@ public class LightBarTransitionsController implements Dumpable {
         mDozeAmount = mStatusBarStateController.getDozeAmount();
         mContext = context;
         mDisplayId = mContext.getDisplayId();
-        mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(
-                mHandler, mContext, null);
     }
 
     /** Call to cleanup the LightBarTransitionsController when done with it. */
@@ -283,8 +279,7 @@ public class LightBarTransitionsController implements Dumpable {
      */
     public boolean supportsIconTintForNavMode(int navigationMode) {
         // In gesture mode, we already do region sampling to update tint based on content beneath.
-        return !QuickStepContract.isGesturalMode(navigationMode)
-                || mGestureNavigationSettingsObserver.areNavigationButtonForcedVisible();
+        return !QuickStepContract.isGesturalMode(navigationMode);
     }
 
     /**
