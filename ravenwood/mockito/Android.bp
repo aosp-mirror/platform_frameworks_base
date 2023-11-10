@@ -1,0 +1,38 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+// Ravenwood tests run on the hostside, so we need mockit of the host variant.
+// But we need to use it in modules of the android variant, so we "wash" the variant with it.
+java_host_for_device {
+    name: "mockito_ravenwood",
+    libs: [
+        "mockito",
+        "objenesis",
+    ],
+}
+
+android_ravenwood_test {
+    name: "RavenwoodMockitoTest",
+
+    srcs: [
+        "test/**/*.java",
+    ],
+    static_libs: [
+        "junit",
+        "truth",
+
+        "mockito_ravenwood",
+    ],
+    libs: [
+        "android.test.mock",
+        "android.test.base",
+        "android.test.runner",
+    ],
+    auto_gen_config: true,
+}
