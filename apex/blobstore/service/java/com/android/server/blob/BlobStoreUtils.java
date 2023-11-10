@@ -24,6 +24,8 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.UserHandle;
 import android.text.format.TimeMigrationUtils;
 import android.util.Slog;
@@ -62,5 +64,28 @@ class BlobStoreUtils {
     @NonNull
     static String formatTime(long timeMs) {
         return TimeMigrationUtils.formatMillisWithFixedFormat(timeMs);
+    }
+
+    private static Handler sRevocableFdHandler;
+    private static final Object sLock = new Object();
+
+    // By default, when using a RevocableFileDescriptor, callbacks will be sent to the process'
+    // main looper. In this case that would be system_server's main looper, which is a heavily
+    // contended thread. It can also cause deadlocks, because the volume daemon 'vold' holds a lock
+    // while making these callbacks to the system_server, while at the same time the system_server
+    // main thread can make a call into vold, which requires that same vold lock. To avoid these
+    // issues, use a separate thread for the RevocableFileDescriptor's requests, so that it can
+    // make progress independently of system_server.
+    static @NonNull Handler getRevocableFdHandler() {
+        synchronized (sLock) {
+            if (sRevocableFdHandler != null) {
+                return sRevocableFdHandler;
+            }
+            final HandlerThread t = new HandlerThread("BlobFuseLooper");
+            t.start();
+            sRevocableFdHandler = new Handler(t.getLooper());
+
+            return sRevocableFdHandler;
+        }
     }
 }
