@@ -9471,6 +9471,22 @@ public class CarrierConfigManager {
             "satellite_attach_supported_bool";
 
     /**
+     * The carrier-enabled satellite connection hysteresis time in seconds to determine whether to
+     * recommend Dialer to prompt users to use satellite emergency messaging.
+     * <p>
+     * A timer is started when there is an ongoing emergency call, and the IMS is not registered,
+     * and cellular service is not available, and the device was connected to a satellite network
+     * within this time in the past. When the timer expires, Telephony will send the event
+     * {@link TelephonyManager#EVENT_DISPLAY_EMERGENCY_MESSAGE} to Dialer, which will then prompt
+     * users to switch to using satellite emergency messaging.
+     * <p>
+     * The default value is 300 seconds.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT =
+            "satellite_connection_hysteresis_sec_int";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -10500,6 +10516,7 @@ public class CarrierConfigManager {
                 KEY_CARRIER_SUPPORTED_SATELLITE_SERVICES_PER_PROVIDER_BUNDLE,
                 PersistableBundle.EMPTY);
         sDefaults.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, false);
+        sDefaults.putInt(KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT, 300);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
