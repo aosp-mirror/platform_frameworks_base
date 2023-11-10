@@ -20,18 +20,22 @@ package com.android.systemui.keyguard.ui.view.layout.blueprints
 import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialIndicatorSection
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
+import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntryIconSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopupMenuSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
+import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeNotificationStackScrollLayoutSection
+import com.android.systemui.util.kotlin.getOrNull
+import java.util.Optional
 import javax.inject.Inject
+import javax.inject.Named
 
 /**
  * Split-shade layout, mostly used for larger devices like foldables and tablets when in landscape
@@ -45,7 +49,8 @@ constructor(
     defaultIndicationAreaSection: DefaultIndicationAreaSection,
     defaultDeviceEntryIconSection: DefaultDeviceEntryIconSection,
     defaultShortcutsSection: DefaultShortcutsSection,
-    defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection,
+    @Named(KeyguardSectionsModule.KEYGUARD_AMBIENT_INDICATION_AREA_SECTION)
+    defaultAmbientIndicationAreaSection: Optional<KeyguardSection>,
     defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
     defaultStatusViewSection: DefaultStatusViewSection,
     defaultStatusBarSection: DefaultStatusBarSection,
@@ -58,11 +63,11 @@ constructor(
     override val id: String = ID
 
     override val sections =
-        listOf(
+        listOfNotNull(
             defaultIndicationAreaSection,
             defaultDeviceEntryIconSection,
             defaultShortcutsSection,
-            defaultAmbientIndicationAreaSection,
+            defaultAmbientIndicationAreaSection.getOrNull(),
             defaultSettingsPopupMenuSection,
             defaultStatusViewSection,
             defaultStatusBarSection,

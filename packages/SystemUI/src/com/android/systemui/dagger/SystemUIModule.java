@@ -59,6 +59,7 @@ import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyevent.data.repository.KeyEventRepositoryModule;
 import com.android.systemui.keyguard.ui.view.layout.blueprints.KeyguardBlueprintModule;
+import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule;
 import com.android.systemui.log.dagger.LogModule;
 import com.android.systemui.log.dagger.MonitorLog;
 import com.android.systemui.log.table.TableLogBuffer;
@@ -189,6 +190,7 @@ import javax.inject.Named;
         KeyEventRepositoryModule.class,
         KeyboardModule.class,
         KeyguardBlueprintModule.class,
+        KeyguardSectionsModule.class,
         LetterboxModule.class,
         LogModule.class,
         MediaProjectionModule.class,
