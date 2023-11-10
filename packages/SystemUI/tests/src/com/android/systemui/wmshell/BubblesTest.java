@@ -160,6 +160,7 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository;
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor;
+import com.android.systemui.util.FakeEventLog;
 import com.android.systemui.util.settings.FakeGlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -540,7 +541,8 @@ public class BubblesTest extends SysuiTestCase {
                         mock(UserTracker.class),
                         mock(DeviceProvisionedController.class),
                         mock(SystemClock.class),
-                        fakeGlobalSettings
+                        fakeGlobalSettings,
+                        new FakeEventLog()
                 );
 
         mShellTaskOrganizer = new ShellTaskOrganizer(mock(ShellInit.class),

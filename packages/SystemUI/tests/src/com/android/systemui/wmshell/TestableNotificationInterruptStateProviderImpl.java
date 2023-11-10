@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.EventLog;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
@@ -52,7 +53,8 @@ public class TestableNotificationInterruptStateProviderImpl
             UserTracker userTracker,
             DeviceProvisionedController deviceProvisionedController,
             SystemClock systemClock,
-            GlobalSettings globalSettings) {
+            GlobalSettings globalSettings,
+            EventLog eventLog) {
         super(
                 powerManager,
                 ambientDisplayConfiguration,
@@ -68,7 +70,8 @@ public class TestableNotificationInterruptStateProviderImpl
                 userTracker,
                 deviceProvisionedController,
                 systemClock,
-                globalSettings);
+                globalSettings,
+                eventLog);
         mUseHeadsUp = true;
     }
 }
