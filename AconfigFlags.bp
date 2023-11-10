@@ -149,7 +149,7 @@ java_aconfig_library {
     name: "android.security.flags-aconfig-java-host",
     aconfig_declarations: "android.security.flags-aconfig",
     host_supported: true,
-    test: true,
+    mode: "test",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
