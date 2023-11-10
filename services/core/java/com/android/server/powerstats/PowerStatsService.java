@@ -603,51 +603,40 @@ public class PowerStatsService extends SystemService {
     @NonNull
     private String getEnergyConsumerName(EnergyConsumer consumer,
             EnergyConsumer[] energyConsumers) {
-        StringBuilder sb = new StringBuilder();
-        switch (consumer.type) {
-            case EnergyConsumerType.BLUETOOTH:
-                sb.append("BLUETOOTH");
-                break;
-            case EnergyConsumerType.CPU_CLUSTER:
-                sb.append("CPU");
-                break;
-            case EnergyConsumerType.DISPLAY:
-                sb.append("DISPLAY");
-                break;
-            case EnergyConsumerType.GNSS:
-                sb.append("GNSS");
-                break;
-            case EnergyConsumerType.MOBILE_RADIO:
-                sb.append("MOBILE_RADIO");
-                break;
-            case EnergyConsumerType.WIFI:
-                sb.append("WIFI");
-                break;
-            case EnergyConsumerType.CAMERA:
-                sb.append("CAMERA");
-                break;
-            default:
-                if (consumer.name != null && !consumer.name.isBlank()) {
-                    sb.append(consumer.name.toUpperCase(Locale.ENGLISH));
-                } else {
-                    sb.append("CONSUMER_").append(consumer.type);
-                }
-                break;
-        }
-        boolean hasOrdinal = consumer.ordinal != 0;
-        if (!hasOrdinal) {
-            // See if any other EnergyConsumer of the same type has an ordinal
-            for (EnergyConsumer aConsumer : energyConsumers) {
-                if (aConsumer.type == consumer.type && aConsumer.ordinal != 0) {
-                    hasOrdinal = true;
-                    break;
+        if (consumer.type != EnergyConsumerType.OTHER) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(energyConsumerTypeToString(consumer.type));
+            boolean hasOrdinal = consumer.ordinal != 0;
+            if (!hasOrdinal) {
+                // See if any other EnergyConsumer of the same type has an ordinal
+                for (EnergyConsumer aConsumer : energyConsumers) {
+                    if (aConsumer.type == consumer.type && aConsumer.ordinal != 0) {
+                        hasOrdinal = true;
+                        break;
+                    }
                 }
             }
+            if (hasOrdinal) {
+                sb.append('/').append(consumer.ordinal);
+            }
+            return sb.toString();
+        } else {
+            return consumer.name;
         }
-        if (hasOrdinal) {
-            sb.append('/').append(consumer.ordinal);
+    }
+
+    private static String energyConsumerTypeToString(int type) {
+        switch(type) {
+            case EnergyConsumerType.BLUETOOTH: return "BLUETOOTH";
+            case EnergyConsumerType.CPU_CLUSTER: return "CPU";
+            case EnergyConsumerType.DISPLAY: return "DISPLAY";
+            case EnergyConsumerType.GNSS: return "GNSS";
+            case EnergyConsumerType.MOBILE_RADIO: return "MOBILE_RADIO";
+            case EnergyConsumerType.WIFI: return "WIFI";
+            case EnergyConsumerType.OTHER: return "";
+            default:
+                throw new IllegalStateException("Unrecognized EnergyConsumerType: " + type);
         }
-        return sb.toString();
     }
 
     /**
