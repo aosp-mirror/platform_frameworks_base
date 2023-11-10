@@ -117,7 +117,7 @@ fi
 
 if (( $two_way )) ; then
   echo "# Running meld..."
-  run meld --diff ${files[0]} ${files[1]} --diff ${files[1]} ${files[2]}
+  run meld --diff ${files[0]} ${files[1]} --diff ${files[1]} ${files[2]} --diff ${files[0]} ${files[2]}
 fi
 
 if (( $any_file_changed == 0 )) ; then

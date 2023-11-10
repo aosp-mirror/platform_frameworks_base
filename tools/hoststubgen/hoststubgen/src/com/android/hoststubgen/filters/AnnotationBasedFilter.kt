@@ -52,7 +52,7 @@ class AnnotationBasedFilter(
         substituteAnnotations_: Set<String>,
         nativeSubstituteAnnotations_: Set<String>,
         classLoadHookAnnotations_: Set<String>,
-        stubStaticInitializerAnnotations_: Set<String>,
+        keepStaticInitializerAnnotations_: Set<String>,
         private val annotationAllowedClassesFilter: ClassFilter,
         fallback: OutputFilter,
 ) : DelegatingFilter(fallback) {
@@ -65,8 +65,8 @@ class AnnotationBasedFilter(
     private var substituteAnnotations = convertToInternalNames(substituteAnnotations_)
     private var nativeSubstituteAnnotations = convertToInternalNames(nativeSubstituteAnnotations_)
     private var classLoadHookAnnotations = convertToInternalNames(classLoadHookAnnotations_)
-    private var stubStaticInitializerAnnotations =
-            convertToInternalNames(stubStaticInitializerAnnotations_)
+    private var keepStaticInitializerAnnotations =
+            convertToInternalNames(keepStaticInitializerAnnotations_)
 
     /** Annotations that control API visibility. */
     private var visibilityAnnotations: Set<String> = convertToInternalNames(
@@ -240,9 +240,9 @@ class AnnotationBasedFilter(
         val cn = classes.getClass(className)
 
         if (methodName == CLASS_INITIALIZER_NAME && descriptor == CLASS_INITIALIZER_DESC) {
-            findAnyAnnotation(cn.name, stubStaticInitializerAnnotations,
+            findAnyAnnotation(cn.name, keepStaticInitializerAnnotations,
                     cn.visibleAnnotations, cn.invisibleAnnotations)?.let {
-                return FilterPolicy.Stub.withReason(reasonAnnotation)
+                return FilterPolicy.Keep.withReason(reasonAnnotation)
             }
         }
 
