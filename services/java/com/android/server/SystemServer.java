@@ -203,6 +203,7 @@ import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.security.rkp.RemoteProvisioningService;
+import com.android.server.selinux.SelinuxAuditLogsService;
 import com.android.server.sensorprivacy.SensorPrivacyService;
 import com.android.server.sensors.SensorService;
 import com.android.server.signedconfig.SignedConfigService;
@@ -2608,6 +2609,14 @@ public final class SystemServer implements Dumpable {
                 }
                 t.traceEnd();
             }
+
+            t.traceBegin("StartSelinuxAuditLogsService");
+            try {
+                SelinuxAuditLogsService.schedule(context);
+            } catch (Throwable e) {
+                reportWtf("starting SelinuxAuditLogsService", e);
+            }
+            t.traceEnd();
 
             // LauncherAppsService uses ShortcutService.
             t.traceBegin("StartShortcutServiceLifecycle");
