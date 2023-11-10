@@ -63,6 +63,7 @@ system_optimized_java_defaults {
                 optimize: false,
                 shrink: true,
                 ignore_warnings: false,
+                proguard_compatibility: false,
                 proguard_flags_files: [
                     "proguard.flags",
                     // Ensure classes referenced in the framework-res manifest
