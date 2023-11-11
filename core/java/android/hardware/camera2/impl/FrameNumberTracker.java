@@ -90,6 +90,22 @@ public class FrameNumberTracker {
                         break;
                     }
                 }
+
+                if (!removeError) {
+                    // Check for the case where we might have an error after a frame number gap
+                    // caused by other types of capture requests
+                    int otherType1 = (requestType + 1) % CaptureRequest.REQUEST_TYPE_COUNT;
+                    int otherType2 = (requestType + 2) % CaptureRequest.REQUEST_TYPE_COUNT;
+                    if (mPendingFrameNumbersWithOtherType[otherType1].isEmpty() &&
+                            mPendingFrameNumbersWithOtherType[otherType2].isEmpty()) {
+                        long errorGapNumber = Math.max(mCompletedFrameNumber[otherType1],
+                                mCompletedFrameNumber[otherType2]) + 1;
+                        if ((errorGapNumber > mCompletedFrameNumber[requestType] + 1) &&
+                                (errorGapNumber == errorFrameNumber)) {
+                            removeError = true;
+                        }
+                    }
+                }
             }
             if (removeError) {
                 mCompletedFrameNumber[requestType] = errorFrameNumber;
