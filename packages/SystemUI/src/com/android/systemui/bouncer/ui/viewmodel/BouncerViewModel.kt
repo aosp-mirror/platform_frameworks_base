@@ -180,6 +180,19 @@ class BouncerViewModel(
                 initialValue = isSideBySideSupported(authMethodViewModel.value),
             )
 
+    /**
+     * Whether the splitting the UI around the fold seam (where the hinge is on a foldable device)
+     * is required.
+     */
+    val isFoldSplitRequired: StateFlow<Boolean> =
+        authMethodViewModel
+            .map { authMethod -> isFoldSplitRequired(authMethod) }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = isFoldSplitRequired(authMethodViewModel.value),
+            )
+
     init {
         if (flags.isEnabled()) {
             applicationScope.launch {
@@ -210,6 +223,10 @@ class BouncerViewModel(
 
     private fun isSideBySideSupported(authMethod: AuthMethodBouncerViewModel?): Boolean {
         return isUserSwitcherVisible || authMethod !is PasswordBouncerViewModel
+    }
+
+    private fun isFoldSplitRequired(authMethod: AuthMethodBouncerViewModel?): Boolean {
+        return authMethod !is PasswordBouncerViewModel
     }
 
     private fun toMessageViewModel(
