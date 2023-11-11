@@ -480,7 +480,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"소리 및 진동"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"설정"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"볼륨을 안전한 수준으로 낮춤"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"헤드폰 볼륨이 권장 시간보다 오랫동안 높은 상태였습니다."</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"헤드폰 볼륨이 권장 시간보다 오래 높은 상태였습니다."</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"헤드폰 볼륨이 이번 주 안전 한도를 초과했습니다."</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"볼륨 유지하기"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"볼륨 낮추기"</string>
