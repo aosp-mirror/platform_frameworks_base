@@ -179,6 +179,7 @@ interface IDevicePolicyManager {
 
     boolean setDeviceOwner(in ComponentName who, int userId, boolean setProfileOwnerOnCurrentUserIfNecessary);
     ComponentName getDeviceOwnerComponent(boolean callingUserOnly);
+    ComponentName getDeviceOwnerComponentOnUser(int userId);
     boolean hasDeviceOwner();
     String getDeviceOwnerName();
     void clearDeviceOwner(String packageName);

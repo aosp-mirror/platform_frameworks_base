@@ -213,11 +213,14 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun tryAutoConfirm_withAutoConfirmPinAndShorterPin_returnsNullAndHasNoEffect() =
         testScope.runTest {
+            val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             val isThrottled by collectLastValue(underTest.isThrottled)
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
-                setAutoConfirmEnabled(true)
+                setAutoConfirmFeatureEnabled(true)
             }
+            assertThat(isAutoConfirmEnabled).isTrue()
+
             assertThat(
                     underTest.authenticate(
                         FakeAuthenticationRepository.DEFAULT_PIN.toMutableList().apply {
@@ -233,10 +236,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun tryAutoConfirm_withAutoConfirmWrongPinCorrectLength_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
+            val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
-                setAutoConfirmEnabled(true)
+                setAutoConfirmFeatureEnabled(true)
             }
+            assertThat(isAutoConfirmEnabled).isTrue()
+
             assertThat(
                     underTest.authenticate(
                         FakeAuthenticationRepository.DEFAULT_PIN.map { it + 1 },
@@ -251,10 +257,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun tryAutoConfirm_withAutoConfirmLongerPin_returnsFalseAndDoesNotUnlockDevice() =
         testScope.runTest {
+            val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
-                setAutoConfirmEnabled(true)
+                setAutoConfirmFeatureEnabled(true)
             }
+            assertThat(isAutoConfirmEnabled).isTrue()
+
             assertThat(
                     underTest.authenticate(
                         FakeAuthenticationRepository.DEFAULT_PIN + listOf(7),
@@ -269,10 +278,13 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun tryAutoConfirm_withAutoConfirmCorrectPin_returnsTrueAndUnlocksDevice() =
         testScope.runTest {
+            val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
-                setAutoConfirmEnabled(true)
+                setAutoConfirmFeatureEnabled(true)
             }
+            assertThat(isAutoConfirmEnabled).isTrue()
+
             assertThat(
                     underTest.authenticate(
                         FakeAuthenticationRepository.DEFAULT_PIN,
@@ -285,11 +297,35 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun tryAutoConfirm_withAutoConfirmCorrectPinButDuringThrottling_returnsNullAndHasNoEffects() =
+        testScope.runTest {
+            val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
+            val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
+            val hintedPinLength by collectLastValue(underTest.hintedPinLength)
+            utils.authenticationRepository.apply {
+                setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
+                setAutoConfirmFeatureEnabled(true)
+                setThrottleDuration(42)
+            }
+
+            val authResult =
+                underTest.authenticate(
+                    FakeAuthenticationRepository.DEFAULT_PIN,
+                    tryAutoConfirm = true
+                )
+
+            assertThat(authResult).isEqualTo(AuthenticationResult.SKIPPED)
+            assertThat(isAutoConfirmEnabled).isFalse()
+            assertThat(isUnlocked).isFalse()
+            assertThat(hintedPinLength).isNull()
+        }
+
+    @Test
     fun tryAutoConfirm_withoutAutoConfirmButCorrectPin_returnsNullAndHasNoEffects() =
         testScope.runTest {
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
-                setAutoConfirmEnabled(false)
+                setAutoConfirmFeatureEnabled(false)
             }
             assertThat(
                     underTest.authenticate(
@@ -416,7 +452,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
-                setAutoConfirmEnabled(false)
+                setAutoConfirmFeatureEnabled(false)
             }
 
             assertThat(hintedPinLength).isNull()
@@ -433,7 +469,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                         repeat(utils.authenticationRepository.hintedPinLength - 1) { add(it + 1) }
                     }
                 )
-                setAutoConfirmEnabled(true)
+                setAutoConfirmFeatureEnabled(true)
             }
 
             assertThat(hintedPinLength).isNull()
@@ -445,7 +481,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             val hintedPinLength by collectLastValue(underTest.hintedPinLength)
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(DataLayerAuthenticationMethodModel.Pin)
-                setAutoConfirmEnabled(true)
+                setAutoConfirmFeatureEnabled(true)
                 overrideCredential(
                     buildList {
                         repeat(utils.authenticationRepository.hintedPinLength) { add(it + 1) }
@@ -467,7 +503,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                         repeat(utils.authenticationRepository.hintedPinLength + 1) { add(it + 1) }
                     }
                 )
-                setAutoConfirmEnabled(true)
+                setAutoConfirmFeatureEnabled(true)
             }
 
             assertThat(hintedPinLength).isNull()

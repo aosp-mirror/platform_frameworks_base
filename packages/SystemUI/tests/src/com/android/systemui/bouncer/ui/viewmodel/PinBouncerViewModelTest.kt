@@ -247,7 +247,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
     fun onAutoConfirm_whenCorrect() =
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            utils.authenticationRepository.setAutoConfirmEnabled(true)
+            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
             lockDeviceAndOpenPinBouncer()
 
             FakeAuthenticationRepository.DEFAULT_PIN.forEach { digit ->
@@ -263,7 +263,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             val currentScene by collectLastValue(sceneInteractor.desiredScene)
             val message by collectLastValue(bouncerViewModel.message)
             val pin by collectLastValue(underTest.pinInput.map { it.getPin() })
-            utils.authenticationRepository.setAutoConfirmEnabled(true)
+            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
             lockDeviceAndOpenPinBouncer()
 
             FakeAuthenticationRepository.DEFAULT_PIN.dropLast(1).forEach { digit ->
@@ -323,7 +323,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val backspaceButtonAppearance by collectLastValue(underTest.backspaceButtonAppearance)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setAutoConfirmEnabled(true)
+            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
 
             assertThat(backspaceButtonAppearance).isEqualTo(ActionButtonAppearance.Hidden)
         }
@@ -333,7 +333,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val backspaceButtonAppearance by collectLastValue(underTest.backspaceButtonAppearance)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setAutoConfirmEnabled(true)
+            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
 
             underTest.onPinButtonClicked(1)
 
@@ -355,7 +355,7 @@ class PinBouncerViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val confirmButtonAppearance by collectLastValue(underTest.confirmButtonAppearance)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.authenticationRepository.setAutoConfirmEnabled(true)
+            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
 
             assertThat(confirmButtonAppearance).isEqualTo(ActionButtonAppearance.Hidden)
         }

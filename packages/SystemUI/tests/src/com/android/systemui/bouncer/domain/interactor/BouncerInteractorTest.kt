@@ -110,12 +110,14 @@ class BouncerInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val currentScene by collectLastValue(sceneInteractor.desiredScene)
             val message by collectLastValue(underTest.message)
+            val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
 
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             runCurrent()
-            utils.authenticationRepository.setAutoConfirmEnabled(true)
+            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
             utils.deviceEntryRepository.setUnlocked(false)
             underTest.showOrUnlockDevice()
+            assertThat(isAutoConfirmEnabled).isTrue()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
             underTest.clearMessage()

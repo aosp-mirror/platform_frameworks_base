@@ -23,7 +23,6 @@ import com.android.systemui.communal.data.repository.CommunalMediaRepository
 import com.android.systemui.communal.data.repository.CommunalRepository
 import com.android.systemui.communal.data.repository.CommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
-import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
@@ -54,9 +53,6 @@ constructor(
     /** Whether communal features are enabled. */
     val isCommunalEnabled: Boolean
         get() = communalRepository.isCommunalEnabled
-
-    /** A flow of info about the widget to be displayed, or null if widget is unavailable. */
-    val appWidgetInfo: Flow<CommunalAppWidgetInfo?> = widgetRepository.stopwatchAppWidgetInfo
 
     /**
      * Target scene as requested by the underlying [SceneTransitionLayout] or through

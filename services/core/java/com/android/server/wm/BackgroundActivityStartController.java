@@ -256,13 +256,24 @@ public class BackgroundActivityStartController {
             mOriginatingPendingIntent = originatingPendingIntent;
             mIntent = intent;
             mRealCallingPackage = mService.getPackageNameIfUnique(realCallingUid, realCallingPid);
+            if (originatingPendingIntent == null) {
+                // grant creator BAL privileges unless explicitly opted out
+                mBalAllowedByPiCreator =
+                        checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
+                                == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED
+                                ? BackgroundStartPrivileges.NONE
+                                : BackgroundStartPrivileges.ALLOW_BAL;
+            } else {
+                // for PendingIntents we restrict creator BAL based on target_sdk
+                mBalAllowedByPiCreator =
+                        checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
+                                == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED
+                                ? BackgroundStartPrivileges.NONE
+                                : BackgroundStartPrivileges.ALLOW_BAL;
+            }
             mBalAllowedByPiSender =
-                    PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(checkedOptions,
-                            realCallingUid, mRealCallingPackage);
-            mBalAllowedByPiCreator =
-                    checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
-                            == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED
-                            ? BackgroundStartPrivileges.NONE : BackgroundStartPrivileges.ALLOW_BAL;
+                    PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
+                            checkedOptions, realCallingUid, mRealCallingPackage);
             mAppSwitchState = mService.getBalAppSwitchesState();
             mCallingUidProcState = mService.mActiveUids.getUidState(callingUid);
             mIsCallingUidPersistentSystemProcess =
@@ -306,8 +317,12 @@ public class BackgroundActivityStartController {
             return name + "[debugOnly]";
         }
 
-        private boolean isPendingIntent() {
+        private boolean hasRealCaller() {
             return mRealCallingUid != NO_PROCESS_UID;
+        }
+
+        private boolean isPendingIntent() {
+            return mOriginatingPendingIntent != null;
         }
 
         private String dump(BalVerdict resultIfPiCreatorAllowsBal) {
@@ -334,7 +349,9 @@ public class BackgroundActivityStartController {
             sb.append("; isCallingUidPersistentSystemProcess: ")
                     .append(mIsCallingUidPersistentSystemProcess);
             sb.append("; balAllowedByPiCreator: ").append(mBalAllowedByPiCreator);
-            if (isPendingIntent()) {
+            sb.append("; hasRealCaller: ").append(hasRealCaller());
+            sb.append("; isPendingIntent: ").append(isPendingIntent());
+            if (hasRealCaller()) {
                 sb.append("; balAllowedByPiSender: ").append(mBalAllowedByPiSender);
                 sb.append("; realCallingPackage: ")
                         .append(getDebugPackageName(mRealCallingPackage, mRealCallingUid));
@@ -351,13 +368,13 @@ public class BackgroundActivityStartController {
             sb.append("; mForcedBalByPiSender: ").append(mForcedBalByPiSender);
             sb.append("; intent: ").append(mIntent);
             sb.append("; callerApp: ").append(mCallerApp);
-            if (isPendingIntent()) {
+            if (hasRealCaller()) {
                 sb.append("; realCallerApp: ").append(mRealCallerApp);
             }
             if (mCallerApp != null) {
                 sb.append("; inVisibleTask: ").append(mCallerApp.hasActivityInVisibleTask());
             }
-            if (isPendingIntent()) {
+            if (hasRealCaller()) {
                 if (mRealCallerApp != null) {
                     sb.append("; realInVisibleTask: ")
                             .append(mRealCallerApp.hasActivityInVisibleTask());
@@ -484,7 +501,7 @@ public class BackgroundActivityStartController {
 
         BalVerdict resultForCaller = checkBackgroundActivityStartAllowedByCaller(state);
 
-        if (!state.isPendingIntent()) {
+        if (!state.hasRealCaller()) {
             if (resultForCaller.allows()) {
                 if (DEBUG_ACTIVITY_STARTS) {
                     Slog.d(TAG, "Background activity start allowed. "
