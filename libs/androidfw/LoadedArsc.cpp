@@ -454,7 +454,8 @@ const LoadedPackage* LoadedArsc::GetPackageById(uint8_t package_id) const {
 std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
                                                          package_property_t property_flags) {
   ATRACE_NAME("LoadedPackage::Load");
-  std::unique_ptr<LoadedPackage> loaded_package(new LoadedPackage());
+  const bool optimize_name_lookups = (property_flags & PROPERTY_OPTIMIZE_NAME_LOOKUPS) != 0;
+  std::unique_ptr<LoadedPackage> loaded_package(new LoadedPackage(optimize_name_lookups));
 
   // typeIdOffset was added at some point, but we still must recognize apps built before this
   // was added.
