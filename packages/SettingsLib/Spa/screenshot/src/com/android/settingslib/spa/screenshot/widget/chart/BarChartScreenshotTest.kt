@@ -25,15 +25,16 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 import platform.test.screenshot.DeviceEmulationSpec
 import platform.test.screenshot.PhoneAndTabletMinimal
 
 /** A screenshot test for ExampleFeature. */
-@RunWith(Parameterized::class)
+@RunWith(ParameterizedAndroidJunit4::class)
 class BarChartScreenshotTest(emulationSpec: DeviceEmulationSpec) {
     companion object {
-        @Parameterized.Parameters(name = "{0}")
+        @Parameters(name = "{0}")
         @JvmStatic
         fun getTestSpecs() = DeviceEmulationSpec.PhoneAndTabletMinimal
     }
