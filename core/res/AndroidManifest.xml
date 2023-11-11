@@ -2772,6 +2772,12 @@
     <permission android:name="android.permission.OEM_UNLOCK_STATE"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows configuration of factory reset protection
+         @FlaggedApi("android.security.frp_enforcement")
+         @hide <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.CONFIGURE_FACTORY_RESET_PROTECTION"
+        android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi @hide Allows querying state of PersistentDataBlock
    <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.ACCESS_PDB_STATE"
