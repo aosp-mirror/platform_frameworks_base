@@ -81,6 +81,9 @@ import android.app.Activity;
 import android.app.IServiceConnection;
 import android.app.KeyguardManager;
 import android.app.admin.SecurityLog.SecurityEvent;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9118,6 +9121,19 @@ public class DevicePolicyManager {
     }
 
     /**
+     * For apps targeting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above, the
+     * {@link #isDeviceOwnerApp} method will use the user contained within the
+     * context.
+     * For apps targeting an SDK version <em>below</em> this, the user of the calling process will
+     * be used (Process.myUserHandle()).
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public static final long IS_DEVICE_OWNER_USER_AWARE = 307233716L;
+
+    /**
      * Used to determine if a particular package has been registered as a Device Owner app.
      * A device owner app is a special device admin that cannot be deactivated by the user, once
      * activated as a device admin. It also cannot be uninstalled. To check whether a particular
@@ -9130,8 +9146,13 @@ public class DevicePolicyManager {
      * app, if any.
      * @return whether or not the package is registered as the device owner app.
      */
+    @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     public boolean isDeviceOwnerApp(String packageName) {
         throwIfParentInstance("isDeviceOwnerApp");
+        if (android.permission.flags.Flags.roleControllerInSystemServer()
+                && CompatChanges.isChangeEnabled(IS_DEVICE_OWNER_USER_AWARE)) {
+            return isDeviceOwnerAppOnContextUser(packageName);
+        }
         return isDeviceOwnerAppOnCallingUser(packageName);
     }
 
@@ -9186,6 +9207,24 @@ public class DevicePolicyManager {
             return false;
         }
         final ComponentName deviceOwner = getDeviceOwnerComponentInner(callingUserOnly);
+        if (deviceOwner == null) {
+            return false;
+        }
+        return packageName.equals(deviceOwner.getPackageName());
+    }
+
+    private boolean isDeviceOwnerAppOnContextUser(String packageName) {
+        if (packageName == null) {
+            return false;
+        }
+        ComponentName deviceOwner = null;
+        if (mService != null) {
+            try {
+                deviceOwner = mService.getDeviceOwnerComponentOnUser(myUserId());
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
         if (deviceOwner == null) {
             return false;
         }
@@ -9608,6 +9647,7 @@ public class DevicePolicyManager {
      * @param packageName The package name of the app to compare with the registered profile owner.
      * @return Whether or not the package is registered as the profile owner.
      */
+    @UserHandleAware
     public boolean isProfileOwnerApp(String packageName) {
         throwIfParentInstance("isProfileOwnerApp");
         if (mService != null) {

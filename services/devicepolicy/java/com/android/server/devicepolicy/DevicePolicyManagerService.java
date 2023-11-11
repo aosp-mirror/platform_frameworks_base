@@ -9667,6 +9667,26 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
     }
 
+    @Override
+    public ComponentName getDeviceOwnerComponentOnUser(int userId) {
+        if (!mHasFeature) {
+            return null;
+        }
+        if (mInjector.userHandleGetCallingUserId() != userId) {
+            Preconditions.checkCallAuthorization(canManageUsers(getCallerIdentity())
+                    || hasCallingOrSelfPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS));
+        }
+        synchronized (getLockObject()) {
+            // There is only ever one device owner on a device so if the passed userId is the same
+            // as the device owner userId we know that the componentName returned by
+            // getDeviceOwnerComponent will be the correct one.
+            if (mOwners.getDeviceOwnerUserId() == userId || userId == UserHandle.USER_ALL) {
+                return mOwners.getDeviceOwnerComponent();
+            }
+        }
+        return null;
+    }
+
     private int getDeviceOwnerUserIdUncheckedLocked() {
         return mOwners.hasDeviceOwner() ? mOwners.getDeviceOwnerUserId() : UserHandle.USER_NULL;
     }
