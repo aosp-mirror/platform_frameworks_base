@@ -575,8 +575,9 @@ public class DownloadManager {
                     extras.putString(Downloads.DIR_TYPE, dirType);
                     client.call(Downloads.CALL_CREATE_EXTERNAL_PUBLIC_DIR, null, extras);
                 } catch (RemoteException e) {
-                    throw new IllegalStateException("Unable to create directory: "
-                            + file.getAbsolutePath());
+                    throw new IllegalStateException(
+                        "Unable to create directory: " + file.getAbsolutePath(),
+                        e);
                 }
             } else {
                 if (file.exists()) {
