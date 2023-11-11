@@ -14,6 +14,9 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE;
+import static com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK;
+import static com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.CLOSE_PANEL_WHEN_EMPTIED;
 import static com.android.systemui.statusbar.phone.CentralSurfaces.DEBUG;
 
@@ -28,6 +31,8 @@ import android.service.vr.IVrStateCallbacks;
 import android.util.Log;
 import android.util.Slog;
 import android.view.View;
+
+import androidx.annotation.NonNull;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.InitController;
@@ -54,7 +59,10 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationAlertsInteractor;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionCondition;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionFilter;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager.OnSettingsClickListener;
@@ -62,6 +70,8 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -163,7 +173,14 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
         initController.addPostInitTask(() -> {
             mNotifShadeEventSource.setShadeEmptiedCallback(this::maybeClosePanelForShadeEmptied);
             mNotifShadeEventSource.setNotifRemovedByUserCallback(this::maybeEndAmbientPulse);
-            visualInterruptionDecisionProvider.addLegacySuppressor(mInterruptSuppressor);
+            if (VisualInterruptionRefactor.isEnabled()) {
+                visualInterruptionDecisionProvider.addCondition(mAlertsDisabledCondition);
+                visualInterruptionDecisionProvider.addCondition(mVrModeCondition);
+                visualInterruptionDecisionProvider.addFilter(mNeedsRedactionFilter);
+                visualInterruptionDecisionProvider.addCondition(mPanelsDisabledCondition);
+            } else {
+                visualInterruptionDecisionProvider.addLegacySuppressor(mInterruptSuppressor);
+            }
             mLockscreenUserManager.setUpWithPresenter(this);
             mGutsManager.setUpWithPresenter(
                     this, mNotifListContainer, mOnSettingsClickListener);
@@ -306,4 +323,54 @@ class StatusBarNotificationPresenter implements NotificationPresenter, CommandQu
             return !mNotificationAlertsInteractor.areNotificationAlertsEnabled();
         }
     };
+
+    private final VisualInterruptionCondition mAlertsDisabledCondition =
+            new VisualInterruptionCondition(Set.of(PEEK, PULSE, BUBBLE),
+                    "notification alerts disabled") {
+                @Override
+                public boolean shouldSuppress() {
+                    return !mNotificationAlertsInteractor.areNotificationAlertsEnabled();
+                }
+            };
+
+    private final VisualInterruptionCondition mVrModeCondition =
+            new VisualInterruptionCondition(Set.of(PEEK, BUBBLE), "device is in VR mode") {
+                @Override
+                public boolean shouldSuppress() {
+                    return isDeviceInVrMode();
+                }
+            };
+
+    private final VisualInterruptionFilter mNeedsRedactionFilter =
+            new VisualInterruptionFilter(Set.of(PEEK), "needs redaction on public lockscreen") {
+                @Override
+                public boolean shouldSuppress(@NonNull NotificationEntry entry) {
+                    if (!mKeyguardStateController.isOccluded()) {
+                        return false;
+                    }
+
+                    if (!mLockscreenUserManager.needsRedaction(entry)) {
+                        return false;
+                    }
+
+                    final int currentUserId = mLockscreenUserManager.getCurrentUserId();
+                    final boolean currentUserPublic = mLockscreenUserManager.isLockscreenPublicMode(
+                            currentUserId);
+
+                    final int notificationUserId = entry.getSbn().getUserId();
+                    final boolean notificationUserPublic =
+                            mLockscreenUserManager.isLockscreenPublicMode(notificationUserId);
+
+                    // TODO(b/135046837): we can probably relax this with dynamic privacy
+                    return currentUserPublic || notificationUserPublic;
+                }
+            };
+
+    private final VisualInterruptionCondition mPanelsDisabledCondition =
+            new VisualInterruptionCondition(Set.of(PEEK), "disabled panel") {
+                @Override
+                public boolean shouldSuppress() {
+                    return !mCommandQueue.panelsEnabled();
+                }
+            };
 }
