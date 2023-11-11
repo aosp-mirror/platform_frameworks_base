@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.notification.interruption
 import android.hardware.display.AmbientDisplayConfiguration
 import android.os.Handler
 import android.os.PowerManager
-import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -30,7 +29,9 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE
 import com.android.systemui.statusbar.policy.BatteryController
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
+import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -40,9 +41,11 @@ class VisualInterruptionDecisionProviderImpl
 constructor(
     private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
     private val batteryController: BatteryController,
+    deviceProvisionedController: DeviceProvisionedController,
     private val globalSettings: GlobalSettings,
     private val headsUpManager: HeadsUpManager,
     private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
+    keyguardStateController: KeyguardStateController,
     private val logger: NotificationInterruptLogger,
     @Main private val mainHandler: Handler,
     private val powerManager: PowerManager,
@@ -50,6 +53,36 @@ constructor(
     private val systemClock: SystemClock,
     private val userTracker: UserTracker,
 ) : VisualInterruptionDecisionProvider {
+    private class DecisionImpl(
+        override val shouldInterrupt: Boolean,
+        override val logReason: String
+    ) : Decision
+
+    private class FullScreenIntentDecisionImpl(
+        private val fsiDecision: FullScreenIntentDecisionProvider.Decision
+    ) : FullScreenIntentDecision {
+        override val shouldInterrupt
+            get() = fsiDecision.shouldFsi
+
+        override val wouldInterruptWithoutDnd
+            get() = fsiDecision.wouldFsiWithoutDnd
+
+        override val logReason
+            get() = fsiDecision.logReason
+    }
+
+    private val fullScreenIntentDecisionProvider =
+        FullScreenIntentDecisionProvider(
+            deviceProvisionedController,
+            keyguardStateController,
+            powerManager,
+            statusBarStateController
+        )
+
+    private val legacySuppressors = mutableSetOf<NotificationInterruptSuppressor>()
+    private val conditions = mutableListOf<VisualInterruptionCondition>()
+    private val filters = mutableListOf<VisualInterruptionFilter>()
+
     private var started = false
 
     override fun start() {
@@ -75,24 +108,6 @@ constructor(
 
         started = true
     }
-
-    private class DecisionImpl(
-        override val shouldInterrupt: Boolean,
-        override val logReason: String
-    ) : Decision
-
-    private class FullScreenIntentDecisionImpl(
-        override val shouldInterrupt: Boolean,
-        override val wouldInterruptWithoutDnd: Boolean,
-        override val logReason: String,
-        val originalEntry: NotificationEntry,
-    ) : FullScreenIntentDecision {
-        var hasBeenLogged = false
-    }
-
-    private val legacySuppressors = mutableSetOf<NotificationInterruptSuppressor>()
-    private val conditions = mutableListOf<VisualInterruptionCondition>()
-    private val filters = mutableListOf<VisualInterruptionFilter>()
 
     override fun addLegacySuppressor(suppressor: NotificationInterruptSuppressor) {
         legacySuppressors.add(suppressor)
@@ -132,32 +147,21 @@ constructor(
         return makeHeadsUpDecision(entry).also { logHeadsUpDecision(entry, it) }
     }
 
+    override fun makeAndLogBubbleDecision(entry: NotificationEntry): Decision {
+        check(started)
+        return makeBubbleDecision(entry).also { logBubbleDecision(entry, it) }
+    }
+
     override fun makeUnloggedFullScreenIntentDecision(
         entry: NotificationEntry
     ): FullScreenIntentDecision {
         check(started)
-        return makeFullScreenDecision(entry)
+        return makeFullScreenIntentDecision(entry)
     }
 
     override fun logFullScreenIntentDecision(decision: FullScreenIntentDecision) {
         check(started)
-        val decisionImpl =
-            decision as? FullScreenIntentDecisionImpl
-                ?: run {
-                    Log.wtf(TAG, "Wrong subclass of FullScreenIntentDecision: $decision")
-                    return
-                }
-        if (decision.hasBeenLogged) {
-            Log.wtf(TAG, "Already logged decision: $decision")
-            return
-        }
-        logFullScreenIntentDecision(decisionImpl)
-        decision.hasBeenLogged = true
-    }
-
-    override fun makeAndLogBubbleDecision(entry: NotificationEntry): Decision {
-        check(started)
-        return makeBubbleDecision(entry).also { logBubbleDecision(entry, it) }
+        // Not yet implemented.
     }
 
     private fun makeHeadsUpDecision(entry: NotificationEntry): DecisionImpl {
@@ -234,16 +238,6 @@ constructor(
         return DecisionImpl(shouldInterrupt = true, logReason = "not suppressed")
     }
 
-    private fun makeFullScreenDecision(entry: NotificationEntry): FullScreenIntentDecisionImpl {
-        // Not yet implemented.
-        return FullScreenIntentDecisionImpl(
-            shouldInterrupt = true,
-            wouldInterruptWithoutDnd = true,
-            logReason = "FSI logic not yet implemented in VisualInterruptionDecisionProviderImpl",
-            originalEntry = entry
-        )
-    }
-
     private fun logHeadsUpDecision(entry: NotificationEntry, decision: DecisionImpl) {
         // Not yet implemented.
     }
@@ -252,8 +246,11 @@ constructor(
         // Not yet implemented.
     }
 
-    private fun logFullScreenIntentDecision(decision: FullScreenIntentDecisionImpl) {
-        // Not yet implemented.
+    private fun makeFullScreenIntentDecision(entry: NotificationEntry): FullScreenIntentDecision {
+        val wouldHeadsUp = makeUnloggedHeadsUpDecision(entry).shouldInterrupt
+        val fsiDecision =
+            fullScreenIntentDecisionProvider.makeFullScreenIntentDecision(entry, wouldHeadsUp)
+        return FullScreenIntentDecisionImpl(fsiDecision)
     }
 
     private fun checkSuppressors(entry: NotificationEntry) =
