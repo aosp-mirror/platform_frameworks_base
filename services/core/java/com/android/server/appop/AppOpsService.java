@@ -2391,7 +2391,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         long token = Binder.clearCallingIdentity();
         try {
             // Permissions are managed by UIDs, but unfortunately a package name is required in API.
-            String packageName = ArrayUtils.firstOrNull(packageManager.getPackagesForUid(uid));
+            String packageName = ArrayUtils.firstOrNull(ArrayUtils.defeatNullable(
+                    packageManager.getPackagesForUid(uid)));
             if (packageName == null) {
                 return false;
             }
