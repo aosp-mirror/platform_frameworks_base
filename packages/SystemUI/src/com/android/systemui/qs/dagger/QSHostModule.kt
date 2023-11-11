@@ -48,7 +48,7 @@ interface QSHostModule {
             qsHost: QSTileHost,
             panelInteractorImpl: PanelInteractorImpl
         ): PanelInteractor {
-            return if (featureFlags.pipelineHostEnabled) {
+            return if (featureFlags.pipelineEnabled) {
                 panelInteractorImpl
             } else {
                 qsHost
@@ -62,7 +62,7 @@ interface QSHostModule {
             qsHost: QSTileHost,
             customTileAddedRepository: CustomTileAddedSharedPrefsRepository
         ): CustomTileAddedRepository {
-            return if (featureFlags.pipelineHostEnabled) {
+            return if (featureFlags.pipelineEnabled) {
                 customTileAddedRepository
             } else {
                 qsHost

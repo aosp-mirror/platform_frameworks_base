@@ -1689,7 +1689,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"삭제"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"권장 수준 이상으로 볼륨을 높이시겠습니까?\n\n높은 볼륨으로 장시간 청취하면 청력에 손상이 올 수 있습니다."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"계속해서 높은 볼륨으로 들으시겠습니까?\n\n헤드폰 볼륨이 권장 시간보다 오랫동안 높은 상태였으며 이로 인해 청력 손상이 발생할 수 있습니다."</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"계속해서 높은 볼륨으로 들으시겠습니까?\n\n헤드폰 볼륨이 권장 시간보다 오래 높은 상태였으며 이로 인해 청력 손상이 발생할 수 있습니다."</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"큰 소리가 감지됨\n\n헤드폰 볼륨이 권장 수준보다 높으며 이로 인해 청력 손상이 발생할 수 있습니다."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"접근성 단축키를 사용하시겠습니까?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"단축키가 사용 설정된 경우 볼륨 버튼 두 개를 동시에 3초간 누르면 접근성 기능이 시작됩니다."</string>

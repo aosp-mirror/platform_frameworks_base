@@ -20,7 +20,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.UserHandle
-import android.util.Log
 import com.android.systemui.Dumpable
 import com.android.systemui.ProtoDumpable
 import com.android.systemui.dagger.SysUISingleton
@@ -174,7 +173,7 @@ constructor(
         }
 
     init {
-        if (featureFlags.pipelineHostEnabled) {
+        if (featureFlags.pipelineEnabled) {
             startTileCollection()
         }
     }

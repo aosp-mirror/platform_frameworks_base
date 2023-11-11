@@ -33,7 +33,7 @@ import javax.inject.Inject
 class QSTileLogger
 @Inject
 constructor(
-    @QSTilesLogBuffers logBuffers: Map<String, LogBuffer>,
+    @QSTilesLogBuffers logBuffers: Map<TileSpec, LogBuffer>,
     private val factory: LogBufferFactory,
     private val mStatusBarStateController: StatusBarStateController,
 ) {
@@ -162,7 +162,7 @@ constructor(
 
     private fun TileSpec.getLogBuffer(): LogBuffer =
         synchronized(logBufferCache) {
-            logBufferCache.getOrPut(this.spec) {
+            logBufferCache.getOrPut(this) {
                 factory.create(
                     this.getLogTag(),
                     BUFFER_MAX_SIZE /* maxSize */,

@@ -35,7 +35,7 @@ constructor(
 ) : CoreStartable {
 
     override fun start() {
-        if (featureFlags.pipelineAutoAddEnabled) {
+        if (featureFlags.pipelineEnabled) {
             autoAddInteractor.init(currentTilesInteractor)
             restoreReconciliationInteractor.start()
         }

@@ -26,5 +26,6 @@ class NotificationListViewModel
 @Inject
 constructor(
     val shelf: NotificationShelfViewModel,
-    val footer: Optional<FooterViewModel>,
+    val hideListViewModel: HideListViewModel,
+    val footer: Optional<FooterViewModel>
 )

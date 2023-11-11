@@ -2673,7 +2673,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 && !mQsController.getFullyExpanded()) {
             alpha *= mClockPositionResult.clockAlpha;
         }
-        mNotificationStackScrollLayoutController.setAlpha(alpha);
+        mNotificationStackScrollLayoutController.setMaxAlphaForExpansion(alpha);
     }
 
     private float getFadeoutAlpha() {
@@ -4697,7 +4697,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             NotificationStackScrollLayoutController stackScroller) {
         return (Float alpha) -> {
             mKeyguardStatusViewController.setAlpha(alpha);
-            stackScroller.setAlpha(alpha);
+            stackScroller.setMaxAlphaForExpansion(alpha);
 
             if (keyguardBottomAreaRefactor()) {
                 mKeyguardInteractor.setAlpha(alpha);

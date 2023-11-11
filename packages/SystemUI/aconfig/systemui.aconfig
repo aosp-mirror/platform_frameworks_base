@@ -38,6 +38,13 @@ flag {
 }
 
 flag {
+    name: "notifications_hide_on_display_switch"
+    namespace: "systemui"
+    description: "Temporary hides notifications when folding/unfolding to reduce unfold latency"
+    bug: "293824309"
+}
+
+flag {
     name: "notification_lifetime_extension_refactor"
     namespace: "systemui"
     description: "Enables moving notification lifetime extension management from SystemUI to "
@@ -69,6 +76,14 @@ flag {
 }
 
 flag {
+    name: "device_entry_udfps_refactor"
+    namespace: "systemui"
+    description: "Refactoring device entry UDFPS icon to use modern architecture and "
+        "consolidating it with the lock/unlock icon to create a combined DeviceEntryIconView"
+    bug: "279440316"
+}
+
+flag {
     name: "visual_interruptions_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the code to decide when notifications "
@@ -89,4 +104,11 @@ flag {
     description: "Moves NSSL into a shared element between the notification_panel and "
         "keyguard_root_view."
     bug: "278054201"
+}
+
+flag {
+   name: "qs_new_pipeline"
+   namespace: "systemui"
+   description: "Use the new pipeline for Quick Settings. Should have no behavior changes."
+   bug: "241772429"
 }

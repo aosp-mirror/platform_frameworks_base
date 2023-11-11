@@ -2006,6 +2006,7 @@
   <java-symbol type="drawable" name="vpn_connected" />
   <java-symbol type="drawable" name="vpn_disconnected" />
   <java-symbol type="drawable" name="usb_cable_unknown_issue" />
+  <java-symbol type="drawable" name="ic_thermostat_notification" />
   <java-symbol type="id" name="ask_checkbox" />
   <java-symbol type="id" name="compat_checkbox" />
   <java-symbol type="id" name="original_app_icon" />
@@ -5085,6 +5086,7 @@
   <java-symbol type="array" name="device_state_notification_power_save_contents"/>
   <java-symbol type="string" name="connected_display_unavailable_notification_title"/>
   <java-symbol type="string" name="connected_display_unavailable_notification_content"/>
+  <java-symbol type="string" name="connected_display_thermally_unavailable_notification_content"/>
   <java-symbol type="string" name="connected_display_cable_dont_support_displays_notification_title"/>
   <java-symbol type="string" name="connected_display_cable_dont_support_displays_notification_content"/>
   <java-symbol type="string" name="concurrent_display_notification_name"/>

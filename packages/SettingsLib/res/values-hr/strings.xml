@@ -436,12 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"Pretpostavi da aplikacije podržavaju moderne formate"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Prikaži obavijesti o konvertiranju"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Onemogući predmemoriju za konvertiranje"</string>
-    <!-- no translation found for widevine_settings_title (4023329801172572917) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_title (4987972688770202547) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_summary (3080790841069996016) -->
-    <skip />
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Postavke Widevinea"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Prisilna L3 zamjena"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Odaberite za prisilnu L3 zamjenu"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Pokrenute usluge"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Pregledajte i kontrolirajte trenutačno pokrenute usluge"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementacija WebViewa"</string>
@@ -565,22 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Aktivirajte i reproducirajte ovdje"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Nije odobreno za reprodukciju"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Nemoguća je reprodukcija medija"</string>
-    <!-- no translation found for tv_media_transfer_connected (5145011475885290725) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_fallback_title (3674360098755328601) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_fallback_title (3098685494578519940) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_subtitle (1040017851325069082) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_subtitle (645191413103303077) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_default (38102257053315304) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (2229000864416329818) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (2433193551482972117) -->
-    <skip />
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"Povezano"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Povezano putem ARC-a"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Povezano putem eARC-a"</string>
+    <string name="tv_media_transfer_default" msgid="38102257053315304">"Zadano za TV"</string>
+    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI izlaz"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Unutarnji zvučnici"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem s povezivanjem. Isključite i ponovo uključite uređaj"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Žičani audiouređaj"</string>
     <string name="help_label" msgid="3528360748637781274">"Pomoć i povratne informacije"</string>

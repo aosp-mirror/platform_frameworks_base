@@ -445,6 +445,19 @@ public final class SatelliteManager {
     public @interface DisplayMode {}
 
     /**
+     * The emergency call is handed over to oem-enabled satellite SOS messaging. SOS messages are
+     * sent to SOS providers, which will then forward the messages to emergency providers.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final int EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_SOS = 1;
+    /**
+     * The emergency call is handed over to carrier-enabled satellite T911 messaging. T911 messages
+     * are sent directly to local emergency providers.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final int EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911 = 2;
+
+    /**
      * Request to enable or disable the satellite modem and demo mode.
      * If satellite modem and cellular modem cannot work concurrently,
      * then this will disable the cellular modem if satellite modem is enabled,

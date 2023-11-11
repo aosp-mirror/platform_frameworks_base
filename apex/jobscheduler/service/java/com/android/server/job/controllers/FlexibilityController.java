@@ -247,6 +247,12 @@ public final class FlexibilityController extends StateController {
         mPrefetchLifeCycleStart.delete(userId);
     }
 
+    boolean isEnabled() {
+        synchronized (mLock) {
+            return mFlexibilityEnabled;
+        }
+    }
+
     /** Checks if the flexibility constraint is actively satisfied for a given job. */
     @GuardedBy("mLock")
     boolean isFlexibilitySatisfiedLocked(JobStatus js) {
@@ -262,7 +268,8 @@ public final class FlexibilityController extends StateController {
     int getNumSatisfiedRequiredConstraintsLocked(JobStatus js) {
         return Integer.bitCount(mSatisfiedFlexibleConstraints)
                 // Connectivity is job-specific, so must be handled separately.
-                + (js.getHasAccessToUnmetered() ? 1 : 0);
+                + (js.canApplyTransportAffinities()
+                        && js.areTransportAffinitiesSatisfied() ? 1 : 0);
     }
 
     /**
@@ -495,7 +502,7 @@ public final class FlexibilityController extends StateController {
             final int curPercent = getCurPercentOfLifecycleLocked(js, nowElapsed);
             int toDrop = 0;
             final int jsMaxFlexibleConstraints = NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS
-                    + (js.getPreferUnmetered() ? 1 : 0);
+                    + (js.canApplyTransportAffinities() ? 1 : 0);
             for (int i = 0; i < jsMaxFlexibleConstraints; i++) {
                 if (curPercent >= mPercentToDropConstraints[i]) {
                     toDrop++;
@@ -661,7 +668,6 @@ public final class FlexibilityController extends StateController {
         }
     }
 
-    @VisibleForTesting
     class FcConfig {
         private boolean mShouldReevaluateConstraints = false;
 
@@ -682,7 +688,7 @@ public final class FlexibilityController extends StateController {
         static final String KEY_RESCHEDULED_JOB_DEADLINE_MS =
                 FC_CONFIG_PREFIX + "rescheduled_job_deadline_ms";
 
-        private static final boolean DEFAULT_FLEXIBILITY_ENABLED = false;
+        static final boolean DEFAULT_FLEXIBILITY_ENABLED = false;
         @VisibleForTesting
         static final long DEFAULT_DEADLINE_PROXIMITY_LIMIT_MS = 15 * MINUTE_IN_MILLIS;
         @VisibleForTesting

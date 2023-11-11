@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -142,7 +143,11 @@ private fun SceneScope.BouncerScene(
     modifier: Modifier = Modifier,
 ) {
     val backgroundColor = MaterialTheme.colorScheme.surface
-    val layout = calculateLayout()
+    val isSideBySideSupported by viewModel.isSideBySideSupported.collectAsState()
+    val layout =
+        calculateLayout(
+            isSideBySideSupported = isSideBySideSupported,
+        )
 
     Box(modifier) {
         Canvas(Modifier.element(Bouncer.Elements.Background).fillMaxSize()) {
@@ -202,8 +207,7 @@ private fun Bouncer(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(60.dp),
-        modifier = modifier.padding(start = 32.dp, top = 92.dp, end = 32.dp, bottom = 92.dp)
+        modifier = modifier.padding(start = 32.dp, top = 92.dp, end = 32.dp, bottom = 0.dp)
     ) {
         Crossfade(
             targetState = message,
@@ -217,6 +221,8 @@ private fun Bouncer(
             )
         }
 
+        Spacer(Modifier.heightIn(min = 21.dp, max = 48.dp))
+
         Box(Modifier.weight(1f)) {
             UserInputArea(
                 viewModel = viewModel,
@@ -225,7 +231,22 @@ private fun Bouncer(
             )
         }
 
-        actionButton?.let { BouncerActionButton(viewModel = it) }
+        Spacer(Modifier.heightIn(min = 21.dp, max = 48.dp))
+
+        val actionButtonModifier = Modifier.height(56.dp)
+
+        actionButton.let { actionButtonViewModel ->
+            if (actionButtonViewModel != null) {
+                BouncerActionButton(
+                    viewModel = actionButtonViewModel,
+                    modifier = actionButtonModifier,
+                )
+            } else {
+                Spacer(modifier = actionButtonModifier)
+            }
+        }
+
+        Spacer(Modifier.height(48.dp))
 
         if (dialogMessage != null) {
             if (dialog == null) {
@@ -567,6 +588,11 @@ private fun SwappableLayout(
 /**
  * Arranges the bouncer contents and user switcher contents side-by-side, supporting a double tap
  * anywhere on the background to flip their positions.
+ *
+ * In situations when [isUserSwitcherVisible] is `false`, one of two things may happen: either the
+ * UI for the bouncer will be shown on its own, taking up one side, with the other side just being
+ * empty space or, if that kind of "stand-alone side-by-side" isn't supported, the standard
+ * rendering of the bouncer will be used instead of the side-by-side layout.
  */
 @Composable
 private fun SideBySide(
@@ -628,7 +654,9 @@ private fun Stacked(
 }
 
 @Composable
-private fun calculateLayout(): Layout {
+private fun calculateLayout(
+    isSideBySideSupported: Boolean,
+): Layout {
     val windowSizeClass = LocalWindowSizeClass.current
     val width = windowSizeClass.widthSizeClass
     val height = windowSizeClass.heightSizeClass
@@ -657,7 +685,7 @@ private fun calculateLayout(): Layout {
         // Large and tall devices (i.e. tablet in portrait).
         isTall -> Layout.STACKED
         // Large and wide/square devices (i.e. tablet in landscape, unfolded).
-        else -> Layout.SIDE_BY_SIDE
+        else -> if (isSideBySideSupported) Layout.SIDE_BY_SIDE else Layout.STANDARD
     }
 }
 

@@ -16,7 +16,6 @@
 
 package com.android.server.job.controllers;
 
-import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 
 import static com.android.server.job.JobSchedulerService.ACTIVE_INDEX;
@@ -162,9 +161,6 @@ public final class JobStatus {
      * Number of required flexible constraints that have been dropped.
      */
     private int mNumDroppedFlexibleConstraints;
-
-    /** If the job is going to be passed an unmetered network. */
-    private boolean mHasAccessToUnmetered;
 
     /** If the effective bucket has been downgraded once due to being buggy. */
     private boolean mIsDowngradedDueToBuggyApp;
@@ -562,11 +558,10 @@ public final class JobStatus {
     /** The job's dynamic requirements have been satisfied. */
     private boolean mReadyDynamicSatisfied;
 
-    /**
-     * The job prefers an unmetered network if it has the connectivity constraint but is
-     * okay with any meteredness.
-     */
-    private final boolean mPreferUnmetered;
+    /** Whether to apply the optimization transport preference logic to this job. */
+    private final boolean mCanApplyTransportAffinities;
+    /** True if the optimization transport preference is satisfied for this job. */
+    private boolean mTransportAffinitiesSatisfied;
 
     /** The reason a job most recently went from ready to not ready. */
     private int mReasonReadyToUnready = JobParameters.STOP_REASON_UNDEFINED;
@@ -671,12 +666,12 @@ public final class JobStatus {
         }
         mHasExemptedMediaUrisOnly = exemptedMediaUrisOnly;
 
-        mPreferUnmetered = job.getRequiredNetwork() != null
-                && !job.getRequiredNetwork().hasCapability(NET_CAPABILITY_NOT_METERED);
+        mCanApplyTransportAffinities = job.getRequiredNetwork() != null
+                && job.getRequiredNetwork().getTransportTypes().length == 0;
 
         final boolean lacksSomeFlexibleConstraints =
                 ((~requiredConstraints) & SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS) != 0
-                        || mPreferUnmetered;
+                        || mCanApplyTransportAffinities;
         final boolean satisfiesMinWindowException =
                 (latestRunTimeElapsedMillis - earliestRunTimeElapsedMillis)
                 >= MIN_WINDOW_FOR_FLEXIBILITY_MS;
@@ -688,7 +683,7 @@ public final class JobStatus {
                 && (numFailures + numSystemStops) != 1
                 && lacksSomeFlexibleConstraints) {
             mNumRequiredFlexibleConstraints =
-                    NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS + (mPreferUnmetered ? 1 : 0);
+                    NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS + (mCanApplyTransportAffinities ? 1 : 0);
             requiredConstraints |= CONSTRAINT_FLEXIBLE;
         } else {
             mNumRequiredFlexibleConstraints = 0;
@@ -1585,17 +1580,16 @@ public final class JobStatus {
         mOriginalLatestRunTimeElapsedMillis = latestRunTimeElapsed;
     }
 
-    /** Sets the jobs access to an unmetered network. */
-    void setHasAccessToUnmetered(boolean access) {
-        mHasAccessToUnmetered = access;
+    boolean areTransportAffinitiesSatisfied() {
+        return mTransportAffinitiesSatisfied;
     }
 
-    boolean getHasAccessToUnmetered() {
-        return mHasAccessToUnmetered;
+    void setTransportAffinitiesSatisfied(boolean isSatisfied) {
+        mTransportAffinitiesSatisfied = isSatisfied;
     }
 
-    boolean getPreferUnmetered() {
-        return mPreferUnmetered;
+    boolean canApplyTransportAffinities() {
+        return mCanApplyTransportAffinities;
     }
 
     @JobParameters.StopReason

@@ -74,6 +74,14 @@ std::shared_ptr<PointerController> PointerController::create(
             controller = std::shared_ptr<PointerController>(
                     new MousePointerController(policy, looper, spriteController, enabled));
             break;
+        case ControllerType::TOUCH:
+            controller = std::shared_ptr<PointerController>(
+                    new TouchPointerController(policy, looper, spriteController, enabled));
+            break;
+        case ControllerType::STYLUS:
+            controller = std::shared_ptr<PointerController>(
+                    new StylusPointerController(policy, looper, spriteController, enabled));
+            break;
         case ControllerType::LEGACY:
         default:
             controller = std::shared_ptr<PointerController>(
@@ -167,8 +175,7 @@ void PointerController::setPosition(float x, float y) {
 
 FloatPoint PointerController::getPosition() const {
     if (!mEnabled) {
-        return FloatPoint{AMOTION_EVENT_INVALID_CURSOR_POSITION,
-                          AMOTION_EVENT_INVALID_CURSOR_POSITION};
+        return FloatPoint{0, 0};
     }
 
     const int32_t displayId = mCursorController.getDisplayId();
@@ -395,6 +402,36 @@ MousePointerController::MousePointerController(const sp<PointerControllerPolicyI
                                                SpriteController& spriteController, bool enabled)
       : PointerController(policy, looper, spriteController, enabled) {
     PointerController::setPresentation(Presentation::POINTER);
+}
+
+MousePointerController::~MousePointerController() {
+    MousePointerController::fade(Transition::IMMEDIATE);
+}
+
+// --- TouchPointerController ---
+
+TouchPointerController::TouchPointerController(const sp<PointerControllerPolicyInterface>& policy,
+                                               const sp<Looper>& looper,
+                                               SpriteController& spriteController, bool enabled)
+      : PointerController(policy, looper, spriteController, enabled) {
+    PointerController::setPresentation(Presentation::SPOT);
+}
+
+TouchPointerController::~TouchPointerController() {
+    TouchPointerController::clearSpots();
+}
+
+// --- StylusPointerController ---
+
+StylusPointerController::StylusPointerController(const sp<PointerControllerPolicyInterface>& policy,
+                                                 const sp<Looper>& looper,
+                                                 SpriteController& spriteController, bool enabled)
+      : PointerController(policy, looper, spriteController, enabled) {
+    PointerController::setPresentation(Presentation::STYLUS_HOVER);
+}
+
+StylusPointerController::~StylusPointerController() {
+    StylusPointerController::fade(Transition::IMMEDIATE);
 }
 
 } // namespace android

@@ -42,3 +42,10 @@ flag {
   description: "enable AttributionSource(int, int, String, String, IBinder, String[], AttributionSource)"
   bug: "304478648"
 }
+
+flag {
+  name: "op_enable_mobile_data_by_user"
+  namespace: "permissions"
+  description: "enables logging of the OP_ENABLE_MOBILE_DATA_BY_USER"
+  bug: "222650148"
+}

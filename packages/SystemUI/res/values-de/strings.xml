@@ -249,8 +249,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Bitte nicht stören"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_detail_empty_text" msgid="5760239584390514322">"Keine gekoppelten Geräte verfügbar"</string>
-    <!-- no translation found for quick_settings_bluetooth_tile_subtitle (212752719010829550) -->
-    <skip />
+    <string name="quick_settings_bluetooth_tile_subtitle" msgid="212752719010829550">"Zum Verbinden oder Trennen eines Geräts tippen"</string>
     <string name="pair_new_bluetooth_devices" msgid="4601767620843349645">"Neues Gerät koppeln"</string>
     <string name="see_all_bluetooth_devices" msgid="1761596816620200433">"Alle ansehen"</string>
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth verwenden"</string>
@@ -397,7 +396,12 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wird schnell geladen • Voll in <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wird langsam geladen • Voll in <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Wird geladen • Voll in <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="communal_tutorial_indicator_text" msgid="700342473477865107">"Klicke auf die Pfeilschaltfläche, um das Community-Tutorial zu starten"</string>
+    <!-- no translation found for communal_tutorial_indicator_text (4503010353591430123) -->
+    <skip />
+    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
+    <skip />
+    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
+    <skip />
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Nutzer wechseln"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"Pull-down-Menü"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Alle Apps und Daten in dieser Sitzung werden gelöscht."</string>
@@ -504,7 +508,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktivieren"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Ton &amp; Vibration"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Einstellungen"</string>
-    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Auf sicherere Lautstärke gesenkt"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Auf verträglichere Lautstärke eingestellt"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Die Kopfhörerlautstärke war länger als empfohlen hoch eingestellt"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Die Kopfhörerlautstärke hat für diese Woche das Sicherheitslimit überschritten"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Weiterhören"</string>
@@ -1206,4 +1210,8 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"Kürzlich von <xliff:g id="APP_NAME">%1$s</xliff:g> verwendet (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"Verwendet von <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"Kürzlich von <xliff:g id="APP_NAME">%1$s</xliff:g> verwendet (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
+    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
+    <skip />
+    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
+    <skip />
 </resources>

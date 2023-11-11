@@ -243,6 +243,32 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     }
 
     /**
+     * Checks whether add user is disabled on the device
+     *
+     * @param context {@link Context} for the calling user.
+     *
+     *
+     * @param userId User to check enforced admin status for.
+     *
+     * @return EnforcedAdmin Object containing the enforced admin component and admin user details,
+     * or {@code null} If adding user is not disabled.
+     */
+    public static EnforcedAdmin checkIfAddUserDisallowed(Context context, int userId) {
+        final UserManager um = UserManager.get(context);
+        if (!um.hasUserRestriction(UserManager.DISALLOW_ADD_USER, UserHandle.of(userId))) {
+            // Restriction is not enforced.
+            return null;
+        }
+        EnforcedAdmin enforcedAdmin = checkIfRestrictionEnforced(context,
+                UserManager.DISALLOW_ADD_USER, userId);
+        if (enforcedAdmin != null) {
+            return enforcedAdmin;
+        }
+        return EnforcedAdmin.createDefaultEnforcedAdminWithRestriction(
+                UserManager.DISALLOW_ADD_USER);
+    }
+
+    /**
      * Check if an application is suspended.
      *
      * @return EnforcedAdmin Object containing the enforced admin component and admin user details,

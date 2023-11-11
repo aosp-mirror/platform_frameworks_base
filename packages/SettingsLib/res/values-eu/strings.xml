@@ -562,22 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Aktibatu gailua hemen erreproduzitzeko"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Gailua ez dago erreproduzitzeko onartuta"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Ezin da erreproduzitu multimedia-eduki hau hemen"</string>
-    <!-- no translation found for tv_media_transfer_connected (5145011475885290725) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_fallback_title (3674360098755328601) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_fallback_title (3098685494578519940) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_subtitle (1040017851325069082) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_subtitle (645191413103303077) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_default (38102257053315304) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (2229000864416329818) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (2433193551482972117) -->
-    <skip />
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"Konektatuta"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC bidez konektatuta"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC bidez konektatuta"</string>
+    <string name="tv_media_transfer_default" msgid="38102257053315304">"Telebistaren audio-irteera lehenetsia"</string>
+    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI irteera"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Barneko bozgorailuak"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Arazo bat izan da konektatzean. Itzali gailua eta pitz ezazu berriro."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio-gailu kableduna"</string>
     <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritziak"</string>

@@ -436,12 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"アプリによる最新形式のサポートを想定"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"コード変換に関する通知の表示"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"コード変換のキャッシュを無効にする"</string>
-    <!-- no translation found for widevine_settings_title (4023329801172572917) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_title (4987972688770202547) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_summary (3080790841069996016) -->
-    <skip />
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine の設定"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 代替の強制"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 代替を強制するかどうか選択します"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"実行中のサービス"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"現在実行中のサービスを表示して制御する"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView の実装"</string>
@@ -565,22 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"デバイスの起動が必要です"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"再生が許可されていません"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"このメディアは再生できません"</string>
-    <!-- no translation found for tv_media_transfer_connected (5145011475885290725) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_fallback_title (3674360098755328601) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_fallback_title (3098685494578519940) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_subtitle (1040017851325069082) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_subtitle (645191413103303077) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_default (38102257053315304) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (2229000864416329818) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (2433193551482972117) -->
-    <skip />
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"接続済み"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC 経由で接続済み"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC 経由で接続済み"</string>
+    <string name="tv_media_transfer_default" msgid="38102257053315304">"テレビのデフォルト"</string>
+    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI 出力"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"内蔵スピーカー"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"接続エラーです。デバイスを OFF にしてから ON に戻してください"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線オーディオ デバイス"</string>
     <string name="help_label" msgid="3528360748637781274">"ヘルプとフィードバック"</string>

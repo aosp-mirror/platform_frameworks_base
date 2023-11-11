@@ -32,5 +32,5 @@ import java.lang.annotation.Target;
  */
 @Target({TYPE, FIELD, METHOD, CONSTRUCTOR})
 @Retention(RetentionPolicy.CLASS)
-public @interface HostSideTestStaticInitializerStub {
+public @interface HostSideTestStaticInitializerKeep {
 }

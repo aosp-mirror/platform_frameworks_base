@@ -29,14 +29,15 @@ import kotlinx.coroutines.flow.asStateFlow
 class BouncerRepository
 @Inject
 constructor(
-    flags: FeatureFlagsClassic,
+    private val flags: FeatureFlagsClassic,
 ) {
     private val _message = MutableStateFlow<String?>(null)
     /** The user-facing message to show in the bouncer. */
     val message: StateFlow<String?> = _message.asStateFlow()
 
     /** Whether the user switcher should be displayed within the bouncer UI on large screens. */
-    val isUserSwitcherVisible: Boolean = flags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)
+    val isUserSwitcherVisible: Boolean
+        get() = flags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)
 
     fun setMessage(message: String?) {
         _message.value = message

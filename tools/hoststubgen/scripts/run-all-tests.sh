@@ -53,4 +53,6 @@ run ./scripts/build-framework-hostside-jars-and-extract.sh
 # These tests should all pass.
 run-ravenwood-test ${READY_TEST_MODULES[*]}
 
+run atest CtsUtilTestCasesRavenwood
+
 echo ""${0##*/}" finished, with no unexpected failures. Ready to submit!"

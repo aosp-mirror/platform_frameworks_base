@@ -16,17 +16,14 @@
 
 package com.android.systemui.log.dagger;
 
-import android.content.ContentResolver;
 import android.os.Build;
-import android.os.Looper;
 
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.log.LogcatEchoTracker;
-import com.android.systemui.log.LogcatEchoTrackerDebug;
-import com.android.systemui.log.LogcatEchoTrackerProd;
+import com.android.systemui.log.echo.LogcatEchoTrackerDebug;
+import com.android.systemui.log.echo.LogcatEchoTrackerProd;
 import com.android.systemui.log.table.TableLogBuffer;
 import com.android.systemui.log.table.TableLogBufferFactory;
 import com.android.systemui.qs.QSFragmentLegacy;
@@ -36,6 +33,7 @@ import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.wakelock.WakeLockLog;
 
+import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
 
@@ -349,10 +347,11 @@ public class LogModule {
     @Provides
     @SysUISingleton
     public static LogcatEchoTracker provideLogcatEchoTracker(
-            ContentResolver contentResolver,
-            @Main Looper looper) {
+            Lazy<LogcatEchoTrackerDebug> lazyTrackerDebug) {
         if (Build.isDebuggable()) {
-            return LogcatEchoTrackerDebug.create(contentResolver, looper);
+            LogcatEchoTrackerDebug trackerDebug = lazyTrackerDebug.get();
+            trackerDebug.start();
+            return trackerDebug;
         } else {
             return new LogcatEchoTrackerProd();
         }

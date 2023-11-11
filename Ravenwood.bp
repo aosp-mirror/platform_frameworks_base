@@ -30,7 +30,7 @@ java_genrule {
     name: "framework-minus-apex.ravenwood-base",
     tools: ["hoststubgen"],
     cmd: "$(location hoststubgen) " +
-        "@$(location :ravenwood-standard-options) " +
+        "@$(location ravenwood/ravenwood-standard-options.txt) " +
 
         "--out-stub-jar $(location ravenwood_stub.jar) " +
         "--out-impl-jar $(location ravenwood.jar) " +
@@ -39,11 +39,13 @@ java_genrule {
         "--gen-input-dump-file $(location hoststubgen_dump.txt) " +
 
         "--in-jar $(location :framework-minus-apex-for-hoststubgen) " +
-        "--policy-override-file $(location framework-minus-apex-ravenwood-policies.txt) ",
+        "--policy-override-file $(location ravenwood/framework-minus-apex-ravenwood-policies.txt) " +
+        "--annotation-allowed-classes-file $(location ravenwood/ravenwood-annotation-allowed-classes.txt) ",
     srcs: [
         ":framework-minus-apex-for-hoststubgen",
-        "framework-minus-apex-ravenwood-policies.txt",
-        ":ravenwood-standard-options",
+        "ravenwood/framework-minus-apex-ravenwood-policies.txt",
+        "ravenwood/ravenwood-standard-options.txt",
+        "ravenwood/ravenwood-annotation-allowed-classes.txt",
     ],
     out: [
         "ravenwood.jar",

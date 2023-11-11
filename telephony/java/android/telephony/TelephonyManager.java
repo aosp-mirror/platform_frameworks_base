@@ -1192,14 +1192,58 @@ public class TelephonyManager {
     /**
      * Event reported from the Telephony stack to indicate that the {@link Connection} is not
      * able to find any network and likely will not get connected. Upon receiving this event,
-     * the dialer app should show satellite SOS button if satellite is provisioned.
+     * the dialer app should start the app included in the extras bundle of this event if satellite
+     * is provisioned.
      * <p>
      * The dialer app receives this event via
      * {@link Call.Callback#onConnectionEvent(Call, String, Bundle)}.
+     * <p>
+     * The {@link Bundle} parameter is expected to include the following extras:
+     * <ul>
+     *     <li>{@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE} - the recommending handover
+     *         type.</li>
+     *     <li>{@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT} - the {@link PendingIntent}
+     *         which will be launched by the Dialer app when receiving this connection event.</li>
+     * </ul>
+     * <p>
+     * If the device is connected to satellite via carrier within the hysteresis time defined by
+     * the carrier config
+     * {@link CarrierConfigManager#KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT}, the component of
+     * the {@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT} will be set to the default SMS
+     * app.
+     * <p>
+     * Otherwise, if the overlay config {@code config_oem_enabled_satellite_handover_app} is
+     * present, the app defined by this config will be used as the component of the
+     * {@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT}. If this overlay config is empty,
+     * {@link #EXTRA_EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT} will not be included in the event
+     * {@link #EVENT_DISPLAY_EMERGENCY_MESSAGE}.
      */
     @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    public static final String EVENT_DISPLAY_SOS_MESSAGE =
-            "android.telephony.event.DISPLAY_SOS_MESSAGE";
+    public static final String EVENT_DISPLAY_EMERGENCY_MESSAGE =
+            "android.telephony.event.DISPLAY_EMERGENCY_MESSAGE";
+
+    /**
+     * Integer extra key used with {@link #EVENT_DISPLAY_EMERGENCY_MESSAGE} which indicates
+     * the type of handover from emergency call to satellite messaging.
+     * <p>
+     * Will be either
+     * android.telephony.satellite.SatelliteManager#EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_SOS
+     * or
+     * android.telephony.satellite.SatelliteManager#EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE_T911
+     * <p>
+     * Set in the extras for the {@link #EVENT_DISPLAY_EMERGENCY_MESSAGE} connection event.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final String EXTRA_EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE =
+            "android.telephony.extra.EMERGENCY_CALL_TO_SATELLITE_HANDOVER_TYPE";
+
+    /**
+     * Extra key used with the {@link #EVENT_DISPLAY_EMERGENCY_MESSAGE} for a {@link PendingIntent}
+     * which will be launched by the Dialer app.
+     */
+    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+    public static final String EXTRA_EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT =
+            "android.telephony.extra.EMERGENCY_CALL_TO_SATELLITE_LAUNCH_INTENT";
 
     /**
      * Integer extra key used with {@link #EVENT_SUPPLEMENTARY_SERVICE_NOTIFICATION} which indicates

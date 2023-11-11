@@ -34,7 +34,8 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ಅನ್‌ಸ್ಟ್ಯಾಶ್ ಮಾಡಿ"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಆ್ಯಪ್ ಕೆಲಸ ಮಾಡದೇ ಇರಬಹುದು"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್‌ ಅನ್ನು ಆ್ಯಪ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ಈ ಆ್ಯಪ್ ಅನ್ನು 1 ವಿಂಡೋದಲ್ಲಿ ಮಾತ್ರ ತೆರೆಯಬಹುದು."</string>
+    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
+    <skip />
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್‌ ಕಾರ್ಯ ನಿರ್ವಹಿಸದೇ ಇರಬಹುದು."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ಸೆಕೆಂಡರಿ ಡಿಸ್‌ಪ್ಲೇಗಳಲ್ಲಿ ಪ್ರಾರಂಭಿಸುವಿಕೆಯನ್ನು ಅಪ್ಲಿಕೇಶನ್ ಬೆಂಬಲಿಸುವುದಿಲ್ಲ."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"ಸ್ಪ್ಲಿಟ್‌ ಸ್ಕ್ರೀನ್ ಡಿವೈಡರ್"</string>

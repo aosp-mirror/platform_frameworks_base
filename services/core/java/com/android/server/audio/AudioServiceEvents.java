@@ -539,6 +539,8 @@ public class AudioServiceEvents {
         static final int DOSE_UPDATE = 1;
         static final int DOSE_REPEAT_5X = 2;
         static final int DOSE_ACCUMULATION_START = 3;
+        static final int LOWER_VOLUME_TO_RS1 = 4;
+
         final int mEventType;
         final float mFloatValue;
         final long mLongValue;
@@ -565,6 +567,10 @@ public class AudioServiceEvents {
             return new SoundDoseEvent(DOSE_ACCUMULATION_START, 0 /*ignored*/, 0 /*ignored*/);
         }
 
+        static SoundDoseEvent getLowerVolumeToRs1Event() {
+            return new SoundDoseEvent(LOWER_VOLUME_TO_RS1, 0 /*ignored*/, 0 /*ignored*/);
+        }
+
         @Override
         public String eventToString() {
             switch (mEventType) {
@@ -578,6 +584,8 @@ public class AudioServiceEvents {
                     return "CSD reached 500%";
                 case DOSE_ACCUMULATION_START:
                     return "CSD accumulating: RS2 entered";
+                case LOWER_VOLUME_TO_RS1:
+                    return "CSD lowering volume to RS1";
             }
             return new StringBuilder("FIXME invalid event type:").append(mEventType).toString();
         }

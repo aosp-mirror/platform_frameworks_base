@@ -176,7 +176,6 @@ class NotificationWakeUpCoordinatorLoggerTest : SysuiTestCase() {
         val recentLogs = mutableListOf<Pair<String, LogLevel>>()
         val tracker =
             object : LogcatEchoTracker {
-                override val logInBackgroundThread: Boolean = false
                 override fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean = false
                 override fun isTagLoggable(tagName: String, level: LogLevel): Boolean {
                     recentLogs.add(tagName to level)

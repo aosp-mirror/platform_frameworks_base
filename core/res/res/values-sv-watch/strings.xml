@@ -22,9 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="permgrouplab_sensors" msgid="2439544173324807471">"Sensorer"</string>
     <string name="global_action_emergency" msgid="2097576936362874627">"SOS-larm"</string>
-    <!-- no translation found for reboot_to_update_prepare (4129802024411268230) -->
-    <skip />
+    <string name="reboot_to_update_prepare" msgid="4129802024411268230">"Förbereder uppdatering"</string>
     <string name="reboot_to_update_title" msgid="8043761242418682803">"Systemuppdatering av Wear OS"</string>
-    <!-- no translation found for select_input_method (1285150113084396451) -->
-    <skip />
+    <string name="select_input_method" msgid="1285150113084396451">"Välj ingång"</string>
 </resources>

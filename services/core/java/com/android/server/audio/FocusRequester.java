@@ -495,7 +495,8 @@ public class FocusRequester {
                 // will be dispatched later, it is now in limbo mode
                 mFocusLossFadeLimbo = true;
                 mFocusController.postDelayedLossAfterFade(this,
-                        FadeOutManager.FADE_OUT_DURATION_MS);
+                        mFocusController.getFadeOutDurationOnFocusLossMillis(
+                                this.getAudioAttributes()));
                 return true;
             }
         }

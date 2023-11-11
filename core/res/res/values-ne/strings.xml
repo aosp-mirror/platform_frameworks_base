@@ -1689,8 +1689,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"हटाउनुहोस्"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"सिफारिस तहभन्दा आवाज ठुलो गर्नुहुन्छ?\n\nलामो समय सम्म उच्च आवाजमा सुन्दा तपाईँको सुन्ने शक्तिलाई हानी गर्न सक्छ।"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ठुलो आवाजमा सुनिरहन चाहनुहुन्छ?\n\nहेडफोनको भोल्युम सिफारिस गरिएको समयभन्दा लामो समयदेखि उच्च छ। यसले तपाईंको श्रवण शक्तिमा क्षति पुर्‍याउन सक्छ"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ठुलो आवाज पत्ता लाग्यो\n\nहेडफोनको भोल्युम सिफारिस गरिएको स्तरभन्दा उच्च छ। यसले तपाईंको श्रवण शक्ति क्षय गर्न सक्छ"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ठुलो साउन्डमा सुनिरहन चाहनुहुन्छ?\n\nहेडफोनको भोल्युम धेरै बेरदेखि उच्च छ। यसले तपाईंको श्रवण शक्तिमा क्षति पुर्‍याउन सक्छ"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"साउन्ड ठूलो भयो\n\nहेडफोनको भोल्युम सिफारिस गरिएको स्तरभन्दा उच्च छ। यसले तपाईंको श्रवण शक्ति क्षय गर्न सक्छ"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"पहुँच सम्बन्धी सर्टकट प्रयोग गर्ने हो?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"यो सर्टकट सक्रिय हुँदा, ३ सेकेन्डसम्म दुवै भोल्युम बटन थिच्नुले पहुँचसम्बन्धी कुनै सुविधा सुरु गर्ने छ।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"एक्सेसिबिलिटीसम्बन्धी सुविधा  प्रयोग गर्न सर्टकट अन गर्ने हो?"</string>

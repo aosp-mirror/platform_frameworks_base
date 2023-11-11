@@ -63,6 +63,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.Surface;
@@ -119,6 +120,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      * to portrait PiP in button navigation mode.
      */
     private static final int CONTENT_OVERLAY_FADE_OUT_DELAY_MS = 500;
+
+    private static final int EXTRA_CONTENT_OVERLAY_FADE_OUT_DELAY_MS =
+            SystemProperties.getInt(
+                    "persist.wm.debug.extra_content_overlay_fade_out_delay_ms", 0);
 
     private final Context mContext;
     private final SyncTransactionQueue mSyncTransactionQueue;
@@ -1863,7 +1868,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 removeContentOverlay(surface, callback);
             }
         });
-        animator.setStartDelay(withStartDelay ? CONTENT_OVERLAY_FADE_OUT_DELAY_MS : 0);
+        animator.setStartDelay(withStartDelay
+                ? CONTENT_OVERLAY_FADE_OUT_DELAY_MS
+                : EXTRA_CONTENT_OVERLAY_FADE_OUT_DELAY_MS);
         animator.start();
     }
 

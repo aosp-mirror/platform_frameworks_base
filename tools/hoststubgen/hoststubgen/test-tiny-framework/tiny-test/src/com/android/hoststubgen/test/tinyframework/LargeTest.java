@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.hoststubgen.test.tinyframework;
 
-package com.android.systemui.log
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.android.systemui.log.core.LogLevel
-
-/** Production version of [LogcatEchoTracker] that isn't configurable. */
-class LogcatEchoTrackerProd : LogcatEchoTracker {
-    override val logInBackgroundThread = false
-
-    override fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean {
-        return level >= LogLevel.WARNING
-    }
-
-    override fun isTagLoggable(tagName: String, level: LogLevel): Boolean {
-        return level >= LogLevel.WARNING
-    }
-}
+/**
+ * We don't want to use any android classes in this module, so we create our own copy of it here.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+public @interface LargeTest {}

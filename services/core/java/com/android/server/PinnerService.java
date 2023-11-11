@@ -51,6 +51,7 @@ import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
+import android.provider.DeviceConfigInterface;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.system.ErrnoException;
@@ -61,6 +62,7 @@ import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
@@ -123,6 +125,8 @@ public final class PinnerService extends SystemService {
     public @interface AppKey {}
 
     private final Context mContext;
+    private final Injector mInjector;
+    private final DeviceConfigInterface mDeviceConfigInterface;
     private final ActivityTaskManagerInternal mAtmInternal;
     private final ActivityManagerInternal mAmInternal;
     private final IActivityManager mAm;
@@ -195,10 +199,29 @@ public final class PinnerService extends SystemService {
                 }
             };
 
+    /** Utility class for testing. */
+    @VisibleForTesting
+    static class Injector {
+        protected DeviceConfigInterface getDeviceConfigInterface() {
+            return DeviceConfigInterface.REAL;
+        }
+
+        protected void publishBinderService(PinnerService service, Binder binderService) {
+            service.publishBinderService("pinner", binderService);
+        }
+    }
+
     public PinnerService(Context context) {
+        this(context, new Injector());
+    }
+
+    @VisibleForTesting
+    PinnerService(Context context, Injector injector) {
         super(context);
 
         mContext = context;
+        mInjector = injector;
+        mDeviceConfigInterface = mInjector.getDeviceConfigInterface();
         mConfiguredToPinCamera = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_pinnerCameraApp);
         mConfiguredToPinHome = context.getResources().getBoolean(
@@ -222,7 +245,7 @@ public final class PinnerService extends SystemService {
         registerUidListener();
         registerUserSetupCompleteListener();
 
-        DeviceConfig.addOnPropertiesChangedListener(
+        mDeviceConfigInterface.addOnPropertiesChangedListener(
                 DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
                 new HandlerExecutor(mPinnerHandler),
                 mDeviceConfigListener);
@@ -234,7 +257,7 @@ public final class PinnerService extends SystemService {
             Slog.i(TAG, "Starting PinnerService");
         }
         mBinderService = new BinderService();
-        publishBinderService("pinner", mBinderService);
+        mInjector.publishBinderService(this, mBinderService);
         publishLocalService(PinnerService.class, this);
 
         mPinnerHandler.obtainMessage(PinnerHandler.PIN_ONSTART_MSG).sendToTarget();
@@ -566,7 +589,7 @@ public final class PinnerService extends SystemService {
         // Pin the camera application. Default to the system property only if the experiment
         // phenotype property is not set.
         boolean shouldPinCamera = mConfiguredToPinCamera
-                && DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                && mDeviceConfigInterface.getBoolean(DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
                         "pin_camera",
                         SystemProperties.getBoolean("pinner.pin_camera", true));
         if (shouldPinCamera) {
@@ -709,7 +732,7 @@ public final class PinnerService extends SystemService {
      */
     private void refreshPinAnonConfig() {
         long newPinAnonSize =
-                DeviceConfig.getLong(
+                mDeviceConfigInterface.getLong(
                         DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
                         DEVICE_CONFIG_KEY_ANON_SIZE,
                         DEFAULT_ANON_SIZE);

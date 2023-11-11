@@ -26,7 +26,6 @@ import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,7 +53,6 @@ final class InputMethodMenuController {
     private final InputMethodManagerService mService;
     private final InputMethodUtils.InputMethodSettings mSettings;
     private final InputMethodSubtypeSwitchingController mSwitchingController;
-    private final ArrayMap<String, InputMethodInfo> mMethodMap;
     private final WindowManagerInternal mWindowManagerInternal;
 
     private AlertDialog.Builder mDialogBuilder;
@@ -73,7 +71,6 @@ final class InputMethodMenuController {
         mService = service;
         mSettings = mService.mSettings;
         mSwitchingController = mService.mSwitchingController;
-        mMethodMap = mService.mMethodMap;
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
     }
 
@@ -101,7 +98,8 @@ final class InputMethodMenuController {
                         mService.getCurrentInputMethodSubtypeLocked();
                 if (currentSubtype != null) {
                     final String curMethodId = mService.getSelectedMethodIdLocked();
-                    final InputMethodInfo currentImi = mMethodMap.get(curMethodId);
+                    final InputMethodInfo currentImi =
+                            mService.queryInputMethodForCurrentUserLocked(curMethodId);
                     lastInputMethodSubtypeId = SubtypeUtils.getSubtypeIdFromHashCode(
                             currentImi, currentSubtype.hashCode());
                 }

@@ -172,6 +172,17 @@
     <integer name="config_satellite_nb_iot_inactivity_timeout_millis">180000</integer>
     <java-symbol type="integer" name="config_satellite_nb_iot_inactivity_timeout_millis" />
 
+    <!-- The timeout duration in milliseconds to determine whether to recommend Dialer to show the
+         emergency messaging option to users.
+
+         The timer is started when there is an ongoing emergency call, and the IMS is not
+         registered, and cellular service is not available. When the timer expires,
+         SatelliteSOSMessageRecommender will send the event EVENT_DISPLAY_EMERGENCY_MESSAGE to
+         Dialer, which will then prompt user to switch to using satellite emergency messaging.
+         -->
+    <integer name="config_emergency_call_wait_for_connection_timeout_millis">20000</integer>
+    <java-symbol type="integer" name="config_emergency_call_wait_for_connection_timeout_millis" />
+
     <!-- Telephony config for the PLMNs of all satellite providers. This is used by satellite modem
          to identify providers that should be ignored if the carrier config
          carrier_supported_satellite_services_per_provider_bundle does not support them.
@@ -183,6 +194,16 @@
          of the satellite PLMN with the format "mccmnc". -->
     <string name="config_satellite_sim_identifier" translatable="false"></string>
     <java-symbol type="string" name="config_satellite_sim_identifier" />
+
+    <!-- The app to which the emergency call will be handed over for OEM-enabled satellite
+         messaging. The format of the config string is "package_name;class_name". -->
+    <string name="config_oem_enabled_satellite_sos_handover_app" translatable="false"></string>
+    <java-symbol type="string" name="config_oem_enabled_satellite_sos_handover_app" />
+
+    <!-- The action of the intent that Dialer sends to the app to which the emergency call will be
+         handed over for emergency messaging via satellite. -->
+    <string name="config_satellite_emergency_handover_intent_action" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_emergency_handover_intent_action" />
 
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
          will not perform handover if the target transport is out of service, or VoPS not

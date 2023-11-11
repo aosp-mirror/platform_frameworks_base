@@ -20,9 +20,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
+import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.Flags
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
@@ -200,6 +202,28 @@ class BouncerViewModelTest : SysuiTestCase() {
 
             underTest.onThrottlingDialogDismissed()
             assertThat(throttlingDialogMessage).isNull()
+        }
+
+    @Test
+    fun isSideBySideSupported() =
+        testScope.runTest {
+            val isSideBySideSupported by collectLastValue(underTest.isSideBySideSupported)
+            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            assertThat(isSideBySideSupported).isTrue()
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Password
+            )
+            assertThat(isSideBySideSupported).isTrue()
+
+            utils.featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            assertThat(isSideBySideSupported).isTrue()
+
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Password
+            )
+            assertThat(isSideBySideSupported).isFalse()
         }
 
     private fun authMethodsToTest(): List<DomainLayerAuthenticationMethodModel> {

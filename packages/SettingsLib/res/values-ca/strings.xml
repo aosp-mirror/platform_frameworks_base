@@ -298,7 +298,7 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Activa el còdec d\'àudio per Bluetooth\nSelecció: mode de canal"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Còdec LDAC d\'àudio de Bluetooth: qualitat de reproducció"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Activa l\'LDAC d\'àudio de Bluetooth\nSelecció de còdec: qualitat de reproducció"</string>
-    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Reproducció en continu: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Reproducció en línia: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS privat"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Selecciona el mode de DNS privat"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Desactivat"</string>
@@ -436,12 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"Assumeix que les aplicacions són compatibles amb formats moderns"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Mostra les notificacions de transcodificació"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Desactiva la memòria cau per a la transcodificació"</string>
-    <!-- no translation found for widevine_settings_title (4023329801172572917) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_title (4987972688770202547) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_summary (3080790841069996016) -->
-    <skip />
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Configuració de Widevine"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Força l\'alternativa L3"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Selecciona per forçar l\'alternativa L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serveis en execució"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Visualitza i controla els serveis en execució"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementació de WebView"</string>
@@ -565,22 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"Activa el dispositiu per reproduir aquí"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"El dispositiu no està aprovat per reproduir contingut"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"No es pot reproduir aquest contingut multimèdia aquí"</string>
-    <!-- no translation found for tv_media_transfer_connected (5145011475885290725) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_fallback_title (3674360098755328601) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_fallback_title (3098685494578519940) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_subtitle (1040017851325069082) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_subtitle (645191413103303077) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_default (38102257053315304) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (2229000864416329818) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (2433193551482972117) -->
-    <skip />
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"S\'ha connectat"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Connectat mitjançant ARC"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Connectat mitjançant eARC"</string>
+    <string name="tv_media_transfer_default" msgid="38102257053315304">"Valor predeterminat per al televisor"</string>
+    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"Sortida HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Altaveus interns"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Hi ha hagut un problema amb la connexió. Apaga el dispositiu i torna\'l a encendre."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositiu d\'àudio amb cable"</string>
     <string name="help_label" msgid="3528360748637781274">"Ajuda i suggeriments"</string>

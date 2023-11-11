@@ -271,13 +271,14 @@ class TransitionController {
         if (mTransitionPlayer == null) return;
         // Immediately set to null so that nothing inadvertently starts/queues.
         mTransitionPlayer = null;
-        // Clean-up/finish any playing transitions.
-        for (int i = 0; i < mPlayingTransitions.size(); ++i) {
+        // Clean-up/finish any playing transitions. Backwards since they can remove themselves.
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
             mPlayingTransitions.get(i).cleanUpOnFailure();
         }
         mPlayingTransitions.clear();
         // Clean up waiting transitions first since they technically started first.
-        for (int i = 0; i < mWaitingTransitions.size(); ++i) {
+        // Backwards since they can remove themselves.
+        for (int i = mWaitingTransitions.size() - 1; i >= 0; --i) {
             mWaitingTransitions.get(i).abort();
         }
         mWaitingTransitions.clear();

@@ -1,0 +1,8 @@
+package: "android.tracing"
+
+flag {
+    name: "perfetto_transition_tracing"
+    namespace: "windowing_tools"
+    description: "Move transition tracing to Perfetto"
+    bug: "309630341"
+}

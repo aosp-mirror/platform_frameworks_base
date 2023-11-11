@@ -19,26 +19,22 @@ package com.android.server.wm.flicker.notification
 import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
-import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
-import android.tools.device.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
-import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.Test
 
 /** Base class for app launch tests */
 abstract class OpenAppTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     protected open val testApp: StandardAppHelper = SimpleAppHelper(instrumentation)
 
-    /** {@inheritDoc} */
-    override val transition: FlickerBuilder.() -> Unit = {
-        setup {
-            tapl.setExpectedRotation(flicker.scenario.startRotation.value)
-            device.wakeUpAndGoToHomeScreen()
-            this.setRotation(flicker.scenario.startRotation)
-        }
-        teardown { testApp.exit(wmHelper) }
+    protected fun clearOverview() {
+        // Close the app that posted the notification to trigger a cold start next time
+        // it is open - can't just kill it because that would remove the notification.
+        tapl.expectedRotationCheckEnabled = false
+        tapl.goHome()
+        tapl.workspace.switchToOverview()
+        tapl.overview.dismissAllTasks()
     }
 
     /**

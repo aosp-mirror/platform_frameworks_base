@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -272,6 +273,7 @@ public class NotificationManager {
      *     {@link #AUTOMATIC_RULE_STATUS_UNKNOWN}.
      * </p>
      */
+    // TODO (b/309101513): Add new status types to javadoc
     public static final String EXTRA_AUTOMATIC_ZEN_RULE_STATUS =
             "android.app.extra.AUTOMATIC_ZEN_RULE_STATUS";
 
@@ -286,7 +288,8 @@ public class NotificationManager {
     /** @hide */
     @IntDef(prefix = { "AUTOMATIC_RULE_STATUS" }, value = {
             AUTOMATIC_RULE_STATUS_ENABLED, AUTOMATIC_RULE_STATUS_DISABLED,
-            AUTOMATIC_RULE_STATUS_REMOVED, AUTOMATIC_RULE_STATUS_UNKNOWN
+            AUTOMATIC_RULE_STATUS_REMOVED, AUTOMATIC_RULE_STATUS_UNKNOWN,
+            AUTOMATIC_RULE_STATUS_ACTIVATED, AUTOMATIC_RULE_STATUS_DEACTIVATED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AutomaticZenRuleStatus {}
@@ -318,6 +321,27 @@ public class NotificationManager {
      * ignored.
      */
     public static final int AUTOMATIC_RULE_STATUS_REMOVED = 3;
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the given rule has been
+     * activated by the user or cross device sync. Sent from
+     * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}. If the rule owner has a mode that includes
+     * a DND component, the rule owner should activate any extra behavior that's part of that mode
+     * in response to this broadcast.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int AUTOMATIC_RULE_STATUS_ACTIVATED = 4;
+
+    /**
+     * Constant value for {@link #EXTRA_AUTOMATIC_ZEN_RULE_STATUS} - the given rule has been
+     * deactivated ("snoozed") by the user. The rule will not return to an activated state until
+     * the app calls {@link #setAutomaticZenRuleState(String, Condition)} with
+     * {@link Condition#STATE_FALSE} (either immediately or when the trigger criteria is no
+     * longer met) and then {@link Condition#STATE_TRUE} when the trigger criteria is freshly met,
+     * or when the user re-activates it.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final int AUTOMATIC_RULE_STATUS_DEACTIVATED = 5;
 
     /**
      * Intent that is broadcast when the state of {@link #getEffectsSuppressor()} changes.

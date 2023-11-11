@@ -19,17 +19,13 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.icon.domain.interactor.AlwaysOnDisplayNotificationIconsInteractor
-import com.android.systemui.util.ui.AnimatableEvent
-import com.android.systemui.util.ui.AnimatedValue
-import com.android.systemui.util.ui.toAnimatedValueFlow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 /** View-model for the row of notification icons displayed on the always-on display. */
 @SysUISingleton
@@ -43,7 +39,7 @@ constructor(
 ) {
 
     /** Are changes to the icon container animated? */
-    val animationsEnabled: Flow<Boolean> =
+    val areContainerChangesAnimated: Flow<Boolean> =
         combine(
             shadeInteractor.isShadeTouchable,
             keyguardInteractor.isKeyguardVisible,
@@ -51,23 +47,21 @@ constructor(
             panelTouchesEnabled && isKeyguardVisible
         }
 
-    /** Should icons be rendered in "dozing" mode? */
-    val isDozing: Flow<AnimatedValue<Boolean>> =
-        keyguardTransitionInteractor.startedKeyguardTransitionStep
-            // Determine if we're dozing based on the most recent transition
-            .map { step: TransitionStep ->
-                val isDozing = step.to == KeyguardState.AOD || step.to == KeyguardState.DOZING
-                isDozing to step
-            }
-            // Only emit changes based on whether we've started or stopped dozing
-            .distinctUntilChanged { (wasDozing, _), (isDozing, _) -> wasDozing != isDozing }
-            // Determine whether we need to animate
-            .map { (isDozing, step) ->
-                val animate = step.to == KeyguardState.AOD || step.from == KeyguardState.AOD
-                AnimatableEvent(isDozing, animate)
-            }
-            .distinctUntilChanged()
-            .toAnimatedValueFlow()
+    /** Amount of a "white" tint to be applied to the icons. */
+    val tintAlpha: Flow<Float> =
+        combine(
+            keyguardTransitionInteractor.transitionValue(KeyguardState.AOD).onStart { emit(0f) },
+            keyguardTransitionInteractor.transitionValue(KeyguardState.DOZING).onStart { emit(0f) },
+        ) { aodAmt, dozeAmt ->
+            aodAmt + dozeAmt // If transitioning between them, they should sum to 1f
+        }
+
+    /** Are notification icons animated (ex: animated gif)? */
+    val areIconAnimationsEnabled: Flow<Boolean> =
+        keyguardTransitionInteractor.isFinishedInStateWhere {
+            // Don't animate icons when we're on AOD / dozing
+            it != KeyguardState.AOD && it != KeyguardState.DOZING
+        }
 
     /** [NotificationIconsViewData] indicating which icons to display in the view. */
     val icons: Flow<NotificationIconsViewData> =
