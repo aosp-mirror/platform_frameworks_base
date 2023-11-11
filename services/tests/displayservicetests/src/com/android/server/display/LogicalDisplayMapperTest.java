@@ -346,14 +346,14 @@ public class LogicalDisplayMapperTest {
 
         // Disable device
         mLogicalDisplayMapper.setDisplayEnabledLocked(
-                displayAdded.getDisplayIdLocked(), /* isEnabled= */ false);
+                displayAdded, /* isEnabled= */ false);
         verify(mListenerMock).onLogicalDisplayEventLocked(mDisplayCaptor.capture(),
                 eq(LOGICAL_DISPLAY_EVENT_REMOVED));
         clearInvocations(mListenerMock);
 
         // Enable device
         mLogicalDisplayMapper.setDisplayEnabledLocked(
-                displayAdded.getDisplayIdLocked(), /* isEnabled= */ true);
+                displayAdded, /* isEnabled= */ true);
         verify(mListenerMock).onLogicalDisplayEventLocked(mDisplayCaptor.capture(),
                 eq(LOGICAL_DISPLAY_EVENT_ADDED));
     }

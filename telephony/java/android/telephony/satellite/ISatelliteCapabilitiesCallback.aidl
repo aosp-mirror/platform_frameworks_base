@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log
+package android.telephony.satellite;
 
-import com.android.systemui.log.core.LogLevel
+import android.telephony.satellite.SatelliteCapabilities;
 
-/** Production version of [LogcatEchoTracker] that isn't configurable. */
-class LogcatEchoTrackerProd : LogcatEchoTracker {
-    override val logInBackgroundThread = false
-
-    override fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean {
-        return level >= LogLevel.WARNING
-    }
-
-    override fun isTagLoggable(tagName: String, level: LogLevel): Boolean {
-        return level >= LogLevel.WARNING
-    }
+/**
+ * Interface for satellite capabilities change callback.
+ * @hide
+ */
+oneway interface ISatelliteCapabilitiesCallback {
+    /**
+     * Called when satellite capability has changed.
+     *
+     * @param capabilities The new satellite capability.
+     */
+    void onSatelliteCapabilitiesChanged(in SatelliteCapabilities capabilities);
 }
+

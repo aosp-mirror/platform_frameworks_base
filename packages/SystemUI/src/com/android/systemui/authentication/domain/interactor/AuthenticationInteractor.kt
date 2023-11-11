@@ -42,6 +42,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -103,9 +104,29 @@ constructor(
                 initialValue = throttling.value.remainingMs > 0,
             )
 
+    /**
+     * Whether the auto confirm feature is enabled for the currently-selected user.
+     *
+     * Note that the length of the PIN is also important to take into consideration, please see
+     * [hintedPinLength].
+     *
+     * During throttling, this is always disabled (`false`).
+     */
+    val isAutoConfirmEnabled: StateFlow<Boolean> =
+        combine(repository.isAutoConfirmFeatureEnabled, isThrottled) { featureEnabled, isThrottled
+                ->
+                // Disable auto-confirm during throttling.
+                featureEnabled && !isThrottled
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
+
     /** The length of the hinted PIN, or `null` if pin length hint should not be shown. */
     val hintedPinLength: StateFlow<Int?> =
-        repository.isAutoConfirmEnabled
+        isAutoConfirmEnabled
             .map { isAutoConfirmEnabled ->
                 repository.getPinLength().takeIf {
                     isAutoConfirmEnabled && it == repository.hintedPinLength
@@ -118,9 +139,6 @@ constructor(
                 started = SharingStarted.WhileSubscribed(),
                 initialValue = null,
             )
-
-    /** Whether the auto confirm feature is enabled for the currently-selected user. */
-    val isAutoConfirmEnabled: StateFlow<Boolean> = repository.isAutoConfirmEnabled
 
     /** Whether the pattern should be visible for the currently-selected user. */
     val isPatternVisible: StateFlow<Boolean> = repository.isPatternVisible

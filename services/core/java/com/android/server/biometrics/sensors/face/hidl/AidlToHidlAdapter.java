@@ -23,6 +23,7 @@ import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.face.EnrollmentStageConfig;
+import android.hardware.biometrics.face.FaceEnrollOptions;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.hardware.biometrics.face.V1_0.OptionalBool;
@@ -343,5 +344,11 @@ public class AidlToHidlAdapter implements ISession {
         public String getInterfaceHash() throws RemoteException {
             return null;
         }
+    }
+
+    @Override
+    public ICancellationSignal enrollWithOptions(FaceEnrollOptions options) {
+        //Unsupported in HIDL
+        return null;
     }
 }

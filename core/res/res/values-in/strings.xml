@@ -1689,7 +1689,7 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Hapus"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Mengeraskan volume di atas tingkat yang disarankan?\n\nMendengarkan dengan volume keras dalam waktu yang lama dapat merusak pendengaran Anda."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Tetap mendengarkan dengan volume tinggi?\n\nVolume headphone tinggi selama lebih lama dari yang direkomendasikan, yang dapat merusak pendengaran Anda"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Tetap mendengarkan dengan volume tinggi?\n\nVolume headphone tinggi untuk waktu lebih lama dari yang direkomendasikan, sehingga dapat merusak pendengaran Anda"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Suara keras terdeteksi\n\nVolume headphone lebih tinggi dari yang direkomendasikan, yang dapat merusak pendengaran Anda"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gunakan Pintasan Aksesibilitas?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas."</string>

@@ -536,7 +536,7 @@ class BlobMetadata {
     private ParcelFileDescriptor createRevocableFd(FileDescriptor fd,
             String callingPackage, int callingUid) throws IOException {
         final RevocableFileDescriptor revocableFd =
-                new RevocableFileDescriptor(mContext, fd);
+                new RevocableFileDescriptor(mContext, fd, BlobStoreUtils.getRevocableFdHandler());
         final Accessor accessor;
         synchronized (mRevocableFds) {
             accessor = new Accessor(callingPackage, callingUid);

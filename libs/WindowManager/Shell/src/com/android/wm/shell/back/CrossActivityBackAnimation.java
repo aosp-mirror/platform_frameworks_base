@@ -57,7 +57,7 @@ import javax.inject.Inject;
 
 /** Class that defines cross-activity animation. */
 @ShellMainThread
-public class CrossActivityAnimation extends ShellBackAnimation {
+public class CrossActivityBackAnimation extends ShellBackAnimation {
     /**
      * Minimum scale of the entering/closing window.
      */
@@ -66,27 +66,27 @@ public class CrossActivityAnimation extends ShellBackAnimation {
     /** Duration of post animation after gesture committed. */
     private static final int POST_ANIMATION_DURATION = 350;
     private static final Interpolator INTERPOLATOR = new DecelerateInterpolator();
-    private static final FloatProperty<CrossActivityAnimation> ENTER_PROGRESS_PROP =
+    private static final FloatProperty<CrossActivityBackAnimation> ENTER_PROGRESS_PROP =
             new FloatProperty<>("enter-alpha") {
                 @Override
-                public void setValue(CrossActivityAnimation anim, float value) {
+                public void setValue(CrossActivityBackAnimation anim, float value) {
                     anim.setEnteringProgress(value);
                 }
 
                 @Override
-                public Float get(CrossActivityAnimation object) {
+                public Float get(CrossActivityBackAnimation object) {
                     return object.getEnteringProgress();
                 }
             };
-    private static final FloatProperty<CrossActivityAnimation> LEAVE_PROGRESS_PROP =
+    private static final FloatProperty<CrossActivityBackAnimation> LEAVE_PROGRESS_PROP =
             new FloatProperty<>("leave-alpha") {
                 @Override
-                public void setValue(CrossActivityAnimation anim, float value) {
+                public void setValue(CrossActivityBackAnimation anim, float value) {
                     anim.setLeavingProgress(value);
                 }
 
                 @Override
-                public Float get(CrossActivityAnimation object) {
+                public Float get(CrossActivityBackAnimation object) {
                     return object.getLeavingProgress();
                 }
             };
@@ -135,7 +135,7 @@ public class CrossActivityAnimation extends ShellBackAnimation {
     private final BackAnimationBackground mBackground;
 
     @Inject
-    public CrossActivityAnimation(Context context, BackAnimationBackground background) {
+    public CrossActivityBackAnimation(Context context, BackAnimationBackground background) {
         mCornerRadius = ScreenDecorationsUtils.getWindowCornerRadius(context);
         mBackAnimationRunner = new BackAnimationRunner(
                 new Callback(), new Runner(), context, CUJ_PREDICTIVE_BACK_CROSS_ACTIVITY);
@@ -377,7 +377,7 @@ public class CrossActivityAnimation extends ShellBackAnimation {
         @Override
         public void onBackStarted(BackMotionEvent backEvent) {
             mProgressAnimator.onBackStarted(backEvent,
-                    CrossActivityAnimation.this::onGestureProgress);
+                    CrossActivityBackAnimation.this::onGestureProgress);
         }
 
         @Override

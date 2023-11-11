@@ -1312,7 +1312,8 @@ public final class PermissionPolicyService extends SystemService {
         }
 
         private boolean isTaskStartedFromLauncher(String currPkg, TaskInfo taskInfo) {
-            return currPkg.equals(taskInfo.baseActivity.getPackageName())
+            return taskInfo.baseActivity != null
+                    && currPkg.equals(taskInfo.baseActivity.getPackageName())
                     && isLauncherIntent(taskInfo.baseIntent);
         }
 

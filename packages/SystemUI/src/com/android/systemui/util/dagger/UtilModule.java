@@ -18,6 +18,8 @@ package com.android.systemui.util.dagger;
 
 import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.RingerModeTrackerImpl;
+import com.android.systemui.util.animation.data.repository.AnimationStatusRepository;
+import com.android.systemui.util.animation.data.repository.AnimationStatusRepositoryImpl;
 import com.android.systemui.util.wrapper.UtilWrapperModule;
 
 import dagger.Binds;
@@ -31,4 +33,8 @@ public interface UtilModule {
     /** */
     @Binds
     RingerModeTracker provideRingerModeTracker(RingerModeTrackerImpl ringerModeTrackerImpl);
+
+    @Binds
+    AnimationStatusRepository provideAnimationStatus(
+            AnimationStatusRepositoryImpl ringerModeTrackerImpl);
 }

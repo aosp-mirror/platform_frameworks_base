@@ -24,6 +24,10 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.LifecycleScreenStatusProvider
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
+import com.android.systemui.unfold.data.repository.UnfoldTransitionRepository
+import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
+import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
+import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractorImpl
 import com.android.systemui.unfold.system.SystemUnfoldSharedModule
 import com.android.systemui.unfold.updates.FoldProvider
 import com.android.systemui.unfold.updates.FoldStateProvider
@@ -149,8 +153,7 @@ class UnfoldTransitionModule {
 
         return resultingProvider?.get()?.orElse(null)?.let { unfoldProgressProvider ->
             UnfoldProgressProvider(unfoldProgressProvider, foldProvider)
-        }
-            ?: ShellUnfoldProgressProvider.NO_PROVIDER
+        } ?: ShellUnfoldProgressProvider.NO_PROVIDER
     }
 
     @Provides
@@ -162,6 +165,10 @@ class UnfoldTransitionModule {
         @IntoMap
         @ClassKey(UnfoldTraceLogger::class)
         fun bindUnfoldTraceLogger(impl: UnfoldTraceLogger): CoreStartable
+
+        @Binds fun bindRepository(impl: UnfoldTransitionRepositoryImpl): UnfoldTransitionRepository
+
+        @Binds fun bindInteractor(impl: UnfoldTransitionInteractorImpl): UnfoldTransitionInteractor
     }
 }
 

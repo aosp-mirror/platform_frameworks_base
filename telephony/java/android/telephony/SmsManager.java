@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -50,6 +51,7 @@ import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ISms;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.SmsRawData;
+import com.android.internal.telephony.flags.Flags;
 import com.android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
@@ -2815,6 +2817,7 @@ public final class SmsManager {
      * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
      * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
      * <code>MMS_ERROR_DATA_DISABLED</code><br>
+     * <code>MMS_ERROR_MMS_DISABLED_BY_CARRIER</code><br>
      * @throws IllegalArgumentException if contentUri is empty
      */
     public void sendMultimediaMessage(Context context, Uri contentUri, String locationUrl,
@@ -2856,6 +2859,7 @@ public final class SmsManager {
      * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
      * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
      * <code>MMS_ERROR_DATA_DISABLED</code><br>
+     * <code>MMS_ERROR_MMS_DISABLED_BY_CARRIER</code><br>
      * @param messageId an id that uniquely identifies the message requested to be sent.
      * Used for logging and diagnostics purposes. The id may be 0.
      * @throws IllegalArgumentException if contentUri is empty
@@ -2916,6 +2920,7 @@ public final class SmsManager {
      * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
      * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
      * <code>MMS_ERROR_DATA_DISABLED</code><br>
+     * <code>MMS_ERROR_MMS_DISABLED_BY_CARRIER</code><br>
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
      */
     public void downloadMultimediaMessage(Context context, String locationUrl, Uri contentUri,
@@ -2959,6 +2964,7 @@ public final class SmsManager {
      * <code>MMS_ERROR_INVALID_SUBSCRIPTION_ID</code><br>
      * <code>MMS_ERROR_INACTIVE_SUBSCRIPTION</code><br>
      * <code>MMS_ERROR_DATA_DISABLED</code><br>
+     * <code>MMS_ERROR_MMS_DISABLED_BY_CARRIER</code><br>
      * @param messageId an id that uniquely identifies the message requested to be downloaded.
      * Used for logging and diagnostics purposes. The id may be 0.
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
@@ -3028,7 +3034,7 @@ public final class SmsManager {
     public static final int MMS_ERROR_CONFIGURATION_ERROR = 7;
 
     /**
-     * There is no data network.
+     * There is neither Wi-Fi nor mobile data network.
      */
     public static final int MMS_ERROR_NO_DATA_NETWORK = 8;
 
@@ -3046,6 +3052,12 @@ public final class SmsManager {
      * Data is disabled for the MMS APN.
      */
     public static final int MMS_ERROR_DATA_DISABLED = 11;
+
+    /**
+     * MMS is disabled by a carrier.
+     */
+    @FlaggedApi(Flags.FLAG_MMS_DISABLED_ERROR)
+    public static final int MMS_ERROR_MMS_DISABLED_BY_CARRIER = 12;
 
     /** Intent extra name for MMS sending result data in byte array type */
     public static final String EXTRA_MMS_DATA = "android.telephony.extra.MMS_DATA";

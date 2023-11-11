@@ -102,6 +102,7 @@ public interface SettingsProxy {
      * @param name to look up in the table
      * @return the corresponding value, or null if not present
      */
+    @Nullable
     String getString(String name);
 
     /**

@@ -17,6 +17,7 @@
 package com.android.server.display.notifications;
 
 import static android.app.Notification.COLOR_DEFAULT;
+
 import static com.android.internal.notification.SystemNotificationChannels.ALERTS;
 
 import android.annotation.Nullable;
@@ -112,7 +113,8 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
 
         sendErrorNotification(createErrorNotification(
                 R.string.connected_display_unavailable_notification_title,
-                R.string.connected_display_unavailable_notification_content));
+                R.string.connected_display_unavailable_notification_content,
+                R.drawable.usb_cable_unknown_issue));
     }
 
     /**
@@ -129,7 +131,8 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
 
         sendErrorNotification(createErrorNotification(
                 R.string.connected_display_cable_dont_support_displays_notification_title,
-                R.string.connected_display_cable_dont_support_displays_notification_content));
+                R.string.connected_display_cable_dont_support_displays_notification_content,
+                R.drawable.usb_cable_unknown_issue));
     }
 
     /**
@@ -144,7 +147,24 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
 
         sendErrorNotification(createErrorNotification(
                 R.string.connected_display_unavailable_notification_title,
-                R.string.connected_display_unavailable_notification_content));
+                R.string.connected_display_unavailable_notification_content,
+                R.drawable.usb_cable_unknown_issue));
+    }
+
+    /**
+     * Send notification about high temperature preventing usage of the external display.
+     */
+    public void onHighTemperatureExternalDisplayNotAllowed() {
+        if (!mConnectedDisplayErrorHandlingEnabled) {
+            Slog.d(TAG, "onHighTemperatureExternalDisplayNotAllowed:"
+                                + " mConnectedDisplayErrorHandlingEnabled is false");
+            return;
+        }
+
+        sendErrorNotification(createErrorNotification(
+                R.string.connected_display_unavailable_notification_title,
+                R.string.connected_display_thermally_unavailable_notification_content,
+                R.drawable.ic_thermostat_notification));
     }
 
     /**
@@ -176,7 +196,8 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
     /**
      * @return a newly built notification about an issue with connected display.
      */
-    private Notification createErrorNotification(final int titleId, final int messageId) {
+    private Notification createErrorNotification(final int titleId, final int messageId,
+            final int icon) {
         final Resources resources = mContext.getResources();
         final CharSequence title = resources.getText(titleId);
         final CharSequence message = resources.getText(messageId);
@@ -190,7 +211,7 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
 
         return new Notification.Builder(mContext, ALERTS)
                 .setGroup(NOTIFICATION_GROUP_NAME)
-                .setSmallIcon(R.drawable.usb_cable_unknown_issue)
+                .setSmallIcon(icon)
                 .setWhen(0)
                 .setTimeoutAfter(NOTIFICATION_TIMEOUT_MILLISEC)
                 .setOngoing(false)

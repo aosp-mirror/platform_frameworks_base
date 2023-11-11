@@ -17,6 +17,7 @@
 package com.android.server.audio;
 
 import android.annotation.NonNull;
+import android.media.AudioAttributes;
 
 public interface PlayerFocusEnforcer {
 
@@ -64,4 +65,18 @@ public interface PlayerFocusEnforcer {
      * @param uid
      */
     void forgetUid(int uid);
+
+    /**
+     * Get the fade out duration currently active for the given usage
+     * @param aa The {@link android.media.AudioAttributes}
+     * @return fade out duration in milliseconds
+     */
+    long getFadeOutDurationMillis(@NonNull AudioAttributes aa);
+
+    /**
+     * Returns the delay to fade-in the offending players
+     * @param aa The {@link android.media.AudioAttributes}
+     * @return delay in milliseconds
+     */
+    long getFadeInDelayForOffendersMillis(@NonNull AudioAttributes aa);
 }

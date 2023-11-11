@@ -75,4 +75,11 @@ public class AidlSession {
     public boolean hasContextMethods() {
         return mHalInterfaceVersion >= 2;
     }
+
+    /**
+     * If this backend implements enroll methods with an {@link android.view.Surface}.
+     */
+    public boolean supportsFaceEnrollOptions() {
+        return mHalInterfaceVersion >= 4;
+    }
 }

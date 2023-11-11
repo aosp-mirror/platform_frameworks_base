@@ -68,7 +68,7 @@ public:
 
     void updatePointerIcon(PointerIconStyle iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
-    void setInactivityTimeout(InactivityTimeout inactivityTimeout);
+    virtual void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void doInactivityTimeout();
     void reloadPointerResources();
     void onDisplayViewportsUpdated(const std::vector<DisplayViewport>& viewports);
@@ -142,6 +142,74 @@ public:
     MousePointerController(const sp<PointerControllerPolicyInterface>& policy,
                            const sp<Looper>& looper, SpriteController& spriteController,
                            bool enabled);
+
+    ~MousePointerController() override;
+
+    void setPresentation(Presentation) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void setSpots(const PointerCoords*, const uint32_t*, BitSet32, int32_t) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void clearSpots() override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+};
+
+class TouchPointerController : public PointerController {
+public:
+    /** A version of PointerController that controls touch spots. */
+    TouchPointerController(const sp<PointerControllerPolicyInterface>& policy,
+                           const sp<Looper>& looper, SpriteController& spriteController,
+                           bool enabled);
+
+    ~TouchPointerController() override;
+
+    std::optional<FloatRect> getBounds() const override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void move(float, float) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void setPosition(float, float) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    FloatPoint getPosition() const override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    int32_t getDisplayId() const override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void fade(Transition) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void unfade(Transition) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void setDisplayViewport(const DisplayViewport&) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void setPresentation(Presentation) override {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void updatePointerIcon(PointerIconStyle) {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    void setCustomPointerIcon(const SpriteIcon&) {
+        LOG_ALWAYS_FATAL("Should not be called");
+    }
+    // fade() should not be called by inactivity timeout. Do nothing.
+    void setInactivityTimeout(InactivityTimeout) override {}
+};
+
+class StylusPointerController : public PointerController {
+public:
+    /** A version of PointerController that controls one stylus pointer. */
+    StylusPointerController(const sp<PointerControllerPolicyInterface>& policy,
+                            const sp<Looper>& looper, SpriteController& spriteController,
+                            bool enabled);
+
+    ~StylusPointerController() override;
 
     void setPresentation(Presentation) override {
         LOG_ALWAYS_FATAL("Should not be called");

@@ -692,15 +692,15 @@ public class FlexibilityControllerTest {
     }
 
     @Test
-    public void testConnectionToUnMeteredNetwork() {
+    public void testTransportAffinity() {
         JobInfo.Builder jb = createJob(0).setRequiredNetworkType(NETWORK_TYPE_ANY);
         JobStatus js = createJobStatus("testTopAppBypass", jb);
         synchronized (mFlexibilityController.mLock) {
-            js.setHasAccessToUnmetered(false);
+            js.setTransportAffinitiesSatisfied(false);
             assertEquals(0, mFlexibilityController.getNumSatisfiedRequiredConstraintsLocked(js));
-            js.setHasAccessToUnmetered(true);
+            js.setTransportAffinitiesSatisfied(true);
             assertEquals(1, mFlexibilityController.getNumSatisfiedRequiredConstraintsLocked(js));
-            js.setHasAccessToUnmetered(false);
+            js.setTransportAffinitiesSatisfied(false);
             assertEquals(0, mFlexibilityController.getNumSatisfiedRequiredConstraintsLocked(js));
         }
     }
@@ -937,10 +937,10 @@ public class FlexibilityControllerTest {
             ArraySet<JobStatus> jobs = trackedJobs.get(i);
             for (int j = 0; j < jobs.size(); j++) {
                 JobStatus js = jobs.valueAt(j);
-                final int isUnMetered = js.getPreferUnmetered()
-                        && js.getHasAccessToUnmetered() ? 1 : 0;
+                final int transportAffinitySatisfied = js.canApplyTransportAffinities()
+                        && js.areTransportAffinitiesSatisfied() ? 1 : 0;
                 assertEquals(js.getNumRequiredFlexibleConstraints()
-                                <= numSatisfiedConstraints + isUnMetered,
+                                <= numSatisfiedConstraints + transportAffinitySatisfied,
                         js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE));
             }
         }

@@ -47,7 +47,7 @@ class HostStubGenOptions(
         var substituteAnnotations: MutableSet<String> = mutableSetOf(),
         var nativeSubstituteAnnotations: MutableSet<String> = mutableSetOf(),
         var classLoadHookAnnotations: MutableSet<String> = mutableSetOf(),
-        var stubStaticInitializerAnnotations: MutableSet<String> = mutableSetOf(),
+        var keepStaticInitializerAnnotations: MutableSet<String> = mutableSetOf(),
 
         var packageRedirects: MutableList<Pair<String, String>> = mutableListOf(),
 
@@ -166,8 +166,8 @@ class HostStubGenOptions(
                         ret.classLoadHookAnnotations +=
                                 ensureUniqueAnnotation(ai.nextArgRequired(arg))
 
-                    "--stub-static-initializer-annotation" ->
-                        ret.stubStaticInitializerAnnotations +=
+                    "--keep-static-initializer-annotation" ->
+                        ret.keepStaticInitializerAnnotations +=
                                 ensureUniqueAnnotation(ai.nextArgRequired(arg))
 
                     "--package-redirect" ->
@@ -318,6 +318,7 @@ class HostStubGenOptions(
               substituteAnnotations=$substituteAnnotations,
               nativeSubstituteAnnotations=$nativeSubstituteAnnotations,
               classLoadHookAnnotations=$classLoadHookAnnotations,
+              keepStaticInitializerAnnotations=$keepStaticInitializerAnnotations,
               packageRedirects=$packageRedirects,
               $annotationAllowedClassesFile=$annotationAllowedClassesFile,
               defaultClassLoadHook=$defaultClassLoadHook,

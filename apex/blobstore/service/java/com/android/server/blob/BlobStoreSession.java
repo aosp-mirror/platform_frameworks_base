@@ -223,7 +223,8 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
         FileDescriptor fd = null;
         try {
             fd = openWriteInternal(offsetBytes, lengthBytes);
-            final RevocableFileDescriptor revocableFd = new RevocableFileDescriptor(mContext, fd);
+            final RevocableFileDescriptor revocableFd = new RevocableFileDescriptor(mContext, fd,
+                    BlobStoreUtils.getRevocableFdHandler());
             synchronized (mSessionLock) {
                 if (mState != STATE_OPENED) {
                     IoUtils.closeQuietly(fd);

@@ -55,12 +55,9 @@ class QSTileLoggerTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         whenever(logBufferFactory.create(any(), any(), any())).thenReturn(logBuffer)
+        val tileSpec: TileSpec = TileSpec.create("chatty_tile")
         underTest =
-            QSTileLogger(
-                mapOf("chatty_tile" to chattyLogBuffer),
-                logBufferFactory,
-                statusBarController
-            )
+            QSTileLogger(mapOf(tileSpec to chattyLogBuffer), logBufferFactory, statusBarController)
     }
 
     @Test

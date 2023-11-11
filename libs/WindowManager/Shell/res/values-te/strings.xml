@@ -34,7 +34,8 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"ఆన్‌స్టాచ్"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"స్ప్లిట్ స్క్రీన్‌తో యాప్ పని చేయకపోవచ్చు"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"యాప్‌లో స్ప్లిట్ స్క్రీన్‌కు సపోర్ట్ లేదు"</string>
-    <string name="dock_multi_instances_not_supported_text" msgid="5242868470666346929">"ఈ యాప్‌ను 1 విండోలో మాత్రమే తెరవవచ్చు."</string>
+    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
+    <skip />
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ప్రత్యామ్నాయ డిస్‌ప్లేలో యాప్ పని చేయకపోవచ్చు."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ప్రత్యామ్నాయ డిస్‌ప్లేల్లో ప్రారంభానికి యాప్ మద్దతు లేదు."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"స్ప్లిట్ స్క్రీన్ డివైడర్"</string>

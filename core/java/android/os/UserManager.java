@@ -5080,6 +5080,32 @@ public class UserManager {
     }
 
     /**
+     * Returns list of the profiles of the given user, including userId itself, as well as the
+     * communal profile, if there is one.
+     *
+     * <p>Note that this returns both enabled and not enabled profiles.
+     * <p>Note that this includes all profile types (not including Restricted profiles).
+     *
+     * @hide
+     */
+    @FlaggedApi(android.multiuser.Flags.FLAG_SUPPORT_COMMUNAL_PROFILE)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS,
+            Manifest.permission.QUERY_USERS})
+    public List<UserInfo> getProfilesIncludingCommunal(@UserIdInt int userId) {
+        final List<UserInfo> profiles = getProfiles(userId);
+        final UserHandle communalProfile = getCommunalProfile();
+        if (communalProfile != null) {
+            final UserInfo communalInfo = getUserInfo(communalProfile.getIdentifier());
+            if (communalInfo != null) {
+                profiles.add(communalInfo);
+            }
+        }
+        return profiles;
+    }
+
+    /**
      * Checks if the 2 provided user handles belong to the same profile group.
      *
      * @param user one of the two user handles to check.

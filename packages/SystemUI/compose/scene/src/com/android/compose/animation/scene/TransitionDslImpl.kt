@@ -21,10 +21,12 @@ import androidx.compose.animation.core.DurationBasedAnimationSpec
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import com.android.compose.animation.scene.transformation.AnchoredSize
 import com.android.compose.animation.scene.transformation.AnchoredTranslate
+import com.android.compose.animation.scene.transformation.DrawScale
 import com.android.compose.animation.scene.transformation.EdgeTranslate
 import com.android.compose.animation.scene.transformation.Fade
 import com.android.compose.animation.scene.transformation.PropertyTransformation
@@ -176,6 +178,10 @@ internal class TransitionBuilderImpl : TransitionBuilder {
 
     override fun scaleSize(matcher: ElementMatcher, width: Float, height: Float) {
         transformation(ScaleSize(matcher, width, height))
+    }
+
+    override fun scaleDraw(matcher: ElementMatcher, scaleX: Float, scaleY: Float, pivot: Offset) {
+        transformation(DrawScale(matcher, scaleX, scaleY, pivot))
     }
 
     override fun anchoredSize(matcher: ElementMatcher, anchor: ElementKey) {

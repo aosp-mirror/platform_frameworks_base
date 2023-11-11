@@ -45,7 +45,7 @@ open class DumpManager @Inject constructor() {
 
     /** See [registerCriticalDumpable]. */
     fun registerCriticalDumpable(module: Dumpable) {
-        registerCriticalDumpable(module::class.java.simpleName, module)
+        registerCriticalDumpable(module::class.java.canonicalName, module)
     }
 
     /**
@@ -62,7 +62,7 @@ open class DumpManager @Inject constructor() {
 
     /** See [registerNormalDumpable]. */
     fun registerNormalDumpable(module: Dumpable) {
-        registerNormalDumpable(module::class.java.simpleName, module)
+        registerNormalDumpable(module::class.java.canonicalName, module)
     }
 
     /**
@@ -105,12 +105,12 @@ open class DumpManager @Inject constructor() {
     }
 
     /**
-     * Same as the above override, but automatically uses the simple class name as the dumpable
+     * Same as the above override, but automatically uses the canonical class name as the dumpable
      * name.
      */
     @Synchronized
     fun registerDumpable(module: Dumpable) {
-        registerDumpable(module::class.java.simpleName, module)
+        registerDumpable(module::class.java.canonicalName, module)
     }
 
     /** Unregisters a previously-registered dumpable. */

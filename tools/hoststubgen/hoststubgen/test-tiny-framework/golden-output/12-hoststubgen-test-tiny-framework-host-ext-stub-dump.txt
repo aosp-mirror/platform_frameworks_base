@@ -405,7 +405,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkClassWithInitializerStub
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 2, methods: 1, attributes: 3
+  interfaces: 0, fields: 2, methods: 0, attributes: 3
   public static boolean sInitialized;
     descriptor: Z
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
@@ -420,16 +420,6 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
       x: #x()
         android.hosttest.annotation.HostSideTestStub
 
-  static {};
-    descriptor: ()V
-    flags: (0x0008) ACC_STATIC
-    Code:
-      stack=3, locals=0, args_size=0
-         x: new           #x                 // class java/lang/RuntimeException
-         x: dup
-         x: ldc           #x                 // String Stub!
-         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
-         x: athrow
 }
 SourceFile: "TinyFrameworkClassWithInitializerStub.java"
 RuntimeVisibleAnnotations:
@@ -445,7 +435,7 @@ RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestStub
   x: #x()
-    android.hosttest.annotation.HostSideTestStaticInitializerStub
+    android.hosttest.annotation.HostSideTestStaticInitializerKeep
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex.class
   Compiled from "TinyFrameworkEnumComplex.java"
 public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex extends java.lang.Enum<com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex>
@@ -784,6 +774,263 @@ RuntimeVisibleAnnotations:
     com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
   x: #x()
     com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested.class
+  Compiled from "TinyFrameworkLambdas.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nested
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 2, methods: 7, attributes: 5
+  public final java.util.function.Supplier<java.lang.Integer> mSupplier;
+    descriptor: Ljava/util/function/Supplier;
+    flags: (0x0011) ACC_PUBLIC, ACC_FINAL
+    Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static final java.util.function.Supplier<java.lang.Integer> sSupplier;
+    descriptor: Ljava/util/function/Supplier;
+    flags: (0x0019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nested();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public java.util.function.Supplier<java.lang.Integer> getSupplier();
+    descriptor: ()Ljava/util/function/Supplier;
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static java.util.function.Supplier<java.lang.Integer> getSupplier_static();
+    descriptor: ()Ljava/util/function/Supplier;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  private static java.lang.Integer lambda$getSupplier_static$3();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  private static java.lang.Integer lambda$getSupplier$2();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  private static java.lang.Integer lambda$static$1();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  private static java.lang.Integer lambda$new$0();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+}
+InnerClasses:
+  public static #x= #x of #x;            // Nested=class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested of class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+  public static final #x= #x of #x;    // Lookup=class java/lang/invoke/MethodHandles$Lookup of class java/lang/invoke/MethodHandles
+SourceFile: "TinyFrameworkLambdas.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestStub
+  x: #x()
+    android.hosttest.annotation.HostSideTestStaticInitializerKeep
+NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas.class
+  Compiled from "TinyFrameworkLambdas.java"
+public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
+  minor version: 0
+  major version: 61
+  flags: (0x0021) ACC_PUBLIC, ACC_SUPER
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+  super_class: #x                         // java/lang/Object
+  interfaces: 0, fields: 2, methods: 7, attributes: 5
+  public final java.util.function.Supplier<java.lang.Integer> mSupplier;
+    descriptor: Ljava/util/function/Supplier;
+    flags: (0x0011) ACC_PUBLIC, ACC_FINAL
+    Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static final java.util.function.Supplier<java.lang.Integer> sSupplier;
+    descriptor: Ljava/util/function/Supplier;
+    flags: (0x0019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL
+    Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public java.util.function.Supplier<java.lang.Integer> getSupplier();
+    descriptor: ()Ljava/util/function/Supplier;
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=3, locals=1, args_size=1
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  public static java.util.function.Supplier<java.lang.Integer> getSupplier_static();
+    descriptor: ()Ljava/util/function/Supplier;
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+    Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestStub
+
+  private static java.lang.Integer lambda$getSupplier_static$3();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  private static java.lang.Integer lambda$getSupplier$2();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  private static java.lang.Integer lambda$static$1();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+
+  private static java.lang.Integer lambda$new$0();
+    descriptor: ()Ljava/lang/Integer;
+    flags: (0x100a) ACC_PRIVATE, ACC_STATIC, ACC_SYNTHETIC
+    Code:
+      stack=3, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: ldc           #x                 // String Stub!
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+         x: athrow
+}
+InnerClasses:
+  public static #x= #x of #x;           // Nested=class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested of class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
+  public static final #x= #x of #x;    // Lookup=class java/lang/invoke/MethodHandles$Lookup of class java/lang/invoke/MethodHandles
+SourceFile: "TinyFrameworkLambdas.java"
+RuntimeVisibleAnnotations:
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+  x: #x()
+    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+RuntimeInvisibleAnnotations:
+  x: #x()
+    android.hosttest.annotation.HostSideTestStub
+  x: #x()
+    android.hosttest.annotation.HostSideTestStaticInitializerKeep
+NestMembers:
+  com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNative.class
   Compiled from "TinyFrameworkNative.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative

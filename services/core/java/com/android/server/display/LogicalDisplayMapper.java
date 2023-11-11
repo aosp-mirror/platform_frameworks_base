@@ -1255,16 +1255,11 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         return null;
     }
 
-    void setDisplayEnabledLocked(int displayId, boolean enabled) {
-        LogicalDisplay display = getDisplayLocked(displayId);
-        if (display == null) {
-            Slog.w(TAG, "Cannot find display " + displayId);
-            return;
-        }
+    void setDisplayEnabledLocked(@NonNull LogicalDisplay display, boolean enabled) {
         boolean isEnabled = display.isEnabledLocked();
         if (isEnabled == enabled) {
             Slog.w(TAG, "Display is already " + (isEnabled ? "enabled" : "disabled") + ": "
-                    + displayId);
+                    + display.getDisplayIdLocked());
             return;
         }
         setEnabledLocked(display, enabled);

@@ -36,6 +36,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.external.CustomTile;
+import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
@@ -142,6 +143,7 @@ public class AutoTileManager implements UserAwareController {
      * Init method must be called after construction to start listening
      */
     public void init() {
+        QSPipelineFlagsRepository.Utils.assertInLegacyMode();
         if (mInitialized) {
             Log.w(TAG, "Trying to re-initialize");
             return;

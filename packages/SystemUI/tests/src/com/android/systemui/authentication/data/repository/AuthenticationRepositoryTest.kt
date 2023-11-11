@@ -100,12 +100,12 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun isAutoConfirmEnabled() =
+    fun isAutoConfirmFeatureEnabled() =
         testScope.runTest {
             whenever(lockPatternUtils.isAutoPinConfirmEnabled(USER_INFOS[0].id)).thenReturn(true)
             whenever(lockPatternUtils.isAutoPinConfirmEnabled(USER_INFOS[1].id)).thenReturn(false)
 
-            val values by collectValues(underTest.isAutoConfirmEnabled)
+            val values by collectValues(underTest.isAutoConfirmFeatureEnabled)
             assertThat(values.first()).isFalse()
             assertThat(values.last()).isTrue()
 

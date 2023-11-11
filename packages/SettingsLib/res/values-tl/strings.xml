@@ -436,12 +436,9 @@
     <string name="transcode_default" msgid="3784803084573509491">"Ipagpalagay na sinusuportahan ng mga app ang mga modernong format"</string>
     <string name="transcode_notification" msgid="5560515979793436168">"Ipakita ang mga notification sa pag-transcode"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"I-disable ang cache ng pag-transcode"</string>
-    <!-- no translation found for widevine_settings_title (4023329801172572917) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_title (4987972688770202547) -->
-    <skip />
-    <!-- no translation found for force_l3_fallback_summary (3080790841069996016) -->
-    <skip />
+    <string name="widevine_settings_title" msgid="4023329801172572917">"Mga setting ng Widevine"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Puwersahin ang L3 fallback"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Piliin para puwersahin ang L3 fallback"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Mga tumatakbong serbisyo"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Tingnan at kontrolin ang mga kasalukuyang tumatakbong serbisyo"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Pagpapatupad sa WebView"</string>
@@ -565,22 +562,14 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"I-wake ang device para i-play dito"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"Hindi naaprubahan ang device para sa pag-play"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"Hindi ma-play ang media na ito rito"</string>
-    <!-- no translation found for tv_media_transfer_connected (5145011475885290725) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_fallback_title (3674360098755328601) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_fallback_title (3098685494578519940) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_arc_subtitle (1040017851325069082) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_earc_subtitle (645191413103303077) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_default (38102257053315304) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (2229000864416329818) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (2433193551482972117) -->
-    <skip />
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"Nakakonekta"</string>
+    <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
+    <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
+    <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Nakakonekta sa pamamagitan ng ARC"</string>
+    <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Nakakonekta sa pamamagitan ng eARC"</string>
+    <string name="tv_media_transfer_default" msgid="38102257053315304">"Naka-default sa TV"</string>
+    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI Output"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Mga Internal na Speaker"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Nagkaproblema sa pagkonekta. I-off at pagkatapos ay i-on ang device"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Wired na audio device"</string>
     <string name="help_label" msgid="3528360748637781274">"Tulong at feedback"</string>

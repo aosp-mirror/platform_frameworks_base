@@ -31,7 +31,6 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.ProtoDumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.nano.SystemUIProtoDump;
@@ -49,6 +48,7 @@ import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepositor
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository;
 import com.android.systemui.qs.tiles.di.NewQSTileFactory;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserFileManager;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
@@ -56,8 +56,6 @@ import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.settings.SecureSettings;
-
-import dagger.Lazy;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -74,6 +72,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import dagger.Lazy;
 
 /** Platform implementation of the quick settings tile host
  *
@@ -167,7 +167,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             // finishes before creating any tiles.
             tunerService.addTunable(this, TILES_SETTING);
             // AutoTileManager can modify mTiles so make sure mTiles has already been initialized.
-            if (!mFeatureFlags.getPipelineAutoAddEnabled()) {
+            if (!mFeatureFlags.getPipelineEnabled()) {
                 mAutoTiles = autoTiles.get();
             }
         });
@@ -288,9 +288,10 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
             }
         }
         // Do not process tiles if the flag is enabled.
-        if (mFeatureFlags.getPipelineHostEnabled()) {
+        if (mFeatureFlags.getPipelineEnabled()) {
             return;
         }
+        QSPipelineFlagsRepository.Utils.assertInLegacyMode();
         if (newValue == null && UserManager.isDeviceInDemoMode(mContext)) {
             newValue = mContext.getResources().getString(R.string.quick_settings_tiles_retail_mode);
         }

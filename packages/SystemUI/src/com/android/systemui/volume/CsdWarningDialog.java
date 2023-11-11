@@ -35,8 +35,8 @@ import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.messages.nano.SystemMessageProto;
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.NotificationChannels;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -46,7 +46,8 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 
 /**
- * A class that implements the four Computed Sound Dose-related warnings defined in {@link AudioManager}:
+ * A class that implements the three Computed Sound Dose-related warnings defined in
+ * {@link AudioManager}:
  * <ul>
  *     <li>{@link AudioManager#CSD_WARNING_DOSE_REACHED_1X}</li>
  *     <li>{@link AudioManager#CSD_WARNING_DOSE_REPEATED_5X}</li>
@@ -188,8 +189,8 @@ public class CsdWarningDialog extends SystemUIDialog
     public void onClick(DialogInterface dialog, int which) {
         if (which == DialogInterface.BUTTON_NEGATIVE) {
             Log.d(TAG, "Lower volume pressed for CSD warning " + mCsdWarning);
+            mAudioManager.lowerVolumeToRs1();
             dismiss();
-
         }
         if (D.BUG) Log.d(TAG, "on click " + which);
     }
@@ -216,10 +217,6 @@ public class CsdWarningDialog extends SystemUIDialog
 
     @Override
     public void onDismiss(DialogInterface unused) {
-        if (mCsdWarning == AudioManager.CSD_WARNING_DOSE_REPEATED_5X) {
-            // level is always reduced to RS1 beyond the 5x dose
-            mAudioManager.lowerVolumeToRs1();
-        }
         try {
             mContext.unregisterReceiver(mReceiver);
         } catch (IllegalArgumentException e) {

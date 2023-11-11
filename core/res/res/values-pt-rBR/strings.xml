@@ -1690,8 +1690,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Remover"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Aumentar o volume acima do nível recomendado?\n\nOuvir em volume alto por longos períodos pode danificar sua audição."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Continuar ouvindo em volume alto?\n\nO volume dos fones de ouvido está alto há mais tempo que o recomendado. Isso pode causar danos à audição"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Som alto detectado\n\nO volume dos fones de ouvido está mais alto que o recomendado. Isso pode causar danos à audição"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Continuar ouvindo em volume alto?\n\nO volume dos fones de ouvido está alto há mais tempo que o recomendado. Isso pode causar danos à audição."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Som alto detectado\n\nO volume dos fones de ouvido está mais alto que o recomendado. Isso pode causar danos à audição."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usar atalho de Acessibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando o atalho estiver ativado, pressione os dois botões de volume por três segundos para iniciar um recurso de acessibilidade."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Ativar atalho para recursos de acessibilidade?"</string>

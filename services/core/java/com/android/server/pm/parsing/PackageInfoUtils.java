@@ -238,21 +238,7 @@ public class PackageInfoUtils {
         }
 
         final SigningDetails signingDetails = pkg.getSigningDetails();
-        // deprecated method of getting signing certificates
-        if ((flags & PackageManager.GET_SIGNATURES) != 0) {
-            if (signingDetails.hasPastSigningCertificates()) {
-                // Package has included signing certificate rotation information.  Return the oldest
-                // cert so that programmatic checks keep working even if unaware of key rotation.
-                info.signatures = new Signature[1];
-                info.signatures[0] = signingDetails.getPastSigningCertificates()[0];
-            } else if (signingDetails.hasSignatures()) {
-                // otherwise keep old behavior
-                int numberOfSigs = signingDetails.getSignatures().length;
-                info.signatures = new Signature[numberOfSigs];
-                System.arraycopy(signingDetails.getSignatures(), 0, info.signatures, 0,
-                        numberOfSigs);
-            }
-        }
+        info.signatures = getDeprecatedSignatures(signingDetails, flags);
 
         // replacement for GET_SIGNATURES
         if ((flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0) {
@@ -356,6 +342,30 @@ public class PackageInfoUtils {
         }
 
         return info;
+    }
+
+    /**
+     *  Retrieve the deprecated {@link PackageInfo.signatures} field of signing certificates
+     */
+    public static Signature[] getDeprecatedSignatures(SigningDetails signingDetails, long flags) {
+        if ((flags & PackageManager.GET_SIGNATURES) == 0) {
+            return null;
+        }
+        if (signingDetails.hasPastSigningCertificates()) {
+            // Package has included signing certificate rotation information.  Return the oldest
+            // cert so that programmatic checks keep working even if unaware of key rotation.
+            Signature[] signatures = new Signature[1];
+            signatures[0] = signingDetails.getPastSigningCertificates()[0];
+            return signatures;
+        } else if (signingDetails.hasSignatures()) {
+            // otherwise keep old behavior
+            int numberOfSigs = signingDetails.getSignatures().length;
+            Signature[] signatures = new Signature[numberOfSigs];
+            System.arraycopy(signingDetails.getSignatures(), 0, signatures, 0,
+                    numberOfSigs);
+            return signatures;
+        }
+        return null;
     }
 
     private static void updateApplicationInfo(ApplicationInfo ai, long flags,

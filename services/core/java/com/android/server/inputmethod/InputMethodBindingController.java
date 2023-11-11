@@ -34,7 +34,6 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
-import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.Slog;
 import android.view.WindowManager;
@@ -64,7 +63,6 @@ final class InputMethodBindingController {
 
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
-    @NonNull private final ArrayMap<String, InputMethodInfo> mMethodMap;
     @NonNull private final InputMethodUtils.InputMethodSettings mSettings;
     @NonNull private final PackageManagerInternal mPackageManagerInternal;
     @NonNull private final WindowManagerInternal mWindowManagerInternal;
@@ -115,7 +113,6 @@ final class InputMethodBindingController {
             int imeConnectionBindFlags, CountDownLatch latchForTesting) {
         mService = service;
         mContext = mService.mContext;
-        mMethodMap = mService.mMethodMap;
         mSettings = mService.mSettings;
         mPackageManagerInternal = mService.mPackageManagerInternal;
         mWindowManagerInternal = mService.mWindowManagerInternal;
@@ -295,7 +292,8 @@ final class InputMethodBindingController {
                         return;
                     }
                     if (DEBUG) Slog.v(TAG, "Initiating attach with token: " + mCurToken);
-                    final InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
+                    final InputMethodInfo info =
+                            mService.queryInputMethodForCurrentUserLocked(mSelectedMethodId);
                     boolean supportsStylusHwChanged =
                             mSupportsStylusHw != info.supportsStylusHandwriting();
                     mSupportsStylusHw = info.supportsStylusHandwriting();
@@ -410,7 +408,7 @@ final class InputMethodBindingController {
             return InputBindResult.NO_IME;
         }
 
-        InputMethodInfo info = mMethodMap.get(mSelectedMethodId);
+        InputMethodInfo info = mService.queryInputMethodForCurrentUserLocked(mSelectedMethodId);
         if (info == null) {
             throw new IllegalArgumentException("Unknown id: " + mSelectedMethodId);
         }

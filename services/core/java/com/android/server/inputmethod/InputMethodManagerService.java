@@ -20,6 +20,7 @@ import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
 import static android.os.IServiceManager.DUMP_FLAG_PROTO;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.os.UserManager.USER_TYPE_SYSTEM_HEADLESS;
 import static android.provider.Settings.Secure.STYLUS_HANDWRITING_DEFAULT_VALUE;
 import static android.provider.Settings.Secure.STYLUS_HANDWRITING_ENABLED;
 import static android.server.inputmethod.InputMethodManagerServiceProto.BACK_DISPOSITION;
@@ -310,7 +311,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
     // All known input methods.
     final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
-    final ArrayMap<String, InputMethodInfo> mMethodMap = new ArrayMap<>();
+    private final ArrayMap<String, InputMethodInfo> mMethodMap = new ArrayMap<>();
     final InputMethodSubtypeSwitchingController mSwitchingController;
     final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController =
             new HardwareKeyboardShortcutController();
@@ -498,6 +499,12 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     private void advanceSequenceNumberLocked() {
         mBindingController.advanceSequenceNumber();
+    }
+
+    @GuardedBy("ImfLock.class")
+    @Nullable
+    InputMethodInfo queryInputMethodForCurrentUserLocked(@NonNull String imeId) {
+        return mMethodMap.get(imeId);
     }
 
     /**
@@ -6451,6 +6458,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         mSettings.getCurrentUserId(), shellCommand.getErrPrintWriter());
                 for (int userId : userIds) {
                     if (!userHasDebugPriv(userId, shellCommand)) {
+                        continue;
+                    }
+                    // Skip on headless user
+                    if (USER_TYPE_SYSTEM_HEADLESS.equals(
+                            mUserManagerInternal.getUserInfo(userId).userType)) {
                         continue;
                     }
                     final String nextIme;

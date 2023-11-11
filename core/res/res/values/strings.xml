@@ -6297,6 +6297,8 @@ ul.</string>
     <string name="connected_display_unavailable_notification_title">Can\'t mirror to display</string>
     <!-- Content of connected display unavailable notification. [CHAR LIMIT=NONE] -->
     <string name="connected_display_unavailable_notification_content">Use a different cable and try again</string>
+    <!-- Content of connected display unavailable due to thermals notification. [CHAR LIMIT=NONE] -->
+    <string name="connected_display_thermally_unavailable_notification_content">Your device is too warm and can\'t mirror to the display until it cools down</string>
 
     <!-- Title of cable don't support displays notifications. [CHAR LIMIT=NONE] -->
     <string name="connected_display_cable_dont_support_displays_notification_title">Cable may not support displays</string>

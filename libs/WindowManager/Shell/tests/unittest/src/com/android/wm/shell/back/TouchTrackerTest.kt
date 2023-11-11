@@ -71,13 +71,13 @@ class TouchTrackerTest {
         linearTracker.update(touchX, 0f, velocityX, velocityY)
         linearTracker.assertProgress(0f)
 
-        // Restart
-        touchX += 10f
-        linearTracker.update(touchX, 0f, velocityX, velocityY)
-        linearTracker.assertProgress(0f)
-
         // Restarted, but pre-commit
         val restartX = touchX
+        touchX += 10f
+        linearTracker.update(touchX, 0f, velocityX, velocityY)
+        linearTracker.assertProgress((touchX - restartX) / MAX_DISTANCE)
+
+        // continue restart within pre-commit
         touchX += 10f
         linearTracker.update(touchX, 0f, velocityX, velocityY)
         linearTracker.assertProgress((touchX - restartX) / MAX_DISTANCE)
@@ -119,13 +119,13 @@ class TouchTrackerTest {
         linearTracker.update(touchX, 0f, velocityX, velocityY)
         linearTracker.assertProgress(0f)
 
-        // Restart
-        touchX -= 10f
-        linearTracker.update(touchX, 0f, velocityX, velocityY)
-        linearTracker.assertProgress(0f)
-
         // Restarted, but pre-commit
         val restartX = touchX
+        touchX -= 10f
+        linearTracker.update(touchX, 0f, velocityX, velocityY)
+        linearTracker.assertProgress((restartX - touchX) / target)
+
+        // continue restart within pre-commit
         touchX -= 10f
         linearTracker.update(touchX, 0f, velocityX, velocityY)
         linearTracker.assertProgress((restartX - touchX) / target)

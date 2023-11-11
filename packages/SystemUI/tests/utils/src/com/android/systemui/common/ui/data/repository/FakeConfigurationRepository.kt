@@ -16,6 +16,7 @@
 
 package com.android.systemui.common.ui.data.repository
 
+import android.content.res.Configuration
 import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
@@ -36,6 +37,10 @@ class FakeConfigurationRepository @Inject constructor() : ConfigurationRepositor
         MutableSharedFlow<Unit>(replay = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
     override val onConfigurationChange: Flow<Unit> = _onConfigurationChange.asSharedFlow()
 
+    private val _configurationChangeValues = MutableSharedFlow<Configuration>()
+    override val configurationValues: Flow<Configuration> =
+        _configurationChangeValues.asSharedFlow()
+
     private val _scaleForResolution = MutableStateFlow(1f)
     override val scaleForResolution: Flow<Float> = _scaleForResolution.asStateFlow()
 
@@ -47,6 +52,11 @@ class FakeConfigurationRepository @Inject constructor() : ConfigurationRepositor
 
     fun onConfigurationChange() {
         _onConfigurationChange.tryEmit(Unit)
+    }
+
+    fun onConfigurationChange(configChange: Configuration) {
+        _configurationChangeValues.tryEmit(configChange)
+        onAnyConfigurationChange()
     }
 
     fun setScaleForResolution(scale: Float) {
