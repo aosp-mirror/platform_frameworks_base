@@ -1683,8 +1683,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Quitar"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar sonidos fuertes durante mucho tiempo puede dañar los oídos."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"¿Seguir escuchando a un volumen alto?\n\nEl volumen de los auriculares ha estado alto durante más tiempo del recomendado, lo que puede dañar tu audición"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Sonido alto detectado\n\nEl volumen de los auriculares está más alto de lo recomendado, lo que puede dañar tu audición"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"¿Seguir escuchando a un volumen alto?\n\nEl volumen de los auriculares ha estado alto durante más tiempo del recomendado, lo que puede dañar tu audición."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Sonido alto detectado\n\nEl volumen de los auriculares está más alto de lo recomendado, lo que puede dañar tu audición."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"¿Utilizar acceso directo de accesibilidad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Si el acceso directo está activado, pulsa los dos botones de volumen durante 3 segundos para iniciar una función de accesibilidad."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"¿Quieres activar el acceso directo a las funciones de accesibilidad?"</string>
