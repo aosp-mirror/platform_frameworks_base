@@ -79,7 +79,8 @@ final class InputMethodMenuController {
 
         synchronized (ImfLock.class) {
             final boolean isScreenLocked = mWindowManagerInternal.isKeyguardLocked()
-                    && mWindowManagerInternal.isKeyguardSecure(mSettings.getCurrentUserId());
+                    && mWindowManagerInternal.isKeyguardSecure(
+                            mService.getCurrentImeUserIdLocked());
             final String lastInputMethodId = mSettings.getSelectedInputMethod();
             int lastInputMethodSubtypeId =
                     mSettings.getSelectedInputMethodSubtypeId(lastInputMethodId);

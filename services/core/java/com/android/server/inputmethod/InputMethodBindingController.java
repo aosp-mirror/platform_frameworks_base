@@ -63,7 +63,6 @@ final class InputMethodBindingController {
 
     @NonNull private final InputMethodManagerService mService;
     @NonNull private final Context mContext;
-    @NonNull private final InputMethodUtils.InputMethodSettings mSettings;
     @NonNull private final PackageManagerInternal mPackageManagerInternal;
     @NonNull private final WindowManagerInternal mWindowManagerInternal;
 
@@ -113,7 +112,6 @@ final class InputMethodBindingController {
             int imeConnectionBindFlags, CountDownLatch latchForTesting) {
         mService = service;
         mContext = mService.mContext;
-        mSettings = mService.mSettings;
         mPackageManagerInternal = mService.mPackageManagerInternal;
         mWindowManagerInternal = mService.mWindowManagerInternal;
         mImeConnectionBindFlags = imeConnectionBindFlags;
@@ -322,7 +320,7 @@ final class InputMethodBindingController {
         private void updateCurrentMethodUid() {
             final String curMethodPackage = mCurIntent.getComponent().getPackageName();
             final int curMethodUid = mPackageManagerInternal.getPackageUid(
-                    curMethodPackage, 0 /* flags */, mSettings.getCurrentUserId());
+                    curMethodPackage, 0 /* flags */, mService.getCurrentImeUserIdLocked());
             if (curMethodUid < 0) {
                 Slog.e(TAG, "Failed to get UID for package=" + curMethodPackage);
                 mCurMethodUid = Process.INVALID_UID;
@@ -478,7 +476,7 @@ final class InputMethodBindingController {
             return false;
         }
         return mContext.bindServiceAsUser(mCurIntent, conn, flags,
-                new UserHandle(mSettings.getCurrentUserId()));
+                new UserHandle(mService.getCurrentImeUserIdLocked()));
     }
 
     @GuardedBy("ImfLock.class")
