@@ -1472,10 +1472,13 @@ public final class CachedAppOptimizer {
             }
             return;
         }
+        boolean processFreezableChangeReported = false;
         if (opt.isPendingFreeze()) {
             // Remove pending DO_FREEZE message
             mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
             opt.setPendingFreeze(false);
+            reportProcessFreezableChangedLocked(app);
+            processFreezableChangeReported = true;
             if (DEBUG_FREEZER) {
                 Slog.d(TAG_AM, "Cancel freezing " + pid + " " + app.processName);
             }
@@ -1524,7 +1527,9 @@ public final class CachedAppOptimizer {
         if (processKilled) {
             return;
         }
-        reportProcessFreezableChangedLocked(app);
+        if (!processFreezableChangeReported) {
+            reportProcessFreezableChangedLocked(app);
+        }
 
         long freezeTime = opt.getFreezeUnfreezeTime();
 
