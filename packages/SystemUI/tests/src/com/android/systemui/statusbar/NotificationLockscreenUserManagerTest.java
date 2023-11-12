@@ -323,6 +323,20 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testCurrentUserPrivateNotificationsNullChannel() {
+        // GIVEN current user allows private notifications to show
+        mSettings.putIntForUser(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1,
+                mCurrentUser.id);
+        changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
+
+        mCurrentUserNotif.setRanking(new RankingBuilder(mCurrentUserNotif.getRanking())
+                .setChannel(null)
+                .setVisibilityOverride(VISIBILITY_NO_OVERRIDE).build());
+        // THEN the notification is not redacted
+        assertFalse(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+    }
+
+    @Test
     public void testWorkPrivateNotificationsRedacted() {
         // GIVEN work profile doesn't private notifications to show
         mSettings.putIntForUser(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0,
