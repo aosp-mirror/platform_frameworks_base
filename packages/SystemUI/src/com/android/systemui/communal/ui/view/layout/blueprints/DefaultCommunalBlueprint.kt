@@ -17,7 +17,6 @@
 package com.android.systemui.communal.ui.view.layout.blueprints
 
 import com.android.systemui.communal.ui.view.layout.sections.DefaultCommunalHubSection
-import com.android.systemui.communal.ui.view.layout.sections.DefaultCommunalWidgetSection
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
@@ -30,13 +29,11 @@ class DefaultCommunalBlueprint
 @Inject
 constructor(
     defaultCommunalHubSection: DefaultCommunalHubSection,
-    defaultCommunalWidgetSection: DefaultCommunalWidgetSection,
 ) : KeyguardBlueprint {
     override val id: String = COMMUNAL
     override val sections: List<KeyguardSection> =
         listOf(
             defaultCommunalHubSection,
-            defaultCommunalWidgetSection,
         )
 
     companion object {

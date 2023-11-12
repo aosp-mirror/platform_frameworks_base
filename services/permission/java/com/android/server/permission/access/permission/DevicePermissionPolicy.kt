@@ -16,7 +16,9 @@
 
 package com.android.server.permission.access.permission
 
+import android.Manifest
 import android.permission.PermissionManager
+import android.permission.flags.Flags
 import android.util.Slog
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
@@ -273,7 +275,12 @@ class DevicePermissionPolicy : SchemePolicy() {
 
         /** These permissions are supported for virtual devices. */
         // TODO: b/298661870 - Use new API to get the list of device aware permissions.
-        val DEVICE_AWARE_PERMISSIONS = emptySet<String>()
+        val DEVICE_AWARE_PERMISSIONS =
+            if (Flags.deviceAwarePermissionApis()) {
+                setOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+            } else {
+                emptySet<String>()
+            }
     }
 
     /**

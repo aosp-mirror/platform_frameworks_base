@@ -29,7 +29,6 @@ import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.data.repository.FakeCommunalTutorialRepository
 import com.android.systemui.communal.data.repository.FakeCommunalWidgetRepository
 import com.android.systemui.communal.domain.model.CommunalContentModel
-import com.android.systemui.communal.shared.model.CommunalAppWidgetInfo
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.shared.model.CommunalWidgetContentModel
 import com.android.systemui.coroutines.collectLastValue
@@ -45,7 +44,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
@@ -53,8 +51,6 @@ import org.mockito.MockitoAnnotations
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class CommunalInteractorTest : SysuiTestCase() {
-    @Mock private lateinit var stopwatchAppWidgetInfo: CommunalAppWidgetInfo
-
     private lateinit var testScope: TestScope
 
     private lateinit var tutorialRepository: FakeCommunalTutorialRepository
@@ -83,18 +79,6 @@ class CommunalInteractorTest : SysuiTestCase() {
 
         underTest = withDeps.communalInteractor
     }
-
-    @Test
-    fun appWidgetInfoFlow() =
-        testScope.runTest {
-            val lastAppWidgetInfo = collectLastValue(underTest.appWidgetInfo)
-            runCurrent()
-            assertThat(lastAppWidgetInfo()).isNull()
-
-            widgetRepository.setStopwatchAppWidgetInfo(stopwatchAppWidgetInfo)
-            runCurrent()
-            assertThat(lastAppWidgetInfo()).isEqualTo(stopwatchAppWidgetInfo)
-        }
 
     @Test
     fun communalEnabled() =

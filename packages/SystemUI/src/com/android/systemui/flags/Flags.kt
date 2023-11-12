@@ -239,8 +239,7 @@ object Flags {
 
     /** Provide new auth messages on the bouncer. */
     // TODO(b/277961132): Tracking bug.
-    @JvmField val REVAMPED_BOUNCER_MESSAGES = unreleasedFlag("revamped_bouncer_messages",
-            teamfood = true)
+    @JvmField val REVAMPED_BOUNCER_MESSAGES = unreleasedFlag("revamped_bouncer_messages")
 
     /** Keyguard Migration */
 
@@ -254,9 +253,6 @@ object Flags {
 
     // TODO(b/287268101): Tracking bug.
     @JvmField val TRANSIT_CLOCK = releasedFlag("lockscreen_custom_transit_clock")
-
-    // TODO(b/288276738): Tracking bug.
-    @JvmField val WIDGET_ON_KEYGUARD = unreleasedFlag("widget_on_keyguard")
 
     /** Migrate the NSSL to the a sibling to both the panel and keyguard root view. */
     // TODO(b/288074305): Tracking bug.
@@ -776,9 +772,4 @@ object Flags {
     @JvmField
     val COMMUNAL_SERVICE_ENABLED = resourceBooleanFlag(R.bool.config_communalServiceEnabled,
         "communal_service_enabled")
-
-    // TODO(b/303131306): Tracking Bug
-    /** Whether communal hub features are enabled. */
-    @JvmField
-    val COMMUNAL_HUB = unreleasedFlag("communal_hub")
 }

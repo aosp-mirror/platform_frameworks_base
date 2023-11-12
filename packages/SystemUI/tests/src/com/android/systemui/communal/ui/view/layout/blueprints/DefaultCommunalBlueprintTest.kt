@@ -7,7 +7,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.ui.view.layout.sections.DefaultCommunalHubSection
-import com.android.systemui.communal.ui.view.layout.sections.DefaultCommunalWidgetSection
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,14 +19,13 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 class DefaultCommunalBlueprintTest : SysuiTestCase() {
     @Mock private lateinit var hubSection: DefaultCommunalHubSection
-    @Mock private lateinit var widgetSection: DefaultCommunalWidgetSection
 
     private lateinit var blueprint: DefaultCommunalBlueprint
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        blueprint = DefaultCommunalBlueprint(hubSection, widgetSection)
+        blueprint = DefaultCommunalBlueprint(hubSection)
     }
 
     @Test
@@ -35,7 +33,6 @@ class DefaultCommunalBlueprintTest : SysuiTestCase() {
         val constraintLayout = ConstraintLayout(context, null)
         blueprint.replaceViews(null, constraintLayout)
         verify(hubSection).addViews(constraintLayout)
-        verify(widgetSection).addViews(constraintLayout)
     }
 
     @Test
@@ -43,6 +40,5 @@ class DefaultCommunalBlueprintTest : SysuiTestCase() {
         val cs = ConstraintSet()
         blueprint.applyConstraints(cs)
         verify(hubSection).applyConstraints(cs)
-        verify(widgetSection).applyConstraints(cs)
     }
 }

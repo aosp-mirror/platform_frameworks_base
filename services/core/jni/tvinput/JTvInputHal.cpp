@@ -494,12 +494,21 @@ JTvInputHal::ITvInputWrapper::ITvInputWrapper(std::shared_ptr<AidlITvInput>& aid
 ::ndk::ScopedAStatus JTvInputHal::ITvInputWrapper::setCallback(
         const std::shared_ptr<TvInputCallbackWrapper>& in_callback) {
     if (mIsHidl) {
-        in_callback->aidlTvInputCallback = nullptr;
-        return hidlSetCallback(in_callback == nullptr ? nullptr : in_callback->hidlTvInputCallback);
+        if (in_callback == nullptr) {
+            return hidlSetCallback(nullptr);
+        }
+        else {
+            in_callback->aidlTvInputCallback = nullptr;
+            return hidlSetCallback(in_callback->hidlTvInputCallback);
+        }
     } else {
-        in_callback->hidlTvInputCallback = nullptr;
-        return mAidlTvInput->setCallback(in_callback == nullptr ? nullptr
-                                                                : in_callback->aidlTvInputCallback);
+        if (in_callback == nullptr) {
+            return mAidlTvInput->setCallback(nullptr);
+        }
+        else {
+            in_callback->hidlTvInputCallback = nullptr;
+            return mAidlTvInput->setCallback(in_callback->aidlTvInputCallback);
+        }
     }
 }
 
