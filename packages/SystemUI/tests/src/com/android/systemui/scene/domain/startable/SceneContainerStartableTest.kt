@@ -24,16 +24,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags as AconfigFlags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.testScope
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.model.SysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.SceneTestUtils.Companion.toDataLayer
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -63,8 +62,12 @@ class SceneContainerStartableTest : SysuiTestCase() {
     private val sceneInteractor = utils.sceneInteractor()
     private val sceneContainerFlags = utils.sceneContainerFlags
     private val authenticationInteractor = utils.authenticationInteractor()
+    private val bouncerInteractor =
+        utils.bouncerInteractor(authenticationInteractor = authenticationInteractor)
+    private val faceAuthRepository = FakeDeviceEntryFaceAuthRepository()
     private val deviceEntryInteractor =
         utils.deviceEntryInteractor(
+            faceAuthRepository = faceAuthRepository,
             authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
         )
@@ -78,7 +81,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
             applicationScope = testScope.backgroundScope,
             sceneInteractor = sceneInteractor,
             deviceEntryInteractor = deviceEntryInteractor,
-            authenticationInteractor = authenticationInteractor,
             keyguardInteractor = keyguardInteractor,
             flags = sceneContainerFlags,
             sysUiState = sysUiState,
@@ -86,6 +88,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             sceneLogger = mock(),
             falsingCollector = falsingCollector,
             powerInteractor = powerInteractor,
+            bouncerInteractor = bouncerInteractor,
         )
 
     @Before
@@ -198,9 +201,52 @@ class SceneContainerStartableTest : SysuiTestCase() {
             assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
             underTest.start()
 
+            // Authenticate using a passive auth method like face auth while bypass is disabled.
+            faceAuthRepository.isAuthenticated.value = true
             utils.deviceEntryRepository.setUnlocked(true)
 
             assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+        }
+
+    @Test
+    fun stayOnCurrentSceneWhenDeviceIsUnlockedAndUserIsNotOnLockscreen() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
+            val transitionStateFlowValue =
+                prepareState(
+                    isBypassEnabled = true,
+                    authenticationMethod = AuthenticationMethodModel.Pin,
+                    initialSceneKey = SceneKey.Lockscreen,
+                )
+            underTest.start()
+            runCurrent()
+
+            sceneInteractor.changeScene(SceneModel(SceneKey.Shade), "switch to shade")
+            transitionStateFlowValue.value = ObservableTransitionState.Idle(SceneKey.Shade)
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
+
+            utils.deviceEntryRepository.setUnlocked(true)
+            runCurrent()
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Shade)
+        }
+
+    @Test
+    fun switchToGoneWhenDeviceIsUnlockedAndUserIsOnBouncerWithBypassDisabled() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
+            prepareState(
+                isBypassEnabled = false,
+                initialSceneKey = SceneKey.Bouncer,
+            )
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Bouncer)
+            underTest.start()
+
+            // Authenticate using a passive auth method like face auth while bypass is disabled.
+            faceAuthRepository.isAuthenticated.value = true
+            utils.deviceEntryRepository.setUnlocked(true)
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Gone)
         }
 
     @Test
@@ -255,6 +301,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             prepareState(
                 initialSceneKey = SceneKey.Lockscreen,
                 authenticationMethod = AuthenticationMethodModel.None,
+                isLockscreenEnabled = false,
             )
             assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
             underTest.start()
@@ -269,7 +316,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
             val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
             prepareState(
                 initialSceneKey = SceneKey.Lockscreen,
-                authenticationMethod = AuthenticationMethodModel.Swipe,
+                authenticationMethod = AuthenticationMethodModel.None,
+                isLockscreenEnabled = true,
             )
             assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
             underTest.start()
@@ -406,6 +454,24 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
+    fun bouncerImeHidden_shouldTransitionBackToLockscreen() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
+            prepareState(
+                initialSceneKey = SceneKey.Lockscreen,
+                authenticationMethod = AuthenticationMethodModel.Password,
+                isDeviceUnlocked = false,
+            )
+            underTest.start()
+            runCurrent()
+
+            bouncerInteractor.onImeHidden()
+            runCurrent()
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+        }
+
+    @Test
     fun collectFalsingSignals_screenOnAndOff_aodUnavailable() =
         testScope.runTest {
             utils.keyguardRepository.setAodAvailable(false)
@@ -526,8 +592,14 @@ class SceneContainerStartableTest : SysuiTestCase() {
         isBypassEnabled: Boolean = false,
         initialSceneKey: SceneKey? = null,
         authenticationMethod: AuthenticationMethodModel? = null,
+        isLockscreenEnabled: Boolean = true,
         startsAwake: Boolean = true,
     ): MutableStateFlow<ObservableTransitionState> {
+        if (authenticationMethod?.isSecure == true) {
+            assert(isLockscreenEnabled) {
+                "Lockscreen cannot be disabled while having a secure authentication method"
+            }
+        }
         sceneContainerFlags.enabled = true
         utils.deviceEntryRepository.setUnlocked(isDeviceUnlocked)
         utils.deviceEntryRepository.setBypassEnabled(isBypassEnabled)
@@ -542,11 +614,9 @@ class SceneContainerStartableTest : SysuiTestCase() {
             sceneInteractor.onSceneChanged(SceneModel(it), "reason")
         }
         authenticationMethod?.let {
-            utils.authenticationRepository.setAuthenticationMethod(
-                authenticationMethod.toDataLayer()
-            )
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(
-                authenticationMethod != AuthenticationMethodModel.None
+            utils.authenticationRepository.setAuthenticationMethod(authenticationMethod)
+            utils.deviceEntryRepository.setLockscreenEnabled(
+                isLockscreenEnabled = isLockscreenEnabled
             )
         }
         if (startsAwake) {

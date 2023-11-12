@@ -19,7 +19,7 @@ package com.android.systemui.qs.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
@@ -90,13 +90,8 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
 
         underTest =
             QuickSettingsSceneViewModel(
-                bouncerInteractor =
-                    utils.bouncerInteractor(
-                        deviceEntryInteractor =
-                            utils.deviceEntryInteractor(
-                                authenticationInteractor = authenticationInteractor,
-                                sceneInteractor = sceneInteractor,
-                            ),
+                deviceEntryInteractor =
+                    utils.deviceEntryInteractor(
                         authenticationInteractor = authenticationInteractor,
                         sceneInteractor = sceneInteractor,
                     ),

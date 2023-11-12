@@ -25,7 +25,7 @@ import com.android.internal.logging.nano.MetricsProto
 import com.android.internal.logging.testing.FakeMetricsLogger
 import com.android.internal.util.EmergencyAffordanceManager
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags.REFACTOR_GETCURRENTUSER
 import com.android.systemui.log.table.TableLogBuffer

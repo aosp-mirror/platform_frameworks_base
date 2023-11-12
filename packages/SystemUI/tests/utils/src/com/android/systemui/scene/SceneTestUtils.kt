@@ -26,11 +26,9 @@ import android.telecom.TelecomManager
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.util.EmergencyAffordanceManager
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel as DataLayerAuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.AuthenticationRepository
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
-import com.android.systemui.authentication.domain.model.AuthenticationMethodModel as DomainLayerAuthenticationMethodModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.bouncer.data.repository.EmergencyServicesRepository
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
@@ -110,7 +108,6 @@ class SceneTestUtils(
     val deviceEntryRepository: FakeDeviceEntryRepository by lazy { FakeDeviceEntryRepository() }
     val authenticationRepository: FakeAuthenticationRepository by lazy {
         FakeAuthenticationRepository(
-            deviceEntryRepository = deviceEntryRepository,
             currentTime = { testScope.currentTime },
         )
     }
@@ -181,6 +178,7 @@ class SceneTestUtils(
             sceneInteractor = sceneInteractor,
             deviceEntryFaceAuthRepository = faceAuthRepository,
             trustRepository = trustRepository,
+            flags = FakeSceneContainerFlags(enabled = true)
         )
     }
 
@@ -192,7 +190,6 @@ class SceneTestUtils(
             repository = repository,
             backgroundDispatcher = testDispatcher,
             userRepository = userRepository,
-            deviceEntryRepository = deviceEntryRepository,
             clock = mock { whenever(elapsedRealtime()).thenAnswer { testScope.currentTime } }
         )
     }
@@ -221,17 +218,13 @@ class SceneTestUtils(
     }
 
     fun bouncerInteractor(
-        deviceEntryInteractor: DeviceEntryInteractor,
         authenticationInteractor: AuthenticationInteractor,
-        sceneInteractor: SceneInteractor,
     ): BouncerInteractor {
         return BouncerInteractor(
             applicationScope = applicationScope(),
             applicationContext = context,
             repository = BouncerRepository(featureFlags),
-            deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
-            sceneInteractor = sceneInteractor,
             flags = sceneContainerFlags,
             falsingInteractor = falsingInteractor(),
         )
@@ -344,20 +337,5 @@ class SceneTestUtils(
             metricsLogger = metricsLogger,
             dozeLogger = dozeLogger,
         )
-    }
-
-    companion object {
-        fun DomainLayerAuthenticationMethodModel.toDataLayer(): DataLayerAuthenticationMethodModel {
-            return when (this) {
-                DomainLayerAuthenticationMethodModel.None -> DataLayerAuthenticationMethodModel.None
-                DomainLayerAuthenticationMethodModel.Swipe ->
-                    DataLayerAuthenticationMethodModel.None
-                DomainLayerAuthenticationMethodModel.Pin -> DataLayerAuthenticationMethodModel.Pin
-                DomainLayerAuthenticationMethodModel.Password ->
-                    DataLayerAuthenticationMethodModel.Password
-                DomainLayerAuthenticationMethodModel.Pattern ->
-                    DataLayerAuthenticationMethodModel.Pattern
-            }
-        }
     }
 }
