@@ -647,7 +647,7 @@
     <string name="notif_inline_reply_remove_attachment_description" msgid="7954075334095405429">"Kendu eranskina"</string>
     <string name="keyboard_shortcut_group_system" msgid="1583416273777875970">"Sistema"</string>
     <string name="keyboard_shortcut_group_system_home" msgid="7465138628692109907">"Hasierako pantaila"</string>
-    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Azkenak"</string>
+    <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Azkenaldikoak"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Atzera"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Jakinarazpenak"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Lasterbideak"</string>

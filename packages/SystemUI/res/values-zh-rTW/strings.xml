@@ -492,7 +492,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"音效與震動"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"設定"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"音量已調低至安全範圍"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"耳罩式耳機以高音量播放已超過建議時間"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"耳機以高音量播放已超過建議時間"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"耳罩式耳機的音量已超過本週的安全限制"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"繼續聆聽"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"調低音量"</string>

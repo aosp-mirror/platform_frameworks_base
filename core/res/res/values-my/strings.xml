@@ -1684,8 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ဖယ်ရှားရန်"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"အသံကို အကြံပြုထားသည့် ပမာဏထက် မြှင့်ပေးရမလား?\n\nအသံကို မြင့်သည့် အဆင့်မှာ ကြာရှည်စွာ နားထောင်ခြင်းက သင်၏ နားကို ထိခိုက်စေနိုင်သည်။"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"အသံကျယ်ကျယ်ဖြင့် ဆက်နားဆင်မလား။\n\nနားကြပ်အသံအား အကြံပြုထားသည်ထက် ပိုကြာရှည်စွာ ချဲ့ထားပြီး ၎င်းက သင့်အကြားအာရုံကို ထိခိုက်စေနိုင်သည်"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ကျယ်လောင်သောအသံကို သိရှိသည်\n\nနားကြပ်အသံအား အကြံပြုထားသည်ထက် ပိုချဲ့ထားပြီး ၎င်းက သင့်အကြားအာရုံကို ထိခိုက်စေနိုင်သည်"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"အသံကျယ်ကျယ်ဖြင့် ဆက်နားဆင်မလား။\n\nနားကြပ်အသံသည် အကြံပြုထားသည်ထက် အချိန်ကြာရှည်စွာ ကျယ်လောင်နေပြီး ၎င်းက သင့်အကြားအာရုံကို ထိခိုက်စေနိုင်သည်"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ကျယ်လောင်သောအသံကို သိရှိသည်\n\nနားကြပ်အသံသည် အကြံပြုထားသည်ထက် ပိုကျယ်နေပြီး ၎င်းက သင့်အကြားအာရုံကို ထိခိုက်စေနိုင်သည်"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"အများသုံးနိုင်မှု ဖြတ်လမ်းလင့်ခ်ကို အသုံးပြုလိုပါသလား။"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ဖြတ်လမ်းလင့်ခ်ကို ဖွင့်ထားစဉ် အသံထိန်းခလုတ် နှစ်ခုစလုံးကို ၃ စက္ကန့်ခန့် ဖိထားခြင်းဖြင့် အများသုံးနိုင်သည့် ဝန်ဆောင်မှုကို ဖွင့်နိုင်သည်။"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများအတွက် ဖြတ်လမ်းကို ဖွင့်မလား။"</string>

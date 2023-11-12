@@ -1684,8 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Өчүрүү"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Сунушталган деңгээлден да катуулатып уккуңуз келеби?\n\nМузыканы узакка чейин катуу уксаңыз, угууңуз начарлап кетиши мүмкүн."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Үнүн катуу кылып уга бересизби?\n\nГарнитуранын үнүн катуу чыгарып, сунушталган убакыттан узагыраак угуп жатасыз. Этияттаңыз, кулагыңыздын угуусу начарлап кетиши мүмкүн"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Үнүн катуу кылып угуп жатасыз\n\nГарнитуранын үнүн катуу чыгарып, сунушталган убакыттан узагыраак угуп жатасыз. Этияттаңыз, кулагыңыздын угуусу начарлап кетиши мүмкүн"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Үнүн катуу кылып уга бересизби?\n\nГарнитуранын үнүн катуу чыгарып, сунушталгандан узагыраак угуп жатасыз. Этияттаңыз, кулагыңыздын угуусу начарлап кетиши мүмкүн"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Үнүн катуу кылып угуп жатасыз\n\nГарнитуранын үнүн сунушталгандан катуураак кылып угуп жатасыз. Этияттаңыз, кулагыңыздын угуусу начарлап кетиши мүмкүн"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Ыкчам иштетесизби?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн ал күйгүзүлгөндө, үндү катуулатып/акырындаткан эки баскычты тең 3 секунддай коё бербей басып туруңуз."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Атайын мүмкүнчүлүктөрдүн ыкчам баскычын иштетесизби?"</string>
