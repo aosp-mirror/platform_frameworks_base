@@ -19,16 +19,14 @@ package com.android.systemui.bouncer.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.res.R
 import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.ceil
 import kotlin.time.Duration.Companion.milliseconds
@@ -48,17 +46,9 @@ class BouncerInteractorTest : SysuiTestCase() {
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val authenticationInteractor = utils.authenticationInteractor()
-    private val sceneInteractor = utils.sceneInteractor()
-    private val deviceEntryInteractor =
-        utils.deviceEntryInteractor(
-            authenticationInteractor = authenticationInteractor,
-            sceneInteractor = sceneInteractor,
-        )
     private val underTest =
         utils.bouncerInteractor(
-            deviceEntryInteractor = deviceEntryInteractor,
             authenticationInteractor = authenticationInteractor,
-            sceneInteractor = sceneInteractor,
         )
 
     @Before
@@ -74,16 +64,10 @@ class BouncerInteractorTest : SysuiTestCase() {
     @Test
     fun pinAuthMethod() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
             val message by collectLastValue(underTest.message)
 
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             runCurrent()
-            utils.deviceEntryRepository.setUnlocked(false)
-            underTest.showOrUnlockDevice()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
-
             underTest.clearMessage()
             assertThat(message).isEmpty()
 
@@ -94,7 +78,6 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(underTest.authenticate(listOf(9, 8, 7)))
                 .isEqualTo(AuthenticationResult.FAILED)
             assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             underTest.resetMessage()
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
@@ -102,37 +85,25 @@ class BouncerInteractorTest : SysuiTestCase() {
             // Correct input.
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
     @Test
     fun pinAuthMethod_tryAutoConfirm_withAutoConfirmPin() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            val message by collectLastValue(underTest.message)
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
 
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             runCurrent()
             utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
-            utils.deviceEntryRepository.setUnlocked(false)
-            underTest.showOrUnlockDevice()
             assertThat(isAutoConfirmEnabled).isTrue()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
-            underTest.clearMessage()
 
             // Incomplete input.
             assertThat(underTest.authenticate(listOf(1, 2), tryAutoConfirm = true))
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(message).isEmpty()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             // Wrong 6-digit pin
             assertThat(underTest.authenticate(listOf(1, 2, 3, 5, 5, 6), tryAutoConfirm = true))
                 .isEqualTo(AuthenticationResult.FAILED)
-            assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             // Correct input.
             assertThat(
@@ -142,27 +113,20 @@ class BouncerInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
     @Test
     fun pinAuthMethod_tryAutoConfirm_withoutAutoConfirmPin() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
             val message by collectLastValue(underTest.message)
 
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             runCurrent()
-            utils.deviceEntryRepository.setUnlocked(false)
-            underTest.showOrUnlockDevice()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
-            underTest.clearMessage()
 
             // Incomplete input.
             assertThat(underTest.authenticate(listOf(1, 2), tryAutoConfirm = true))
                 .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(message).isEmpty()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             // Correct input.
             assertThat(
@@ -173,25 +137,16 @@ class BouncerInteractorTest : SysuiTestCase() {
                 )
                 .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(message).isEmpty()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
 
     @Test
     fun passwordAuthMethod() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
             val message by collectLastValue(underTest.message)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
             runCurrent()
-            utils.deviceEntryRepository.setUnlocked(false)
-            underTest.showOrUnlockDevice()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
-
-            underTest.clearMessage()
-            assertThat(message).isEmpty()
 
             underTest.resetMessage()
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
@@ -200,7 +155,6 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(underTest.authenticate("alohamora".toList()))
                 .isEqualTo(AuthenticationResult.FAILED)
             assertThat(message).isEqualTo(MESSAGE_WRONG_PASSWORD)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             underTest.resetMessage()
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
@@ -208,26 +162,16 @@ class BouncerInteractorTest : SysuiTestCase() {
             // Correct input.
             assertThat(underTest.authenticate("password".toList()))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
         }
 
     @Test
     fun patternAuthMethod() =
         testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
             val message by collectLastValue(underTest.message)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern
             )
             runCurrent()
-            utils.deviceEntryRepository.setUnlocked(false)
-            underTest.showOrUnlockDevice()
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
-
-            underTest.clearMessage()
-            assertThat(message).isEmpty()
-
             underTest.resetMessage()
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
 
@@ -243,7 +187,6 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(wrongPattern.size).isAtLeast(utils.authenticationRepository.minPatternLength)
             assertThat(underTest.authenticate(wrongPattern)).isEqualTo(AuthenticationResult.FAILED)
             assertThat(message).isEqualTo(MESSAGE_WRONG_PATTERN)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             underTest.resetMessage()
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
@@ -257,7 +200,6 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(underTest.authenticate(tooShortPattern))
                 .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(message).isEqualTo(MESSAGE_WRONG_PATTERN)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
 
             underTest.resetMessage()
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PATTERN)
@@ -265,51 +207,6 @@ class BouncerInteractorTest : SysuiTestCase() {
             // Correct input.
             assertThat(underTest.authenticate(FakeAuthenticationRepository.PATTERN))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
-        }
-
-    @Test
-    fun showOrUnlockDevice_notLocked_switchesToGoneScene() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.deviceEntryRepository.setUnlocked(true)
-            runCurrent()
-
-            underTest.showOrUnlockDevice()
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
-        }
-
-    @Test
-    fun showOrUnlockDevice_authMethodNotSecure_switchesToGoneScene() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
-            utils.deviceEntryRepository.setUnlocked(false)
-
-            underTest.showOrUnlockDevice()
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
-        }
-
-    @Test
-    fun showOrUnlockDevice_customMessageShown() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            val message by collectLastValue(underTest.message)
-            utils.authenticationRepository.setAuthenticationMethod(
-                AuthenticationMethodModel.Password
-            )
-            runCurrent()
-            utils.deviceEntryRepository.setUnlocked(false)
-
-            val customMessage = "Hello there!"
-            underTest.showOrUnlockDevice(customMessage)
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
-            assertThat(message).isEqualTo(customMessage)
         }
 
     @Test
@@ -318,15 +215,9 @@ class BouncerInteractorTest : SysuiTestCase() {
             val isThrottled by collectLastValue(underTest.isThrottled)
             val throttling by collectLastValue(underTest.throttling)
             val message by collectLastValue(underTest.message)
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            runCurrent()
-            underTest.showOrUnlockDevice()
-            runCurrent()
-            assertThat(currentScene?.key).isEqualTo(SceneKey.Bouncer)
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
-            assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PIN)
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) { times ->
                 // Wrong PIN.
                 assertThat(underTest.authenticate(listOf(6, 7, 8, 9)))
@@ -355,7 +246,6 @@ class BouncerInteractorTest : SysuiTestCase() {
             // Correct PIN, but throttled, so doesn't change away from the bouncer scene:
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(currentScene?.key).isEqualTo(SceneKey.Bouncer)
             assertTryAgainMessage(
                 message,
                 FakeAuthenticationRepository.THROTTLE_DURATION_MS.milliseconds.inWholeSeconds
@@ -381,42 +271,24 @@ class BouncerInteractorTest : SysuiTestCase() {
                             FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
                     )
                 )
-            assertThat(currentScene?.key).isEqualTo(SceneKey.Bouncer)
 
             // Correct PIN and no longer throttled so changes to the Gone scene:
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(currentScene?.key).isEqualTo(SceneKey.Gone)
             assertThat(isThrottled).isFalse()
             assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
         }
 
     @Test
-    fun hide_whenOnBouncerScene_hidesBouncerAndGoesToLockscreenScene() =
+    fun imeHiddenEvent_isTriggered() =
         testScope.runTest {
-            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "")
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            val bouncerSceneKey = currentScene?.key
-            assertThat(bouncerSceneKey).isEqualTo(SceneKey.Bouncer)
+            val imeHiddenEvent by collectLastValue(underTest.onImeHidden)
+            runCurrent()
 
             underTest.onImeHidden()
+            runCurrent()
 
-            assertThat(currentScene?.key).isEqualTo(SceneKey.Lockscreen)
-        }
-
-    @Test
-    fun hide_whenNotOnBouncerScene_doesNothing() =
-        testScope.runTest {
-            sceneInteractor.changeScene(SceneModel(SceneKey.Shade), "")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Shade), "")
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            val notBouncerSceneKey = currentScene?.key
-            assertThat(notBouncerSceneKey).isNotEqualTo(SceneKey.Bouncer)
-
-            underTest.onImeHidden()
-
-            assertThat(currentScene?.key).isEqualTo(notBouncerSceneKey)
+            assertThat(imeHiddenEvent).isNotNull()
         }
 
     private fun assertTryAgainMessage(

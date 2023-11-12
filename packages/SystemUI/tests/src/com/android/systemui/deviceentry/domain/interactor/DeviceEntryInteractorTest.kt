@@ -19,7 +19,7 @@ package com.android.systemui.deviceentry.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
@@ -60,7 +60,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         testScope.runTest {
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
             utils.deviceEntryRepository.apply {
-                setInsecureLockscreenEnabled(false)
+                setLockscreenEnabled(false)
 
                 // Toggle isUnlocked, twice.
                 //
@@ -83,8 +83,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun isUnlocked_whenAuthMethodIsNoneAndLockscreenEnabled_isTrue() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            setupSwipeDeviceEntryMethod()
 
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             assertThat(isUnlocked).isTrue()
@@ -94,8 +93,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     fun isDeviceEntered_onLockscreenWithSwipe_isFalse() =
         testScope.runTest {
             val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            setupSwipeDeviceEntryMethod()
             switchToScene(SceneKey.Lockscreen)
 
             assertThat(isDeviceEntered).isFalse()
@@ -105,8 +103,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     fun isDeviceEntered_onShadeBeforeDismissingLockscreenWithSwipe_isFalse() =
         testScope.runTest {
             val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            setupSwipeDeviceEntryMethod()
             switchToScene(SceneKey.Lockscreen)
             runCurrent()
             switchToScene(SceneKey.Shade)
@@ -118,8 +115,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     fun isDeviceEntered_afterDismissingLockscreenWithSwipe_isTrue() =
         testScope.runTest {
             val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            setupSwipeDeviceEntryMethod()
             switchToScene(SceneKey.Lockscreen)
             runCurrent()
             switchToScene(SceneKey.Gone)
@@ -131,8 +127,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     fun isDeviceEntered_onShadeAfterDismissingLockscreenWithSwipe_isTrue() =
         testScope.runTest {
             val isDeviceEntered by collectLastValue(underTest.isDeviceEntered)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            setupSwipeDeviceEntryMethod()
             switchToScene(SceneKey.Lockscreen)
             runCurrent()
             switchToScene(SceneKey.Gone)
@@ -148,7 +143,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Pattern
             )
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            utils.deviceEntryRepository.setLockscreenEnabled(true)
             switchToScene(SceneKey.Lockscreen)
             runCurrent()
             switchToScene(SceneKey.Bouncer)
@@ -160,8 +155,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun canSwipeToEnter_onLockscreenWithSwipe_isTrue() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            setupSwipeDeviceEntryMethod()
             switchToScene(SceneKey.Lockscreen)
 
             val canSwipeToEnter by collectLastValue(underTest.canSwipeToEnter)
@@ -172,7 +166,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     fun canSwipeToEnter_onLockscreenWithPin_isFalse() =
         testScope.runTest {
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            utils.deviceEntryRepository.setLockscreenEnabled(true)
             switchToScene(SceneKey.Lockscreen)
 
             val canSwipeToEnter by collectLastValue(underTest.canSwipeToEnter)
@@ -182,8 +176,7 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
     @Test
     fun canSwipeToEnter_afterLockscreenDismissedInSwipeMode_isFalse() =
         testScope.runTest {
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            setupSwipeDeviceEntryMethod()
             switchToScene(SceneKey.Lockscreen)
             runCurrent()
             switchToScene(SceneKey.Gone)
@@ -191,6 +184,11 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             val canSwipeToEnter by collectLastValue(underTest.canSwipeToEnter)
             assertThat(canSwipeToEnter).isFalse()
         }
+
+    private fun setupSwipeDeviceEntryMethod() {
+        utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+        utils.deviceEntryRepository.setLockscreenEnabled(true)
+    }
 
     @Test
     fun canSwipeToEnter_whenTrustedByTrustManager_isTrue() =
@@ -278,10 +276,66 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun showOrUnlockDevice_notLocked_switchesToGoneScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            switchToScene(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
+            utils.deviceEntryRepository.setUnlocked(true)
+            runCurrent()
+
+            underTest.attemptDeviceEntry()
+
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+        }
+
+    @Test
+    fun showOrUnlockDevice_authMethodNotSecure_switchesToGoneScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            switchToScene(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+
+            underTest.attemptDeviceEntry()
+
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+        }
+
+    @Test
+    fun showOrUnlockDevice_authMethodSwipe_switchesToGoneScene() =
+        testScope.runTest {
+            val currentScene by collectLastValue(sceneInteractor.desiredScene)
+            switchToScene(SceneKey.Lockscreen)
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+
+            utils.deviceEntryRepository.setLockscreenEnabled(true)
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
+
+            underTest.attemptDeviceEntry()
+
+            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
+        }
+
+    @Test
     fun isBypassEnabled_disabledInRepository_false() =
         testScope.runTest {
             utils.deviceEntryRepository.setBypassEnabled(false)
             assertThat(underTest.isBypassEnabled.value).isFalse()
+        }
+
+    @Test
+    fun successfulAuthenticationChallengeAttempt_updatedIsUnlockedState() =
+        testScope.runTest {
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            assertThat(isUnlocked).isFalse()
+
+            utils.authenticationRepository.reportAuthenticationAttempt(true)
+
+            assertThat(isUnlocked).isTrue()
         }
 
     private fun switchToScene(sceneKey: SceneKey) {

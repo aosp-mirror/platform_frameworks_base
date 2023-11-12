@@ -26,7 +26,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.scene.SceneTestUtils
@@ -125,6 +125,22 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
 
             userRepository.setSelectedUserInfo(USER_INFOS[1])
             assertThat(values.last()).isTrue()
+        }
+
+    @Test
+    fun reportAuthenticationAttempt_emitsAuthenticationChallengeResult() =
+        testScope.runTest {
+            val authenticationChallengeResults by
+                collectValues(underTest.authenticationChallengeResult)
+
+            runCurrent()
+            underTest.reportAuthenticationAttempt(true)
+            runCurrent()
+            underTest.reportAuthenticationAttempt(false)
+            runCurrent()
+            underTest.reportAuthenticationAttempt(true)
+
+            assertThat(authenticationChallengeResults).isEqualTo(listOf(true, false, true))
         }
 
     private fun setSecurityModeAndDispatchBroadcast(
