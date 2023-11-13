@@ -38,6 +38,7 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.util.fastForEach
 
@@ -60,7 +61,7 @@ internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
     enabled: Boolean,
     startDragImmediately: Boolean,
-    onDragStarted: (startedPosition: Offset, pointersDown: Int) -> Unit,
+    onDragStarted: (layoutSize: IntSize, startedPosition: Offset, pointersDown: Int) -> Unit,
     onDragDelta: (Float) -> Unit,
     onDragStopped: (velocity: Float) -> Unit,
 ): Modifier = composed {
@@ -83,7 +84,7 @@ internal fun Modifier.multiPointerDraggable(
 
         val onDragStart: (Offset, Int) -> Unit = { startedPosition, pointersDown ->
             velocityTracker.resetTracking()
-            onDragStarted(startedPosition, pointersDown)
+            onDragStarted(size, startedPosition, pointersDown)
         }
 
         val onDragCancel: () -> Unit = { onDragStopped(/* velocity= */ 0f) }

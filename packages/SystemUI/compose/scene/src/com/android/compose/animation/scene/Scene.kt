@@ -25,8 +25,9 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.zIndex
@@ -44,14 +45,24 @@ internal class Scene(
     var content by mutableStateOf(content)
     var userActions by mutableStateOf(actions)
     var zIndex by mutableFloatStateOf(zIndex)
-    var size by mutableStateOf(IntSize.Zero)
+    var targetSize by mutableStateOf(IntSize.Zero)
 
     /** The shared values in this scene that are not tied to a specific element. */
     val sharedValues = SnapshotStateMap<ValueKey, Element.SharedValue<*>>()
 
     @Composable
+    @OptIn(ExperimentalComposeUiApi::class)
     fun Content(modifier: Modifier = Modifier) {
-        Box(modifier.zIndex(zIndex).onPlaced { size = it.size }.testTag(key.testTag)) {
+        Box(
+            modifier
+                .zIndex(zIndex)
+                .intermediateLayout { measurable, constraints ->
+                    targetSize = lookaheadSize
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) { placeable.place(0, 0) }
+                }
+                .testTag(key.testTag)
+        ) {
             scope.content()
         }
     }

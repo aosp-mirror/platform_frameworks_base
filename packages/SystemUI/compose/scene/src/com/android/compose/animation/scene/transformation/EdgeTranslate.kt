@@ -38,7 +38,7 @@ internal class EdgeTranslate(
         transition: TransitionState.Transition,
         value: Offset
     ): Offset {
-        val sceneSize = scene.size
+        val sceneSize = scene.targetSize
         val elementSize = sceneValues.targetSize
         if (elementSize == Element.SizeUnspecified) {
             return value
