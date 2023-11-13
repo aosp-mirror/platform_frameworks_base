@@ -208,12 +208,8 @@ private fun StandardLayout(
     val isSplitAroundTheFoldRequired by viewModel.isFoldSplitRequired.collectAsState()
     val isSplitAroundTheFold =
         foldPosture == FoldPosture.Tabletop && !outputOnly && isSplitAroundTheFoldRequired
-    val currentSceneKey by
-        remember(isSplitAroundTheFold) {
-            mutableStateOf(
-                if (isSplitAroundTheFold) SceneKeys.SplitSceneKey else SceneKeys.ContiguousSceneKey
-            )
-        }
+    val currentSceneKey =
+        if (isSplitAroundTheFold) SceneKeys.SplitSceneKey else SceneKeys.ContiguousSceneKey
 
     SceneTransitionLayout(
         currentScene = currentSceneKey,
@@ -405,8 +401,7 @@ private fun UserInputArea(
             if (visibility == UserInputAreaVisibility.INPUT_ONLY) {
                 PatternBouncer(
                     viewModel = nonNullViewModel,
-                    modifier =
-                        Modifier.aspectRatio(1f, matchHeightConstraintsFirst = false).then(modifier)
+                    modifier = modifier.aspectRatio(1f, matchHeightConstraintsFirst = false)
                 )
             }
         else -> Unit
