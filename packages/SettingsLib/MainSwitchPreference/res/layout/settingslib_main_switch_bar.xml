@@ -38,6 +38,13 @@
         android:layout_marginStart="@dimen/settingslib_switchbar_subsettings_margin_start"
         android:textAlignment="viewStart"/>
 
-    <include layout="@layout/settingslib_main_switch" />
+    <Switch
+        android:id="@android:id/switch_widget"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:focusable="false"
+        android:clickable="false"
+        android:theme="@style/SwitchBar.Switch.Settingslib"/>
 </LinearLayout>
 
