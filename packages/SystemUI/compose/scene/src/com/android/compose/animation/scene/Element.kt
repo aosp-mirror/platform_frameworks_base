@@ -18,7 +18,6 @@ package com.android.compose.animation.scene
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
@@ -155,20 +154,16 @@ internal fun Modifier.element(
         }
     }
 
-    val drawScale by
-        remember(layoutImpl, element, scene, sceneValues) {
-            derivedStateOf { getDrawScale(layoutImpl, element, scene, sceneValues) }
-        }
-
     drawWithContent {
             if (shouldDrawElement(layoutImpl, scene, element)) {
+                val drawScale = getDrawScale(layoutImpl, element, scene, sceneValues)
                 if (drawScale == Scale.Default) {
-                    this@drawWithContent.drawContent()
+                    drawContent()
                 } else {
                     scale(
                         drawScale.scaleX,
                         drawScale.scaleY,
-                        if (drawScale.pivot.isUnspecified) center else drawScale.pivot
+                        if (drawScale.pivot.isUnspecified) center else drawScale.pivot,
                     ) {
                         this@drawWithContent.drawContent()
                     }
