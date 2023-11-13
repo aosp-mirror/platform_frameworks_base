@@ -325,7 +325,7 @@ public final class AudioDeviceAttributes implements Parcelable {
                 + " role:" + roleToString(mRole)
                 + " type:" + (mRole == ROLE_OUTPUT ? AudioSystem.getOutputDeviceName(mNativeType)
                         : AudioSystem.getInputDeviceName(mNativeType))
-                + " addr:" + mAddress
+                + " addr:" + Utils.anonymizeBluetoothAddress(mNativeType, mAddress)
                 + " name:" + mName
                 + " profiles:" + mAudioProfiles.toString()
                 + " descriptors:" + mAudioDescriptors.toString());
