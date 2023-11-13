@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade
 
-import android.os.VibrationEffect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.HapticFeedbackConstants
@@ -26,13 +25,10 @@ import androidx.test.filters.SmallTest
 import com.android.internal.util.CollectionUtils
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED
-import com.android.systemui.statusbar.VibratorHelper
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -61,9 +57,6 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     @Captor private lateinit var viewCaptor: ArgumentCaptor<View>
 
     override fun getMainDispatcher() = Dispatchers.Main.immediate
-
-    private val ADDITIONAL_TAP_REQUIRED_VIBRATION_EFFECT =
-        VibrationEffect.get(VibrationEffect.EFFECT_STRENGTH_MEDIUM, false)
 
     @Test
     fun testDisableUserSwitcherAfterEnabling_returnsViewStubToTheViewHierarchy() = runTest {
@@ -158,31 +151,8 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     }
 
     @Test
-    fun doubleTapRequired_onKeyguard_oneWayHapticsDisabled_usesOldVibrate() = runTest {
+    fun doubleTapRequired_onKeyguard_usesPerformHapticFeedback() = runTest {
         launch(Dispatchers.Main.immediate) {
-            mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
-            val listener = getFalsingTapListener()
-            mStatusBarStateController.setState(KEYGUARD)
-
-            listener.onAdditionalTapRequired()
-            val packageName = mView.context.packageName
-            verify(mKeyguardIndicationController).showTransientIndication(anyInt())
-            verify(mVibratorHelper)
-                .vibrate(
-                    any(),
-                    eq(packageName),
-                    eq(ADDITIONAL_TAP_REQUIRED_VIBRATION_EFFECT),
-                    eq("falsing-additional-tap-required"),
-                    eq(VibratorHelper.TOUCH_VIBRATION_ATTRIBUTES)
-                )
-        }
-        advanceUntilIdle()
-    }
-
-    @Test
-    fun doubleTapRequired_onKeyguard_oneWayHapticsEnabled_usesPerformHapticFeedback() = runTest {
-        launch(Dispatchers.Main.immediate) {
-            mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true)
             val listener = getFalsingTapListener()
             mStatusBarStateController.setState(KEYGUARD)
 
@@ -208,32 +178,8 @@ class NotificationPanelViewControllerWithCoroutinesTest :
     }
 
     @Test
-    fun doubleTapRequired_shadeLocked_oneWayHapticsDisabled_usesOldVibrate() = runTest {
+    fun doubleTapRequired_shadeLocked_usesPerformHapticFeedback() = runTest {
         launch(Dispatchers.Main.immediate) {
-            mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false)
-            val listener = getFalsingTapListener()
-            val packageName = mView.context.packageName
-            mStatusBarStateController.setState(SHADE_LOCKED)
-
-            listener.onAdditionalTapRequired()
-            verify(mVibratorHelper)
-                .vibrate(
-                    any(),
-                    eq(packageName),
-                    eq(ADDITIONAL_TAP_REQUIRED_VIBRATION_EFFECT),
-                    eq("falsing-additional-tap-required"),
-                    eq(VibratorHelper.TOUCH_VIBRATION_ATTRIBUTES)
-                )
-
-            verify(mTapAgainViewController).show()
-        }
-        advanceUntilIdle()
-    }
-
-    @Test
-    fun doubleTapRequired_shadeLocked_oneWayHapticsEnabled_usesPerformHapticFeedback() = runTest {
-        launch(Dispatchers.Main.immediate) {
-            mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true)
             val listener = getFalsingTapListener()
             mStatusBarStateController.setState(SHADE_LOCKED)
 
