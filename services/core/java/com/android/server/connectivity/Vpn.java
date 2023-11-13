@@ -148,7 +148,6 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
-import com.android.modules.utils.build.SdkLevel;
 import com.android.net.module.util.BinderUtils;
 import com.android.net.module.util.LinkPropertiesUtils;
 import com.android.net.module.util.NetdUtils;
@@ -1058,8 +1057,6 @@ public class Vpn {
         // Store mPackage since it might be reset or might be replaced with the other VPN app.
         final String oldPackage = mPackage;
         final boolean isPackageChanged = !Objects.equals(packageName, oldPackage);
-        // TODO: Remove "SdkLevel.isAtLeastT()" check once VpnManagerService is decoupled from
-        //  ConnectivityServiceTest.
         // Only notify VPN apps that were already always-on, and only if the always-on provider
         // changed, or the lockdown mode changed.
         final boolean shouldNotifyOldPkg = isVpnApp(oldPackage) && mAlwaysOn
@@ -1072,12 +1069,6 @@ public class Vpn {
         }
 
         saveAlwaysOnPackage();
-
-        // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
-        //  ConnectivityServiceTest.
-        if (!SdkLevel.isAtLeastT()) {
-            return true;
-        }
 
         if (shouldNotifyOldPkg) {
             // If both of shouldNotifyOldPkg & isPackageChanged are true, that means the
@@ -1979,9 +1970,7 @@ public class Vpn {
         for (String app : packageNames) {
             int uid = getAppUid(mContext, app, userId);
             if (uid != -1) uids.add(uid);
-            // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
-            // ConnectivityServiceTest.
-            if (Process.isApplicationUid(uid) && SdkLevel.isAtLeastT()) {
+            if (Process.isApplicationUid(uid)) {
                 uids.add(Process.toSdkSandboxUid(uid));
             }
         }
@@ -4002,9 +3991,7 @@ public class Vpn {
                 // Ignore stale runner.
                 if (mVpnRunner != this) return;
 
-                // TODO(b/230548427): Remove SDK check once VPN related stuff are
-                //  decoupled from ConnectivityServiceTest.
-                if (SdkLevel.isAtLeastT() && category != null && isVpnApp(mPackage)) {
+                if (category != null && isVpnApp(mPackage)) {
                     sendEventToVpnManagerApp(category, errorClass, errorCode,
                             getPackage(), mSessionKey, makeVpnProfileStateLocked(),
                             mActiveNetwork,
@@ -4361,11 +4348,9 @@ public class Vpn {
         // Build intent first because the sessionKey will be reset after performing
         // VpnRunner.exit(). Also, cache mOwnerUID even if ownerUID will not be changed in
         // VpnRunner.exit() to prevent design being changed in the future.
-        // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
-        //  ConnectivityServiceTest.
         final int ownerUid = mOwnerUID;
         Intent intent = null;
-        if (SdkLevel.isAtLeastT() && isVpnApp(mPackage)) {
+        if (isVpnApp(mPackage)) {
             intent = buildVpnManagerEventIntent(
                     VpnManager.CATEGORY_EVENT_DEACTIVATED_BY_USER,
                     -1 /* errorClass */, -1 /* errorCode*/, mPackage,
@@ -4406,12 +4391,8 @@ public class Vpn {
         // The underlying network, NetworkCapabilities and LinkProperties are not
         // necessary to send to VPN app since the purpose of this event is to notify
         // VPN app that VPN is deactivated by the user.
-        // TODO(b/230548427): Remove SDK check once VPN related stuff are decoupled from
-        //  ConnectivityServiceTest.
-        if (SdkLevel.isAtLeastT()) {
-            mEventChanges.log("[VMEvent] " + packageName + " stopped");
-            sendEventToVpnManagerApp(intent, packageName);
-        }
+        mEventChanges.log("[VMEvent] " + packageName + " stopped");
+        sendEventToVpnManagerApp(intent, packageName);
     }
 
     private boolean storeAppExclusionList(@NonNull String packageName,
