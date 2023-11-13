@@ -758,6 +758,11 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
         return snapshot().isPackageQuarantinedForUser(packageName, userId);
     }
 
+    @Override
+    public boolean isPackageStopped(@NonNull String packageName, @UserIdInt int userId) {
+        return snapshot().isPackageStoppedForUser(packageName, userId);
+    }
+
     @NonNull
     @Override
     @Deprecated
