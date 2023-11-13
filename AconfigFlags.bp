@@ -26,6 +26,7 @@ aconfig_srcjars = [
     ":android.os.flags-aconfig-java{.generated_srcjars}",
     ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
     ":android.security.flags-aconfig-java{.generated_srcjars}",
+    ":android.server.app.flags-aconfig-java{.generated_srcjars}",
     ":android.service.chooser.flags-aconfig-java{.generated_srcjars}",
     ":android.service.notification.flags-aconfig-java{.generated_srcjars}",
     ":android.view.flags-aconfig-java{.generated_srcjars}",
@@ -831,6 +832,19 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.appwidget.flags-aconfig-java",
     aconfig_declarations: "android.appwidget.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// App
+aconfig_declarations {
+    name: "android.server.app.flags-aconfig",
+    package: "android.server.app",
+    srcs: ["services/core/java/com/android/server/app/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.server.app.flags-aconfig-java",
+    aconfig_declarations: "android.server.app.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 

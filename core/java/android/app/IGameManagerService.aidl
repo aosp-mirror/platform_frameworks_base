@@ -52,4 +52,6 @@ interface IGameManagerService {
     void removeGameModeListener(IGameModeListener gameModeListener);
     void addGameStateListener(IGameStateListener gameStateListener);
     void removeGameStateListener(IGameStateListener gameStateListener);
+    @EnforcePermission("MANAGE_GAME_MODE")
+    void toggleGameDefaultFrameRate(boolean isEnabled);
 }
