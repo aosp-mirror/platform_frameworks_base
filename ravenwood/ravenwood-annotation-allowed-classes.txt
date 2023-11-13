@@ -10,3 +10,13 @@ android.os.IBinder
 android.os.Process
 android.os.SystemClock
 android.os.UserHandle
+
+android.content.ClipData
+android.content.ClipData$Item
+android.content.ClipDescription
+android.content.ComponentName
+android.content.ContentUris
+android.content.ContentValues
+android.content.Intent
+android.content.IntentFilter
+android.content.UriMatcher
