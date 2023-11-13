@@ -21,6 +21,7 @@ import static android.app.ActivityOptions.ANIM_CUSTOM;
 
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_NONE;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
+import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionTypeFromInfo;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -253,7 +254,8 @@ class ActivityEmbeddingAnimationSpec {
 
     private boolean shouldShowBackdrop(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change) {
-        final Animation a = loadAttributeAnimation(info, change, WALLPAPER_TRANSITION_NONE,
+        final int type = getTransitionTypeFromInfo(info);
+        final Animation a = loadAttributeAnimation(type, info, change, WALLPAPER_TRANSITION_NONE,
                 mTransitionAnimation, false);
         return a != null && a.getShowBackdrop();
     }
