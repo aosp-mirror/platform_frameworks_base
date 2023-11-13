@@ -186,6 +186,7 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                     if (mDebugHotwordLogging) {
                         Slog.i(TAG, "Egressed detected result: " + newResult);
                     }
+                    logEgressSizeStats(newResult);
                 }
             }
 
@@ -228,6 +229,7 @@ final class DspTrustedHotwordDetectorSession extends DetectorSession {
                     if (mDebugHotwordLogging && result != null) {
                         Slog.i(TAG, "Egressed rejected result: " + result);
                     }
+                    logEgressSizeStats(result);
                 }
             }
 

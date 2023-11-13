@@ -179,6 +179,7 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                     }
                     Slog.i(TAG, "Egressed " + HotwordDetectedResult.getUsageSize(newResult)
                             + " bits from hotword trusted process");
+                    logEgressSizeStats(newResult);
                     if (mDebugHotwordLogging) {
                         Slog.i(TAG, "Egressed detected result: " + newResult);
                     }
@@ -194,6 +195,7 @@ final class SoftwareTrustedHotwordDetectorSession extends DetectorSession {
                         HotwordDetector.DETECTOR_TYPE_TRUSTED_HOTWORD_SOFTWARE,
                         HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECTED,
                         mVoiceInteractionServiceUid);
+                logEgressSizeStats(result);
                 // onRejected isn't allowed here, and we are not expecting it.
             }
 
