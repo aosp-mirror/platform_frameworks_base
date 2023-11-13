@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.unfold;
 
+import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TRANSITIONS;
@@ -188,23 +189,27 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
             @NonNull TransitionFinishCallback finishCallback) {
-        if (info.getType() == TRANSIT_CHANGE) {
-            // TODO (b/286928742) unfold transition handler should be part of mixed handler to
-            //  handle merges better.
-            for (int i = 0; i < info.getChanges().size(); ++i) {
-                final TransitionInfo.Change change = info.getChanges().get(i);
-                final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-                if (taskInfo != null
-                        && taskInfo.configuration.windowConfiguration.isAlwaysOnTop()) {
-                    // Tasks that are always on top (e.g. bubbles), will handle their own transition
-                    // as they are on top of everything else. So skip merging transitions here.
-                    return;
-                }
-            }
-            // Apply changes happening during the unfold animation immediately
-            t.apply();
-            finishCallback.onTransitionFinished(null);
+        if (info.getType() != TRANSIT_CHANGE) {
+            return;
         }
+        if ((info.getFlags() & KEYGUARD_VISIBILITY_TRANSIT_FLAGS) != 0) {
+            return;
+        }
+        // TODO (b/286928742) unfold transition handler should be part of mixed handler to
+        //  handle merges better.
+        for (int i = 0; i < info.getChanges().size(); ++i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
+            if (taskInfo != null
+                    && taskInfo.configuration.windowConfiguration.isAlwaysOnTop()) {
+                // Tasks that are always on top (e.g. bubbles), will handle their own transition
+                // as they are on top of everything else. So skip merging transitions here.
+                return;
+            }
+        }
+        // Apply changes happening during the unfold animation immediately
+        t.apply();
+        finishCallback.onTransitionFinished(null);
     }
 
     /** Whether `request` contains an unfold action. */
