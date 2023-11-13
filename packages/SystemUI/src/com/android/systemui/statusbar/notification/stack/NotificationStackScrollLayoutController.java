@@ -20,6 +20,7 @@ import static android.service.notification.NotificationStats.DISMISSAL_SHADE;
 import static android.service.notification.NotificationStats.DISMISS_SENTIMENT_NEUTRAL;
 
 import static com.android.app.animation.Interpolators.STANDARD;
+
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_NOTIFICATION_SHADE_SCROLL_FLING;
 import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME;
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
@@ -34,7 +35,6 @@ import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.animation.ObjectAnimator;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.graphics.Point;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -65,9 +65,7 @@ import com.android.systemui.Gefingerpoken;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
-import com.android.systemui.common.ui.ConfigurationState;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
@@ -94,7 +92,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
-import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
@@ -112,7 +109,6 @@ import com.android.systemui.statusbar.notification.collection.render.Notificatio
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor;
-import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ShelfNotificationIconViewStore;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -122,11 +118,9 @@ import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.NotificationListViewBinder;
-import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -958,6 +952,13 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     public void setOnHeightChangedListener(
             ExpandableView.OnHeightChangedListener listener) {
         mView.setOnHeightChangedListener(listener);
+    }
+
+    /**
+     * Invoked in addition to {@see #setOnHeightChangedListener}
+     */
+    public void setOnHeightChangedRunnable(Runnable r) {
+        mView.setOnHeightChangedRunnable(r);
     }
 
     public void setOverscrollTopChangedListener(

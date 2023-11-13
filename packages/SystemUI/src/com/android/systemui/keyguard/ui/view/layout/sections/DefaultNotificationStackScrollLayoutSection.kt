@@ -30,6 +30,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import javax.inject.Inject
@@ -44,6 +45,7 @@ constructor(
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     controller: NotificationStackScrollLayoutController,
+    notificationStackSizeCalculator: NotificationStackSizeCalculator,
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
 ) :
     NotificationStackScrollLayoutSection(
@@ -53,6 +55,7 @@ constructor(
         sharedNotificationContainer,
         sharedNotificationContainerViewModel,
         controller,
+        notificationStackSizeCalculator,
     ) {
     override fun applyConstraints(constraintSet: ConstraintSet) {
         if (!featureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
