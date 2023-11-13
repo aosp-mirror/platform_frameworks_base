@@ -1213,7 +1213,12 @@ public class WindowManagerService extends IWindowManager.Stub
 
         mWindowTracing = WindowTracing.createDefaultAndStartLooper(this,
                 Choreographer.getInstance());
-        mTransitionTracer = new TransitionTracer();
+
+        if (android.tracing.Flags.perfettoTransitionTracing()) {
+            mTransitionTracer = new PerfettoTransitionTracer();
+        } else {
+            mTransitionTracer = new LegacyTransitionTracer();
+        }
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
 
@@ -6087,7 +6092,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean isTransitionTraceEnabled() {
-        return mTransitionTracer.isActiveTracingEnabled();
+        return mTransitionTracer.isTracing();
     }
 
     @Override
