@@ -707,7 +707,7 @@
     <string name="switch_bar_off" msgid="5669805115416379556">"બંધ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ઉપલબ્ધ નથી"</string>
     <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"વધુ જાણો"</string>
-    <string name="nav_bar" msgid="4642708685386136807">"નેવિગેશન બાર"</string>
+    <string name="nav_bar" msgid="4642708685386136807">"નૅવિગેશન બાર"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"લેઆઉટ"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"અતિરિક્ત ડાબો બટન પ્રકાર"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"અતિરિક્ત જમણો બટન પ્રકાર"</string>
@@ -726,7 +726,7 @@
     <string name="save" msgid="3392754183673848006">"સાચવો"</string>
     <string name="reset" msgid="8715144064608810383">"રીસેટ કરો"</string>
     <string name="clipboard" msgid="8517342737534284617">"ક્લિપબોર્ડ"</string>
-    <string name="accessibility_key" msgid="3471162841552818281">"કસ્ટમ નેવિગેશન બટન"</string>
+    <string name="accessibility_key" msgid="3471162841552818281">"કસ્ટમ નૅવિગેશન બટન"</string>
     <string name="left_keycode" msgid="8211040899126637342">"ડાબો કીકોડ"</string>
     <string name="right_keycode" msgid="2480715509844798438">"જમણો કીકોડ"</string>
     <string name="left_icon" msgid="5036278531966897006">"ડાબું આઇકન"</string>
