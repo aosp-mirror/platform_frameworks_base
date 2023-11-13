@@ -18,20 +18,31 @@ package com.android.systemui.qs.tiles.viewmodel
 
 import com.android.internal.util.Preconditions
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
 
 interface QSTileConfigProvider {
 
     /**
-     * Returns a [QSTileConfig] for a [tileSpec] or throws [IllegalArgumentException] if there is no
-     * config for such [tileSpec].
+     * Returns a [QSTileConfig] for a [tileSpec]:
+     * - injected config for [TileSpec.PlatformTileSpec] or throws [IllegalArgumentException] if
+     *   there is none
+     * - new config for [TileSpec.CustomTileSpec].
+     * - throws [IllegalArgumentException] for [TileSpec.Invalid]
      */
     fun getConfig(tileSpec: String): QSTileConfig
+
+    fun hasConfig(tileSpec: String): Boolean
 }
 
 @SysUISingleton
-class QSTileConfigProviderImpl @Inject constructor(private val configs: Map<String, QSTileConfig>) :
-    QSTileConfigProvider {
+class QSTileConfigProviderImpl
+@Inject
+constructor(
+    private val configs: Map<String, QSTileConfig>,
+    private val qsEventLogger: QsEventLogger,
+) : QSTileConfigProvider {
 
     init {
         for (entry in configs.entries) {
@@ -44,6 +55,26 @@ class QSTileConfigProviderImpl @Inject constructor(private val configs: Map<Stri
         }
     }
 
+    override fun hasConfig(tileSpec: String): Boolean =
+        when (TileSpec.create(tileSpec)) {
+            is TileSpec.PlatformTileSpec -> configs.containsKey(tileSpec)
+            is TileSpec.CustomTileSpec -> true
+            is TileSpec.Invalid -> false
+        }
+
     override fun getConfig(tileSpec: String): QSTileConfig =
-        configs[tileSpec] ?: throw IllegalArgumentException("There is no config for spec=$tileSpec")
+        when (val spec = TileSpec.create(tileSpec)) {
+            is TileSpec.PlatformTileSpec -> {
+                configs[tileSpec]
+                    ?: throw IllegalArgumentException("There is no config for spec=$tileSpec")
+            }
+            is TileSpec.CustomTileSpec ->
+                QSTileConfig(
+                    spec,
+                    QSTileUIConfig.Empty,
+                    qsEventLogger.getNewInstanceId(),
+                )
+            is TileSpec.Invalid ->
+                throw IllegalArgumentException("TileSpec.Invalid doesn't support configs")
+        }
 }
