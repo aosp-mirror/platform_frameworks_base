@@ -135,14 +135,6 @@ object Flags {
             "lockscreen_custom_clocks"
         )
 
-    // TODO(b/286092087): Tracking Bug
-    @JvmField
-    val ENABLE_SYSTEM_UI_DREAM_CONTROLLER = unreleasedFlag("enable_system_ui_dream_controller")
-
-    // TODO(b/288287730): Tracking Bug
-    @JvmField
-    val ENABLE_SYSTEM_UI_DREAM_HOSTING = unreleasedFlag("enable_system_ui_dream_hosting")
-
     /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
      * the digits when the clock moves.
