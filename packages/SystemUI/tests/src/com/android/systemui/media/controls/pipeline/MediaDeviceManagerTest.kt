@@ -38,8 +38,6 @@ import com.android.settingslib.media.MediaDevice
 import com.android.settingslib.media.PhoneMediaDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.media.controls.MediaTestUtils
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaDeviceData
@@ -112,7 +110,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     private lateinit var session: MediaSession
     private lateinit var mediaData: MediaData
     @JvmField @Rule val mockito = MockitoJUnit.rule()
-    private val featureFlags = FakeFeatureFlagsClassic()
 
     @Before
     fun setUp() {
@@ -131,7 +128,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
                 fakeFgExecutor,
                 fakeBgExecutor,
                 dumpster,
-                featureFlags,
             )
         manager.addListener(listener)
 
@@ -150,7 +146,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
             MediaTestUtils.emptyMediaData.copy(packageName = PACKAGE, token = session.sessionToken)
         whenever(controllerFactory.create(session.sessionToken)).thenReturn(controller)
         setupLeAudioConfiguration(false)
-        featureFlags.set(Flags.MEDIA_DEVICE_NAME_FIX, false)
     }
 
     @After
@@ -463,7 +458,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
     @Test
     fun mr2ReturnsSystemRouteWithNullName_isPhone_usePhoneName() {
-        featureFlags.set(Flags.MEDIA_DEVICE_NAME_FIX, true)
         // When the routing session name is null, and is a system session for a PhoneMediaDevice
         val phoneDevice = mock(PhoneMediaDevice::class.java)
         whenever(phoneDevice.iconWithoutBackground).thenReturn(icon)
@@ -489,7 +483,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
     @Test
     fun mr2ReturnsSystemRouteWithNullName_useSelectedRouteName() {
-        featureFlags.set(Flags.MEDIA_DEVICE_NAME_FIX, true)
         // When the routing session does not have a name, and is a system session
         whenever(route.name).thenReturn(null)
         whenever(mr2.getSelectedRoutes(any())).thenReturn(listOf(selectedRoute))
@@ -724,101 +717,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         val data = captureDeviceData(KEY)
         assertThat(data.showBroadcastButton).isFalse()
     }
-
-    // Duplicates of above tests with MEDIA_DEVICE_NAME_FIX enabled
-
-    @Test
-    fun loadMediaDataWithNullToken_withNameFix() {
-        featureFlags.set(Flags.MEDIA_DEVICE_NAME_FIX, true)
-        manager.onMediaDataLoaded(KEY, null, mediaData.copy(token = null))
-        fakeBgExecutor.runAllReady()
-        fakeFgExecutor.runAllReady()
-        val data = captureDeviceData(KEY)
-        assertThat(data.enabled).isTrue()
-        assertThat(data.name).isEqualTo(DEVICE_NAME)
-    }
-
-    @Test
-    fun onAboutToConnectDeviceAdded_findsDeviceInfoFromAddress_withNameFix() {
-        featureFlags.set(Flags.MEDIA_DEVICE_NAME_FIX, true)
-        manager.onMediaDataLoaded(KEY, null, mediaData)
-        // Run and reset the executors and listeners so we only focus on new events.
-        fakeBgExecutor.runAllReady()
-        fakeFgExecutor.runAllReady()
-        reset(listener)
-
-        // Ensure we'll get device info when using the address
-        val fullMediaDevice = mock(MediaDevice::class.java)
-        val address = "fakeAddress"
-        val nameFromDevice = "nameFromDevice"
-        val iconFromDevice = mock(Drawable::class.java)
-        whenever(lmm.getMediaDeviceById(eq(address))).thenReturn(fullMediaDevice)
-        whenever(fullMediaDevice.name).thenReturn(nameFromDevice)
-        whenever(fullMediaDevice.iconWithoutBackground).thenReturn(iconFromDevice)
-
-        // WHEN the about-to-connect device changes to non-null
-        val deviceCallback = captureCallback()
-        val nameFromParam = "nameFromParam"
-        val iconFromParam = mock(Drawable::class.java)
-        deviceCallback.onAboutToConnectDeviceAdded(address, nameFromParam, iconFromParam)
-        assertThat(fakeFgExecutor.runAllReady()).isEqualTo(1)
-
-        // THEN the about-to-connect device based on the address is returned
-        val data = captureDeviceData(KEY)
-        assertThat(data.enabled).isTrue()
-        assertThat(data.name).isEqualTo(nameFromDevice)
-        assertThat(data.name).isNotEqualTo(nameFromParam)
-        assertThat(data.icon).isEqualTo(iconFromDevice)
-        assertThat(data.icon).isNotEqualTo(iconFromParam)
-    }
-
-    @Test
-    fun deviceNameFromMR2RouteInfo_withNameFix() {
-        featureFlags.set(Flags.MEDIA_DEVICE_NAME_FIX, true)
-        // GIVEN that MR2Manager returns a valid routing session
-        whenever(route.name).thenReturn(REMOTE_DEVICE_NAME)
-        // WHEN a notification is added
-        manager.onMediaDataLoaded(KEY, null, mediaData)
-        fakeBgExecutor.runAllReady()
-        fakeFgExecutor.runAllReady()
-        // THEN it uses the route name (instead of device name)
-        val data = captureDeviceData(KEY)
-        assertThat(data.enabled).isTrue()
-        assertThat(data.name).isEqualTo(REMOTE_DEVICE_NAME)
-    }
-
-    @Test
-    fun deviceDisabledWhenMR2ReturnsNullRouteInfo_withNameFix() {
-        featureFlags.set(Flags.MEDIA_DEVICE_NAME_FIX, true)
-        // GIVEN that MR2Manager returns null for routing session
-        whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
-        // WHEN a notification is added
-        manager.onMediaDataLoaded(KEY, null, mediaData)
-        fakeBgExecutor.runAllReady()
-        fakeFgExecutor.runAllReady()
-        // THEN the device is disabled and name is set to null
-        val data = captureDeviceData(KEY)
-        assertThat(data.enabled).isFalse()
-        assertThat(data.name).isNull()
-    }
-
-    @Test
-    fun mr2ReturnsNonSystemRouteWithNullName_useLocalDeviceName_withNameFix() {
-        featureFlags.set(Flags.MEDIA_DEVICE_NAME_FIX, true)
-        // GIVEN that MR2Manager returns a routing session that does not have a name
-        whenever(route.name).thenReturn(null)
-        whenever(route.isSystemSession).thenReturn(false)
-        // WHEN a notification is added
-        manager.onMediaDataLoaded(KEY, null, mediaData)
-        fakeBgExecutor.runAllReady()
-        fakeFgExecutor.runAllReady()
-        // THEN the device is enabled and uses the current connected device name
-        val data = captureDeviceData(KEY)
-        assertThat(data.name).isEqualTo(DEVICE_NAME)
-        assertThat(data.enabled).isTrue()
-    }
-
-    // End duplicate tests
 
     private fun captureCallback(): LocalMediaManager.DeviceCallback {
         val captor = ArgumentCaptor.forClass(LocalMediaManager.DeviceCallback::class.java)
