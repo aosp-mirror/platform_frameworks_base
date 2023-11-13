@@ -18,14 +18,12 @@ package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.SysUITestComponent
-import com.android.SysUITestModule
-import com.android.TestMocksModule
-import com.android.collectLastValue
-import com.android.runCurrent
-import com.android.runTest
+import com.android.systemui.SysUITestComponent
+import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.TestMocksModule
 import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule
+import com.android.systemui.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
 import com.android.systemui.flags.Flags
@@ -39,6 +37,8 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
+import com.android.systemui.runCurrent
+import com.android.systemui.runTest
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
