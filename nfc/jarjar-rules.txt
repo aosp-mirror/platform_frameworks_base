@@ -1,0 +1,38 @@
+# Used by framework-nfc for proto debug dumping
+rule android.app.PendingIntentProto* com.android.nfc.x.@0
+rule android.content.ComponentNameProto* com.android.nfc.x.@0
+rule android.content.IntentProto* com.android.nfc.x.@0
+rule android.content.IntentFilterProto* com.android.nfc.x.@0
+rule android.content.AuthorityEntryProto* com.android.nfc.x.@0
+rule android.nfc.cardemulation.AidGroupProto* com.android.nfc.x.@0
+rule android.nfc.cardemulation.ApduServiceInfoProto* com.android.nfc.x.@0
+rule android.nfc.cardemulation.NfcFServiceInfoProto* com.android.nfc.x.@0
+rule android.nfc.NdefMessageProto* com.android.nfc.x.@0
+rule android.nfc.NdefRecordProto* com.android.nfc.x.@0
+rule com.android.nfc.cardemulation.CardEmulationManagerProto* com.android.nfc.x.@0
+rule com.android.nfc.cardemulation.RegisteredServicesCacheProto* com.android.nfc.x.@0
+rule com.android.nfc.cardemulation.RegisteredNfcFServicesCacheProto* com.android.nfc.x.@0
+rule com.android.nfc.cardemulation.PreferredServicesProto* com.android.nfc.x.@0
+rule com.android.nfc.cardemulation.EnabledNfcFServicesProto* com.android.nfc.x.@0
+rule com.android.nfc.cardemulation.RegisteredAidCacheProto* com.android.nfc.x.@0
+rule com.android.nfc.cardemulation.AidRoutingManagerProto* com.android.nfc.x.@0
+rule com.android.nfc.cardemulation.RegisteredT3tIdentifiersCacheProto* com.android.nfc.x.@0
+rule com.android.nfc.cardemulation.SystemCodeRoutingManagerProto* com.android.nfc.x.@0
+rule com.android.nfc.cardemulation.HostEmulationManagerProto* com.android.nfc.x.@0
+rule com.android.nfc.cardemulation.HostNfcFEmulationManagerProto* com.android.nfc.x.@0
+rule com.android.nfc.NfcServiceDumpProto* com.android.nfc.x.@0
+rule com.android.nfc.DiscoveryParamsProto* com.android.nfc.x.@0
+rule com.android.nfc.NfcDispatcherProto* com.android.nfc.x.@0
+rule android.os.PersistableBundleProto* com.android.nfc.x.@0
+
+# Used by framework-nfc for reading trunk stable flags
+rule android.nfc.FakeFeatureFlagsImpl* com.android.nfc.x.@0
+rule android.nfc.FeatureFlags* com.android.nfc.x.@0
+rule android.nfc.Flags* com.android.nfc.x.@0
+rule android.permission.flags.** com.android.nfc.x.@0
+
+# Used by framework-nfc for misc utilities
+rule android.os.PatternMatcher* com.android.nfc.x.@0
+
+rule com.android.incident.Privacy* com.android.nfc.x.@0
+rule com.android.incident.PrivacyFlags* com.android.nfc.x.@0
