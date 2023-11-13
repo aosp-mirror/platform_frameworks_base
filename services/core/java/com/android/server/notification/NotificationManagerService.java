@@ -360,6 +360,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
@@ -5245,10 +5246,20 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        // TODO: b/310620812 - Remove getZenRules() when MODES_API is inlined.
         @Override
         public List<ZenModeConfig.ZenRule> getZenRules() throws RemoteException {
-            enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRules");
+            enforcePolicyAccess(Binder.getCallingUid(), "getZenRules");
             return mZenModeHelper.getZenRules();
+        }
+
+        @Override
+        public Map<String, AutomaticZenRule> getAutomaticZenRules() {
+            if (!android.app.Flags.modesApi()) {
+                throw new IllegalStateException("getAutomaticZenRules called with flag off!");
+            }
+            enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRules");
+            return mZenModeHelper.getAutomaticZenRules();
         }
 
         @Override
