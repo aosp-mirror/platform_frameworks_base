@@ -1081,6 +1081,61 @@ public final class NfcAdapter {
         }
     }
 
+
+    /**
+     * Returns whether the device supports observer mode or not. When observe
+     * mode is enabled, the NFC hardware will listen for NFC readers, but not
+     * respond to them. When observe mode is disabled, the NFC hardware will
+     * resoond to the reader and proceed with the transaction.
+     * @return true if the mode is supported, false otherwise.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
+    public boolean isObserveModeSupported() {
+        try {
+            return sService.isObserveModeSupported();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+   /**
+    * Disables observe mode to allow the transaction to proceed. See
+    * {@link #isObserveModeSupported()} for a description of observe mode and
+    * use {@link #disallowTransaction()} to enable observe mode and block
+    * transactions again.
+    *
+    * @return boolean indicating success or failure.
+    */
+    @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
+    public boolean allowTransaction() {
+        try {
+            return sService.setObserveMode(false);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
+    * Signals that the transaction has completed and observe mode may be
+    * reenabled. See {@link #isObserveModeSupported()} for a description of
+    * observe mode and use {@link #allowTransaction()} to disable observe
+    * mode and allow transactions to proceed.
+    *
+    * @return boolean indicating success or failure.
+    */
+
+    @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
+    public boolean disallowTransaction() {
+        try {
+            return sService.setObserveMode(true);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
     /**
      * Resumes default polling for the current device state if polling is paused. Calling
      * this while polling is not paused is a no-op.
