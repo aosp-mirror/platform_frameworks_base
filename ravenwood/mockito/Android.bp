@@ -36,3 +36,37 @@ android_ravenwood_test {
     ],
     auto_gen_config: true,
 }
+
+android_test {
+    name: "RavenwoodMockitoTest_device",
+
+    srcs: [
+        "test/**/*.java",
+    ],
+    static_libs: [
+        "junit",
+        "truth",
+
+        "androidx.test.rules",
+
+        "ravenwood-junit",
+
+        "mockito-target-extended-minus-junit4",
+    ],
+    libs: [
+        "android.test.mock",
+        "android.test.base",
+        "android.test.runner",
+    ],
+    jni_libs: [
+        // Required by mockito
+        "libdexmakerjvmtiagent",
+        "libstaticjvmtiagent",
+    ],
+    test_suites: [
+        "device-tests",
+    ],
+    optimize: {
+        enabled: false,
+    },
+}
