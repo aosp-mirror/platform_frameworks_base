@@ -189,12 +189,11 @@ public class JsonStyleParser {
 
     private Event.UinputControlCode readUinputControlCode() throws IOException {
         var code = readValueAsInt((controlTypeStr) -> {
-            for (Event.UinputControlCode controlCode : Event.UinputControlCode.values()) {
-                if (controlCode.getName().equals(controlTypeStr)) {
-                    return controlCode.getValue();
-                }
+            try {
+                return Event.UinputControlCode.valueOf(controlTypeStr).getValue();
+            } catch (IllegalArgumentException ex) {
+                return -1;
             }
-            return -1;
         });
         for (Event.UinputControlCode controlCode : Event.UinputControlCode.values()) {
             if (controlCode.getValue() == code) {

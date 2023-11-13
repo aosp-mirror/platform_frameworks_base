@@ -31,16 +31,10 @@ public class Event {
     private static final String TAG = "UinputEvent";
 
     enum Command {
-        REGISTER("register"),
-        DELAY("delay"),
-        INJECT("inject"),
-        SYNC("sync");
-
-        final String mCommandName;
-
-        Command(String command) {
-            mCommandName = command;
-        }
+        REGISTER,
+        DELAY,
+        INJECT,
+        SYNC,
     }
 
     // Constants representing evdev event types, from include/uapi/linux/input-event-codes.h in the
@@ -55,27 +49,21 @@ public class Event {
     public static final int EV_FF = 0x15;
 
     public enum UinputControlCode {
-        UI_SET_EVBIT("UI_SET_EVBIT", 100),
-        UI_SET_KEYBIT("UI_SET_KEYBIT", 101),
-        UI_SET_RELBIT("UI_SET_RELBIT", 102),
-        UI_SET_ABSBIT("UI_SET_ABSBIT", 103),
-        UI_SET_MSCBIT("UI_SET_MSCBIT", 104),
-        UI_SET_LEDBIT("UI_SET_LEDBIT", 105),
-        UI_SET_SNDBIT("UI_SET_SNDBIT", 106),
-        UI_SET_FFBIT("UI_SET_FFBIT", 107),
-        UI_SET_SWBIT("UI_SET_SWBIT", 109),
-        UI_SET_PROPBIT("UI_SET_PROPBIT", 110);
+        UI_SET_EVBIT(100),
+        UI_SET_KEYBIT(101),
+        UI_SET_RELBIT(102),
+        UI_SET_ABSBIT(103),
+        UI_SET_MSCBIT(104),
+        UI_SET_LEDBIT(105),
+        UI_SET_SNDBIT(106),
+        UI_SET_FFBIT(107),
+        UI_SET_SWBIT(109),
+        UI_SET_PROPBIT(110);
 
-        private final String mName;
         private final int mValue;
 
-        UinputControlCode(String name, int value) {
-            this.mName = name;
+        UinputControlCode(int value) {
             this.mValue = value;
-        }
-
-        public String getName() {
-            return mName;
         }
 
         public int getValue() {
@@ -193,14 +181,7 @@ public class Event {
         }
 
         public void setCommand(String command) {
-            Objects.requireNonNull(command, "Command must not be null");
-            for (Command cmd : Command.values()) {
-                if (cmd.mCommandName.equals(command)) {
-                    mEvent.mCommand = cmd;
-                    return;
-                }
-            }
-            throw new IllegalStateException("Unrecognized command: " + command);
+            mEvent.mCommand = Command.valueOf(command.toUpperCase());
         }
 
         public void setName(String name) {
