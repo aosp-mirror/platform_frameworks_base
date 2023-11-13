@@ -93,9 +93,9 @@ public class Event {
     private Bus mBus;
     private int[] mInjections;
     private SparseArray<int[]> mConfiguration;
-    private int mDuration;
+    private int mDurationMillis;
     private int mFfEffectsMax = 0;
-    private String mInputport;
+    private String mInputPort;
     private SparseArray<InputAbsInfo> mAbsInfo;
     private String mSyncToken;
 
@@ -127,12 +127,20 @@ public class Event {
         return mInjections;
     }
 
+    /**
+     * Returns a {@link SparseArray} describing the event codes that should be registered for the
+     * device. The keys are uinput ioctl codes (such as those returned from {@link
+     * UinputControlCode#getValue()}, while the values are arrays of event codes to be enabled with
+     * those ioctls. For example, key 101 (corresponding to {@link UinputControlCode#UI_SET_KEYBIT})
+     * could have values 0x110 ({@code BTN_LEFT}, 0x111 ({@code BTN_RIGHT}), and 0x112
+     * ({@code BTN_MIDDLE}).
+     */
     public SparseArray<int[]> getConfiguration() {
         return mConfiguration;
     }
 
-    public int getDuration() {
-        return mDuration;
+    public int getDurationMillis() {
+        return mDurationMillis;
     }
 
     public int getFfEffectsMax() {
@@ -144,7 +152,7 @@ public class Event {
     }
 
     public String getPort() {
-        return mInputport;
+        return mInputPort;
     }
 
     public String getSyncToken() {
@@ -163,9 +171,9 @@ public class Event {
             + ", bus=" + mBus
             + ", events=" + Arrays.toString(mInjections)
             + ", configuration=" + mConfiguration
-            + ", duration=" + mDuration
+            + ", duration=" + mDurationMillis + "ms"
             + ", ff_effects_max=" + mFfEffectsMax
-            + ", port=" + mInputport
+            + ", port=" + mInputPort
             + "}";
     }
 
@@ -192,6 +200,12 @@ public class Event {
             mEvent.mInjections = events;
         }
 
+        /**
+         * Sets the event codes that should be registered with a {@code register} command.
+         *
+         * @param configuration An array of ioctls and event codes, as described at
+         *                      {@link Event#getConfiguration()}.
+         */
         public void setConfiguration(SparseArray<int[]> configuration) {
             mEvent.mConfiguration = configuration;
         }
@@ -208,8 +222,8 @@ public class Event {
             mEvent.mBus = bus;
         }
 
-        public void setDuration(int duration) {
-            mEvent.mDuration = duration;
+        public void setDurationMillis(int durationMillis) {
+            mEvent.mDurationMillis = durationMillis;
         }
 
         public void setFfEffectsMax(int ffEffectsMax) {
@@ -220,8 +234,8 @@ public class Event {
             mEvent.mAbsInfo = absInfo;
         }
 
-        public void setInputport(String port) {
-            mEvent.mInputport = port;
+        public void setInputPort(String port) {
+            mEvent.mInputPort = port;
         }
 
         public void setSyncToken(String syncToken) {
@@ -242,7 +256,7 @@ public class Event {
                     }
                 }
                 case DELAY -> {
-                    if (mEvent.mDuration <= 0) {
+                    if (mEvent.mDurationMillis <= 0) {
                         throw new IllegalStateException("Delay has missing or invalid duration");
                     }
                 }

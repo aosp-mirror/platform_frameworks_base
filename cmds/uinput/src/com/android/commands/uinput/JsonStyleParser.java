@@ -70,8 +70,8 @@ public class JsonStyleParser {
                         case "configuration" -> eb.setConfiguration(readConfiguration());
                         case "ff_effects_max" -> eb.setFfEffectsMax(readInt());
                         case "abs_info" -> eb.setAbsInfo(readAbsInfoArray());
-                        case "duration" -> eb.setDuration(readInt());
-                        case "port" -> eb.setInputport(mReader.nextString());
+                        case "duration" -> eb.setDurationMillis(readInt());
+                        case "port" -> eb.setInputPort(mReader.nextString());
                         case "syncToken" -> eb.setSyncToken(mReader.nextString());
                         default -> mReader.skipValue();
                     }
