@@ -54,6 +54,15 @@ public class TestableNotificationManagerService extends NotificationManagerServi
         return mRankingHelper;
     }
 
+    /**
+     * Sets {@link #isSystemUid} and {@link #isSystemAppId} to {@code false}, so that calls to NMS
+     * methods don't succeed {@link #isCallingUidSystem()} and similar checks.
+     */
+    void setCallerIsNormalPackage() {
+        isSystemUid = false;
+        isSystemAppId = false;
+    }
+
     @Override
     protected boolean isCallingUidSystem() {
         countSystemChecks++;

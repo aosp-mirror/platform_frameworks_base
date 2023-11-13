@@ -2574,6 +2574,8 @@
   <java-symbol type="string" name="zen_mode_default_weekends_name" />
   <java-symbol type="string" name="zen_mode_default_events_name" />
   <java-symbol type="string" name="zen_mode_default_every_night_name" />
+  <java-symbol type="string" name="zen_mode_implicit_activated" />
+  <java-symbol type="string" name="zen_mode_implicit_deactivated" />
   <java-symbol type="string" name="display_rotation_camera_compat_toast_after_rotation" />
   <java-symbol type="string" name="display_rotation_camera_compat_toast_in_multi_window" />
   <java-symbol type="array" name="config_system_condition_providers" />
