@@ -45,6 +45,17 @@
         {"include-filter": "com.android.server.power"},
         {"exclude-annotation": "org.junit.Ignore"}
       ]
+    },
+    {
+      "name": "CtsStatsdAtomHostTestCases",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"},
+        {"include-filter": "android.cts.statsdatom.powermanager"}
+      ],
+      "file_patterns": [
+        "(/|^)ThermalManagerService.java"
+      ]
     }
   ]
 }
