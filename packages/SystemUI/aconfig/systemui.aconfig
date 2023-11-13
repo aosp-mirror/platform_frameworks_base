@@ -46,6 +46,13 @@ flag {
 }
 
 flag {
+    name: "notification_throttle_hun"
+    namespace: "systemui"
+    description: "During notification avalanche, throttle HUNs showing in fast succession."
+    bug: "307288824"
+}
+
+flag {
     name: "scene_container"
     namespace: "systemui"
     description: "Enables the scene container framework go/flexiglass."
