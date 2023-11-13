@@ -354,7 +354,7 @@ public class SplitControllerTest {
         bundle.putBinder(ActivityOptions.KEY_LAUNCH_TASK_FRAGMENT_TOKEN,
                 container.getTaskFragmentToken());
         monitor.mCurrentIntent = intent;
-        doReturn(container).when(mSplitController).getContainer(any());
+        doReturn(container).when(mSplitController).getContainer(any(IBinder.class));
 
         monitor.onStartActivityResult(START_CANCELED, bundle);
         assertNull(container.getPendingAppearedIntent());
@@ -1642,7 +1642,7 @@ public class SplitControllerTest {
         // We need to set those in case we are not respecting clear top.
         // TODO(b/231845476) we should always respect clearTop.
         final int windowingMode = mSplitController.getTaskContainer(primaryContainer.getTaskId())
-                .getWindowingModeForSplitTaskFragment(TASK_BOUNDS);
+                .getWindowingModeForTaskFragment(TASK_BOUNDS);
         primaryContainer.setLastRequestedWindowingMode(windowingMode);
         secondaryContainer.setLastRequestedWindowingMode(windowingMode);
         primaryContainer.setLastRequestedBounds(getSplitBounds(true /* isPrimary */));

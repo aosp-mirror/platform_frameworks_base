@@ -16,6 +16,7 @@
 
 package androidx.window.extensions.embedding;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static androidx.window.extensions.embedding.ActivityEmbeddingOptionsProperties.KEY_OVERLAY_TAG;
@@ -287,10 +288,10 @@ public class OverlayPresentationTest {
         createOrUpdateOverlayTaskFragmentIfNeeded("test");
 
         verify(mSplitPresenter).resizeTaskFragment(mTransaction, overlayToken, new Rect());
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, overlayToken,
+        verify(mSplitPresenter).updateWindowingMode(mTransaction, overlayToken,
+                WINDOWING_MODE_UNDEFINED);
+        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, overlayContainer,
                 false);
-        assertThat(mSplitController.getAllOverlayTaskFragmentContainers())
-                .containsExactly(overlayContainer);
     }
 
     @Test
@@ -315,8 +316,10 @@ public class OverlayPresentationTest {
         createOrUpdateOverlayTaskFragmentIfNeeded("test");
 
         verify(mSplitPresenter).resizeTaskFragment(mTransaction, overlayToken, new Rect());
-        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction, overlayToken,
-                false);
+        verify(mSplitPresenter).updateWindowingMode(mTransaction,
+                overlayToken, WINDOWING_MODE_UNDEFINED);
+        verify(mSplitPresenter).setTaskFragmentIsolatedNavigation(mTransaction,
+                overlayContainer, false);
         assertThat(mSplitController.getAllOverlayTaskFragmentContainers())
                 .containsExactly(overlayContainer);
     }
@@ -423,6 +426,50 @@ public class OverlayPresentationTest {
         assertWithMessage("The overlay must be dismissed since there's no activity"
                 + " in the task and other taskFragment.")
                 .that(taskContainer.getTaskFragmentContainers()).isEmpty();
+    }
+
+    @Test
+    public void testUpdateActivityStackAttributes_nullParams_throwException() {
+        assertThrows(NullPointerException.class, () ->
+                mSplitController.updateActivityStackAttributes(null,
+                        new ActivityStackAttributes.Builder().build()));
+
+        assertThrows(NullPointerException.class, () ->
+                mSplitController.updateActivityStackAttributes(new Binder(), null));
+
+        verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateActivityStackAttributes_nullContainer_earlyReturn() {
+        final TaskFragmentContainer container = mSplitController.newContainer(mActivity,
+                mActivity.getTaskId());
+        mSplitController.updateActivityStackAttributes(container.getTaskFragmentToken(),
+                new ActivityStackAttributes.Builder().build());
+
+        verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateActivityStackAttributes_notOverlay_earlyReturn() {
+        final TaskFragmentContainer container = createMockTaskFragmentContainer(mActivity);
+
+        mSplitController.updateActivityStackAttributes(container.getTaskFragmentToken(),
+                new ActivityStackAttributes.Builder().build());
+
+        verify(mSplitPresenter, never()).applyActivityStackAttributes(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateActivityStackAttributes() {
+        final TaskFragmentContainer container = createTestOverlayContainer(TASK_ID, "test");
+        doNothing().when(mSplitPresenter).applyActivityStackAttributes(any(), any(), any());
+        final ActivityStackAttributes attrs = new ActivityStackAttributes.Builder().build();
+        final IBinder token = container.getTaskFragmentToken();
+
+        mSplitController.updateActivityStackAttributes(token, attrs);
+
+        verify(mSplitPresenter).applyActivityStackAttributes(any(), eq(container), eq(attrs));
     }
 
     /**
