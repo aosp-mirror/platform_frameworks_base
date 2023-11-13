@@ -10,7 +10,15 @@ package {
 filegroup {
     name: "framework-nfc-non-updatable-sources",
     path: "java",
-    srcs: [],
+    srcs: [
+        "java/android/nfc/NfcServiceManager.java",
+        "java/android/nfc/cardemulation/ApduServiceInfo.aidl",
+        "java/android/nfc/cardemulation/ApduServiceInfo.java",
+        "java/android/nfc/cardemulation/NfcFServiceInfo.aidl",
+        "java/android/nfc/cardemulation/NfcFServiceInfo.java",
+        "java/android/nfc/cardemulation/AidGroup.aidl",
+        "java/android/nfc/cardemulation/AidGroup.java",
+    ],
 }
 
 filegroup {
@@ -30,12 +38,17 @@ java_sdk_library {
     libs: [
         "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
     ],
+    static_libs: [
+        "android.nfc.flags-aconfig-java",
+        "android.permission.flags-aconfig-java",
+    ],
     srcs: [
         ":framework-nfc-updatable-sources",
+        ":framework-nfc-javastream-protos",
     ],
     defaults: ["framework-module-defaults"],
     sdk_version: "module_current",
-    min_sdk_version: "VanillaIceCream",
+    min_sdk_version: "34", // should be 35 (making it 34 for compiling for `-next`)
     installable: true,
     optimize: {
         enabled: false,
@@ -48,4 +61,15 @@ java_sdk_library {
     hidden_api_packages: [
         "com.android.nfc",
     ],
+    impl_library_visibility: [
+        "//frameworks/base:__subpackages__",
+        "//cts/tests/tests/nfc",
+        "//packages/apps/Nfc:__subpackages__",
+    ],
+    jarjar_rules: ":nfc-jarjar-rules",
+}
+
+filegroup {
+    name: "nfc-jarjar-rules",
+    srcs: ["jarjar-rules.txt"],
 }

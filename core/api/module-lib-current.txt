@@ -319,11 +319,6 @@ package android.net.wifi {
 
 package android.nfc {
 
-  public class NfcFrameworkInitializer {
-    method public static void registerServiceWrappers();
-    method public static void setNfcServiceManager(@NonNull android.nfc.NfcServiceManager);
-  }
-
   public class NfcServiceManager {
     method @NonNull public android.nfc.NfcServiceManager.ServiceRegisterer getNfcManagerServiceRegisterer();
   }
