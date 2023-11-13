@@ -680,7 +680,7 @@ public class NotificationLockscreenUserManagerImpl implements
         }
         NotificationEntry entry = mCommonNotifCollectionLazy.get().getEntry(key);
         if (mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
-            return entry != null
+            return entry != null && entry.getRanking().getChannel() != null
                     && entry.getRanking().getChannel().getLockscreenVisibility()
                     == Notification.VISIBILITY_PRIVATE;
         } else {

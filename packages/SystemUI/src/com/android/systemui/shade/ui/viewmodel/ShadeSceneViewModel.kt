@@ -16,7 +16,6 @@
 
 package com.android.systemui.shade.ui.viewmodel
 
-import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
@@ -34,8 +33,7 @@ class ShadeSceneViewModel
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    deviceEntryInteractor: DeviceEntryInteractor,
-    private val bouncerInteractor: BouncerInteractor,
+    private val deviceEntryInteractor: DeviceEntryInteractor,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
 ) {
     /** The key of the scene we should switch to when swiping up. */
@@ -60,9 +58,7 @@ constructor(
             )
 
     /** Notifies that some content in the shade was clicked. */
-    fun onContentClicked() {
-        bouncerInteractor.showOrUnlockDevice()
-    }
+    fun onContentClicked() = deviceEntryInteractor.attemptDeviceEntry()
 
     private fun upDestinationSceneKey(
         isUnlocked: Boolean,

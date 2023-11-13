@@ -83,16 +83,27 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun isInsecureLockscreenEnabled() =
+    fun isLockscreenEnabled() =
         testScope.runTest {
             whenever(lockPatternUtils.isLockScreenDisabled(USER_INFOS[0].id)).thenReturn(false)
             whenever(lockPatternUtils.isLockScreenDisabled(USER_INFOS[1].id)).thenReturn(true)
 
             userRepository.setSelectedUserInfo(USER_INFOS[0])
-            assertThat(underTest.isInsecureLockscreenEnabled()).isTrue()
+            assertThat(underTest.isLockscreenEnabled()).isTrue()
 
             userRepository.setSelectedUserInfo(USER_INFOS[1])
-            assertThat(underTest.isInsecureLockscreenEnabled()).isFalse()
+            assertThat(underTest.isLockscreenEnabled()).isFalse()
+        }
+
+    @Test
+    fun reportSuccessfulAuthentication_shouldUpdateIsUnlocked() =
+        testScope.runTest {
+            val isUnlocked by collectLastValue(underTest.isUnlocked)
+            assertThat(isUnlocked).isFalse()
+
+            underTest.reportSuccessfulAuthentication()
+
+            assertThat(isUnlocked).isTrue()
         }
 
     @Test

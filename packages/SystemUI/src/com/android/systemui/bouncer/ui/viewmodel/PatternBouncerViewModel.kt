@@ -18,7 +18,7 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
 import android.util.TypedValue
-import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.res.R

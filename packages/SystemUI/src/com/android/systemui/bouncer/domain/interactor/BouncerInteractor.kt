@@ -19,24 +19,22 @@ package com.android.systemui.bouncer.domain.interactor
 import android.content.Context
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
-import com.android.systemui.authentication.domain.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.res.R
-import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -51,9 +49,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val applicationContext: Context,
     private val repository: BouncerRepository,
-    private val deviceEntryInteractor: DeviceEntryInteractor,
     private val authenticationInteractor: AuthenticationInteractor,
-    private val sceneInteractor: SceneInteractor,
     flags: SceneContainerFlags,
     private val falsingInteractor: FalsingInteractor,
 ) {
@@ -100,6 +96,10 @@ constructor(
     val isUserSwitcherVisible: Boolean
         get() = repository.isUserSwitcherVisible
 
+    private val _onImeHidden = MutableSharedFlow<Unit>()
+    /** Provide the onImeHidden events from the bouncer */
+    val onImeHidden: SharedFlow<Unit> = _onImeHidden
+
     init {
         if (flags.isEnabled()) {
             // Clear the message if moved from throttling to no-longer throttling.
@@ -139,32 +139,6 @@ constructor(
                 /* reason= */ "empty pattern input",
             )
         )
-    }
-
-    /**
-     * Either shows the bouncer or unlocks the device, if the bouncer doesn't need to be shown.
-     *
-     * @param message An optional message to show to the user in the bouncer.
-     */
-    fun showOrUnlockDevice(
-        message: String? = null,
-    ) {
-        applicationScope.launch {
-            if (deviceEntryInteractor.isAuthenticationRequired()) {
-                repository.setMessage(
-                    message ?: promptMessage(authenticationInteractor.getAuthenticationMethod())
-                )
-                sceneInteractor.changeScene(
-                    scene = SceneModel(SceneKey.Bouncer),
-                    loggingReason = "request to unlock device while authentication required",
-                )
-            } else {
-                sceneInteractor.changeScene(
-                    scene = SceneModel(SceneKey.Gone),
-                    loggingReason = "request to unlock device while authentication isn't required",
-                )
-            }
-        }
     }
 
     /**
@@ -212,17 +186,11 @@ constructor(
         return applicationScope
             .async {
                 val authResult = authenticationInteractor.authenticate(input, tryAutoConfirm)
-                when (authResult) {
-                    // Authentication succeeded.
-                    AuthenticationResult.SUCCEEDED ->
-                        sceneInteractor.changeScene(
-                            scene = SceneModel(SceneKey.Gone),
-                            loggingReason = "successful authentication",
-                        )
-                    // Authentication failed.
-                    AuthenticationResult.FAILED -> showErrorMessage()
-                    // Authentication skipped.
-                    AuthenticationResult.SKIPPED -> if (!tryAutoConfirm) showErrorMessage()
+                if (
+                    authResult == AuthenticationResult.FAILED ||
+                        (authResult == AuthenticationResult.SKIPPED && !tryAutoConfirm)
+                ) {
+                    showErrorMessage()
                 }
                 authResult
             }
@@ -242,16 +210,8 @@ constructor(
     }
 
     /** Notifies the interactor that the input method editor has been hidden. */
-    fun onImeHidden() {
-        // If the bouncer is showing, hide it and return to the lockscreen scene.
-        if (sceneInteractor.desiredScene.value.key != SceneKey.Bouncer) {
-            return
-        }
-
-        sceneInteractor.changeScene(
-            scene = SceneModel(SceneKey.Lockscreen),
-            loggingReason = "IME hidden",
-        )
+    suspend fun onImeHidden() {
+        _onImeHidden.emit(Unit)
     }
 
     private fun promptMessage(authMethod: AuthenticationMethodModel): String {

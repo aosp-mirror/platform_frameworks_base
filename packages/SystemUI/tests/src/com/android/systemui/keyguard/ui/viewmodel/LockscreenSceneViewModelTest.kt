@@ -19,7 +19,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
@@ -45,7 +45,7 @@ class LockscreenSceneViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val upTransitionSceneKey by collectLastValue(underTest.upDestinationSceneKey)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.None)
-            utils.deviceEntryRepository.setInsecureLockscreenEnabled(true)
+            utils.deviceEntryRepository.setLockscreenEnabled(true)
             utils.deviceEntryRepository.setUnlocked(true)
             sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
 
