@@ -822,14 +822,23 @@ public class PipTransition extends PipTransitionController {
                     + "participant");
         }
 
-        // Make sure other open changes are visible as entering PIP. Some may be hidden in
-        // Transitions#setupStartState because the transition type is OPEN (such as auto-enter).
+        // Make sure other non-pip changes are handled correctly.
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (change == enterPip) continue;
             if (TransitionUtil.isOpeningType(change.getMode())) {
+                // For other open changes that are visible when entering PIP, some may be hidden in
+                // Transitions#setupStartState because the transition type is OPEN (such as
+                // auto-enter).
                 final SurfaceControl leash = change.getLeash();
                 startTransaction.show(leash).setAlpha(leash, 1.f);
+            } else if (TransitionUtil.isClosingType(change.getMode())) {
+                // For other close changes that are invisible as entering PIP, hide them immediately
+                // to avoid showing a freezing surface.
+                // Ideally, we should let other handler to handle them (likely RemoteHandler by
+                // Launcher).
+                final SurfaceControl leash = change.getLeash();
+                startTransaction.hide(leash);
             }
         }
 
