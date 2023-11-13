@@ -832,8 +832,14 @@ public class Process {
     /**
      * Returns true if the current process is a 64-bit runtime.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static final boolean is64Bit() {
         return VMRuntime.getRuntime().is64Bit();
+    }
+
+    /** @hide */
+    public static final boolean is64Bit$ravenwood() {
+        return "amd64".equals(System.getProperty("os.arch"));
     }
 
     private static SomeArgs sIdentity$ravenwood;
@@ -906,6 +912,7 @@ public class Process {
      * {@link #myUid()} in that a particular user will have multiple
      * distinct apps running under it each with their own uid.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static UserHandle myUserHandle() {
         return UserHandle.of(UserHandle.getUserId(myUid()));
     }
@@ -914,6 +921,7 @@ public class Process {
      * Returns whether the given uid belongs to a system core component or not.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isCoreUid(int uid) {
         return UserHandle.isCore(uid);
     }
@@ -924,6 +932,7 @@ public class Process {
      * @return Whether the uid corresponds to an application sandbox running in
      *     a specific user.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean isApplicationUid(int uid) {
         return UserHandle.isApp(uid);
     }
@@ -931,6 +940,7 @@ public class Process {
     /**
      * Returns whether the current process is in an isolated sandbox.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static final boolean isIsolated() {
         return isIsolated(myUid());
     }
@@ -942,6 +952,7 @@ public class Process {
     @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.TIRAMISU,
             publicAlternatives = "Use {@link #isIsolatedUid(int)} instead.")
+    @android.ravenwood.annotation.RavenwoodKeep
     public static final boolean isIsolated(int uid) {
         return isIsolatedUid(uid);
     }
@@ -949,6 +960,7 @@ public class Process {
     /**
      * Returns whether the process with the given {@code uid} is an isolated sandbox.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static final boolean isIsolatedUid(int uid) {
         uid = UserHandle.getAppId(uid);
         return (uid >= FIRST_ISOLATED_UID && uid <= LAST_ISOLATED_UID)
@@ -962,6 +974,7 @@ public class Process {
      */
     @SystemApi(client = MODULE_LIBRARIES)
     @TestApi
+    @android.ravenwood.annotation.RavenwoodKeep
     public static final boolean isSdkSandboxUid(int uid) {
         uid = UserHandle.getAppId(uid);
         return (uid >= FIRST_SDK_SANDBOX_UID && uid <= LAST_SDK_SANDBOX_UID);
@@ -975,6 +988,7 @@ public class Process {
      */
     @SystemApi(client = MODULE_LIBRARIES)
     @TestApi
+    @android.ravenwood.annotation.RavenwoodKeep
     public static final int getAppUidForSdkSandboxUid(int uid) {
         return uid - (FIRST_SDK_SANDBOX_UID - FIRST_APPLICATION_UID);
     }
@@ -987,6 +1001,7 @@ public class Process {
      */
     @SystemApi(client = MODULE_LIBRARIES)
     @TestApi
+    @android.ravenwood.annotation.RavenwoodKeep
     public static final int toSdkSandboxUid(int uid) {
         return uid + (FIRST_SDK_SANDBOX_UID - FIRST_APPLICATION_UID);
     }
@@ -994,6 +1009,7 @@ public class Process {
     /**
      * Returns whether the current process is a sdk sandbox process.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static final boolean isSdkSandbox() {
         return isSdkSandboxUid(myUid());
     }

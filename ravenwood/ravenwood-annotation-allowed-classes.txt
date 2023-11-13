@@ -7,3 +7,4 @@ android.os.Binder$IdentitySupplier
 android.os.IBinder
 android.os.Process
 android.os.SystemClock
+android.os.UserHandle

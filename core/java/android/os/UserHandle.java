@@ -36,6 +36,7 @@ import java.util.Random;
 /**
  * Representation of a user on the device.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class UserHandle implements Parcelable {
     // NOTE: keep logic in sync with system/core/libcutils/multiuser.c
 
