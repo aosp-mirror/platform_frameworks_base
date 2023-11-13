@@ -19039,6 +19039,14 @@ public final class Settings {
             public static final int BATTERY_SAVER_MODE_CUSTOM = 4;
 
             /**
+             Whether 1P apps vote for enabling data during different modes,
+             i.e. BTM, BBSM
+             * @hide
+             */
+            @Readable(maxTargetSdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+            public static final String CONNECTIVITY_KEEP_DATA_ON = "wear_connectivity_keep_data_on";
+
+            /**
              * The maximum ambient mode duration when an activity is allowed to auto resume.
              * @hide
              */
