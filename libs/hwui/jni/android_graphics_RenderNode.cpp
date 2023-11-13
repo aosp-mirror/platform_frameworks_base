@@ -597,7 +597,13 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             SkIRect clipBounds;
             if (enableClip) {
                 uirenderer::Rect initialClipBounds;
-                props.getClippingRectForFlags(props.getClippingFlags(), &initialClipBounds);
+                const auto clipFlags = props.getClippingFlags();
+                if (clipFlags) {
+                    props.getClippingRectForFlags(clipFlags, &initialClipBounds);
+                } else {
+                    // Works for RenderNode::damageSelf()
+                    initialClipBounds.set(DIRTY_MIN, DIRTY_MIN, DIRTY_MAX, DIRTY_MAX);
+                }
                 clipBounds =
                         info.damageAccumulator
                                 ->computeClipAndTransform(initialClipBounds.toSkRect(), &transform)
