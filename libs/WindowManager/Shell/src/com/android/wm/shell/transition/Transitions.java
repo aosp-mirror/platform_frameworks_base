@@ -83,6 +83,9 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.tracing.LegacyTransitionTracer;
+import com.android.wm.shell.transition.tracing.PerfettoTransitionTracer;
+import com.android.wm.shell.transition.tracing.TransitionTracer;
 import com.android.wm.shell.util.TransitionUtil;
 
 import java.io.PrintWriter;
@@ -184,7 +187,7 @@ public class Transitions implements RemoteCallable<Transitions>,
     private final ShellController mShellController;
     private final ShellTransitionImpl mImpl = new ShellTransitionImpl();
     private final SleepHandler mSleepHandler = new SleepHandler();
-    private final Tracer mTracer = new Tracer();
+    private final TransitionTracer mTransitionTracer;
     private boolean mIsRegistered = false;
 
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
@@ -307,6 +310,12 @@ public class Transitions implements RemoteCallable<Transitions>,
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Remote");
         shellInit.addInitCallback(this::onInit, this);
         mHomeTransitionObserver = observer;
+
+        if (android.tracing.Flags.perfettoTransitionTracing()) {
+            mTransitionTracer = new PerfettoTransitionTracer();
+        } else {
+            mTransitionTracer = new LegacyTransitionTracer();
+        }
     }
 
     private void onInit() {
@@ -868,7 +877,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition %s ready while"
                 + " %s is still animating. Notify the animating transition"
                 + " in case they can be merged", ready, playing);
-        mTracer.logMergeRequested(ready.mInfo.getDebugId(), playing.mInfo.getDebugId());
+        mTransitionTracer.logMergeRequested(ready.mInfo.getDebugId(), playing.mInfo.getDebugId());
         playing.mHandler.mergeAnimation(ready.mToken, ready.mInfo, ready.mStartT,
                 playing.mToken, (wct) -> onMerged(playing, ready));
     }
@@ -902,7 +911,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         for (int i = 0; i < mObservers.size(); ++i) {
             mObservers.get(i).onTransitionMerged(merged.mToken, playing.mToken);
         }
-        mTracer.logMerged(merged.mInfo.getDebugId(), playing.mInfo.getDebugId());
+        mTransitionTracer.logMerged(merged.mInfo.getDebugId(), playing.mInfo.getDebugId());
         // See if we should merge another transition.
         processReadyQueue(track);
     }
@@ -923,7 +932,7 @@ public class Transitions implements RemoteCallable<Transitions>,
                     active.mStartT, active.mFinishT, (wct) -> onFinish(active, wct));
             if (consumed) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by firstHandler");
-                mTracer.logDispatched(active.mInfo.getDebugId(), active.mHandler);
+                mTransitionTracer.logDispatched(active.mInfo.getDebugId(), active.mHandler);
                 return;
             }
         }
@@ -948,7 +957,7 @@ public class Transitions implements RemoteCallable<Transitions>,
             if (consumed) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by %s",
                         mHandlers.get(i));
-                mTracer.logDispatched(info.getDebugId(), mHandlers.get(i));
+                mTransitionTracer.logDispatched(info.getDebugId(), mHandlers.get(i));
                 return mHandlers.get(i);
             }
         }
@@ -978,7 +987,7 @@ public class Transitions implements RemoteCallable<Transitions>,
         final Track track = mTracks.get(transition.getTrack());
         transition.mAborted = true;
 
-        mTracer.logAborted(transition.mInfo.getDebugId());
+        mTransitionTracer.logAborted(transition.mInfo.getDebugId());
 
         if (transition.mHandler != null) {
             // Notifies to clean-up the aborted transition.
@@ -1506,12 +1515,18 @@ public class Transitions implements RemoteCallable<Transitions>,
         }
     }
 
-
     @Override
     public boolean onShellCommand(String[] args, PrintWriter pw) {
         switch (args[0]) {
             case "tracing": {
-                mTracer.onShellCommand(Arrays.copyOfRange(args, 1, args.length), pw);
+                if (!android.tracing.Flags.perfettoTransitionTracing()) {
+                    ((LegacyTransitionTracer) mTransitionTracer)
+                            .onShellCommand(Arrays.copyOfRange(args, 1, args.length), pw);
+                } else {
+                    pw.println("Command not supported. Use the Perfetto command instead to start "
+                            + "and stop this trace instead.");
+                    return false;
+                }
                 return true;
             }
             default: {
@@ -1524,8 +1539,10 @@ public class Transitions implements RemoteCallable<Transitions>,
 
     @Override
     public void printShellCommandHelp(PrintWriter pw, String prefix) {
-        pw.println(prefix + "tracing");
-        mTracer.printShellCommandHelp(pw, prefix + "  ");
+        if (!android.tracing.Flags.perfettoTransitionTracing()) {
+            pw.println(prefix + "tracing");
+            ((LegacyTransitionTracer) mTransitionTracer).printShellCommandHelp(pw, prefix + "  ");
+        }
     }
 
     private void dump(@NonNull PrintWriter pw, String prefix) {
