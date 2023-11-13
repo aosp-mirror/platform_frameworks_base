@@ -75,8 +75,6 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.provider.Settings;
-import android.util.ArraySet;
-import android.view.Display;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -103,7 +101,7 @@ public class VibrationSettingsTest {
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private static final int UID = 1;
-    private static final int VIRTUAL_DISPLAY_ID = 1;
+    private static final int VIRTUAL_DEVICE_ID = 1;
     private static final String SYSUI_PACKAGE_NAME = "sysui";
     private static final PowerSaveState NORMAL_POWER_STATE = new PowerSaveState.Builder().build();
     private static final PowerSaveState LOW_POWER_STATE = new PowerSaveState.Builder()
@@ -137,9 +135,6 @@ public class VibrationSettingsTest {
     private VibrationSettings mVibrationSettings;
     private PowerManagerInternal.LowPowerModeListener mRegisteredPowerModeListener;
     private BroadcastReceiver mRegisteredBatteryBroadcastReceiver;
-    private VirtualDeviceManagerInternal.VirtualDisplayListener mRegisteredVirtualDisplayListener;
-    private VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener
-            mRegisteredAppsOnVirtualDeviceListener;
 
     @Before
     public void setUp() throws Exception {
@@ -155,14 +150,6 @@ public class VibrationSettingsTest {
         }).when(mPowerManagerInternalMock).registerLowPowerModeObserver(any());
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName(SYSUI_PACKAGE_NAME, ""));
-        doAnswer(invocation -> {
-            mRegisteredVirtualDisplayListener = invocation.getArgument(0);
-            return null;
-        }).when(mVirtualDeviceManagerInternalMock).registerVirtualDisplayListener(any());
-        doAnswer(invocation -> {
-            mRegisteredAppsOnVirtualDeviceListener = invocation.getArgument(0);
-            return null;
-        }).when(mVirtualDeviceManagerInternalMock).registerAppsOnVirtualDeviceListener(any());
 
         removeServicesForTest();
         addServicesForTest();
@@ -654,62 +641,20 @@ public class VibrationSettingsTest {
     }
 
     @Test
-    public void shouldIgnoreVibrationFromVirtualDisplays_displayNonVirtual_neverIgnored() {
-        // Vibrations from the primary display is never ignored regardless of the creation and
-        // removal of virtual displays and of the changes of apps running on virtual displays.
-        mRegisteredVirtualDisplayListener.onVirtualDisplayCreated(VIRTUAL_DISPLAY_ID);
-        mRegisteredAppsOnVirtualDeviceListener.onAppsOnAnyVirtualDeviceChanged(
-                new ArraySet<>(Arrays.asList(UID)));
+    public void shouldIgnoreVibrationFromVirtualDevices_defaultDevice_neverIgnored() {
+        // Vibrations from the primary device is never ignored.
         for (int usage : ALL_USAGES) {
-            assertVibrationNotIgnoredForUsageAndDisplay(usage, Display.DEFAULT_DISPLAY);
-        }
-
-        mRegisteredVirtualDisplayListener.onVirtualDisplayRemoved(VIRTUAL_DISPLAY_ID);
-        for (int usage : ALL_USAGES) {
-            assertVibrationNotIgnoredForUsageAndDisplay(usage, Display.DEFAULT_DISPLAY);
-        }
-
-        mRegisteredAppsOnVirtualDeviceListener.onAppsOnAnyVirtualDeviceChanged(new ArraySet<>());
-        for (int usage : ALL_USAGES) {
-            assertVibrationNotIgnoredForUsageAndDisplay(usage, Display.DEFAULT_DISPLAY);
+            assertVibrationNotIgnoredForUsageAndDevice(usage, Context.DEVICE_ID_DEFAULT);
         }
     }
 
     @Test
-    public void shouldIgnoreVibrationFromVirtualDisplays_displayVirtual() {
-        // Ignore the vibration when the coming display id represents a virtual display.
-        mRegisteredVirtualDisplayListener.onVirtualDisplayCreated(VIRTUAL_DISPLAY_ID);
-
+    public void shouldIgnoreVibrationFromVirtualDevices_virtualDevice_alwaysIgnored() {
+        // Ignore the vibration when the coming device id represents a virtual device.
         for (int usage : ALL_USAGES) {
-            assertVibrationIgnoredForUsageAndDisplay(usage, VIRTUAL_DISPLAY_ID,
+            assertVibrationIgnoredForUsageAndDevice(usage, VIRTUAL_DEVICE_ID,
                     Vibration.Status.IGNORED_FROM_VIRTUAL_DEVICE);
         }
-
-        // Stop ignoring when the virtual display is removed.
-        mRegisteredVirtualDisplayListener.onVirtualDisplayRemoved(VIRTUAL_DISPLAY_ID);
-        for (int usage : ALL_USAGES) {
-            assertVibrationNotIgnoredForUsageAndDisplay(usage, VIRTUAL_DISPLAY_ID);
-        }
-    }
-
-
-    @Test
-    public void shouldIgnoreVibrationFromVirtualDisplays_appsOnVirtualDisplay() {
-        // Ignore when the passed-in display id is invalid and the calling uid is on a virtual
-        // display.
-        mRegisteredAppsOnVirtualDeviceListener.onAppsOnAnyVirtualDeviceChanged(
-                new ArraySet<>(Arrays.asList(UID)));
-        for (int usage : ALL_USAGES) {
-            assertVibrationIgnoredForUsageAndDisplay(usage, Display.INVALID_DISPLAY,
-                    Vibration.Status.IGNORED_FROM_VIRTUAL_DEVICE);
-        }
-
-        // Stop ignoring when the app is no longer on virtual display.
-        mRegisteredAppsOnVirtualDeviceListener.onAppsOnAnyVirtualDeviceChanged(new ArraySet<>());
-        for (int usage : ALL_USAGES) {
-            assertVibrationNotIgnoredForUsageAndDisplay(usage, Display.INVALID_DISPLAY);
-        }
-
     }
 
     @Test
@@ -932,13 +877,13 @@ public class VibrationSettingsTest {
 
     private void assertVibrationIgnoredForUsage(@VibrationAttributes.Usage int usage,
             Vibration.Status expectedStatus) {
-        assertVibrationIgnoredForUsageAndDisplay(usage, Display.DEFAULT_DISPLAY, expectedStatus);
+        assertVibrationIgnoredForUsageAndDevice(usage, Context.DEVICE_ID_DEFAULT, expectedStatus);
     }
 
-    private void assertVibrationIgnoredForUsageAndDisplay(@VibrationAttributes.Usage int usage,
-            int displayId, Vibration.Status expectedStatus) {
+    private void assertVibrationIgnoredForUsageAndDevice(@VibrationAttributes.Usage int usage,
+            int deviceId, Vibration.Status expectedStatus) {
         Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(
-                VibrationAttributes.createForUsage(usage), UID, displayId, null, null);
+                VibrationAttributes.createForUsage(usage), UID, deviceId, null, null);
         assertEquals(errorMessageForUsage(usage), expectedStatus,
                 mVibrationSettings.shouldIgnoreVibration(callerInfo));
     }
@@ -946,7 +891,7 @@ public class VibrationSettingsTest {
     private void assertVibrationIgnoredForAttributes(VibrationAttributes attrs,
             Vibration.Status expectedStatus) {
         Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(attrs, UID,
-                Display.DEFAULT_DISPLAY, null, null);
+                Context.DEVICE_ID_DEFAULT, null, null);
         assertEquals(errorMessageForAttributes(attrs), expectedStatus,
                 mVibrationSettings.shouldIgnoreVibration(callerInfo));
     }
@@ -957,27 +902,27 @@ public class VibrationSettingsTest {
 
     private void assertVibrationNotIgnoredForUsageAndFlags(@VibrationAttributes.Usage int usage,
             @VibrationAttributes.Flag int flags) {
-        assertVibrationNotIgnoredForUsageAndFlagsAndDisplay(usage, Display.DEFAULT_DISPLAY, flags);
+        assertVibrationNotIgnoredForUsageAndFlagsAndDevice(usage, Context.DEVICE_ID_DEFAULT, flags);
     }
 
-    private void assertVibrationNotIgnoredForUsageAndDisplay(@VibrationAttributes.Usage int usage,
-            int displayId) {
-        assertVibrationNotIgnoredForUsageAndFlagsAndDisplay(usage, displayId, /* flags= */ 0);
+    private void assertVibrationNotIgnoredForUsageAndDevice(@VibrationAttributes.Usage int usage,
+            int deviceId) {
+        assertVibrationNotIgnoredForUsageAndFlagsAndDevice(usage, deviceId, /* flags= */ 0);
     }
 
-    private void assertVibrationNotIgnoredForUsageAndFlagsAndDisplay(
-            @VibrationAttributes.Usage int usage, int displayId,
+    private void assertVibrationNotIgnoredForUsageAndFlagsAndDevice(
+            @VibrationAttributes.Usage int usage, int deviceId,
             @VibrationAttributes.Flag int flags) {
         Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(
                 new VibrationAttributes.Builder().setUsage(usage).setFlags(flags).build(), UID,
-                displayId, null, null);
+                deviceId, null, null);
         assertNull(errorMessageForUsage(usage),
                 mVibrationSettings.shouldIgnoreVibration(callerInfo));
     }
 
     private void assertVibrationNotIgnoredForAttributes(VibrationAttributes attrs) {
         Vibration.CallerInfo callerInfo = new Vibration.CallerInfo(attrs, UID,
-                Display.DEFAULT_DISPLAY, null, null);
+                Context.DEVICE_ID_DEFAULT, null, null);
         assertNull(errorMessageForAttributes(attrs),
                 mVibrationSettings.shouldIgnoreVibration(callerInfo));
     }
@@ -1032,7 +977,7 @@ public class VibrationSettingsTest {
     private Vibration.CallerInfo createCallerInfo(int uid, String opPkg,
             @VibrationAttributes.Usage int usage) {
         VibrationAttributes attrs = VibrationAttributes.createForUsage(usage);
-        return new Vibration.CallerInfo(attrs, uid, VIRTUAL_DISPLAY_ID, opPkg, null);
+        return new Vibration.CallerInfo(attrs, uid, VIRTUAL_DEVICE_ID, opPkg, null);
     }
 
     private void setBatteryReceiverRegistrationResult(Intent result) {

@@ -259,8 +259,6 @@ public class VirtualDeviceManagerServiceTest {
     @Mock
     private Consumer<ArraySet<Integer>> mRunningAppsChangedCallback;
     @Mock
-    private VirtualDeviceManagerInternal.VirtualDisplayListener mDisplayListener;
-    @Mock
     private VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener mAppsOnVirtualDeviceListener;
     @Mock
     IPowerManager mIPowerManagerMock;
@@ -721,28 +719,6 @@ public class VirtualDeviceManagerServiceTest {
         addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
         // This call should not throw any exceptions.
         mDeviceImpl.onVirtualDisplayRemoved(DISPLAY_ID_1);
-    }
-
-    @Test
-    public void onVirtualDisplayCreatedLocked_listenersNotified() {
-        mLocalService.registerVirtualDisplayListener(mDisplayListener);
-
-        mLocalService.onVirtualDisplayCreated(DISPLAY_ID_1);
-        TestableLooper.get(this).processAllMessages();
-
-        verify(mDisplayListener).onVirtualDisplayCreated(DISPLAY_ID_1);
-    }
-
-    @Test
-    public void onVirtualDisplayRemovedLocked_listenersNotified() {
-        mLocalService.registerVirtualDisplayListener(mDisplayListener);
-
-        addVirtualDisplay(mDeviceImpl, DISPLAY_ID_1);
-
-        mLocalService.onVirtualDisplayRemoved(mDeviceImpl, DISPLAY_ID_1);
-        TestableLooper.get(this).processAllMessages();
-
-        verify(mDisplayListener).onVirtualDisplayRemoved(DISPLAY_ID_1);
     }
 
     @Test

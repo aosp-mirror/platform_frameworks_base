@@ -33,13 +33,13 @@ interface IVibratorManagerService {
     boolean unregisterVibratorStateListener(int vibratorId, in IVibratorStateListener listener);
     boolean setAlwaysOnEffect(int uid, String opPkg, int alwaysOnId,
             in CombinedVibration vibration, in VibrationAttributes attributes);
-    void vibrate(int uid, int displayId, String opPkg, in CombinedVibration vibration,
+    void vibrate(int uid, int deviceId, String opPkg, in CombinedVibration vibration,
             in VibrationAttributes attributes, String reason, IBinder token);
     void cancelVibrate(int usageFilter, IBinder token);
 
     // Async oneway APIs.
     // There is no order guarantee with respect to the two-way APIs above like
     // vibrate/isVibrating/cancel.
-    oneway void performHapticFeedback(int uid, int displayId, String opPkg, int constant,
+    oneway void performHapticFeedback(int uid, int deviceId, String opPkg, int constant,
             boolean always, String reason, IBinder token);
 }
