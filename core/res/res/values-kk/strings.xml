@@ -1685,7 +1685,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Жою"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Дыбыс деңгейін ұсынылған деңгейден көтеру керек пе?\n\nЖоғары дыбыс деңгейінде ұзақ кезеңдер бойы тыңдау есту қабілетіңізге зиян тигізуі мүмкін."</string>
     <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Жоғары дыбыс деңгейінде тыңдай бересіз бе?\n\nҚұлақаспаптың жоғары дыбыс деңгейі ұсынылған уақыттан ұзақ қосылып тұрды. Есту мүшеңізге зияны тиюі мүмкін."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Қатты дыбыс анықталды\n\nҚұлақаспаптың жоғары дыбыс деңгейі ұсынылған уақыттан ұзақ қосылып тұрды. Есту мүшеңізге зияны тиюі мүмкін."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Қатты дыбыс анықталды\n\nҚұлақаспаптың дыбысы ұсынылған деңгейден асып кетті. Есту мүшеңізге зияны тиюі мүмкін."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Арнайы мүмкіндік төте жолын пайдалану керек пе?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Түймелер тіркесімі қосулы кезде, екі дыбыс түймесін 3 секунд басып тұрсаңыз, \"Арнайы мүмкіндіктер\" функциясы іске қосылады."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Арнайы мүмкіндіктердің жылдам пәрмені іске қосылсын ба?"</string>

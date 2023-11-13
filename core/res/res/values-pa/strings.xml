@@ -1684,8 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ਹਟਾਓ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ਕੀ ਵੌਲਿਊਮ  ਸਿਫ਼ਾਰਸ਼  ਕੀਤੇ ਪੱਧਰ ਤੋਂ ਵਧਾਉਣੀ ਹੈ?\n\nਲੰਮੇ ਸਮੇਂ ਤੱਕ ਉੱਚ ਵੌਲਿਊਮ ਤੇ ਸੁਣਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ।"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ਕੀ ਉੱਚੀ ਅਵਾਜ਼ ਵਿੱਚ ਸੁਣਨਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਸਿਫ਼ਾਰਸ਼ੀ ਸਮੇਂ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖੀ ਗਈ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ਉੱਚੀ ਧੁਨੀ ਦਾ ਪਤਾ ਲੱਗਾ\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਨੂੰ ਸਿਫ਼ਾਰਸ਼ੀ ਪੱਧਰ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖਿਆ ਗਿਆ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ਕੀ ਉੱਚੀ ਅਵਾਜ਼ ਵਿੱਚ ਸੁਣਦੇ ਰਹਿਣਾ ਹੈ?\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਸਿਫ਼ਾਰਸ਼ੀ ਸਮੇਂ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖੀ ਹੋਈ ਹੈ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ਉੱਚੀ ਅਵਾਜ਼ ਦਾ ਪਤਾ ਲੱਗਾ\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਸਿਫ਼ਾਰਸ਼ੀ ਪੱਧਰ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖੀ ਹੋਈ ਹੈ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਵਰਤਣਾ ਹੈ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਹੋਣ \'ਤੇ, ਕਿਸੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਬਟਨਾਂ ਨੂੰ 3 ਸਕਿੰਟ ਲਈ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਲਈ ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
