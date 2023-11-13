@@ -34,6 +34,9 @@ import android.system.StructPollfd;
 import android.util.Pair;
 import android.webkit.WebViewZygote;
 
+import com.android.internal.os.SomeArgs;
+import com.android.internal.util.Preconditions;
+
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
@@ -833,12 +836,35 @@ public class Process {
         return VMRuntime.getRuntime().is64Bit();
     }
 
+    private static SomeArgs sIdentity$ravenwood;
+
+    /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
+    public static void init$ravenwood(int uid, int pid) {
+        final SomeArgs args = SomeArgs.obtain();
+        args.argi1 = uid;
+        args.argi2 = pid;
+        sIdentity$ravenwood = args;
+    }
+
+    /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
+    public static void reset$ravenwood() {
+        sIdentity$ravenwood = null;
+    }
+
     /**
      * Returns the identifier of this process, which can be used with
      * {@link #killProcess} and {@link #sendSignal}.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static final int myPid() {
         return Os.getpid();
+    }
+
+    /** @hide */
+    public static final int myPid$ravenwood() {
+        return Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).argi2;
     }
 
     /**
@@ -864,8 +890,14 @@ public class Process {
      * app-specific sandbox.  It is different from {@link #myUserHandle} in that
      * a uid identifies a specific app sandbox in a specific user.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static final int myUid() {
         return Os.getuid();
+    }
+
+    /** @hide */
+    public static final int myUid$ravenwood() {
+        return Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).argi1;
     }
 
     /**

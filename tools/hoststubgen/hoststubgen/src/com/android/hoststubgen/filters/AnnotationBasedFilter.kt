@@ -377,7 +377,7 @@ class AnnotationBasedFilter(
                         throw HostStubGenInternalException("Policy $policy shouldn't show up here")
                     }
 
-                    val suffix = getAnnotationField(an, "suffix") ?: return@let
+                    val suffix = getAnnotationField(an, "suffix", false) ?: "\$ravenwood"
                     val renameFrom = mn.name + suffix
                     val renameTo = mn.name
 
@@ -387,13 +387,17 @@ class AnnotationBasedFilter(
                     }
 
                     // This mn has "SubstituteWith". This means,
-                        // 1. Re move the "rename-to" method, so add it to substitutedMethods.
+                    // 1. Re move the "rename-to" method, so add it to substitutedMethods.
                     policiesFromSubstitution[MethodKey(renameTo, mn.desc)] =
                             FilterPolicy.Remove.withReason("substitute-to")
 
+                    // If the policy is "stub", use "stub".
+                    // Otherwise, it must be "keep" or "throw", but there's no point in using
+                    // "throw", so let's use "keep".
+                    val newPolicy = if (policy.needsInStub) policy else FilterPolicy.Keep
                     // 2. We also keep the from-to in the map.
                     policiesFromSubstitution[MethodKey(renameFrom, mn.desc)] =
-                            policy.withReason("substitute-from")
+                            newPolicy.withReason("substitute-from")
                     substituteToMethods[MethodKey(renameFrom, mn.desc)] = renameTo
 
                     log.v("Substitution found: %s%s -> %s", renameFrom, mn.desc, renameTo)
@@ -405,10 +409,11 @@ class AnnotationBasedFilter(
     /**
      * Return the (String) value of 'value' parameter from an annotation.
      */
-    private fun getAnnotationField(an: AnnotationNode, name: String): String? {
+    private fun getAnnotationField(an: AnnotationNode, name: String,
+                                   required: Boolean = true): String? {
         try {
             val suffix = findAnnotationValueAsString(an, name)
-            if (suffix == null) {
+            if (suffix == null && required) {
                 errors.onErrorFound("Annotation \"${an.desc}\" must have field $name")
             }
             return suffix
