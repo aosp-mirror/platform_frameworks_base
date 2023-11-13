@@ -98,6 +98,7 @@ import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.statusbar.StatusBarManagerInternal;
+import com.android.server.testutils.OffsettableClock;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.DisplayPolicy;
@@ -160,7 +161,8 @@ class TestPhoneWindowManager {
     @Mock private KeyguardServiceDelegate mKeyguardServiceDelegate;
 
     private StaticMockitoSession mMockitoSession;
-    private TestLooper mTestLooper = new TestLooper();
+    private OffsettableClock mClock = new OffsettableClock();
+    private TestLooper mTestLooper = new TestLooper(() -> mClock.now());
     private HandlerThread mHandlerThread;
     private Handler mHandler;
 
@@ -327,6 +329,15 @@ class TestPhoneWindowManager {
 
     void dispatchUnhandledKey(KeyEvent event) {
         mPhoneWindowManager.dispatchUnhandledKey(null /*focusedToken*/, event, FLAG_INTERACTIVE);
+    }
+
+    long getCurrentTime() {
+        return mClock.now();
+    }
+
+    void moveTimeForward(long timeMs) {
+        mClock.fastForward(timeMs);
+        mTestLooper.dispatchAll();
     }
 
     /**
