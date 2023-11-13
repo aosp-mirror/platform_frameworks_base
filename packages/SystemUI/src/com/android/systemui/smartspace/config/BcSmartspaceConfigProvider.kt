@@ -17,11 +17,10 @@
 package com.android.systemui.smartspace.config
 
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.BcSmartspaceConfigPlugin
 
 class BcSmartspaceConfigProvider(private val featureFlags: FeatureFlags) :
     BcSmartspaceConfigPlugin {
     override val isDefaultDateWeatherDisabled: Boolean
-        get() = featureFlags.isEnabled(Flags.SMARTSPACE_DATE_WEATHER_DECOUPLED)
+        get() = true
 }

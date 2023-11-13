@@ -316,11 +316,6 @@ object Flags {
     val SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
         releasedFlag("smartspace_shared_element_transition_enabled")
 
-    // TODO(b/258517050): Clean up after the feature is launched.
-    @JvmField
-    val SMARTSPACE_DATE_WEATHER_DECOUPLED =
-        sysPropBooleanFlag("persist.sysui.ss.dw_decoupled", default = true)
-
     // TODO(b/270223352): Tracking Bug
     @JvmField
     val HIDE_SMARTSPACE_ON_DREAM_OVERLAY = releasedFlag("hide_smartspace_on_dream_overlay")
