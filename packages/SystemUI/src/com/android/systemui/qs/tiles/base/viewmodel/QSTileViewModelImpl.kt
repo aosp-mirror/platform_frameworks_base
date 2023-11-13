@@ -116,7 +116,7 @@ class QSTileViewModelImpl<DATA_TYPE>(
             )
 
     override fun forceUpdate() {
-        forceUpdates.tryEmit(Unit)
+        tileScope.launch { forceUpdates.emit(Unit) }
     }
 
     override fun onUserChanged(user: UserHandle) {
