@@ -387,7 +387,6 @@ public class VoiceInteractionService extends Service {
                 VoiceInteractionService::onShutdownInternal, VoiceInteractionService.this));
     };
 
-
     private void onShutdownInternal() {
         onShutdown();
         // Stop any active recognitions when shutting down.
@@ -1022,6 +1021,26 @@ public class VoiceInteractionService extends Service {
             }
             mActiveVisualQueryDetector = visualQueryDetector;
             return visualQueryDetector;
+        }
+    }
+
+    /** Set sandboxed detection training data egress op.
+     *
+     * <p> This method can be called by a preinstalled assistant to allow/disallow training data
+     * egress from trusted process.
+     *
+     * @return whether was able to update sandboxed detection op successfully.
+     * @throws SecurityException if assistant is not a preinstalled assistant.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
+    public boolean setSandboxedDetectionTrainingDataOp(int opMode) {
+        Log.i(TAG, "Setting training data egress op-mode to " + opMode);
+        try {
+            return mSystemService.setSandboxedDetectionTrainingDataOp(opMode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
