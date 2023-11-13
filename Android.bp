@@ -396,6 +396,7 @@ java_defaults {
         "soundtrigger_middleware-aidl-java",
         "modules-utils-binary-xml",
         "modules-utils-build",
+        "modules-utils-fastxmlserializer",
         "modules-utils-preconditions",
         "modules-utils-statemachine",
         "modules-utils-synchronous-result-receiver",

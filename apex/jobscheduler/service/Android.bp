@@ -26,6 +26,10 @@ java_library {
         "unsupportedappusage",
     ],
 
+    static_libs: [
+        "modules-utils-fastxmlserializer",
+    ],
+
     // Rename classes shared with the framework
     jarjar_rules: "jarjar-rules.txt",
 
