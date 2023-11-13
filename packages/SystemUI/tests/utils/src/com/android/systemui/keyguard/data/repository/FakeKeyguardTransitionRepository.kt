@@ -151,6 +151,17 @@ class FakeKeyguardTransitionRepository @Inject constructor() : KeyguardTransitio
         _transitions.emit(step)
     }
 
+    suspend fun sendTransitionSteps(
+        steps: List<TransitionStep>,
+        testScope: TestScope,
+        validateStep: Boolean = true
+    ) {
+        steps.forEach {
+            sendTransitionStep(it, validateStep = validateStep)
+            testScope.testScheduler.runCurrent()
+        }
+    }
+
     override fun startTransition(info: TransitionInfo): UUID? {
         return if (info.animator == null) UUID.randomUUID() else null
     }

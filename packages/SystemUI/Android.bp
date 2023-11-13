@@ -294,8 +294,6 @@ filegroup {
         "tests/src/com/android/systemui/bouncer/ui/viewmodel/KeyguardBouncerViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/DreamingToLockscreenTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/GoneToDreamingTransitionViewModelTest.kt",
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToDreamingTransitionViewModelTest.kt",
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToOccludedTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/OccludedToLockscreenTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/PrimaryBouncerToGoneTransitionViewModelTest.kt",
         // Keyguard helper

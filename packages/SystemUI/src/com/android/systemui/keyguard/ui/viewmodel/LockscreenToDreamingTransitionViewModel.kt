@@ -21,6 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor.Companion.TO_DREAMING_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
@@ -34,7 +35,8 @@ class LockscreenToDreamingTransitionViewModel
 @Inject
 constructor(
     interactor: KeyguardTransitionInteractor,
-) {
+    shadeDependentFlows: ShadeDependentFlows,
+) : DeviceEntryIconTransition {
     private val transitionAnimation =
         KeyguardTransitionAnimationFlow(
             transitionDuration = TO_DREAMING_DURATION,
@@ -58,6 +60,12 @@ constructor(
         transitionAnimation.createFlow(
             duration = 250.milliseconds,
             onStep = { 1f - it },
+        )
+
+    override val deviceEntryParentViewAlpha: Flow<Float> =
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsNotExpanded = lockscreenAlpha,
+            flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
         )
 
     companion object {

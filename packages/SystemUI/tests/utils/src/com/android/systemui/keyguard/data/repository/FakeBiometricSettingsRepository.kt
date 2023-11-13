@@ -18,13 +18,18 @@
 package com.android.systemui.keyguard.data.repository
 
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.AuthenticationFlags
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 
-class FakeBiometricSettingsRepository : BiometricSettingsRepository {
+@SysUISingleton
+class FakeBiometricSettingsRepository @Inject constructor() : BiometricSettingsRepository {
     private val _isFingerprintEnrolledAndEnabled = MutableStateFlow(false)
     override val isFingerprintEnrolledAndEnabled: StateFlow<Boolean>
         get() = _isFingerprintEnrolledAndEnabled
@@ -96,4 +101,9 @@ class FakeBiometricSettingsRepository : BiometricSettingsRepository {
             )
         }
     }
+}
+
+@Module
+interface FakeBiometricSettingsRepositoryModule {
+    @Binds fun bindFake(fake: FakeBiometricSettingsRepository): BiometricSettingsRepository
 }

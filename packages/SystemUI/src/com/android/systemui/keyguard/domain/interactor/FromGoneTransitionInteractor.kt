@@ -138,6 +138,6 @@ constructor(
     companion object {
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
-        val TO_AOD_DURATION = 1100.milliseconds
+        val TO_AOD_DURATION = 1300.milliseconds
     }
 }

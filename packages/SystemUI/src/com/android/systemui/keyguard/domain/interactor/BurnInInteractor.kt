@@ -50,14 +50,18 @@ constructor(
     private val configurationRepository: ConfigurationRepository,
     private val keyguardInteractor: KeyguardInteractor,
 ) {
-    val udfpsBurnInXOffset: StateFlow<Int> =
+    val deviceEntryIconXOffset: StateFlow<Int> =
         burnInOffsetDefinedInPixels(R.dimen.udfps_burn_in_offset_x, isXAxis = true)
-    val udfpsBurnInYOffset: StateFlow<Int> =
+    val deviceEntryIconYOffset: StateFlow<Int> =
         burnInOffsetDefinedInPixels(R.dimen.udfps_burn_in_offset_y, isXAxis = false)
-    val udfpsBurnInProgress: StateFlow<Float> =
+    val udfpsProgress: StateFlow<Float> =
         keyguardInteractor.dozeTimeTick
             .mapLatest { burnInHelperWrapper.burnInProgressOffset() }
-            .stateIn(scope, SharingStarted.Lazily, burnInHelperWrapper.burnInProgressOffset())
+            .stateIn(
+                scope,
+                SharingStarted.WhileSubscribed(),
+                burnInHelperWrapper.burnInProgressOffset()
+            )
 
     val keyguardBurnIn: Flow<BurnInModel> =
         combine(

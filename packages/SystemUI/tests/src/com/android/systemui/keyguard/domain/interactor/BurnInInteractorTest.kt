@@ -84,8 +84,8 @@ class BurnInInteractorTest : SysuiTestCase() {
     @Test
     fun udfpsBurnInOffset_updatesOnResolutionScaleChange() =
         testScope.runTest {
-            val udfpsBurnInOffsetX by collectLastValue(underTest.udfpsBurnInXOffset)
-            val udfpsBurnInOffsetY by collectLastValue(underTest.udfpsBurnInYOffset)
+            val udfpsBurnInOffsetX by collectLastValue(underTest.deviceEntryIconXOffset)
+            val udfpsBurnInOffsetY by collectLastValue(underTest.deviceEntryIconYOffset)
             assertThat(udfpsBurnInOffsetX).isEqualTo(burnInOffset)
             assertThat(udfpsBurnInOffsetY).isEqualTo(burnInOffset)
 
@@ -101,7 +101,7 @@ class BurnInInteractorTest : SysuiTestCase() {
     @Test
     fun udfpsBurnInProgress_updatesOnDozeTimeTick() =
         testScope.runTest {
-            val udfpsBurnInProgress by collectLastValue(underTest.udfpsBurnInProgress)
+            val udfpsBurnInProgress by collectLastValue(underTest.udfpsProgress)
             assertThat(udfpsBurnInProgress).isEqualTo(burnInProgress)
 
             setBurnInProgress(.88f)

@@ -17,22 +17,29 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromAodTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 
 /**
  * Breaks down AOD->LOCKSCREEN transition into discrete steps for corresponding views to consume.
  */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class AodToLockscreenTransitionViewModel
 @Inject
 constructor(
-    private val interactor: KeyguardTransitionInteractor,
-) {
+    interactor: KeyguardTransitionInteractor,
+    deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
         KeyguardTransitionAnimationFlow(
@@ -47,4 +54,21 @@ constructor(
             onStart = { 1f },
             onStep = { 1f },
         )
+
+    val deviceEntryBackgroundViewAlpha: Flow<Float> =
+        deviceEntryUdfpsInteractor.isUdfpsSupported.flatMapLatest { isUdfps ->
+            if (isUdfps) {
+                // fade in
+                transitionAnimation.createFlow(
+                    duration = 250.milliseconds,
+                    onStep = { it },
+                    onFinish = { 1f },
+                )
+            } else {
+                // background view isn't visible, so return an empty flow
+                emptyFlow()
+            }
+        }
+
+    override val deviceEntryParentViewAlpha: Flow<Float> = lockscreenAlpha
 }
