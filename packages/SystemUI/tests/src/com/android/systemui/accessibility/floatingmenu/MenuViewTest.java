@@ -17,9 +17,7 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static android.app.UiModeManager.MODE_NIGHT_YES;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -27,9 +25,7 @@ import static org.mockito.Mockito.verify;
 import android.app.UiModeManager;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
@@ -65,10 +61,6 @@ public class MenuViewTest extends SysuiTestCase {
 
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
@@ -147,7 +139,7 @@ public class MenuViewTest extends SysuiTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_FLOATING_MENU_RADII_ANIMATION)
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_RADII_ANIMATION)
     public void onEdgeChanged_startsRadiiAnimation() {
         final RadiiAnimator radiiAnimator = getRadiiAnimator();
         mMenuView.onEdgeChanged();
@@ -155,7 +147,7 @@ public class MenuViewTest extends SysuiTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_FLOATING_MENU_RADII_ANIMATION)
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_RADII_ANIMATION)
     public void onDraggingStart_startsRadiiAnimation() {
         final RadiiAnimator radiiAnimator = getRadiiAnimator();
         mMenuView.onDraggingStart();

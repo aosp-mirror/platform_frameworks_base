@@ -17,7 +17,6 @@
 package com.android.systemui.accessibility.floatingmenu;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -26,9 +25,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.graphics.PointF;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.annotations.EnableFlags;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.View;
@@ -73,10 +70,6 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
 
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
@@ -233,7 +226,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_FLOATING_MENU_ANIMATED_TUCK)
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_ANIMATED_TUCK)
     public void tuck_animates() {
         mMenuAnimationController.cancelAnimations();
         mMenuAnimationController.moveToEdgeAndHide();
@@ -242,7 +235,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_FLOATING_MENU_ANIMATED_TUCK)
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_ANIMATED_TUCK)
     public void untuck_animates() {
         mMenuAnimationController.cancelAnimations();
         mMenuAnimationController.moveOutEdgeAndShow();
