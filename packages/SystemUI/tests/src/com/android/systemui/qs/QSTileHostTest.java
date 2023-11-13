@@ -18,6 +18,7 @@ package com.android.systemui.qs;
 
 
 import static com.android.systemui.Flags.FLAG_QS_NEW_PIPELINE;
+import static com.android.systemui.Flags.FLAG_QS_NEW_TILES;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
@@ -53,7 +54,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.nano.SystemUIProtoDump;
 import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QSFactory;
@@ -79,6 +79,8 @@ import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import dagger.Lazy;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -92,8 +94,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Provider;
-
-import dagger.Lazy;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
@@ -147,9 +147,8 @@ public class QSTileHostTest extends SysuiTestCase {
         mFeatureFlags = new FakeFeatureFlags();
 
         mSetFlagsRule.disableFlags(FLAG_QS_NEW_PIPELINE);
-        // TODO(b/299909337): Add test checking the new factory is used when the flag is on
-        mFeatureFlags.set(Flags.QS_PIPELINE_NEW_TILES, false);
-        mQSPipelineFlagsRepository = new QSPipelineFlagsRepository(mFeatureFlags);
+        mSetFlagsRule.disableFlags(FLAG_QS_NEW_TILES);
+        mQSPipelineFlagsRepository = new QSPipelineFlagsRepository();
 
         mMainExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -704,7 +703,7 @@ public class QSTileHostTest extends SysuiTestCase {
                 TileLifecycleManager.Factory tileLifecycleManagerFactory,
                 UserFileManager userFileManager, QSPipelineFlagsRepository featureFlags) {
             super(context, newQSTileFactoryProvider, defaultFactory, mainExecutor, pluginManager,
-                    tunerService, autoTiles,  shadeController, qsLogger,
+                    tunerService, autoTiles, shadeController, qsLogger,
                     userTracker, secureSettings, customTileStatePersister,
                     tileLifecycleManagerFactory, userFileManager, featureFlags);
         }

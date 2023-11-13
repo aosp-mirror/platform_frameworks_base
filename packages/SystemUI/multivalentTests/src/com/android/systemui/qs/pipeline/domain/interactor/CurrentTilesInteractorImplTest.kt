@@ -25,11 +25,10 @@ import android.service.quicksettings.Tile
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_QS_NEW_PIPELINE
+import com.android.systemui.Flags.FLAG_QS_NEW_TILES
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dump.nano.SystemUIProtoDump
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTile.BooleanState
 import com.android.systemui.qs.FakeQSFactory
@@ -81,8 +80,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
     private val tileFactory = FakeQSFactory(::tileCreator)
     private val customTileAddedRepository: CustomTileAddedRepository =
         FakeCustomTileAddedRepository()
-    private val featureFlags = FakeFeatureFlags()
-    private val pipelineFlags = QSPipelineFlagsRepository(featureFlags)
+    private val pipelineFlags = QSPipelineFlagsRepository()
     private val tileLifecycleManagerFactory = TLMFactory()
 
     @Mock private lateinit var customTileStatePersister: CustomTileStatePersister
@@ -100,14 +98,12 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
     private lateinit var underTest: CurrentTilesInteractorImpl
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
         mSetFlagsRule.enableFlags(FLAG_QS_NEW_PIPELINE)
-        // TODO(b/299909337): Add test checking the new factory is used when the flag is on
-        featureFlags.set(Flags.QS_PIPELINE_NEW_TILES, true)
+        mSetFlagsRule.enableFlags(FLAG_QS_NEW_TILES)
 
         userRepository.setUserInfos(listOf(USER_INFO_0, USER_INFO_1))
 

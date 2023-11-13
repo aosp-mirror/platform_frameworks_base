@@ -336,7 +336,7 @@ constructor(
     private suspend fun createTile(spec: TileSpec): QSTile? {
         val tile =
             withContext(mainDispatcher) {
-                if (featureFlags.pipelineTilesEnabled) {
+                if (featureFlags.tilesEnabled) {
                     newQSTileFactory.get().createTile(spec.spec)
                 } else {
                     null
