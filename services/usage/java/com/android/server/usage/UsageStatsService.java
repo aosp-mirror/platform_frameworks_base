@@ -206,6 +206,7 @@ public class UsageStatsService extends SystemService implements
     static final int MSG_NOTIFY_ESTIMATED_LAUNCH_TIMES_CHANGED = 9;
     static final int MSG_UID_REMOVED = 10;
     static final int MSG_USER_STARTED = 11;
+    static final int MSG_NOTIFY_USAGE_EVENT_LISTENER = 12;
 
     private final Object mLock = new Object();
     private Handler mHandler;
@@ -314,6 +315,16 @@ public class UsageStatsService extends SystemService implements
                 handleEstimatedLaunchTimesOnUserUnlock(userId);
                 Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
                 return true;
+            }
+            case MSG_NOTIFY_USAGE_EVENT_LISTENER: {
+                final int userId = msg.arg1;
+                final Event event = (Event) msg.obj;
+                synchronized (mUsageEventListeners) {
+                    final int size = mUsageEventListeners.size();
+                    for (int i = 0; i < size; ++i) {
+                        mUsageEventListeners.valueAt(i).onUsageEvent(userId, event);
+                    }
+                }
             }
         }
         return false;
@@ -532,9 +543,6 @@ public class UsageStatsService extends SystemService implements
             }
             reportEvent(unlockEvent, userId);
 
-            mIoHandler.obtainMessage(MSG_HANDLE_LAUNCH_TIME_ON_USER_UNLOCK,
-                    userId, 0).sendToTarget();
-
             // Remove all the stats stored in system DE.
             deleteRecursively(new File(Environment.getDataSystemDeDirectory(userId), "usagestats"));
 
@@ -546,6 +554,8 @@ public class UsageStatsService extends SystemService implements
                 userService.persistActiveStats();
             }
         }
+
+        mIoHandler.obtainMessage(MSG_HANDLE_LAUNCH_TIME_ON_USER_UNLOCK, userId, 0).sendToTarget();
     }
 
     /**
@@ -1240,12 +1250,7 @@ public class UsageStatsService extends SystemService implements
             service.reportEvent(event);
         }
 
-        synchronized (mUsageEventListeners) {
-            final int size = mUsageEventListeners.size();
-            for (int i = 0; i < size; ++i) {
-                mUsageEventListeners.valueAt(i).onUsageEvent(userId, event);
-            }
-        }
+        mIoHandler.obtainMessage(MSG_NOTIFY_USAGE_EVENT_LISTENER, userId, 0, event).sendToTarget();
     }
 
     private String getUsageSourcePackage(Event event) {
