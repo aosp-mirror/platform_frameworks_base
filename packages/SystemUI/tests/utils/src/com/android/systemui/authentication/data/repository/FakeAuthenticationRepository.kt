@@ -60,6 +60,10 @@ class FakeAuthenticationRepository(
 
     override val minPatternLength: Int = 4
 
+    private val _isPinEnhancedPrivacyEnabled = MutableStateFlow(false)
+    override val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> =
+        _isPinEnhancedPrivacyEnabled.asStateFlow()
+
     private var failedAttemptCount = 0
     private var throttlingEndTimestamp = 0L
     private var credentialOverride: List<Any>? = null
@@ -136,6 +140,10 @@ class FakeAuthenticationRepository(
                 throttleDurationMs = THROTTLE_DURATION_MS,
             )
         }
+    }
+
+    fun setPinEnhancedPrivacyEnabled(isEnabled: Boolean) {
+        _isPinEnhancedPrivacyEnabled.value = isEnabled
     }
 
     private fun getExpectedCredential(securityMode: SecurityMode): List<Any> {

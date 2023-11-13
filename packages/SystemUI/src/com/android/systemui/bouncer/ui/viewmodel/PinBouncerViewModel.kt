@@ -84,6 +84,19 @@ class PinBouncerViewModel(
 
     override val throttlingMessageId = R.string.kg_too_many_failed_pin_attempts_dialog_message
 
+    /**
+     * Whether the digit buttons should be animated when touched. Note that this doesn't affect the
+     * delete or enter buttons; those should always animate.
+     */
+    val isDigitButtonAnimationEnabled: StateFlow<Boolean> =
+        interactor.isPinEnhancedPrivacyEnabled
+            .map { !it }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = !interactor.isPinEnhancedPrivacyEnabled.value,
+            )
+
     /** Notifies that the user clicked on a PIN button with the given digit value. */
     fun onPinButtonClicked(input: Int) {
         val pinInput = mutablePinInput.value
