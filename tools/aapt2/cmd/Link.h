@@ -17,11 +17,17 @@
 #ifndef AAPT2_LINK_H
 #define AAPT2_LINK_H
 
+#include <optional>
 #include <regex>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include "Command.h"
 #include "Resource.h"
 #include "androidfw/IDiagnostics.h"
+#include "cmd/Util.h"
 #include "format/binary/TableFlattener.h"
 #include "format/proto/ProtoSerialize.h"
 #include "link/ManifestFixer.h"
@@ -72,6 +78,7 @@ struct LinkOptions {
   bool use_sparse_encoding = false;
   std::unordered_set<std::string> extensions_to_not_compress;
   std::optional<std::regex> regex_to_not_compress;
+  FeatureFlagValues feature_flag_values;
 
   // Static lib options.
   bool no_static_lib_packages = false;
