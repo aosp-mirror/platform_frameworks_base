@@ -108,6 +108,9 @@ interface AuthenticationRepository {
     /** The minimal length of a pattern. */
     val minPatternLength: Int
 
+    /** Whether the "enhanced PIN privacy" setting is enabled for the current user. */
+    val isPinEnhancedPrivacyEnabled: StateFlow<Boolean>
+
     /**
      * Returns the currently-configured authentication method. This determines how the
      * authentication challenge needs to be completed in order to unlock an otherwise locked device.
@@ -211,6 +214,12 @@ constructor(
             }
 
     override val minPatternLength: Int = LockPatternUtils.MIN_LOCK_PATTERN_SIZE
+
+    override val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> =
+        refreshingFlow(
+            initialValue = true,
+            getFreshValue = { userId -> lockPatternUtils.isPinEnhancedPrivacyEnabled(userId) },
+        )
 
     override suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
         return withContext(backgroundDispatcher) {
