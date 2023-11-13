@@ -100,6 +100,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteracto
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver;
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
@@ -334,6 +335,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private CastController mCastController;
     @Mock private SharedNotificationContainerInteractor mSharedNotificationContainerInteractor;
     @Mock private KeyguardClockPositionAlgorithm mKeyguardClockPositionAlgorithm;
+    @Mock private NaturalScrollingSettingObserver mNaturalScrollingSettingObserver;
 
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
@@ -498,6 +500,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(true);
         when(mQs.getView()).thenReturn(mView);
         when(mQSFragment.getView()).thenReturn(mView);
+        when(mNaturalScrollingSettingObserver.isNaturalScrollingEnabled()).thenReturn(true);
         doAnswer(invocation -> {
             mFragmentListener = invocation.getArgument(1);
             return null;
@@ -708,7 +711,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mKeyguardFaceAuthInteractor,
                 new ResourcesSplitShadeStateController(),
                 mPowerInteractor,
-                mKeyguardClockPositionAlgorithm);
+                mKeyguardClockPositionAlgorithm,
+                mNaturalScrollingSettingObserver);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 null,
