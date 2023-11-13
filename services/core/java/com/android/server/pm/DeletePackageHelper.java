@@ -578,6 +578,12 @@ final class DeletePackageHelper {
                             ? null
                             : ps.getUserStateOrDefault(nextUserId).getArchiveState();
 
+            // Preserve firstInstallTime in case of DELETE_KEEP_DATA
+            // For full uninstalls, reset firstInstallTime to 0 as if it has never been installed
+            final long firstInstallTime = (flags & DELETE_KEEP_DATA) == 0
+                    ? 0
+                    : ps.getUserStateOrDefault(nextUserId).getFirstInstallTimeMillis();
+
             ps.setUserState(nextUserId,
                     ps.getCeDataInode(nextUserId),
                     ps.getDeDataInode(nextUserId),
@@ -597,7 +603,7 @@ final class DeletePackageHelper {
                     PackageManager.UNINSTALL_REASON_UNKNOWN,
                     null /*harmfulAppWarning*/,
                     null /*splashScreenTheme*/,
-                    0 /*firstInstallTime*/,
+                    firstInstallTime,
                     PackageManager.USER_MIN_ASPECT_RATIO_UNSET,
                     archiveState);
         }
