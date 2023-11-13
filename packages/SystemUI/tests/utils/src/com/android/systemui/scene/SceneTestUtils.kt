@@ -61,7 +61,10 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.data.repository.PowerRepository
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -69,6 +72,7 @@ import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.data.repository.TelephonyRepository
@@ -137,6 +141,7 @@ class SceneTestUtils(
 
     private val falsingCollectorFake: FalsingCollector by lazy { FalsingCollectorFake() }
     private var falsingInteractor: FalsingInteractor? = null
+    private var powerInteractor: PowerInteractor? = null
 
     fun fakeSceneContainerRepository(
         containerConfig: SceneContainerConfig = fakeSceneContainerConfig(),
@@ -159,7 +164,7 @@ class SceneTestUtils(
         return SceneInteractor(
             applicationScope = applicationScope(),
             repository = repository,
-            powerRepository = powerRepository,
+            powerInteractor = powerInteractor(),
             logger = mock(),
         )
     }
@@ -227,6 +232,7 @@ class SceneTestUtils(
             authenticationInteractor = authenticationInteractor,
             flags = sceneContainerFlags,
             falsingInteractor = falsingInteractor(),
+            powerInteractor = powerInteractor()
         )
     }
 
@@ -262,6 +268,22 @@ class SceneTestUtils(
 
     fun falsingCollector(): FalsingCollector {
         return falsingCollectorFake
+    }
+
+    fun powerInteractor(
+        repository: PowerRepository = powerRepository,
+        falsingCollector: FalsingCollector = falsingCollector(),
+        screenOffAnimationController: ScreenOffAnimationController = mock(),
+        statusBarStateController: StatusBarStateController = mock(),
+    ): PowerInteractor {
+        return powerInteractor
+            ?: PowerInteractor(
+                    repository = repository,
+                    falsingCollector = falsingCollector,
+                    screenOffAnimationController = screenOffAnimationController,
+                    statusBarStateController = statusBarStateController,
+                )
+                .also { powerInteractor = it }
     }
 
     private fun applicationScope(): CoroutineScope {

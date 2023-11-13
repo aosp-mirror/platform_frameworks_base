@@ -291,6 +291,14 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(imeHiddenEvent).isNotNull()
         }
 
+    @Test
+    fun intentionalUserInputEvent_registersTouchEvent() =
+        testScope.runTest {
+            assertThat(utils.powerRepository.userTouchRegistered).isFalse()
+            underTest.onIntentionalUserInput()
+            assertThat(utils.powerRepository.userTouchRegistered).isTrue()
+        }
+
     private fun assertTryAgainMessage(
         message: String?,
         time: Int,

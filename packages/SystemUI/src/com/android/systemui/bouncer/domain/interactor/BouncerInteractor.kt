@@ -26,6 +26,7 @@ import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.util.kotlin.pairwise
@@ -52,6 +53,7 @@ constructor(
     private val authenticationInteractor: AuthenticationInteractor,
     flags: SceneContainerFlags,
     private val falsingInteractor: FalsingInteractor,
+    private val powerInteractor: PowerInteractor,
 ) {
 
     /** The user-facing message to show in the bouncer. */
@@ -124,6 +126,7 @@ constructor(
      * user's pocket or by the user's face while holding their device up to their ear.
      */
     fun onIntentionalUserInput() {
+        powerInteractor.onUserTouch()
         falsingInteractor.updateFalseConfidence(FalsingClassifier.Result.passed(0.6))
     }
 

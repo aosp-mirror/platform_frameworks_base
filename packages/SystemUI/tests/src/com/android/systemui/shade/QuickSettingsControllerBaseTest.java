@@ -37,7 +37,6 @@ import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
-import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
@@ -58,7 +57,6 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
-import com.android.systemui.power.data.repository.FakePowerRepository;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.res.R;
@@ -169,6 +167,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
     @Mock protected CastController mCastController;
     @Mock protected UserSwitcherInteractor mUserSwitcherInteractor;
     @Mock protected SelectedUserInteractor mSelectedUserInteractor;
+
     protected FakeDisableFlagsRepository mDisableFlagsRepository =
             new FakeDisableFlagsRepository();
     protected FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
@@ -198,12 +197,11 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 new FakeDeviceProvisioningRepository();
         deviceProvisioningRepository.setDeviceProvisioned(true);
         FakeFeatureFlagsClassic featureFlags = new FakeFeatureFlagsClassic();
-        FakePowerRepository powerRepository = new FakePowerRepository();
         FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
 
-        PowerInteractor powerInteractor = new PowerInteractor(
-                powerRepository,
-                new FalsingCollectorFake(),
+        PowerInteractor powerInteractor = mUtils.powerInteractor(
+                mUtils.getPowerRepository(),
+                mUtils.falsingCollector(),
                 mock(ScreenOffAnimationController.class),
                 mStatusBarStateController);
 
@@ -212,7 +210,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 new SceneContainerRepository(
                         mTestScope.getBackgroundScope(),
                         mUtils.fakeSceneContainerConfig()),
-                powerRepository,
+                powerInteractor,
                 mock(SceneLogger.class));
 
         FakeSceneContainerFlags sceneContainerFlags = new FakeSceneContainerFlags();
@@ -251,7 +249,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                                 new InWindowLauncherUnlockAnimationRepository(),
                                 mTestScope.getBackgroundScope(),
                                 keyguardTransitionInteractor,
-                                () -> new FakeKeyguardSurfaceBehindRepository(),
+                                FakeKeyguardSurfaceBehindRepository::new,
                                 mock(ActivityManagerWrapper.class)
                         )
                 );
