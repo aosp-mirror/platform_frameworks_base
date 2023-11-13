@@ -20,7 +20,6 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.volume.Events.DISMISS_REASON_UNKNOWN;
 import static com.android.systemui.volume.Events.SHOW_REASON_UNKNOWN;
 import static com.android.systemui.volume.VolumeDialogControllerImpl.STREAMS;
@@ -68,7 +67,6 @@ import com.android.systemui.Prefs;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.VolumeDialogController;
@@ -149,14 +147,13 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         }
     };
 
-    private FakeFeatureFlags mFeatureFlags;
     private int mLongestHideShowAnimationDuration = 250;
     private FakeSettings mSecureSettings;
 
     @Rule
     public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
 
-    @Before
+   @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
 
@@ -179,8 +176,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         mConfigurationController = new FakeConfigurationController();
 
-        mFeatureFlags = new FakeFeatureFlags();
-
         mSecureSettings = new FakeSettings();
 
         when(mLazySecureSettings.get()).thenReturn(mSecureSettings);
@@ -200,7 +195,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mPostureController,
                 mTestableLooper.getLooper(),
                 mDumpManager,
-                mFeatureFlags,
                 mLazySecureSettings);
         mDialog.init(0, null);
         State state = createShellState();
@@ -328,7 +322,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
     @Test
     public void testVibrateOnRingerChangedToVibrate() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
         final State initialSilentState = new State();
         initialSilentState.ringerModeInternal = AudioManager.RINGER_MODE_SILENT;
 
@@ -349,30 +342,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testControllerDoesNotVibrateOnRingerChangedToVibrate_OnewayAPI_On() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
-        final State initialSilentState = new State();
-        initialSilentState.ringerModeInternal = AudioManager.RINGER_MODE_SILENT;
-
-        final State vibrateState = new State();
-        vibrateState.ringerModeInternal = AudioManager.RINGER_MODE_VIBRATE;
-
-        // change ringer to silent
-        mDialog.onStateChangedH(initialSilentState);
-
-        // expected: shouldn't call vibrate yet
-        verify(mVolumeDialogController, never()).vibrate(any());
-
-        // changed ringer to vibrate
-        mDialog.onStateChangedH(vibrateState);
-
-        // expected: vibrate method of controller is not used
-        verify(mVolumeDialogController, never()).vibrate(any());
-    }
-
-    @Test
     public void testNoVibrateOnRingerInitialization() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
         final State initialUnsetState = new State();
         initialUnsetState.ringerModeInternal = -1;
 
@@ -390,48 +360,11 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testControllerDoesNotVibrateOnRingerInitialization_OnewayAPI_On() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
-        final State initialUnsetState = new State();
-        initialUnsetState.ringerModeInternal = -1;
-
-        // ringer not initialized yet:
-        mDialog.onStateChangedH(initialUnsetState);
-
-        final State vibrateState = new State();
-        vibrateState.ringerModeInternal = AudioManager.RINGER_MODE_VIBRATE;
-
-        // changed ringer to vibrate
-        mDialog.onStateChangedH(vibrateState);
-
-        // shouldn't call vibrate on the controller either
-        verify(mVolumeDialogController, never()).vibrate(any());
-    }
-
-    @Test
     public void testSelectVibrateFromDrawer() {
         assumeHasDrawer();
 
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
         final State initialUnsetState = new State();
         initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_NORMAL;
-        mDialog.onStateChangedH(initialUnsetState);
-
-        mActiveRinger.performClick();
-        mDrawerVibrate.performClick();
-
-        // Make sure we've actually changed the ringer mode.
-        verify(mVolumeDialogController, times(1)).setRingerMode(
-                AudioManager.RINGER_MODE_VIBRATE, false);
-    }
-
-    @Test
-    public void testSelectVibrateFromDrawer_OnewayAPI_On() {
-        assumeHasDrawer();
-
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
-        final State initialUnsetState = new State();
-        initialUnsetState.ringerModeInternal = RINGER_MODE_NORMAL;
         mDialog.onStateChangedH(initialUnsetState);
 
         mActiveRinger.performClick();
@@ -446,26 +379,8 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     public void testSelectMuteFromDrawer() {
         assumeHasDrawer();
 
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
         final State initialUnsetState = new State();
         initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_NORMAL;
-        mDialog.onStateChangedH(initialUnsetState);
-
-        mActiveRinger.performClick();
-        mDrawerMute.performClick();
-
-        // Make sure we've actually changed the ringer mode.
-        verify(mVolumeDialogController, times(1)).setRingerMode(
-                AudioManager.RINGER_MODE_SILENT, false);
-    }
-
-    @Test
-    public void testSelectMuteFromDrawer_OnewayAPI_On() {
-        assumeHasDrawer();
-
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
-        final State initialUnsetState = new State();
-        initialUnsetState.ringerModeInternal = RINGER_MODE_NORMAL;
         mDialog.onStateChangedH(initialUnsetState);
 
         mActiveRinger.performClick();
@@ -480,7 +395,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     public void testSelectNormalFromDrawer() {
         assumeHasDrawer();
 
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
         final State initialUnsetState = new State();
         initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_VIBRATE;
         mDialog.onStateChangedH(initialUnsetState);
@@ -491,23 +405,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         // Make sure we've actually changed the ringer mode.
         verify(mVolumeDialogController, times(1)).setRingerMode(
                 AudioManager.RINGER_MODE_NORMAL, false);
-    }
-
-    @Test
-    public void testSelectNormalFromDrawer_OnewayAPI_On() {
-        assumeHasDrawer();
-
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
-        final State initialUnsetState = new State();
-        initialUnsetState.ringerModeInternal = AudioManager.RINGER_MODE_VIBRATE;
-        mDialog.onStateChangedH(initialUnsetState);
-
-        mActiveRinger.performClick();
-        mDrawerNormal.performClick();
-
-        // Make sure we've actually changed the ringer mode.
-        verify(mVolumeDialogController, times(1)).setRingerMode(
-                RINGER_MODE_NORMAL, false);
     }
 
     /**
@@ -682,7 +579,6 @@ public class VolumeDialogImplTest extends SysuiTestCase {
 
         State state = createShellState();
         state.ringerModeInternal = ringerMode;
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
         mDialog.onStateChangedH(state);
 
         mDialog.show(SHOW_REASON_UNKNOWN);
