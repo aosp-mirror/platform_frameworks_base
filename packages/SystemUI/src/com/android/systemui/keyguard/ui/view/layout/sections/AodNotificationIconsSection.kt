@@ -86,7 +86,6 @@ constructor(
         }
 
         if (NotificationIconContainerRefactor.isEnabled) {
-            nic.setOnLockScreen(true)
             nicBindingDisposable?.dispose()
             nicBindingDisposable =
                 NotificationIconContainerViewBinder.bind(

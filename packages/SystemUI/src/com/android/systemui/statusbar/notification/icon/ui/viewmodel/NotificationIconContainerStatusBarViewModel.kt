@@ -15,9 +15,12 @@
  */
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
+import android.content.res.Resources
 import android.graphics.Rect
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.DarkIconDispatcher
+import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor
@@ -44,8 +47,11 @@ constructor(
     headsUpIconInteractor: HeadsUpNotificationIconInteractor,
     keyguardInteractor: KeyguardInteractor,
     notificationsInteractor: ActiveNotificationsInteractor,
+    @Main resources: Resources,
     shadeInteractor: ShadeInteractor,
 ) {
+
+    private val maxIcons = resources.getInteger(R.integer.max_notif_static_icons)
 
     /** Are changes to the icon container animated? */
     val animationsEnabled: Flow<Boolean> =
@@ -77,7 +83,8 @@ constructor(
     val icons: Flow<NotificationIconsViewData> =
         iconsInteractor.statusBarNotifs.map { entries ->
             NotificationIconsViewData(
-                visibleKeys = entries.mapNotNull { it.toIconInfo(it.statusBarIcon) },
+                visibleIcons = entries.mapNotNull { it.toIconInfo(it.statusBarIcon) },
+                iconLimit = maxIcons,
             )
         }
 
@@ -86,7 +93,7 @@ constructor(
         headsUpIconInteractor.isolatedNotification
             .combine(icons) { isolatedNotif, iconsViewData ->
                 isolatedNotif?.let {
-                    iconsViewData.visibleKeys.firstOrNull { it.notifKey == isolatedNotif }
+                    iconsViewData.visibleIcons.firstOrNull { it.notifKey == isolatedNotif }
                 }
             }
             .pairwise(initialValue = null)

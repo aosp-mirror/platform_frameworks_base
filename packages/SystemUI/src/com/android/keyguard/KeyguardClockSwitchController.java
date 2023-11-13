@@ -603,7 +603,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                     mAodIconsBindHandle.dispose();
                 }
                 if (nic != null) {
-                    nic.setOnLockScreen(true);
                     final DisposableHandle viewHandle = NotificationIconContainerViewBinder.bind(
                             nic,
                             mAodIconsViewModel,
