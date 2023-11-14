@@ -14,23 +14,51 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.component;
+package com.android.internal.pm.pkg.component;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.IntentFilter;
+import android.content.ComponentName;
+import android.content.pm.PackageManager.Property;
+import android.os.Bundle;
 
-/** @hide **/
+import java.util.List;
+import java.util.Map;
+
+/** @hide */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface ParsedIntentInfo {
+public interface ParsedComponent {
 
-    boolean isHasDefault();
+    int getBanner();
 
-    int getLabelRes();
+    @NonNull
+    ComponentName getComponentName();
 
-    @Nullable CharSequence getNonLocalizedLabel();
+    int getDescriptionRes();
+
+    int getFlags();
 
     int getIcon();
 
-    @NonNull IntentFilter getIntentFilter();
+    @NonNull
+    List<ParsedIntentInfo> getIntents();
+
+    int getLabelRes();
+
+    int getLogo();
+
+    @NonNull
+    Bundle getMetaData();
+
+    @NonNull
+    String getName();
+
+    @Nullable
+    CharSequence getNonLocalizedLabel();
+
+    @NonNull
+    String getPackageName();
+
+    @NonNull
+    Map<String, Property> getProperties();
 }

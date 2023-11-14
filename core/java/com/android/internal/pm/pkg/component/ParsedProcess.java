@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.component;
+package com.android.internal.pm.pkg.component;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;

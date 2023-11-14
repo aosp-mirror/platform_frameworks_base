@@ -249,6 +249,7 @@ java_library {
         "android.se.omapi-V1-java",
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
+        "ImmutabilityAnnotation",
 
         "com.android.sysprop.init",
         "com.android.sysprop.localization",

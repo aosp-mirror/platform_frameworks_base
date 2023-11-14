@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,51 +14,35 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.component;
+package com.android.internal.pm.pkg.component;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
-import android.content.pm.PackageManager.Property;
-import android.os.Bundle;
-
-import java.util.List;
-import java.util.Map;
 
 /** @hide */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface ParsedComponent {
-
-    int getBanner();
+public interface ParsedMainComponent extends ParsedComponent {
 
     @NonNull
-    ComponentName getComponentName();
+    String[] getAttributionTags();
 
-    int getDescriptionRes();
-
-    int getFlags();
-
-    int getIcon();
-
+    /**
+     * A main component's name is a class name. This makes code slightly more readable.
+     */
     @NonNull
-    List<ParsedIntentInfo> getIntents();
+    String getClassName();
 
-    int getLabelRes();
+    boolean isDirectBootAware();
 
-    int getLogo();
+    boolean isEnabled();
 
-    @NonNull
-    Bundle getMetaData();
+    boolean isExported();
 
-    @NonNull
-    String getName();
+    int getOrder();
 
     @Nullable
-    CharSequence getNonLocalizedLabel();
+    String getProcessName();
 
-    @NonNull
-    String getPackageName();
-
-    @NonNull
-    Map<String, Property> getProperties();
+    @Nullable
+    String getSplitName();
 }

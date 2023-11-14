@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.component;
+package com.android.internal.pm.pkg.component;
 
 import android.annotation.Nullable;
 
-/** @hide **/
+/** @hide */
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface ParsedService extends ParsedMainComponent {
-
-    int getForegroundServiceType();
+public interface ParsedInstrumentation extends ParsedComponent {
 
     @Nullable
-    String getPermission();
+    String getTargetPackage();
+
+    @Nullable
+    String getTargetProcesses();
+
+    boolean isFunctionalTest();
+
+    boolean isHandleProfiling();
 }

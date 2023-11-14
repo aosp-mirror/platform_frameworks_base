@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,32 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.component;
+package com.android.internal.pm.pkg.component;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.IntentFilter;
 
-import java.util.Set;
-
-/** @hide */
+/** @hide **/
 //@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
-public interface ParsedPermission extends ParsedComponent {
+public interface ParsedIntentInfo {
 
-    @Nullable
-    String getBackgroundPermission();
+    boolean isHasDefault();
 
-    @Nullable
-    String getGroup();
+    int getLabelRes();
 
-    @NonNull
-    Set<String> getKnownCerts();
+    @Nullable CharSequence getNonLocalizedLabel();
 
-    @Nullable
-    ParsedPermissionGroup getParsedPermissionGroup();
+    int getIcon();
 
-    int getProtectionLevel();
-
-    int getRequestRes();
-
-    boolean isTree();
+    @NonNull IntentFilter getIntentFilter();
 }

@@ -25,7 +25,7 @@ import android.os.Parcelable;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.component.ParsedProcess;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling;
@@ -35,7 +35,6 @@ import java.util.Set;
 /** @hide */
 @DataClass(genGetters = true, genSetters = true, genParcelable = true, genAidl = false,
         genBuilder = false)
-@VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
 public class ParsedProcessImpl implements ParsedProcess, Parcelable {
 
     @NonNull
