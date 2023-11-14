@@ -296,9 +296,11 @@ interface IWindowSession {
 
     /**
     * Request the server to call setInputWindowInfo on a given Surface, and return
-    * an input channel where the client can receive input.
+    * an input channel where the client can receive input. For windows, the clientToken should be
+    * the IWindow binder object. For other requests, the token can be any unique IBinder token to
+    * be used as unique identifier.
     */
-    void grantInputChannel(int displayId, in SurfaceControl surface, in IWindow window,
+    void grantInputChannel(int displayId, in SurfaceControl surface, in IBinder clientToken,
             in IBinder hostInputToken, int flags, int privateFlags, int inputFeatures, int type,
             in IBinder windowToken, in IBinder focusGrantToken, String inputHandleName,
             out InputChannel outInputChannel);

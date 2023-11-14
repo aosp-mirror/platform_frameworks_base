@@ -1693,8 +1693,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    public IWindow getIWindow() {
-        return mClient;
+    public IBinder getWindowToken() {
+        return mClient.asBinder();
     }
 
     @Override

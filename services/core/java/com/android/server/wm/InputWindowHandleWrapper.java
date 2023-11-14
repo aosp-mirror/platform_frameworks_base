@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.InputConfig;
-import android.view.IWindow;
 import android.view.InputApplicationHandle;
 import android.view.InputWindowHandle;
 import android.view.InputWindowHandle.InputConfigFlags;
@@ -264,8 +263,8 @@ class InputWindowHandleWrapper {
         mChanged = true;
     }
 
-    void setWindowToken(IWindow windowToken) {
-        if (mHandle.getWindow() == windowToken) {
+    void setWindowToken(IBinder windowToken) {
+        if (mHandle.getWindowToken() == windowToken) {
             return;
         }
         mHandle.setWindowToken(windowToken);
