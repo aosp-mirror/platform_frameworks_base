@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +48,7 @@ import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.launch
 
 /** An element on screen, that can be composed in one or more scenes. */
+@Stable
 internal class Element(val key: ElementKey) {
     /**
      * The last values of this element, coming from any scene. Note that this value will be unstable
@@ -91,6 +93,7 @@ internal class Element(val key: ElementKey) {
     }
 
     /** The target values of this element in a given scene. */
+    @Stable
     class TargetValues(val scene: SceneKey) {
         val lastValues = Values()
 
@@ -108,6 +111,7 @@ internal class Element(val key: ElementKey) {
     }
 
     /** A shared value of this element. */
+    @Stable
     class SharedValue<T>(val key: ValueKey, initialValue: T) {
         var value by mutableStateOf(initialValue)
     }

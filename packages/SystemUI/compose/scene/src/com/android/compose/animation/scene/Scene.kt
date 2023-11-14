@@ -19,11 +19,13 @@ package com.android.compose.animation.scene
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -34,6 +36,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.zIndex
 
 /** A scene in a [SceneTransitionLayout]. */
+@Stable
 internal class Scene(
     val key: SceneKey,
     layoutImpl: SceneTransitionLayoutImpl,
@@ -105,11 +108,13 @@ private class SceneScopeImpl(
     ): State<T> {
         val element =
             element?.let { key ->
-                layoutImpl.elements[key]
-                    ?: error(
-                        "Element $key is not composed. Make sure to call animateSharedXAsState " +
-                            "*after* Modifier.element(key)."
-                    )
+                Snapshot.withoutReadObservation {
+                    layoutImpl.elements[key]
+                        ?: error(
+                            "Element $key is not composed. Make sure to call " +
+                                "animateSharedXAsState *after* Modifier.element(key)."
+                        )
+                }
             }
 
         return animateSharedValueAsState(

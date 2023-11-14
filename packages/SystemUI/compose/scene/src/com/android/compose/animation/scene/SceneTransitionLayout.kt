@@ -19,6 +19,7 @@ package com.android.compose.animation.scene
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -95,6 +96,7 @@ interface SceneTransitionLayoutScope {
 @DslMarker annotation class ElementDsl
 
 @ElementDsl
+@Stable
 interface SceneScope {
     /** The state of the [SceneTransitionLayout] in which this scene is contained. */
     val layoutState: SceneTransitionLayoutState

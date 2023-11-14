@@ -18,6 +18,7 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.snap
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
@@ -92,6 +93,7 @@ class SceneTransitions(
 }
 
 /** The definition of a transition between [from] and [to]. */
+@Stable
 data class TransitionSpec(
     val from: SceneKey?,
     val to: SceneKey?,
