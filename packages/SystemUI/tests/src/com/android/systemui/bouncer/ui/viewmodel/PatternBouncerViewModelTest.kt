@@ -373,15 +373,23 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
         )
     }
 
+    private fun TestScope.switchToScene(toScene: SceneKey) {
+        val currentScene by collectLastValue(sceneInteractor.desiredScene)
+        val bouncerShown = currentScene?.key != SceneKey.Bouncer && toScene == SceneKey.Bouncer
+        val bouncerHidden = currentScene?.key == SceneKey.Bouncer && toScene != SceneKey.Bouncer
+        sceneInteractor.changeScene(SceneModel(toScene), "reason")
+        sceneInteractor.onSceneChanged(SceneModel(toScene), "reason")
+        if (bouncerShown) underTest.onShown()
+        if (bouncerHidden) underTest.onHidden()
+        runCurrent()
+
+        assertThat(currentScene).isEqualTo(SceneModel(toScene))
+    }
+
     private fun TestScope.lockDeviceAndOpenPatternBouncer() {
         utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pattern)
         utils.deviceEntryRepository.setUnlocked(false)
-        sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
-        sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
-        assertThat(collectLastValue(sceneInteractor.desiredScene).invoke())
-            .isEqualTo(SceneModel(SceneKey.Bouncer))
-        underTest.onShown()
-        runCurrent()
+        switchToScene(SceneKey.Bouncer)
     }
 
     companion object {

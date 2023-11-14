@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -69,8 +70,10 @@ fun PinPad(
     viewModel: PinBouncerViewModel,
     modifier: Modifier = Modifier,
 ) {
-    // Report that the UI is shown to let the view-model run some logic.
-    LaunchedEffect(Unit) { viewModel.onShown() }
+    DisposableEffect(Unit) {
+        viewModel.onShown()
+        onDispose { viewModel.onHidden() }
+    }
 
     val isInputEnabled: Boolean by viewModel.isInputEnabled.collectAsState()
     val backspaceButtonAppearance by viewModel.backspaceButtonAppearance.collectAsState()
