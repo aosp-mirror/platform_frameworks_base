@@ -31,6 +31,7 @@ import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
@@ -65,10 +66,7 @@ constructor(
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (
-            !keyguardBottomAreaRefactor() &&
-                !featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)
-        ) {
+        if (!keyguardBottomAreaRefactor() && !DeviceEntryUdfpsRefactor.isEnabled) {
             return
         }
 
@@ -77,7 +75,7 @@ constructor(
         }
 
         val view =
-            if (featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+            if (DeviceEntryUdfpsRefactor.isEnabled) {
                 DeviceEntryIconView(context, null).apply { id = deviceEntryIconViewId }
             } else {
                 // keyguardBottomAreaRefactor()
@@ -87,7 +85,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+        if (DeviceEntryUdfpsRefactor.isEnabled) {
             constraintLayout.findViewById<DeviceEntryIconView?>(deviceEntryIconViewId)?.let {
                 DeviceEntryIconViewBinder.bind(
                     it,
@@ -140,7 +138,7 @@ constructor(
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+        if (DeviceEntryUdfpsRefactor.isEnabled) {
             constraintLayout.removeView(deviceEntryIconViewId)
         } else {
             constraintLayout.removeView(R.id.lock_icon_view)
@@ -160,7 +158,7 @@ constructor(
             }
 
         val iconId =
-            if (featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+            if (DeviceEntryUdfpsRefactor.isEnabled) {
                 deviceEntryIconViewId
             } else {
                 R.id.lock_icon_view

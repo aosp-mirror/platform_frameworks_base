@@ -80,11 +80,7 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testScope = TestScope()
         configRepository = FakeConfigurationRepository()
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
-                set(Flags.FACE_AUTH_REFACTOR, false)
-            }
+        featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
         KeyguardInteractorFactory.create(featureFlags = featureFlags).let {
             keyguardInteractor = it.keyguardInteractor
             keyguardRepository = it.repository

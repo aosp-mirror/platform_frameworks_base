@@ -67,10 +67,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
 
         featureFlags =
-            FakeFeatureFlagsClassic().apply {
-                set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, false)
-                set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
-            }
+            FakeFeatureFlagsClassic().apply { set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false) }
         underTest =
             DefaultDeviceEntryIconSection(
                 keyguardUpdateMonitor,
@@ -98,7 +95,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
     @Test
     fun addViewsConditionally_migrateAndRefactorFlagsOn() {
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
         assertThat(constraintLayout.childCount).isGreaterThan(0)
@@ -107,7 +104,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
     @Test
     fun addViewsConditionally_migrateFlagOff() {
         mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, false)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
         assertThat(constraintLayout.childCount).isEqualTo(0)
@@ -115,7 +112,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
 
     @Test
     fun applyConstraints_udfps_refactor_off() {
-        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, false)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val cs = ConstraintSet()
         underTest.applyConstraints(cs)
 
@@ -127,7 +124,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
 
     @Test
     fun applyConstraints_udfps_refactor_on() {
-        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val cs = ConstraintSet()
         underTest.applyConstraints(cs)
 
@@ -139,7 +136,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
 
     @Test
     fun testCenterIcon_udfps_refactor_off() {
-        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, false)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val cs = ConstraintSet()
         underTest.centerIcon(Point(5, 6), 1F, cs)
 
@@ -155,7 +152,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
 
     @Test
     fun testCenterIcon_udfps_refactor_on() {
-        featureFlags.set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
+        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         val cs = ConstraintSet()
         underTest.centerIcon(Point(5, 6), 1F, cs)
 

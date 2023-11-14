@@ -23,6 +23,7 @@ import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.common.ui.view.LongPressHandlingView
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
@@ -51,6 +52,7 @@ object DeviceEntryIconViewBinder {
         bgViewModel: DeviceEntryBackgroundViewModel,
         falsingManager: FalsingManager,
     ) {
+        DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()
         val longPressHandlingView = view.longPressHandlingView
         val fgIconView = view.iconView
         val bgView = view.bgView
