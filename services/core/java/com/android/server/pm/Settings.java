@@ -948,6 +948,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             ret.getPkgState().setUpdatedSystemApp(false);
             ret.setTargetSdkVersion(p.getTargetSdkVersion());
             ret.setRestrictUpdateHash(p.getRestrictUpdateHash());
+            ret.setScannedAsStoppedSystemApp(p.isScannedAsStoppedSystemApp());
         }
         mDisabledSysPackages.remove(name);
         return ret;
@@ -1162,6 +1163,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     Slog.i(PackageManagerService.TAG, "Stopping system package " + pkgName, e);
                 }
                 pkgSetting.setStopped(true, installUserId);
+                pkgSetting.setScannedAsStoppedSystemApp(true);
             }
             if (sharedUser != null) {
                 pkgSetting.setAppId(sharedUser.mAppId);
@@ -3072,6 +3074,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             serializer.attributeBytesBase64(null, "restrictUpdateHash",
                     pkg.getRestrictUpdateHash());
         }
+        serializer.attributeBoolean(null, "scannedAsStoppedSystemApp",
+            pkg.isScannedAsStoppedSystemApp());
         if (pkg.getLegacyNativeLibraryPath() != null) {
             serializer.attribute(null, "nativeLibraryPath", pkg.getLegacyNativeLibraryPath());
         }
@@ -3140,6 +3144,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             serializer.attributeBytesBase64(null, "restrictUpdateHash",
                     pkg.getRestrictUpdateHash());
         }
+        serializer.attributeBoolean(null, "scannedAsStoppedSystemApp",
+            pkg.isScannedAsStoppedSystemApp());
         if (!pkg.hasSharedUser()) {
             serializer.attributeInt(null, "userId", pkg.getAppId());
         } else {
@@ -3873,6 +3879,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         int targetSdkVersion = parser.getAttributeInt(null, "targetSdkVersion", 0);
         byte[] restrictUpdateHash = parser.getAttributeBytesBase64(null, "restrictUpdateHash",
                 null);
+        boolean isScannedAsStoppedSystemApp =  parser.getAttributeBoolean(null,
+            "scannedAsStoppedSystemApp", false);
 
         int pkgFlags = 0;
         int pkgPrivateFlags = 0;
@@ -3893,7 +3901,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 .setCpuAbiOverride(cpuAbiOverrideStr)
                 .setLongVersionCode(versionCode)
                 .setTargetSdkVersion(targetSdkVersion)
-                .setRestrictUpdateHash(restrictUpdateHash);
+                .setRestrictUpdateHash(restrictUpdateHash)
+                .setScannedAsStoppedSystemApp(isScannedAsStoppedSystemApp);
         long timeStamp = parser.getAttributeLongHex(null, "ft", 0);
         if (timeStamp == 0) {
             timeStamp = parser.getAttributeLong(null, "ts", 0);
@@ -3988,6 +3997,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
         String appMetadataFilePath = null;
         int targetSdkVersion = 0;
         byte[] restrictUpdateHash = null;
+        boolean isScannedAsStoppedSystemApp = false;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -4028,6 +4038,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             categoryHint = parser.getAttributeInt(null, "categoryHint",
                     ApplicationInfo.CATEGORY_UNDEFINED);
             appMetadataFilePath = parser.getAttributeValue(null, "appMetadataFilePath");
+            isScannedAsStoppedSystemApp = parser.getAttributeBoolean(null,
+                "scannedAsStoppedSystemApp", false);
 
             String domainSetIdString = parser.getAttributeValue(null, "domainSetId");
 
@@ -4174,7 +4186,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                     .setLoadingCompletedTime(loadingCompletedTime)
                     .setAppMetadataFilePath(appMetadataFilePath)
                     .setTargetSdkVersion(targetSdkVersion)
-                    .setRestrictUpdateHash(restrictUpdateHash);
+                    .setRestrictUpdateHash(restrictUpdateHash)
+                    .setScannedAsStoppedSystemApp(isScannedAsStoppedSystemApp);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
@@ -4988,6 +5001,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 pw.append(prefix).append("  queriesIntents=")
                         .println(ps.getPkg().getQueriesIntents());
             }
+            pw.print(prefix); pw.print("  scannedAsStoppedSystemApp=");
+            pw.println(ps.isScannedAsStoppedSystemApp());
             pw.print(prefix); pw.print("  supportsScreens=[");
             boolean first = true;
             if (pkg.isSmallScreensSupported()) {
