@@ -152,6 +152,7 @@ public class PackageInfoUtils {
         info.compileSdkVersionCodename = pkg.getCompileSdkVersionCodeName();
         info.firstInstallTime = firstInstallTime;
         info.lastUpdateTime = lastUpdateTime;
+        info.setArchiveTimeMillis(state.getArchiveTimeMillis());
         if ((flags & PackageManager.GET_GIDS) != 0) {
             info.gids = gids;
         }

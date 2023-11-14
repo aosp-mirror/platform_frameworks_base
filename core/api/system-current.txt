@@ -3861,6 +3861,10 @@ package android.content.pm {
     field @RequiresPermission(android.Manifest.permission.ACCESS_SHORTCUTS) public static final int FLAG_GET_PERSONS_DATA = 2048; // 0x800
   }
 
+  public class PackageInfo implements android.os.Parcelable {
+    method @FlaggedApi("android.content.pm.archiving") public long getArchiveTimeMillis();
+  }
+
   public class PackageInstaller {
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
