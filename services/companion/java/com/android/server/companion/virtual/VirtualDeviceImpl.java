@@ -692,7 +692,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createDpad(config.getInputDeviceName(), config.getVendorId(),
-                    config.getProductId(), deviceToken, config.getAssociatedDisplayId());
+                    config.getProductId(), deviceToken,
+                    getTargetDisplayIdForInput(config.getAssociatedDisplayId()));
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -710,7 +711,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createKeyboard(config.getInputDeviceName(), config.getVendorId(),
-                    config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
+                    config.getProductId(), deviceToken,
+                    getTargetDisplayIdForInput(config.getAssociatedDisplayId()),
                     config.getLanguageTag(), config.getLayoutType());
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -776,7 +778,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         try {
             mInputController.createNavigationTouchpad(
                     config.getInputDeviceName(), config.getVendorId(),
-                    config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
+                    config.getProductId(), deviceToken,
+                    getTargetDisplayIdForInput(config.getAssociatedDisplayId()),
                     touchpadHeight, touchpadWidth);
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -1000,6 +1003,20 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if (mVirtualCameraController != null) {
             mVirtualCameraController.dump(fout, indent);
         }
+    }
+
+    // For display mirroring, we want to dispatch all key events to the source (default) display,
+    // as the virtual display doesn't have any focused windows. Hence, call this for
+    // associating any input device to the source display if the input device emits any key events.
+    private int getTargetDisplayIdForInput(int displayId) {
+        if (!Flags.interactiveScreenMirror()) {
+            return displayId;
+        }
+
+        DisplayManagerInternal displayManager = LocalServices.getService(
+                DisplayManagerInternal.class);
+        int mirroredDisplayId = displayManager.getDisplayIdToMirror(displayId);
+        return mirroredDisplayId == Display.INVALID_DISPLAY ? displayId : mirroredDisplayId;
     }
 
     @GuardedBy("mVirtualDeviceLock")
