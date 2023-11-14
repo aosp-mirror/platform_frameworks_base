@@ -26,7 +26,6 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILIT
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CLIENT;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_ACCESSIBILITY_SERVICE_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
-import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.accessibility.AccessibilityInteractionClient.CALL_STACK;
 import static android.view.accessibility.AccessibilityInteractionClient.IGNORE_CALL_STACK;
@@ -69,7 +68,6 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
-import android.os.Trace;
 import android.provider.Settings;
 import android.util.Pair;
 import android.util.Slog;
@@ -93,7 +91,6 @@ import android.window.ScreenCapture.ScreenshotHardwareBuffer;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
-import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
 import com.android.internal.inputmethod.IRemoteAccessibilityInputConnection;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
@@ -101,7 +98,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityWindowManager.RemoteAccessibilityConnection;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
-import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
 
 import java.io.FileDescriptor;
@@ -1993,20 +1989,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         }
     }
 
-    private void createImeSessionInternal() {
-        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
-        if (listener != null) {
-            try {
-                if (svcClientTracingEnabled()) {
-                    logTraceSvcClient("createImeSession", "");
-                }
-                AccessibilityCallback callback = new AccessibilityCallback();
-                listener.createImeSession(callback);
-            } catch (RemoteException re) {
-                Slog.e(LOG_TAG,
-                        "Error requesting IME session from " + mService, re);
-            }
-        }
+    protected void createImeSessionInternal() {
     }
 
     private void setImeSessionEnabledInternal(IAccessibilityInputMethodSession session,
@@ -2655,21 +2638,6 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     mContext.getContentResolver(), Settings.Global.ANIMATOR_DURATION_SCALE, scale);
         } finally {
             Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    private static final class AccessibilityCallback
-            extends IAccessibilityInputMethodSessionCallback.Stub {
-        @Override
-        public void sessionCreated(IAccessibilityInputMethodSession session, int id) {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AACS.sessionCreated");
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                InputMethodManagerInternal.get().onSessionForAccessibilityCreated(id, session);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
     }
 
