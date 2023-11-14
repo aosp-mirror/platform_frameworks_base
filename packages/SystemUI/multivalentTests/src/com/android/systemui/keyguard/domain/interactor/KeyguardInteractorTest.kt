@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
@@ -53,7 +54,6 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private val sceneInteractor = testUtils.sceneInteractor()
     private val commandQueue = FakeCommandQueue()
     private val bouncerRepository = FakeKeyguardBouncerRepository()
-    private val configurationRepository = FakeConfigurationRepository()
     private val shadeRepository = FakeShadeRepository()
     private val transitionState: MutableStateFlow<ObservableTransitionState> =
         MutableStateFlow(ObservableTransitionState.Idle(SceneKey.Gone))
@@ -65,7 +65,7 @@ class KeyguardInteractorTest : SysuiTestCase() {
             powerInteractor = PowerInteractorFactory.create().powerInteractor,
             sceneContainerFlags = testUtils.sceneContainerFlags,
             bouncerRepository = bouncerRepository,
-            configurationRepository = configurationRepository,
+            configurationInteractor = ConfigurationInteractor(FakeConfigurationRepository()),
             shadeRepository = shadeRepository,
             sceneInteractorProvider = { sceneInteractor },
         )

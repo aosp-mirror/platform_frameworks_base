@@ -26,7 +26,6 @@ import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardDone
-import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import dagger.Binds
 import dagger.Module
@@ -122,17 +121,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha: StateFlow<Float> = _keyguardAlpha
-
-    private val _keyguardRootViewVisibility =
-        MutableStateFlow(
-            KeyguardRootViewVisibilityState(
-                0,
-                goingToFullShade = false,
-                occlusionTransitionRunning = false
-            )
-        )
-    override val keyguardRootViewVisibility: Flow<KeyguardRootViewVisibilityState> =
-        _keyguardRootViewVisibility.asStateFlow()
 
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
@@ -253,19 +241,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun setKeyguardAlpha(alpha: Float) {
         _keyguardAlpha.value = alpha
-    }
-
-    override fun setKeyguardVisibility(
-        statusBarState: Int,
-        goingToFullShade: Boolean,
-        occlusionTransitionRunning: Boolean
-    ) {
-        _keyguardRootViewVisibility.value =
-            KeyguardRootViewVisibilityState(
-                statusBarState,
-                goingToFullShade,
-                occlusionTransitionRunning
-            )
     }
 }
 

@@ -40,6 +40,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.flags.FeatureFlags;
@@ -228,7 +229,7 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 powerInteractor,
                 sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
-                configurationRepository,
+                new ConfigurationInteractor(configurationRepository),
                 mShadeRepository,
                 () -> sceneInteractor);
 

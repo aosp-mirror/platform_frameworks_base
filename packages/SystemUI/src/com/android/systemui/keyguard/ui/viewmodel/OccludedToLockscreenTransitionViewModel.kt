@@ -17,12 +17,14 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,8 +42,10 @@ class OccludedToLockscreenTransitionViewModel
 @Inject
 constructor(
     interactor: KeyguardTransitionInteractor,
-    deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor
+    deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+    configurationInteractor: ConfigurationInteractor,
 ) : DeviceEntryIconTransition {
+
     private val transitionAnimation =
         KeyguardTransitionAnimationFlow(
             transitionDuration = TO_LOCKSCREEN_DURATION,
@@ -49,14 +53,17 @@ constructor(
         )
 
     /** Lockscreen views y-translation */
-    fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
-        return transitionAnimation.createFlow(
-            duration = TO_LOCKSCREEN_DURATION,
-            onStep = { value -> -translatePx + value * translatePx },
-            interpolator = EMPHASIZED_DECELERATE,
-            onCancel = { 0f },
-        )
-    }
+    val lockscreenTranslationY: Flow<Float> =
+        configurationInteractor
+            .dimensionPixelSize(R.dimen.occluded_to_lockscreen_transition_lockscreen_translation_y)
+            .flatMapLatest { translatePx ->
+                transitionAnimation.createFlow(
+                    duration = TO_LOCKSCREEN_DURATION,
+                    onStep = { value -> -translatePx + value * translatePx },
+                    interpolator = EMPHASIZED_DECELERATE,
+                    onCancel = { 0f },
+                )
+            }
 
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.createFlow(
