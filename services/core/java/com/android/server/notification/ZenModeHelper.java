@@ -106,7 +106,9 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -334,6 +336,7 @@ public class ZenModeHelper {
         return mZenMode;
     }
 
+    // TODO: b/310620812 - Make private (or inline) when MODES_API is inlined.
     public List<ZenRule> getZenRules() {
         List<ZenRule> rules = new ArrayList<>();
         synchronized (mConfigLock) {
@@ -343,6 +346,20 @@ public class ZenModeHelper {
                     rules.add(rule);
                 }
             }
+        }
+        return rules;
+    }
+
+    /**
+     * Get the list of {@link AutomaticZenRule} instances that the calling package can manage
+     * (which means the owned rules for a regular app, and every rule for system callers) together
+     * with their ids.
+     */
+    Map<String, AutomaticZenRule> getAutomaticZenRules() {
+        List<ZenRule> ruleList = getZenRules();
+        HashMap<String, AutomaticZenRule> rules = new HashMap<>(ruleList.size());
+        for (ZenRule rule : ruleList) {
+            rules.put(rule.id, zenRuleToAutomaticZenRule(rule));
         }
         return rules;
     }
