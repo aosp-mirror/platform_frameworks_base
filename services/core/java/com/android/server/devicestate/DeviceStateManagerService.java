@@ -1114,11 +1114,21 @@ public final class DeviceStateManagerService extends SystemService {
 
         public void notifyDeviceStateInfoAsync(@NonNull DeviceStateInfo info) {
             mHandler.post(() -> {
+                boolean tracingEnabled = Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER);
+                if (tracingEnabled) { // To avoid creating the string when not needed.
+                    Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER,
+                            "notifyDeviceStateInfoAsync(pid=" + mPid + ")");
+                }
                 try {
                     mCallback.onDeviceStateInfoChanged(info);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to notify process " + mPid + " that device state changed.",
                             ex);
+                }
+                finally {
+                    if (tracingEnabled) {
+                        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+                    }
                 }
             });
         }
