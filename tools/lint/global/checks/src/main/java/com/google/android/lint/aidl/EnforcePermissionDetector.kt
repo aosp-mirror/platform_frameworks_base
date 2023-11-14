@@ -168,7 +168,7 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
             annotationInfo.origin == AnnotationOrigin.METHOD) {
             /* Ignore implementations that are not a sub-class of Stub (i.e., Proxy). */
             val uMethod = element as? UMethod ?: return
-            if (!isContainedInSubclassOfStub(context, uMethod)) {
+            if (getContainingAidlInterface(context, uMethod) == null) {
                 return
             }
             val overridingMethod = element.sourcePsi as PsiMethod
@@ -184,7 +184,8 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
             if (context.evaluator.isAbstract(node)) return
             if (!node.hasAnnotation(ANNOTATION_ENFORCE_PERMISSION)) return
 
-            if (!isContainedInSubclassOfStub(context, node)) {
+            val stubClass = containingStub(context, node)
+            if (stubClass == null) {
                 context.report(
                     ISSUE_MISUSING_ENFORCE_PERMISSION,
                     node,
@@ -196,7 +197,7 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
 
             /* Check that we are connected to the super class */
             val overridingMethod = node as PsiMethod
-            val parents = overridingMethod.findSuperMethods()
+            val parents = overridingMethod.findSuperMethods(stubClass)
             if (parents.isEmpty()) {
                 context.report(
                     ISSUE_MISUSING_ENFORCE_PERMISSION,
