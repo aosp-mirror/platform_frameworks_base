@@ -173,7 +173,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private final TransitionController mController;
     private final BLASTSyncEngine mSyncEngine;
     private final Token mToken;
-    private IApplicationThread mRemoteAnimApp;
 
     private @Nullable ActivityRecord mPipActivity;
 
@@ -1487,13 +1486,14 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return mForcePlaying;
     }
 
+    /** Adjusts the priority of the process which will run the transition animation. */
     void setRemoteAnimationApp(IApplicationThread app) {
-        mRemoteAnimApp = app;
-    }
-
-    /** Returns the app which will run the transition animation. */
-    IApplicationThread getRemoteAnimationApp() {
-        return mRemoteAnimApp;
+        final WindowProcessController wpc = mController.mAtm.getProcessController(app);
+        if (wpc != null) {
+            // This is an early prediction. If the process doesn't ack the animation in 200 ms,
+            // the priority will be restored.
+            mController.mRemotePlayer.update(wpc, true /* running */, true /* predict */);
+        }
     }
 
     void setNoAnimation(WindowContainer wc) {
