@@ -2096,14 +2096,48 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     /**
      * Send a notification to registrants about the data activity state.
      *
+     * @param subId the subscriptionId for the data connection
+     * @param state indicates the latest data activity type
+     * e.g.,{@link TelephonyManager#DATA_ACTIVITY_IN}
+     *
+     */
+
+    public void notifyDataActivityForSubscriber(int subId, int state) {
+        if (!checkNotifyPermission("notifyDataActivity()")) {
+            return;
+        }
+        int phoneId = getPhoneIdFromSubId(subId);
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                mDataActivity[phoneId] = state;
+                for (Record r : mRecords) {
+                    // Notify by correct subId.
+                    if (r.matchTelephonyCallbackEvent(
+                            TelephonyCallback.EVENT_DATA_ACTIVITY_CHANGED)
+                            && idMatch(r, subId, phoneId)) {
+                        try {
+                            r.callback.onDataActivity(state);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    /**
+     * Send a notification to registrants about the data activity state.
+     *
      * @param phoneId the phoneId carrying the data connection
      * @param subId the subscriptionId for the data connection
      * @param state indicates the latest data activity type
      * e.g.,{@link TelephonyManager#DATA_ACTIVITY_IN}
      *
      */
-    public void notifyDataActivityForSubscriber(int phoneId, int subId, int state) {
-        if (!checkNotifyPermission("notifyDataActivity()" )) {
+    public void notifyDataActivityForSubscriberWithSlot(int phoneId, int subId, int state) {
+        if (!checkNotifyPermission("notifyDataActivityWithSlot()")) {
             return;
         }
 
