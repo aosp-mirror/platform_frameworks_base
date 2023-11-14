@@ -142,8 +142,10 @@ public final class SharedLibraryInfo implements Parcelable {
         mName = parcel.readString8();
         mVersion = parcel.readLong();
         mType = parcel.readInt();
-        mDeclaringPackage = parcel.readParcelable(null, android.content.pm.VersionedPackage.class);
-        mDependentPackages = parcel.readArrayList(null, android.content.pm.VersionedPackage.class);
+        mDeclaringPackage =
+                parcel.readParcelable(null, android.content.pm.VersionedPackage.class);
+        mDependentPackages =
+                parcel.readArrayList(null, android.content.pm.VersionedPackage.class);
         mDependencies = parcel.createTypedArrayList(SharedLibraryInfo.CREATOR);
         mIsNative = parcel.readBoolean();
     }

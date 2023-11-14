@@ -3862,11 +3862,13 @@ public class ComputerEngine implements Computer {
                     Binder.restoreCallingIdentity(identity);
                 }
 
+                var usingSharedLibraryPair =
+                        getPackagesUsingSharedLibrary(libInfo, flags, callingUid, userId);
                 SharedLibraryInfo resLibInfo = new SharedLibraryInfo(libInfo.getPath(),
                         libInfo.getPackageName(), libInfo.getAllCodePaths(),
                         libInfo.getName(), libInfo.getLongVersion(),
                         libInfo.getType(), declaringPackage,
-                        getPackagesUsingSharedLibrary(libInfo, flags, callingUid, userId),
+                        usingSharedLibraryPair.first,
                         (libInfo.getDependencies() == null
                                 ? null
                                 : new ArrayList<>(libInfo.getDependencies())),
@@ -3935,13 +3937,15 @@ public class ComputerEngine implements Computer {
         return false;
     }
 
+
     @Override
-    public List<VersionedPackage> getPackagesUsingSharedLibrary(@NonNull SharedLibraryInfo libInfo,
-            @PackageManager.PackageInfoFlagsBits long flags, int callingUid,
-            @UserIdInt int userId) {
+    public Pair<List<VersionedPackage>, List<Boolean>> getPackagesUsingSharedLibrary(
+            @NonNull SharedLibraryInfo libInfo, @PackageManager.PackageInfoFlagsBits long flags,
+            int callingUid, @UserIdInt int userId) {
         List<VersionedPackage> versionedPackages = null;
         final ArrayMap<String, ? extends PackageStateInternal> packageStates = getPackageStates();
         final int packageCount = packageStates.size();
+        List<Boolean> usesLibsOptional = null;
         for (int i = 0; i < packageCount; i++) {
             PackageStateInternal ps = packageStates.valueAt(i);
             if (ps == null) {
@@ -3958,12 +3962,15 @@ public class ComputerEngine implements Computer {
                         libInfo.isStatic() ? ps.getUsesStaticLibraries() : ps.getUsesSdkLibraries();
                 final long[] libsVersions = libInfo.isStatic() ? ps.getUsesStaticLibrariesVersions()
                         : ps.getUsesSdkLibrariesVersionsMajor();
+                final boolean[] libsOptional = libInfo.isSdk()
+                        ? ps.getUsesSdkLibrariesOptional() : null;
 
                 final int libIdx = ArrayUtils.indexOf(libs, libName);
                 if (libIdx < 0) {
                     continue;
                 }
                 if (libsVersions[libIdx] != libInfo.getLongVersion()) {
+                    // Not expected StaticLib/SdkLib version
                     continue;
                 }
                 if (shouldFilterApplication(ps, callingUid, userId)) {
@@ -3972,6 +3979,9 @@ public class ComputerEngine implements Computer {
                 if (versionedPackages == null) {
                     versionedPackages = new ArrayList<>();
                 }
+                if (usesLibsOptional == null) {
+                    usesLibsOptional = new ArrayList<>();
+                }
                 // If the dependent is a static shared lib, use the public package name
                 String dependentPackageName = ps.getPackageName();
                 if (ps.getPkg() != null && ps.getPkg().isStaticSharedLibrary()) {
@@ -3979,6 +3989,7 @@ public class ComputerEngine implements Computer {
                 }
                 versionedPackages.add(new VersionedPackage(dependentPackageName,
                         ps.getVersionCode()));
+                usesLibsOptional.add(libsOptional != null && libsOptional[libIdx]);
             } else if (ps.getPkg() != null) {
                 if (ArrayUtils.contains(ps.getPkg().getUsesLibraries(), libName)
                         || ArrayUtils.contains(ps.getPkg().getUsesOptionalLibraries(), libName)) {
@@ -3994,7 +4005,7 @@ public class ComputerEngine implements Computer {
             }
         }
 
-        return versionedPackages;
+        return new Pair<>(versionedPackages, usesLibsOptional);
     }
 
     @Nullable
@@ -4053,13 +4064,14 @@ public class ComputerEngine implements Computer {
                     Binder.restoreCallingIdentity(identity);
                 }
 
+                var usingSharedLibraryPair =
+                        getPackagesUsingSharedLibrary(libraryInfo, flags, callingUid, userId);
                 SharedLibraryInfo resultLibraryInfo = new SharedLibraryInfo(
                         libraryInfo.getPath(), libraryInfo.getPackageName(),
                         libraryInfo.getAllCodePaths(), libraryInfo.getName(),
                         libraryInfo.getLongVersion(), libraryInfo.getType(),
                         libraryInfo.getDeclaringPackage(),
-                        getPackagesUsingSharedLibrary(
-                                libraryInfo, flags, callingUid, userId),
+                        usingSharedLibraryPair.first,
                         libraryInfo.getDependencies() == null
                                 ? null : new ArrayList<>(libraryInfo.getDependencies()),
                         libraryInfo.isNative());

@@ -1340,6 +1340,15 @@ public interface AndroidPackage {
     @Nullable
     long[] getUsesSdkLibrariesVersionsMajor();
 
+
+    /**
+     * @see R.styleable#AndroidManifestUsesSdkLibrary_optional
+     * @hide
+     */
+    @Immutable.Ignore
+    @Nullable
+    boolean[] getUsesSdkLibrariesOptional();
+
     /**
      * TODO(b/135203078): Move static library stuff to an inner data class
      *

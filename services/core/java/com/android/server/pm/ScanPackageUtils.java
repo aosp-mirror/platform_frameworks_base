@@ -218,7 +218,8 @@ final class ScanPackageUtils {
                     parsedPackage.getLongVersionCode(), pkgFlags, pkgPrivateFlags, user,
                     true /*allowInstall*/, instantApp, virtualPreload, isStoppedSystemApp,
                     UserManagerService.getInstance(), usesSdkLibraries,
-                    parsedPackage.getUsesSdkLibrariesVersionsMajor(), usesStaticLibraries,
+                    parsedPackage.getUsesSdkLibrariesVersionsMajor(),
+                    parsedPackage.getUsesSdkLibrariesOptional(), usesStaticLibraries,
                     parsedPackage.getUsesStaticLibrariesVersions(), parsedPackage.getMimeGroups(),
                     newDomainSetId,
                     parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
@@ -240,6 +241,7 @@ final class ScanPackageUtils {
                     PackageInfoUtils.appInfoPrivateFlags(parsedPackage, pkgSetting),
                     UserManagerService.getInstance(),
                     usesSdkLibraries, parsedPackage.getUsesSdkLibrariesVersionsMajor(),
+                    parsedPackage.getUsesSdkLibrariesOptional(),
                     usesStaticLibraries, parsedPackage.getUsesStaticLibrariesVersions(),
                     parsedPackage.getMimeGroups(), newDomainSetId,
                     parsedPackage.getTargetSdkVersion(), parsedPackage.getRestrictUpdateHash());
