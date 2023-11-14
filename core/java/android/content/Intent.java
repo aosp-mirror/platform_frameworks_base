@@ -2800,6 +2800,12 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: An application package that was previously in the stopped state has been
      * started and is no longer considered stopped.
+     * <p>When a package is force-stopped, the {@link #ACTION_PACKAGE_RESTARTED} broadcast is sent
+     * and the package in the stopped state cannot self-start for any reason unless there's an
+     * explicit request to start a component in the package. The {@link #ACTION_PACKAGE_UNSTOPPED}
+     * broadcast is sent when such an explicit process start occurs and the package is taken
+     * out of the stopped state.
+     * </p>
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * <li> {@link #EXTRA_TIME} containing the {@link SystemClock#elapsedRealtime()
@@ -2807,6 +2813,9 @@ public class Intent implements Parcelable, Cloneable {
      * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent by the system.
+     *
+     * @see ApplicationInfo#FLAG_STOPPED
+     * @see #ACTION_PACKAGE_RESTARTED
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @FlaggedApi(android.content.pm.Flags.FLAG_STAY_STOPPED)
