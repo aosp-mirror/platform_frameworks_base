@@ -25,9 +25,7 @@ import androidx.lifecycle.lifecycleScope
 import com.android.internal.policy.SystemBarUtils
 import com.android.internal.statusbar.StatusBarIcon
 import com.android.internal.util.ContrastColorUtil
-import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
@@ -39,21 +37,15 @@ import com.android.systemui.statusbar.notification.icon.ui.viewmodel.Notificatio
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerShelfViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconsViewData
-import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconsViewData.LimitType
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.onConfigChanged
-import com.android.systemui.util.asIndenting
 import com.android.systemui.util.kotlin.mapValuesNotNullTo
 import com.android.systemui.util.kotlin.stateFlow
-import com.android.systemui.util.printCollection
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
-import dagger.Binds
-import dagger.multibindings.ClassKey
-import dagger.multibindings.IntoMap
-import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
@@ -134,6 +126,7 @@ object NotificationIconContainerViewBinder {
     ): DisposableHandle {
         return view.repeatWhenAttached {
             lifecycleScope.launch {
+                view.setUseIncreasedIconScale(true)
                 launch {
                     viewModel.icons.bindIcons(
                         view,
@@ -229,7 +222,6 @@ object NotificationIconContainerViewBinder {
                 ->
                 FrameLayout.LayoutParams(iconSize + 2 * iconHPadding, statusBarHeight)
             }
-
         val failedBindings = mutableSetOf<String>()
         val boundViewsByNotifKey = ArrayMap<String, Pair<StatusBarIconView, Job>>()
         var prevIcons = NotificationIconsViewData()
@@ -237,62 +229,109 @@ object NotificationIconContainerViewBinder {
             val iconsDiff = NotificationIconsViewData.computeDifference(iconsData, prevIcons)
             prevIcons = iconsData
 
+            // Lookup 1:1 group icon replacements
             val replacingIcons: ArrayMap<String, StatusBarIcon> =
-                iconsDiff.groupReplacements.mapValuesNotNullTo(ArrayMap()) { (_, info) ->
-                    boundViewsByNotifKey[info.notifKey]?.first?.statusBarIcon
+                iconsDiff.groupReplacements.mapValuesNotNullTo(ArrayMap()) { (_, notifKey) ->
+                    boundViewsByNotifKey[notifKey]?.first?.statusBarIcon
                 }
-            view.setReplacingIcons(replacingIcons)
-
-            for (notifKey in iconsDiff.removed) {
-                failedBindings.remove(notifKey)
-                val (child, job) = boundViewsByNotifKey.remove(notifKey) ?: continue
-                view.removeView(child)
-                job.cancel()
-            }
-
-            val toAdd: Sequence<String> =
-                iconsDiff.added.asSequence().map { it.notifKey } + failedBindings
-            for ((idx, notifKey) in toAdd.withIndex()) {
-                val sbiv = viewStore.iconView(notifKey)
-                if (sbiv == null) {
-                    failedBindings.add(notifKey)
-                    continue
+            view.withIconReplacements(replacingIcons) {
+                // Remove and unbind.
+                for (notifKey in iconsDiff.removed) {
+                    failedBindings.remove(notifKey)
+                    val (child, job) = boundViewsByNotifKey.remove(notifKey) ?: continue
+                    view.removeView(child)
+                    job.cancel()
                 }
-                // The view might still be transiently added if it was just removed and added again
-                view.removeTransientView(sbiv)
-                view.addView(sbiv, idx)
-                boundViewsByNotifKey.remove(notifKey)?.second?.cancel()
-                boundViewsByNotifKey[notifKey] =
-                    Pair(
-                        sbiv,
-                        launch {
-                            launch { layoutParams.collect { sbiv.layoutParams = it } }
-                            bindIcon(notifKey, sbiv)
-                        },
-                    )
-            }
 
-            notifyBindingFailures(failedBindings)
-
-            view.setChangingViewPositions(true)
-
-            // Re-sort notification icons
-            val expectedChildren =
-                iconsData.visibleKeys.mapNotNull { boundViewsByNotifKey[it.notifKey]?.first }
-            val childCount = view.childCount
-            for (i in 0 until childCount) {
-                val actual = view.getChildAt(i)
-                val expected = expectedChildren[i]
-                if (actual === expected) {
-                    continue
+                // Add and bind.
+                val toAdd: Sequence<String> = iconsDiff.added.asSequence() + failedBindings
+                for ((idx, notifKey) in toAdd.withIndex()) {
+                    // Lookup the StatusBarIconView from the store.
+                    val sbiv = viewStore.iconView(notifKey)
+                    if (sbiv == null) {
+                        failedBindings.add(notifKey)
+                        continue
+                    }
+                    // The view might still be transiently added if it was just removed and added
+                    // again
+                    view.removeTransientView(sbiv)
+                    view.addView(sbiv, idx)
+                    boundViewsByNotifKey.remove(notifKey)?.second?.cancel()
+                    boundViewsByNotifKey[notifKey] =
+                        Pair(
+                            sbiv,
+                            launch {
+                                launch { layoutParams.collect { sbiv.layoutParams = it } }
+                                bindIcon(notifKey, sbiv)
+                            },
+                        )
                 }
-                view.removeView(expected)
-                view.addView(expected, i)
-            }
-            view.setChangingViewPositions(false)
 
-            view.setReplacingIcons(null)
+                // Set the maximum number of icons to show in the container. Any icons over this
+                // amount will render as an "overflow dot".
+                val maxIconsAmount: Int =
+                    when (iconsData.limitType) {
+                        LimitType.MaximumIndex -> {
+                            iconsData.visibleIcons
+                                .asSequence()
+                                .take(iconsData.iconLimit)
+                                .count { info -> info.notifKey in boundViewsByNotifKey }
+                        }
+                        LimitType.MaximumAmount -> {
+                            iconsData.iconLimit
+                        }
+                    }
+                view.setMaxIconsAmount(maxIconsAmount)
+
+                // Track the binding failures so that they appear in dumpsys.
+                notifyBindingFailures(failedBindings)
+
+                // Re-sort notification icons
+                view.changeViewPositions {
+                    val expectedChildren: List<StatusBarIconView> =
+                        iconsData.visibleIcons.mapNotNull {
+                            boundViewsByNotifKey[it.notifKey]?.first
+                        }
+                    val childCount = view.childCount
+                    for (i in 0 until childCount) {
+                        val actual = view.getChildAt(i)
+                        val expected = expectedChildren[i]
+                        if (actual === expected) {
+                            continue
+                        }
+                        view.removeView(expected)
+                        view.addView(expected, i)
+                    }
+                }
+            }
+            // Recalculate all icon positions, to reflect our updates.
+            view.calculateIconXTranslations()
         }
+    }
+
+    /**
+     * Track which groups are being replaced with a different icon instance, but with the same
+     * visual icon. This prevents a weird animation where it looks like an icon disappears and
+     * reappears unchanged.
+     */
+    // TODO(b/305739416): Ideally we wouldn't swap out the StatusBarIconView at all, and instead use
+    //  a single SBIV instance for the group. Then this whole concept can go away.
+    private inline fun <R> NotificationIconContainer.withIconReplacements(
+        replacements: ArrayMap<String, StatusBarIcon>,
+        block: () -> R
+    ): R {
+        setReplacingIcons(replacements)
+        return block().also { setReplacingIcons(null) }
+    }
+
+    /**
+     * Any invocations of [NotificationIconContainer.addView] /
+     * [NotificationIconContainer.removeView] inside of [block] will not cause a new add / remove
+     * animation.
+     */
+    private inline fun <R> NotificationIconContainer.changeViewPositions(block: () -> R): R {
+        setChangingViewPositions(true)
+        return block().also { setChangingViewPositions(false) }
     }
 
     /** External storage for [StatusBarIconView] instances. */
