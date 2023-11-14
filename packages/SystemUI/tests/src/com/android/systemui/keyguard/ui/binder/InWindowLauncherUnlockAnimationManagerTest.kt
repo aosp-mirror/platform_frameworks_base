@@ -18,7 +18,7 @@ package com.android.systemui.keyguard.ui.binder
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestModule
+import com.android.SysUITestModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager

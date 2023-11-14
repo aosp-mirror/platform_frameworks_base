@@ -5,8 +5,8 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestModule
-import com.android.systemui.TestMocksModule
+import com.android.SysUITestModule
+import com.android.TestMocksModule
 import com.android.systemui.ExpandHelper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
@@ -607,9 +607,9 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         @Component.Factory
         interface Factory {
             fun create(
-                    @BindsInstance test: SysuiTestCase,
-                    featureFlags: FakeFeatureFlagsClassicModule,
-                    mocks: TestMocksModule,
+                @BindsInstance test: SysuiTestCase,
+                featureFlags: FakeFeatureFlagsClassicModule,
+                mocks: TestMocksModule,
             ): TestComponent
         }
     }

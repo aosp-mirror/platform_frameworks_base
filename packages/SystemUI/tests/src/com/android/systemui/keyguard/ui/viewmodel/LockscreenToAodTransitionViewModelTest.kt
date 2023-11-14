@@ -18,13 +18,15 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
+import com.android.SysUITestComponent
+import com.android.SysUITestModule
+import com.android.TestMocksModule
+import com.android.collectLastValue
+import com.android.collectValues
+import com.android.runCurrent
+import com.android.runTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
-import com.android.systemui.collectLastValue
-import com.android.systemui.collectValues
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
@@ -37,8 +39,6 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.user.domain.UserDomainLayerModule
 import com.google.common.collect.Range
@@ -77,15 +77,15 @@ class LockscreenToAodTransitionViewModelTest : SysuiTestCase() {
                 mocks: TestMocksModule,
             ): TestComponent
         }
-    }
 
-    private fun TestComponent.shadeExpanded(expanded: Boolean) {
-        if (expanded) {
-            shadeRepository.setQsExpansion(1f)
-        } else {
-            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
-            shadeRepository.setQsExpansion(0f)
-            shadeRepository.setLockscreenShadeExpansion(0f)
+        fun shadeExpanded(expanded: Boolean) {
+            if (expanded) {
+                shadeRepository.setQsExpansion(1f)
+            } else {
+                keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+                shadeRepository.setQsExpansion(0f)
+                shadeRepository.setLockscreenShadeExpansion(0f)
+            }
         }
     }
 

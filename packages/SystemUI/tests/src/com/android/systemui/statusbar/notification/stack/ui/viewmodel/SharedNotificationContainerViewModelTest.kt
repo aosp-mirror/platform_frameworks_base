@@ -19,11 +19,13 @@ package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
+import com.android.SysUITestComponent
+import com.android.SysUITestModule
+import com.android.TestMocksModule
+import com.android.collectLastValue
+import com.android.runCurrent
+import com.android.runTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.collectLastValue
 import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
@@ -37,8 +39,6 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.res.R
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.user.domain.UserDomainLayerModule
