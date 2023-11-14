@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.companion.virtual.camera;
 
 /**
- * Counterpart of ICameraDeviceSession for virtual camera.
- *
+ * Data structure used to store {@link android.hardware.camera2.CameraMetadata} compatible with
+ * VirtualCamera.
  * @hide
  */
-interface IVirtualCameraSession {
-
-    void configureStream(int width, int height, int format);
-
-    void close();
-}
+parcelable VirtualCameraMetadata;

@@ -1940,7 +1940,7 @@ public class VirtualDeviceManagerServiceTest {
                         mRunningAppsChangedCallback,
                         params,
                         new DisplayManagerGlobal(mIDisplayManager),
-                        new VirtualCameraController(mContext));
+                        new VirtualCameraController());
         mVdms.addVirtualDevice(virtualDeviceImpl);
         assertThat(virtualDeviceImpl.getAssociationId()).isEqualTo(mAssociationInfo.getId());
         assertThat(virtualDeviceImpl.getPersistentDeviceId())
