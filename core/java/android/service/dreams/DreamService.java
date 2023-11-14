@@ -264,6 +264,7 @@ public class DreamService extends Service implements Window.Callback {
     private boolean mDozing;
     private boolean mWindowless;
     private int mDozeScreenState = Display.STATE_UNKNOWN;
+    private @Display.StateReason int mDozeScreenStateReason = Display.STATE_REASON_UNKNOWN;
     private int mDozeScreenBrightness = PowerManager.BRIGHTNESS_DEFAULT;
 
     private boolean mDebug = false;
@@ -748,7 +749,9 @@ public class DreamService extends Service implements Window.Callback {
 
         if (mDozing) {
             try {
-                mDreamManager.startDozing(mDreamToken, mDozeScreenState, mDozeScreenBrightness);
+                mDreamManager.startDozing(
+                        mDreamToken, mDozeScreenState, mDozeScreenStateReason,
+                        mDozeScreenBrightness);
             } catch (RemoteException ex) {
                 // system server died
             }
@@ -808,6 +811,19 @@ public class DreamService extends Service implements Window.Callback {
     }
 
     /**
+     * Same as {@link #setDozeScreenState(int, int)}, but with no screen state reason specified.
+     *
+     * <p>Use {@link #setDozeScreenState(int, int)} whenever possible to allow properly accounting
+     * for the screen state reason.
+     *
+     * @hide
+     */
+    @UnsupportedAppUsage
+    public void setDozeScreenState(int state) {
+        setDozeScreenState(state, Display.STATE_REASON_UNKNOWN);
+    }
+
+    /**
      * Sets the screen state to use while dozing.
      * <p>
      * The value of this property determines the power state of the primary display
@@ -841,13 +857,15 @@ public class DreamService extends Service implements Window.Callback {
      * {@link Display#STATE_DOZE}, {@link Display#STATE_DOZE_SUSPEND},
      * {@link Display#STATE_ON_SUSPEND}, {@link Display#STATE_OFF}, or {@link Display#STATE_UNKNOWN}
      * for the default behavior.
+     * @param reason the reason for setting the specified screen state.
      *
      * @hide For use by system UI components only.
      */
     @UnsupportedAppUsage
-    public void setDozeScreenState(int state) {
+    public void setDozeScreenState(int state, @Display.StateReason int reason) {
         if (mDozeScreenState != state) {
             mDozeScreenState = state;
+            mDozeScreenStateReason = reason;
             updateDoze();
         }
     }
