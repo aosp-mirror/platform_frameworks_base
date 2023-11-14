@@ -22,17 +22,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
-import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
-import android.icu.text.UnicodeSet;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
-
-import com.android.internal.annotations.VisibleForTesting;
-
-import java.util.Objects;
 
 /**
  * A representation of an activity that can belong to this user or a managed
@@ -42,10 +35,6 @@ import java.util.Objects;
 public class LauncherActivityInfo {
     private final PackageManager mPm;
     private final LauncherActivityInfoInternal mInternal;
-
-    private static final UnicodeSet TRIMMABLE_CHARACTERS =
-            new UnicodeSet("[[:White_Space:][:Default_Ignorable_Code_Point:][:gc=Cc:]]",
-                    /* ignoreWhitespace= */ false).freeze();
 
     /**
      * Create a launchable activity object for a given ResolveInfo and user.
@@ -83,28 +72,13 @@ public class LauncherActivityInfo {
     }
 
     /**
-     * Retrieves the label for the activity. The returned label can be different
-     * from {@link ActivityInfo#loadLabel(PackageManager)} or
-     * {@link PackageItemInfo#loadLabel(PackageManager)}. The returned result is trimmed.
-     * If the activity's label is empty, use the application's label instead.
-     * If the application's label is still empty, use the package name instead.
+     * Retrieves the label for the activity.
      *
-     * @return The label for the activity. If the activity's label is empty,
-     *         return the application's label instead. If the application's label
-     *         is still empty, return the package name instead.
+     * @return The label for the activity.
      */
     public CharSequence getLabel() {
-        CharSequence label = trim(getActivityInfo().loadLabel(mPm));
-        // If the trimmed label is empty, use application's label instead
-        if (TextUtils.isEmpty(label)) {
-            label = trim(getApplicationInfo().loadLabel(mPm));
-            // If the trimmed label is still empty, use package name instead
-            if (TextUtils.isEmpty(label)) {
-                label = getComponentName().getPackageName();
-            }
-        }
         // TODO: Go through LauncherAppsService
-        return label;
+        return getActivityInfo().loadLabel(mPm);
     }
 
     /**
@@ -205,150 +179,5 @@ public class LauncherActivityInfo {
         Drawable originalIcon = getIcon(density);
 
         return mPm.getUserBadgedIcon(originalIcon, mInternal.getUser());
-    }
-
-    /**
-     * If the {@code ch} is trimmable, return {@code true}. Otherwise, return
-     * {@code false}. If the count of the code points of {@code ch} doesn't
-     * equal 1, return {@code false}.
-     * <p>
-     * There are two types of the trimmable characters.
-     * 1. The character is one of the Default_Ignorable_Code_Point in
-     * <a href="
-     * https://www.unicode.org/Public/UCD/latest/ucd/DerivedCoreProperties.txt">
-     * DerivedCoreProperties.txt</a>, the White_Space in <a href=
-     * "https://www.unicode.org/Public/UCD/latest/ucd/PropList.txt">PropList.txt
-     * </a> or category Cc.
-     * <p>
-     * 2. The character is not supported in the current system font.
-     * {@link android.graphics.Paint#hasGlyph(String)}
-     * <p>
-     *
-     */
-    private static boolean isTrimmable(@NonNull Paint paint, @NonNull CharSequence ch) {
-        Objects.requireNonNull(paint);
-        Objects.requireNonNull(ch);
-
-        // if ch is empty or it is not a character (i,e, the count of code
-        // point doesn't equal one), return false
-        if (TextUtils.isEmpty(ch)
-                || Character.codePointCount(ch, /* beginIndex= */ 0, ch.length()) != 1) {
-            return false;
-        }
-
-        // Return true for the cases as below:
-        // 1. The character is in the TRIMMABLE_CHARACTERS set
-        // 2. The character is not supported in the system font
-        return TRIMMABLE_CHARACTERS.contains(ch) || !paint.hasGlyph(ch.toString());
-    }
-
-    /**
-     * If the {@code sequence} has some leading trimmable characters, creates a new copy
-     * and removes the trimmable characters from the copy. Otherwise the given
-     * {@code sequence} is returned as it is. Use {@link #isTrimmable(Paint, CharSequence)}
-     * to determine whether the character is trimmable or not.
-     *
-     * @return the trimmed string or the original string that has no
-     *         leading trimmable characters.
-     * @see    #isTrimmable(Paint, CharSequence)
-     * @see    #trim(CharSequence)
-     * @see    #trimEnd(CharSequence)
-     *
-     * @hide
-     */
-    @VisibleForTesting
-    @NonNull
-    public static CharSequence trimStart(@NonNull CharSequence sequence) {
-        Objects.requireNonNull(sequence);
-
-        if (TextUtils.isEmpty(sequence)) {
-            return sequence;
-        }
-
-        final Paint paint = new Paint();
-        int trimCount = 0;
-        final int[] codePoints = sequence.codePoints().toArray();
-        for (int i = 0, length = codePoints.length; i < length; i++) {
-            String ch = Character.toString(codePoints[i]);
-            if (!isTrimmable(paint, ch)) {
-                break;
-            }
-            trimCount += ch.length();
-        }
-        if (trimCount == 0) {
-            return sequence;
-        }
-        return sequence.subSequence(trimCount, sequence.length());
-    }
-
-    /**
-     * If the {@code sequence} has some trailing trimmable characters, creates a new copy
-     * and removes the trimmable characters from the copy. Otherwise the given
-     * {@code sequence} is returned as it is. Use {@link #isTrimmable(Paint, CharSequence)}
-     * to determine whether the character is trimmable or not.
-     *
-     * @return the trimmed sequence or the original sequence that has no
-     *         trailing trimmable characters.
-     * @see    #isTrimmable(Paint, CharSequence)
-     * @see    #trimStart(CharSequence)
-     * @see    #trim(CharSequence)
-     *
-     * @hide
-     */
-    @VisibleForTesting
-    @NonNull
-    public static CharSequence trimEnd(@NonNull CharSequence sequence) {
-        Objects.requireNonNull(sequence);
-
-        if (TextUtils.isEmpty(sequence)) {
-            return sequence;
-        }
-
-        final Paint paint = new Paint();
-        int trimCount = 0;
-        final int[] codePoints = sequence.codePoints().toArray();
-        for (int i = codePoints.length - 1; i >= 0; i--) {
-            String ch = Character.toString(codePoints[i]);
-            if (!isTrimmable(paint, ch)) {
-                break;
-            }
-            trimCount += ch.length();
-        }
-
-        if (trimCount == 0) {
-            return sequence;
-        }
-        return sequence.subSequence(0, sequence.length() - trimCount);
-    }
-
-    /**
-     * If the {@code sequence} has some leading or trailing trimmable characters, creates
-     * a new copy and removes the trimmable characters from the copy. Otherwise the given
-     * {@code sequence} is returned as it is. Use {@link #isTrimmable(Paint, CharSequence)}
-     * to determine whether the character is trimmable or not.
-     *
-     * @return the trimmed sequence or the original sequence that has no leading or
-     *         trailing trimmable characters.
-     * @see    #isTrimmable(Paint, CharSequence)
-     * @see    #trimStart(CharSequence)
-     * @see    #trimEnd(CharSequence)
-     *
-     * @hide
-     */
-    @VisibleForTesting
-    @NonNull
-    public static CharSequence trim(@NonNull CharSequence sequence) {
-        Objects.requireNonNull(sequence);
-
-        if (TextUtils.isEmpty(sequence)) {
-            return sequence;
-        }
-
-        CharSequence result = trimStart(sequence);
-        if (TextUtils.isEmpty(result)) {
-            return result;
-        }
-
-        return trimEnd(result);
     }
 }
