@@ -1710,6 +1710,10 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Dịch vụ này có thể theo dõi các hoạt động tương tác của bạn với một ứng dụng hoặc bộ cảm biến phần cứng, cũng như có thể thay mặt bạn tương tác với các ứng dụng."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Cho phép"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Từ chối"</string>
+    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
+    <skip />
+    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
+    <skip />
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Nhấn vào một tính năng để bắt đầu sử dụng:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Chọn các tính năng để dùng với nút hỗ trợ tiếp cận"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Chọn các tính năng để dùng với phím tắt là phím âm lượng"</string>
@@ -1904,6 +1908,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Cuối tuần"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Sự kiện"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Ngủ"</string>
+    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <skip />
+    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> đang tắt một số âm thanh"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Đã xảy ra sự cố nội bộ với thiết bị của bạn và thiết bị có thể sẽ không ổn định cho tới khi bạn thiết lập lại dữ liệu ban đầu."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Đã xảy ra sự cố nội bộ với thiết bị. Hãy liên hệ với nhà sản xuất của bạn để biết chi tiết."</string>
@@ -2336,6 +2344,8 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Micrô đang bị chặn"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Không chiếu được nội dung lên màn hình"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Hãy dùng một cáp khác rồi thử lại"</string>
+    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
+    <skip />
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Có thể cáp không hỗ trợ màn hình"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Có thể cáp USB-C của bạn chưa kết nối đúng cách với màn hình"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
