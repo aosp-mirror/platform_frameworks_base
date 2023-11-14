@@ -4701,6 +4701,13 @@
     <string name="accessibility_dialog_button_allow">Allow</string>
     <!-- String for the deny button in accessibility permission dialog. [CHAR LIMIT=10] -->
     <string name="accessibility_dialog_button_deny">Deny</string>
+    <!-- String for the uninstall button in accessibility permission dialog. -->
+    <string name="accessibility_dialog_button_uninstall">Uninstall</string>
+    <!-- Warning shown when user input has been blocked due to another app overlaying screen
+         content. Since we don't know what the app is showing on top of the input target, we
+         can't verify user consent. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_dialog_touch_filtered_warning">An app is obscuring the permission
+        request so your response cannot be verified.</string>
 
     <!-- Title for accessibility select shortcut menu dialog. [CHAR LIMIT=100] -->
     <string name="accessibility_select_shortcut_menu_title">Tap a feature to start using it:</string>
