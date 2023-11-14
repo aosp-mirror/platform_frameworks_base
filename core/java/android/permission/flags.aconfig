@@ -17,6 +17,7 @@ flag {
 
 flag {
     name: "role_controller_in_system_server"
+    is_fixed_read_only: true
     namespace: "permissions"
     description: "enable role controller in system server"
     bug: "302562590"
