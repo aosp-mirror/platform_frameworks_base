@@ -13400,7 +13400,7 @@ public class DevicePolicyManager {
      * A device owner, by default, may continue granting these permissions. However, for increased
      * user control, the admin may opt out of controlling grants for these permissions by including
      * {@link #EXTRA_PROVISIONING_SENSORS_PERMISSION_GRANT_OPT_OUT} in the provisioning parameters.
-     * In that case the device owner's control will be limited do denying these permissions.
+     * In that case the device owner's control will be limited to denying these permissions.
      * <p>
      * NOTE: On devices running {@link android.os.Build.VERSION_CODES#S} and above, control over
      * the following permissions are restricted for managed profile owners:
