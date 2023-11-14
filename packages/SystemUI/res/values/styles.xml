@@ -1491,10 +1491,14 @@
 
     <style name="ShortCutButton" parent="@android:style/Widget.Material.Button">
         <item name="android:background">@drawable/shortcut_button_colored</item>
-        <item name="android:stateListAnimator">@null</item>
         <item name="android:textSize">16sp</item>
-        <item name="android:padding">4dp</item>
-        <item name="android:textColor">?androidprv:attr/textColorSecondary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
+        <item name="android:layout_marginEnd">12dp</item>
+        <item name="android:paddingLeft">24dp</item>
+        <item name="android:paddingRight">24dp</item>
+        <item name="android:minHeight">40dp</item>
+        <item name="android:stateListAnimator">@*android:anim/flat_button_state_list_anim_material</item>
+        <item name="android:pointerIcon">arrow</item>
     </style>
 
     <style name="ShortcutHorizontalDivider">
