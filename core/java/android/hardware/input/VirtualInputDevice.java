@@ -42,9 +42,12 @@ abstract class VirtualInputDevice implements Closeable {
      */
     protected final IBinder mToken;
 
+    protected final VirtualInputDeviceConfig mConfig;
+
     /** @hide */
-    VirtualInputDevice(
+    VirtualInputDevice(VirtualInputDeviceConfig config,
             IVirtualDevice virtualDevice, IBinder token) {
+        mConfig = config;
         mVirtualDevice = virtualDevice;
         mToken = token;
     }
@@ -69,5 +72,10 @@ abstract class VirtualInputDevice implements Closeable {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Override
+    public String toString() {
+        return mConfig.toString();
     }
 }

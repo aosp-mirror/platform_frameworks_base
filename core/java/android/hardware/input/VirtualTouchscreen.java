@@ -34,8 +34,9 @@ import android.os.RemoteException;
 @SystemApi
 public class VirtualTouchscreen extends VirtualInputDevice {
     /** @hide */
-    public VirtualTouchscreen(IVirtualDevice virtualDevice, IBinder token) {
-        super(virtualDevice, token);
+    public VirtualTouchscreen(VirtualTouchscreenConfig config,
+            IVirtualDevice virtualDevice, IBinder token) {
+        super(config, virtualDevice, token);
     }
 
     /**

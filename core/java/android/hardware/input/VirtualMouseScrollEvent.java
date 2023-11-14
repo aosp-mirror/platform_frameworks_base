@@ -65,6 +65,14 @@ public final class VirtualMouseScrollEvent implements Parcelable {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "VirtualMouseScrollEvent("
+                + " x=" + mXAxisMovement
+                + " y=" + mYAxisMovement
+                + " eventTime(ns)=" + mEventTimeNanos;
+    }
+
     /**
      * Returns the x-axis scroll movement, normalized from -1.0 to 1.0, inclusive. Positive values
      * indicate scrolling upward; negative values, downward.

@@ -70,6 +70,12 @@ public final class VirtualNavigationTouchpadConfig extends VirtualInputDeviceCon
         dest.writeInt(mWidth);
     }
 
+    @Override
+    @NonNull
+    String additionalFieldsToString() {
+        return " width=" + mWidth + " height=" + mHeight;
+    }
+
     @NonNull
     public static final Creator<VirtualNavigationTouchpadConfig> CREATOR =
             new Creator<VirtualNavigationTouchpadConfig>() {

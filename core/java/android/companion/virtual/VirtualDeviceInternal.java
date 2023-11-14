@@ -271,7 +271,7 @@ public class VirtualDeviceInternal {
             final IBinder token = new Binder(
                     "android.hardware.input.VirtualDpad:" + config.getInputDeviceName());
             mVirtualDevice.createVirtualDpad(config, token);
-            return new VirtualDpad(mVirtualDevice, token);
+            return new VirtualDpad(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -283,7 +283,7 @@ public class VirtualDeviceInternal {
             final IBinder token = new Binder(
                     "android.hardware.input.VirtualKeyboard:" + config.getInputDeviceName());
             mVirtualDevice.createVirtualKeyboard(config, token);
-            return new VirtualKeyboard(mVirtualDevice, token);
+            return new VirtualKeyboard(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -295,7 +295,7 @@ public class VirtualDeviceInternal {
             final IBinder token = new Binder(
                     "android.hardware.input.VirtualMouse:" + config.getInputDeviceName());
             mVirtualDevice.createVirtualMouse(config, token);
-            return new VirtualMouse(mVirtualDevice, token);
+            return new VirtualMouse(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -308,7 +308,7 @@ public class VirtualDeviceInternal {
             final IBinder token = new Binder(
                     "android.hardware.input.VirtualTouchscreen:" + config.getInputDeviceName());
             mVirtualDevice.createVirtualTouchscreen(config, token);
-            return new VirtualTouchscreen(mVirtualDevice, token);
+            return new VirtualTouchscreen(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -322,7 +322,7 @@ public class VirtualDeviceInternal {
                     "android.hardware.input.VirtualNavigationTouchpad:"
                             + config.getInputDeviceName());
             mVirtualDevice.createVirtualNavigationTouchpad(config, token);
-            return new VirtualNavigationTouchpad(mVirtualDevice, token);
+            return new VirtualNavigationTouchpad(config, mVirtualDevice, token);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

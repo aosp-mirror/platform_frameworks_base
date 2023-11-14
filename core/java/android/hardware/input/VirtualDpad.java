@@ -52,8 +52,8 @@ public class VirtualDpad extends VirtualInputDevice {
                                     KeyEvent.KEYCODE_DPAD_CENTER)));
 
     /** @hide */
-    public VirtualDpad(IVirtualDevice virtualDevice, IBinder token) {
-        super(virtualDevice, token);
+    public VirtualDpad(VirtualDpadConfig config, IVirtualDevice virtualDevice, IBinder token) {
+        super(config, virtualDevice, token);
     }
 
     /**
