@@ -413,6 +413,13 @@ class InWindowLauncherUnlockAnimationInteractorTest : SysuiTestCase() {
             )
             transitionRepository.sendTransitionStep(
                 TransitionStep(
+                    transitionState = TransitionState.CANCELED,
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                )
+            )
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
                     transitionState = TransitionState.STARTED,
                     from = KeyguardState.GONE,
                     to = KeyguardState.AOD,

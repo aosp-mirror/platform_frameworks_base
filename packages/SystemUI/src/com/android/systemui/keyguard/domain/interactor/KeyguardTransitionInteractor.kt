@@ -37,14 +37,14 @@ import com.android.systemui.keyguard.shared.model.TransitionStep
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.shareIn
 
 /** Encapsulates business-logic related to the keyguard transitions. */
 @SysUISingleton
@@ -171,16 +171,16 @@ constructor(
         repository.transitions.filter { step -> step.transitionState == TransitionState.FINISHED }
 
     /** The destination state of the last started transition. */
-    val startedKeyguardState: StateFlow<KeyguardState> =
+    val startedKeyguardState: SharedFlow<KeyguardState> =
         startedKeyguardTransitionStep
             .map { step -> step.to }
-            .stateIn(scope, SharingStarted.Eagerly, OFF)
+            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     /** The last completed [KeyguardState] transition */
-    val finishedKeyguardState: StateFlow<KeyguardState> =
+    val finishedKeyguardState: SharedFlow<KeyguardState> =
         finishedKeyguardTransitionStep
             .map { step -> step.to }
-            .stateIn(scope, SharingStarted.Eagerly, LOCKSCREEN)
+            .shareIn(scope, SharingStarted.Eagerly, replay = 1)
 
     /**
      * Whether we're currently in a transition to a new [KeyguardState] and haven't yet completed
@@ -227,14 +227,13 @@ constructor(
      * state.
      */
     fun startDismissKeyguardTransition() {
-        when (startedKeyguardState.value) {
+        when (val startedState = startedKeyguardState.replayCache.last()) {
             LOCKSCREEN -> fromLockscreenTransitionInteractor.get().dismissKeyguard()
             PRIMARY_BOUNCER -> fromPrimaryBouncerTransitionInteractor.get().dismissPrimaryBouncer()
             else ->
                 Log.e(
                     "KeyguardTransitionInteractor",
-                    "We don't know how to dismiss keyguard from state " +
-                        "${startedKeyguardState.value}"
+                    "We don't know how to dismiss keyguard from state $startedState."
                 )
         }
     }
