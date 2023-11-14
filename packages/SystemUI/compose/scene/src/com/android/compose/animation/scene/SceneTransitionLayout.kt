@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene
 
+import androidx.annotation.FloatRange
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -41,6 +42,8 @@ import androidx.compose.ui.platform.LocalDensity
  * @param transitions the definition of the transitions used to animate a change of scene.
  * @param state the observable state of this layout.
  * @param edgeDetector the edge detector used to detect which edge a swipe is started from, if any.
+ * @param transitionInterceptionThreshold used during a scene transition. For the scene to be
+ *   intercepted, the progress value must be above the threshold, and below (1 - threshold).
  * @param scenes the configuration of the different scenes of this layout.
  */
 @Composable
@@ -51,6 +54,7 @@ fun SceneTransitionLayout(
     modifier: Modifier = Modifier,
     state: SceneTransitionLayoutState = remember { SceneTransitionLayoutState(currentScene) },
     edgeDetector: EdgeDetector = DefaultEdgeDetector,
+    @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
@@ -63,6 +67,7 @@ fun SceneTransitionLayout(
             state = state,
             density = density,
             edgeDetector = edgeDetector,
+            transitionInterceptionThreshold = transitionInterceptionThreshold,
             coroutineScope = coroutineScope,
         )
     }
@@ -71,6 +76,7 @@ fun SceneTransitionLayout(
     layoutImpl.transitions = transitions
     layoutImpl.density = density
     layoutImpl.edgeDetector = edgeDetector
+    layoutImpl.transitionInterceptionThreshold = transitionInterceptionThreshold
 
     layoutImpl.setScenes(scenes)
     layoutImpl.setCurrentScene(currentScene)
