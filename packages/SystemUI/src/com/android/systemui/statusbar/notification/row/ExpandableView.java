@@ -38,6 +38,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.Roundable;
 import com.android.systemui.statusbar.notification.RoundableState;
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.util.Compile;
@@ -400,6 +401,7 @@ public abstract class ExpandableView extends FrameLayout implements Dumpable, Ro
      * @param below true if it is below.
      */
     public void setBelowSpeedBump(boolean below) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
     }
 
     public int getPinnedHeadsUpHeight() {
