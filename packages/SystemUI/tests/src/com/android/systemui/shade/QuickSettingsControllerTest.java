@@ -285,6 +285,20 @@ public class QuickSettingsControllerTest extends QuickSettingsControllerBaseTest
     }
 
     @Test
+    public void updateQsState_fullscreenTrue() {
+        mQsController.setExpanded(true);
+        mQsController.updateQsState();
+        assertThat(mShadeRepository.getLegacyQsFullscreen().getValue()).isTrue();
+    }
+
+    @Test
+    public void updateQsState_fullscreenFalse() {
+        mQsController.setExpanded(false);
+        mQsController.updateQsState();
+        assertThat(mShadeRepository.getLegacyQsFullscreen().getValue()).isFalse();
+    }
+
+    @Test
     public void shadeExpanded_onKeyguard() {
         mStatusBarStateController.setState(KEYGUARD);
         // set maxQsExpansion in NPVC

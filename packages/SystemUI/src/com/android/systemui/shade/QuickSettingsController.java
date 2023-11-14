@@ -973,6 +973,7 @@ public class QuickSettingsController implements Dumpable {
 
     void updateQsState() {
         boolean qsFullScreen = getExpanded() && !mSplitShadeEnabled;
+        mShadeRepository.setLegacyQsFullscreen(qsFullScreen);
         mNotificationStackScrollLayoutController.setQsFullScreen(qsFullScreen);
         mNotificationStackScrollLayoutController.setScrollingEnabled(
                 mBarState != KEYGUARD && (!qsFullScreen || mExpansionFromOverscroll));

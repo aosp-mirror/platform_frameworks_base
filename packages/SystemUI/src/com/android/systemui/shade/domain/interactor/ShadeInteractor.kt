@@ -31,6 +31,9 @@ interface ShadeInteractor : BaseShadeInteractor {
     /** Whether either the shade or QS is fully expanded. */
     val isAnyFullyExpanded: Flow<Boolean>
 
+    /** Whether the Shade is fully expanded. */
+    val isShadeFullyExpanded: Flow<Boolean>
+
     /**
      * Whether the user is expanding or collapsing either the shade or quick settings with user
      * input (i.e. dragging a pointer). This will be true even if the user's input gesture had ended
@@ -61,7 +64,7 @@ interface BaseShadeInteractor {
      */
     val isAnyExpanded: StateFlow<Boolean>
 
-    /** The amount [0-1] that the shade has been opened */
+    /** The amount [0-1] that the shade has been opened. */
     val shadeExpansion: Flow<Float>
 
     /**
@@ -80,6 +83,12 @@ interface BaseShadeInteractor {
      * previously called "expand immediate" in the legacy codebase.
      */
     val isQsBypassingShade: Flow<Boolean>
+
+    /**
+     * Emits true when QS is displayed over the entire screen of the device. Currently, this only
+     * happens on phones that are not unfolded when QS expansion is equal to 1.
+     */
+    val isQsFullscreen: Flow<Boolean>
 
     /**
      * Whether the user is expanding or collapsing the shade with user input. This will be true even

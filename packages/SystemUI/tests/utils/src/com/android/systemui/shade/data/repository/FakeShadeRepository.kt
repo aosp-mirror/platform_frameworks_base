@@ -97,6 +97,14 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
         legacyLockscreenShadeTracking.value = tracking
     }
 
+    private val _legacyQsFullscreen = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead") override val legacyQsFullscreen = _legacyQsFullscreen
+
+    @Deprecated("Use ShadeInteractor instead")
+    override fun setLegacyQsFullscreen(legacyQsFullscreen: Boolean) {
+        _legacyQsFullscreen.value = legacyQsFullscreen
+    }
+
     fun setShadeModel(model: ShadeModel) {
         _shadeModel.value = model
     }

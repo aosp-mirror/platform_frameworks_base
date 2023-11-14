@@ -83,6 +83,16 @@ constructor(
             }
             .distinctUntilChanged()
 
+    override val isQsFullscreen: Flow<Boolean> =
+        sceneInteractor.transitionState
+            .map { state ->
+                when (state) {
+                    is ObservableTransitionState.Idle -> state.scene == SceneKey.QuickSettings
+                    is ObservableTransitionState.Transition -> false
+                }
+            }
+            .distinctUntilChanged()
+
     override val anyExpansion: StateFlow<Float> =
         createAnyExpansionFlow(scope, shadeExpansion, qsExpansion)
 
