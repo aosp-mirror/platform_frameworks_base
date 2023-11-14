@@ -1,13 +1,3 @@
-// b/305195721
-android/app/admin/DevicePolicyManager.java:2670: lint: Unresolved link/see tag "android.os.UserManager#DISALLOW_CAMERA UserManager#DISALLOW_CAMERA" in android.app.admin.DevicePolicyManager [101]
-android/app/admin/DevicePolicyManager.java:7257: lint: Unresolved link/see tag "android.app.admin.DevicePolicyIdentifiers#USB_DATA_SIGNALING_POLICY DevicePolicyIdentifiers#USB_DATA_SIGNALING_POLICY" in android.app.admin.DevicePolicyManager [101]
-android/app/admin/DevicePolicyManager.java:7425: lint: Unresolved link/see tag "ACTION_DEVICE_FINANCING_STATE_CHANGED" in android.app.admin.DevicePolicyManager [101]
-android/app/admin/DevicePolicyManager.java:7425: lint: Unresolved link/see tag "android.app.role.RoleManager#ROLE_FINANCED_DEVICE_KIOSK" in android.app.admin.DevicePolicyManager [101]
-android/app/admin/DevicePolicyManager.java:7428: lint: Unresolved link/see tag "android.app.role.RoleManager.ROLE_DEVICE_POLICY_MANAGEMENT" in android.app.admin.DevicePolicyManager [101]
-android/app/admin/DevicePolicyManager.java:8860: lint: Unresolved link/see tag "android.app.admin.DevicePolicyResources.Drawables DevicePolicyResources.Drawables" in android.app.admin.DevicePolicyManager [101]
-android/app/admin/DevicePolicyManager.java:8860: lint: Unresolved link/see tag "android.app.admin.DevicePolicyResources.Strings DevicePolicyResources.Strings" in android.app.admin.DevicePolicyManager [101]
-android/app/admin/DevicePolicyResourcesManager.java:179: lint: Unresolved link/see tag "android.app.admin.DevicePolicyResources.Strings DevicePolicyResources.Strings" in android.app.admin.DevicePolicyResourcesManager [101]
-
 // b/303477132
 android/app/appsearch/AppSearchSchema.java:402: lint: Unresolved link/see tag "#getIndexableNestedProperties()" in android.app.appsearch.AppSearchSchema.DocumentPropertyConfig.Builder [101]
 android/app/appsearch/AppSearchSession.java:55: lint: Unresolved link/see tag "Features#LIST_FILTER_QUERY_LANGUAGE" in android.app.appsearch.AppSearchSession [101]

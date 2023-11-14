@@ -452,7 +452,7 @@ public class DevicePolicyResourcesManager {
 
     /**
      * Returns the appropriate updated string for the {@code stringId} (see
-     * {@link DevicePolicyResources.Strings}) if one was set using
+     * {@code DevicePolicyResources.Strings}) if one was set using
      * {@code setStrings}, otherwise returns the string from {@code defaultStringLoader}.
      *
      * <p>Also returns the string from {@code defaultStringLoader} if {@code stringId} is

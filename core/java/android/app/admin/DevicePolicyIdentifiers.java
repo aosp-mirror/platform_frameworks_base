@@ -164,11 +164,8 @@ public final class DevicePolicyIdentifiers {
 
     /**
      * String identifier for {@link DevicePolicyManager#setUsbDataSignalingEnabled}.
-     *
-     * @hide
      */
     @FlaggedApi(Flags.FLAG_POLICY_ENGINE_MIGRATION_V2_ENABLED)
-    @TestApi
     public static final String USB_DATA_SIGNALING_POLICY = "usbDataSignaling";
 
     /**
