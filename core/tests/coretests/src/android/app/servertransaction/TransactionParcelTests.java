@@ -173,11 +173,9 @@ public class TransactionParcelTests {
         final PersistableBundle persistableBundle = new PersistableBundle();
         persistableBundle.putInt("k", 4);
 
-        final LaunchActivityItem item = new LaunchActivityItemBuilder()
-                .setActivityToken(activityToken)
-                .setIntent(intent)
+        final LaunchActivityItem item = new LaunchActivityItemBuilder(
+                activityToken, intent, activityInfo)
                 .setIdent(ident)
-                .setInfo(activityInfo)
                 .setCurConfig(config())
                 .setOverrideConfig(overrideConfig)
                 .setReferrer(referrer)

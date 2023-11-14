@@ -65,7 +65,7 @@ public class WindowContextInfoChangeItem extends ClientTransactionItem {
             instance = new WindowContextInfoChangeItem();
         }
         instance.mClientToken = requireNonNull(clientToken);
-        instance.mInfo = new WindowContextInfo(config, displayId);
+        instance.mInfo = new WindowContextInfo(new Configuration(config), displayId);
 
         return instance;
     }

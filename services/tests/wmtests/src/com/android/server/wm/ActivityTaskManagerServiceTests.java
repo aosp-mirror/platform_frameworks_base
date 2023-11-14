@@ -39,9 +39,10 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.never;
 
@@ -51,7 +52,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
-import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.EnterPipRequestedItem;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -90,9 +91,6 @@ import java.util.function.Consumer;
 @RunWith(WindowTestRunner.class)
 public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
-    private final ArgumentCaptor<ClientTransaction> mClientTransactionCaptor =
-            ArgumentCaptor.forClass(ClientTransaction.class);
-
     private static final String DEFAULT_PACKAGE_NAME = "my.application.package";
     private static final int DEFAULT_USER_ID = 100;
 
@@ -123,53 +121,42 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
         final ClientLifecycleManager mockLifecycleManager = mock(ClientLifecycleManager.class);
         doReturn(mockLifecycleManager).when(mAtm).getLifecycleManager();
         doReturn(true).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        clearInvocations(mClientLifecycleManager);
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        verify(mockLifecycleManager).scheduleTransaction(mClientTransactionCaptor.capture());
-        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
+        final ArgumentCaptor<ClientTransactionItem> clientTransactionItemCaptor =
+                ArgumentCaptor.forClass(ClientTransactionItem.class);
+        verify(mockLifecycleManager).scheduleTransaction(any(),
+                clientTransactionItemCaptor.capture());
+        final ClientTransactionItem transactionItem = clientTransactionItemCaptor.getValue();
         // Check that only an enter pip request item callback was scheduled.
-        assertEquals(1, transaction.getCallbacks().size());
-        assertTrue(transaction.getCallbacks().get(0) instanceof EnterPipRequestedItem);
-        // Check the activity lifecycle state remains unchanged.
-        assertNull(transaction.getLifecycleStateRequest());
+        assertTrue(transactionItem instanceof EnterPipRequestedItem);
     }
 
     @Test
     public void testOnPictureInPictureRequested_cannotEnterPip() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doReturn(false).when(activity).inPinnedWindowingMode();
         doReturn(false).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
+        clearInvocations(mClientLifecycleManager);
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        verify(lifecycleManager, atLeast(0))
-                .scheduleTransaction(mClientTransactionCaptor.capture());
-        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
-        // Check that none are enter pip request items.
-        transaction.getCallbacks().forEach(clientTransactionItem -> {
-            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
-        });
+        verify(mClientLifecycleManager, never()).scheduleTransaction(any(), any());
     }
 
     @Test
     public void testOnPictureInPictureRequested_alreadyInPIPMode() throws RemoteException {
         final Task stack = new TaskBuilder(mSupervisor).setCreateActivity(true).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
-        ClientLifecycleManager lifecycleManager = mAtm.getLifecycleManager();
         doReturn(true).when(activity).inPinnedWindowingMode();
+        clearInvocations(mClientLifecycleManager);
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        verify(lifecycleManager, atLeast(0))
-                .scheduleTransaction(mClientTransactionCaptor.capture());
-        final ClientTransaction transaction = mClientTransactionCaptor.getValue();
-        // Check that none are enter pip request items.
-        transaction.getCallbacks().forEach(clientTransactionItem -> {
-            assertFalse(clientTransactionItem instanceof EnterPipRequestedItem);
-        });
+        verify(mClientLifecycleManager, never()).scheduleTransaction(any(), any());
     }
 
     @Test
