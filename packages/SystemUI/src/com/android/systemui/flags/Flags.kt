@@ -721,12 +721,6 @@ object Flags {
     @JvmField
     val USE_REPOS_FOR_BOUNCER_SHOWING = releasedFlag("use_repos_for_bouncer_showing")
 
-    // 3100 - Haptic interactions
-
-    // TODO(b/290213663): Tracking Bug
-    @JvmField
-    val ONE_WAY_HAPTICS_API_MIGRATION = releasedFlag("oneway_haptics_api_migration")
-
     /** TODO(b/296223317): Enables the new keyguard presentation containing a clock. */
     @JvmField
     val ENABLE_CLOCK_KEYGUARD_PRESENTATION = releasedFlag("enable_clock_keyguard_presentation")
