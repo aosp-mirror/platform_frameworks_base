@@ -26,7 +26,7 @@ import static com.android.systemui.Flags.keyguardBottomAreaRefactor;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
-import static com.android.systemui.flags.Flags.NEW_AOD_TRANSITION;
+import static com.android.systemui.Flags.newAodTransition;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.annotation.SuppressLint;
@@ -395,7 +395,7 @@ public class LockIconViewController implements Dumpable {
             mView.updateIcon(ICON_LOCK, true);
             mView.setContentDescription(mLockedLabel);
             mView.setVisibility(View.VISIBLE);
-        } else if (mIsDozing && mFeatureFlags.isEnabled(NEW_AOD_TRANSITION)) {
+        } else if (mIsDozing && newAodTransition()) {
             mView.animate()
                     .alpha(0f)
                     .setDuration(FADE_OUT_DURATION_MS)

@@ -120,3 +120,10 @@ flag {
         "allow for tracing of coroutine continuations using System UI's tracinglib"
     bug: "289353932"
 }
+
+flag {
+    name: "new_aod_transition"
+    namespace: "systemui"
+    description: "New LOCKSCREEN <=> AOD transition"
+    bug: "301915812"
+}

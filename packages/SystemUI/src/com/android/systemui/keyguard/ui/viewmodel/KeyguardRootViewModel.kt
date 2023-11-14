@@ -21,11 +21,11 @@ import android.content.Context
 import android.util.MathUtils
 import android.view.View.VISIBLE
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -280,7 +280,7 @@ constructor(
                         dozeParameters.displayNeedsBlanking -> false
                         // We only want the appear animations to happen when the notifications
                         // get fully hidden, since otherwise the un-hide animation overlaps.
-                        featureFlags.isEnabled(Flags.NEW_AOD_TRANSITION) -> true
+                        newAodTransition() -> true
                         else -> fullyHidden
                     }
                 AnimatableEvent(fullyHidden, animate)

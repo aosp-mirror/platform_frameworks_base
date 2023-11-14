@@ -34,13 +34,13 @@ import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.jank.InteractionJankMonitor.CUJ_SCREEN_OFF_SHOW_AOD
 import com.android.keyguard.KeyguardClockSwitch.MISSING_CLOCK_ID
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
+import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
@@ -384,7 +384,7 @@ object KeyguardRootViewBinder {
                 }
                 visibility = if (isVisible.value) View.VISIBLE else View.INVISIBLE
             }
-            featureFlags.isEnabled(Flags.NEW_AOD_TRANSITION) -> {
+            newAodTransition() -> {
                 animateInIconTranslation(statusViewMigrated)
                 if (isVisible.value) {
                     CrossFadeHelper.fadeIn(this, animatorListener)
