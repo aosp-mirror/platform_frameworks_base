@@ -50,19 +50,32 @@ class FullScreenIntentDecisionProvider(
         val shouldFsi: Boolean
         val wouldFsiWithoutDnd: Boolean
         val logReason: String
+        val shouldLog: Boolean
+        val isWarning: Boolean
     }
 
     private enum class DecisionImpl(
         override val shouldFsi: Boolean,
         override val logReason: String,
         override val wouldFsiWithoutDnd: Boolean = shouldFsi,
-        val supersedesDnd: Boolean = false
+        val supersedesDnd: Boolean = false,
+        override val shouldLog: Boolean = true,
+        override val isWarning: Boolean = false
     ) : Decision {
-        NO_FSI_NO_FULL_SCREEN_INTENT(false, "no full-screen intent", supersedesDnd = true),
+        NO_FSI_NO_FULL_SCREEN_INTENT(
+            false,
+            "no full-screen intent",
+            supersedesDnd = true,
+            shouldLog = false
+        ),
         NO_FSI_SHOW_STICKY_HUN(false, "full-screen intents are disabled", supersedesDnd = true),
         NO_FSI_NOT_IMPORTANT_ENOUGH(false, "not important enough"),
-        NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR(false, "suppressive group alert behavior"),
-        NO_FSI_SUPPRESSIVE_BUBBLE_METADATA(false, "suppressive bubble metadata"),
+        NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR(
+            false,
+            "suppressive group alert behavior",
+            isWarning = true
+        ),
+        NO_FSI_SUPPRESSIVE_BUBBLE_METADATA(false, "suppressive bubble metadata", isWarning = true),
         NO_FSI_PACKAGE_SUSPENDED(false, "package suspended"),
         FSI_DEVICE_NOT_INTERACTIVE(true, "device is not interactive"),
         FSI_DEVICE_DREAMING(true, "device is dreaming"),
@@ -71,7 +84,7 @@ class FullScreenIntentDecisionProvider(
         FSI_KEYGUARD_OCCLUDED(true, "keyguard is occluded"),
         FSI_LOCKED_SHADE(true, "locked shade"),
         FSI_DEVICE_NOT_PROVISIONED(true, "device not provisioned"),
-        NO_FSI_NO_HUN_OR_KEYGUARD(false, "no HUN or keyguard"),
+        NO_FSI_NO_HUN_OR_KEYGUARD(false, "no HUN or keyguard", isWarning = true),
         NO_FSI_SUPPRESSED_BY_DND(false, "suppressed by DND", wouldFsiWithoutDnd = false),
         NO_FSI_SUPPRESSED_ONLY_BY_DND(false, "suppressed only by DND", wouldFsiWithoutDnd = true)
     }

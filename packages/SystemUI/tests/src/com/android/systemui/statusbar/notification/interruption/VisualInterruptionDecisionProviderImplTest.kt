@@ -37,7 +37,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             headsUpManager,
             keyguardNotificationVisibilityProvider,
             keyguardStateController,
-            logger,
+            newLogger,
             mainHandler,
             powerManager,
             statusBarStateController,
@@ -222,14 +222,14 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
     private class TestCondition(
         types: Set<VisualInterruptionType>,
         val onShouldSuppress: () -> Boolean
-    ) : VisualInterruptionCondition(types = types, reason = "") {
+    ) : VisualInterruptionCondition(types = types, reason = "test condition") {
         override fun shouldSuppress(): Boolean = onShouldSuppress()
     }
 
     private class TestFilter(
         types: Set<VisualInterruptionType>,
         val onShouldSuppress: (NotificationEntry) -> Boolean = { true }
-    ) : VisualInterruptionFilter(types = types, reason = "") {
+    ) : VisualInterruptionFilter(types = types, reason = "test filter") {
         override fun shouldSuppress(entry: NotificationEntry) = onShouldSuppress(entry)
     }
 }
