@@ -55,6 +55,7 @@ package android {
     field public static final String BIND_CONTENT_SUGGESTIONS_SERVICE = "android.permission.BIND_CONTENT_SUGGESTIONS_SERVICE";
     field public static final String BIND_DIRECTORY_SEARCH = "android.permission.BIND_DIRECTORY_SEARCH";
     field public static final String BIND_DISPLAY_HASHING_SERVICE = "android.permission.BIND_DISPLAY_HASHING_SERVICE";
+    field @FlaggedApi("com.android.internal.telephony.flags.ap_domain_selection_enabled") public static final String BIND_DOMAIN_SELECTION_SERVICE = "android.permission.BIND_DOMAIN_SELECTION_SERVICE";
     field public static final String BIND_DOMAIN_VERIFICATION_AGENT = "android.permission.BIND_DOMAIN_VERIFICATION_AGENT";
     field public static final String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
     field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
