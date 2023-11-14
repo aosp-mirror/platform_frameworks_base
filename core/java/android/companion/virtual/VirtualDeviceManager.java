@@ -212,9 +212,10 @@ public final class VirtualDeviceManager {
      * existing virtual devices.</p>
      *
      * <p>Note that if a virtual device is closed and becomes invalid, the returned objects will
-     * not be updated and may contain stale values. Use a {@link VirtualDeviceListener} for real
-     * time updates of the availability of virtual devices.</p>
+     * not be updated and may contain stale values.</p>
      */
+    // TODO(b/310912420): Add "Use a VirtualDeviceListener for real time updates of the
+    // availability  of virtual devices." in the note paragraph above with a link annotation.
     @NonNull
     public List<android.companion.virtual.VirtualDevice> getVirtualDevices() {
         if (mService == null) {
