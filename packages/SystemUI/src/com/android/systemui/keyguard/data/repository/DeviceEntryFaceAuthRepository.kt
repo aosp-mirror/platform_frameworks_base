@@ -89,7 +89,7 @@ import kotlinx.coroutines.withContext
  */
 interface DeviceEntryFaceAuthRepository {
     /** Provide the current face authentication state for device entry. */
-    val isAuthenticated: Flow<Boolean>
+    val isAuthenticated: StateFlow<Boolean>
 
     /** Whether face auth can run at this point. */
     val canRunFaceAuth: StateFlow<Boolean>
@@ -199,8 +199,7 @@ constructor(
     private val canRunDetection: StateFlow<Boolean>
 
     private val _isAuthenticated = MutableStateFlow(false)
-    override val isAuthenticated: Flow<Boolean>
-        get() = _isAuthenticated
+    override val isAuthenticated: StateFlow<Boolean> = _isAuthenticated
 
     private var cancellationInProgress = MutableStateFlow(false)
 
@@ -454,8 +453,8 @@ constructor(
                 if (errorStatus.isLockoutError()) {
                     _isLockedOut.value = true
                 }
-                _authenticationStatus.value = errorStatus
                 _isAuthenticated.value = false
+                _authenticationStatus.value = errorStatus
                 if (errorStatus.isHardwareError()) {
                     faceAuthLogger.hardwareError(errorStatus)
                     handleFaceHardwareError()
@@ -477,8 +476,17 @@ constructor(
             }
 
             override fun onAuthenticationSucceeded(result: FaceManager.AuthenticationResult) {
-                _authenticationStatus.value = SuccessFaceAuthenticationStatus(result)
+                // Update _isAuthenticated before _authenticationStatus is updated. There are
+                // consumers that receive the face authentication updates through a long chain of
+                // callbacks
+                // _authenticationStatus -> KeyguardUpdateMonitor -> KeyguardStateController ->
+                // onUnlockChanged
+                // These consumers then query the isAuthenticated boolean. This makes sure that the
+                // boolean is updated to new value before the event is propagated.
+                // TODO (b/310592822): once all consumers can use the new system directly, we don't
+                //  have to worry about this ordering.
                 _isAuthenticated.value = true
+                _authenticationStatus.value = SuccessFaceAuthenticationStatus(result)
                 faceAuthLogger.faceAuthSuccess(result)
                 onFaceAuthRequestCompleted()
             }
