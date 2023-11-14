@@ -28,8 +28,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.android.systemui.Dumpable;
-import com.android.systemui.res.R;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.res.R;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.util.LargeScreenUtils;
 
@@ -59,6 +59,8 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     private boolean mClippingEnabled;
     private boolean mIsFullWidth;
 
+    private boolean mSceneContainerEnabled;
+
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
@@ -70,6 +72,10 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
         mHeader = findViewById(R.id.header);
         mQSCustomizer = findViewById(R.id.qs_customize);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+    }
+
+    void setSceneContainerEnabled(boolean enabled) {
+        mSceneContainerEnabled = enabled;
     }
 
     @Override
@@ -161,7 +167,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
         }
         mQSPanelContainer.setPaddingRelative(
                 mQSPanelContainer.getPaddingStart(),
-                topPadding,
+                mSceneContainerEnabled ? 0 : topPadding,
                 mQSPanelContainer.getPaddingEnd(),
                 mQSPanelContainer.getPaddingBottom());
 

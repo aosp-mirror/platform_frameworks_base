@@ -21,12 +21,12 @@ import com.android.systemui.dagger.qualifiers.RootView
 import dagger.BindsInstance
 import dagger.Subcomponent
 
-@Subcomponent(modules = [QSFlexiglassModule::class])
+@Subcomponent(modules = [QSSceneModule::class])
 @QSScope
-interface QSFlexiglassComponent : QSComponent {
+interface QSSceneComponent : QSComponent {
 
     @Subcomponent.Factory
     interface Factory {
-        fun create(@RootView @BindsInstance rootView: View): QSFlexiglassComponent
+        fun create(@RootView @BindsInstance rootView: View): QSSceneComponent
     }
 }

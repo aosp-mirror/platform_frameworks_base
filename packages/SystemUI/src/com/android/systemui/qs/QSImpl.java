@@ -97,6 +97,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
     private boolean mStackScrollerOverscrolling;
 
     private QSAnimator mQSAnimator;
+    @Nullable
     private HeightListener mPanelView;
     private QSSquishinessController mQSSquishinessController;
     protected QuickStatusBarHeader mHeader;
@@ -340,6 +341,7 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         }
         if (mQSCustomizerController != null) {
             mQSCustomizerController.setQs(null);
+            mQSCustomizerController.setContainerController(null);
         }
         mScrollListener = null;
         if (mContainer != null) {
@@ -347,6 +349,10 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         }
         mDumpManager.unregisterDumpable(getClass().getSimpleName());
         mListeningAndVisibilityLifecycleOwner.destroy();
+        ViewGroup parent = ((ViewGroup) getView().getParent());
+        if (parent != null) {
+            parent.removeView(getView());
+        }
     }
 
     public void onSaveInstanceState(Bundle outState) {
@@ -853,6 +859,10 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         mQSCustomizerController.hide();
     }
 
+    public void closeCustomizerImmediately() {
+        mQSCustomizerController.hide(false);
+    }
+
     public void notifyCustomizeChanged() {
         // The customize state changed, so our height changed.
         mContainer.updateExpansion();
@@ -863,7 +873,9 @@ public class QSImpl implements QS, CommandQueue.Callbacks, StatusBarStateControl
         mHeader.setVisibility(!customizing ? View.VISIBLE : View.INVISIBLE);
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.
-        mPanelView.onQsHeightChanged();
+        if (mPanelView != null) {
+            mPanelView.onQsHeightChanged();
+        }
     }
 
     /**

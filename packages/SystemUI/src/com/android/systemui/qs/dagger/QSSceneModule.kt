@@ -24,7 +24,7 @@ import dagger.Provides
 import javax.inject.Named
 
 @Module(includes = [QSScopeModule::class])
-interface QSFlexiglassModule {
+interface QSSceneModule {
 
     @Module
     companion object {
