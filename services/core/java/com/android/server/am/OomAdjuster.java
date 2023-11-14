@@ -2230,8 +2230,10 @@ public class OomAdjuster {
                             || now < (s.lastActivity + mConstants.MAX_SERVICE_INACTIVITY)) {
                         // This service has seen some activity within
                         // recent memory, so we will keep its process ahead
-                        // of the background processes.
-                        if (adj > SERVICE_ADJ) {
+                        // of the background processes. This does not apply
+                        // to the SDK sandbox process since it should never
+                        // be more important than its corresponding app.
+                        if (!app.isSdkSandbox && adj > SERVICE_ADJ) {
                             adj = SERVICE_ADJ;
                             state.setAdjType("started-services");
                             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
