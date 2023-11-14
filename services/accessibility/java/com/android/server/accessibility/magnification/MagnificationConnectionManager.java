@@ -1130,7 +1130,8 @@ public class MagnificationConnectionManager implements
             }
             final float normScale = MagnificationScaleProvider.constrainScale(scale);
             if (Float.compare(mScale, normScale) != 0
-                    && mMagnificationConnectionManager.setScaleInternal(mDisplayId, scale)) {
+                    && mMagnificationConnectionManager
+                        .setScaleForWindowMagnificationInternal(mDisplayId, scale)) {
                 mScale = normScale;
             }
         }
@@ -1286,8 +1287,10 @@ public class MagnificationConnectionManager implements
                 animationCallback);
     }
 
-    private boolean setScaleInternal(int displayId, float scale) {
-        return mConnectionWrapper != null && mConnectionWrapper.setScale(displayId, scale);
+    @GuardedBy("mLock")
+    private boolean setScaleForWindowMagnificationInternal(int displayId, float scale) {
+        return mConnectionWrapper != null
+                && mConnectionWrapper.setScaleForWindowMagnification(displayId, scale);
     }
 
     @GuardedBy("mLock")

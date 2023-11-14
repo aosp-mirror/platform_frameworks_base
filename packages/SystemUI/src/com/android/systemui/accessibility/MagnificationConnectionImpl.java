@@ -57,8 +57,8 @@ class MagnificationConnectionImpl extends IWindowMagnificationConnection.Stub {
     }
 
     @Override
-    public void setScale(int displayId, float scale) {
-        mHandler.post(() -> mMagnification.setScale(displayId, scale));
+    public void setScaleForWindowMagnification(int displayId, float scale) {
+        mHandler.post(() -> mMagnification.setScaleForWindowMagnification(displayId, scale));
     }
 
     @Override

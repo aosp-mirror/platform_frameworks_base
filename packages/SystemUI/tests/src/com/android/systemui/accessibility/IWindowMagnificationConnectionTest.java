@@ -133,8 +133,8 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     }
 
     @Test
-    public void setScale() throws RemoteException {
-        mIWindowMagnificationConnection.setScale(TEST_DISPLAY, 3.0f);
+    public void setScaleForWindowMagnification() throws RemoteException {
+        mIWindowMagnificationConnection.setScaleForWindowMagnification(TEST_DISPLAY, 3.0f);
         waitForIdleSync();
 
         verify(mWindowMagnificationController).setScale(3.0f);

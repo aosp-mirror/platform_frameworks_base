@@ -73,9 +73,9 @@ public class MagnificationConnectionWrapperTest {
     }
 
     @Test
-    public void setScale() throws RemoteException {
-        mConnectionWrapper.setScale(TEST_DISPLAY, 3.0f);
-        verify(mConnection).setScale(TEST_DISPLAY, 3.0f);
+    public void setScaleForWindowMagnification() throws RemoteException {
+        mConnectionWrapper.setScaleForWindowMagnification(TEST_DISPLAY, 3.0f);
+        verify(mConnection).setScaleForWindowMagnification(TEST_DISPLAY, 3.0f);
     }
 
     @Test

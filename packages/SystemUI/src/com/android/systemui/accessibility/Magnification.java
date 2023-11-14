@@ -220,7 +220,7 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     }
 
     @MainThread
-    void setScale(int displayId, float scale) {
+    void setScaleForWindowMagnification(int displayId, float scale) {
         final WindowMagnificationController windowMagnificationController =
                 mMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationController != null) {
