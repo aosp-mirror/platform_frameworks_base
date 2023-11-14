@@ -71,6 +71,7 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
     private final Runnable mRestoreComplications = new Runnable() {
         @Override
         public void run() {
+            Log.d(TAG, "Restoring complications...");
             mVisibilityController.setVisibility(View.VISIBLE);
             mHidden = false;
         }
@@ -83,6 +84,7 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
                 // Avoid interfering with the exit animations.
                 return;
             }
+            Log.d(TAG, "Hiding complications...");
             mVisibilityController.setVisibility(View.INVISIBLE);
             mHidden = true;
             if (mHiddenCallback != null) {
@@ -136,9 +138,7 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
             final MotionEvent motionEvent = (MotionEvent) ev;
 
             if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                if (DEBUG) {
-                    Log.d(TAG, "ACTION_DOWN received");
-                }
+                Log.i(TAG, "ACTION_DOWN received");
 
                 final ListenableFuture<Boolean> touchCheck = mTouchInsetManager
                         .checkWithinTouchRegion(Math.round(motionEvent.getX()),
@@ -163,6 +163,8 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
                 }, mExecutor);
             } else if (motionEvent.getAction() == MotionEvent.ACTION_CANCEL
                     || motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                Log.i(TAG, "ACTION_CANCEL|ACTION_UP received");
+
                 // End session and initiate delayed reappearance of the complications.
                 session.pop();
                 runAfterHidden(() -> mCancelCallbacks.add(
@@ -179,8 +181,10 @@ public class HideComplicationTouchHandler implements DreamTouchHandler {
     private void runAfterHidden(Runnable runnable) {
         mExecutor.execute(() -> {
             if (mHidden) {
+                Log.i(TAG, "Executing after hidden runnable immediately...");
                 runnable.run();
             } else {
+                Log.i(TAG, "Queuing after hidden runnable...");
                 mHiddenCallback = runnable;
             }
         });
