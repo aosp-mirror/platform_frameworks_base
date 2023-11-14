@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
@@ -40,6 +41,7 @@ constructor(
     private val sharedNotificationContainer: SharedNotificationContainer,
     private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
     private val controller: NotificationStackScrollLayoutController,
+    private val notificationStackSizeCalculator: NotificationStackSizeCalculator,
 ) : KeyguardSection() {
     private val placeHolderId = R.id.nssl_placeholder
     private var disposableHandle: DisposableHandle? = null
@@ -69,6 +71,7 @@ constructor(
                 sharedNotificationContainer,
                 sharedNotificationContainerViewModel,
                 controller,
+                notificationStackSizeCalculator,
             )
     }
 

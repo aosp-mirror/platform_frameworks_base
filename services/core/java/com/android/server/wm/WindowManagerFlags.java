@@ -49,5 +49,8 @@ class WindowManagerFlags {
 
     final boolean mWallpaperOffsetAsync = Flags.wallpaperOffsetAsync();
 
+    final boolean mAllowsScreenSizeDecoupledFromStatusBarAndCutout =
+            Flags.allowsScreenSizeDecoupledFromStatusBarAndCutout();
+
     /* End Available Flags */
 }

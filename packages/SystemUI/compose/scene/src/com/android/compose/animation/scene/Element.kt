@@ -506,7 +506,10 @@ private inline fun <T> computeValue(
 
     // There is no ongoing transition.
     if (state !is TransitionState.Transition || state.fromScene == state.toScene) {
-        return idleValue
+        // Even if this element SceneTransitionLayout is not animated, the layout itself might be
+        // animated (e.g. by another parent SceneTransitionLayout), in which case this element still
+        // need to participate in the layout phase.
+        return currentValue()
     }
 
     // A transition was started but it's not ready yet (not all elements have been composed/laid

@@ -40,6 +40,7 @@ import java.util.function.IntFunction;
 /**
  * Static utility methods for arrays that aren't already included in {@link java.util.Arrays}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ArrayUtils {
     private static final int CACHE_SIZE = 73;
     private static Object[] sCache = new Object[CACHE_SIZE];
@@ -48,35 +49,43 @@ public class ArrayUtils {
 
     private ArrayUtils() { /* cannot be instantiated */ }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static byte[] newUnpaddedByteArray(int minLen) {
         return (byte[])VMRuntime.getRuntime().newUnpaddedArray(byte.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static char[] newUnpaddedCharArray(int minLen) {
         return (char[])VMRuntime.getRuntime().newUnpaddedArray(char.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int[] newUnpaddedIntArray(int minLen) {
         return (int[])VMRuntime.getRuntime().newUnpaddedArray(int.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static boolean[] newUnpaddedBooleanArray(int minLen) {
         return (boolean[])VMRuntime.getRuntime().newUnpaddedArray(boolean.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static long[] newUnpaddedLongArray(int minLen) {
         return (long[])VMRuntime.getRuntime().newUnpaddedArray(long.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static float[] newUnpaddedFloatArray(int minLen) {
         return (float[])VMRuntime.getRuntime().newUnpaddedArray(float.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     public static Object[] newUnpaddedObjectArray(int minLen) {
         return (Object[])VMRuntime.getRuntime().newUnpaddedArray(Object.class, minLen);
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @SuppressWarnings("unchecked")
     public static <T> T[] newUnpaddedArray(Class<T> clazz, int minLen) {

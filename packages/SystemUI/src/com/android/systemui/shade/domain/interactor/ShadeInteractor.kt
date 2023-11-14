@@ -72,7 +72,7 @@ constructor(
     userSetupRepository: UserSetupRepository,
     userSwitcherInteractor: UserSwitcherInteractor,
     sharedNotificationContainerInteractor: SharedNotificationContainerInteractor,
-    repository: ShadeRepository,
+    private val repository: ShadeRepository,
 ) {
     /** Emits true if the shade is currently allowed and false otherwise. */
     val isShadeEnabled: StateFlow<Boolean> =
@@ -185,7 +185,15 @@ constructor(
         if (sceneContainerFlags.isEnabled()) {
             sceneBasedInteracting(sceneInteractorProvider.get(), SceneKey.Shade)
         } else {
-            userInteractingFlow(repository.legacyShadeTracking, repository.legacyShadeExpansion)
+            combine(
+                userInteractingFlow(
+                    repository.legacyShadeTracking,
+                    repository.legacyShadeExpansion
+                ),
+                repository.legacyLockscreenShadeTracking
+            ) { legacyShadeTracking, legacyLockscreenShadeTracking ->
+                legacyShadeTracking || legacyLockscreenShadeTracking
+            }
         }
 
     /**

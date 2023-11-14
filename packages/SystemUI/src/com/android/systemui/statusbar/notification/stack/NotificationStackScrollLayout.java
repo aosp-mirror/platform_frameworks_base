@@ -253,6 +253,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private NotificationLogger.OnChildLocationsChangedListener mListener;
     private OnOverscrollTopChangedListener mOverscrollTopChangedListener;
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
+    private Runnable mOnHeightChangedRunnable;
     private OnEmptySpaceClickListener mOnEmptySpaceClickListener;
     private boolean mNeedsAnimation;
     private boolean mTopPaddingNeedsAnimation;
@@ -1120,6 +1121,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private void notifyHeightChangeListener(ExpandableView view, boolean needsAnimation) {
         if (mOnHeightChangedListener != null) {
             mOnHeightChangedListener.onHeightChanged(view, needsAnimation);
+        }
+
+        if (mOnHeightChangedRunnable != null) {
+            mOnHeightChangedRunnable.run();
         }
     }
 
@@ -4250,6 +4255,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     void setOnHeightChangedListener(
             ExpandableView.OnHeightChangedListener onHeightChangedListener) {
         this.mOnHeightChangedListener = onHeightChangedListener;
+    }
+
+    void setOnHeightChangedRunnable(Runnable r) {
+        this.mOnHeightChangedRunnable = r;
     }
 
     void onChildAnimationFinished() {

@@ -16,13 +16,14 @@
 
 package com.android.systemui.qs.tiles.impl.custom.di
 
+import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
 import com.android.systemui.qs.tiles.impl.di.QSTileComponent
 import com.android.systemui.qs.tiles.impl.di.QSTileScope
 import dagger.Subcomponent
 
 @QSTileScope
 @Subcomponent(modules = [QSTileConfigModule::class, CustomTileModule::class])
-interface CustomTileComponent : QSTileComponent<Any> {
+interface CustomTileComponent : QSTileComponent<CustomTileDataModel> {
 
     @Subcomponent.Builder
     interface Builder {

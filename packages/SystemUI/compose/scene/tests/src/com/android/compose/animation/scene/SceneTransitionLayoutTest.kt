@@ -18,6 +18,8 @@ package com.android.compose.animation.scene
 
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.test.subjects.DpOffsetSubject
 import com.android.compose.test.subjects.assertThat
 import com.google.common.truth.Truth.assertThat
@@ -305,6 +308,26 @@ class SceneTransitionLayoutTest {
         rule.mainClock.advanceTimeByFrame()
         assertThat(layoutState.transitionState).isInstanceOf(TransitionState.Idle::class.java)
         assertThat(layoutState.transitionState.currentScene).isEqualTo(TestScenes.SceneA)
+    }
+
+    @Test
+    fun layoutSizeIsAnimated() {
+        val layoutTag = "layout"
+        rule.testTransition(
+            fromSceneContent = { Box(Modifier.size(200.dp, 100.dp)) },
+            toSceneContent = { Box(Modifier.size(120.dp, 140.dp)) },
+            transition = {
+                // 4 frames of animation.
+                spec = tween(4 * 16, easing = LinearEasing)
+            },
+            layoutModifier = Modifier.testTag(layoutTag),
+        ) {
+            before { rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(200.dp, 100.dp) }
+            at(16) { rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(180.dp, 110.dp) }
+            at(32) { rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(160.dp, 120.dp) }
+            at(48) { rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(140.dp, 130.dp) }
+            after { rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(120.dp, 140.dp) }
+        }
     }
 
     private fun SemanticsNodeInteraction.offsetRelativeTo(

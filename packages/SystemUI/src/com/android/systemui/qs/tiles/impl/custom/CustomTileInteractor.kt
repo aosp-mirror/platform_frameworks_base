@@ -19,17 +19,18 @@ package com.android.systemui.qs.tiles.impl.custom
 import android.os.UserHandle
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
+import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
 import com.android.systemui.qs.tiles.impl.di.QSTileScope
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
 @QSTileScope
-class CustomTileInteractor @Inject constructor() : QSTileDataInteractor<CustomTileData> {
+class CustomTileInteractor @Inject constructor() : QSTileDataInteractor<CustomTileDataModel> {
 
     override fun tileData(
         user: UserHandle,
         triggers: Flow<DataUpdateTrigger>
-    ): Flow<CustomTileData> {
+    ): Flow<CustomTileDataModel> {
         TODO("Not yet implemented")
     }
 

@@ -32,28 +32,11 @@ import java.util.Set;
  */
 public abstract class VirtualDeviceManagerInternal {
 
-    /** Interface to listen to the creation and destruction of virtual displays. */
-    public interface VirtualDisplayListener {
-        /** Notifies that a virtual display was created. */
-        void onVirtualDisplayCreated(int displayId);
-
-        /** Notifies that a virtual display was removed. */
-        void onVirtualDisplayRemoved(int displayId);
-    }
-
     /** Interface to listen to the changes on the list of app UIDs running on any virtual device. */
     public interface AppsOnVirtualDeviceListener {
         /** Notifies that running apps on any virtual device has changed */
         void onAppsOnAnyVirtualDeviceChanged(Set<Integer> allRunningUids);
     }
-
-    /** Register a listener for the creation and destruction of virtual displays. */
-    public abstract void registerVirtualDisplayListener(
-            @NonNull VirtualDisplayListener listener);
-
-    /** Unregister a listener for the creation and destruction of virtual displays. */
-    public abstract void unregisterVirtualDisplayListener(
-            @NonNull VirtualDisplayListener listener);
 
     /** Register a listener for changes of running app UIDs on any virtual device. */
     public abstract void registerAppsOnVirtualDeviceListener(
@@ -102,13 +85,6 @@ public abstract class VirtualDeviceManagerInternal {
      * the app is running on the default device or not.
      */
     public abstract @NonNull ArraySet<Integer> getDeviceIdsForUid(int uid);
-
-    /**
-     * Notifies that a virtual display is created.
-     *
-     * @param displayId The display id of the created virtual display.
-     */
-    public abstract void onVirtualDisplayCreated(int displayId);
 
     /**
      * Notifies that a virtual display is removed.

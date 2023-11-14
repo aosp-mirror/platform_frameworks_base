@@ -1642,6 +1642,7 @@ public class NotificationManager {
      *
      * <p>
      */
+    // TODO(b/309457271): Update documentation with VANILLA_ICE_CREAM behavior.
     public Policy getNotificationPolicy() {
         INotificationManager service = getService();
         try {
@@ -1660,6 +1661,7 @@ public class NotificationManager {
      *
      * @param policy The new desired policy.
      */
+    // TODO(b/309457271): Update documentation with VANILLA_ICE_CREAM behavior.
     public void setNotificationPolicy(@NonNull Policy policy) {
         checkRequired("policy", policy);
         INotificationManager service = getService();
@@ -2608,6 +2610,7 @@ public class NotificationManager {
      * Only available if policy access is granted to this package. See
      * {@link #isNotificationPolicyAccessGranted}.
      */
+    // TODO(b/309457271): Update documentation with VANILLA_ICE_CREAM behavior.
     public final void setInterruptionFilter(@InterruptionFilter int interruptionFilter) {
         final INotificationManager service = getService();
         try {

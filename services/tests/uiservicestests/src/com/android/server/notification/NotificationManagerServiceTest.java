@@ -43,6 +43,7 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
+import static android.app.NotificationManager.INTERRUPTION_FILTER_PRIORITY;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CALLS;
 import static android.app.NotificationManager.Policy.PRIORITY_CATEGORY_CONVERSATIONS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
@@ -72,6 +73,7 @@ import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
+import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
 import static android.service.notification.NotificationListenerService.FLAG_FILTER_TYPE_ALERTING;
@@ -163,6 +165,7 @@ import android.app.StatsManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.companion.AssociationInfo;
+import android.companion.AssociationRequest;
 import android.companion.ICompanionDeviceManager;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.content.BroadcastReceiver;
@@ -3820,6 +3823,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mCompanionMgr.getAssociations(PKG, mUserId))
                 .thenReturn(singletonList(mock(AssociationInfo.class)));
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
+        mListener.component = new ComponentName(PKG, PKG);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
         when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
 
@@ -3870,6 +3874,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mCompanionMgr.getAssociations(PKG, mUserId))
                 .thenReturn(emptyList());
         mListener = mock(ManagedServices.ManagedServiceInfo.class);
+        mListener.component = new ComponentName(PKG, PKG);
         when(mListener.enabledAndUserMatches(anyInt())).thenReturn(false);
         when(mListeners.checkServiceTokenLocked(any())).thenReturn(mListener);
         try {
@@ -12775,6 +12780,145 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         simulateProfileAvailabilityActions(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         verify(mWorkerHandler).post(any(Runnable.class));
         verify(mSnoozeHelper).clearData(anyInt());
+    }
+
+    @Test
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setNotificationPolicy_mappedToImplicitRule() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mService.setCallerIsNormalPackage();
+        ZenModeHelper zenHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = zenHelper;
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+
+        NotificationManager.Policy policy = new NotificationManager.Policy(0, 0, 0);
+        mBinderService.setNotificationPolicy("package", policy);
+
+        verify(zenHelper).applyGlobalPolicyAsImplicitZenRule(eq("package"), anyInt(), eq(policy));
+    }
+
+    @Test
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setNotificationPolicy_systemCaller_setsGlobalPolicy() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        ZenModeHelper zenModeHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = zenModeHelper;
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+        mService.isSystemUid = true;
+
+        NotificationManager.Policy policy = new NotificationManager.Policy(0, 0, 0);
+        mBinderService.setNotificationPolicy("package", policy);
+
+        verify(zenModeHelper).setNotificationPolicy(eq(policy), anyInt(), anyBoolean());
+    }
+
+    @Test
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setNotificationPolicy_watchCompanionApp_setsGlobalPolicy() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mService.setCallerIsNormalPackage();
+        ZenModeHelper zenModeHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = zenModeHelper;
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+        when(mCompanionMgr.getAssociations(anyString(), anyInt()))
+                .thenReturn(ImmutableList.of(
+                        new AssociationInfo.Builder(1, mUserId, "package")
+                                .setDisplayName("My watch")
+                                .setDeviceProfile(AssociationRequest.DEVICE_PROFILE_WATCH)
+                                .build()));
+
+        NotificationManager.Policy policy = new NotificationManager.Policy(0, 0, 0);
+        mBinderService.setNotificationPolicy("package", policy);
+
+        verify(zenModeHelper).setNotificationPolicy(eq(policy), anyInt(), anyBoolean());
+    }
+
+    @Test
+    @DisableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setNotificationPolicy_withoutCompat_setsGlobalPolicy() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mService.setCallerIsNormalPackage();
+        ZenModeHelper zenModeHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = zenModeHelper;
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+
+        NotificationManager.Policy policy = new NotificationManager.Policy(0, 0, 0);
+        mBinderService.setNotificationPolicy("package", policy);
+
+        verify(zenModeHelper).setNotificationPolicy(eq(policy), anyInt(), anyBoolean());
+    }
+
+    @Test
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void getNotificationPolicy_mappedFromImplicitRule() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mService.setCallerIsNormalPackage();
+        ZenModeHelper zenHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = zenHelper;
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+
+        mBinderService.getNotificationPolicy("package");
+
+        verify(zenHelper).getNotificationPolicyFromImplicitZenRule(eq("package"));
+    }
+
+    @Test
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setInterruptionFilter_mappedToImplicitRule() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mService.setCallerIsNormalPackage();
+        ZenModeHelper zenHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = zenHelper;
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+
+        mBinderService.setInterruptionFilter("package", INTERRUPTION_FILTER_PRIORITY);
+
+        verify(zenHelper).applyGlobalZenModeAsImplicitZenRule(eq("package"), anyInt(),
+                eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS));
+    }
+
+    @Test
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setInterruptionFilter_systemCaller_setsGlobalPolicy() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mService.setCallerIsNormalPackage();
+        ZenModeHelper zenModeHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = zenModeHelper;
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+        mService.isSystemUid = true;
+
+        mBinderService.setInterruptionFilter("package", INTERRUPTION_FILTER_PRIORITY);
+
+        verify(zenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS), eq(null),
+                eq("package"), anyString(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    @EnableCompatChanges(NotificationManagerService.MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES)
+    public void setInterruptionFilter_watchCompanionApp_setsGlobalPolicy() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        ZenModeHelper zenModeHelper = mock(ZenModeHelper.class);
+        mService.mZenModeHelper = zenModeHelper;
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+        when(mCompanionMgr.getAssociations(anyString(), anyInt()))
+                .thenReturn(ImmutableList.of(
+                        new AssociationInfo.Builder(1, mUserId, "package")
+                                .setDisplayName("My watch")
+                                .setDeviceProfile(AssociationRequest.DEVICE_PROFILE_WATCH)
+                                .build()));
+
+        mBinderService.setInterruptionFilter("package", INTERRUPTION_FILTER_PRIORITY);
+
+        verify(zenModeHelper).setManualZenMode(eq(ZEN_MODE_IMPORTANT_INTERRUPTIONS), eq(null),
+                eq("package"), anyString(), anyInt(), anyBoolean());
     }
 
     private NotificationRecord createAndPostNotification(Notification.Builder nb, String testName)

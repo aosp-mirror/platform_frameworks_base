@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.impl.custom
+package com.android.systemui.qs.tiles.impl.custom.domain.entity
 
 import android.content.ComponentName
 import android.graphics.drawable.Icon
@@ -22,12 +22,11 @@ import android.os.UserHandle
 import android.service.quicksettings.Tile
 import com.android.systemui.qs.tiles.impl.custom.di.bound.CustomTileBoundComponent
 
-data class CustomTileData(
+data class CustomTileDataModel(
     val user: UserHandle,
     val componentName: ComponentName,
     val tile: Tile,
     val callingAppUid: Int,
-    val isActive: Boolean,
     val hasPendingBind: Boolean,
     val shouldShowChevron: Boolean,
     val defaultTileLabel: CharSequence?,

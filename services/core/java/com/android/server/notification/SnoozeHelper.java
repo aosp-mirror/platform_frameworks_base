@@ -118,7 +118,10 @@ public final class SnoozeHelper {
 
     protected boolean canSnooze(int numberToSnooze) {
         synchronized (mLock) {
-            if ((mSnoozedNotifications.size() + numberToSnooze) > CONCURRENT_SNOOZE_LIMIT) {
+            if ((mSnoozedNotifications.size() + numberToSnooze) > CONCURRENT_SNOOZE_LIMIT
+                    || (mPersistedSnoozedNotifications.size()
+                    + mPersistedSnoozedNotificationsWithContext.size() + numberToSnooze)
+                    > CONCURRENT_SNOOZE_LIMIT) {
                 return false;
             }
         }
@@ -357,6 +360,9 @@ public final class SnoozeHelper {
 
             if (groupSummaryKey != null) {
                 NotificationRecord record = mSnoozedNotifications.remove(groupSummaryKey);
+                String trimmedKey = getTrimmedString(groupSummaryKey);
+                mPersistedSnoozedNotificationsWithContext.remove(trimmedKey);
+                mPersistedSnoozedNotifications.remove(trimmedKey);
 
                 if (record != null && !record.isCanceled) {
                     Runnable runnable = () -> {

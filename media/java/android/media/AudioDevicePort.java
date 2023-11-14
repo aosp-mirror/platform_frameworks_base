@@ -156,7 +156,7 @@ public class AudioDevicePort extends AudioPort {
                             AudioSystem.getOutputDeviceName(mType));
         return "{" + super.toString()
                 + ", mType: " + type
-                + ", mAddress: " + mAddress
+                + ", mAddress: " + Utils.anonymizeBluetoothAddress(mType, mAddress)
                 + "}";
     }
 }

@@ -16,7 +16,6 @@
 
 package com.android.compose.animation.scene
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -104,7 +103,7 @@ fun ComposeContentTestRule.testTransition(
                 currentScene,
                 onChangeScene,
                 transitions { from(fromScene, to = toScene, transition) },
-                layoutModifier.fillMaxSize(),
+                layoutModifier,
             ) {
                 scene(fromScene, content = fromSceneContent)
                 scene(toScene, content = toSceneContent)

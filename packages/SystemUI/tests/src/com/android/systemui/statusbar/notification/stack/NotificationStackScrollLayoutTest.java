@@ -83,6 +83,7 @@ import com.android.systemui.statusbar.notification.collection.render.GroupMember
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.init.NotificationsController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -904,6 +905,20 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 .dispatchWindowInsetsAnimationProgress(windowInsets, windowInsetsAnimations);
 
         assertEquals(bottomImeInset, mStackScrollerInternal.mBottomInset);
+    }
+
+    @Test
+    public void testSetMaxDisplayedNotifications_notifiesListeners() {
+        ExpandableView.OnHeightChangedListener listener =
+                mock(ExpandableView.OnHeightChangedListener.class);
+        Runnable runnable = mock(Runnable.class);
+        mStackScroller.setOnHeightChangedListener(listener);
+        mStackScroller.setOnHeightChangedRunnable(runnable);
+
+        mStackScroller.setMaxDisplayedNotifications(50);
+
+        verify(listener).onHeightChanged(mNotificationShelf, false);
+        verify(runnable).run();
     }
 
     private void setBarStateForTest(int state) {

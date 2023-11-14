@@ -65,7 +65,7 @@ public class HostTestUtils {
      */
     public static void onThrowMethodCalled() {
         // TODO: Maybe add call tracking?
-        throw new AssumptionViolatedException("This method is not supported on the host side");
+        throw new RuntimeException("This method is not supported on the host side");
     }
 
     /**

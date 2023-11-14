@@ -163,7 +163,7 @@ public final class SQLiteRawStatement implements Closeable {
      * {@link IllegalStateException} if a transaction is not in progress. Clients should call
      * {@link SQLiteDatabase.createRawStatement} to create a new instance.
      */
-    SQLiteRawStatement(@NonNull SQLiteDatabase db, @NonNull String sql) throws SQLiteException {
+    SQLiteRawStatement(@NonNull SQLiteDatabase db, @NonNull String sql) {
         mThread = Thread.currentThread();
         mDatabase = db;
         mSession = mDatabase.getThreadSession();
@@ -245,7 +245,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteDatabaseLockedException if the database is locked or busy.
      * @throws SQLiteException if a native error occurs.
      */
-    public boolean step() throws SQLiteException {
+    public boolean step() {
         throwIfInvalid();
         try {
             int err = nativeStep(mStatement, true);
@@ -392,7 +392,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindBlob(int parameterIndex, @NonNull byte[] value) throws SQLiteException {
+    public void bindBlob(int parameterIndex, @NonNull byte[] value) {
         Objects.requireNonNull(value);
         throwIfInvalid();
         try {
@@ -418,8 +418,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindBlob(int parameterIndex, @NonNull byte[] value, int offset, int length)
-            throws SQLiteException {
+    public void bindBlob(int parameterIndex, @NonNull byte[] value, int offset, int length) {
         Objects.requireNonNull(value);
         throwIfInvalid();
         throwIfInvalidBounds(value.length, offset, length);
@@ -442,7 +441,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindDouble(int parameterIndex, double value) throws SQLiteException {
+    public void bindDouble(int parameterIndex, double value) {
         throwIfInvalid();
         try {
             nativeBindDouble(mStatement, parameterIndex, value);
@@ -462,7 +461,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindInt(int parameterIndex, int value) throws SQLiteException {
+    public void bindInt(int parameterIndex, int value) {
         throwIfInvalid();
         try {
             nativeBindInt(mStatement, parameterIndex, value);
@@ -482,7 +481,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindLong(int parameterIndex, long value) throws SQLiteException {
+    public void bindLong(int parameterIndex, long value) {
         throwIfInvalid();
         try {
             nativeBindLong(mStatement, parameterIndex, value);
@@ -502,7 +501,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindNull(int parameterIndex) throws SQLiteException {
+    public void bindNull(int parameterIndex) {
         throwIfInvalid();
         try {
             nativeBindNull(mStatement, parameterIndex);
@@ -523,7 +522,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the parameter is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public void bindText(int parameterIndex, @NonNull String value) throws SQLiteException {
+    public void bindText(int parameterIndex, @NonNull String value) {
         Objects.requireNonNull(value);
         throwIfInvalid();
         try {
@@ -562,7 +561,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteException if a native error occurs.
      */
     @SQLiteDataType
-    public int getColumnType(int columnIndex) throws SQLiteException {
+    public int getColumnType(int columnIndex) {
         throwIfInvalid();
         try {
             return nativeColumnType(mStatement, columnIndex);
@@ -584,7 +583,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteOutOfMemoryException if the database cannot allocate memory for the name.
      */
     @NonNull
-    public String getColumnName(int columnIndex) throws SQLiteException {
+    public String getColumnName(int columnIndex) {
         throwIfInvalid();
         try {
             return nativeColumnName(mStatement, columnIndex);
@@ -609,7 +608,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public int getColumnLength(int columnIndex) throws SQLiteException {
+    public int getColumnLength(int columnIndex) {
         throwIfInvalid();
         try {
             return nativeColumnBytes(mStatement, columnIndex);
@@ -635,7 +634,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteException if a native error occurs.
      */
     @Nullable
-    public byte[] getColumnBlob(int columnIndex) throws SQLiteException {
+    public byte[] getColumnBlob(int columnIndex) {
         throwIfInvalid();
         try {
             return nativeColumnBlob(mStatement, columnIndex);
@@ -668,8 +667,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteException if a native error occurs.
      */
     public int readColumnBlob(int columnIndex, @NonNull byte[] buffer, int offset,
-            int length, int srcOffset)
-            throws SQLiteException {
+            int length, int srcOffset) {
         Objects.requireNonNull(buffer);
         throwIfInvalid();
         throwIfInvalidBounds(buffer.length, offset, length);
@@ -695,7 +693,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public double getColumnDouble(int columnIndex) throws SQLiteException {
+    public double getColumnDouble(int columnIndex) {
         throwIfInvalid();
         try {
             return nativeColumnDouble(mStatement, columnIndex);
@@ -719,7 +717,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public int getColumnInt(int columnIndex) throws SQLiteException {
+    public int getColumnInt(int columnIndex) {
         throwIfInvalid();
         try {
             return nativeColumnInt(mStatement, columnIndex);
@@ -743,7 +741,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteBindOrColumnIndexOutOfRangeException if the column is out of range.
      * @throws SQLiteException if a native error occurs.
      */
-    public long getColumnLong(int columnIndex) throws SQLiteException {
+    public long getColumnLong(int columnIndex) {
         throwIfInvalid();
         try {
             return nativeColumnLong(mStatement, columnIndex);
@@ -768,7 +766,7 @@ public final class SQLiteRawStatement implements Closeable {
      * @throws SQLiteException if a native error occurs.
      */
     @NonNull
-    public String getColumnText(int columnIndex) throws SQLiteException {
+    public String getColumnText(int columnIndex) {
         throwIfInvalid();
         try {
             return nativeColumnText(mStatement, columnIndex);
