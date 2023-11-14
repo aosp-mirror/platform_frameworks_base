@@ -17,14 +17,14 @@ package com.android.systemui.statusbar.notification.icon.domain.interactor
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
+import com.android.SysUITestComponent
+import com.android.SysUITestModule
+import com.android.TestMocksModule
+import com.android.collectLastValue
+import com.android.runTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
-import com.android.systemui.runTest
 import com.android.systemui.statusbar.data.repository.NotificationListenerSettingsRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore

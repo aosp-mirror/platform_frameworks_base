@@ -294,8 +294,6 @@ filegroup {
         "tests/src/com/android/systemui/bouncer/ui/viewmodel/KeyguardBouncerViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/DreamingToLockscreenTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/GoneToDreamingTransitionViewModelTest.kt",
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToDreamingTransitionViewModelTest.kt",
-        "tests/src/com/android/systemui/keyguard/ui/viewmodel/LockscreenToOccludedTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/OccludedToLockscreenTransitionViewModelTest.kt",
         "tests/src/com/android/systemui/keyguard/ui/viewmodel/PrimaryBouncerToGoneTransitionViewModelTest.kt",
         // Keyguard helper
@@ -618,9 +616,6 @@ android_robolectric_test {
 
     instrumentation_for: "SystemUIRobo-stub",
     java_resource_dirs: ["tests/robolectric/config"],
-    plugins: [
-        "dagger2-compiler",
-    ],
 }
 
 // Opt-out config for optimizing the SystemUI target using R8.
