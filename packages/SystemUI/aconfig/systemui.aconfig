@@ -127,3 +127,10 @@ flag {
     description: "New LOCKSCREEN <=> AOD transition"
     bug: "301915812"
 }
+
+flag {
+    name: "light_reveal_migration"
+    namespace: "systemui"
+    description: "Move LightRevealScrim to recommended architecture"
+    bug: "281655028"
+}

@@ -27,6 +27,7 @@ import static androidx.core.view.ViewCompat.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
 
 import static com.android.systemui.Dependency.TIME_TICK_HANDLER_NAME;
+import static com.android.systemui.Flags.lightRevealMigration;
 import static com.android.systemui.charging.WirelessChargingAnimation.UNKNOWN_BATTERY_LEVEL;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
@@ -239,6 +240,8 @@ import com.android.wm.shell.startingsurface.StartingSurface;
 
 import dalvik.annotation.optimization.NeverCompile;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -249,8 +252,6 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-
-import dagger.Lazy;
 
 /**
  * A class handling initialization and coordination between some of the key central surfaces in
@@ -953,7 +954,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
             @Override
             public void onKeyguardGoingAwayChanged() {
-                if (mFeatureFlags.isEnabled(Flags.LIGHT_REVEAL_MIGRATION)) {
+                if (lightRevealMigration()) {
                     // This code path is not used if the KeyguardTransitionRepository is managing
                     // the lightreveal scrim.
                     return;
@@ -1222,7 +1223,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         });
         mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront);
 
-        if (mFeatureFlags.isEnabled(Flags.LIGHT_REVEAL_MIGRATION)) {
+        if (lightRevealMigration()) {
             LightRevealScrimViewBinder.bind(
                     mLightRevealScrim, mLightRevealScrimViewModelLazy.get());
         }
@@ -2355,7 +2356,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             return;
         }
 
-        if (mFeatureFlags.isEnabled(Flags.LIGHT_REVEAL_MIGRATION)) {
+        if (lightRevealMigration()) {
             return;
         }
 
@@ -3001,7 +3002,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             return;
         }
 
-        if (!mFeatureFlags.isEnabled(Flags.LIGHT_REVEAL_MIGRATION)) {
+        if (!lightRevealMigration()) {
             mLightRevealScrim.setAlpha(mScrimController.getState().getMaxLightRevealScrimAlpha());
         }
     }
@@ -3156,7 +3157,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
                 @Override
                 public void onDozeAmountChanged(float linear, float eased) {
-                    if (!mFeatureFlags.isEnabled(Flags.LIGHT_REVEAL_MIGRATION)
+                    if (!lightRevealMigration()
                             && !(mLightRevealScrim.getRevealEffect() instanceof CircleReveal)) {
                         mLightRevealScrim.setRevealAmount(1f - linear);
                     }

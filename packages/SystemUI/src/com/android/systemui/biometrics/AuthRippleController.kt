@@ -31,11 +31,11 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.keyguard.logging.KeyguardLogger
 import com.android.settingslib.Utils
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.lightRevealMigration
 import com.android.systemui.res.R
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -191,7 +191,7 @@ class AuthRippleController @Inject constructor(
 
         // This code path is not used if the KeyguardTransitionRepository is managing the light
         // reveal scrim.
-        if (!featureFlags.isEnabled(Flags.LIGHT_REVEAL_MIGRATION)) {
+        if (!lightRevealMigration()) {
             if (statusBarStateController.isDozing || biometricUnlockController.isWakeAndUnlock) {
                 circleReveal?.let {
                     lightRevealScrim.revealAmount = 0f
@@ -210,7 +210,7 @@ class AuthRippleController @Inject constructor(
     }
 
     override fun onKeyguardFadingAwayChanged() {
-        if (featureFlags.isEnabled(Flags.LIGHT_REVEAL_MIGRATION)) {
+        if (lightRevealMigration()) {
             return
         }
 
