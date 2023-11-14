@@ -229,7 +229,9 @@ public class NotificationShelf extends ActivatableNotificationView {
             } else {
                 viewState.setAlpha(1f - ambientState.getHideAmount());
             }
-            viewState.belowSpeedBump = getSpeedBumpIndex() == 0;
+            if (!NotificationIconContainerRefactor.isEnabled()) {
+                viewState.belowSpeedBump = getSpeedBumpIndex() == 0;
+            }
             viewState.hideSensitive = false;
             viewState.setXTranslation(getTranslationX());
             viewState.hasItemsInStableShelf = lastViewState.inShelf;
