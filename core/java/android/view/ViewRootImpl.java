@@ -442,9 +442,6 @@ public final class ViewRootImpl implements ViewParent,
      */
     private boolean mForceNextConfigUpdate;
 
-    private boolean mUseBLASTAdapter;
-    private boolean mForceDisableBLAST;
-
     /** lazily-initialized in getAudioManager() */
     private boolean mFastScrollSoundEffectsEnabled = false;
 
@@ -1290,8 +1287,6 @@ public final class ViewRootImpl implements ViewParent,
                 if (mWindowAttributes.packageName == null) {
                     mWindowAttributes.packageName = mBasePackageName;
                 }
-                mWindowAttributes.privateFlags |=
-                        WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
 
                 attrs = mWindowAttributes;
                 setTag();
@@ -1501,9 +1496,6 @@ public final class ViewRootImpl implements ViewParent,
                 if (mExtraDisplayListenerLogging) {
                     Slog.i(mTag, "(" + mBasePackageName + ") Initial DisplayState: "
                             + mAttachInfo.mDisplayState, new Throwable());
-                }
-                if ((res & WindowManagerGlobal.ADD_FLAG_USE_BLAST) != 0) {
-                    mUseBLASTAdapter = true;
                 }
 
                 if (view instanceof RootViewSurfaceTaker) {
@@ -1901,8 +1893,7 @@ public final class ViewRootImpl implements ViewParent,
             mWindowAttributes.insetsFlags.appearance = appearance;
             mWindowAttributes.insetsFlags.behavior = behavior;
             mWindowAttributes.privateFlags |= compatibleWindowFlag
-                    | appearanceAndBehaviorPrivateFlags
-                    | WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
+                    | appearanceAndBehaviorPrivateFlags;
 
             if (mWindowAttributes.preservePreviousSurfaceInsets) {
                 // Restore old surface insets.
@@ -8692,11 +8683,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         if (mSurfaceControl.isValid()) {
-            if (!useBLAST()) {
-                mSurface.copyFrom(mSurfaceControl);
-            } else {
-                updateBlastSurfaceIfNeeded();
-            }
+            updateBlastSurfaceIfNeeded();
             if (mAttachInfo.mThreadedRenderer != null) {
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl, mBlastBufferQueue);
             }
@@ -11533,7 +11520,7 @@ public final class ViewRootImpl implements ViewParent,
         SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
         transaction.setBlurRegions(surfaceControl, regionCopy);
 
-        if (useBLAST() && mBlastBufferQueue != null) {
+        if (mBlastBufferQueue != null) {
             mBlastBufferQueue.mergeWithNextTransaction(transaction, frameNumber);
         }
     }
@@ -11548,18 +11535,6 @@ public final class ViewRootImpl implements ViewParent,
     @Override
     public void onDescendantUnbufferedRequested() {
         mUnbufferedInputSource = mView.mUnbufferedInputSource;
-    }
-
-    /**
-     * Force disabling use of the BLAST adapter regardless of the system
-     * flag. Needs to be called before addView.
-     */
-    void forceDisableBLAST() {
-        mForceDisableBLAST = true;
-    }
-
-    boolean useBLAST() {
-        return mUseBLASTAdapter && !mForceDisableBLAST;
     }
 
     int getSurfaceSequenceId() {

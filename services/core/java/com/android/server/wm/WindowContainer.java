@@ -3950,7 +3950,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return true;
     }
 
-    boolean useBLASTSync() {
+    boolean syncNextBuffer() {
         return mSyncState != SYNC_STATE_NONE;
     }
 

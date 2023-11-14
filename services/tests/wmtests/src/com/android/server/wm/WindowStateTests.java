@@ -551,7 +551,7 @@ public class WindowStateTests extends WindowTestsBase {
         final SurfaceControl.Transaction[] handledT = { null };
         // The normal case that the draw transaction is applied with finishing drawing.
         win.applyWithNextDraw(t -> handledT[0] = t);
-        assertTrue(win.useBLASTSync());
+        assertTrue(win.syncNextBuffer());
         final SurfaceControl.Transaction drawT = new StubTransaction();
         final SurfaceControl.Transaction currT = win.getSyncTransaction();
         clearInvocations(currT);
@@ -560,12 +560,12 @@ public class WindowStateTests extends WindowTestsBase {
         // The draw transaction should be merged to current transaction even if the state is hidden.
         verify(currT).merge(eq(drawT));
         assertEquals(drawT, handledT[0]);
-        assertFalse(win.useBLASTSync());
+        assertFalse(win.syncNextBuffer());
 
         // If the window is gone before reporting drawn, the sync state should be cleared.
         win.applyWithNextDraw(t -> handledT[0] = t);
         win.destroySurfaceUnchecked();
-        assertFalse(win.useBLASTSync());
+        assertFalse(win.syncNextBuffer());
         assertNotEquals(drawT, handledT[0]);
     }
 
