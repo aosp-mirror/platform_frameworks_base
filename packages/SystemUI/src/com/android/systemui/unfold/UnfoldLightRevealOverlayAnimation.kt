@@ -49,6 +49,7 @@ import com.android.systemui.unfold.updates.RotationChangeProvider
 import com.android.systemui.unfold.util.ScaleAwareTransitionProgressProvider.Companion.areAnimationsEnabled
 import com.android.systemui.util.concurrency.ThreadFactory
 import com.android.app.tracing.traceSection
+import com.android.keyguard.logging.ScrimLogger
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper
 import java.util.Optional
 import java.util.concurrent.Executor
@@ -69,7 +70,8 @@ constructor(
     @Main private val executor: Executor,
     private val threadFactory: ThreadFactory,
     private val rotationChangeProvider: RotationChangeProvider,
-    private val displayTracker: DisplayTracker
+    private val displayTracker: DisplayTracker,
+    private val scrimLogger: ScrimLogger,
 ) {
 
     private val transitionListener = TransitionListener()
@@ -179,8 +181,8 @@ constructor(
                 )
                 .apply {
                     revealEffect = createLightRevealEffect()
-                    isScrimOpaqueChangedListener = Consumer {}
                     revealAmount = calculateRevealAmount()
+                    scrimLogger = this@UnfoldLightRevealOverlayAnimation.scrimLogger
                 }
 
         newRoot.setView(newView, params)

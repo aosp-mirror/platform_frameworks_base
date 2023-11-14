@@ -517,6 +517,16 @@ public class LogModule {
     }
 
     /**
+     * Provides a {@link LogBuffer} for Scrims like LightRevealScrim.
+     */
+    @Provides
+    @SysUISingleton
+    @ScrimLog
+    public static LogBuffer provideScrimLogBuffer(LogBufferFactory factory) {
+        return factory.create("ScrimLog", 100);
+    }
+
+    /**
      * Provides a {@link LogBuffer} for dream-related logs.
      */
     @Provides

@@ -22,6 +22,7 @@ import android.os.Handler
 import android.view.LayoutInflater
 import android.view.ViewStub
 import androidx.constraintlayout.motion.widget.MotionLayout
+import com.android.keyguard.logging.ScrimLogger
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.biometrics.AuthRippleView
@@ -140,8 +141,14 @@ abstract class ShadeViewProviderModule {
         @SysUISingleton
         fun providesLightRevealScrim(
             notificationShadeWindowView: NotificationShadeWindowView,
+            scrimLogger: ScrimLogger,
         ): LightRevealScrim {
-            return notificationShadeWindowView.requireViewById(R.id.light_reveal_scrim)
+            val scrim =
+                notificationShadeWindowView.requireViewById<LightRevealScrim>(
+                    R.id.light_reveal_scrim
+                )
+            scrim.scrimLogger = scrimLogger
+            return scrim
         }
 
         @Provides

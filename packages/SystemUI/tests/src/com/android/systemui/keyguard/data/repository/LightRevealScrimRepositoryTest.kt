@@ -31,6 +31,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealEffect
+import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -60,15 +61,11 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         fakeKeyguardRepository = FakeKeyguardRepository()
         powerRepository = FakePowerRepository()
-        powerInteractor = PowerInteractorFactory.create(
-                repository = powerRepository
-        ).powerInteractor
+        powerInteractor =
+            PowerInteractorFactory.create(repository = powerRepository).powerInteractor
 
-        underTest = LightRevealScrimRepositoryImpl(
-                fakeKeyguardRepository,
-                context,
-                powerInteractor,
-        )
+        underTest =
+            LightRevealScrimRepositoryImpl(fakeKeyguardRepository, context, powerInteractor, mock())
     }
 
     @Test
