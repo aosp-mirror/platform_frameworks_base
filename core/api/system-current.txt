@@ -11234,15 +11234,11 @@ package android.provider {
     field public static final String MAX_CONNECTIONS = "max_conns";
     field public static final String MODEM_PERSIST = "modem_cognitive";
     field @Deprecated public static final String MTU = "mtu";
-    field public static final String MTU_V4 = "mtu_v4";
-    field public static final String MTU_V6 = "mtu_v6";
     field public static final int NO_APN_SET_ID = 0; // 0x0
     field public static final String TIME_LIMIT_FOR_MAX_CONNECTIONS = "max_conns_time";
     field public static final int UNEDITED = 0; // 0x0
     field public static final int USER_DELETED = 2; // 0x2
-    field public static final String USER_EDITABLE = "user_editable";
     field public static final int USER_EDITED = 1; // 0x1
-    field public static final String USER_VISIBLE = "user_visible";
     field public static final String WAIT_TIME_RETRY = "wait_time";
   }
 
