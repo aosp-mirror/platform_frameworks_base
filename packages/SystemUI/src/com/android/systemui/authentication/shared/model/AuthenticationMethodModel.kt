@@ -37,4 +37,6 @@ sealed class AuthenticationMethodModel(
     object Password : AuthenticationMethodModel(isSecure = true)
 
     object Pattern : AuthenticationMethodModel(isSecure = true)
+
+    object Sim : AuthenticationMethodModel(isSecure = true)
 }

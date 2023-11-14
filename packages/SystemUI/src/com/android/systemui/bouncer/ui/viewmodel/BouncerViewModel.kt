@@ -23,6 +23,7 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.Text
@@ -64,6 +65,7 @@ class BouncerViewModel(
     users: Flow<List<UserViewModel>>,
     userSwitcherMenu: Flow<List<UserActionViewModel>>,
     actionButtonInteractor: BouncerActionButtonInteractor,
+    private val simBouncerInteractor: SimBouncerInteractor,
 ) {
     val selectedUserImage: StateFlow<Bitmap?> =
         selectedUser
@@ -259,6 +261,17 @@ class BouncerViewModel(
                     viewModelScope = newViewModelScope,
                     interactor = bouncerInteractor,
                     isInputEnabled = isInputEnabled,
+                    simBouncerInteractor = simBouncerInteractor,
+                    authenticationMethod = authenticationMethod
+                )
+            is AuthenticationMethodModel.Sim ->
+                PinBouncerViewModel(
+                    applicationContext = applicationContext,
+                    viewModelScope = newViewModelScope,
+                    interactor = bouncerInteractor,
+                    isInputEnabled = isInputEnabled,
+                    simBouncerInteractor = simBouncerInteractor,
+                    authenticationMethod = authenticationMethod,
                 )
             is AuthenticationMethodModel.Password ->
                 PasswordBouncerViewModel(
@@ -316,6 +329,7 @@ object BouncerViewModelModule {
         flags: SceneContainerFlags,
         userSwitcherViewModel: UserSwitcherViewModel,
         actionButtonInteractor: BouncerActionButtonInteractor,
+        simBouncerInteractor: SimBouncerInteractor,
     ): BouncerViewModel {
         return BouncerViewModel(
             applicationContext = applicationContext,
@@ -328,6 +342,7 @@ object BouncerViewModelModule {
             users = userSwitcherViewModel.users,
             userSwitcherMenu = userSwitcherViewModel.menu,
             actionButtonInteractor = actionButtonInteractor,
+            simBouncerInteractor = simBouncerInteractor,
         )
     }
 }

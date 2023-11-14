@@ -37,13 +37,14 @@ import com.android.systemui.biometrics.FingerprintReEnrollNotification;
 import com.android.systemui.biometrics.UdfpsDisplayModeProvider;
 import com.android.systemui.biometrics.dagger.BiometricsModule;
 import com.android.systemui.biometrics.domain.BiometricsDomainLayerModule;
+import com.android.systemui.bouncer.data.repository.BouncerRepositoryModule;
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractorModule;
 import com.android.systemui.bouncer.ui.BouncerViewModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.clipboardoverlay.dagger.ClipboardOverlayModule;
+import com.android.systemui.common.CommonModule;
 import com.android.systemui.communal.dagger.CommunalModule;
 import com.android.systemui.complication.dagger.ComplicationComponent;
-import com.android.systemui.common.CommonModule;
 import com.android.systemui.controls.dagger.ControlsModule;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.SystemUser;
@@ -171,6 +172,7 @@ import javax.inject.Named;
         BiometricsModule.class,
         BiometricsDomainLayerModule.class,
         BouncerInteractorModule.class,
+        BouncerRepositoryModule.class,
         BouncerViewModule.class,
         ClipboardOverlayModule.class,
         ClockRegistryModule.class,

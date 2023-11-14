@@ -32,6 +32,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.time.SystemClock
@@ -168,6 +169,7 @@ constructor(
     private val userRepository: UserRepository,
     private val lockPatternUtils: LockPatternUtils,
     broadcastDispatcher: BroadcastDispatcher,
+    mobileConnectionsRepository: MobileConnectionsRepository,
 ) : AuthenticationRepository {
 
     override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
@@ -192,9 +194,11 @@ constructor(
         get() = getSelectedUserInfo().id
 
     override val authenticationMethod: Flow<AuthenticationMethodModel> =
-        userRepository.selectedUserInfo
-            .map { it.id }
-            .distinctUntilChanged()
+        combine(userRepository.selectedUserInfo, mobileConnectionsRepository.isAnySimSecure) {
+                selectedUserInfo,
+                _ ->
+                selectedUserInfo.id
+            }
             .flatMapLatest { selectedUserId ->
                 broadcastDispatcher
                     .broadcastFlow(
@@ -212,6 +216,7 @@ constructor(
                     blockingAuthenticationMethodInternal(selectedUserId)
                 }
             }
+            .distinctUntilChanged()
 
     override val minPatternLength: Int = LockPatternUtils.MIN_LOCK_PATTERN_SIZE
 
@@ -354,9 +359,9 @@ constructor(
         userId: Int,
     ): AuthenticationMethodModel {
         return when (getSecurityMode.apply(userId)) {
-            KeyguardSecurityModel.SecurityMode.PIN,
+            KeyguardSecurityModel.SecurityMode.PIN -> AuthenticationMethodModel.Pin
             KeyguardSecurityModel.SecurityMode.SimPin,
-            KeyguardSecurityModel.SecurityMode.SimPuk -> AuthenticationMethodModel.Pin
+            KeyguardSecurityModel.SecurityMode.SimPuk -> AuthenticationMethodModel.Sim
             KeyguardSecurityModel.SecurityMode.Password -> AuthenticationMethodModel.Password
             KeyguardSecurityModel.SecurityMode.Pattern -> AuthenticationMethodModel.Pattern
             KeyguardSecurityModel.SecurityMode.None -> AuthenticationMethodModel.None

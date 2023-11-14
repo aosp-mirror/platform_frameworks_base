@@ -178,6 +178,7 @@ class FakeAuthenticationRepository(
                 is AuthenticationMethodModel.Password -> SecurityMode.Password
                 is AuthenticationMethodModel.Pattern -> SecurityMode.Pattern
                 is AuthenticationMethodModel.None -> SecurityMode.None
+                is AuthenticationMethodModel.Sim -> SecurityMode.SimPin
             }
         }
 

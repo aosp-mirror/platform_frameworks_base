@@ -54,6 +54,7 @@ constructor(
     flags: SceneContainerFlags,
     private val falsingInteractor: FalsingInteractor,
     private val powerInteractor: PowerInteractor,
+    private val simBouncerInteractor: SimBouncerInteractor,
 ) {
 
     /** The user-facing message to show in the bouncer. */
@@ -148,6 +149,10 @@ constructor(
         )
     }
 
+    fun setMessage(message: String?) {
+        repository.setMessage(message)
+    }
+
     /**
      * Resets the user-facing message back to the default according to the current authentication
      * method.
@@ -186,6 +191,12 @@ constructor(
         if (input.isEmpty()) {
             return AuthenticationResult.SKIPPED
         }
+
+        if (authenticationInteractor.getAuthenticationMethod() == AuthenticationMethodModel.Sim) {
+            // We authenticate sim in SimInteractor
+            return AuthenticationResult.SKIPPED
+        }
+
         // Switching to the application scope here since this method is often called from
         // view-models, whose lifecycle (and thus scope) is shorter than this interactor.
         // This allows the task to continue running properly even when the calling scope has been
@@ -223,6 +234,7 @@ constructor(
 
     private fun promptMessage(authMethod: AuthenticationMethodModel): String {
         return when (authMethod) {
+            is AuthenticationMethodModel.Sim -> simBouncerInteractor.getDefaultMessage()
             is AuthenticationMethodModel.Pin ->
                 applicationContext.getString(R.string.keyguard_enter_your_pin)
             is AuthenticationMethodModel.Password ->
