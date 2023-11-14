@@ -1196,7 +1196,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 && mFlags.mAllowsScreenSizeDecoupledFromStatusBarAndCutout;
         if (!isScreenSizeDecoupledFromStatusBarAndCutout) {
             mDecorTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.navigationBars();
-            mConfigTypes = WindowInsets.Type.statusBars() | WindowInsets.Type.navigationBars();
+            mConfigTypes = WindowInsets.Type.displayCutout() | WindowInsets.Type.statusBars()
+                    | WindowInsets.Type.navigationBars();
         } else {
             mDecorTypes = WindowInsets.Type.navigationBars();
             mConfigTypes = WindowInsets.Type.navigationBars();

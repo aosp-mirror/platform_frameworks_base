@@ -1877,15 +1877,12 @@ public class DisplayPolicy {
                 final InsetsState insetsState = df.mInsetsState;
                 final Rect displayFrame = insetsState.getDisplayFrame();
                 final Insets decor = insetsState.calculateInsets(displayFrame,
-                        dc.mWmService.mDecorTypes,
-                        true /* ignoreVisibility */);
-                final Insets statusBar = insetsState.calculateInsets(displayFrame,
-                        Type.statusBars(), true /* ignoreVisibility */);
+                        dc.mWmService.mDecorTypes, true /* ignoreVisibility */);
+                final Insets configInsets = insetsState.calculateInsets(displayFrame,
+                        dc.mWmService.mConfigTypes, true /* ignoreVisibility */);
                 mNonDecorInsets.set(decor.left, decor.top, decor.right, decor.bottom);
-                mConfigInsets.set(Math.max(statusBar.left, decor.left),
-                        Math.max(statusBar.top, decor.top),
-                        Math.max(statusBar.right, decor.right),
-                        Math.max(statusBar.bottom, decor.bottom));
+                mConfigInsets.set(configInsets.left, configInsets.top, configInsets.right,
+                        configInsets.bottom);
                 mNonDecorFrame.set(displayFrame);
                 mNonDecorFrame.inset(mNonDecorInsets);
                 mConfigFrame.set(displayFrame);
