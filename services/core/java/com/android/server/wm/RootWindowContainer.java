@@ -842,6 +842,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         handleResizingWindows();
         clearFrameChangingWindows();
 
+        // Called after #handleResizingWindows to include WindowStateResizeItem if any.
+        mWmService.mAtmService.getLifecycleManager().dispatchPendingTransactions();
+
         if (mWmService.mDisplayFrozen) {
             ProtoLog.v(WM_DEBUG_ORIENTATION,
                     "With display frozen, orientationChangeComplete=%b",
