@@ -636,6 +636,7 @@ public class TransitionTests extends WindowTestsBase {
         transition.collect(app);
         controller.requestStartTransition(transition, null /* startTask */, remoteTransition,
                 null /* displayChange */);
+        assertTrue(delegateProc.isRunningRemoteTransition());
         testPlayer.startTransition();
         app.onStartingWindowDrawn();
         // The task appeared event should be deferred until transition ready.
@@ -643,7 +644,6 @@ public class TransitionTests extends WindowTestsBase {
         testPlayer.onTransactionReady(app.getSyncTransaction());
         assertTrue(task.taskAppearedReady());
         assertTrue(playerProc.isRunningRemoteTransition());
-        assertTrue(delegateProc.isRunningRemoteTransition());
         assertTrue(controller.mRemotePlayer.reportRunning(delegateProc.getThread()));
         assertTrue(app.isVisible());
 
