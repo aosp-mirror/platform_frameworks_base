@@ -892,7 +892,7 @@ public class SpeechRecognizer {
     }
 
     private boolean checkOpenConnection() {
-        if (mService != null) {
+        if (mService != null && mService.asBinder().isBinderAlive()) {
             return true;
         }
         mListener.onError(ERROR_CLIENT);
