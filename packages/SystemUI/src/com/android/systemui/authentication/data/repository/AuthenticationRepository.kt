@@ -108,6 +108,9 @@ interface AuthenticationRepository {
     /** The minimal length of a pattern. */
     val minPatternLength: Int
 
+    /** The minimal length of a password. */
+    val minPasswordLength: Int
+
     /** Whether the "enhanced PIN privacy" setting is enabled for the current user. */
     val isPinEnhancedPrivacyEnabled: StateFlow<Boolean>
 
@@ -214,6 +217,8 @@ constructor(
             }
 
     override val minPatternLength: Int = LockPatternUtils.MIN_LOCK_PATTERN_SIZE
+
+    override val minPasswordLength: Int = LockPatternUtils.MIN_LOCK_PASSWORD_SIZE
 
     override val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> =
         refreshingFlow(
