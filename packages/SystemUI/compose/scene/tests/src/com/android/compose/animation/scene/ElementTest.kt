@@ -18,9 +18,15 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.intermediateLayout
@@ -29,6 +35,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -208,5 +215,216 @@ class ElementTest {
                 at(32L + i * 16) { assertNumberOfLayoutsAndPlacements() }
             }
         }
+    }
+
+    @Test
+    fun elementIsReusedInSameSceneAndBetweenScenes() {
+        var currentScene by mutableStateOf(TestScenes.SceneA)
+        var sceneCState by mutableStateOf(0)
+        var sceneDState by mutableStateOf(0)
+        val key = TestElements.Foo
+        var nullableLayoutImpl: SceneTransitionLayoutImpl? = null
+
+        rule.setContent {
+            SceneTransitionLayoutForTesting(
+                currentScene = currentScene,
+                onChangeScene = { currentScene = it },
+                transitions = remember { transitions {} },
+                state = remember { SceneTransitionLayoutState(currentScene) },
+                edgeDetector = DefaultEdgeDetector,
+                modifier = Modifier,
+                transitionInterceptionThreshold = 0f,
+                onLayoutImpl = { nullableLayoutImpl = it },
+            ) {
+                scene(TestScenes.SceneA) { /* Nothing */}
+                scene(TestScenes.SceneB) { Box(Modifier.element(key)) }
+                scene(TestScenes.SceneC) {
+                    when (sceneCState) {
+                        0 -> Row(Modifier.element(key)) {}
+                        1 -> Column(Modifier.element(key)) {}
+                        else -> {
+                            /* Nothing */
+                        }
+                    }
+                }
+                scene(TestScenes.SceneD) {
+                    // We should be able to extract the modifier before assigning it to different
+                    // nodes.
+                    val childModifier = Modifier.element(key)
+                    when (sceneDState) {
+                        0 -> Row(childModifier) {}
+                        1 -> Column(childModifier) {}
+                        else -> {
+                            /* Nothing */
+                        }
+                    }
+                }
+            }
+        }
+
+        assertThat(nullableLayoutImpl).isNotNull()
+        val layoutImpl = nullableLayoutImpl!!
+
+        // Scene A: no elements in the elements map.
+        rule.waitForIdle()
+        assertThat(layoutImpl.elements).isEmpty()
+
+        // Scene B: element is in the map.
+        currentScene = TestScenes.SceneB
+        rule.waitForIdle()
+
+        assertThat(layoutImpl.elements.keys).containsExactly(key)
+        val element = layoutImpl.elements.getValue(key)
+        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneB)
+
+        // Scene C, state 0: the same element is reused.
+        currentScene = TestScenes.SceneC
+        sceneCState = 0
+        rule.waitForIdle()
+
+        assertThat(layoutImpl.elements.keys).containsExactly(key)
+        assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
+        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneC)
+
+        // Scene C, state 1: the same element is reused.
+        sceneCState = 1
+        rule.waitForIdle()
+
+        assertThat(layoutImpl.elements.keys).containsExactly(key)
+        assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
+        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneC)
+
+        // Scene D, state 0: the same element is reused.
+        currentScene = TestScenes.SceneD
+        sceneDState = 0
+        rule.waitForIdle()
+
+        assertThat(layoutImpl.elements.keys).containsExactly(key)
+        assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
+        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneD)
+
+        // Scene D, state 1: the same element is reused.
+        sceneDState = 1
+        rule.waitForIdle()
+
+        assertThat(layoutImpl.elements.keys).containsExactly(key)
+        assertThat(layoutImpl.elements.getValue(key)).isSameInstanceAs(element)
+        assertThat(element.sceneValues.keys).containsExactly(TestScenes.SceneD)
+
+        // Scene D, state 2: the element is removed from the map.
+        sceneDState = 2
+        rule.waitForIdle()
+
+        assertThat(element.sceneValues).isEmpty()
+        assertThat(layoutImpl.elements).isEmpty()
+    }
+
+    @Test
+    fun throwsExceptionWhenElementIsComposedMultipleTimes() {
+        val key = TestElements.Foo
+
+        assertThrows(IllegalStateException::class.java) {
+            rule.setContent {
+                TestSceneScope {
+                    Column {
+                        Box(Modifier.element(key))
+                        Box(Modifier.element(key))
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun throwsExceptionWhenElementIsComposedMultipleTimes_childModifier() {
+        val key = TestElements.Foo
+
+        assertThrows(IllegalStateException::class.java) {
+            rule.setContent {
+                TestSceneScope {
+                    Column {
+                        val childModifier = Modifier.element(key)
+                        Box(childModifier)
+                        Box(childModifier)
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun throwsExceptionWhenElementIsComposedMultipleTimes_childModifier_laterDuplication() {
+        val key = TestElements.Foo
+
+        assertThrows(IllegalStateException::class.java) {
+            var nElements by mutableStateOf(1)
+            rule.setContent {
+                TestSceneScope {
+                    Column {
+                        val childModifier = Modifier.element(key)
+                        repeat(nElements) { Box(childModifier) }
+                    }
+                }
+            }
+
+            nElements = 2
+            rule.waitForIdle()
+        }
+    }
+
+    @Test
+    fun throwsExceptionWhenElementIsComposedMultipleTimes_updatedNode() {
+        assertThrows(IllegalStateException::class.java) {
+            var key by mutableStateOf(TestElements.Foo)
+            rule.setContent {
+                TestSceneScope {
+                    Column {
+                        Box(Modifier.element(key))
+                        Box(Modifier.element(TestElements.Bar))
+                    }
+                }
+            }
+
+            key = TestElements.Bar
+            rule.waitForIdle()
+        }
+    }
+
+    @Test
+    fun elementModifierSupportsUpdates() {
+        var key by mutableStateOf(TestElements.Foo)
+        var nullableLayoutImpl: SceneTransitionLayoutImpl? = null
+
+        rule.setContent {
+            SceneTransitionLayoutForTesting(
+                currentScene = TestScenes.SceneA,
+                onChangeScene = {},
+                transitions = remember { transitions {} },
+                state = remember { SceneTransitionLayoutState(TestScenes.SceneA) },
+                edgeDetector = DefaultEdgeDetector,
+                modifier = Modifier,
+                transitionInterceptionThreshold = 0f,
+                onLayoutImpl = { nullableLayoutImpl = it },
+            ) {
+                scene(TestScenes.SceneA) { Box(Modifier.element(key)) }
+            }
+        }
+
+        assertThat(nullableLayoutImpl).isNotNull()
+        val layoutImpl = nullableLayoutImpl!!
+
+        // There is only Foo in the elements map.
+        assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Foo)
+        val fooElement = layoutImpl.elements.getValue(TestElements.Foo)
+        assertThat(fooElement.sceneValues.keys).containsExactly(TestScenes.SceneA)
+
+        key = TestElements.Bar
+
+        // There is only Bar in the elements map and foo scene values was cleaned up.
+        rule.waitForIdle()
+        assertThat(layoutImpl.elements.keys).containsExactly(TestElements.Bar)
+        val barElement = layoutImpl.elements.getValue(TestElements.Bar)
+        assertThat(barElement.sceneValues.keys).containsExactly(TestScenes.SceneA)
+        assertThat(fooElement.sceneValues).isEmpty()
     }
 }

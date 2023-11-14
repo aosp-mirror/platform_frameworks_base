@@ -26,6 +26,7 @@ object TestScenes {
     val SceneA = SceneKey("SceneA")
     val SceneB = SceneKey("SceneB")
     val SceneC = SceneKey("SceneC")
+    val SceneD = SceneKey("SceneD")
 }
 
 /** Element keys that can be reused by tests. */
