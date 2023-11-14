@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,10 +24,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
+import com.android.compose.animation.scene.FixedSizeEdgeDetector
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.Swipe
+import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
@@ -76,17 +77,24 @@ fun CommunalContainer(
         currentScene = currentScene,
         onChangeScene = { sceneKey -> viewModel.onSceneChanged(sceneKey.toCommunalSceneKey()) },
         transitions = sceneTransitions,
+        edgeDetector = FixedSizeEdgeDetector(ContainerDimensions.EdgeSwipeSize)
     ) {
         scene(
             TransitionSceneKey.Blank,
-            userActions = mapOf(Swipe.Left to TransitionSceneKey.Communal)
+            userActions =
+                mapOf(
+                    Swipe(SwipeDirection.Left, fromEdge = Edge.Right) to TransitionSceneKey.Communal
+                )
         ) {
             BlankScene { showSceneTransitionLayout = false }
         }
 
         scene(
             TransitionSceneKey.Communal,
-            userActions = mapOf(Swipe.Right to TransitionSceneKey.Blank),
+            userActions =
+                mapOf(
+                    Swipe(SwipeDirection.Right, fromEdge = Edge.Left) to TransitionSceneKey.Blank
+                ),
         ) {
             CommunalScene(viewModel, modifier = modifier)
         }
@@ -105,14 +113,12 @@ private fun BlankScene(
     Box(modifier.fillMaxSize()) {
         Column(
             Modifier.fillMaxHeight()
-                .width(100.dp)
+                .width(ContainerDimensions.EdgeSwipeSize)
                 .align(Alignment.CenterEnd)
                 .background(Color(0x55e9f2eb)),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Default scene")
-
             IconButton(onClick = hideSceneTransitionLayout) {
                 Icon(Icons.Filled.Close, contentDescription = "Close button")
             }
@@ -141,4 +147,8 @@ fun CommunalSceneKey.toTransitionSceneKey(): SceneKey {
 
 fun SceneKey.toCommunalSceneKey(): CommunalSceneKey {
     return this.identity as CommunalSceneKey
+}
+
+object ContainerDimensions {
+    val EdgeSwipeSize = 40.dp
 }
