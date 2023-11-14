@@ -32,7 +32,6 @@ import static android.os.Build.VERSION_CODES.M;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.IInputConstants.INVALID_INPUT_DEVICE_ID;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
-import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.STATE_OFF;
@@ -69,6 +68,7 @@ import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_KEY_OTHER;
 import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_PERMISSION_DENIED;
+import static android.view.contentprotection.flags.Flags.createAccessibilityOverlayAppOpEnabled;
 
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
 import static com.android.internal.util.FrameworkStatsLog.ACCESSIBILITY_SHORTCUT_REPORTED__SHORTCUT_TYPE__A11Y_WEAR_TRIPLE_PRESS_GESTURE;
@@ -101,6 +101,7 @@ import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager;
 import android.app.AppOpsManager;
+import android.app.IActivityManager;
 import android.app.IUiModeManager;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
@@ -427,6 +428,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     WindowManagerInternal mWindowManagerInternal;
     PowerManager mPowerManager;
     ActivityManagerInternal mActivityManagerInternal;
+    IActivityManager mActivityManagerService;
     ActivityTaskManagerInternal mActivityTaskManagerInternal;
     AutofillManagerInternal mAutofillManagerInternal;
     InputManager mInputManager;
@@ -549,7 +551,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLidNavigationAccessibility;
     int mShortPressOnPowerBehavior;
     private boolean mShouldEarlyShortPressOnPower;
-    private boolean mShouldEarlyShortPressOnStemPrimary;
+    boolean mShouldEarlyShortPressOnStemPrimary;
     int mLongPressOnPowerBehavior;
     long mLongPressOnPowerAssistantTimeoutMs;
     int mVeryLongPressOnPowerBehavior;
@@ -578,6 +580,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int mDoublePressOnStemPrimaryBehavior;
     private int mTriplePressOnStemPrimaryBehavior;
     private int mLongPressOnStemPrimaryBehavior;
+    private RecentTaskInfo mBackgroundRecentTaskInfoOnStemPrimarySingleKeyUp;
 
     private boolean mHandleVolumeKeysInWM;
 
@@ -1563,7 +1566,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         ? false
                         : mKeyguardDelegate.isShowing();
                 if (!keyguardActive) {
-                    switchRecentTask();
+                    performStemPrimaryDoublePressSwitchToRecentTask();
                 }
                 break;
         }
@@ -1672,11 +1675,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /**
      * Load most recent task (expect current task) and bring it to the front.
      */
-    private void switchRecentTask() {
-        RecentTaskInfo targetTask = mActivityTaskManagerInternal.getMostRecentTaskFromBackground();
+    void performStemPrimaryDoublePressSwitchToRecentTask() {
+        RecentTaskInfo targetTask = mBackgroundRecentTaskInfoOnStemPrimarySingleKeyUp;
         if (targetTask == null) {
             if (DEBUG_INPUT) {
-                Slog.w(TAG, "No recent task available! Show watch face.");
+                Slog.w(TAG, "No recent task available! Show wallpaper.");
             }
             goHome();
             return;
@@ -1695,7 +1698,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             + targetTask.baseIntent);
         }
         try {
-            ActivityManager.getService().startActivityFromRecents(targetTask.persistentId, null);
+            mActivityManagerService.startActivityFromRecents(targetTask.persistentId, null);
         } catch (RemoteException | IllegalArgumentException e) {
             Slog.e(TAG, "Failed to start task " + targetTask.persistentId + " from recents", e);
         }
@@ -2219,6 +2222,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         }
                     });
         }
+
+        IActivityManager getActivityManagerService() {
+            return ActivityManager.getService();
+        }
     }
 
     /** {@inheritDoc} */
@@ -2233,6 +2240,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mWindowManagerFuncs = injector.getWindowManagerFuncs();
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
+        mActivityManagerService = injector.getActivityManagerService();
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mInputManager = mContext.getSystemService(InputManager.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
@@ -2767,8 +2775,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         @Override
         void onKeyUp(long eventTime, int count) {
-            if (mShouldEarlyShortPressOnStemPrimary && count == 1) {
-                stemPrimaryPress(1 /*pressCount*/);
+            if (count == 1) {
+                // Save info about the most recent task on the first press of the stem key. This
+                // may be used later to switch to the most recent app using double press gesture.
+                // It is possible that we may navigate away from this task before the double
+                // press is detected, as a result of the first press, so we save the  current
+                // most recent task before that happens.
+                mBackgroundRecentTaskInfoOnStemPrimarySingleKeyUp =
+                        mActivityTaskManagerInternal.getMostRecentTaskFromBackground();
+                if (mShouldEarlyShortPressOnStemPrimary) {
+                    stemPrimaryPress(1 /*pressCount*/);
+                }
             }
         }
     }
