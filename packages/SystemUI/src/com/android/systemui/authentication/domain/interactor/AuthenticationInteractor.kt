@@ -200,9 +200,8 @@ constructor(
                 // We're being throttled, the UI layer should not have called this; skip the
                 // attempt.
                 isThrottled.value -> true
-                // The pattern is too short; skip the attempt.
-                authMethod == AuthenticationMethodModel.Pattern &&
-                    input.size < repository.minPatternLength -> true
+                // The input is too short; skip the attempt.
+                input.isTooShort(authMethod) -> true
                 // Auto-confirm attempt when the feature is not enabled; skip the attempt.
                 tryAutoConfirm && !isAutoConfirmEnabled.value -> true
                 // Auto-confirm should skip the attempt if the pin entered is too short.
@@ -244,6 +243,14 @@ constructor(
             AuthenticationResult.SUCCEEDED
         } else {
             AuthenticationResult.FAILED
+        }
+    }
+
+    private fun List<Any>.isTooShort(authMethod: AuthenticationMethodModel): Boolean {
+        return when (authMethod) {
+            AuthenticationMethodModel.Pattern -> size < repository.minPatternLength
+            AuthenticationMethodModel.Password -> size < repository.minPasswordLength
+            else -> false
         }
     }
 

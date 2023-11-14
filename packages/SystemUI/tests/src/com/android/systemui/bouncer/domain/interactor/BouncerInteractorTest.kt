@@ -172,6 +172,19 @@ class BouncerInteractorTest : SysuiTestCase() {
             underTest.resetMessage()
             assertThat(message).isEqualTo(MESSAGE_ENTER_YOUR_PASSWORD)
 
+            // Too short input.
+            assertThat(
+                    underTest.authenticate(
+                        buildList {
+                            repeat(utils.authenticationRepository.minPasswordLength - 1) { time ->
+                                add("$time")
+                            }
+                        }
+                    )
+                )
+                .isEqualTo(AuthenticationResult.SKIPPED)
+            assertThat(message).isEqualTo(MESSAGE_WRONG_PASSWORD)
+
             // Correct input.
             assertThat(underTest.authenticate("password".toList()))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)

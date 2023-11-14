@@ -455,4 +455,22 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
             assertThat(hintedPinLength).isNull()
         }
+
+    @Test
+    fun authenticate_withTooShortPassword() =
+        testScope.runTest {
+            utils.authenticationRepository.setAuthenticationMethod(
+                AuthenticationMethodModel.Password
+            )
+            assertThat(
+                    underTest.authenticate(
+                        buildList {
+                            repeat(utils.authenticationRepository.minPasswordLength - 1) { time ->
+                                add("$time")
+                            }
+                        }
+                    )
+                )
+                .isEqualTo(AuthenticationResult.SKIPPED)
+        }
 }

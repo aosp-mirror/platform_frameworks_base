@@ -60,6 +60,8 @@ class FakeAuthenticationRepository(
 
     override val minPatternLength: Int = 4
 
+    override val minPasswordLength: Int = 4
+
     private val _isPinEnhancedPrivacyEnabled = MutableStateFlow(false)
     override val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> =
         _isPinEnhancedPrivacyEnabled.asStateFlow()
