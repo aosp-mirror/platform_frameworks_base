@@ -71,3 +71,10 @@ flag {
     description: "default retail demo role holder"
     bug: "274132354"
 }
+
+flag {
+    name: "wallet_role_enabled"
+    namespace: "wallet_integration"
+    description: "This flag is used to enabled the Wallet Role for all users on the device"
+    bug: "283989236"
+}

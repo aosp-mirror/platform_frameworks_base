@@ -812,8 +812,8 @@ public final class NfcAdapter {
         if (context == null) {
             throw new IllegalArgumentException("context cannot be null");
         }
-        context = context.getApplicationContext();
-        if (context == null) {
+        Context applicationContext = context.getApplicationContext();
+        if (applicationContext == null) {
             throw new IllegalArgumentException(
                     "context not associated with any application (using a mock context?)");
         }

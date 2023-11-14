@@ -475,6 +475,7 @@ package android {
     field public static final int config_defaultNotes = 17039429; // 0x1040045
     field @FlaggedApi("android.permission.flags.retail_demo_role_enabled") public static final int config_defaultRetailDemo;
     field public static final int config_defaultSms = 17039396; // 0x1040024
+    field @FlaggedApi("android.permission.flags.wallet_role_enabled") public static final int config_defaultWallet;
     field public static final int config_devicePolicyManagement = 17039421; // 0x104003d
     field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
     field public static final int config_feedbackIntentNameKey = 17039392; // 0x1040020
@@ -9967,6 +9968,7 @@ package android.nfc.cardemulation {
   }
 
   public final class CardEmulation {
+    method @FlaggedApi("android.permission.flags.wallet_role_enabled") @Nullable @RequiresPermission(android.Manifest.permission.NFC_PREFERRED_PAYMENT_INFO) public android.nfc.cardemulation.ApduServiceInfo getPreferredPaymentService();
     method @FlaggedApi("android.nfc.enable_nfc_mainline") @NonNull public java.util.List<android.nfc.cardemulation.ApduServiceInfo> getServices(@NonNull String, int);
   }
 
