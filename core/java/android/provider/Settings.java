@@ -19472,6 +19472,7 @@ public final class Settings {
              *
              * @hide
              */
+            @Readable
             public static final String WEAR_MEDIA_CONTROLS_PACKAGE = "wear_media_controls_package";
 
             /**
@@ -19479,6 +19480,7 @@ public final class Settings {
              *
              * @hide
              */
+            @Readable
             public static final String WEAR_MEDIA_SESSIONS_PACKAGE = "wear_media_sessions_package";
 
             /*
