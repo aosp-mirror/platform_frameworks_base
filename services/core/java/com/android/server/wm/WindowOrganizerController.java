@@ -63,6 +63,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_PINNED_TASK;
 import static com.android.server.wm.Task.FLAG_FORCE_HIDDEN_FOR_TASK_ORG;
 import static com.android.server.wm.TaskFragment.EMBEDDING_ALLOWED;
@@ -938,7 +939,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     break;
                 }
                 final Task task = wc.asTask();
-                task.remove(true, "Applying remove task Hierarchy Op");
+
+                if (task.isLeafTask()) {
+                    mService.mTaskSupervisor
+                            .removeTask(task, true, REMOVE_FROM_RECENTS, "remove-task"
+                                    + "-through-hierarchyOp");
+                } else {
+                    mService.mTaskSupervisor.removeRootTask(task);
+                }
                 break;
             }
             case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
