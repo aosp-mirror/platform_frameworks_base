@@ -49,7 +49,7 @@ import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewClockViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardPreviewSmartspaceViewBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
@@ -445,7 +445,7 @@ constructor(
 
     private fun setUpClock(previewContext: Context, parentView: ViewGroup) {
         largeClockHostView =
-            if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            if (KeyguardShadeMigrationNssl.isEnabled) {
                 parentView.requireViewById<FrameLayout>(R.id.lockscreen_clock_view_large)
             } else {
                 val hostView = FrameLayout(previewContext)
@@ -460,7 +460,7 @@ constructor(
         largeClockHostView.isInvisible = true
 
         smallClockHostView =
-            if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+            if (KeyguardShadeMigrationNssl.isEnabled) {
                 parentView.requireViewById<FrameLayout>(R.id.lockscreen_clock_view)
             } else {
                 val resources = parentView.resources

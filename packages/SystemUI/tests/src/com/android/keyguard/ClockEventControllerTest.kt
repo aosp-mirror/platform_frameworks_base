@@ -127,7 +127,6 @@ class ClockEventControllerTest : SysuiTestCase() {
 
         withDeps.featureFlags.apply {
             set(Flags.REGION_SAMPLING, false)
-            set(Flags.MIGRATE_KEYGUARD_STATUS_VIEW, false)
             set(Flags.FACE_AUTH_REFACTOR, false)
         }
         underTest =

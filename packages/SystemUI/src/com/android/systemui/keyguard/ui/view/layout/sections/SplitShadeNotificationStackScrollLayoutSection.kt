@@ -26,6 +26,7 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
@@ -40,7 +41,7 @@ class SplitShadeNotificationStackScrollLayoutSection
 @Inject
 constructor(
     context: Context,
-    featureFlags: FeatureFlags,
+    private val featureFlags: FeatureFlags,
     notificationPanelView: NotificationPanelView,
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
@@ -50,7 +51,6 @@ constructor(
 ) :
     NotificationStackScrollLayoutSection(
         context,
-        featureFlags,
         notificationPanelView,
         sharedNotificationContainer,
         sharedNotificationContainerViewModel,
@@ -58,7 +58,7 @@ constructor(
         notificationStackSizeCalculator,
     ) {
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
         constraintSet.apply {

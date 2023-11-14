@@ -68,10 +68,9 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
@@ -155,7 +154,6 @@ public class QuickSettingsController implements Dumpable {
     private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     private final CastController mCastController;
     private final SplitShadeStateController mSplitShadeStateController;
-    private final FeatureFlags mFeatureFlags;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final ShadeRepository mShadeRepository;
     private final ShadeInteractor mShadeInteractor;
@@ -333,7 +331,6 @@ public class QuickSettingsController implements Dumpable {
             AccessibilityManager accessibilityManager,
             LockscreenGestureLogger lockscreenGestureLogger,
             MetricsLogger metricsLogger,
-            FeatureFlags featureFlags,
             InteractionJankMonitor interactionJankMonitor,
             ShadeLogger shadeLog,
             DumpManager dumpManager,
@@ -384,7 +381,6 @@ public class QuickSettingsController implements Dumpable {
         mShadeLog = shadeLog;
         mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
         mCastController = castController;
-        mFeatureFlags = featureFlags;
         mInteractionJankMonitor = interactionJankMonitor;
         mShadeRepository = shadeRepository;
         mShadeInteractor = shadeInteractor;
@@ -1776,7 +1772,7 @@ public class QuickSettingsController implements Dumpable {
                     // Dragging down on the lockscreen statusbar should prohibit other interactions
                     // immediately, otherwise we'll wait on the touchslop. This is to allow
                     // dragging down to expanded quick settings directly on the lockscreen.
-                    if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+                    if (!KeyguardShadeMigrationNssl.isEnabled()) {
                         mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
                     }
                 }
@@ -1821,7 +1817,7 @@ public class QuickSettingsController implements Dumpable {
                         && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldQuickSettingsIntercept(
                         mInitialTouchX, mInitialTouchY, h)) {
-                    if (!mFeatureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+                    if (!KeyguardShadeMigrationNssl.isEnabled()) {
                         mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
                     }
                     mShadeLog.onQsInterceptMoveQsTrackingEnabled(h);

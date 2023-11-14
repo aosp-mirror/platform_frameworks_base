@@ -254,14 +254,6 @@ object Flags {
     // TODO(b/287268101): Tracking bug.
     @JvmField val TRANSIT_CLOCK = releasedFlag("lockscreen_custom_transit_clock")
 
-    /** Migrate the NSSL to the a sibling to both the panel and keyguard root view. */
-    // TODO(b/288074305): Tracking bug.
-    @JvmField val MIGRATE_NSSL = unreleasedFlag("migrate_nssl")
-
-    /** Migrate the status view from the notification panel to keyguard root view. */
-    // TODO(b/291767565): Tracking bug.
-    @JvmField val MIGRATE_KEYGUARD_STATUS_VIEW = unreleasedFlag("migrate_keyguard_status_view")
-
     /** Migrate the status bar view on keyguard from notification panel to keyguard root view. */
     // TODO(b/299115332): Tracking Bug.
     @JvmField val MIGRATE_KEYGUARD_STATUS_BAR_VIEW =

@@ -39,10 +39,10 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.DisplaySpecific
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.MIGRATE_KEYGUARD_STATUS_VIEW
 import com.android.systemui.flags.Flags.REGION_SAMPLING
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.log.LogBuffer
@@ -298,7 +298,7 @@ constructor(
         object : KeyguardUpdateMonitorCallback() {
             override fun onKeyguardVisibilityChanged(visible: Boolean) {
                 isKeyguardVisible = visible
-                if (!featureFlags.isEnabled(MIGRATE_KEYGUARD_STATUS_VIEW)) {
+                if (!KeyguardShadeMigrationNssl.isEnabled) {
                     if (!isKeyguardVisible) {
                         clock?.run {
                             smallClock.animations.doze(if (isDozing) 1f else 0f)
@@ -345,7 +345,7 @@ constructor(
             parent.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
                     listenForDozing(this)
-                    if (featureFlags.isEnabled(MIGRATE_KEYGUARD_STATUS_VIEW)) {
+                    if (KeyguardShadeMigrationNssl.isEnabled) {
                         listenForDozeAmountTransition(this)
                         listenForAnyStateToAodTransition(this)
                     } else {

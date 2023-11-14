@@ -32,6 +32,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.fragments.FragmentService
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.plugins.qs.QS
@@ -129,7 +130,6 @@ class NotificationsQSContainerController @Inject constructor(
         isGestureNavigation = QuickStepContract.isGesturalMode(currentMode)
 
         mView.setStackScroller(notificationStackScrollLayoutController.getView())
-        mView.setMigratingNSSL(featureFlags.isEnabled(Flags.MIGRATE_NSSL))
         if (featureFlags.isEnabled(Flags.QS_CONTAINER_GRAPH_OPTIMIZER)){
             mView.enableGraphOptimization()
         }
@@ -283,7 +283,7 @@ class NotificationsQSContainerController @Inject constructor(
     }
 
     private fun setNotificationsConstraints(constraintSet: ConstraintSet) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
         val startConstraintId = if (splitShadeEnabled) R.id.qs_edge_guideline else PARENT_ID

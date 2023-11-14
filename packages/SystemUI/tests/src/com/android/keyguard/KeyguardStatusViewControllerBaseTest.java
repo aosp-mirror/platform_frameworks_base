@@ -30,7 +30,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -60,7 +59,6 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
     @Mock protected ScreenOffAnimationController mScreenOffAnimationController;
     @Mock protected KeyguardLogger mKeyguardLogger;
     @Mock protected KeyguardStatusViewController mControllerMock;
-    @Mock protected FeatureFlags mFeatureFlags;
     @Mock protected InteractionJankMonitor mInteractionJankMonitor;
     @Mock protected ViewTreeObserver mViewTreeObserver;
     @Mock protected KeyguardTransitionInteractor mKeyguardTransitionInteractor;
@@ -91,7 +89,6 @@ public class KeyguardStatusViewControllerBaseTest extends SysuiTestCase {
                 mDozeParameters,
                 mScreenOffAnimationController,
                 mKeyguardLogger,
-                mFeatureFlags,
                 mInteractionJankMonitor,
                 deps.getKeyguardInteractor(),
                 mKeyguardTransitionInteractor,

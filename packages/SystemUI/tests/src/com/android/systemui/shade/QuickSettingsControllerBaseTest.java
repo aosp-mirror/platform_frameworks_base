@@ -355,7 +355,6 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 mAccessibilityManager,
                 mLockscreenGestureLogger,
                 mMetricsLogger,
-                mFeatureFlags,
                 mInteractionJankMonitor,
                 mShadeLogger,
                 mDumpManager,
