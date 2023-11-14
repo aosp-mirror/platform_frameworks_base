@@ -19,7 +19,9 @@ package com.android.systemui.qs.tiles.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,8 +31,8 @@ import org.junit.runner.RunWith
 class QSTileConfigProviderTest : SysuiTestCase() {
 
     private val underTest =
-        QSTileConfigProviderImpl(
-            mapOf(VALID_SPEC.spec to QSTileConfigTestBuilder.build { tileSpec = VALID_SPEC })
+        createQSTileConfigProviderImpl(
+            mapOf(VALID_SPEC.spec to QSTileConfigTestBuilder.build { tileSpec = VALID_SPEC }),
         )
 
     @Test
@@ -43,12 +45,30 @@ class QSTileConfigProviderTest : SysuiTestCase() {
         underTest.getConfig(INVALID_SPEC.spec)
     }
 
+    @Test
+    fun hasConfigReturnsTrueForValidSpec() {
+        assertThat(underTest.hasConfig(VALID_SPEC.spec)).isTrue()
+    }
+
+    @Test
+    fun hasConfigReturnsFalseForInvalidSpec() {
+        assertThat(underTest.hasConfig(INVALID_SPEC.spec)).isFalse()
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun validatesSpecUponCreation() {
-        QSTileConfigProviderImpl(
+        createQSTileConfigProviderImpl(
             mapOf(VALID_SPEC.spec to QSTileConfigTestBuilder.build { tileSpec = INVALID_SPEC })
         )
     }
+
+    private fun createQSTileConfigProviderImpl(
+        configs: Map<String, QSTileConfig>
+    ): QSTileConfigProviderImpl =
+        QSTileConfigProviderImpl(
+            configs,
+            mock<QsEventLogger>(),
+        )
 
     private companion object {
 

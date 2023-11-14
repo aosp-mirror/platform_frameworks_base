@@ -46,6 +46,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 private const val SCREEN_SIZE = 100f
+private val LAYOUT_SIZE = IntSize(SCREEN_SIZE.toInt(), SCREEN_SIZE.toInt())
 
 @RunWith(AndroidJUnit4::class)
 class SceneGestureHandlerTest {
@@ -80,7 +81,7 @@ class SceneGestureHandlerTest {
                             edgeDetector = DefaultEdgeDetector,
                             coroutineScope = coroutineScope,
                         )
-                        .also { it.size = IntSize(SCREEN_SIZE.toInt(), SCREEN_SIZE.toInt()) },
+                        .apply { setScenesTargetSizeForTest(LAYOUT_SIZE) },
                 orientation = Orientation.Vertical,
                 coroutineScope = coroutineScope,
             )
@@ -128,18 +129,21 @@ class SceneGestureHandlerTest {
         runMonotonicClockTest { TestGestureScope(coroutineScope = this).block() }
     }
 
+    private fun DraggableHandler.onDragStarted() =
+        onDragStarted(layoutSize = LAYOUT_SIZE, startedPosition = Offset.Zero)
+
     @Test
     fun testPreconditions() = runGestureTest { assertScene(currentScene = SceneA, isIdle = true) }
 
     @Test
     fun onDragStarted_shouldStartATransition() = runGestureTest {
-        draggable.onDragStarted(startedPosition = Offset.Zero)
+        draggable.onDragStarted()
         assertScene(currentScene = SceneA, isIdle = false)
     }
 
     @Test
     fun afterSceneTransitionIsStarted_interceptDragEvents() = runGestureTest {
-        draggable.onDragStarted(startedPosition = Offset.Zero)
+        draggable.onDragStarted()
         assertScene(currentScene = SceneA, isIdle = false)
         val transition = transitionState as Transition
 
@@ -152,7 +156,7 @@ class SceneGestureHandlerTest {
 
     @Test
     fun onDragStoppedAfterDrag_velocityLowerThanThreshold_remainSameScene() = runGestureTest {
-        draggable.onDragStarted(startedPosition = Offset.Zero)
+        draggable.onDragStarted()
         assertScene(currentScene = SceneA, isIdle = false)
 
         draggable.onDelta(pixels = deltaInPixels10)
@@ -170,7 +174,7 @@ class SceneGestureHandlerTest {
 
     @Test
     fun onDragStoppedAfterDrag_velocityAtLeastThreshold_goToNextScene() = runGestureTest {
-        draggable.onDragStarted(startedPosition = Offset.Zero)
+        draggable.onDragStarted()
         assertScene(currentScene = SceneA, isIdle = false)
 
         draggable.onDelta(pixels = deltaInPixels10)
@@ -188,7 +192,7 @@ class SceneGestureHandlerTest {
 
     @Test
     fun onDragStoppedAfterStarted_returnImmediatelyToIdle() = runGestureTest {
-        draggable.onDragStarted(startedPosition = Offset.Zero)
+        draggable.onDragStarted()
         assertScene(currentScene = SceneA, isIdle = false)
 
         draggable.onDragStopped(velocity = 0f)
@@ -197,7 +201,7 @@ class SceneGestureHandlerTest {
 
     @Test
     fun startGestureDuringAnimatingOffset_shouldImmediatelyStopTheAnimation() = runGestureTest {
-        draggable.onDragStarted(startedPosition = Offset.Zero)
+        draggable.onDragStarted()
         assertScene(currentScene = SceneA, isIdle = false)
 
         draggable.onDelta(pixels = deltaInPixels10)
@@ -217,7 +221,7 @@ class SceneGestureHandlerTest {
         assertScene(currentScene = SceneC, isIdle = false)
 
         // Start a new gesture while the offset is animating
-        draggable.onDragStarted(startedPosition = Offset.Zero)
+        draggable.onDragStarted()
         assertThat(sceneGestureHandler.isAnimatingOffset).isFalse()
     }
 
@@ -421,6 +425,7 @@ class SceneGestureHandlerTest {
         draggable.onDelta(deltaInPixels10)
         assertScene(currentScene = SceneA, isIdle = true)
     }
+
     @Test
     fun beforeDraggableStart_stop_shouldBeIgnored() = runGestureTest {
         draggable.onDragStopped(velocityThreshold)
@@ -437,7 +442,7 @@ class SceneGestureHandlerTest {
     @Test
     fun startNestedScrollWhileDragging() = runGestureTest {
         val nestedScroll = nestedScrollConnection(nestedScrollBehavior = Always)
-        draggable.onDragStarted(Offset.Zero)
+        draggable.onDragStarted()
         assertScene(currentScene = SceneA, isIdle = false)
         val transition = transitionState as Transition
 

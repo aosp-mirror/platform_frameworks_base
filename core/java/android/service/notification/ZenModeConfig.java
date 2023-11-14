@@ -1004,6 +1004,8 @@ public class ZenModeConfig implements Parcelable {
             priorityCategories |= Policy.PRIORITY_CATEGORY_CONVERSATIONS;
             conversationSenders = getConversationSendersWithDefault(
                     zenPolicy.getPriorityConversationSenders(), conversationSenders);
+        } else {
+            conversationSenders = CONVERSATION_SENDERS_NONE;
         }
 
         if (zenPolicy.isCategoryAllowed(ZenPolicy.PRIORITY_CATEGORY_CALLS,
@@ -1102,7 +1104,7 @@ public class ZenModeConfig implements Parcelable {
         return (policy.suppressedVisualEffects & visualEffect) == 0;
     }
 
-    private int getNotificationPolicySenders(@ZenPolicy.PeopleType int senders,
+    private static int getNotificationPolicySenders(@ZenPolicy.PeopleType int senders,
             int defaultPolicySender) {
         switch (senders) {
             case ZenPolicy.PEOPLE_TYPE_ANYONE:
@@ -1116,7 +1118,7 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
-    private int getConversationSendersWithDefault(@ZenPolicy.ConversationSenders int senders,
+    private static int getConversationSendersWithDefault(@ZenPolicy.ConversationSenders int senders,
             int defaultPolicySender) {
         switch (senders) {
             case ZenPolicy.CONVERSATION_SENDERS_ANYONE:

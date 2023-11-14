@@ -65,6 +65,10 @@ interface ShadeRepository {
      */
     @Deprecated("Use ShadeInteractor instead") val legacyShadeTracking: StateFlow<Boolean>
 
+    /** Specifically tracks the user expanding the shade on the lockscreen only */
+    @Deprecated("Use ShadeInteractor.isUserInteractingWithShade instead")
+    val legacyLockscreenShadeTracking: MutableStateFlow<Boolean>
+
     /**
      * QuickSettingsController.mTracking as a flow. "Tracking" means that the user is moving quick
      * settings up or down with a pointer. Going forward, this concept will be replaced by checks
@@ -105,6 +109,9 @@ interface ShadeRepository {
 
     /** Sets whether the user is moving the shade with a pointer */
     fun setLegacyShadeTracking(tracking: Boolean)
+
+    /** Sets whether the user is moving the shade with a pointer, on lockscreen only */
+    fun setLegacyLockscreenShadeTracking(tracking: Boolean)
 
     /** Amount shade has expanded with regard to the UDFPS location */
     val udfpsTransitionToFullShadeProgress: StateFlow<Float>
@@ -177,6 +184,8 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     @Deprecated("Use ShadeInteractor instead")
     override val legacyShadeTracking: StateFlow<Boolean> = _legacyShadeTracking.asStateFlow()
 
+    override val legacyLockscreenShadeTracking = MutableStateFlow(false)
+
     private val _legacyQsTracking = MutableStateFlow(false)
     @Deprecated("Use ShadeInteractor instead")
     override val legacyQsTracking: StateFlow<Boolean> = _legacyQsTracking.asStateFlow()
@@ -210,6 +219,11 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     @Deprecated("Should only be called by NPVC and tests")
     override fun setLegacyShadeTracking(tracking: Boolean) {
         _legacyShadeTracking.value = tracking
+    }
+
+    @Deprecated("Should only be called by NPVC and tests")
+    override fun setLegacyLockscreenShadeTracking(tracking: Boolean) {
+        legacyLockscreenShadeTracking.value = tracking
     }
 
     override fun setQsExpansion(qsExpansion: Float) {

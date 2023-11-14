@@ -354,6 +354,18 @@ class PinBouncerViewModelTest : SysuiTestCase() {
             assertThat(confirmButtonAppearance).isEqualTo(ActionButtonAppearance.Hidden)
         }
 
+    @Test
+    fun isDigitButtonAnimationEnabled() =
+        testScope.runTest {
+            val isAnimationEnabled by collectLastValue(underTest.isDigitButtonAnimationEnabled)
+
+            utils.authenticationRepository.setPinEnhancedPrivacyEnabled(true)
+            assertThat(isAnimationEnabled).isFalse()
+
+            utils.authenticationRepository.setPinEnhancedPrivacyEnabled(false)
+            assertThat(isAnimationEnabled).isTrue()
+        }
+
     private fun TestScope.lockDeviceAndOpenPinBouncer() {
         utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
         utils.deviceEntryRepository.setUnlocked(false)

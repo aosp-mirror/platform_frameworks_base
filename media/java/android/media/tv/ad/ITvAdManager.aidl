@@ -13,26 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.ravenwood.annotations;
 
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.TYPE;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package android.media.tv.ad;
 
 /**
- * THIS ANNOTATION IS EXPERIMENTAL. REACH OUT TO g/ravenwood BEFORE USING IT, OR YOU HAVE ANY
- * QUESTIONS ABOUT IT.
- *
- * TODO: Javadoc
- *
+ * Interface to the TV AD service.
  * @hide
  */
-@Target({TYPE, FIELD, METHOD, CONSTRUCTOR})
-@Retention(RetentionPolicy.CLASS)
-public @interface RavenwoodKeep {
+interface ITvAdManager {
+    void startAdService(in IBinder sessionToken, int userId);
 }

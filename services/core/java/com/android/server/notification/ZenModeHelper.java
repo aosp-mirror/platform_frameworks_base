@@ -27,6 +27,7 @@ import static android.service.notification.NotificationServiceProto.ROOT_CONFIG;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 
+import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
@@ -44,6 +45,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -349,11 +351,11 @@ public class ZenModeHelper {
         ZenRule rule;
         synchronized (mConfigLock) {
             if (mConfig == null) return null;
-             rule = mConfig.automaticRules.get(id);
+            rule = mConfig.automaticRules.get(id);
         }
         if (rule == null) return null;
         if (canManageAutomaticZenRule(rule)) {
-             return createAutomaticZenRule(rule);
+            return zenRuleToAutomaticZenRule(rule);
         }
         return null;
     }
@@ -437,6 +439,167 @@ public class ZenModeHelper {
             return setConfigLocked(newConfig, reason, rule.component, true, callingUid,
                     fromSystemOrSystemUi);
         }
+    }
+
+    /**
+     * Create (or activate, or deactivate) an "implicit" {@link ZenRule} when an app that has
+     * Notification Policy Access but is not allowed to manage the global zen state
+     * calls {@link NotificationManager#setInterruptionFilter}.
+     *
+     * <p>When the {@code zenMode} is {@link Global#ZEN_MODE_OFF}, an existing implicit rule will be
+     * deactivated (if there is no implicit rule, the call will be ignored). For other modes, the
+     * rule's interruption filter will match the supplied {@code zenMode}. The policy of the last
+     * call to {@link NotificationManager#setNotificationPolicy} will be used (or, if never called,
+     * the global policy).
+     *
+     * <p>The created rule is owned by the calling package, but it has neither a
+     * {@link ConditionProviderService} nor an associated
+     * {@link AutomaticZenRule#configurationActivity}.
+     *
+     * @param zenMode one of the {@code Global#ZEN_MODE_x} values
+     */
+    void applyGlobalZenModeAsImplicitZenRule(String callingPkg, int callingUid, int zenMode) {
+        if (!android.app.Flags.modesApi()) {
+            Log.wtf(TAG, "applyGlobalZenModeAsImplicitZenRule called with flag off!");
+            return;
+        }
+        synchronized (mConfigLock) {
+            if (mConfig == null) {
+                return;
+            }
+            if (zenMode == Global.ZEN_MODE_OFF) {
+                // Deactivate implicit rule if it exists and is active; otherwise ignore.
+                ZenRule rule = mConfig.automaticRules.get(implicitRuleId(callingPkg));
+                if (rule != null) {
+                    Condition deactivated = new Condition(rule.conditionId,
+                            mContext.getString(R.string.zen_mode_implicit_deactivated),
+                            Condition.STATE_FALSE);
+                    setAutomaticZenRuleState(rule.id, deactivated,
+                            callingUid, /* fromSystemOrSystemUi= */ false);
+                }
+            } else {
+                // Either create a new rule with a default ZenPolicy, or update an existing rule's
+                // filter value. In both cases, also activate (and unsnooze) it.
+                ZenModeConfig newConfig = mConfig.copy();
+                ZenRule rule = newConfig.automaticRules.get(implicitRuleId(callingPkg));
+                if (rule == null) {
+                    rule = newImplicitZenRule(callingPkg);
+                    newConfig.automaticRules.put(rule.id, rule);
+                }
+                rule.zenMode = zenMode;
+                rule.snoozing = false;
+                rule.condition = new Condition(rule.conditionId,
+                        mContext.getString(R.string.zen_mode_implicit_activated),
+                        Condition.STATE_TRUE);
+                setConfigLocked(newConfig, /* triggeringComponent= */ null,
+                        "applyGlobalZenModeAsImplicitZenRule",
+                        callingUid, /* fromSystemOrSystemUi= */ false);
+            }
+        }
+    }
+
+    /**
+     * Create (or update) an "implicit" {@link ZenRule} when an app that has Notification Policy
+     * Access but is not allowed to manage the global zen state calls
+     * {@link NotificationManager#setNotificationPolicy}.
+     *
+     * <p>The created rule is owned by the calling package and has the {@link ZenPolicy}
+     * corresponding to the supplied {@code policy}, but it has neither a
+     * {@link ConditionProviderService} nor an associated
+     * {@link AutomaticZenRule#configurationActivity}. Its zen mode will be set to
+     * {@link Global#ZEN_MODE_IMPORTANT_INTERRUPTIONS}.
+     */
+    void applyGlobalPolicyAsImplicitZenRule(String callingPkg, int callingUid,
+            NotificationManager.Policy policy) {
+        if (!android.app.Flags.modesApi()) {
+            Log.wtf(TAG, "applyGlobalPolicyAsImplicitZenRule called with flag off!");
+            return;
+        }
+        synchronized (mConfigLock) {
+            if (mConfig == null) {
+                return;
+            }
+            ZenModeConfig newConfig = mConfig.copy();
+            ZenRule rule = newConfig.automaticRules.get(implicitRuleId(callingPkg));
+            if (rule == null) {
+                rule = newImplicitZenRule(callingPkg);
+                rule.zenMode = Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+                newConfig.automaticRules.put(rule.id, rule);
+            }
+            // TODO: b/308673679 - Keep user customization of this rule!
+            rule.zenPolicy = ZenAdapters.notificationPolicyToZenPolicy(policy);
+            setConfigLocked(newConfig, /* triggeringComponent= */ null,
+                    "applyGlobalPolicyAsImplicitZenRule",
+                    callingUid, /* fromSystemOrSystemUi= */ false);
+        }
+    }
+
+    /**
+     * Returns the {@link Policy} associated to the "implicit" {@link ZenRule} of a package that has
+     * Notification Policy Access but is not allowed to manage the global zen state.
+     *
+     * <p>If the implicit rule doesn't exist, or it doesn't specify a {@link ZenPolicy} (because the
+     * app never called {@link NotificationManager#setNotificationPolicy}) then the default policy
+     * is returned (i.e. same as {@link #getNotificationPolicy}.
+     *
+     * <p>Any unset values in the {@link ZenPolicy} will be mapped to their current defaults.
+     */
+    @Nullable
+    Policy getNotificationPolicyFromImplicitZenRule(String callingPkg) {
+        if (!android.app.Flags.modesApi()) {
+            Log.wtf(TAG, "getNotificationPolicyFromImplicitZenRule called with flag off!");
+            return getNotificationPolicy();
+        }
+        synchronized (mConfigLock) {
+            if (mConfig == null) {
+                return null;
+            }
+            ZenRule implicitRule = mConfig.automaticRules.get(implicitRuleId(callingPkg));
+            if (implicitRule != null && implicitRule.zenPolicy != null) {
+                return mConfig.toNotificationPolicy(implicitRule.zenPolicy);
+            } else {
+                return getNotificationPolicy();
+            }
+        }
+    }
+
+    /**
+     * Creates an empty {@link ZenRule} to be used as the implicit rule for {@code pkg}.
+     * Both {@link ZenRule#zenMode} and {@link ZenRule#zenPolicy} are unset.
+     */
+    private ZenRule newImplicitZenRule(String pkg) {
+        ZenRule rule = new ZenRule();
+        rule.id = implicitRuleId(pkg);
+        rule.pkg = pkg;
+        rule.creationTime = System.currentTimeMillis();
+
+        Binder.withCleanCallingIdentity(() -> {
+            try {
+                ApplicationInfo applicationInfo = mPm.getApplicationInfo(pkg, 0);
+                rule.name = applicationInfo.loadLabel(mPm).toString();
+            } catch (PackageManager.NameNotFoundException e) {
+                // Should not happen, since it's the app calling us (?)
+                Log.w(TAG, "Package not found for creating implicit zen rule");
+                rule.name = "Unknown";
+            }
+        });
+
+        rule.condition = null;
+        rule.conditionId = new Uri.Builder()
+                .scheme(Condition.SCHEME)
+                .authority("android")
+                .appendPath("implicit")
+                .appendPath(pkg)
+                .build();
+        rule.enabled = true;
+        rule.modified = false;
+        rule.component = null;
+        rule.configurationActivity = null;
+        return rule;
+    }
+
+    private static String implicitRuleId(String forPackage) {
+        return "implicit_" + forPackage;
     }
 
     public boolean removeAutomaticZenRule(String id, String reason, int callingUid,
@@ -626,7 +789,7 @@ public class ZenModeHelper {
                         }
                         // update default rule (if locale changed, name of rule will change)
                         currRule.name = defaultRule.name;
-                        updateAutomaticZenRule(defaultRule.id, createAutomaticZenRule(currRule),
+                        updateAutomaticZenRule(defaultRule.id, zenRuleToAutomaticZenRule(currRule),
                                 "locale changed", callingUid, fromSystemOrSystemUi);
                     }
                 }
@@ -669,7 +832,7 @@ public class ZenModeHelper {
         return null;
     }
 
-    private void populateZenRule(String pkg, AutomaticZenRule automaticZenRule, ZenRule rule,
+    private static void populateZenRule(String pkg, AutomaticZenRule automaticZenRule, ZenRule rule,
             boolean isNew) {
         if (rule.enabled != automaticZenRule.isEnabled()) {
             rule.snoozing = false;
@@ -699,7 +862,7 @@ public class ZenModeHelper {
         }
     }
 
-    protected AutomaticZenRule createAutomaticZenRule(ZenRule rule) {
+    private static AutomaticZenRule zenRuleToAutomaticZenRule(ZenRule rule) {
         AutomaticZenRule azr;
         if (Flags.modesApi()) {
             azr = new AutomaticZenRule.Builder(rule.name, rule.conditionId)

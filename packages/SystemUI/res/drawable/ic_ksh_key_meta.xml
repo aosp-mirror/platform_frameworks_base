@@ -19,9 +19,14 @@
         android:height="24dp"
         android:viewportWidth="24"
         android:viewportHeight="24">
-    <path android:fillColor="@color/ksh_key_item_color"
-            android:pathData="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91
-3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27 .28 v.79l5 4.99L20.49
-19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5
-14z" />
+    <path android:pathData="M5.5,5.5m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0"
+            android:fillColor="@color/ksh_key_item_color" />
+    <path android:pathData="M5.5,16.5m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0"
+            android:fillColor="@color/ksh_key_item_color" />
+    <path android:pathData="M16.5,5.5m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0"
+            android:fillColor="@color/ksh_key_item_color" />
+    <path android:pathData="M18.5,16.5C18.5,15.4 17.6,14.5 16.5,14.5C15.4,14.5 14.5,15.4 14.5,16.5C14.5,17.6 15.4,18.5 16.5,18.5C17.6,18.5 18.5,17.6 18.5,16.5ZM12.5,16.5C12.5,14.29 14.29,12.5 16.5,12.5C18.71,12.5 20.5,14.29 20.5,16.5C20.5,17.241 20.299,17.934 19.948,18.529L23,21.59L21.59,23L18.529,19.948C17.934,20.299 17.241,20.5 16.5,20.5C14.29,20.5 12.5,18.71 12.5,16.5Z"
+            android:fillColor="@color/ksh_key_item_color"
+            android:fillType="evenOdd" />
 </vector>
+

@@ -180,6 +180,18 @@ aconfig_declarations {
     srcs: ["core/java/android/nfc/*.aconfig"],
 }
 
+cc_aconfig_library {
+    name: "android_nfc_flags_aconfig_c_lib",
+    vendor_available: true,
+    aconfig_declarations: "android.nfc.flags-aconfig",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.nfcservices",
+        "nfc_nci.st21nfc.default",
+    ],
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 java_aconfig_library {
     name: "android.nfc.flags-aconfig-java",
     aconfig_declarations: "android.nfc.flags-aconfig",

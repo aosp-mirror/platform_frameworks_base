@@ -141,6 +141,7 @@ constructor(
     private val umoContent: Flow<List<CommunalContentModel.Umo>> =
         mediaRepository.mediaPlaying.flatMapLatest { mediaPlaying ->
             if (mediaPlaying) {
+                // TODO(b/310254801): support HALF and FULL layouts
                 flowOf(listOf(CommunalContentModel.Umo(CommunalContentSize.THIRD)))
             } else {
                 flowOf(emptyList())

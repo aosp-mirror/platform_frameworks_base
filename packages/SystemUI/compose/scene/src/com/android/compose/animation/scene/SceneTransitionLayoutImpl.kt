@@ -30,13 +30,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.layout.LookaheadScope
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
+import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 
@@ -63,12 +65,6 @@ class SceneTransitionLayoutImpl(
 
     private val horizontalGestureHandler: SceneGestureHandler
     private val verticalGestureHandler: SceneGestureHandler
-
-    /**
-     * The size of this layout. Note that this could be [IntSize.Zero] if this layour does not have
-     * any scene configured or right before the first measure pass of the layout.
-     */
-    @VisibleForTesting var size by mutableStateOf(IntSize.Zero)
 
     init {
         setScenes(builder)
@@ -157,15 +153,46 @@ class SceneTransitionLayoutImpl(
     }
 
     @Composable
+    @OptIn(ExperimentalComposeUiApi::class)
     internal fun Content(modifier: Modifier) {
         Box(
             modifier
                 // Handle horizontal and vertical swipes on this layout.
                 // Note: order here is important and will give a slight priority to the vertical
                 // swipes.
-                .swipeToScene(gestureHandler(Orientation.Horizontal))
-                .swipeToScene(gestureHandler(Orientation.Vertical))
-                .onSizeChanged { size = it }
+                .swipeToScene(horizontalGestureHandler)
+                .swipeToScene(verticalGestureHandler)
+                // Animate the size of this layout.
+                .intermediateLayout { measurable, constraints ->
+                    // Measure content normally.
+                    val placeable = measurable.measure(constraints)
+
+                    val width: Int
+                    val height: Int
+                    val state = state.transitionState
+                    if (state !is TransitionState.Transition || state.fromScene == state.toScene) {
+                        width = placeable.width
+                        height = placeable.height
+                    } else {
+                        // Interpolate the size.
+                        val fromSize = scene(state.fromScene).targetSize
+                        val toSize = scene(state.toScene).targetSize
+
+                        // Optimization: make sure we don't read state.progress if fromSize ==
+                        // toSize to avoid running this code every frame when the layout size does
+                        // not change.
+                        if (fromSize == toSize) {
+                            width = fromSize.width
+                            height = fromSize.height
+                        } else {
+                            val size = lerp(fromSize, toSize, state.progress)
+                            width = size.width.coerceAtLeast(0)
+                            height = size.height.coerceAtLeast(0)
+                        }
+                    }
+
+                    layout(width, height) { placeable.place(0, 0) }
+                }
         ) {
             LookaheadScope {
                 val scenesToCompose =
@@ -230,4 +257,9 @@ class SceneTransitionLayoutImpl(
     }
 
     internal fun isSceneReady(scene: SceneKey): Boolean = readyScenes.containsKey(scene)
+
+    @VisibleForTesting
+    fun setScenesTargetSizeForTest(size: IntSize) {
+        scenes.values.forEach { it.targetSize = size }
+    }
 }

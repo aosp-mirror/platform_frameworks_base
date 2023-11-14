@@ -20,6 +20,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
+import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import kotlinx.coroutines.DisposableHandle
@@ -33,6 +34,7 @@ object SharedNotificationContainerBinder {
         view: SharedNotificationContainer,
         viewModel: SharedNotificationContainerViewModel,
         controller: NotificationStackScrollLayoutController,
+        notificationStackSizeCalculator: NotificationStackSizeCalculator,
     ): DisposableHandle {
         val disposableHandle =
             view.repeatWhenAttached {
@@ -54,9 +56,16 @@ object SharedNotificationContainerBinder {
                     }
 
                     launch {
-                        viewModel.maxNotifications.collect {
-                            controller.setMaxDisplayedNotifications(it)
-                        }
+                        viewModel
+                            .getMaxNotifications { space ->
+                                notificationStackSizeCalculator.computeMaxKeyguardNotifications(
+                                    controller.getView(),
+                                    space,
+                                    0f, // Vertical space for shelf is already accounted for
+                                    controller.getShelfHeight().toFloat(),
+                                )
+                            }
+                            .collect { controller.setMaxDisplayedNotifications(it) }
                     }
 
                     launch {
@@ -70,9 +79,12 @@ object SharedNotificationContainerBinder {
                 }
             }
 
+        controller.setOnHeightChangedRunnable(Runnable { viewModel.notificationStackChanged() })
+
         return object : DisposableHandle {
             override fun dispose() {
                 disposableHandle.dispose()
+                controller.setOnHeightChangedRunnable(null)
             }
         }
     }

@@ -599,6 +599,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final String INTENT_REMOTE_BUGREPORT_FINISHED =
             "com.android.internal.intent.action.REMOTE_BUGREPORT_FINISHED";
 
+    public static final String DATA_FILE_PATH_HEADER = "Data File: ";
+    public static final String DATA_FILE_PATH_FOOTER = "End Data File\n";
+
     // If set, we will push process association information in to procstats.
     static final boolean TRACK_PROCSTATS_ASSOCIATIONS = true;
 
@@ -9595,17 +9598,33 @@ public class ActivityManagerService extends IActivityManager.Stub
                         : Settings.Global.getInt(mContext.getContentResolver(), logcatSetting, 0);
                 int dropboxMaxSize = Settings.Global.getInt(
                         mContext.getContentResolver(), maxBytesSetting, DROPBOX_DEFAULT_MAX_SIZE);
-                int maxDataFileSize = dropboxMaxSize - sb.length()
-                        - lines * RESERVED_BYTES_PER_LOGCAT_LINE;
 
-                if (dataFile != null && maxDataFileSize > 0) {
-                    try {
-                        sb.append(FileUtils.readTextFile(dataFile, maxDataFileSize,
-                                    "\n\n[[TRUNCATED]]"));
-                    } catch (IOException e) {
-                        Slog.e(TAG, "Error reading " + dataFile, e);
+                if (dataFile != null) {
+                    // Attach the stack traces file to the report so collectors can load them
+                    // by file if they have access.
+                    sb.append(DATA_FILE_PATH_HEADER)
+                            .append(dataFile.getAbsolutePath()).append('\n');
+
+                    int maxDataFileSize = dropboxMaxSize
+                            - sb.length()
+                            - lines * RESERVED_BYTES_PER_LOGCAT_LINE
+                            - DATA_FILE_PATH_FOOTER.length();
+
+                    if (maxDataFileSize > 0) {
+                        // Inline dataFile contents if there is room.
+                        try {
+                            sb.append(FileUtils.readTextFile(dataFile, maxDataFileSize,
+                                    "\n\n[[TRUNCATED]]\n"));
+                        } catch (IOException e) {
+                            Slog.e(TAG, "Error reading " + dataFile, e);
+                        }
                     }
+
+                    // Always append the footer, even there wasn't enough space to inline the
+                    // dataFile contents.
+                    sb.append(DATA_FILE_PATH_FOOTER);
                 }
+
                 if (crashInfo != null && crashInfo.stackTrace != null) {
                     sb.append(crashInfo.stackTrace);
                 }

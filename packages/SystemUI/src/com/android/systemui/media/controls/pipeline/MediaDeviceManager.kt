@@ -37,8 +37,6 @@ import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.media.controls.models.player.MediaData
 import com.android.systemui.media.controls.models.player.MediaDeviceData
 import com.android.systemui.media.controls.util.MediaControllerFactory
@@ -70,7 +68,6 @@ constructor(
     @Main private val fgExecutor: Executor,
     @Background private val bgExecutor: Executor,
     dumpManager: DumpManager,
-    private val featureFlags: FeatureFlagsClassic,
 ) : MediaDataManager.Listener, Dumpable {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
@@ -390,13 +387,6 @@ constructor(
                         " routingSession ${routingSession?.name}" +
                         " or ${selectedRoutes?.firstOrNull()?.name}"
                 )
-            }
-
-            if (!featureFlags.isEnabled(Flags.MEDIA_DEVICE_NAME_FIX)) {
-                if (controller == null || routingSession != null) {
-                    return routingSession?.name?.toString() ?: device?.name
-                }
-                return null
             }
 
             if (controller == null) {

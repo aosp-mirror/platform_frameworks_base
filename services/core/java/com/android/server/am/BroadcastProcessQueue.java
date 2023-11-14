@@ -265,13 +265,6 @@ class BroadcastProcessQueue {
     @Nullable
     public BroadcastRecord enqueueOrReplaceBroadcast(@NonNull BroadcastRecord record,
             int recordIndex, @NonNull BroadcastConsumer deferredStatesApplyConsumer) {
-        // When updateDeferredStates() has already applied a deferred state to
-        // all pending items, apply to this new broadcast too
-        if (mLastDeferredStates && record.deferUntilActive
-                && (record.getDeliveryState(recordIndex) == BroadcastRecord.DELIVERY_PENDING)) {
-            deferredStatesApplyConsumer.accept(record, recordIndex);
-        }
-
         // Ignore FLAG_RECEIVER_REPLACE_PENDING if the sender specified the policy using the
         // BroadcastOptions delivery group APIs.
         if (record.isReplacePending()
@@ -294,6 +287,13 @@ class BroadcastProcessQueue {
         // with implicit responsiveness expectations.
         getQueueForBroadcast(record).addLast(newBroadcastArgs);
         onBroadcastEnqueued(record, recordIndex);
+
+        // When updateDeferredStates() has already applied a deferred state to
+        // all pending items, apply to this new broadcast too
+        if (mLastDeferredStates && shouldBeDeferred()
+                && (record.getDeliveryState(recordIndex) == BroadcastRecord.DELIVERY_PENDING)) {
+            deferredStatesApplyConsumer.accept(record, recordIndex);
+        }
         return null;
     }
 
@@ -1235,30 +1235,43 @@ class BroadcastProcessQueue {
     }
 
     /**
-     * Update {@link BroadcastRecord.DELIVERY_DEFERRED} states of all our
+     * Update {@link BroadcastRecord#DELIVERY_DEFERRED} states of all our
      * pending broadcasts, when needed.
      */
     void updateDeferredStates(@NonNull BroadcastConsumer applyConsumer,
             @NonNull BroadcastConsumer clearConsumer) {
         // When all we have pending is deferred broadcasts, and we're cached,
         // then we want everything to be marked deferred
-        final boolean wantDeferredStates = (mCountDeferred > 0)
-                && (mCountDeferred == mCountEnqueued) && mProcessFreezable;
+        final boolean wantDeferredStates = shouldBeDeferred();
 
         if (mLastDeferredStates != wantDeferredStates) {
             mLastDeferredStates = wantDeferredStates;
             if (wantDeferredStates) {
                 forEachMatchingBroadcast((r, i) -> {
-                    return r.deferUntilActive
-                            && (r.getDeliveryState(i) == BroadcastRecord.DELIVERY_PENDING);
+                    return (r.getDeliveryState(i) == BroadcastRecord.DELIVERY_PENDING);
                 }, applyConsumer, false);
             } else {
                 forEachMatchingBroadcast((r, i) -> {
-                    return r.deferUntilActive
-                            && (r.getDeliveryState(i) == BroadcastRecord.DELIVERY_DEFERRED);
+                    return (r.getDeliveryState(i) == BroadcastRecord.DELIVERY_DEFERRED);
                 }, clearConsumer, false);
             }
         }
+    }
+
+    void clearDeferredStates(@NonNull BroadcastConsumer clearConsumer) {
+        if (mLastDeferredStates) {
+            mLastDeferredStates = false;
+            forEachMatchingBroadcast((r, i) -> {
+                return (r.getDeliveryState(i) == BroadcastRecord.DELIVERY_DEFERRED);
+            }, clearConsumer, false);
+        }
+    }
+
+    @VisibleForTesting
+    boolean shouldBeDeferred() {
+        if (mRunnableAtInvalidated) updateRunnableAt();
+        return mRunnableAtReason == REASON_CACHED
+                || mRunnableAtReason == REASON_CACHED_INFINITE_DEFER;
     }
 
     /**

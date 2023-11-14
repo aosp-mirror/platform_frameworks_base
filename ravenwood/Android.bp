@@ -28,9 +28,8 @@ java_library {
     name: "ravenwood-junit",
     srcs: ["junit-src/**/*.java"],
     libs: [
+        "framework-minus-apex.ravenwood",
         "junit",
     ],
-    sdk_version: "core_current",
-    host_supported: true,
     visibility: ["//visibility:public"],
 }

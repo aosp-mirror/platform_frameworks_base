@@ -22,28 +22,26 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
-import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 
 /** View-model for the shared notification container, used by both the shade and keyguard spaces */
 class SharedNotificationContainerViewModel
 @Inject
 constructor(
-    interactor: SharedNotificationContainerInteractor,
+    private val interactor: SharedNotificationContainerInteractor,
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    notificationStackSizeCalculator: NotificationStackSizeCalculator,
-    controller: NotificationStackScrollLayoutController,
-    shadeInteractor: ShadeInteractor,
+    private val shadeInteractor: ShadeInteractor,
 ) {
     private val statesForConstrainedNotifications =
         setOf(
@@ -151,24 +149,46 @@ constructor(
      * When on keyguard, there is limited space to display notifications so calculate how many could
      * be shown. Otherwise, there is no limit since the vertical space will be scrollable.
      *
-     * TODO: b/296606746 - Need to rerun logic when notifs change
+     * When expanding or when the user is interacting with the shade, keep the count stable; do not
+     * emit a value.
      */
-    val maxNotifications: Flow<Int> =
-        combine(isOnLockscreen, shadeInteractor.shadeExpansion, position) {
-            onLockscreen,
-            shadeExpansion,
-            positionInfo ->
-            if (onLockscreen && shadeExpansion < 1f) {
-                notificationStackSizeCalculator.computeMaxKeyguardNotifications(
-                    controller.getView(),
-                    positionInfo.bottom - positionInfo.top,
-                    0f, // Vertical space for shelf is already accounted for
-                    controller.getShelfHeight().toFloat(),
-                )
-            } else {
-                -1 // No limit
+    fun getMaxNotifications(calculateSpace: (Float) -> Int): Flow<Int> {
+        // When to limit notifications: on lockscreen with an unexpanded shade. Also, recalculate
+        // when the notification stack has changed internally
+        val limitedNotifications =
+            combineTransform(
+                isOnLockscreen,
+                position,
+                shadeInteractor.shadeExpansion,
+                interactor.notificationStackChanged.onStart { emit(Unit) },
+            ) { isOnLockscreen, position, shadeExpansion, _ ->
+                if (isOnLockscreen && shadeExpansion == 0f) {
+                    emit(calculateSpace(position.bottom - position.top))
+                }
             }
-        }
+
+        // When to show unlimited notifications: When the shade is fully expanded and the user is
+        // not actively dragging the shade
+        val unlimitedNotifications =
+            combineTransform(
+                shadeInteractor.shadeExpansion,
+                shadeInteractor.isUserInteracting,
+            ) { shadeExpansion, isUserInteracting ->
+                if (shadeExpansion == 1f && !isUserInteracting) {
+                    emit(-1)
+                }
+            }
+
+        return merge(
+                limitedNotifications,
+                unlimitedNotifications,
+            )
+            .distinctUntilChanged()
+    }
+
+    fun notificationStackChanged() {
+        interactor.notificationStackChanged()
+    }
 
     data class ConfigurationBasedDimensions(
         val marginStart: Int,

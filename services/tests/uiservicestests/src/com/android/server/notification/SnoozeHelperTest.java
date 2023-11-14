@@ -19,6 +19,7 @@ import static com.android.server.notification.SnoozeHelper.CONCURRENT_SNOOZE_LIM
 import static com.android.server.notification.SnoozeHelper.EXTRA_KEY;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -72,6 +73,14 @@ import java.io.IOException;
 @RunWith(AndroidJUnit4.class)
 public class SnoozeHelperTest extends UiServiceTestCase {
     private static final String TEST_CHANNEL_ID = "test_channel_id";
+
+    private static final String XML_TAG_NAME = "snoozed-notifications";
+    private static final String XML_SNOOZED_NOTIFICATION = "notification";
+    private static final String XML_SNOOZED_NOTIFICATION_CONTEXT = "context";
+    private static final String XML_SNOOZED_NOTIFICATION_KEY = "key";
+    private static final String XML_SNOOZED_NOTIFICATION_TIME = "time";
+    private static final String XML_SNOOZED_NOTIFICATION_CONTEXT_ID = "id";
+    private static final String XML_SNOOZED_NOTIFICATION_VERSION_LABEL = "version";
 
     @Mock SnoozeHelper.Callback mCallback;
     @Mock AlarmManager mAm;
@@ -313,6 +322,53 @@ public class SnoozeHelperTest extends UiServiceTestCase {
             }
         }
         assertFalse(mSnoozeHelper.canSnooze(1));
+    }
+
+    @Test
+    public void testSnoozeLimit_maximumPersisted() throws XmlPullParserException, IOException {
+        final long snoozeTimeout = 1234;
+        final String snoozeContext = "ctx";
+        // Serialize & deserialize notifications so that only persisted lists are used
+        TypedXmlSerializer serializer = Xml.newFastSerializer();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
+        serializer.startDocument(null, true);
+        serializer.startTag(null, XML_TAG_NAME);
+        // Serialize maximum number of timed + context snoozed notifications, half of each
+        for (int i = 0; i < CONCURRENT_SNOOZE_LIMIT; i++) {
+            final boolean timedNotification = i % 2 == 0;
+            if (timedNotification) {
+                serializer.startTag(null, XML_SNOOZED_NOTIFICATION);
+            } else {
+                serializer.startTag(null, XML_SNOOZED_NOTIFICATION_CONTEXT);
+            }
+            serializer.attributeInt(null, XML_SNOOZED_NOTIFICATION_VERSION_LABEL, 1);
+            serializer.attribute(null, XML_SNOOZED_NOTIFICATION_KEY, "key" + i);
+            if (timedNotification) {
+                serializer.attributeLong(null, XML_SNOOZED_NOTIFICATION_TIME, snoozeTimeout);
+                serializer.endTag(null, XML_SNOOZED_NOTIFICATION);
+            } else {
+                serializer.attribute(null, XML_SNOOZED_NOTIFICATION_CONTEXT_ID, snoozeContext);
+                serializer.endTag(null, XML_SNOOZED_NOTIFICATION_CONTEXT);
+            }
+        }
+        serializer.endTag(null, XML_TAG_NAME);
+        serializer.endDocument();
+        serializer.flush();
+
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(
+                new ByteArrayInputStream(baos.toByteArray())), "utf-8");
+        mSnoozeHelper.readXml(parser, 1);
+        // Verify that we can't snooze any more notifications
+        //  and that the limit is caused by persisted notifications
+        assertThat(mSnoozeHelper.canSnooze(1)).isFalse();
+        assertThat(mSnoozeHelper.isSnoozed(UserHandle.USER_SYSTEM, "pkg", "key0")).isFalse();
+        assertThat(mSnoozeHelper.getSnoozeTimeForUnpostedNotification(UserHandle.USER_SYSTEM,
+                "pkg", "key0")).isEqualTo(snoozeTimeout);
+        assertThat(
+            mSnoozeHelper.getSnoozeContextForUnpostedNotification(UserHandle.USER_SYSTEM, "pkg",
+                "key1")).isEqualTo(snoozeContext);
     }
 
     @Test
@@ -611,6 +667,7 @@ public class SnoozeHelperTest extends UiServiceTestCase {
 
     @Test
     public void repostGroupSummary_repostsSummary() throws Exception {
+        final int snoozeDuration = 1000;
         IntArray profileIds = new IntArray();
         profileIds.add(UserHandle.USER_SYSTEM);
         when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
@@ -618,10 +675,14 @@ public class SnoozeHelperTest extends UiServiceTestCase {
                 "pkg", 1, "one", UserHandle.SYSTEM, "group1", true);
         NotificationRecord r2 = getNotificationRecord(
                 "pkg", 2, "two", UserHandle.SYSTEM, "group1", false);
-        mSnoozeHelper.snooze(r, 1000);
-        mSnoozeHelper.snooze(r2, 1000);
+        final long snoozeTime = System.currentTimeMillis() + snoozeDuration;
+        mSnoozeHelper.snooze(r, snoozeDuration);
+        mSnoozeHelper.snooze(r2, snoozeDuration);
         assertEquals(2, mSnoozeHelper.getSnoozed().size());
         assertEquals(2, mSnoozeHelper.getSnoozed(UserHandle.USER_SYSTEM, "pkg").size());
+        // Verify that summary notification was added to the persisted list
+        assertThat(mSnoozeHelper.getSnoozeTimeForUnpostedNotification(UserHandle.USER_SYSTEM, "pkg",
+                r.getKey())).isAtLeast(snoozeTime);
 
         mSnoozeHelper.repostGroupSummary("pkg", UserHandle.USER_SYSTEM, r.getGroupKey());
 
@@ -630,6 +691,39 @@ public class SnoozeHelperTest extends UiServiceTestCase {
 
         assertEquals(1, mSnoozeHelper.getSnoozed().size());
         assertEquals(1, mSnoozeHelper.getSnoozed(UserHandle.USER_SYSTEM, "pkg").size());
+        // Verify that summary notification was removed from the persisted list
+        assertThat(mSnoozeHelper.getSnoozeTimeForUnpostedNotification(UserHandle.USER_SYSTEM, "pkg",
+                r.getKey())).isEqualTo(0);
+    }
+
+    @Test
+    public void snoozeWithContext_repostGroupSummary_removesPersisted() throws Exception {
+        final String snoozeContext = "zzzzz";
+        IntArray profileIds = new IntArray();
+        profileIds.add(UserHandle.USER_SYSTEM);
+        when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
+        NotificationRecord r = getNotificationRecord(
+                "pkg", 1, "one", UserHandle.SYSTEM, "group1", true);
+        NotificationRecord r2 = getNotificationRecord(
+                "pkg", 2, "two", UserHandle.SYSTEM, "group1", false);
+        mSnoozeHelper.snooze(r, snoozeContext);
+        mSnoozeHelper.snooze(r2, snoozeContext);
+        assertEquals(2, mSnoozeHelper.getSnoozed().size());
+        assertEquals(2, mSnoozeHelper.getSnoozed(UserHandle.USER_SYSTEM, "pkg").size());
+        // Verify that summary notification was added to the persisted list
+        assertThat(mSnoozeHelper.getSnoozeContextForUnpostedNotification(UserHandle.USER_SYSTEM,
+            "pkg", r.getKey())).isEqualTo(snoozeContext);
+
+        mSnoozeHelper.repostGroupSummary("pkg", UserHandle.USER_SYSTEM, r.getGroupKey());
+
+        verify(mCallback, times(1)).repost(UserHandle.USER_SYSTEM, r, false);
+        verify(mCallback, never()).repost(UserHandle.USER_SYSTEM, r2, false);
+
+        assertEquals(1, mSnoozeHelper.getSnoozed().size());
+        assertEquals(1, mSnoozeHelper.getSnoozed(UserHandle.USER_SYSTEM, "pkg").size());
+        // Verify that summary notification was removed from the persisted list
+        assertThat(mSnoozeHelper.getSnoozeContextForUnpostedNotification(UserHandle.USER_SYSTEM,
+                "pkg", r.getKey())).isNull();
     }
 
     @Test

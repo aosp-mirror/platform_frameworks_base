@@ -143,6 +143,23 @@ class AuthenticationRepositoryTest : SysuiTestCase() {
             assertThat(authenticationChallengeResults).isEqualTo(listOf(true, false, true))
         }
 
+    @Test
+    fun isPinEnhancedPrivacyEnabled() =
+        testScope.runTest {
+            whenever(lockPatternUtils.isPinEnhancedPrivacyEnabled(USER_INFOS[0].id))
+                .thenReturn(false)
+            whenever(lockPatternUtils.isPinEnhancedPrivacyEnabled(USER_INFOS[1].id))
+                .thenReturn(true)
+
+            val values by collectValues(underTest.isPinEnhancedPrivacyEnabled)
+            assertThat(values.first()).isTrue()
+            assertThat(values.last()).isFalse()
+
+            userRepository.setSelectedUserInfo(USER_INFOS[1])
+            assertThat(values.last()).isTrue()
+
+    }
+
     private fun setSecurityModeAndDispatchBroadcast(
         securityMode: KeyguardSecurityModel.SecurityMode,
     ) {

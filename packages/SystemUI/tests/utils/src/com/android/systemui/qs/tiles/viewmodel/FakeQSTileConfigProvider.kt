@@ -24,6 +24,8 @@ class FakeQSTileConfigProvider : QSTileConfigProvider {
 
     override fun getConfig(tileSpec: String): QSTileConfig = configs.getValue(tileSpec)
 
+    override fun hasConfig(tileSpec: String): Boolean = configs.containsKey(tileSpec)
+
     fun putConfig(tileSpec: TileSpec, config: QSTileConfig) {
         configs[tileSpec.spec] = config
     }

@@ -14,12 +14,19 @@
 }
 
 # APIs referenced by dependent JAR files and modules
--keep @interface android.annotation.SystemApi
+# TODO(b/300514883): Pull @SystemApi keep rules from system-api.pro.
+-keep interface android.annotation.SystemApi
 -keep @android.annotation.SystemApi class * {
   public protected *;
 }
 -keepclasseswithmembers class * {
   @android.annotation.SystemApi *;
+}
+# Also ensure nested classes are kept. This is overly conservative, but handles
+# cases where such classes aren't explicitly marked @SystemApi.
+-if @android.annotation.SystemApi class *
+-keep public class <1>$** {
+  public protected *;
 }
 
 # Derivatives of SystemService and other services created via reflection

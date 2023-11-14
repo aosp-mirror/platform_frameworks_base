@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
@@ -90,7 +91,7 @@ class SceneGestureHandler(
 
     internal var gestureWithPriority: Any? = null
 
-    internal fun onDragStarted(pointersDown: Int, startedPosition: Offset?) {
+    internal fun onDragStarted(pointersDown: Int, layoutSize: IntSize, startedPosition: Offset?) {
         if (isDrivingTransition) {
             // This [transition] was already driving the animation: simply take over it.
             // Stop animating and start from where the current offset.
@@ -126,14 +127,14 @@ class SceneGestureHandler(
         // we will also have to make sure that we correctly handle overscroll.
         swipeTransition.absoluteDistance =
             when (orientation) {
-                Orientation.Horizontal -> layoutImpl.size.width
-                Orientation.Vertical -> layoutImpl.size.height
+                Orientation.Horizontal -> layoutSize.width
+                Orientation.Vertical -> layoutSize.height
             }.toFloat()
 
         val fromEdge =
             startedPosition?.let { position ->
                 layoutImpl.edgeDetector.edge(
-                    layoutImpl.size,
+                    layoutSize,
                     position.round(),
                     layoutImpl.density,
                     orientation,
@@ -513,9 +514,9 @@ class SceneGestureHandler(
 private class SceneDraggableHandler(
     private val gestureHandler: SceneGestureHandler,
 ) : DraggableHandler {
-    override fun onDragStarted(startedPosition: Offset, pointersDown: Int) {
+    override fun onDragStarted(layoutSize: IntSize, startedPosition: Offset, pointersDown: Int) {
         gestureHandler.gestureWithPriority = this
-        gestureHandler.onDragStarted(pointersDown, startedPosition)
+        gestureHandler.onDragStarted(pointersDown, layoutSize, startedPosition)
     }
 
     override fun onDelta(pixels: Float) {
@@ -647,7 +648,11 @@ class SceneNestedScrollHandler(
             canContinueScroll = { true },
             onStart = {
                 gestureHandler.gestureWithPriority = this
-                gestureHandler.onDragStarted(pointersDown = 1, startedPosition = null)
+                gestureHandler.onDragStarted(
+                    pointersDown = 1,
+                    layoutSize = gestureHandler.currentScene.targetSize,
+                    startedPosition = null,
+                )
             },
             onScroll = { offsetAvailable ->
                 if (gestureHandler.gestureWithPriority != this) {

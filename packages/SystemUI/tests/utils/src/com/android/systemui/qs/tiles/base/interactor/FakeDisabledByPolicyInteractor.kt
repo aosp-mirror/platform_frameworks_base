@@ -20,7 +20,6 @@ import android.os.UserHandle
 
 class FakeDisabledByPolicyInteractor : DisabledByPolicyInteractor {
 
-    var handleResult: Boolean = false
     var policyResult: DisabledByPolicyInteractor.PolicyResult =
         DisabledByPolicyInteractor.PolicyResult.TileEnabled
 
@@ -31,5 +30,9 @@ class FakeDisabledByPolicyInteractor : DisabledByPolicyInteractor {
 
     override fun handlePolicyResult(
         policyResult: DisabledByPolicyInteractor.PolicyResult
-    ): Boolean = handleResult
+    ): Boolean =
+        when (policyResult) {
+            is DisabledByPolicyInteractor.PolicyResult.TileEnabled -> false
+            is DisabledByPolicyInteractor.PolicyResult.TileDisabled -> true
+        }
 }

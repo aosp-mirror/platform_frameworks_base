@@ -18,13 +18,15 @@
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import android.content.Context
-import com.android.systemui.res.R
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -42,6 +44,10 @@ constructor(
 
     private val _topPosition = MutableStateFlow(0f)
     val topPosition = _topPosition.asStateFlow()
+
+    private val _notificationStackChanged = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    /** An internal modification was made to notifications */
+    val notificationStackChanged = _notificationStackChanged.asSharedFlow()
 
     val configurationBasedDimensions: Flow<ConfigurationBasedDimensions> =
         configurationRepository.onAnyConfigurationChange
@@ -70,6 +76,11 @@ constructor(
     /** Top position (without translation) of the shared container. */
     fun setTopPosition(top: Float) {
         _topPosition.value = top
+    }
+
+    /** An internal modification was made to notifications */
+    fun notificationStackChanged() {
+        _notificationStackChanged.tryEmit(Unit)
     }
 
     data class ConfigurationBasedDimensions(

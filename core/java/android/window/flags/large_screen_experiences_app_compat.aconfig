@@ -1,0 +1,9 @@
+package: "com.android.window.flags"
+
+flag {
+  name: "allows_screen_size_decoupled_from_status_bar_and_cutout"
+  namespace: "large_screen_experiences_app_compat"
+  description: "When necessary, configuration decoupled from status bar and display cutout"
+  bug: "291870756"
+  is_fixed_read_only: true
+}

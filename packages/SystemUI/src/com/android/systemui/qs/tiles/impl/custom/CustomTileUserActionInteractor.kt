@@ -18,14 +18,15 @@ package com.android.systemui.qs.tiles.impl.custom
 
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
 import com.android.systemui.qs.tiles.impl.di.QSTileScope
 import javax.inject.Inject
 
 @QSTileScope
 class CustomTileUserActionInteractor @Inject constructor() :
-    QSTileUserActionInteractor<CustomTileData> {
+    QSTileUserActionInteractor<CustomTileDataModel> {
 
-    override suspend fun handleInput(input: QSTileInput<CustomTileData>) {
+    override suspend fun handleInput(input: QSTileInput<CustomTileDataModel>) {
         TODO("Not yet implemented")
     }
 }

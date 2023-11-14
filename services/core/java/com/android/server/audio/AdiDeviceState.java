@@ -25,6 +25,7 @@ import android.annotation.Nullable;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
+import android.media.Utils;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -167,8 +168,9 @@ import java.util.Objects;
     public String toString() {
         return "type: " + mDeviceType
                 + " internal type: 0x" + Integer.toHexString(mInternalDeviceType)
-                + " addr: " + mDeviceAddress + " bt audio type: "
-                + AudioManager.audioDeviceCategoryToString(mAudioDeviceCategory)
+                + " addr: " + Utils.anonymizeBluetoothAddress(mInternalDeviceType, mDeviceAddress)
+                + " bt audio type: "
+                        + AudioManager.audioDeviceCategoryToString(mAudioDeviceCategory)
                 + " enabled: " + mSAEnabled + " HT: " + mHasHeadTracker
                 + " HTenabled: " + mHeadTrackerEnabled;
     }

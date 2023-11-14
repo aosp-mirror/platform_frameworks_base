@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.ravenwood.annotations;
+package android.ravenwood.annotation;
 
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.METHOD;
 
 import java.lang.annotation.Retention;
@@ -27,11 +26,10 @@ import java.lang.annotation.Target;
  * QUESTIONS ABOUT IT.
  *
  * TODO: Javadoc
- * TODO: Create "whole-class-throw"?
  *
  * @hide
  */
-@Target({METHOD, CONSTRUCTOR})
+@Target({METHOD})
 @Retention(RetentionPolicy.CLASS)
-public @interface RavenwoodThrow {
+public @interface RavenwoodReplace {
 }

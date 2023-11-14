@@ -21,6 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor.Companion.TO_OCCLUDED_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.flow.Flow
@@ -33,8 +34,9 @@ import kotlinx.coroutines.flow.Flow
 class LockscreenToOccludedTransitionViewModel
 @Inject
 constructor(
-    private val interactor: KeyguardTransitionInteractor,
-) {
+    interactor: KeyguardTransitionInteractor,
+    shadeDependentFlows: ShadeDependentFlows,
+) : DeviceEntryIconTransition {
     private val transitionAnimation =
         KeyguardTransitionAnimationFlow(
             transitionDuration = TO_OCCLUDED_DURATION,
@@ -59,4 +61,10 @@ constructor(
             interpolator = EMPHASIZED_ACCELERATE,
         )
     }
+
+    override val deviceEntryParentViewAlpha: Flow<Float> =
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsNotExpanded = lockscreenAlpha,
+            flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
+        )
 }

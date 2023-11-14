@@ -92,6 +92,10 @@ constructor(
     /** Whether the pattern should be visible for the currently-selected user. */
     val isPatternVisible: StateFlow<Boolean> = authenticationInteractor.isPatternVisible
 
+    /** Whether the "enhanced PIN privacy" setting is enabled for the current user. */
+    val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> =
+        authenticationInteractor.isPinEnhancedPrivacyEnabled
+
     /** Whether the user switcher should be displayed within the bouncer UI on large screens. */
     val isUserSwitcherVisible: Boolean
         get() = repository.isUserSwitcherVisible
