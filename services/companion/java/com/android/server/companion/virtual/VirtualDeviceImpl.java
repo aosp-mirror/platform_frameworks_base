@@ -304,7 +304,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         UserHandle ownerUserHandle = UserHandle.getUserHandleForUid(attributionSource.getUid());
         mContext = context.createContextAsUser(ownerUserHandle, 0);
         mAssociationInfo = associationInfo;
-        mPersistentDeviceId = PERSISTENT_ID_PREFIX_CDM_ASSOCIATION + associationInfo.getId();
+        mPersistentDeviceId = createPersistentDeviceId(associationInfo.getId());
         mService = service;
         mPendingTrampolineCallback = pendingTrampolineCallback;
         mActivityListener = activityListener;
@@ -378,6 +378,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @VisibleForTesting
     SensorController getSensorControllerForTest() {
         return mSensorController;
+    }
+
+    static String createPersistentDeviceId(int associationId) {
+        return PERSISTENT_ID_PREFIX_CDM_ASSOCIATION + associationId;
     }
 
     /**

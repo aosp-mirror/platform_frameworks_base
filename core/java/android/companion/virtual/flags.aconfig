@@ -58,6 +58,13 @@ flag {
 }
 
 flag {
+  name: "persistent_device_id_api"
+  namespace: "virtual_devices"
+  description: "Enable persistent device ID notification API"
+  bug: "295258915"
+}
+
+flag {
   name: "express_metrics"
   namespace: "virtual_devices"
   description: "Enable express metrics in VDM"

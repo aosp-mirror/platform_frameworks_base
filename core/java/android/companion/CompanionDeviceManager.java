@@ -33,6 +33,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UserHandleAware;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
@@ -795,9 +796,19 @@ public final class CompanionDeviceManager {
     @UserHandleAware
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public @NonNull List<AssociationInfo> getAllAssociations() {
+        return getAllAssociations(mContext.getUserId());
+    }
+
+    /**
+     * Per-user version of {@link #getAllAssociations()}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
+    public @NonNull List<AssociationInfo> getAllAssociations(@UserIdInt int userId) {
         if (!checkFeaturePresent()) return Collections.emptyList();
         try {
-            return mService.getAllAssociationsForUser(mContext.getUserId());
+            return mService.getAllAssociationsForUser(userId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -830,12 +841,25 @@ public final class CompanionDeviceManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
     public void addOnAssociationsChangedListener(
             @NonNull Executor executor, @NonNull OnAssociationsChangedListener listener) {
+        addOnAssociationsChangedListener(executor, listener, mContext.getUserId());
+    }
+
+    /**
+     * Per-user version of
+     * {@link #addOnAssociationsChangedListener(Executor, OnAssociationsChangedListener)}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_COMPANION_DEVICES)
+    public void addOnAssociationsChangedListener(
+            @NonNull Executor executor, @NonNull OnAssociationsChangedListener listener,
+            @UserIdInt int userId) {
         if (!checkFeaturePresent()) return;
         synchronized (mListeners) {
             final OnAssociationsChangedListenerProxy proxy = new OnAssociationsChangedListenerProxy(
                     executor, listener);
             try {
-                mService.addOnAssociationsChangedListener(proxy, mContext.getUserId());
+                mService.addOnAssociationsChangedListener(proxy, userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

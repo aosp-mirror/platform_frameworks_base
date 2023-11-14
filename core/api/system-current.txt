@@ -3185,6 +3185,7 @@ package android.companion.virtual {
     field public static final int LAUNCH_FAILURE_NO_ACTIVITY = 2; // 0x2
     field public static final int LAUNCH_FAILURE_PENDING_INTENT_CANCELED = 1; // 0x1
     field public static final int LAUNCH_SUCCESS = 0; // 0x0
+    field @FlaggedApi("android.companion.virtual.flags.persistent_device_id_api") public static final String PERSISTENT_DEVICE_ID_DEFAULT = "default:0";
   }
 
   public static interface VirtualDeviceManager.ActivityListener {

@@ -522,7 +522,8 @@ public class CompanionDeviceManagerService extends SystemService {
     private void notifyListeners(
             @UserIdInt int userId, @NonNull List<AssociationInfo> associations) {
         mListeners.broadcast((listener, callbackUserId) -> {
-            if ((int) callbackUserId == userId) {
+            int listenerUserId = (int) callbackUserId;
+            if (listenerUserId == userId || listenerUserId == UserHandle.USER_ALL) {
                 try {
                     listener.onAssociationsChanged(associations);
                 } catch (RemoteException ignored) {
@@ -660,6 +661,9 @@ public class CompanionDeviceManagerService extends SystemService {
 
             enforceCallerIsSystemOrCanInteractWithUserId(getContext(), userId);
 
+            if (userId == UserHandle.USER_ALL) {
+                return List.copyOf(mAssociationStore.getAssociations());
+            }
             return mAssociationStore.getAssociationsForUser(userId);
         }
 
