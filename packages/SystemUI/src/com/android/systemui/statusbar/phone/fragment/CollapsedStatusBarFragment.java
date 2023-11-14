@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.disableflags.DisableFlagsLogger.DisableSta
 import com.android.systemui.statusbar.events.SystemStatusAnimationCallback;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder;
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarNotificationIconViewStore;
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel;
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
@@ -217,6 +218,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mWaitingForWindowStateChangeAfterCameraLaunch = false;
         mTransitionFromLockscreenToDreamStarted = false;
     };
+    private final StatusBarIconViewBindingFailureTracker mIconViewBindingFailureTracker;
 
     @Inject
     public CollapsedStatusBarFragment(
@@ -235,6 +237,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             KeyguardStateController keyguardStateController,
             ShadeViewController shadeViewController,
             StatusBarStateController statusBarStateController,
+            StatusBarIconViewBindingFailureTracker iconViewBindingFailureTracker,
             CommandQueue commandQueue,
             CarrierConfigTracker carrierConfigTracker,
             CollapsedStatusBarFragmentLogger collapsedStatusBarFragmentLogger,
@@ -264,6 +267,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mKeyguardStateController = keyguardStateController;
         mShadeViewController = shadeViewController;
         mStatusBarStateController = statusBarStateController;
+        mIconViewBindingFailureTracker = iconViewBindingFailureTracker;
         mCommandQueue = commandQueue;
         mCarrierConfigTracker = carrierConfigTracker;
         mCollapsedStatusBarFragmentLogger = collapsedStatusBarFragmentLogger;
@@ -471,6 +475,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                     mStatusBarIconsViewModel,
                     mConfigurationState,
                     mConfigurationController,
+                    mIconViewBindingFailureTracker,
                     mStatusBarIconViewStore);
         } else {
             mNotificationIconAreaInner =

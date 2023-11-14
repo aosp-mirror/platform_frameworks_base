@@ -62,6 +62,7 @@ import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder;
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker;
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel;
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -105,6 +106,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final DozeParameters mDozeParameters;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final AlwaysOnDisplayNotificationIconViewStore mAodIconViewStore;
+    private final StatusBarIconViewBindingFailureTracker mIconViewBindingFailureTracker;
     private FrameLayout mSmallClockFrame; // top aligned clock
     private FrameLayout mLargeClockFrame; // centered clock
 
@@ -179,6 +181,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             LockscreenSmartspaceController smartspaceController,
             ConfigurationController configurationController,
             ScreenOffAnimationController screenOffAnimationController,
+            StatusBarIconViewBindingFailureTracker iconViewBindingFailureTracker,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             SecureSettings secureSettings,
             @Main DelayableExecutor uiExecutor,
@@ -202,6 +205,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mSmartspaceController = smartspaceController;
         mConfigurationController = configurationController;
         mScreenOffAnimationController = screenOffAnimationController;
+        mIconViewBindingFailureTracker = iconViewBindingFailureTracker;
         mSecureSettings = secureSettings;
         mUiExecutor = uiExecutor;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
@@ -605,6 +609,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                             mAodIconsViewModel,
                             mConfigurationState,
                             mConfigurationController,
+                            mIconViewBindingFailureTracker,
                             mAodIconViewStore);
                     final DisposableHandle visHandle = KeyguardRootViewBinder.bindAodIconVisibility(
                             nic,

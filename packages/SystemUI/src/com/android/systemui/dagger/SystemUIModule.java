@@ -120,6 +120,7 @@ import com.android.systemui.statusbar.policy.PolicyModule;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.statusbar.policy.dagger.SmartRepliesInflationModule;
 import com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule;
+import com.android.systemui.statusbar.ui.binder.StatusBarViewBinderModule;
 import com.android.systemui.statusbar.window.StatusBarWindowModule;
 import com.android.systemui.telephony.data.repository.TelephonyRepositoryModule;
 import com.android.systemui.temporarydisplay.dagger.TemporaryDisplayModule;
@@ -215,6 +216,7 @@ import javax.inject.Named;
         StatusBarModule.class,
         StatusBarPipelineModule.class,
         StatusBarPolicyModule.class,
+        StatusBarViewBinderModule.class,
         StatusBarWindowModule.class,
         SystemPropertiesFlagsModule.class,
         SysUIConcurrencyModule.class,

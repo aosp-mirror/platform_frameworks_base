@@ -24,6 +24,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ShelfNotificationIconViewStore
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
 import com.android.systemui.statusbar.notification.row.ui.viewbinder.ActivatableNotificationViewBinder
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
@@ -40,6 +41,7 @@ object NotificationShelfViewBinder {
         configuration: ConfigurationState,
         configurationController: ConfigurationController,
         falsingManager: FalsingManager,
+        iconViewBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
         notificationIconAreaController: NotificationIconAreaController,
         shelfIconViewStore: ShelfNotificationIconViewStore,
     ) {
@@ -51,6 +53,7 @@ object NotificationShelfViewBinder {
                     viewModel.icons,
                     configuration,
                     configurationController,
+                    iconViewBindingFailureTracker,
                     shelfIconViewStore,
                 )
             } else {

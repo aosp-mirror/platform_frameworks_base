@@ -389,4 +389,31 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
             assertThat(isolatedIcon?.value?.notifKey).isEqualTo("notif1")
             assertThat(isolatedIcon?.isAnimating).isFalse()
         }
+
+    @Test
+    fun isolatedIcon_updateWhenIconDataChanges() =
+        testComponent.runTest {
+            val icon: Icon = mock()
+            val isolatedIcon by collectLastValue(underTest.isolatedIcon)
+            runCurrent()
+
+            headsUpViewStateRepository.isolatedNotification.value = "notif1"
+            runCurrent()
+
+            activeNotificationsRepository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply {
+                        addIndividualNotif(
+                            activeNotificationModel(
+                                key = "notif1",
+                                groupKey = "group",
+                                statusBarIcon = icon
+                            )
+                        )
+                    }
+                    .build()
+            runCurrent()
+
+            assertThat(isolatedIcon?.value?.notifKey).isEqualTo("notif1")
+        }
 }

@@ -23,27 +23,37 @@ import androidx.annotation.ColorInt
 import androidx.collection.ArrayMap
 import androidx.lifecycle.lifecycleScope
 import com.android.internal.policy.SystemBarUtils
+import com.android.internal.statusbar.StatusBarIcon
 import com.android.internal.util.ContrastColorUtil
+import com.android.systemui.CoreStartable
 import com.android.systemui.common.ui.ConfigurationState
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.NotifCollection
+import com.android.systemui.statusbar.notification.icon.IconPack
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder.IconViewStore
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconColors
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerShelfViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerStatusBarViewModel
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconsViewData
+import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.phone.NotificationIconContainer
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.onConfigChanged
-import com.android.systemui.util.children
+import com.android.systemui.util.asIndenting
 import com.android.systemui.util.kotlin.mapValuesNotNullTo
-import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.kotlin.stateFlow
+import com.android.systemui.util.printCollection
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
+import dagger.Binds
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
@@ -62,11 +72,18 @@ object NotificationIconContainerViewBinder {
         viewModel: NotificationIconContainerShelfViewModel,
         configuration: ConfigurationState,
         configurationController: ConfigurationController,
+        failureTracker: StatusBarIconViewBindingFailureTracker,
         viewStore: ShelfNotificationIconViewStore,
     ): DisposableHandle {
         return view.repeatWhenAttached {
             lifecycleScope.launch {
-                viewModel.icons.bindIcons(view, configuration, configurationController, viewStore)
+                viewModel.icons.bindIcons(
+                    view,
+                    configuration,
+                    configurationController,
+                    notifyBindingFailures = { failureTracker.shelfFailures = it },
+                    viewStore,
+                )
             }
         }
     }
@@ -77,18 +94,20 @@ object NotificationIconContainerViewBinder {
         viewModel: NotificationIconContainerStatusBarViewModel,
         configuration: ConfigurationState,
         configurationController: ConfigurationController,
+        failureTracker: StatusBarIconViewBindingFailureTracker,
         viewStore: StatusBarNotificationIconViewStore,
     ): DisposableHandle {
         val contrastColorUtil = ContrastColorUtil.getInstance(view.context)
         return view.repeatWhenAttached {
             lifecycleScope.run {
                 launch {
-                    val iconColors =
+                    val iconColors: Flow<NotificationIconColors> =
                         viewModel.iconColors.mapNotNull { it.iconColors(view.viewBounds) }
                     viewModel.icons.bindIcons(
                         view,
                         configuration,
                         configurationController,
+                        notifyBindingFailures = { failureTracker.statusBarFailures = it },
                         viewStore,
                     ) { _, sbiv ->
                         StatusBarIconViewBinder.bindIconColors(
@@ -110,6 +129,7 @@ object NotificationIconContainerViewBinder {
         viewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
         configuration: ConfigurationState,
         configurationController: ConfigurationController,
+        failureTracker: StatusBarIconViewBindingFailureTracker,
         viewStore: IconViewStore,
     ): DisposableHandle {
         return view.repeatWhenAttached {
@@ -119,6 +139,7 @@ object NotificationIconContainerViewBinder {
                         view,
                         configuration,
                         configurationController,
+                        notifyBindingFailures = { failureTracker.aodFailures = it },
                         viewStore,
                     ) { _, sbiv ->
                         viewModel.bindAodStatusBarIconView(sbiv, configuration)
@@ -176,7 +197,7 @@ object NotificationIconContainerViewBinder {
     }
 
     /**
-     * Binds [NotificationIconsViewData] to a [NotificationIconContainer]'s [children].
+     * Binds [NotificationIconsViewData] to a [NotificationIconContainer]'s children.
      *
      * [bindIcon] will be invoked to bind a child [StatusBarIconView] to an icon associated with the
      * given `iconKey`. The parent [Job] of this coroutine will be cancelled automatically when the
@@ -186,6 +207,7 @@ object NotificationIconContainerViewBinder {
         view: NotificationIconContainer,
         configuration: ConfigurationState,
         configurationController: ConfigurationController,
+        notifyBindingFailures: (Collection<String>) -> Unit,
         viewStore: IconViewStore,
         bindIcon: suspend (iconKey: String, view: StatusBarIconView) -> Unit = { _, _ -> },
     ): Unit = coroutineScope {
@@ -208,57 +230,59 @@ object NotificationIconContainerViewBinder {
                 FrameLayout.LayoutParams(iconSize + 2 * iconHPadding, statusBarHeight)
             }
 
-        launch {
-            layoutParams.collect { params: FrameLayout.LayoutParams ->
-                for (child in view.children) {
-                    child.layoutParams = params
-                }
-            }
-        }
-
-        val iconBindings = mutableMapOf<String, Job>()
+        val failedBindings = mutableSetOf<String>()
+        val boundViewsByNotifKey = ArrayMap<String, Pair<StatusBarIconView, Job>>()
         var prevIcons = NotificationIconsViewData()
-        sample(layoutParams, ::Pair).collect {
-            (iconsData: NotificationIconsViewData, layoutParams: FrameLayout.LayoutParams),
-            ->
+        collect { iconsData: NotificationIconsViewData ->
             val iconsDiff = NotificationIconsViewData.computeDifference(iconsData, prevIcons)
             prevIcons = iconsData
 
-            val replacingIcons =
-                iconsDiff.groupReplacements.mapValuesNotNullTo(ArrayMap()) { (_, v) ->
-                    viewStore.iconView(v.notifKey).statusBarIcon
+            val replacingIcons: ArrayMap<String, StatusBarIcon> =
+                iconsDiff.groupReplacements.mapValuesNotNullTo(ArrayMap()) { (_, info) ->
+                    boundViewsByNotifKey[info.notifKey]?.first?.statusBarIcon
                 }
             view.setReplacingIcons(replacingIcons)
 
-            val childrenByNotifKey: Map<String, StatusBarIconView> =
-                view.children.filterIsInstance<StatusBarIconView>().associateByTo(ArrayMap()) {
-                    it.notification.key
-                }
-
-            iconsDiff.removed
-                .mapNotNull { key -> childrenByNotifKey[key]?.let { key to it } }
-                .forEach { (key, child) ->
-                    view.removeView(child)
-                    iconBindings.remove(key)?.cancel()
-                }
-
-            val toAdd = iconsDiff.added.map { it.notifKey to viewStore.iconView(it.notifKey) }
-            for ((i, keyAndView) in toAdd.withIndex()) {
-                val (key, sbiv) = keyAndView
-                // The view might still be transiently added if it was just removed
-                // and added again
-                view.removeTransientView(sbiv)
-                view.addView(sbiv, i, layoutParams)
-                iconBindings.remove(key)?.cancel()
-                iconBindings[key] = launch { bindIcon(key, sbiv) }
+            for (notifKey in iconsDiff.removed) {
+                failedBindings.remove(notifKey)
+                val (child, job) = boundViewsByNotifKey.remove(notifKey) ?: continue
+                view.removeView(child)
+                job.cancel()
             }
 
+            val toAdd: Sequence<String> =
+                iconsDiff.added.asSequence().map { it.notifKey } + failedBindings
+            for ((idx, notifKey) in toAdd.withIndex()) {
+                val sbiv = viewStore.iconView(notifKey)
+                if (sbiv == null) {
+                    failedBindings.add(notifKey)
+                    continue
+                }
+                // The view might still be transiently added if it was just removed and added again
+                view.removeTransientView(sbiv)
+                view.addView(sbiv, idx)
+                boundViewsByNotifKey.remove(notifKey)?.second?.cancel()
+                boundViewsByNotifKey[notifKey] =
+                    Pair(
+                        sbiv,
+                        launch {
+                            launch { layoutParams.collect { sbiv.layoutParams = it } }
+                            bindIcon(notifKey, sbiv)
+                        },
+                    )
+            }
+
+            notifyBindingFailures(failedBindings)
+
             view.setChangingViewPositions(true)
+
             // Re-sort notification icons
+            val expectedChildren =
+                iconsData.visibleKeys.mapNotNull { boundViewsByNotifKey[it.notifKey]?.first }
             val childCount = view.childCount
             for (i in 0 until childCount) {
                 val actual = view.getChildAt(i)
-                val expected = viewStore.iconView(iconsData.visibleKeys[i].notifKey)
+                val expected = expectedChildren[i]
                 if (actual === expected) {
                     continue
                 }
@@ -273,47 +297,30 @@ object NotificationIconContainerViewBinder {
 
     /** External storage for [StatusBarIconView] instances. */
     fun interface IconViewStore {
-        fun iconView(key: String): StatusBarIconView
+        fun iconView(key: String): StatusBarIconView?
     }
 
     @ColorInt private val DEFAULT_AOD_ICON_COLOR = Color.WHITE
 }
 
 /** [IconViewStore] for the [com.android.systemui.statusbar.NotificationShelf] */
-class ShelfNotificationIconViewStore
-@Inject
-constructor(
-    private val notifCollection: NotifCollection,
-) : IconViewStore {
-    override fun iconView(key: String): StatusBarIconView {
-        val entry = notifCollection.getEntry(key) ?: error("No entry found for key: $key")
-        return entry.icons.shelfIcon ?: error("No shelf IconView found for key: $key")
-    }
-}
+class ShelfNotificationIconViewStore @Inject constructor(notifCollection: NotifCollection) :
+    IconViewStore by (notifCollection.iconViewStoreBy { it.shelfIcon })
 
 /** [IconViewStore] for the always-on display. */
 class AlwaysOnDisplayNotificationIconViewStore
 @Inject
-constructor(
-    private val notifCollection: NotifCollection,
-) : IconViewStore {
-    override fun iconView(key: String): StatusBarIconView {
-        val entry = notifCollection.getEntry(key) ?: error("No entry found for key: $key")
-        return entry.icons.aodIcon ?: error("No AOD IconView found for key: $key")
-    }
-}
+constructor(notifCollection: NotifCollection) :
+    IconViewStore by (notifCollection.iconViewStoreBy { it.aodIcon })
 
 /** [IconViewStore] for the status bar. */
-class StatusBarNotificationIconViewStore
-@Inject
-constructor(
-    private val notifCollection: NotifCollection,
-) : IconViewStore {
-    override fun iconView(key: String): StatusBarIconView {
-        val entry = notifCollection.getEntry(key) ?: error("No entry found for key: $key")
-        return entry.icons.statusBarIcon ?: error("No status bar IconView found for key: $key")
+class StatusBarNotificationIconViewStore @Inject constructor(notifCollection: NotifCollection) :
+    IconViewStore by (notifCollection.iconViewStoreBy { it.statusBarIcon })
+
+private fun NotifCollection.iconViewStoreBy(block: (IconPack) -> StatusBarIconView?) =
+    IconViewStore { key ->
+        getEntry(key)?.icons?.let(block)
     }
-}
 
 private val View.viewBounds: Rect
     get() {

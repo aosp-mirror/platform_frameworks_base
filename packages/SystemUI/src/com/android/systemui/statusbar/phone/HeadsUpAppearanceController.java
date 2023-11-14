@@ -252,7 +252,7 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             }
             if (NotificationIconContainerRefactor.isEnabled()) {
                 mHeadsUpNotificationIconInteractor.setIsolatedIconNotificationKey(
-                        newEntry == null ? null : newEntry.getKey());
+                        newEntry == null ? null : newEntry.getRepresentativeEntry().getKey());
             } else {
                 updateIsolatedIconLocation(false /* requireUpdate */);
                 mNotificationIconAreaController.showIconIsolated(newEntry == null ? null

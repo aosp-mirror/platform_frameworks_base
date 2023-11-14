@@ -31,6 +31,7 @@ import com.android.systemui.util.ui.toAnimatedValueFlow
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 
@@ -83,19 +84,18 @@ constructor(
     /** An Icon to show "isolated" in the IconContainer. */
     val isolatedIcon: Flow<AnimatedValue<NotificationIconInfo?>> =
         headsUpIconInteractor.isolatedNotification
+            .combine(icons) { isolatedNotif, iconsViewData ->
+                isolatedNotif?.let {
+                    iconsViewData.visibleKeys.firstOrNull { it.notifKey == isolatedNotif }
+                }
+            }
             .pairwise(initialValue = null)
-            .sample(combine(icons, shadeInteractor.shadeExpansion, ::Pair)) {
-                (prev, isolatedNotif),
-                (iconsViewData, shadeExpansion),
-                ->
-                val iconInfo =
-                    isolatedNotif?.let {
-                        iconsViewData.visibleKeys.firstOrNull { it.notifKey == isolatedNotif }
-                    }
+            .distinctUntilChanged()
+            .sample(shadeInteractor.shadeExpansion) { (prev, iconInfo), shadeExpansion ->
                 val animate =
                     when {
-                        isolatedNotif == prev -> false
-                        isolatedNotif == null || prev == null -> shadeExpansion == 0f
+                        iconInfo?.notifKey == prev?.notifKey -> false
+                        iconInfo == null || prev == null -> shadeExpansion == 0f
                         else -> false
                     }
                 AnimatableEvent(iconInfo, animate)
