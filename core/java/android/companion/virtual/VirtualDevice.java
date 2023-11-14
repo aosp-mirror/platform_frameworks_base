@@ -32,9 +32,8 @@ import android.os.RemoteException;
  * Details of a particular virtual device.
  *
  * <p>Read-only device representation exposing the properties of an existing virtual device.
- *
- * @see VirtualDeviceManager#registerVirtualDeviceListener
  */
+// TODO(b/310912420): Link to VirtualDeviceManager#registerVirtualDeviceListener from the docs
 public final class VirtualDevice implements Parcelable {
 
     private final @NonNull IVirtualDevice mVirtualDevice;
@@ -92,8 +91,8 @@ public final class VirtualDevice implements Parcelable {
      * per device.
      *
      * @see Context#createDeviceContext
-     * @see #getPersistentDeviceId
      */
+    // TODO(b/310912420): Link to #getPersistentDeviceId from the docs
     public int getDeviceId() {
         return mId;
     }
