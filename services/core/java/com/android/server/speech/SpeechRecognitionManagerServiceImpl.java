@@ -280,12 +280,12 @@ final class SpeechRecognitionManagerServiceImpl extends
                 return null;
             }
 
-            if (getSessionCountByUidLocked(callingUid) >= MAX_CONCURRENT_CONNECTIONS_BY_CLIENT) {
+            if (getSessionCountByUidLocked(callingUid) == MAX_CONCURRENT_CONNECTIONS_BY_CLIENT) {
                 Slog.w(TAG, "Number of sessions exceeded for uid: " + callingUid);
                 Counter.logIncrementWithUid(
                         "speech_recognition.value_exceed_session_count",
                         callingUid);
-                return null;
+                // TODO(b/297249772): return null early to refuse the new connection
             }
 
             if (servicesForClient != null) {
