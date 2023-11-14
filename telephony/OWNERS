@@ -7,10 +7,12 @@ rgreenwalt@google.com
 tgunn@google.com
 huiwang@google.com
 jayachandranc@google.com
-chinmayd@google.com
 amruthr@google.com
 sasindran@google.com
 
 # Requiring TL ownership for new carrier config keys.
 per-file CarrierConfigManager.java=set noparent
 per-file CarrierConfigManager.java=amruthr@google.com,tgunn@google.com,rgreenwalt@google.com,satk@google.com
+
+#Domain Selection is jointly owned, add additional owners for domain selection specific files
+per-file TransportSelectorCallback.java,WwanSelectorCallback.java,DomainSelectionService.java,DomainSelectionService.aidl,DomainSelector.java,EmergencyRegResult.java,EmergencyRegResult.aidl,IDomainSelectionServiceController.aidl,IDomainSelector.aidl,ITransportSelectorCallback.aidl,ITransportSelectorResultCallback.aidl,IWwanSelectorCallback.aidl,IWwanSelectorResultCallback.aidl=hwangoo@google.com,forestchoi@google.com,avinashmp@google.com,mkoon@google.com,seheele@google.com,radhikaagrawal@google.com
