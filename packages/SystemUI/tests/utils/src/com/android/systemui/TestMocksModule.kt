@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android
+package com.android.systemui
 
 import android.app.ActivityManager
 import android.app.admin.DevicePolicyManager
@@ -24,7 +24,6 @@ import com.android.internal.logging.MetricsLogger
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardViewController
-import com.android.systemui.GuestResumeSessionReceiver
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager

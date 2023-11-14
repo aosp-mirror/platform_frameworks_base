@@ -14,20 +14,17 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import androidx.test.filters.SmallTest
-import com.android.SysUITestComponent
-import com.android.SysUITestModule
-import com.android.collectLastValue
-import com.android.runCurrent
-import com.android.runTest
+import com.android.systemui.SysUITestComponent
+import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.runCurrent
+import com.android.systemui.runTest
 import com.android.systemui.statusbar.notification.data.repository.FakeNotificationsKeyguardViewStateRepository
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 @SmallTest

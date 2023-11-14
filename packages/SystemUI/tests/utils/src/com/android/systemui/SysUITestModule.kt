@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android
+package com.android.systemui
 
 import android.content.Context
 import android.content.res.Resources
 import android.testing.TestableContext
 import android.testing.TestableResources
-import com.android.systemui.FakeSystemUiModule
-import com.android.systemui.SysuiTestCase
-import com.android.systemui.SysuiTestableContext
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.broadcast.FakeBroadcastDispatcher
 import com.android.systemui.coroutines.collectLastValue
