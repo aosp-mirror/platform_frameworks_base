@@ -38,6 +38,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.CloseGuard;
 import android.util.Log;
 import android.util.Slog;
 
@@ -46,6 +47,7 @@ import com.android.internal.R;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.Reference;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
@@ -58,6 +60,9 @@ import java.util.concurrent.LinkedBlockingQueue;
  * {@link SpeechRecognizer#createSpeechRecognizer(Context)}, or
  * {@link SpeechRecognizer#createOnDeviceSpeechRecognizer(Context)}. This class's methods must be
  * invoked only from the main application thread.
+ *
+ * <p><strong>Important:</strong> the caller MUST invoke {@link #destroy()} on a
+ * SpeechRecognizer object when it is no longer needed.
  *
  * <p>The implementation of this API is likely to stream audio to remote servers to perform speech
  * recognition. As such this API is not intended to be used for continuous recognition, which would
@@ -301,6 +306,8 @@ public class SpeechRecognizer {
     /** The actual RecognitionService endpoint */
     private IRecognitionService mService;
 
+    private final CloseGuard mCloseGuard = new CloseGuard();
+
     /** Context with which the manager was created */
     private final Context mContext;
 
@@ -366,9 +373,7 @@ public class SpeechRecognizer {
      * {@link #createSpeechRecognizer} static factory method
      */
     private SpeechRecognizer(final Context context, final ComponentName serviceComponent) {
-        mContext = context;
-        mServiceComponent = serviceComponent;
-        mOnDevice = false;
+        this(context, serviceComponent, false);
     }
 
     /**
@@ -376,9 +381,17 @@ public class SpeechRecognizer {
      * {@link #createOnDeviceSpeechRecognizer} static factory method
      */
     private SpeechRecognizer(final Context context, boolean onDevice) {
+        this(context, null, onDevice);
+    }
+
+    private SpeechRecognizer(
+            final Context context,
+            final ComponentName serviceComponent,
+            final boolean onDevice) {
         mContext = context;
-        mServiceComponent = null;
+        mServiceComponent = serviceComponent;
         mOnDevice = onDevice;
+        mCloseGuard.open("SpeechRecognizer#destroy()");
     }
 
     /**
@@ -418,6 +431,9 @@ public class SpeechRecognizer {
      * command to the created {@code SpeechRecognizer}, otherwise no notifications will be
      * received.
      *
+     * <p><strong>Important:</strong> the caller MUST invoke {@link #destroy()} on a
+     * SpeechRecognizer object when it is no longer needed.
+     *
      * <p>For apps targeting Android 11 (API level 30) interaction with a speech recognition
      * service requires <queries> element to be added to the manifest file:
      * <pre>{@code
@@ -444,6 +460,9 @@ public class SpeechRecognizer {
      * received.
      * Use this version of the method to specify a specific service to direct this
      * {@link SpeechRecognizer} to.
+     *
+     * <p><strong>Important:</strong> the caller MUST invoke {@link #destroy()} on a
+     * SpeechRecognizer object when it is no longer needed.
      *
      * <p><strong>Important</strong>: before calling this method, please check via
      * {@link android.content.pm.PackageManager#queryIntentServices(Intent, int)} that {@code
@@ -485,6 +504,9 @@ public class SpeechRecognizer {
      * <p>Please note that {@link #setRecognitionListener(RecognitionListener)} should be called
      * before dispatching any command to the created {@code SpeechRecognizer}, otherwise no
      * notifications will be received.
+     *
+     * <p><strong>Important:</strong> the caller MUST invoke {@link #destroy()} on a
+     * SpeechRecognizer object when it is no longer needed.
      *
      * @param context in which to create {@code SpeechRecognizer}
      * @return a new on-device {@code SpeechRecognizer}.
@@ -886,17 +908,32 @@ public class SpeechRecognizer {
 
     /** Destroys the {@code SpeechRecognizer} object. */
     public void destroy() {
-        if (mService != null) {
-            try {
-                mService.cancel(mListener, /*isShutdown*/ true);
-            } catch (final Exception e) {
-                // Not important
+        try {
+            if (mService != null) {
+                try {
+                    mService.cancel(mListener, /*isShutdown*/ true);
+                } catch (final Exception e) {
+                    // Not important
+                }
             }
-        }
 
-        mService = null;
-        mPendingTasks.clear();
-        mListener.mInternalListener = null;
+            mService = null;
+            mPendingTasks.clear();
+            mListener.mInternalListener = null;
+            mCloseGuard.close();
+        } finally {
+            Reference.reachabilityFence(this);
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        try {
+            mCloseGuard.warnIfOpen();
+            destroy();
+        } finally {
+            super.finalize();
+        }
     }
 
     /** Establishes a connection to system server proxy and initializes the session. */
