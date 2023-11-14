@@ -35,16 +35,5 @@ interface ShadeStateEvents {
          * Invoked when the notification panel starts or stops launching an [android.app.Activity].
          */
         fun onLaunchingActivityChanged(isLaunchingActivity: Boolean) {}
-
-        /**
-         * Invoked when the "expand immediate" attribute changes.
-         *
-         * An example of expanding immediately is when swiping down from the top with two fingers.
-         * Instead of going to QQS, we immediately expand to full QS.
-         *
-         * Another example is when full QS is showing, and we swipe up from the bottom. Instead of
-         * going to QQS, the panel fully collapses.
-         */
-        fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {}
     }
 }

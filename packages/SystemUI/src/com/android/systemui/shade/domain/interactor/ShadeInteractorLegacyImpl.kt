@@ -75,6 +75,8 @@ constructor(
 
     override val isQsExpanded: StateFlow<Boolean> = repository.legacyIsQsExpanded
 
+    override val isQsBypassingShade: Flow<Boolean> = repository.legacyExpandImmediate
+
     override val anyExpansion: StateFlow<Float> =
         createAnyExpansionFlow(scope, shadeExpansion, qsExpansion)
 

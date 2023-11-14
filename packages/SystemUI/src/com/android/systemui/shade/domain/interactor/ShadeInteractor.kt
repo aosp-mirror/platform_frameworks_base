@@ -74,6 +74,14 @@ interface BaseShadeInteractor {
     val isQsExpanded: StateFlow<Boolean>
 
     /**
+     * Emits true whenever Quick Settings is being expanded without first expanding the Shade or if
+     * if Quick Settings is being collapsed without first collapsing to shade, i.e. expanding with
+     * 2-finger swipe or collapsing by flinging from the bottom of the screen. This concept was
+     * previously called "expand immediate" in the legacy codebase.
+     */
+    val isQsBypassingShade: Flow<Boolean>
+
+    /**
      * Whether the user is expanding or collapsing the shade with user input. This will be true even
      * if the user's input gesture has ended but a transition they initiated is animating.
      */

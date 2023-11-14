@@ -93,6 +93,22 @@ interface ShadeRepository {
      */
     @Deprecated("Use ShadeInteractor instead") val legacyIsQsExpanded: StateFlow<Boolean>
 
+    /**
+     * QuickSettingsController.mExpandImmediate as a flow. Indicates that Quick Settings is being
+     * expanded without first expanding the Shade or Quick Settings is being collapsed without first
+     * collapsing to shade, i.e. expanding with 2-finger swipe or collapsing by flinging from the
+     * bottom of the screen. Replaced by ShadeInteractor.isQsBypassingShade.
+     */
+    @Deprecated("Use ShadeInteractor.isQsBypassingShade instead")
+    val legacyExpandImmediate: StateFlow<Boolean>
+
+    /**
+     * Sets whether Quick Settings is being expanded without first expanding the Shade or Quick
+     * Settings is being collapsed without first collapsing to shade.
+     */
+    @Deprecated("Use ShadeInteractor instead")
+    fun setLegacyExpandImmediate(legacyExpandImmediate: Boolean)
+
     /** Sets whether QS is expanded. */
     @Deprecated("Use ShadeInteractor instead")
     fun setLegacyIsQsExpanded(legacyIsQsExpanded: Boolean)
@@ -198,6 +214,13 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     private val _legacyIsQsExpanded = MutableStateFlow(false)
     @Deprecated("Use ShadeInteractor instead")
     override val legacyIsQsExpanded: StateFlow<Boolean> = _legacyIsQsExpanded.asStateFlow()
+
+    private val _legacyExpandImmediate = MutableStateFlow(false)
+    override val legacyExpandImmediate: StateFlow<Boolean> = _legacyExpandImmediate.asStateFlow()
+
+    override fun setLegacyExpandImmediate(legacyExpandImmediate: Boolean) {
+        _legacyExpandImmediate.value = legacyExpandImmediate
+    }
 
     @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyIsQsExpanded(legacyIsQsExpanded: Boolean) {

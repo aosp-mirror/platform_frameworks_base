@@ -35,7 +35,7 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
-import com.android.systemui.shade.ShadeExpansionStateManager
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -50,6 +50,7 @@ import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
@@ -74,7 +75,7 @@ import org.mockito.junit.MockitoJUnit
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 class MediaHierarchyManagerTest : SysuiTestCase() {
 
     @Mock private lateinit var lockHost: MediaHost
@@ -91,6 +92,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var uniqueObjectHostView: UniqueObjectHostView
     @Mock private lateinit var dreamOverlayStateController: DreamOverlayStateController
+    @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock lateinit var logger: MediaViewLogger
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
@@ -101,12 +103,12 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         ArgumentCaptor<(DreamOverlayStateController.Callback)>
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     private lateinit var mediaHierarchyManager: MediaHierarchyManager
+    private lateinit var isQsBypassingShade: MutableStateFlow<Boolean>
     private lateinit var mediaFrame: ViewGroup
     private val configurationController = FakeConfigurationController()
     private val communalRepository = FakeCommunalRepository(isCommunalEnabled = true)
     private val communalInteractor =
         CommunalInteractorFactory.create(communalRepository = communalRepository).communalInteractor
-    private val notifPanelEvents = ShadeExpansionStateManager()
     private val settings = FakeSettings()
     private lateinit var testableLooper: TestableLooper
     private lateinit var fakeHandler: FakeHandler
@@ -122,6 +124,8 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         testableLooper = TestableLooper.get(this)
         fakeHandler = FakeHandler(testableLooper.looper)
         whenever(mediaCarouselController.mediaFrame).thenReturn(mediaFrame)
+        isQsBypassingShade = MutableStateFlow(false)
+        whenever(shadeInteractor.isQsBypassingShade).thenReturn(isQsBypassingShade)
         mediaHierarchyManager =
             MediaHierarchyManager(
                 context,
@@ -135,7 +139,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 communalInteractor,
                 configurationController,
                 wakefulnessLifecycle,
-                notifPanelEvents,
+                shadeInteractor,
                 settings,
                 fakeHandler,
                 testScope.backgroundScope,
@@ -430,17 +434,21 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isTrue()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun isCurrentlyInGuidedTransformation_hostsVisible_expandImmediateEnabled_returnsFalse() {
-        notifPanelEvents.notifyExpandImmediateChange(true)
-        goToLockscreen()
-        enterGuidedTransformation()
-        whenever(lockHost.visible).thenReturn(true)
-        whenever(qsHost.visible).thenReturn(true)
-        whenever(qqsHost.visible).thenReturn(true)
+    fun isCurrentlyInGuidedTransformation_hostsVisible_expandImmediateEnabled_returnsFalse() =
+        testScope.runTest {
+            runCurrent()
+            isQsBypassingShade.value = true
+            runCurrent()
+            goToLockscreen()
+            enterGuidedTransformation()
+            whenever(lockHost.visible).thenReturn(true)
+            whenever(qsHost.visible).thenReturn(true)
+            whenever(qqsHost.visible).thenReturn(true)
 
-        assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isFalse()
-    }
+            assertThat(mediaHierarchyManager.isCurrentlyInGuidedTransformation()).isFalse()
+        }
 
     @Test
     fun isCurrentlyInGuidedTransformation_hostNotVisible_returnsFalse_with_active() {
