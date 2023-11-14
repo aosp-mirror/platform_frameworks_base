@@ -103,7 +103,21 @@ class android.os.TransactionTooLargeException stubclass
 # Containers
 class android.os.BaseBundle stubclass
 class android.os.Bundle stubclass
+class android.os.PersistableBundle stubclass
 
 # Misc
 class android.os.PatternMatcher stubclass
 class android.os.ParcelUuid stubclass
+
+# XML
+class com.android.internal.util.XmlPullParserWrapper stubclass
+class com.android.internal.util.XmlSerializerWrapper stubclass
+class com.android.internal.util.XmlUtils stubclass
+
+class com.android.modules.utils.BinaryXmlPullParser stubclass
+class com.android.modules.utils.BinaryXmlSerializer stubclass
+class com.android.modules.utils.FastDataInput stubclass
+class com.android.modules.utils.FastDataOutput stubclass
+class com.android.modules.utils.ModifiedUtf8 stubclass
+class com.android.modules.utils.TypedXmlPullParser stubclass
+class com.android.modules.utils.TypedXmlSerializer stubclass

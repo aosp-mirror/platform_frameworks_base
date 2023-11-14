@@ -2,6 +2,8 @@
 
 com.android.internal.util.ArrayUtils
 
+android.util.Xml
+
 android.os.Binder
 android.os.Binder$IdentitySupplier
 android.os.IBinder
