@@ -172,6 +172,7 @@ public final class VirtualKeyEvent implements Parcelable {
             KeyEvent.KEYCODE_BREAK,
             KeyEvent.KEYCODE_BACK,
             KeyEvent.KEYCODE_FORWARD,
+            KeyEvent.KEYCODE_LANGUAGE_SWITCH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SupportedKeycode {
