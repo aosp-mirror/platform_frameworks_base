@@ -2625,7 +2625,7 @@ public class MockingOomAdjusterTests {
         doReturn(PROCESS_STATE_TOP).when(sService.mAtmInternal).getTopProcessState();
         doReturn(app).when(sService).getTopApp();
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
-        sService.mOomAdjuster.updateOomAdjLocked(app, OOM_ADJ_REASON_NONE);
+        updateOomAdj(app);
 
         assertEquals(FOREGROUND_APP_ADJ, app.mState.getSetAdj());
 
@@ -2637,7 +2637,7 @@ public class MockingOomAdjusterTests {
         // Since sr.app is null, this service cannot be in the same process as the
         // client so we expect the BIND_ABOVE_CLIENT adjustment to take effect.
         app.mServices.updateHasAboveClientLocked();
-        sService.mOomAdjuster.updateOomAdjLocked(app, OOM_ADJ_REASON_NONE);
+        updateOomAdj(app);
         assertTrue(app.mServices.hasAboveClient());
         assertNotEquals(FOREGROUND_APP_ADJ, app.mState.getSetAdj());
     }
