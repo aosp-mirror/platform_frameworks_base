@@ -632,6 +632,7 @@ public class AccessibilityServiceInfo implements Parcelable {
             InputDevice.SOURCE_JOYSTICK,
             InputDevice.SOURCE_SENSOR
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface MotionEventSources {}
 
     /**

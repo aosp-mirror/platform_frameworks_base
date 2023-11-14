@@ -924,6 +924,7 @@ public class Notification implements Parcelable
             VISIBILITY_SECRET,
             NotificationManager.VISIBILITY_NO_OVERRIDE
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationVisibilityOverride{};
 
     /**

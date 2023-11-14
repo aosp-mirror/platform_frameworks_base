@@ -22,6 +22,8 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -35,6 +37,7 @@ public final class RcsClientConfiguration implements Parcelable {
     /**@hide*/
     @StringDef(prefix = "RCS_PROFILE_",
             value = {RCS_PROFILE_1_0, RCS_PROFILE_2_3, RCS_PROFILE_2_4})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface StringRcsProfile {}
 
     /**

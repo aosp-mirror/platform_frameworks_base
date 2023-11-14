@@ -22,6 +22,9 @@ import android.os.Parcelable;
 
 import com.android.internal.util.DataClass;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Represents a result supporting the rejected hotword trigger.
  *
@@ -57,6 +60,7 @@ public final class HotwordRejectedResult implements Parcelable {
             CONFIDENCE_LEVEL_MEDIUM,
             CONFIDENCE_LEVEL_HIGH
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface HotwordConfidenceLevelValue {
     }
 

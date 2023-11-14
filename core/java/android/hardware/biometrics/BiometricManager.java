@@ -131,6 +131,7 @@ public class BiometricManager {
                 BIOMETRIC_CONVENIENCE,
                 DEVICE_CREDENTIAL,
         })
+        @Retention(RetentionPolicy.SOURCE)
         @interface Types {}
 
         /**

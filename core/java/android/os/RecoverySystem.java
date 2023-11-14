@@ -57,6 +57,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.security.GeneralSecurityException;
 import java.security.PublicKey;
 import java.security.SignatureException;
@@ -166,6 +168,7 @@ public class RecoverySystem {
             RESUME_ON_REBOOT_REBOOT_ERROR_LSKF_NOT_CAPTURED,
             RESUME_ON_REBOOT_REBOOT_ERROR_SLOT_MISMATCH,
             RESUME_ON_REBOOT_REBOOT_ERROR_PROVIDER_PREPARATION_FAILURE})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface ResumeOnRebootRebootErrorCode {}
 
     /**

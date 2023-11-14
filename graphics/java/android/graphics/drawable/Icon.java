@@ -62,6 +62,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -116,6 +118,7 @@ public final class Icon implements Parcelable {
      */
     @IntDef({TYPE_BITMAP, TYPE_RESOURCE, TYPE_DATA, TYPE_URI, TYPE_ADAPTIVE_BITMAP,
             TYPE_URI_ADAPTIVE_BITMAP})
+    @Retention(RetentionPolicy.SOURCE)
     public @interface IconType {
     }
 

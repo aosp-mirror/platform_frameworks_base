@@ -651,6 +651,7 @@ public interface WindowManager extends ViewManager {
             REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY,
             REMOVE_CONTENT_MODE_DESTROY,
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface RemoveContentMode {}
 
     /**
@@ -685,6 +686,7 @@ public interface WindowManager extends ViewManager {
             DISPLAY_IME_POLICY_FALLBACK_DISPLAY,
             DISPLAY_IME_POLICY_HIDE,
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface DisplayImePolicy {}
 
     /**
@@ -3349,6 +3351,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
                 PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
         })
+        @Retention(RetentionPolicy.SOURCE)
         public @interface PrivateFlags {}
 
         /**

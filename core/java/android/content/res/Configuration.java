@@ -163,6 +163,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             GRAMMATICAL_GENDER_FEMININE,
             GRAMMATICAL_GENDER_MASCULINE,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface GrammaticalGender {}
 
     /**
@@ -698,6 +699,7 @@ public final class Configuration implements Parcelable, Comparable<Configuration
             ORIENTATION_LANDSCAPE,
             ORIENTATION_SQUARE
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface Orientation {
     }
 
