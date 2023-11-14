@@ -80,6 +80,7 @@ combined_apis {
         "framework-location",
         "framework-media",
         "framework-mediaprovider",
+        "framework-nfc",
         "framework-ondevicepersonalization",
         "framework-permission",
         "framework-permission-s",
@@ -383,7 +384,10 @@ java_defaults {
     stub_only_libs: ["framework-protos"],
     impl_only_libs: ["framework-minus-apex-headers"], // the framework, including hidden API
     impl_library_visibility: ["//frameworks/base"],
-    defaults_visibility: ["//frameworks/base/location"],
+    defaults_visibility: [
+        "//frameworks/base/location",
+        "//frameworks/base/nfc",
+    ],
     plugins: ["error_prone_android_framework"],
     errorprone: {
         javacflags: [

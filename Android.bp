@@ -414,13 +414,25 @@ java_defaults {
     ],
 }
 
+// Collection of non updatable unbundled jars. The list here should match
+// |non_updatable_modules| variable in frameworks/base/api/api.go.
+java_library {
+    name: "framework-non-updatable-unbundled-impl-libs",
+    static_libs: [
+        "framework-location.impl",
+        "framework-nfc.impl",
+    ],
+    sdk_version: "core_platform",
+    installable: false,
+}
+
 // Separated so framework-minus-apex-defaults can be used without the libs dependency
 java_defaults {
     name: "framework-minus-apex-with-libs-defaults",
     defaults: ["framework-minus-apex-defaults"],
     libs: [
         "framework-virtualization.stubs.module_lib",
-        "framework-location.impl",
+        "framework-non-updatable-unbundled-impl-libs",
     ],
 }
 
@@ -451,7 +463,7 @@ java_library {
     stem: "framework",
     apex_available: ["//apex_available:platform"],
     visibility: [
-        "//frameworks/base/location",
+        "//frameworks/base:__subpackages__",
     ],
     compile_dex: false,
     headers_only: true,
@@ -514,8 +526,8 @@ java_library {
     installable: false, // this lib is a build-only library
     static_libs: [
         "app-compat-annotations",
-        "framework-location.impl",
         "framework-minus-apex",
+        "framework-non-updatable-unbundled-impl-libs",
         "framework-updatable-stubs-module_libs_api",
     ],
     sdk_version: "core_platform",
