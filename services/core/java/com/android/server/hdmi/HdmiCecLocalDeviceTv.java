@@ -191,9 +191,16 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         launchDeviceDiscovery();
         startQueuedActions();
         if (!mDelayedMessageBuffer.isBuffered(Constants.MESSAGE_ACTIVE_SOURCE)) {
-            mService.sendCecCommand(
-                    HdmiCecMessageBuilder.buildRequestActiveSource(
-                            getDeviceInfo().getLogicalAddress()));
+            addAndStartAction(new RequestActiveSourceAction(this, new IHdmiControlCallback.Stub() {
+                @Override
+                public void onComplete(int result) {
+                    if (result != HdmiControlManager.RESULT_SUCCESS) {
+                        mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
+                                getDeviceInfo().getLogicalAddress(),
+                                getDeviceInfo().getPhysicalAddress()));
+                    }
+                }
+            }));
         }
     }
 
@@ -1325,6 +1332,8 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         removeAction(TimerRecordingAction.class);
         removeAction(NewDeviceAction.class);
         removeAction(AbsoluteVolumeAudioStatusAction.class);
+        // Remove pending actions.
+        removeAction(RequestActiveSourceAction.class);
 
         // Keep SAM enabled if eARC is enabled, unless we're going to Standby.
         if (initiatedByCec || !mService.isEarcEnabled()){

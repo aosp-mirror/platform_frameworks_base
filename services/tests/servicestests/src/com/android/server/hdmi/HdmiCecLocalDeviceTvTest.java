@@ -1680,4 +1680,47 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mHdmiControlService.isSystemAudioActivated()).isTrue();
 
     }
+
+    @Test
+    public void onAddressAllocated_startRequestActiveSourceAction_playbackActiveSource() {
+        HdmiCecMessage requestActiveSource =
+                HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
+        HdmiCecMessage activeSourceFromPlayback =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1, 0x1000);
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+
+        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
+        mNativeWrapper.clearResultMessages();
+        mNativeWrapper.onCecMessage(activeSourceFromPlayback);
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSourceFromTv);
+    }
+
+    @Test
+    public void onAddressAllocated_startRequestActiveSourceAction_noActiveSource() {
+        HdmiCecMessage requestActiveSource =
+                HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+
+        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
+        mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(activeSourceFromTv);
+    }
 }
