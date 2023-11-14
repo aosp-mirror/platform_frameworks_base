@@ -29,7 +29,6 @@ import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
 import static com.android.systemui.classifier.Classifier.UNLOCK;
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll;
 import static com.android.systemui.navigationbar.gestural.Utilities.isTrackpadThreeFingerSwipe;
 import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
@@ -41,7 +40,6 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_Q
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
-import static com.android.systemui.statusbar.VibratorHelper.TOUCH_VIBRATION_ATTRIBUTES;
 import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FOLD_TO_AOD;
 import static com.android.systemui.util.DumpUtilsKt.asIndenting;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
@@ -64,7 +62,6 @@ import android.graphics.Region;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.Trace;
 import android.os.UserManager;
 import android.os.VibrationEffect;
@@ -2841,16 +2838,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
 
         if (!mStatusBarStateController.isDozing()) {
-            if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-                mVibratorHelper.performHapticFeedback(mView, HapticFeedbackConstants.REJECT);
-            } else {
-                mVibratorHelper.vibrate(
-                        Process.myUid(),
-                        mView.getContext().getPackageName(),
-                        ADDITIONAL_TAP_REQUIRED_VIBRATION_EFFECT,
-                        "falsing-additional-tap-required",
-                        TOUCH_VIBRATION_ATTRIBUTES);
-            }
+            mVibratorHelper.performHapticFeedback(mView, HapticFeedbackConstants.REJECT);
         }
     }
 
@@ -3678,14 +3666,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void maybeVibrateOnOpening(boolean openingWithTouch) {
         if (mVibrateOnOpening && mBarState != KEYGUARD && mBarState != SHADE_LOCKED) {
             if (!openingWithTouch || !mHasVibratedOnOpen) {
-                if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
-                    mVibratorHelper.performHapticFeedback(
-                            mView,
-                            HapticFeedbackConstants.GESTURE_START
-                    );
-                } else {
-                    mVibratorHelper.vibrate(VibrationEffect.EFFECT_TICK);
-                }
+                mVibratorHelper.performHapticFeedback(
+                        mView,
+                        HapticFeedbackConstants.GESTURE_START
+                );
                 mHasVibratedOnOpen = true;
                 mShadeLog.v("Vibrating on opening, mHasVibratedOnOpen=true");
             }

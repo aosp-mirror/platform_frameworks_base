@@ -374,7 +374,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false);
         mFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false);
         mFeatureFlags.set(Flags.QS_USER_DETAIL_SHORTCUT, false);
-        mFeatureFlags.set(Flags.ONE_WAY_HAPTICS_API_MIGRATION, false);
         mFeatureFlags.set(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT, false);
 
         mSetFlagsRule.disableFlags(KeyguardShadeMigrationNssl.FLAG_NAME);
