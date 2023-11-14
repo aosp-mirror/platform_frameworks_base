@@ -123,11 +123,12 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.SceneTestUtils;
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -389,26 +390,27 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mPowerInteractor = keyguardInteractorDeps.getPowerInteractor();
         when(mKeyguardTransitionInteractor.isInTransitionToStateWhere(any())).thenReturn(
                 StateFlowKt.MutableStateFlow(false));
-        mShadeInteractor = new ShadeInteractor(
+        mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
                 new FakeDeviceProvisioningRepository(),
                 new FakeDisableFlagsRepository(),
                 mDozeParameters,
-                new FakeSceneContainerFlags(),
-                mUtils::sceneInteractor,
                 mFakeKeyguardRepository,
                 mKeyguardTransitionInteractor,
                 mPowerInteractor,
                 new FakeUserSetupRepository(),
                 mock(UserSwitcherInteractor.class),
-                new SharedNotificationContainerInteractor(
-                        new FakeConfigurationRepository(),
-                        mContext,
-                        new ResourcesSplitShadeStateController()
-                ),
-                mShadeRepository
+                new ShadeInteractorLegacyImpl(
+                        mTestScope.getBackgroundScope(),
+                        mFakeKeyguardRepository,
+                        new SharedNotificationContainerInteractor(
+                                new FakeConfigurationRepository(),
+                                mContext,
+                                new ResourcesSplitShadeStateController()
+                        ),
+                        mShadeRepository
+                )
         );
-
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger,
                 mInteractionJankMonitor, mJavaAdapter, () -> mShadeInteractor);

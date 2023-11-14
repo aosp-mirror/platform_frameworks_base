@@ -126,6 +126,8 @@ import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeWindowLogger;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.NotificationEntryHelper;
@@ -454,23 +456,24 @@ public class BubblesTest extends SysuiTestCase {
                 new ResourcesSplitShadeStateController();
 
         mShadeInteractor =
-                new ShadeInteractor(
+                new ShadeInteractorImpl(
                         mTestScope.getBackgroundScope(),
                         deviceProvisioningRepository,
                         new FakeDisableFlagsRepository(),
                         mDozeParameters,
-                        sceneContainerFlags,
-                        () -> sceneInteractor,
                         keyguardRepository,
                         keyguardTransitionInteractor,
                         powerInteractor,
                         new FakeUserSetupRepository(),
                         mock(UserSwitcherInteractor.class),
-                        new SharedNotificationContainerInteractor(
-                                configurationRepository,
-                                mContext,
-                                splitShadeStateController),
-                        new FakeShadeRepository()
+                        new ShadeInteractorLegacyImpl(
+                                mTestScope.getBackgroundScope(), keyguardRepository,
+                                new SharedNotificationContainerInteractor(
+                                        configurationRepository,
+                                        mContext,
+                                        splitShadeStateController),
+                                shadeRepository
+                        )
                 );
 
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(
