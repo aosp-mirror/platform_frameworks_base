@@ -113,6 +113,7 @@ import android.hardware.iris.IrisManager;
 import android.hardware.lights.LightsManager;
 import android.hardware.lights.SystemLightsManager;
 import android.hardware.location.ContextHubManager;
+import android.hardware.location.IContextHubService;
 import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
 import android.hardware.usb.UsbManager;
@@ -1114,8 +1115,12 @@ public final class SystemServiceRegistry {
                 new CachedServiceFetcher<ContextHubManager>() {
             @Override
             public ContextHubManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                return new ContextHubManager(ctx.getOuterContext(),
-                  ctx.mMainThread.getHandler().getLooper());
+                IBinder b = ServiceManager.getService(Context.CONTEXTHUB_SERVICE);
+                if (b == null) {
+                    return null;
+                }
+                return new ContextHubManager(IContextHubService.Stub.asInterface(b),
+                        ctx.mMainThread.getHandler().getLooper());
             }});
 
         registerService(Context.INCIDENT_SERVICE, IncidentManager.class,
