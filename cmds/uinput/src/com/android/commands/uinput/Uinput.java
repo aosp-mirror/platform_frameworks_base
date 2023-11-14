@@ -35,7 +35,7 @@ import java.util.Objects;
 public class Uinput {
     private static final String TAG = "UINPUT";
 
-    private final Event.Reader mReader;
+    private final JsonStyleParser mParser;
     private final SparseArray<Device> mDevices;
 
     private static void usage() {
@@ -74,7 +74,7 @@ public class Uinput {
     private Uinput(InputStream in) {
         mDevices = new SparseArray<Device>();
         try {
-            mReader = new Event.Reader(new InputStreamReader(in, "UTF-8"));
+            mParser = new JsonStyleParser(new InputStreamReader(in, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -83,7 +83,7 @@ public class Uinput {
     private void run() {
         try {
             Event e = null;
-            while ((e = mReader.getNextEvent()) != null) {
+            while ((e = mParser.getNextEvent()) != null) {
                 process(e);
             }
         } catch (IOException ex) {
@@ -111,7 +111,7 @@ public class Uinput {
             case REGISTER ->
                     error("Device id=" + e.getId() + " is already registered. Ignoring event.");
             case INJECT -> d.injectEvent(e.getInjections());
-            case DELAY -> d.addDelay(e.getDuration());
+            case DELAY -> d.addDelay(e.getDurationMillis());
             case SYNC -> d.syncEvent(e.getSyncToken());
         }
     }
