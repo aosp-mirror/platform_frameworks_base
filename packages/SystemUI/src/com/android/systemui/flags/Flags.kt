@@ -280,11 +280,6 @@ object Flags {
             R.bool.flag_stop_pulsing_face_scanning_animation,
             "stop_pulsing_face_scanning_animation")
 
-    /** Flag to use a separate view for the alternate bouncer. */
-    // TODO(b/300440924): Tracking bug
-    @JvmField
-    val ALTERNATE_BOUNCER_VIEW: UnreleasedFlag = unreleasedFlag("alternate_bouncer_view")
-
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag("power_menu_lite")
