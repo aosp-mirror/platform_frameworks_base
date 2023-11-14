@@ -40,7 +40,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -76,6 +75,7 @@ constructor(
         dismissDialog()
 
         var updateDeviceItemJob: Job? = null
+        var updateDialogUiJob: Job? = null
 
         job =
             coroutineScope.launch(mainDispatcher) {
@@ -93,10 +93,9 @@ constructor(
                     )
                 }
                     ?: dialog!!.show()
+
                 updateDeviceItemJob?.cancel()
                 updateDeviceItemJob = launch {
-                    // Add a slight delay for smoother dialog bounds change
-                    delay(FIRST_LOAD_DELAY_MS)
                     deviceItemInteractor.updateDeviceItems(context, DeviceFetchTrigger.FIRST_LOAD)
                 }
 
@@ -128,11 +127,14 @@ constructor(
 
                 deviceItemInteractor.deviceItemUpdate
                     .onEach {
-                        dialog!!.onDeviceItemUpdated(
-                            it.take(MAX_DEVICE_ITEM_ENTRY),
-                            showSeeAll = it.size > MAX_DEVICE_ITEM_ENTRY,
-                            showPairNewDevice = bluetoothStateInteractor.isBluetoothEnabled
-                        )
+                        updateDialogUiJob?.cancel()
+                        updateDialogUiJob = launch {
+                            dialog?.onDeviceItemUpdated(
+                                it.take(MAX_DEVICE_ITEM_ENTRY),
+                                showSeeAll = it.size > MAX_DEVICE_ITEM_ENTRY,
+                                showPairNewDevice = bluetoothStateInteractor.isBluetoothEnabled
+                            )
+                        }
                     }
                     .launchIn(this)
 
@@ -153,6 +155,7 @@ constructor(
                 bluetoothStateInteractor.isBluetoothEnabled,
                 getSubtitleResId(bluetoothStateInteractor.isBluetoothEnabled),
                 this@BluetoothTileDialogViewModel,
+                mainDispatcher,
                 systemClock,
                 uiEventLogger,
                 logger,
@@ -205,7 +208,6 @@ constructor(
 
     companion object {
         private const val INTERACTION_JANK_TAG = "bluetooth_tile_dialog"
-        private const val FIRST_LOAD_DELAY_MS = 500L
         private fun getSubtitleResId(isBluetoothEnabled: Boolean) =
             if (isBluetoothEnabled) R.string.quick_settings_bluetooth_tile_subtitle
             else R.string.bt_is_off
