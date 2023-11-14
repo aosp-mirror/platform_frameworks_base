@@ -2657,8 +2657,9 @@ public class Vpn {
      *
      * Callers are responsible for checking permissions if needed.
      */
-    public void startLegacyVpnPrivileged(VpnProfile profile,
+    public void startLegacyVpnPrivileged(VpnProfile profileToStart,
             @Nullable Network underlying, @NonNull LinkProperties egress) {
+        final VpnProfile profile = profileToStart.clone();
         UserInfo user = mUserManager.getUserInfo(mUserId);
         if (user.isRestricted() || mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN,
                     new UserHandle(mUserId))) {
