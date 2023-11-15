@@ -35,3 +35,10 @@ flag {
     description: "Enables taskbar / navbar unification"
     bug: "309671494"
 }
+
+flag {
+    name: "enable_pip_ui_state_on_entering"
+    namespace: "multitasking"
+    description: "Enables PiP UI state callback on entering"
+    bug: "303718131"
+}
