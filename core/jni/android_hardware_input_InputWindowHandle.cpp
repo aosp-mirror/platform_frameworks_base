@@ -74,6 +74,7 @@ static struct {
     jfieldID transform;
     jfieldID windowToken;
     jfieldID focusTransferTarget;
+    jfieldID alpha;
 } gInputWindowHandleClassInfo;
 
 static struct {
@@ -325,6 +326,8 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.windowToken,
                         javaObjectForIBinder(env, windowInfo.windowToken));
 
+    env->SetFloatField(inputWindowHandle, gInputWindowHandleClassInfo.alpha, windowInfo.alpha);
+
     return inputWindowHandle;
 }
 
@@ -445,6 +448,8 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.touchableRegionSurfaceControl.ctrl, clazz,
             "touchableRegionSurfaceControl", "Ljava/lang/ref/WeakReference;");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.alpha, clazz, "alpha", "F");
 
     jclass surfaceControlClazz;
     FIND_CLASS(surfaceControlClazz, "android/view/SurfaceControl");
