@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
+import static android.media.audio.Flags.FLAG_FOREGROUND_AUDIO_CONTROL;
 
 import android.Manifest;
 import android.annotation.ColorInt;
@@ -794,6 +795,7 @@ public class ActivityManager {
             PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK,
             PROCESS_CAPABILITY_BFSL,
             PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK,
+            PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ProcessCapability {}
@@ -943,6 +945,14 @@ public class ActivityManager {
     public static final int PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK = 1 << 5;
 
     /**
+     * @hide
+     * Process can access volume APIs and can request audio focus with GAIN.
+     */
+    @FlaggedApi(FLAG_FOREGROUND_AUDIO_CONTROL)
+    @SystemApi
+    public static final int PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL = 1 << 6;
+
+    /**
      * @hide all capabilities, the ORing of all flags in {@link ProcessCapability}.
      *
      * Don't expose it as TestApi -- we may add new capabilities any time, which could
@@ -953,7 +963,8 @@ public class ActivityManager {
             | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
             | PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK
             | PROCESS_CAPABILITY_BFSL
-            | PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK;
+            | PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK
+            | PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL;
 
     /**
      * All implicit capabilities. There are capabilities that process automatically have.
@@ -975,6 +986,7 @@ public class ActivityManager {
         pw.print((caps & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0 ? 'N' : '-');
         pw.print((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
         pw.print((caps & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0 ? 'U' : '-');
+        pw.print((caps & PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL) != 0 ? 'A' : '-');
     }
 
     /** @hide */
@@ -986,6 +998,7 @@ public class ActivityManager {
         sb.append((caps & PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK) != 0 ? 'N' : '-');
         sb.append((caps & PROCESS_CAPABILITY_BFSL) != 0 ? 'F' : '-');
         sb.append((caps & PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK) != 0 ? 'U' : '-');
+        sb.append((caps & PROCESS_CAPABILITY_FOREGROUND_AUDIO_CONTROL) != 0 ? 'A' : '-');
     }
 
     /**
