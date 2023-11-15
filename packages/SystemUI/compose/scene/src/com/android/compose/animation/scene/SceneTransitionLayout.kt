@@ -95,6 +95,9 @@ interface SceneTransitionLayoutScope {
 
 @ElementDsl
 interface SceneScope {
+    /** The state of the [SceneTransitionLayout] in which this scene is contained. */
+    val layoutState: SceneTransitionLayoutState
+
     /**
      * Tag an element identified by [key].
      *
