@@ -33,3 +33,10 @@ java_library {
     ],
     visibility: ["//visibility:public"],
 }
+
+java_host_for_device {
+    name: "core-xml-for-device",
+    libs: [
+        "core-xml-for-host",
+    ],
+}
