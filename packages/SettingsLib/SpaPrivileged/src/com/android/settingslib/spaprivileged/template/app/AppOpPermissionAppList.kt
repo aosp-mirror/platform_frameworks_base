@@ -16,9 +16,7 @@
 
 package com.android.settingslib.spaprivileged.template.app
 
-import android.app.AppOpsManager.MODE_ALLOWED
-import android.app.AppOpsManager.MODE_DEFAULT
-import android.app.AppOpsManager.MODE_ERRORED
+import android.app.AppOpsManager
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import androidx.compose.runtime.Composable
@@ -64,7 +62,7 @@ abstract class AppOpPermissionListModel(
      */
     open val permissionHasAppOpFlag: Boolean = true
 
-    open val modeForNotAllowed: Int = MODE_ERRORED
+    open val modeForNotAllowed: Int = AppOpsManager.MODE_ERRORED
 
     /**
      * Use AppOpsManager#setUidMode() instead of AppOpsManager#setMode() when set allowed.
@@ -130,27 +128,14 @@ abstract class AppOpPermissionListModel(
     override fun filter(userIdFlow: Flow<Int>, recordListFlow: Flow<List<AppOpPermissionRecord>>) =
         recordListFlow.filterItem(::isChangeable)
 
-    /**
-     * Defining the default behavior as permissible as long as the package requested this permission
-     * (This means pre-M gets approval during install time; M apps gets approval during runtime).
-     */
     @Composable
-    override fun isAllowed(record: AppOpPermissionRecord): () -> Boolean? {
-        if (record.hasRequestBroaderPermission) {
-            // Broader permission trumps the specific permission.
-            return { true }
-        }
-
-        val mode = record.appOpsController.mode.observeAsState()
-        return {
-            when (mode.value) {
-                null -> null
-                MODE_ALLOWED -> true
-                MODE_DEFAULT -> with(packageManagers) { record.app.hasGrantPermission(permission) }
-                else -> false
-            }
-        }
-    }
+    override fun isAllowed(record: AppOpPermissionRecord): () -> Boolean? =
+        isAllowed(
+            record = record,
+            appOpsController = record.appOpsController,
+            permission = permission,
+            packageManagers = packageManagers,
+        )
 
     override fun isChangeable(record: AppOpPermissionRecord) =
         record.hasRequestPermission &&
@@ -159,5 +144,35 @@ abstract class AppOpPermissionListModel(
 
     override fun setAllowed(record: AppOpPermissionRecord, newAllowed: Boolean) {
         record.appOpsController.setAllowed(newAllowed)
+    }
+}
+
+/**
+ * Defining the default behavior as permissible as long as the package requested this permission
+ * (This means pre-M gets approval during install time; M apps gets approval during runtime).
+ */
+@Composable
+internal fun isAllowed(
+    record: AppOpPermissionRecord,
+    appOpsController: IAppOpsController,
+    permission: String,
+    packageManagers: IPackageManagers = PackageManagers,
+): () -> Boolean? {
+    if (record.hasRequestBroaderPermission) {
+        // Broader permission trumps the specific permission.
+        return { true }
+    }
+
+    val mode = appOpsController.mode.observeAsState()
+    return {
+        when (mode.value) {
+            null -> null
+            AppOpsManager.MODE_ALLOWED -> true
+            AppOpsManager.MODE_DEFAULT -> {
+                with(packageManagers) { record.app.hasGrantPermission(permission) }
+            }
+
+            else -> false
+        }
     }
 }
