@@ -29,7 +29,6 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.back.domain.interactor.BackActionInteractor
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
 import com.android.systemui.bouncer.data.repository.BouncerMessageRepositoryImpl
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
@@ -60,7 +59,6 @@ import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.log.BouncerLogger
-import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationShadeWindowView.InteractionEventHandler
 import com.android.systemui.statusbar.DragDownHelper
@@ -114,8 +112,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var centralSurfaces: CentralSurfaces
     @Mock private lateinit var dozeServiceHost: DozeServiceHost
     @Mock private lateinit var dozeScrimController: DozeScrimController
-    @Mock private lateinit var backActionInteractor: BackActionInteractor
-    @Mock private lateinit var powerInteractor: PowerInteractor
     @Mock private lateinit var dockManager: DockManager
     @Mock private lateinit var notificationPanelViewController: NotificationPanelViewController
     @Mock private lateinit var notificationStackScrollLayout: NotificationStackScrollLayout
@@ -192,7 +188,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
         featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
-        featureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, false)
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         testScope = TestScope()
         controller =
             NotificationShadeWindowViewController(

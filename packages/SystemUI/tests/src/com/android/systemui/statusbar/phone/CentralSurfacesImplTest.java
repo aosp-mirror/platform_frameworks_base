@@ -352,8 +352,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.LIGHT_REVEAL_MIGRATION, true);
         // Turn AOD on and toggle feature flag for jank fixes
         mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);
-        mFeatureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, false);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,

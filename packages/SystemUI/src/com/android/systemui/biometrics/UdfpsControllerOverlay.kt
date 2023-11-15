@@ -48,9 +48,9 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -237,7 +237,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                 )
             }
             REASON_AUTH_KEYGUARD -> {
-                if (featureFlags.isEnabled(REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+                if (DeviceEntryUdfpsRefactor.isEnabled) {
                     // note: empty controller, currently shows no visual affordance
                     // instead SysUI will show the fingerprint icon in its DeviceEntryIconView
                     UdfpsBpViewController(

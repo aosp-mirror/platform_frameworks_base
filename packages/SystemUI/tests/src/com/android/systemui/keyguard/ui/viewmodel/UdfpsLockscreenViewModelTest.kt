@@ -83,11 +83,7 @@ class UdfpsLockscreenViewModelTest : SysuiTestCase() {
         testScope = TestScope()
         transitionRepository = FakeKeyguardTransitionRepository()
         shadeRepository = FakeShadeRepository()
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
-                set(Flags.FACE_AUTH_REFACTOR, false)
-            }
+        featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
         KeyguardInteractorFactory.create(
                 featureFlags = featureFlags,
             )

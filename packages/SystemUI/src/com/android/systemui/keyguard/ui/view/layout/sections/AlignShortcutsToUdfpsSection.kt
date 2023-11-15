@@ -26,14 +26,13 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
-import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
@@ -48,7 +47,6 @@ constructor(
     private val falsingManager: FalsingManager,
     private val indicationController: KeyguardIndicationController,
     private val vibratorHelper: VibratorHelper,
-    private val featureFlags: FeatureFlagsClassic,
 ) : BaseShortcutSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (keyguardBottomAreaRefactor()) {
@@ -86,11 +84,12 @@ constructor(
         val width = resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width)
         val height = resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_height)
 
-        val lockIconViewId = if (featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
-            R.id.device_entry_icon_view
-        } else {
-            R.id.lock_icon_view
-        }
+        val lockIconViewId =
+            if (DeviceEntryUdfpsRefactor.isEnabled) {
+                R.id.device_entry_icon_view
+            } else {
+                R.id.lock_icon_view
+            }
 
         constraintSet.apply {
             constrainWidth(R.id.start_button, width)

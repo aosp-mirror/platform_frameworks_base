@@ -24,6 +24,7 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
@@ -81,7 +82,7 @@ constructor(
             connect(R.id.nssl_placeholder, END, PARENT_ID, END)
 
             val lockId =
-                if (featureFlags.isEnabled(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS)) {
+                if (DeviceEntryUdfpsRefactor.isEnabled) {
                     R.id.device_entry_icon_view
                 } else {
                     R.id.lock_icon_view

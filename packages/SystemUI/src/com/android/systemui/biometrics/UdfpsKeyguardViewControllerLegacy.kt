@@ -184,6 +184,7 @@ open class UdfpsKeyguardViewControllerLegacy(
     }
 
     init {
+        com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor.assertInLegacyMode()
         view.repeatWhenAttached {
             // repeatOnLifecycle CREATED (as opposed to STARTED) because the Bouncer expansion
             // can make the view not visible; and we still want to listen for events

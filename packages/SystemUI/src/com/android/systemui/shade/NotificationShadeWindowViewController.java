@@ -46,6 +46,7 @@ import com.android.systemui.communal.data.repository.CommunalRepository;
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel;
 import com.android.systemui.compose.ComposeFacade;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
@@ -448,7 +449,7 @@ public class NotificationShadeWindowViewController implements Dumpable {
                 }
 
                 boolean bouncerShowing;
-                if (mFeatureFlagsClassic.isEnabled(Flags.ALTERNATE_BOUNCER_VIEW)) {
+                if (DeviceEntryUdfpsRefactor.isEnabled()) {
                     bouncerShowing = mPrimaryBouncerInteractor.isBouncerShowing()
                             || mAlternateBouncerInteractor.isVisibleState();
                 } else {

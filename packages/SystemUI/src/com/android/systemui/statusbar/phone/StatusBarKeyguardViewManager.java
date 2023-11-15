@@ -62,6 +62,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.bouncer.ui.BouncerView;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.flags.FeatureFlags;
@@ -1573,7 +1574,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * notification shade's child views.
      */
     public boolean shouldInterceptTouchEvent(MotionEvent event) {
-        if (mFlags.isEnabled(Flags.ALTERNATE_BOUNCER_VIEW)) {
+        if (DeviceEntryUdfpsRefactor.isEnabled()) {
             return false;
         }
         return mAlternateBouncerInteractor.isVisibleState();
@@ -1584,7 +1585,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * showing.
      */
     public boolean onTouch(MotionEvent event) {
-        if (mFlags.isEnabled(Flags.ALTERNATE_BOUNCER_VIEW)) {
+        if (DeviceEntryUdfpsRefactor.isEnabled()) {
             return false;
         }
 
