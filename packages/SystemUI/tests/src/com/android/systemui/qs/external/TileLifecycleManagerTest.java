@@ -373,6 +373,30 @@ public class TileLifecycleManagerTest extends SysuiTestCase {
         verify(falseContext).bindServiceAsUser(any(), any(), eq(flags), any());
     }
 
+    @Test
+    public void testNullBindingCallsUnbind() {
+        Context mockContext = mock(Context.class);
+        // Binding has to succeed
+        when(mockContext.bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(true);
+        TileLifecycleManager manager = new TileLifecycleManager(mHandler, mockContext,
+                mock(IQSService.class),
+                mMockPackageManagerAdapter,
+                mMockBroadcastDispatcher,
+                mTileServiceIntent,
+                mUser,
+                mExecutor);
+
+        manager.executeSetBindService(true);
+        mExecutor.runAllReady();
+
+        ArgumentCaptor<ServiceConnection> captor = ArgumentCaptor.forClass(ServiceConnection.class);
+        verify(mockContext).bindServiceAsUser(any(), captor.capture(), anyInt(), any());
+
+        captor.getValue().onNullBinding(mTileServiceComponentName);
+        mExecutor.runAllReady();
+        verify(mockContext).unbindService(captor.getValue());
+    }
+
     private void mockChangeEnabled(long changeId, boolean enabled) {
         doReturn(enabled).when(() -> CompatChanges.isChangeEnabled(eq(changeId), anyString(),
                 any(UserHandle.class)));
