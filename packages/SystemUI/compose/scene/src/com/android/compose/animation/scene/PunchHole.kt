@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.compose.animation.scene.transformation
+package com.android.compose.animation.scene
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -34,11 +34,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.withSaveLayer
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.toSize
-import com.android.compose.animation.scene.Element
-import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.ElementMatcher
-import com.android.compose.animation.scene.Scene
-import com.android.compose.animation.scene.SceneTransitionLayoutImpl
+import com.android.compose.animation.scene.transformation.ModifierTransformation
 
 /** Punch a hole in an element using the bounds of another element and a given [shape]. */
 internal class PunchHole(

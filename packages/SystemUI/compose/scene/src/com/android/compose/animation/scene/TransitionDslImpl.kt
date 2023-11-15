@@ -30,7 +30,6 @@ import com.android.compose.animation.scene.transformation.DrawScale
 import com.android.compose.animation.scene.transformation.EdgeTranslate
 import com.android.compose.animation.scene.transformation.Fade
 import com.android.compose.animation.scene.transformation.PropertyTransformation
-import com.android.compose.animation.scene.transformation.PunchHole
 import com.android.compose.animation.scene.transformation.RangedPropertyTransformation
 import com.android.compose.animation.scene.transformation.ScaleSize
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
