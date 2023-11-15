@@ -2976,7 +2976,12 @@
              depends on the number of isolated services that an application starts,
              and how much memory those services save by preloading and sharing memory with
              the app zygote. Therefore, it is recommended to measure memory usage under
-             typical workloads to determine whether it makes sense to use this flag. -->
+             typical workloads to determine whether it makes sense to use this flag.
+
+             <p>There is a limit to the number of isolated services that can be spawned from
+                the Application Zygote; the absolute limit is 100, but due to potential
+                delays in service process cleanup, a much safer limit to use in practice is 50.
+             -->
         <attr name="useAppZygote" format="boolean" />
         <!-- If this is a foreground service, specify its category. -->
         <attr name="foregroundServiceType" />
