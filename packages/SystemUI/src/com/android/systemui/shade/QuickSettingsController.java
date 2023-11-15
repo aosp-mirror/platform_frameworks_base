@@ -261,6 +261,14 @@ public class QuickSettingsController implements Dumpable {
     private Insets mCachedGestureInsets;
 
     /**
+     * The window width currently in effect -- used together with
+     * {@link QuickSettingsController#mCachedGestureInsets} to decide whether a back gesture should
+     * receive a horizontal swipe inwards from the left/right vertical edge of the screen.
+     * We cache this on ACTION_DOWN, and query it during both ACTION_DOWN and ACTION_MOVE events.
+     */
+    private int mCachedWindowWidth;
+
+    /**
      * The amount of progress we are currently in if we're transitioning to the full shade.
      * 0.0f means we're not transitioning yet, while 1 means we're all the way in the full
      * shade. This value can also go beyond 1.1 when we're overshooting!
@@ -544,6 +552,7 @@ public class QuickSettingsController implements Dumpable {
         WindowMetrics windowMetrics = wm.getCurrentWindowMetrics();
         mCachedGestureInsets = windowMetrics.getWindowInsets().getInsets(
                 WindowInsets.Type.systemGestures());
+        mCachedWindowWidth = windowMetrics.getBounds().width();
     }
 
     /**
@@ -552,7 +561,7 @@ public class QuickSettingsController implements Dumpable {
      */
     public boolean shouldBackBypassQuickSettings(float touchX) {
         return (touchX < mCachedGestureInsets.left)
-                || (touchX > mKeyguardStatusBar.getWidth() - mCachedGestureInsets.right);
+                || (touchX > mCachedWindowWidth - mCachedGestureInsets.right);
     }
 
     /** Returns whether touch is within QS area */
@@ -2121,6 +2130,8 @@ public class QuickSettingsController implements Dumpable {
         ipw.println(mAnimatorExpand);
         ipw.print("mCachedGestureInsets=");
         ipw.println(mCachedGestureInsets);
+        ipw.print("mCachedWindowWidth=");
+        ipw.println(mCachedWindowWidth);
         ipw.print("mTransitioningToFullShadeProgress=");
         ipw.println(mTransitioningToFullShadeProgress);
         ipw.print("mDistanceForFullShadeTransition=");
