@@ -35,3 +35,6 @@ android.database.MatrixCursor
 android.database.MatrixCursor$RowBuilder
 android.database.MergeCursor
 android.database.Observable
+
+android.text.TextUtils
+android.text.TextUtils$SimpleStringSplitter
