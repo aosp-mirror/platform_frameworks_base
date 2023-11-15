@@ -4119,7 +4119,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      -D: enable debugging");
             pw.println("      --suspend: debugged app suspend threads at startup (only with -D)");
             pw.println("      -N: enable native debugging");
-            pw.println("      -W: wait for launch to complete");
+            pw.println("      -W: wait for launch to complete (initial display)");
             pw.println("      --start-profiler <FILE>: start profiler and send results to <FILE>");
             pw.println("      --sampling INTERVAL: use sample profiling with INTERVAL microseconds");
             pw.println("          between samples (use with --start-profiler)");
