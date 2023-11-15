@@ -376,6 +376,11 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         }
     }
 
+    @Nullable
+    View getAodNotifIconContainer() {
+        return mAodIconContainer;
+    }
+
     @Override
     protected void onViewDetached() {
         mClockRegistry.unregisterClockChangeListener(mClockChangedListener);
@@ -629,6 +634,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 }
             } else {
                 mNotificationIconAreaController.setupAodIcons(nic);
+                mAodIconContainer = nic;
             }
         }
     }
