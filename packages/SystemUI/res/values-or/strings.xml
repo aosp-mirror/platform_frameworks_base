@@ -396,7 +396,7 @@
     <string name="guest_notification_session_active" msgid="5567273684713471450">"ଆପଣ ଅତିଥି ମୋଡରେ ଅଛନ୍ତି"</string>
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବା ଦ୍ୱାରା ଅତିଥି ମୋଡରୁ ବାହାରି ଯିବ ଏବଂ ବର୍ତ୍ତମାନର ଅତିଥି ସେସନରୁ ସମସ୍ତ ଆପ ଓ ଡାଟା ଡିଲିଟ ହୋଇଯିବ।"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"ଉପଯୋଗକର୍ତ୍ତା ସୀମାରେ ପହଞ୍ଚିଛି"</string>
-    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{କେବଳ ଜଣେ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରାଯାଇପାରିବ।}other{କେବଳ # ଜଣ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରାଯାଇପାରିବ।}}"</string>
+    <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{କେବଳ ଜଣେ ୟୁଜର ତିଆରି କରାଯାଇପାରିବ।}other{କେବଳ # ଜଣ ୟୁଜର ତିଆରି କରାଯାଇପାରିବ।}}"</string>
     <string name="user_remove_user_title" msgid="9124124694835811874">"ୟୁଜରଙ୍କୁ ବାହାର କରିବେ?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"ଏହି ୟୁଜରଙ୍କ ସମସ୍ତ ଆପ୍‍ ଓ ଡାଟା ଡିଲିଟ୍‍ ହେବ।"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
@@ -492,7 +492,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"ସାଉଣ୍ଡ ଓ ଭାଇବ୍ରେସନ"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ସେଟିଂସ"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"ଭଲ୍ୟୁମକୁ ସୁରକ୍ଷିତ ଲେଭେଲକୁ କମ କରାଯାଇଛି"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"ସୁପାରିଶ କରାଯାଇଥିବା ଅପେକ୍ଷା ଅଧିକ ସମୟ ପାଇଁ ହେଡଫୋନର ଭଲ୍ୟୁମ ଅଧିକ ଅଛି"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"ସୁପାରିଶ ଭଲ୍ୟୁମ ଠାରୁ ହେଡଫୋନର ଭଲ୍ୟୁମ ଅଧିକ ଅଛି"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"ଏହି ସପ୍ତାହ ପାଇଁ ହେଡଫୋନର ଭଲ୍ୟୁମ ସୁରକ୍ଷିତ ସୀମାକୁ ଅତିକ୍ରମ କରିଛି"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"ଶୁଣିବା ଜାରି ରଖନ୍ତୁ"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"ଭଲ୍ୟୁମ କମାନ୍ତୁ"</string>

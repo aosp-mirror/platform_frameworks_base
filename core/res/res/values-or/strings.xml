@@ -1684,8 +1684,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ମାତ୍ରା ବଢ଼ାଇ ସୁପାରିଶ ସ୍ତର ବଢ଼ାଉଛନ୍ତି? \n\n ଲମ୍ବା ସମୟ ପର୍ଯ୍ୟନ୍ତ ଉଚ୍ଚ ଶବ୍ଦରେ ଶୁଣିଲେ ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତି ଖରାପ ହୋଇପାରେ।"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ଅଧିକ ଭଲ୍ୟୁମରେ ଶୁଣିବା ଜାରି ରଖିବେ?\n\nସୁପାରିଶ କରାଯାଇଥିବା ଅପେକ୍ଷା ଅଧିକ ସମୟ ପାଇଁ ହେଡଫୋନର ଭଲ୍ୟୁମ ଅଧିକ ଅଛି, ଯାହା ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତିକୁ ନଷ୍ଟ କରିପାରିବ"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ଉଚ୍ଚ ସାଉଣ୍ଡ ଚିହ୍ନଟ କରାଯାଇଛି\n\nହେଡଫୋନର ଭଲ୍ୟୁମ ସୁପାରିଶ କରାଯାଇଥିବା ଅପେକ୍ଷା ଅଧିକ ଅଛି, ଯାହା ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତିକୁ ନଷ୍ଟ କରିପାରିବ"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ଅଧିକ ଭଲ୍ୟୁମରେ ଶୁଣିବା ଜାରି ରଖିବେ?\n\nସୁପାରିଶ କରାଯାଇଥିବା ଭଲ୍ୟୁମ ଠାରୁ ହେଡଫୋନର ଭଲ୍ୟୁମ ଅଧିକ ଅଛି, ଯାହା ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତିକୁ ନଷ୍ଟ କରିପାରେ"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ଲାଉଡ ସାଉଣ୍ଡ ଚିହ୍ନଟ ହୋଇଛି\n\nସୁପାରିଶ ଭଲ୍ୟୁମ ଠାରୁ ହେଡଫୋନର ଭଲ୍ୟୁମ ଅଧିକ ଅଛି, ଯାହା ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତିକୁ ନଷ୍ଟ କରିପାରେ"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ଆକ୍ସେସବିଲିଟି ଶର୍ଟକଟ୍‍ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ସର୍ଟକଟ୍ ଚାଲୁ ଥିବା ବେଳେ, ଉଭୟ ଭଲ୍ୟୁମ୍ ବଟନ୍ 3 ସେକେଣ୍ଡ ପାଇଁ ଦବାଇବା ଦ୍ୱାରା ଏକ ଆକ୍ସେସବିଲିଟି ଫିଚର୍ ଆରମ୍ଭ ହେବ।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ଆକ୍ସେସିବିଲିଟୀ ଫିଚରଗୁଡ଼ିକ ପାଇଁ ସର୍ଟକଟ୍ ଚାଲୁ କରିବେ?"</string>

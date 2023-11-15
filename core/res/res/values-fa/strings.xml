@@ -166,7 +166,7 @@
     <string name="httpErrorTimeout" msgid="7446272815190334204">"زمان اتصال به سرور تمام شده است."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"این صفحه دارای تعداد بسیار زیادی تغییر مسیر سرور است."</string>
     <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"‏پروتکل پشتیبانی نمی‌‎شود."</string>
-    <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"اتصال امن ایجاد نشد."</string>
+    <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"اتصال ایمن ایجاد نشد."</string>
     <string name="httpErrorBadUrl" msgid="754447723314832538">"به‌دلیل نامعتبر بودن نشانی اینترنتی، صفحه باز نمی‌شود."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"دسترسی به فایل انجام نشد."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"فایل درخواستی پیدا نشد."</string>
