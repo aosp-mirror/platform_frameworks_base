@@ -415,12 +415,6 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
-    "-1717147904": {
-      "message": "Current focused window is embeddedWindow. Dispatch KEYCODE_BACK.",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
-    },
     "-1710206702": {
       "message": "Display id=%d is frozen while keyguard locked, return %d",
       "level": "VERBOSE",
@@ -1212,12 +1206,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "-997565097": {
-      "message": "Focused window found using getFocusedWindowToken",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_BACK_PREVIEW",
-      "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
     "-993378225": {
       "message": "finishDrawingLocked: mDrawState=COMMIT_DRAW_PENDING %s in %s",
@@ -2233,6 +2221,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
+    "-98422345": {
+      "message": "Focus window is closing.",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BACK_PREVIEW",
+      "at": "com\/android\/server\/wm\/BackNavigationController.java"
+    },
     "-91393839": {
       "message": "Set animatingExit: reason=remove\/applyAnimation win=%s",
       "level": "VERBOSE",
@@ -2731,12 +2725,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "309039362": {
-      "message": "SURFACE MATRIX [%f,%f,%f,%f]: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
-    },
     "312030608": {
       "message": "New topFocusedDisplayId=%d",
       "level": "DEBUG",
@@ -3090,12 +3078,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "633654009": {
-      "message": "SURFACE POS (setPositionInTransaction) @ (%f,%f): %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
     },
     "638429464": {
       "message": "\tRemove container=%s",

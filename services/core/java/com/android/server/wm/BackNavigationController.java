@@ -39,7 +39,6 @@ import android.content.res.ResourceId;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -60,7 +59,6 @@ import android.window.TaskSnapshot;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.server.LocalServices;
 import com.android.server.wm.utils.InsetUtils;
 
 import java.io.PrintWriter;
@@ -151,60 +149,8 @@ class BackNavigationController {
                 // Don't start any animation for it.
                 return null;
             }
-            WindowManagerInternal windowManagerInternal =
-                    LocalServices.getService(WindowManagerInternal.class);
-            IBinder focusedWindowToken = windowManagerInternal.getFocusedWindowToken();
 
             window = wmService.getFocusedWindowLocked();
-
-            if (window == null) {
-                EmbeddedWindowController.EmbeddedWindow embeddedWindow =
-                        wmService.mEmbeddedWindowController.getByInputTransferToken(
-                                focusedWindowToken);
-                if (embeddedWindow != null) {
-                    ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
-                            "Current focused window is embeddedWindow. Dispatch KEYCODE_BACK.");
-                    return null;
-                }
-            }
-
-            // Lets first gather the states of things
-            //  - What is our current window ?
-            //  - Does it has an Activity and a Task ?
-            // TODO Temp workaround for Sysui until b/221071505 is fixed
-            if (window != null) {
-                ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
-                        "Focused window found using getFocusedWindowToken");
-            }
-
-            if (window != null) {
-                // This is needed to bridge the old and new back behavior with recents.  While in
-                // Overview with live tile enabled, the previous app is technically focused but we
-                // add an input consumer to capture all input that would otherwise go to the apps
-                // being controlled by the animation. This means that the window resolved is not
-                // the right window to consume back while in overview, so we need to route it to
-                // launcher and use the legacy behavior of injecting KEYCODE_BACK since the existing
-                // compat callback in VRI only works when the window is focused.
-                // This symptom also happen while shell transition enabled, we can check that by
-                // isTransientLaunch to know whether the focus window is point to live tile.
-                final RecentsAnimationController recentsAnimationController =
-                        wmService.getRecentsAnimationController();
-                final ActivityRecord ar = window.mActivityRecord;
-                if ((ar != null && ar.isActivityTypeHomeOrRecents()
-                        && ar.mTransitionController.isTransientLaunch(ar))
-                        || (recentsAnimationController != null
-                        && recentsAnimationController.shouldApplyInputConsumer(ar))) {
-                    ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Current focused window being animated by "
-                            + "recents. Overriding back callback to recents controller callback.");
-                    return null;
-                }
-
-                if (!window.isDrawn()) {
-                    ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
-                            "Focused window didn't have a valid surface drawn.");
-                    return null;
-                }
-            }
 
             if (window == null) {
                 // We don't have any focused window, fallback ont the top currentTask of the focused
@@ -212,35 +158,67 @@ class BackNavigationController {
                 ProtoLog.w(WM_DEBUG_BACK_PREVIEW,
                         "No focused window, defaulting to top current task's window");
                 currentTask = wmService.mAtmService.getTopDisplayFocusedRootTask();
-                window = currentTask.getWindow(WindowState::isFocused);
+                window = currentTask != null
+                        ? currentTask.getWindow(WindowState::isFocused) : null;
             }
-
-            // Now let's find if this window has a callback from the client side.
-            OnBackInvokedCallbackInfo callbackInfo = null;
-            if (window != null) {
-                currentActivity = window.mActivityRecord;
-                currentTask = window.getTask();
-                callbackInfo = window.getOnBackInvokedCallbackInfo();
-                if (callbackInfo == null) {
-                    Slog.e(TAG, "No callback registered, returning null.");
-                    return null;
-                }
-                if (!callbackInfo.isSystemCallback()) {
-                    backType = BackNavigationInfo.TYPE_CALLBACK;
-                }
-                infoBuilder.setOnBackInvokedCallback(callbackInfo.getCallback());
-                infoBuilder.setAnimationCallback(callbackInfo.isAnimationCallback());
-                mNavigationMonitor.startMonitor(window, navigationObserver);
-            }
-
-            ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
-                            + "topRunningActivity=%s, callbackInfo=%s, currentFocus=%s",
-                    currentTask, currentActivity, callbackInfo, window);
 
             if (window == null) {
                 Slog.e(TAG, "Window is null, returning null.");
                 return null;
             }
+
+            // This is needed to bridge the old and new back behavior with recents.  While in
+            // Overview with live tile enabled, the previous app is technically focused but we
+            // add an input consumer to capture all input that would otherwise go to the apps
+            // being controlled by the animation. This means that the window resolved is not
+            // the right window to consume back while in overview, so we need to route it to
+            // launcher and use the legacy behavior of injecting KEYCODE_BACK since the existing
+            // compat callback in VRI only works when the window is focused.
+            // This symptom also happen while shell transition enabled, we can check that by
+            // isTransientLaunch to know whether the focus window is point to live tile.
+            final RecentsAnimationController recentsAnimationController =
+                    wmService.getRecentsAnimationController();
+            final ActivityRecord tmpAR = window.mActivityRecord;
+            if ((tmpAR != null && tmpAR.isActivityTypeHomeOrRecents()
+                    && tmpAR.mTransitionController.isTransientLaunch(tmpAR))
+                    || (recentsAnimationController != null
+                    && recentsAnimationController.shouldApplyInputConsumer(tmpAR))) {
+                ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Current focused window being animated by "
+                        + "recents. Overriding back callback to recents controller callback.");
+                return null;
+            }
+
+            if (!window.isDrawn()) {
+                ProtoLog.d(WM_DEBUG_BACK_PREVIEW,
+                        "Focused window didn't have a valid surface drawn.");
+                return null;
+            }
+
+            currentActivity = window.mActivityRecord;
+            currentTask = window.getTask();
+            if ((currentTask != null && !currentTask.isVisibleRequested())
+                    || (currentActivity != null && !currentActivity.isVisibleRequested())) {
+                // Closing transition is happening on focus window and should be update soon,
+                // don't drive back navigation with it.
+                ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "Focus window is closing.");
+                return null;
+            }
+            // Now let's find if this window has a callback from the client side.
+            final OnBackInvokedCallbackInfo callbackInfo = window.getOnBackInvokedCallbackInfo();
+            if (callbackInfo == null) {
+                Slog.e(TAG, "No callback registered, returning null.");
+                return null;
+            }
+            if (!callbackInfo.isSystemCallback()) {
+                backType = BackNavigationInfo.TYPE_CALLBACK;
+            }
+            infoBuilder.setOnBackInvokedCallback(callbackInfo.getCallback());
+            infoBuilder.setAnimationCallback(callbackInfo.isAnimationCallback());
+            mNavigationMonitor.startMonitor(window, navigationObserver);
+
+            ProtoLog.d(WM_DEBUG_BACK_PREVIEW, "startBackNavigation currentTask=%s, "
+                            + "topRunningActivity=%s, callbackInfo=%s, currentFocus=%s",
+                    currentTask, currentActivity, callbackInfo, window);
 
             // If we don't need to set up the animation, we return early. This is the case when
             // - We have an application callback.
@@ -322,12 +300,13 @@ class BackNavigationController {
                     }
                     return false;
                 }, currentTask, false /*includeBoundary*/, true /*traverseTopToBottom*/);
-                final ActivityRecord tmpPre = prevTask.getTopNonFinishingActivity();
+                final ActivityRecord tmpPre = prevTask != null
+                        ? prevTask.getTopNonFinishingActivity() : null;
                 if (tmpPre != null) {
                     prevActivities.add(tmpPre);
                     findAdjacentActivityIfExist(tmpPre, prevActivities);
                 }
-                if (prevActivities.isEmpty()
+                if (prevTask == null || prevActivities.isEmpty()
                         || (isOccluded && !prevActivities.get(0).canShowWhenLocked())) {
                     backType = BackNavigationInfo.TYPE_CALLBACK;
                 } else if (prevTask.isActivityTypeHome()) {
