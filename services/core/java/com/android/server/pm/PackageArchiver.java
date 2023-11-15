@@ -95,6 +95,9 @@ public class PackageArchiver {
 
     private static final String TAG = "PackageArchiverService";
 
+    public static final String EXTRA_UNARCHIVE_INTENT_SENDER =
+            "android.content.pm.extra.UNARCHIVE_INTENT_SENDER";
+
     /**
      * The maximum time granted for an app store to start a foreground service when unarchival
      * is requested.
@@ -103,6 +106,8 @@ public class PackageArchiver {
     private static final int DEFAULT_UNARCHIVE_FOREGROUND_TIMEOUT_MS = 120 * 1000;
 
     private static final String ARCHIVE_ICONS_DIR = "package_archiver";
+
+    private static final String ACTION_UNARCHIVE_DIALOG = "android.intent.action.UNARCHIVE_DIALOG";
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -403,11 +408,12 @@ public class PackageArchiver {
         }
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
                 "unarchiveApp");
-        verifyInstallPermissions();
 
         PackageStateInternal ps;
+        PackageStateInternal callerPs;
         try {
             ps = getPackageState(packageName, snapshot, binderUid, userId);
+            callerPs = getPackageState(callerPackageName, snapshot, binderUid, userId);
             verifyArchived(ps, userId);
         } catch (PackageManager.NameNotFoundException e) {
             throw new ParcelableException(e);
@@ -420,12 +426,32 @@ public class PackageArchiver {
                                     packageName)));
         }
 
-        // TODO(b/305902395) Introduce a confirmation dialog if the requestor only holds
-        // REQUEST_INSTALL permission.
+        boolean hasInstallPackages = mContext.checkCallingOrSelfPermission(
+                Manifest.permission.INSTALL_PACKAGES)
+                == PackageManager.PERMISSION_GRANTED;
+        // We don't check the AppOpsManager here for REQUEST_INSTALL_PACKAGES because the requester
+        // is not the source of the installation.
+        boolean hasRequestInstallPackages = callerPs.getAndroidPackage().getRequestedPermissions()
+                .contains(android.Manifest.permission.REQUEST_INSTALL_PACKAGES);
+        if (!hasInstallPackages && !hasRequestInstallPackages) {
+            throw new SecurityException("You need the com.android.permission.INSTALL_PACKAGES "
+                    + "or com.android.permission.REQUEST_INSTALL_PACKAGES permission to request "
+                    + "an unarchival.");
+        }
+
+        if (!hasInstallPackages) {
+            requestUnarchiveConfirmation(packageName, statusReceiver);
+            return;
+        }
+
+        // TODO(b/311709794) Check that the responsible installer has INSTALL_PACKAGES or
+        // OPSTR_REQUEST_INSTALL_PACKAGES too. Edge case: In reality this should always be the case,
+        // unless a user has disabled the permission after archiving an app.
+
         int draftSessionId;
         try {
-            draftSessionId = createDraftSession(packageName, installerPackage, statusReceiver,
-                    userId);
+            draftSessionId = Binder.withCleanCallingIdentity(() ->
+                    createDraftSession(packageName, installerPackage, statusReceiver, userId));
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
                 throw ExceptionUtils.wrap((IOException) e.getCause());
@@ -438,15 +464,17 @@ public class PackageArchiver {
                 () -> unarchiveInternal(packageName, userHandle, installerPackage, draftSessionId));
     }
 
-    private void verifyInstallPermissions() {
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
-                != PackageManager.PERMISSION_GRANTED && mContext.checkCallingOrSelfPermission(
-                Manifest.permission.REQUEST_INSTALL_PACKAGES)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("You need the com.android.permission.INSTALL_PACKAGES "
-                    + "or com.android.permission.REQUEST_INSTALL_PACKAGES permission to request "
-                    + "an unarchival.");
-        }
+    private void requestUnarchiveConfirmation(String packageName, IntentSender statusReceiver) {
+        final Intent dialogIntent = new Intent(ACTION_UNARCHIVE_DIALOG);
+        dialogIntent.putExtra(EXTRA_UNARCHIVE_INTENT_SENDER, statusReceiver);
+        dialogIntent.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, packageName);
+
+        final Intent broadcastIntent = new Intent();
+        broadcastIntent.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, packageName);
+        broadcastIntent.putExtra(PackageInstaller.EXTRA_UNARCHIVE_STATUS,
+                PackageInstaller.STATUS_PENDING_USER_ACTION);
+        broadcastIntent.putExtra(Intent.EXTRA_INTENT, dialogIntent);
+        sendIntent(statusReceiver, packageName, /* message= */ "", broadcastIntent);
     }
 
     private void verifyUninstallPermissions() {
@@ -461,7 +489,7 @@ public class PackageArchiver {
     }
 
     private int createDraftSession(String packageName, String installerPackage,
-            IntentSender statusReceiver, int userId) {
+            IntentSender statusReceiver, int userId) throws IOException {
         PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
         sessionParams.setAppPackageName(packageName);
@@ -477,12 +505,11 @@ public class PackageArchiver {
             return existingSessionId;
         }
 
-        int sessionId = Binder.withCleanCallingIdentity(
-                () -> mPm.mInstallerService.createSessionInternal(
-                        sessionParams,
-                        installerPackage, mContext.getAttributionTag(),
-                        installerUid,
-                        userId));
+        int sessionId = mPm.mInstallerService.createSessionInternal(
+                sessionParams,
+                installerPackage, mContext.getAttributionTag(),
+                installerUid,
+                userId);
         // TODO(b/297358628) Also cleanup sessions upon device restart.
         mPm.mHandler.postDelayed(() -> mPm.mInstallerService.cleanupDraftIfUnclaimed(sessionId),
                 getUnarchiveForegroundTimeout());
@@ -692,20 +719,25 @@ public class PackageArchiver {
             String message) {
         Slog.d(TAG, TextUtils.formatSimple("Failed to archive %s with message %s", packageName,
                 message));
-        final Intent fillIn = new Intent();
-        fillIn.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, packageName);
-        fillIn.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
-        fillIn.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, message);
+        final Intent intent = new Intent();
+        intent.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, packageName);
+        intent.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_FAILURE);
+        intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, message);
+        sendIntent(statusReceiver, packageName, message, intent);
+    }
+
+    private void sendIntent(IntentSender statusReceiver, String packageName, String message,
+            Intent intent) {
         try {
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setPendingIntentBackgroundActivityStartMode(
                     MODE_BACKGROUND_ACTIVITY_START_DENIED);
-            statusReceiver.sendIntent(mContext, 0, fillIn, /* onFinished= */ null,
+            statusReceiver.sendIntent(mContext, 0, intent, /* onFinished= */ null,
                     /* handler= */ null, /* requiredPermission= */ null, options.toBundle());
         } catch (IntentSender.SendIntentException e) {
             Slog.e(
                     TAG,
-                    TextUtils.formatSimple("Failed to send failure status for %s with message %s",
+                    TextUtils.formatSimple("Failed to send status for %s with message %s",
                             packageName, message),
                     e);
         }
