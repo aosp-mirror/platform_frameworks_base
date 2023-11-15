@@ -46,6 +46,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.ui.binder.KeyguardRootViewBinder;
 import com.android.systemui.keyguard.ui.view.InWindowLauncherUnlockAnimationManager;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel;
@@ -62,6 +63,7 @@ import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore;
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder;
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker;
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel;
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -105,6 +107,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final DozeParameters mDozeParameters;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final AlwaysOnDisplayNotificationIconViewStore mAodIconViewStore;
+    private final StatusBarIconViewBindingFailureTracker mIconViewBindingFailureTracker;
     private FrameLayout mSmallClockFrame; // top aligned clock
     private FrameLayout mLargeClockFrame; // centered clock
 
@@ -179,6 +182,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             LockscreenSmartspaceController smartspaceController,
             ConfigurationController configurationController,
             ScreenOffAnimationController screenOffAnimationController,
+            StatusBarIconViewBindingFailureTracker iconViewBindingFailureTracker,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             SecureSettings secureSettings,
             @Main DelayableExecutor uiExecutor,
@@ -202,6 +206,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mSmartspaceController = smartspaceController;
         mConfigurationController = configurationController;
         mScreenOffAnimationController = screenOffAnimationController;
+        mIconViewBindingFailureTracker = iconViewBindingFailureTracker;
         mSecureSettings = secureSettings;
         mUiExecutor = uiExecutor;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
@@ -362,7 +367,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     int getNotificationIconAreaHeight() {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (KeyguardShadeMigrationNssl.isEnabled()) {
             return 0;
         } else if (NotificationIconContainerRefactor.isEnabled()) {
             return mAodIconContainer != null ? mAodIconContainer.getHeight() : 0;
@@ -590,7 +595,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void updateAodIcons() {
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
             NotificationIconContainer nic = (NotificationIconContainer)
                     mView.findViewById(
                             com.android.systemui.res.R.id.left_aligned_notification_icon_container);
@@ -599,12 +604,12 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                     mAodIconsBindHandle.dispose();
                 }
                 if (nic != null) {
-                    nic.setOnLockScreen(true);
                     final DisposableHandle viewHandle = NotificationIconContainerViewBinder.bind(
                             nic,
                             mAodIconsViewModel,
                             mConfigurationState,
                             mConfigurationController,
+                            mIconViewBindingFailureTracker,
                             mAodIconViewStore);
                     final DisposableHandle visHandle = KeyguardRootViewBinder.bindAodIconVisibility(
                             nic,

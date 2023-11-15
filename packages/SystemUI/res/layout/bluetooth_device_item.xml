@@ -21,7 +21,7 @@
     style="@style/BluetoothTileDialog.Device"
     android:layout_width="match_parent"
     android:layout_height="@dimen/bluetooth_dialog_device_height"
-    android:paddingEnd="24dp"
+    android:paddingEnd="0dp"
     android:paddingStart="20dp"
     android:layout_marginBottom="4dp">
 
@@ -86,6 +86,7 @@
         android:id="@+id/gear_icon_image"
         android:layout_width="0dp"
         android:layout_height="24dp"
+        android:paddingEnd="24dp"
         android:src="@drawable/ic_settings_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

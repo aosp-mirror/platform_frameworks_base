@@ -521,7 +521,7 @@
     <color name="system_surface_dim_dark">#121316</color>
     <color name="system_surface_variant_dark">#44474F</color>
     <color name="system_on_surface_variant_dark">#C4C6D0</color>
-    <color name="system_outline_dark">#72747D</color>
+    <color name="system_outline_dark">#8E9099</color>
     <color name="system_outline_variant_dark">#444746</color>
     <color name="system_error_dark">#FFB4A8</color>
     <color name="system_on_error_dark">#690001</color>

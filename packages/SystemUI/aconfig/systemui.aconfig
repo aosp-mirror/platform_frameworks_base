@@ -107,8 +107,16 @@ flag {
 }
 
 flag {
-   name: "qs_new_pipeline"
-   namespace: "systemui"
-   description: "Use the new pipeline for Quick Settings. Should have no behavior changes."
-   bug: "241772429"
+    name: "qs_new_pipeline"
+    namespace: "systemui"
+    description: "Use the new pipeline for Quick Settings. Should have no behavior changes."
+    bug: "241772429"
+}
+
+flag {
+    name: "coroutine_tracing"
+    namespace: "systemui"
+    description: "Adds thread-local data to System UI's global coroutine scopes to "
+        "allow for tracing of coroutine continuations using System UI's tracinglib"
+    bug: "289353932"
 }

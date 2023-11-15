@@ -53,7 +53,6 @@ import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags.ALTERNATE_BOUNCER_VIEW
 import com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED
-import com.android.systemui.flags.Flags.MIGRATE_NSSL
 import com.android.systemui.flags.Flags.REVAMPED_BOUNCER_MESSAGES
 import com.android.systemui.flags.Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION
 import com.android.systemui.flags.Flags.TRACKPAD_GESTURE_COMMON
@@ -67,6 +66,7 @@ import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepo
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.log.BouncerLogger
@@ -198,7 +198,6 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         featureFlagsClassic.set(SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         featureFlagsClassic.set(REVAMPED_BOUNCER_MESSAGES, true)
         featureFlagsClassic.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
-        featureFlagsClassic.set(MIGRATE_NSSL, false)
         featureFlagsClassic.set(ALTERNATE_BOUNCER_VIEW, false)
 
         mCommunalRepository = FakeCommunalRepository()
@@ -468,7 +467,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         // AND the lock icon wants the touch
         whenever(lockIconViewController.willHandleTouchWhileDozing(DOWN_EVENT)).thenReturn(true)
 
-        featureFlagsClassic.set(MIGRATE_NSSL, true)
+        mSetFlagsRule.enableFlags(KeyguardShadeMigrationNssl.FLAG_NAME)
 
         // THEN touch should NOT be intercepted by NotificationShade
         assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isFalse()
@@ -487,7 +486,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         whenever(quickSettingsController.shouldQuickSettingsIntercept(any(), any(), any()))
             .thenReturn(false)
 
-        featureFlagsClassic.set(MIGRATE_NSSL, true)
+        mSetFlagsRule.enableFlags(KeyguardShadeMigrationNssl.FLAG_NAME)
 
         // THEN touch should NOT be intercepted by NotificationShade
         assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isTrue()
@@ -506,7 +505,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         whenever(quickSettingsController.shouldQuickSettingsIntercept(any(), any(), any()))
             .thenReturn(true)
 
-        featureFlagsClassic.set(MIGRATE_NSSL, true)
+        mSetFlagsRule.enableFlags(KeyguardShadeMigrationNssl.FLAG_NAME)
 
         // THEN touch should NOT be intercepted by NotificationShade
         assertThat(interactionEventHandler.shouldInterceptTouchEvent(DOWN_EVENT)).isTrue()

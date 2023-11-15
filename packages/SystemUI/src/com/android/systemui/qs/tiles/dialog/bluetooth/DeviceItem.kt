@@ -49,5 +49,6 @@ data class DeviceItem(
     val connectionSummary: String = "",
     val iconWithDescription: Pair<Drawable, String>? = null,
     val background: Int? = null,
-    var isEnabled: Boolean = true
+    var isEnabled: Boolean = true,
+    var actionAccessibilityLabel: String = "",
 )

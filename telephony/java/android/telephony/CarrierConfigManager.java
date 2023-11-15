@@ -8875,12 +8875,35 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "child_session_aes_ctr_key_size_int_array";
 
         /**
+         * List of supported key sizes for AES Galois/Counter Mode (GCM) encryption mode
+         * of child session.
+         * Possible values are:
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_UNUSED},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_128},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_192},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_256}
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_AEAD_ALGORITHMS)
+        public static final String KEY_CHILD_SESSION_AES_GCM_KEY_SIZE_INT_ARRAY =
+                KEY_PREFIX + "child_session_aes_gcm_key_size_int_array";
+
+        /**
          * List of supported encryption algorithms for child session. Possible values are
          * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CBC},
          * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CTR}
          */
         public static final String KEY_SUPPORTED_CHILD_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY =
                 KEY_PREFIX + "supported_child_session_encryption_algorithms_int_array";
+
+        /**
+         * List of supported AEAD algorithms for child session. Possible values are
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_8},
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_12},
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_16}
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_AEAD_ALGORITHMS)
+        public static final String KEY_SUPPORTED_CHILD_SESSION_AEAD_ALGORITHMS_INT_ARRAY =
+                KEY_PREFIX + "supported_child_session_aead_algorithms_int_array";
 
         /**
          * Time in seconds after which the IKE session is terminated if rekey procedure is not
@@ -8919,12 +8942,35 @@ public class CarrierConfigManager {
                  KEY_PREFIX + "ike_session_encryption_aes_ctr_key_size_int_array";
 
         /**
+         * List of supported key sizes for AES Galois/Counter Mode (GCM) encryption mode
+         * of IKE session.
+         * Possible values -
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_UNUSED},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_128},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_192},
+         * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_AES_256}
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_AEAD_ALGORITHMS)
+        public static final String KEY_IKE_SESSION_AES_GCM_KEY_SIZE_INT_ARRAY =
+                KEY_PREFIX + "ike_session_encryption_aes_gcm_key_size_int_array";
+
+        /**
          * List of supported encryption algorithms for IKE session. Possible values are
          * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CBC},
          * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_CTR}
          */
         public static final String KEY_SUPPORTED_IKE_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY =
                 KEY_PREFIX + "supported_ike_session_encryption_algorithms_int_array";
+
+        /**
+         * List of supported AEAD algorithms for IKE session. Possible values are
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_8},
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_12},
+         * {@link android.net.ipsec.ike.SaProposal#ENCRYPTION_ALGORITHM_AES_GCM_16}
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_AEAD_ALGORITHMS)
+        public static final String KEY_SUPPORTED_IKE_SESSION_AEAD_ALGORITHMS_INT_ARRAY =
+                KEY_PREFIX + "supported_ike_session_aead_algorithms_int_array";
 
         /**
          * List of supported integrity algorithms for IKE session. Possible values are
@@ -9156,8 +9202,12 @@ public class CarrierConfigManager {
                     KEY_SUPPORTED_IKE_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY,
                     new int[] {SaProposal.ENCRYPTION_ALGORITHM_AES_CBC});
             defaults.putIntArray(
+                    KEY_SUPPORTED_IKE_SESSION_AEAD_ALGORITHMS_INT_ARRAY, new int[] {});
+            defaults.putIntArray(
                     KEY_SUPPORTED_CHILD_SESSION_ENCRYPTION_ALGORITHMS_INT_ARRAY,
                     new int[] {SaProposal.ENCRYPTION_ALGORITHM_AES_CBC});
+            defaults.putIntArray(
+                    KEY_SUPPORTED_CHILD_SESSION_AEAD_ALGORITHMS_INT_ARRAY, new int[] {});
             defaults.putIntArray(
                     KEY_SUPPORTED_INTEGRITY_ALGORITHMS_INT_ARRAY,
                     new int[] {
@@ -9206,6 +9256,10 @@ public class CarrierConfigManager {
                       SaProposal.KEY_LEN_AES_128,
                       SaProposal.KEY_LEN_AES_192,
                       SaProposal.KEY_LEN_AES_256});
+            defaults.putIntArray(
+                    KEY_IKE_SESSION_AES_GCM_KEY_SIZE_INT_ARRAY, new int[] {});
+            defaults.putIntArray(
+                    KEY_CHILD_SESSION_AES_GCM_KEY_SIZE_INT_ARRAY, new int[] {});
             defaults.putIntArray(
                     KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY,
                     new int[] {EPDG_ADDRESS_PLMN, EPDG_ADDRESS_STATIC});

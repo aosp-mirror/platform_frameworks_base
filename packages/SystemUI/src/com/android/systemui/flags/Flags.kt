@@ -135,14 +135,6 @@ object Flags {
             "lockscreen_custom_clocks"
         )
 
-    // TODO(b/286092087): Tracking Bug
-    @JvmField
-    val ENABLE_SYSTEM_UI_DREAM_CONTROLLER = unreleasedFlag("enable_system_ui_dream_controller")
-
-    // TODO(b/288287730): Tracking Bug
-    @JvmField
-    val ENABLE_SYSTEM_UI_DREAM_HOSTING = unreleasedFlag("enable_system_ui_dream_hosting")
-
     /**
      * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
      * the digits when the clock moves.
@@ -253,14 +245,6 @@ object Flags {
 
     // TODO(b/287268101): Tracking bug.
     @JvmField val TRANSIT_CLOCK = releasedFlag("lockscreen_custom_transit_clock")
-
-    /** Migrate the NSSL to the a sibling to both the panel and keyguard root view. */
-    // TODO(b/288074305): Tracking bug.
-    @JvmField val MIGRATE_NSSL = unreleasedFlag("migrate_nssl")
-
-    /** Migrate the status view from the notification panel to keyguard root view. */
-    // TODO(b/291767565): Tracking bug.
-    @JvmField val MIGRATE_KEYGUARD_STATUS_VIEW = unreleasedFlag("migrate_keyguard_status_view")
 
     /** Migrate the status bar view on keyguard from notification panel to keyguard root view. */
     // TODO(b/299115332): Tracking Bug.

@@ -25,6 +25,8 @@ import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_STACK_
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.wm.shell.bubbles.BubblePositioner.NUM_VISIBLE_WHEN_RESTING;
+import static com.android.wm.shell.bubbles.BubblePositioner.StackPinnedEdge.LEFT;
+import static com.android.wm.shell.bubbles.BubblePositioner.StackPinnedEdge.RIGHT;
 import static com.android.wm.shell.common.bubbles.BubbleConstants.BUBBLE_EXPANDED_SCRIM_ALPHA;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BUBBLES;
 
@@ -1296,6 +1298,9 @@ public class BubbleStackView extends FrameLayout
         return shouldShow;
     }
 
+    /**
+     * Show manage education if should show and was not showing before.
+     */
     private void maybeShowManageEdu() {
         if (!shouldShowManageEdu()) {
             return;
@@ -1304,7 +1309,16 @@ public class BubbleStackView extends FrameLayout
             mManageEduView = new ManageEducationView(mContext, mPositioner);
             addView(mManageEduView);
         }
-        mManageEduView.show(mExpandedBubble.getExpandedView());
+        showManageEdu();
+    }
+
+    /**
+     * Show manage education if was not showing before.
+     */
+    private void showManageEdu() {
+        if (mExpandedBubble == null || mExpandedBubble.getExpandedView() == null) return;
+        mManageEduView.show(mExpandedBubble.getExpandedView(),
+                mStackAnimationController.isStackOnLeftSide());
     }
 
     @VisibleForTesting
@@ -1350,10 +1364,21 @@ public class BubbleStackView extends FrameLayout
             mStackEduView = new StackEducationView(mContext, mPositioner, mBubbleController);
             addView(mStackEduView);
         }
+        return showStackEdu();
+    }
+
+    /**
+     * @return true if education view for the collapsed stack was not showing before.
+     */
+    private boolean showStackEdu() {
+        // Stack appears on top of the education views
         mBubbleContainer.bringToFront();
         // Ensure the stack is in the correct spot
-        mStackAnimationController.setStackPosition(mPositioner.getDefaultStartPosition());
-        return mStackEduView.show(mPositioner.getDefaultStartPosition());
+        PointF position = mPositioner.getStartPosition(
+                mStackAnimationController.isStackOnLeftSide() ? LEFT : RIGHT);
+        // Animate stack to the position
+        mStackAnimationController.springStackAfterFling(position.x, position.y);
+        return mStackEduView.show(position);
     }
 
     @VisibleForTesting
@@ -1367,16 +1392,13 @@ public class BubbleStackView extends FrameLayout
             removeView(mStackEduView);
             mStackEduView = new StackEducationView(mContext, mPositioner, mBubbleController);
             addView(mStackEduView);
-            mBubbleContainer.bringToFront(); // Stack appears on top of the stack education
-            // Ensure the stack is in the correct spot
-            mStackAnimationController.setStackPosition(mPositioner.getDefaultStartPosition());
-            mStackEduView.show(mPositioner.getDefaultStartPosition());
+            showStackEdu();
         }
         if (isManageEduVisible()) {
             removeView(mManageEduView);
             mManageEduView = new ManageEducationView(mContext, mPositioner);
             addView(mManageEduView);
-            mManageEduView.show(mExpandedBubble.getExpandedView());
+            showManageEdu();
         }
     }
 

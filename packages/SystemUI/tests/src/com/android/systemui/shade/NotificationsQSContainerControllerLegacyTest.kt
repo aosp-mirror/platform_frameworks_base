@@ -65,7 +65,10 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-/** Uses Flags.MIGRATE_NSSL set to false. If all goes well, this set of tests will be deleted. */
+/**
+ * Uses Flags.KEYGUARD_STATUS_VIEW_MIGRATE_NSSL set to false. If all goes well, this set of tests
+ * will be deleted.
+ */
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
@@ -101,11 +104,7 @@ class NotificationsQSContainerControllerLegacyTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         fakeSystemClock = FakeSystemClock()
         delayableExecutor = FakeExecutor(fakeSystemClock)
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.MIGRATE_NSSL, false)
-                set(Flags.QS_CONTAINER_GRAPH_OPTIMIZER, false)
-            }
+        featureFlags = FakeFeatureFlags().apply { set(Flags.QS_CONTAINER_GRAPH_OPTIMIZER, false) }
         mContext.ensureTestableResources()
         whenever(view.context).thenReturn(mContext)
         whenever(view.resources).thenReturn(mContext.resources)

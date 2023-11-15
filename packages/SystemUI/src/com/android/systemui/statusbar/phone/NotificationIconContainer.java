@@ -141,8 +141,10 @@ public class NotificationIconContainer extends ViewGroup {
     private int mMaxStaticIcons;
     private boolean mDozing;
     private boolean mOnLockScreen;
-    private boolean mOverrideIconColor;
+    private int mSpeedBumpIndex = -1;
 
+    private int mMaxIcons = Integer.MAX_VALUE;
+    private boolean mOverrideIconColor;
     private boolean mIsStaticLayout = true;
     private final HashMap<View, IconState> mIconStates = new HashMap<>();
     private int mDotPadding;
@@ -153,7 +155,6 @@ public class NotificationIconContainer extends ViewGroup {
     private boolean mChangingViewPositions;
     private int mAddAnimationStartIndex = -1;
     private int mCannedAnimationStartIndex = -1;
-    private int mSpeedBumpIndex = -1;
     private int mIconSize;
     private boolean mDisallowNextAnimation;
     private boolean mAnimationsEnabled = true;
@@ -170,6 +171,7 @@ public class NotificationIconContainer extends ViewGroup {
     private View mIsolatedIconForAnimation;
     private int mThemedTextColorPrimary;
     private Runnable mIsolatedIconAnimationEndRunnable;
+    private boolean mUseIncreasedIconScale;
 
     public NotificationIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -436,18 +438,24 @@ public class NotificationIconContainer extends ViewGroup {
         if (numIcons == 0) {
             return 0f;
         }
-        final float contentWidth =
-                mIconSize * MathUtils.min(numIcons, mMaxIconsOnLockscreen + 1);
-        return getActualPaddingStart()
-                + contentWidth
-                + getActualPaddingEnd();
+        final float contentWidth;
+        if (NotificationIconContainerRefactor.isEnabled()) {
+            contentWidth = mIconSize * numIcons;
+        } else {
+            contentWidth = mIconSize * MathUtils.min(numIcons, mMaxIconsOnLockscreen + 1);
+        }
+        return getActualPaddingStart() + contentWidth + getActualPaddingEnd();
     }
 
     @VisibleForTesting
     boolean shouldForceOverflow(int i, int speedBumpIndex, float iconAppearAmount,
             int maxVisibleIcons) {
-        return speedBumpIndex != -1 && i >= speedBumpIndex
-                && iconAppearAmount > 0.0f || i >= maxVisibleIcons;
+        if (NotificationIconContainerRefactor.isEnabled()) {
+            return i >= maxVisibleIcons && iconAppearAmount > 0.0f;
+        } else {
+            return speedBumpIndex != -1 && i >= speedBumpIndex
+                    && iconAppearAmount > 0.0f || i >= maxVisibleIcons;
+        }
     }
 
     @VisibleForTesting
@@ -502,9 +510,8 @@ public class NotificationIconContainer extends ViewGroup {
                 firstOverflowIndex = i;
                 mVisualOverflowStart = translationX;
             }
-            final float drawingScale = mOnLockScreen && view instanceof StatusBarIconView
-                    ? ((StatusBarIconView) view).getIconScaleIncreased()
-                    : 1f;
+
+            final float drawingScale = getDrawingScale(view);
             translationX += iconState.iconAppearAmount * view.getWidth() * drawingScale;
         }
         mIsShowingOverflowDot = false;
@@ -554,9 +561,26 @@ public class NotificationIconContainer extends ViewGroup {
         }
     }
 
+    private float getDrawingScale(View view) {
+        final boolean useIncreasedScale = NotificationIconContainerRefactor.isEnabled()
+                ? mUseIncreasedIconScale
+                : mOnLockScreen;
+        return useIncreasedScale && view instanceof StatusBarIconView
+                ? ((StatusBarIconView) view).getIconScaleIncreased()
+                : 1f;
+    }
+
+    public void setUseIncreasedIconScale(boolean useIncreasedIconScale) {
+        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return;
+        mUseIncreasedIconScale = useIncreasedIconScale;
+    }
+
     private int getMaxVisibleIcons(int childCount) {
-        return mOnLockScreen ? mMaxIconsOnAod :
-                mIsStaticLayout ? mMaxStaticIcons : childCount;
+        if (NotificationIconContainerRefactor.isEnabled()) {
+            return mMaxIcons;
+        } else {
+            return mOnLockScreen ? mMaxIconsOnAod : mIsStaticLayout ? mMaxStaticIcons : childCount;
+        }
     }
 
     private float getLayoutEnd() {
@@ -673,7 +697,13 @@ public class NotificationIconContainer extends ViewGroup {
     }
 
     public void setSpeedBumpIndex(int speedBumpIndex) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
         mSpeedBumpIndex = speedBumpIndex;
+    }
+
+    public void setMaxIconsAmount(int maxIcons) {
+        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return;
+        mMaxIcons = maxIcons;
     }
 
     public int getIconSize() {
@@ -740,6 +770,7 @@ public class NotificationIconContainer extends ViewGroup {
      * configured to. Depending on these values, the layout of the AOD icons change.
      */
     public void setOnLockScreen(boolean onLockScreen) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
         mOnLockScreen = onLockScreen;
     }
 

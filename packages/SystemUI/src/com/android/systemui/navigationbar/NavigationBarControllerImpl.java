@@ -35,6 +35,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseBooleanArray;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.View;
@@ -93,6 +94,9 @@ public class NavigationBarControllerImpl implements
     /** A displayId - nav bar maps. */
     @VisibleForTesting
     SparseArray<NavigationBar> mNavigationBars = new SparseArray<>();
+
+    /** Local cache for {@link IWindowManager#hasNavigationBar(int)}. */
+    private SparseBooleanArray mHasNavBar = new SparseBooleanArray();
 
     // Tracks config changes that will actually recreate the nav bar
     private final InterestingConfigChanges mConfigChanges = new InterestingConfigChanges(
@@ -221,10 +225,16 @@ public class NavigationBarControllerImpl implements
     }
 
     private boolean shouldCreateNavBarAndTaskBar(int displayId) {
+        if (mHasNavBar.indexOfKey(displayId) > -1) {
+            return mHasNavBar.get(displayId);
+        }
+
         final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
 
         try {
-            return wms.hasNavigationBar(displayId);
+            boolean hasNavigationBar = wms.hasNavigationBar(displayId);
+            mHasNavBar.put(displayId, hasNavigationBar);
+            return hasNavigationBar;
         } catch (RemoteException e) {
             // Cannot get wms, just return false with warning message.
             Log.w(TAG, "Cannot get WindowManager.");

@@ -17,13 +17,40 @@
 package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
-
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl
+import com.android.systemui.shade.domain.interactor.ShadeInteractorSceneContainerImpl
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import javax.inject.Provider
 
 /** Module for classes related to the notification shade. */
 @Module(includes = [StartShadeModule::class, ShadeViewProviderModule::class])
 abstract class ShadeModule {
+    companion object {
+        @Provides
+        @SysUISingleton
+        fun provideBaseShadeInteractor(
+            sceneContainerFlags: SceneContainerFlags,
+            sceneContainerOn: Provider<ShadeInteractorSceneContainerImpl>,
+            sceneContainerOff: Provider<ShadeInteractorLegacyImpl>
+        ): BaseShadeInteractor {
+            return if (sceneContainerFlags.isEnabled()) {
+                sceneContainerOn.get()
+            } else {
+                sceneContainerOff.get()
+            }
+        }
+    }
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeInteractor(si: ShadeInteractorImpl): ShadeInteractor
+
     @Binds
     @SysUISingleton
     abstract fun bindsShadeViewController(

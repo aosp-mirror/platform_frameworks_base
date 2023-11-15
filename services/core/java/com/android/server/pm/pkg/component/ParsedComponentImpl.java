@@ -32,6 +32,8 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.component.ParsedComponent;
+import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
 import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;

@@ -43,9 +43,9 @@ import com.android.systemui.util.time.SystemClock
 class PeekDisabledSuppressor(
     private val globalSettings: GlobalSettings,
     private val headsUpManager: HeadsUpManager,
-    private val logger: NotificationInterruptLogger,
+    private val logger: VisualInterruptionDecisionLogger,
     @Main private val mainHandler: Handler,
-) : VisualInterruptionCondition(types = setOf(PEEK), reason = "peek setting disabled") {
+) : VisualInterruptionCondition(types = setOf(PEEK), reason = "peek disabled by global setting") {
     private var isEnabled = false
 
     override fun shouldSuppress(): Boolean = !isEnabled
@@ -87,16 +87,13 @@ class PeekDisabledSuppressor(
 class PulseDisabledSuppressor(
     private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
     private val userTracker: UserTracker,
-) : VisualInterruptionCondition(types = setOf(PULSE), reason = "pulse setting disabled") {
+) : VisualInterruptionCondition(types = setOf(PULSE), reason = "pulse disabled by user setting") {
     override fun shouldSuppress(): Boolean =
         !ambientDisplayConfiguration.pulseOnNotificationEnabled(userTracker.userId)
 }
 
 class PulseBatterySaverSuppressor(private val batteryController: BatteryController) :
-    VisualInterruptionCondition(
-        types = setOf(PULSE),
-        reason = "pulsing disabled by battery saver"
-    ) {
+    VisualInterruptionCondition(types = setOf(PULSE), reason = "pulse disabled by battery saver") {
     override fun shouldSuppress() = batteryController.isAodPowerSave()
 }
 
@@ -128,14 +125,14 @@ class PeekDndSuppressor() :
 }
 
 class PeekNotImportantSuppressor() :
-    VisualInterruptionFilter(types = setOf(PEEK), reason = "not important") {
+    VisualInterruptionFilter(types = setOf(PEEK), reason = "importance < HIGH") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.importance < IMPORTANCE_HIGH
 }
 
 class PeekDeviceNotInUseSuppressor(
     private val powerManager: PowerManager,
     private val statusBarStateController: StatusBarStateController
-) : VisualInterruptionCondition(types = setOf(PEEK), reason = "not in use") {
+) : VisualInterruptionCondition(types = setOf(PEEK), reason = "device not in use") {
     override fun shouldSuppress() =
         when {
             !powerManager.isScreenOn || statusBarStateController.isDreaming -> true
@@ -144,7 +141,7 @@ class PeekDeviceNotInUseSuppressor(
 }
 
 class PeekOldWhenSuppressor(private val systemClock: SystemClock) :
-    VisualInterruptionFilter(types = setOf(PEEK), reason = "old when") {
+    VisualInterruptionFilter(types = setOf(PEEK), reason = "has old `when`") {
     private fun whenAge(entry: NotificationEntry) =
         systemClock.currentTimeMillis() - entry.sbn.notification.`when`
 
@@ -165,21 +162,21 @@ class PeekOldWhenSuppressor(private val systemClock: SystemClock) :
 }
 
 class PulseEffectSuppressor() :
-    VisualInterruptionFilter(types = setOf(PULSE), reason = "ambient effect suppressed") {
+    VisualInterruptionFilter(types = setOf(PULSE), reason = "suppressed by DND") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.shouldSuppressAmbient()
 }
 
 class PulseLockscreenVisibilityPrivateSuppressor() :
     VisualInterruptionFilter(
         types = setOf(PULSE),
-        reason = "notification hidden on lock screen by override"
+        reason = "hidden by lockscreen visibility override"
     ) {
     override fun shouldSuppress(entry: NotificationEntry) =
         entry.ranking.lockscreenVisibilityOverride == VISIBILITY_PRIVATE
 }
 
 class PulseLowImportanceSuppressor() :
-    VisualInterruptionFilter(types = setOf(PULSE), reason = "importance less than DEFAULT") {
+    VisualInterruptionFilter(types = setOf(PULSE), reason = "importance < DEFAULT") {
     override fun shouldSuppress(entry: NotificationEntry) = entry.importance < IMPORTANCE_DEFAULT
 }
 
@@ -198,12 +195,12 @@ class HunJustLaunchedFsiSuppressor() :
 }
 
 class BubbleNotAllowedSuppressor() :
-    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "not allowed") {
+    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "cannot bubble") {
     override fun shouldSuppress(entry: NotificationEntry) = !entry.canBubble()
 }
 
 class BubbleNoMetadataSuppressor() :
-    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "no bubble metadata") {
+    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "has no or invalid bubble metadata") {
 
     private fun isValidMetadata(metadata: BubbleMetadata?) =
         metadata != null && (metadata.intent != null || metadata.shortcutId != null)

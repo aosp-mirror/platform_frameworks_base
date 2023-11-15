@@ -92,6 +92,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     private int mIndexOfFirstViewInShelf = -1;
     private float mCornerAnimationDistance;
     private float mActualWidth = -1;
+    private int mMaxIconsOnLockscreen;
     private final RefactorFlag mSensitiveRevealAnim =
             RefactorFlag.forView(Flags.SENSITIVE_REVEAL_ANIM);
     private boolean mCanModifyColorOfNotifications;
@@ -136,6 +137,7 @@ public class NotificationShelf extends ActivatableNotificationView {
         Resources res = getResources();
         mStatusBarHeight = SystemBarUtils.getStatusBarHeight(mContext);
         mPaddingBetweenElements = res.getDimensionPixelSize(R.dimen.notification_divider_height);
+        mMaxIconsOnLockscreen = res.getInteger(R.integer.max_notif_icons_on_lockscreen);
 
         ViewGroup.LayoutParams layoutParams = getLayoutParams();
         final int newShelfHeight = res.getDimensionPixelOffset(R.dimen.notification_shelf_height);
@@ -227,7 +229,9 @@ public class NotificationShelf extends ActivatableNotificationView {
             } else {
                 viewState.setAlpha(1f - ambientState.getHideAmount());
             }
-            viewState.belowSpeedBump = getSpeedBumpIndex() == 0;
+            if (!NotificationIconContainerRefactor.isEnabled()) {
+                viewState.belowSpeedBump = getSpeedBumpIndex() == 0;
+            }
             viewState.hideSensitive = false;
             viewState.setXTranslation(getTranslationX());
             viewState.hasItemsInStableShelf = lastViewState.inShelf;
@@ -271,6 +275,7 @@ public class NotificationShelf extends ActivatableNotificationView {
     }
 
     private int getSpeedBumpIndex() {
+        NotificationIconContainerRefactor.assertInLegacyMode();
         return mHostLayout.getSpeedBumpIndex();
     }
 
@@ -280,9 +285,19 @@ public class NotificationShelf extends ActivatableNotificationView {
      */
     @VisibleForTesting
     public void updateActualWidth(float fractionToShade, float shortestWidth) {
+        NotificationIconContainerRefactor.assertInLegacyMode();
         final float actualWidth = mAmbientState.isOnKeyguard()
                 ? MathUtils.lerp(shortestWidth, getWidth(), fractionToShade)
                 : getWidth();
+        setBackgroundWidth((int) actualWidth);
+        if (mShelfIcons != null) {
+            mShelfIcons.setActualLayoutWidth((int) actualWidth);
+        }
+        mActualWidth = actualWidth;
+    }
+
+    private void setActualWidth(float actualWidth) {
+        if (NotificationIconContainerRefactor.isUnexpectedlyInLegacyMode()) return;
         setBackgroundWidth((int) actualWidth);
         if (mShelfIcons != null) {
             mShelfIcons.setActualLayoutWidth((int) actualWidth);
@@ -467,12 +482,26 @@ public class NotificationShelf extends ActivatableNotificationView {
 
         final float fractionToShade = Interpolators.STANDARD.getInterpolation(
                 mAmbientState.getFractionToShade());
-        final float shortestWidth = mShelfIcons.calculateWidthFor(numViewsInShelf);
-        updateActualWidth(fractionToShade, shortestWidth);
+
+        if (NotificationIconContainerRefactor.isEnabled()) {
+            if (mAmbientState.isOnKeyguard()) {
+                float numViews = MathUtils.min(numViewsInShelf, mMaxIconsOnLockscreen + 1);
+                float shortestWidth = mShelfIcons.calculateWidthFor(numViews);
+                float actualWidth = MathUtils.lerp(shortestWidth, getWidth(), fractionToShade);
+                setActualWidth(actualWidth);
+            } else {
+                setActualWidth(getWidth());
+            }
+        } else {
+            final float shortestWidth = mShelfIcons.calculateWidthFor(numViewsInShelf);
+            updateActualWidth(fractionToShade, shortestWidth);
+        }
 
         // TODO(b/172289889) transition last icon in shelf to notification icon and vice versa.
         setVisibility(isHidden ? View.INVISIBLE : View.VISIBLE);
-        mShelfIcons.setSpeedBumpIndex(getSpeedBumpIndex());
+        if (!NotificationIconContainerRefactor.isEnabled()) {
+            mShelfIcons.setSpeedBumpIndex(getSpeedBumpIndex());
+        }
         mShelfIcons.calculateIconXTranslations();
         mShelfIcons.applyIconStates();
         for (int i = 0; i < getHostLayoutChildCount(); i++) {

@@ -51,10 +51,9 @@ import com.android.keyguard.logging.KeyguardLogger;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ViewHierarchyAnimator;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.plugins.ClockController;
@@ -100,7 +99,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
     private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
-    private final FeatureFlags mFeatureFlags;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final Rect mClipBounds = new Rect();
     private final KeyguardInteractor mKeyguardInteractor;
@@ -136,7 +134,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             DozeParameters dozeParameters,
             ScreenOffAnimationController screenOffAnimationController,
             KeyguardLogger logger,
-            FeatureFlags featureFlags,
             InteractionJankMonitor interactionJankMonitor,
             KeyguardInteractor keyguardInteractor,
             KeyguardTransitionInteractor keyguardTransitionInteractor,
@@ -149,9 +146,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mConfigurationController = configurationController;
         mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView, keyguardStateController,
                 dozeParameters, screenOffAnimationController, /* animateYPos= */ true,
-                featureFlags, logger.getBuffer());
+                logger.getBuffer());
         mInteractionJankMonitor = interactionJankMonitor;
-        mFeatureFlags = featureFlags;
         mDumpManager = dumpManager;
         mKeyguardInteractor = keyguardInteractor;
         mPowerInteractor = powerInteractor;
@@ -188,7 +184,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         mDumpManager.registerDumpable(getInstanceName(), this);
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (KeyguardShadeMigrationNssl.isEnabled()) {
             startCoroutines(EmptyCoroutineContext.INSTANCE);
         }
     }
@@ -454,7 +450,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         ConstraintSet constraintSet = new ConstraintSet();
         constraintSet.clone(layout);
         int guideline;
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (KeyguardShadeMigrationNssl.isEnabled()) {
             guideline = R.id.split_shade_guideline;
         } else {
             guideline = R.id.qs_edge_guideline;

@@ -5716,8 +5716,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         @Override
         public void onSessionForAccessibilityCreated(int accessibilityConnectionId,
-                IAccessibilityInputMethodSession session) {
+                IAccessibilityInputMethodSession session, @UserIdInt int userId) {
             synchronized (ImfLock.class) {
+                // TODO(b/305829876): Implement user ID verification
                 if (mCurClient != null) {
                     clearClientSessionForAccessibilityLocked(mCurClient, accessibilityConnectionId);
                     mCurClient.mAccessibilitySessions.put(accessibilityConnectionId,
@@ -5744,8 +5745,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         @Override
-        public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId) {
+        public void unbindAccessibilityFromCurrentClient(int accessibilityConnectionId,
+                @UserIdInt int userId) {
             synchronized (ImfLock.class) {
+                // TODO(b/305829876): Implement user ID verification
                 if (mCurClient != null) {
                     if (DEBUG) {
                         Slog.v(TAG, "unbindAccessibilityFromCurrentClientLocked: client="

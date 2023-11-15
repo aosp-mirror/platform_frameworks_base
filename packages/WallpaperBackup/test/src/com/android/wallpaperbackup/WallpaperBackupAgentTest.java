@@ -359,7 +359,7 @@ public class WallpaperBackupAgentTest {
     }
 
     @Test
-    public void testUpdateWallpaperComponent_doesApplyLater() throws IOException {
+    public void testUpdateWallpaperComponent_systemAndLock() throws IOException {
         mWallpaperBackupAgent.mIsDeviceInRestore = true;
         mWallpaperBackupAgent.updateWallpaperComponent(mWallpaperComponent,
                 /* which */ FLAG_LOCK | FLAG_SYSTEM);
@@ -377,7 +377,7 @@ public class WallpaperBackupAgentTest {
     }
 
     @Test
-    public void testUpdateWallpaperComponent_applyToLockFalse_doesApplyLaterOnlyToMainScreen()
+    public void testUpdateWallpaperComponent_systemOnly()
             throws IOException {
         mWallpaperBackupAgent.mIsDeviceInRestore = true;
 
@@ -617,7 +617,7 @@ public class WallpaperBackupAgentTest {
 
         mWallpaperBackupAgent.onRestoreFinished();
 
-        // wallpaper will be applied to home & lock screen, a success for both screens in expected
+        // wallpaper will be applied to home & lock screen, a success for both screens is expected
         DataTypeResult result = getLoggingResult(WALLPAPER_IMG_SYSTEM,
                 mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
         assertThat(result).isNotNull();

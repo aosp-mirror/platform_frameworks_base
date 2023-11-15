@@ -54,7 +54,10 @@ constructor(
 
     fun startToLockscreenTransition() {
         scope.launch {
-            if (transitionInteractor.startedKeyguardState.value == KeyguardState.DREAMING) {
+            if (
+                transitionInteractor.startedKeyguardState.replayCache.last() ==
+                    KeyguardState.DREAMING
+            ) {
                 startTransitionTo(KeyguardState.LOCKSCREEN)
             }
         }

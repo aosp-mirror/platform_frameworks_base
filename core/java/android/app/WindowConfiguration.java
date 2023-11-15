@@ -42,6 +42,8 @@ import android.view.Surface;
 import android.view.WindowManager;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
@@ -120,6 +122,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             WINDOWING_MODE_PINNED,
             WINDOWING_MODE_FREEFORM,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface WindowingMode {}
 
     /** The current activity type of the configuration. */
@@ -147,6 +150,7 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
             ACTIVITY_TYPE_ASSISTANT,
             ACTIVITY_TYPE_DREAM,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface ActivityType {}
 
     /** The current always on top status of the configuration. */

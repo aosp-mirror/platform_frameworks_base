@@ -149,6 +149,19 @@ public final class VirtualDeviceManager {
     @SystemApi
     public static final int LAUNCH_FAILURE_NO_ACTIVITY = 2;
 
+    /**
+     * Persistent device identifier corresponding to the default device.
+     *
+     * @see Context#DEVICE_ID_DEFAULT
+     * @see VirtualDevice#getPersistentDeviceId()
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_PERSISTENT_DEVICE_ID_API)
+    public static final String PERSISTENT_DEVICE_ID_DEFAULT =
+            "default:" + Context.DEVICE_ID_DEFAULT;
+
     private final IVirtualDeviceManager mService;
     private final Context mContext;
 
@@ -199,9 +212,10 @@ public final class VirtualDeviceManager {
      * existing virtual devices.</p>
      *
      * <p>Note that if a virtual device is closed and becomes invalid, the returned objects will
-     * not be updated and may contain stale values. Use a {@link VirtualDeviceListener} for real
-     * time updates of the availability of virtual devices.</p>
+     * not be updated and may contain stale values.</p>
      */
+    // TODO(b/310912420): Add "Use a VirtualDeviceListener for real time updates of the
+    // availability  of virtual devices." in the note paragraph above with a link annotation.
     @NonNull
     public List<android.companion.virtual.VirtualDevice> getVirtualDevices() {
         if (mService == null) {

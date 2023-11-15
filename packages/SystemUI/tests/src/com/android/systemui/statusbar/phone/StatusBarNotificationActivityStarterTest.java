@@ -163,7 +163,6 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
     @Mock
     private InteractionJankMonitor mJankMonitor;
     private FakePowerRepository mPowerRepository;
-    private PowerInteractor mPowerInteractor;
     @Mock
     private UserTracker mUserTracker;
     private final FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
@@ -214,7 +213,7 @@ public class StatusBarNotificationActivityStarterTest extends SysuiTestCase {
                 UserHandle.of(ActivityManager.getCurrentUser()));
 
         mPowerRepository = new FakePowerRepository();
-        mPowerInteractor = PowerInteractorFactory.create(
+        PowerInteractor mPowerInteractor = PowerInteractorFactory.create(
                 mPowerRepository,
                 new FalsingCollectorFake(),
                 mScreenOffAnimationController,

@@ -19,6 +19,7 @@ package com.android.systemui.bouncer.domain.interactor
 import android.content.Context
 import android.content.Intent
 import android.telecom.TelecomManager
+import android.telephony.euicc.EuiccManager
 import com.android.internal.util.EmergencyAffordanceManager
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -46,5 +47,10 @@ object BouncerInteractorModule {
         @Application applicationContext: Context,
     ): EmergencyAffordanceManager {
         return EmergencyAffordanceManager(applicationContext)
+    }
+
+    @Provides
+    fun provideEuiccManager(@Application applicationContext: Context): EuiccManager {
+        return applicationContext.getSystemService(Context.EUICC_SERVICE) as EuiccManager
     }
 }

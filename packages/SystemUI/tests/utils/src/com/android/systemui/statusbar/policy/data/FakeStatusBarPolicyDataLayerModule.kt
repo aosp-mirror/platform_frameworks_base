@@ -16,7 +16,14 @@
 package com.android.systemui.statusbar.policy.data
 
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepositoryModule
+import com.android.systemui.statusbar.policy.data.repository.FakeZenModeRepositoryModule
 import dagger.Module
 
-@Module(includes = [FakeDeviceProvisioningRepositoryModule::class])
+@Module(
+    includes =
+        [
+            FakeDeviceProvisioningRepositoryModule::class,
+            FakeZenModeRepositoryModule::class,
+        ]
+)
 object FakeStatusBarPolicyDataLayerModule

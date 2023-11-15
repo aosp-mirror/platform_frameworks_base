@@ -27,11 +27,11 @@ import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Patterns;
 
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.server.SystemConfig;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedActivity;
-import com.android.server.pm.pkg.component.ParsedIntentInfo;
 
 import java.util.List;
 import java.util.Objects;

@@ -69,7 +69,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
         }
         instance.setActivityToken(activityToken);
         instance.mTargetDisplayId = targetDisplayId;
-        instance.mConfiguration = configuration;
+        instance.mConfiguration = new Configuration(configuration);
 
         return instance;
     }
@@ -78,7 +78,7 @@ public class MoveToDisplayItem extends ActivityTransactionItem {
     public void recycle() {
         super.recycle();
         mTargetDisplayId = 0;
-        mConfiguration = Configuration.EMPTY;
+        mConfiguration = null;
         ObjectPool.recycle(this);
     }
 

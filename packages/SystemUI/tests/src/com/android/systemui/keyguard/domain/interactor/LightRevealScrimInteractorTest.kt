@@ -39,6 +39,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.Spy
@@ -120,6 +121,9 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
     @Test
     fun lightRevealEffect_startsAnimationOnlyForDifferentStateTargets() =
         testScope.runTest {
+            runCurrent()
+            reset(fakeLightRevealScrimRepository)
+
             fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     transitionState = TransitionState.STARTED,

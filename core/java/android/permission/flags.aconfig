@@ -44,6 +44,13 @@ flag {
 }
 
 flag {
+    name: "enhanced_confirmation_mode_apis"
+    namespace: "permissions"
+    description: "enable enhanced confirmation mode apis"
+    bug: "310220212"
+}
+
+flag {
   name: "op_enable_mobile_data_by_user"
   namespace: "permissions"
   description: "enables logging of the OP_ENABLE_MOBILE_DATA_BY_USER"

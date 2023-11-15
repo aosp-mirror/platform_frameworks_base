@@ -165,6 +165,7 @@
 
     <!-- AccessibilityShortcutChooserActivityTest permissions -->
     <uses-permission android:name="android.permission.MANAGE_ACCESSIBILITY" />
+    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
 
     <application
         android:theme="@style/Theme"

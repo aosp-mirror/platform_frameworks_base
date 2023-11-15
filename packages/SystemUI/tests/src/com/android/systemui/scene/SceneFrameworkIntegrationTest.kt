@@ -20,6 +20,7 @@ package com.android.systemui.scene
 
 import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
+import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
@@ -39,6 +40,7 @@ import com.android.systemui.model.SysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
+import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.domain.startable.SceneContainerStartable
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -182,6 +184,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private var bouncerSceneJob: Job? = null
 
+    private val qsFlexiglassAdapter = FakeQSSceneAdapter(inflateDelegate = { _, _ -> mock<View>() })
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -232,6 +236,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 applicationScope = testScope.backgroundScope,
                 deviceEntryInteractor = deviceEntryInteractor,
                 shadeHeaderViewModel = shadeHeaderViewModel,
+                qsSceneAdapter = qsFlexiglassAdapter,
             )
 
         utils.deviceEntryRepository.setUnlocked(false)
@@ -251,6 +256,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 falsingCollector = utils.falsingCollector(),
                 powerInteractor = powerInteractor,
                 bouncerInteractor = bouncerInteractor,
+                simBouncerInteractor = utils.simBouncerInteractor,
+                authenticationInteractor = utils.authenticationInteractor()
             )
         startable.start()
 
@@ -478,6 +485,32 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             verify(telecomManager).showInCallScreen(any())
         }
 
+    @Test
+    fun showBouncer_whenLockedSimIntroduced() =
+        testScope.runTest {
+            setAuthMethod(AuthenticationMethodModel.None)
+            introduceLockedSim()
+            assertCurrentScene(SceneKey.Bouncer)
+        }
+
+    @Test
+    fun goesToGone_whenSimUnlocked_whileDeviceUnlocked() =
+        testScope.runTest {
+            introduceLockedSim()
+            emulateUiSceneTransition(expectedVisible = true)
+            enterSimPin(authMethodAfterSimUnlock = AuthenticationMethodModel.None)
+            assertCurrentScene(SceneKey.Gone)
+        }
+
+    @Test
+    fun showLockscreen_whenSimUnlocked_whileDeviceLocked() =
+        testScope.runTest {
+            introduceLockedSim()
+            emulateUiSceneTransition(expectedVisible = true)
+            enterSimPin(authMethodAfterSimUnlock = AuthenticationMethodModel.Pin)
+            assertCurrentScene(SceneKey.Lockscreen)
+        }
+
     /**
      * Asserts that the current scene in the view-model matches what's expected.
      *
@@ -678,6 +711,35 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         runCurrent()
     }
 
+    /**
+     * Enters the correct PIN in the sim bouncer UI.
+     *
+     * Asserts that the current scene is [SceneKey.Bouncer] and that the current bouncer UI is a PIN
+     * before proceeding.
+     *
+     * Does not assert that the device is locked or unlocked.
+     */
+    private fun TestScope.enterSimPin(
+        authMethodAfterSimUnlock: AuthenticationMethodModel = AuthenticationMethodModel.None
+    ) {
+        assertWithMessage("Cannot enter PIN when not on the Bouncer scene!")
+            .that(getCurrentSceneInUi())
+            .isEqualTo(SceneKey.Bouncer)
+        val authMethodViewModel by collectLastValue(bouncerViewModel.authMethodViewModel)
+        assertWithMessage("Cannot enter PIN when not using a PIN authentication method!")
+            .that(authMethodViewModel)
+            .isInstanceOf(PinBouncerViewModel::class.java)
+
+        val pinBouncerViewModel = authMethodViewModel as PinBouncerViewModel
+        FakeAuthenticationRepository.DEFAULT_PIN.forEach { digit ->
+            pinBouncerViewModel.onPinButtonClicked(digit)
+        }
+        pinBouncerViewModel.onAuthenticateButtonClicked()
+        setAuthMethod(authMethodAfterSimUnlock)
+        utils.mobileConnectionsRepository.isAnySimSecure.value = false
+        runCurrent()
+    }
+
     /** Changes device wakefulness state from asleep to awake, going through intermediary states. */
     private fun TestScope.wakeUpDevice() {
         val wakefulnessModel = powerInteractor.detailedWakefulness.value
@@ -717,5 +779,11 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
             onImeVisibilityChanged(false)
             runCurrent()
         }
+    }
+
+    private fun TestScope.introduceLockedSim() {
+        setAuthMethod(AuthenticationMethodModel.Sim)
+        utils.mobileConnectionsRepository.isAnySimSecure.value = true
+        runCurrent()
     }
 }

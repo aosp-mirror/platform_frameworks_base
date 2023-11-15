@@ -32,6 +32,7 @@ import android.util.Slog;
 
 import com.android.internal.content.ReferrerIntent;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -51,7 +52,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
 
     /**
      * A record that was properly configured for relaunch. Execution will be cancelled if not
-     * initialized after {@link #preExecute(ClientTransactionHandler, IBinder)}.
+     * initialized after {@link #preExecute(ClientTransactionHandler)}.
      */
     private ActivityClientRecord mActivityClientRecord;
 
@@ -99,10 +100,11 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
             instance = new ActivityRelaunchItem();
         }
         instance.setActivityToken(activityToken);
-        instance.mPendingResults = pendingResults;
-        instance.mPendingNewIntents = pendingNewIntents;
+        instance.mPendingResults = pendingResults != null ? new ArrayList<>(pendingResults) : null;
+        instance.mPendingNewIntents =
+                pendingNewIntents != null ? new ArrayList<>(pendingNewIntents) : null;
         instance.mConfigChanges = configChanges;
-        instance.mConfig = config;
+        instance.mConfig = new MergedConfiguration(config);
         instance.mPreserveWindow = preserveWindow;
 
         return instance;

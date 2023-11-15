@@ -26,6 +26,7 @@ import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.util.kotlin.pairwise
@@ -52,6 +53,8 @@ constructor(
     private val authenticationInteractor: AuthenticationInteractor,
     flags: SceneContainerFlags,
     private val falsingInteractor: FalsingInteractor,
+    private val powerInteractor: PowerInteractor,
+    private val simBouncerInteractor: SimBouncerInteractor,
 ) {
 
     /** The user-facing message to show in the bouncer. */
@@ -128,6 +131,7 @@ constructor(
      * user's pocket or by the user's face while holding their device up to their ear.
      */
     fun onIntentionalUserInput() {
+        powerInteractor.onUserTouch()
         falsingInteractor.updateFalseConfidence(FalsingClassifier.Result.passed(0.6))
     }
 
@@ -143,6 +147,10 @@ constructor(
                 /* reason= */ "empty pattern input",
             )
         )
+    }
+
+    fun setMessage(message: String?) {
+        repository.setMessage(message)
     }
 
     /**
@@ -183,6 +191,12 @@ constructor(
         if (input.isEmpty()) {
             return AuthenticationResult.SKIPPED
         }
+
+        if (authenticationInteractor.getAuthenticationMethod() == AuthenticationMethodModel.Sim) {
+            // We authenticate sim in SimInteractor
+            return AuthenticationResult.SKIPPED
+        }
+
         // Switching to the application scope here since this method is often called from
         // view-models, whose lifecycle (and thus scope) is shorter than this interactor.
         // This allows the task to continue running properly even when the calling scope has been
@@ -220,6 +234,7 @@ constructor(
 
     private fun promptMessage(authMethod: AuthenticationMethodModel): String {
         return when (authMethod) {
+            is AuthenticationMethodModel.Sim -> simBouncerInteractor.getDefaultMessage()
             is AuthenticationMethodModel.Pin ->
                 applicationContext.getString(R.string.keyguard_enter_your_pin)
             is AuthenticationMethodModel.Password ->

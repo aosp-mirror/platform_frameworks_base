@@ -46,6 +46,12 @@ public class BubblePositioner {
             ? "BubblePositioner"
             : BubbleDebugConfig.TAG_BUBBLES;
 
+    /** The screen edge the bubble stack is pinned to */
+    public enum StackPinnedEdge {
+        LEFT,
+        RIGHT
+    }
+
     /** When the bubbles are collapsed in a stack only some of them are shown, this is how many. **/
     public static final int NUM_VISIBLE_WHEN_RESTING = 2;
     /** Indicates a bubble's height should be the maximum available space. **/
@@ -694,6 +700,15 @@ public class BubblePositioner {
         final boolean startOnLeft = isAppBubble
                 ? layoutDirection == LAYOUT_DIRECTION_RTL
                 : layoutDirection != LAYOUT_DIRECTION_RTL;
+        return getStartPosition(startOnLeft ? StackPinnedEdge.LEFT : StackPinnedEdge.RIGHT);
+    }
+
+    /**
+     * The stack position to use if user education is being shown.
+     *
+     * @param stackPinnedEdge the screen edge the stack is pinned to.
+     */
+    public PointF getStartPosition(StackPinnedEdge stackPinnedEdge) {
         final RectF allowableStackPositionRegion = getAllowableStackPositionRegion(
                 1 /* default starts with 1 bubble */);
         if (isLargeScreen()) {
@@ -702,7 +717,7 @@ public class BubblePositioner {
             final float desiredY = mScreenRect.height() / 2f - (mBubbleSize / 2f);
             final float offset = desiredY / mScreenRect.height();
             return new BubbleStackView.RelativeStackPosition(
-                    startOnLeft,
+                    stackPinnedEdge == StackPinnedEdge.LEFT,
                     offset)
                     .getAbsolutePositionInRegion(allowableStackPositionRegion);
         } else {
@@ -710,7 +725,7 @@ public class BubblePositioner {
                     R.dimen.bubble_stack_starting_offset_y);
             // TODO: placement bug here because mPositionRect doesn't handle the overhanging edge
             return new BubbleStackView.RelativeStackPosition(
-                    startOnLeft,
+                    stackPinnedEdge == StackPinnedEdge.LEFT,
                     startingVerticalOffset / mPositionRect.height())
                     .getAbsolutePositionInRegion(allowableStackPositionRegion);
         }

@@ -18,8 +18,14 @@ package com.android.systemui.qs.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
+import com.android.systemui.scene.shared.model.Direction
+import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.scene.shared.model.SceneModel
+import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.map
 
 /** Models UI state and handles user input for the quick settings scene. */
 @SysUISingleton
@@ -28,7 +34,20 @@ class QuickSettingsSceneViewModel
 constructor(
     private val deviceEntryInteractor: DeviceEntryInteractor,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
+    val qsSceneAdapter: QSSceneAdapter,
 ) {
     /** Notifies that some content in quick settings was clicked. */
     fun onContentClicked() = deviceEntryInteractor.attemptDeviceEntry()
+
+    val destinationScenes =
+        qsSceneAdapter.isCustomizing.map { customizing ->
+            if (customizing) {
+                mapOf<UserAction, SceneModel>(UserAction.Back to SceneModel(SceneKey.QuickSettings))
+            } else {
+                mapOf(
+                    UserAction.Back to SceneModel(SceneKey.Shade),
+                    UserAction.Swipe(Direction.UP) to SceneModel(SceneKey.Shade),
+                )
+            }
+        }
 }

@@ -3147,4 +3147,16 @@ interface ITelephony {
             + "android.Manifest.permission.SATELLITE_COMMUNICATION)")
     void unregisterForSatelliteCapabilitiesChanged(int subId,
             in ISatelliteCapabilitiesCallback callback);
+
+    /**
+     * This API can be used by only CTS to override the cached value for the device overlay config
+     * value : config_send_satellite_datagram_to_modem_in_demo_mode, which determines whether
+     * outgoing satellite datagrams should be sent to modem in demo mode.
+     *
+     * @param shouldSendToDemoMode Whether send datagram in demo mode should be sent to satellite
+     * modem or not.
+     *
+     * @return {@code true} if the operation is successful, {@code false} otherwise.
+     */
+    boolean setShouldSendDatagramToModemInDemoMode(boolean shouldSendToModemInDemoMode);
 }

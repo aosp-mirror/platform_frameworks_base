@@ -49,16 +49,16 @@ import android.util.SparseArray;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedPermission;
 import com.android.server.om.OverlayReferenceMapper;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedActivity;
 import com.android.server.pm.pkg.component.ParsedActivityImpl;
 import com.android.server.pm.pkg.component.ParsedComponentImpl;
 import com.android.server.pm.pkg.component.ParsedInstrumentationImpl;
 import com.android.server.pm.pkg.component.ParsedIntentInfoImpl;
-import com.android.server.pm.pkg.component.ParsedPermission;
 import com.android.server.pm.pkg.component.ParsedPermissionImpl;
 import com.android.server.pm.pkg.component.ParsedProviderImpl;
 import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;

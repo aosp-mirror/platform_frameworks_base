@@ -23,6 +23,7 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.qs.ui.adapter.FakeQSSceneAdapter
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -76,6 +77,8 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             scope = testScope.backgroundScope,
         )
 
+    private val qsFlexiglassAdapter = FakeQSSceneAdapter { _, _ -> mock() }
+
     private lateinit var shadeHeaderViewModel: ShadeHeaderViewModel
 
     private lateinit var underTest: ShadeSceneViewModel
@@ -97,6 +100,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 applicationScope = testScope.backgroundScope,
                 deviceEntryInteractor = deviceEntryInteractor,
                 shadeHeaderViewModel = shadeHeaderViewModel,
+                qsSceneAdapter = qsFlexiglassAdapter,
             )
     }
 

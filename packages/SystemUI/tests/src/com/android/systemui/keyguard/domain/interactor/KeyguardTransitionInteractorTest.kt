@@ -26,13 +26,14 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
-import com.android.systemui.keyguard.shared.model.KeyguardState.OFF
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
+import com.android.systemui.keyguard.shared.model.TransitionState.CANCELED
 import com.android.systemui.keyguard.shared.model.TransitionState.FINISHED
 import com.android.systemui.keyguard.shared.model.TransitionState.RUNNING
 import com.android.systemui.keyguard.shared.model.TransitionState.STARTED
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.google.common.truth.Truth.assertThat
+import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -136,7 +137,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
     @Test
     fun startedKeyguardStateTests() = testScope.runTest {
-        val finishedSteps by collectValues(underTest.startedKeyguardState)
+        val startedStates by collectValues(underTest.startedKeyguardState)
         runCurrent()
         val steps = mutableListOf<TransitionStep>()
 
@@ -153,7 +154,7 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
         }
 
-        assertThat(finishedSteps).isEqualTo(listOf(OFF, PRIMARY_BOUNCER, AOD, GONE))
+        assertThat(startedStates).isEqualTo(listOf(LOCKSCREEN, PRIMARY_BOUNCER, AOD, GONE))
     }
 
     @Test
@@ -162,12 +163,12 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
         val steps = mutableListOf<TransitionStep>()
 
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
-        steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
         steps.add(TransitionStep(LOCKSCREEN, AOD, 0f, STARTED))
         steps.add(TransitionStep(LOCKSCREEN, AOD, 0.9f, RUNNING))
         steps.add(TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED))
+        steps.add(TransitionStep(AOD, LOCKSCREEN, 0f, STARTED))
+        steps.add(TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING))
+        steps.add(TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED))
         steps.add(TransitionStep(AOD, GONE, 1f, STARTED))
 
         steps.forEach {
@@ -175,7 +176,9 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
             runCurrent()
         }
 
-        assertThat(finishedSteps).isEqualTo(listOf(steps[2], steps[5]))
+        // Ignore the default state.
+        assertThat(finishedSteps.subList(1, finishedSteps.size))
+                .isEqualTo(listOf(steps[2], steps[5]))
     }
 
     @Test
@@ -648,6 +651,81 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 false,
                 true,
         ))
+    }
+
+    @Test
+    fun finishedKeyguardState_emitsAgainIfCancelledAndReversed() = testScope.runTest {
+        val finishedStates by collectValues(underTest.finishedKeyguardState)
+
+        // We default FINISHED in LOCKSCREEN.
+        assertEquals(listOf(
+                LOCKSCREEN
+        ), finishedStates)
+
+        sendSteps(
+                TransitionStep(LOCKSCREEN, AOD, 0f, STARTED),
+                TransitionStep(LOCKSCREEN, AOD, 0.5f, RUNNING),
+                TransitionStep(LOCKSCREEN, AOD, 1f, FINISHED),
+        )
+
+        // We're FINISHED in AOD.
+        assertEquals(listOf(
+                LOCKSCREEN,
+                AOD,
+        ), finishedStates)
+
+        // Transition back to LOCKSCREEN.
+        sendSteps(
+                TransitionStep(AOD, LOCKSCREEN, 0f, STARTED),
+                TransitionStep(AOD, LOCKSCREEN, 0.5f, RUNNING),
+                TransitionStep(AOD, LOCKSCREEN, 1f, FINISHED),
+        )
+
+        // We're FINISHED in LOCKSCREEN.
+        assertEquals(listOf(
+                LOCKSCREEN,
+                AOD,
+                LOCKSCREEN,
+        ), finishedStates)
+
+        sendSteps(
+                TransitionStep(LOCKSCREEN, GONE, 0f, STARTED),
+                TransitionStep(LOCKSCREEN, GONE, 0.5f, RUNNING),
+        )
+
+        // We've STARTED a transition to GONE but not yet finished it so we're still FINISHED in
+        // LOCKSCREEN.
+        assertEquals(listOf(
+                LOCKSCREEN,
+                AOD,
+                LOCKSCREEN,
+        ), finishedStates)
+
+        sendSteps(
+                TransitionStep(LOCKSCREEN, GONE, 0.6f, CANCELED),
+        )
+
+        // We've CANCELED a transition to GONE, we're still FINISHED in LOCKSCREEN.
+        assertEquals(listOf(
+                LOCKSCREEN,
+                AOD,
+                LOCKSCREEN,
+        ), finishedStates)
+
+        sendSteps(
+                TransitionStep(GONE, LOCKSCREEN, 0.6f, STARTED),
+                TransitionStep(GONE, LOCKSCREEN, 0.9f, RUNNING),
+                TransitionStep(GONE, LOCKSCREEN, 1f, FINISHED),
+        )
+
+        // Expect another emission of LOCKSCREEN, as we have FINISHED a second transition to
+        // LOCKSCREEN after the cancellation.
+        assertEquals(listOf(
+                LOCKSCREEN,
+                AOD,
+                LOCKSCREEN,
+                LOCKSCREEN,
+        ), finishedStates)
     }
 
     private suspend fun sendSteps(vararg steps: TransitionStep) {

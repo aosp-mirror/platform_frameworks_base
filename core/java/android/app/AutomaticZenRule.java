@@ -22,12 +22,12 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.NotificationManager.InterruptionFilter;
-import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.service.notification.Condition;
+import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenPolicy;
 import android.view.WindowInsetsController;
 
@@ -111,6 +111,7 @@ public final class AutomaticZenRule implements Parcelable {
     private ComponentName configurationActivity;
     private long creationTime;
     private ZenPolicy mZenPolicy;
+    private ZenDeviceEffects mDeviceEffects;
     private boolean mModified = false;
     private String mPkg;
     private int mType = TYPE_UNKNOWN;
@@ -190,6 +191,7 @@ public final class AutomaticZenRule implements Parcelable {
     /**
      * @hide
      */
+    // TODO: b/310620812 - Remove when the flag is inlined (all system callers should use Builder).
     public AutomaticZenRule(String name, ComponentName owner, ComponentName configurationActivity,
             Uri conditionId, ZenPolicy policy, int interruptionFilter, boolean enabled,
             long creationTime) {
@@ -209,10 +211,11 @@ public final class AutomaticZenRule implements Parcelable {
         configurationActivity = getTrimmedComponentName(
                 source.readParcelable(null, android.content.ComponentName.class));
         creationTime = source.readLong();
-        mZenPolicy = source.readParcelable(null, android.service.notification.ZenPolicy.class);
+        mZenPolicy = source.readParcelable(null, ZenPolicy.class);
         mModified = source.readInt() == ENABLED;
         mPkg = source.readString();
         if (Flags.modesApi()) {
+            mDeviceEffects = source.readParcelable(null, ZenDeviceEffects.class);
             mAllowManualInvocation = source.readBoolean();
             mIconResId = source.readInt();
             mTriggerDescription = getTrimmedString(source.readString(), MAX_DESC_LENGTH);
@@ -274,8 +277,16 @@ public final class AutomaticZenRule implements Parcelable {
     /**
      * Gets the zen policy.
      */
+    @Nullable
     public ZenPolicy getZenPolicy() {
         return mZenPolicy == null ? null : this.mZenPolicy.copy();
+    }
+
+    /** Gets the {@link ZenDeviceEffects} of this rule. */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public ZenDeviceEffects getDeviceEffects() {
+        return mDeviceEffects;
     }
 
     /**
@@ -325,8 +336,18 @@ public final class AutomaticZenRule implements Parcelable {
     /**
      * Sets the zen policy.
      */
-    public void setZenPolicy(ZenPolicy zenPolicy) {
+    public void setZenPolicy(@Nullable ZenPolicy zenPolicy) {
         this.mZenPolicy = (zenPolicy == null ? null : zenPolicy.copy());
+    }
+
+    /**
+     * Sets the {@link ZenDeviceEffects} associated to this rule. Device effects specify changes to
+     * the device behavior that should apply while the rule is active, but are not directly related
+     * to suppressing notifications (for example: disabling always-on display).
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public void setDeviceEffects(@Nullable ZenDeviceEffects deviceEffects) {
+        mDeviceEffects = deviceEffects;
     }
 
     /**
@@ -451,6 +472,7 @@ public final class AutomaticZenRule implements Parcelable {
         dest.writeInt(mModified ? ENABLED : DISABLED);
         dest.writeString(mPkg);
         if (Flags.modesApi()) {
+            dest.writeParcelable(mDeviceEffects, 0);
             dest.writeBoolean(mAllowManualInvocation);
             dest.writeInt(mIconResId);
             dest.writeString(mTriggerDescription);
@@ -472,7 +494,8 @@ public final class AutomaticZenRule implements Parcelable {
                 .append(",mZenPolicy=").append(mZenPolicy);
 
         if (Flags.modesApi()) {
-            sb.append(",allowManualInvocation=").append(mAllowManualInvocation)
+            sb.append(",deviceEffects=").append(mDeviceEffects)
+                    .append(",allowManualInvocation=").append(mAllowManualInvocation)
                     .append(",iconResId=").append(mIconResId)
                     .append(",triggerDescription=").append(mTriggerDescription)
                     .append(",type=").append(mType);
@@ -498,6 +521,7 @@ public final class AutomaticZenRule implements Parcelable {
                 && other.creationTime == creationTime;
         if (Flags.modesApi()) {
             return finalEquals
+                    && Objects.equals(other.mDeviceEffects, mDeviceEffects)
                     && other.mAllowManualInvocation == mAllowManualInvocation
                     && other.mIconResId == mIconResId
                     && Objects.equals(other.mTriggerDescription, mTriggerDescription)
@@ -510,8 +534,8 @@ public final class AutomaticZenRule implements Parcelable {
     public int hashCode() {
         if (Flags.modesApi()) {
             return Objects.hash(enabled, name, interruptionFilter, conditionId, owner,
-                    configurationActivity, mZenPolicy, mModified, creationTime, mPkg,
-                    mAllowManualInvocation, mIconResId, mTriggerDescription, mType);
+                    configurationActivity, mZenPolicy, mDeviceEffects, mModified, creationTime,
+                    mPkg, mAllowManualInvocation, mIconResId, mTriggerDescription, mType);
         }
         return Objects.hash(enabled, name, interruptionFilter, conditionId, owner,
                 configurationActivity, mZenPolicy, mModified, creationTime, mPkg);
@@ -573,6 +597,7 @@ public final class AutomaticZenRule implements Parcelable {
         private boolean mEnabled;
         private ComponentName mConfigurationActivity = null;
         private ZenPolicy mPolicy = null;
+        private ZenDeviceEffects mDeviceEffects = null;
         private int mType;
         private String mDescription;
         private int mIconResId;
@@ -588,6 +613,7 @@ public final class AutomaticZenRule implements Parcelable {
             mEnabled = rule.isEnabled();
             mConfigurationActivity = rule.getConfigurationActivity();
             mPolicy = rule.getZenPolicy();
+            mDeviceEffects = rule.getDeviceEffects();
             mType = rule.getType();
             mDescription = rule.getTriggerDescription();
             mIconResId = rule.getIconResId();
@@ -635,6 +661,17 @@ public final class AutomaticZenRule implements Parcelable {
 
         public @NonNull Builder setZenPolicy(@Nullable ZenPolicy policy) {
             mPolicy = policy;
+            return this;
+        }
+
+        /**
+         * Sets the {@link ZenDeviceEffects} associated to this rule. Device effects specify changes
+         * to the device behavior that should apply while the rule is active, but are not directly
+         * related to suppressing notifications (for example: disabling always-on display).
+         */
+        @NonNull
+        public Builder setDeviceEffects(@Nullable ZenDeviceEffects deviceEffects) {
+            mDeviceEffects = deviceEffects;
             return this;
         }
 
@@ -687,6 +724,7 @@ public final class AutomaticZenRule implements Parcelable {
         public @NonNull AutomaticZenRule build() {
             AutomaticZenRule rule = new AutomaticZenRule(mName, mOwner, mConfigurationActivity,
                     mConditionId, mPolicy, mInterruptionFilter, mEnabled);
+            rule.mDeviceEffects = mDeviceEffects;
             rule.creationTime = mCreationTime;
             rule.mType = mType;
             rule.mTriggerDescription = mDescription;

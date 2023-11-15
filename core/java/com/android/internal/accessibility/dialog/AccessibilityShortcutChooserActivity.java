@@ -28,6 +28,7 @@ import static com.android.internal.accessibility.util.AccessibilityUtils.isUserS
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.KeyguardManager;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -56,7 +57,7 @@ public class AccessibilityShortcutChooserActivity extends Activity {
             "accessibility_shortcut_menu_mode";
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
     private AlertDialog mMenuDialog;
-    private AlertDialog mPermissionDialog;
+    private Dialog mPermissionDialog;
     private ShortcutTargetAdapter mTargetAdapter;
 
     @Override
@@ -123,7 +124,7 @@ public class AccessibilityShortcutChooserActivity extends Activity {
 
             if (target instanceof AccessibilityServiceTarget) {
                 showPermissionDialogIfNeeded(this, (AccessibilityServiceTarget) target,
-                        mTargetAdapter);
+                        position, mTargetAdapter);
                 return;
             }
         }
@@ -149,20 +150,43 @@ public class AccessibilityShortcutChooserActivity extends Activity {
     }
 
     private void showPermissionDialogIfNeeded(Context context,
-            AccessibilityServiceTarget serviceTarget, ShortcutTargetAdapter targetAdapter) {
+            AccessibilityServiceTarget serviceTarget, int position,
+            ShortcutTargetAdapter targetAdapter) {
         if (mPermissionDialog != null) {
             return;
         }
 
-        mPermissionDialog = new AlertDialog.Builder(context)
-                .setView(createEnableDialogContentView(context, serviceTarget,
-                        v -> {
-                            mPermissionDialog.dismiss();
-                            targetAdapter.notifyDataSetChanged();
-                        },
-                        v -> mPermissionDialog.dismiss()))
-                .setOnDismissListener(dialog -> mPermissionDialog = null)
-                .create();
+        if (Flags.deduplicateAccessibilityWarningDialog()) {
+            mPermissionDialog = AccessibilityServiceWarning
+                    .createAccessibilityServiceWarningDialog(context,
+                            serviceTarget.getAccessibilityServiceInfo(),
+                            v -> {
+                                serviceTarget.onCheckedChanged(true);
+                                targetAdapter.notifyDataSetChanged();
+                                mPermissionDialog.dismiss();
+                            }, v -> {
+                                serviceTarget.onCheckedChanged(false);
+                                mPermissionDialog.dismiss();
+                            },
+                            v -> {
+                                mTargets.remove(position);
+                                context.getPackageManager().getPackageInstaller().uninstall(
+                                        serviceTarget.getComponentName().getPackageName(), null);
+                                targetAdapter.notifyDataSetChanged();
+                                mPermissionDialog.dismiss();
+                            });
+            mPermissionDialog.setOnDismissListener(dialog -> mPermissionDialog = null);
+        } else {
+            mPermissionDialog = new AlertDialog.Builder(context)
+                    .setView(createEnableDialogContentView(context, serviceTarget,
+                            v -> {
+                                mPermissionDialog.dismiss();
+                                targetAdapter.notifyDataSetChanged();
+                            },
+                            v -> mPermissionDialog.dismiss()))
+                    .setOnDismissListener(dialog -> mPermissionDialog = null)
+                    .create();
+        }
         mPermissionDialog.show();
     }
 

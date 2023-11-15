@@ -859,9 +859,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int callingUid = Process.FIRST_APPLICATION_UID;
         final int callingPid = 1234;
         final SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        final IWindow window = mock(IWindow.class);
-        final IBinder windowToken = mock(IBinder.class);
-        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder window = new Binder();
         final IBinder focusGrantToken = mock(IBinder.class);
 
         final InputChannel inputChannel = new InputChannel();
@@ -879,9 +877,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int callingUid = Process.SYSTEM_UID;
         final int callingPid = 1234;
         final SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        final IWindow window = mock(IWindow.class);
-        final IBinder windowToken = mock(IBinder.class);
-        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder window = new Binder();
         final IBinder focusGrantToken = mock(IBinder.class);
 
         final InputChannel inputChannel = new InputChannel();
@@ -901,9 +897,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int callingUid = Process.FIRST_APPLICATION_UID;
         final int callingPid = 1234;
         final SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        final IWindow window = mock(IWindow.class);
-        final IBinder windowToken = mock(IBinder.class);
-        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder window = new Binder();
         final IBinder focusGrantToken = mock(IBinder.class);
 
         final InputChannel inputChannel = new InputChannel();
@@ -927,9 +921,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         final int callingUid = Process.SYSTEM_UID;
         final int callingPid = 1234;
         final SurfaceControl surfaceControl = mock(SurfaceControl.class);
-        final IWindow window = mock(IWindow.class);
-        final IBinder windowToken = mock(IBinder.class);
-        when(window.asBinder()).thenReturn(windowToken);
+        final IBinder window = new Binder();
         final IBinder focusGrantToken = mock(IBinder.class);
 
         final InputChannel inputChannel = new InputChannel();

@@ -5378,19 +5378,37 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void requestImeLocked(AbstractAccessibilityServiceConnection connection) {
+        if (!(connection instanceof AccessibilityServiceConnection)
+                || (connection instanceof ProxyAccessibilityServiceConnection)) {
+            if (DEBUG) {
+                Slog.d(LOG_TAG, "The connection should be a real connection but was "
+                        + connection);
+            }
+            return;
+        }
+        AccessibilityServiceConnection realConnection = (AccessibilityServiceConnection) connection;
         mMainHandler.sendMessage(obtainMessage(
-                AccessibilityManagerService::createSessionForConnection, this, connection));
+                AccessibilityManagerService::createSessionForConnection, this, realConnection));
         mMainHandler.sendMessage(obtainMessage(
-                AccessibilityManagerService::bindAndStartInputForConnection, this, connection));
+                AccessibilityManagerService::bindAndStartInputForConnection, this, realConnection));
     }
 
     @Override
     public void unbindImeLocked(AbstractAccessibilityServiceConnection connection) {
+        if (!(connection instanceof AccessibilityServiceConnection)
+                || (connection instanceof ProxyAccessibilityServiceConnection)) {
+            if (DEBUG) {
+                Slog.d(LOG_TAG, "The connection should be a real connection but was "
+                        + connection);
+            }
+            return;
+        }
+        AccessibilityServiceConnection realConnection = (AccessibilityServiceConnection) connection;
         mMainHandler.sendMessage(obtainMessage(
-                AccessibilityManagerService::unbindInputForConnection, this, connection));
+                AccessibilityManagerService::unbindInputForConnection, this, realConnection));
     }
 
-    private void createSessionForConnection(AbstractAccessibilityServiceConnection connection) {
+    private void createSessionForConnection(AccessibilityServiceConnection connection) {
         synchronized (mLock) {
             if (mInputSessionRequested) {
                 connection.createImeSessionLocked();
@@ -5398,7 +5416,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private void bindAndStartInputForConnection(AbstractAccessibilityServiceConnection connection) {
+    private void bindAndStartInputForConnection(AccessibilityServiceConnection connection) {
         synchronized (mLock) {
             if (mInputBound) {
                 connection.bindInputLocked();
@@ -5407,8 +5425,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private void unbindInputForConnection(AbstractAccessibilityServiceConnection connection) {
-        InputMethodManagerInternal.get().unbindAccessibilityFromCurrentClient(connection.mId);
+    private void unbindInputForConnection(AccessibilityServiceConnection connection) {
+        InputMethodManagerInternal.get()
+                .unbindAccessibilityFromCurrentClient(connection.mId, connection.mUserId);
         synchronized (mLock) {
             connection.unbindInputLocked();
         }

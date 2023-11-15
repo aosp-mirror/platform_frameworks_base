@@ -233,6 +233,7 @@ class BouncerViewModelTest : SysuiTestCase() {
             AuthenticationMethodModel.Pin,
             AuthenticationMethodModel.Password,
             AuthenticationMethodModel.Pattern,
+            AuthenticationMethodModel.Sim,
         )
     }
 }

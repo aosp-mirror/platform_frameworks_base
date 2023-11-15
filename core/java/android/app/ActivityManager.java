@@ -4998,6 +4998,7 @@ public class ActivityManager {
             STOP_USER_ON_SWITCH_TRUE,
             STOP_USER_ON_SWITCH_FALSE
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface StopUserOnSwitch {}
 
     /**

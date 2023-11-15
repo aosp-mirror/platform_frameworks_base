@@ -49,8 +49,10 @@ import kotlinx.coroutines.flow.filter
  * [TransitionInteractor]. These interactors will call [startTransition] and [updateTransition] on
  * this repository.
  *
- * To print all transitions to logcat to help with debugging, run this command: adb shell settings
- * put global systemui/buffer/KeyguardLog VERBOSE
+ * To print all transitions to logcat to help with debugging, run this command:
+ * ```
+ * adb shell cmd statusbar echo -b KeyguardLog:VERBOSE
+ * ```
  *
  * This will print all keyguard transitions to logcat with the KeyguardTransitionAuditLogger tag.
  */
@@ -175,9 +177,11 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
                     override fun onAnimationStart(animation: Animator) {
                         emitTransition(TransitionStep(info, startingValue, TransitionState.STARTED))
                     }
+
                     override fun onAnimationCancel(animation: Animator) {
                         endAnimation(lastStep.value, TransitionState.CANCELED)
                     }
+
                     override fun onAnimationEnd(animation: Animator) {
                         endAnimation(1f, TransitionState.FINISHED)
                     }
@@ -222,7 +226,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
     }
 
     private fun emitTransition(nextStep: TransitionStep, isManual: Boolean = false) {
-        trace(nextStep, isManual)
+        logAndTrace(nextStep, isManual)
         val emitted = _transitions.tryEmit(nextStep)
         if (!emitted) {
             Log.w(TAG, "Failed to emit next value without suspending")
@@ -230,26 +234,22 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
         lastStep = nextStep
     }
 
-    private fun trace(step: TransitionStep, isManual: Boolean) {
+    private fun logAndTrace(step: TransitionStep, isManual: Boolean) {
         if (step.transitionState == TransitionState.RUNNING) {
             return
         }
-        val traceName =
-            "Transition: ${step.from} -> ${step.to} " +
-                if (isManual) {
-                    "(manual)"
-                } else {
-                    ""
-                }
+        val manualStr = if (isManual) " (manual)" else ""
+        val traceName = "Transition: ${step.from} -> ${step.to}$manualStr"
+
         val traceCookie = traceName.hashCode()
-        if (step.transitionState == TransitionState.STARTED) {
-            Trace.beginAsyncSection(traceName, traceCookie)
-        } else if (
-            step.transitionState == TransitionState.FINISHED ||
-                step.transitionState == TransitionState.CANCELED
-        ) {
-            Trace.endAsyncSection(traceName, traceCookie)
+        when (step.transitionState) {
+            TransitionState.STARTED -> Trace.beginAsyncSection(traceName, traceCookie)
+            TransitionState.FINISHED -> Trace.endAsyncSection(traceName, traceCookie)
+            TransitionState.CANCELED -> Trace.endAsyncSection(traceName, traceCookie)
+            else -> {}
         }
+
+        Log.i(TAG, "${step.transitionState.name} transition: $step$manualStr")
     }
 
     companion object {

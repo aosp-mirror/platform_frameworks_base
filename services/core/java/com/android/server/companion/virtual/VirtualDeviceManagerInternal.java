@@ -25,6 +25,7 @@ import android.os.LocaleList;
 import android.util.ArraySet;
 
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Virtual device manager local service interface.
@@ -46,6 +47,14 @@ public abstract class VirtualDeviceManagerInternal {
     public abstract void unregisterAppsOnVirtualDeviceListener(
             @NonNull AppsOnVirtualDeviceListener listener);
 
+    /** Register a listener for removal of persistent device IDs. */
+    public abstract void registerPersistentDeviceIdRemovedListener(
+            @NonNull Consumer<String> persistentDeviceIdRemovedListener);
+
+    /** Unregister a listener for the removal of persistent device IDs. */
+    public abstract void unregisterPersistentDeviceIdRemovedListener(
+            @NonNull Consumer<String> persistentDeviceIdRemovedListener);
+
     /**
      * Notifies that the set of apps running on virtual devices has changed.
      * This method only notifies the listeners when the union of running UIDs on all virtual devices
@@ -57,6 +66,11 @@ public abstract class VirtualDeviceManagerInternal {
      * Notifies that an authentication prompt is about to be shown for an app with the given uid.
      */
     public abstract void onAuthenticationPrompt(int uid);
+
+    /**
+     * Notifies the given persistent device IDs have been removed.
+     */
+    public abstract void onPersistentDeviceIdsRemoved(Set<String> removedPersistentDeviceIds);
 
     /**
      * Gets the owner uid for a deviceId.

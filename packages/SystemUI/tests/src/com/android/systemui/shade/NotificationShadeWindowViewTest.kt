@@ -192,7 +192,6 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
         featureFlags.set(Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false)
-        featureFlags.set(Flags.MIGRATE_NSSL, false)
         featureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, false)
         testScope = TestScope()
         controller =

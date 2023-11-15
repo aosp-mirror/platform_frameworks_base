@@ -31,9 +31,8 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.keyguard.KeyguardStatusView
 import com.android.keyguard.dagger.KeyguardStatusViewComponent
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardViewConfigurator
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.media.controls.ui.KeyguardMediaController
 import com.android.systemui.res.R
@@ -49,7 +48,6 @@ class DefaultStatusViewSection
 @Inject
 constructor(
     private val context: Context,
-    private val featureFlags: FeatureFlags,
     private val notificationPanelView: NotificationPanelView,
     private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
     private val keyguardViewConfigurator: Lazy<KeyguardViewConfigurator>,
@@ -60,7 +58,7 @@ constructor(
     private val statusViewId = R.id.keyguard_status_view
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
         // At startup, 2 views with the ID `R.id.keyguard_status_view` will be available.
@@ -82,7 +80,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+        if (KeyguardShadeMigrationNssl.isEnabled) {
             constraintLayout.findViewById<KeyguardStatusView?>(R.id.keyguard_status_view)?.let {
                 val statusViewComponent =
                     keyguardStatusViewComponentFactory.build(it, context.display)

@@ -27,6 +27,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteCallback;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Information to be sent to SysUI about a back event.
  *
@@ -85,6 +88,7 @@ public final class BackNavigationInfo implements Parcelable {
             TYPE_CROSS_TASK,
             TYPE_CALLBACK
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface BackTargetType {
     }
 

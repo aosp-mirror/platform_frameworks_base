@@ -20,6 +20,8 @@ import static android.app.servertransaction.TransactionExecutorHelper.getActivit
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -93,7 +95,7 @@ public abstract class ActivityTransactionItem extends ClientTransactionItem {
     }
 
     void setActivityToken(@NonNull IBinder activityToken) {
-        mActivityToken = activityToken;
+        mActivityToken = requireNonNull(activityToken);
     }
 
     // To be overridden

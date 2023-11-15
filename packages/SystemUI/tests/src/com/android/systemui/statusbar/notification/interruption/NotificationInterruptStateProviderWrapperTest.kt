@@ -44,7 +44,7 @@ class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecision
                 statusBarStateController,
                 keyguardStateController,
                 headsUpManager,
-                logger,
+                oldLogger,
                 mainHandler,
                 flags,
                 keyguardNotificationVisibilityProvider,

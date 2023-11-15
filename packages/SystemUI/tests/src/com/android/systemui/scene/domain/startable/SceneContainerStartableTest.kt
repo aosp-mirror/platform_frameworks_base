@@ -89,6 +89,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
             falsingCollector = falsingCollector,
             powerInteractor = powerInteractor,
             bouncerInteractor = bouncerInteractor,
+            simBouncerInteractor = utils.simBouncerInteractor,
+            authenticationInteractor = authenticationInteractor,
         )
 
     @Before
@@ -585,6 +587,64 @@ class SceneContainerStartableTest : SysuiTestCase() {
             sceneInteractor.changeScene(SceneModel(SceneKey.Gone), "reason")
             runCurrent()
             verify(falsingCollector, times(2)).onBouncerHidden()
+        }
+
+    @Test
+    fun switchesToBouncer_whenSimBecomesLocked() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
+
+            prepareState(
+                initialSceneKey = SceneKey.Lockscreen,
+                authenticationMethod = AuthenticationMethodModel.Pin,
+                isDeviceUnlocked = false,
+            )
+            underTest.start()
+            runCurrent()
+
+            utils.mobileConnectionsRepository.isAnySimSecure.value = true
+            runCurrent()
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Bouncer)
+        }
+
+    @Test
+    fun switchesToLockscreen_whenSimBecomesUnlocked() =
+        testScope.runTest {
+            utils.mobileConnectionsRepository.isAnySimSecure.value = true
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
+
+            prepareState(
+                initialSceneKey = SceneKey.Bouncer,
+                authenticationMethod = AuthenticationMethodModel.Pin,
+                isDeviceUnlocked = false,
+            )
+            underTest.start()
+            runCurrent()
+            utils.mobileConnectionsRepository.isAnySimSecure.value = false
+            runCurrent()
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+        }
+
+    @Test
+    fun switchesToGone_whenSimBecomesUnlocked_ifDeviceUnlockedAndLockscreenDisabled() =
+        testScope.runTest {
+            utils.mobileConnectionsRepository.isAnySimSecure.value = true
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
+
+            prepareState(
+                initialSceneKey = SceneKey.Lockscreen,
+                authenticationMethod = AuthenticationMethodModel.None,
+                isDeviceUnlocked = true,
+                isLockscreenEnabled = false,
+            )
+            underTest.start()
+            runCurrent()
+            utils.mobileConnectionsRepository.isAnySimSecure.value = false
+            runCurrent()
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Gone)
         }
 
     private fun TestScope.prepareState(

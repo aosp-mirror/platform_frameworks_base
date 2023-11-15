@@ -23,6 +23,8 @@ import android.annotation.NonNull;
 
 import libcore.util.NativeAllocationRegistry;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.Buffer;
 import java.nio.ShortBuffer;
 
@@ -43,6 +45,7 @@ public class Mesh {
      * Determines how the mesh is represented and will be drawn.
      */
     @IntDef({TRIANGLES, TRIANGLE_STRIP})
+    @Retention(RetentionPolicy.SOURCE)
     private @interface Mode {}
 
     /**

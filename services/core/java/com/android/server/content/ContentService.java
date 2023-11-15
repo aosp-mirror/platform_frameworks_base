@@ -1058,7 +1058,8 @@ public final class ContentService extends IContentService.Stub {
 
         final long identityToken = clearCallingIdentity();
         try {
-            return getSyncManager().computeSyncable(account, userId, providerName, false);
+            return getSyncManager().computeSyncable(account, userId, providerName, false,
+                    /*checkStoppedState=*/ false);
         } finally {
             restoreCallingIdentity(identityToken);
         }

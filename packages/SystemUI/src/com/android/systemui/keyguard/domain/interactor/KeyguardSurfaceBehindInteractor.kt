@@ -24,6 +24,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -40,18 +41,20 @@ constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val viewParams: Flow<KeyguardSurfaceBehindModel> =
-        transitionInteractor.isInTransitionToAnyState.flatMapLatest { isInTransition ->
-            if (!isInTransition) {
-                defaultParams
-            } else {
-                combine(
-                    transitionSpecificViewParams,
-                    defaultParams,
-                ) { transitionParams, defaultParams ->
-                    transitionParams ?: defaultParams
+        transitionInteractor.isInTransitionToAnyState
+            .flatMapLatest { isInTransition ->
+                if (!isInTransition) {
+                    defaultParams
+                } else {
+                    combine(
+                        transitionSpecificViewParams,
+                        defaultParams,
+                    ) { transitionParams, defaultParams ->
+                        transitionParams ?: defaultParams
+                    }
                 }
             }
-        }
+            .distinctUntilChanged()
 
     val isAnimatingSurface = repository.isAnimatingSurface
 

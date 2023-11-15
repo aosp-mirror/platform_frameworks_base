@@ -1310,7 +1310,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             // Set default string with battery level in device connected situation.
             if (isTwsBatteryAvailable(leftBattery, rightBattery)) {
                 stringRes = R.string.bluetooth_battery_level_untethered;
-            } else if (batteryLevelPercentageString != null) {
+            } else if (batteryLevelPercentageString != null && !shortSummary) {
                 stringRes = R.string.bluetooth_battery_level;
             }
 

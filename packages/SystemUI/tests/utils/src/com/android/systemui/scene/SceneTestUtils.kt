@@ -23,6 +23,10 @@ import android.content.pm.UserInfo
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.telecom.TelecomManager
+import android.telephony.PinResult
+import android.telephony.PinResult.PIN_RESULT_TYPE_SUCCESS
+import android.telephony.TelephonyManager
+import android.telephony.euicc.EuiccManager
 import com.android.internal.logging.MetricsLogger
 import com.android.internal.util.EmergencyAffordanceManager
 import com.android.systemui.SysuiTestCase
@@ -32,9 +36,11 @@ import com.android.systemui.authentication.domain.interactor.AuthenticationInter
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.bouncer.data.repository.EmergencyServicesRepository
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.bouncer.data.repository.FakeSimBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.EmergencyDialerIntentFactory
+import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
@@ -61,7 +67,10 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.data.repository.PowerRepository
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.data.repository.SceneContainerRepository
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -69,6 +78,8 @@ import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.data.repository.TelephonyRepository
@@ -85,6 +96,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.currentTime
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
+import org.mockito.Mockito
 
 /**
  * Utilities for creating scene container framework related repositories, interactors, and
@@ -123,9 +137,33 @@ class SceneTestUtils(
     }
     val telephonyRepository: FakeTelephonyRepository by lazy { FakeTelephonyRepository() }
 
+    val bouncerRepository = BouncerRepository(featureFlags)
     val communalRepository: FakeCommunalRepository by lazy { FakeCommunalRepository() }
     val keyguardRepository: FakeKeyguardRepository by lazy { FakeKeyguardRepository() }
     val powerRepository: FakePowerRepository by lazy { FakePowerRepository() }
+    val simBouncerRepository: FakeSimBouncerRepository by lazy { FakeSimBouncerRepository() }
+    val telephonyManager: TelephonyManager =
+        Mockito.mock(TelephonyManager::class.java).apply {
+            whenever(createForSubscriptionId(anyInt())).thenReturn(this)
+            whenever(supplyIccLockPin(anyString()))
+                .thenReturn(PinResult(PIN_RESULT_TYPE_SUCCESS, 3))
+        }
+    val mobileConnectionsRepository: FakeMobileConnectionsRepository by lazy {
+        FakeMobileConnectionsRepository(mock(), mock())
+    }
+
+    val simBouncerInteractor =
+        SimBouncerInteractor(
+            applicationContext = context,
+            backgroundDispatcher = testDispatcher,
+            applicationScope = applicationScope(),
+            repository = simBouncerRepository,
+            telephonyManager = telephonyManager,
+            resources = context.resources,
+            keyguardUpdateMonitor = mock(),
+            euiccManager = context.getSystemService(Context.EUICC_SERVICE) as EuiccManager,
+            mobileConnectionsRepository = mobileConnectionsRepository,
+        )
 
     val userRepository: UserRepository by lazy {
         FakeUserRepository().apply {
@@ -137,6 +175,7 @@ class SceneTestUtils(
 
     private val falsingCollectorFake: FalsingCollector by lazy { FalsingCollectorFake() }
     private var falsingInteractor: FalsingInteractor? = null
+    private var powerInteractor: PowerInteractor? = null
 
     fun fakeSceneContainerRepository(
         containerConfig: SceneContainerConfig = fakeSceneContainerConfig(),
@@ -159,7 +198,7 @@ class SceneTestUtils(
         return SceneInteractor(
             applicationScope = applicationScope(),
             repository = repository,
-            powerRepository = powerRepository,
+            powerInteractor = powerInteractor(),
             logger = mock(),
         )
     }
@@ -223,10 +262,12 @@ class SceneTestUtils(
         return BouncerInteractor(
             applicationScope = applicationScope(),
             applicationContext = context,
-            repository = BouncerRepository(featureFlags),
+            repository = bouncerRepository,
             authenticationInteractor = authenticationInteractor,
             flags = sceneContainerFlags,
             falsingInteractor = falsingInteractor(),
+            powerInteractor = powerInteractor(),
+            simBouncerInteractor = simBouncerInteractor,
         )
     }
 
@@ -247,6 +288,7 @@ class SceneTestUtils(
             users = flowOf(users),
             userSwitcherMenu = flowOf(createMenuActions()),
             actionButtonInteractor = actionButtonInteractor,
+            simBouncerInteractor = simBouncerInteractor,
         )
     }
 
@@ -262,6 +304,22 @@ class SceneTestUtils(
 
     fun falsingCollector(): FalsingCollector {
         return falsingCollectorFake
+    }
+
+    fun powerInteractor(
+        repository: PowerRepository = powerRepository,
+        falsingCollector: FalsingCollector = falsingCollector(),
+        screenOffAnimationController: ScreenOffAnimationController = mock(),
+        statusBarStateController: StatusBarStateController = mock(),
+    ): PowerInteractor {
+        return powerInteractor
+            ?: PowerInteractor(
+                    repository = repository,
+                    falsingCollector = falsingCollector,
+                    screenOffAnimationController = screenOffAnimationController,
+                    statusBarStateController = statusBarStateController,
+                )
+                .also { powerInteractor = it }
     }
 
     private fun applicationScope(): CoroutineScope {

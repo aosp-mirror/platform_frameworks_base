@@ -246,11 +246,9 @@ filegroup {
     srcs: [
         /* Status bar fakes */
         "tests/src/com/android/systemui/statusbar/pipeline/airplane/data/repository/FakeAirplaneModeRepository.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/mobile/data/repository/FakeMobileConnectionRepository.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/mobile/data/repository/FakeMobileConnectionsRepository.kt",
-        "tests/src/com/android/systemui/statusbar/pipeline/mobile/util/FakeMobileMappingsProxy.kt",
         "tests/src/com/android/systemui/statusbar/pipeline/shared/data/repository/FakeConnectivityRepository.kt",
         "tests/src/com/android/systemui/statusbar/pipeline/wifi/data/repository/FakeWifiRepository.kt",
+        "tests/src/com/android/systemui/statusbar/pipeline/mobile/util/FakeSubscriptionManagerProxy.kt",
 
         /* QS fakes */
         "tests/src/com/android/systemui/qs/pipeline/domain/interactor/FakeQSTile.kt",
@@ -263,6 +261,7 @@ filegroup {
     srcs: [
         /* Keyguard converted tests */
         // data
+        "tests/src/com/android/systemui/bouncer/data/repository/SimBouncerRepositoryTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/DoNotDisturbQuickAffordanceConfigTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/FlashlightQuickAffordanceConfigTest.kt",
         "tests/src/com/android/systemui/keyguard/data/quickaffordance/HomeControlsKeyguardQuickAffordanceConfigTest.kt",
@@ -285,6 +284,7 @@ filegroup {
         "tests/src/com/android/systemui/bouncer/domain/interactor/AlternateBouncerInteractorTest.kt",
         "tests/src/com/android/systemui/bouncer/domain/interactor/PrimaryBouncerCallbackInteractorTest.kt",
         "tests/src/com/android/systemui/bouncer/domain/interactor/PrimaryBouncerInteractorWithCoroutinesTest.kt",
+        "tests/src/com/android/systemui/bouncer/domain/interactor/SimBouncerInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardLongPressInteractorTest.kt",
         "tests/src/com/android/systemui/keyguard/domain/interactor/KeyguardQuickAffordanceInteractorTest.kt",
