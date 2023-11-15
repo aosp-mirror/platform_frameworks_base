@@ -10,7 +10,6 @@ import com.android.systemui.shade.ui.composable.Shade
 fun TransitionBuilder.lockscreenToShadeTransition() {
     spec = tween(durationMillis = 500)
 
-    punchHole(Shade.Elements.QuickSettings, bounds = Shade.Elements.Scrim, Shade.Shapes.Scrim)
     translate(Shade.Elements.Scrim, Edge.Top, startsOutsideLayoutBounds = false)
     fractionRange(end = 0.5f) {
         fade(Shade.Elements.ScrimBackground)

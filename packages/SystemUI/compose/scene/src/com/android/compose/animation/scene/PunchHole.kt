@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.toRect
@@ -28,48 +27,68 @@ import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.withSaveLayer
+import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.toSize
-import com.android.compose.animation.scene.transformation.ModifierTransformation
 
-/** Punch a hole in an element using the bounds of another element and a given [shape]. */
-internal class PunchHole(
-    override val matcher: ElementMatcher,
+internal fun Modifier.punchHole(
+    layoutImpl: SceneTransitionLayoutImpl,
+    element: ElementKey,
+    bounds: ElementKey,
+    shape: Shape,
+): Modifier = this.then(PunchHoleElement(layoutImpl, element, bounds, shape))
+
+private data class PunchHoleElement(
+    private val layoutImpl: SceneTransitionLayoutImpl,
+    private val element: ElementKey,
     private val bounds: ElementKey,
     private val shape: Shape,
-) : ModifierTransformation {
+) : ModifierNodeElement<PunchHoleNode>() {
+    override fun create(): PunchHoleNode = PunchHoleNode(layoutImpl, element, bounds, shape)
 
+    override fun update(node: PunchHoleNode) {
+        node.layoutImpl = layoutImpl
+        node.element = element
+        node.bounds = bounds
+        node.shape = shape
+    }
+}
+
+private class PunchHoleNode(
+    var layoutImpl: SceneTransitionLayoutImpl,
+    var element: ElementKey,
+    var bounds: ElementKey,
+    var shape: Shape,
+) : Modifier.Node(), DrawModifierNode {
     private var lastSize: Size = Size.Unspecified
     private var lastLayoutDirection: LayoutDirection = LayoutDirection.Ltr
     private var lastOutline: Outline? = null
 
-    override fun Modifier.transform(
-        layoutImpl: SceneTransitionLayoutImpl,
-        scene: Scene,
-        element: Element,
-        sceneValues: Element.TargetValues,
-    ): Modifier {
-        return drawWithContent {
-            val bounds = layoutImpl.elements[bounds]
-            if (
-                bounds == null ||
-                    bounds.lastSharedValues.size == Element.SizeUnspecified ||
-                    bounds.lastSharedValues.offset == Offset.Unspecified
-            ) {
-                drawContent()
-                return@drawWithContent
-            }
-            drawIntoCanvas { canvas ->
-                canvas.withSaveLayer(size.toRect(), Paint()) {
-                    drawContent()
+    override fun ContentDrawScope.draw() {
+        val bounds = layoutImpl.elements[bounds]
 
-                    val offset = bounds.lastSharedValues.offset - element.lastSharedValues.offset
-                    translate(offset.x, offset.y) { drawHole(bounds) }
-                }
+        if (
+            bounds == null ||
+                bounds.lastSharedValues.size == Element.SizeUnspecified ||
+                bounds.lastSharedValues.offset == Offset.Unspecified
+        ) {
+            drawContent()
+            return
+        }
+
+        val element = layoutImpl.elements.getValue(element)
+        drawIntoCanvas { canvas ->
+            canvas.withSaveLayer(size.toRect(), Paint()) {
+                drawContent()
+
+                val offset = bounds.lastSharedValues.offset - element.lastSharedValues.offset
+                translate(offset.x, offset.y) { drawHole(bounds) }
             }
         }
     }

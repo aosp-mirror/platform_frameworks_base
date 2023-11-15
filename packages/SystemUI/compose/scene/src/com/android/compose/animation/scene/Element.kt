@@ -161,7 +161,6 @@ internal fun Modifier.element(
                 }
             }
         }
-        .modifierTransformations(layoutImpl, scene, element, sceneValues)
         .intermediateLayout { measurable, constraints ->
             val placeable =
                 measure(layoutImpl, scene, element, sceneValues, measurable, constraints)
@@ -329,39 +328,6 @@ internal fun sharedElementTransformation(
     }
 
     return sharedInFromScene
-}
-
-/**
- * Chain the [com.android.compose.animation.scene.transformation.ModifierTransformation] applied
- * throughout the current transition, if any.
- */
-private fun Modifier.modifierTransformations(
-    layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
-    element: Element,
-    sceneValues: Element.TargetValues,
-): Modifier {
-    when (val state = layoutImpl.state.transitionState) {
-        is TransitionState.Idle -> return this
-        is TransitionState.Transition -> {
-            val fromScene = state.fromScene
-            val toScene = state.toScene
-            if (fromScene == toScene) {
-                // Same as idle.
-                return this
-            }
-
-            return layoutImpl.transitions
-                .transitionSpec(fromScene, state.toScene)
-                .transformations(element.key, scene.key)
-                .modifier
-                .fold(this) { modifier, transformation ->
-                    with(transformation) {
-                        modifier.transform(layoutImpl, scene, element, sceneValues)
-                    }
-                }
-        }
-    }
 }
 
 /**

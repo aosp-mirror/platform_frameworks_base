@@ -23,6 +23,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.platform.LocalDensity
 
@@ -177,6 +178,18 @@ interface SceneScope {
         lerp: (start: T, stop: T, fraction: Float) -> T,
         canOverflow: Boolean,
     ): State<T>
+
+    /**
+     * Punch a hole in this [element] using the bounds of [bounds] in [scene] and the given [shape].
+     *
+     * Punching a hole in an element will "remove" any pixel drawn by that element in the hole area.
+     * This can be used to make content drawn below an opaque element visible. For example, if we
+     * have [this lockscreen scene](http://shortn/_VYySFnJDhN) drawn below
+     * [this shade scene](http://shortn/_fpxGUk0Rg7) and punch a hole in the latter using the big
+     * clock time bounds and a RoundedCornerShape(10dp), [this](http://shortn/_qt80IvORFj) would be
+     * the result.
+     */
+    fun Modifier.punchHole(element: ElementKey, bounds: ElementKey, shape: Shape): Modifier
 }
 
 // TODO(b/291053742): Add animateSharedValueAsState(targetValue) without any ValueKey and ElementKey

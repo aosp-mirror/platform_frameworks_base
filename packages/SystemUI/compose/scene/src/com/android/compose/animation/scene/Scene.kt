@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.intermediateLayout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
@@ -130,4 +131,10 @@ private class SceneScopeImpl(
     ) {
         MovableElement(layoutImpl, scene, key, modifier, content)
     }
+
+    override fun Modifier.punchHole(
+        element: ElementKey,
+        bounds: ElementKey,
+        shape: Shape
+    ): Modifier = punchHole(layoutImpl, element, bounds, shape)
 }

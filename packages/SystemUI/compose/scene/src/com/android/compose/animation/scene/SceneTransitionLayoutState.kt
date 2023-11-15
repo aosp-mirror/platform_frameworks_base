@@ -46,6 +46,12 @@ class SceneTransitionLayoutState(initialScene: SceneKey) {
         return (from == null || transition.fromScene == from) &&
             (to == null || transition.toScene == to)
     }
+
+    /** Whether we are transitioning from [scene] to [other], or from [other] to [scene]. */
+    fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean {
+        return isTransitioning(from = scene, to = other) ||
+            isTransitioning(from = other, to = scene)
+    }
 }
 
 sealed interface TransitionState {

@@ -22,7 +22,6 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import com.android.compose.animation.scene.transformation.AnchoredSize
 import com.android.compose.animation.scene.transformation.AnchoredTranslate
@@ -90,10 +89,6 @@ internal class TransitionBuilderImpl : TransitionBuilder {
         }
 
         spec.vectorize(Float.VectorConverter).durationMillis
-    }
-
-    override fun punchHole(matcher: ElementMatcher, bounds: ElementKey, shape: Shape) {
-        transformations.add(PunchHole(matcher, bounds, shape))
     }
 
     override fun reversed(builder: TransitionBuilder.() -> Unit) {
