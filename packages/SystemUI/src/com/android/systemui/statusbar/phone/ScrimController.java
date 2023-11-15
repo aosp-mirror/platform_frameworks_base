@@ -389,9 +389,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             states[i].setDefaultScrimAlpha(mDefaultScrimAlpha);
         }
 
-        mScrimBehind.setDefaultFocusHighlightEnabled(false);
-        mNotificationsScrim.setDefaultFocusHighlightEnabled(false);
-        mScrimInFront.setDefaultFocusHighlightEnabled(false);
         mTransparentScrimBackground = notificationsScrim.getResources()
                 .getBoolean(R.bool.notification_scrim_transparent);
         updateScrims();
@@ -494,12 +491,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mAnimationDuration = state.getAnimationDuration();
 
         applyState();
-
-        // Scrim might acquire focus when user is navigating with a D-pad or a keyboard.
-        // We need to disable focus otherwise AOD would end up with a gray overlay.
-        mScrimInFront.setFocusable(!state.isLowPowerState());
-        mScrimBehind.setFocusable(!state.isLowPowerState());
-        mNotificationsScrim.setFocusable(!state.isLowPowerState());
 
         mScrimInFront.setBlendWithMainColor(state.shouldBlendWithMainColor());
 
