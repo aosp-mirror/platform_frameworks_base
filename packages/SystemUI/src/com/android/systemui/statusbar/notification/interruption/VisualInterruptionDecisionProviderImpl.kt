@@ -20,12 +20,15 @@ import android.os.Handler
 import android.os.PowerManager
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.logging.UiEventLogger
+import com.android.internal.logging.UiEventLogger.UiEventEnum
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.Decision
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider.FullScreenIntentDecision
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionSuppressor.EventLogData
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE
@@ -33,6 +36,7 @@ import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.EventLog
 import com.android.systemui.util.settings.GlobalSettings
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -43,6 +47,7 @@ constructor(
     private val ambientDisplayConfiguration: AmbientDisplayConfiguration,
     private val batteryController: BatteryController,
     deviceProvisionedController: DeviceProvisionedController,
+    private val eventLog: EventLog,
     private val globalSettings: GlobalSettings,
     private val headsUpManager: HeadsUpManager,
     private val keyguardNotificationVisibilityProvider: KeyguardNotificationVisibilityProvider,
@@ -52,14 +57,25 @@ constructor(
     private val powerManager: PowerManager,
     private val statusBarStateController: StatusBarStateController,
     private val systemClock: SystemClock,
+    private val uiEventLogger: UiEventLogger,
     private val userTracker: UserTracker,
 ) : VisualInterruptionDecisionProvider {
+    interface Loggable {
+        val uiEventId: UiEventEnum?
+        val eventLogData: EventLogData?
+    }
+
     private class DecisionImpl(
         override val shouldInterrupt: Boolean,
         override val logReason: String
     ) : Decision
 
-    private data class LoggableDecision private constructor(val decision: DecisionImpl) {
+    private data class LoggableDecision
+    private constructor(
+        val decision: DecisionImpl,
+        override val uiEventId: UiEventEnum? = null,
+        override val eventLogData: EventLogData? = null
+    ) : Loggable {
         companion object {
             val unsuppressed =
                 LoggableDecision(DecisionImpl(shouldInterrupt = true, logReason = "not suppressed"))
@@ -74,7 +90,9 @@ constructor(
 
             fun suppressed(suppressor: VisualInterruptionSuppressor) =
                 LoggableDecision(
-                    DecisionImpl(shouldInterrupt = false, logReason = suppressor.reason)
+                    DecisionImpl(shouldInterrupt = false, logReason = suppressor.reason),
+                    uiEventId = suppressor.uiEventId,
+                    eventLogData = suppressor.eventLogData
                 )
         }
     }
@@ -82,7 +100,7 @@ constructor(
     private class FullScreenIntentDecisionImpl(
         val entry: NotificationEntry,
         private val fsiDecision: FullScreenIntentDecisionProvider.Decision
-    ) : FullScreenIntentDecision {
+    ) : FullScreenIntentDecision, Loggable {
         var hasBeenLogged = false
 
         override val shouldInterrupt
@@ -99,6 +117,12 @@ constructor(
 
         val isWarning
             get() = fsiDecision.isWarning
+
+        override val uiEventId
+            get() = fsiDecision.uiEventId
+
+        override val eventLogData
+            get() = fsiDecision.eventLogData
     }
 
     private val fullScreenIntentDecisionProvider =
@@ -214,9 +238,10 @@ constructor(
     private fun logDecision(
         type: VisualInterruptionType,
         entry: NotificationEntry,
-        loggable: LoggableDecision
+        loggableDecision: LoggableDecision
     ) {
-        logger.logDecision(type.name, entry, loggable.decision)
+        logger.logDecision(type.name, entry, loggableDecision.decision)
+        logEvents(entry, loggableDecision)
     }
 
     override fun makeUnloggedFullScreenIntentDecision(
@@ -250,6 +275,14 @@ constructor(
         }
 
         logger.logFullScreenIntentDecision(decision.entry, decision, decision.isWarning)
+        logEvents(decision.entry, decision)
+    }
+
+    private fun logEvents(entry: NotificationEntry, loggable: Loggable) {
+        loggable.uiEventId?.let { uiEventLogger.log(it, entry.sbn.uid, entry.sbn.packageName) }
+        loggable.eventLogData?.let {
+            eventLog.writeEvent(0x534e4554, it.number, entry.sbn.uid, it.description)
+        }
     }
 
     private fun checkSuppressInterruptions(entry: NotificationEntry) =

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.interruption
 
 import android.app.NotificationManager.IMPORTANCE_HIGH
 import android.os.PowerManager
+import com.android.internal.logging.UiEventLogger.UiEventEnum
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.StatusBarState.KEYGUARD
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
@@ -37,6 +38,10 @@ import com.android.systemui.statusbar.notification.interruption.FullScreenIntent
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_SUPPRESSED_ONLY_BY_DND
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_SUPPRESSIVE_BUBBLE_METADATA
 import com.android.systemui.statusbar.notification.interruption.FullScreenIntentDecisionProvider.DecisionImpl.NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionSuppressor.EventLogData
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 
@@ -52,6 +57,8 @@ class FullScreenIntentDecisionProvider(
         val logReason: String
         val shouldLog: Boolean
         val isWarning: Boolean
+        val uiEventId: UiEventEnum?
+        val eventLogData: EventLogData?
     }
 
     private enum class DecisionImpl(
@@ -60,7 +67,9 @@ class FullScreenIntentDecisionProvider(
         override val wouldFsiWithoutDnd: Boolean = shouldFsi,
         val supersedesDnd: Boolean = false,
         override val shouldLog: Boolean = true,
-        override val isWarning: Boolean = false
+        override val isWarning: Boolean = false,
+        override val uiEventId: UiEventEnum? = null,
+        override val eventLogData: EventLogData? = null
     ) : Decision {
         NO_FSI_NO_FULL_SCREEN_INTENT(
             false,
@@ -73,9 +82,17 @@ class FullScreenIntentDecisionProvider(
         NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR(
             false,
             "suppressive group alert behavior",
-            isWarning = true
+            isWarning = true,
+            uiEventId = FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR,
+            eventLogData = EventLogData("231322873", "groupAlertBehavior")
         ),
-        NO_FSI_SUPPRESSIVE_BUBBLE_METADATA(false, "suppressive bubble metadata", isWarning = true),
+        NO_FSI_SUPPRESSIVE_BUBBLE_METADATA(
+            false,
+            "suppressive bubble metadata",
+            isWarning = true,
+            uiEventId = FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA,
+            eventLogData = EventLogData("274759612", "bubbleMetadata")
+        ),
         NO_FSI_PACKAGE_SUSPENDED(false, "package suspended"),
         FSI_DEVICE_NOT_INTERACTIVE(true, "device is not interactive"),
         FSI_DEVICE_DREAMING(true, "device is dreaming"),
@@ -84,7 +101,13 @@ class FullScreenIntentDecisionProvider(
         FSI_KEYGUARD_OCCLUDED(true, "keyguard is occluded"),
         FSI_LOCKED_SHADE(true, "locked shade"),
         FSI_DEVICE_NOT_PROVISIONED(true, "device not provisioned"),
-        NO_FSI_NO_HUN_OR_KEYGUARD(false, "no HUN or keyguard", isWarning = true),
+        NO_FSI_NO_HUN_OR_KEYGUARD(
+            false,
+            "no HUN or keyguard",
+            isWarning = true,
+            uiEventId = FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD,
+            eventLogData = EventLogData("231322873", "no hun or keyguard")
+        ),
         NO_FSI_SUPPRESSED_BY_DND(false, "suppressed by DND", wouldFsiWithoutDnd = false),
         NO_FSI_SUPPRESSED_ONLY_BY_DND(false, "suppressed only by DND", wouldFsiWithoutDnd = true)
     }
