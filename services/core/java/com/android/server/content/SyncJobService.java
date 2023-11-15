@@ -19,6 +19,7 @@ package com.android.server.content;
 import android.annotation.Nullable;
 import android.app.job.JobParameters;
 import android.app.job.JobService;
+import android.content.pm.PackageManagerInternal;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
@@ -28,6 +29,7 @@ import android.util.SparseBooleanArray;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.LocalServices;
 
 public class SyncJobService extends JobService {
     private static final String TAG = "SyncManager";
@@ -95,6 +97,20 @@ public class SyncJobService extends JobService {
             final boolean wantsReschedule = !op.isPeriodic;
             jobFinished(params, wantsReschedule);
             return true;
+        }
+
+        // TODO(b/209852664): remove this logic from here once it's added within JobScheduler.
+        // JobScheduler should not call onStartJob for syncs whose source packages are stopped.
+        // Until JS adds the relevant logic, this is a temporary solution to keep deferring syncs
+        // for packages in the stopped state.
+        if (android.content.pm.Flags.stayStopped()) {
+            if (LocalServices.getService(PackageManagerInternal.class)
+                    .isPackageStopped(op.owningPackage, op.target.userId)) {
+                if (Log.isLoggable(TAG, Log.DEBUG)) {
+                    Slog.d(TAG, "Skipping sync for force-stopped package: " + op.owningPackage);
+                }
+                return false;
+            }
         }
 
         boolean isLoggable = Log.isLoggable(TAG, Log.VERBOSE);
