@@ -71,17 +71,13 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
     @NonNull
     public static ActivityConfigurationChangeItem obtain(@NonNull IBinder activityToken,
             @NonNull Configuration config) {
-        if (config == null) {
-            throw new IllegalArgumentException("Config must not be null.");
-        }
-
         ActivityConfigurationChangeItem instance =
                 ObjectPool.obtain(ActivityConfigurationChangeItem.class);
         if (instance == null) {
             instance = new ActivityConfigurationChangeItem();
         }
         instance.setActivityToken(activityToken);
-        instance.mConfiguration = config;
+        instance.mConfiguration = new Configuration(config);
 
         return instance;
     }
@@ -89,7 +85,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
     @Override
     public void recycle() {
         super.recycle();
-        mConfiguration = Configuration.EMPTY;
+        mConfiguration = null;
         ObjectPool.recycle(this);
     }
 

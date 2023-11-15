@@ -25,9 +25,9 @@ import android.view.ViewGroup
 import android.view.WindowManagerPolicyConstants.EXTRA_FROM_BRIGHTNESS_KEY
 import androidx.test.filters.SmallTest
 import androidx.test.rule.ActivityTestRule
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.activity.SingleActivityFactory
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.FakeExecutor
@@ -182,5 +182,15 @@ class BrightnessDialogTest : SysuiTestCase() {
             brightnessControllerFactory,
             mainExecutor,
             accessibilityMgr
-        )
+        ) {
+        private var finishing = false
+
+        override fun isFinishing(): Boolean {
+            return finishing
+        }
+
+        override fun requestFinish() {
+            finishing = true
+        }
+    }
 }

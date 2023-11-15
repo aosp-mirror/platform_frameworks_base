@@ -20,6 +20,7 @@
 
 #include <aidl/android/hardware/power/IPower.h>
 #include <android-base/stringprintf.h>
+#include <inttypes.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <powermanager/PowerHalController.h>
@@ -37,6 +38,15 @@ using aidl::android::hardware::power::WorkDuration;
 using android::base::StringPrintf;
 
 namespace android {
+
+static struct {
+    jclass clazz{};
+    jfieldID workPeriodStartTimestampNanos{};
+    jfieldID actualTotalDurationNanos{};
+    jfieldID actualCpuDurationNanos{};
+    jfieldID actualGpuDurationNanos{};
+    jfieldID timestampNanos{};
+} gWorkDurationInfo;
 
 static power::PowerHalController gPowerHalController;
 static std::unordered_map<jlong, std::shared_ptr<IPowerHintSession>> gSessionMap;
@@ -180,6 +190,26 @@ static void nativeSetMode(JNIEnv* env, jclass /* clazz */, jlong session_ptr, ji
     setMode(session_ptr, static_cast<SessionMode>(mode), enabled);
 }
 
+static void nativeReportActualWorkDuration2(JNIEnv* env, jclass /* clazz */, jlong session_ptr,
+                                            jobjectArray jWorkDurations) {
+    int size = env->GetArrayLength(jWorkDurations);
+    std::vector<WorkDuration> workDurations(size);
+    for (int i = 0; i < size; i++) {
+        jobject workDuration = env->GetObjectArrayElement(jWorkDurations, i);
+        workDurations[i].workPeriodStartTimestampNanos =
+                env->GetLongField(workDuration, gWorkDurationInfo.workPeriodStartTimestampNanos);
+        workDurations[i].durationNanos =
+                env->GetLongField(workDuration, gWorkDurationInfo.actualTotalDurationNanos);
+        workDurations[i].cpuDurationNanos =
+                env->GetLongField(workDuration, gWorkDurationInfo.actualCpuDurationNanos);
+        workDurations[i].gpuDurationNanos =
+                env->GetLongField(workDuration, gWorkDurationInfo.actualGpuDurationNanos);
+        workDurations[i].timeStampNanos =
+                env->GetLongField(workDuration, gWorkDurationInfo.timestampNanos);
+    }
+    reportActualWorkDuration(session_ptr, workDurations);
+}
+
 // ----------------------------------------------------------------------------
 static const JNINativeMethod sHintManagerServiceMethods[] = {
         /* name, signature, funcPtr */
@@ -194,9 +224,23 @@ static const JNINativeMethod sHintManagerServiceMethods[] = {
         {"nativeSendHint", "(JI)V", (void*)nativeSendHint},
         {"nativeSetThreads", "(J[I)V", (void*)nativeSetThreads},
         {"nativeSetMode", "(JIZ)V", (void*)nativeSetMode},
+        {"nativeReportActualWorkDuration", "(J[Landroid/os/WorkDuration;)V",
+         (void*)nativeReportActualWorkDuration2},
 };
 
 int register_android_server_HintManagerService(JNIEnv* env) {
+    gWorkDurationInfo.clazz = env->FindClass("android/os/WorkDuration");
+    gWorkDurationInfo.workPeriodStartTimestampNanos =
+            env->GetFieldID(gWorkDurationInfo.clazz, "mWorkPeriodStartTimestampNanos", "J");
+    gWorkDurationInfo.actualTotalDurationNanos =
+            env->GetFieldID(gWorkDurationInfo.clazz, "mActualTotalDurationNanos", "J");
+    gWorkDurationInfo.actualCpuDurationNanos =
+            env->GetFieldID(gWorkDurationInfo.clazz, "mActualCpuDurationNanos", "J");
+    gWorkDurationInfo.actualGpuDurationNanos =
+            env->GetFieldID(gWorkDurationInfo.clazz, "mActualGpuDurationNanos", "J");
+    gWorkDurationInfo.timestampNanos =
+            env->GetFieldID(gWorkDurationInfo.clazz, "mTimestampNanos", "J");
+
     return jniRegisterNativeMethods(env,
                                     "com/android/server/power/hint/"
                                     "HintManagerService$NativeWrapper",

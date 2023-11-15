@@ -48,6 +48,8 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
             viewModelScope = testScope.backgroundScope,
             interactor = bouncerInteractor,
             isInputEnabled = MutableStateFlow(true),
+            simBouncerInteractor = utils.simBouncerInteractor,
+            authenticationMethod = AuthenticationMethodModel.Pin,
         )
 
     @Test

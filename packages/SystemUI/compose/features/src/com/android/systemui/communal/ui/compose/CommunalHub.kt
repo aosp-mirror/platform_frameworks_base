@@ -22,10 +22,11 @@ import android.widget.FrameLayout
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -42,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -65,6 +67,7 @@ fun CommunalHub(
         LazyHorizontalGrid(
             modifier = modifier.height(Dimensions.GridHeight).align(Alignment.CenterStart),
             rows = GridCells.Fixed(CommunalContentSize.FULL.span),
+            contentPadding = PaddingValues(horizontal = Dimensions.Spacing),
             horizontalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
             verticalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
         ) {
@@ -92,6 +95,16 @@ fun CommunalHub(
                 LocalContext.current.getString(R.string.button_to_open_widget_picker)
             )
         }
+
+        // This spacer covers the edge of the LazyHorizontalGrid and prevents it from receiving
+        // touches, so that the SceneTransitionLayout can intercept the touches and allow an edge
+        // swipe back to the blank scene.
+        Spacer(
+            Modifier.height(Dimensions.GridHeight)
+                .align(Alignment.CenterStart)
+                .width(Dimensions.Spacing)
+                .pointerInput(Unit) {}
+        )
     }
 }
 
@@ -164,11 +177,7 @@ private fun TutorialContent(modifier: Modifier = Modifier) {
 @Composable
 private fun Umo(viewModel: CommunalViewModel, modifier: Modifier = Modifier) {
     AndroidView(
-        modifier =
-            modifier
-                .width(Dimensions.CardWidth)
-                .height(Dimensions.CardHeightThird)
-                .padding(Dimensions.Spacing),
+        modifier = modifier,
         factory = {
             viewModel.mediaHost.expansion = MediaHostState.EXPANDED
             viewModel.mediaHost.showsOnlyActiveMedia = false

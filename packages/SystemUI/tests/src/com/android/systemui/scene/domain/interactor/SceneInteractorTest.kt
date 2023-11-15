@@ -341,6 +341,7 @@ class SceneInteractorTest : SysuiTestCase() {
     @Test
     fun userInput() =
         testScope.runTest {
+            assertThat(utils.powerRepository.userTouchRegistered).isFalse()
             underTest.onUserInput()
             assertThat(utils.powerRepository.userTouchRegistered).isTrue()
         }

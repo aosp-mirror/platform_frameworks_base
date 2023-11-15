@@ -44,14 +44,19 @@ import static org.mockito.Mockito.when;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
+import android.app.UiAutomation;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Handler;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -62,6 +67,7 @@ import android.support.test.uiautomator.Until;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.Flags;
 import android.view.accessibility.IAccessibilityManager;
 
@@ -90,12 +96,17 @@ import java.util.Collections;
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityShortcutChooserActivityTest {
     private static final String ONE_HANDED_MODE = "One-Handed mode";
+    private static final String ALLOW_LABEL = "Allow";
     private static final String DENY_LABEL = "Deny";
+    private static final String UNINSTALL_LABEL = "Uninstall";
     private static final String EDIT_LABEL = "Edit shortcuts";
     private static final String LIST_TITLE_LABEL = "Choose features to use";
     private static final String TEST_LABEL = "TEST_LABEL";
-    private static final ComponentName TEST_COMPONENT_NAME = new ComponentName("package", "class");
+    private static final String TEST_PACKAGE = "TEST_LABEL";
+    private static final ComponentName TEST_COMPONENT_NAME = new ComponentName(TEST_PACKAGE,
+            "class");
     private static final long UI_TIMEOUT_MS = 1000;
+    private UiAutomation mUiAutomation;
     private UiDevice mDevice;
     private ActivityScenario<TestAccessibilityShortcutChooserActivity> mScenario;
     private TestAccessibilityShortcutChooserActivity mActivity;
@@ -117,6 +128,10 @@ public class AccessibilityShortcutChooserActivityTest {
     private IAccessibilityManager mAccessibilityManagerService;
     @Mock
     private KeyguardManager mKeyguardManager;
+    @Mock
+    private PackageManager mPackageManager;
+    @Mock
+    private PackageInstaller mPackageInstaller;
 
     @Before
     public void setUp() throws Exception {
@@ -125,6 +140,7 @@ public class AccessibilityShortcutChooserActivityTest {
         assumeFalse("AccessibilityShortcutChooserActivity not supported on watch",
                 pm.hasSystemFeature(PackageManager.FEATURE_WATCH));
 
+        mUiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
         mDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         mDevice.wakeUp();
         when(mAccessibilityServiceInfo.getResolveInfo()).thenReturn(mResolveInfo);
@@ -134,12 +150,15 @@ public class AccessibilityShortcutChooserActivityTest {
         when(mAccessibilityServiceInfo.getComponentName()).thenReturn(TEST_COMPONENT_NAME);
         when(mAccessibilityManagerService.getInstalledAccessibilityServiceList(
                 anyInt())).thenReturn(new ParceledListSlice<>(
-                        Collections.singletonList(mAccessibilityServiceInfo)));
+                Collections.singletonList(mAccessibilityServiceInfo)));
         when(mAccessibilityManagerService.isAccessibilityTargetAllowed(
                 anyString(), anyInt(), anyInt())).thenReturn(true);
         when(mKeyguardManager.isKeyguardLocked()).thenReturn(false);
+        when(mPackageManager.getPackageInstaller()).thenReturn(mPackageInstaller);
+
         TestAccessibilityShortcutChooserActivity.setupForTesting(
-                mAccessibilityManagerService, mKeyguardManager);
+                mAccessibilityManagerService, mKeyguardManager,
+                mPackageManager);
     }
 
     @After
@@ -150,23 +169,61 @@ public class AccessibilityShortcutChooserActivityTest {
     }
 
     @Test
-    public void doubleClickTestServiceAndClickDenyButton_permissionDialogDoesNotExist() {
+    @RequiresFlagsDisabled(Flags.FLAG_DEDUPLICATE_ACCESSIBILITY_WARNING_DIALOG)
+    public void selectTestService_oldPermissionDialog_deny_dialogIsHidden() {
         launchActivity();
         openShortcutsList();
 
-        // Performing the double-click is flaky so retry if needed.
-        for (int attempt = 1; attempt <= 2; attempt++) {
-            onView(withText(TEST_LABEL)).perform(scrollTo(), doubleClick());
-            if (mDevice.wait(Until.hasObject(By.text(DENY_LABEL)), UI_TIMEOUT_MS)) {
-                break;
-            }
-        }
-
+        mDevice.findObject(By.text(TEST_LABEL)).clickAndWait(Until.newWindow(), UI_TIMEOUT_MS);
         onView(withText(DENY_LABEL)).perform(scrollTo(), click());
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
         onView(withId(R.id.accessibility_permissionDialog_title)).inRoot(isDialog()).check(
                 doesNotExist());
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DEDUPLICATE_ACCESSIBILITY_WARNING_DIALOG)
+    public void selectTestService_permissionDialog_allow_rowChecked() {
+        launchActivity();
+        openShortcutsList();
+
+        mDevice.findObject(By.text(TEST_LABEL)).clickAndWait(Until.newWindow(), UI_TIMEOUT_MS);
+        clickSystemDialogButton(ALLOW_LABEL);
+
+        assertThat(mDevice.wait(Until.hasObject(By.textStartsWith(LIST_TITLE_LABEL)),
+                UI_TIMEOUT_MS)).isTrue();
+        assertThat(mDevice.wait(Until.hasObject(By.checked(true)), UI_TIMEOUT_MS)).isTrue();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DEDUPLICATE_ACCESSIBILITY_WARNING_DIALOG)
+    public void selectTestService_permissionDialog_deny_rowNotChecked() {
+        launchActivity();
+        openShortcutsList();
+
+        mDevice.findObject(By.text(TEST_LABEL)).clickAndWait(Until.newWindow(), UI_TIMEOUT_MS);
+        clickSystemDialogButton(DENY_LABEL);
+
+        assertThat(mDevice.wait(Until.hasObject(By.textStartsWith(LIST_TITLE_LABEL)),
+                UI_TIMEOUT_MS)).isTrue();
+        assertThat(mDevice.wait(Until.hasObject(By.checked(true)), UI_TIMEOUT_MS)).isFalse();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_DEDUPLICATE_ACCESSIBILITY_WARNING_DIALOG)
+    public void selectTestService_permissionDialog_uninstall_callsUninstaller_rowRemoved() {
+        launchActivity();
+        openShortcutsList();
+
+        mDevice.findObject(By.text(TEST_LABEL)).clickAndWait(Until.newWindow(), UI_TIMEOUT_MS);
+        clickSystemDialogButton(UNINSTALL_LABEL);
+
+        verify(mPackageInstaller).uninstall(eq(TEST_PACKAGE), any());
+        assertThat(mDevice.wait(Until.hasObject(By.textStartsWith(LIST_TITLE_LABEL)),
+                UI_TIMEOUT_MS)).isTrue();
+        assertThat(mDevice.wait(Until.hasObject(By.textStartsWith(TEST_LABEL)),
+                UI_TIMEOUT_MS)).isFalse();
     }
 
     @Test
@@ -239,6 +296,18 @@ public class AccessibilityShortcutChooserActivityTest {
         mDevice.wait(Until.hasObject(By.textStartsWith(LIST_TITLE_LABEL)), UI_TIMEOUT_MS);
     }
 
+    private void clickSystemDialogButton(String dialogButtonText) {
+        // Use UiAutomation to find the button because UiDevice struggles to find
+        // a UI element in a system dialog.
+        final AccessibilityNodeInfo button =
+                mUiAutomation.getRootInActiveWindow()
+                        .findAccessibilityNodeInfosByText(dialogButtonText).stream()
+                        .filter(AccessibilityNodeInfo::isClickable).findFirst().get();
+        final Rect bounds = new Rect();
+        button.getBoundsInScreen(bounds);
+        mDevice.click(bounds.centerX(), bounds.centerY());
+    }
+
     /**
      * Used for testing.
      */
@@ -246,12 +315,30 @@ public class AccessibilityShortcutChooserActivityTest {
             AccessibilityShortcutChooserActivity {
         private static IAccessibilityManager sAccessibilityManagerService;
         private static KeyguardManager sKeyguardManager;
+        private static PackageManager sPackageManager;
 
         public static void setupForTesting(
                 IAccessibilityManager accessibilityManagerService,
-                KeyguardManager keyguardManager) {
+                KeyguardManager keyguardManager,
+                PackageManager packageManager) {
             sAccessibilityManagerService = accessibilityManagerService;
             sKeyguardManager = keyguardManager;
+            sPackageManager = packageManager;
+        }
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            if (Flags.deduplicateAccessibilityWarningDialog()) {
+                // Setting the Theme is necessary here for the dialog to use the proper style
+                // resources as designated in its layout XML.
+                setTheme(R.style.Theme_DeviceDefault_DayNight);
+            }
+        }
+
+        @Override
+        public PackageManager getPackageManager() {
+            return sPackageManager;
         }
 
         @Override

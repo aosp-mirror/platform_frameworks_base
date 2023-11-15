@@ -24,6 +24,8 @@ import android.util.ArrayMap;
 import android.view.MotionEvent;
 import android.view.accessibility.AccessibilityInteractionClient;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Executor;
@@ -92,6 +94,7 @@ public final class TouchInteractionController {
         STATE_DRAGGING,
         STATE_DELEGATING
     })
+    @Retention(RetentionPolicy.SOURCE)
     private @interface State {}
 
     // The maximum number of pointers that can be touching the screen at once. (See MAX_POINTER_ID

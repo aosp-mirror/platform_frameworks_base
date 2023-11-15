@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -37,7 +38,8 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.notifications.ui.composable.Notifications
-import com.android.systemui.qs.footer.ui.compose.QuickSettings
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
+import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
@@ -152,7 +154,11 @@ private fun SceneScope.ShadeScene(
                 statusBarIconController = statusBarIconController,
             )
             Spacer(modifier = Modifier.height(16.dp))
-            QuickSettings(modifier = Modifier.height(160.dp))
+            QuickSettings(
+                modifier = Modifier.wrapContentHeight(),
+                viewModel.qsSceneAdapter,
+                QSSceneAdapter.State.QQS
+            )
             Spacer(modifier = Modifier.height(16.dp))
             Notifications(modifier = Modifier.weight(1f))
         }

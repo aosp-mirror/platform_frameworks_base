@@ -17,7 +17,6 @@
 package com.android.systemui.flags
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.Flags as Classic
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import javax.inject.Inject
@@ -28,9 +27,5 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
     FlagDependenciesBase(featureFlags, handler) {
     override fun defineDependencies() {
         FooterViewRefactor.token dependsOn NotificationIconContainerRefactor.token
-
-        // These two flags are effectively linked. We should migrate them to a single aconfig flag.
-        Classic.MIGRATE_NSSL dependsOn Classic.MIGRATE_KEYGUARD_STATUS_VIEW
-        Classic.MIGRATE_KEYGUARD_STATUS_VIEW dependsOn Classic.MIGRATE_NSSL
     }
 }

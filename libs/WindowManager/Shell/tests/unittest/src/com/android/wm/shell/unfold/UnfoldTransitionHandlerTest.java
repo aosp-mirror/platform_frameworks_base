@@ -17,6 +17,7 @@
 package com.android.wm.shell.unfold;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -46,6 +47,7 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.transition.TransitionInfoBuilder;
 import com.android.wm.shell.transition.Transitions.TransitionFinishCallback;
 import com.android.wm.shell.unfold.animation.FullscreenUnfoldTaskAnimator;
 import com.android.wm.shell.unfold.animation.SplitTaskUnfoldAnimator;
@@ -263,6 +265,42 @@ public class UnfoldTransitionHandlerTest {
         );
 
         verify(finishCallback).onTransitionFinished(any());
+    }
+
+    @Test
+    public void mergeAnimation_eatsDisplayOnlyTransitions() {
+        TransitionRequestInfo requestInfo = createUnfoldTransitionRequestInfo();
+        mUnfoldTransitionHandler.handleRequest(mTransition, requestInfo);
+        TransitionFinishCallback finishCallback = mock(TransitionFinishCallback.class);
+        TransitionFinishCallback mergeCallback = mock(TransitionFinishCallback.class);
+
+        mUnfoldTransitionHandler.startAnimation(
+                mTransition,
+                mock(TransitionInfo.class),
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class),
+                finishCallback);
+
+        // Offer a keyguard unlock transition - this should NOT merge
+        mUnfoldTransitionHandler.mergeAnimation(
+                new Binder(),
+                new TransitionInfoBuilder(TRANSIT_CHANGE, TRANSIT_FLAG_KEYGUARD_GOING_AWAY).build(),
+                mock(SurfaceControl.Transaction.class),
+                mTransition,
+                mergeCallback);
+        verify(finishCallback, never()).onTransitionFinished(any());
+
+        // Offer a CHANGE-only transition - this SHOULD merge (b/278064943)
+        mUnfoldTransitionHandler.mergeAnimation(
+                new Binder(),
+                new TransitionInfoBuilder(TRANSIT_CHANGE).build(),
+                mock(SurfaceControl.Transaction.class),
+                mTransition,
+                mergeCallback);
+        verify(mergeCallback).onTransitionFinished(any());
+
+        // We should never have finished the original transition.
+        verify(finishCallback, never()).onTransitionFinished(any());
     }
 
     private TransitionRequestInfo createUnfoldTransitionRequestInfo() {

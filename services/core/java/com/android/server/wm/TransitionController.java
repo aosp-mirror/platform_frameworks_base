@@ -1251,13 +1251,7 @@ class TransitionController {
         } else if (mPlayingTransitions.isEmpty()) {
             mTransitionPlayerProc.setRunningRemoteAnimation(false);
             mRemotePlayer.clear();
-            return;
         }
-        final IApplicationThread appThread = transition.getRemoteAnimationApp();
-        if (appThread == null || appThread == mTransitionPlayerProc.getThread()) return;
-        final WindowProcessController delegate = mAtm.getProcessController(appThread);
-        if (delegate == null) return;
-        mRemotePlayer.update(delegate, isPlaying, true /* predict */);
     }
 
     /** Called when a transition is aborted. This should only be called by {@link Transition} */
@@ -1483,7 +1477,7 @@ class TransitionController {
      * {@link #mTransitionPlayerProc}.
      */
     static class RemotePlayer {
-        private static final long REPORT_RUNNING_GRACE_PERIOD_MS = 100;
+        private static final long REPORT_RUNNING_GRACE_PERIOD_MS = 200;
         @GuardedBy("itself")
         private final ArrayMap<IBinder, DelegateProcess> mDelegateProcesses = new ArrayMap<>();
         private final ActivityTaskManagerService mAtm;

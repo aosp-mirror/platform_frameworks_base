@@ -858,10 +858,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         return row.getVisibility() == View.VISIBLE;
     }
 
-    public boolean isViewAffectedBySwipe(ExpandableView expandableView) {
-        return mNotificationRoundnessManager.isViewAffectedBySwipe(expandableView);
-    }
-
     public void addOnExpandedHeightChangedListener(BiConsumer<Float, Float> listener) {
         mView.addOnExpandedHeightChangedListener(listener);
     }
@@ -1259,18 +1255,6 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public void setPanelFlinging(boolean flinging) {
         mView.setPanelFlinging(flinging);
-    }
-
-    public boolean isFooterViewNotGone() {
-        return mView.isFooterViewNotGone();
-    }
-
-    public boolean isFooterViewContentVisible() {
-        return mView.isFooterViewContentVisible();
-    }
-
-    public int getFooterViewHeightWithPadding() {
-        return mView.getFooterViewHeightWithPadding();
     }
 
     /**

@@ -86,7 +86,9 @@ public final class AmbientContextEvent implements Parcelable {
             EVENT_SNORE,
             EVENT_BACK_DOUBLE_TAP,
             EVENT_VENDOR_WEARABLE_START,
-    }) public @interface EventCode {}
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface EventCode {}
 
     /** The integer indicating an unknown level. */
     public static final int LEVEL_UNKNOWN = 0;
@@ -114,7 +116,9 @@ public final class AmbientContextEvent implements Parcelable {
             LEVEL_MEDIUM,
             LEVEL_MEDIUM_HIGH,
             LEVEL_HIGH
-    }) public @interface LevelValue {}
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface LevelValue {}
 
     @EventCode private final int mEventType;
     private static int defaultEventType() {

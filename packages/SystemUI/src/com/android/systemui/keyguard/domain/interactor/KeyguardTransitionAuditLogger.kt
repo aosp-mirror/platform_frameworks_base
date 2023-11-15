@@ -75,24 +75,6 @@ constructor(
         }
 
         scope.launch {
-            interactor.finishedKeyguardTransitionStep.collect {
-                logger.log(TAG, VERBOSE, "Finished transition", it)
-            }
-        }
-
-        scope.launch {
-            interactor.canceledKeyguardTransitionStep.collect {
-                logger.log(TAG, VERBOSE, "Canceled transition", it)
-            }
-        }
-
-        scope.launch {
-            interactor.startedKeyguardTransitionStep.collect {
-                logger.log(TAG, VERBOSE, "Started transition", it)
-            }
-        }
-
-        scope.launch {
             keyguardInteractor.dozeTransitionModel.collect {
                 logger.log(TAG, VERBOSE, "Doze transition", it)
             }

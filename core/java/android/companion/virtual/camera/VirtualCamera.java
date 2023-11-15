@@ -16,20 +16,44 @@
 
 package android.companion.virtual.camera;
 
+import android.annotation.FlaggedApi;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
+import android.companion.virtual.VirtualDeviceManager;
+import android.companion.virtual.VirtualDeviceParams;
+import android.companion.virtual.flags.Flags;
+import android.hardware.camera2.CameraDevice;
 import android.os.RemoteException;
 
 import androidx.annotation.NonNull;
 
+import java.io.Closeable;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
- * Virtual camera that is used to send image data into system.
+ * A VirtualCamera is the representation of a remote or computer generated camera that will be
+ * exposed to applications using the Android Camera APIs.
  *
+ * <p>A VirtualCamera is created using {@link
+ * VirtualDeviceManager.VirtualDevice#createVirtualCamera(VirtualCameraConfig)}.
+ *
+ * <p>Once a virtual camera is created, it will receive callbacks from the system when an
+ * application attempts to use it via the {@link VirtualCameraCallback} class set using {@link
+ * VirtualCameraConfig.Builder#setVirtualCameraCallback(Executor, VirtualCameraCallback)}
+ *
+ * @see VirtualDeviceManager.VirtualDevice#createVirtualDevice(int, VirtualDeviceParams)
+ * @see VirtualCameraConfig.Builder#setVirtualCameraCallback(Executor, VirtualCameraCallback)
+ * @see android.hardware.camera2.CameraManager#openCamera(String, CameraDevice.StateCallback,
+ *     android.os.Handler)
  * @hide
  */
-public final class VirtualCamera extends IVirtualCamera.Stub {
+@SystemApi
+@FlaggedApi(Flags.FLAG_VIRTUAL_CAMERA)
+public final class VirtualCamera implements Closeable {
 
+    private final IVirtualDevice mVirtualDevice;
     private final VirtualCameraConfig mConfig;
 
     /**
@@ -37,24 +61,20 @@ public final class VirtualCamera extends IVirtualCamera.Stub {
      *
      * @param virtualDevice The Binder object representing this camera in the server.
      * @param config Configuration for the new virtual camera
+     * @hide
      */
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public VirtualCamera(
             @NonNull IVirtualDevice virtualDevice, @NonNull VirtualCameraConfig config) {
+        mVirtualDevice = virtualDevice;
         mConfig = Objects.requireNonNull(config);
         Objects.requireNonNull(virtualDevice);
+        // TODO(b/310857519): Avoid registration inside constructor.
         try {
-            virtualDevice.registerVirtualCamera(this);
+            mVirtualDevice.registerVirtualCamera(config);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
-    }
-
-    /** Get the camera session associated with this device */
-    @Override
-    public IVirtualCameraSession open() {
-        // TODO: b/302255544 - Make this async.
-        VirtualCameraSession session = mConfig.getCallback().onOpenSession();
-        return new VirtualCameraSessionInternal(session);
     }
 
     /** Returns the configuration of this virtual camera instance. */
@@ -63,14 +83,13 @@ public final class VirtualCamera extends IVirtualCamera.Stub {
         return mConfig;
     }
 
-    /**
-     * Returns the configuration to be used by the virtual camera HAL.
-     *
-     * @hide
-     */
     @Override
-    @NonNull
-    public VirtualCameraHalConfig getHalConfig() {
-        return mConfig.getHalConfig();
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void close() {
+        try {
+            mVirtualDevice.unregisterVirtualCamera(mConfig);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 }

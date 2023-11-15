@@ -32,6 +32,8 @@ import android.os.PerformanceHintManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.os.WorkDuration;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.SparseIntArray;
@@ -195,6 +197,9 @@ public final class HintManagerService extends SystemService {
 
         private static native void nativeSetMode(long halPtr, int mode, boolean enabled);
 
+        private static native void nativeReportActualWorkDuration(long halPtr,
+                                                                  WorkDuration[] workDurations);
+
         /** Wrapper for HintManager.nativeInit */
         public void halInit() {
             nativeInit();
@@ -252,6 +257,10 @@ public final class HintManagerService extends SystemService {
             nativeSetMode(halPtr, mode, enabled);
         }
 
+        /** Wrapper for HintManager.nativeReportActualWorkDuration */
+        public void halReportActualWorkDuration(long halPtr, WorkDuration[] workDurations) {
+            nativeReportActualWorkDuration(halPtr, workDurations);
+        }
     }
 
     @VisibleForTesting
@@ -621,6 +630,52 @@ public final class HintManagerService extends SystemService {
                 Preconditions.checkArgument(mode >= 0, "the mode Id value should be"
                         + " greater than zero.");
                 mNativeWrapper.halSetMode(mHalSessionPtr, mode, enabled);
+            }
+        }
+
+        @Override
+        public void reportActualWorkDuration2(WorkDuration[] workDurations) {
+            synchronized (this) {
+                if (mHalSessionPtr == 0 || !mUpdateAllowed) {
+                    return;
+                }
+                Preconditions.checkArgument(workDurations.length != 0, "the count"
+                        + " of work durations shouldn't be 0.");
+                for (WorkDuration workDuration : workDurations) {
+                    validateWorkDuration(workDuration);
+                }
+                mNativeWrapper.halReportActualWorkDuration(mHalSessionPtr, workDurations);
+            }
+        }
+
+        void validateWorkDuration(WorkDuration workDuration) {
+            if (DEBUG) {
+                Slogf.d(TAG, "WorkDuration(" + workDuration.getTimestampNanos() + ", "
+                        + workDuration.getWorkPeriodStartTimestampNanos() + ", "
+                        + workDuration.getActualTotalDurationNanos() + ", "
+                        + workDuration.getActualCpuDurationNanos() + ", "
+                        + workDuration.getActualGpuDurationNanos() + ")");
+            }
+            if (workDuration.getWorkPeriodStartTimestampNanos() <= 0) {
+                throw new IllegalArgumentException(
+                    TextUtils.formatSimple(
+                            "Work period start timestamp (%d) should be greater than 0",
+                            workDuration.getWorkPeriodStartTimestampNanos()));
+            }
+            if (workDuration.getActualTotalDurationNanos() <= 0) {
+                throw new IllegalArgumentException(
+                    TextUtils.formatSimple("Actual total duration (%d) should be greater than 0",
+                            workDuration.getActualTotalDurationNanos()));
+            }
+            if (workDuration.getActualCpuDurationNanos() <= 0) {
+                throw new IllegalArgumentException(
+                    TextUtils.formatSimple("Actual CPU duration (%d) should be greater than 0",
+                            workDuration.getActualCpuDurationNanos()));
+            }
+            if (workDuration.getActualGpuDurationNanos() < 0) {
+                throw new IllegalArgumentException(
+                    TextUtils.formatSimple("Actual GPU duration (%d) should be non negative",
+                            workDuration.getActualGpuDurationNanos()));
             }
         }
 

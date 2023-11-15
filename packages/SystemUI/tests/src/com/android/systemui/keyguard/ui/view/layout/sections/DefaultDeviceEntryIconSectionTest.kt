@@ -24,12 +24,14 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.LockIconViewController
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
+import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
@@ -42,6 +44,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
 import org.mockito.Answers
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
@@ -77,7 +80,9 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
                 notificationPanelView,
                 featureFlags,
                 { lockIconViewController },
-                { DeviceEntryIconViewModel() },
+                { mock(DeviceEntryIconViewModel::class.java) },
+                { mock(DeviceEntryForegroundViewModel::class.java) },
+                { mock(DeviceEntryBackgroundViewModel::class.java) },
                 { falsingManager },
             )
     }

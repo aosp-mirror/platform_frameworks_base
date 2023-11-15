@@ -37,7 +37,6 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
 import android.view.WindowContentFrameStats;
-import android.view.WindowManager;
 
 import com.android.internal.protolog.common.ProtoLog;
 
@@ -73,7 +72,7 @@ class WindowSurfaceController {
         mWindowSession = win.mSession;
 
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "new SurfaceControl");
-        final SurfaceControl.Builder b = win.makeSurface()
+        mSurfaceControl = win.makeSurface()
                 .setParent(win.getSurfaceControl())
                 .setName(name)
                 .setFormat(format)
@@ -81,16 +80,8 @@ class WindowSurfaceController {
                 .setMetadata(METADATA_WINDOW_TYPE, windowType)
                 .setMetadata(METADATA_OWNER_UID, mWindowSession.mUid)
                 .setMetadata(METADATA_OWNER_PID, mWindowSession.mPid)
-                .setCallsite("WindowSurfaceController");
-
-        final boolean useBLAST = mService.mUseBLAST && ((win.getAttrs().privateFlags
-                & WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST) != 0);
-
-        if (useBLAST) {
-            b.setBLASTLayer();
-        }
-
-        mSurfaceControl = b.build();
+                .setCallsite("WindowSurfaceController")
+                .setBLASTLayer().build();
 
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }

@@ -45,6 +45,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -135,10 +136,16 @@ public class LaunchActivityItem extends ClientTransactionItem {
         if (instance == null) {
             instance = new LaunchActivityItem();
         }
-        setValues(instance, activityToken, intent, ident, info, curConfig, overrideConfig, deviceId,
-                referrer, voiceInteractor, procState, state, persistentState, pendingResults,
-                pendingNewIntents, activityOptions, isForward, profilerInfo, assistToken,
-                activityClientController, shareableActivityToken,
+        setValues(instance, activityToken, new Intent(intent), ident,  new ActivityInfo(info),
+                new Configuration(curConfig), new Configuration(overrideConfig), deviceId,
+                referrer, voiceInteractor, procState,
+                state != null ? new Bundle(state) : null,
+                persistentState != null ? new PersistableBundle(persistentState) : null,
+                pendingResults != null ? new ArrayList<>(pendingResults) : null,
+                pendingNewIntents != null ? new ArrayList<>(pendingNewIntents) : null,
+                activityOptions, isForward,
+                profilerInfo != null ? new ProfilerInfo(profilerInfo) : null,
+                assistToken, activityClientController, shareableActivityToken,
                 launchedFromBubble, taskFragmentToken);
 
         return instance;

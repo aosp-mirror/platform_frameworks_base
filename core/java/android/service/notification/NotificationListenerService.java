@@ -309,6 +309,7 @@ public abstract class NotificationListenerService extends Service {
             REASON_ASSISTANT_CANCEL,
             REASON_LOCKDOWN,
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationCancelReason{};
 
     /**
@@ -320,6 +321,7 @@ public abstract class NotificationListenerService extends Service {
             FLAG_FILTER_TYPE_SILENT,
             FLAG_FILTER_TYPE_ONGOING
     })
+    @Retention(RetentionPolicy.SOURCE)
     public @interface NotificationFilterTypes {}
     /**
      * A flag value indicating that this notification listener can see conversation type

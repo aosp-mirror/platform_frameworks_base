@@ -244,7 +244,12 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
 
     /** Hice the customizer. */
     public void hide() {
-        final boolean animate = mScreenLifecycle.getScreenState() != ScreenLifecycle.SCREEN_OFF;
+        hide(true);
+    }
+
+    public void hide(boolean animated) {
+        final boolean animate = animated
+                && mScreenLifecycle.getScreenState() != ScreenLifecycle.SCREEN_OFF;
         if (mView.isShown()) {
             mUiEventLogger.log(QSEditEvent.QS_EDIT_CLOSED);
             mToolbar.dismissPopupMenus();

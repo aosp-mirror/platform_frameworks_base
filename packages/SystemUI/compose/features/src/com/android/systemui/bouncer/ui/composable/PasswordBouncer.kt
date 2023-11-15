@@ -66,7 +66,7 @@ internal fun PasswordBouncer(
     LaunchedEffect(Unit) {
         // When the UI comes up, request focus on the TextField to bring up the software keyboard.
         focusRequester.requestFocus()
-        // Also, report that the UI is shown to let the view-model runs some logic.
+        // Also, report that the UI is shown to let the view-model run some logic.
         viewModel.onShown()
     }
 

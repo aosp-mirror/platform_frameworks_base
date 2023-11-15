@@ -16,6 +16,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.customize.QSCustomizerController
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.settings.brightness.BrightnessController
 import com.android.systemui.settings.brightness.BrightnessSliderController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
@@ -61,6 +62,8 @@ class QSPanelControllerTest : SysuiTestCase() {
     @Mock private lateinit var configuration: Configuration
     @Mock private lateinit var pagedTileLayout: PagedTileLayout
 
+    private val sceneContainerFlags = FakeSceneContainerFlags()
+
     private lateinit var controller: QSPanelController
     private val testableResources: TestableResources = mContext.orCreateTestableResources
 
@@ -96,7 +99,8 @@ class QSPanelControllerTest : SysuiTestCase() {
             brightnessSliderFactory,
             falsingManager,
             statusBarKeyguardViewManager,
-                ResourcesSplitShadeStateController()
+            ResourcesSplitShadeStateController(),
+            sceneContainerFlags,
         )
     }
 

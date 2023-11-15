@@ -16,12 +16,28 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.util
 
+import android.telephony.SubscriptionInfo
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 
 /** Fake of [SubscriptionManagerProxy] for easy testing */
 class FakeSubscriptionManagerProxy(
     /** Set the default data subId to be returned in [getDefaultDataSubscriptionId] */
-    var defaultDataSubId: Int = INVALID_SUBSCRIPTION_ID
+    var defaultDataSubId: Int = INVALID_SUBSCRIPTION_ID,
+    var activeSubscriptionInfo: SubscriptionInfo? = null
 ) : SubscriptionManagerProxy {
     override fun getDefaultDataSubscriptionId(): Int = defaultDataSubId
+
+    override fun isValidSubscriptionId(subId: Int): Boolean {
+        return subId > -1
+    }
+
+    override suspend fun getActiveSubscriptionInfo(subId: Int): SubscriptionInfo? {
+        return activeSubscriptionInfo
+    }
+
+    /** Sets the active subscription info. */
+    fun setActiveSubscriptionInfo(subId: Int, isEmbedded: Boolean = false) {
+        activeSubscriptionInfo =
+            SubscriptionInfo.Builder().setId(subId).setEmbedded(isEmbedded).build()
+    }
 }

@@ -36,3 +36,10 @@ flag {
     description: "Whether to allow showing fullscreen dim on ActivityEmbedding split"
     bug: "253533308"
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "activity_embedding_interactive_divider_flag"
+    description: "Whether the interactive divider feature is enabled"
+    bug: "293654166"
+}

@@ -18,109 +18,185 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.SysUITestComponent
+import com.android.SysUITestModule
+import com.android.TestMocksModule
+import com.android.collectLastValue
+import com.android.collectValues
+import com.android.runCurrent
+import com.android.runTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.user.domain.UserDomainLayerModule
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runTest
-import org.junit.Before
+import dagger.BindsInstance
+import dagger.Component
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
-    private lateinit var underTest: LockscreenToOccludedTransitionViewModel
-    private lateinit var repository: FakeKeyguardTransitionRepository
+    @SysUISingleton
+    @Component(
+        modules =
+            [
+                SysUITestModule::class,
+                UserDomainLayerModule::class,
+            ]
+    )
+    interface TestComponent : SysUITestComponent<LockscreenToOccludedTransitionViewModel> {
+        val repository: FakeKeyguardTransitionRepository
+        val keyguardRepository: FakeKeyguardRepository
+        val shadeRepository: FakeShadeRepository
 
-    @Before
-    fun setUp() {
-        repository = FakeKeyguardTransitionRepository()
-        val interactor =
-            KeyguardTransitionInteractorFactory.create(
-                    scope = TestScope().backgroundScope,
-                    repository = repository,
-                )
-                .keyguardTransitionInteractor
-        underTest = LockscreenToOccludedTransitionViewModel(interactor)
+        @Component.Factory
+        interface Factory {
+            fun create(
+                @BindsInstance test: SysuiTestCase,
+                featureFlags: FakeFeatureFlagsClassicModule,
+                mocks: TestMocksModule,
+            ): TestComponent
+        }
+
+        fun shadeExpanded(expanded: Boolean) {
+            if (expanded) {
+                shadeRepository.setQsExpansion(1f)
+            } else {
+                keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+                shadeRepository.setQsExpansion(0f)
+                shadeRepository.setLockscreenShadeExpansion(0f)
+            }
+        }
     }
+
+    private val testComponent: TestComponent =
+        DaggerLockscreenToOccludedTransitionViewModelTest_TestComponent.factory()
+            .create(
+                test = this,
+                featureFlags =
+                    FakeFeatureFlagsClassicModule {
+                        set(Flags.FACE_AUTH_REFACTOR, true)
+                        set(Flags.FULL_SCREEN_USER_SWITCHER, true)
+                    },
+                mocks = TestMocksModule(),
+            )
 
     @Test
     fun lockscreenFadeOut() =
-        runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<Float>()
-
-            val job = underTest.lockscreenAlpha.onEach { values.add(it) }.launchIn(this)
-
-            // Should start running here...
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            repository.sendTransitionStep(step(0f))
-            repository.sendTransitionStep(step(0.1f))
-            repository.sendTransitionStep(step(0.4f))
-            repository.sendTransitionStep(step(0.7f))
-            // ...up to here
-            repository.sendTransitionStep(step(1f))
-
+        testComponent.runTest {
+            val values by collectValues(underTest.lockscreenAlpha)
+            repository.sendTransitionSteps(
+                steps =
+                    listOf(
+                        step(0f, TransitionState.STARTED), // Should start running here...
+                        step(0f),
+                        step(.1f),
+                        step(.4f),
+                        step(.7f), // ...up to here
+                        step(1f),
+                    ),
+                testScope = testScope,
+            )
             // Only 3 values should be present, since the dream overlay runs for a small fraction
             // of the overall animation time
             assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
-
-            job.cancel()
         }
 
     @Test
     fun lockscreenTranslationY() =
-        runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<Float>()
-
+        testComponent.runTest {
             val pixels = 100
-            val job =
-                underTest.lockscreenTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
-
-            // Should start running here...
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            repository.sendTransitionStep(step(0f))
-            repository.sendTransitionStep(step(0.3f))
-            repository.sendTransitionStep(step(0.5f))
-            repository.sendTransitionStep(step(1f))
-            // ...up to here
-
+            val values by collectValues(underTest.lockscreenTranslationY(pixels))
+            repository.sendTransitionSteps(
+                steps =
+                    listOf(
+                        step(0f, TransitionState.STARTED), // Should start running here...
+                        step(0f),
+                        step(.3f),
+                        step(.5f),
+                        step(1f), // ...up to here
+                    ),
+                testScope = testScope,
+            )
             assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 100f)) }
-
-            job.cancel()
         }
 
     @Test
     fun lockscreenTranslationYIsCanceled() =
-        runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<Float>()
-
+        testComponent.runTest {
             val pixels = 100
-            val job =
-                underTest.lockscreenTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
-
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            repository.sendTransitionStep(step(0f))
-            repository.sendTransitionStep(step(0.3f))
-            repository.sendTransitionStep(step(0.3f, TransitionState.CANCELED))
-
+            val values by collectValues(underTest.lockscreenTranslationY(pixels))
+            repository.sendTransitionSteps(
+                steps =
+                    listOf(
+                        step(0f, TransitionState.STARTED),
+                        step(0f),
+                        step(.3f),
+                        step(0.3f, TransitionState.CANCELED),
+                    ),
+                testScope = testScope,
+            )
             assertThat(values.size).isEqualTo(4)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 100f)) }
 
             // Cancel will reset the translation
             assertThat(values[3]).isEqualTo(0)
+        }
 
-            job.cancel()
+    @Test
+    fun deviceEntryParentViewAlpha_shadeExpanded() =
+        testComponent.runTest {
+            val values by collectValues(underTest.deviceEntryParentViewAlpha)
+            shadeExpanded(true)
+            runCurrent()
+
+            // immediately 0f
+            repository.sendTransitionSteps(
+                steps =
+                    listOf(
+                        step(0f, TransitionState.STARTED),
+                        step(.5f),
+                        step(1f, TransitionState.FINISHED)
+                    ),
+                testScope = testScope,
+            )
+
+            values.forEach { assertThat(it).isEqualTo(0f) }
+        }
+
+    @Test
+    fun deviceEntryParentViewAlpha_shadeNotExpanded() =
+        testComponent.runTest {
+            val actual by collectLastValue(underTest.deviceEntryParentViewAlpha)
+            shadeExpanded(false)
+            runCurrent()
+
+            // fade out
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(actual).isEqualTo(1f)
+
+            repository.sendTransitionStep(step(.2f))
+            assertThat(actual).isIn(Range.open(.1f, .9f))
+
+            // alpha is 1f before the full transition starts ending
+            repository.sendTransitionStep(step(0.8f))
+            assertThat(actual).isEqualTo(0f)
+
+            repository.sendTransitionStep(step(1f, TransitionState.FINISHED))
+            assertThat(actual).isEqualTo(0f)
         }
 
     private fun step(

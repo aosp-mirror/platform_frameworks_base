@@ -3622,11 +3622,14 @@
   <java-symbol type="string" name="accessibility_uncheck_legacy_item_warning" />
 
   <java-symbol type="layout" name="accessibility_enable_service_warning" />
+  <java-symbol type="layout" name="accessibility_service_warning" />
   <java-symbol type="id" name="accessibility_permissionDialog_icon" />
   <java-symbol type="id" name="accessibility_permissionDialog_title" />
   <java-symbol type="id" name="accessibility_permission_enable_allow_button" />
   <java-symbol type="id" name="accessibility_permission_enable_deny_button" />
+  <java-symbol type="id" name="accessibility_permission_enable_uninstall_button" />
   <java-symbol type="string" name="accessibility_enable_service_title" />
+  <java-symbol type="string" name="accessibility_dialog_touch_filtered_warning" />
 
   <java-symbol type="layout" name="accessibility_shortcut_chooser_item" />
   <java-symbol type="id" name="accessibility_shortcut_target_checkbox" />
@@ -3655,6 +3658,7 @@
 
   <java-symbol type="drawable" name="ic_accessibility_color_inversion" />
   <java-symbol type="drawable" name="ic_accessibility_color_correction" />
+  <java-symbol type="drawable" name="ic_accessibility_generic" />
   <java-symbol type="drawable" name="ic_accessibility_hearing_aid" />
   <java-symbol type="drawable" name="ic_accessibility_magnification" />
   <java-symbol type="drawable" name="ic_accessibility_reduce_bright_colors" />

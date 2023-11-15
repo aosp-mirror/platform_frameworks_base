@@ -163,12 +163,6 @@ public class FeatureFlagUtils {
     public static final String SETTINGS_REMOTEAUTH_ENROLLMENT_SETTINGS =
             "settings_remoteauth_enrollment";
 
-    /** Flag to enable/disable entire page in Accessibility -> Hearing aids
-     *  @hide
-     */
-    public static final String SETTINGS_ACCESSIBILITY_HEARING_AID_PAGE =
-            "settings_accessibility_hearing_aid_page";
-
     /**
      * Flag to enable/disable preferring the AccessibilityMenu service in the system.
      * @hide
@@ -244,7 +238,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
         DEFAULT_FLAGS.put(SETTINGS_SHOW_STYLUS_PREFERENCES, "true");
         DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
-        DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_HEARING_AID_PAGE, "true");
         DEFAULT_FLAGS.put(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM, "false");
         DEFAULT_FLAGS.put(SETTINGS_AUDIO_ROUTING, "false");
         DEFAULT_FLAGS.put(SETTINGS_FLASH_NOTIFICATIONS, "true");

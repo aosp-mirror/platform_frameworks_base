@@ -20,6 +20,7 @@ import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LightRevealScrim
@@ -34,8 +35,6 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.app.tracing.TraceUtils
 import com.android.systemui.util.settings.GlobalSettings
 import javax.inject.Inject
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 
 /**
  * When to show the keyguard (AOD) view. This should be once the light reveal scrim is barely
@@ -68,7 +67,6 @@ class UnlockedScreenOffAnimationController @Inject constructor(
     private val interactionJankMonitor: InteractionJankMonitor,
     private val powerManager: PowerManager,
     private val handler: Handler = Handler(),
-    private val featureFlags: FeatureFlags,
 ) : WakefulnessLifecycle.Observer, ScreenOffAnimation {
     private lateinit var centralSurfaces: CentralSurfaces
     private lateinit var shadeViewController: ShadeViewController
@@ -288,7 +286,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 // up, with unpredictable consequences.
                 if (!powerManager.isInteractive(Display.DEFAULT_DISPLAY) &&
                         shouldAnimateInKeyguard) {
-                    if (!featureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+                    if (!KeyguardShadeMigrationNssl.isEnabled) {
                         // Tracking this state should no longer be relevant, as the isInteractive
                         // check covers it
                         aodUiAnimationPlaying = true

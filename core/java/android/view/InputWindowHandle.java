@@ -26,6 +26,7 @@ import android.graphics.Region;
 import android.gui.TouchOcclusionMode;
 import android.os.IBinder;
 import android.os.InputConfig;
+import android.util.Size;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -105,6 +106,9 @@ public final class InputWindowHandle {
 
     // Window frame.
     public final Rect frame = new Rect();
+
+    // The real size of the content, excluding any crop. If no buffer is rendered, this is 0,0
+    public Size contentSize = new Size(0, 0);
 
     public int surfaceInset;
 
@@ -199,6 +203,7 @@ public final class InputWindowHandle {
             transform.set(other.transform);
         }
         focusTransferTarget = other.focusTransferTarget;
+        contentSize = new Size(other.contentSize.getWidth(), other.contentSize.getHeight());
     }
 
     @Override
@@ -211,6 +216,7 @@ public final class InputWindowHandle {
                 .append(", windowToken=").append(windowToken)
                 .append(", displayId=").append(displayId)
                 .append(", isClone=").append((inputConfig & InputConfig.CLONE) != 0)
+                .append(", contentSize=").append(contentSize)
                 .toString();
 
     }

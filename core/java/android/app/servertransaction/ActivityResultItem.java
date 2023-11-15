@@ -35,6 +35,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Trace;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -82,7 +83,7 @@ public class ActivityResultItem extends ActivityTransactionItem {
             instance = new ActivityResultItem();
         }
         instance.setActivityToken(activityToken);
-        instance.mResultInfoList = resultInfoList;
+        instance.mResultInfoList = new ArrayList<>(resultInfoList);
 
         return instance;
     }

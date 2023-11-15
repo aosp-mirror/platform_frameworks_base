@@ -20,10 +20,10 @@ package com.android.systemui.keyguard.ui.view.layout.blueprints
 import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialIndicatorSection
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
+import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.layout.items.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
-import com.android.systemui.keyguard.ui.view.layout.sections.DefaultAmbientIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntryIconSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
@@ -31,8 +31,13 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultSettingsPopu
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultShortcutsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
+import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule.Companion.KEYGUARD_AMBIENT_INDICATION_AREA_SECTION
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
+import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
+import java.util.Optional
 import javax.inject.Inject
+import javax.inject.Named
+import kotlin.jvm.optionals.getOrNull
 
 /**
  * Positions elements of the lockscreen to the default position.
@@ -47,7 +52,8 @@ constructor(
     defaultIndicationAreaSection: DefaultIndicationAreaSection,
     defaultDeviceEntryIconSection: DefaultDeviceEntryIconSection,
     defaultShortcutsSection: DefaultShortcutsSection,
-    defaultAmbientIndicationAreaSection: DefaultAmbientIndicationAreaSection,
+    @Named(KEYGUARD_AMBIENT_INDICATION_AREA_SECTION)
+    defaultAmbientIndicationAreaSection: Optional<KeyguardSection>,
     defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection,
     defaultStatusViewSection: DefaultStatusViewSection,
     defaultStatusBarSection: DefaultStatusBarSection,
@@ -61,11 +67,11 @@ constructor(
     override val id: String = DEFAULT
 
     override val sections =
-        listOf(
+        listOfNotNull(
             defaultIndicationAreaSection,
             defaultDeviceEntryIconSection,
             defaultShortcutsSection,
-            defaultAmbientIndicationAreaSection,
+            defaultAmbientIndicationAreaSection.getOrNull(),
             defaultSettingsPopupMenuSection,
             defaultStatusViewSection,
             defaultStatusBarSection,

@@ -142,9 +142,7 @@ constructor(
                     ::toTriple
                 )
                 .collect { (isAsleep, lastStartedStep, isAodAvailable) ->
-                    if (
-                        lastStartedStep.to == KeyguardState.OCCLUDED && isAsleep
-                    ) {
+                    if (lastStartedStep.to == KeyguardState.OCCLUDED && isAsleep) {
                         startTransitionTo(
                             if (isAodAvailable) KeyguardState.AOD else KeyguardState.DOZING
                         )
@@ -187,5 +185,6 @@ constructor(
     companion object {
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_LOCKSCREEN_DURATION = 933.milliseconds
+        val TO_AOD_DURATION = DEFAULT_DURATION
     }
 }

@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
 import com.android.systemui.statusbar.notification.icon.domain.interactor.NotificationIconsInteractor
+import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconsViewData.LimitType
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -29,8 +30,23 @@ constructor(
     /** [NotificationIconsViewData] indicating which icons to display in the view. */
     val icons: Flow<NotificationIconsViewData> =
         interactor.filteredNotifSet().map { entries ->
+            var firstAmbient = 0
+            val visibleKeys = buildList {
+                for (entry in entries) {
+                    entry.toIconInfo(entry.shelfIcon)?.let { info ->
+                        add(info)
+                        // NOTE: we assume that all ambient notifications will be at the end of the
+                        // list
+                        if (!entry.isAmbient) {
+                            firstAmbient++
+                        }
+                    }
+                }
+            }
             NotificationIconsViewData(
-                visibleKeys = entries.mapNotNull { it.toIconInfo(it.shelfIcon) },
+                visibleKeys,
+                iconLimit = firstAmbient,
+                limitType = LimitType.MaximumIndex,
             )
         }
 }

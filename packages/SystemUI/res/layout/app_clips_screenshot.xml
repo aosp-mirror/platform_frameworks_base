@@ -28,26 +28,28 @@
         style="@android:style/Widget.DeviceDefault.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:text="@string/app_clips_save_add_to_note"
         android:layout_marginStart="8dp"
         android:background="@drawable/overlay_button_background"
+        android:paddingHorizontal="24dp"
+        android:text="@string/app_clips_save_add_to_note"
         android:textColor="?android:textColorSecondary"
+        app:layout_constraintBottom_toTopOf="@id/preview"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/preview" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/cancel"
         style="@android:style/Widget.DeviceDefault.Button.Colored"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:text="@android:string/cancel"
-        android:layout_marginStart="6dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/overlay_button_background"
+        android:paddingHorizontal="24dp"
+        android:text="@android:string/cancel"
         android:textColor="?android:textColorSecondary"
+        app:layout_constraintBottom_toTopOf="@id/preview"
         app:layout_constraintStart_toEndOf="@id/save"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/preview" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/preview"

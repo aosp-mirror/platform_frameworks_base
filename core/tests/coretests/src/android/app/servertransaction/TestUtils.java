@@ -18,6 +18,8 @@ package android.app.servertransaction;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
@@ -92,17 +94,18 @@ class TestUtils {
     }
 
     static class LaunchActivityItemBuilder {
-        @Nullable
-        private IBinder mActivityToken;
-        @Nullable
-        private Intent mIntent;
+        @NonNull
+        private final IBinder mActivityToken;
+        @NonNull
+        private final Intent mIntent;
+        @NonNull
+        private final ActivityInfo mInfo;
+        @NonNull
+        private final Configuration mCurConfig = new Configuration();
+        @NonNull
+        private final Configuration mOverrideConfig = new Configuration();
+
         private int mIdent;
-        @Nullable
-        private ActivityInfo mInfo;
-        @Nullable
-        private Configuration mCurConfig;
-        @Nullable
-        private Configuration mOverrideConfig;
         private int mDeviceId;
         @Nullable
         private String mReferrer;
@@ -130,16 +133,11 @@ class TestUtils {
         @Nullable
         private IBinder mTaskFragmentToken;
 
-        @NonNull
-        LaunchActivityItemBuilder setActivityToken(@Nullable IBinder activityToken) {
-            mActivityToken = activityToken;
-            return this;
-        }
-
-        @NonNull
-        LaunchActivityItemBuilder setIntent(@Nullable Intent intent) {
-            mIntent = intent;
-            return this;
+        LaunchActivityItemBuilder(@NonNull IBinder activityToken, @NonNull Intent intent,
+                @NonNull ActivityInfo info) {
+            mActivityToken = requireNonNull(activityToken);
+            mIntent = requireNonNull(intent);
+            mInfo = requireNonNull(info);
         }
 
         @NonNull
@@ -149,20 +147,14 @@ class TestUtils {
         }
 
         @NonNull
-        LaunchActivityItemBuilder setInfo(@Nullable ActivityInfo info) {
-            mInfo = info;
+        LaunchActivityItemBuilder setCurConfig(@NonNull Configuration curConfig) {
+            mCurConfig.setTo(curConfig);
             return this;
         }
 
         @NonNull
-        LaunchActivityItemBuilder setCurConfig(@Nullable Configuration curConfig) {
-            mCurConfig = curConfig;
-            return this;
-        }
-
-        @NonNull
-        LaunchActivityItemBuilder setOverrideConfig(@Nullable Configuration overrideConfig) {
-            mOverrideConfig = overrideConfig;
+        LaunchActivityItemBuilder setOverrideConfig(@NonNull Configuration overrideConfig) {
+            mOverrideConfig.setTo(overrideConfig);
             return this;
         }
 

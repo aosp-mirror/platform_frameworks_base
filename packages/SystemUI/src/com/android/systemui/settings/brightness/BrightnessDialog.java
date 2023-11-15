@@ -181,10 +181,14 @@ public class BrightnessDialog extends Activity {
             if (mCancelTimeoutRunnable != null) {
                 mCancelTimeoutRunnable.run();
             }
-            finish();
+            requestFinish();
         }
 
         return super.onKeyDown(keyCode, event);
+    }
+
+    protected void requestFinish() {
+        finish();
     }
 
     private boolean triggeredByBrightnessKey() {
@@ -197,6 +201,6 @@ public class BrightnessDialog extends Activity {
         }
         final int timeout = mAccessibilityMgr.getRecommendedTimeoutMillis(DIALOG_TIMEOUT_MILLIS,
                 AccessibilityManager.FLAG_CONTENT_CONTROLS);
-        mCancelTimeoutRunnable = mMainExecutor.executeDelayed(this::finish, timeout);
+        mCancelTimeoutRunnable = mMainExecutor.executeDelayed(this::requestFinish, timeout);
     }
 }

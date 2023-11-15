@@ -34,6 +34,8 @@ import com.android.internal.accessibility.common.ShortcutConstants.ShortcutMenuM
  */
 class AccessibilityServiceTarget extends AccessibilityTarget {
 
+    private final AccessibilityServiceInfo mAccessibilityServiceInfo;
+
     AccessibilityServiceTarget(Context context, @ShortcutType int shortcutType,
             @AccessibilityFragmentType int fragmentType,
             @NonNull AccessibilityServiceInfo serviceInfo) {
@@ -47,6 +49,7 @@ class AccessibilityServiceTarget extends AccessibilityTarget {
                 serviceInfo.getResolveInfo().loadLabel(context.getPackageManager()),
                 serviceInfo.getResolveInfo().loadIcon(context.getPackageManager()),
                 convertToKey(convertToUserType(shortcutType)));
+        mAccessibilityServiceInfo = serviceInfo;
     }
 
     @Override
@@ -63,5 +66,9 @@ class AccessibilityServiceTarget extends AccessibilityTarget {
         holder.mIconView.setEnabled(enabled);
         holder.mLabelView.setEnabled(enabled);
         holder.mStatusView.setEnabled(enabled);
+    }
+
+    public AccessibilityServiceInfo getAccessibilityServiceInfo() {
+        return mAccessibilityServiceInfo;
     }
 }

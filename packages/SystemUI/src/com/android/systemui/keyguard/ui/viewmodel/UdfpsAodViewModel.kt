@@ -17,9 +17,9 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
-import com.android.systemui.res.R
-import com.android.systemui.keyguard.domain.interactor.BurnInOffsets
+import com.android.systemui.keyguard.domain.interactor.Offsets
 import com.android.systemui.keyguard.domain.interactor.UdfpsKeyguardInteractor
+import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,7 +35,7 @@ constructor(
     val context: Context,
 ) {
     val alpha: Flow<Float> = interactor.dozeAmount
-    val burnInOffsets: Flow<BurnInOffsets> = interactor.burnInOffsets
+    val burnInOffsets: Flow<Offsets> = interactor.burnInOffsets
     val isVisible: Flow<Boolean> = alpha.map { it != 0f }
 
     // Padding between the fingerprint icon and its bounding box in pixels.

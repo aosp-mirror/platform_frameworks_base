@@ -660,11 +660,6 @@ public class WindowManagerService extends IWindowManager.Stub
     @NonNull
     final RootWindowContainer mRoot;
 
-    // Whether the system should use BLAST for ViewRootImpl
-    final boolean mUseBLAST;
-    // Whether to enable BLASTSyncEngine Transaction passing.
-    static final boolean USE_BLAST_SYNC = true;
-
     final BLASTSyncEngine mSyncEngine;
 
     boolean mIsPc;
@@ -1219,8 +1214,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mRoot = new RootWindowContainer(this);
 
         final ContentResolver resolver = context.getContentResolver();
-        mUseBLAST = Settings.Global.getInt(resolver,
-            Settings.Global.DEVELOPMENT_USE_BLAST_ADAPTER_VR, 1) == 1;
 
         mSyncEngine = new BLASTSyncEngine(this);
 
@@ -1741,13 +1734,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             // From now on, no exceptions or errors allowed!
-
-            res = ADD_OKAY;
-
-            if (mUseBLAST) {
-                res |= WindowManagerGlobal.ADD_FLAG_USE_BLAST;
-            }
-
             if (displayContent.mCurrentFocus == null) {
                 displayContent.mWinAddedSinceNullFocus.add(win);
             }
@@ -2555,7 +2541,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (outSyncIdBundle != null) {
                 final int maybeSyncSeqId;
-                if (USE_BLAST_SYNC && win.useBLASTSync() && viewVisibility == View.VISIBLE
+                if (win.syncNextBuffer() && viewVisibility == View.VISIBLE
                         && win.mSyncSeqId > lastSyncSeqId) {
                     maybeSyncSeqId = win.shouldSyncWithBuffers() ? win.mSyncSeqId : -1;
                     win.markRedrawForSyncReported();
@@ -5815,15 +5801,6 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public IWindowSession openSession(IWindowSessionCallback callback) {
         return new Session(this, callback);
-    }
-
-    @Override
-    public boolean useBLAST() {
-        return mUseBLAST;
-    }
-
-    public boolean useBLASTSync() {
-        return USE_BLAST_SYNC;
     }
 
     @Override

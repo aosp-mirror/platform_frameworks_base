@@ -4668,22 +4668,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mClearAllInProgress;
     }
 
-    public boolean isFooterViewNotGone() {
-        return mFooterView != null
-                && mFooterView.getVisibility() != View.GONE
-                && !mFooterView.willBeGone();
-    }
-
-    public boolean isFooterViewContentVisible() {
-        return mFooterView != null && mFooterView.isContentVisible();
-    }
-
-    public int getFooterViewHeightWithPadding() {
-        return mFooterView == null ? 0 : mFooterView.getHeight()
-                + mPaddingBetweenElements
-                + mGapHeight;
-    }
-
     /**
      * @return the padding after the media header on the lockscreen
      */

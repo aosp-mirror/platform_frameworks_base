@@ -254,14 +254,6 @@ object Flags {
     // TODO(b/287268101): Tracking bug.
     @JvmField val TRANSIT_CLOCK = releasedFlag("lockscreen_custom_transit_clock")
 
-    /** Migrate the NSSL to the a sibling to both the panel and keyguard root view. */
-    // TODO(b/288074305): Tracking bug.
-    @JvmField val MIGRATE_NSSL = unreleasedFlag("migrate_nssl")
-
-    /** Migrate the status view from the notification panel to keyguard root view. */
-    // TODO(b/291767565): Tracking bug.
-    @JvmField val MIGRATE_KEYGUARD_STATUS_VIEW = unreleasedFlag("migrate_keyguard_status_view")
-
     /** Migrate the status bar view on keyguard from notification panel to keyguard root view. */
     // TODO(b/299115332): Tracking Bug.
     @JvmField val MIGRATE_KEYGUARD_STATUS_BAR_VIEW =
@@ -315,11 +307,6 @@ object Flags {
     // TODO(b/254513100): Tracking Bug
     val SMARTSPACE_SHARED_ELEMENT_TRANSITION_ENABLED =
         releasedFlag("smartspace_shared_element_transition_enabled")
-
-    // TODO(b/258517050): Clean up after the feature is launched.
-    @JvmField
-    val SMARTSPACE_DATE_WEATHER_DECOUPLED =
-        sysPropBooleanFlag("persist.sysui.ss.dw_decoupled", default = true)
 
     // TODO(b/270223352): Tracking Bug
     @JvmField

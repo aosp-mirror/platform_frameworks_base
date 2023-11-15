@@ -64,6 +64,8 @@ import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.PasswordValidationError;
 import com.android.internal.widget.VerifyCredentialResponse;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
@@ -235,6 +237,7 @@ public class KeyguardManager {
             PIN,
             PATTERN
     })
+    @Retention(RetentionPolicy.SOURCE)
     @interface LockTypes {}
 
     private final IKeyguardLockedStateListener mIKeyguardLockedStateListener =

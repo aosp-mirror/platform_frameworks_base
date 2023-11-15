@@ -27,10 +27,10 @@ import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 /** Hosts business logic for interacting with the power system. */
 @SysUISingleton
@@ -59,16 +59,26 @@ constructor(
      * Whether we're awake (screen is on and responding to user touch) or asleep (screen is off, or
      * on AOD).
      */
-    val isAwake = repository.wakefulness
+    val isAwake =
+        repository.wakefulness
             .map { it.isAwake() }
             .distinctUntilChanged(checkEquivalentUnlessEmitDuplicatesUnderTest)
 
-    /**
-     * Helper flow in case "isAsleep" reads better than "!isAwake".
-     */
+    /** Helper flow in case "isAsleep" reads better than "!isAwake". */
     val isAsleep = isAwake.map { !it }
 
     val screenPowerState = repository.screenPowerState
+
+    /**
+     * Notifies the power interactor that a user touch happened.
+     *
+     * @param noChangeLights If true, does not cause the keyboard backlight to turn on because of
+     *   this event. This is set when the power key is pressed. We want the device to stay on while
+     *   the button is down, but we're about to turn off the screen so we don't want the keyboard
+     *   backlight to turn on again. Otherwise the lights flash on and then off and it looks weird.
+     */
+    fun onUserTouch(noChangeLights: Boolean = false) =
+        repository.userTouch(noChangeLights = noChangeLights)
 
     /**
      * Wakes up the device if the device was dozing.
@@ -92,9 +102,7 @@ constructor(
      */
     fun wakeUpForFullScreenIntent() {
         if (repository.wakefulness.value.isAsleep() || statusBarStateController.isDozing) {
-            repository.wakeUp(
-                    why = FSI_WAKE_WHY,
-                    wakeReason = PowerManager.WAKE_REASON_APPLICATION)
+            repository.wakeUp(why = FSI_WAKE_WHY, wakeReason = PowerManager.WAKE_REASON_APPLICATION)
         }
     }
 
@@ -120,8 +128,8 @@ constructor(
      * directly.
      */
     fun onStartedWakingUp(
-            @PowerManager.WakeReason reason: Int,
-            powerButtonLaunchGestureTriggeredOnWakeUp: Boolean,
+        @PowerManager.WakeReason reason: Int,
+        powerButtonLaunchGestureTriggeredOnWakeUp: Boolean,
     ) {
         // If the launch gesture was previously detected, either via onCameraLaunchGestureDetected
         // or onFinishedGoingToSleep(), carry that state forward. It will be reset by the next
@@ -210,14 +218,14 @@ constructor(
          * reset that flag and then return false.
          */
         private val checkEquivalentUnlessEmitDuplicatesUnderTest: (Boolean, Boolean) -> Boolean =
-                { old, new ->
-                    if (emitDuplicateWakefulnessValue) {
-                        emitDuplicateWakefulnessValue = false
-                        false
-                    } else {
-                        old == new
-                    }
+            { old, new ->
+                if (emitDuplicateWakefulnessValue) {
+                    emitDuplicateWakefulnessValue = false
+                    false
+                } else {
+                    old == new
                 }
+            }
 
         /**
          * Helper method for tests to simulate the device waking up.
@@ -232,14 +240,14 @@ constructor(
          */
         @JvmOverloads
         fun PowerInteractor.setAwakeForTest(
-                @PowerManager.WakeReason reason: Int = PowerManager.WAKE_REASON_UNKNOWN,
-                forceEmit: Boolean = false
+            @PowerManager.WakeReason reason: Int = PowerManager.WAKE_REASON_UNKNOWN,
+            forceEmit: Boolean = false
         ) {
             emitDuplicateWakefulnessValue = forceEmit
 
             this.onStartedWakingUp(
-                    reason = reason,
-                    powerButtonLaunchGestureTriggeredOnWakeUp = false,
+                reason = reason,
+                powerButtonLaunchGestureTriggeredOnWakeUp = false,
             )
             this.onFinishedWakingUp()
         }
@@ -258,15 +266,14 @@ constructor(
          */
         @JvmOverloads
         fun PowerInteractor.setAsleepForTest(
-                @PowerManager.GoToSleepReason sleepReason: Int =
-                        PowerManager.GO_TO_SLEEP_REASON_MIN,
-                forceEmit: Boolean = false,
+            @PowerManager.GoToSleepReason sleepReason: Int = PowerManager.GO_TO_SLEEP_REASON_MIN,
+            forceEmit: Boolean = false,
         ) {
             emitDuplicateWakefulnessValue = forceEmit
 
             this.onStartedGoingToSleep(reason = sleepReason)
             this.onFinishedGoingToSleep(
-                    powerButtonLaunchGestureTriggeredDuringSleep = false,
+                powerButtonLaunchGestureTriggeredDuringSleep = false,
             )
         }
     }

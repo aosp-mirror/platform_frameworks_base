@@ -37,7 +37,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_USE_BLAST;
 
 import static com.android.internal.policy.DecorView.NAVIGATION_BAR_COLOR_VIEW_ATTRIBUTES;
 import static com.android.internal.policy.DecorView.STATUS_BAR_COLOR_VIEW_ATTRIBUTES;
@@ -426,7 +425,7 @@ public class SnapshotDrawerUtils {
         // Setting as trusted overlay to let touches pass through. This is safe because this
         // window is controlled by the system.
         layoutParams.privateFlags = (windowPrivateFlags & PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS)
-                | PRIVATE_FLAG_TRUSTED_OVERLAY | PRIVATE_FLAG_USE_BLAST;
+                | PRIVATE_FLAG_TRUSTED_OVERLAY;
         layoutParams.token = token;
         layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
         layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;

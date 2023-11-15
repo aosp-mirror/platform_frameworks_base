@@ -18,20 +18,27 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromGoneTransitionInteractor.Companion.TO_AOD_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 
 /** Breaks down GONE->AOD transition into discrete steps for corresponding views to consume. */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class GoneToAodTransitionViewModel
 @Inject
 constructor(
-    private val interactor: KeyguardTransitionInteractor,
-) {
+    interactor: KeyguardTransitionInteractor,
+    deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
         KeyguardTransitionAnimationFlow(
@@ -60,4 +67,21 @@ constructor(
             onStart = { 0f },
             onStep = { it },
         )
+    val deviceEntryBackgroundViewAlpha: Flow<Float> =
+        transitionAnimation.immediatelyTransitionTo(0f)
+    override val deviceEntryParentViewAlpha: Flow<Float> =
+        deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest { udfpsEnrolled ->
+            if (udfpsEnrolled) {
+                // fade in at the end of the transition to give time for FP to start running
+                // and avoid a flicker of the unlocked icon
+                transitionAnimation.createFlow(
+                    startTime = 1100.milliseconds,
+                    duration = 200.milliseconds,
+                    onStep = { it },
+                    onFinish = { 1f },
+                )
+            } else {
+                emptyFlow()
+            }
+        }
 }

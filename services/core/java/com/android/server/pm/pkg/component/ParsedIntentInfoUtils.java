@@ -31,6 +31,7 @@ import android.util.Slog;
 import android.util.TypedValue;
 
 import com.android.internal.R;
+import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.pkg.parsing.ParsingUtils;

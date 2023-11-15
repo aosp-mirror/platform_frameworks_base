@@ -936,7 +936,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
 
                 final int deviceId = getDeviceIdForDisplayId(r.getDisplayId());
                 clientTransaction.addCallback(LaunchActivityItem.obtain(r.token,
-                        new Intent(r.intent), System.identityHashCode(r), r.info,
+                        r.intent, System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
                         // and override configs.
                         mergedConfiguration.getGlobalConfiguration(),

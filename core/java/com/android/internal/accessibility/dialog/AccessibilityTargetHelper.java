@@ -296,6 +296,10 @@ public final class AccessibilityTargetHelper {
         }
     }
 
+    /**
+     * @deprecated Use {@link AccessibilityServiceWarning}.
+     */
+    @Deprecated
     static View createEnableDialogContentView(Context context,
             AccessibilityServiceTarget target, View.OnClickListener allowListener,
             View.OnClickListener denyListener) {

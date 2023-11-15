@@ -88,6 +88,19 @@ class BouncerInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun pinAuthMethod_sim_skipsAuthentication() =
+        testScope.runTest {
+            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Sim)
+            runCurrent()
+
+            // We rely on TelephonyManager to authenticate the sim card.
+            // Additionally, authenticating the sim card does not unlock the device.
+            // Thus, when auth method is sim, we expect to skip here.
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
+                .isEqualTo(AuthenticationResult.SKIPPED)
+        }
+
+    @Test
     fun pinAuthMethod_tryAutoConfirm_withAutoConfirmPin() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
@@ -289,6 +302,14 @@ class BouncerInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(imeHiddenEvent).isNotNull()
+        }
+
+    @Test
+    fun intentionalUserInputEvent_registersTouchEvent() =
+        testScope.runTest {
+            assertThat(utils.powerRepository.userTouchRegistered).isFalse()
+            underTest.onIntentionalUserInput()
+            assertThat(utils.powerRepository.userTouchRegistered).isTrue()
         }
 
     private fun assertTryAgainMessage(

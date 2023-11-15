@@ -18,6 +18,7 @@ package com.android.server.accessibility;
 
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_FAIL_UNKNOWN;
 import static android.accessibilityservice.AccessibilityService.SoftKeyboardController.ENABLE_IME_SUCCESS;
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
@@ -27,6 +28,8 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityTrace;
 import android.accessibilityservice.IAccessibilityServiceClient;
 import android.accessibilityservice.TouchInteractionController;
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -38,12 +41,15 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.view.Display;
 import android.view.MotionEvent;
 
+import com.android.internal.inputmethod.IAccessibilityInputMethodSession;
+import com.android.internal.inputmethod.IAccessibilityInputMethodSessionCallback;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -70,13 +76,38 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
      Having the reference be null when being called is a very bad sign, but we check the condition.
     */
     final WeakReference<AccessibilityUserState> mUserStateWeakReference;
+    @UserIdInt
+    final int mUserId;
     final Intent mIntent;
     final ActivityTaskManagerInternal mActivityTaskManagerService;
 
     private final Handler mMainHandler;
 
-    AccessibilityServiceConnection(AccessibilityUserState userState, Context context,
-            ComponentName componentName,
+    private static final class AccessibilityInputMethodSessionCallback
+            extends IAccessibilityInputMethodSessionCallback.Stub {
+        @UserIdInt
+        private final int mUserId;
+
+        AccessibilityInputMethodSessionCallback(@UserIdInt int userId) {
+            mUserId = userId;
+        }
+
+        @Override
+        public void sessionCreated(IAccessibilityInputMethodSession session, int id) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "ASC.sessionCreated");
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                InputMethodManagerInternal.get()
+                        .onSessionForAccessibilityCreated(id, session, mUserId);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        }
+    }
+
+    AccessibilityServiceConnection(@Nullable AccessibilityUserState userState,
+            Context context, ComponentName componentName,
             AccessibilityServiceInfo accessibilityServiceInfo, int id, Handler mainHandler,
             Object lock, AccessibilitySecurityPolicy securityPolicy, SystemSupport systemSupport,
             AccessibilityTrace trace, WindowManagerInternal windowManagerInternal,
@@ -86,6 +117,10 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
                 securityPolicy, systemSupport, trace, windowManagerInternal, systemActionPerfomer,
                 awm);
         mUserStateWeakReference = new WeakReference<AccessibilityUserState>(userState);
+        // the user ID doesn't matter when userState is null, because it is null only when this is a
+        // ProxyAccessibilityServiceConnection, for which it never creates an IME session and uses
+        // the user ID.
+        mUserId = userState == null ? UserHandle.USER_NULL : userState.mUserId;
         mIntent = new Intent().setComponent(mComponentName);
         mMainHandler = mainHandler;
         mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
@@ -555,6 +590,24 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
 
     public boolean requestImeApis() {
         return mRequestImeApis;
+    }
+
+    @Override
+    protected void createImeSessionInternal() {
+        final IAccessibilityServiceClient listener = getServiceInterfaceSafely();
+        if (listener != null) {
+            try {
+                if (svcClientTracingEnabled()) {
+                    logTraceSvcClient("createImeSession", "");
+                }
+                AccessibilityInputMethodSessionCallback
+                        callback = new AccessibilityInputMethodSessionCallback(mUserId);
+                listener.createImeSession(callback);
+            } catch (RemoteException re) {
+                Slog.e(LOG_TAG,
+                        "Error requesting IME session from " + mService, re);
+            }
+        }
     }
 
     private void notifyMotionEventInternal(MotionEvent event) {

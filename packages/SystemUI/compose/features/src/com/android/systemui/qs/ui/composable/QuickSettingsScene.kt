@@ -17,43 +17,53 @@
 package com.android.systemui.qs.ui.composable
 
 import android.view.ViewGroup
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.qs.footer.ui.compose.QuickSettings
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
-import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
-import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
+import com.android.systemui.shade.ui.composable.ShadeHeader
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 
 /** The Quick Settings (AKA "QS") scene shows the quick setting tiles. */
 @SysUISingleton
 class QuickSettingsScene
 @Inject
 constructor(
+    @Application private val applicationScope: CoroutineScope,
     private val viewModel: QuickSettingsSceneViewModel,
     private val tintedIconManagerFactory: TintedIconManager.Factory,
     private val batteryMeterViewControllerFactory: BatteryMeterViewController.Factory,
@@ -61,14 +71,12 @@ constructor(
 ) : ComposableScene {
     override val key = SceneKey.QuickSettings
 
-    private val _destinationScenes =
-        MutableStateFlow<Map<UserAction, SceneModel>>(
-                mapOf(
-                    UserAction.Swipe(Direction.UP) to SceneModel(SceneKey.Shade),
-                )
-            )
-            .asStateFlow()
-    override val destinationScenes: StateFlow<Map<UserAction, SceneModel>> = _destinationScenes
+    override val destinationScenes =
+        viewModel.destinationScenes.stateIn(
+            scope = applicationScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = emptyMap(),
+        )
 
     @Composable
     override fun SceneScope.Content(
@@ -93,6 +101,9 @@ private fun SceneScope.QuickSettingsScene(
     modifier: Modifier = Modifier,
 ) {
     // TODO(b/280887232): implement the real UI.
+    val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
+    val collapsedHeaderHeight =
+        with(LocalDensity.current) { ShadeHeader.Dimensions.CollapsedHeight.roundToPx() }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier =
@@ -103,12 +114,27 @@ private fun SceneScope.QuickSettingsScene(
     ) {
         when (LocalWindowSizeClass.current.widthSizeClass) {
             WindowWidthSizeClass.Compact ->
-                ExpandedShadeHeader(
-                    viewModel = viewModel.shadeHeaderViewModel,
-                    createTintedIconManager = createTintedIconManager,
-                    createBatteryMeterViewController = createBatteryMeterViewController,
-                    statusBarIconController = statusBarIconController,
-                )
+                AnimatedVisibility(
+                    visible = !isCustomizing,
+                    enter =
+                        expandVertically(
+                            animationSpec = tween(1000),
+                            initialHeight = { collapsedHeaderHeight },
+                        ) + fadeIn(tween(1000)),
+                    exit =
+                        shrinkVertically(
+                            animationSpec = tween(1000),
+                            targetHeight = { collapsedHeaderHeight },
+                            shrinkTowards = Alignment.Top,
+                        ) + fadeOut(tween(1000)),
+                ) {
+                    ExpandedShadeHeader(
+                        viewModel = viewModel.shadeHeaderViewModel,
+                        createTintedIconManager = createTintedIconManager,
+                        createBatteryMeterViewController = createBatteryMeterViewController,
+                        statusBarIconController = statusBarIconController,
+                    )
+                }
             else ->
                 CollapsedShadeHeader(
                     viewModel = viewModel.shadeHeaderViewModel,
@@ -118,6 +144,10 @@ private fun SceneScope.QuickSettingsScene(
                 )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        QuickSettings()
+        QuickSettings(
+            modifier = Modifier.fillMaxHeight(),
+            viewModel.qsSceneAdapter,
+            QSSceneAdapter.State.QS
+        )
     }
 }

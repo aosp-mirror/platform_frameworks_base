@@ -19,7 +19,10 @@
 package com.android.systemui.scene.domain.startable
 
 import com.android.systemui.CoreStartable
+import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
+import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.SimBouncerInteractor
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorActual
 import com.android.systemui.dagger.SysUISingleton
@@ -72,6 +75,8 @@ constructor(
     private val sceneLogger: SceneLogger,
     @FalsingCollectorActual private val falsingCollector: FalsingCollector,
     private val powerInteractor: PowerInteractor,
+    private val simBouncerInteractor: SimBouncerInteractor,
+    private val authenticationInteractor: AuthenticationInteractor,
 ) : CoreStartable {
 
     override fun start() {
@@ -128,6 +133,33 @@ constructor(
                         scene = SceneModel(SceneKey.Lockscreen),
                         loggingReason = "IME hidden",
                     )
+                }
+            }
+        }
+        applicationScope.launch {
+            simBouncerInteractor.isAnySimSecure.collect { isAnySimLocked ->
+                val canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value
+                val isUnlocked = deviceEntryInteractor.isUnlocked.value
+
+                when {
+                    isAnySimLocked -> {
+                        switchToScene(
+                            targetSceneKey = SceneKey.Bouncer,
+                            loggingReason = "Need to authenticate locked sim card."
+                        )
+                    }
+                    isUnlocked && !canSwipeToEnter -> {
+                        switchToScene(
+                            targetSceneKey = SceneKey.Gone,
+                            loggingReason = "Sim cards are unlocked."
+                        )
+                    }
+                    else -> {
+                        switchToScene(
+                            targetSceneKey = SceneKey.Lockscreen,
+                            loggingReason = "Sim cards are unlocked."
+                        )
+                    }
                 }
             }
         }
@@ -205,6 +237,14 @@ constructor(
                             loggingReason =
                                 "device is waking up while unlocked without the ability" +
                                     " to swipe up on lockscreen to enter.",
+                        )
+                    } else if (
+                        authenticationInteractor.getAuthenticationMethod() ==
+                            AuthenticationMethodModel.Sim
+                    ) {
+                        switchToScene(
+                            targetSceneKey = SceneKey.Bouncer,
+                            loggingReason = "device is starting to wake up with a locked sim"
                         )
                     }
                 }

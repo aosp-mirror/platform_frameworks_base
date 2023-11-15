@@ -229,7 +229,19 @@ public class DisplayModeDirectorTest {
                                     LIMIT_MODE_70.getPhysicalWidth(),
                                     LIMIT_MODE_70.getPhysicalHeight(),
                                     0, APP_MODE_65.getRefreshRate())),
-                        /*displayResolutionRangeVotingEnabled*/ true}});
+                        /*displayResolutionRangeVotingEnabled*/ true},
+                {/*expectedBaseModeId*/ APP_MODE_65.getModeId(),
+                        /*expectedPhysicalRefreshRate*/ 64.99f,
+                        /*expectedAppRequestedRefreshRate*/ 64.99f,
+                        /*votesWithPriorities*/ Map.of(
+                                Vote.PRIORITY_APP_REQUEST_BASE_MODE_REFRESH_RATE,
+                                Vote.forBaseModeRefreshRate(APP_MODE_65.getRefreshRate()),
+                                Vote.PRIORITY_APP_REQUEST_SIZE,
+                                Vote.forSize(APP_MODE_65.getPhysicalWidth(),
+                                        APP_MODE_65.getPhysicalHeight()),
+                                Vote.PRIORITY_LOW_POWER_MODE,
+                                Vote.forPhysicalRefreshRates(
+                                        0, 64.99f))}});
 
         final var res = new ArrayList<Object[]>(appRequestedSizeTestCases.size() * 2);
 

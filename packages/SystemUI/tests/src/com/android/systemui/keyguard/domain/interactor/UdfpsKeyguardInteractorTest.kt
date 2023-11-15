@@ -123,30 +123,30 @@ class UdfpsKeyguardInteractorTest : SysuiTestCase() {
             runCurrent()
 
             // THEN burn in offsets are 0
-            assertThat(burnInOffsets?.burnInProgress).isEqualTo(0f)
-            assertThat(burnInOffsets?.burnInYOffset).isEqualTo(0)
-            assertThat(burnInOffsets?.burnInXOffset).isEqualTo(0)
+            assertThat(burnInOffsets?.progress).isEqualTo(0f)
+            assertThat(burnInOffsets?.y).isEqualTo(0)
+            assertThat(burnInOffsets?.x).isEqualTo(0)
 
             // WHEN we're in the middle of the doze amount change
             keyguardRepository.setDozeAmount(.50f)
             runCurrent()
 
             // THEN burn in is updated (between 0 and the full offset)
-            assertThat(burnInOffsets?.burnInProgress).isGreaterThan(0f)
-            assertThat(burnInOffsets?.burnInYOffset).isGreaterThan(0)
-            assertThat(burnInOffsets?.burnInXOffset).isGreaterThan(0)
-            assertThat(burnInOffsets?.burnInProgress).isLessThan(burnInProgress)
-            assertThat(burnInOffsets?.burnInYOffset).isLessThan(burnInYOffset)
-            assertThat(burnInOffsets?.burnInXOffset).isLessThan(burnInXOffset)
+            assertThat(burnInOffsets?.progress).isGreaterThan(0f)
+            assertThat(burnInOffsets?.y).isGreaterThan(0)
+            assertThat(burnInOffsets?.x).isGreaterThan(0)
+            assertThat(burnInOffsets?.progress).isLessThan(burnInProgress)
+            assertThat(burnInOffsets?.y).isLessThan(burnInYOffset)
+            assertThat(burnInOffsets?.x).isLessThan(burnInXOffset)
 
             // WHEN we're fully dozing
             keyguardRepository.setDozeAmount(1f)
             runCurrent()
 
             // THEN burn in offsets are updated to final current values (for the given time)
-            assertThat(burnInOffsets?.burnInProgress).isEqualTo(burnInProgress)
-            assertThat(burnInOffsets?.burnInYOffset).isEqualTo(burnInYOffset)
-            assertThat(burnInOffsets?.burnInXOffset).isEqualTo(burnInXOffset)
+            assertThat(burnInOffsets?.progress).isEqualTo(burnInProgress)
+            assertThat(burnInOffsets?.y).isEqualTo(burnInYOffset)
+            assertThat(burnInOffsets?.x).isEqualTo(burnInXOffset)
         }
 
     @Test

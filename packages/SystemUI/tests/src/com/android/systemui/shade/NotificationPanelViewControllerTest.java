@@ -59,6 +59,7 @@ import androidx.test.filters.SmallTest;
 import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.res.R;
@@ -1105,7 +1106,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
 
     @Test
     public void nsslFlagEnabled_allowOnlyExternalTouches() {
-        mFeatureFlags.set(Flags.MIGRATE_NSSL, true);
+        mSetFlagsRule.enableFlags(KeyguardShadeMigrationNssl.FLAG_NAME);
 
         // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
         mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);

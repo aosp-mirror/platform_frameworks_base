@@ -21,7 +21,6 @@ import android.graphics.PointF
 import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnKeyListener
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -30,16 +29,17 @@ import com.android.wm.shell.R
 import com.android.wm.shell.animation.Interpolators
 
 /**
- * User education view to highlight the collapsed stack of bubbles.
- * Shown only the first time a user taps the stack.
+ * User education view to highlight the collapsed stack of bubbles. Shown only the first time a user
+ * taps the stack.
  */
-class StackEducationView constructor(
+class StackEducationView(
     context: Context,
     positioner: BubblePositioner,
     controller: BubbleController
 ) : LinearLayout(context) {
 
-    private val TAG = if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "BubbleStackEducationView"
+    private val TAG =
+        if (BubbleDebugConfig.TAG_WITH_CLASS_NAME) "BubbleStackEducationView"
         else BubbleDebugConfig.TAG_BUBBLES
 
     private val ANIMATE_DURATION: Long = 200
@@ -69,7 +69,7 @@ class StackEducationView constructor(
 
     override fun setLayoutDirection(layoutDirection: Int) {
         super.setLayoutDirection(layoutDirection)
-        setDrawableDirection()
+        setDrawableDirection(layoutDirection == LAYOUT_DIRECTION_LTR)
     }
 
     override fun onFinishInflate() {
@@ -111,16 +111,16 @@ class StackEducationView constructor(
         descTextView.setTextColor(textColor)
     }
 
-    private fun setDrawableDirection() {
+    private fun setDrawableDirection(isOnLeft: Boolean) {
         view.setBackgroundResource(
-            if (resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR)
-                R.drawable.bubble_stack_user_education_bg
-            else R.drawable.bubble_stack_user_education_bg_rtl)
+            if (isOnLeft) R.drawable.bubble_stack_user_education_bg
+            else R.drawable.bubble_stack_user_education_bg_rtl
+        )
     }
 
     /**
-     * If necessary, shows the user education view for the bubble stack. This appears the first
-     * time a user taps on a bubble.
+     * If necessary, shows the user education view for the bubble stack. This appears the first time
+     * a user taps on a bubble.
      *
      * @return true if user education was shown and wasn't showing before, false otherwise.
      */
@@ -129,29 +129,44 @@ class StackEducationView constructor(
         if (visibility == VISIBLE) return false
 
         controller.updateWindowFlagsForBackpress(true /* interceptBack */)
-        layoutParams.width = if (positioner.isLargeScreen || positioner.isLandscape)
-            context.resources.getDimensionPixelSize(R.dimen.bubbles_user_education_width)
-        else ViewGroup.LayoutParams.MATCH_PARENT
+        layoutParams.width =
+                if (positioner.isLargeScreen || positioner.isLandscape)
+                    context.resources.getDimensionPixelSize(R.dimen.bubbles_user_education_width)
+                else ViewGroup.LayoutParams.MATCH_PARENT
 
-        val stackPadding = context.resources.getDimensionPixelSize(
-                R.dimen.bubble_user_education_stack_padding)
+        val isStackOnLeft = positioner.isStackOnLeft(stackPosition)
+        (view.layoutParams as MarginLayoutParams).apply {
+            // Update the horizontal margins depending on the stack position
+            val edgeMargin =
+                resources.getDimensionPixelSize(R.dimen.bubble_user_education_margin_horizontal)
+            leftMargin = if (isStackOnLeft) 0 else edgeMargin
+            rightMargin = if (isStackOnLeft) edgeMargin else 0
+        }
+
+        val stackPadding =
+            context.resources.getDimensionPixelSize(R.dimen.bubble_user_education_stack_padding)
         setAlpha(0f)
         setVisibility(View.VISIBLE)
+        setDrawableDirection(isOnLeft = isStackOnLeft)
         post {
             requestFocus()
             with(view) {
-                if (resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR) {
-                    setPadding(positioner.bubbleSize + stackPadding, paddingTop, paddingRight,
-                            paddingBottom)
+                if (isStackOnLeft) {
+                    setPadding(
+                        positioner.bubbleSize + stackPadding,
+                        paddingTop,
+                        paddingRight,
+                        paddingBottom
+                    )
+                    translationX = 0f
                 } else {
-                    setPadding(paddingLeft, paddingTop, positioner.bubbleSize + stackPadding,
-                            paddingBottom)
-                    if (positioner.isLargeScreen || positioner.isLandscape) {
-                        translationX = (positioner.screenRect.right - width - stackPadding)
-                                .toFloat()
-                    } else {
-                        translationX = 0f
-                    }
+                    setPadding(
+                        paddingLeft,
+                        paddingTop,
+                        positioner.bubbleSize + stackPadding,
+                        paddingBottom
+                    )
+                    translationX = (positioner.screenRect.right - width - stackPadding).toFloat()
                 }
                 translationY = stackPosition.y + positioner.bubbleSize / 2 - getHeight() / 2
             }
@@ -168,7 +183,7 @@ class StackEducationView constructor(
      * If necessary, hides the stack education view.
      *
      * @param isExpanding if true this indicates the hide is happening due to the bubble being
-     *                      expanded, false if due to a touch outside of the bubble stack.
+     *   expanded, false if due to a touch outside of the bubble stack.
      */
     fun hide(isExpanding: Boolean) {
         if (visibility != VISIBLE || isHiding) return
@@ -182,8 +197,11 @@ class StackEducationView constructor(
     }
 
     private fun setShouldShow(shouldShow: Boolean) {
-        context.getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
-                .edit().putBoolean(PREF_STACK_EDUCATION, !shouldShow).apply()
+        context
+            .getSharedPreferences(context.packageName, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean(PREF_STACK_EDUCATION, !shouldShow)
+            .apply()
     }
 }
 

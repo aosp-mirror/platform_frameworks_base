@@ -32,6 +32,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.res.R;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
@@ -59,7 +60,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     private QS mQs;
     private View mQSContainer;
     private int mLastQSPaddingBottom;
-    private boolean mIsMigratingNSSL;
 
     /**
      *  These are used to compute the bounding box containing the shade and the notification scrim,
@@ -180,10 +180,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
         super.dispatchDraw(canvas);
     }
 
-    void setMigratingNSSL(boolean isMigrating) {
-        mIsMigratingNSSL = isMigrating;
-    }
-
     void enableGraphOptimization() {
         setOptimizationLevel(getOptimizationLevel() | OPTIMIZATION_GRAPH);
     }
@@ -196,7 +192,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     @Override
     protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        if (mIsMigratingNSSL) {
+        if (KeyguardShadeMigrationNssl.isEnabled()) {
             return super.drawChild(canvas, child, drawingTime);
         }
         int layoutIndex = mLayoutDrawingOrder.indexOf(child);

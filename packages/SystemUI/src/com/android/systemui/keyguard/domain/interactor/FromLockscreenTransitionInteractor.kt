@@ -391,5 +391,7 @@ constructor(
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_OCCLUDED_DURATION = 450.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
+        val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION
+        val TO_GONE_DURATION = DEFAULT_DURATION
     }
 }

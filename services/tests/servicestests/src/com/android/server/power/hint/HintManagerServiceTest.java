@@ -44,6 +44,7 @@ import android.os.IBinder;
 import android.os.IHintSession;
 import android.os.PerformanceHintManager;
 import android.os.Process;
+import android.os.WorkDuration;
 import android.util.Log;
 
 import com.android.server.FgThread;
@@ -89,6 +90,11 @@ public class HintManagerServiceTest {
     private static final long[] DURATIONS_ZERO = new long[] {};
     private static final long[] TIMESTAMPS_ZERO = new long[] {};
     private static final long[] TIMESTAMPS_TWO = new long[] {1L, 2L};
+    private static final WorkDuration[] WORK_DURATIONS_THREE = new WorkDuration[] {
+        new WorkDuration(1L, 11L, 8L, 4L, 1L),
+        new WorkDuration(2L, 13L, 8L, 6L, 2L),
+        new WorkDuration(3L, 333333333L, 8L, 333333333L, 3L),
+    };
 
     @Mock private Context mContext;
     @Mock private HintManagerService.NativeWrapper mNativeWrapperMock;
@@ -592,5 +598,56 @@ public class HintManagerServiceTest {
             Log.w(TAG, "No reportActualWorkDuration executed");
         }
         a.close();
+    }
+
+    @Test
+    public void testReportActualWorkDuration2() throws Exception {
+        HintManagerService service = createService();
+        IBinder token = new Binder();
+
+        AppHintSession a = (AppHintSession) service.getBinderServiceInstance()
+                .createHintSession(token, SESSION_TIDS_A, DEFAULT_TARGET_DURATION);
+
+        a.updateTargetWorkDuration(100L);
+        a.reportActualWorkDuration2(WORK_DURATIONS_THREE);
+        verify(mNativeWrapperMock, times(1)).halReportActualWorkDuration(anyLong(),
+                eq(WORK_DURATIONS_THREE));
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            a.reportActualWorkDuration2(new WorkDuration[] {});
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            a.reportActualWorkDuration2(new WorkDuration[] {new WorkDuration(0L, 11L, 8L, 4L, 1L)});
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            a.reportActualWorkDuration2(new WorkDuration[] {new WorkDuration(1L, 0L, 8L, 4L, 1L)});
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            a.reportActualWorkDuration2(new WorkDuration[] {new WorkDuration(1L, 11L, 0L, 4L, 1L)});
+        });
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            a.reportActualWorkDuration2(
+                    new WorkDuration[] {new WorkDuration(1L, 11L, 8L, -1L, 1L)});
+        });
+
+        reset(mNativeWrapperMock);
+        // Set session to background, then the duration would not be updated.
+        service.mUidObserver.onUidStateChanged(
+                a.mUid, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
+
+        // Using CountDownLatch to ensure above onUidStateChanged() job was digested.
+        final CountDownLatch latch = new CountDownLatch(1);
+        FgThread.getHandler().post(() -> {
+            latch.countDown();
+        });
+        latch.await();
+
+        assertFalse(service.mUidObserver.isUidForeground(a.mUid));
+        a.reportActualWorkDuration2(WORK_DURATIONS_THREE);
+        verify(mNativeWrapperMock, never()).halReportActualWorkDuration(anyLong(), any(), any());
     }
 }

@@ -44,6 +44,8 @@ import android.app.ActivityThread.ActivityClientRecord;
 import android.app.ClientTransactionHandler;
 import android.app.servertransaction.ActivityLifecycleItem.LifecycleState;
 import android.app.servertransaction.TestUtils.LaunchActivityItemBuilder;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -290,7 +292,7 @@ public class TransactionExecutorTests {
         // A previous queued launch transaction runs on main thread (execute).
         final ClientTransaction launchTransaction = ClientTransaction.obtain(null /* client */);
         final LaunchActivityItem launchItem =
-                spy(new LaunchActivityItemBuilder().setActivityToken(token).build());
+                spy(new LaunchActivityItemBuilder(token, new Intent(), new ActivityInfo()).build());
         launchTransaction.addCallback(launchItem);
         mExecutor.execute(launchTransaction);
 
@@ -322,7 +324,7 @@ public class TransactionExecutorTests {
         // A previous queued launch transaction runs on main thread (execute).
         final ClientTransaction launchTransaction = ClientTransaction.obtain(null /* client */);
         final LaunchActivityItem launchItem =
-                spy(new LaunchActivityItemBuilder().setActivityToken(token).build());
+                spy(new LaunchActivityItemBuilder(token, new Intent(), new ActivityInfo()).build());
         launchTransaction.addTransactionItem(launchItem);
         mExecutor.execute(launchTransaction);
 

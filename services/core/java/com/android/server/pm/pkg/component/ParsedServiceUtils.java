@@ -32,6 +32,7 @@ import android.content.res.XmlResourceParser;
 import android.os.Build;
 
 import com.android.internal.R;
+import com.android.internal.pm.pkg.component.ParsedService;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingUtils;
 

@@ -59,6 +59,7 @@ static struct {
     jfieldID layoutParamsType;
     jfieldID dispatchingTimeoutMillis;
     jfieldID frame;
+    jfieldID contentSize;
     jfieldID surfaceInset;
     jfieldID scaleFactor;
     jfieldID touchableRegion;
@@ -281,6 +282,9 @@ jobject android_view_InputWindowHandle_fromWindowInfo(JNIEnv* env, gui::WindowIn
     ScopedLocalRef<jobject> rectObj(env, JNICommon::objFromRect(env, windowInfo.frame));
     env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.frame, rectObj.get());
 
+    ScopedLocalRef<jobject> sizeObj(env, JNICommon::objFromSize(env, windowInfo.contentSize));
+    env->SetObjectField(inputWindowHandle, gInputWindowHandleClassInfo.contentSize, sizeObj.get());
+
     env->SetIntField(inputWindowHandle, gInputWindowHandleClassInfo.surfaceInset,
                      windowInfo.surfaceInset);
     env->SetFloatField(inputWindowHandle, gInputWindowHandleClassInfo.scaleFactor,
@@ -392,6 +396,9 @@ int register_android_view_InputWindowHandle(JNIEnv* env) {
                  "dispatchingTimeoutMillis", "J");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.frame, clazz, "frame", "Landroid/graphics/Rect;");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.contentSize, clazz, "contentSize",
+                 "Landroid/util/Size;");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.surfaceInset, clazz,
             "surfaceInset", "I");

@@ -176,6 +176,29 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
                 """.addLineContinuation())
     }
 
+    fun testDetectNoIssuesAnnotationOnNonStubMethod() {
+        lint().files(java(
+            """
+            package test.pkg;
+            public class TestClass43 extends IFooMethod.Stub {
+                public void aRegularMethodNotPartOfStub() {
+                }
+            }
+            """).indented(), java(
+            """
+            package test.pkg;
+            public class TestClass44 extends TestClass43 {
+              @Override
+              public void aRegularMethodNotPartOfStub() {
+              }
+            }
+            """).indented(),
+                *stubs
+        )
+        .run()
+        .expectClean()
+    }
+
     fun testDetectIssuesEmptyAnnotationOnMethod() {
         lint().files(java(
             """

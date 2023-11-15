@@ -21,8 +21,7 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
@@ -36,7 +35,6 @@ import kotlinx.coroutines.DisposableHandle
 abstract class NotificationStackScrollLayoutSection
 constructor(
     protected val context: Context,
-    protected val featureFlags: FeatureFlags,
     private val notificationPanelView: NotificationPanelView,
     private val sharedNotificationContainer: SharedNotificationContainer,
     private val sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
@@ -47,7 +45,7 @@ constructor(
     private var disposableHandle: DisposableHandle? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
         // This moves the existing NSSL view to a different parent, as the controller is a
@@ -62,7 +60,7 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!featureFlags.isEnabled(Flags.MIGRATE_NSSL)) {
+        if (!KeyguardShadeMigrationNssl.isEnabled) {
             return
         }
         disposableHandle?.dispose()

@@ -93,7 +93,6 @@ import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
-import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.dump.DumpManager;
@@ -112,7 +111,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.power.data.repository.FakePowerRepository;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.scene.FakeWindowRootViewComponent;
 import com.android.systemui.scene.SceneTestUtils;
@@ -125,7 +123,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.ShadeController;
-import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeWindowLogger;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
@@ -249,8 +246,6 @@ public class BubblesTest extends SysuiTestCase {
     private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock
     private AuthController mAuthController;
-    @Mock
-    private ShadeExpansionStateManager mShadeExpansionStateManager;
 
     private SysUiState mSysUiState;
     private boolean mSysUiStateBubblesExpanded;
@@ -340,8 +335,8 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private Icon mAppBubbleIcon;
 
-    private SceneTestUtils mUtils = new SceneTestUtils(this);
-    private TestScope mTestScope = mUtils.getTestScope();
+    private final SceneTestUtils mUtils = new SceneTestUtils(this);
+    private final TestScope mTestScope = mUtils.getTestScope();
     private ShadeInteractor mShadeInteractor;
     private ShellTaskOrganizer mShellTaskOrganizer;
     private TaskViewTransitions mTaskViewTransitions;
@@ -352,7 +347,7 @@ public class BubblesTest extends SysuiTestCase {
 
     private TestableLooper mTestableLooper;
 
-    private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
+    private final FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     private UserHandle mUser0;
@@ -388,12 +383,11 @@ public class BubblesTest extends SysuiTestCase {
         FakeKeyguardRepository keyguardRepository = new FakeKeyguardRepository();
         FakeFeatureFlagsClassic featureFlags = new FakeFeatureFlagsClassic();
         FakeShadeRepository shadeRepository = new FakeShadeRepository();
-        FakePowerRepository powerRepository = new FakePowerRepository();
         FakeConfigurationRepository configurationRepository = new FakeConfigurationRepository();
 
         PowerInteractor powerInteractor = new PowerInteractor(
-                powerRepository,
-                new FalsingCollectorFake(),
+                mUtils.getPowerRepository(),
+                mUtils.falsingCollector(),
                 mock(ScreenOffAnimationController.class),
                 mStatusBarStateController);
 
@@ -402,7 +396,7 @@ public class BubblesTest extends SysuiTestCase {
                 new SceneContainerRepository(
                         mTestScope.getBackgroundScope(),
                         mUtils.fakeSceneContainerConfig()),
-                powerRepository,
+                powerInteractor,
                 mock(SceneLogger.class));
 
         FakeSceneContainerFlags sceneContainerFlags = new FakeSceneContainerFlags();
@@ -441,7 +435,7 @@ public class BubblesTest extends SysuiTestCase {
                                 new InWindowLauncherUnlockAnimationRepository(),
                                 mTestScope.getBackgroundScope(),
                                 keyguardTransitionInteractor,
-                                () -> new FakeKeyguardSurfaceBehindRepository(),
+                                FakeKeyguardSurfaceBehindRepository::new,
                                 mock(ActivityManagerWrapper.class)
                         )
                 );

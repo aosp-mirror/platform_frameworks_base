@@ -32,6 +32,8 @@ import com.android.systemui.qs.external.QSExternalModule;
 import com.android.systemui.qs.pipeline.dagger.QSPipelineModule;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.qs.tiles.di.QSTilesModule;
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter;
+import com.android.systemui.qs.ui.adapter.QSSceneAdapterImpl;
 import com.android.systemui.statusbar.phone.AutoTileManager;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.policy.CastController;
@@ -42,18 +44,19 @@ import com.android.systemui.statusbar.policy.SafetyController;
 import com.android.systemui.statusbar.policy.WalletController;
 import com.android.systemui.util.settings.SecureSettings;
 
-import dagger.Module;
-import dagger.Provides;
-import dagger.multibindings.Multibinds;
-
 import java.util.Map;
 
 import javax.inject.Named;
 
+import dagger.Binds;
+import dagger.Module;
+import dagger.Provides;
+import dagger.multibindings.Multibinds;
+
 /**
  * Module for QS dependencies
  */
-@Module(subcomponents = {QSFragmentComponent.class, QSFlexiglassComponent.class},
+@Module(subcomponents = {QSFragmentComponent.class, QSSceneComponent.class},
         includes = {
                 MediaModule.class,
                 QSExternalModule.class,
@@ -110,4 +113,7 @@ public interface QSModule {
         manager.init();
         return manager;
     }
+
+    @Binds
+    QSSceneAdapter bindsQsSceneInteractor(QSSceneAdapterImpl impl);
 }

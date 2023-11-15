@@ -23,8 +23,7 @@ import android.util.Property;
 import android.view.View;
 
 import com.android.app.animation.Interpolators;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.core.LogLevel;
 import com.android.systemui.statusbar.StatusBarState;
@@ -55,7 +54,6 @@ public class KeyguardVisibilityHelper {
     private boolean mKeyguardViewVisibilityAnimating;
     private boolean mLastOccludedState = false;
     private final AnimationProperties mAnimationProperties = new AnimationProperties();
-    private final FeatureFlags mFeatureFlags;
     private final LogBuffer mLogBuffer;
 
     public KeyguardVisibilityHelper(View view,
@@ -63,14 +61,12 @@ public class KeyguardVisibilityHelper {
             DozeParameters dozeParameters,
             ScreenOffAnimationController screenOffAnimationController,
             boolean animateYPos,
-            FeatureFlags featureFlags,
             LogBuffer logBuffer) {
         mView = view;
         mKeyguardStateController = keyguardStateController;
         mDozeParameters = dozeParameters;
         mScreenOffAnimationController = screenOffAnimationController;
         mAnimateYPos = animateYPos;
-        mFeatureFlags = featureFlags;
         mLogBuffer = logBuffer;
     }
 
@@ -167,7 +163,7 @@ public class KeyguardVisibilityHelper {
                         animProps,
                         true /* animate */);
             } else if (mScreenOffAnimationController.shouldAnimateInKeyguard()) {
-                if (mFeatureFlags.isEnabled(Flags.MIGRATE_KEYGUARD_STATUS_VIEW)) {
+                if (KeyguardShadeMigrationNssl.isEnabled()) {
                     log("Using GoneToAodTransition");
                     mKeyguardViewVisibilityAnimating = false;
                 } else {

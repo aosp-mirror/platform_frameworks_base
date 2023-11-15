@@ -145,6 +145,9 @@ constructor(
     val authenticationChallengeResult: SharedFlow<Boolean> =
         repository.authenticationChallengeResult
 
+    /** Whether the "enhanced PIN privacy" setting is enabled for the current user. */
+    val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> = repository.isPinEnhancedPrivacyEnabled
+
     private var throttlingCountdownJob: Job? = null
 
     init {

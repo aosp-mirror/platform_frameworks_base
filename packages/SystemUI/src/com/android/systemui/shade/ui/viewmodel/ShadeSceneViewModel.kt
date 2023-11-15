@@ -19,13 +19,14 @@ package com.android.systemui.shade.ui.viewmodel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.shared.model.SceneKey
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import javax.inject.Inject
 
 /** Models UI state and handles user input for the shade scene. */
 @SysUISingleton
@@ -34,6 +35,7 @@ class ShadeSceneViewModel
 constructor(
     @Application private val applicationScope: CoroutineScope,
     private val deviceEntryInteractor: DeviceEntryInteractor,
+    val qsSceneAdapter: QSSceneAdapter,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
 ) {
     /** The key of the scene we should switch to when swiping up. */

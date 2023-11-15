@@ -60,6 +60,10 @@ class FakeAuthenticationRepository(
 
     override val minPatternLength: Int = 4
 
+    private val _isPinEnhancedPrivacyEnabled = MutableStateFlow(false)
+    override val isPinEnhancedPrivacyEnabled: StateFlow<Boolean> =
+        _isPinEnhancedPrivacyEnabled.asStateFlow()
+
     private var failedAttemptCount = 0
     private var throttlingEndTimestamp = 0L
     private var credentialOverride: List<Any>? = null
@@ -138,6 +142,10 @@ class FakeAuthenticationRepository(
         }
     }
 
+    fun setPinEnhancedPrivacyEnabled(isEnabled: Boolean) {
+        _isPinEnhancedPrivacyEnabled.value = isEnabled
+    }
+
     private fun getExpectedCredential(securityMode: SecurityMode): List<Any> {
         return when (val credentialType = getCurrentCredentialType(securityMode)) {
             LockPatternUtils.CREDENTIAL_TYPE_PIN -> credentialOverride ?: DEFAULT_PIN
@@ -170,6 +178,7 @@ class FakeAuthenticationRepository(
                 is AuthenticationMethodModel.Password -> SecurityMode.Password
                 is AuthenticationMethodModel.Pattern -> SecurityMode.Pattern
                 is AuthenticationMethodModel.None -> SecurityMode.None
+                is AuthenticationMethodModel.Sim -> SecurityMode.SimPin
             }
         }
 

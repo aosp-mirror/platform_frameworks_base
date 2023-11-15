@@ -52,16 +52,18 @@ public class WindowStateResizeItemTest {
     private PendingTransactionActions mPendingActions;
     @Mock
     private IWindow mWindow;
-    @Mock
-    private ClientWindowFrames mFrames;
-    @Mock
-    private MergedConfiguration mConfiguration;
-    @Mock
+
     private InsetsState mInsetsState;
+    private ClientWindowFrames mFrames;
+    private MergedConfiguration mConfiguration;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+
+        mInsetsState = new InsetsState();
+        mFrames = new ClientWindowFrames();
+        mConfiguration = new MergedConfiguration();
     }
 
     @Test

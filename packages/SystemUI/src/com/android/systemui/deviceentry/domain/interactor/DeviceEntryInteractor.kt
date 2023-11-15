@@ -29,6 +29,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -46,6 +47,7 @@ import kotlinx.coroutines.launch
  * Device entry occurs when the user successfully dismisses (or bypasses) the lockscreen, regardless
  * of the authentication method used.
  */
+@ExperimentalCoroutinesApi
 @SysUISingleton
 class DeviceEntryInteractor
 @Inject
@@ -72,7 +74,8 @@ constructor(
                 repository.isUnlocked,
                 authenticationInteractor.authenticationMethod,
             ) { isUnlocked, authenticationMethod ->
-                !authenticationMethod.isSecure || isUnlocked
+                (!authenticationMethod.isSecure || isUnlocked) &&
+                    authenticationMethod != AuthenticationMethodModel.Sim
             }
             .stateIn(
                 scope = applicationScope,

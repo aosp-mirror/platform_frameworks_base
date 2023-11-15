@@ -17,16 +17,21 @@
 package com.android.systemui.qs.tiles.base.interactor
 
 import android.os.UserHandle
-import javax.annotation.CheckReturnValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.flatMapLatest
 
-class FakeQSTileDataInteractor<T>(
-    private val dataFlow: MutableSharedFlow<T> = MutableSharedFlow(replay = Int.MAX_VALUE),
-    private val availabilityFlow: MutableSharedFlow<Boolean> =
-        MutableSharedFlow(replay = Int.MAX_VALUE),
-) : QSTileDataInteractor<T> {
+class FakeQSTileDataInteractor<T> : QSTileDataInteractor<T> {
+
+    private val dataFlow: MutableSharedFlow<T> = MutableSharedFlow(replay = 1)
+    val dataSubscriptionCount
+        get() = dataFlow.subscriptionCount
+    private val availabilityFlow: MutableSharedFlow<Boolean> = MutableSharedFlow(replay = 1)
+    val availabilitySubscriptionCount
+        get() = availabilityFlow.subscriptionCount
+
+    private val mutableTriggers = mutableListOf<DataUpdateTrigger>()
+    val triggers: List<DataUpdateTrigger> = mutableTriggers
 
     private val mutableDataRequests = mutableListOf<DataRequest>()
     val dataRequests: List<DataRequest> = mutableDataRequests
@@ -34,14 +39,17 @@ class FakeQSTileDataInteractor<T>(
     private val mutableAvailabilityRequests = mutableListOf<AvailabilityRequest>()
     val availabilityRequests: List<AvailabilityRequest> = mutableAvailabilityRequests
 
-    @CheckReturnValue fun emitData(data: T): Boolean = dataFlow.tryEmit(data)
+    suspend fun emitData(data: T): Unit = dataFlow.emit(data)
 
     fun tryEmitAvailability(isAvailable: Boolean): Boolean = availabilityFlow.tryEmit(isAvailable)
     suspend fun emitAvailability(isAvailable: Boolean) = availabilityFlow.emit(isAvailable)
 
     override fun tileData(user: UserHandle, triggers: Flow<DataUpdateTrigger>): Flow<T> {
         mutableDataRequests.add(DataRequest(user))
-        return triggers.flatMapLatest { dataFlow }
+        return triggers.flatMapLatest {
+            mutableTriggers.add(it)
+            dataFlow
+        }
     }
 
     override fun availability(user: UserHandle): Flow<Boolean> {

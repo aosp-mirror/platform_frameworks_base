@@ -76,6 +76,8 @@ fun PinPad(
     val backspaceButtonAppearance by viewModel.backspaceButtonAppearance.collectAsState()
     val confirmButtonAppearance by viewModel.confirmButtonAppearance.collectAsState()
     val animateFailure: Boolean by viewModel.animateFailure.collectAsState()
+    val isDigitButtonAnimationEnabled: Boolean by
+        viewModel.isDigitButtonAnimationEnabled.collectAsState()
 
     val buttonScaleAnimatables = remember { List(12) { Animatable(1f) } }
     LaunchedEffect(animateFailure) {
@@ -94,10 +96,11 @@ fun PinPad(
     ) {
         repeat(9) { index ->
             DigitButton(
-                index + 1,
-                isInputEnabled,
-                viewModel::onPinButtonClicked,
-                buttonScaleAnimatables[index]::value,
+                digit = index + 1,
+                isInputEnabled = isInputEnabled,
+                onClicked = viewModel::onPinButtonClicked,
+                scaling = buttonScaleAnimatables[index]::value,
+                isAnimationEnabled = isDigitButtonAnimationEnabled,
             )
         }
 
@@ -116,10 +119,11 @@ fun PinPad(
         )
 
         DigitButton(
-            0,
-            isInputEnabled,
-            viewModel::onPinButtonClicked,
-            buttonScaleAnimatables[10]::value,
+            digit = 0,
+            isInputEnabled = isInputEnabled,
+            onClicked = viewModel::onPinButtonClicked,
+            scaling = buttonScaleAnimatables[10]::value,
+            isAnimationEnabled = isDigitButtonAnimationEnabled,
         )
 
         ActionButton(
@@ -143,15 +147,17 @@ private fun DigitButton(
     isInputEnabled: Boolean,
     onClicked: (Int) -> Unit,
     scaling: () -> Float,
+    isAnimationEnabled: Boolean,
 ) {
     PinPadButton(
         onClicked = { onClicked(digit) },
         isEnabled = isInputEnabled,
         backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
         foregroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        isAnimationEnabled = isAnimationEnabled,
         modifier =
             Modifier.graphicsLayer {
-                val scale = scaling()
+                val scale = if (isAnimationEnabled) scaling() else 1f
                 scaleX = scale
                 scaleY = scale
             }
@@ -195,6 +201,7 @@ private fun ActionButton(
         isEnabled = isInputEnabled && !isHidden,
         backgroundColor = backgroundColor,
         foregroundColor = foregroundColor,
+        isAnimationEnabled = true,
         modifier =
             Modifier.graphicsLayer {
                 alpha = hiddenAlpha
@@ -216,6 +223,7 @@ private fun PinPadButton(
     isEnabled: Boolean,
     backgroundColor: Color,
     foregroundColor: Color,
+    isAnimationEnabled: Boolean,
     modifier: Modifier = Modifier,
     onLongPressed: (() -> Unit)? = null,
     content: @Composable (contentColor: () -> Color) -> Unit,
@@ -243,7 +251,7 @@ private fun PinPadButton(
 
     val cornerRadius: Dp by
         animateDpAsState(
-            if (isPressed) 24.dp else pinButtonSize / 2,
+            if (isAnimationEnabled && isPressed) 24.dp else pinButtonSize / 2,
             label = "PinButton round corners",
             animationSpec = tween(animDurationMillis, easing = animEasing)
         )
@@ -251,7 +259,7 @@ private fun PinPadButton(
     val containerColor: Color by
         animateColorAsState(
             when {
-                isPressed -> MaterialTheme.colorScheme.primary
+                isAnimationEnabled && isPressed -> MaterialTheme.colorScheme.primary
                 else -> backgroundColor
             },
             label = "Pin button container color",
@@ -260,7 +268,7 @@ private fun PinPadButton(
     val contentColor =
         animateColorAsState(
             when {
-                isPressed -> MaterialTheme.colorScheme.onPrimary
+                isAnimationEnabled && isPressed -> MaterialTheme.colorScheme.onPrimary
                 else -> foregroundColor
             },
             label = "Pin button container color",

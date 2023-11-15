@@ -28,6 +28,10 @@ private val backgroundOff = R.drawable.bluetooth_tile_dialog_bg_off
 private val backgroundOffBusy = R.drawable.bluetooth_tile_dialog_bg_off_busy
 private val connected = R.string.quick_settings_bluetooth_device_connected
 private val saved = R.string.quick_settings_bluetooth_device_saved
+private val actionAccessibilityLabelActivate =
+    R.string.accessibility_quick_settings_bluetooth_device_tap_to_activate
+private val actionAccessibilityLabelDisconnect =
+    R.string.accessibility_quick_settings_bluetooth_device_tap_to_disconnect
 
 /** Factories to create different types of Bluetooth device items from CachedBluetoothDevice. */
 internal abstract class DeviceItemFactory {
@@ -60,6 +64,7 @@ internal class ActiveMediaDeviceItemFactory : DeviceItemFactory() {
                 },
             background = backgroundOn,
             isEnabled = !cachedDevice.isBusy,
+            actionAccessibilityLabel = context.getString(actionAccessibilityLabelDisconnect),
         )
     }
 }
@@ -87,6 +92,7 @@ internal class AvailableMediaDeviceItemFactory : DeviceItemFactory() {
                 },
             background = if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
             isEnabled = !cachedDevice.isBusy,
+            actionAccessibilityLabel = context.getString(actionAccessibilityLabelActivate),
         )
     }
 }
@@ -112,6 +118,7 @@ internal class ConnectedDeviceItemFactory : DeviceItemFactory() {
                 },
             background = if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
             isEnabled = !cachedDevice.isBusy,
+            actionAccessibilityLabel = context.getString(actionAccessibilityLabelDisconnect),
         )
     }
 }
@@ -137,6 +144,7 @@ internal class SavedDeviceItemFactory : DeviceItemFactory() {
                 },
             background = if (cachedDevice.isBusy) backgroundOffBusy else backgroundOff,
             isEnabled = !cachedDevice.isBusy,
+            actionAccessibilityLabel = context.getString(actionAccessibilityLabelActivate),
         )
     }
 }

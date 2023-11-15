@@ -31,6 +31,8 @@ import android.util.EventLog;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.pm.pkg.component.ParsedPermission;
+import com.android.internal.pm.pkg.component.ParsedPermissionGroup;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingUtils;
 

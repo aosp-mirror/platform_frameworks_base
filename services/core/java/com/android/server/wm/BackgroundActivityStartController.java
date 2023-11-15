@@ -583,7 +583,7 @@ public class BackgroundActivityStartController {
                                 + " if the PI sender upgrades target_sdk to 34+! "
                                 + " (missing opt in by PI sender)! "
                                 + state.dump(resultForCaller, resultForRealCaller));
-                showBalBlockedToast("BAL would be blocked", state);
+                showBalRiskToast("BAL would be blocked", state);
                 return statsLog(resultForRealCaller, state);
             }
             Slog.wtf(TAG, "Without Android 14 BAL hardening this activity start would be allowed"

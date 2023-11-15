@@ -120,6 +120,16 @@
                 android:visibility="gone"
                 app:constraint_referenced_ids="ic_arrow,see_all_text" />
 
+            <View
+                android:id="@+id/see_all_clickable_row"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:contentDescription="@string/accessibility_bluetooth_device_settings_see_all"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/device_list"
+                app:layout_constraintBottom_toTopOf="@+id/pair_new_device_text" />
+
             <ImageView
                 android:id="@+id/ic_arrow"
                 android:layout_marginStart="36dp"
@@ -141,6 +151,8 @@
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
+                android:importantForAccessibility="no"
+                android:clickable="false"
                 android:layout_marginStart="0dp"
                 android:paddingStart="20dp"
                 android:text="@string/see_all_bluetooth_devices"
@@ -157,6 +169,16 @@
                 android:layout_height="wrap_content"
                 android:visibility="gone"
                 app:constraint_referenced_ids="ic_add,pair_new_device_text" />
+
+            <View
+                android:id="@+id/pair_new_device_clickable_row"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:contentDescription="@string/accessibility_bluetooth_device_settings_pair_new_device"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/see_all_text"
+                app:layout_constraintBottom_toTopOf="@+id/done_button" />
 
             <ImageView
                 android:id="@+id/ic_add"
@@ -180,6 +202,8 @@
                 android:maxLines="1"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
+                android:importantForAccessibility="no"
+                android:clickable="false"
                 android:layout_marginStart="0dp"
                 android:paddingStart="20dp"
                 android:text="@string/pair_new_bluetooth_devices"

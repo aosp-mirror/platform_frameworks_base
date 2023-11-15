@@ -32,6 +32,11 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.test.TestCoroutineScheduler
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -67,17 +72,24 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     private val fakeSystemClock = FakeSystemClock()
 
+    private lateinit var scheduler: TestCoroutineScheduler
+    private lateinit var dispatcher: CoroutineDispatcher
+    private lateinit var testScope: TestScope
     private lateinit var icon: Pair<Drawable, String>
     private lateinit var bluetoothTileDialog: BluetoothTileDialog
     private lateinit var deviceItem: DeviceItem
 
     @Before
     fun setUp() {
+        scheduler = TestCoroutineScheduler()
+        dispatcher = UnconfinedTestDispatcher(scheduler)
+        testScope = TestScope(dispatcher)
         bluetoothTileDialog =
             BluetoothTileDialog(
                 ENABLED,
                 subtitleResId,
                 bluetoothTileDialogCallback,
+                dispatcher,
                 fakeSystemClock,
                 uiEventLogger,
                 logger,
@@ -111,29 +123,33 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     @Test
     fun testShowDialog_displayBluetoothDevice() {
-        bluetoothTileDialog =
-            BluetoothTileDialog(
-                ENABLED,
-                subtitleResId,
-                bluetoothTileDialogCallback,
-                fakeSystemClock,
-                uiEventLogger,
-                logger,
-                mContext
+        testScope.runTest {
+            bluetoothTileDialog =
+                BluetoothTileDialog(
+                    ENABLED,
+                    subtitleResId,
+                    bluetoothTileDialogCallback,
+                    dispatcher,
+                    fakeSystemClock,
+                    uiEventLogger,
+                    logger,
+                    mContext
+                )
+            bluetoothTileDialog.show()
+            fakeSystemClock.setElapsedRealtime(Long.MAX_VALUE)
+            bluetoothTileDialog.onDeviceItemUpdated(
+                listOf(deviceItem),
+                showSeeAll = false,
+                showPairNewDevice = false
             )
-        bluetoothTileDialog.show()
-        bluetoothTileDialog.onDeviceItemUpdated(
-            listOf(deviceItem),
-            showSeeAll = false,
-            showPairNewDevice = false
-        )
 
-        val recyclerView = bluetoothTileDialog.requireViewById<RecyclerView>(R.id.device_list)
-        val adapter = recyclerView?.adapter as BluetoothTileDialog.Adapter
-        assertThat(adapter.itemCount).isEqualTo(1)
-        assertThat(adapter.getItem(0).deviceName).isEqualTo(DEVICE_NAME)
-        assertThat(adapter.getItem(0).connectionSummary).isEqualTo(DEVICE_CONNECTION_SUMMARY)
-        assertThat(adapter.getItem(0).iconWithDescription).isEqualTo(icon)
+            val recyclerView = bluetoothTileDialog.requireViewById<RecyclerView>(R.id.device_list)
+            val adapter = recyclerView?.adapter as BluetoothTileDialog.Adapter
+            assertThat(adapter.itemCount).isEqualTo(1)
+            assertThat(adapter.getItem(0).deviceName).isEqualTo(DEVICE_NAME)
+            assertThat(adapter.getItem(0).connectionSummary).isEqualTo(DEVICE_CONNECTION_SUMMARY)
+            assertThat(adapter.getItem(0).iconWithDescription).isEqualTo(icon)
+        }
     }
 
     @Test
@@ -147,6 +163,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
                     ENABLED,
                     subtitleResId,
                     bluetoothTileDialogCallback,
+                    dispatcher,
                     fakeSystemClock,
                     uiEventLogger,
                     logger,
@@ -173,6 +190,7 @@ class BluetoothTileDialogTest : SysuiTestCase() {
                     ENABLED,
                     subtitleResId,
                     bluetoothTileDialogCallback,
+                    dispatcher,
                     fakeSystemClock,
                     uiEventLogger,
                     logger,
@@ -190,33 +208,37 @@ class BluetoothTileDialogTest : SysuiTestCase() {
 
     @Test
     fun testOnDeviceUpdated_hideSeeAll_showPairNew() {
-        bluetoothTileDialog =
-            BluetoothTileDialog(
-                ENABLED,
-                subtitleResId,
-                bluetoothTileDialogCallback,
-                fakeSystemClock,
-                uiEventLogger,
-                logger,
-                mContext
+        testScope.runTest {
+            bluetoothTileDialog =
+                BluetoothTileDialog(
+                    ENABLED,
+                    subtitleResId,
+                    bluetoothTileDialogCallback,
+                    dispatcher,
+                    fakeSystemClock,
+                    uiEventLogger,
+                    logger,
+                    mContext
+                )
+            bluetoothTileDialog.show()
+            fakeSystemClock.setElapsedRealtime(Long.MAX_VALUE)
+            bluetoothTileDialog.onDeviceItemUpdated(
+                listOf(deviceItem),
+                showSeeAll = false,
+                showPairNewDevice = true
             )
-        bluetoothTileDialog.show()
-        bluetoothTileDialog.onDeviceItemUpdated(
-            listOf(deviceItem),
-            showSeeAll = false,
-            showPairNewDevice = true
-        )
 
-        val seeAllLayout = bluetoothTileDialog.requireViewById<View>(R.id.see_all_layout_group)
-        val pairNewLayout =
-            bluetoothTileDialog.requireViewById<View>(R.id.pair_new_device_layout_group)
-        val recyclerView = bluetoothTileDialog.requireViewById<RecyclerView>(R.id.device_list)
-        val adapter = recyclerView?.adapter as BluetoothTileDialog.Adapter
+            val seeAllLayout = bluetoothTileDialog.requireViewById<View>(R.id.see_all_layout_group)
+            val pairNewLayout =
+                bluetoothTileDialog.requireViewById<View>(R.id.pair_new_device_layout_group)
+            val recyclerView = bluetoothTileDialog.requireViewById<RecyclerView>(R.id.device_list)
+            val adapter = recyclerView?.adapter as BluetoothTileDialog.Adapter
 
-        assertThat(seeAllLayout).isNotNull()
-        assertThat(seeAllLayout.visibility).isEqualTo(GONE)
-        assertThat(pairNewLayout).isNotNull()
-        assertThat(pairNewLayout.visibility).isEqualTo(VISIBLE)
-        assertThat(adapter.itemCount).isEqualTo(1)
+            assertThat(seeAllLayout).isNotNull()
+            assertThat(seeAllLayout.visibility).isEqualTo(GONE)
+            assertThat(pairNewLayout).isNotNull()
+            assertThat(pairNewLayout.visibility).isEqualTo(VISIBLE)
+            assertThat(adapter.itemCount).isEqualTo(1)
+        }
     }
 }
