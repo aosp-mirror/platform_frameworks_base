@@ -157,6 +157,7 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
         ArgumentCaptor<ContentObserver> observerCaptor =
                 ArgumentCaptor.forClass(ContentObserver.class);
         mController.init();
+        mExecutor.runAllReady();
         verify(mSecureSettings).registerContentObserverForUser(
                 eq(Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK),
                     anyBoolean(), observerCaptor.capture(), eq(UserHandle.USER_ALL));
@@ -212,6 +213,7 @@ public class KeyguardClockSwitchControllerTest extends KeyguardClockSwitchContro
         ArgumentCaptor<ContentObserver> observerCaptor =
                 ArgumentCaptor.forClass(ContentObserver.class);
         mController.init();
+        mExecutor.runAllReady();
         verify(mSecureSettings).registerContentObserverForUser(
                 eq(Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED), anyBoolean(),
                     observerCaptor.capture(), eq(UserHandle.USER_ALL));

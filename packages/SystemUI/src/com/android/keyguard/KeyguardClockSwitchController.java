@@ -39,6 +39,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.systemui.Dumpable;
 import com.android.systemui.common.ui.ConfigurationState;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
@@ -78,6 +79,7 @@ import com.android.systemui.util.settings.SecureSettings;
 
 import java.io.PrintWriter;
 import java.util.Locale;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -136,6 +138,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private KeyguardInteractor mKeyguardInteractor;
     private KeyguardClockInteractor mKeyguardClockInteractor;
     private final DelayableExecutor mUiExecutor;
+    private final Executor mBgExecutor;
     private boolean mCanShowDoubleLineClock = true;
     private DisposableHandle mAodIconsBindHandle;
     @Nullable private NotificationIconContainer mAodIconContainer;
@@ -186,6 +189,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
             SecureSettings secureSettings,
             @Main DelayableExecutor uiExecutor,
+            @Background Executor bgExecutor,
             DumpManager dumpManager,
             ClockEventController clockEventController,
             @KeyguardClockLog LogBuffer logBuffer,
@@ -209,6 +213,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mIconViewBindingFailureTracker = iconViewBindingFailureTracker;
         mSecureSettings = secureSettings;
         mUiExecutor = uiExecutor;
+        mBgExecutor = bgExecutor;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
         mDumpManager = dumpManager;
         mClockEventController = clockEventController;
@@ -328,19 +333,22 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         updateAodIcons();
         mStatusArea = mView.findViewById(R.id.keyguard_status_area);
 
-        mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
-                false, /* notifyForDescendants */
-                mDoubleLineClockObserver,
-                UserHandle.USER_ALL
-        );
+        mBgExecutor.execute(() -> {
+            mSecureSettings.registerContentObserverForUser(
+                    Settings.Secure.LOCKSCREEN_USE_DOUBLE_LINE_CLOCK,
+                    false, /* notifyForDescendants */
+                    mDoubleLineClockObserver,
+                    UserHandle.USER_ALL
+            );
 
-        mSecureSettings.registerContentObserverForUser(
-                Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED,
-                false, /* notifyForDescendants */
-                mShowWeatherObserver,
-                UserHandle.USER_ALL
-        );
+            mSecureSettings.registerContentObserverForUser(
+                    Settings.Secure.LOCK_SCREEN_WEATHER_ENABLED,
+                    false, /* notifyForDescendants */
+                    mShowWeatherObserver,
+                    UserHandle.USER_ALL
+            );
+        });
+
         updateDoubleLineClock();
 
         mKeyguardUnlockAnimationController.addKeyguardUnlockAnimationListener(
@@ -382,8 +390,10 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mClockEventController.unregisterListeners();
         setClock(null);
 
-        mSecureSettings.unregisterContentObserver(mDoubleLineClockObserver);
-        mSecureSettings.unregisterContentObserver(mShowWeatherObserver);
+        mBgExecutor.execute(() -> {
+            mSecureSettings.unregisterContentObserver(mDoubleLineClockObserver);
+            mSecureSettings.unregisterContentObserver(mShowWeatherObserver);
+        });
 
         mKeyguardUnlockAnimationController.removeKeyguardUnlockAnimationListener(
                 mKeyguardUnlockAnimationListener);
