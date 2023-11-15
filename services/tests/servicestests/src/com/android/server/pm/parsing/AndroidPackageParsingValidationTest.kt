@@ -492,6 +492,40 @@ class AndroidPackageParsingValidationTest {
         validateTagAttr(tag, "name", R.styleable.AndroidManifestUsesPermission_name, 1024)
     }
 
+    @Test
+    fun totalMetadataValuesExceedMax_shouldFail() {
+        val value = "x".repeat(8192)
+        var tags = ""
+        repeat(32) { index ->
+            tags += "<meta-data name=\"name$index\" value=\"$value\" />"
+        }
+        var xml = "<application>$tags</application>"
+        try {
+            parseXmlForMetadata(xml)
+        } catch (e: SecurityException) {
+            fail(
+                "Failed to parse component meta-data when values have not exceeded max allowed"
+            )
+        }
+        try {
+            parseXmlForMetadataRes(xml)
+        } catch (e: SecurityException) {
+            fail(
+                "Failed to parse component meta-data when values have not exceeded max allowed"
+            )
+        }
+        tags += "<meta-data name=\"last\" value=\"x\" />"
+        xml = "<application>$tags</application>"
+        var e = assertThrows(SecurityException::class.java) {
+            parseXmlForMetadata(xml)
+        }
+        assertEquals("Max total meta data size limit exceeded for application", e.message)
+        e = assertThrows(SecurityException::class.java) {
+            parseXmlForMetadataRes(xml)
+        }
+        assertEquals("Max total meta data size limit exceeded for application", e.message)
+    }
+
     private fun validateTagAttrComponentName(tag: String, attr: String, index: Int) {
         val passNames = arrayOf("com.android.TestClass", "TestClass", "_", "$", ".TestClass", "上")
         for (name in passNames) {
@@ -661,6 +695,38 @@ class AndroidPackageParsingValidationTest {
         do {
             val type = pullParser.next()
             validator.validate(pullParser)
+        } while (type != XmlPullParser.END_DOCUMENT)
+    }
+
+    fun parseXmlForMetadata(manifestStr: String) {
+        pullParser.setInput(ByteArrayInputStream(manifestStr.toByteArray()), null)
+        val validator = Validator()
+        do {
+            val type = pullParser.next()
+            validator.validate(pullParser)
+            if (type == XmlPullParser.START_TAG && pullParser.getName().equals("meta-data")) {
+                val name = "value"
+                val value = pullParser.getAttributeValue("", name)
+                validator.validateStrAttr(pullParser, "value", value)
+            }
+        } while (type != XmlPullParser.END_DOCUMENT)
+    }
+
+    fun parseXmlForMetadataRes(manifestStr: String) {
+        pullParser.setInput(ByteArrayInputStream(manifestStr.toByteArray()), null)
+        val validator = Validator()
+        do {
+            val type = pullParser.next()
+            validator.validate(pullParser)
+            if (type == XmlPullParser.START_TAG && pullParser.getName().equals("meta-data")) {
+                val name = "value"
+                val value = pullParser.getAttributeValue("", name)
+                validator.validateResStrAttr(
+                    pullParser,
+                    R.styleable.AndroidManifestMetaData_value,
+                    value
+                )
+            }
         } while (type != XmlPullParser.END_DOCUMENT)
     }
 

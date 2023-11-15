@@ -38,9 +38,11 @@ public class Element {
     private static final int MAX_ATTR_LEN_PERMISSION_GROUP = 256;
     private static final int MAX_ATTR_LEN_PACKAGE = 256;
     private static final int MAX_ATTR_LEN_MIMETYPE = 512;
-    public static final int MAX_ATTR_LEN_NAME = 1024;
-    public static final int MAX_ATTR_LEN_PATH = 4000;
-    public static final int MAX_ATTR_LEN_VALUE = 32_768;
+    private static final int MAX_ATTR_LEN_NAME = 1024;
+    private static final int MAX_ATTR_LEN_PATH = 4000;
+    private static final int MAX_ATTR_LEN_VALUE = 32_768;
+
+    private static final int MAX_TOTAL_META_DATA_SIZE = 262_144;
 
     private static final String BAD_COMPONENT_NAME_CHARS = ";,[](){}:?%^*|/\\";
 
@@ -157,6 +159,7 @@ public class Element {
     }
 
     private long mChildTagMask = 0;
+    private int mTotalComponentMetadataSize = 0;
 
     private static int getCounterIdx(String tag) {
         switch(tag) {
@@ -283,6 +286,7 @@ public class Element {
     private void init(String tag) {
         this.mTag = tag;
         mChildTagMask = 0;
+        mTotalComponentMetadataSize = 0;
         switch (tag) {
             case TAG_ACTIVITY:
                 initializeCounter(TAG_LAYOUT, 1000);
@@ -820,6 +824,12 @@ public class Element {
         }
     }
 
+    void validateComponentMetadata(String value) {
+        mTotalComponentMetadataSize += value.length();
+        if (mTotalComponentMetadataSize > MAX_TOTAL_META_DATA_SIZE) {
+            throw new SecurityException("Max total meta data size limit exceeded for " + mTag);
+        }
+    }
 
     void seen(@NonNull Element element) {
         TagCounter counter = mTagCounters[getCounterIdx(element.mTag)];
