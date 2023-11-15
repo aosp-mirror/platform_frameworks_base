@@ -171,23 +171,23 @@ constructor(
         legacySuppressors.remove(suppressor)
     }
 
-    fun addCondition(condition: VisualInterruptionCondition) {
+    override fun addCondition(condition: VisualInterruptionCondition) {
         conditions.add(condition)
         condition.start()
     }
 
     @VisibleForTesting
-    fun removeCondition(condition: VisualInterruptionCondition) {
+    override fun removeCondition(condition: VisualInterruptionCondition) {
         conditions.remove(condition)
     }
 
-    fun addFilter(filter: VisualInterruptionFilter) {
+    override fun addFilter(filter: VisualInterruptionFilter) {
         filters.add(filter)
         filter.start()
     }
 
     @VisibleForTesting
-    fun removeFilter(filter: VisualInterruptionFilter) {
+    override fun removeFilter(filter: VisualInterruptionFilter) {
         filters.remove(filter)
     }
 
