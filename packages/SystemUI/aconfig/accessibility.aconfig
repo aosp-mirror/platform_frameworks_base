@@ -10,6 +10,13 @@ flag {
 }
 
 flag {
+    name: "floating_menu_drag_to_hide"
+    namespace: "accessibility"
+    description: "Allows users to hide the FAB then use notification to dismiss or bring it back."
+    bug: "298718415"
+}
+
+flag {
     name: "floating_menu_ime_displacement_animation"
     namespace: "accessibility"
     description: "Adds an animation for when the FAB is displaced by an IME becoming visible."

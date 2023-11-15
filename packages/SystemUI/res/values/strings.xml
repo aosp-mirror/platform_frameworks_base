@@ -2274,6 +2274,8 @@
     <string name="notification_channel_storage">Storage</string>
     <!-- Title for the notification channel for hints and suggestions. [CHAR LIMIT=NONE] -->
     <string name="notification_channel_hints">Hints</string>
+    <!-- Title for the notification channel for accessibility related (i.e. accessibility floating menu). [CHAR LIMIT=NONE] -->
+    <string name="notification_channel_accessibility">Accessibility</string>
 
     <!-- App label of the instant apps notification [CHAR LIMIT=60] -->
     <string name="instant_apps">Instant Apps</string>
@@ -2544,6 +2546,11 @@
     <string name="accessibility_floating_button_docking_tooltip">Move button to the edge to hide it temporarily</string>
     <!-- Text for the undo action button of the message view of the accessibility floating menu to perform undo operation. [CHAR LIMIT=30]-->
     <string name="accessibility_floating_button_undo">Undo</string>
+    <!-- Notification title shown when accessibility floating button is in hidden state. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_floating_button_hidden_notification_title">Accessibility button hidden</string>
+    <!-- Notification content text to explain user can tap notification to bring back accessibility floating button. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_floating_button_hidden_notification_text">Tap to show accessibility button</string>
+
     <!-- Text for the message view with undo action of the accessibility floating menu to show which feature shortcut was removed. [CHAR LIMIT=30]-->
     <string name="accessibility_floating_button_undo_message_label_text"><xliff:g id="feature name" example="Magnification">%s</xliff:g> shortcut removed</string>
     <!-- Text for the message view with undo action of the accessibility floating menu to show how many features shortcuts were removed. [CHAR LIMIT=30]-->
