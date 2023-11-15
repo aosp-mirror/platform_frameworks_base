@@ -940,8 +940,11 @@
     <!-- Keyboard shortcuts helper -->
     <dimen name="ksh_layout_width">@dimen/match_parent</dimen>
     <dimen name="ksh_item_text_size">14sp</dimen>
-    <dimen name="ksh_item_padding">4dp</dimen>
+    <dimen name="ksh_item_padding">0dp</dimen>
     <dimen name="ksh_item_margin_start">4dp</dimen>
+    <dimen name="ksh_icon_scaled_size">18dp</dimen>
+    <dimen name="ksh_key_view_padding_vertical">4dp</dimen>
+    <dimen name="ksh_key_view_padding_horizontal">12dp</dimen>
 
     <!-- The size of corner radius of the arrow in the onboarding toast. -->
     <dimen name="recents_onboarding_toast_arrow_corner_radius">2dp</dimen>

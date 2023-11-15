@@ -119,9 +119,8 @@
 
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
-    <color name="ksh_key_item_color">@color/material_grey_600</color>
-    <color name="ksh_key_item_background">@color/material_grey_100</color>
-    <color name="ksh_key_item_new_background">@color/transparent</color>
+    <color name="ksh_key_item_color">?androidprv:attr/materialColorOnSurfaceVariant</color>
+    <color name="ksh_key_item_background">?androidprv:attr/materialColorSurfaceContainerHighest</color>
 
     <color name="instant_apps_color">#ff4d5a64</color>
 

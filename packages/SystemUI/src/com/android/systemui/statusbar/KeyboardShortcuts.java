@@ -85,7 +85,6 @@ public final class KeyboardShortcuts {
 
     private final SparseArray<String> mSpecialCharacterNames = new SparseArray<>();
     private final SparseArray<String> mModifierNames = new SparseArray<>();
-    private final SparseArray<Drawable> mSpecialCharacterDrawables = new SparseArray<>();
     private final SparseArray<Drawable> mModifierDrawables = new SparseArray<>();
     // Ordered list of modifiers that are supported. All values in this array must exist in
     // mModifierNames.
@@ -339,19 +338,6 @@ public final class KeyboardShortcuts {
         mModifierNames.put(KeyEvent.META_SHIFT_ON, "Shift");
         mModifierNames.put(KeyEvent.META_SYM_ON, "Sym");
         mModifierNames.put(KeyEvent.META_FUNCTION_ON, "Fn");
-
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DEL, context.getDrawable(R.drawable.ic_ksh_key_backspace));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_ENTER, context.getDrawable(R.drawable.ic_ksh_key_enter));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_UP, context.getDrawable(R.drawable.ic_ksh_key_up));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_RIGHT, context.getDrawable(R.drawable.ic_ksh_key_right));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_DOWN, context.getDrawable(R.drawable.ic_ksh_key_down));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_LEFT, context.getDrawable(R.drawable.ic_ksh_key_left));
 
         mModifierDrawables.put(
                 KeyEvent.META_META_ON, context.getDrawable(R.drawable.ic_ksh_key_meta));
@@ -747,9 +733,6 @@ public final class KeyboardShortcuts {
         Drawable shortcutKeyDrawable = null;
         if (info.getBaseCharacter() > Character.MIN_VALUE) {
             shortcutKeyString = String.valueOf(info.getBaseCharacter());
-        } else if (mSpecialCharacterDrawables.get(info.getKeycode()) != null) {
-            shortcutKeyDrawable = mSpecialCharacterDrawables.get(info.getKeycode());
-            shortcutKeyString = mSpecialCharacterNames.get(info.getKeycode());
         } else if (mSpecialCharacterNames.get(info.getKeycode()) != null) {
             shortcutKeyString = mSpecialCharacterNames.get(info.getKeycode());
         } else {
