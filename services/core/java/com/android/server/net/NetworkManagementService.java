@@ -74,7 +74,6 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.HexDump;
 import com.android.modules.utils.build.SdkLevel;
-import com.android.net.flags.Flags;
 import com.android.net.module.util.NetdUtils;
 import com.android.net.module.util.PermissionUtils;
 import com.android.server.FgThread;
@@ -1062,7 +1061,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             }
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "setDataSaverModeEnabled");
             try {
-                if (Flags.setDataSaverViaCm()) {
+                if (SdkLevel.isAtLeastV()) {
                     // setDataSaverEnabled throws if it fails to set data saver.
                     mContext.getSystemService(ConnectivityManager.class)
                             .setDataSaverEnabled(enable);

@@ -57,7 +57,7 @@ import android.util.ArrayMap;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.IBatteryStats;
-import com.android.net.flags.Flags;
+import com.android.modules.utils.build.SdkLevel;
 
 import org.junit.After;
 import org.junit.Before;
@@ -264,7 +264,7 @@ public class NetworkManagementServiceTest {
         verify(mCm).addUidToMeteredNetworkDenyList(TEST_UID);
 
         mNMService.setDataSaverModeEnabled(true);
-        if (Flags.setDataSaverViaCm()) {
+        if (SdkLevel.isAtLeastV()) {
             verify(mCm).setDataSaverEnabled(true);
         } else {
             verify(mNetdService).bandwidthEnableDataSaver(true);
@@ -284,7 +284,7 @@ public class NetworkManagementServiceTest {
         mNMService.setUidOnMeteredNetworkAllowlist(TEST_UID, false);
         verify(mCm).removeUidFromMeteredNetworkAllowList(TEST_UID);
         mNMService.setDataSaverModeEnabled(false);
-        if (Flags.setDataSaverViaCm()) {
+        if (SdkLevel.isAtLeastV()) {
             verify(mCm).setDataSaverEnabled(false);
         } else {
             verify(mNetdService).bandwidthEnableDataSaver(false);
