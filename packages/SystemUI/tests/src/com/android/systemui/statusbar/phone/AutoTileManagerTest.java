@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.Flags.FLAG_QS_NEW_PIPELINE;
 import static com.android.systemui.qs.dagger.QSFlagsModule.RBC_AVAILABLE;
 import static com.android.systemui.statusbar.phone.AutoTileManager.DEVICE_CONTROLS;
 
@@ -134,6 +135,8 @@ public class AutoTileManagerTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mSecureSettings = new FakeSettings();
+
+        mSetFlagsRule.disableFlags(FLAG_QS_NEW_PIPELINE);
 
         mContext.getOrCreateTestableResources().addOverride(
                 R.array.config_quickSettingsAutoAdd,
