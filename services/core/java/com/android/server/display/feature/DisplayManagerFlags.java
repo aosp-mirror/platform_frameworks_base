@@ -90,6 +90,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_ENABLE_EXTERNAL_VSYNC_PROXIMITY_VOTE,
             Flags::enableExternalVsyncProximityVote);
 
+    private final FlagState mBrightnessWearBedtimeModeClamperFlagState = new FlagState(
+            Flags.FLAG_BRIGHTNESS_WEAR_BEDTIME_MODE_CLAMPER,
+            Flags::brightnessWearBedtimeModeClamper);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -178,6 +182,10 @@ public class DisplayManagerFlags {
         return mVsyncProximityVote.isEnabled();
     }
 
+    public boolean isBrightnessWearBedtimeModeClamperEnabled() {
+        return mBrightnessWearBedtimeModeClamperFlagState.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -197,6 +205,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mSmallAreaDetectionFlagState);
         pw.println(" " + mBrightnessIntRangeUserPerceptionFlagState);
         pw.println(" " + mVsyncProximityVote);
+        pw.println(" " + mBrightnessWearBedtimeModeClamperFlagState);
     }
 
     private static class FlagState {

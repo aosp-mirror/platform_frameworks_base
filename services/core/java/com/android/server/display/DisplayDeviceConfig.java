@@ -528,6 +528,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *         <majorVersion>2</majorVersion>
  *         <minorVersion>0</minorVersion>
  *     </usiVersion>
+ *     <screenBrightnessCapForWearBedtimeMode>0.1</screenBrightnessCapForWearBedtimeMode>
  *    </displayConfiguration>
  *  }
  *  </pre>
@@ -842,6 +843,11 @@ public class DisplayDeviceConfig {
 
     @Nullable
     private HdrBrightnessData mHdrBrightnessData;
+
+    /**
+     * Maximum screen brightness setting when screen brightness capped in Wear Bedtime mode.
+     */
+    private float mBrightnessCapForWearBedtimeMode;
 
     @VisibleForTesting
     DisplayDeviceConfig(Context context) {
@@ -1741,6 +1747,13 @@ public class DisplayDeviceConfig {
         return mHostUsiVersion;
     }
 
+    /**
+     * @return Maximum screen brightness setting when screen brightness capped in Wear Bedtime mode.
+     */
+    public float getBrightnessCapForWearBedtimeMode() {
+        return mBrightnessCapForWearBedtimeMode;
+    }
+
     @Override
     public String toString() {
         return "DisplayDeviceConfig{"
@@ -1867,11 +1880,12 @@ public class DisplayDeviceConfig {
                 + ", mHighAmbientBrightnessThresholds= "
                 + Arrays.toString(mHighAmbientBrightnessThresholds)
                 + "\n"
-                + "mScreenOffBrightnessSensorValueToLux=" + Arrays.toString(
+                + "mScreenOffBrightnessSensorValueToLux= " + Arrays.toString(
                 mScreenOffBrightnessSensorValueToLux)
                 + "\n"
                 + "mUsiVersion= " + mHostUsiVersion + "\n"
-                + "mHdrBrightnessData" + mHdrBrightnessData
+                + "mHdrBrightnessData= " + mHdrBrightnessData + "\n"
+                + "mBrightnessCapForWearBedtimeMode= " + mBrightnessCapForWearBedtimeMode
                 + "}";
     }
 
@@ -1938,6 +1952,7 @@ public class DisplayDeviceConfig {
                 loadScreenOffBrightnessSensorValueToLuxFromDdc(config);
                 loadUsiVersion(config);
                 mHdrBrightnessData = HdrBrightnessData.loadConfig(config);
+                loadBrightnessCapForWearBedtimeMode(config);
             } else {
                 Slog.w(TAG, "DisplayDeviceConfig file is null");
             }
@@ -1961,6 +1976,7 @@ public class DisplayDeviceConfig {
         loadAutoBrightnessConfigsFromConfigXml();
         loadAutoBrightnessAvailableFromConfigXml();
         loadRefreshRateSetting(null);
+        loadBrightnessCapForWearBedtimeModeFromConfigXml();
         mLoadedFrom = "<config.xml>";
     }
 
@@ -3348,6 +3364,23 @@ public class DisplayDeviceConfig {
                         usiVersion.getMajorVersion().intValue(),
                         usiVersion.getMinorVersion().intValue())
                 : null;
+    }
+
+    private void loadBrightnessCapForWearBedtimeMode(DisplayConfiguration config) {
+        if (config != null) {
+            BigDecimal configBrightnessCap = config.getScreenBrightnessCapForWearBedtimeMode();
+            if (configBrightnessCap != null) {
+                mBrightnessCapForWearBedtimeMode = configBrightnessCap.floatValue();
+            } else {
+                loadBrightnessCapForWearBedtimeModeFromConfigXml();
+            }
+        }
+    }
+
+    private void loadBrightnessCapForWearBedtimeModeFromConfigXml() {
+        mBrightnessCapForWearBedtimeMode = BrightnessSynchronizer.brightnessIntToFloat(
+                mContext.getResources().getInteger(com.android.internal.R.integer
+                        .config_screenBrightnessCapForWearBedtimeMode));
     }
 
     /**

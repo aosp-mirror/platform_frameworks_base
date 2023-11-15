@@ -2078,6 +2078,7 @@
   <java-symbol type="integer" name="config_screenBrightnessSettingMinimum" />
   <java-symbol type="integer" name="config_screenBrightnessSettingMaximum" />
   <java-symbol type="integer" name="config_screenBrightnessSettingDefault" />
+  <java-symbol type="integer" name="config_screenBrightnessCapForWearBedtimeMode" />
   <java-symbol type="dimen" name="config_screenBrightnessSettingMinimumFloat" />
   <java-symbol type="dimen" name="config_screenBrightnessSettingMaximumFloat" />
   <java-symbol type="dimen" name="config_screenBrightnessSettingDefaultFloat" />

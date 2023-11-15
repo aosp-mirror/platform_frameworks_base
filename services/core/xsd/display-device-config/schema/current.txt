@@ -110,6 +110,7 @@ package com.android.server.display.config {
     method public final com.android.server.display.config.SensorDetails getProxSensor();
     method public com.android.server.display.config.DisplayQuirks getQuirks();
     method public com.android.server.display.config.RefreshRateConfigs getRefreshRate();
+    method public final java.math.BigDecimal getScreenBrightnessCapForWearBedtimeMode();
     method @NonNull public final java.math.BigDecimal getScreenBrightnessDefault();
     method @NonNull public final com.android.server.display.config.NitsMap getScreenBrightnessMap();
     method public final java.math.BigInteger getScreenBrightnessRampDecreaseMaxIdleMillis();
@@ -143,6 +144,7 @@ package com.android.server.display.config {
     method public final void setProxSensor(com.android.server.display.config.SensorDetails);
     method public void setQuirks(com.android.server.display.config.DisplayQuirks);
     method public void setRefreshRate(com.android.server.display.config.RefreshRateConfigs);
+    method public final void setScreenBrightnessCapForWearBedtimeMode(java.math.BigDecimal);
     method public final void setScreenBrightnessDefault(@NonNull java.math.BigDecimal);
     method public final void setScreenBrightnessMap(@NonNull com.android.server.display.config.NitsMap);
     method public final void setScreenBrightnessRampDecreaseMaxIdleMillis(java.math.BigInteger);
