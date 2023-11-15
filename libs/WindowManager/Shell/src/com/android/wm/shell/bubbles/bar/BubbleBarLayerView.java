@@ -28,16 +28,13 @@ import android.graphics.drawable.ColorDrawable;
 import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
-import com.android.wm.shell.bubbles.DeviceConfig;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 
 import kotlin.Unit;
@@ -107,8 +104,7 @@ public class BubbleBarLayerView extends FrameLayout
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        mPositioner.update(DeviceConfig.create(mContext, Objects.requireNonNull(windowManager)));
+        mPositioner.update();
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
     }
 

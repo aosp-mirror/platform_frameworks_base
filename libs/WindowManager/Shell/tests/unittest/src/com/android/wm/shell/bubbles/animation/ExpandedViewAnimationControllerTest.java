@@ -50,6 +50,9 @@ public class ExpandedViewAnimationControllerTest extends ShellTestCase {
     private ExpandedViewAnimationController mController;
 
     @Mock
+    private WindowManager mWindowManager;
+
+    @Mock
     private BubbleExpandedView mMockExpandedView;
 
     @Before
@@ -57,7 +60,7 @@ public class ExpandedViewAnimationControllerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
 
         TestableBubblePositioner positioner = new TestableBubblePositioner(getContext(),
-                getContext().getSystemService(WindowManager.class));
+                mWindowManager);
         mController = new ExpandedViewAnimationControllerImpl(getContext(), positioner);
 
         mController.setExpandedView(mMockExpandedView);
