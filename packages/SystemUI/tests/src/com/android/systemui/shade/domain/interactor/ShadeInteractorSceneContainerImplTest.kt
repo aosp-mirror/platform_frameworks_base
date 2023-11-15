@@ -179,6 +179,67 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun qsFullscreen_falseWhenTransitioning() =
+        testComponent.runTest() {
+            val actual by collectLastValue(underTest.isQsFullscreen)
+
+            // WHEN scene transition active
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            val progress = MutableStateFlow(.3f)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.QuickSettings,
+                        toScene = SceneKey.Shade,
+                        progress = progress,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            runCurrent()
+
+            // THEN QS is not fullscreen
+            Truth.assertThat(actual).isFalse()
+        }
+
+    @Test
+    fun qsFullscreen_falseWhenIdleNotQS() =
+        testComponent.runTest() {
+            val actual by collectLastValue(underTest.isQsFullscreen)
+
+            // WHEN Idle but not on QuickSettings scene
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(SceneKey.Shade)
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            runCurrent()
+
+            // THEN QS is not fullscreen
+            Truth.assertThat(actual).isFalse()
+        }
+
+    @Test
+    fun qsFullscreen_trueWhenIdleQS() =
+        testComponent.runTest() {
+            val actual by collectLastValue(underTest.isQsFullscreen)
+
+            // WHEN Idle on QuickSettings scene
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(SceneKey.QuickSettings)
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            runCurrent()
+
+            // THEN QS is fullscreen
+            Truth.assertThat(actual).isTrue()
+        }
+
+    @Test
     fun lockscreenShadeExpansion_idle_onScene() =
         testComponent.runTest() {
             // GIVEN an expansion flow based on transitions to and from a scene

@@ -62,6 +62,9 @@ constructor(
     override val isAnyFullyExpanded: Flow<Boolean> =
         anyExpansion.map { it >= 1f }.distinctUntilChanged()
 
+    override val isShadeFullyExpanded: Flow<Boolean> =
+        baseShadeInteractor.shadeExpansion.map { it >= 1f }.distinctUntilChanged()
+
     override val isUserInteracting: Flow<Boolean> =
         combine(isUserInteractingWithShade, isUserInteractingWithQs) { shade, qs -> shade || qs }
             .distinctUntilChanged()

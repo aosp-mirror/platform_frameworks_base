@@ -216,4 +216,13 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
             underTest.setLegacyExpandImmediate(true)
             assertThat(underTest.legacyExpandImmediate.value).isEqualTo(true)
         }
+
+    @Test
+    fun updateLegacyQsFullscreen() =
+        testScope.runTest {
+            assertThat(underTest.legacyQsFullscreen.value).isEqualTo(false)
+
+            underTest.setLegacyQsFullscreen(true)
+            assertThat(underTest.legacyQsFullscreen.value).isEqualTo(true)
+        }
 }
