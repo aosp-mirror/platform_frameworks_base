@@ -156,8 +156,7 @@ public final class PlaybackActivityMonitor
     private final int mMaxAlarmVolume;
     private int mPrivilegedAlarmActiveCount = 0;
     private final Consumer<AudioDeviceAttributes> mMuteAwaitConnectionTimeoutCb;
-    private final FadeOutManager mFadeOutManager;
-
+    private final FadeOutManager mFadeOutManager = new FadeOutManager();
 
     PlaybackActivityMonitor(Context context, int maxAlarmVolume,
             Consumer<AudioDeviceAttributes> muteTimeoutCallback) {
@@ -167,7 +166,6 @@ public final class PlaybackActivityMonitor
         AudioPlaybackConfiguration.sPlayerDeathMonitor = this;
         mMuteAwaitConnectionTimeoutCb = muteTimeoutCallback;
         initEventHandler();
-        mFadeOutManager = new FadeOutManager(new FadeConfigurations());
     }
 
     //=================================================================
@@ -1334,6 +1332,38 @@ public final class PlaybackActivityMonitor
                     + AudioPlaybackConfiguration.toLogFriendlyPlayerType(mPlayerType)
                     + " attr:" + mPlayerAttr
                     + " session:" + mSessionId);
+        }
+    }
+
+    static final class FadeEvent extends EventLogger.Event {
+        private final int mPlayerIId;
+        private final int mPlayerType;
+        private final int mClientUid;
+        private final int mClientPid;
+        private final AudioAttributes mPlayerAttr;
+        private final VolumeShaper.Configuration mVShaper;
+        private final VolumeShaper.Operation mVOperation;
+
+        FadeEvent(AudioPlaybackConfiguration apc, VolumeShaper.Configuration vShaper,
+                VolumeShaper.Operation vOperation) {
+            mPlayerIId = apc.getPlayerInterfaceId();
+            mClientUid = apc.getClientUid();
+            mClientPid = apc.getClientPid();
+            mPlayerAttr = apc.getAudioAttributes();
+            mPlayerType = apc.getPlayerType();
+            mVShaper = vShaper;
+            mVOperation = vOperation;
+        }
+
+        @Override
+        public String eventToString() {
+            return "Fade Event:" + " player piid:" + mPlayerIId
+                    + " uid/pid:" + mClientUid + "/" + mClientPid
+                    + " player type:"
+                    + AudioPlaybackConfiguration.toLogFriendlyPlayerType(mPlayerType)
+                    + " attr:" + mPlayerAttr
+                    + " volume shaper:" + mVShaper
+                    + " volume operation:" + mVOperation;
         }
     }
 

@@ -16,13 +16,21 @@
 
 package com.android.server.audio;
 
+import static android.media.audiopolicy.Flags.enableFadeManagerConfiguration;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.media.AudioAttributes;
 import android.media.AudioPlaybackConfiguration;
+import android.media.FadeManagerConfiguration;
 import android.media.VolumeShaper;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
+
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Class to encapsulate configurations used for fading players
@@ -69,51 +77,150 @@ public final class FadeConfigurations {
 
     private static final int INVALID_UID = -1;
 
+    private final Object mLock = new Object();
+    @GuardedBy("mLock")
+    private FadeManagerConfiguration mDefaultFadeManagerConfig;
+    @GuardedBy("mLock")
+    private FadeManagerConfiguration mUpdatedFadeManagerConfig;
+    /** active fade manager is one of updated > default */
+    @GuardedBy("mLock")
+    private FadeManagerConfiguration mActiveFadeManagerConfig;
+
+    /**
+     * Sets the custom fade manager configuration
+     *
+     * @param fadeManagerConfig custom fade manager configuration
+     * @return {@code true} if setting custom fade manager configuration succeeds or {@code false}
+     * otherwise (example - when fade manager configuration is disabled)
+     */
+    public boolean setFadeManagerConfiguration(
+            @NonNull FadeManagerConfiguration fadeManagerConfig) {
+        if (!enableFadeManagerConfiguration()) {
+            return false;
+        }
+
+        synchronized (mLock) {
+            mUpdatedFadeManagerConfig = Objects.requireNonNull(fadeManagerConfig,
+                    "Fade manager configuration cannot be null");
+            mActiveFadeManagerConfig = getActiveFadeMgrConfigLocked();
+        }
+        return true;
+    }
+
+    /**
+     * Clears the fade manager configuration that was previously set with
+     * {@link #setFadeManagerConfiguration(FadeManagerConfiguration)}
+     *
+     * @return {@code true} if previously set fade manager configuration is cleared or {@code false}
+     * otherwise (say, when fade manager configuration is disabled)
+     */
+    public boolean clearFadeManagerConfiguration() {
+        if (!enableFadeManagerConfiguration()) {
+            return false;
+        }
+        synchronized (mLock) {
+            mUpdatedFadeManagerConfig = null;
+            mActiveFadeManagerConfig = getActiveFadeMgrConfigLocked();
+        }
+        return true;
+    }
+
     /**
      * Query {@link android.media.AudioAttributes.AttributeUsage usages} that are allowed to
      * fade
+     *
      * @return list of {@link android.media.AudioAttributes.AttributeUsage}
      */
     @NonNull
     public List<Integer> getFadeableUsages() {
-        return DEFAULT_FADEABLE_USAGES;
+        if (!enableFadeManagerConfiguration()) {
+            return DEFAULT_FADEABLE_USAGES;
+        }
+
+        synchronized (mLock) {
+            FadeManagerConfiguration fadeManagerConfig = getUpdatedFadeManagerConfigLocked();
+            // when fade is not enabled, return an empty list instead
+            return fadeManagerConfig.isFadeEnabled() ? fadeManagerConfig.getFadeableUsages()
+                    : Collections.EMPTY_LIST;
+        }
     }
 
     /**
      * Query {@link android.media.AudioAttributes.AttributeContentType content types} that are
      * exempted from fade enforcement
+     *
      * @return list of {@link android.media.AudioAttributes.AttributeContentType}
      */
     @NonNull
     public List<Integer> getUnfadeableContentTypes() {
-        return DEFAULT_UNFADEABLE_CONTENT_TYPES;
+        if (!enableFadeManagerConfiguration()) {
+            return DEFAULT_UNFADEABLE_CONTENT_TYPES;
+        }
+
+        synchronized (mLock) {
+            FadeManagerConfiguration fadeManagerConfig = getUpdatedFadeManagerConfigLocked();
+            // when fade is not enabled, return an empty list instead
+            return fadeManagerConfig.isFadeEnabled() ? fadeManagerConfig.getUnfadeableContentTypes()
+                    : Collections.EMPTY_LIST;
+        }
     }
 
     /**
      * Query {@link android.media.AudioPlaybackConfiguration.PlayerType player types} that are
      * exempted from fade enforcement
+     *
      * @return list of {@link android.media.AudioPlaybackConfiguration.PlayerType}
      */
     @NonNull
     public List<Integer> getUnfadeablePlayerTypes() {
-        return DEFAULT_UNFADEABLE_PLAYER_TYPES;
+        if (!enableFadeManagerConfiguration()) {
+            return DEFAULT_UNFADEABLE_PLAYER_TYPES;
+        }
+
+        synchronized (mLock) {
+            FadeManagerConfiguration fadeManagerConfig = getUpdatedFadeManagerConfigLocked();
+            // when fade is not enabled, return an empty list instead
+            return fadeManagerConfig.isFadeEnabled() ? fadeManagerConfig.getUnfadeablePlayerTypes()
+                    : Collections.EMPTY_LIST;
+        }
     }
 
     /**
      * Get the {@link android.media.VolumeShaper.Configuration} configuration to be applied
      * for the fade-out
+     *
      * @param aa The {@link android.media.AudioAttributes}
      * @return {@link android.media.VolumeShaper.Configuration} for the
-     * {@link android.media.AudioAttributes.AttributeUsage} or default volume shaper if not
-     * configured
+     * {@link android.media.AudioAttributes} or default volume shaper if not configured
      */
     @NonNull
     public VolumeShaper.Configuration getFadeOutVolumeShaperConfig(@NonNull AudioAttributes aa) {
-        return DEFAULT_FADEOUT_VSHAPE;
+        if (!enableFadeManagerConfiguration()) {
+            return DEFAULT_FADEOUT_VSHAPE;
+        }
+        return getOptimalFadeOutVolShaperConfig(aa);
     }
 
     /**
+     * Get the {@link android.media.VolumeShaper.Configuration} configuration to be applied for the
+     * fade in
+     *
+     * @param aa The {@link android.media.AudioAttributes}
+     * @return {@link android.media.VolumeShaper.Configuration} for the
+     * {@link android.media.AudioAttributes} or {@code null} otherwise
+     */
+    @Nullable
+    public VolumeShaper.Configuration getFadeInVolumeShaperConfig(@NonNull AudioAttributes aa) {
+        if (!enableFadeManagerConfiguration()) {
+            return null;
+        }
+        return getOptimalFadeInVolShaperConfig(aa);
+    }
+
+
+    /**
      * Get the duration to fade out a player of type usage
+     *
      * @param aa The {@link android.media.AudioAttributes}
      * @return duration in milliseconds for the
      * {@link android.media.AudioAttributes} or default duration if not configured
@@ -122,22 +229,73 @@ public final class FadeConfigurations {
         if (!isFadeable(aa, INVALID_UID, AudioPlaybackConfiguration.PLAYER_TYPE_UNKNOWN)) {
             return 0;
         }
-        return DEFAULT_FADE_OUT_DURATION_MS;
+        if (!enableFadeManagerConfiguration()) {
+            return DEFAULT_FADE_OUT_DURATION_MS;
+        }
+        return getOptimalFadeOutDuration(aa);
     }
 
     /**
-     * Get the delay to fade in offending players that do not stop after losing audio focus.
+     * Get the delay to fade in offending players that do not stop after losing audio focus
+     *
      * @param aa The {@link android.media.AudioAttributes}
      * @return delay in milliseconds for the
      * {@link android.media.AudioAttributes.Attribute} or default delay if not configured
      */
     public long getDelayFadeInOffenders(@NonNull AudioAttributes aa) {
-        return DEFAULT_DELAY_FADE_IN_OFFENDERS_MS;
+        if (!enableFadeManagerConfiguration()) {
+            return DEFAULT_DELAY_FADE_IN_OFFENDERS_MS;
+        }
+
+        synchronized (mLock) {
+            return getUpdatedFadeManagerConfigLocked().getFadeInDelayForOffenders();
+        }
+    }
+
+    /**
+     * Query {@link android.media.AudioAttributes} that are exempted from fade enforcement
+     *
+     * @return list of {@link android.media.AudioAttributes}
+     */
+    @NonNull
+    public List<AudioAttributes> getUnfadeableAudioAttributes() {
+        // unfadeable audio attributes is only supported with fade manager configurations
+        if (!enableFadeManagerConfiguration()) {
+            return Collections.EMPTY_LIST;
+        }
+
+        synchronized (mLock) {
+            FadeManagerConfiguration fadeManagerConfig = getUpdatedFadeManagerConfigLocked();
+            // when fade is not enabled, return empty list
+            return fadeManagerConfig.isFadeEnabled()
+                    ? fadeManagerConfig.getUnfadeableAudioAttributes() : Collections.EMPTY_LIST;
+        }
+    }
+
+    /**
+     * Query uids that are exempted from fade enforcement
+     *
+     * @return list of uids
+     */
+    @NonNull
+    public List<Integer> getUnfadeableUids() {
+        // unfadeable uids is only supported with fade manager configurations
+        if (!enableFadeManagerConfiguration()) {
+            return Collections.EMPTY_LIST;
+        }
+
+        synchronized (mLock) {
+            FadeManagerConfiguration fadeManagerConfig = getUpdatedFadeManagerConfigLocked();
+            // when fade is not enabled, return empty list
+            return fadeManagerConfig.isFadeEnabled() ? fadeManagerConfig.getUnfadeableUids()
+                    : Collections.EMPTY_LIST;
+        }
     }
 
     /**
      * Check if it is allowed to fade for the given {@link android.media.AudioAttributes},
-     * client uid and {@link android.media.AudioPlaybackConfiguration.PlayerType} config.
+     * client uid and {@link android.media.AudioPlaybackConfiguration.PlayerType} config
+     *
      * @param aa The {@link android.media.AudioAttributes}
      * @param uid The uid of the client owning the player
      * @param playerType The {@link android.media.AudioPlaybackConfiguration.PlayerType}
@@ -145,36 +303,169 @@ public final class FadeConfigurations {
      */
     public boolean isFadeable(@NonNull AudioAttributes aa, int uid,
             @AudioPlaybackConfiguration.PlayerType int playerType) {
-        if (isPlayerTypeUnfadeable(playerType)) {
-            if (DEBUG) {
-                Slog.i(TAG, "not fadeable: player type:" + playerType);
+        synchronized (mLock) {
+            if (isPlayerTypeUnfadeableLocked(playerType)) {
+                if (DEBUG) {
+                    Slog.i(TAG, "not fadeable: player type:" + playerType);
+                }
+                return false;
             }
-            return false;
-        }
-        if (isContentTypeUnfadeable(aa.getContentType())) {
-            if (DEBUG) {
-                Slog.i(TAG, "not fadeable: content type:" + aa.getContentType());
+            if (isContentTypeUnfadeableLocked(aa.getContentType())) {
+                if (DEBUG) {
+                    Slog.i(TAG, "not fadeable: content type:" + aa.getContentType());
+                }
+                return false;
             }
-            return false;
-        }
-        if (!isUsageFadeable(aa.getUsage())) {
-            if (DEBUG) {
-                Slog.i(TAG, "not fadeable: usage:" + aa.getUsage());
+            if (!isUsageFadeableLocked(aa.getSystemUsage())) {
+                if (DEBUG) {
+                    Slog.i(TAG, "not fadeable: usage:" + aa.getUsage());
+                }
+                return false;
             }
-            return false;
+            // new configs using fade manager configuration
+            if (isUnfadeableForFadeMgrConfigLocked(aa, uid)) {
+                return false;
+            }
+            return true;
         }
-        return true;
     }
 
-    private boolean isUsageFadeable(int usage) {
-        return getFadeableUsages().contains(usage);
+    /** Tries to get the fade out volume shaper config closest to the audio attributes */
+    private VolumeShaper.Configuration getOptimalFadeOutVolShaperConfig(AudioAttributes aa) {
+        synchronized (mLock) {
+            FadeManagerConfiguration fadeManagerConfig = getUpdatedFadeManagerConfigLocked();
+            // check if the specific audio attributes has a volume shaper config defined
+            VolumeShaper.Configuration volShaperConfig =
+                    fadeManagerConfig.getFadeOutVolumeShaperConfigForAudioAttributes(aa);
+            if (volShaperConfig != null) {
+                return volShaperConfig;
+            }
+
+            // get the volume shaper config for usage
+            // for fadeable usages, this should never return null
+            return fadeManagerConfig.getFadeOutVolumeShaperConfigForUsage(
+                    aa.getSystemUsage());
+        }
     }
 
-    private boolean isContentTypeUnfadeable(int contentType) {
-        return getUnfadeableContentTypes().contains(contentType);
+    /** Tries to get the fade in volume shaper config closest to the audio attributes */
+    private VolumeShaper.Configuration getOptimalFadeInVolShaperConfig(AudioAttributes aa) {
+        synchronized (mLock) {
+            FadeManagerConfiguration fadeManagerConfig = getUpdatedFadeManagerConfigLocked();
+            // check if the specific audio attributes has a volume shaper config defined
+            VolumeShaper.Configuration volShaperConfig =
+                    fadeManagerConfig.getFadeInVolumeShaperConfigForAudioAttributes(aa);
+            if (volShaperConfig != null) {
+                return volShaperConfig;
+            }
+
+            // get the volume shaper config for usage
+            // for fadeable usages, this should never return null
+            return fadeManagerConfig.getFadeInVolumeShaperConfigForUsage(aa.getSystemUsage());
+        }
     }
 
-    private boolean isPlayerTypeUnfadeable(int playerType) {
-        return getUnfadeablePlayerTypes().contains(playerType);
+    /** Tries to get the duration closest to the audio attributes */
+    private long getOptimalFadeOutDuration(AudioAttributes aa) {
+        synchronized (mLock) {
+            FadeManagerConfiguration fadeManagerConfig = getUpdatedFadeManagerConfigLocked();
+            // check if specific audio attributes has a duration defined
+            long duration = fadeManagerConfig.getFadeOutDurationForAudioAttributes(aa);
+            if (duration != FadeManagerConfiguration.DURATION_NOT_SET) {
+                return duration;
+            }
+
+            // get the duration for usage
+            // for fadeable usages, this should never return DURATION_NOT_SET
+            return fadeManagerConfig.getFadeOutDurationForUsage(aa.getSystemUsage());
+        }
+    }
+
+    @GuardedBy("mLock")
+    private boolean isUnfadeableForFadeMgrConfigLocked(AudioAttributes aa, int uid) {
+        if (isAudioAttributesUnfadeableLocked(aa)) {
+            if (DEBUG) {
+                Slog.i(TAG, "not fadeable: aa:" + aa);
+            }
+            return true;
+        }
+        if (isUidUnfadeableLocked(uid)) {
+            if (DEBUG) {
+                Slog.i(TAG, "not fadeable: uid:" + uid);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @GuardedBy("mLock")
+    private boolean isUsageFadeableLocked(int usage) {
+        if (!enableFadeManagerConfiguration()) {
+            return DEFAULT_FADEABLE_USAGES.contains(usage);
+        }
+        return getUpdatedFadeManagerConfigLocked().isUsageFadeable(usage);
+    }
+
+    @GuardedBy("mLock")
+    private boolean isContentTypeUnfadeableLocked(int contentType) {
+        if (!enableFadeManagerConfiguration()) {
+            return DEFAULT_UNFADEABLE_CONTENT_TYPES.contains(contentType);
+        }
+        return getUpdatedFadeManagerConfigLocked().isContentTypeUnfadeable(contentType);
+    }
+
+    @GuardedBy("mLock")
+    private boolean isPlayerTypeUnfadeableLocked(int playerType) {
+        if (!enableFadeManagerConfiguration()) {
+            return DEFAULT_UNFADEABLE_PLAYER_TYPES.contains(playerType);
+        }
+        return getUpdatedFadeManagerConfigLocked().isPlayerTypeUnfadeable(playerType);
+    }
+
+    @GuardedBy("mLock")
+    private boolean isAudioAttributesUnfadeableLocked(AudioAttributes aa) {
+        if (!enableFadeManagerConfiguration()) {
+            // default fade configs do not support unfadeable audio attributes, hence return false
+            return false;
+        }
+        return getUpdatedFadeManagerConfigLocked().isAudioAttributesUnfadeable(aa);
+    }
+
+    @GuardedBy("mLock")
+    private boolean isUidUnfadeableLocked(int uid) {
+        if (!enableFadeManagerConfiguration()) {
+            // default fade configs do not support unfadeable uids, hence return false
+            return false;
+        }
+        return getUpdatedFadeManagerConfigLocked().isUidUnfadeable(uid);
+    }
+
+    @GuardedBy("mLock")
+    private FadeManagerConfiguration getUpdatedFadeManagerConfigLocked() {
+        if (mActiveFadeManagerConfig == null) {
+            mActiveFadeManagerConfig = getActiveFadeMgrConfigLocked();
+        }
+        return mActiveFadeManagerConfig;
+    }
+
+    /** Priority between fade manager configs: Updated > Default */
+    @GuardedBy("mLock")
+    private FadeManagerConfiguration getActiveFadeMgrConfigLocked() {
+        // below configs are arranged in the order of priority
+        // configs placed higher have higher priority
+        if (mUpdatedFadeManagerConfig != null) {
+            return mUpdatedFadeManagerConfig;
+        }
+
+        // default - must be the lowest priority
+        return getDefaultFadeManagerConfigLocked();
+    }
+
+    @GuardedBy("mLock")
+    private FadeManagerConfiguration getDefaultFadeManagerConfigLocked() {
+        if (mDefaultFadeManagerConfig == null) {
+            mDefaultFadeManagerConfig = new FadeManagerConfiguration.Builder().build();
+        }
+        return mDefaultFadeManagerConfig;
     }
 }

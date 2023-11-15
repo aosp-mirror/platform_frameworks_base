@@ -16,21 +16,24 @@
 
 package com.android.server.audio;
 
+import static android.media.audiopolicy.Flags.enableFadeManagerConfiguration;
+
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
+import android.media.FadeManagerConfiguration;
 import android.media.VolumeShaper;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Class to handle fading out players
@@ -40,14 +43,6 @@ public final class FadeOutManager {
     public static final String TAG = "AS.FadeOutManager";
 
     private static final boolean DEBUG = PlaybackActivityMonitor.DEBUG;
-    private static final VolumeShaper.Operation PLAY_CREATE_IF_NEEDED =
-            new VolumeShaper.Operation.Builder(VolumeShaper.Operation.PLAY)
-                    .createIfNeeded()
-                    .build();
-
-    // like a PLAY_CREATE_IF_NEEDED operation but with a skip to the end of the ramp
-    private static final VolumeShaper.Operation PLAY_SKIP_RAMP =
-            new VolumeShaper.Operation.Builder(PLAY_CREATE_IF_NEEDED).setXOffset(1.0f).build();
 
     private final Object mLock = new Object();
 
@@ -57,16 +52,40 @@ public final class FadeOutManager {
     @GuardedBy("mLock")
     private final SparseArray<FadedOutApp> mUidToFadedAppsMap = new SparseArray<>();
 
-    @GuardedBy("mLock")
-    private FadeConfigurations mFadeConfigurations;
+    private final FadeConfigurations mFadeConfigurations = new FadeConfigurations();
 
-    public FadeOutManager() {
-        mFadeConfigurations = new FadeConfigurations();
+    /**
+     * Sets the custom fade manager configuration to be used for player fade out and in
+     *
+     * @param fadeManagerConfig custom fade manager configuration
+     * @return {@code true} if setting fade manager config succeeded, {@code false} otherwise
+     */
+    boolean setFadeManagerConfiguration(FadeManagerConfiguration fadeManagerConfig) {
+        if (!enableFadeManagerConfiguration()) {
+            return false;
+        }
+
+        // locked to ensure the fade configs are not updated while faded app state is being updated
+        synchronized (mLock) {
+            return mFadeConfigurations.setFadeManagerConfiguration(fadeManagerConfig);
+        }
     }
 
-    public FadeOutManager(FadeConfigurations fadeConfigurations) {
-        mFadeConfigurations = Objects.requireNonNull(fadeConfigurations,
-                "Fade configurations can not be null");
+    /**
+     * Clears the fade manager configuration that was previously set with
+     * {@link #setFadeManagerConfiguration(FadeManagerConfiguration)}
+     *
+     * @return {@code true} if clearing fade manager config succeeded, {@code false} otherwise
+     */
+    boolean clearFadeManagerConfiguration() {
+        if (!enableFadeManagerConfiguration()) {
+            return false;
+        }
+
+        // locked to ensure the fade configs are not updated while faded app state is being updated
+        synchronized (mLock) {
+            return mFadeConfigurations.clearFadeManagerConfiguration();
+        }
     }
 
     // TODO explore whether a shorter fade out would be a better UX instead of not fading out at all
@@ -128,7 +147,7 @@ public final class FadeOutManager {
         }
     }
 
-    void fadeOutUid(int uid, ArrayList<AudioPlaybackConfiguration> players) {
+    void fadeOutUid(int uid, List<AudioPlaybackConfiguration> players) {
         Slog.i(TAG, "fadeOutUid() uid:" + uid);
         synchronized (mLock) {
             if (!mUidToFadedAppsMap.contains(uid)) {
@@ -148,15 +167,31 @@ public final class FadeOutManager {
      * @param uid the uid for the app to unfade out
      * @param players map of current available players (so we can get an APC from piid)
      */
-    void unfadeOutUid(int uid, HashMap<Integer, AudioPlaybackConfiguration> players) {
+    void unfadeOutUid(int uid, Map<Integer, AudioPlaybackConfiguration> players) {
         Slog.i(TAG, "unfadeOutUid() uid:" + uid);
         synchronized (mLock) {
-            final FadedOutApp fa = mUidToFadedAppsMap.get(uid);
+            FadedOutApp fa = mUidToFadedAppsMap.get(uid);
             if (fa == null) {
                 return;
             }
             mUidToFadedAppsMap.remove(uid);
-            fa.removeUnfadeAll(players);
+
+            if (!enableFadeManagerConfiguration()) {
+                fa.removeUnfadeAll(players);
+                return;
+            }
+
+            // since fade manager configs may have volume-shaper config per audio attributes,
+            // iterate through each palyer and gather respective configs  for fade in
+            ArrayList<AudioPlaybackConfiguration> apcs = new ArrayList<>(players.values());
+            for (int index = 0; index < apcs.size(); index++) {
+                AudioPlaybackConfiguration apc = apcs.get(index);
+                VolumeShaper.Configuration config = mFadeConfigurations
+                        .getFadeInVolumeShaperConfig(apc.getAudioAttributes());
+                fa.fadeInPlayer(apc, config);
+            }
+            // ideal case all players should be faded in
+            fa.clear();
         }
     }
 
@@ -209,16 +244,6 @@ public final class FadeOutManager {
         }
     }
 
-    /**
-     * Update fade configurations used for player fade operations
-     * @param fadeConfigurations set of configs that define fade properties
-     */
-    void setFadeConfigurations(@NonNull FadeConfigurations fadeConfigurations) {
-        synchronized (mLock) {
-            mFadeConfigurations = fadeConfigurations;
-        }
-    }
-
     void dump(PrintWriter pw) {
         synchronized (mLock) {
             for (int index = 0; index < mUidToFadedAppsMap.size(); index++) {
@@ -232,6 +257,15 @@ public final class FadeOutManager {
      * Class to group players from a common app, that are faded out.
      */
     private static final class FadedOutApp {
+        private static final VolumeShaper.Operation PLAY_CREATE_IF_NEEDED =
+                new VolumeShaper.Operation.Builder(VolumeShaper.Operation.PLAY)
+                        .createIfNeeded()
+                        .build();
+
+        // like a PLAY_CREATE_IF_NEEDED operation but with a skip to the end of the ramp
+        private static final VolumeShaper.Operation PLAY_SKIP_RAMP =
+                new VolumeShaper.Operation.Builder(PLAY_CREATE_IF_NEEDED).setXOffset(1.0f).build();
+
         private final int mUid;
         // key -> piid; value -> volume shaper config applied
         private final SparseArray<VolumeShaper.Configuration> mFadedPlayers = new SparseArray<>();
@@ -269,17 +303,8 @@ public final class FadeOutManager {
                 return;
             }
             if (apc.getPlayerProxy() != null) {
-                try {
-                    PlaybackActivityMonitor.sEventLogger.enqueue(
-                            (new PlaybackActivityMonitor.FadeOutEvent(apc, skipRamp)).printLog(
-                                    TAG));
-                    apc.getPlayerProxy().applyVolumeShaper(volShaper,
-                            skipRamp ? PLAY_SKIP_RAMP : PLAY_CREATE_IF_NEEDED);
-                    mFadedPlayers.put(piid, volShaper);
-                } catch (Exception e) {
-                    Slog.e(TAG, "Error fading out player piid:" + piid
-                            + " uid:" + apc.getClientUid(), e);
-                }
+                applyVolumeShaperInternal(apc, piid, volShaper,
+                        skipRamp ? PLAY_SKIP_RAMP : PLAY_CREATE_IF_NEEDED);
             } else {
                 if (DEBUG) {
                     Slog.v(TAG, "Error fading out player piid:" + piid
@@ -288,21 +313,13 @@ public final class FadeOutManager {
             }
         }
 
-        void removeUnfadeAll(HashMap<Integer, AudioPlaybackConfiguration> players) {
+        void removeUnfadeAll(Map<Integer, AudioPlaybackConfiguration> players) {
             for (int index = 0; index < mFadedPlayers.size(); index++) {
                 int piid = mFadedPlayers.keyAt(index);
                 final AudioPlaybackConfiguration apc = players.get(piid);
                 if ((apc != null) && (apc.getPlayerProxy() != null)) {
-                    final VolumeShaper.Configuration volShaper = mFadedPlayers.valueAt(index);
-                    try {
-                        PlaybackActivityMonitor.sEventLogger.enqueue(
-                                (new EventLogger.StringEvent("unfading out piid:"
-                                        + piid)).printLog(TAG));
-                        apc.getPlayerProxy().applyVolumeShaper(volShaper,
-                                VolumeShaper.Operation.REVERSE);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Error unfading out player piid:" + piid + " uid:" + mUid, e);
-                    }
+                    applyVolumeShaperInternal(apc, piid, /* volShaperConfig= */ null,
+                            VolumeShaper.Operation.REVERSE);
                 } else {
                     // this piid was in the list of faded players, but wasn't found
                     if (DEBUG) {
@@ -314,8 +331,61 @@ public final class FadeOutManager {
             mFadedPlayers.clear();
         }
 
+        void fadeInPlayer(@NonNull AudioPlaybackConfiguration apc,
+                @Nullable VolumeShaper.Configuration config) {
+            int piid = Integer.valueOf(apc.getPlayerInterfaceId());
+            // if not found, no need to fade in since it was never faded out
+            if (!mFadedPlayers.contains(piid)) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Player (piid: " + piid + ") for uid (" + mUid
+                            + ") is not faded out, no need to fade in");
+                }
+                return;
+            }
+
+            mFadedPlayers.remove(piid);
+            if (apc.getPlayerProxy() != null) {
+                applyVolumeShaperInternal(apc, piid, config,
+                        config != null ? PLAY_CREATE_IF_NEEDED : VolumeShaper.Operation.REVERSE);
+            } else {
+                if (DEBUG) {
+                    Slog.v(TAG, "Error fading in player piid:" + piid
+                            + ", player not found for uid " + mUid);
+                }
+            }
+        }
+
+        void clear() {
+            if (mFadedPlayers.size() > 0) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Non empty faded players list being cleared! Faded out players:"
+                            + mFadedPlayers);
+                }
+            }
+            // should the players be faded in irrespective?
+            mFadedPlayers.clear();
+        }
+
         void removeReleased(@NonNull AudioPlaybackConfiguration apc) {
             mFadedPlayers.delete(Integer.valueOf(apc.getPlayerInterfaceId()));
+        }
+
+        private void applyVolumeShaperInternal(AudioPlaybackConfiguration apc, int piid,
+                VolumeShaper.Configuration volShaperConfig, VolumeShaper.Operation operation) {
+            VolumeShaper.Configuration config = volShaperConfig;
+            // when operation is reverse, use the fade out volume shaper config instead
+            if (operation.equals(VolumeShaper.Operation.REVERSE)) {
+                config = mFadedPlayers.get(piid);
+            }
+            try {
+                PlaybackActivityMonitor.sEventLogger.enqueue(
+                        (new PlaybackActivityMonitor.FadeEvent(apc, config, operation))
+                                .printLog(TAG));
+                apc.getPlayerProxy().applyVolumeShaper(config, operation);
+            } catch (Exception e) {
+                Slog.e(TAG, "Error fading player piid:" + piid + " uid:" + mUid
+                        + " operation:" + operation, e);
+            }
         }
     }
 }
