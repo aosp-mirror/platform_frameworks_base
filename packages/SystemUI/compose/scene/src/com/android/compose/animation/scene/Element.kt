@@ -131,6 +131,7 @@ data class Scale(val scaleX: Float, val scaleY: Float, val pivot: Offset = Offse
 
 /** The implementation of [SceneScope.element]. */
 @OptIn(ExperimentalComposeUiApi::class)
+@Stable
 internal fun Modifier.element(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
