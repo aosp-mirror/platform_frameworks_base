@@ -313,8 +313,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
                     bubbleCountSupplier,
                     onBubbleAnimatedOutAction,
                     onStackAnimationFinished,
-                    new TestableBubblePositioner(mContext,
-                            mContext.getSystemService(WindowManager.class)));
+                    new TestableBubblePositioner(mContext, mock(WindowManager.class)));
         }
 
         @Override

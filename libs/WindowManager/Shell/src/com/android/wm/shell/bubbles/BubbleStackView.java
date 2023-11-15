@@ -61,7 +61,6 @@ import android.view.ViewGroup;
 import android.view.ViewOutlineProvider;
 import android.view.ViewPropertyAnimator;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -1002,8 +1001,7 @@ public class BubbleStackView extends FrameLayout
 
         mOrientationChangedListener =
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
-                    mPositioner.update(DeviceConfig.create(mContext, mContext.getSystemService(
-                            WindowManager.class)));
+                    mPositioner.update();
                     onDisplaySizeChanged();
                     mExpandedAnimationController.updateResources();
                     mStackAnimationController.updateResources();
@@ -1524,8 +1522,7 @@ public class BubbleStackView extends FrameLayout
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
-        WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        mPositioner.update(DeviceConfig.create(mContext, Objects.requireNonNull(windowManager)));
+        mPositioner.update();
         getViewTreeObserver().addOnComputeInternalInsetsListener(this);
         getViewTreeObserver().addOnDrawListener(mSystemGestureExcludeUpdater);
     }
