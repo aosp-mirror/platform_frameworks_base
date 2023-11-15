@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.MediumTest
 import com.android.settingslib.RestrictedLockUtils
 import com.android.systemui.SysuiTestCase
@@ -45,8 +46,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.runners.Parameterized.Parameter
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -54,14 +53,15 @@ import org.mockito.MockitoAnnotations
 
 /** Tests all possible [QSTileUserAction]s. If you need */
 @MediumTest
-@RunWith(Parameterized::class)
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class QSTileViewModelUserInputTest : SysuiTestCase() {
 
     @Mock private lateinit var qsTileLogger: QSTileLogger
     @Mock private lateinit var qsTileAnalytics: QSTileAnalytics
 
-    @Parameter lateinit var userAction: QSTileUserAction
+    // TODO(b/299909989): this should be parametrised. b/299096521 blocks this.
+    private val userAction: QSTileUserAction = QSTileUserAction.Click(null)
 
     private val tileConfig =
         QSTileConfigTestBuilder.build { policy = QSTilePolicy.Restricted("test_restriction") }
@@ -180,15 +180,4 @@ class QSTileViewModelUserInputTest : SysuiTestCase() {
             testCoroutineDispatcher,
             scope.backgroundScope,
         )
-
-    companion object {
-
-        @JvmStatic
-        @Parameterized.Parameters
-        fun data(): Iterable<QSTileUserAction> =
-            listOf(
-                QSTileUserAction.Click(null),
-                QSTileUserAction.LongClick(null),
-            )
-    }
 }
