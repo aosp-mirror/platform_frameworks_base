@@ -17,6 +17,7 @@
 
 package android.telephony.data;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -27,9 +28,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.Annotation.DataFailureCause;
 import android.telephony.DataFailCause;
+import android.telephony.PreciseDataConnectionState;
 import android.telephony.data.ApnSetting.ProtocolType;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -123,7 +126,6 @@ public final class DataCallResponse implements Parcelable {
      * Indicates that the pdu session id is not set.
      */
     public static final int PDU_SESSION_ID_NOT_SET = 0;
-
     private final @DataFailureCause int mCause;
     private final long mSuggestedRetryTime;
     private final int mId;
@@ -143,6 +145,7 @@ public final class DataCallResponse implements Parcelable {
     private final List<QosBearerSession> mQosBearerSessions;
     private final NetworkSliceInfo mSliceInfo;
     private final List<TrafficDescriptor> mTrafficDescriptors;
+    private final @PreciseDataConnectionState.NetworkValidationStatus int mNetworkValidationStatus;
 
     /**
      * @param cause Data call fail cause. {@link DataFailCause#NONE} indicates no error.
@@ -185,7 +188,8 @@ public final class DataCallResponse implements Parcelable {
                 HANDOVER_FAILURE_MODE_LEGACY, PDU_SESSION_ID_NOT_SET,
                 null /* defaultQos */, Collections.emptyList() /* qosBearerSessions */,
                 null /* sliceInfo */,
-                Collections.emptyList() /* trafficDescriptors */);
+                Collections.emptyList(), /* trafficDescriptors */
+                PreciseDataConnectionState.NETWORK_VALIDATION_UNSUPPORTED);
     }
 
     private DataCallResponse(@DataFailureCause int cause, long suggestedRetryTime, int id,
@@ -196,7 +200,8 @@ public final class DataCallResponse implements Parcelable {
             @HandoverFailureMode int handoverFailureMode, int pduSessionId,
             @Nullable Qos defaultQos, @NonNull List<QosBearerSession> qosBearerSessions,
             @Nullable NetworkSliceInfo sliceInfo,
-            @NonNull List<TrafficDescriptor> trafficDescriptors) {
+            @NonNull List<TrafficDescriptor> trafficDescriptors,
+            @PreciseDataConnectionState.NetworkValidationStatus int networkValidationStatus) {
         mCause = cause;
         mSuggestedRetryTime = suggestedRetryTime;
         mId = id;
@@ -216,6 +221,7 @@ public final class DataCallResponse implements Parcelable {
         mQosBearerSessions = new ArrayList<>(qosBearerSessions);
         mSliceInfo = sliceInfo;
         mTrafficDescriptors = new ArrayList<>(trafficDescriptors);
+        mNetworkValidationStatus = networkValidationStatus;
 
         if (mLinkStatus == LINK_STATUS_ACTIVE
                 || mLinkStatus == LINK_STATUS_DORMANT) {
@@ -270,6 +276,7 @@ public final class DataCallResponse implements Parcelable {
         source.readList(mTrafficDescriptors,
                 TrafficDescriptor.class.getClassLoader(),
                 android.telephony.data.TrafficDescriptor.class);
+        mNetworkValidationStatus = source.readInt();
     }
 
     /**
@@ -442,6 +449,17 @@ public final class DataCallResponse implements Parcelable {
         return Collections.unmodifiableList(mTrafficDescriptors);
     }
 
+    /**
+     * Return the network validation status that was initiated by {@link
+     * DataService.DataServiceProvider#requestValidation}
+     *
+     * @return The network validation status of data connection.
+     */
+    @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
+    public @PreciseDataConnectionState.NetworkValidationStatus int getNetworkValidationStatus() {
+        return mNetworkValidationStatus;
+    }
+
     @NonNull
     @Override
     public String toString() {
@@ -466,6 +484,8 @@ public final class DataCallResponse implements Parcelable {
            .append(" qosBearerSessions=").append(mQosBearerSessions)
            .append(" sliceInfo=").append(mSliceInfo)
            .append(" trafficDescriptors=").append(mTrafficDescriptors)
+           .append(" networkValidationStatus=").append(PreciseDataConnectionState
+                        .networkValidationStatusToString(mNetworkValidationStatus))
            .append("}");
         return sb.toString();
     }
@@ -504,7 +524,8 @@ public final class DataCallResponse implements Parcelable {
                 && mQosBearerSessions.containsAll(other.mQosBearerSessions) // non-null
                 && Objects.equals(mSliceInfo, other.mSliceInfo)
                 && mTrafficDescriptors.size() == other.mTrafficDescriptors.size() // non-null
-                && mTrafficDescriptors.containsAll(other.mTrafficDescriptors); // non-null
+                && mTrafficDescriptors.containsAll(other.mTrafficDescriptors) // non-null
+                && mNetworkValidationStatus == other.mNetworkValidationStatus;
     }
 
     @Override
@@ -513,7 +534,7 @@ public final class DataCallResponse implements Parcelable {
                 mInterfaceName, Set.copyOf(mAddresses), Set.copyOf(mDnsAddresses),
                 Set.copyOf(mGatewayAddresses), Set.copyOf(mPcscfAddresses), mMtu, mMtuV4, mMtuV6,
                 mHandoverFailureMode, mPduSessionId, mDefaultQos, Set.copyOf(mQosBearerSessions),
-                mSliceInfo, Set.copyOf(mTrafficDescriptors));
+                mSliceInfo, Set.copyOf(mTrafficDescriptors), mNetworkValidationStatus);
     }
 
     @Override
@@ -542,6 +563,7 @@ public final class DataCallResponse implements Parcelable {
         dest.writeList(mQosBearerSessions);
         dest.writeParcelable(mSliceInfo, flags);
         dest.writeList(mTrafficDescriptors);
+        dest.writeInt(mNetworkValidationStatus);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<DataCallResponse> CREATOR =
@@ -628,6 +650,9 @@ public final class DataCallResponse implements Parcelable {
         private @Nullable NetworkSliceInfo mSliceInfo;
 
         private List<TrafficDescriptor> mTrafficDescriptors = new ArrayList<>();
+
+        private @PreciseDataConnectionState.NetworkValidationStatus int mNetworkValidationStatus =
+                PreciseDataConnectionState.NETWORK_VALIDATION_UNSUPPORTED;
 
         /**
          * Default constructor for Builder.
@@ -905,6 +930,20 @@ public final class DataCallResponse implements Parcelable {
         }
 
         /**
+         * Set the network validation status that corresponds to the state of the network validation
+         * request started by {@link DataService.DataServiceProvider#requestValidation}
+         *
+         * @param status The network validation status.
+         * @return The same instance of the builder.
+         */
+        @FlaggedApi(Flags.FLAG_NETWORK_VALIDATION)
+        public @NonNull Builder setNetworkValidationStatus(
+                @PreciseDataConnectionState.NetworkValidationStatus int status) {
+            mNetworkValidationStatus = status;
+            return this;
+        }
+
+        /**
          * Build the DataCallResponse.
          *
          * @return the DataCallResponse object.
@@ -913,7 +952,8 @@ public final class DataCallResponse implements Parcelable {
             return new DataCallResponse(mCause, mSuggestedRetryTime, mId, mLinkStatus,
                     mProtocolType, mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses,
                     mPcscfAddresses, mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId,
-                    mDefaultQos, mQosBearerSessions, mSliceInfo, mTrafficDescriptors);
+                    mDefaultQos, mQosBearerSessions, mSliceInfo, mTrafficDescriptors,
+                    mNetworkValidationStatus);
         }
     }
 }
