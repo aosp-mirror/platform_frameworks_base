@@ -62,6 +62,8 @@ public final class UserProperties implements Parcelable {
             "mediaSharedWithParent";
     private static final String ATTR_CREDENTIAL_SHAREABLE_WITH_PARENT =
             "credentialShareableWithParent";
+    private static final String ATTR_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE =
+            "authAlwaysRequiredToDisableQuietMode";
     private static final String ATTR_DELETE_APP_WITH_PARENT = "deleteAppWithParent";
     private static final String ATTR_ALWAYS_VISIBLE = "alwaysVisible";
 
@@ -80,6 +82,7 @@ public final class UserProperties implements Parcelable {
             INDEX_DELETE_APP_WITH_PARENT,
             INDEX_ALWAYS_VISIBLE,
             INDEX_HIDE_IN_SETTINGS_IN_QUIET_MODE,
+            INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE,
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -97,6 +100,7 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_DELETE_APP_WITH_PARENT = 10;
     private static final int INDEX_ALWAYS_VISIBLE = 11;
     private static final int INDEX_HIDE_IN_SETTINGS_IN_QUIET_MODE = 12;
+    private static final int INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE = 13;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -329,6 +333,8 @@ public final class UserProperties implements Parcelable {
             setShowInSettings(orig.getShowInSettings());
             setHideInSettingsInQuietMode(orig.getHideInSettingsInQuietMode());
             setUseParentsContacts(orig.getUseParentsContacts());
+            setAuthAlwaysRequiredToDisableQuietMode(
+                    orig.isAuthAlwaysRequiredToDisableQuietMode());
         }
         if (hasQueryOrManagePermission) {
             // Add items that require QUERY_USERS or stronger.
@@ -611,6 +617,31 @@ public final class UserProperties implements Parcelable {
     }
     private boolean mCredentialShareableWithParent;
 
+    /**
+     * Returns whether the profile always requires user authentication to disable from quiet mode.
+     *
+     * <p> Settings this field to true will ensure that the credential confirmation activity is
+     * always shown whenever the user requests to disable quiet mode. The behavior of credential
+     * checks is not guaranteed when the property is false and may vary depending on user types.
+     * @hide
+     */
+    public boolean isAuthAlwaysRequiredToDisableQuietMode() {
+        if (isPresent(INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE)) {
+            return mAuthAlwaysRequiredToDisableQuietMode;
+        }
+        if (mDefaultProperties != null) {
+            return mDefaultProperties.mAuthAlwaysRequiredToDisableQuietMode;
+        }
+        throw new SecurityException(
+                "You don't have permission to query authAlwaysRequiredToDisableQuietMode");
+    }
+    /** @hide */
+    public void setAuthAlwaysRequiredToDisableQuietMode(boolean val) {
+        this.mAuthAlwaysRequiredToDisableQuietMode = val;
+        setPresent(INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE);
+    }
+    private boolean mAuthAlwaysRequiredToDisableQuietMode;
+
     /*
      Indicate if {@link com.android.server.pm.CrossProfileIntentFilter}s need to be updated during
      OTA update between user-parent
@@ -693,6 +724,8 @@ public final class UserProperties implements Parcelable {
                 + getCrossProfileIntentResolutionStrategy()
                 + ", mMediaSharedWithParent=" + isMediaSharedWithParent()
                 + ", mCredentialShareableWithParent=" + isCredentialShareableWithParent()
+                + ", mAuthAlwaysRequiredToDisableQuietMode="
+                + isAuthAlwaysRequiredToDisableQuietMode()
                 + ", mDeleteAppWithParent=" + getDeleteAppWithParent()
                 + ", mAlwaysVisible=" + getAlwaysVisible()
                 + "}";
@@ -720,6 +753,8 @@ public final class UserProperties implements Parcelable {
         pw.println(prefix + "    mMediaSharedWithParent=" + isMediaSharedWithParent());
         pw.println(prefix + "    mCredentialShareableWithParent="
                 + isCredentialShareableWithParent());
+        pw.println(prefix + "    mAuthAlwaysRequiredToDisableQuietMode="
+                + isAuthAlwaysRequiredToDisableQuietMode());
         pw.println(prefix + "    mDeleteAppWithParent=" + getDeleteAppWithParent());
         pw.println(prefix + "    mAlwaysVisible=" + getAlwaysVisible());
     }
@@ -788,6 +823,9 @@ public final class UserProperties implements Parcelable {
                 case ATTR_CREDENTIAL_SHAREABLE_WITH_PARENT:
                     setCredentialShareableWithParent(parser.getAttributeBoolean(i));
                     break;
+                case ATTR_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE:
+                    setAuthAlwaysRequiredToDisableQuietMode(parser.getAttributeBoolean(i));
+                    break;
                 case ATTR_DELETE_APP_WITH_PARENT:
                     setDeleteAppWithParent(parser.getAttributeBoolean(i));
                     break;
@@ -853,6 +891,10 @@ public final class UserProperties implements Parcelable {
             serializer.attributeBoolean(null, ATTR_CREDENTIAL_SHAREABLE_WITH_PARENT,
                     mCredentialShareableWithParent);
         }
+        if (isPresent(INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE)) {
+            serializer.attributeBoolean(null, ATTR_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE,
+                    mAuthAlwaysRequiredToDisableQuietMode);
+        }
         if (isPresent(INDEX_DELETE_APP_WITH_PARENT)) {
             serializer.attributeBoolean(null, ATTR_DELETE_APP_WITH_PARENT,
                     mDeleteAppWithParent);
@@ -878,6 +920,7 @@ public final class UserProperties implements Parcelable {
         dest.writeInt(mCrossProfileIntentResolutionStrategy);
         dest.writeBoolean(mMediaSharedWithParent);
         dest.writeBoolean(mCredentialShareableWithParent);
+        dest.writeBoolean(mAuthAlwaysRequiredToDisableQuietMode);
         dest.writeBoolean(mDeleteAppWithParent);
         dest.writeBoolean(mAlwaysVisible);
     }
@@ -901,6 +944,7 @@ public final class UserProperties implements Parcelable {
         mCrossProfileIntentResolutionStrategy = source.readInt();
         mMediaSharedWithParent = source.readBoolean();
         mCredentialShareableWithParent = source.readBoolean();
+        mAuthAlwaysRequiredToDisableQuietMode = source.readBoolean();
         mDeleteAppWithParent = source.readBoolean();
         mAlwaysVisible = source.readBoolean();
     }
@@ -941,6 +985,7 @@ public final class UserProperties implements Parcelable {
                 CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_DEFAULT;
         private boolean mMediaSharedWithParent = false;
         private boolean mCredentialShareableWithParent = false;
+        private boolean mAuthAlwaysRequiredToDisableQuietMode = false;
         private boolean mDeleteAppWithParent = false;
         private boolean mAlwaysVisible = false;
 
@@ -1010,6 +1055,14 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
+        /** Sets the value for {@link #mAuthAlwaysRequiredToDisableQuietMode} */
+        public Builder setAuthAlwaysRequiredToDisableQuietMode(
+                boolean authAlwaysRequiredToDisableQuietMode) {
+            mAuthAlwaysRequiredToDisableQuietMode =
+                    authAlwaysRequiredToDisableQuietMode;
+            return this;
+        }
+
         /** Sets the value for {@link #mDeleteAppWithParent}*/
         public Builder setDeleteAppWithParent(boolean deleteAppWithParent) {
             mDeleteAppWithParent = deleteAppWithParent;
@@ -1036,6 +1089,7 @@ public final class UserProperties implements Parcelable {
                     mCrossProfileIntentResolutionStrategy,
                     mMediaSharedWithParent,
                     mCredentialShareableWithParent,
+                    mAuthAlwaysRequiredToDisableQuietMode,
                     mDeleteAppWithParent,
                     mAlwaysVisible);
         }
@@ -1053,6 +1107,7 @@ public final class UserProperties implements Parcelable {
             @CrossProfileIntentResolutionStrategy int crossProfileIntentResolutionStrategy,
             boolean mediaSharedWithParent,
             boolean credentialShareableWithParent,
+            boolean authAlwaysRequiredToDisableQuietMode,
             boolean deleteAppWithParent,
             boolean alwaysVisible) {
         mDefaultProperties = null;
@@ -1067,6 +1122,8 @@ public final class UserProperties implements Parcelable {
         setCrossProfileIntentResolutionStrategy(crossProfileIntentResolutionStrategy);
         setMediaSharedWithParent(mediaSharedWithParent);
         setCredentialShareableWithParent(credentialShareableWithParent);
+        setAuthAlwaysRequiredToDisableQuietMode(
+                authAlwaysRequiredToDisableQuietMode);
         setDeleteAppWithParent(deleteAppWithParent);
         setAlwaysVisible(alwaysVisible);
     }

@@ -193,6 +193,7 @@ public final class UserTypeFactory {
                         .setStartWithParent(true)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
                         .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
+                        .setAuthAlwaysRequiredToDisableQuietMode(false)
                         .setCredentialShareableWithParent(true));
     }
 
@@ -292,7 +293,8 @@ public final class UserTypeFactory {
                 .setDefaultSecureSettings(getDefaultNonManagedProfileSecureSettings())
                 .setDefaultUserProperties(new UserProperties.Builder()
                         .setStartWithParent(true)
-                        .setCredentialShareableWithParent(false)
+                        .setCredentialShareableWithParent(true)
+                        .setAuthAlwaysRequiredToDisableQuietMode(true)
                         .setMediaSharedWithParent(false)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
                         .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)

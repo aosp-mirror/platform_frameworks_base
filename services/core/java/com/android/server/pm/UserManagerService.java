@@ -1388,9 +1388,31 @@ public class UserManagerService extends IUserManager.Stub {
 
         final long identity = Binder.clearCallingIdentity();
         try {
+            // QUIET_MODE_DISABLE_DONT_ASK_CREDENTIAL is only allowed for managed-profiles
+            if (dontAskCredential) {
+                UserInfo userInfo;
+                synchronized (mUsersLock) {
+                    userInfo = getUserInfo(userId);
+                }
+                if (!userInfo.isManagedProfile()) {
+                    throw new IllegalArgumentException("Invalid flags: " + flags
+                            + ". Can't skip credential check for the user");
+                }
+            }
             if (enableQuietMode) {
                 setQuietModeEnabled(userId, true /* enableQuietMode */, target, callingPackage);
                 return true;
+            }
+            if (android.os.Flags.allowPrivateProfile()) {
+                final UserProperties userProperties = getUserPropertiesInternal(userId);
+                if (userProperties != null
+                        && userProperties.isAuthAlwaysRequiredToDisableQuietMode()) {
+                    if (onlyIfCredentialNotRequired) {
+                        return false;
+                    }
+                    showConfirmCredentialToDisableQuietMode(userId, target);
+                    return false;
+                }
             }
             final boolean hasUnifiedChallenge =
                     mLockPatternUtils.isManagedProfileWithUnifiedChallenge(userId);
