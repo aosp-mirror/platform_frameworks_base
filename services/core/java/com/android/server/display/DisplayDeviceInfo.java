@@ -122,11 +122,10 @@ final class DisplayDeviceInfo {
 
     /**
      * Flag: This flag identifies secondary displays that should show system decorations, such as
-     * status bar, navigation bar, home activity or IME.
+     * navigation bar, home activity or wallpaper.
      * <p>Note that this flag doesn't work without {@link #FLAG_TRUSTED}</p>
      * @hide
      */
-    // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 12;
 
     /**
