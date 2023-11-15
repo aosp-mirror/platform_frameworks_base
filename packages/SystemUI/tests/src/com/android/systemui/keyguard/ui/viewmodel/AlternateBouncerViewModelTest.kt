@@ -27,7 +27,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
@@ -50,7 +49,6 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
     private lateinit var testScope: TestScope
 
     @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
-    @Mock private lateinit var falsingManager: FalsingManager
 
     private lateinit var transitionRepository: FakeKeyguardTransitionRepository
     private lateinit var transitionInteractor: KeyguardTransitionInteractor
@@ -69,7 +67,6 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
             AlternateBouncerViewModel(
                 statusBarKeyguardViewManager,
                 transitionInteractor,
-                falsingManager,
             )
     }
 
@@ -106,36 +103,6 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun clickListenerUpdate() =
-        runTest(UnconfinedTestDispatcher()) {
-            val clickListener by collectLastValue(underTest.onClickListener)
-
-            // keyguard state => ALTERNATE_BOUNCER
-            transitionRepository.sendTransitionStep(
-                stepToAlternateBouncer(0f, TransitionState.STARTED)
-            )
-            assertThat(clickListener).isNull()
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(.3f))
-            assertThat(clickListener).isNull()
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(.6f))
-            assertThat(clickListener).isNull()
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(1f))
-            assertThat(clickListener).isNotNull()
-
-            // ALTERNATE_BOUNCER -> keyguard state
-            transitionRepository.sendTransitionStep(
-                stepFromAlternateBouncer(0f, TransitionState.STARTED)
-            )
-            assertThat(clickListener).isNotNull()
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(.3f))
-            assertThat(clickListener).isNull()
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(.6f))
-            assertThat(clickListener).isNull()
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(1f))
-            assertThat(clickListener).isNull()
-        }
-
-    @Test
     fun forcePluginOpen() =
         runTest(UnconfinedTestDispatcher()) {
             val forcePluginOpen by collectLastValue(underTest.forcePluginOpen)
@@ -154,6 +121,27 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
             transitionRepository.sendTransitionStep(stepFromAlternateBouncer(.6f))
             transitionRepository.sendTransitionStep(stepFromAlternateBouncer(1f))
             assertThat(forcePluginOpen).isFalse()
+        }
+
+    @Test
+    fun registerForDismissGestures() =
+        runTest(UnconfinedTestDispatcher()) {
+            val registerForDismissGestures by collectLastValue(underTest.registerForDismissGestures)
+            transitionRepository.sendTransitionStep(
+                stepToAlternateBouncer(0f, TransitionState.STARTED)
+            )
+            transitionRepository.sendTransitionStep(stepToAlternateBouncer(.3f))
+            transitionRepository.sendTransitionStep(stepToAlternateBouncer(.6f))
+            transitionRepository.sendTransitionStep(stepToAlternateBouncer(1f))
+            assertThat(registerForDismissGestures).isTrue()
+
+            transitionRepository.sendTransitionStep(
+                stepFromAlternateBouncer(0f, TransitionState.STARTED)
+            )
+            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(.3f))
+            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(.6f))
+            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(1f))
+            assertThat(registerForDismissGestures).isFalse()
         }
 
     private fun stepToAlternateBouncer(

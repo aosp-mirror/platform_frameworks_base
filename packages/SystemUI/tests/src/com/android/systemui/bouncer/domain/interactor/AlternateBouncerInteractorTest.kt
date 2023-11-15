@@ -67,6 +67,13 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
             )
         biometricSettingsRepository = FakeBiometricSettingsRepository()
         fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
+
+        mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+        initializeUnderTest()
+    }
+
+    private fun initializeUnderTest() {
+        // Set any feature flags before creating the alternateBouncerInteractor
         underTest =
             AlternateBouncerInteractor(
                 statusBarStateController,
@@ -161,6 +168,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     @Test
     fun canShowAlternateBouncerForFingerprint_rearFps() {
         mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+        initializeUnderTest()
         givenCanShowAlternateBouncer()
         fingerprintPropertyRepository.supportsRearFps() // does not support alternate bouncer
 
@@ -169,7 +177,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun alternateBouncerUiAvailable_fromMultipleSources() {
-        mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+        initializeUnderTest()
         assertFalse(bouncerRepository.alternateBouncerUIAvailable.value)
 
         // GIVEN there are two different sources indicating the alternate bouncer is available

@@ -103,8 +103,6 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.time.SystemClock;
 
-import kotlin.Unit;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -113,6 +111,8 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import kotlin.Unit;
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
@@ -589,7 +589,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
         // Always pilfer pointers that are within sensor area or when alternate bouncer is showing
         if (mActivePointerId != MotionEvent.INVALID_POINTER_ID
-                || mAlternateBouncerInteractor.isVisibleState()) {
+                || (mAlternateBouncerInteractor.isVisibleState()
+                && !DeviceEntryUdfpsRefactor.isEnabled())) {
             shouldPilfer = true;
         }
 
