@@ -37,6 +37,7 @@ import java.io.PrintWriter;
  * name inside of that package.
  *
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ComponentName implements Parcelable, Cloneable, Comparable<ComponentName> {
     private final String mPackage;
     private final String mClass;

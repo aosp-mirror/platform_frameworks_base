@@ -82,6 +82,7 @@ android_ravenwood_libgroup {
         "junit",
         "truth",
         "ravenwood-junit",
+        "android.test.mock",
     ],
 }
 
