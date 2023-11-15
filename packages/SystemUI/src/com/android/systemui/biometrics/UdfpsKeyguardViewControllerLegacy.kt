@@ -16,7 +16,6 @@
 
 package com.android.systemui.biometrics
 
-import android.animation.ValueAnimator
 import android.content.res.Configuration
 import android.util.MathUtils
 import android.view.View
@@ -27,17 +26,17 @@ import com.android.app.animation.Interpolators
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
+import com.android.systemui.biometrics.UdfpsKeyguardViewLegacy.ANIMATION_UNLOCKED_SCREEN_OFF
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.KeyguardViewManagerCallback
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager.OccludingAppBiometricUI
@@ -48,10 +47,14 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 
 /** Class that coordinates non-HBM animations during keyguard authentication. */
+@ExperimentalCoroutinesApi
 open class UdfpsKeyguardViewControllerLegacy(
     private val view: UdfpsKeyguardViewLegacy,
     statusBarStateController: StatusBarStateController,
@@ -65,11 +68,11 @@ open class UdfpsKeyguardViewControllerLegacy(
     systemUIDialogManager: SystemUIDialogManager,
     private val udfpsController: UdfpsController,
     private val activityLaunchAnimator: ActivityLaunchAnimator,
-    featureFlags: FeatureFlags,
     primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
     private val selectedUserInteractor: SelectedUserInteractor,
+    private val transitionInteractor: KeyguardTransitionInteractor,
 ) :
     UdfpsAnimationViewController<UdfpsKeyguardViewLegacy>(
         view,
@@ -91,44 +94,10 @@ open class UdfpsKeyguardViewControllerLegacy(
     private var launchTransitionFadingAway = false
     private var isLaunchingActivity = false
     private var activityLaunchProgress = 0f
-    private val unlockedScreenOffDozeAnimator =
-        ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = StackStateAnimator.ANIMATION_DURATION_STANDARD.toLong()
-            interpolator = Interpolators.ALPHA_IN
-            addUpdateListener { animation ->
-                view.onDozeAmountChanged(
-                    animation.animatedFraction,
-                    animation.animatedValue as Float,
-                    UdfpsKeyguardViewLegacy.ANIMATION_UNLOCKED_SCREEN_OFF
-                )
-            }
-        }
     private var inputBouncerExpansion = 0f
 
     private val stateListener: StatusBarStateController.StateListener =
         object : StatusBarStateController.StateListener {
-            override fun onDozeAmountChanged(linear: Float, eased: Float) {
-                if (lastDozeAmount < linear) {
-                    showUdfpsBouncer(false)
-                }
-                unlockedScreenOffDozeAnimator.cancel()
-                val animatingFromUnlockedScreenOff =
-                    unlockedScreenOffAnimationController.isAnimationPlaying()
-                if (animatingFromUnlockedScreenOff && linear != 0f) {
-                    // we manually animate the fade in of the UDFPS icon since the unlocked
-                    // screen off animation prevents the doze amounts to be incrementally eased in
-                    unlockedScreenOffDozeAnimator.start()
-                } else {
-                    view.onDozeAmountChanged(
-                        linear,
-                        eased,
-                        UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN
-                    )
-                }
-                lastDozeAmount = linear
-                updatePauseAuth()
-            }
-
             override fun onStateChanged(statusBarState: Int) {
                 this@UdfpsKeyguardViewControllerLegacy.statusBarState = statusBarState
                 updateAlpha()
@@ -222,7 +191,35 @@ open class UdfpsKeyguardViewControllerLegacy(
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 listenForBouncerExpansion(this)
                 listenForAlternateBouncerVisibility(this)
+                listenForGoneToAodTransition(this)
+                listenForLockscreenAodTransitions(this)
             }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForGoneToAodTransition(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor.goneToAodTransition.collect { transitionStep ->
+                view.onDozeAmountChanged(
+                    transitionStep.value,
+                    transitionStep.value,
+                    ANIMATION_UNLOCKED_SCREEN_OFF,
+                )
+            }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForLockscreenAodTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor.dozeAmountTransition.collect { transitionStep ->
+                  view.onDozeAmountChanged(
+                      transitionStep.value,
+                      transitionStep.value,
+                      UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
+                  )
+              }
         }
     }
 

@@ -83,6 +83,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter;
 import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels;
 import com.android.systemui.log.SessionTracker;
@@ -170,6 +171,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final SelectedUserInteractor mSelectedUserInteractor;
     @NonNull private final FpsUnlockTracker mFpsUnlockTracker;
     private final boolean mIgnoreRefreshRate;
+    private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
 
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
@@ -283,8 +285,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         mPrimaryBouncerInteractor,
                         mAlternateBouncerInteractor,
                         mUdfpsKeyguardAccessibilityDelegate,
-                        mUdfpsKeyguardViewModels,
-                            mSelectedUserInteractor
+                        mKeyguardTransitionInteractor,
+                        mSelectedUserInteractor
                     )));
         }
 
@@ -649,7 +651,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull UdfpsKeyguardAccessibilityDelegate udfpsKeyguardAccessibilityDelegate,
             @NonNull Provider<UdfpsKeyguardViewModels> udfpsKeyguardViewModelsProvider,
             @NonNull SelectedUserInteractor selectedUserInteractor,
-            @NonNull FpsUnlockTracker fpsUnlockTracker) {
+            @NonNull FpsUnlockTracker fpsUnlockTracker,
+            @NonNull KeyguardTransitionInteractor keyguardTransitionInteractor) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -695,6 +698,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mSelectedUserInteractor = selectedUserInteractor;
         mFpsUnlockTracker = fpsUnlockTracker;
         mFpsUnlockTracker.startTracking();
+        mKeyguardTransitionInteractor = keyguardTransitionInteractor;
 
         mTouchProcessor = singlePointerTouchProcessor;
         mSessionTracker = sessionTracker;

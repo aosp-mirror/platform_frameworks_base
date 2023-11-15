@@ -51,8 +51,8 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.adapter.UdfpsKeyguardViewControllerAdapter
-import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -63,7 +63,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import javax.inject.Provider
 
 private const val TAG = "UdfpsControllerOverlay"
 
@@ -102,7 +101,7 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val isDebuggable: Boolean = Build.IS_DEBUGGABLE,
     private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
-    private val udfpsKeyguardViewModels: Provider<UdfpsKeyguardViewModels>,
+    private val transitionInteractor: KeyguardTransitionInteractor,
     private val selectedUserInteractor: SelectedUserInteractor,
 ) {
     /** The view, when [isShowing], or null. */
@@ -264,11 +263,11 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                         dialogManager,
                         controller,
                         activityLaunchAnimator,
-                        featureFlags,
                         primaryBouncerInteractor,
                         alternateBouncerInteractor,
                         udfpsKeyguardAccessibilityDelegate,
                         selectedUserInteractor,
+                        transitionInteractor,
                     )
                 }
             }

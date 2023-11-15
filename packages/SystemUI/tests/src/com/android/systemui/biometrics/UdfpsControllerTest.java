@@ -86,6 +86,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
@@ -237,6 +238,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private ViewRootImpl mViewRootImpl;
     @Mock
     private FpsUnlockTracker mFpsUnlockTracker;
+    @Mock
+    private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
 
     @Before
     public void setUp() {
@@ -329,7 +332,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mUdfpsKeyguardAccessibilityDelegate,
                 mUdfpsKeyguardViewModels,
                 mSelectedUserInteractor,
-                mFpsUnlockTracker
+                mFpsUnlockTracker,
+                mKeyguardTransitionInteractor
         );
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
