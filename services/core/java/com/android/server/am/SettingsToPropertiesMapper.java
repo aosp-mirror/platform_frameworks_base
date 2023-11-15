@@ -144,6 +144,7 @@ public class SettingsToPropertiesMapper {
         "haptics",
         "hardware_backed_security_mainline",
         "input",
+        "lse_desktop_experience",
         "machine_learning",
         "mainline_modularization",
         "mainline_sdk",
