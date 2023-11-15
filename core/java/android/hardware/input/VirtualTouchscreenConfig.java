@@ -69,6 +69,12 @@ public final class VirtualTouchscreenConfig extends VirtualInputDeviceConfig imp
         dest.writeInt(mHeight);
     }
 
+    @Override
+    @NonNull
+    String additionalFieldsToString() {
+        return " width=" + mWidth + " height=" + mHeight;
+    }
+
     @NonNull
     public static final Creator<VirtualTouchscreenConfig> CREATOR =
             new Creator<VirtualTouchscreenConfig>() {

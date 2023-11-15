@@ -205,6 +205,14 @@ public final class VirtualKeyEvent implements Parcelable {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "VirtualKeyEvent("
+                + " action=" + KeyEvent.actionToString(mAction)
+                + " keyCode=" + KeyEvent.keyCodeToString(mKeyCode)
+                + " eventTime(ns)=" + mEventTimeNanos;
+    }
+
     /**
      * Returns the key code associated with this event.
      */
