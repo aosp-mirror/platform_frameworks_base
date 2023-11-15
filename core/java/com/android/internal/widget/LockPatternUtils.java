@@ -1936,7 +1936,8 @@ public class LockPatternUtils {
      * If the user is not secured, ie doesn't have an LSKF, then decrypt the user's synthetic
      * password and use it to unlock various cryptographic keys associated with the user.  This
      * primarily includes unlocking the user's credential-encrypted (CE) storage.  It also includes
-     * deriving or decrypting the vendor auth secret and sending it to the AuthSecret HAL.
+     * unlocking the user's Keystore super keys, and deriving or decrypting the vendor auth secret
+     * and sending it to the AuthSecret HAL in order to unlock Secure Element firmware updates.
      * <p>
      * These tasks would normally be done when the LSKF is verified.  This method is where these
      * tasks are done when the user doesn't have an LSKF.  It's called when the user is started.
