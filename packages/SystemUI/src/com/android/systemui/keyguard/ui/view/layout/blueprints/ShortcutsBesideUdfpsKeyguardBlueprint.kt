@@ -59,7 +59,6 @@ constructor(
     override val sections =
         listOfNotNull(
             defaultIndicationAreaSection,
-            defaultDeviceEntryIconSection,
             defaultAmbientIndicationAreaSection.getOrNull(),
             defaultSettingsPopupMenuSection,
             alignShortcutsToUdfpsSection,
@@ -69,6 +68,7 @@ constructor(
             splitShadeGuidelines,
             aodNotificationIconsSection,
             aodBurnInSection,
+            defaultDeviceEntryIconSection, // Add LAST: Intentionally has z-order above other views.
         )
 
     companion object {

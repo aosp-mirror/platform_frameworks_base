@@ -20,6 +20,7 @@ import android.content.Context
 import android.os.Handler
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerCallbackInteractor
@@ -86,9 +87,11 @@ object KeyguardDismissInteractorFactory {
                 mock(StatusBarStateController::class.java),
                 mock(KeyguardStateController::class.java),
                 bouncerRepository,
+                FakeFingerprintPropertyRepository(),
                 FakeBiometricSettingsRepository(),
                 FakeSystemClock(),
                 keyguardUpdateMonitor,
+                testScope.backgroundScope,
             )
         val powerInteractorWithDeps =
             PowerInteractorFactory.create(

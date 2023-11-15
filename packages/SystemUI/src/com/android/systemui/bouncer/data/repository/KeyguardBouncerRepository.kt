@@ -22,6 +22,7 @@ import com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.EX
 import com.android.systemui.bouncer.shared.model.BouncerShowMessageModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.log.dagger.BouncerTableLog
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
@@ -208,6 +209,7 @@ constructor(
     }
 
     override fun setAlternateBouncerUIAvailable(isAvailable: Boolean) {
+        DeviceEntryUdfpsRefactor.assertInLegacyMode()
         _alternateBouncerUIAvailable.value = isAvailable
     }
 
