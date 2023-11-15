@@ -93,8 +93,8 @@ import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.Text.Companion.loadText
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.fold.ui.composable.FoldPosture
 import com.android.systemui.fold.ui.composable.foldPosture
+import com.android.systemui.fold.ui.helper.FoldPosture
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
