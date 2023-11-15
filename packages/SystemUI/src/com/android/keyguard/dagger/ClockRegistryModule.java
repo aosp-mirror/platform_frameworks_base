@@ -20,7 +20,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
 
-import com.android.systemui.res.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -30,6 +29,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.dagger.KeyguardClockLog;
 import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.res.R;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.shared.clocks.DefaultClockProvider;
 
@@ -67,7 +67,8 @@ public abstract class ClockRegistryModule {
                         context,
                         layoutInflater,
                         resources,
-                        featureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION)),
+                        featureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION),
+                        featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)),
                 context.getString(R.string.lockscreen_clock_id_fallback),
                 logBuffer,
                 /* keepAllLoaded = */ false,

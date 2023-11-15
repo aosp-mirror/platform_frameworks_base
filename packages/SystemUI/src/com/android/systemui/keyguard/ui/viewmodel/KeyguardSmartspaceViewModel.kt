@@ -30,16 +30,21 @@ constructor(val context: Context, smartspaceController: LockscreenSmartspaceCont
     val isWeatherEnabled: Boolean = smartspaceController.isWeatherEnabled()
     val isDateWeatherDecoupled: Boolean = smartspaceController.isDateWeatherDecoupled()
     val smartspaceViewId: Int
-        get() {
-            return context.resources
-                .getIdentifier("bc_smartspace_view", "id", context.packageName)
-                .also {
-                    if (it == 0) {
-                        Log.d(TAG, "Cannot resolve id bc_smartspace_view")
-                    }
-                }
-        }
+        get() = getId("bc_smartspace_view")
 
+    val dateId: Int
+        get() = getId("date_smartspace_view")
+
+    val weatherId: Int
+        get() = getId("weather_smartspace_view")
+
+    private fun getId(name: String): Int {
+        return context.resources.getIdentifier(name, "id", context.packageName).also {
+            if (it == 0) {
+                Log.d(TAG, "Cannot resolve id $name")
+            }
+        }
+    }
     fun getDimen(name: String): Int {
         val res = context.packageManager.getResourcesForApplication(context.packageName)
         val id = res.getIdentifier(name, "dimen", context.packageName)

@@ -23,7 +23,6 @@ import android.app.StatusBarManager
 import android.graphics.Point
 import android.util.MathUtils
 import com.android.app.animation.Interpolators
-import com.android.keyguard.KeyguardClockSwitch.ClockSize
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
@@ -243,8 +242,6 @@ constructor(
             }
         }
 
-    val clockSize: Flow<Int> = repository.clockSize.distinctUntilChanged()
-
     val clockShouldBeCentered: Flow<Boolean> = repository.clockShouldBeCentered
 
     /** Whether to animate the next doze mode transition. */
@@ -319,10 +316,6 @@ constructor(
 
     fun setAnimateDozingTransitions(animate: Boolean) {
         repository.setAnimateDozingTransitions(animate)
-    }
-
-    fun setClockSize(@ClockSize size: Int) {
-        repository.setClockSize(size)
     }
 
     fun setClockShouldBeCentered(shouldBeCentered: Boolean) {

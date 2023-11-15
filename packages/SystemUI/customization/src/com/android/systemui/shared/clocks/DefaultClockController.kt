@@ -53,6 +53,7 @@ class DefaultClockController(
     private val resources: Resources,
     private val settings: ClockSettings?,
     private val hasStepClockAnimation: Boolean = false,
+    private val migratedClocks: Boolean = false,
 ) : ClockController {
     override val smallClock: DefaultClockFaceController
     override val largeClock: LargeClockFaceController
@@ -195,6 +196,10 @@ class DefaultClockController(
         }
 
         override fun recomputePadding(targetRegion: Rect?) {
+            // TODO(b/310989341): remove after changing migrate_clocks_to_blueprint to aconfig
+            if (migratedClocks) {
+                return
+            }
             // We center the view within the targetRegion instead of within the parent
             // view by computing the difference and adding that to the padding.
             val lp = view.getLayoutParams() as FrameLayout.LayoutParams
