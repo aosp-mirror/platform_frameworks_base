@@ -1,0 +1,10 @@
+package: "com.android.server.backup"
+
+flag {
+    name: "enable_skipping_restore_launched_apps"
+    namespace: "onboarding"
+    description: "Enforce behavior determined by BackupTransport implementation on whether to skip "
+            "restore for apps that have been launched."
+    bug: "308401499"
+    is_fixed_read_only: true
+}

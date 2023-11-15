@@ -46,6 +46,7 @@ android_test {
         "androidx.test.espresso.core",
         "androidx.test.espresso.contrib",
         "androidx.test.ext.truth",
+        "backup_flags_lib",
         "flag-junit",
         "frameworks-base-testutils",
         "hamcrest-library",
