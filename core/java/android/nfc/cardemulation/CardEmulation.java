@@ -328,6 +328,24 @@ public final class CardEmulation {
             return SELECTION_MODE_ASK_IF_CONFLICT;
         }
     }
+    /**
+     * Sets whether the system should default to observe mode or not when
+     * the service is in the foreground or the default payment service.
+     *
+     * @param service The component name of the service
+     * @param enable Whether the servic should default to observe mode or not
+     * @return whether the change was successful.
+     */
+    @FlaggedApi(Flags.FLAG_NFC_OBSERVE_MODE)
+    public boolean setServiceObserveModeDefault(@NonNull ComponentName service, boolean enable) {
+        try {
+            return sService.setServiceObserveModeDefault(mContext.getUser().getIdentifier(),
+                    service, enable);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to reach CardEmulationService.");
+        }
+        return  false;
+    }
 
     /**
      * Registers a list of AIDs for a specific category for the
