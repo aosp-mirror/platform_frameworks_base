@@ -16,22 +16,28 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE;
+import static com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK;
+import static com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.testing.FakeMetricsLogger;
+import com.android.systemui.Flags;
 import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
@@ -55,7 +61,10 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationAlertsInteractor;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionCondition;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionFilter;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
@@ -64,9 +73,13 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+
+import java.util.List;
+import java.util.Set;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -76,18 +89,23 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     private final VisualInterruptionDecisionProvider mVisualInterruptionDecisionProvider =
             mock(VisualInterruptionDecisionProvider.class);
     private NotificationInterruptSuppressor mInterruptSuppressor;
+    private VisualInterruptionCondition mAlertsDisabledCondition;
+    private VisualInterruptionCondition mVrModeCondition;
+    private VisualInterruptionFilter mNeedsRedactionFilter;
+    private VisualInterruptionCondition mPanelsDisabledCondition;
     private CommandQueue mCommandQueue;
-    private FakeMetricsLogger mMetricsLogger;
     private final ShadeController mShadeController = mock(ShadeController.class);
     private final NotificationAlertsInteractor mNotificationAlertsInteractor =
             mock(NotificationAlertsInteractor.class);
     private final KeyguardStateController mKeyguardStateController =
             mock(KeyguardStateController.class);
-    private final InitController mInitController = new InitController();
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
+            SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
 
     @Before
     public void setup() {
-        mMetricsLogger = new FakeMetricsLogger();
         mCommandQueue = new CommandQueue(mContext, new FakeDisplayTracker(mContext));
         mDependency.injectTestDependency(StatusBarStateController.class,
                 mock(SysuiStatusBarStateController.class));
@@ -95,15 +113,182 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
         mDependency.injectMockDependency(NotificationRemoteInputManager.Callback.class);
         mDependency.injectMockDependency(NotificationShadeWindowController.class);
 
-        NotificationShadeWindowView notificationShadeWindowView =
+        when(mNotificationAlertsInteractor.areNotificationAlertsEnabled()).thenReturn(true);
+    }
+
+    @Test
+    public void testInit_refactorDisabled() {
+        ensureRefactorDisabledState();
+    }
+
+    @Test
+    public void testInit_refactorEnabled() {
+        ensureRefactorEnabledState();
+    }
+
+    @Test
+    public void testNoSuppressHeadsUp_default_refactorDisabled() {
+        ensureRefactorDisabledState();
+
+        assertFalse(mInterruptSuppressor.suppressAwakeHeadsUp(createNotificationEntry()));
+    }
+
+    @Test
+    public void testNoSuppressHeadsUp_default_refactorEnabled() {
+        ensureRefactorEnabledState();
+
+        assertFalse(mAlertsDisabledCondition.shouldSuppress());
+        assertFalse(mVrModeCondition.shouldSuppress());
+        assertFalse(mNeedsRedactionFilter.shouldSuppress(createNotificationEntry()));
+        assertFalse(mAlertsDisabledCondition.shouldSuppress());
+    }
+
+    @Test
+    public void testSuppressHeadsUp_disabledStatusBar_refactorDisabled() {
+        ensureRefactorDisabledState();
+
+        mCommandQueue.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_EXPAND, 0,
+                false /* animate */);
+        TestableLooper.get(this).processAllMessages();
+
+        assertTrue("The panel should suppress heads up while disabled",
+                mInterruptSuppressor.suppressAwakeHeadsUp(createNotificationEntry()));
+    }
+
+    @Test
+    public void testSuppressHeadsUp_disabledStatusBar_refactorEnabled() {
+        ensureRefactorEnabledState();
+
+        mCommandQueue.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_EXPAND, 0,
+                false /* animate */);
+        TestableLooper.get(this).processAllMessages();
+
+        assertTrue("The panel should suppress heads up while disabled",
+                mPanelsDisabledCondition.shouldSuppress());
+    }
+
+    @Test
+    public void testSuppressHeadsUp_disabledNotificationShade_refactorDisabled() {
+        ensureRefactorDisabledState();
+
+        mCommandQueue.disable(DEFAULT_DISPLAY, 0, StatusBarManager.DISABLE2_NOTIFICATION_SHADE,
+                false /* animate */);
+        TestableLooper.get(this).processAllMessages();
+
+        assertTrue("The panel should suppress interruptions while notification shade disabled",
+                mInterruptSuppressor.suppressAwakeHeadsUp(createNotificationEntry()));
+    }
+
+    @Test
+    public void testSuppressHeadsUp_disabledNotificationShade_refactorEnabled() {
+        ensureRefactorEnabledState();
+
+        mCommandQueue.disable(DEFAULT_DISPLAY, 0, StatusBarManager.DISABLE2_NOTIFICATION_SHADE,
+                false /* animate */);
+        TestableLooper.get(this).processAllMessages();
+
+        assertTrue("The panel should suppress interruptions while notification shade disabled",
+                mPanelsDisabledCondition.shouldSuppress());
+    }
+
+    @Test
+    public void testPanelsDisabledConditionSuppressesPeek() {
+        ensureRefactorEnabledState();
+
+        final Set<VisualInterruptionType> types = mPanelsDisabledCondition.getTypes();
+        assertTrue(types.contains(PEEK));
+        assertFalse(types.contains(PULSE));
+        assertFalse(types.contains(BUBBLE));
+    }
+
+    @Test
+    public void testNoSuppressHeadsUp_FSI_nonOccludedKeyguard_refactorDisabled() {
+        ensureRefactorDisabledState();
+
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+
+        assertFalse(mInterruptSuppressor.suppressAwakeHeadsUp(createFsiNotificationEntry()));
+    }
+
+    @Test
+    public void testNoSuppressHeadsUp_FSI_nonOccludedKeyguard_refactorEnabled() {
+        ensureRefactorEnabledState();
+
+        when(mKeyguardStateController.isShowing()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(false);
+
+        assertFalse(mNeedsRedactionFilter.shouldSuppress(createFsiNotificationEntry()));
+
+        final Set<VisualInterruptionType> types = mNeedsRedactionFilter.getTypes();
+        assertTrue(types.contains(PEEK));
+        assertFalse(types.contains(PULSE));
+        assertFalse(types.contains(BUBBLE));
+    }
+
+    @Test
+    public void testSuppressInterruptions_vrMode_refactorDisabled() {
+        ensureRefactorDisabledState();
+
+        mStatusBarNotificationPresenter.mVrMode = true;
+
+        assertTrue("Vr mode should suppress interruptions",
+                mInterruptSuppressor.suppressAwakeInterruptions(createNotificationEntry()));
+    }
+
+    @Test
+    public void testSuppressInterruptions_vrMode_refactorEnabled() {
+        ensureRefactorEnabledState();
+
+        mStatusBarNotificationPresenter.mVrMode = true;
+
+        assertTrue("Vr mode should suppress interruptions", mVrModeCondition.shouldSuppress());
+
+        final Set<VisualInterruptionType> types = mVrModeCondition.getTypes();
+        assertTrue(types.contains(PEEK));
+        assertFalse(types.contains(PULSE));
+        assertTrue(types.contains(BUBBLE));
+    }
+
+    @Test
+    public void testSuppressInterruptions_statusBarAlertsDisabled_refactorDisabled() {
+        ensureRefactorDisabledState();
+
+        when(mNotificationAlertsInteractor.areNotificationAlertsEnabled()).thenReturn(false);
+
+        assertTrue("When alerts aren't enabled, interruptions are suppressed",
+                mInterruptSuppressor.suppressInterruptions(createNotificationEntry()));
+    }
+
+    @Test
+    public void testSuppressInterruptions_statusBarAlertsDisabled_refactorEnabled() {
+        ensureRefactorEnabledState();
+
+        when(mNotificationAlertsInteractor.areNotificationAlertsEnabled()).thenReturn(false);
+
+        assertTrue("When alerts aren't enabled, interruptions are suppressed",
+                mAlertsDisabledCondition.shouldSuppress());
+
+        final Set<VisualInterruptionType> types = mAlertsDisabledCondition.getTypes();
+        assertTrue(types.contains(PEEK));
+        assertTrue(types.contains(PULSE));
+        assertTrue(types.contains(BUBBLE));
+    }
+
+    private void createPresenter() {
+        final ShadeViewController shadeViewController = mock(ShadeViewController.class);
+
+        final NotificationShadeWindowView notificationShadeWindowView =
                 mock(NotificationShadeWindowView.class);
+        when(notificationShadeWindowView.getResources()).thenReturn(mContext.getResources());
+
         NotificationStackScrollLayoutController stackScrollLayoutController =
                 mock(NotificationStackScrollLayoutController.class);
         when(stackScrollLayoutController.getView()).thenReturn(
                 mock(NotificationStackScrollLayout.class));
-        when(notificationShadeWindowView.getResources()).thenReturn(mContext.getResources());
 
-        ShadeViewController shadeViewController = mock(ShadeViewController.class);
+        final InitController initController = new InitController();
+
         mStatusBarNotificationPresenter = new StatusBarNotificationPresenter(
                 mContext,
                 shadeViewController,
@@ -125,110 +310,76 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotifShadeEventSource.class),
                 mock(NotificationMediaManager.class),
                 mock(NotificationGutsManager.class),
-                mInitController,
+                initController,
                 mVisualInterruptionDecisionProvider,
                 mock(NotificationRemoteInputManager.class),
                 mock(NotificationRemoteInputManager.Callback.class),
                 mock(NotificationListContainer.class));
-        mInitController.executePostInitTasks();
-        ArgumentCaptor<NotificationInterruptSuppressor> suppressorCaptor =
+
+        initController.executePostInitTasks();
+    }
+
+    private void verifyAndCaptureSuppressors() {
+        mInterruptSuppressor = null;
+
+        final ArgumentCaptor<VisualInterruptionCondition> conditionCaptor =
+                ArgumentCaptor.forClass(VisualInterruptionCondition.class);
+        verify(mVisualInterruptionDecisionProvider, times(3)).addCondition(
+                conditionCaptor.capture());
+        final List<VisualInterruptionCondition> conditions = conditionCaptor.getAllValues();
+        mAlertsDisabledCondition = conditions.get(0);
+        mVrModeCondition = conditions.get(1);
+        mPanelsDisabledCondition = conditions.get(2);
+
+        final ArgumentCaptor<VisualInterruptionFilter> needsRedactionFilterCaptor =
+                ArgumentCaptor.forClass(VisualInterruptionFilter.class);
+        verify(mVisualInterruptionDecisionProvider).addFilter(needsRedactionFilterCaptor.capture());
+        mNeedsRedactionFilter = needsRedactionFilterCaptor.getValue();
+    }
+
+    private void verifyAndCaptureLegacySuppressor() {
+        mAlertsDisabledCondition = null;
+        mVrModeCondition = null;
+        mNeedsRedactionFilter = null;
+        mPanelsDisabledCondition = null;
+
+        final ArgumentCaptor<NotificationInterruptSuppressor> suppressorCaptor =
                 ArgumentCaptor.forClass(NotificationInterruptSuppressor.class);
         verify(mVisualInterruptionDecisionProvider).addLegacySuppressor(suppressorCaptor.capture());
         mInterruptSuppressor = suppressorCaptor.getValue();
     }
 
-    @Test
-    public void testNoSuppressHeadsUp_default() {
-        Notification n = new Notification.Builder(getContext(), "a").build();
-        NotificationEntry entry = new NotificationEntryBuilder()
+    private void ensureRefactorDisabledState() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_VISUAL_INTERRUPTIONS_REFACTOR);
+        createPresenter();
+        verifyAndCaptureLegacySuppressor();
+    }
+
+    private void ensureRefactorEnabledState() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_VISUAL_INTERRUPTIONS_REFACTOR);
+        createPresenter();
+        verifyAndCaptureSuppressors();
+    }
+
+    private NotificationEntry createNotificationEntry() {
+        return new NotificationEntryBuilder()
                 .setPkg("a")
                 .setOpPkg("a")
                 .setTag("a")
-                .setNotification(n)
+                .setNotification(new Notification.Builder(getContext(), "a").build())
                 .build();
-
-        assertFalse(mInterruptSuppressor.suppressAwakeHeadsUp(entry));
     }
 
-    @Test
-    public void testSuppressHeadsUp_disabledStatusBar() {
-        Notification n = new Notification.Builder(getContext(), "a").build();
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setPkg("a")
-                .setOpPkg("a")
-                .setTag("a")
-                .setNotification(n)
-                .build();
-        mCommandQueue.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_EXPAND, 0,
-                false /* animate */);
-        TestableLooper.get(this).processAllMessages();
-
-        assertTrue("The panel should suppress heads up while disabled",
-                mInterruptSuppressor.suppressAwakeHeadsUp(entry));
-    }
-
-    @Test
-    public void testSuppressHeadsUp_disabledNotificationShade() {
-        Notification n = new Notification.Builder(getContext(), "a").build();
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setPkg("a")
-                .setOpPkg("a")
-                .setTag("a")
-                .setNotification(n)
-                .build();
-        mCommandQueue.disable(DEFAULT_DISPLAY, 0, StatusBarManager.DISABLE2_NOTIFICATION_SHADE,
-                false /* animate */);
-        TestableLooper.get(this).processAllMessages();
-
-        assertTrue("The panel should suppress interruptions while notification shade "
-                        + "disabled",
-                mInterruptSuppressor.suppressAwakeHeadsUp(entry));
-    }
-
-    @Test
-    public void testNoSuppressHeadsUp_FSI_nonOccludedKeyguard() {
-        Notification n = new Notification.Builder(getContext(), "a")
+    private NotificationEntry createFsiNotificationEntry() {
+        final Notification notification = new Notification.Builder(getContext(), "a")
                 .setFullScreenIntent(mock(PendingIntent.class), true)
                 .build();
-        NotificationEntry entry = new NotificationEntryBuilder()
+
+        return new NotificationEntryBuilder()
                 .setPkg("a")
                 .setOpPkg("a")
                 .setTag("a")
-                .setNotification(n)
+                .setNotification(notification)
                 .build();
-
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
-        assertFalse(mInterruptSuppressor.suppressAwakeHeadsUp(entry));
-    }
-
-    @Test
-    public void testSuppressInterruptions_vrMode() {
-        Notification n = new Notification.Builder(getContext(), "a").build();
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setPkg("a")
-                .setOpPkg("a")
-                .setTag("a")
-                .setNotification(n)
-                .build();
-        mStatusBarNotificationPresenter.mVrMode = true;
-
-        assertTrue("Vr mode should suppress interruptions",
-                mInterruptSuppressor.suppressAwakeInterruptions(entry));
-    }
-
-    @Test
-    public void testSuppressInterruptions_statusBarAlertsDisabled() {
-        Notification n = new Notification.Builder(getContext(), "a").build();
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setPkg("a")
-                .setOpPkg("a")
-                .setTag("a")
-                .setNotification(n)
-                .build();
-        when(mNotificationAlertsInteractor.areNotificationAlertsEnabled()).thenReturn(false);
-
-        assertTrue("When alerts aren't enabled, interruptions are suppressed",
-                mInterruptSuppressor.suppressInterruptions(entry));
     }
 }

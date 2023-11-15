@@ -73,6 +73,11 @@ abstract class VisualInterruptionCondition(
     override val uiEventId: UiEventEnum? = null,
     override val eventLogData: EventLogData? = null
 ) : VisualInterruptionSuppressor {
+    constructor(
+        types: Set<VisualInterruptionType>,
+        reason: String
+    ) : this(types, reason, /* uiEventId = */ null)
+
     /** @return true if these interruptions should be suppressed right now. */
     abstract fun shouldSuppress(): Boolean
 }
@@ -84,6 +89,11 @@ abstract class VisualInterruptionFilter(
     override val uiEventId: UiEventEnum? = null,
     override val eventLogData: EventLogData? = null
 ) : VisualInterruptionSuppressor {
+    constructor(
+        types: Set<VisualInterruptionType>,
+        reason: String
+    ) : this(types, reason, /* uiEventId = */ null)
+
     /**
      * @param entry the notification to consider suppressing
      * @return true if these interruptions should be suppressed for this notification right now
