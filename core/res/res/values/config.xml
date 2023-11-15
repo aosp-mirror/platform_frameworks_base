@@ -4014,6 +4014,18 @@
          by shrinking the display such that it does not overlap the cutout area. -->
     <bool name="config_maskMainBuiltInDisplayCutout">false</bool>
 
+    <!-- This string array provide override side of each rotation of the given insets.
+         Array of "[rotation],[side]".
+         Undefined rotation will apply the default behavior.
+         When there are cutouts on multiple edges of the display, the override won't take any
+         effect. -->
+    <string-array name="config_mainBuiltInDisplayCutoutSideOverride" translatable="false">
+        <!-- Example:
+        <item>90,top</item>
+        <item>270,bottom</item>
+        -->
+    </string-array>
+
     <!-- Ultrasound support for Mic/speaker path -->
     <!-- Whether the default microphone audio source supports near-ultrasound frequencies
          (range of 18 - 21 kHz). -->
@@ -6370,6 +6382,8 @@
     </string>
     <bool name="config_fillSecondaryBuiltInDisplayCutout">false</bool>
     <bool name="config_maskSecondaryBuiltInDisplayCutout">false</bool>
+    <string-array name="config_secondaryBuiltInDisplayCutoutSideOverride" translatable="false">
+    </string-array>
 
     <!-- An array contains unique ids of all built-in displays and the unique id of a display can be
          obtained from {@link Display#getUniqueId}. This array should be set for multi-display
@@ -6414,6 +6428,11 @@
         <item>@string/config_mainBuiltInDisplayCutoutRectApproximation</item>
         <item>@string/config_secondaryBuiltInDisplayCutoutRectApproximation</item>
     </string-array>
+
+    <array name="config_displayCutoutSideOverrideArray" translatable="false">
+        <item>@array/config_mainBuiltInDisplayCutoutSideOverride</item>
+        <item>@array/config_secondaryBuiltInDisplayCutoutSideOverride</item>
+    </array>
 
     <!-- The maskBuiltInDisplayCutout config for each display in a multi-display device. -->
     <array name="config_maskBuiltInDisplayCutoutArray" translatable="false">

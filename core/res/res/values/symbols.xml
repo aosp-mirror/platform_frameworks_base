@@ -4035,6 +4035,7 @@
   <java-symbol type="string" name="global_action_logout" />
   <java-symbol type="string" name="config_mainBuiltInDisplayCutout" />
   <java-symbol type="string" name="config_mainBuiltInDisplayCutoutRectApproximation" />
+  <java-symbol type="array" name="config_mainBuiltInDisplayCutoutSideOverride" />
   <java-symbol type="drawable" name="messaging_user" />
   <java-symbol type="bool" name="config_fillMainBuiltInDisplayCutout" />
   <java-symbol type="drawable" name="ic_logout" />
@@ -5001,9 +5002,11 @@
   <java-symbol type="string" name="config_secondaryBuiltInDisplayCutoutRectApproximation" />
   <java-symbol type="bool" name="config_fillSecondaryBuiltInDisplayCutout" />
   <java-symbol type="bool" name="config_maskSecondaryBuiltInDisplayCutout" />
+  <java-symbol type="array" name="config_secondaryBuiltInDisplayCutoutSideOverride" />
   <java-symbol type="array" name="config_displayUniqueIdArray" />
   <java-symbol type="array" name="config_displayCutoutPathArray" />
   <java-symbol type="array" name="config_displayCutoutApproximationRectArray" />
+  <java-symbol type="array" name="config_displayCutoutSideOverrideArray" />
   <java-symbol type="array" name="config_fillBuiltInDisplayCutoutArray" />
   <java-symbol type="array" name="config_maskBuiltInDisplayCutoutArray" />
   <java-symbol type="dimen" name="secondary_waterfall_display_left_edge_size" />
