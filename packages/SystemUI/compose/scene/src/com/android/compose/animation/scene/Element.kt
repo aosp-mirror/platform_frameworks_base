@@ -25,16 +25,17 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.geometry.lerp
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.IntermediateMeasureScope
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.intermediateLayout
+import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Constraints
@@ -144,23 +145,9 @@ internal fun Modifier.element(
                 ?: Element.TargetValues(scene.key).also { element.sceneValues[scene.key] = it }
     }
 
-    return this.then(ElementModifier(layoutImpl, element, sceneValues))
-        .drawWithContent {
-            if (shouldDrawElement(layoutImpl, scene, element)) {
-                val drawScale = getDrawScale(layoutImpl, element, scene, sceneValues)
-                if (drawScale == Scale.Default) {
-                    drawContent()
-                } else {
-                    scale(
-                        drawScale.scaleX,
-                        drawScale.scaleY,
-                        if (drawScale.pivot.isUnspecified) center else drawScale.pivot,
-                    ) {
-                        this@drawWithContent.drawContent()
-                    }
-                }
-            }
-        }
+    return this.then(ElementModifier(layoutImpl, scene, element, sceneValues))
+        // TODO(b/311132415): Move this into ElementNode once we can create a delegate
+        // IntermediateLayoutModifierNode.
         .intermediateLayout { measurable, constraints ->
             val placeable =
                 measure(layoutImpl, scene, element, sceneValues, measurable, constraints)
@@ -177,22 +164,25 @@ internal fun Modifier.element(
  */
 private data class ElementModifier(
     private val layoutImpl: SceneTransitionLayoutImpl,
+    private val scene: Scene,
     private val element: Element,
     private val sceneValues: Element.TargetValues,
 ) : ModifierNodeElement<ElementNode>() {
-    override fun create(): ElementNode = ElementNode(layoutImpl, element, sceneValues)
+    override fun create(): ElementNode = ElementNode(layoutImpl, scene, element, sceneValues)
 
     override fun update(node: ElementNode) {
-        node.update(layoutImpl, element, sceneValues)
+        node.update(layoutImpl, scene, element, sceneValues)
     }
 }
 
 internal class ElementNode(
     layoutImpl: SceneTransitionLayoutImpl,
+    scene: Scene,
     element: Element,
     sceneValues: Element.TargetValues,
-) : Modifier.Node() {
+) : Modifier.Node(), DrawModifierNode {
     private var layoutImpl: SceneTransitionLayoutImpl = layoutImpl
+    private var scene: Scene = scene
     private var element: Element = element
     private var sceneValues: Element.TargetValues = sceneValues
 
@@ -238,14 +228,33 @@ internal class ElementNode(
 
     fun update(
         layoutImpl: SceneTransitionLayoutImpl,
+        scene: Scene,
         element: Element,
         sceneValues: Element.TargetValues,
     ) {
         removeNodeFromSceneValues()
         this.layoutImpl = layoutImpl
+        this.scene = scene
         this.element = element
         this.sceneValues = sceneValues
         addNodeToSceneValues()
+    }
+
+    override fun ContentDrawScope.draw() {
+        if (shouldDrawElement(layoutImpl, scene, element)) {
+            val drawScale = getDrawScale(layoutImpl, element, scene, sceneValues)
+            if (drawScale == Scale.Default) {
+                drawContent()
+            } else {
+                scale(
+                    drawScale.scaleX,
+                    drawScale.scaleY,
+                    if (drawScale.pivot.isUnspecified) center else drawScale.pivot,
+                ) {
+                    this@draw.drawContent()
+                }
+            }
+        }
     }
 }
 
