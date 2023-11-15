@@ -65,6 +65,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.MAX_HUN_WHEN_AGE_MS
 import com.android.systemui.statusbar.policy.FakeDeviceProvisionedController
 import com.android.systemui.statusbar.policy.HeadsUpManager
+import com.android.systemui.util.FakeEventLog
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.settings.FakeGlobalSettings
@@ -100,6 +101,7 @@ abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
     protected val ambientDisplayConfiguration = FakeAmbientDisplayConfiguration(context)
     protected val batteryController = FakeBatteryController(leakCheck)
     protected val deviceProvisionedController = FakeDeviceProvisionedController()
+    protected val eventLog = FakeEventLog()
     protected val flags: NotifPipelineFlags = mock()
     protected val globalSettings =
         FakeGlobalSettings().also { it.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON) }

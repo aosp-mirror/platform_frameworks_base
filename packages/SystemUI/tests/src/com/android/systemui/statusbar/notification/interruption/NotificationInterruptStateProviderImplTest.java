@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.FakeEventLog;
 import com.android.systemui.util.settings.FakeGlobalSettings;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -126,6 +127,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     DeviceProvisionedController mDeviceProvisionedController;
     FakeSystemClock mSystemClock;
     FakeGlobalSettings mGlobalSettings;
+    FakeEventLog mEventLog;
 
     private NotificationInterruptStateProviderImpl mNotifInterruptionStateProvider;
 
@@ -138,6 +140,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         mSystemClock = new FakeSystemClock();
         mGlobalSettings = new FakeGlobalSettings();
         mGlobalSettings.putInt(HEADS_UP_NOTIFICATIONS_ENABLED, HEADS_UP_ON);
+        mEventLog = new FakeEventLog();
 
         mNotifInterruptionStateProvider =
                 new NotificationInterruptStateProviderImpl(
@@ -155,7 +158,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                         mUserTracker,
                         mDeviceProvisionedController,
                         mSystemClock,
-                        mGlobalSettings);
+                        mGlobalSettings,
+                        mEventLog);
         mNotifInterruptionStateProvider.mUseHeadsUp = true;
     }
 
