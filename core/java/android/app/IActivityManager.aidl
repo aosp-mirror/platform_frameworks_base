@@ -17,7 +17,6 @@
 package android.app;
 
 import android.app.ActivityManager;
-import android.app.ActivityManager.PendingIntentInfo;
 import android.app.ActivityTaskManager;
 import android.app.ApplicationStartInfo;
 import android.app.ApplicationErrorReport;
@@ -553,6 +552,14 @@ interface IActivityManager {
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isTopOfTask(in IBinder token);
     void bootAnimationComplete();
+
+    /**
+     * Used by {@link com.android.systemui.theme.ThemeOverlayController} to notify of color
+     * palette readiness.
+     * @throws RemoteException
+     */
+    void setThemeOverlayReady(boolean readiness);
+
     @UnsupportedAppUsage
     void registerTaskStackListener(in ITaskStackListener listener);
     void unregisterTaskStackListener(in ITaskStackListener listener);

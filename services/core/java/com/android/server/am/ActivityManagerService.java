@@ -187,6 +187,7 @@ import static com.android.server.wm.ActivityTaskManagerService.DUMP_TOP_RESUMED_
 import static com.android.server.wm.ActivityTaskManagerService.DUMP_VISIBLE_ACTIVITIES;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToString;
+import static com.android.systemui.shared.Flags.enableHomeDelay;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -521,6 +522,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -920,6 +922,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy("this")
     final ComponentAliasResolver mComponentAliasResolver;
+
+    private static final long HOME_LAUNCH_TIMEOUT_MS = 15000;
+    private final AtomicBoolean mHasHomeDelay = new AtomicBoolean(false);
+
+    /**
+     * Tracks all users with computed color resources by ThemeOverlaycvontroller
+     */
+    @GuardedBy("this")
+    private final Set<Integer> mThemeOverlayReadiness = new HashSet<>();
 
     /**
      * Tracks association information for a particular package along with debuggability.
@@ -2332,6 +2343,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mService.startBroadcastObservers();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 mService.mPackageWatchdog.onPackagesReady();
+                mService.setHomeTimeout();
             }
         }
 
@@ -5301,6 +5313,59 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (callFinishBooting) {
             finishBooting();
+        }
+    }
+
+    /**
+     * Starts Home if there is no completion signal from ThemeOverlayController
+     */
+    private void setHomeTimeout() {
+        if (enableHomeDelay() && mHasHomeDelay.compareAndSet(false, true)) {
+            mHandler.postDelayed(() -> {
+                if (!getThemeOverlayReadiness()) {
+                    Slog.d(TAG,
+                            "ThemeHomeDelay: ThemeOverlayController not responding, launching "
+                                    + "Home after "
+                                    + HOME_LAUNCH_TIMEOUT_MS + "ms");
+                    setThemeOverlayReady(true);
+                }
+            }, HOME_LAUNCH_TIMEOUT_MS);
+        }
+    }
+
+    /**
+     * Used by ThemeOverlayController to notify all listeners for
+     * color palette readiness.
+     * @hide
+     */
+    @Override
+    public void setThemeOverlayReady(boolean readiness) {
+        enforceCallingPermission(Manifest.permission.SET_THEME_OVERLAY_CONTROLLER_READY,
+                "setThemeOverlayReady");
+
+        int currentUserId = mUserController.getCurrentUserId();
+
+        boolean updateReadiness;
+        synchronized (mThemeOverlayReadiness) {
+            updateReadiness = readiness ? mThemeOverlayReadiness.add(currentUserId)
+                    : mThemeOverlayReadiness.remove(currentUserId);
+        }
+
+        if (updateReadiness && readiness && enableHomeDelay()) {
+            mAtmInternal.startHomeOnAllDisplays(currentUserId, "setThemeOverlayReady");
+        }
+    }
+
+    /**
+     * Returns current state of ThemeOverlayController color
+     * palette readiness.
+     *
+     * @hide
+     */
+    public boolean getThemeOverlayReadiness() {
+        int uid = mUserController.getCurrentUserId();
+        synchronized (mThemeOverlayReadiness) {
+            return mThemeOverlayReadiness.contains(uid);
         }
     }
 
@@ -18033,6 +18098,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             mAtmInternal.onUserStopped(userId);
             // Clean up various services by removing the user
             mBatteryStatsService.onUserRemoved(userId);
+
+            synchronized (mThemeOverlayReadiness) {
+                mThemeOverlayReadiness.remove(userId);
+            }
         }
 
         @Override
@@ -19390,6 +19459,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 boolean isRestore, final IPackageDataObserver observer, int userId) {
             return ActivityManagerService.this.clearApplicationUserData(packageName, keepState,
                     isRestore, observer, userId);
+        }
+
+        @Override
+        public boolean getThemeOverlayReadiness() {
+            return ActivityManagerService.this.getThemeOverlayReadiness();
         }
     }
 
