@@ -63,6 +63,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
@@ -258,12 +259,14 @@ class SceneTestUtils(
 
     fun bouncerInteractor(
         authenticationInteractor: AuthenticationInteractor,
+        keyguardFaceAuthInteractor: KeyguardFaceAuthInteractor = mock(),
     ): BouncerInteractor {
         return BouncerInteractor(
             applicationScope = applicationScope(),
             applicationContext = context,
             repository = bouncerRepository,
             authenticationInteractor = authenticationInteractor,
+            keyguardFaceAuthInteractor = keyguardFaceAuthInteractor,
             flags = sceneContainerFlags,
             falsingInteractor = falsingInteractor(),
             powerInteractor = powerInteractor(),
