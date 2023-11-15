@@ -42,3 +42,11 @@ flag {
     description: "Enables PiP UI state callback on entering"
     bug: "303718131"
 }
+
+flag {
+    name: "enable_pip2_implementation"
+    namespace: "multitasking"
+    description: "Enables the new implementation of PiP (PiP2)"
+    bug: "290220798"
+    is_fixed_read_only: true
+}

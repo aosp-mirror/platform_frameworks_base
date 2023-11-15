@@ -472,12 +472,6 @@ object Flags {
     val WALLPAPER_MULTI_CROP =
         sysPropBooleanFlag("persist.wm.debug.wallpaper_multi_crop", default = false)
 
-    // TODO(b/290220798): Tracking Bug
-    @Keep
-    @JvmField
-    val ENABLE_PIP2_IMPLEMENTATION =
-        sysPropBooleanFlag("persist.wm.debug.enable_pip2_implementation", default = false)
-
     // 1200 - predictive back
     @Keep
     @JvmField
