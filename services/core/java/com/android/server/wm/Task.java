@@ -4626,7 +4626,7 @@ class Task extends TaskFragment {
                                 // Expanding pip into new rotation, so create a rotation leash
                                 // until the display is rotated.
                                 topActivity.getOrCreateFixedRotationLeash(
-                                        topActivity.getSyncTransaction());
+                                        topActivity.getPendingTransaction());
                             }
                             lastParentBeforePip.moveToFront("movePinnedActivityToOriginalTask");
                         }
