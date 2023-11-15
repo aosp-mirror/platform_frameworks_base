@@ -1745,8 +1745,8 @@ public final class ColorDisplayService extends SystemService {
 
         @Override
         public boolean setSaturationLevel(int level) {
-            final boolean hasTransformsPermission = getContext()
-                    .checkCallingPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
+            final boolean hasTransformsPermission = getContext().checkCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
                     == PackageManager.PERMISSION_GRANTED;
             final boolean hasLegacyPermission = getContext()
                     .checkCallingPermission(Manifest.permission.CONTROL_DISPLAY_SATURATION)

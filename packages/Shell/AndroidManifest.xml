@@ -562,6 +562,9 @@
     <!-- Permissions required for CTS test - NotificationManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_NOTIFICATION_LISTENERS" />
 
+    <!-- Permissions required for CTS test - NotificationManagerZenTest -->
+    <uses-permission android:name="android.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS" />
+
     <!-- Permissions required for CTS test - CtsContactsProviderTestCases -->
     <uses-permission android:name="android.contacts.permission.MANAGE_SIM_ACCOUNTS" />
     <uses-permission android:name="android.permission.SET_DEFAULT_ACCOUNT_FOR_CONTACTS" />

@@ -2941,6 +2941,12 @@ public class NotificationManagerService extends SystemService {
             registerDeviceConfigChange();
             migrateDefaultNAS();
             maybeShowInitialReviewPermissionsNotification();
+
+            if (android.app.Flags.modesApi()) {
+                // Cannot be done earlier, as some services aren't ready until this point.
+                mZenModeHelper.setDeviceEffectsApplier(
+                        new DefaultDeviceEffectsApplier(getContext()));
+            }
         } else if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
             mSnoozeHelper.scheduleRepostsForPersistedNotifications(System.currentTimeMillis());
         } else if (phase == SystemService.PHASE_DEVICE_SPECIFIC_SERVICES_READY) {
