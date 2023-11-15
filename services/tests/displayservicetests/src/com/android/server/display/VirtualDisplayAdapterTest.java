@@ -77,7 +77,7 @@ public class VirtualDisplayAdapterTest {
 
         DisplayDevice result = mVirtualDisplayAdapter.createVirtualDisplayLocked(mMockCallback,
                 /* projection= */ null, /* ownerUid= */ 10, /* packageName= */ "testpackage",
-                /* surface= */ null, /* flags= */ 0, config);
+                /* uniqueId= */ "uniqueId", /* surface= */ null, /* flags= */ 0, config);
 
         assertNotNull(result);
     }
@@ -89,12 +89,12 @@ public class VirtualDisplayAdapterTest {
         VirtualDisplayConfig config2 = new VirtualDisplayConfig.Builder("test2", /* width= */ 1,
                 /* height= */ 1, /* densityDpi= */ 1).build();
         mVirtualDisplayAdapter.createVirtualDisplayLocked(mMockCallback, /* projection= */ null,
-                /* ownerUid= */ 10, /* packageName= */ "testpackage", /* surface= */ null,
-                /* flags= */ 0, config1);
+                /* ownerUid= */ 10, /* packageName= */ "testpackage", /* uniqueId= */ "uniqueId1",
+                /* surface= */ null, /* flags= */ 0, config1);
 
         DisplayDevice result = mVirtualDisplayAdapter.createVirtualDisplayLocked(mMockCallback,
                 /* projection= */ null, /* ownerUid= */ 10, /* packageName= */ "testpackage",
-                /* surface= */ null, /* flags= */ 0, config2);
+                /* uniqueId= */ "uniqueId2", /* surface= */ null, /* flags= */ 0, config2);
 
         assertNull(result);
     }

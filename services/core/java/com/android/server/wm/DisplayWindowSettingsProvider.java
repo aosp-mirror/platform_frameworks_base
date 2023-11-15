@@ -164,6 +164,11 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
         mOverrideSettings.onDisplayRemoved(info);
     }
 
+    @Override
+    public void clearDisplaySettings(@NonNull DisplayInfo info) {
+        mOverrideSettings.clearDisplaySettings(info);
+    }
+
     @VisibleForTesting
     int getOverrideSettingsSize() {
         return mOverrideSettings.mSettings.size();
@@ -289,6 +294,12 @@ class DisplayWindowSettingsProvider implements SettingsProvider {
                 // map.
                 mSettings.remove(identifier);
             }
+        }
+
+        void clearDisplaySettings(@NonNull DisplayInfo info) {
+            final String identifier = getIdentifier(info);
+            mSettings.remove(identifier);
+            mVirtualDisplayIdentifiers.remove(identifier);
         }
 
         private void writeSettings() {
