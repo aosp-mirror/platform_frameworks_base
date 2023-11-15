@@ -93,6 +93,7 @@ cc_library_shared_for_libandroid_runtime {
     shared_libs: [
         "libbase",
         "libcutils",
+        "libtracing_perfetto",
         "libharfbuzz_ng",
         "liblog",
         "libminikin",
@@ -358,6 +359,7 @@ cc_library_shared_for_libandroid_runtime {
                 "libimage_io",
                 "libultrahdr",
                 "libperfetto_c",
+                "libtracing_perfetto",
             ],
             export_shared_lib_headers: [
                 // our headers include libnativewindow's public headers

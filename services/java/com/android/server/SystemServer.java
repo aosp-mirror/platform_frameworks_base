@@ -76,6 +76,7 @@ import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.IStorageManager;
@@ -1089,6 +1090,7 @@ public final class SystemServer implements Dumpable {
 
         final Context systemUiContext = activityThread.getSystemUiContext();
         systemUiContext.setTheme(DEFAULT_SYSTEM_THEME);
+        Trace.registerWithPerfetto();
     }
 
     /**
