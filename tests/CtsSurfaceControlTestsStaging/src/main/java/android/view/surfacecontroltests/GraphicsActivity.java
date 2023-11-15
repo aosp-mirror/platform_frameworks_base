@@ -85,7 +85,8 @@ public class GraphicsActivity extends Activity {
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private final Object mLock = new Object();
     private Surface mSurface = null;
-    private float mDeviceFrameRate;
+    private float mDisplayModeRefreshRate;
+    private float mDisplayRefreshRate;
     private ModeChangedEvents mModeChangedEvents = new ModeChangedEvents();
 
     private enum ActivityState { RUNNING, PAUSED, DESTROYED }
@@ -123,14 +124,20 @@ public class GraphicsActivity extends Activity {
                 return;
             }
             synchronized (mLock) {
-                Display.Mode mode = mDisplayManager.getDisplay(displayId).getMode();
+                Display display = mDisplayManager.getDisplay(displayId);
+                Display.Mode mode = display.getMode();
                 mModeChangedEvents.add(mode);
-                float frameRate = mode.getRefreshRate();
-                if (frameRate != mDeviceFrameRate) {
+                float displayModeRefreshRate = mode.getRefreshRate();
+                float displayRefreshRate = display.getRefreshRate();
+                if (displayModeRefreshRate != mDisplayModeRefreshRate
+                        || displayRefreshRate != mDisplayRefreshRate) {
                     Log.i(TAG,
-                            String.format("Frame rate changed: %.2f --> %.2f", mDeviceFrameRate,
-                                    frameRate));
-                    mDeviceFrameRate = frameRate;
+                            String.format("Refresh rate changed: (mode) %.2f --> %.2f, "
+                                            + "(display) %.2f --> %.2f",
+                                    mDisplayModeRefreshRate, displayModeRefreshRate,
+                                    mDisplayRefreshRate, displayRefreshRate));
+                    mDisplayModeRefreshRate = displayModeRefreshRate;
+                    mDisplayRefreshRate = displayRefreshRate;
                     mLock.notify();
                 }
             }
@@ -317,8 +324,10 @@ public class GraphicsActivity extends Activity {
         super.onCreate(savedInstanceState);
         synchronized (mLock) {
             mDisplayManager = getSystemService(DisplayManager.class);
-            Display.Mode mode = getDisplay().getMode();
-            mDeviceFrameRate = mode.getRefreshRate();
+            Display display = getDisplay();
+            Display.Mode mode = display.getMode();
+            mDisplayModeRefreshRate = mode.getRefreshRate();
+            mDisplayRefreshRate = display.getRefreshRate();
             // Insert the initial mode so we have the full display mode history.
             mModeChangedEvents.add(mode);
             mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
@@ -516,22 +525,25 @@ public class GraphicsActivity extends Activity {
             if (expectedFrameRate > FRAME_RATE_TOLERANCE) { // expectedFrameRate > 0
                 // Wait until we switch to a compatible frame rate.
                 Log.i(TAG,
-                        "Verifying expected frame rate: actual (device)=" + mDeviceFrameRate
-                                + " expected=" + expectedFrameRate);
+                        String.format(
+                                "Verifying expected frame rate: actual=%.2f, expected=%.2f",
+                                multiplesAllowed ? mDisplayModeRefreshRate : mDisplayRefreshRate,
+                                expectedFrameRate));
                 if (multiplesAllowed) {
-                    while (!isFrameRateMultiple(mDeviceFrameRate, expectedFrameRate)
+                    while (!isFrameRateMultiple(mDisplayModeRefreshRate, expectedFrameRate)
                             && !waitForEvents(gracePeriodEndTimeNanos, surfaces)) {
                         // Empty
                     }
                 } else {
-                    while (!frameRateEquals(mDeviceFrameRate, expectedFrameRate)
+                    while (!frameRateEquals(mDisplayRefreshRate, expectedFrameRate)
                             && !waitForEvents(gracePeriodEndTimeNanos, surfaces)) {
                         // Empty
                     }
                 }
                 nowNanos = System.nanoTime();
                 if (nowNanos >= gracePeriodEndTimeNanos) {
-                    throw new FrameRateTimeoutException(expectedFrameRate, mDeviceFrameRate);
+                    throw new FrameRateTimeoutException(expectedFrameRate,
+                            multiplesAllowed ? mDisplayModeRefreshRate : mDisplayRefreshRate);
                 }
             }
 
@@ -541,7 +553,10 @@ public class GraphicsActivity extends Activity {
             while (endTimeNanos > nowNanos) {
                 int numModeChangedEvents = mModeChangedEvents.size();
                 if (waitForEvents(endTimeNanos, surfaces)) {
-                    Log.i(TAG, String.format("Stable frame rate %.2f verified", mDeviceFrameRate));
+                    Log.i(TAG,
+                            String.format("Stable frame rate %.2f verified",
+                                    multiplesAllowed ? mDisplayModeRefreshRate
+                                                     : mDisplayRefreshRate));
                     return;
                 }
                 nowNanos = System.nanoTime();
