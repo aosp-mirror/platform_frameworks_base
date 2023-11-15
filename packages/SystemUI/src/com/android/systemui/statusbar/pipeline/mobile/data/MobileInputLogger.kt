@@ -109,8 +109,9 @@ constructor(
             {
                 int1 = subId
                 str1 = displayInfo.toString()
+                bool1 = displayInfo.isRoaming
             },
-            { "onDisplayInfoChanged: subId=$int1 displayInfo=$str1" },
+            { "onDisplayInfoChanged: subId=$int1 displayInfo=$str1 isRoaming=$bool1" },
         )
     }
 
