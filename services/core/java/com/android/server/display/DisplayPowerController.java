@@ -1540,12 +1540,13 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 performScreenOffTransition = true;
                 break;
             case DisplayPowerRequest.POLICY_DOZE:
-                if (mPowerRequest.dozeScreenState != Display.STATE_UNKNOWN) {
+                if (mDozeStateOverride != Display.STATE_UNKNOWN) {
+                    state = mDozeStateOverride;
+                } else if (mPowerRequest.dozeScreenState != Display.STATE_UNKNOWN) {
                     state = mPowerRequest.dozeScreenState;
                 } else {
                     state = Display.STATE_DOZE;
                 }
-                state = mDozeStateOverride == Display.STATE_UNKNOWN ? state : mDozeStateOverride;
                 if (!mAllowAutoBrightnessWhileDozingConfig) {
                     brightnessState = mPowerRequest.dozeScreenBrightness;
                     mBrightnessReasonTemp.setReason(BrightnessReason.REASON_DOZE);

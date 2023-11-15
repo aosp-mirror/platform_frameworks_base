@@ -61,12 +61,13 @@ public class DisplayStateController {
                 mPerformScreenOffTransition = true;
                 break;
             case DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE:
-                if (displayPowerRequest.dozeScreenState != Display.STATE_UNKNOWN) {
+                if (mDozeStateOverride != Display.STATE_UNKNOWN) {
+                    state = mDozeStateOverride;
+                } else if (displayPowerRequest.dozeScreenState != Display.STATE_UNKNOWN) {
                     state = displayPowerRequest.dozeScreenState;
                 } else {
                     state = Display.STATE_DOZE;
                 }
-                state = mDozeStateOverride == Display.STATE_UNKNOWN ? state : mDozeStateOverride;
                 break;
             case DisplayManagerInternal.DisplayPowerRequest.POLICY_DIM:
             case DisplayManagerInternal.DisplayPowerRequest.POLICY_BRIGHT:
