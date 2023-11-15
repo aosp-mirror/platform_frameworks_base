@@ -29,6 +29,13 @@ flag {
 }
 
 flag {
+    name: "allow_thermal_headroom_thresholds"
+    namespace: "game"
+    description: "Enable thermal headroom thresholds API"
+    bug: "288119641"
+}
+
+flag {
     name: "allow_private_profile"
     namespace: "profile_experiences"
     description: "Guards a new Private Profile type in UserManager - everything from its setup to config to deletion."

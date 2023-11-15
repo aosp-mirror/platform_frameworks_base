@@ -22,5 +22,15 @@
        ],
        "file_patterns": ["performance_hint.cpp"]
     }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsThermalTestCases",
+       "file_patterns": ["thermal.cpp"]
+    },
+    {
+      "name": "NativeThermalUnitTestCases",
+       "file_patterns": ["thermal.cpp"]
+    }
   ]
 }
