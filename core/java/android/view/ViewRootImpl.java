@@ -81,6 +81,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
@@ -12029,7 +12031,8 @@ public final class ViewRootImpl implements ViewParent,
                 || motionEventAction == MotionEvent.ACTION_MOVE
                 || motionEventAction == MotionEvent.ACTION_UP;
         boolean desiredType = windowType == TYPE_BASE_APPLICATION || windowType == TYPE_APPLICATION
-                || windowType == TYPE_APPLICATION_STARTING || windowType == TYPE_DRAWN_APPLICATION;
+                || windowType == TYPE_APPLICATION_STARTING || windowType == TYPE_DRAWN_APPLICATION
+                || windowType == TYPE_NOTIFICATION_SHADE || windowType == TYPE_STATUS_BAR;
         // use toolkitSetFrameRate flag to gate the change
         return desiredAction && desiredType && sToolkitSetFrameRateReadOnlyFlagValue;
     }
