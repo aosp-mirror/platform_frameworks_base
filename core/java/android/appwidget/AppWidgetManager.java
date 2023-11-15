@@ -52,6 +52,7 @@ import android.widget.RemoteViews;
 
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.FunctionalUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -562,6 +563,40 @@ public class AppWidgetManager {
         });
     }
 
+    private void tryAdapterConversion(
+            FunctionalUtils.RemoteExceptionIgnoringConsumer<RemoteViews> action,
+            RemoteViews original, String failureMsg) {
+        final boolean isConvertingAdapter = RemoteViews.isAdapterConversionEnabled()
+                && (mHasPostedLegacyLists = mHasPostedLegacyLists
+                        || (original != null && original.hasLegacyLists()));
+
+        if (isConvertingAdapter) {
+            final RemoteViews viewsCopy = new RemoteViews(original);
+            Runnable updateWidgetWithTask = () -> {
+                try {
+                    viewsCopy.collectAllIntents().get();
+                    action.acceptOrThrow(viewsCopy);
+                } catch (Exception e) {
+                    Log.e(TAG, failureMsg, e);
+                }
+            };
+
+            if (Looper.getMainLooper() == Looper.myLooper()) {
+                createUpdateExecutorIfNull().execute(updateWidgetWithTask);
+                return;
+            }
+
+            updateWidgetWithTask.run();
+            return;
+        }
+
+        try {
+            action.acceptOrThrow(original);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Set the RemoteViews to use for the specified appWidgetIds.
      * <p>
@@ -586,32 +621,8 @@ public class AppWidgetManager {
             return;
         }
 
-        final boolean isConvertingAdapter = RemoteViews.isAdapterConversionEnabled()
-                && (mHasPostedLegacyLists = mHasPostedLegacyLists
-                        || (views != null && views.hasLegacyLists()));
-
-        if (isConvertingAdapter) {
-            views.collectAllIntents();
-
-            if (Looper.getMainLooper() == Looper.myLooper()) {
-                RemoteViews viewsCopy = new RemoteViews(views);
-                createUpdateExecutorIfNull().execute(() -> {
-                    try {
-                        mService.updateAppWidgetIds(mPackageName, appWidgetIds, viewsCopy);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Error updating app widget views in background", e);
-                    }
-                });
-
-                return;
-            }
-        }
-
-        try {
-            mService.updateAppWidgetIds(mPackageName, appWidgetIds, views);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        tryAdapterConversion(view -> mService.updateAppWidgetIds(mPackageName, appWidgetIds,
+                view), views, "Error updating app widget views in background");
     }
 
     /**
@@ -716,32 +727,9 @@ public class AppWidgetManager {
             return;
         }
 
-        final boolean isConvertingAdapter = RemoteViews.isAdapterConversionEnabled()
-                && (mHasPostedLegacyLists = mHasPostedLegacyLists
-                        || (views != null && views.hasLegacyLists()));
-
-        if (isConvertingAdapter) {
-            views.collectAllIntents();
-
-            if (Looper.getMainLooper() == Looper.myLooper()) {
-                RemoteViews viewsCopy = new RemoteViews(views);
-                createUpdateExecutorIfNull().execute(() -> {
-                    try {
-                        mService.partiallyUpdateAppWidgetIds(mPackageName, appWidgetIds, viewsCopy);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Error partially updating app widget views in background", e);
-                    }
-                });
-
-                return;
-            }
-        }
-
-        try {
-            mService.partiallyUpdateAppWidgetIds(mPackageName, appWidgetIds, views);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        tryAdapterConversion(view -> mService.partiallyUpdateAppWidgetIds(mPackageName,
+                appWidgetIds, view), views,
+                "Error partially updating app widget views in background");
     }
 
     /**
@@ -793,33 +781,8 @@ public class AppWidgetManager {
             return;
         }
 
-        final boolean isConvertingAdapter = RemoteViews.isAdapterConversionEnabled()
-                && (mHasPostedLegacyLists = mHasPostedLegacyLists
-                        || (views != null && views.hasLegacyLists()));
-
-        if (isConvertingAdapter) {
-            views.collectAllIntents();
-
-            if (Looper.getMainLooper() == Looper.myLooper()) {
-                RemoteViews viewsCopy = new RemoteViews(views);
-                createUpdateExecutorIfNull().execute(() -> {
-                    try {
-                        mService.updateAppWidgetProvider(provider, viewsCopy);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Error updating app widget view using provider in background",
-                                e);
-                    }
-                });
-
-                return;
-            }
-        }
-
-        try {
-            mService.updateAppWidgetProvider(provider, views);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        tryAdapterConversion(view -> mService.updateAppWidgetProvider(provider, view), views,
+                "Error updating app widget view using provider in background");
     }
 
     /**
