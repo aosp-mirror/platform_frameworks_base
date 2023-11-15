@@ -37,11 +37,11 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Tests for WindowMagnificationConnectionWrapper. We don't test {@code
- * WindowMagnificationConnectionWrapper#linkToDeath(IBinder.DeathRecipient)} since it's tested in
+ * Tests for MagnificationConnectionWrapper. We don't test {@code
+ * MagnificationConnectionWrapper#linkToDeath(IBinder.DeathRecipient)} since it's tested in
  * {@link WindowMagnificationManagerTest}.
  */
-public class WindowMagnificationConnectionWrapperTest {
+public class MagnificationConnectionWrapperTest {
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
 
@@ -54,14 +54,14 @@ public class WindowMagnificationConnectionWrapperTest {
     private MagnificationAnimationCallback mAnimationCallback;
 
     private MockWindowMagnificationConnection mMockWindowMagnificationConnection;
-    private WindowMagnificationConnectionWrapper mConnectionWrapper;
+    private MagnificationConnectionWrapper mConnectionWrapper;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
         mMockWindowMagnificationConnection = new MockWindowMagnificationConnection();
         mConnection = mMockWindowMagnificationConnection.getConnection();
-        mConnectionWrapper = new WindowMagnificationConnectionWrapper(mConnection, mTrace);
+        mConnectionWrapper = new MagnificationConnectionWrapper(mConnection, mTrace);
     }
 
     @Test
