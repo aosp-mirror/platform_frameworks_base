@@ -2563,11 +2563,14 @@ public class ActivityOptions extends ComponentOptions {
         public static final int TYPE_LOCKSCREEN = 3;
         /** Launched from recents gesture handler. */
         public static final int TYPE_RECENTS_ANIMATION = 4;
+        /** Launched from desktop's transition handler. */
+        public static final int TYPE_DESKTOP_ANIMATION = 5;
 
         @IntDef(prefix = { "TYPE_" }, value = {
                 TYPE_LAUNCHER,
                 TYPE_NOTIFICATION,
                 TYPE_LOCKSCREEN,
+                TYPE_DESKTOP_ANIMATION
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface SourceType {}

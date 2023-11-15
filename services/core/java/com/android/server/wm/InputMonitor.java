@@ -393,8 +393,12 @@ final class InputMonitor {
      */
     void setActiveRecents(@Nullable ActivityRecord activity, @Nullable ActivityRecord layer) {
         final boolean clear = activity == null;
+        final boolean wasActive = mActiveRecentsActivity != null && mActiveRecentsLayerRef != null;
         mActiveRecentsActivity = clear ? null : new WeakReference<>(activity);
         mActiveRecentsLayerRef = clear ? null : new WeakReference<>(layer);
+        if (clear && wasActive) {
+            setUpdateInputWindowsNeededLw();
+        }
     }
 
     private static <T> T getWeak(WeakReference<T> ref) {
