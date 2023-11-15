@@ -188,10 +188,12 @@ public class BatteryUsageStatsProvider {
             }
 
             batteryUsageStatsBuilder.getOrCreateUidBatteryConsumerBuilder(uid)
-                    .setTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND,
+                    .setTimeInProcessStateMs(UidBatteryConsumer.PROCESS_STATE_BACKGROUND,
                             getProcessBackgroundTimeMs(uid, realtimeUs))
-                    .setTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND,
-                            getProcessForegroundTimeMs(uid, realtimeUs));
+                    .setTimeInProcessStateMs(UidBatteryConsumer.PROCESS_STATE_FOREGROUND,
+                            getProcessForegroundTimeMs(uid, realtimeUs))
+                    .setTimeInProcessStateMs(UidBatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE,
+                            getProcessForegroundServiceTimeMs(uid, realtimeUs));
         }
 
         final int[] powerComponents = query.getPowerComponents();
@@ -295,10 +297,14 @@ public class BatteryUsageStatsProvider {
     }
 
     private long getProcessBackgroundTimeMs(BatteryStats.Uid uid, long realtimeUs) {
-        return (uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_BACKGROUND,
+        return uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_BACKGROUND,
                 realtimeUs, BatteryStats.STATS_SINCE_CHARGED)
-                + uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE,
-                realtimeUs, BatteryStats.STATS_SINCE_CHARGED))
+                / 1000;
+    }
+
+    private long getProcessForegroundServiceTimeMs(BatteryStats.Uid uid, long realtimeUs) {
+        return uid.getProcessStateTime(BatteryStats.Uid.PROCESS_STATE_FOREGROUND_SERVICE,
+                realtimeUs, BatteryStats.STATS_SINCE_CHARGED)
                 / 1000;
     }
 
