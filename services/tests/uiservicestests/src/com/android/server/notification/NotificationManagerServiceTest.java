@@ -3239,7 +3239,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mPreferencesHelper.getNotificationChannel(
                 anyString(), anyInt(), eq("foo"), anyBoolean())).thenReturn(
-                        new NotificationChannel("foo", "foo", IMPORTANCE_HIGH));
+                    new NotificationChannel("foo", "foo", IMPORTANCE_HIGH));
 
         Notification.TvExtender tv = new Notification.TvExtender().setChannelId("foo");
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "testTvExtenderChannelOverride_onTv", 0,
@@ -9924,6 +9924,174 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 system);
 
         assertEquals(PRIORITY_CATEGORY_CALLS, actual);
+    }
+
+    @Test
+    public void testRestoreConversationChannel_deleted() throws Exception {
+        // Create parent channel
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        final NotificationChannel originalChannel = new NotificationChannel("id", "name",
+                IMPORTANCE_DEFAULT);
+        NotificationChannel parentChannel = parcelAndUnparcel(originalChannel,
+                NotificationChannel.CREATOR);
+        assertEquals(originalChannel, parentChannel);
+        mBinderService.createNotificationChannels(PKG,
+                new ParceledListSlice(Arrays.asList(parentChannel)));
+
+        //Create deleted conversation channel
+        mBinderService.createConversationNotificationChannelForPackage(
+                PKG, mUid, parentChannel, VALID_CONVO_SHORTCUT_ID);
+        final NotificationChannel conversationChannel =
+                mBinderService.getConversationNotificationChannel(
+                PKG, mUserId, PKG, originalChannel.getId(), false, VALID_CONVO_SHORTCUT_ID);
+        conversationChannel.setDeleted(true);
+
+        //Create notification record
+        Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
+                null /* groupKey */, false /* isSummary */);
+        nb.setShortcutId(VALID_CONVO_SHORTCUT_ID);
+        nb.setChannelId(originalChannel.getId());
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "tag", mUid, 0, nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, originalChannel);
+        assertThat(nr.getChannel()).isEqualTo(originalChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        // Verify that the channel was changed to the conversation channel and restored
+        assertThat(mService.getNotificationRecord(nr.getKey()).isConversation()).isTrue();
+        assertThat(mService.getNotificationRecord(nr.getKey()).getChannel()).isEqualTo(
+                conversationChannel);
+        assertThat(mService.getNotificationRecord(nr.getKey()).getChannel().isDeleted()).isFalse();
+        assertThat(mService.getNotificationRecord(nr.getKey()).getChannel().getDeletedTimeMs())
+                .isEqualTo(-1);
+    }
+
+    @Test
+    public void testDoNotRestoreParentChannel_deleted() throws Exception {
+        // Create parent channel and set as deleted
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        final NotificationChannel originalChannel = new NotificationChannel("id", "name",
+                IMPORTANCE_DEFAULT);
+        NotificationChannel parentChannel = parcelAndUnparcel(originalChannel,
+                NotificationChannel.CREATOR);
+        assertEquals(originalChannel, parentChannel);
+        mBinderService.createNotificationChannels(PKG,
+                new ParceledListSlice(Arrays.asList(parentChannel)));
+        parentChannel.setDeleted(true);
+
+        //Create notification record
+        Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
+                null /* groupKey */, false /* isSummary */);
+        nb.setShortcutId(VALID_CONVO_SHORTCUT_ID);
+        nb.setChannelId(originalChannel.getId());
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "tag", mUid, 0, nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, originalChannel);
+        assertThat(nr.getChannel()).isEqualTo(originalChannel);
+
+        when(mPermissionHelper.hasPermission(mUid)).thenReturn(true);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        // Verify that the channel was not restored and the notification was not posted
+        assertThat(mService.mChannelToastsSent).contains(mUid);
+        assertThat(mService.getNotificationRecord(nr.getKey())).isNull();
+        assertThat(parentChannel.isDeleted()).isTrue();
+    }
+
+    @Test
+    public void testEnqueueToConversationChannel_notDeleted_doesNotRestore() throws Exception {
+        TestableNotificationManagerService service = spy(mService);
+        PreferencesHelper preferencesHelper = spy(mService.mPreferencesHelper);
+        service.setPreferencesHelper(preferencesHelper);
+        // Create parent channel
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        final NotificationChannel originalChannel = new NotificationChannel("id", "name",
+                IMPORTANCE_DEFAULT);
+        NotificationChannel parentChannel = parcelAndUnparcel(originalChannel,
+                NotificationChannel.CREATOR);
+        assertEquals(originalChannel, parentChannel);
+        mBinderService.createNotificationChannels(PKG,
+                new ParceledListSlice(Arrays.asList(parentChannel)));
+
+        //Create conversation channel
+        mBinderService.createConversationNotificationChannelForPackage(
+                PKG, mUid, parentChannel, VALID_CONVO_SHORTCUT_ID);
+        final NotificationChannel conversationChannel =
+                mBinderService.getConversationNotificationChannel(
+                    PKG, mUserId, PKG, originalChannel.getId(), false, VALID_CONVO_SHORTCUT_ID);
+
+        //Create notification record
+        Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
+                null /* groupKey */, false /* isSummary */);
+        nb.setShortcutId(VALID_CONVO_SHORTCUT_ID);
+        nb.setChannelId(originalChannel.getId());
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "tag", mUid, 0, nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, originalChannel);
+        assertThat(nr.getChannel()).isEqualTo(originalChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        // Verify that the channel was changed to the conversation channel and not restored
+        assertThat(service.getNotificationRecord(nr.getKey()).isConversation()).isTrue();
+        assertThat(service.getNotificationRecord(nr.getKey()).getChannel()).isEqualTo(
+                conversationChannel);
+        verify(service, never()).handleSavePolicyFile();
+        verify(preferencesHelper, never()).createNotificationChannel(anyString(),
+                anyInt(), any(), anyBoolean(), anyBoolean(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testEnqueueToParentChannel_notDeleted_doesNotRestore() throws Exception {
+        TestableNotificationManagerService service = spy(mService);
+        PreferencesHelper preferencesHelper = spy(mService.mPreferencesHelper);
+        service.setPreferencesHelper(preferencesHelper);
+        // Create parent channel
+        when(mPackageManager.isPackageSuspendedForUser(anyString(), anyInt())).thenReturn(false);
+        final NotificationChannel originalChannel = new NotificationChannel("id", "name",
+                IMPORTANCE_DEFAULT);
+        NotificationChannel parentChannel = parcelAndUnparcel(originalChannel,
+                NotificationChannel.CREATOR);
+        assertEquals(originalChannel, parentChannel);
+        mBinderService.createNotificationChannels(PKG,
+                new ParceledListSlice(Arrays.asList(parentChannel)));
+
+        //Create deleted conversation channel
+        mBinderService.createConversationNotificationChannelForPackage(
+                PKG, mUid, parentChannel, VALID_CONVO_SHORTCUT_ID);
+        final NotificationChannel conversationChannel =
+                mBinderService.getConversationNotificationChannel(
+                    PKG, mUserId, PKG, originalChannel.getId(), false, VALID_CONVO_SHORTCUT_ID);
+
+        //Create notification record without a shortcutId
+        Notification.Builder nb = getMessageStyleNotifBuilder(false /* addDefaultMetadata */,
+                null /* groupKey */, false /* isSummary */);
+        nb.setShortcutId(null);
+        nb.setChannelId(originalChannel.getId());
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                "tag", mUid, 0, nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        NotificationRecord nr = new NotificationRecord(mContext, sbn, originalChannel);
+        assertThat(nr.getChannel()).isEqualTo(originalChannel);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+                nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        // Verify that the channel is the parent channel and no channel was restored
+        //assertThat(service.getNotificationRecord(nr.getKey()).isConversation()).isFalse();
+        assertThat(service.getNotificationRecord(nr.getKey()).getChannel()).isEqualTo(
+                parentChannel);
+        verify(service, never()).handleSavePolicyFile();
+        verify(preferencesHelper, never()).createNotificationChannel(anyString(),
+                anyInt(), any(), anyBoolean(), anyBoolean(), anyInt(), anyBoolean());
     }
 
     @Test
