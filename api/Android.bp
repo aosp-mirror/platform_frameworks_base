@@ -83,7 +83,6 @@ combined_apis {
         "framework-configinfrastructure",
         "framework-connectivity",
         "framework-connectivity-t",
-        "framework-crashrecovery",
         "framework-devicelock",
         "framework-graphics",
         "framework-healthfitness",
@@ -105,7 +104,6 @@ combined_apis {
     system_server_classpath: [
         "service-art",
         "service-configinfrastructure",
-        "service-crashrecovery",
         "service-healthfitness",
         "service-media-s",
         "service-permission",
