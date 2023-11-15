@@ -50,8 +50,6 @@ import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteracto
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel
 import com.android.systemui.display.data.repository.FakeDisplayRepository
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.events.ANIMATING_OUT
@@ -86,8 +84,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
 
     @JvmField @Rule
     var mockitoRule = MockitoJUnit.rule()
-
-    private val featureFlags = FakeFeatureFlags()
 
     @Mock
     lateinit var callback: AuthDialogCallback
@@ -135,7 +131,6 @@ open class AuthContainerViewTest : SysuiTestCase() {
     @Before
     fun setup() {
         displayRepository = FakeDisplayRepository()
-        featureFlags.set(Flags.ONE_WAY_HAPTICS_API_MIGRATION, false)
 
         displayStateInteractor =
             DisplayStateInteractorImpl(
