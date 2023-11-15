@@ -5,8 +5,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dagger.qualifiers.Tracing
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
+import com.android.systemui.Flags.coroutineTracing
 import com.android.app.tracing.TraceUtils.Companion.coroutineTracingIsEnabled
 import com.android.app.tracing.TraceContextElement
 import dagger.Module
@@ -15,31 +14,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import javax.inject.Qualifier
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
-
-/** Key associated with a [Boolean] flag that enables or disables the coroutine tracing feature. */
-@Qualifier
-annotation class CoroutineTracingEnabledKey
-
-/**
- * Same as [@Application], but does not make use of flags. This should only be used when early usage
- * of [@Application] would introduce a circular dependency on [FeatureFlagsClassic].
- */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class UnflaggedApplication
-
-/**
- * Same as [@Background], but does not make use of flags. This should only be used when early usage
- * of [@Application] would introduce a circular dependency on [FeatureFlagsClassic].
- */
-@Qualifier
-@MustBeDocumented
-@Retention(AnnotationRetention.RUNTIME)
-annotation class UnflaggedBackground
 
 /** Providers for various coroutines-related constructs. */
 @Module
@@ -50,11 +26,6 @@ class CoroutinesModule {
     fun applicationScope(
             @Main dispatcherContext: CoroutineContext,
     ): CoroutineScope = CoroutineScope(dispatcherContext)
-
-    @Provides
-    @SysUISingleton
-    @UnflaggedApplication
-    fun unflaggedApplicationScope(): CoroutineScope = CoroutineScope(Dispatchers.Main.immediate)
 
     @Provides
     @SysUISingleton
@@ -98,28 +69,14 @@ class CoroutinesModule {
         return Dispatchers.IO + tracingCoroutineContext
     }
 
-    @Provides
-    @UnflaggedBackground
-    @SysUISingleton
-    fun unflaggedBackgroundCoroutineContext(): CoroutineContext {
-        return Dispatchers.IO
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     @Provides
     @Tracing
     @SysUISingleton
-    fun tracingCoroutineContext(
-        @CoroutineTracingEnabledKey enableTracing: Boolean
-    ): CoroutineContext = if (enableTracing) TraceContextElement() else EmptyCoroutineContext
-
-    companion object {
-        @[Provides CoroutineTracingEnabledKey]
-        fun provideIsCoroutineTracingEnabledKey(featureFlags: FeatureFlagsClassic): Boolean {
-            return if (featureFlags.isEnabled(Flags.COROUTINE_TRACING)) {
-                coroutineTracingIsEnabled = true
-                true
-            } else false
-        }
+    fun tracingCoroutineContext(): CoroutineContext {
+        return if (coroutineTracing()) {
+            coroutineTracingIsEnabled = true
+            TraceContextElement()
+        } else EmptyCoroutineContext
     }
 }

@@ -622,10 +622,6 @@ object Flags {
     val WARN_ON_BLOCKING_BINDER_TRANSACTIONS =
         unreleasedFlag("warn_on_blocking_binder_transactions")
 
-    @JvmField
-    val COROUTINE_TRACING =
-        unreleasedFlag("coroutine_tracing")
-
     // TODO(b/283071711): Tracking bug
     @JvmField
     val TRIM_RESOURCES_WITH_BACKGROUND_TRIM_AT_LOCK =
