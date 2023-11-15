@@ -9367,6 +9367,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     void appendDropBoxProcessHeaders(ProcessRecord process, String processName,
             final VolatileDropboxEntryStates volatileStates, final StringBuilder sb) {
+        sb.append("SystemUptimeMs: ").append(SystemClock.uptimeMillis()).append("\n");
+
         // Watchdog thread ends up invoking this function (with
         // a null ProcessRecord) to add the stack file to dropbox.
         // Do not acquire a lock on this (am) in such cases, as it
