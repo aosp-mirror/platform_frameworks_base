@@ -1633,7 +1633,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         }
     }
 
-    private void removeRootTaskInSurfaceTransaction(Task rootTask) {
+    /**
+     * Removes the root task associated with the given {@param rootTask}. If the {@param rootTask}
+     * is the pinned task, then its child tasks are not explicitly removed when the root task is
+     * destroyed, but instead moved back onto the TaskDisplayArea.
+     */
+    void removeRootTask(Task rootTask) {
         if (rootTask.getWindowingMode() == WINDOWING_MODE_PINNED) {
             removePinnedRootTaskInSurfaceTransaction(rootTask);
         } else {
@@ -1641,15 +1646,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 removeTask(task, true /* killProcess */, REMOVE_FROM_RECENTS, "remove-root-task");
             }, true /* traverseTopToBottom */);
         }
-    }
-
-    /**
-     * Removes the root task associated with the given {@param task}. If the {@param task} is the
-     * pinned task, then its child tasks are not explicitly removed when the root task is
-     * destroyed, but instead moved back onto the TaskDisplayArea.
-     */
-    void removeRootTask(Task task) {
-        mWindowManager.inSurfaceTransaction(() -> removeRootTaskInSurfaceTransaction(task));
     }
 
     /**

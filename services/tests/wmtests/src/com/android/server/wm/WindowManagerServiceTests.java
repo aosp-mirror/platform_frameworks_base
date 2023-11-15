@@ -273,7 +273,6 @@ public class WindowManagerServiceTests extends WindowTestsBase {
         assertFalse(win.mHasSurface);
         assertNull(win.mWinAnimator.mSurfaceController);
 
-        doReturn(mSystemServicesTestRule.mTransaction).when(SurfaceControl::getGlobalTransaction);
         // Invisible requested activity should not get the last config even if its view is visible.
         mWm.relayoutWindow(win.mSession, win.mClient, win.mAttrs, w, h, View.VISIBLE, 0, 0, 0,
                 outFrames, outConfig, outSurfaceControl, outInsetsState, outControls, outBundle);

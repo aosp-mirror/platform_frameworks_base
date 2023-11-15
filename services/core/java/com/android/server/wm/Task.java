@@ -4544,12 +4544,6 @@ class Task extends TaskFragment {
      * @param creating {@code true} if this is being run during task construction.
      */
     void setWindowingMode(int preferredWindowingMode, boolean creating) {
-        mWmService.inSurfaceTransaction(() -> setWindowingModeInSurfaceTransaction(
-                preferredWindowingMode, creating));
-    }
-
-    private void setWindowingModeInSurfaceTransaction(int preferredWindowingMode,
-            boolean creating) {
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
         if (taskDisplayArea == null) {
             Slog.d(TAG, "taskDisplayArea is null, bail early");
@@ -5965,18 +5959,16 @@ class Task extends TaskFragment {
                     "Can't exit pinned mode if it's not pinned already.");
         }
 
-        mWmService.inSurfaceTransaction(() -> {
-            final Task task = getBottomMostTask();
-            setWindowingMode(WINDOWING_MODE_UNDEFINED);
+        final Task task = getBottomMostTask();
+        setWindowingMode(WINDOWING_MODE_UNDEFINED);
 
-            // Task could have been removed from the hierarchy due to windowing mode change
-            // where its only child is reparented back to their original parent task.
-            if (isAttached()) {
-                getDisplayArea().positionChildAt(POSITION_TOP, this, false /* includingParents */);
-            }
+        // Task could have been removed from the hierarchy due to windowing mode change
+        // where its only child is reparented back to their original parent task.
+        if (isAttached()) {
+            getDisplayArea().positionChildAt(POSITION_TOP, this, false /* includingParents */);
+        }
 
-            mTaskSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, this);
-        });
+        mTaskSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(task, this);
     }
 
     private int setBounds(Rect existing, Rect bounds) {

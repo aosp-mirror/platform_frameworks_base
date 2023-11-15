@@ -1054,29 +1054,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     SystemPerformanceHinter mSystemPerformanceHinter;
 
-    void openSurfaceTransaction() {
-        try {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "openSurfaceTransaction");
-            SurfaceControl.openTransaction();
-        } finally {
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
-    /**
-     * Closes a surface transaction.
-     * @param where debug string indicating where the transaction originated
-     */
-    void closeSurfaceTransaction(String where) {
-        try {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "closeSurfaceTransaction");
-            SurfaceControl.closeTransaction();
-            mWindowTracing.logState(where);
-        } finally {
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        }
-    }
-
     /** Listener to notify activity manager about app transitions. */
     final WindowManagerInternal.AppTransitionListener mActivityManagerAppTransitionNotifier
             = new WindowManagerInternal.AppTransitionListener() {
@@ -8574,39 +8551,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     void unregisterAppFreezeListener(AppFreezeListener listener) {
         mAppFreezeListeners.remove(listener);
-    }
-
-    /**
-     * WARNING: This interrupts surface updates, be careful! Don't
-     * execute within the transaction for longer than you would
-     * execute on an animation thread.
-     * WARNING: This method contains locks known to the State of California
-     * to cause Deadlocks and other conditions.
-     *
-     * Begins a surface transaction with which the AM can batch operations.
-     * All Surface updates performed by the WindowManager following this
-     * will not appear on screen until after the call to
-     * closeSurfaceTransaction.
-     *
-     * ActivityManager can use this to ensure multiple 'commands' will all
-     * be reflected in a single frame. For example when reparenting a window
-     * which was previously hidden due to it's parent properties, we may
-     * need to ensure it is hidden in the same frame that the properties
-     * from the new parent are inherited, otherwise it could be revealed
-     * mistakenly.
-     *
-     * TODO(b/36393204): We can investigate totally replacing #deferSurfaceLayout
-     * with something like this but it seems that some existing cases of
-     * deferSurfaceLayout may be a little too broad, in particular the total
-     * enclosure of startActivityUnchecked which could run for quite some time.
-     */
-    void inSurfaceTransaction(Runnable exec) {
-        SurfaceControl.openTransaction();
-        try {
-            exec.run();
-        } finally {
-            SurfaceControl.closeTransaction();
-        }
     }
 
     /** Called to inform window manager if non-Vr UI shoul be disabled or not. */

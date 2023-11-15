@@ -5586,12 +5586,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     void prepareSurfaces() {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "prepareSurfaces");
         try {
-            final Transaction transaction = getPendingTransaction();
             super.prepareSurfaces();
-
-            // TODO: Once we totally eliminate global transaction we will pass transaction in here
-            //       rather than merging to global.
-            SurfaceControl.mergeToGlobalTransaction(transaction);
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }

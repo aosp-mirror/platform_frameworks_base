@@ -20,7 +20,6 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.SurfaceControl.METADATA_OWNER_PID;
 import static android.view.SurfaceControl.METADATA_OWNER_UID;
 import static android.view.SurfaceControl.METADATA_WINDOW_TYPE;
-import static android.view.SurfaceControl.getGlobalTransaction;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
@@ -157,14 +156,9 @@ class WindowSurfaceController {
         if (mSurfaceControl == null) {
             return;
         }
-        if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setOpaqueLocked");
-        mService.openSurfaceTransaction();
-        try {
-            getGlobalTransaction().setOpaque(mSurfaceControl, isOpaque);
-        } finally {
-            mService.closeSurfaceTransaction("setOpaqueLocked");
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setOpaqueLocked");
-        }
+
+        mAnimator.mWin.getPendingTransaction().setOpaque(mSurfaceControl, isOpaque);
+        mService.scheduleAnimationLocked();
     }
 
     void setSecure(boolean isSecure) {
@@ -174,18 +168,15 @@ class WindowSurfaceController {
             return;
         }
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, ">>> OPEN TRANSACTION setSecureLocked");
-        mService.openSurfaceTransaction();
-        try {
-            getGlobalTransaction().setSecure(mSurfaceControl, isSecure);
 
-            final DisplayContent dc = mAnimator.mWin.mDisplayContent;
-            if (dc != null) {
-                dc.refreshImeSecureFlag(getGlobalTransaction());
-            }
-        } finally {
-            mService.closeSurfaceTransaction("setSecure");
-            if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG, "<<< CLOSE TRANSACTION setSecureLocked");
+        final SurfaceControl.Transaction t = mAnimator.mWin.getPendingTransaction();
+        t.setSecure(mSurfaceControl, isSecure);
+
+        final DisplayContent dc = mAnimator.mWin.mDisplayContent;
+        if (dc != null) {
+            dc.refreshImeSecureFlag(t);
         }
+        mService.scheduleAnimationLocked();
     }
 
     void setColorSpaceAgnostic(SurfaceControl.Transaction t, boolean agnostic) {
