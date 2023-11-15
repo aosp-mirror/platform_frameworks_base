@@ -574,7 +574,7 @@ static jint android_media_AudioRecord_get_min_buff_size(JNIEnv *env,  jobject th
     if (result != NO_ERROR) {
         return -1;
     }
-    return frameCount * channelCount * audio_bytes_per_sample(format);
+    return frameCount * audio_bytes_per_frame(channelCount, format);
 }
 
 static jboolean android_media_AudioRecord_setInputDevice(
