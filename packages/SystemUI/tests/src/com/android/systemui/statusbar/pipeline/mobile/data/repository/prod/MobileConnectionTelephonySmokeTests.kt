@@ -32,6 +32,8 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_LTE
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.flags.FakeFeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
@@ -97,6 +99,9 @@ class MobileConnectionTelephonySmokeTests : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionRepositoryImpl
     private lateinit var connectionsRepo: FakeMobileConnectionsRepository
 
+    private val flags =
+        FakeFeatureFlagsClassic().also { it.set(Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
+
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var telephonyManager: TelephonyManager
     @Mock private lateinit var logger: MobileInputLogger
@@ -139,6 +144,7 @@ class MobileConnectionTelephonySmokeTests : SysuiTestCase() {
                 testDispatcher,
                 logger,
                 tableLogger,
+                flags,
                 testScope.backgroundScope,
             )
     }

@@ -50,10 +50,7 @@ object MobileTelephonyHelpers {
     }
 
     fun telephonyDisplayInfo(networkType: Int, overrideNetworkType: Int) =
-        mock<TelephonyDisplayInfo>().also {
-            whenever(it.networkType).thenReturn(networkType)
-            whenever(it.overrideNetworkType).thenReturn(overrideNetworkType)
-        }
+        TelephonyDisplayInfo(networkType, overrideNetworkType)
 
     inline fun <reified T> getTelephonyCallbackForType(mockTelephonyManager: TelephonyManager): T {
         val cbs = getTelephonyCallbacks(mockTelephonyManager).filterIsInstance<T>()
