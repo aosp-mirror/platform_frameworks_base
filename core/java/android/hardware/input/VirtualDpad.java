@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import java.util.Arrays;
@@ -80,7 +81,10 @@ public class VirtualDpad extends VirtualInputDevice {
                                 + event.getKeyCode()
                                 + " sent to a VirtualDpad input device.");
             }
-            mVirtualDevice.sendDpadKeyEvent(mToken, event);
+            if (!mVirtualDevice.sendDpadKeyEvent(mToken, event)) {
+                Log.w(TAG, "Failed to send key event to virtual dpad "
+                        + mConfig.getInputDeviceName());
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
