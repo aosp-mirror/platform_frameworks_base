@@ -19,6 +19,16 @@ import static android.media.AudioManager.GET_DEVICES_OUTPUTS;
 import static android.media.AudioPlaybackConfiguration.PLAYER_UPDATE_DEVICE_ID;
 import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_TYPE_MPEG_4;
 import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_TYPE_MPEG_D;
+import static android.media.MediaFormat.KEY_AAC_DRC_EFFECT_TYPE;
+import static android.media.MediaFormat.KEY_AAC_DRC_HEAVY_COMPRESSION;
+import static android.media.MediaFormat.KEY_AAC_DRC_TARGET_REFERENCE_LEVEL;
+
+import static com.android.server.audio.LoudnessCodecHelper.SPL_RANGE_LARGE;
+import static com.android.server.audio.LoudnessCodecHelper.SPL_RANGE_MEDIUM;
+import static com.android.server.audio.LoudnessCodecHelper.SPL_RANGE_SMALL;
+import static com.android.server.audio.LoudnessCodecHelper.SPL_RANGE_UNKNOWN;
+
+import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,10 +44,14 @@ import android.media.ILoudnessCodecUpdatesDispatcher;
 import android.media.LoudnessCodecInfo;
 import android.media.PlayerBase;
 import android.os.IBinder;
+import android.os.PersistableBundle;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import com.android.server.audio.LoudnessCodecHelper.DeviceSplRange;
+import com.android.server.audio.LoudnessCodecHelper.LoudnessCodecInputProperties;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -200,6 +214,108 @@ public class LoudnessCodecHelperTest {
                 any());
     }
 
+    @Test
+    public void checkParcelableBundle_forMpeg4CodecInputProperties() {
+        PersistableBundle loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_4, /*isDownmixing*/true,
+                SPL_RANGE_SMALL).createLoudnessParameters();
+        assertEquals(64, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(1, loudnessParameters.getInt(KEY_AAC_DRC_HEAVY_COMPRESSION));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_4, /*isDownmixing*/false,
+                SPL_RANGE_SMALL).createLoudnessParameters();
+        assertEquals(64, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(1, loudnessParameters.getInt(KEY_AAC_DRC_HEAVY_COMPRESSION));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_4, /*isDownmixing*/true,
+                SPL_RANGE_MEDIUM).createLoudnessParameters();
+        assertEquals(96, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(1, loudnessParameters.getInt(KEY_AAC_DRC_HEAVY_COMPRESSION));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_4, /*isDownmixing*/false,
+                SPL_RANGE_MEDIUM).createLoudnessParameters();
+        assertEquals(96, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(0, loudnessParameters.getInt(KEY_AAC_DRC_HEAVY_COMPRESSION));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_4, /*isDownmixing*/true,
+                SPL_RANGE_LARGE).createLoudnessParameters();
+        assertEquals(124, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(0, loudnessParameters.getInt(KEY_AAC_DRC_HEAVY_COMPRESSION));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_4, /*isDownmixing*/false,
+                SPL_RANGE_LARGE).createLoudnessParameters();
+        assertEquals(124, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(0, loudnessParameters.getInt(KEY_AAC_DRC_HEAVY_COMPRESSION));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_4, /*isDownmixing*/true,
+                SPL_RANGE_UNKNOWN).createLoudnessParameters();
+        assertEquals(96, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(1, loudnessParameters.getInt(KEY_AAC_DRC_HEAVY_COMPRESSION));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_4, /*isDownmixing*/false,
+                SPL_RANGE_UNKNOWN).createLoudnessParameters();
+        assertEquals(96, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(0, loudnessParameters.getInt(KEY_AAC_DRC_HEAVY_COMPRESSION));
+    }
+
+    @Test
+    public void checkParcelableBundle_forMpegDCodecInputProperties() {
+        PersistableBundle loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_D, /*isDownmixing*/true,
+                SPL_RANGE_SMALL).createLoudnessParameters();
+        assertEquals(64, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(3, loudnessParameters.getInt(KEY_AAC_DRC_EFFECT_TYPE));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_D, /*isDownmixing*/false,
+                SPL_RANGE_SMALL).createLoudnessParameters();
+        assertEquals(64, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(3, loudnessParameters.getInt(KEY_AAC_DRC_EFFECT_TYPE));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_D, /*isDownmixing*/true,
+                SPL_RANGE_MEDIUM).createLoudnessParameters();
+        assertEquals(96, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(6, loudnessParameters.getInt(KEY_AAC_DRC_EFFECT_TYPE));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_D, /*isDownmixing*/false,
+                SPL_RANGE_MEDIUM).createLoudnessParameters();
+        assertEquals(96, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(6, loudnessParameters.getInt(KEY_AAC_DRC_EFFECT_TYPE));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_D, /*isDownmixing*/true,
+                SPL_RANGE_LARGE).createLoudnessParameters();
+        assertEquals(124, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(6, loudnessParameters.getInt(KEY_AAC_DRC_EFFECT_TYPE));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_D, /*isDownmixing*/false,
+                SPL_RANGE_LARGE).createLoudnessParameters();
+        assertEquals(124, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(6, loudnessParameters.getInt(KEY_AAC_DRC_EFFECT_TYPE));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_D, /*isDownmixing*/true,
+                SPL_RANGE_UNKNOWN).createLoudnessParameters();
+        assertEquals(96, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(6, loudnessParameters.getInt(KEY_AAC_DRC_EFFECT_TYPE));
+
+        loudnessParameters = createInputProperties(
+                CODEC_METADATA_TYPE_MPEG_D, /*isDownmixing*/false,
+                SPL_RANGE_UNKNOWN).createLoudnessParameters();
+        assertEquals(96, loudnessParameters.getInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL));
+        assertEquals(6, loudnessParameters.getInt(KEY_AAC_DRC_EFFECT_TYPE));
+    }
+
     private List<AudioPlaybackConfiguration> getApcListForPiids(int... piids) {
         final ArrayList<AudioPlaybackConfiguration> apcList = new ArrayList<>();
 
@@ -218,6 +334,12 @@ public class LoudnessCodecHelperTest {
             apcList.add(apc);
         }
         return apcList;
+    }
+
+    private static LoudnessCodecInputProperties createInputProperties(
+            int metadataType, boolean isDownmixing, @DeviceSplRange int splRange) {
+        return new LoudnessCodecInputProperties.Builder().setMetadataType(
+                metadataType).setIsDownmixing(isDownmixing).setDeviceSplRange(splRange).build();
     }
 
     private static LoudnessCodecInfo getLoudnessInfo(int mediaCodecHash, boolean isDownmixing,
