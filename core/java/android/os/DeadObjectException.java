@@ -19,7 +19,8 @@ import android.os.RemoteException;
 
 /**
  * The object you are calling has died, because its hosting process
- * no longer exists.
+ * no longer exists. This is also thrown for low-level binder
+ * errors.
  */
 public class DeadObjectException extends RemoteException {
     public DeadObjectException() {
