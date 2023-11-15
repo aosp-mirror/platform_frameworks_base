@@ -25,6 +25,7 @@
 #include "util/Files.h"
 
 using ::android::ConfigDescription;
+using testing::Pair;
 using testing::UnorderedElementsAre;
 
 namespace aapt {
@@ -352,6 +353,51 @@ TEST (UtilTest, ParseSplitParameters) {
       .setSdkVersion(0x001A) // colorMode (hdr|colour gamut) requires oreo
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
+}
+
+TEST(UtilTest, ParseFeatureFlagsParameter_Empty) {
+  auto diagnostics = test::ContextBuilder().Build()->GetDiagnostics();
+  FeatureFlagValues feature_flag_values;
+  ASSERT_TRUE(ParseFeatureFlagsParameter("", diagnostics, &feature_flag_values));
+  EXPECT_TRUE(feature_flag_values.empty());
+}
+
+TEST(UtilTest, ParseFeatureFlagsParameter_TooManyParts) {
+  auto diagnostics = test::ContextBuilder().Build()->GetDiagnostics();
+  FeatureFlagValues feature_flag_values;
+  ASSERT_FALSE(ParseFeatureFlagsParameter("foo=bar=baz", diagnostics, &feature_flag_values));
+}
+
+TEST(UtilTest, ParseFeatureFlagsParameter_NoNameGiven) {
+  auto diagnostics = test::ContextBuilder().Build()->GetDiagnostics();
+  FeatureFlagValues feature_flag_values;
+  ASSERT_FALSE(ParseFeatureFlagsParameter("foo=true,=false", diagnostics, &feature_flag_values));
+}
+
+TEST(UtilTest, ParseFeatureFlagsParameter_InvalidValue) {
+  auto diagnostics = test::ContextBuilder().Build()->GetDiagnostics();
+  FeatureFlagValues feature_flag_values;
+  ASSERT_FALSE(ParseFeatureFlagsParameter("foo=true,bar=42", diagnostics, &feature_flag_values));
+}
+
+TEST(UtilTest, ParseFeatureFlagsParameter_DuplicateFlag) {
+  auto diagnostics = test::ContextBuilder().Build()->GetDiagnostics();
+  FeatureFlagValues feature_flag_values;
+  ASSERT_TRUE(
+      ParseFeatureFlagsParameter("foo=true,bar=true,foo=false", diagnostics, &feature_flag_values));
+  EXPECT_THAT(feature_flag_values, UnorderedElementsAre(Pair("foo", std::optional<bool>(false)),
+                                                        Pair("bar", std::optional<bool>(true))));
+}
+
+TEST(UtilTest, ParseFeatureFlagsParameter_Valid) {
+  auto diagnostics = test::ContextBuilder().Build()->GetDiagnostics();
+  FeatureFlagValues feature_flag_values;
+  ASSERT_TRUE(ParseFeatureFlagsParameter("foo= true, bar =FALSE,baz=, quux", diagnostics,
+                                         &feature_flag_values));
+  EXPECT_THAT(feature_flag_values,
+              UnorderedElementsAre(Pair("foo", std::optional<bool>(true)),
+                                   Pair("bar", std::optional<bool>(false)),
+                                   Pair("baz", std::nullopt), Pair("quux", std::nullopt)));
 }
 
 TEST (UtilTest, AdjustSplitConstraintsForMinSdk) {
