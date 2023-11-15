@@ -40,6 +40,7 @@ import java.util.List;
  * Implementations should subclass {@link AbstractCursor}.
  * </p>
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public interface Cursor extends Closeable {
     /*
      * Values returned by {@link #getType(int)}.
