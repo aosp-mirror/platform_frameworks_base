@@ -62,6 +62,13 @@ sealed class AuthMethodBouncerViewModel(
 
     /** Notifies that the UI has been shown to the user. */
     fun onShown() {
+        interactor.resetMessage()
+    }
+
+    /**
+     * Notifies that the UI has been hidden from the user (after any transitions have completed).
+     */
+    fun onHidden() {
         clearInput()
         interactor.resetMessage()
     }
@@ -113,8 +120,6 @@ sealed class AuthMethodBouncerViewModel(
             }
             _animateFailure.value = authenticationResult != AuthenticationResult.SUCCEEDED
 
-            // TODO(b/291528545): On success, this should only be cleared after the view is animated
-            //  away).
             clearInput()
         }
     }
