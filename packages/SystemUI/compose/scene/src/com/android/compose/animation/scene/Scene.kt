@@ -76,6 +76,8 @@ private class SceneScopeImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val scene: Scene,
 ) : SceneScope {
+    override val layoutState: SceneTransitionLayoutState = layoutImpl.state
+
     override fun Modifier.element(key: ElementKey): Modifier {
         return element(layoutImpl, scene, key)
     }

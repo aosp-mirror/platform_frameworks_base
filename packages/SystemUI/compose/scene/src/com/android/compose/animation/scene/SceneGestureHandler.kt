@@ -17,7 +17,6 @@
 package com.android.compose.animation.scene
 
 import android.util.Log
-import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -37,8 +36,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
-@VisibleForTesting
-class SceneGestureHandler(
+internal class SceneGestureHandler(
     internal val layoutImpl: SceneTransitionLayoutImpl,
     internal val orientation: Orientation,
     private val coroutineScope: CoroutineScope,
@@ -63,12 +61,10 @@ class SceneGestureHandler(
     internal val currentScene: Scene
         get() = layoutImpl.scene(transitionState.currentScene)
 
-    @VisibleForTesting
-    val isDrivingTransition
+    internal val isDrivingTransition
         get() = transitionState == swipeTransition
 
-    @VisibleForTesting
-    var isAnimatingOffset
+    internal var isAnimatingOffset
         get() = swipeTransition.isAnimatingOffset
         private set(value) {
             swipeTransition.isAnimatingOffset = value
@@ -81,7 +77,7 @@ class SceneGestureHandler(
      * The velocity threshold at which the intent of the user is to swipe up or down. It is the same
      * as SwipeableV2Defaults.VelocityThreshold.
      */
-    @VisibleForTesting val velocityThreshold = with(layoutImpl.density) { 125.dp.toPx() }
+    internal val velocityThreshold = with(layoutImpl.density) { 125.dp.toPx() }
 
     /**
      * The positional threshold at which the intent of the user is to swipe to the next scene. It is
@@ -533,8 +529,7 @@ private class SceneDraggableHandler(
     }
 }
 
-@VisibleForTesting
-class SceneNestedScrollHandler(
+internal class SceneNestedScrollHandler(
     private val gestureHandler: SceneGestureHandler,
     private val startBehavior: NestedScrollBehavior,
     private val endBehavior: NestedScrollBehavior,
