@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Güvənli məkandan çıxarın"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Tətbiq bölünmüş ekranda işləməyə bilər"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Tətbiq bölünmüş ekranı dəstəkləmir"</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Bu tətbiq yalnız 1 pəncərədə açıla bilər"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Tətbiq ikinci ekranda işləməyə bilər."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Tətbiq ikinci ekranda başlamağı dəstəkləmir."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Bölünmüş ekran ayırıcısı"</string>
