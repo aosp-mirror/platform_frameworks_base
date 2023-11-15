@@ -33,7 +33,6 @@ import static com.android.systemui.statusbar.NotificationLockscreenUserManager.P
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
@@ -2925,45 +2924,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         } else {
             KeyboardShortcuts.dismiss();
         }
-    }
-
-    /**
-     * Dismiss the keyguard then execute an action.
-     *
-     * @param action The action to execute after dismissing the keyguard.
-     * @param collapsePanel Whether we should collapse the panel after dismissing the keyguard.
-     * @param willAnimateOnKeyguard Whether {@param action} will run an animation on the keyguard if
-     *                              we are locked.
-     */
-    private void executeActionDismissingKeyguard(Runnable action, boolean afterKeyguardGone,
-            boolean collapsePanel, boolean willAnimateOnKeyguard) {
-        if (!mDeviceProvisionedController.isDeviceProvisioned()) return;
-
-        OnDismissAction onDismissAction = new OnDismissAction() {
-            @Override
-            public boolean onDismiss() {
-                new Thread(() -> {
-                    try {
-                        // The intent we are sending is for the application, which
-                        // won't have permission to immediately start an activity after
-                        // the user switches to home.  We know it is safe to do at this
-                        // point, so make sure new activity switches are now allowed.
-                        ActivityManager.getService().resumeAppSwitches();
-                    } catch (RemoteException e) {
-                    }
-                    action.run();
-                }).start();
-
-                return collapsePanel ? mShadeController.collapseShade() : willAnimateOnKeyguard;
-            }
-
-            @Override
-            public boolean willRunAnimationOnKeyguard() {
-                return willAnimateOnKeyguard;
-            }
-        };
-        mActivityStarter.dismissKeyguardThenExecute(onDismissAction, /* cancel= */ null,
-                afterKeyguardGone);
     }
 
     private void clearNotificationEffects() {
