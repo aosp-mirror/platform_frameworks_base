@@ -348,6 +348,10 @@ object Flags {
     // TODO(b/301610137): Tracking bug
     @JvmField val NEW_NETWORK_SLICE_UI = releasedFlag("new_network_slice_ui")
 
+    // TODO(b/311222557): Tracking bug
+    val ROAMING_INDICATOR_VIA_DISPLAY_INFO =
+        releasedFlag("roaming_indicator_via_display_info")
+
     // TODO(b/308138154): Tracking bug
     val FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS =
         releasedFlag("filter_provisioning_network_subscriptions")
