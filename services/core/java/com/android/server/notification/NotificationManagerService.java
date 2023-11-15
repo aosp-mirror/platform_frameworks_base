@@ -828,6 +828,22 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        // Removes all notifications with the specified user & package.
+        public void removePackageNotifications(String pkg, @UserIdInt int userId) {
+            synchronized (mBufferLock) {
+                Iterator<Pair<StatusBarNotification, Integer>> bufferIter = descendingIterator();
+                while (bufferIter.hasNext()) {
+                    final Pair<StatusBarNotification, Integer> pair = bufferIter.next();
+                    if (pair.first != null
+                            && userId == pair.first.getNormalizedUserId()
+                            && pkg != null && pkg.equals(pair.first.getPackageName())
+                            && pair.first.getNotification() != null) {
+                        bufferIter.remove();
+                    }
+                }
+            }
+        }
+
         void dumpImpl(PrintWriter pw, @NonNull DumpFilter filter) {
             synchronized (mBufferLock) {
                 Iterator<Pair<StatusBarNotification, Integer>> iter = descendingIterator();
@@ -1902,7 +1918,6 @@ public class NotificationManagerService extends SystemService {
                         unhideNotificationsForPackages(pkgList, uidList);
                     }
                 }
-
                 mHandler.scheduleOnPackageChanged(removingPackage, changeUserId, pkgList, uidList);
             }
         }
@@ -4216,7 +4231,8 @@ public class NotificationManagerService extends SystemService {
             boolean previouslyExisted = mPreferencesHelper.deleteNotificationChannel(
                     pkg, callingUid, channelId, callingUid, isSystemOrSystemUi);
             if (previouslyExisted) {
-                // Remove from both recent notification archive and notification history
+                // Remove from both recent notification archive (recently dismissed notifications)
+                // and notification history
                 mArchive.removeChannelNotifications(pkg, callingUser, channelId);
                 mHistoryManager.deleteNotificationChannel(pkg, callingUid, channelId);
                 mListeners.notifyNotificationChannelChanged(pkg,
@@ -9418,7 +9434,11 @@ public class NotificationManagerService extends SystemService {
             for (int i = 0; i < size; i++) {
                 final String pkg = pkgList[i];
                 final int uid = uidList[i];
-                mHistoryManager.onPackageRemoved(UserHandle.getUserId(uid), pkg);
+                final int userHandle = UserHandle.getUserId(uid);
+                // Removes this package's notifications from both recent notification archive
+                // (recently dismissed notifications) and notification history.
+                mArchive.removePackageNotifications(pkg, userHandle);
+                mHistoryManager.onPackageRemoved(userHandle, pkg);
             }
         }
         if (preferencesChanged) {
