@@ -16,10 +16,12 @@
 
 package com.android.compose.nestedscroll
 
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
+import com.android.compose.ui.util.SpaceVectorConverter
 
 /**
  * This [NestedScrollConnection] waits for a child to scroll ([onPreScroll] or [onPostScroll]), and
@@ -147,3 +149,35 @@ class PriorityNestedScrollConnection(
         return onStop(velocity)
     }
 }
+
+fun PriorityNestedScrollConnection(
+    orientation: Orientation,
+    canStartPreScroll: (offsetAvailable: Float, offsetBeforeStart: Float) -> Boolean,
+    canStartPostScroll: (offsetAvailable: Float, offsetBeforeStart: Float) -> Boolean,
+    canStartPostFling: (velocityAvailable: Float) -> Boolean,
+    canContinueScroll: () -> Boolean,
+    onStart: () -> Unit,
+    onScroll: (offsetAvailable: Float) -> Float,
+    onStop: (velocityAvailable: Float) -> Float,
+) =
+    with(SpaceVectorConverter(orientation)) {
+        PriorityNestedScrollConnection(
+            canStartPreScroll = { offsetAvailable: Offset, offsetBeforeStart: Offset ->
+                canStartPreScroll(offsetAvailable.toFloat(), offsetBeforeStart.toFloat())
+            },
+            canStartPostScroll = { offsetAvailable: Offset, offsetBeforeStart: Offset ->
+                canStartPostScroll(offsetAvailable.toFloat(), offsetBeforeStart.toFloat())
+            },
+            canStartPostFling = { velocityAvailable: Velocity ->
+                canStartPostFling(velocityAvailable.toFloat())
+            },
+            canContinueScroll = canContinueScroll,
+            onStart = onStart,
+            onScroll = { offsetAvailable: Offset ->
+                onScroll(offsetAvailable.toFloat()).toOffset()
+            },
+            onStop = { velocityAvailable: Velocity ->
+                onStop(velocityAvailable.toFloat()).toVelocity()
+            },
+        )
+    }
