@@ -212,14 +212,11 @@ static jint android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject w
             return (jint) AUDIORECORD_ERROR_SETUP_INVALIDFORMAT;
         }
 
-        size_t bytesPerSample = audio_bytes_per_sample(format);
-
         if (buffSizeInBytes == 0) {
             ALOGE("Error creating AudioRecord: frameCount is 0.");
             return (jint) AUDIORECORD_ERROR_SETUP_ZEROFRAMECOUNT;
         }
-        size_t frameSize = channelCount * bytesPerSample;
-        size_t frameCount = buffSizeInBytes / frameSize;
+        size_t frameCount = buffSizeInBytes / audio_bytes_per_frame(channelCount, format);
 
         // create an uninitialized AudioRecord object
         Parcel* parcel = parcelForJavaObject(env, jAttributionSource);
