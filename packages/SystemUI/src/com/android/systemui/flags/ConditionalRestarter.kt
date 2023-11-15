@@ -17,9 +17,9 @@
 package com.android.systemui.flags
 
 import android.util.Log
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.ConditionalRestarter.Condition
-import com.android.systemui.util.kotlin.UnflaggedApplication
-import com.android.systemui.util.kotlin.UnflaggedBackground
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Named
@@ -39,8 +39,8 @@ constructor(
     private val systemExitRestarter: SystemExitRestarter,
     private val conditions: Set<@JvmSuppressWildcards Condition>,
     @Named(RESTART_DELAY) private val restartDelaySec: Long,
-    @UnflaggedApplication private val applicationScope: CoroutineScope,
-    @UnflaggedBackground private val backgroundDispatcher: CoroutineContext,
+    @Application private val applicationScope: CoroutineScope,
+    @Background private val backgroundDispatcher: CoroutineContext,
 ) : Restarter {
 
     private var pendingReason = ""
