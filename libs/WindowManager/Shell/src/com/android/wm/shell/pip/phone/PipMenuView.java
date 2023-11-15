@@ -107,7 +107,7 @@ public class PipMenuView extends FrameLayout {
     private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
     private static final long MENU_SHOW_ON_EXPAND_START_DELAY = 30;
 
-    private static final float MENU_BACKGROUND_ALPHA = 0.3f;
+    private static final float MENU_BACKGROUND_ALPHA = 0.54f;
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
     private int mMenuState;
