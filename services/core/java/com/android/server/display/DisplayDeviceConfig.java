@@ -71,7 +71,7 @@ import com.android.server.display.config.RefreshRateThrottlingPoint;
 import com.android.server.display.config.RefreshRateZone;
 import com.android.server.display.config.SdrHdrRatioMap;
 import com.android.server.display.config.SdrHdrRatioPoint;
-import com.android.server.display.config.SensorDetails;
+import com.android.server.display.config.SensorData;
 import com.android.server.display.config.ThermalStatus;
 import com.android.server.display.config.ThermalThrottling;
 import com.android.server.display.config.ThresholdPoint;
@@ -349,6 +349,20 @@ import javax.xml.datatype.DatatypeConfigurationException;
  *      <proxSensor>
  *        <type>android.sensor.proximity</type>
  *        <name>1234 Proximity Sensor</name>
+ *        <refreshRate>
+ *             <minimum>60</minimum>
+ *             <maximum>60</maximum>
+ *         </refreshRate>
+ *         <supportedModes>
+ *             <point>
+ *                 <first>60</first>   // refreshRate
+ *                 <second>60</second> //vsyncRate
+ *             </point>
+ *             <point>
+ *                 <first>120</first>   // refreshRate
+ *                 <second>120</second> //vsyncRate
+ *             </point>
+ *          </supportedModes>
  *      </proxSensor>
  *
  *      <ambientLightHorizonLong>10001</ambientLightHorizonLong>
@@ -581,15 +595,15 @@ public class DisplayDeviceConfig {
     private final Context mContext;
 
     // The details of the ambient light sensor associated with this display.
-    private final SensorData mAmbientLightSensor = new SensorData();
+    private SensorData mAmbientLightSensor;
 
     // The details of the doze brightness sensor associated with this display.
-    private final SensorData mScreenOffBrightnessSensor = new SensorData();
+    private SensorData mScreenOffBrightnessSensor;
 
     // The details of the proximity sensor associated with this display.
     // Is null when no sensor should be used for that display
     @Nullable
-    private SensorData mProximitySensor = new SensorData();
+    private SensorData mProximitySensor;
 
     private final List<RefreshRateLimitation> mRefreshRateLimitations =
             new ArrayList<>(2 /*initialCapacity*/);
@@ -1913,9 +1927,10 @@ public class DisplayDeviceConfig {
                 loadLuxThrottling(config);
                 loadQuirks(config);
                 loadBrightnessRamps(config);
-                loadAmbientLightSensorFromDdc(config);
-                loadScreenOffBrightnessSensorFromDdc(config);
-                loadProxSensorFromDdc(config);
+                mAmbientLightSensor = SensorData.loadAmbientLightSensorConfig(config,
+                        mContext.getResources());
+                mScreenOffBrightnessSensor = SensorData.loadScreenOffBrightnessSensorConfig(config);
+                mProximitySensor = SensorData.loadProxSensorConfig(config);
                 loadAmbientHorizonFromDdc(config);
                 loadBrightnessChangeThresholds(config);
                 loadAutoBrightnessConfigValues(config);
@@ -1940,9 +1955,9 @@ public class DisplayDeviceConfig {
         loadBrightnessConstraintsFromConfigXml();
         loadBrightnessMapFromConfigXml();
         loadBrightnessRampsFromConfigXml();
-        loadAmbientLightSensorFromConfigXml();
+        mAmbientLightSensor = SensorData.loadAmbientLightSensorConfig(mContext.getResources());
+        mProximitySensor = SensorData.loadSensorUnspecifiedConfig();
         loadBrightnessChangeThresholdsFromXml();
-        setProxSensorUnspecified();
         loadAutoBrightnessConfigsFromConfigXml();
         loadAutoBrightnessAvailableFromConfigXml();
         loadRefreshRateSetting(null);
@@ -1966,8 +1981,8 @@ public class DisplayDeviceConfig {
         mBrightnessRampDecreaseMaxIdleMillis = 0;
         mBrightnessRampIncreaseMaxIdleMillis = 0;
         setSimpleMappingStrategyValues();
-        loadAmbientLightSensorFromConfigXml();
-        setProxSensorUnspecified();
+        mAmbientLightSensor = SensorData.loadAmbientLightSensorConfig(mContext.getResources());
+        mProximitySensor = SensorData.loadSensorUnspecifiedConfig();
         loadAutoBrightnessAvailableFromConfigXml();
     }
 
@@ -2919,62 +2934,8 @@ public class DisplayDeviceConfig {
         mBrightnessRampSlowDecrease = mBrightnessRampSlowIncrease;
     }
 
-    private void loadAmbientLightSensorFromConfigXml() {
-        mAmbientLightSensor.name = "";
-        mAmbientLightSensor.type = mContext.getResources().getString(
-                com.android.internal.R.string.config_displayLightSensorType);
-    }
-
     private void loadAutoBrightnessConfigsFromConfigXml() {
         loadAutoBrightnessDisplayBrightnessMapping(null /*AutoBrightnessConfig*/);
-    }
-
-    private void loadAmbientLightSensorFromDdc(DisplayConfiguration config) {
-        final SensorDetails sensorDetails = config.getLightSensor();
-        if (sensorDetails != null) {
-            loadSensorData(sensorDetails, mAmbientLightSensor);
-        } else {
-            loadAmbientLightSensorFromConfigXml();
-        }
-    }
-
-    private void setProxSensorUnspecified() {
-        mProximitySensor = new SensorData();
-    }
-
-    private void loadScreenOffBrightnessSensorFromDdc(DisplayConfiguration config) {
-        final SensorDetails sensorDetails = config.getScreenOffBrightnessSensor();
-        if (sensorDetails != null) {
-            loadSensorData(sensorDetails, mScreenOffBrightnessSensor);
-        }
-    }
-
-    private void loadProxSensorFromDdc(DisplayConfiguration config) {
-        SensorDetails sensorDetails = config.getProxSensor();
-        if (sensorDetails != null) {
-            String name = sensorDetails.getName();
-            String type = sensorDetails.getType();
-            if ("".equals(name) && "".equals(type)) {
-                // <proxSensor> with empty values to the config means no sensor should be used
-                mProximitySensor = null;
-            } else {
-                mProximitySensor = new SensorData();
-                loadSensorData(sensorDetails, mProximitySensor);
-            }
-        } else {
-            setProxSensorUnspecified();
-        }
-    }
-
-    private void loadSensorData(@NonNull SensorDetails sensorDetails,
-            @NonNull SensorData sensorData) {
-        sensorData.name = sensorDetails.getName();
-        sensorData.type = sensorDetails.getType();
-        final RefreshRateRange rr = sensorDetails.getRefreshRate();
-        if (rr != null) {
-            sensorData.minRefreshRate = rr.getMinimum().floatValue();
-            sensorData.maxRefreshRate = rr.getMaximum().floatValue();
-        }
     }
 
     private void loadBrightnessChangeThresholdsFromXml() {
@@ -3387,37 +3348,6 @@ public class DisplayDeviceConfig {
                         usiVersion.getMajorVersion().intValue(),
                         usiVersion.getMinorVersion().intValue())
                 : null;
-    }
-
-    /**
-     * Uniquely identifies a Sensor, with the combination of Type and Name.
-     */
-    public static class SensorData {
-        public String type;
-        public String name;
-        public float minRefreshRate = 0.0f;
-        public float maxRefreshRate = Float.POSITIVE_INFINITY;
-
-        @Override
-        public String toString() {
-            return "Sensor{"
-                    + "type: " + type
-                    + ", name: " + name
-                    + ", refreshRateRange: [" + minRefreshRate + ", " + maxRefreshRate + "]"
-                    + "} ";
-        }
-
-        /**
-         * @return True if the sensor matches both the specified name and type, or one if only one
-         * is specified (not-empty). Always returns false if both parameters are null or empty.
-         */
-        public boolean matches(String sensorName, String sensorType) {
-            final boolean isNameSpecified = !TextUtils.isEmpty(sensorName);
-            final boolean isTypeSpecified = !TextUtils.isEmpty(sensorType);
-            return (isNameSpecified || isTypeSpecified)
-                    && (!isNameSpecified || sensorName.equals(name))
-                    && (!isTypeSpecified || sensorType.equals(type));
-        }
     }
 
     /**

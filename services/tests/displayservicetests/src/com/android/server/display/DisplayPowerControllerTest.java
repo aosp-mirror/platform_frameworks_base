@@ -76,6 +76,7 @@ import com.android.server.am.BatteryStatsService;
 import com.android.server.display.RampAnimator.DualRampAnimator;
 import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.color.ColorDisplayService;
+import com.android.server.display.config.SensorData;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.feature.flags.Flags;
 import com.android.server.display.layout.Layout;
@@ -1515,23 +1516,13 @@ public final class DisplayPowerControllerTest {
         when(displayDeviceMock.getUniqueId()).thenReturn(uniqueId);
         when(displayDeviceMock.getDisplayDeviceConfig()).thenReturn(displayDeviceConfigMock);
         when(displayDeviceConfigMock.getProximitySensor()).thenReturn(
-                new DisplayDeviceConfig.SensorData() {
-                    {
-                        type = Sensor.STRING_TYPE_PROXIMITY;
-                        name = null;
-                    }
-                });
+                new SensorData(Sensor.STRING_TYPE_PROXIMITY, null));
         when(displayDeviceConfigMock.getNits()).thenReturn(new float[]{2, 500});
         when(displayDeviceConfigMock.isAutoBrightnessAvailable()).thenReturn(true);
         when(displayDeviceConfigMock.getAmbientLightSensor()).thenReturn(
-                new DisplayDeviceConfig.SensorData());
+                new SensorData());
         when(displayDeviceConfigMock.getScreenOffBrightnessSensor()).thenReturn(
-                new DisplayDeviceConfig.SensorData() {
-                    {
-                        type = Sensor.STRING_TYPE_LIGHT;
-                        name = null;
-                    }
-                });
+                new SensorData(Sensor.STRING_TYPE_LIGHT, null));
         when(displayDeviceConfigMock.getScreenOffBrightnessSensorValueToLux())
                 .thenReturn(new int[0]);
 
