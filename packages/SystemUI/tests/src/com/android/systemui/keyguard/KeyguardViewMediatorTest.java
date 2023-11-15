@@ -910,6 +910,20 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         assertATMSAndKeyguardViewMediatorStatesMatch();
     }
 
+    @Test
+    @TestableLooper.RunWithLooper(setAsMainLooper = true)
+    public void testStartKeyguardExitAnimation_whenNotInteractive_doesShowAndUpdatesWM() {
+        // If the exit animation was triggered but the device became non-interactive, make sure
+        // relock happens
+        when(mPowerManager.isInteractive()).thenReturn(false);
+
+        startMockKeyguardExitAnimation();
+        cancelMockKeyguardExitAnimation();
+
+        verify(mStatusBarKeyguardViewManager, atLeast(1)).show(null);
+        assertATMSAndKeyguardViewMediatorStatesMatch();
+    }
+
     /**
      * Interactions with the ActivityTaskManagerService and others are posted to an executor that
      * doesn't use the testable looper. Use this method to ensure those are run as well.
