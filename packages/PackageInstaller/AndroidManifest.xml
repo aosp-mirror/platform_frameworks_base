@@ -81,6 +81,7 @@
             android:exported="false" />
 
         <activity android:name=".PackageInstallerActivity"
+                  android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
                   android:exported="false" />
 
         <activity android:name=".InstallInstalling"
