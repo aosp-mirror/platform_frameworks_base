@@ -6734,7 +6734,7 @@ public abstract class Context {
             @Intent.AccessUriMode int modeFlags);
 
     /**
-     * Determine whether a particular process and user ID has been granted
+     * Determine whether a particular process and uid has been granted
      * permission to access a specific URI.  This only checks for permissions
      * that have been explicitly granted -- if the given process/uid has
      * more general access to the URI's content provider then this check will
@@ -6758,7 +6758,38 @@ public abstract class Context {
             @Intent.AccessUriMode int modeFlags);
 
     /**
-     * Determine whether a particular process and user ID has been granted
+     * Determine whether a particular process and uid has been granted
+     * permission to access a specific content URI.
+     *
+     * <p>Unlike {@link #checkUriPermission(Uri, int, int, int)}, this method
+     * checks for general access to the URI's content provider, as well as
+     * explicitly granted permissions.</p>
+     *
+     * <p>Note, this check will throw an {@link IllegalArgumentException}
+     * for non-content URIs.</p>
+     *
+     * @param uri The content uri that is being checked.
+     * @param pid (Optional) The process ID being checked against. If the
+     * pid is unknown, pass -1.
+     * @param uid The UID being checked against.  A uid of 0 is the root
+     * user, which will pass every permission check.
+     * @param modeFlags The access modes to check.
+     *
+     * @return {@link PackageManager#PERMISSION_GRANTED} if the given
+     * pid/uid is allowed to access that uri, or
+     * {@link PackageManager#PERMISSION_DENIED} if it is not.
+     *
+     * @see #checkUriPermission(Uri, int, int, int)
+     */
+    @FlaggedApi(android.security.Flags.FLAG_CONTENT_URI_PERMISSION_APIS)
+    @PackageManager.PermissionResult
+    public int checkContentUriPermissionFull(@NonNull Uri uri, int pid, int uid,
+            @Intent.AccessUriMode int modeFlags) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Determine whether a particular process and uid has been granted
      * permission to access a list of URIs.  This only checks for permissions
      * that have been explicitly granted -- if the given process/uid has
      * more general access to the URI's content provider then this check will
@@ -6794,7 +6825,7 @@ public abstract class Context {
             @Intent.AccessUriMode int modeFlags, IBinder callerToken);
 
     /**
-     * Determine whether the calling process and user ID has been
+     * Determine whether the calling process and uid has been
      * granted permission to access a specific URI.  This is basically
      * the same as calling {@link #checkUriPermission(Uri, int, int,
      * int)} with the pid and uid returned by {@link
@@ -6817,7 +6848,7 @@ public abstract class Context {
     public abstract int checkCallingUriPermission(Uri uri, @Intent.AccessUriMode int modeFlags);
 
     /**
-     * Determine whether the calling process and user ID has been
+     * Determine whether the calling process and uid has been
      * granted permission to access a list of URIs.  This is basically
      * the same as calling {@link #checkUriPermissions(List, int, int, int)}
      * with the pid and uid returned by {@link
@@ -6911,7 +6942,7 @@ public abstract class Context {
             @Intent.AccessUriMode int modeFlags);
 
     /**
-     * If a particular process and user ID has not been granted
+     * If a particular process and uid has not been granted
      * permission to access a specific URI, throw {@link
      * SecurityException}.  This only checks for permissions that have
      * been explicitly granted -- if the given process/uid has more
@@ -6931,7 +6962,7 @@ public abstract class Context {
             Uri uri, int pid, int uid, @Intent.AccessUriMode int modeFlags, String message);
 
     /**
-     * If the calling process and user ID has not been granted
+     * If the calling process and uid has not been granted
      * permission to access a specific URI, throw {@link
      * SecurityException}.  This is basically the same as calling
      * {@link #enforceUriPermission(Uri, int, int, int, String)} with

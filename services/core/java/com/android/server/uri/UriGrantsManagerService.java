@@ -25,6 +25,7 @@ import static android.content.Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_PREFIX_URI_PERMISSION;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
+import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
@@ -1103,18 +1104,13 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
      */
     private int checkGrantUriPermissionUnlocked(int callingUid, String targetPkg, GrantUri grantUri,
             int modeFlags, int lastTargetUid) {
-        if (!Intent.isAccessUriMode(modeFlags)) {
+        if (!isContentUriWithAccessModeFlags(grantUri, modeFlags,
+                /* logAction */ "grant URI permission")) {
             return -1;
         }
 
         if (targetPkg != null) {
             if (DEBUG) Slog.v(TAG, "Checking grant " + targetPkg + " permission to " + grantUri);
-        }
-
-        // If this is not a content: uri, we can't do anything with it.
-        if (!ContentResolver.SCHEME_CONTENT.equals(grantUri.uri.getScheme())) {
-            if (DEBUG) Slog.v(TAG, "Can't grant URI permission for non-content URI: " + grantUri);
-            return -1;
         }
 
         // Bail early if system is trying to hand out permissions directly; it
@@ -1137,7 +1133,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
 
         final String authority = grantUri.uri.getAuthority();
         final ProviderInfo pi = getProviderInfo(authority, grantUri.sourceUserId,
-                MATCH_DEBUG_TRIAGED_MISSING, callingUid);
+                MATCH_DIRECT_BOOT_AUTO, callingUid);
         if (pi == null) {
             Slog.w(TAG, "No content provider found for permission check: " +
                     grantUri.uri.toSafeString());
@@ -1283,6 +1279,65 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
         }
 
         return targetUid;
+    }
+
+    private boolean isContentUriWithAccessModeFlags(GrantUri grantUri, int modeFlags,
+            String logAction) {
+        if (!Intent.isAccessUriMode(modeFlags)) {
+            if (DEBUG) Slog.v(TAG, "Mode flags are not access URI mode flags: " + modeFlags);
+            return false;
+        }
+
+        if (!ContentResolver.SCHEME_CONTENT.equals(grantUri.uri.getScheme())) {
+            if (DEBUG) {
+                Slog.v(TAG, "Can't " + logAction + " on non-content URI: " + grantUri);
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    /** Check if the uid has permission to the content URI in grantUri. */
+    private boolean checkContentUriPermissionFullUnlocked(GrantUri grantUri, int uid,
+            int modeFlags) {
+        if (uid < 0) {
+            throw new IllegalArgumentException("Uid must be positive for the content URI "
+                    + "permission check of " + grantUri.uri.toSafeString());
+        }
+
+        if (!isContentUriWithAccessModeFlags(grantUri, modeFlags,
+                /* logAction */ "check content URI permission")) {
+            throw new IllegalArgumentException("The URI must be a content URI and the mode "
+                    + "flags must be at least read and/or write for the content URI permission "
+                    + "check of " + grantUri.uri.toSafeString());
+        }
+
+        final int appId = UserHandle.getAppId(uid);
+        if ((appId == SYSTEM_UID) || (appId == ROOT_UID)) {
+            return true;
+        }
+
+        // Retrieve the URI's content provider
+        final String authority = grantUri.uri.getAuthority();
+        ProviderInfo pi = getProviderInfo(authority, grantUri.sourceUserId, MATCH_DIRECT_BOOT_AUTO,
+                uid);
+
+        if (pi == null) {
+            Slog.w(TAG, "No content provider found for content URI permission check: "
+                    + grantUri.uri.toSafeString());
+            return false;
+        }
+
+        // Check if it has general permission to the URI's content provider
+        if (checkHoldingPermissionsUnlocked(pi, grantUri, uid, modeFlags)) {
+            return true;
+        }
+
+        // Check if it has explicitly granted permissions to the URI
+        synchronized (mLock) {
+            return checkUriPermissionLocked(grantUri, uid, modeFlags);
+        }
     }
 
     /**
@@ -1482,7 +1537,12 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
         }
 
         @Override
-        public boolean checkUriPermission(GrantUri grantUri, int uid, int modeFlags) {
+        public boolean checkUriPermission(GrantUri grantUri, int uid, int modeFlags,
+                boolean isFullAccessForContentUri) {
+            if (isFullAccessForContentUri) {
+                return UriGrantsManagerService.this.checkContentUriPermissionFullUnlocked(grantUri,
+                        uid, modeFlags);
+            }
             synchronized (mLock) {
                 return UriGrantsManagerService.this.checkUriPermissionLocked(grantUri, uid,
                         modeFlags);
