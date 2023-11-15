@@ -197,6 +197,10 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth bağlandı."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Bluetooth cihaz simgesi"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Cihaz ayrıntılarını yapılandırmak için tıklayın"</string>
+    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
+    <skip />
+    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
+    <skip />
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Pil yüzdesi bilinmiyor."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> ile bağlı."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> bağlantısı kuruldu."</string>
@@ -255,6 +259,10 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth\'u kullan"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Bağlandı"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Kaydedildi"</string>
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Pil düzeyi <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Ses"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Mikrofonlu kulaklık"</string>
@@ -396,8 +404,7 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Hızlı şarj oluyor • Dolmasına <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> kaldı"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Yavaş şarj oluyor • Dolmasına <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> kaldı"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Şarj oluyor • Dolmasına <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> kaldı"</string>
-    <!-- no translation found for communal_tutorial_indicator_text (4503010353591430123) -->
-    <skip />
+    <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Ortak eğitimi başlatmak için sola kaydırın"</string>
     <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
     <skip />
     <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
