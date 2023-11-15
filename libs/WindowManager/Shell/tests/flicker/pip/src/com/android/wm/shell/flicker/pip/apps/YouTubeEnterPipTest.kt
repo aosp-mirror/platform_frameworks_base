@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip.apps
 
+import android.Manifest
 import android.platform.test.annotations.Postsubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.YouTubeAppHelper
@@ -57,6 +58,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class YouTubeEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition(flicker) {
     override val standardAppHelper: YouTubeAppHelper = YouTubeAppHelper(instrumentation)
+
+    override val permissions: Array<String> = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
 
     override val defaultEnterPip: FlickerBuilder.() -> Unit = {
         setup {
