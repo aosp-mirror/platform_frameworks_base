@@ -65,10 +65,13 @@ fun CommunalContainer(
         viewModel.currentScene
             .transform<CommunalSceneKey, SceneKey> { value -> value.toTransitionSceneKey() }
             .collectAsState(TransitionSceneKey.Blank)
+    // Don't show hub mode UI if keyguard is present. This is important since we're in the shade,
+    // which can be opened from many locations.
+    val isKeyguardShowing by viewModel.isKeyguardVisible.collectAsState(initial = false)
 
     // Failsafe to hide the whole SceneTransitionLayout in case of bugginess.
     var showSceneTransitionLayout by remember { mutableStateOf(true) }
-    if (!showSceneTransitionLayout) {
+    if (!showSceneTransitionLayout || !isKeyguardShowing) {
         return
     }
 

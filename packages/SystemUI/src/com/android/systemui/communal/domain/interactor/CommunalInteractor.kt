@@ -27,6 +27,7 @@ import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.communal.widgets.EditWidgetsActivityStarter
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.smartspace.data.repository.SmartspaceRepository
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -46,6 +47,7 @@ constructor(
     private val widgetRepository: CommunalWidgetRepository,
     mediaRepository: CommunalMediaRepository,
     smartspaceRepository: SmartspaceRepository,
+    keyguardInteractor: KeyguardInteractor,
     private val appWidgetHost: AppWidgetHost,
     private val editWidgetsActivityStarter: EditWidgetsActivityStarter
 ) {
@@ -66,6 +68,8 @@ constructor(
      */
     val isCommunalShowing: Flow<Boolean> =
         communalRepository.desiredScene.map { it == CommunalSceneKey.Communal }
+
+    val isKeyguardVisible: Flow<Boolean> = keyguardInteractor.isKeyguardVisible
 
     /** Callback received whenever the [SceneTransitionLayout] finishes a scene transition. */
     fun onSceneChanged(newScene: CommunalSceneKey) {
