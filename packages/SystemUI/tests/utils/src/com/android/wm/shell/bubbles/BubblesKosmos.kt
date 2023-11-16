@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.user.domain.interactor
+package com.android.wm.shell.bubbles
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.user.data.repository.userRepository
+import com.android.systemui.util.mockito.mock
+import java.util.Optional
 
-val Kosmos.refreshUsersScheduler by
-    Kosmos.Fixture {
-        RefreshUsersScheduler(applicationCoroutineScope, testDispatcher, userRepository)
-    }
+var Kosmos.bubblesOptional by Kosmos.Fixture { Optional.of(bubbles) }
+var Kosmos.bubbles by Kosmos.Fixture { mock<Bubbles> {} }

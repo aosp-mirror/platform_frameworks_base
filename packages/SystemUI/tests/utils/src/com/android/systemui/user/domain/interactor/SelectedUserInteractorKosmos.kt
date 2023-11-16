@@ -16,12 +16,9 @@
 
 package com.android.systemui.user.domain.interactor
 
+import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.user.data.repository.userRepository
 
-val Kosmos.refreshUsersScheduler by
-    Kosmos.Fixture {
-        RefreshUsersScheduler(applicationCoroutineScope, testDispatcher, userRepository)
-    }
+val Kosmos.selectedUserInteractor by
+    Kosmos.Fixture { SelectedUserInteractor(userRepository, featureFlagsClassic) }

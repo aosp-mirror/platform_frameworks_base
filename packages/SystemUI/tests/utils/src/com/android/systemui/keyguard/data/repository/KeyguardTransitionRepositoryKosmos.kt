@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.flags
+package com.android.systemui.keyguard.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.featureFlags by Kosmos.Fixture { FakeFeatureFlagsClassic() }
+var Kosmos.keyguardTransitionRepository: KeyguardTransitionRepository by
+    Kosmos.Fixture { fakeKeyguardTransitionRepository }
+val Kosmos.fakeKeyguardTransitionRepository by Kosmos.Fixture { FakeKeyguardTransitionRepository() }

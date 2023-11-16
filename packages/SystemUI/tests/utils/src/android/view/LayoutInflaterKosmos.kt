@@ -14,14 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.user.domain.interactor
+package android.view
 
+import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.user.data.repository.userRepository
 
-val Kosmos.refreshUsersScheduler by
-    Kosmos.Fixture {
-        RefreshUsersScheduler(applicationCoroutineScope, testDispatcher, userRepository)
-    }
+val Kosmos.layoutInflater: LayoutInflater by
+    Kosmos.Fixture { LayoutInflater.from(applicationContext) }

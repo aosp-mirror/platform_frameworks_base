@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.user.domain.interactor
+package com.android.systemui.statusbar.notification.stack.domain.interactor
 
+import android.content.applicationContext
+import com.android.systemui.common.ui.data.repository.configurationRepository
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.user.data.repository.userRepository
+import com.android.systemui.statusbar.policy.splitShadeStateController
 
-val Kosmos.refreshUsersScheduler by
+val Kosmos.sharedNotificationContainerInteractor by
     Kosmos.Fixture {
-        RefreshUsersScheduler(applicationCoroutineScope, testDispatcher, userRepository)
+        SharedNotificationContainerInteractor(
+            configurationRepository = configurationRepository,
+            context = applicationContext,
+            splitShadeStateController = splitShadeStateController,
+        )
     }
