@@ -40,6 +40,8 @@ import static android.window.TransitionInfo.FLAG_SYNC;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionTypeFromInfo;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -93,6 +95,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.internal.R;
+import com.android.internal.policy.TransitionAnimation;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
@@ -1461,6 +1465,43 @@ public class ShellTransitionTests extends ShellTestCase {
         mMainExecutor.flushAll();
 
         assertEquals(0, mDefaultHandler.activeCount());
+    }
+
+    @Test
+    public void testCloseTransitAnimationWhenClosingChangesExists() {
+        Transitions transitions = createTestTransitions();
+        Transitions.TransitionObserver observer = mock(Transitions.TransitionObserver.class);
+        transitions.registerObserver(observer);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+        final TransitionAnimation transitionAnimation = new TransitionAnimation(mContext, false,
+                Transitions.TAG);
+        spyOn(transitionAnimation);
+
+        // Creating a transition by the app hooking the back key event to start the
+        // previous activity with FLAG_ACTIVITY_CLEAR_TOP | FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+        // flags in order to clear the top activity and bring the exist previous activity to front.
+        // Expects the activity transition should playing the close animation instead the initiated
+        // open animation made by startActivity.
+        IBinder transitToken = new Binder();
+        transitions.requestStartTransition(transitToken,
+                new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
+        TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_CLOSE).addChange(TRANSIT_TO_FRONT).build();
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
+
+        final int type = getTransitionTypeFromInfo(info);
+        assertEquals(TRANSIT_CLOSE, type);
+
+        TransitionAnimationHelper.loadAttributeAnimation(type, info, info.getChanges().get(0), 0,
+                transitionAnimation, false);
+        verify(transitionAnimation).loadDefaultAnimationAttr(
+                eq(R.styleable.WindowAnimation_activityCloseExitAnimation), anyBoolean());
+
+        TransitionAnimationHelper.loadAttributeAnimation(type, info, info.getChanges().get(1), 0,
+                transitionAnimation, false);
+        verify(transitionAnimation).loadDefaultAnimationAttr(
+                eq(R.styleable.WindowAnimation_activityCloseEnterAnimation), anyBoolean());
     }
 
     class ChangeBuilder {
