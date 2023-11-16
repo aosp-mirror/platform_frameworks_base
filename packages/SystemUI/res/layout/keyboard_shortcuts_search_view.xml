@@ -85,15 +85,13 @@
                 android:id="@+id/shortcut_system"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
                 style="@style/ShortCutButton"
-                android:text="@string/keyboard_shortcut_search_category_system"/>
+                android:text="@string/keyboard_shortcut_search_category_system" />
 
             <Button
                 android:id="@+id/shortcut_input"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
                 style="@style/ShortCutButton"
                 android:text="@string/keyboard_shortcut_search_category_input"/>
 
@@ -101,7 +99,6 @@
                 android:id="@+id/shortcut_open_apps"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
                 style="@style/ShortCutButton"
                 android:text="@string/keyboard_shortcut_search_category_open_apps"/>
 
@@ -109,7 +106,6 @@
                 android:id="@+id/shortcut_specific_app"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
                 style="@style/ShortCutButton"
                 android:text="@string/keyboard_shortcut_search_category_current_app"/>
         </LinearLayout>

@@ -1277,12 +1277,12 @@ public final class KeyboardShortcutListSearch {
 
     private int getColorOfTextColorOnAccent() {
         return Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.textColorOnAccent);
+                mContext, com.android.internal.R.attr.materialColorOnPrimary);
     }
 
     private int getColorOfTextColorSecondary() {
         return Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.textColorSecondary);
+                mContext, com.android.internal.R.attr.materialColorOnSurface);
     }
 
     // Create the new data structure for handling the N-to-1 key mapping and other complex case.
