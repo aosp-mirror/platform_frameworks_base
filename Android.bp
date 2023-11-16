@@ -376,6 +376,7 @@ java_defaults {
         // system propagates "required" properly.
         "gps_debug.conf",
         "protolog.conf.json.gz",
+        "framework-res",
         // any install dependencies should go into framework-minus-apex-install-dependencies
         // rather than here to avoid bloating incremental build time
     ],
