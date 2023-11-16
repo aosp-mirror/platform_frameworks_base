@@ -79,7 +79,6 @@ import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_
 import static android.os.PowerExemptionManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_BOOT_COMPLETED;
 import static android.os.PowerExemptionManager.REASON_COMPANION_DEVICE_MANAGER;
-import static android.os.PowerExemptionManager.REASON_DENIED;
 import static android.os.PowerExemptionManager.REASON_INSTR_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_LOCKED_BOOT_COMPLETED;
 import static android.os.PowerExemptionManager.REASON_PROC_STATE_BTOP;
@@ -5048,7 +5047,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     REASON_LOCKED_BOOT_COMPLETED);
         }
         // Send BOOT_COMPLETED if the user is unlocked
-        if (StorageManager.isUserKeyUnlocked(app.userId)) {
+        if (StorageManager.isCeStorageUnlocked(app.userId)) {
             sendBootBroadcastToAppLocked(app, new Intent(Intent.ACTION_BOOT_COMPLETED),
                     REASON_BOOT_COMPLETED);
         }
