@@ -273,6 +273,10 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
         }
     }
 
+    void onFullscreenMagnificationActivationChanged(int displayId, boolean activated) {
+        // Do nothing
+    }
+
     @MainThread
     void toggleSettingsPanelVisibility(int displayId) {
         final MagnificationSettingsController magnificationSettingsController =
