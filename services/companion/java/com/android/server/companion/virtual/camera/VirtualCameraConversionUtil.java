@@ -20,9 +20,11 @@ import android.annotation.NonNull;
 import android.companion.virtual.camera.IVirtualCameraCallback;
 import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtual.camera.VirtualCameraStreamConfig;
+import android.companion.virtualcamera.Format;
 import android.companion.virtualcamera.IVirtualCameraService;
 import android.companion.virtualcamera.SupportedStreamConfiguration;
 import android.companion.virtualcamera.VirtualCameraConfiguration;
+import android.graphics.ImageFormat;
 import android.os.RemoteException;
 import android.view.Surface;
 
@@ -85,8 +87,12 @@ public final class VirtualCameraConversionUtil {
         SupportedStreamConfiguration supportedConfig = new SupportedStreamConfiguration();
         supportedConfig.height = stream.getHeight();
         supportedConfig.width = stream.getWidth();
-        supportedConfig.pixelFormat = stream.getFormat();
+        supportedConfig.pixelFormat = convertFormat(stream.getFormat());
         return supportedConfig;
+    }
+
+    private static int convertFormat(int format) {
+        return format == ImageFormat.YUV_420_888 ? Format.YUV_420_888 : Format.UNKNOWN;
     }
 
     private VirtualCameraConversionUtil() {
