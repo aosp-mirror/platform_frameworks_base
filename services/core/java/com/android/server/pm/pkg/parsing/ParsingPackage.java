@@ -345,6 +345,8 @@ public interface ParsingPackage {
 
     ParsingPackage setStaticSharedLibraryVersion(long staticSharedLibraryVersion);
 
+    ParsingPackage setUpdatableSystem(boolean value);
+
     ParsingPackage setLargeScreensSupported(int supportsLargeScreens);
 
     ParsingPackage setNormalScreensSupported(int supportsNormalScreens);

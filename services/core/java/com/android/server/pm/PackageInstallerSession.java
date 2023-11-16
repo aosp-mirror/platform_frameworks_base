@@ -2248,31 +2248,39 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 == PackageManager.PERMISSION_GRANTED;
     }
 
+    private boolean isInstallationAllowed(PackageStateInternal psi) {
+        if (psi == null || psi.getPkg() == null) {
+            return true;
+        }
+        if (psi.getPkg().isUpdatableSystem()) {
+            return true;
+        }
+        if (mOriginalInstallerUid == Process.ROOT_UID) {
+            Slog.w(TAG, "Overriding updatableSystem because the installer is root: "
+                    + psi.getPackageName());
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Check if this package can be installed archived.
      */
-    private static boolean isArchivedInstallationAllowed(String packageName) {
-        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-        final PackageStateInternal existingPkgSetting = pmi.getPackageStateInternal(packageName);
-        if (existingPkgSetting == null) {
+    private static boolean isArchivedInstallationAllowed(PackageStateInternal psi) {
+        if (psi == null) {
             return true;
         }
-
         return false;
     }
 
     /**
      * Checks if the package can be installed on IncFs.
      */
-    private static boolean isIncrementalInstallationAllowed(String packageName) {
-        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
-        final PackageStateInternal existingPkgSetting = pmi.getPackageStateInternal(packageName);
-        if (existingPkgSetting == null || existingPkgSetting.getPkg() == null) {
+    private static boolean isIncrementalInstallationAllowed(PackageStateInternal psi) {
+        if (psi == null || psi.getPkg() == null) {
             return true;
         }
-
-        return !existingPkgSetting.isSystem()
-                && !existingPkgSetting.isUpdatedSystemApp();
+        return !psi.isSystem() && !psi.isUpdatedSystemApp();
     }
 
     /**
@@ -3371,6 +3379,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         "Split " + apk.getSplitName() + " was defined multiple times");
             }
 
+            if (!apk.isUpdatableSystem()) {
+                if (mOriginalInstallerUid == Process.ROOT_UID) {
+                    Slog.w(TAG, "Overriding updatableSystem because the installer is root for: "
+                            + apk.getPackageName());
+                } else {
+                    throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
+                            "Non updatable system package can't be installed or updated");
+                }
+            }
+
             // Use first package to define unknown values
             if (mPackageName == null) {
                 mPackageName = apk.getPackageName();
@@ -3445,8 +3463,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        final PackageStateInternal existingPkgSetting = pmi.getPackageStateInternal(mPackageName);
+
+        if (!isInstallationAllowed(existingPkgSetting)) {
+            throw new PackageManagerException(
+                    PackageManager.INSTALL_FAILED_SESSION_INVALID,
+                    "Installation of this package is not allowed.");
+        }
+
         if (isArchivedInstallation()) {
-            if (!isArchivedInstallationAllowed(mPackageName)) {
+            if (!isArchivedInstallationAllowed(existingPkgSetting)) {
                 throw new PackageManagerException(
                         PackageManager.INSTALL_FAILED_SESSION_INVALID,
                         "Archived installation of this package is not allowed.");
@@ -3462,7 +3489,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (isIncrementalInstallation()) {
-            if (!isIncrementalInstallationAllowed(mPackageName)) {
+            if (!isIncrementalInstallationAllowed(existingPkgSetting)) {
                 throw new PackageManagerException(
                         PackageManager.INSTALL_FAILED_SESSION_INVALID,
                         "Incremental installation of this package is not allowed.");
