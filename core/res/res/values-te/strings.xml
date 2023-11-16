@@ -1710,6 +1710,10 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"మీరు ఒక యాప్‌‌తో చేసే ఇంటరాక్షన్‌లను లేదా హార్డ్‌వేర్ సెన్సార్‌ను ట్రాక్ చేస్తూ మీ త‌ర‌ఫున యాప్‌లతో ఇంటరాక్ట్ చేయగలదు."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"అనుమతించండి"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"వద్దు"</string>
+    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
+    <skip />
+    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
+    <skip />
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ఫీచర్‌ని ఉపయోగించడం ప్రారంభించడానికి, దాన్ని ట్యాప్ చేయండి:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"యాక్సెసిబిలిటీ బటన్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"వాల్యూమ్ కీ షార్ట్‌కట్‌తో ఉపయోగించడానికి ఫీచర్లను ఎంచుకోండి"</string>
@@ -1904,6 +1908,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ఈవెంట్"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"నిద్రావస్థ"</string>
+    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <skip />
+    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది. వివరాల కోసం మీ తయారీదారుని సంప్రదించండి."</string>
@@ -2336,6 +2344,8 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"మైక్రోఫోన్ బ్లాక్ చేయబడింది"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"డిస్‌ప్లే చేయడానికి మిర్రర్ చేయడం సాధ్యపడదు"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"వేరే కేబుల్‌ను ఉపయోగించి, మళ్లీ ట్రై చేయండి"</string>
+    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
+    <skip />
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"డిస్‌ప్లేలను కేబుల్ సపోర్ట్ చేయకపోవచ్చు"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"మీ USB-C కేబుల్, డిస్‌ప్లేలకు సరిగ్గా కనెక్ట్ కాకపోవచ్చు"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>

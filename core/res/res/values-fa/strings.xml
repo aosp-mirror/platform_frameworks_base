@@ -166,7 +166,7 @@
     <string name="httpErrorTimeout" msgid="7446272815190334204">"زمان اتصال به سرور تمام شده است."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"این صفحه دارای تعداد بسیار زیادی تغییر مسیر سرور است."</string>
     <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"‏پروتکل پشتیبانی نمی‌‎شود."</string>
-    <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"اتصال امن ایجاد نشد."</string>
+    <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"اتصال ایمن ایجاد نشد."</string>
     <string name="httpErrorBadUrl" msgid="754447723314832538">"به‌دلیل نامعتبر بودن نشانی اینترنتی، صفحه باز نمی‌شود."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"دسترسی به فایل انجام نشد."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"فایل درخواستی پیدا نشد."</string>
@@ -1710,6 +1710,10 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"این عملکرد می‌تواند با برنامه یا حسگری سخت‌افزاری تعاملاتتان را ردیابی کند و ازطرف شما با برنامه‌ها تعامل داشته باشد."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"اجازه دادن"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"مجاز نبودن"</string>
+    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
+    <skip />
+    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
+    <skip />
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"برای استفاده از ویژگی، روی آن ضربه بزنید:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"انتخاب ویژگی‌های موردنظر برای استفاده با دکمه دسترس‌پذیری"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"انتخاب ویژگی‌های موردنظر برای استفاده با میان‌بر کلید میزان صدا"</string>
@@ -1904,6 +1908,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"آخر هفته"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"رویداد"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"خوابیدن"</string>
+    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <skip />
+    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> درحال قطع کردن بعضی از صداهاست"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"دستگاهتان یک مشکل داخلی دارد، و ممکن است تا زمانی که بازنشانی داده‌های کارخانه انجام نگیرد، بی‌ثبات بماند."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"دستگاهتان یک مشکل داخلی دارد. برای جزئیات آن با سازنده‌تان تماس بگیرید."</string>
@@ -2336,6 +2344,8 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"میکروفون مسدود شد"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"بازتاب دادن به نمایشگر ممکن نبود"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"از کابل دیگری استفاده کنید و دوباره امتحان کنید"</string>
+    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
+    <skip />
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"شاید کابل از نمایشگر پشتیبانی نکند"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"‏کابل USB-C شما ممکن است به‌درستی به نمایشگرها وصل نشود"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"‫Dual screen"</string>

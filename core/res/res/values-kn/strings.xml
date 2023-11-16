@@ -1689,8 +1689,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ತೆಗೆದುಹಾಕು"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ವಾಲ್ಯೂಮ್‌ ಅನ್ನು ಶಿಫಾರಸು ಮಾಡಲಾದ ಮಟ್ಟಕ್ಕಿಂತಲೂ ಹೆಚ್ಚು ಮಾಡಬೇಕೆ?\n\nದೀರ್ಘ ಅವಧಿಯವರೆಗೆ ಹೆಚ್ಚಿನ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಆಲಿಸುವುದರಿಂದ ನಿಮ್ಮ ಆಲಿಸುವಿಕೆ ಸಾಮರ್ಥ್ಯಕ್ಕೆ ಹಾನಿಯುಂಟು ಮಾಡಬಹುದು."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ಹೆಚ್ಚಿನ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಆಲಿಸುವುದನ್ನು ಮುಂದುವರಿಸಬೇಕೇ?\n\nಹೆಡ್‌ಫೋನ್‌ನ ವಾಲ್ಯೂಮ್ ಶಿಫಾರಸು ಮಾಡಿದ್ದಕ್ಕಿಂತಲೂ ಹೆಚ್ಚಿನ ಸಮಯದವರೆಗೆ ಅಧಿಕವಾಗಿದ್ದು, ಇದರಿಂದ ನಿಮ್ಮ ಶ್ರವಣ ಶಕ್ತಿಗೆ ಹಾನಿಯಾಗಬಹುದು"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ದೊಡ್ಡ ಧ್ವನಿ ಪತ್ತೆಯಾಗಿದೆ\n\nಹೆಡ್‌ಫೋನ್ ವಾಲ್ಯೂಮ್ ಶಿಫಾರಸು ಮಾಡಿದ್ದಕ್ಕಿಂತಲೂ ಹೆಚ್ಚಾಗಿದ್ದು, ಇದರಿಂದ ನಿಮ್ಮ ಶ್ರವಣ ಶಕ್ತಿಗೆ ಹಾನಿಯಾಗಬಹುದು"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ಹೆಚ್ಚಿನ ವಾಲ್ಯೂಮ್‌ನಲ್ಲಿ ಆಲಿಸುವುದನ್ನು ಮುಂದುವರಿಸಬೇಕೇ?\n\nಶಿಫಾರಸು ಮಾಡಿದ್ದಕ್ಕಿಂತಲೂ ದೀರ್ಘಕಾಲ ಹೆಡ್‌ಫೋನ್‌ನ ವಾಲ್ಯೂಮ್ ಹೆಚ್ಚಿಗೆ ಇದ್ದು, ಇದರಿಂದ ನಿಮ್ಮ ಶ್ರವಣ ಶಕ್ತಿಗೆ ಹಾನಿಯಾಗಬಹುದು"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ದೊಡ್ಡ ಧ್ವನಿ ಪತ್ತೆಯಾಗಿದೆ\n\nಶಿಫಾರಸು ಮಾಡಿದ್ದಕ್ಕಿಂತಲೂ ದೀರ್ಘಕಾಲ ಹೆಡ್‌ಫೋನ್ ವಾಲ್ಯೂಮ್ ಹೆಚ್ಚಿಗೆ ಇದ್ದು, ಇದರಿಂದ ನಿಮ್ಮ ಶ್ರವಣ ಶಕ್ತಿಗೆ ಹಾನಿಯಾಗಬಹುದು"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಶಾರ್ಟ್‌ಕಟ್ ಬಳಸುವುದೇ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ಶಾರ್ಟ್‌ಕಟ್ ಆನ್ ಆಗಿರುವಾಗ, ಎರಡೂ ವಾಲ್ಯೂಮ್ ಬಟನ್‌ಗಳನ್ನು 3 ಸೆಕೆಂಡುಗಳ ಕಾಲ ಒತ್ತಿದರೆ ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ವೈಶಿಷ್ಟ್ಯವೊಂದು ಪ್ರಾರಂಭವಾಗುತ್ತದೆ."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ವೈಶಿಷ್ಟ್ಯಗಳಿಗಾಗಿ ಶಾರ್ಟ್‌ಕಟ್ ಆನ್ ಮಾಡಬೇಕೇ?"</string>
@@ -1710,6 +1710,10 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ಇದು ಆ್ಯಪ್ ಅಥವಾ ಹಾರ್ಡ್‌ವೇರ್ ಸೆನ್ಸರ್‌ನ ಜೊತೆಗಿನ ನಿಮ್ಮ ಸಂವಹನಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಬಹುದು, ಮತ್ತು ನಿಮ್ಮ ಪರವಾಗಿ ಆ್ಯಪ್‌ಗಳ ಜೊತೆ ಸಂವಹನ ನಡೆಸಬಹುದು."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ಅನುಮತಿಸಿ"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ನಿರಾಕರಿಸಿ"</string>
+    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
+    <skip />
+    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
+    <skip />
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ವೈಶಿಷ್ಟ್ದ ಬಳಸುವುದನ್ನು ಪ್ರಾರಂಭಿಸಲು ಅದನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಬಟನ್ ಜೊತೆಗೆ ಬಳಸಲು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ವಾಲ್ಯೂಮ್ ಕೀ ಶಾರ್ಟ್‌ಕಟ್ ಜೊತೆಗೆ ಬಳಸಲು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -1904,6 +1908,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ವಾರಾಂತ್ಯ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ಈವೆಂಟ್"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ನಿದ್ರೆಯ ಸಮಯ"</string>
+    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <skip />
+    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ಧ್ವನಿ ಮ್ಯೂಟ್ ಮಾಡುತ್ತಿದ್ದಾರೆ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ ಹಾಗೂ ನೀವು ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾವನ್ನು ರೀಸೆಟ್ ಮಾಡುವವರೆಗೂ ಅದು ಅಸ್ಥಿರವಾಗಬಹುದು."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ. ವಿವರಗಳಿಗಾಗಿ ನಿಮ್ಮ ತಯಾರಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
@@ -2336,6 +2344,8 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ಡಿಸ್‌ಪ್ಲೇಗೆ ಪ್ರತಿಬಿಂಬಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"ಬೇರೆ ಕೇಬಲ್ ಬಳಸಿ ಹಾಗೂ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
+    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
+    <skip />
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ಡಿಸ್‌ಪ್ಲೇಗಳನ್ನು ಕೇಬಲ್ ಬೆಂಬಲಿಸದಿರಬಹುದು"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"ನಿಮ್ಮ USB-C ಕೇಬಲ್ ಡಿಸ್‌ಪ್ಲೇಗಳಿಗೆ ಸರಿಯಾಗಿ ಕನೆಕ್ಟ್ ಆಗದಿರಬಹುದು"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>

@@ -1689,8 +1689,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ਹਟਾਓ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ਕੀ ਵੌਲਿਊਮ  ਸਿਫ਼ਾਰਸ਼  ਕੀਤੇ ਪੱਧਰ ਤੋਂ ਵਧਾਉਣੀ ਹੈ?\n\nਲੰਮੇ ਸਮੇਂ ਤੱਕ ਉੱਚ ਵੌਲਿਊਮ ਤੇ ਸੁਣਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ।"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ਕੀ ਉੱਚੀ ਅਵਾਜ਼ ਵਿੱਚ ਸੁਣਨਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਸਿਫ਼ਾਰਸ਼ੀ ਸਮੇਂ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖੀ ਗਈ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ਉੱਚੀ ਧੁਨੀ ਦਾ ਪਤਾ ਲੱਗਾ\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਨੂੰ ਸਿਫ਼ਾਰਸ਼ੀ ਪੱਧਰ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖਿਆ ਗਿਆ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ਕੀ ਉੱਚੀ ਅਵਾਜ਼ ਵਿੱਚ ਸੁਣਦੇ ਰਹਿਣਾ ਹੈ?\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਸਿਫ਼ਾਰਸ਼ੀ ਸਮੇਂ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖੀ ਹੋਈ ਹੈ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ਉੱਚੀ ਅਵਾਜ਼ ਦਾ ਪਤਾ ਲੱਗਾ\n\nਹੈੱਡਫ਼ੋਨ ਦੀ ਅਵਾਜ਼ ਸਿਫ਼ਾਰਸ਼ੀ ਪੱਧਰ ਨਾਲੋਂ ਜ਼ਿਆਦਾ ਦੇਰ ਤੱਕ ਉੱਚੀ ਰੱਖੀ ਹੋਈ ਹੈ, ਜਿਸ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਵਰਤਣਾ ਹੈ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਹੋਣ \'ਤੇ, ਕਿਸੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਬਟਨਾਂ ਨੂੰ 3 ਸਕਿੰਟ ਲਈ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਲਈ ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਕਰਨਾ ਹੈ?"</string>
@@ -1710,6 +1710,10 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ਇਹ ਕਿਸੇ ਐਪ ਜਾਂ ਹਾਰਡਵੇਅਰ ਸੈਂਸਰ ਦੇ ਨਾਲ ਤੁਹਾਡੀਆਂ ਅੰਤਰਕਿਰਿਆਵਾਂ ਨੂੰ ਟਰੈਕ ਕਰ ਸਕਦੀ ਹੈ, ਅਤੇ ਤੁਹਾਡੀ ਤਰਫ਼ੋਂ ਐਪਾਂ ਦੇ ਨਾਲ ਅੰਤਰਕਿਰਿਆ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ਕਰਨ ਦਿਓ"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ਨਾ ਕਰਨ ਦਿਓ"</string>
+    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
+    <skip />
+    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
+    <skip />
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ਕਿਸੇ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਵਰਤਣਾ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਉਸ \'ਤੇ ਟੈਪ ਕਰੋ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ਪਹੁੰਚਯੋਗਤਾ ਬਟਨ ਨਾਲ ਵਰਤਣ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚੁਣੋ"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ਅਵਾਜ਼ ਕੁੰਜੀ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਵਰਤਣ ਲਈ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਚੁਣੋ"</string>
@@ -1904,6 +1908,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ਹਫ਼ਤੇ ਦਾ ਅੰਤਲਾ ਦਿਨ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ਇਵੈਂਟ"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ਸੌਣ ਵੇਲੇ"</string>
+    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <skip />
+    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ਕੁਝ ਧੁਨੀਆਂ ਨੂੰ ਮਿਊਟ ਕਰ ਰਹੀ ਹੈ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਇੱਕ ਅੰਦਰੂਨੀ ਸਮੱਸਿਆ ਹੈ ਅਤੇ ਇਹ ਅਸਥਿਰ ਹੋ ਸਕਦੀ ਹੈ ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਫੈਕਟਰੀ ਡਾਟਾ ਰੀਸੈੱਟ ਨਹੀਂ ਕਰਦੇ।"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨਾਲ ਇੱਕ ਅੰਦਰੂਨੀ ਸਮੱਸਿਆ ਸੀ। ਵੇਰਵਿਆਂ ਲਈ ਆਪਣੇ ਨਿਰਮਾਤਾ ਨੂੰ ਸੰਪਰਕ ਕਰੋ।"</string>
@@ -2336,6 +2344,8 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਬਲਾਕ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ਡਿਸਪਲੇ \'ਤੇ ਪ੍ਰਤਿਬਿੰਬਿਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"ਕੋਈ ਵੱਖਰੀ ਕੇਬਲ ਵਰਤ ਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
+    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
+    <skip />
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਕੇਬਲ ਡਿਸਪਲੇਆਂ ਦਾ ਸਮਰਥਨ ਨਾ ਕਰੇ"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"ਹੋ ਸਕਦਾ ਹੈ ਕਿ ਤੁਹਾਡੀ USB-C ਕੇਬਲ ਡਿਸਪਲੇਆਂ ਨਾਲ ਠੀਕ ਤਰ੍ਹਾਂ ਕਨੈਕਟ ਨਾ ਹੋਵੇ"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
