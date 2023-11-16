@@ -79,7 +79,7 @@ public class CompanionDevicePresenceMonitor implements AssociationStore.OnChange
         void onDeviceDisappeared(int associationId);
 
         /**Invoked when device has corresponding event changes. */
-        void onDeviceEvent(int associationId, int state);
+        void onDeviceEvent(int associationId, int event);
     }
 
     private final @NonNull AssociationStore mAssociationStore;
