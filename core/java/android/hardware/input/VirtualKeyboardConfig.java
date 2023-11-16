@@ -99,6 +99,12 @@ public final class VirtualKeyboardConfig extends VirtualInputDeviceConfig implem
         dest.writeString8(mLayoutType);
     }
 
+    @Override
+    @NonNull
+    String additionalFieldsToString() {
+        return " languageTag=" + mLanguageTag + " layoutType=" + mLayoutType;
+    }
+
     /**
      * Builder for creating a {@link VirtualKeyboardConfig}.
      */

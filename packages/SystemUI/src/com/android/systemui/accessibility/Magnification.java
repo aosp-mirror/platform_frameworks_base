@@ -59,8 +59,8 @@ import javax.inject.Inject;
  * when {@code IStatusBar#requestWindowMagnificationConnection(boolean)} is called.
  */
 @SysUISingleton
-public class WindowMagnification implements CoreStartable, CommandQueue.Callbacks {
-    private static final String TAG = "WindowMagnification";
+public class Magnification implements CoreStartable, CommandQueue.Callbacks {
+    private static final String TAG = "Magnification";
 
     private final ModeSwitchesController mModeSwitchesController;
     private final Context mContext;
@@ -154,7 +154,7 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
     DisplayIdIndexSupplier<MagnificationSettingsController> mMagnificationSettingsSupplier;
 
     @Inject
-    public WindowMagnification(Context context, @Main Handler mainHandler,
+    public Magnification(Context context, @Main Handler mainHandler,
             CommandQueue commandQueue, ModeSwitchesController modeSwitchesController,
             SysUiState sysUiState, OverviewProxyService overviewProxyService,
             SecureSettings secureSettings, DisplayTracker displayTracker,
@@ -366,49 +366,53 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
     @VisibleForTesting
     final MagnificationSettingsController.Callback mMagnificationSettingsControllerCallback =
             new MagnificationSettingsController.Callback() {
-        @Override
-        public void onSetMagnifierSize(int displayId, int index) {
-            mHandler.post(() -> onSetMagnifierSizeInternal(displayId, index));
-            mA11yLogger.logWithPosition(
-                    MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_WINDOW_SIZE_SELECTED,
-                    index
-            );
-        }
+                @Override
+                public void onSetMagnifierSize(int displayId, int index) {
+                    mHandler.post(() -> onSetMagnifierSizeInternal(displayId, index));
+                    mA11yLogger.logWithPosition(
+                            MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_WINDOW_SIZE_SELECTED,
+                            index
+                    );
+                }
 
-        @Override
-        public void onSetDiagonalScrolling(int displayId, boolean enable) {
-            mHandler.post(() -> onSetDiagonalScrollingInternal(displayId, enable));
-        }
+                @Override
+                public void onSetDiagonalScrolling(int displayId, boolean enable) {
+                    mHandler.post(() -> onSetDiagonalScrollingInternal(displayId, enable));
+                }
 
-        @Override
-        public void onEditMagnifierSizeMode(int displayId, boolean enable) {
-            mHandler.post(() -> onEditMagnifierSizeModeInternal(displayId, enable));
-            mA11yLogger.log(enable
-                    ? MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_SIZE_EDITING_ACTIVATED
-                    : MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_SIZE_EDITING_DEACTIVATED);
-        }
+                @Override
+                public void onEditMagnifierSizeMode(int displayId, boolean enable) {
+                    mHandler.post(() -> onEditMagnifierSizeModeInternal(displayId, enable));
+                    mA11yLogger.log(enable
+                            ?
+                            MagnificationSettingsEvent
+                                    .MAGNIFICATION_SETTINGS_SIZE_EDITING_ACTIVATED
+                            : MagnificationSettingsEvent
+                                    .MAGNIFICATION_SETTINGS_SIZE_EDITING_DEACTIVATED);
+                }
 
-        @Override
-        public void onMagnifierScale(int displayId, float scale, boolean updatePersistence) {
-            if (mWindowMagnificationConnectionImpl != null) {
-                mWindowMagnificationConnectionImpl.onPerformScaleAction(
-                        displayId, scale, updatePersistence);
-            }
-            mA11yLogger.logThrottled(
-                    MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_ZOOM_SLIDER_CHANGED
-            );
-        }
+                @Override
+                public void onMagnifierScale(int displayId, float scale,
+                        boolean updatePersistence) {
+                    if (mWindowMagnificationConnectionImpl != null) {
+                        mWindowMagnificationConnectionImpl.onPerformScaleAction(
+                                displayId, scale, updatePersistence);
+                    }
+                    mA11yLogger.logThrottled(
+                            MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_ZOOM_SLIDER_CHANGED
+                    );
+                }
 
-        @Override
-        public void onModeSwitch(int displayId, int newMode) {
-            mHandler.post(() -> onModeSwitchInternal(displayId, newMode));
-        }
+                @Override
+                public void onModeSwitch(int displayId, int newMode) {
+                    mHandler.post(() -> onModeSwitchInternal(displayId, newMode));
+                }
 
-        @Override
-        public void onSettingsPanelVisibilityChanged(int displayId, boolean shown) {
-            mHandler.post(() -> onSettingsPanelVisibilityChangedInternal(displayId, shown));
-        }
-    };
+                @Override
+                public void onSettingsPanelVisibilityChanged(int displayId, boolean shown) {
+                    mHandler.post(() -> onSettingsPanelVisibilityChangedInternal(displayId, shown));
+                }
+            };
 
     @MainThread
     private void onSetMagnifierSizeInternal(int displayId, int index) {

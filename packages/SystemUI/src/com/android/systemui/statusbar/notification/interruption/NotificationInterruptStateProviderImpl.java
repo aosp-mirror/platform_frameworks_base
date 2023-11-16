@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.EventLog;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
@@ -81,6 +82,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final SystemClock mSystemClock;
     private final GlobalSettings mGlobalSettings;
+    private final EventLog mEventLog;
 
     @VisibleForTesting
     protected boolean mUseHeadsUp = false;
@@ -129,7 +131,8 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             UserTracker userTracker,
             DeviceProvisionedController deviceProvisionedController,
             SystemClock systemClock,
-            GlobalSettings globalSettings) {
+            GlobalSettings globalSettings,
+            EventLog eventLog) {
         mPowerManager = powerManager;
         mBatteryController = batteryController;
         mAmbientDisplayConfiguration = ambientDisplayConfiguration;
@@ -144,6 +147,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         mDeviceProvisionedController = deviceProvisionedController;
         mSystemClock = systemClock;
         mGlobalSettings = globalSettings;
+        mEventLog = eventLog;
         ContentObserver headsUpObserver = new ContentObserver(mainHandler) {
             @Override
             public void onChange(boolean selfChange) {
@@ -369,7 +373,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                 // explicitly prevent logging for this (frequent) case
                 return;
             case NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR:
-                android.util.EventLog.writeEvent(0x534e4554, "231322873", uid,
+                mEventLog.writeEvent(0x534e4554, "231322873", uid,
                         "groupAlertBehavior");
                 mUiEventLogger.log(FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR, uid,
                         packageName);
@@ -377,7 +381,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                         decision + ": GroupAlertBehavior will prevent HUN");
                 return;
             case NO_FSI_SUPPRESSIVE_BUBBLE_METADATA:
-                android.util.EventLog.writeEvent(0x534e4554, "274759612", uid,
+                mEventLog.writeEvent(0x534e4554, "274759612", uid,
                         "bubbleMetadata");
                 mUiEventLogger.log(FSI_SUPPRESSED_SUPPRESSIVE_BUBBLE_METADATA, uid,
                         packageName);
@@ -385,7 +389,7 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                         decision + ": BubbleMetadata may prevent HUN");
                 return;
             case NO_FSI_NO_HUN_OR_KEYGUARD:
-                android.util.EventLog.writeEvent(0x534e4554, "231322873", uid,
+                mEventLog.writeEvent(0x534e4554, "231322873", uid,
                         "no hun or keyguard");
                 mUiEventLogger.log(FSI_SUPPRESSED_NO_HUN_OR_KEYGUARD, uid, packageName);
                 mLogger.logNoFullscreenWarning(entry,

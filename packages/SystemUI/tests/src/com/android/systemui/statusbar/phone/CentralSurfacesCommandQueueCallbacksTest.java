@@ -18,8 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
-
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
@@ -30,7 +28,6 @@ import android.app.ActivityManager;
 import android.app.StatusBarManager;
 import android.os.PowerManager;
 import android.os.UserHandle;
-import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.testing.AndroidTestingRunner;
 import android.view.HapticFeedbackConstants;
@@ -42,7 +39,6 @@ import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.assist.AssistManager;
-import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSHost;
@@ -53,7 +49,6 @@ import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
-import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
@@ -94,14 +89,12 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     @Mock private DozeServiceHost mDozeServiceHost;
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private PowerManager mPowerManager;
-    @Mock private VibratorHelper mVibratorHelper;
     @Mock private Vibrator mVibrator;
     @Mock private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock private Lazy<CameraLauncher> mCameraLauncherLazy;
     @Mock private UserTracker mUserTracker;
     @Mock private QSHost mQSHost;
     @Mock private ActivityStarter mActivityStarter;
-    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
     CentralSurfacesCommandQueueCallbacks mSbcqCallbacks;
 
@@ -131,15 +124,13 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
                 mNotificationStackScrollLayoutController,
                 mStatusBarHideIconsForBouncerManager,
                 mPowerManager,
-                mVibratorHelper,
                 Optional.of(mVibrator),
                 new DisableFlagsLogger(),
                 DEFAULT_DISPLAY,
                 mCameraLauncherLazy,
                 mUserTracker,
                 mQSHost,
-                mActivityStarter,
-                mFeatureFlags);
+                mActivityStarter);
 
         when(mUserTracker.getUserHandle()).thenReturn(
                 UserHandle.of(ActivityManager.getCurrentUser()));
@@ -192,18 +183,7 @@ public class CentralSurfacesCommandQueueCallbacksTest extends SysuiTestCase {
     }
 
     @Test
-    public void vibrateOnNavigationKeyDown_oneWayHapticsDisabled_usesVibrate() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
-
-        mSbcqCallbacks.vibrateOnNavigationKeyDown();
-
-        verify(mVibratorHelper).vibrate(VibrationEffect.EFFECT_TICK);
-    }
-
-    @Test
-    public void vibrateOnNavigationKeyDown_oneWayHapticsEnabled_usesPerformHapticFeedback() {
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, true);
-
+    public void vibrateOnNavigationKeyDown_usesPerformHapticFeedback() {
         mSbcqCallbacks.vibrateOnNavigationKeyDown();
 
         verify(mShadeViewController).performHapticFeedback(

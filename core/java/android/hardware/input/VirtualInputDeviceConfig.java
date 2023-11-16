@@ -91,6 +91,22 @@ public abstract class VirtualInputDeviceConfig {
         dest.writeString8(mInputDeviceName);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getName() + "( "
+                + " name=" + mInputDeviceName
+                + " vendorId=" + mVendorId
+                + " productId=" + mProductId
+                + " associatedDisplayId=" + mAssociatedDisplayId
+                + additionalFieldsToString() + ")";
+    }
+
+    /** @hide */
+    @NonNull
+    String additionalFieldsToString() {
+        return "";
+    }
+
     /**
      * A builder for {@link VirtualInputDeviceConfig}
      *

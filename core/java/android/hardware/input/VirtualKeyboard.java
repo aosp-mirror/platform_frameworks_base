@@ -39,8 +39,9 @@ public class VirtualKeyboard extends VirtualInputDevice {
     private final int mUnsupportedKeyCode = KeyEvent.KEYCODE_DPAD_CENTER;
 
     /** @hide */
-    public VirtualKeyboard(IVirtualDevice virtualDevice, IBinder token) {
-        super(virtualDevice, token);
+    public VirtualKeyboard(VirtualKeyboardConfig config,
+            IVirtualDevice virtualDevice, IBinder token) {
+        super(config, virtualDevice, token);
     }
 
     /**

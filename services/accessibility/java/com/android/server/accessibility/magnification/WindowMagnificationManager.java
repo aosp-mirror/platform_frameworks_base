@@ -60,7 +60,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 /**
- * A class to manipulate window magnification through {@link WindowMagnificationConnectionWrapper}
+ * A class to manipulate window magnification through {@link MagnificationConnectionWrapper}
  * create by {@link #setConnection(IWindowMagnificationConnection)}. To set the connection with
  * SysUI, call {@code StatusBarManagerInternal#requestWindowMagnificationConnection(boolean)}.
  * The applied magnification scale is constrained by
@@ -133,7 +133,7 @@ public class WindowMagnificationManager implements
     @VisibleForTesting
     @GuardedBy("mLock")
     @Nullable
-    WindowMagnificationConnectionWrapper mConnectionWrapper;
+    MagnificationConnectionWrapper mConnectionWrapper;
     @GuardedBy("mLock")
     private ConnectionCallback mConnectionCallback;
     @GuardedBy("mLock")
@@ -245,7 +245,7 @@ public class WindowMagnificationManager implements
                 }
             }
             if (connection != null) {
-                mConnectionWrapper = new WindowMagnificationConnectionWrapper(connection, mTrace);
+                mConnectionWrapper = new MagnificationConnectionWrapper(connection, mTrace);
             }
 
             if (mConnectionWrapper != null) {

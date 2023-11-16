@@ -178,6 +178,8 @@ import com.android.systemui.statusbar.policy.UserInfoControllerImpl;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
+import com.android.systemui.util.EventLog;
+import com.android.systemui.util.FakeEventLog;
 import com.android.systemui.util.WallpaperController;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.concurrency.MessageRouterImpl;
@@ -324,6 +326,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     private ShadeController mShadeController;
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private final FakeGlobalSettings mFakeGlobalSettings = new FakeGlobalSettings();
+    private final FakeEventLog mFakeEventLog = new FakeEventLog();
     private final FakeExecutor mMainExecutor = new FakeExecutor(mFakeSystemClock);
     private final FakeExecutor mUiBgExecutor = new FakeExecutor(mFakeSystemClock);
     private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
@@ -349,8 +352,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.LIGHT_REVEAL_MIGRATION, true);
         // Turn AOD on and toggle feature flag for jank fixes
         mFeatureFlags.set(Flags.ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD, true);
-        mFeatureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, false);
         when(mDozeParameters.getAlwaysOn()).thenReturn(true);
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
@@ -374,7 +377,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                         mUserTracker,
                         mDeviceProvisionedController,
                         mFakeSystemClock,
-                        mFakeGlobalSettings);
+                        mFakeGlobalSettings,
+                        mFakeEventLog);
 
         mContext.addMockSystemService(TrustManager.class, mock(TrustManager.class));
         mContext.addMockSystemService(FingerprintManager.class, mock(FingerprintManager.class));
@@ -1187,7 +1191,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 UserTracker userTracker,
                 DeviceProvisionedController deviceProvisionedController,
                 SystemClock systemClock,
-                GlobalSettings globalSettings) {
+                GlobalSettings globalSettings,
+                EventLog eventLog) {
             super(
                     powerManager,
                     ambientDisplayConfiguration,
@@ -1203,7 +1208,8 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                     userTracker,
                     deviceProvisionedController,
                     systemClock,
-                    globalSettings
+                    globalSettings,
+                    eventLog
             );
             mUseHeadsUp = true;
         }

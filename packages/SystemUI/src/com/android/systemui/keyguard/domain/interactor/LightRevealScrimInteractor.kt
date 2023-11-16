@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.keyguard.logging.ScrimLogger
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.LightRevealScrimRepository
@@ -37,6 +38,7 @@ constructor(
     private val transitionInteractor: KeyguardTransitionInteractor,
     private val lightRevealScrimRepository: LightRevealScrimRepository,
     @Application private val scope: CoroutineScope,
+    private val scrimLogger: ScrimLogger,
 ) {
 
     init {
@@ -46,6 +48,7 @@ constructor(
     private fun listenForStartedKeyguardTransitionStep() {
         scope.launch {
             transitionInteractor.startedKeyguardTransitionStep.collect {
+                scrimLogger.d(TAG, "listenForStartedKeyguardTransitionStep", it)
                 if (willTransitionChangeEndState(it)) {
                     lightRevealScrimRepository.startRevealAmountAnimator(
                         willBeRevealedInState(it.to)
@@ -100,5 +103,7 @@ constructor(
                 KeyguardState.OCCLUDED -> true
             }
         }
+
+        val TAG = LightRevealScrimInteractor::class.simpleName!!
     }
 }

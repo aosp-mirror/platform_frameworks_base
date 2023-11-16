@@ -1421,6 +1421,11 @@ public abstract class PackageManagerInternal {
             @UserIdInt int userId);
 
     /**
+     * Checks if package is stopped for a specific user.
+     */
+    public abstract boolean isPackageStopped(@NonNull String packageName, @UserIdInt int userId);
+
+    /**
      * Sends the PACKAGE_RESTARTED broadcast.
      */
     public abstract void sendPackageRestartedBroadcast(@NonNull String packageName,

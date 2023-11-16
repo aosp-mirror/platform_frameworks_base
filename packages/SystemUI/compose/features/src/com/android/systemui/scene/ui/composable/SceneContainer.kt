@@ -18,7 +18,6 @@
 
 package com.android.systemui.scene.ui.composable
 
-import android.os.SystemProperties
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
@@ -84,7 +83,6 @@ fun SceneContainer(
     val currentDestinations: Map<UserAction, SceneModel> by
         currentScene.destinationScenes.collectAsState()
     val state = remember { SceneTransitionLayoutState(currentSceneKey.toTransitionSceneKey()) }
-    val isRibbonEnabled = remember { SystemProperties.getBoolean("flexi.ribbon", false) }
 
     DisposableEffect(viewModel, state) {
         viewModel.setTransitionState(state.observableTransitionState().map { it.toModel() })
@@ -137,17 +135,15 @@ fun SceneContainer(
             }
         }
 
-        if (isRibbonEnabled) {
-            BottomRightCornerRibbon(
-                content = {
-                    Text(
-                        text = "flexi\uD83E\uDD43",
-                        color = Color.White,
-                    )
-                },
-                modifier = Modifier.align(Alignment.BottomEnd),
-            )
-        }
+        BottomRightCornerRibbon(
+            content = {
+                Text(
+                    text = "flexi\uD83E\uDD43",
+                    color = Color.White,
+                )
+            },
+            modifier = Modifier.align(Alignment.BottomEnd),
+        )
     }
 }
 

@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
+import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -39,6 +40,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 import org.mockito.Spy
@@ -79,7 +81,8 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
             LightRevealScrimInteractor(
                 keyguardTransitionInteractor,
                 fakeLightRevealScrimRepository,
-                testScope.backgroundScope
+                testScope.backgroundScope,
+                mock()
             )
     }
 
@@ -120,6 +123,9 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
     @Test
     fun lightRevealEffect_startsAnimationOnlyForDifferentStateTargets() =
         testScope.runTest {
+            runCurrent()
+            reset(fakeLightRevealScrimRepository)
+
             fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     transitionState = TransitionState.STARTED,

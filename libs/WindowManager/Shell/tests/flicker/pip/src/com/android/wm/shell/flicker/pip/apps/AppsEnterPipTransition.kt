@@ -34,7 +34,7 @@ abstract class AppsEnterPipTransition(flicker: LegacyFlickerTest) : EnterPipTran
     @FlickerBuilderProvider
     override fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
-            withoutScreenRecorder()
+            instrumentation.uiAutomation.adoptShellPermissionIdentity()
             setup { flicker.scenario.setIsTablet(tapl.isTablet) }
             transition()
         }

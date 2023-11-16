@@ -40,7 +40,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
+import com.android.packageinstaller.v2.ui.InstallLaunch;
 import java.util.Arrays;
 
 /**
@@ -57,9 +57,23 @@ public class InstallStart extends Activity {
 
     private final boolean mLocalLOGV = false;
 
+    // TODO (sumedhsen): Replace with an Android Feature Flag once implemented
+    private static final boolean USE_PIA_V2 = false;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (USE_PIA_V2) {
+            Intent piaV2 = new Intent(getIntent());
+            piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_NAME, getCallingPackage());
+            piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_UID, getLaunchedFromUid());
+            piaV2.setClass(this, InstallLaunch.class);
+            piaV2.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+            startActivity(piaV2);
+            finish();
+            return;
+        }
         mPackageManager = getPackageManager();
         mUserManager = getSystemService(UserManager.class);
 

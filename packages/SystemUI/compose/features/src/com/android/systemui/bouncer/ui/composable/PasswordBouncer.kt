@@ -28,6 +28,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,11 +64,13 @@ internal fun PasswordBouncer(
     val isImeVisible by rememberUpdatedState(WindowInsets.imeAnimationTarget.getBottom(density) > 0)
     LaunchedEffect(isImeVisible) { viewModel.onImeVisibilityChanged(isImeVisible) }
 
-    LaunchedEffect(Unit) {
+    DisposableEffect(Unit) {
+        viewModel.onShown()
+
         // When the UI comes up, request focus on the TextField to bring up the software keyboard.
         focusRequester.requestFocus()
-        // Also, report that the UI is shown to let the view-model run some logic.
-        viewModel.onShown()
+
+        onDispose { viewModel.onHidden() }
     }
 
     LaunchedEffect(animateFailure) {

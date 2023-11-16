@@ -100,6 +100,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock lateinit var enterDesktopTransitionHandler: EnterDesktopTaskTransitionHandler
     @Mock lateinit var mToggleResizeDesktopTaskTransitionHandler:
             ToggleResizeDesktopTaskTransitionHandler
+    @Mock lateinit var dragToDesktopTransitionHandler: DragToDesktopTransitionHandler
     @Mock lateinit var launchAdjacentController: LaunchAdjacentController
     @Mock lateinit var desktopModeWindowDecoration: DesktopModeWindowDecoration
     @Mock lateinit var splitScreenController: SplitScreenController
@@ -127,7 +128,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(transitions.startTransition(anyInt(), any(), isNull())).thenAnswer { Binder() }
 
         controller = createController()
-        controller.splitScreenController = splitScreenController
+        controller.setSplitScreenController(splitScreenController)
 
         shellInit.init()
 
@@ -150,6 +151,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             enterDesktopTransitionHandler,
             exitDesktopTransitionHandler,
             mToggleResizeDesktopTaskTransitionHandler,
+            dragToDesktopTransitionHandler,
             desktopModeTaskRepository,
             launchAdjacentController,
             recentsTransitionHandler,
@@ -757,6 +759,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     private fun setUpSplitScreenTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createSplitScreenTask(displayId)
+        whenever(splitScreenController.isTaskInSplitScreen(task.taskId)).thenReturn(true)
         whenever(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         runningTasks.add(task)
         return task

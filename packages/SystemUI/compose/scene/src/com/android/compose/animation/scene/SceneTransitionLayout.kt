@@ -57,30 +57,17 @@ fun SceneTransitionLayout(
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0f,
     scenes: SceneTransitionLayoutScope.() -> Unit,
 ) {
-    val density = LocalDensity.current
-    val coroutineScope = rememberCoroutineScope()
-    val layoutImpl = remember {
-        SceneTransitionLayoutImpl(
-            onChangeScene = onChangeScene,
-            builder = scenes,
-            transitions = transitions,
-            state = state,
-            density = density,
-            edgeDetector = edgeDetector,
-            transitionInterceptionThreshold = transitionInterceptionThreshold,
-            coroutineScope = coroutineScope,
-        )
-    }
-
-    layoutImpl.onChangeScene = onChangeScene
-    layoutImpl.transitions = transitions
-    layoutImpl.density = density
-    layoutImpl.edgeDetector = edgeDetector
-    layoutImpl.transitionInterceptionThreshold = transitionInterceptionThreshold
-
-    layoutImpl.setScenes(scenes)
-    layoutImpl.setCurrentScene(currentScene)
-    layoutImpl.Content(modifier)
+    SceneTransitionLayoutForTesting(
+        currentScene,
+        onChangeScene,
+        transitions,
+        state,
+        edgeDetector,
+        transitionInterceptionThreshold,
+        modifier,
+        onLayoutImpl = null,
+        scenes,
+    )
 }
 
 interface SceneTransitionLayoutScope {
@@ -108,6 +95,9 @@ interface SceneTransitionLayoutScope {
 
 @ElementDsl
 interface SceneScope {
+    /** The state of the [SceneTransitionLayout] in which this scene is contained. */
+    val layoutState: SceneTransitionLayoutState
+
     /**
      * Tag an element identified by [key].
      *
@@ -227,4 +217,48 @@ enum class SwipeDirection(val orientation: Orientation) {
     Down(Orientation.Vertical),
     Left(Orientation.Horizontal),
     Right(Orientation.Horizontal),
+}
+
+/**
+ * An internal version of [SceneTransitionLayout] to be used for tests.
+ *
+ * Important: You should use this only in tests and if you need to access the underlying
+ * [SceneTransitionLayoutImpl]. In other cases, you should use [SceneTransitionLayout].
+ */
+@Composable
+internal fun SceneTransitionLayoutForTesting(
+    currentScene: SceneKey,
+    onChangeScene: (SceneKey) -> Unit,
+    transitions: SceneTransitions,
+    state: SceneTransitionLayoutState,
+    edgeDetector: EdgeDetector,
+    transitionInterceptionThreshold: Float,
+    modifier: Modifier,
+    onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)?,
+    scenes: SceneTransitionLayoutScope.() -> Unit,
+) {
+    val density = LocalDensity.current
+    val coroutineScope = rememberCoroutineScope()
+    val layoutImpl = remember {
+        SceneTransitionLayoutImpl(
+                onChangeScene = onChangeScene,
+                builder = scenes,
+                transitions = transitions,
+                state = state,
+                density = density,
+                edgeDetector = edgeDetector,
+                transitionInterceptionThreshold = transitionInterceptionThreshold,
+                coroutineScope = coroutineScope,
+            )
+            .also { onLayoutImpl?.invoke(it) }
+    }
+
+    layoutImpl.onChangeScene = onChangeScene
+    layoutImpl.transitions = transitions
+    layoutImpl.density = density
+    layoutImpl.edgeDetector = edgeDetector
+
+    layoutImpl.setScenes(scenes)
+    layoutImpl.setCurrentScene(currentScene)
+    layoutImpl.Content(modifier)
 }

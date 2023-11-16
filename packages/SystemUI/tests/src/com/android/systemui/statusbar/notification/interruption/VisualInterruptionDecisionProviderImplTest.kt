@@ -33,6 +33,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             ambientDisplayConfiguration,
             batteryController,
             deviceProvisionedController,
+            eventLog,
             globalSettings,
             headsUpManager,
             keyguardNotificationVisibilityProvider,
@@ -42,6 +43,7 @@ class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionPro
             powerManager,
             statusBarStateController,
             systemClock,
+            uiEventLogger,
             userTracker,
         )
     }

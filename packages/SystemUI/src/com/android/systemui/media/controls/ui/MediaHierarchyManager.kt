@@ -46,8 +46,7 @@ import com.android.systemui.media.controls.pipeline.MediaDataManager
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
-import com.android.systemui.shade.ShadeStateEvents
-import com.android.systemui.shade.ShadeStateEvents.ShadeStateEventsListener
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -103,7 +102,7 @@ constructor(
     private val communalInteractor: CommunalInteractor,
     configurationController: ConfigurationController,
     wakefulnessLifecycle: WakefulnessLifecycle,
-    panelEventsEvents: ShadeStateEvents,
+    shadeInteractor: ShadeInteractor,
     private val secureSettings: SecureSettings,
     @Main private val handler: Handler,
     @Application private val coroutineScope: CoroutineScope,
@@ -545,14 +544,12 @@ constructor(
             mediaHosts.forEach { it?.updateViewVisibility() }
         }
 
-        panelEventsEvents.addShadeStateEventsListener(
-            object : ShadeStateEventsListener {
-                override fun onExpandImmediateChanged(isExpandImmediateEnabled: Boolean) {
-                    skipQqsOnExpansion = isExpandImmediateEnabled
-                    updateDesiredLocation()
-                }
+        coroutineScope.launch {
+            shadeInteractor.isQsBypassingShade.collect { isExpandImmediateEnabled ->
+                skipQqsOnExpansion = isExpandImmediateEnabled
+                updateDesiredLocation()
             }
-        )
+        }
 
         val settingsObserver: ContentObserver =
             object : ContentObserver(handler) {

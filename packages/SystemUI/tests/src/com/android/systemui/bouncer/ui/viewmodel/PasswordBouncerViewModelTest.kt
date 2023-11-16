@@ -78,9 +78,25 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             lockDeviceAndOpenPasswordBouncer()
 
             assertThat(message?.text).isEqualTo(ENTER_YOUR_PASSWORD)
-            assertThat(password).isEqualTo("")
+            assertThat(password).isEmpty()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
             assertThat(underTest.authenticationMethod).isEqualTo(AuthenticationMethodModel.Password)
+        }
+
+    @Test
+    fun onHidden_resetsPasswordInputAndMessage() =
+        testScope.runTest {
+            val message by collectLastValue(bouncerViewModel.message)
+            val password by collectLastValue(underTest.password)
+            lockDeviceAndOpenPasswordBouncer()
+
+            underTest.onPasswordInputChanged("password")
+            assertThat(message?.text).isNotEqualTo(ENTER_YOUR_PASSWORD)
+            assertThat(password).isNotEmpty()
+
+            underTest.onHidden()
+            assertThat(message?.text).isEqualTo(ENTER_YOUR_PASSWORD)
+            assertThat(password).isEmpty()
         }
 
     @Test
@@ -121,7 +137,7 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             underTest.onPasswordInputChanged("wrong")
             underTest.onAuthenticateKeyPressed()
 
-            assertThat(password).isEqualTo("")
+            assertThat(password).isEmpty()
             assertThat(message?.text).isEqualTo(WRONG_PASSWORD)
         }
 
@@ -134,14 +150,13 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
                 AuthenticationMethodModel.Password
             )
             utils.deviceEntryRepository.setUnlocked(false)
-            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
-            underTest.onShown()
-            // Enter nothing.
+            switchToScene(SceneKey.Bouncer)
+
+            // No input entered.
 
             underTest.onAuthenticateKeyPressed()
 
-            assertThat(password).isEqualTo("")
+            assertThat(password).isEmpty()
             assertThat(message?.text).isEqualTo(ENTER_YOUR_PASSWORD)
         }
 
@@ -182,32 +197,33 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             assertThat(password).isEqualTo("password")
 
             // The user doesn't confirm the password, but navigates back to the lockscreen instead.
-            sceneInteractor.changeScene(SceneModel(SceneKey.Lockscreen), "reason")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Lockscreen), "reason")
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Lockscreen))
+            switchToScene(SceneKey.Lockscreen)
 
             // The user navigates to the bouncer again.
-            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
-
-            underTest.onShown()
+            switchToScene(SceneKey.Bouncer)
 
             // Ensure the previously-entered password is not shown.
             assertThat(password).isEmpty()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
 
+    private fun TestScope.switchToScene(toScene: SceneKey) {
+        val currentScene by collectLastValue(sceneInteractor.desiredScene)
+        val bouncerShown = currentScene?.key != SceneKey.Bouncer && toScene == SceneKey.Bouncer
+        val bouncerHidden = currentScene?.key == SceneKey.Bouncer && toScene != SceneKey.Bouncer
+        sceneInteractor.changeScene(SceneModel(toScene), "reason")
+        sceneInteractor.onSceneChanged(SceneModel(toScene), "reason")
+        if (bouncerShown) underTest.onShown()
+        if (bouncerHidden) underTest.onHidden()
+        runCurrent()
+
+        assertThat(currentScene).isEqualTo(SceneModel(toScene))
+    }
+
     private fun TestScope.lockDeviceAndOpenPasswordBouncer() {
         utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Password)
         utils.deviceEntryRepository.setUnlocked(false)
-        sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "reason")
-        sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "reason")
-
-        assertThat(collectLastValue(sceneInteractor.desiredScene).invoke())
-            .isEqualTo(SceneModel(SceneKey.Bouncer))
-        underTest.onShown()
-        runCurrent()
+        switchToScene(SceneKey.Bouncer)
     }
 
     companion object {

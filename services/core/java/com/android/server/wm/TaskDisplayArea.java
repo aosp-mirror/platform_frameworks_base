@@ -1767,7 +1767,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * Exposes the home task capability of the TaskDisplayArea
      */
     boolean canHostHomeTask() {
-        return mDisplayContent.supportsSystemDecorations() && mCanHostHomeTask;
+        return mDisplayContent.isHomeSupported() && mCanHostHomeTask;
     }
 
     /**

@@ -70,6 +70,7 @@ import java.util.List;
 *</dl>
 *
 */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ContentUris {
 
     /**

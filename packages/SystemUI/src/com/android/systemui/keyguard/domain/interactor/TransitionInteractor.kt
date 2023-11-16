@@ -53,16 +53,16 @@ sealed class TransitionInteractor(
         modeOnCanceled: TransitionModeOnCanceled = TransitionModeOnCanceled.LAST_VALUE
     ): UUID? {
         if (
-            fromState != transitionInteractor.startedKeyguardState.value &&
-                fromState != transitionInteractor.finishedKeyguardState.value
+            fromState != transitionInteractor.startedKeyguardState.replayCache.last() &&
+                fromState != transitionInteractor.finishedKeyguardState.replayCache.last()
         ) {
             Log.e(
                 name,
                 "startTransition: We were asked to transition from " +
                     "$fromState to $toState, however we last finished a transition to " +
-                    "${transitionInteractor.finishedKeyguardState.value}, " +
+                    "${transitionInteractor.finishedKeyguardState.replayCache.last()}, " +
                     "and last started a transition to " +
-                    "${transitionInteractor.startedKeyguardState.value}. " +
+                    "${transitionInteractor.startedKeyguardState.replayCache.last()}. " +
                     "Ignoring startTransition, but this should never happen."
             )
             return null

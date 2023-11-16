@@ -455,6 +455,20 @@
                 <xs:annotation name="nullable"/>
                 <xs:annotation name="final"/>
             </xs:element>
+            <!-- list of supported modes when sensor is ON. Each point corresponds to one mode.
+            Mode format is : first = refreshRate, second = vsyncRate. E.g. :
+            <supportedModes>
+                <point>
+                    <first>60</first>   // refreshRate
+                    <second>60</second> //vsyncRate
+                </point>
+                ....
+            </supportedModes>
+             -->
+            <xs:element type="nonNegativeFloatToFloatMap" name="supportedModes" minOccurs="0">
+                <xs:annotation name="nullable"/>
+                <xs:annotation name="final"/>
+            </xs:element>
         </xs:sequence>
     </xs:complexType>
 

@@ -115,6 +115,19 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
         b.setParent(sc);
     }
 
+    /**
+     * Re-parents the provided surface to the leash of the provided display.
+     *
+     * @param displayId the display area to reparent to.
+     * @param sc the surface to be reparented.
+     * @param t a {@link SurfaceControl.Transaction} in which to reparent.
+     */
+    public void reparentToDisplayArea(int displayId, SurfaceControl sc,
+                                      SurfaceControl.Transaction t) {
+        final SurfaceControl displayAreaLeash = mLeashes.get(displayId);
+        t.reparent(sc, displayAreaLeash);
+    }
+
     public void setPosition(@NonNull SurfaceControl.Transaction tx, int displayId, int x, int y) {
         final SurfaceControl sc = mLeashes.get(displayId);
         if (sc == null) {

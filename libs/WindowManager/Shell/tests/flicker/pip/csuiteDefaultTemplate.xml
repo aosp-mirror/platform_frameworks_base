@@ -71,9 +71,9 @@
     <!-- Enable mocking GPS location by the test app -->
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="run-command"
-                value="appops set com.android.wm.shell.flicker.pip.apps android:mock_location allow"/>
+                value="appops set com.android.shell android:mock_location allow"/>
         <option name="teardown-command"
-                value="appops set com.android.wm.shell.flicker.pip.apps android:mock_location deny"/>
+                value="appops set com.android.shell android:mock_location deny"/>
     </target_preparer>
 
     <!-- Needed for pushing the trace config file -->

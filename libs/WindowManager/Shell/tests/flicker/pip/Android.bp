@@ -124,6 +124,10 @@ android_test {
         ":WMShellFlickerTestsPipCommon-src",
     ],
     static_libs: ["WMShellFlickerTestsBase"],
+    test_suites: [
+        "device-tests",
+        "csuite",
+    ],
 }
 
 csuite_test {

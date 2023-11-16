@@ -21,18 +21,16 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.view.View
 import androidx.test.filters.SmallTest
-import com.android.SysUITestComponent
-import com.android.SysUITestModule
-import com.android.TestMocksModule
-import com.android.collectLastValue
-import com.android.runCurrent
-import com.android.runTest
+import com.android.systemui.Flags as AConfigFlags
+import com.android.systemui.SysUITestComponent
+import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.TestMocksModule
+import com.android.systemui.collectLastValue
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
-import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
 import com.android.systemui.flags.Flags
@@ -46,6 +44,8 @@ import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.plugins.ClockController
+import com.android.systemui.runCurrent
+import com.android.systemui.runTest
 import com.android.systemui.statusbar.notification.data.repository.FakeNotificationsKeyguardViewStateRepository
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
@@ -64,7 +64,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -109,10 +108,7 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
 
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
 
-        val featureFlags =
-            FakeFeatureFlagsClassic().apply {
-                set(Flags.FACE_AUTH_REFACTOR, true)
-            }
+        val featureFlags = FakeFeatureFlagsClassic().apply { set(Flags.FACE_AUTH_REFACTOR, true) }
 
         val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
         keyguardInteractor = withDeps.keyguardInteractor

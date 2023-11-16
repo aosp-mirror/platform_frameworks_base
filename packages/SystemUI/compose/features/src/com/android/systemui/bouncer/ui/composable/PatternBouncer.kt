@@ -26,6 +26,7 @@ import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,8 +66,10 @@ internal fun PatternBouncer(
     viewModel: PatternBouncerViewModel,
     modifier: Modifier = Modifier,
 ) {
-    // Report that the UI is shown to let the view-model run some logic.
-    LaunchedEffect(Unit) { viewModel.onShown() }
+    DisposableEffect(Unit) {
+        viewModel.onShown()
+        onDispose { viewModel.onHidden() }
+    }
 
     val colCount = viewModel.columnCount
     val rowCount = viewModel.rowCount

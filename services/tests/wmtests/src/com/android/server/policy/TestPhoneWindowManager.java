@@ -57,6 +57,7 @@ import static org.mockito.Mockito.withSettings;
 
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.IActivityManager;
 import android.app.NotificationManager;
 import android.app.SearchManager;
 import android.content.ComponentName;
@@ -126,7 +127,8 @@ class TestPhoneWindowManager {
 
     @Mock private WindowManagerInternal mWindowManagerInternal;
     @Mock private ActivityManagerInternal mActivityManagerInternal;
-    @Mock private ActivityTaskManagerInternal mActivityTaskManagerInternal;
+    @Mock ActivityTaskManagerInternal mActivityTaskManagerInternal;
+    @Mock IActivityManager mActivityManagerService;
     @Mock private InputManagerInternal mInputManagerInternal;
     @Mock private InputManager mInputManager;
     @Mock private SensorPrivacyManager mSensorPrivacyManager;
@@ -180,6 +182,10 @@ class TestPhoneWindowManager {
 
         KeyguardServiceDelegate getKeyguardServiceDelegate() {
             return mKeyguardServiceDelegate;
+        }
+
+        IActivityManager getActivityManagerService() {
+            return mActivityManagerService;
         }
     }
 
@@ -345,6 +351,10 @@ class TestPhoneWindowManager {
 
     void overrideShortPressOnPower(int behavior) {
         mPhoneWindowManager.mShortPressOnPowerBehavior = behavior;
+    }
+
+    void overrideShouldEarlyShortPressOnStemPrimary(boolean shouldEarlyShortPress) {
+        mPhoneWindowManager.mShouldEarlyShortPressOnStemPrimary = shouldEarlyShortPress;
     }
 
      // Override assist perform function.
@@ -666,5 +676,12 @@ class TestPhoneWindowManager {
         verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED,
                         vendorId, productId, logEvent.getIntValue(), new int[]{expectedKey},
                         expectedModifierState), description(errorMsg));
+    }
+
+    void assertSwitchToRecent(int persistentId) throws RemoteException {
+        mTestLooper.dispatchAll();
+        verify(mActivityManagerService,
+                timeout(TEST_SINGLE_KEY_DELAY_MILLIS)).startActivityFromRecents(eq(persistentId),
+                isNull());
     }
 }

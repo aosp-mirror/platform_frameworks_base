@@ -100,6 +100,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteracto
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver;
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.keyguard.ui.viewmodel.GoneToDreamingLockscreenHostedTransitionViewModel;
@@ -123,11 +124,12 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.QSFragmentLegacy;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.SceneTestUtils;
-import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -334,6 +336,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock private CastController mCastController;
     @Mock private SharedNotificationContainerInteractor mSharedNotificationContainerInteractor;
     @Mock private KeyguardClockPositionAlgorithm mKeyguardClockPositionAlgorithm;
+    @Mock private NaturalScrollingSettingObserver mNaturalScrollingSettingObserver;
 
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected FakeFeatureFlagsClassic mFeatureFlags = new FakeFeatureFlagsClassic();
@@ -389,26 +392,27 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mPowerInteractor = keyguardInteractorDeps.getPowerInteractor();
         when(mKeyguardTransitionInteractor.isInTransitionToStateWhere(any())).thenReturn(
                 StateFlowKt.MutableStateFlow(false));
-        mShadeInteractor = new ShadeInteractor(
+        mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
                 new FakeDeviceProvisioningRepository(),
                 new FakeDisableFlagsRepository(),
                 mDozeParameters,
-                new FakeSceneContainerFlags(),
-                mUtils::sceneInteractor,
                 mFakeKeyguardRepository,
                 mKeyguardTransitionInteractor,
                 mPowerInteractor,
                 new FakeUserSetupRepository(),
                 mock(UserSwitcherInteractor.class),
-                new SharedNotificationContainerInteractor(
-                        new FakeConfigurationRepository(),
-                        mContext,
-                        new ResourcesSplitShadeStateController()
-                ),
-                mShadeRepository
+                new ShadeInteractorLegacyImpl(
+                        mTestScope.getBackgroundScope(),
+                        mFakeKeyguardRepository,
+                        new SharedNotificationContainerInteractor(
+                                new FakeConfigurationRepository(),
+                                mContext,
+                                new ResourcesSplitShadeStateController()
+                        ),
+                        mShadeRepository
+                )
         );
-
         SystemClock systemClock = new FakeSystemClock();
         mStatusBarStateController = new StatusBarStateControllerImpl(mUiEventLogger,
                 mInteractionJankMonitor, mJavaAdapter, () -> mShadeInteractor);
@@ -498,6 +502,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mScreenOffAnimationController.shouldAnimateClockChange()).thenReturn(true);
         when(mQs.getView()).thenReturn(mView);
         when(mQSFragment.getView()).thenReturn(mView);
+        when(mNaturalScrollingSettingObserver.isNaturalScrollingEnabled()).thenReturn(true);
         doAnswer(invocation -> {
             mFragmentListener = invocation.getArgument(1);
             return null;
@@ -708,7 +713,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mKeyguardFaceAuthInteractor,
                 new ResourcesSplitShadeStateController(),
                 mPowerInteractor,
-                mKeyguardClockPositionAlgorithm);
+                mKeyguardClockPositionAlgorithm,
+                mNaturalScrollingSettingObserver);
         mNotificationPanelViewController.initDependencies(
                 mCentralSurfaces,
                 null,

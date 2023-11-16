@@ -178,7 +178,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.WM_ENABLE_PREDICTIVE_BACK_BOUNCER_ANIM, true);
         mFeatureFlags.set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false);
         mFeatureFlags.set(Flags.KEYGUARD_WM_STATE_REFACTOR, false);
-        mFeatureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, false);
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
 
         when(mNotificationShadeWindowController.getWindowRootView())
                 .thenReturn(mNotificationShadeWindowView);
@@ -771,7 +771,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
         mStatusBarKeyguardViewManager.addCallback(mCallback);
 
         // GIVEN alternate bouncer view flag enabled & the alternate bouncer is visible
-        mFeatureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, true);
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
         // THEN the touch is not acted upon
@@ -781,7 +781,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     @Test
     public void onInterceptTouch_alternateBouncerViewFlagEnabled() {
         // GIVEN alternate bouncer view flag enabled & the alternate bouncer is visible
-        mFeatureFlags.set(Flags.ALTERNATE_BOUNCER_VIEW, true);
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(true);
 
         // THEN the touch is not intercepted

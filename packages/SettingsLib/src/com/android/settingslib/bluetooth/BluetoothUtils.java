@@ -594,6 +594,16 @@ public class BluetoothUtils {
                 || cachedDevice.isActiveDevice(BluetoothProfile.LE_AUDIO);
     }
 
+    /**
+     * Check if the Bluetooth device is an active LE Audio device
+     *
+     * @param cachedDevice the CachedBluetoothDevice
+     * @return if the Bluetooth device is an active LE Audio device
+     */
+    public static boolean isActiveLeAudioDevice(CachedBluetoothDevice cachedDevice) {
+        return cachedDevice.isActiveDevice(BluetoothProfile.LE_AUDIO);
+    }
+
     private static boolean isDeviceConnected(CachedBluetoothDevice cachedDevice) {
         if (cachedDevice == null) {
             return false;

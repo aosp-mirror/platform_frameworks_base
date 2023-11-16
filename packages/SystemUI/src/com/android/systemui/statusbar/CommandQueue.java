@@ -75,13 +75,13 @@ import com.android.systemui.statusbar.CommandQueue.Callbacks;
 import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.policy.CallbackController;
 
+import dagger.Lazy;
+
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
-import dagger.Lazy;
 
 /**
  * This class takes the functions from IStatusBar that come in on
@@ -424,7 +424,7 @@ public class CommandQueue extends IStatusBar.Stub implements
         default void onTracingStateChanged(boolean enabled) { }
 
         /**
-         * Requests {@link com.android.systemui.accessibility.WindowMagnification} to invoke
+         * Requests {@link com.android.systemui.accessibility.Magnification} to invoke
          * {@code android.view.accessibility.AccessibilityManager#
          * setWindowMagnificationConnection(IWindowMagnificationConnection)}
          *

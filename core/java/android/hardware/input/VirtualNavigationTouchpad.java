@@ -40,8 +40,9 @@ import android.os.RemoteException;
 public class VirtualNavigationTouchpad extends VirtualInputDevice {
 
     /** @hide */
-    public VirtualNavigationTouchpad(IVirtualDevice virtualDevice, IBinder token) {
-        super(virtualDevice, token);
+    public VirtualNavigationTouchpad(VirtualNavigationTouchpadConfig config,
+            IVirtualDevice virtualDevice, IBinder token) {
+        super(config, virtualDevice, token);
     }
 
     /**

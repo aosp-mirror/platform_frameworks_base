@@ -138,6 +138,19 @@ public final class VirtualTouchEvent implements Parcelable {
         return 0;
     }
 
+    @Override
+    public String toString() {
+        return "VirtualTouchEvent("
+                + " pointerId=" + mPointerId
+                + " toolType=" + MotionEvent.toolTypeToString(mToolType)
+                + " action=" + MotionEvent.actionToString(mAction)
+                + " x=" + mX
+                + " y=" + mY
+                + " pressure=" + mPressure
+                + " majorAxisSize=" + mMajorAxisSize
+                + " eventTime(ns)=" + mEventTimeNanos;
+    }
+
     /**
      * Returns the pointer id associated with this event.
      */

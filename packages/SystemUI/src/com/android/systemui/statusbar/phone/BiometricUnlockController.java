@@ -49,7 +49,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.BiometricUnlockInteractor;
@@ -186,8 +185,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private long mLastFpFailureUptimeMillis;
     private int mNumConsecutiveFpFailures;
 
-    private final FeatureFlags mFeatureFlags;
-
     private static final class PendingAuthenticated {
         public final int userId;
         public final BiometricSourceType biometricSourceType;
@@ -291,7 +288,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             ScreenOffAnimationController screenOffAnimationController,
             VibratorHelper vibrator,
             SystemClock systemClock,
-            FeatureFlags featureFlags,
             DeviceEntryHapticsInteractor hapticsInteractor,
             Lazy<SelectedUserInteractor> selectedUserInteractor,
             BiometricUnlockInteractor biometricUnlockInteractor
@@ -322,7 +318,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         mVibratorHelper = vibrator;
         mLogger = biometricUnlockLogger;
         mSystemClock = systemClock;
-        mFeatureFlags = featureFlags;
         mOrderUnlockAndWake = resources.getBoolean(
                 com.android.internal.R.bool.config_orderUnlockAndWake);
         mHapticsInteractor = hapticsInteractor;

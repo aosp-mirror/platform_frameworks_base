@@ -237,6 +237,37 @@ class DisplayWindowSettings {
         mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
     }
 
+    boolean isHomeSupportedLocked(@NonNull DisplayContent dc) {
+        if (dc.getDisplayId() == Display.DEFAULT_DISPLAY) {
+            // Default display should show home.
+            return true;
+        }
+
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+        final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
+        return settings.mIsHomeSupported != null
+                ? settings.mIsHomeSupported
+                : shouldShowSystemDecorsLocked(dc);
+    }
+
+    void setHomeSupportedOnDisplayLocked(@NonNull String displayUniqueId, int displayType,
+            boolean supported) {
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.uniqueId = displayUniqueId;
+        displayInfo.type = displayType;
+        final SettingsProvider.SettingsEntry overrideSettings =
+                mSettingsProvider.getOverrideSettings(displayInfo);
+        overrideSettings.mIsHomeSupported = supported;
+        mSettingsProvider.updateOverrideSettings(displayInfo, overrideSettings);
+    }
+
+    void clearDisplaySettings(@NonNull String displayUniqueId, int displayType) {
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.uniqueId = displayUniqueId;
+        displayInfo.type = displayType;
+        mSettingsProvider.clearDisplaySettings(displayInfo);
+    }
+
     @DisplayImePolicy
     int getImePolicyLocked(@NonNull DisplayContent dc) {
         if (dc.getDisplayId() == Display.DEFAULT_DISPLAY) {
@@ -382,9 +413,16 @@ class DisplayWindowSettings {
         void updateOverrideSettings(@NonNull DisplayInfo info, @NonNull SettingsEntry overrides);
 
         /**
-         * Called when a display is removed to cleanup.
+         * Called when a display is removed to cleanup. Note that for non-virtual displays the
+         * relevant settings entry will be kept, if non-empty.
          */
         void onDisplayRemoved(@NonNull DisplayInfo info);
+
+        /**
+         * Explicitly removes all settings entory for the given {@link DisplayInfo}, even if it is
+         * not empty.
+         */
+        void clearDisplaySettings(@NonNull DisplayInfo info);
 
         /**
          * Settings for a display.
@@ -410,6 +448,8 @@ class DisplayWindowSettings {
             Boolean mShouldShowWithInsecureKeyguard;
             @Nullable
             Boolean mShouldShowSystemDecors;
+            @Nullable
+            Boolean mIsHomeSupported;
             @Nullable
             Integer mImePolicy;
             @Nullable
@@ -477,6 +517,10 @@ class DisplayWindowSettings {
                 }
                 if (!Objects.equals(other.mShouldShowSystemDecors, mShouldShowSystemDecors)) {
                     mShouldShowSystemDecors = other.mShouldShowSystemDecors;
+                    changed = true;
+                }
+                if (!Objects.equals(other.mIsHomeSupported, mIsHomeSupported)) {
+                    mIsHomeSupported = other.mIsHomeSupported;
                     changed = true;
                 }
                 if (!Objects.equals(other.mImePolicy, mImePolicy)) {
@@ -561,6 +605,11 @@ class DisplayWindowSettings {
                     mShouldShowSystemDecors = delta.mShouldShowSystemDecors;
                     changed = true;
                 }
+                if (delta.mIsHomeSupported != null && !Objects.equals(
+                        delta.mIsHomeSupported, mIsHomeSupported)) {
+                    mIsHomeSupported = delta.mIsHomeSupported;
+                    changed = true;
+                }
                 if (delta.mImePolicy != null
                         && !Objects.equals(delta.mImePolicy, mImePolicy)) {
                     mImePolicy = delta.mImePolicy;
@@ -599,6 +648,7 @@ class DisplayWindowSettings {
                         && mRemoveContentMode == REMOVE_CONTENT_MODE_UNDEFINED
                         && mShouldShowWithInsecureKeyguard == null
                         && mShouldShowSystemDecors == null
+                        && mIsHomeSupported == null
                         && mImePolicy == null
                         && mFixedToUserRotation == null
                         && mIgnoreOrientationRequest == null
@@ -622,6 +672,7 @@ class DisplayWindowSettings {
                         && Objects.equals(mShouldShowWithInsecureKeyguard,
                                 that.mShouldShowWithInsecureKeyguard)
                         && Objects.equals(mShouldShowSystemDecors, that.mShouldShowSystemDecors)
+                        && Objects.equals(mIsHomeSupported, that.mIsHomeSupported)
                         && Objects.equals(mImePolicy, that.mImePolicy)
                         && Objects.equals(mFixedToUserRotation, that.mFixedToUserRotation)
                         && Objects.equals(mIgnoreOrientationRequest, that.mIgnoreOrientationRequest)
@@ -633,9 +684,9 @@ class DisplayWindowSettings {
             public int hashCode() {
                 return Objects.hash(mWindowingMode, mUserRotationMode, mUserRotation, mForcedWidth,
                         mForcedHeight, mForcedDensity, mForcedScalingMode, mRemoveContentMode,
-                        mShouldShowWithInsecureKeyguard, mShouldShowSystemDecors, mImePolicy,
-                        mFixedToUserRotation, mIgnoreOrientationRequest, mIgnoreDisplayCutout,
-                        mDontMoveToTop);
+                        mShouldShowWithInsecureKeyguard, mShouldShowSystemDecors, mIsHomeSupported,
+                        mImePolicy, mFixedToUserRotation, mIgnoreOrientationRequest,
+                        mIgnoreDisplayCutout, mDontMoveToTop);
             }
 
             @Override
@@ -651,6 +702,7 @@ class DisplayWindowSettings {
                         + ", mRemoveContentMode=" + mRemoveContentMode
                         + ", mShouldShowWithInsecureKeyguard=" + mShouldShowWithInsecureKeyguard
                         + ", mShouldShowSystemDecors=" + mShouldShowSystemDecors
+                        + ", mIsHomeSupported=" + mIsHomeSupported
                         + ", mShouldShowIme=" + mImePolicy
                         + ", mFixedToUserRotation=" + mFixedToUserRotation
                         + ", mIgnoreOrientationRequest=" + mIgnoreOrientationRequest

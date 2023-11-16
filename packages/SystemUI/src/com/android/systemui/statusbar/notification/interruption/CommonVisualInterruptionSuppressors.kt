@@ -32,6 +32,7 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.StatusBarState.SHADE
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.MAX_HUN_WHEN_AGE_MS
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl.NotificationInterruptEvent.HUN_SUPPRESSED_OLD_WHEN
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PULSE
@@ -141,7 +142,11 @@ class PeekDeviceNotInUseSuppressor(
 }
 
 class PeekOldWhenSuppressor(private val systemClock: SystemClock) :
-    VisualInterruptionFilter(types = setOf(PEEK), reason = "has old `when`") {
+    VisualInterruptionFilter(
+        types = setOf(PEEK),
+        reason = "has old `when`",
+        uiEventId = HUN_SUPPRESSED_OLD_WHEN
+    ) {
     private fun whenAge(entry: NotificationEntry) =
         systemClock.currentTimeMillis() - entry.sbn.notification.`when`
 

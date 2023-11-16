@@ -68,6 +68,8 @@ import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
+import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -267,25 +269,26 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
         ResourcesSplitShadeStateController splitShadeStateController =
                 new ResourcesSplitShadeStateController();
 
-        mShadeInteractor =
-                new ShadeInteractor(
+        mShadeInteractor = new ShadeInteractorImpl(
+                mTestScope.getBackgroundScope(),
+                deviceProvisioningRepository,
+                mDisableFlagsRepository,
+                mDozeParameters,
+                mKeyguardRepository,
+                keyguardTransitionInteractor,
+                powerInteractor,
+                new FakeUserSetupRepository(),
+                mUserSwitcherInteractor,
+                new ShadeInteractorLegacyImpl(
                         mTestScope.getBackgroundScope(),
-                        deviceProvisioningRepository,
-                        mDisableFlagsRepository,
-                        mDozeParameters,
-                        sceneContainerFlags,
-                        () -> sceneInteractor,
                         mKeyguardRepository,
-                        keyguardTransitionInteractor,
-                        powerInteractor,
-                        new FakeUserSetupRepository(),
-                        mUserSwitcherInteractor,
                         new SharedNotificationContainerInteractor(
                                 configurationRepository,
                                 mContext,
                                 splitShadeStateController),
                         mShadeRepository
-                );
+                )
+        );
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);

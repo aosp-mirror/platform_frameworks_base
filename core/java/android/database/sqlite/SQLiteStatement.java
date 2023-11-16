@@ -27,7 +27,6 @@ import android.os.ParcelFileDescriptor;
  * <p>
  * This class is not thread-safe.
  * </p>
- * Note that this class is unrelated to {@link SQLiteRawStatement}.
  */
 public final class SQLiteStatement extends SQLiteProgram {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)

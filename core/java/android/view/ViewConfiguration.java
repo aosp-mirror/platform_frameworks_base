@@ -88,6 +88,13 @@ public class ViewConfiguration {
     private static final int DEFAULT_MULTI_PRESS_TIMEOUT = 300;
 
     /**
+     * Defines the default duration in milliseconds between a key being pressed and its first key
+     * repeat event being generated. Historically, Android used the long press timeout as the
+     * key repeat timeout, so its default value is set to long press timeout's default.
+     */
+    private static final int DEFAULT_KEY_REPEAT_TIMEOUT_MS = DEFAULT_LONG_PRESS_TIMEOUT;
+
+    /**
      * Defines the default duration between successive key repeats in milliseconds.
      */
     private static final int DEFAULT_KEY_REPEAT_DELAY_MS = 50;
@@ -719,11 +726,8 @@ public class ViewConfiguration {
      * @return the time before the first key repeat in milliseconds.
      */
     public static int getKeyRepeatTimeout() {
-        // Before the key repeat timeout was introduced, some users relied on changing
-        // LONG_PRESS_TIMEOUT settings to also change the key repeat timeout. To support
-        // this backward compatibility, we'll use the long press timeout as default value.
         return AppGlobals.getIntCoreSetting(Settings.Secure.KEY_REPEAT_TIMEOUT_MS,
-                getLongPressTimeout());
+                DEFAULT_KEY_REPEAT_TIMEOUT_MS);
     }
 
     /**

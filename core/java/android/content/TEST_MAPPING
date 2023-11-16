@@ -57,5 +57,11 @@
       ],
       "file_patterns": ["(/|^)Context.java", "(/|^)ContextWrapper.java"]
     }
+  ],
+  "ravenwood-presubmit": [
+    {
+      "name": "CtsContentTestCasesRavenwood",
+      "host": true
+    }
   ]
 }

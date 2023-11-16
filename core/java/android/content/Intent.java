@@ -660,6 +660,7 @@ import java.util.TimeZone;
  * {@link #setFlags} and {@link #addFlags}.  See {@link #setFlags} for a list
  * of all possible flags.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Intent implements Parcelable, Cloneable {
     private static final String TAG = "Intent";
 
@@ -2800,6 +2801,12 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Broadcast Action: An application package that was previously in the stopped state has been
      * started and is no longer considered stopped.
+     * <p>When a package is force-stopped, the {@link #ACTION_PACKAGE_RESTARTED} broadcast is sent
+     * and the package in the stopped state cannot self-start for any reason unless there's an
+     * explicit request to start a component in the package. The {@link #ACTION_PACKAGE_UNSTOPPED}
+     * broadcast is sent when such an explicit process start occurs and the package is taken
+     * out of the stopped state.
+     * </p>
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
      * <li> {@link #EXTRA_TIME} containing the {@link SystemClock#elapsedRealtime()
@@ -2807,6 +2814,9 @@ public class Intent implements Parcelable, Cloneable {
      * </ul>
      *
      * <p class="note">This is a protected intent that can only be sent by the system.
+     *
+     * @see ApplicationInfo#FLAG_STOPPED
+     * @see #ACTION_PACKAGE_RESTARTED
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @FlaggedApi(android.content.pm.Flags.FLAG_STAY_STOPPED)
@@ -12171,6 +12181,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void prepareToLeaveProcess(Context context) {
         final boolean leavingPackage;
@@ -12192,6 +12203,7 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public void prepareToLeaveProcess(boolean leavingPackage) {
         setAllowFds(false);
 
@@ -12287,6 +12299,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public void prepareToEnterProcess(boolean fromProtectedComponent, AttributionSource source) {
         if (fromProtectedComponent) {
             prepareToEnterProcess(LOCAL_FLAG_FROM_PROTECTED_COMPONENT, source);
@@ -12298,6 +12311,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public void prepareToEnterProcess(int localFlags, AttributionSource source) {
         // We just entered destination process, so we should be able to read all
         // parcelables inside.
@@ -12369,6 +12383,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
      public void fixUris(int contentUserHint) {
         Uri data = getData();
         if (data != null) {
@@ -12408,6 +12423,7 @@ public class Intent implements Parcelable, Cloneable {
      * @return Whether any contents were migrated.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public boolean migrateExtraStreamToClipData() {
         return migrateExtraStreamToClipData(AppGlobals.getInitialApplication());
     }
@@ -12421,6 +12437,7 @@ public class Intent implements Parcelable, Cloneable {
      * @return Whether any contents were migrated.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow
     public boolean migrateExtraStreamToClipData(Context context) {
         // Refuse to touch if extras already parcelled
         if (mExtras != null && mExtras.isParcelled()) return false;
@@ -12536,6 +12553,7 @@ public class Intent implements Parcelable, Cloneable {
         return false;
     }
 
+    @android.ravenwood.annotation.RavenwoodThrow
     private Uri maybeConvertFileToContentUri(Context context, Uri uri) {
         if (ContentResolver.SCHEME_FILE.equals(uri.getScheme())
                 && context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.R) {
@@ -12589,6 +12607,7 @@ public class Intent implements Parcelable, Cloneable {
 
     // TODO(b/299109198): Refactor into the {@link SdkSandboxManagerLocal}
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodThrow
     public boolean isSandboxActivity(@NonNull Context context) {
         if (mAction != null && mAction.equals(ACTION_START_SANDBOXED_ACTIVITY)) {
             return true;

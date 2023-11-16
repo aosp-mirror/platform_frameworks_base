@@ -67,6 +67,7 @@ public class UserManagerServiceUserPropertiesTest {
                 .setCrossProfileIntentResolutionStrategy(0)
                 .setMediaSharedWithParent(false)
                 .setCredentialShareableWithParent(true)
+                .setAuthAlwaysRequiredToDisableQuietMode(false)
                 .setDeleteAppWithParent(false)
                 .setAlwaysVisible(false)
                 .build();
@@ -80,6 +81,7 @@ public class UserManagerServiceUserPropertiesTest {
         actualProps.setCrossProfileIntentResolutionStrategy(1);
         actualProps.setMediaSharedWithParent(true);
         actualProps.setCredentialShareableWithParent(false);
+        actualProps.setAuthAlwaysRequiredToDisableQuietMode(true);
         actualProps.setDeleteAppWithParent(true);
         actualProps.setAlwaysVisible(true);
 
@@ -123,6 +125,7 @@ public class UserManagerServiceUserPropertiesTest {
                 .setInheritDevicePolicy(1732)
                 .setMediaSharedWithParent(true)
                 .setDeleteAppWithParent(true)
+                .setAuthAlwaysRequiredToDisableQuietMode(false)
                 .setAlwaysVisible(true)
                 .build();
         final UserProperties orig = new UserProperties(defaultProps);
@@ -131,6 +134,7 @@ public class UserManagerServiceUserPropertiesTest {
         orig.setShowInSettings(1437);
         orig.setInheritDevicePolicy(9456);
         orig.setDeleteAppWithParent(false);
+        orig.setAuthAlwaysRequiredToDisableQuietMode(true);
         orig.setAlwaysVisible(false);
 
         // Test every permission level. (Currently, it's linear so it's easy.)
@@ -182,6 +186,8 @@ public class UserManagerServiceUserPropertiesTest {
                 hasManagePermission);
         assertEqualGetterOrThrows(orig::getUseParentsContacts,
                 copy::getUseParentsContacts, hasManagePermission);
+        assertEqualGetterOrThrows(orig::isAuthAlwaysRequiredToDisableQuietMode,
+                copy::isAuthAlwaysRequiredToDisableQuietMode, hasManagePermission);
 
         // Items requiring hasQueryPermission - put them here using hasQueryPermission.
 
@@ -242,6 +248,8 @@ public class UserManagerServiceUserPropertiesTest {
                 .isEqualTo(actual.isMediaSharedWithParent());
         assertThat(expected.isCredentialShareableWithParent())
                 .isEqualTo(actual.isCredentialShareableWithParent());
+        assertThat(expected.isAuthAlwaysRequiredToDisableQuietMode())
+                .isEqualTo(actual.isAuthAlwaysRequiredToDisableQuietMode());
         assertThat(expected.getDeleteAppWithParent()).isEqualTo(actual.getDeleteAppWithParent());
         assertThat(expected.getAlwaysVisible()).isEqualTo(actual.getAlwaysVisible());
     }

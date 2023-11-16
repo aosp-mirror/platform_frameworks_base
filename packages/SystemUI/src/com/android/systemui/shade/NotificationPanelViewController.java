@@ -134,6 +134,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInterac
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
+import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver;
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
 import com.android.systemui.keyguard.shared.model.TransitionState;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
@@ -355,6 +356,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final NotificationGutsManager mGutsManager;
     private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     private final QuickSettingsController mQsController;
+    private final NaturalScrollingSettingObserver mNaturalScrollingSettingObserver;
     private final TouchHandler mTouchHandler = new TouchHandler();
 
     private long mDownTime;
@@ -407,6 +409,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private float mOverStretchAmount;
     private float mDownX;
     private float mDownY;
+    private boolean mIsTrackpadReverseScroll;
     private int mDisplayTopInset = 0; // in pixels
     private int mDisplayRightInset = 0; // in pixels
     private int mDisplayLeftInset = 0; // in pixels
@@ -775,7 +778,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
             SplitShadeStateController splitShadeStateController,
             PowerInteractor powerInteractor,
-            KeyguardClockPositionAlgorithm keyguardClockPositionAlgorithm) {
+            KeyguardClockPositionAlgorithm keyguardClockPositionAlgorithm,
+            NaturalScrollingSettingObserver naturalScrollingSettingObserver) {
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
             @Override
             public void onKeyguardFadingAwayChanged() {
@@ -804,6 +808,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mPowerInteractor = powerInteractor;
         mKeyguardViewConfigurator = keyguardViewConfigurator;
         mClockPositionAlgorithm = keyguardClockPositionAlgorithm;
+        mNaturalScrollingSettingObserver = naturalScrollingSettingObserver;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -3682,7 +3687,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
      */
     private boolean isDirectionUpwards(float x, float y) {
         float xDiff = x - mInitialExpandX;
-        float yDiff = y - mInitialExpandY;
+        float yDiff = (mIsTrackpadReverseScroll ? -1 : 1) * (y - mInitialExpandY);
         if (yDiff >= 0) {
             return false;
         }
@@ -3719,7 +3724,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 || (!isFullyExpanded() && !isFullyCollapsed())
                 || event.getActionMasked() == MotionEvent.ACTION_CANCEL || forceCancel) {
             mVelocityTracker.computeCurrentVelocity(1000);
-            float vel = mVelocityTracker.getYVelocity();
+            float vel = (mIsTrackpadReverseScroll ? -1 : 1) * mVelocityTracker.getYVelocity();
             float vectorVel = (float) Math.hypot(
                     mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
 
@@ -3758,8 +3763,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_UNLOCK, heightDp, velocityDp);
                 mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_UNLOCK);
             }
+            float dy = (mIsTrackpadReverseScroll ? -1 : 1) * (y - mInitialExpandY);
             @Classifier.InteractionType int interactionType = vel == 0 ? GENERIC
-                    : y - mInitialExpandY > 0 ? QUICK_SETTINGS
+                    : dy > 0 ? QUICK_SETTINGS
                             : (mKeyguardStateController.canDismissLockScreen()
                                     ? UNLOCK : BOUNCER_UNLOCK);
 
@@ -3786,7 +3792,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private float getCurrentExpandVelocity() {
         mVelocityTracker.computeCurrentVelocity(1000);
-        return mVelocityTracker.getYVelocity();
+        return (mIsTrackpadReverseScroll ? -1 : 1) * mVelocityTracker.getYVelocity();
     }
 
     private void endClosing() {
@@ -4827,6 +4833,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                                 + " mAnimatingOnDown: true, mClosing: true");
                         return true;
                     }
+
+                    mIsTrackpadReverseScroll =
+                            !mNaturalScrollingSettingObserver.isNaturalScrollingEnabled()
+                                    && isTrackpadScroll(mTrackpadGestureFeaturesEnabled, event);
                     if (!isTracking() || isFullyCollapsed()) {
                         mInitialExpandY = y;
                         mInitialExpandX = x;
@@ -4869,7 +4879,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    final float h = y - mInitialExpandY;
+                    final float h = (mIsTrackpadReverseScroll ? -1 : 1) * (y - mInitialExpandY);
                     addMovement(event);
                     final boolean openShadeWithoutHun =
                             mPanelClosedOnDown && !mCollapsedAndHeadsUpOnDown;
@@ -5133,7 +5143,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     if (!isFullyCollapsed()) {
                         maybeVibrateOnOpening(true /* openingWithTouch */);
                     }
-                    float h = y - mInitialExpandY;
+                    float h = (mIsTrackpadReverseScroll ? -1 : 1) * (y - mInitialExpandY);
 
                     // If the panel was collapsed when touching, we only need to check for the
                     // y-component of the gesture, as we have no conflicting horizontal gesture.
@@ -5182,6 +5192,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                             mQsController.cancelJankMonitoring();
                         }
                     }
+                    mIsTrackpadReverseScroll = false;
                     break;
             }
             return !mGestureWaitForTouchSlop || isTracking();

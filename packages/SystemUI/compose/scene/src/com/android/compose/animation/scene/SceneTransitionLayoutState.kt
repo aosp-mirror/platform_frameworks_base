@@ -30,6 +30,22 @@ class SceneTransitionLayoutState(initialScene: SceneKey) {
      */
     var transitionState: TransitionState by mutableStateOf(TransitionState.Idle(initialScene))
         internal set
+
+    /**
+     * Whether we are transitioning, optionally restricting the check to the transition between
+     * [from] and [to].
+     */
+    fun isTransitioning(from: SceneKey? = null, to: SceneKey? = null): Boolean {
+        val transition = transitionState as? TransitionState.Transition ?: return false
+
+        // TODO(b/310915136): Remove this check.
+        if (transition.fromScene == transition.toScene) {
+            return false
+        }
+
+        return (from == null || transition.fromScene == from) &&
+            (to == null || transition.toScene == to)
+    }
 }
 
 sealed interface TransitionState {

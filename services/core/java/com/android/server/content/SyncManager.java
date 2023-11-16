@@ -438,6 +438,23 @@ public class SyncManager {
         }
     };
 
+    private final BroadcastReceiver mForceStoppedReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final boolean isLoggable = Log.isLoggable(TAG, Log.DEBUG);
+            // For now, just log when packages were force-stopped and unstopped for debugging.
+            if (isLoggable) {
+                if (Intent.ACTION_PACKAGE_RESTARTED.equals(intent.getAction())) {
+                    Log.d(TAG, "Package force-stopped: "
+                            + intent.getData().getSchemeSpecificPart());
+                } else if (Intent.ACTION_PACKAGE_UNSTOPPED.equals(intent.getAction())) {
+                    Log.d(TAG, "Package unstopped: "
+                            + intent.getData().getSchemeSpecificPart());
+                }
+            }
+        }
+    };
+
     private final HandlerThread mThread;
     private final SyncHandler mSyncHandler;
     private final SyncManagerConstants mConstants;
@@ -700,6 +717,12 @@ public class SyncManager {
         intentFilter.addAction(Intent.ACTION_USER_STOPPED);
         mContext.registerReceiverAsUser(
                 mUserIntentReceiver, UserHandle.ALL, intentFilter, null, null);
+
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
+        intentFilter.addAction(Intent.ACTION_PACKAGE_UNSTOPPED);
+        intentFilter.addDataScheme("package");
+        context.registerReceiver(mForceStoppedReceiver, intentFilter);
 
         intentFilter = new IntentFilter(Intent.ACTION_TIME_CHANGED);
         context.registerReceiver(mOtherIntentsReceiver, intentFilter);
@@ -1108,7 +1131,7 @@ public class SyncManager {
 
             for (String authority : syncableAuthorities) {
                 int isSyncable = computeSyncable(account.account, account.userId, authority,
-                        !checkIfAccountReady);
+                        !checkIfAccountReady, /*checkStoppedState=*/ true);
 
                 if (isSyncable == AuthorityInfo.NOT_SYNCABLE) {
                     continue;
@@ -1228,7 +1251,7 @@ public class SyncManager {
     }
 
     public int computeSyncable(Account account, int userId, String authority,
-            boolean checkAccountAccess) {
+            boolean checkAccountAccess, boolean checkStoppedState) {
         final int status = getIsSyncable(account, userId, authority);
         if (status == AuthorityInfo.NOT_SYNCABLE) {
             return AuthorityInfo.NOT_SYNCABLE;
@@ -1241,6 +1264,9 @@ public class SyncManager {
         }
         final int owningUid = syncAdapterInfo.uid;
         final String owningPackage = syncAdapterInfo.componentName.getPackageName();
+        if (checkStoppedState && isPackageStopped(owningPackage, userId)) {
+            return AuthorityInfo.NOT_SYNCABLE;
+        }
         if (mAmi.isAppStartModeDisabled(owningUid, owningPackage)) {
             Slog.w(TAG, "Not scheduling job " + syncAdapterInfo.uid + ":"
                     + syncAdapterInfo.componentName
@@ -1254,6 +1280,17 @@ public class SyncManager {
         }
 
         return status;
+    }
+
+    /**
+     * Returns whether the package is in a stopped state or not.
+     * Always returns {@code false} if the {@code android.content.pm.stay_stopped} flag is not set.
+     */
+    private boolean isPackageStopped(String packageName, int userId) {
+        if (android.content.pm.Flags.stayStopped()) {
+            return mPackageManagerInternal.isPackageStopped(packageName, userId);
+        }
+        return false;
     }
 
     private boolean canAccessAccount(Account account, String packageName, int uid) {
@@ -3496,6 +3533,9 @@ public class SyncManager {
             for (SyncOperation op: ops) {
                 if (op.isPeriodic && op.target.matchesSpec(target)
                         && op.areExtrasEqual(extras, /*includeSyncSettings=*/ true)) {
+                    if (isPackageStopped(op.owningPackage, target.userId)) {
+                        continue; // skip stopped package
+                    }
                     maybeUpdateSyncPeriodH(op, pollFrequencyMillis, flexMillis);
                     return;
                 }
@@ -3627,7 +3667,8 @@ public class SyncManager {
                 }
             }
             // Drop this sync request if it isn't syncable.
-            state = computeSyncable(target.account, target.userId, target.provider, true);
+            state = computeSyncable(target.account, target.userId, target.provider, true,
+                    /*checkStoppedState=*/ true);
             if (state == AuthorityInfo.SYNCABLE_NO_ACCOUNT_ACCESS) {
                 if (isLoggable) {
                     Slog.v(TAG, "    Dropping sync operation: "

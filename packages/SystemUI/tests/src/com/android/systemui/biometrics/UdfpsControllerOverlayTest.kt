@@ -43,7 +43,7 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.keyguard.ui.viewmodel.UdfpsKeyguardViewModels
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.LockscreenShadeTransitionController
@@ -68,7 +68,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
-import javax.inject.Provider
 import org.mockito.Mockito.`when` as whenever
 
 private const val REQUEST_ID = 2L
@@ -111,11 +110,10 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
     @Mock private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
-    @Mock private lateinit var udfpsUtils: UdfpsUtils
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var udfpsKeyguardAccessibilityDelegate:
             UdfpsKeyguardAccessibilityDelegate
-    @Mock private lateinit var udfpsKeyguardViewModels: Provider<UdfpsKeyguardViewModels>
+    @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Captor private lateinit var layoutParamsCaptor: ArgumentCaptor<WindowManager.LayoutParams>
 
     private val onTouch = { _: View, _: MotionEvent, _: Boolean -> true }
@@ -164,7 +162,7 @@ class UdfpsControllerOverlayTest : SysuiTestCase() {
             alternateBouncerInteractor,
             isDebuggable,
             udfpsKeyguardAccessibilityDelegate,
-            udfpsKeyguardViewModels,
+            keyguardTransitionInteractor,
             mSelectedUserInteractor,
         )
         block()

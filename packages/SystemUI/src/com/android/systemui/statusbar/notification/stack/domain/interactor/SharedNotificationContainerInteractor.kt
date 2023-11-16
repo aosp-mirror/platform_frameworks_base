@@ -73,6 +73,11 @@ constructor(
             }
             .distinctUntilChanged()
 
+    val isSplitShadeEnabled: Flow<Boolean> =
+        configurationBasedDimensions
+            .map { dimens: ConfigurationBasedDimensions -> dimens.useSplitShade }
+            .distinctUntilChanged()
+
     /** Top position (without translation) of the shared container. */
     fun setTopPosition(top: Float) {
         _topPosition.value = top

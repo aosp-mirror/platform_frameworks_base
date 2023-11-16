@@ -150,19 +150,19 @@ public class Transitions implements RemoteCallable<Transitions>,
     /** Transition type for maximize to freeform transition. */
     public static final int TRANSIT_RESTORE_FROM_MAXIMIZE = WindowManager.TRANSIT_FIRST_CUSTOM + 9;
 
-    /** Transition type for starting the move to desktop mode. */
-    public static final int TRANSIT_START_DRAG_TO_DESKTOP_MODE =
+    /** Transition type for starting the drag to desktop mode. */
+    public static final int TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP =
             WindowManager.TRANSIT_FIRST_CUSTOM + 10;
 
-    /** Transition type for finalizing the move to desktop mode. */
-    public static final int TRANSIT_FINALIZE_DRAG_TO_DESKTOP_MODE =
+    /** Transition type for finalizing the drag to desktop mode. */
+    public static final int TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP =
             WindowManager.TRANSIT_FIRST_CUSTOM + 11;
 
     /** Transition type to fullscreen from desktop mode. */
     public static final int TRANSIT_EXIT_DESKTOP_MODE = WindowManager.TRANSIT_FIRST_CUSTOM + 12;
 
-    /** Transition type to animate back to fullscreen when drag to freeform is cancelled. */
-    public static final int TRANSIT_CANCEL_DRAG_TO_DESKTOP_MODE =
+    /** Transition type to cancel the drag to desktop mode. */
+    public static final int TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP =
             WindowManager.TRANSIT_FIRST_CUSTOM + 13;
 
     /** Transition type to animate the toggle resize between the max and default desktop sizes. */

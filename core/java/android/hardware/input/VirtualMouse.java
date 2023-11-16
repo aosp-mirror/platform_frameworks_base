@@ -38,8 +38,8 @@ import android.view.MotionEvent;
 public class VirtualMouse extends VirtualInputDevice {
 
     /** @hide */
-    public VirtualMouse(IVirtualDevice virtualDevice, IBinder token) {
-        super(virtualDevice, token);
+    public VirtualMouse(VirtualMouseConfig config, IVirtualDevice virtualDevice, IBinder token) {
+        super(config, virtualDevice, token);
     }
 
     /**

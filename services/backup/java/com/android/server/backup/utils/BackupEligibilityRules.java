@@ -80,6 +80,7 @@ public class BackupEligibilityRules {
     private final int mUserId;
     private boolean mIsProfileUser = false;
     @BackupDestination  private final int mBackupDestination;
+    private final boolean mSkipRestoreForLaunchedApps;
 
     /**
      * When  this change is enabled, {@code adb backup}  is automatically turned on for apps
@@ -112,12 +113,23 @@ public class BackupEligibilityRules {
             int userId,
             Context context,
             @BackupDestination int backupDestination) {
+        this(packageManager, packageManagerInternal, userId, context, backupDestination,
+                /* skipRestoreForLaunchedApps */ false);
+    }
+
+    public BackupEligibilityRules(PackageManager packageManager,
+            PackageManagerInternal packageManagerInternal,
+            int userId,
+            Context context,
+            @BackupDestination int backupDestination,
+            boolean skipRestoreForLaunchedApps) {
         mPackageManager = packageManager;
         mPackageManagerInternal = packageManagerInternal;
         mUserId = userId;
         mBackupDestination = backupDestination;
         UserManager userManager = context.getSystemService(UserManager.class);
         mIsProfileUser = userManager.isProfile();
+        mSkipRestoreForLaunchedApps = skipRestoreForLaunchedApps;
     }
 
     /**
@@ -131,6 +143,9 @@ public class BackupEligibilityRules {
      *     <li>they run as a system-level uid but do not supply their own backup agent
      *     <li>it is the special shared-storage backup package used for 'adb backup'
      * </ol>
+     *
+     * These eligibility conditions are also checked before restore, in case the backup happened on
+     * a device / from the version of the app where these rules were not enforced.
      *
      * However, the above eligibility rules are ignored for non-system apps in in case of
      * device-to-device migration, see {@link BackupDestination}.
@@ -281,6 +296,27 @@ public class BackupEligibilityRules {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+
+    /**
+     * Determine if data restore should be run for the given package.
+     *
+     * <p>This is used in combination with {@link #appIsEligibleForBackup(ApplicationInfo)} that
+     * checks whether the backup being restored should have happened in the first place.</p>
+     */
+    public boolean isAppEligibleForRestore(ApplicationInfo app) {
+        if (!mSkipRestoreForLaunchedApps) {
+            return true;
+        }
+
+        // If an app implemented a BackupAgent, they are expected to handle being restored even
+        // after first launch and avoid conflicts between existing app data and restored data.
+        if (app.backupAgentName != null) {
+            return true;
+        }
+
+        // Otherwise only restore an app if it hasn't been launched before.
+        return !mPackageManagerInternal.wasPackageEverLaunched(app.packageName, mUserId);
     }
 
     /** Avoid backups of 'disabled' apps. */

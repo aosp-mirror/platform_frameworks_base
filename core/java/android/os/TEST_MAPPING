@@ -153,5 +153,11 @@
       "file_patterns": ["Bugreport[^/]*\\.java"],
       "name": "ShellTests"
     }
+  ],
+  "ravenwood-presubmit": [
+    {
+      "name": "CtsOsTestCasesRavenwood",
+      "host": true
+    }
   ]
 }

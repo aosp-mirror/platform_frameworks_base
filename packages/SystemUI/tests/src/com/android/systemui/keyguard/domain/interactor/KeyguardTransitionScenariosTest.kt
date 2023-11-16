@@ -618,7 +618,22 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     @Test
     fun dozingToLockscreenCannotBeInterruptedByDreaming() =
         testScope.runTest {
+            transitionRepository.sendTransitionSteps(
+                KeyguardState.LOCKSCREEN,
+                KeyguardState.DOZING,
+                testScheduler
+            )
             // GIVEN a prior transition has started to LOCKSCREEN
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.DOZING,
+                    to = KeyguardState.LOCKSCREEN,
+                    value = 0f,
+                    transitionState = TransitionState.STARTED,
+                    ownerName = "KeyguardTransitionScenariosTest",
+                )
+            )
+            runCurrent()
             transitionRepository.sendTransitionStep(
                 TransitionStep(
                     from = KeyguardState.DOZING,

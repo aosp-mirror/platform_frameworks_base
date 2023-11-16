@@ -384,8 +384,14 @@ public abstract class InCallService extends Service {
 
     /** Manages the binder calls so that the implementor does not need to deal with it. */
     private final class InCallServiceBinder extends IInCallService.Stub {
+        private boolean mInCallAdapterSet;
         @Override
         public void setInCallAdapter(IInCallAdapter inCallAdapter) {
+            if (mInCallAdapterSet) {
+                Log.i(this, "setInCallAdapter: InCallAdapter already set, skipping...");
+                return;
+            }
+            mInCallAdapterSet = true;
             mHandler.obtainMessage(MSG_SET_IN_CALL_ADAPTER, inCallAdapter).sendToTarget();
         }
 

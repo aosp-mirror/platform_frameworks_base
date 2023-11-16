@@ -46,6 +46,9 @@ android_app {
         "xz-java",
         "androidx.leanback_leanback",
         "androidx.annotation_annotation",
+        "androidx.fragment_fragment",
+        "androidx.lifecycle_lifecycle-livedata",
+        "androidx.lifecycle_lifecycle-extensions",
     ],
 
     lint: {
@@ -69,6 +72,9 @@ android_app {
     static_libs: [
         "xz-java",
         "androidx.leanback_leanback",
+        "androidx.fragment_fragment",
+        "androidx.lifecycle_lifecycle-livedata",
+        "androidx.lifecycle_lifecycle-extensions",
     ],
     aaptflags: ["--product tablet"],
 
@@ -94,6 +100,9 @@ android_app {
         "xz-java",
         "androidx.leanback_leanback",
         "androidx.annotation_annotation",
+        "androidx.fragment_fragment",
+        "androidx.lifecycle_lifecycle-livedata",
+        "androidx.lifecycle_lifecycle-extensions",
     ],
     aaptflags: ["--product tv"],
 

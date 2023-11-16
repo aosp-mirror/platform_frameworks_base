@@ -17,6 +17,8 @@
 package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.domain.interactor.ShadeInteractorEmptyImpl
 import dagger.Binds
 import dagger.Module
 
@@ -30,4 +32,8 @@ abstract class ShadeEmptyImplModule {
     @Binds
     @SysUISingleton
     abstract fun bindsShadeController(sc: ShadeControllerEmptyImpl): ShadeController
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeInteractor(si: ShadeInteractorEmptyImpl): ShadeInteractor
 }
