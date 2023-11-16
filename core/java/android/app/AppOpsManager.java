@@ -9931,10 +9931,11 @@ public class AppOpsManager {
             if (i != firstInteresting) {
                 sb.append('\n');
             }
-            if (!sFullLog && sb.length() + trace[i].toString().length() > 600) {
+            final String traceString = trace[i].toString();
+            if (!sFullLog && sb.length() + traceString.length() > 600) {
                 break;
             }
-            sb.append(trace[i]);
+            sb.append(traceString);
         }
 
         return sb.toString();
