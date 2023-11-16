@@ -59,8 +59,15 @@ interface IWindowSession {
     int addToDisplayWithoutInputChannel(IWindow window, in WindowManager.LayoutParams attrs,
             in int viewVisibility, in int layerStackId, out InsetsState insetsState,
             out Rect attachedFrame, out float[] sizeCompatScale);
-    @UnsupportedAppUsage
-    void remove(IWindow window);
+
+    /**
+     * Removes a clientToken from WMS, which includes unlinking the input channel.
+     *
+     * @param clientToken The token that should be removed. This will normally be the IWindow token
+     * for a standard window. It can also be the generic clientToken that was used when calling
+     * grantInputChannel
+     */
+    void remove(IBinder clientToken);
 
     /**
      * Change the parameters of a window.  You supply the

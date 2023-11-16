@@ -112,7 +112,7 @@ public class WindowAddRemovePerfTest extends WindowManagerPerfTestBase
                 state.addExtraResult("add", elapsedTimeNsOfAdd);
 
                 startTime = SystemClock.elapsedRealtimeNanos();
-                session.remove(this);
+                session.remove(asBinder());
                 final long elapsedTimeNsOfRemove = SystemClock.elapsedRealtimeNanos() - startTime;
                 state.addExtraResult("remove", elapsedTimeNsOfRemove);
 

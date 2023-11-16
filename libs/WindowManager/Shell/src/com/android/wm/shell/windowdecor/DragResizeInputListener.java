@@ -314,14 +314,14 @@ class DragResizeInputListener implements AutoCloseable {
         mInputEventReceiver.dispose();
         mInputChannel.dispose();
         try {
-            mWindowSession.remove(mFakeWindow);
+            mWindowSession.remove(mFakeWindow.asBinder());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
 
         mSinkInputChannel.dispose();
         try {
-            mWindowSession.remove(mFakeSinkWindow);
+            mWindowSession.remove(mFakeSinkWindow.asBinder());
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

@@ -5881,7 +5881,7 @@ public final class ViewRootImpl implements ViewParent,
             mInputQueue = null;
         }
         try {
-            mWindowSession.remove(mWindow);
+            mWindowSession.remove(mWindow.asBinder());
         } catch (RemoteException e) {
         }
         // Dispose receiver would dispose client InputChannel, too. That could send out a socket

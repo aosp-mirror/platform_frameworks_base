@@ -322,13 +322,12 @@ public class SystemWindows {
         }
 
         @Override
-        public void remove(android.view.IWindow window) throws RemoteException {
-            super.remove(window);
+        public void remove(IBinder clientToken) throws RemoteException {
+            super.remove(clientToken);
             synchronized(this) {
-                IBinder token = window.asBinder();
-                new SurfaceControl.Transaction().remove(mLeashForWindow.get(token))
+                new SurfaceControl.Transaction().remove(mLeashForWindow.get(clientToken))
                     .apply();
-                mLeashForWindow.remove(token);
+                mLeashForWindow.remove(clientToken);
             }
         }
 
