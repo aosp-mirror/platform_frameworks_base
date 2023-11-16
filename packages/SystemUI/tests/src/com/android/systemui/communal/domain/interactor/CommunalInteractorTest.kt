@@ -18,7 +18,6 @@
 package com.android.systemui.communal.domain.interactor
 
 import android.app.smartspace.SmartspaceTarget
-import android.provider.Settings
 import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
 import android.widget.RemoteViews
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -99,24 +98,6 @@ class CommunalInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun tutorial_tutorialNotCompletedAndKeyguardVisible_showTutorialContent() =
-        testScope.runTest {
-            // Keyguard showing, and tutorial not started.
-            keyguardRepository.setKeyguardShowing(true)
-            keyguardRepository.setKeyguardOccluded(false)
-            tutorialRepository.setTutorialSettingState(
-                Settings.Secure.HUB_MODE_TUTORIAL_NOT_STARTED
-            )
-
-            val communalContent by collectLastValue(underTest.communalContent)
-
-            assertThat(communalContent!!).isNotEmpty()
-            communalContent!!.forEach { model ->
-                assertThat(model is CommunalContentModel.Tutorial).isTrue()
-            }
-        }
-
-    @Test
     fun widget_tutorialCompletedAndWidgetsAvailable_showWidgetContent() =
         testScope.runTest {
             // Keyguard showing, and tutorial completed.
@@ -145,12 +126,11 @@ class CommunalInteractorTest : SysuiTestCase() {
                 )
             widgetRepository.setCommunalWidgets(widgets)
 
-            val communalContent by collectLastValue(underTest.communalContent)
+            val widgetContent by collectLastValue(underTest.widgetContent)
 
-            assertThat(communalContent!!).isNotEmpty()
-            communalContent!!.forEachIndexed { index, model ->
-                assertThat((model as CommunalContentModel.Widget).appWidgetId)
-                    .isEqualTo(widgets[index].appWidgetId)
+            assertThat(widgetContent!!).isNotEmpty()
+            widgetContent!!.forEachIndexed { index, model ->
+                assertThat(model.appWidgetId).isEqualTo(widgets[index].appWidgetId)
             }
         }
 
@@ -183,48 +163,9 @@ class CommunalInteractorTest : SysuiTestCase() {
             val targets = listOf(target1, target2, target3)
             smartspaceRepository.setLockscreenSmartspaceTargets(targets)
 
-            val communalContent by collectLastValue(underTest.communalContent)
-            assertThat(communalContent?.size).isEqualTo(1)
-            assertThat(communalContent?.get(0)?.key).isEqualTo("smartspace_target3")
-        }
-
-    @Test
-    fun smartspace_smartspaceAndWidgetsAvailable_showSmartspaceAndWidgetContent() =
-        testScope.runTest {
-            // Keyguard showing, and tutorial completed.
-            keyguardRepository.setKeyguardShowing(true)
-            keyguardRepository.setKeyguardOccluded(false)
-            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-
-            // Widgets available.
-            val widgets =
-                listOf(
-                    CommunalWidgetContentModel(
-                        appWidgetId = 0,
-                        priority = 30,
-                        providerInfo = mock(),
-                    ),
-                    CommunalWidgetContentModel(
-                        appWidgetId = 1,
-                        priority = 20,
-                        providerInfo = mock(),
-                    ),
-                )
-            widgetRepository.setCommunalWidgets(widgets)
-
-            // Smartspace available.
-            val target = mock(SmartspaceTarget::class.java)
-            whenever(target.smartspaceTargetId).thenReturn("target")
-            whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
-            whenever(target.remoteViews).thenReturn(mock(RemoteViews::class.java))
-            smartspaceRepository.setLockscreenSmartspaceTargets(listOf(target))
-
-            val communalContent by collectLastValue(underTest.communalContent)
-
-            assertThat(communalContent?.size).isEqualTo(3)
-            assertThat(communalContent?.get(0)?.key).isEqualTo("smartspace_target")
-            assertThat(communalContent?.get(1)?.key).isEqualTo("widget_0")
-            assertThat(communalContent?.get(2)?.key).isEqualTo("widget_1")
+            val smartspaceContent by collectLastValue(underTest.smartspaceContent)
+            assertThat(smartspaceContent?.size).isEqualTo(1)
+            assertThat(smartspaceContent?.get(0)?.key).isEqualTo("smartspace_target3")
         }
 
     @Test
@@ -236,55 +177,11 @@ class CommunalInteractorTest : SysuiTestCase() {
             // Media is playing.
             mediaRepository.mediaPlaying.value = true
 
-            val communalContent by collectLastValue(underTest.communalContent)
+            val umoContent by collectLastValue(underTest.umoContent)
 
-            assertThat(communalContent?.size).isEqualTo(1)
-            assertThat(communalContent?.get(0)).isInstanceOf(CommunalContentModel.Umo::class.java)
-            assertThat(communalContent?.get(0)?.key).isEqualTo(CommunalContentModel.UMO_KEY)
-        }
-
-    @Test
-    fun ordering_smartspaceBeforeUmoBeforeWidgets() =
-        testScope.runTest {
-            tutorialRepository.setTutorialSettingState(HUB_MODE_TUTORIAL_COMPLETED)
-
-            // Widgets available.
-            val widgets =
-                listOf(
-                    CommunalWidgetContentModel(
-                        appWidgetId = 0,
-                        priority = 30,
-                        providerInfo = mock(),
-                    ),
-                    CommunalWidgetContentModel(
-                        appWidgetId = 1,
-                        priority = 20,
-                        providerInfo = mock(),
-                    ),
-                )
-            widgetRepository.setCommunalWidgets(widgets)
-
-            // Smartspace available.
-            val target = mock(SmartspaceTarget::class.java)
-            whenever(target.smartspaceTargetId).thenReturn("target")
-            whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
-            whenever(target.remoteViews).thenReturn(mock(RemoteViews::class.java))
-            smartspaceRepository.setLockscreenSmartspaceTargets(listOf(target))
-
-            // Media playing.
-            mediaRepository.mediaPlaying.value = true
-
-            val communalContent by collectLastValue(underTest.communalContent)
-
-            // Order is smart space, then UMO, then widget content.
-            assertThat(communalContent?.size).isEqualTo(4)
-            assertThat(communalContent?.get(0))
-                .isInstanceOf(CommunalContentModel.Smartspace::class.java)
-            assertThat(communalContent?.get(1)).isInstanceOf(CommunalContentModel.Umo::class.java)
-            assertThat(communalContent?.get(2))
-                .isInstanceOf(CommunalContentModel.Widget::class.java)
-            assertThat(communalContent?.get(3))
-                .isInstanceOf(CommunalContentModel.Widget::class.java)
+            assertThat(umoContent?.size).isEqualTo(1)
+            assertThat(umoContent?.get(0)).isInstanceOf(CommunalContentModel.Umo::class.java)
+            assertThat(umoContent?.get(0)?.key).isEqualTo(CommunalContentModel.UMO_KEY)
         }
 
     @Test

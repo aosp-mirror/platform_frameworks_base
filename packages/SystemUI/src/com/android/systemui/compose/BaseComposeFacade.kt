@@ -22,7 +22,7 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
-import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.scene.shared.model.Scene
@@ -77,9 +77,9 @@ interface BaseComposeFacade {
     /** Create a [View] to represent [viewModel] on screen. */
     fun createCommunalView(
         context: Context,
-        viewModel: CommunalViewModel,
+        viewModel: BaseCommunalViewModel,
     ): View
 
     /** Creates a container that hosts the communal UI and handles gesture transitions. */
-    fun createCommunalContainer(context: Context, viewModel: CommunalViewModel): View
+    fun createCommunalContainer(context: Context, viewModel: BaseCommunalViewModel): View
 }

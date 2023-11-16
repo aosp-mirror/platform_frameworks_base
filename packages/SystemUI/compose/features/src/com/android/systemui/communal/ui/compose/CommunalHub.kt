@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
-import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.res.R
@@ -59,7 +59,7 @@ import com.android.systemui.res.R
 @Composable
 fun CommunalHub(
     modifier: Modifier = Modifier,
-    viewModel: CommunalViewModel,
+    viewModel: BaseCommunalViewModel,
 ) {
     val communalContent by viewModel.communalContent.collectAsState(initial = emptyList())
     Box(
@@ -109,7 +109,7 @@ fun CommunalHub(
 @Composable
 private fun CommunalContent(
     model: CommunalContentModel,
-    viewModel: CommunalViewModel,
+    viewModel: BaseCommunalViewModel,
     size: SizeF,
     deleteOnClick: (id: Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -173,7 +173,7 @@ private fun TutorialContent(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun Umo(viewModel: CommunalViewModel, modifier: Modifier = Modifier) {
+private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier) {
     AndroidView(
         modifier = modifier,
         factory = {
