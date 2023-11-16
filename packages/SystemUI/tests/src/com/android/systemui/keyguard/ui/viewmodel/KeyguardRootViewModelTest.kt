@@ -22,6 +22,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags as AConfigFlags
+import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
@@ -347,10 +348,7 @@ class KeyguardRootViewModelTestWithFakes : SysuiTestCase() {
             .create(
                 test = this,
                 featureFlags =
-                    FakeFeatureFlagsClassicModule {
-                        setDefault(Flags.NEW_AOD_TRANSITION)
-                        set(Flags.FACE_AUTH_REFACTOR, true)
-                    },
+                    FakeFeatureFlagsClassicModule { set(Flags.FACE_AUTH_REFACTOR, true) },
                 mocks =
                     TestMocksModule(
                         dozeParameters = dozeParams,
@@ -362,6 +360,11 @@ class KeyguardRootViewModelTestWithFakes : SysuiTestCase() {
                 underTest.clockControllerProvider = Provider { clockController }
                 block()
             }
+
+    @Before
+    fun before() {
+        mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
+    }
 
     @Test
     fun iconContainer_isNotVisible_notOnKeyguard_dontShowAodIconsWhenShade() = runTest {

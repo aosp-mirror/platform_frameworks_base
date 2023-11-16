@@ -148,18 +148,6 @@ object Flags {
     // TODO(b/255607168): Tracking Bug
     @JvmField val DOZING_MIGRATION_1 = unreleasedFlag("dozing_migration_1")
 
-    /**
-     * Migrates control of the LightRevealScrim's reveal effect and amount from legacy code to the
-     * new KeyguardTransitionRepository.
-     */
-    // TODO(b/281655028): Tracking bug
-    @JvmField
-    val LIGHT_REVEAL_MIGRATION = unreleasedFlag("light_reveal_migration", teamfood = true)
-
-    // TODO(b/301915812): Tracking Bug
-    @JvmField
-    val NEW_AOD_TRANSITION = unreleasedFlag("new_aod_transition", teamfood = true)
-
     // TODO(b/305984787):
     @JvmField
     val REFACTOR_GETCURRENTUSER = unreleasedFlag("refactor_getcurrentuser", teamfood = true)
