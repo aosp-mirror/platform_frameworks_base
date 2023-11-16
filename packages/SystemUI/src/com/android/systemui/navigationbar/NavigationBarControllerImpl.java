@@ -278,6 +278,7 @@ public class NavigationBarControllerImpl implements
         @Override
         public void onDisplayRemoved(int displayId) {
             removeNavigationBar(displayId);
+            mHasNavBar.delete(displayId);
         }
 
         @Override
