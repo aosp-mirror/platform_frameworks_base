@@ -6563,7 +6563,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
 
             final Intent intent = new Intent();
-            intent.setData(uri);
+            intent.setData(ContentProvider.maybeAddUserId(uri, userId));
             intent.setFlags(modeFlags);
 
             final NeededUriGrants needed = mUgmInternal.checkGrantUriPermissionFromIntent(intent,
