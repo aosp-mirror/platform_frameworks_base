@@ -437,7 +437,7 @@
     <string name="transcode_notification" msgid="5560515979793436168">"Хөрвүүлгийн мэдэгдэл харуулах"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Хөрвүүлгийн завсрын санах ойг идэвхгүй болгох"</string>
     <string name="widevine_settings_title" msgid="4023329801172572917">"Widevine-н тохиргоо"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 нөөцийг хүчилнэ үү"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"L3 нөөцийг хүчлэх"</string>
     <string name="force_l3_fallback_summary" msgid="3080790841069996016">"L3 нөөцийг хүчлэхийг сонгоно уу"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Ажиллаж байгаа үйлчилгээнүүд"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Одоо ажиллаж байгаа үйлчилгээнүүдийг харах болон хянах"</string>
