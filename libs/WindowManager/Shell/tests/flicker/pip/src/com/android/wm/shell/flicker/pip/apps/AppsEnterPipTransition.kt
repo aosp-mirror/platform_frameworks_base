@@ -31,10 +31,18 @@ import org.junit.runners.Parameterized
 abstract class AppsEnterPipTransition(flicker: LegacyFlickerTest) : EnterPipTransition(flicker) {
     protected abstract val standardAppHelper: StandardAppHelper
 
+    protected abstract val permissions: Array<String>
+
     @FlickerBuilderProvider
     override fun buildFlicker(): FlickerBuilder {
         return FlickerBuilder(instrumentation).apply {
             instrumentation.uiAutomation.adoptShellPermissionIdentity()
+            for (permission in permissions) {
+                instrumentation.uiAutomation.grantRuntimePermission(
+                    standardAppHelper.packageName,
+                    permission
+                )
+            }
             setup { flicker.scenario.setIsTablet(tapl.isTablet) }
             transition()
         }
