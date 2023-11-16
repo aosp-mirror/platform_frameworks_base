@@ -152,6 +152,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 KeyguardLongPressViewModel(
                     interactor = mock(),
                 ),
+            keyguardRoot = utils.keyguardRootViewModel(),
+            notifications = utils.notificationsPlaceholderViewModel(),
         )
 
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
@@ -237,6 +239,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 deviceEntryInteractor = deviceEntryInteractor,
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
+                notifications = utils.notificationsPlaceholderViewModel(),
             )
 
         utils.deviceEntryRepository.setUnlocked(false)

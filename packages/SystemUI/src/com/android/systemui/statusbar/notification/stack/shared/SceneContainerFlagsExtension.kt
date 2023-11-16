@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.common.shared.model
+package com.android.systemui.statusbar.notification.stack.shared
 
-/** Positioning info for the shared notification container */
-data class SharedNotificationContainerPosition(
-    val top: Float = 0f,
-    val bottom: Float = 0f,
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 
-    /** Whether any modifications to top/bottom are smoothly animated */
-    val animate: Boolean = false,
-) {
-    val height: Float = bottom - top
-}
+private const val FLEXI_NOTIFS = false
+
+/**
+ * Returns whether flexiglass is displaying notifications, which is currently an optional piece of
+ * flexiglass
+ */
+fun SceneContainerFlags.flexiNotifsEnabled() = FLEXI_NOTIFS && isEnabled()

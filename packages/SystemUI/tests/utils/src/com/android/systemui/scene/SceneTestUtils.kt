@@ -65,6 +65,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -79,6 +80,9 @@ import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.notification.stack.data.repository.NotificationStackAppearanceRepository
+import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobileConnectionsRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
@@ -118,6 +122,7 @@ class SceneTestUtils(
         FakeFeatureFlagsClassic().apply {
             set(Flags.FACE_AUTH_REFACTOR, false)
             set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+            set(Flags.NSSL_DEBUG_LINES, false)
         }
     val sceneContainerFlags = FakeSceneContainerFlags().apply { enabled = true }
     val deviceEntryRepository: FakeDeviceEntryRepository by lazy { FakeDeviceEntryRepository() }
@@ -271,6 +276,19 @@ class SceneTestUtils(
             falsingInteractor = falsingInteractor(),
             powerInteractor = powerInteractor(),
             simBouncerInteractor = simBouncerInteractor,
+        )
+    }
+
+    fun keyguardRootViewModel(): KeyguardRootViewModel = mock()
+
+    fun notificationsPlaceholderViewModel(): NotificationsPlaceholderViewModel {
+        return NotificationsPlaceholderViewModel(
+            interactor =
+                NotificationStackAppearanceInteractor(
+                    repository = NotificationStackAppearanceRepository(),
+                ),
+            flags = sceneContainerFlags,
+            featureFlags = featureFlags,
         )
     }
 

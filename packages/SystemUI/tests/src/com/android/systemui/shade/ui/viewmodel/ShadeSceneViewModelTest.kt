@@ -101,6 +101,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
                 deviceEntryInteractor = deviceEntryInteractor,
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
+                notifications = utils.notificationsPlaceholderViewModel(),
             )
     }
 

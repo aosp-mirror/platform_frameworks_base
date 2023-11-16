@@ -19,5 +19,5 @@ fun TransitionBuilder.lockscreenToShadeTransition() {
             startsOutsideLayoutBounds = false,
         )
     }
-    fractionRange(start = 0.5f) { fade(Notifications.Elements.Notifications) }
+    fractionRange(start = 0.5f) { fade(Notifications.Elements.NotificationScrim) }
 }

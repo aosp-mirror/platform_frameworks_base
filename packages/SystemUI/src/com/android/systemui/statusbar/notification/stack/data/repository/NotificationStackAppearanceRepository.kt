@@ -12,17 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-package com.android.systemui.common.shared.model
+package com.android.systemui.statusbar.notification.stack.data.repository
 
-/** Positioning info for the shared notification container */
-data class SharedNotificationContainerPosition(
-    val top: Float = 0f,
-    val bottom: Float = 0f,
+import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
+import com.android.systemui.dagger.SysUISingleton
+import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 
-    /** Whether any modifications to top/bottom are smoothly animated */
-    val animate: Boolean = false,
-) {
-    val height: Float = bottom - top
+/** A repository which holds state about and controlling the appearance of the NSSL */
+@SysUISingleton
+class NotificationStackAppearanceRepository @Inject constructor() {
+    /** The position of the notification stack in the current scene */
+    val stackPosition = MutableStateFlow(SharedNotificationContainerPosition(0f, 0f))
 }

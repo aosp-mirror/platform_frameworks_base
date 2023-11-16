@@ -4,9 +4,11 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.view.WindowInsets
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** A root view of the main SysUI window that supports scenes. */
@@ -27,6 +29,8 @@ class SceneWindowRootView(
     fun init(
         viewModel: SceneContainerViewModel,
         containerConfig: SceneContainerConfig,
+        sharedNotificationContainer: SharedNotificationContainer,
+        flags: SceneContainerFlags,
         scenes: Set<Scene>,
         layoutInsetController: LayoutInsetsController,
     ) {
@@ -37,6 +41,8 @@ class SceneWindowRootView(
             viewModel = viewModel,
             windowInsets = windowInsets,
             containerConfig = containerConfig,
+            sharedNotificationContainer = sharedNotificationContainer,
+            flags = flags,
             scenes = scenes,
             onVisibilityChangedInternal = { isVisible ->
                 super.setVisibility(if (isVisible) View.VISIBLE else View.INVISIBLE)

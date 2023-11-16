@@ -24,6 +24,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -43,6 +44,7 @@ import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.notifications.ui.composable.HeadsUpNotificationSpace
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.scene.shared.model.SceneKey
@@ -101,53 +103,59 @@ private fun SceneScope.QuickSettingsScene(
     modifier: Modifier = Modifier,
 ) {
     // TODO(b/280887232): implement the real UI.
-    val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
-    val collapsedHeaderHeight =
-        with(LocalDensity.current) { ShadeHeader.Dimensions.CollapsedHeight.roundToPx() }
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier =
-            modifier
-                .fillMaxSize()
-                .clickable(onClick = { viewModel.onContentClicked() })
-                .padding(start = 16.dp, end = 16.dp, bottom = 48.dp)
-    ) {
-        when (LocalWindowSizeClass.current.widthSizeClass) {
-            WindowWidthSizeClass.Compact ->
-                AnimatedVisibility(
-                    visible = !isCustomizing,
-                    enter =
-                        expandVertically(
-                            animationSpec = tween(1000),
-                            initialHeight = { collapsedHeaderHeight },
-                        ) + fadeIn(tween(1000)),
-                    exit =
-                        shrinkVertically(
-                            animationSpec = tween(1000),
-                            targetHeight = { collapsedHeaderHeight },
-                            shrinkTowards = Alignment.Top,
-                        ) + fadeOut(tween(1000)),
-                ) {
-                    ExpandedShadeHeader(
+    Box(modifier = modifier.fillMaxSize()) {
+        val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
+        val collapsedHeaderHeight =
+            with(LocalDensity.current) { ShadeHeader.Dimensions.CollapsedHeight.roundToPx() }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier =
+                Modifier.fillMaxSize()
+                    .clickable(onClick = { viewModel.onContentClicked() })
+                    .padding(start = 16.dp, end = 16.dp, bottom = 48.dp)
+        ) {
+            when (LocalWindowSizeClass.current.widthSizeClass) {
+                WindowWidthSizeClass.Compact ->
+                    AnimatedVisibility(
+                        visible = !isCustomizing,
+                        enter =
+                            expandVertically(
+                                animationSpec = tween(1000),
+                                initialHeight = { collapsedHeaderHeight },
+                            ) + fadeIn(tween(1000)),
+                        exit =
+                            shrinkVertically(
+                                animationSpec = tween(1000),
+                                targetHeight = { collapsedHeaderHeight },
+                                shrinkTowards = Alignment.Top,
+                            ) + fadeOut(tween(1000)),
+                    ) {
+                        ExpandedShadeHeader(
+                            viewModel = viewModel.shadeHeaderViewModel,
+                            createTintedIconManager = createTintedIconManager,
+                            createBatteryMeterViewController = createBatteryMeterViewController,
+                            statusBarIconController = statusBarIconController,
+                        )
+                    }
+                else ->
+                    CollapsedShadeHeader(
                         viewModel = viewModel.shadeHeaderViewModel,
                         createTintedIconManager = createTintedIconManager,
                         createBatteryMeterViewController = createBatteryMeterViewController,
                         statusBarIconController = statusBarIconController,
                     )
-                }
-            else ->
-                CollapsedShadeHeader(
-                    viewModel = viewModel.shadeHeaderViewModel,
-                    createTintedIconManager = createTintedIconManager,
-                    createBatteryMeterViewController = createBatteryMeterViewController,
-                    statusBarIconController = statusBarIconController,
-                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            QuickSettings(
+                modifier = Modifier.fillMaxHeight(),
+                viewModel.qsSceneAdapter,
+                QSSceneAdapter.State.QS
+            )
         }
-        Spacer(modifier = Modifier.height(16.dp))
-        QuickSettings(
-            modifier = Modifier.fillMaxHeight(),
-            viewModel.qsSceneAdapter,
-            QSSceneAdapter.State.QS
+        HeadsUpNotificationSpace(
+            viewModel = viewModel.notifications,
+            isPeekFromBottom = true,
+            modifier = Modifier.padding(16.dp).fillMaxSize(),
         )
     }
 }
