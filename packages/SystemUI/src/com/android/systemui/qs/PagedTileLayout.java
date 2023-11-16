@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,16 +23,17 @@ import android.view.animation.OvershootInterpolator;
 import android.widget.Scroller;
 
 import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.res.R;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.QSPanelControllerBase.TileRecord;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.res.R;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private static final int NO_PAGE = -1;
 
     private static final int REVEAL_SCROLL_DURATION_MILLIS = 750;
+    private static final int SINGLE_PAGE_SCROLL_DURATION_MILLIS = 300;
     private static final float BOUNCE_ANIMATION_TENSION = 1.3f;
     private static final long BOUNCE_ANIMATION_DURATION = 450L;
     private static final int TILE_ANIMATION_STAGGER_DELAY = 85;
@@ -63,8 +66,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private PageListener mPageListener;
 
     private boolean mListening;
-    private Scroller mScroller;
+    @VisibleForTesting Scroller mScroller;
 
+    /* set of animations used to indicate which tiles were just revealed  */
     @Nullable
     private AnimatorSet mBounceAnimatorSet;
     private float mLastExpansion;
@@ -306,6 +310,38 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mPageIndicator = indicator;
         mPageIndicator.setNumPages(mPages.size());
         mPageIndicator.setLocation(mPageIndicatorPosition);
+        mPageIndicator.setOnKeyListener((view, keyCode, keyEvent) -> {
+            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                // only scroll on ACTION_UP as we don't handle longpressing for now. Still we need
+                // to intercept even ACTION_DOWN otherwise keyboard focus will be moved before we
+                // have a chance to intercept ACTION_UP.
+                if (keyEvent.getAction() == KeyEvent.ACTION_UP && mScroller.isFinished()) {
+                    scrollByX(getDeltaXForKeyboardScrolling(keyCode),
+                            SINGLE_PAGE_SCROLL_DURATION_MILLIS);
+                }
+                return true;
+            }
+            return false;
+        });
+    }
+
+    private int getDeltaXForKeyboardScrolling(int keyCode) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && getCurrentItem() != 0) {
+            return -getWidth();
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT
+                && getCurrentItem() != mPages.size() - 1) {
+            return getWidth();
+        }
+        return 0;
+    }
+
+    private void scrollByX(int x, int durationMillis) {
+        if (x != 0) {
+            mScroller.startScroll(/* startX= */ getScrollX(), /* startY= */ getScrollY(),
+                    /* dx= */ x, /* dy= */ 0, /* duration= */ durationMillis);
+            // scroller just sets its state, we need to invalidate view to actually start scrolling
+            postInvalidateOnAnimation();
+        }
     }
 
     @Override
@@ -590,9 +626,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         });
         setOffscreenPageLimit(lastPageNumber); // Ensure the page to reveal has been inflated.
         int dx = getWidth() * lastPageNumber;
-        mScroller.startScroll(getScrollX(), getScrollY(), isLayoutRtl() ? -dx : dx, 0,
-                REVEAL_SCROLL_DURATION_MILLIS);
-        postInvalidateOnAnimation();
+        scrollByX(isLayoutRtl() ? -dx : dx, REVEAL_SCROLL_DURATION_MILLIS);
     }
 
     private boolean shouldNotRunAnimation(Set<String> tilesToReveal) {
