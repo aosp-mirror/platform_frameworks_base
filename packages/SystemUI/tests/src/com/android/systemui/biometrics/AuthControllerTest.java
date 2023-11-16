@@ -475,6 +475,22 @@ public class AuthControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOnAuthenticationFailedInvoked_whenBiometricReEnrollRequired() {
+        showDialog(new int[] {1} /* sensorIds */, false /* credentialAllowed */);
+        final int modality = BiometricAuthenticator.TYPE_FACE;
+        mAuthController.onBiometricError(modality,
+                BiometricConstants.BIOMETRIC_ERROR_RE_ENROLL,
+                0 /* vendorCode */);
+
+        verify(mDialog1).onAuthenticationFailed(mModalityCaptor.capture(),
+                mMessageCaptor.capture());
+
+        assertThat(mModalityCaptor.getValue()).isEqualTo(modality);
+        assertThat(mMessageCaptor.getValue()).isEqualTo(mContext.getString(
+                R.string.face_recalibrate_notification_content));
+    }
+
+    @Test
     public void testOnAuthenticationFailedInvoked_coex_whenFaceAuthRejected_withPaused() {
         testOnAuthenticationFailedInvoked_coex_whenFaceAuthRejected(
                 BiometricConstants.BIOMETRIC_PAUSED_REJECTED);

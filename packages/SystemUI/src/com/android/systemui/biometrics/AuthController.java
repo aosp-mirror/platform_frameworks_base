@@ -100,7 +100,6 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 
 import kotlin.Unit;
-
 import kotlinx.coroutines.CoroutineScope;
 
 /**
@@ -1099,6 +1098,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
         // TODO(b/141025588): Create separate methods for handling hard and soft errors.
         final boolean isSoftError = (error == BiometricConstants.BIOMETRIC_PAUSED_REJECTED
                 || error == BiometricConstants.BIOMETRIC_ERROR_TIMEOUT
+                || error == BiometricConstants.BIOMETRIC_ERROR_RE_ENROLL
                 || isCameraPrivacyEnabled);
         if (mCurrentDialog != null) {
             if (mCurrentDialog.isAllowDeviceCredentials() && isLockout) {
