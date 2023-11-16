@@ -436,13 +436,16 @@ public final class SurfaceControl implements Parcelable {
         // Jank due to unknown reasons.
         public static final int UNKNOWN = 0x80;
 
-        public JankData(long frameVsyncId, @JankType int jankType) {
+        public JankData(long frameVsyncId, @JankType int jankType, long frameIntervalNs) {
             this.frameVsyncId = frameVsyncId;
             this.jankType = jankType;
+            this.frameIntervalNs = frameIntervalNs;
+
         }
 
         public final long frameVsyncId;
         public final @JankType int jankType;
+        public final long frameIntervalNs;
     }
 
     /**
