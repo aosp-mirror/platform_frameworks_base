@@ -17,6 +17,7 @@
 package android.view.accessibility;
 
 import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_ACCESSIBILITY_VOLUME;
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -25,6 +26,7 @@ import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
 import android.accessibilityservice.AccessibilityShortcutInfo;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -2042,6 +2044,9 @@ public final class AccessibilityManager {
      * @return {@code true} if flash notification works properly.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_FLASH_NOTIFICATION_SYSTEM_API)
+    @TestApi
+    @SystemApi(client = MODULE_LIBRARIES)
     public boolean startFlashNotificationSequence(@NonNull Context context,
             @FlashNotificationReason int reason) {
         final IAccessibilityManager service;
@@ -2071,6 +2076,9 @@ public final class AccessibilityManager {
      * @return {@code true} if flash notification stops properly.
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_FLASH_NOTIFICATION_SYSTEM_API)
+    @TestApi
+    @SystemApi(client = MODULE_LIBRARIES)
     public boolean stopFlashNotificationSequence(@NonNull Context context) {
         final IAccessibilityManager service;
         synchronized (mLock) {
