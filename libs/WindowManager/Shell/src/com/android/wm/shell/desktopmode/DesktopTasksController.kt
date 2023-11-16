@@ -21,7 +21,6 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
-import android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
 import android.app.WindowConfiguration.WindowingMode
 import android.content.Context
@@ -321,24 +320,10 @@ class DesktopTasksController(
     }
 
     /** Move a task with given `taskId` to fullscreen */
-    fun moveToFullscreen(taskId: Int) {
-        shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task -> moveToFullscreen(task) }
-    }
-
-    /** Move a task to fullscreen */
-    fun moveToFullscreen(task: RunningTaskInfo) {
-        KtProtoLog.v(
-            WM_SHELL_DESKTOP_MODE,
-            "DesktopTasksController: moveToFullscreen taskId=%d",
-            task.taskId
-        )
-
-        val wct = WindowContainerTransaction()
-        addMoveToFullscreenChanges(wct, task)
-        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
-        } else {
-            shellTaskOrganizer.applyTransaction(wct)
+    fun moveToFullscreen(taskId: Int, windowDecor: DesktopModeWindowDecoration) {
+        shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { task ->
+            windowDecor.incrementRelayoutBlock()
+            moveToFullscreenWithAnimation(task, task.positionInParent)
         }
     }
 
