@@ -1612,7 +1612,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 Certificate[] ignored = ApkChecksums.verifySignature(checksums, signature);
             } catch (IOException | NoSuchAlgorithmException | SignatureException e) {
-                throw new IllegalArgumentException("Can't verify signature", e);
+                throw new IllegalArgumentException("Can't verify signature: " + e.getMessage(), e);
             }
         }
 
