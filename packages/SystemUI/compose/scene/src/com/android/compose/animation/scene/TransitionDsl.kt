@@ -18,8 +18,6 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -129,19 +127,6 @@ interface TransitionBuilder : PropertyTransformationBuilder {
         enabled: Boolean = true,
         scenePicker: SharedElementScenePicker = DefaultSharedElementScenePicker,
     )
-
-    /**
-     * Punch a hole in the element(s) matching [matcher] that has the same bounds as [bounds] and
-     * using the given [shape].
-     *
-     * Punching a hole in an element will "remove" any pixel drawn by that element in the hole area.
-     * This can be used to make content drawn below an opaque element visible. For example, if we
-     * have [this lockscreen scene](http://shortn/_VYySFnJDhN) drawn below
-     * [this shade scene](http://shortn/_fpxGUk0Rg7) and punch a hole in the latter using the big
-     * clock time bounds and a RoundedCornerShape(10dp), [this](http://shortn/_qt80IvORFj) would be
-     * the result.
-     */
-    fun punchHole(matcher: ElementMatcher, bounds: ElementKey, shape: Shape = RectangleShape)
 
     /**
      * Adds the transformations in [builder] but in reversed order. This allows you to partially

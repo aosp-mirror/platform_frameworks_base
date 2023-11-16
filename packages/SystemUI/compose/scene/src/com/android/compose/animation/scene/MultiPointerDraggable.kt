@@ -23,20 +23,25 @@ import androidx.compose.foundation.gestures.awaitHorizontalTouchSlopOrCancellati
 import androidx.compose.foundation.gestures.awaitVerticalTouchSlopOrCancellation
 import androidx.compose.foundation.gestures.horizontalDrag
 import androidx.compose.foundation.gestures.verticalDrag
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
+import androidx.compose.ui.input.pointer.SuspendingPointerInputModifierNode
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
+import androidx.compose.ui.node.CompositionLocalConsumerModifierNode
+import androidx.compose.ui.node.DelegatingNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.node.PointerInputModifierNode
+import androidx.compose.ui.node.currentValueOf
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.Velocity
@@ -56,7 +61,7 @@ import androidx.compose.ui.util.fastForEach
  * dragged) and a second pointer is down and dragged. This is an implementation detail that might
  * change in the future.
  */
-// TODO(b/291055080): Migrate to the Modifier.Node API.
+@Stable
 internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
     enabled: Boolean,
@@ -64,22 +69,88 @@ internal fun Modifier.multiPointerDraggable(
     onDragStarted: (layoutSize: IntSize, startedPosition: Offset, pointersDown: Int) -> Unit,
     onDragDelta: (Float) -> Unit,
     onDragStopped: (velocity: Float) -> Unit,
-): Modifier = composed {
-    val onDragStarted by rememberUpdatedState(onDragStarted)
-    val onDragStopped by rememberUpdatedState(onDragStopped)
-    val onDragDelta by rememberUpdatedState(onDragDelta)
-    val startDragImmediately by rememberUpdatedState(startDragImmediately)
+): Modifier =
+    this.then(
+        MultiPointerDraggableElement(
+            orientation,
+            enabled,
+            startDragImmediately,
+            onDragStarted,
+            onDragDelta,
+            onDragStopped,
+        )
+    )
 
-    val velocityTracker = remember { VelocityTracker() }
-    val maxFlingVelocity =
-        LocalViewConfiguration.current.maximumFlingVelocity.let { max ->
-            val maxF = max.toFloat()
-            Velocity(maxF, maxF)
+private data class MultiPointerDraggableElement(
+    private val orientation: Orientation,
+    private val enabled: Boolean,
+    private val startDragImmediately: Boolean,
+    private val onDragStarted:
+        (layoutSize: IntSize, startedPosition: Offset, pointersDown: Int) -> Unit,
+    private val onDragDelta: (Float) -> Unit,
+    private val onDragStopped: (velocity: Float) -> Unit,
+) : ModifierNodeElement<MultiPointerDraggableNode>() {
+    override fun create(): MultiPointerDraggableNode =
+        MultiPointerDraggableNode(
+            orientation = orientation,
+            enabled = enabled,
+            startDragImmediately = startDragImmediately,
+            onDragStarted = onDragStarted,
+            onDragDelta = onDragDelta,
+            onDragStopped = onDragStopped,
+        )
+
+    override fun update(node: MultiPointerDraggableNode) {
+        node.orientation = orientation
+        node.enabled = enabled
+        node.startDragImmediately = startDragImmediately
+        node.onDragStarted = onDragStarted
+        node.onDragDelta = onDragDelta
+        node.onDragStopped = onDragStopped
+    }
+}
+
+private class MultiPointerDraggableNode(
+    orientation: Orientation,
+    enabled: Boolean,
+    var startDragImmediately: Boolean,
+    var onDragStarted: (layoutSize: IntSize, startedPosition: Offset, pointersDown: Int) -> Unit,
+    var onDragDelta: (Float) -> Unit,
+    var onDragStopped: (velocity: Float) -> Unit,
+) : PointerInputModifierNode, DelegatingNode(), CompositionLocalConsumerModifierNode {
+    private val pointerInputHandler: suspend PointerInputScope.() -> Unit = { pointerInput() }
+    private val delegate = delegate(SuspendingPointerInputModifierNode(pointerInputHandler))
+    private val velocityTracker = VelocityTracker()
+
+    var enabled: Boolean = enabled
+        set(value) {
+            // Reset the pointer input whenever enabled changed.
+            if (value != field) {
+                field = value
+                delegate.resetPointerInputHandler()
+            }
         }
 
-    pointerInput(enabled, orientation, maxFlingVelocity) {
+    var orientation: Orientation = orientation
+        set(value) {
+            // Reset the pointer input whenever enabled orientation.
+            if (value != field) {
+                field = value
+                delegate.resetPointerInputHandler()
+            }
+        }
+
+    override fun onCancelPointerInput() = delegate.onCancelPointerInput()
+
+    override fun onPointerEvent(
+        pointerEvent: PointerEvent,
+        pass: PointerEventPass,
+        bounds: IntSize
+    ) = delegate.onPointerEvent(pointerEvent, pass, bounds)
+
+    private suspend fun PointerInputScope.pointerInput() {
         if (!enabled) {
-            return@pointerInput
+            return
         }
 
         val onDragStart: (Offset, Int) -> Unit = { startedPosition, pointersDown ->
@@ -90,6 +161,12 @@ internal fun Modifier.multiPointerDraggable(
         val onDragCancel: () -> Unit = { onDragStopped(/* velocity= */ 0f) }
 
         val onDragEnd: () -> Unit = {
+            val maxFlingVelocity =
+                currentValueOf(LocalViewConfiguration).maximumFlingVelocity.let { max ->
+                    val maxF = max.toFloat()
+                    Velocity(maxF, maxF)
+                }
+
             val velocity = velocityTracker.calculateVelocity(maxFlingVelocity)
             onDragStopped(
                 when (orientation) {
