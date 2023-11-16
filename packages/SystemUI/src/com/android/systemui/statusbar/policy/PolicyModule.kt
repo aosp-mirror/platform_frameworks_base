@@ -14,8 +14,6 @@
 
 package com.android.systemui.statusbar.policy
 
-import com.android.systemui.qs.QsEventLogger
-import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tiles.AlarmTile
 import com.android.systemui.qs.tiles.CameraToggleTile
@@ -25,18 +23,8 @@ import com.android.systemui.qs.tiles.LocationTile
 import com.android.systemui.qs.tiles.MicrophoneToggleTile
 import com.android.systemui.qs.tiles.UiModeNightTile
 import com.android.systemui.qs.tiles.WorkModeTile
-import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
-import com.android.systemui.qs.tiles.impl.flashlight.domain.FlashlightMapper
-import com.android.systemui.qs.tiles.impl.flashlight.domain.interactor.FlashlightTileDataInteractor
-import com.android.systemui.qs.tiles.impl.flashlight.domain.interactor.FlashlightTileUserActionInteractor
-import com.android.systemui.qs.tiles.impl.flashlight.domain.model.FlashlightTileModel
-import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
-import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
-import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
-import com.android.systemui.res.R
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.multibindings.IntoMap
 import dagger.multibindings.StringKey
 
@@ -51,42 +39,6 @@ interface PolicyModule {
     @IntoMap
     @StringKey(WorkModeTile.TILE_SPEC)
     fun bindWorkModeTile(workModeTile: WorkModeTile): QSTileImpl<*>
-
-    companion object {
-        const val FLASHLIGHT_TILE_SPEC = "flashlight"
-
-        /** Inject config */
-        @Provides
-        @IntoMap
-        @StringKey(FLASHLIGHT_TILE_SPEC)
-        fun provideFlashlightTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
-            QSTileConfig(
-                tileSpec = TileSpec.create(FLASHLIGHT_TILE_SPEC),
-                uiConfig =
-                    QSTileUIConfig.Resource(
-                        iconRes = R.drawable.qs_flashlight_icon_off,
-                        labelRes = R.string.quick_settings_flashlight_label,
-                    ),
-                instanceId = uiEventLogger.getNewInstanceId(),
-            )
-
-        /** Inject FlashlightTile into tileViewModelMap in QSModule */
-        @Provides
-        @IntoMap
-        @StringKey(FLASHLIGHT_TILE_SPEC)
-        fun provideFlashlightTileViewModel(
-            factory: QSTileViewModelFactory.Static<FlashlightTileModel>,
-            mapper: FlashlightMapper,
-            stateInteractor: FlashlightTileDataInteractor,
-            userActionInteractor: FlashlightTileUserActionInteractor
-        ): QSTileViewModel =
-            factory.create(
-                TileSpec.create(FLASHLIGHT_TILE_SPEC),
-                userActionInteractor,
-                stateInteractor,
-                mapper,
-            )
-    }
 
     /** Inject FlashlightTile into tileMap in QSModule */
     @Binds
