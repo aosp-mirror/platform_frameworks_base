@@ -16,13 +16,35 @@
 
 package android.platform.test.ravenwood;
 
+import android.os.HandlerThread;
+import android.os.Looper;
+
+import java.util.Objects;
+
 public class RavenwoodRuleImpl {
+    private static final String MAIN_THREAD_NAME = "RavenwoodMain";
+
+    public static boolean isUnderRavenwood() {
+        return true;
+    }
+
     public static void init(RavenwoodRule rule) {
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
         android.os.Binder.init$ravenwood();
+
+        if (rule.mProvideMainThread) {
+            final HandlerThread main = new HandlerThread(MAIN_THREAD_NAME);
+            main.start();
+            Looper.setMainLooperForTest(main.getLooper());
+        }
     }
 
     public static void reset(RavenwoodRule rule) {
+        if (rule.mProvideMainThread) {
+            Looper.getMainLooper().quit();
+            Looper.clearMainLooperForTest();
+        }
+
         android.os.Process.reset$ravenwood();
         android.os.Binder.reset$ravenwood();
     }

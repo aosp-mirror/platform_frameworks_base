@@ -110,6 +110,11 @@ public final class SystemClock {
     private static volatile IAlarmManager sIAlarmManager;
 
     /**
+     * Since {@code nanoTime()} is arbitrary, anchor our Ravenwood clocks against it.
+     */
+    private static final long sAnchorNanoTime$ravenwood = System.nanoTime();
+
+    /**
      * This class is uninstantiable.
      */
     @UnsupportedAppUsage
@@ -193,9 +198,7 @@ public final class SystemClock {
 
     /** @hide */
     public static long uptimeMillis$ravenwood() {
-        // Ravenwood booted in Jan 2023, and has been in deep sleep for one week
-        return System.currentTimeMillis() - (1672556400L * 1_000)
-                - (DateUtils.WEEK_IN_MILLIS * 1_000);
+        return uptimeNanos() / 1_000_000;
     }
 
     /**
@@ -210,9 +213,7 @@ public final class SystemClock {
 
     /** @hide */
     public static long uptimeNanos$ravenwood() {
-        // Ravenwood booted in Jan 2023, and has been in deep sleep for one week
-        return System.nanoTime() - (1672556400L * 1_000_000_000)
-                - (DateUtils.WEEK_IN_MILLIS * 1_000_000_000);
+        return System.nanoTime() - sAnchorNanoTime$ravenwood;
     }
 
     /**
@@ -241,8 +242,7 @@ public final class SystemClock {
 
     /** @hide */
     public static long elapsedRealtime$ravenwood() {
-        // Ravenwood booted in Jan 2023, and has been in deep sleep for one week
-        return System.currentTimeMillis() - (1672556400L * 1_000);
+        return elapsedRealtimeNanos() / 1_000_000;
     }
 
     /**
@@ -271,8 +271,8 @@ public final class SystemClock {
 
     /** @hide */
     public static long elapsedRealtimeNanos$ravenwood() {
-        // Ravenwood booted in Jan 2023, and has been in deep sleep for one week
-        return System.nanoTime() - (1672556400L * 1_000_000_000);
+        // Elapsed realtime is uptime plus an hour that we've been "asleep"
+        return uptimeNanos() + (DateUtils.HOUR_IN_MILLIS * 1_000_000);
     }
 
     /**

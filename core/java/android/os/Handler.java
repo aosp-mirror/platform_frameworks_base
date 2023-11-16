@@ -63,6 +63,7 @@ import java.lang.reflect.Modifier;
  * your new thread.  The given Runnable or Message will then be scheduled
  * in the Handler's message queue and processed when appropriate.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Handler {
     /*
      * Set this flag to true to detect anonymous, local or member classes

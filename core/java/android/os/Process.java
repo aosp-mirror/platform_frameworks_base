@@ -842,15 +842,19 @@ public class Process {
         return "amd64".equals(System.getProperty("os.arch"));
     }
 
-    private static SomeArgs sIdentity$ravenwood;
+    private static ThreadLocal<SomeArgs> sIdentity$ravenwood;
 
     /** @hide */
     @android.ravenwood.annotation.RavenwoodKeep
-    public static void init$ravenwood(int uid, int pid) {
-        final SomeArgs args = SomeArgs.obtain();
-        args.argi1 = uid;
-        args.argi2 = pid;
-        sIdentity$ravenwood = args;
+    public static void init$ravenwood(final int uid, final int pid) {
+        sIdentity$ravenwood = ThreadLocal.withInitial(() -> {
+            final SomeArgs args = SomeArgs.obtain();
+            args.argi1 = uid;
+            args.argi2 = pid;
+            args.argi3 = Long.hashCode(Thread.currentThread().getId());
+            args.argi4 = THREAD_PRIORITY_DEFAULT;
+            return args;
+        });
     }
 
     /** @hide */
@@ -870,7 +874,7 @@ public class Process {
 
     /** @hide */
     public static final int myPid$ravenwood() {
-        return Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).argi2;
+        return Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get().argi2;
     }
 
     /**
@@ -886,8 +890,14 @@ public class Process {
      * Returns the identifier of the calling thread, which be used with
      * {@link #setThreadPriority(int, int)}.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static final int myTid() {
         return Os.gettid();
+    }
+
+    /** @hide */
+    public static final int myTid$ravenwood() {
+        return Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get().argi3;
     }
 
     /**
@@ -903,7 +913,7 @@ public class Process {
 
     /** @hide */
     public static final int myUid$ravenwood() {
-        return Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).argi1;
+        return Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get().argi1;
     }
 
     /**
@@ -1086,8 +1096,21 @@ public class Process {
      * not have permission to modify the given thread, or to use the given
      * priority.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static final native void setThreadPriority(int tid, int priority)
             throws IllegalArgumentException, SecurityException;
+
+    /** @hide */
+    public static final void setThreadPriority$ravenwood(int tid, int priority) {
+        final SomeArgs args =
+                Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get();
+        if (args.argi3 == tid) {
+            args.argi4 = priority;
+        } else {
+            throw new UnsupportedOperationException(
+                    "Cross-thread priority management not yet available in Ravenwood");
+        }
+    }
 
     /**
      * Call with 'false' to cause future calls to {@link #setThreadPriority(int)} to
@@ -1226,8 +1249,14 @@ public class Process {
      *
      * @see #setThreadPriority(int, int)
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static final native void setThreadPriority(int priority)
             throws IllegalArgumentException, SecurityException;
+
+    /** @hide */
+    public static final void setThreadPriority$ravenwood(int priority) {
+        setThreadPriority(myTid(), priority);
+    }
 
     /**
      * Return the current priority of a thread, based on Linux priorities.
@@ -1242,8 +1271,21 @@ public class Process {
      * @throws IllegalArgumentException Throws IllegalArgumentException if
      * <var>tid</var> does not exist.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static final native int getThreadPriority(int tid)
             throws IllegalArgumentException;
+
+    /** @hide */
+    public static final int getThreadPriority$ravenwood(int tid) {
+        final SomeArgs args =
+                Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get();
+        if (args.argi3 == tid) {
+            return args.argi4;
+        } else {
+            throw new UnsupportedOperationException(
+                    "Cross-thread priority management not yet available in Ravenwood");
+        }
+    }
 
     /**
      * Return the current scheduling policy of a thread, based on Linux.
