@@ -38,7 +38,9 @@ public class FakeGlobalSettings implements GlobalSettings {
 
     @Override
     public ContentResolver getContentResolver() {
-        return null;
+        throw new UnsupportedOperationException(
+                "GlobalSettings.getContentResolver is not implemented, but you may find "
+                        + "GlobalSettings.registerContentObserver helpful instead.");
     }
 
     @Override
