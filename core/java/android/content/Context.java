@@ -7560,7 +7560,7 @@ public abstract class Context {
      * @throws UnsupportedOperationException if the method is called on an instance that is not
      *         associated with any display.
      */
-    @Nullable
+    @NonNull
     public Display getDisplay() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
