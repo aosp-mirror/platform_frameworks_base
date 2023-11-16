@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Susa isiteshi"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Ama-app okungenzeka angasebenzi ngesikrini esihlukanisiwe"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"I-app ayisekeli isikrini esihlukanisiwe."</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Le-app ingavulwa kuphela ewindini eli-1."</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Uhlelo lokusebenza kungenzeka lungasebenzi kusibonisi sesibili."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Uhlelo lokusebenza alusekeli ukuqalisa kuzibonisi zesibili."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Isihlukanisi sokuhlukanisa isikrini"</string>

@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Razkrij"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Aplikacija morda ne deluje v načinu razdeljenega zaslona."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Aplikacija ne podpira načina razdeljenega zaslona."</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"To aplikacijo je mogoče odpreti samo v enem oknu"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Aplikacija morda ne bo delovala na sekundarnem zaslonu."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Aplikacija ne podpira zagona na sekundarnih zaslonih."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Razdelilnik zaslonov"</string>

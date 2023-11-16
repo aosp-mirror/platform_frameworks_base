@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"അൺസ്റ്റാഷ് ചെയ്യൽ"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"സ്‌ക്രീൻ വിഭജന മോഡിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"സ്‌ക്രീൻ വിഭജന മോഡിനെ ആപ്പ് പിന്തുണയ്ക്കുന്നില്ല"</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"ഈ ആപ്പ് ഒരു വിൻഡോയിൽ മാത്രമേ തുറക്കാനാകൂ"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"രണ്ടാം ഡിസ്‌പ്ലേയിൽ ആപ്പ് പ്രവർത്തിച്ചേക്കില്ല."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"രണ്ടാം ഡിസ്‌പ്ലേകളിൽ സമാരംഭിക്കുന്നതിനെ ആപ്പ് അനുവദിക്കുന്നില്ല."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"സ്‌ക്രീൻ വിഭജന മോഡ് ഡിവൈഡർ"</string>

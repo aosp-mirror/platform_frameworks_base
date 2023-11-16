@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Unstash"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"መተግበሪያ ከተከፈለ ማያ ገፅ ጋር ላይሠራ ይችላል"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"መተግበሪያው የተከፈለ ማያ ገጽን አይደግፍም"</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"ይህ መተግበሪያ መከፈት የሚችለው በ1 መስኮት ብቻ ነው"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"መተግበሪያ በሁለተኛ ማሳያ ላይ ላይሠራ ይችላል።"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"መተግበሪያ በሁለተኛ ማሳያዎች ላይ ማስጀመርን አይደግፍም።"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"የተከፈለ የማያ ገፅ ከፋይ"</string>

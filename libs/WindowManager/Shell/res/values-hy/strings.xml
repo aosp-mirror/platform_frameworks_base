@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Ցուցադրել"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Հավելվածը չի կարող աշխատել տրոհված էկրանի ռեժիմում"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Հավելվածը չի աջակցում էկրանի տրոհումը"</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Այս հավելվածը հնարավոր է բացել միայն մեկ պատուհանում"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Հավելվածը կարող է չաշխատել լրացուցիչ էկրանի վրա"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Հավելվածը չի աջակցում գործարկումը լրացուցիչ էկրանների վրա"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Տրոհված էկրանի բաժանիչ"</string>

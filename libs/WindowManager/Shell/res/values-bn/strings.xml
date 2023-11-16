@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"আনস্ট্যাস করুন"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"স্প্লিট স্ক্রিনে এই অ্যাপ নাও কাজ করতে পারে"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"স্প্লিট স্ক্রিনে এই অ্যাপ কাজ করে না"</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"এই অ্যাপটি শুধুমাত্র ১টি উইন্ডোতে খোলা যেতে পারে"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"সেকেন্ডারি ডিসপ্লেতে অ্যাপটি কাজ নাও করতে পারে।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"সেকেন্ডারি ডিসপ্লেতে অ্যাপ লঞ্চ করা যাবে না।"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"স্প্লিট স্ক্রিন বিভাজক"</string>
