@@ -860,6 +860,9 @@ public class ZenModeHelper {
         rule.enabled = automaticZenRule.isEnabled();
         rule.modified = automaticZenRule.isModified();
         rule.zenPolicy = automaticZenRule.getZenPolicy();
+        if (Flags.modesApi()) {
+            rule.zenDeviceEffects = automaticZenRule.getDeviceEffects();
+        }
         rule.zenMode = NotificationManager.zenModeFromInterruptionFilter(
                 automaticZenRule.getInterruptionFilter(), Global.ZEN_MODE_OFF);
         rule.configurationActivity = automaticZenRule.getConfigurationActivity();
@@ -888,6 +891,7 @@ public class ZenModeHelper {
                     .setIconResId(rule.iconResId)
                     .setType(rule.type)
                     .setZenPolicy(rule.zenPolicy)
+                    .setDeviceEffects(rule.zenDeviceEffects)
                     .setEnabled(rule.enabled)
                     .setInterruptionFilter(
                             NotificationManager.zenModeToInterruptionFilter(rule.zenMode))

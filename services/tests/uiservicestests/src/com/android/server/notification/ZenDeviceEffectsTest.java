@@ -102,4 +102,18 @@ public class ZenDeviceEffectsTest extends UiServiceTestCase {
         assertThat(copy.shouldSuppressAmbientDisplay()).isTrue();
         assertThat(copy.shouldDisplayGrayscale()).isFalse();
     }
+
+    @Test
+    public void hasEffects_none_returnsFalse() {
+        ZenDeviceEffects effects = new ZenDeviceEffects.Builder().build();
+        assertThat(effects.hasEffects()).isFalse();
+    }
+
+    @Test
+    public void hasEffects_some_returnsTrue() {
+        ZenDeviceEffects effects = new ZenDeviceEffects.Builder()
+                .setShouldDimWallpaper(true)
+                .build();
+        assertThat(effects.hasEffects()).isTrue();
+    }
 }
