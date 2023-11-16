@@ -146,8 +146,6 @@ private fun WidgetContent(
                     .createView(context, model.appWidgetId, model.providerInfo)
                     .apply { updateAppWidgetSize(Bundle.EMPTY, listOf(size)) }
             },
-            // For reusing composition in lazy lists.
-            onReset = {}
         )
     }
 }
