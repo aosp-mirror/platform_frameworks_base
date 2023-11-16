@@ -19,9 +19,14 @@ package com.android.credentialmanager.ui
 import androidx.navigation.NavController
 
 fun NavController.navigateToLoading() {
-    navigate(Screen.Loading.route)
+    navigateToAsRoot(Screen.Loading.route)
 }
 
 fun NavController.navigateToSinglePasswordScreen() {
-    navigate(Screen.SinglePasswordScreen.route)
+    navigateToAsRoot(Screen.SinglePasswordScreen.route)
+}
+
+fun NavController.navigateToAsRoot(route: String) {
+    popBackStack()
+    navigate(route)
 }
