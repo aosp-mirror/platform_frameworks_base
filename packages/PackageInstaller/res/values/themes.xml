@@ -32,8 +32,8 @@
         <item name="android:windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.AlertDialogActivity.NoDim">
-        <item name="android:windowNoTitle">true</item>
+    <style name="Theme.AlertDialogActivity.NoDim"
+        parent="@style/Theme.AlertDialogActivity.NoActionBar">
         <item name="android:backgroundDimAmount">0</item>
     </style>
 
