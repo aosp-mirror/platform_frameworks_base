@@ -718,6 +718,27 @@ static constexpr inline bool is_power_of_two(int value) {
     return (value & (value - 1)) == 0;
 }
 
+template <typename T>
+constexpr bool doesPaintHaveFill(T& paint) {
+    using T1 = std::remove_cv_t<T>;
+    if constexpr (std::is_same_v<T1, SkPaint>) {
+        return paint.getStyle() != SkPaint::Style::kStroke_Style;
+    } else if constexpr (std::is_same_v<T1, SkPaint&>) {
+        return paint.getStyle() != SkPaint::Style::kStroke_Style;
+    } else if constexpr (std::is_same_v<T1, SkPaint*>) {
+        return paint && paint->getStyle() != SkPaint::Style::kStroke_Style;
+    } else if constexpr (std::is_same_v<T1, const SkPaint*>) {
+        return paint && paint->getStyle() != SkPaint::Style::kStroke_Style;
+    }
+
+    return false;
+}
+
+template <typename... Args>
+constexpr bool hasPaintWithFill(Args&&... args) {
+    return (... || doesPaintHaveFill(args));
+}
+
 template <typename T, typename... Args>
 void* DisplayListData::push(size_t pod, Args&&... args) {
     size_t skip = SkAlignPtr(sizeof(T) + pod);
@@ -736,6 +757,14 @@ void* DisplayListData::push(size_t pod, Args&&... args) {
     new (op) T{std::forward<Args>(args)...};
     op->type = (uint32_t)T::kType;
     op->skip = skip;
+
+    // check if this is a fill op or not, in case we need to avoid messing with it with force invert
+    if constexpr (!std::is_same_v<T, DrawTextBlob>) {
+        if (hasPaintWithFill(args...)) {
+            mHasFill = true;
+        }
+    }
+
     return op + 1;
 }
 

@@ -427,7 +427,13 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
         children.push_back(node);
     });
     if (mDisplayList.hasText()) {
-        usage = UsageHint::Foreground;
+        if (mDisplayList.hasFill()) {
+            // Handle a special case for custom views that draw both text and background in the
+            // same RenderNode, which would otherwise be altered to white-on-white text.
+            usage = UsageHint::Container;
+        } else {
+            usage = UsageHint::Foreground;
+        }
     }
     if (usage == UsageHint::Unknown) {
         if (children.size() > 1) {
@@ -453,8 +459,13 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
             drawn.join(bounds);
         }
     }
-    mDisplayList.applyColorTransform(
-            usage == UsageHint::Background ? ColorTransform::Dark : ColorTransform::Light);
+
+    if (usage == UsageHint::Container) {
+        mDisplayList.applyColorTransform(ColorTransform::Invert);
+    } else {
+        mDisplayList.applyColorTransform(usage == UsageHint::Background ? ColorTransform::Dark
+                                                                        : ColorTransform::Light);
+    }
 }
 
 void RenderNode::pushStagingDisplayListChanges(TreeObserver& observer, TreeInfo& info) {
