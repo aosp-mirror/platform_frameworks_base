@@ -982,6 +982,24 @@
             android:excludeFromRecents="true"
             android:visibleToInstantApps="true"/>
 
+        <activity android:name="com.android.systemui.communal.widgets.WidgetPickerActivity"
+            android:theme="@style/Theme.EditWidgetsActivity"
+            android:excludeFromRecents="true"
+            android:autoRemoveFromRecents="true"
+            android:showOnLockScreen="true"
+            android:launchMode="singleTop"
+            android:exported="false">
+        </activity>
+
+        <activity android:name="com.android.systemui.communal.widgets.EditWidgetsActivity"
+            android:theme="@style/Theme.EditWidgetsActivity"
+            android:excludeFromRecents="true"
+            android:autoRemoveFromRecents="true"
+            android:showOnLockScreen="true"
+            android:launchMode="singleTop"
+            android:exported="false">
+        </activity>
+
         <!-- Doze with notifications, run in main sysui process for every user  -->
         <service
             android:name=".doze.DozeService"

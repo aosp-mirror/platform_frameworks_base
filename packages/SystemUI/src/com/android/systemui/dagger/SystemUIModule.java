@@ -130,6 +130,7 @@ import com.android.systemui.tuner.dagger.TunerModule;
 import com.android.systemui.unfold.SysUIUnfoldModule;
 import com.android.systemui.user.UserModule;
 import com.android.systemui.user.domain.UserDomainLayerModule;
+import com.android.systemui.util.EventLogModule;
 import com.android.systemui.util.concurrency.SysUIConcurrencyModule;
 import com.android.systemui.util.dagger.UtilModule;
 import com.android.systemui.util.kotlin.CoroutinesModule;
@@ -186,6 +187,7 @@ import javax.inject.Named;
         DisableFlagsModule.class,
         DisplayModule.class,
         DreamModule.class,
+        EventLogModule.class,
         FalsingModule.class,
         FlagsModule.class,
         FlagDependenciesModule.class,

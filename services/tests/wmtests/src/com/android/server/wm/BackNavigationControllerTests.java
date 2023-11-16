@@ -117,6 +117,20 @@ public class BackNavigationControllerTests extends WindowTestsBase {
     }
 
     @Test
+    public void noBackWhenMoveTaskToBack() {
+        Task taskA = createTask(mDefaultDisplay);
+        ActivityRecord recordA = createActivityRecord(taskA);
+        Mockito.doNothing().when(recordA).reparentSurfaceControl(any(), any());
+
+        final Task topTask = createTopTaskWithActivity();
+        withSystemCallback(topTask);
+        // simulate moveTaskToBack
+        topTask.setVisibleRequested(false);
+        BackNavigationInfo backNavigationInfo = startBackNavigation();
+        assertWithMessage("BackNavigationInfo").that(backNavigationInfo).isNull();
+    }
+
+    @Test
     public void backTypeCrossTaskWhenBackToPreviousTask() {
         Task taskA = createTask(mDefaultDisplay);
         ActivityRecord recordA = createActivityRecord(taskA);

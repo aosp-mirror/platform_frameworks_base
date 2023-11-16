@@ -2,8 +2,36 @@
 
 com.android.internal.util.ArrayUtils
 
+android.util.Xml
+
 android.os.Binder
 android.os.Binder$IdentitySupplier
 android.os.IBinder
 android.os.Process
 android.os.SystemClock
+android.os.UserHandle
+
+android.content.ClipData
+android.content.ClipData$Item
+android.content.ClipDescription
+android.content.ComponentName
+android.content.ContentUris
+android.content.ContentValues
+android.content.Intent
+android.content.IntentFilter
+android.content.UriMatcher
+
+android.database.AbstractCursor
+android.database.CharArrayBuffer
+android.database.ContentObservable
+android.database.ContentObserver
+android.database.Cursor
+android.database.CursorIndexOutOfBoundsException
+android.database.CursorJoiner
+android.database.CursorWrapper
+android.database.DataSetObservable
+android.database.DataSetObserver
+android.database.MatrixCursor
+android.database.MatrixCursor$RowBuilder
+android.database.MergeCursor
+android.database.Observable

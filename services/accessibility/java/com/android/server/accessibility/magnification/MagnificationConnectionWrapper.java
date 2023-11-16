@@ -35,15 +35,15 @@ import com.android.server.accessibility.AccessibilityTraceManager;
 /**
  * A wrapper of {@link IWindowMagnificationConnection}.
  */
-class WindowMagnificationConnectionWrapper {
+class MagnificationConnectionWrapper {
 
     private static final boolean DBG = false;
-    private static final String TAG = "WindowMagnificationConnectionWrapper";
+    private static final String TAG = "MagnificationConnectionWrapper";
 
     private final @NonNull IWindowMagnificationConnection mConnection;
     private final @NonNull AccessibilityTraceManager mTrace;
 
-    WindowMagnificationConnectionWrapper(@NonNull IWindowMagnificationConnection connection,
+    MagnificationConnectionWrapper(@NonNull IWindowMagnificationConnection connection,
             @NonNull AccessibilityTraceManager trace) {
         mConnection = connection;
         mTrace = trace;

@@ -943,6 +943,11 @@
         <item name="android:windowLightStatusBar">true</item>
     </style>
 
+    <style name="Theme.EditWidgetsActivity"
+        parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/white</item>
+    </style>
+
     <style name="TextAppearance.Control">
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>

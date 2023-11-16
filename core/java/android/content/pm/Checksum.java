@@ -139,6 +139,13 @@ public final class Checksum implements Parcelable {
     public @interface TypeMask {}
 
     /**
+     * Max size of checksum in bytes.
+     * sizeof(SHA512) == 64 bytes
+     * @hide
+     */
+    public static final int MAX_CHECKSUM_SIZE_BYTES = 64;
+
+    /**
      * Serialize checksum to the stream in binary format.
      * @hide
      */
@@ -276,10 +283,10 @@ public final class Checksum implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1619810358402L,
+            time = 1700002689652L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/core/java/android/content/pm/Checksum.java",
-            inputSignatures = "public static final  int TYPE_WHOLE_MERKLE_ROOT_4K_SHA256\npublic static final @java.lang.Deprecated int TYPE_WHOLE_MD5\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA1\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA256\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA512\npublic static final  int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256\npublic static final  int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512\nprivate final @android.content.pm.Checksum.Type int mType\nprivate final @android.annotation.NonNull byte[] mValue\npublic static  void writeToStream(java.io.DataOutputStream,android.content.pm.Checksum)\npublic static @android.annotation.NonNull android.content.pm.Checksum readFromStream(java.io.DataInputStream)\nclass Checksum extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstDefs=false)")
+            inputSignatures = "public static final  int TYPE_WHOLE_MERKLE_ROOT_4K_SHA256\npublic static final @java.lang.Deprecated int TYPE_WHOLE_MD5\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA1\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA256\npublic static final @java.lang.Deprecated int TYPE_WHOLE_SHA512\npublic static final  int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA256\npublic static final  int TYPE_PARTIAL_MERKLE_ROOT_1M_SHA512\npublic static final  int MAX_CHECKSUM_SIZE_BYTES\nprivate final @android.content.pm.Checksum.Type int mType\nprivate final @android.annotation.NonNull byte[] mValue\npublic static  void writeToStream(java.io.DataOutputStream,android.content.pm.Checksum)\npublic static @android.annotation.NonNull android.content.pm.Checksum readFromStream(java.io.DataInputStream)\nclass Checksum extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genConstDefs=false)")
     @Deprecated
     private void __metadata() {}
 

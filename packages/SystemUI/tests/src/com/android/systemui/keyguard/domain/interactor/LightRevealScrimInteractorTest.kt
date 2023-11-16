@@ -26,6 +26,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.statusbar.LightRevealScrim
+import com.android.systemui.util.mockito.mock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -80,7 +81,8 @@ class LightRevealScrimInteractorTest : SysuiTestCase() {
             LightRevealScrimInteractor(
                 keyguardTransitionInteractor,
                 fakeLightRevealScrimRepository,
-                testScope.backgroundScope
+                testScope.backgroundScope,
+                mock()
             )
     }
 

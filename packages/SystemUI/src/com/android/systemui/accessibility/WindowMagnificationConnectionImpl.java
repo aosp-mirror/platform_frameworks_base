@@ -37,12 +37,12 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
     private static final String TAG = "WindowMagnificationConnectionImpl";
 
     private IWindowMagnificationConnectionCallback mConnectionCallback;
-    private final WindowMagnification mWindowMagnification;
+    private final Magnification mMagnification;
     private final Handler mHandler;
 
-    WindowMagnificationConnectionImpl(@NonNull WindowMagnification windowMagnification,
+    WindowMagnificationConnectionImpl(@NonNull Magnification magnification,
             @Main Handler mainHandler) {
-        mWindowMagnification = windowMagnification;
+        mMagnification = magnification;
         mHandler = mainHandler;
     }
 
@@ -51,56 +51,56 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
             float magnificationFrameOffsetRatioX, float magnificationFrameOffsetRatioY,
             IRemoteMagnificationAnimationCallback callback) {
         mHandler.post(
-                () -> mWindowMagnification.enableWindowMagnification(displayId, scale, centerX,
+                () -> mMagnification.enableWindowMagnification(displayId, scale, centerX,
                         centerY, magnificationFrameOffsetRatioX,
                         magnificationFrameOffsetRatioY, callback));
     }
 
     @Override
     public void setScale(int displayId, float scale) {
-        mHandler.post(() -> mWindowMagnification.setScale(displayId, scale));
+        mHandler.post(() -> mMagnification.setScale(displayId, scale));
     }
 
     @Override
     public void disableWindowMagnification(int displayId,
             IRemoteMagnificationAnimationCallback callback) {
-        mHandler.post(() -> mWindowMagnification.disableWindowMagnification(displayId,
+        mHandler.post(() -> mMagnification.disableWindowMagnification(displayId,
                 callback));
     }
 
     @Override
     public void moveWindowMagnifier(int displayId, float offsetX, float offsetY) {
         mHandler.post(
-                () -> mWindowMagnification.moveWindowMagnifier(displayId, offsetX, offsetY));
+                () -> mMagnification.moveWindowMagnifier(displayId, offsetX, offsetY));
     }
 
     @Override
     public void moveWindowMagnifierToPosition(int displayId, float positionX, float positionY,
             IRemoteMagnificationAnimationCallback callback) {
-        mHandler.post(() -> mWindowMagnification.moveWindowMagnifierToPositionInternal(
+        mHandler.post(() -> mMagnification.moveWindowMagnifierToPositionInternal(
                 displayId, positionX, positionY, callback));
     }
 
     @Override
     public void showMagnificationButton(int displayId, int magnificationMode) {
         mHandler.post(
-                () -> mWindowMagnification.showMagnificationButton(displayId, magnificationMode));
+                () -> mMagnification.showMagnificationButton(displayId, magnificationMode));
     }
 
     @Override
     public void removeMagnificationButton(int displayId) {
         mHandler.post(
-                () -> mWindowMagnification.removeMagnificationButton(displayId));
+                () -> mMagnification.removeMagnificationButton(displayId));
     }
 
     @Override
     public void removeMagnificationSettingsPanel(int display) {
-        mHandler.post(() -> mWindowMagnification.hideMagnificationSettingsPanel(display));
+        mHandler.post(() -> mMagnification.hideMagnificationSettingsPanel(display));
     }
 
     @Override
     public void onUserMagnificationScaleChanged(int userId, int displayId, float scale) {
-        mHandler.post(() -> mWindowMagnification.setUserMagnificationScale(
+        mHandler.post(() -> mMagnification.setUserMagnificationScale(
                 userId, displayId, scale));
     }
 

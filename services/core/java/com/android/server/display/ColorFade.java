@@ -411,6 +411,33 @@ final class ColorFade {
     }
 
     /**
+     * Destroys ColorFade animation and its resources
+     *
+     * This method should be called when the ColorFade is no longer in use; i.e. when
+     * the {@link #mDisplayId display} has been removed.
+     */
+    public void destroy() {
+        if (DEBUG) {
+            Slog.d(TAG, "destroy");
+        }
+        if (mPrepared) {
+            if (mCreatedResources) {
+                attachEglContext();
+                try {
+                    destroyScreenshotTexture();
+                    destroyGLShaders();
+                    destroyGLBuffers();
+                    destroyEglSurface();
+                } finally {
+                    detachEglContext();
+                }
+            }
+            destroyEglContext();
+            destroySurface();
+        }
+    }
+
+    /**
      * Draws an animation frame showing the color fade activated at the
      * specified level.
      *
@@ -790,6 +817,12 @@ final class ColorFade {
         if (mEglDisplay != null) {
             EGL14.eglMakeCurrent(mEglDisplay,
                     EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_SURFACE, EGL14.EGL_NO_CONTEXT);
+        }
+    }
+
+    private void destroyEglContext() {
+        if (mEglDisplay != null && mEglContext != null) {
+            EGL14.eglDestroyContext(mEglDisplay, mEglContext);
         }
     }
 

@@ -19,6 +19,7 @@ package android.database;
 /**
  * This is used for {@link Cursor#copyStringToBuffer}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class CharArrayBuffer {
     public CharArrayBuffer(int size) {
         data = new char[size];

@@ -331,6 +331,9 @@ public final class UserManagerTest {
                 .isEqualTo(privateProfileUserProperties.isMediaSharedWithParent());
         assertThat(typeProps.isCredentialShareableWithParent())
                 .isEqualTo(privateProfileUserProperties.isCredentialShareableWithParent());
+        assertThat(typeProps.isAuthAlwaysRequiredToDisableQuietMode())
+                .isEqualTo(privateProfileUserProperties
+                        .isAuthAlwaysRequiredToDisableQuietMode());
         assertThrows(SecurityException.class, privateProfileUserProperties::getDeleteAppWithParent);
 
         // Verify private profile parent

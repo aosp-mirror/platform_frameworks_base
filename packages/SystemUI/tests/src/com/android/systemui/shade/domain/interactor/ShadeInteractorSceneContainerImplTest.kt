@@ -19,13 +19,11 @@ package com.android.systemui.shade.domain.interactor
 import android.content.pm.UserInfo
 import android.os.UserManager
 import androidx.test.filters.SmallTest
-import com.android.SysUITestComponent
-import com.android.SysUITestModule
-import com.android.TestMocksModule
-import com.android.collectLastValue
-import com.android.runCurrent
-import com.android.runTest
+import com.android.systemui.SysUITestComponent
+import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.TestMocksModule
+import com.android.systemui.collectLastValue
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
@@ -35,6 +33,8 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.power.data.repository.FakePowerRepository
 import com.android.systemui.res.R
+import com.android.systemui.runCurrent
+import com.android.systemui.runTest
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
@@ -176,6 +176,67 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
             // THEN shade expansion is zero
             Truth.assertThat(actual).isEqualTo(.7f)
+        }
+
+    @Test
+    fun qsFullscreen_falseWhenTransitioning() =
+        testComponent.runTest() {
+            val actual by collectLastValue(underTest.isQsFullscreen)
+
+            // WHEN scene transition active
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            val progress = MutableStateFlow(.3f)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.QuickSettings,
+                        toScene = SceneKey.Shade,
+                        progress = progress,
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            runCurrent()
+
+            // THEN QS is not fullscreen
+            Truth.assertThat(actual).isFalse()
+        }
+
+    @Test
+    fun qsFullscreen_falseWhenIdleNotQS() =
+        testComponent.runTest() {
+            val actual by collectLastValue(underTest.isQsFullscreen)
+
+            // WHEN Idle but not on QuickSettings scene
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(SceneKey.Shade)
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            runCurrent()
+
+            // THEN QS is not fullscreen
+            Truth.assertThat(actual).isFalse()
+        }
+
+    @Test
+    fun qsFullscreen_trueWhenIdleQS() =
+        testComponent.runTest() {
+            val actual by collectLastValue(underTest.isQsFullscreen)
+
+            // WHEN Idle on QuickSettings scene
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Idle(SceneKey.QuickSettings)
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            runCurrent()
+
+            // THEN QS is fullscreen
+            Truth.assertThat(actual).isTrue()
         }
 
     @Test

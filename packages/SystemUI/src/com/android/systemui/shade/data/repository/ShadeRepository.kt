@@ -102,6 +102,13 @@ interface ShadeRepository {
     @Deprecated("Use ShadeInteractor.isQsBypassingShade instead")
     val legacyExpandImmediate: StateFlow<Boolean>
 
+    /** True when QS is taking up the entire screen, i.e. fully expanded on a non-unfolded phone. */
+    @Deprecated("Use ShadeInteractor instead") val legacyQsFullscreen: StateFlow<Boolean>
+
+    /**  */
+    @Deprecated("Use ShadeInteractor instead")
+    fun setLegacyQsFullscreen(legacyQsFullscreen: Boolean)
+
     /**
      * Sets whether Quick Settings is being expanded without first expanding the Shade or Quick
      * Settings is being collapsed without first collapsing to shade.
@@ -121,12 +128,13 @@ interface ShadeRepository {
     fun setLegacyExpandedOrAwaitingInputTransfer(legacyExpandedOrAwaitingInputTransfer: Boolean)
 
     /** Sets whether the user is moving Quick Settings with a pointer */
-    fun setLegacyQsTracking(legacyQsTracking: Boolean)
+    @Deprecated("Use ShadeInteractor instead") fun setLegacyQsTracking(legacyQsTracking: Boolean)
 
     /** Sets whether the user is moving the shade with a pointer */
-    fun setLegacyShadeTracking(tracking: Boolean)
+    @Deprecated("Use ShadeInteractor instead") fun setLegacyShadeTracking(tracking: Boolean)
 
     /** Sets whether the user is moving the shade with a pointer, on lockscreen only */
+    @Deprecated("Use ShadeInteractor instead")
     fun setLegacyLockscreenShadeTracking(tracking: Boolean)
 
     /** Amount shade has expanded with regard to the UDFPS location */
@@ -216,7 +224,16 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     override val legacyIsQsExpanded: StateFlow<Boolean> = _legacyIsQsExpanded.asStateFlow()
 
     private val _legacyExpandImmediate = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead")
     override val legacyExpandImmediate: StateFlow<Boolean> = _legacyExpandImmediate.asStateFlow()
+
+    private val _legacyQsFullscreen = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyQsFullscreen: StateFlow<Boolean> = _legacyQsFullscreen.asStateFlow()
+
+    override fun setLegacyQsFullscreen(legacyQsFullscreen: Boolean) {
+        _legacyQsFullscreen.value = legacyQsFullscreen
+    }
 
     override fun setLegacyExpandImmediate(legacyExpandImmediate: Boolean) {
         _legacyExpandImmediate.value = legacyExpandImmediate

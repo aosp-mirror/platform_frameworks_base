@@ -7,19 +7,12 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-// Include all test java files.
-filegroup {
-    name: "displayservicetests-sources",
-    srcs: [
-        "src/**/*.java",
-    ],
-}
-
 android_test {
     name: "DisplayServiceTests",
 
     srcs: [
         "src/**/*.java",
+        "src/**/*.kt",
     ],
 
     libs: [
@@ -33,6 +26,8 @@ android_test {
         "frameworks-base-testutils",
         "junit",
         "junit-params",
+        "kotlin-test",
+        "mockito-kotlin2",
         "mockingservicestests-utils-mockito",
         "platform-compat-test-rules",
         "platform-test-annotations",

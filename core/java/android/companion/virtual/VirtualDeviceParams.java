@@ -37,6 +37,7 @@ import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorDirectChannelCallback;
 import android.content.ComponentName;
 import android.content.Context;
+import android.hardware.display.VirtualDisplayConfig;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SharedMemory;
@@ -326,8 +327,8 @@ public final class VirtualDeviceParams implements Parcelable {
      * support home activities.
      *
      * @see Builder#setHomeComponent
+     * @see VirtualDisplayConfig#isHomeSupported()
      */
-    // TODO(b/297168328): Link to the relevant API for creating displays with home support.
     @FlaggedApi(Flags.FLAG_VDM_CUSTOM_HOME)
     @Nullable
     public ComponentName getHomeComponent() {
@@ -737,8 +738,9 @@ public final class VirtualDeviceParams implements Parcelable {
          *
          * @param homeComponent The component name to be used as home. If unset, then the system-
          *   default secondary home activity will be used.
+         *
+         * @see VirtualDisplayConfig#isHomeSupported()
          */
-        // TODO(b/297168328): Link to the relevant API for creating displays with home support.
         @FlaggedApi(Flags.FLAG_VDM_CUSTOM_HOME)
         @NonNull
         public Builder setHomeComponent(@Nullable ComponentName homeComponent) {

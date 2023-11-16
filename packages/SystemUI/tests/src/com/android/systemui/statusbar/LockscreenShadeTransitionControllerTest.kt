@@ -5,8 +5,8 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
-import com.android.SysUITestModule
-import com.android.TestMocksModule
+import com.android.systemui.SysUITestModule
+import com.android.systemui.TestMocksModule
 import com.android.systemui.ExpandHelper
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
@@ -14,6 +14,7 @@ import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.power.domain.interactor.PowerInteractor
@@ -99,6 +100,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
     @Mock lateinit var stackscroller: NotificationStackScrollLayout
     @Mock lateinit var statusbarStateController: SysuiStatusBarStateController
     @Mock lateinit var transitionControllerCallback: LockscreenShadeTransitionController.Callback
+    @Mock lateinit var naturalScrollingSettingObserver: NaturalScrollingSettingObserver
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -123,6 +125,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         whenever(lockScreenUserManager.shouldShowLockscreenNotifications()).thenReturn(true)
         whenever(lockScreenUserManager.isLockscreenPublicMode(anyInt())).thenReturn(true)
         whenever(keyguardBypassController.bypassEnabled).thenReturn(false)
+        whenever(naturalScrollingSettingObserver.isNaturalScrollingEnabled).thenReturn(true)
 
         testComponent =
             DaggerLockscreenShadeTransitionControllerTest_TestComponent.factory()
@@ -185,6 +188,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 shadeInteractor = testComponent.shadeInteractor,
                 powerInteractor = testComponent.powerInteractor,
                 splitShadeStateController = ResourcesSplitShadeStateController(),
+                naturalScrollingSettingObserver = naturalScrollingSettingObserver,
             )
 
         transitionController.addCallback(transitionControllerCallback)
@@ -607,9 +611,9 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
         @Component.Factory
         interface Factory {
             fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-                mocks: TestMocksModule,
+                    @BindsInstance test: SysuiTestCase,
+                    featureFlags: FakeFeatureFlagsClassicModule,
+                    mocks: TestMocksModule,
             ): TestComponent
         }
     }

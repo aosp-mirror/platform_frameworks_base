@@ -75,11 +75,7 @@ class UdfpsFingerprintViewModelTest : SysuiTestCase() {
         keyguardRepository = FakeKeyguardRepository()
         bouncerRepository = FakeKeyguardBouncerRepository()
         fakeCommandQueue = FakeCommandQueue()
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
-                set(Flags.FACE_AUTH_REFACTOR, false)
-            }
+        featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
         bouncerRepository = FakeKeyguardBouncerRepository()
         transitionRepository = FakeKeyguardTransitionRepository()
         shadeRepository = FakeShadeRepository()

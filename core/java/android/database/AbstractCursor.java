@@ -33,11 +33,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-
 /**
  * This is an abstract cursor class that handles a lot of the common code
  * that all cursors need to deal with and is provided for convenience reasons.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class AbstractCursor implements CrossProcessCursor {
     private static final String TAG = "Cursor";
 
@@ -89,7 +89,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     private Bundle mExtras = Bundle.EMPTY;
 
     /** CloseGuard to detect leaked cursor **/
-    private final CloseGuard mCloseGuard = CloseGuard.get();
+    private final CloseGuard mCloseGuard;
 
     /* -------------------------------------------------------- */
     /* These need to be implemented by subclasses */
@@ -184,7 +184,9 @@ public abstract class AbstractCursor implements CrossProcessCursor {
         mClosed = true;
         mContentObservable.unregisterAll();
         onDeactivateOrClose();
-        mCloseGuard.close();
+        if (mCloseGuard != null) {
+            mCloseGuard.close();
+        }
     }
 
     /**
@@ -224,7 +226,19 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     /* Implementation */
     public AbstractCursor() {
         mPos = -1;
-        mCloseGuard.open("AbstractCursor.close");
+        mCloseGuard = initCloseGuard();
+        if (mCloseGuard != null) {
+            mCloseGuard.open("AbstractCursor.close");
+        }
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private CloseGuard initCloseGuard() {
+        return CloseGuard.get();
+    }
+
+    private CloseGuard initCloseGuard$ravenwood() {
+        return null;
     }
 
     @Override

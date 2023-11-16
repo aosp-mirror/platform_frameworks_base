@@ -18,9 +18,9 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.SysUITestModule
-import com.android.TestMocksModule
+import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.TestMocksModule
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.FakeKeyguardSurfaceBehindRepository

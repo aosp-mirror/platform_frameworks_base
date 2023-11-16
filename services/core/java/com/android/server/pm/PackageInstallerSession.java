@@ -1616,6 +1616,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        for (Checksum checksum : checksums) {
+            if (checksum.getValue() == null
+                    || checksum.getValue().length > Checksum.MAX_CHECKSUM_SIZE_BYTES) {
+                throw new IllegalArgumentException("Invalid checksum.");
+            }
+        }
+
         assertCallerIsOwnerOrRoot();
         synchronized (mLock) {
             assertPreparedAndNotCommittedOrDestroyedLocked("addChecksums");

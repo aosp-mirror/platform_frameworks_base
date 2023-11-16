@@ -21,7 +21,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.UserInfo
 import android.os.UserHandle
-import android.platform.test.flag.junit.SetFlagsRule
 import android.service.quicksettings.Tile
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -62,7 +61,6 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyString
@@ -76,8 +74,6 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class CurrentTilesInteractorImplTest : SysuiTestCase() {
-
-    @Rule @JvmField val setFlagsRule = SetFlagsRule()
 
     private val tileSpecRepository: TileSpecRepository = FakeTileSpecRepository()
     private val userRepository = FakeUserRepository()
@@ -109,7 +105,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        setFlagsRule.enableFlags(FLAG_QS_NEW_PIPELINE)
+        mSetFlagsRule.enableFlags(FLAG_QS_NEW_PIPELINE)
         // TODO(b/299909337): Add test checking the new factory is used when the flag is on
         featureFlags.set(Flags.QS_PIPELINE_NEW_TILES, true)
 

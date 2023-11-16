@@ -4019,6 +4019,15 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports multiple concurrent IME sessions.
+     */
+    @FlaggedApi("android.view.inputmethod.concurrent_input_methods")
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CONCURRENT_INPUT_METHODS =
+            "android.software.concurrent_input_methods";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports device policy enforcement via device admins.
      */
     @SdkConstant(SdkConstantType.FEATURE)

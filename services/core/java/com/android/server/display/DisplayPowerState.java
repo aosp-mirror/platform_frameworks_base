@@ -320,7 +320,9 @@ final class DisplayPowerState {
     public void stop() {
         mStopped = true;
         mPhotonicModulator.interrupt();
-        dismissColorFade();
+        if (mColorFade != null) {
+            mColorFade.destroy();
+        }
         mCleanListener = null;
         mHandler.removeCallbacksAndMessages(null);
     }

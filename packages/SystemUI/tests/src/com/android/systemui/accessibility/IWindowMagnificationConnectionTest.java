@@ -54,7 +54,7 @@ import org.mockito.MockitoAnnotations;
 
 /**
  * Tests for {@link android.view.accessibility.IWindowMagnificationConnection} retrieved from
- * {@link WindowMagnification}
+ * {@link Magnification}
  */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -86,7 +86,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     private AccessibilityLogger mA11yLogger;
 
     private IWindowMagnificationConnection mIWindowMagnificationConnection;
-    private WindowMagnification mWindowMagnification;
+    private Magnification mMagnification;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
     @Before
@@ -98,16 +98,16 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
             return null;
         }).when(mAccessibilityManager).setWindowMagnificationConnection(
                 any(IWindowMagnificationConnection.class));
-        mWindowMagnification = new WindowMagnification(getContext(),
+        mMagnification = new Magnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue,
                 mModeSwitchesController, mSysUiState, mOverviewProxyService, mSecureSettings,
                 mDisplayTracker, getContext().getSystemService(DisplayManager.class), mA11yLogger);
-        mWindowMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
+        mMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class));
-        mWindowMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
+        mMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
                 mContext.getSystemService(DisplayManager.class));
 
-        mWindowMagnification.requestWindowMagnificationConnection(true);
+        mMagnification.requestWindowMagnificationConnection(true);
         assertNotNull(mIWindowMagnificationConnection);
         mIWindowMagnificationConnection.setConnectionCallback(mConnectionCallback);
     }
@@ -161,7 +161,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     @Test
     public void showMagnificationButton() throws RemoteException {
         // magnification settings panel should not be showing
-        assertFalse(mWindowMagnification.isMagnificationSettingsPanelShowing(TEST_DISPLAY));
+        assertFalse(mMagnification.isMagnificationSettingsPanelShowing(TEST_DISPLAY));
 
         mIWindowMagnificationConnection.showMagnificationButton(TEST_DISPLAY,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
@@ -195,8 +195,8 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
                 testUserId, TEST_DISPLAY, testScale);
         waitForIdleSync();
 
-        assertTrue(mWindowMagnification.mUsersScales.contains(testUserId));
-        assertEquals(mWindowMagnification.mUsersScales.get(testUserId).get(TEST_DISPLAY),
+        assertTrue(mMagnification.mUsersScales.contains(testUserId));
+        assertEquals(mMagnification.mUsersScales.get(testUserId).get(TEST_DISPLAY),
                 (Float) testScale);
         verify(mMagnificationSettingsController).setMagnificationScale(eq(testScale));
     }

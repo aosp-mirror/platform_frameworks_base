@@ -31,6 +31,7 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -71,6 +72,7 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
     protected @Mock AlternateBouncerInteractor mAlternateBouncerInteractor;
     protected @Mock UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
     protected @Mock SelectedUserInteractor mSelectedUserInteractor;
+    protected @Mock KeyguardTransitionInteractor mKeyguardTransitionInteractor;
 
     protected FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
@@ -141,11 +143,11 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
                 mDialogManager,
                 mUdfpsController,
                 mActivityLaunchAnimator,
-                mFeatureFlags,
                 mPrimaryBouncerInteractor,
                 mAlternateBouncerInteractor,
                 mUdfpsKeyguardAccessibilityDelegate,
-                mSelectedUserInteractor);
+                mSelectedUserInteractor,
+                mKeyguardTransitionInteractor);
         return controller;
     }
 }

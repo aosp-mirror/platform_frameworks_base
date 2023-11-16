@@ -43,7 +43,10 @@ class SceneKey(
     name: String,
     identity: Any = Object(),
 ) : Key(name, identity) {
-    @VisibleForTesting val testTag: String = "scene:$name"
+    @VisibleForTesting
+    // TODO(b/240432457): Make internal once PlatformComposeSceneTransitionLayoutTestsUtils can
+    // access internal members.
+    val testTag: String = "scene:$name"
 
     /** The unique [ElementKey] identifying this scene's root element. */
     val rootElementKey = ElementKey(name, identity)
@@ -64,7 +67,10 @@ class ElementKey(
      */
     val isBackground: Boolean = false,
 ) : Key(name, identity), ElementMatcher {
-    @VisibleForTesting val testTag: String = "element:$name"
+    @VisibleForTesting
+    // TODO(b/240432457): Make internal once PlatformComposeSceneTransitionLayoutTestsUtils can
+    // access internal members.
+    val testTag: String = "element:$name"
 
     override fun matches(key: ElementKey, scene: SceneKey): Boolean {
         return key == this

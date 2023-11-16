@@ -129,6 +129,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
@@ -2777,7 +2778,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mScrimController.setExpansionAffectsAlpha(!unlocking);
 
         if (mAlternateBouncerInteractor.isVisibleState()) {
-            if (!mFeatureFlags.isEnabled(Flags.ALTERNATE_BOUNCER_VIEW)) {
+            if (!DeviceEntryUdfpsRefactor.isEnabled()) {
                 if ((!mKeyguardStateController.isOccluded() || mShadeSurface.isPanelExpanded())
                         && (mState == StatusBarState.SHADE || mState == StatusBarState.SHADE_LOCKED
                         || mTransitionToFullShadeProgress > 0f)) {

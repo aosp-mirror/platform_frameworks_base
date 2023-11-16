@@ -53,6 +53,7 @@ class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecision
                 deviceProvisionedController,
                 systemClock,
                 globalSettings,
+                eventLog
             )
         )
     }

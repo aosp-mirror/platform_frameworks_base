@@ -67,11 +67,7 @@ class UdfpsAodViewModelTest : SysuiTestCase() {
         overrideResource(com.android.systemui.res.R.dimen.lock_icon_padding, defaultPadding)
         testScope = TestScope()
         shadeRepository = FakeShadeRepository()
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.REFACTOR_UDFPS_KEYGUARD_VIEWS, true)
-                set(Flags.FACE_AUTH_REFACTOR, false)
-            }
+        featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
         KeyguardInteractorFactory.create(
                 featureFlags = featureFlags,
             )

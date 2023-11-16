@@ -14,7 +14,7 @@ following case-sensitive regex:
 The Flag: stanza is regex matched and should describe whether your change is behind a flag or flags.
 
 As a CL author, you'll have a consistent place to describe the risk of the proposed change by explicitly calling out the name of the
-flag in addition to its state (ENABLED|DISABLED|DEVELOPMENT|TEAMFOOD|TRUNKFOOD|NEXTFOOD).
+flag in addition to its state (ENABLED|DISABLED|DEVELOPMENT|STAGING|TEAMFOOD|TRUNKFOOD|NEXTFOOD).
 
 Some examples below:
 
@@ -74,11 +74,11 @@ def main():
     #common_typos_disable
     flagName = '([a-zA-z0-9_.])+'
 
-    #[state:ENABLED|DISABLED|DEVELOPMENT|TEAM*(TEAMFOOD)|TRUNK*(TRUNK_STAGING, TRUNK_FOOD)|NEXT*(NEXTFOOD)]
-    stateExpression = '\s*(ENABLED|DISABLED|DEVELOPMENT|TEAM[a-zA-z]*|TRUNK[a-zA-z]*|NEXT[a-zA-z]*)'
+    #[state:ENABLED|DISABLED|DEVELOPMENT|TEAM*(TEAMFOOD)|STAGING|TRUNK*(TRUNK_STAGING, TRUNK_FOOD)|NEXT*(NEXTFOOD)]
+    stateExpression = '\s*(ENABLED|DISABLED|DEVELOPMENT|TEAM[a-zA-z]*|STAGING|TRUNK[a-zA-z]*|NEXT[a-zA-z]*)'
     #common_typos_enable
 
-    readableRegexMsg = '\n\tFlag: (NONE|NA)\n\tFlag: LEGACY|ACONFIG FlagName|packageName.flagName ENABLED|DISABLED|DEVELOPMENT|TEAMFOOD|TRUNKFOOD|NEXTFOOD'
+    readableRegexMsg = '\n\tFlag: (NONE|NA)\n\tFlag: LEGACY|ACONFIG FlagName|packageName.flagName ENABLED|DISABLED|DEVELOPMENT|TEAMFOOD|STAGING|TRUNKFOOD|NEXTFOOD'
 
     flagRegex = fr'^{field}: .*$'
     check_flag = re.compile(flagRegex) #Flag:

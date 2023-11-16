@@ -284,6 +284,9 @@ java_library {
         "hoststubgen-helper-runtime.ravenwood",
         "framework-minus-apex.ravenwood",
     ],
+    static_libs: [
+        "core-xml-for-device",
+    ],
 }
 
 // Defaults for host side test modules.

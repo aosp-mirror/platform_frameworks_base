@@ -66,17 +66,12 @@ public class UdfpsKeyguardViewLegacyControllerTest extends
     public void testViewControllerQueriesSBStateOnAttached() {
         mController.onViewAttached();
         verify(mStatusBarStateController).getState();
-        verify(mStatusBarStateController).getDozeAmount();
 
-        final float dozeAmount = .88f;
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.SHADE_LOCKED);
-        when(mStatusBarStateController.getDozeAmount()).thenReturn(dozeAmount);
         captureStatusBarStateListeners();
 
         mController.onViewAttached();
         verify(mView, atLeast(1)).setPauseAuth(true);
-        verify(mView).onDozeAmountChanged(dozeAmount, dozeAmount,
-                UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
     }
 
     @Test
@@ -88,19 +83,6 @@ public class UdfpsKeyguardViewLegacyControllerTest extends
 
         verify(mStatusBarStateController).removeCallback(mStatusBarStateListener);
         verify(mKeyguardStateController).removeCallback(mKeyguardStateControllerCallback);
-    }
-
-    @Test
-    public void testDozeEventsSentToView() {
-        mController.onViewAttached();
-        captureStatusBarStateListeners();
-
-        final float linear = .55f;
-        final float eased = .65f;
-        mStatusBarStateListener.onDozeAmountChanged(linear, eased);
-
-        verify(mView).onDozeAmountChanged(linear, eased,
-                UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
     }
 
     @Test

@@ -286,11 +286,15 @@ public class Parcel_host {
     }
 
     public static byte[] nativeReadBlob(long nativePtr) {
+        var p = getInstance(nativePtr);
+        if (p.mSize - p.mPos < 4) {
+            // Match native impl that returns "null" when not enough data
+            return null;
+        }
         final var size = nativeReadInt(nativePtr);
         if (size == -1) {
             return null;
         }
-        var p = getInstance(nativePtr);
         try {
             p.ensureDataAvailable(align4(size));
         } catch (Exception e) {

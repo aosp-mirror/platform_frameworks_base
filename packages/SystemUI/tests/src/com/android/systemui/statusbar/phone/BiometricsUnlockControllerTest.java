@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -50,7 +49,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.BiometricUnlockInteractor;
@@ -130,14 +128,11 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
     @Mock
     private BiometricUnlockInteractor mBiometricUnlockInteractor;
     private final FakeSystemClock mSystemClock = new FakeSystemClock();
-    private FakeFeatureFlags mFeatureFlags;
     private BiometricUnlockController mBiometricUnlockController;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mFeatureFlags = new FakeFeatureFlags();
-        mFeatureFlags.set(ONE_WAY_HAPTICS_API_MIGRATION, false);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
         when(mKeyguardStateController.isFaceEnrolled()).thenReturn(true);
@@ -165,7 +160,6 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
                 mAuthController, mStatusBarStateController,
                 mSessionTracker, mLatencyTracker, mScreenOffAnimationController, mVibratorHelper,
                 mSystemClock,
-                mFeatureFlags,
                 mDeviceEntryHapticsInteractor,
                 () -> mSelectedUserInteractor,
                 mBiometricUnlockInteractor
