@@ -1185,14 +1185,11 @@ public class ScrimControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testScrimFocus() {
-        mScrimController.transitionTo(ScrimState.AOD);
-        assertFalse("Should not be focusable on AOD", mScrimBehind.isFocusable());
-        assertFalse("Should not be focusable on AOD", mScrimInFront.isFocusable());
-
-        mScrimController.transitionTo(ScrimState.KEYGUARD);
-        Assert.assertTrue("Should be focusable on keyguard", mScrimBehind.isFocusable());
-        Assert.assertTrue("Should be focusable on keyguard", mScrimInFront.isFocusable());
+    public void testScrimsAreNotFocusable() {
+        assertFalse("Behind scrim should not be focusable", mScrimBehind.isFocusable());
+        assertFalse("Front scrim should not be focusable", mScrimInFront.isFocusable());
+        assertFalse("Notifications scrim should not be focusable",
+                mNotificationsScrim.isFocusable());
     }
 
     @Test
@@ -1260,14 +1257,6 @@ public class ScrimControllerTest extends SysuiTestCase {
         ScrimState.AOD.prepare(ScrimState.KEYGUARD);
         Assert.assertTrue("Animate scrims when ColorFade won't be triggered",
                 ScrimState.AOD.getAnimateChange());
-    }
-
-    @Test
-    public void testViewsDontHaveFocusHighlight() {
-        assertFalse("Scrim shouldn't have focus highlight",
-                mScrimInFront.getDefaultFocusHighlightEnabled());
-        assertFalse("Scrim shouldn't have focus highlight",
-                mScrimBehind.getDefaultFocusHighlightEnabled());
     }
 
     @Test

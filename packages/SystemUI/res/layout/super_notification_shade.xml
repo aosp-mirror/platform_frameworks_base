@@ -30,7 +30,6 @@
         android:id="@+id/scrim_behind"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
     />
 
@@ -38,7 +37,6 @@
         android:id="@+id/scrim_notifications"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
     />
 
@@ -78,7 +76,6 @@
         android:id="@+id/scrim_in_front"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
     />
 
