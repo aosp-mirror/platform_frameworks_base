@@ -602,6 +602,7 @@ android_robolectric_test {
         ":SystemUI-tests-multivalent",
     ],
     static_libs: [
+        "dagger2",
         "androidx.test.uiautomator_uiautomator",
         "androidx.core_core-animation-testing",
         "androidx.test.ext.junit",
