@@ -19,7 +19,6 @@ package com.android.systemui.bouncer.ui.composable
 import android.app.AlertDialog
 import android.app.Dialog
 import android.content.DialogInterface
-import android.content.res.Configuration
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
@@ -54,8 +53,6 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -68,7 +65,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
@@ -83,8 +79,8 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.transitions
 import com.android.compose.modifiers.thenIf
-import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
+import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout
 import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
@@ -149,10 +145,7 @@ private fun SceneScope.BouncerScene(
 ) {
     val backgroundColor = MaterialTheme.colorScheme.surface
     val isSideBySideSupported by viewModel.isSideBySideSupported.collectAsState()
-    val layout =
-        calculateLayout(
-            isSideBySideSupported = isSideBySideSupported,
-        )
+    val layout = calculateLayout(isSideBySideSupported = isSideBySideSupported)
 
     Box(modifier) {
         Canvas(Modifier.element(Bouncer.Elements.Background).fillMaxSize()) {
@@ -163,27 +156,27 @@ private fun SceneScope.BouncerScene(
         val isFullScreenUserSwitcherEnabled = viewModel.isUserSwitcherVisible
 
         when (layout) {
-            Layout.STANDARD ->
+            BouncerSceneLayout.STANDARD ->
                 StandardLayout(
                     viewModel = viewModel,
                     dialogFactory = dialogFactory,
                     modifier = childModifier,
                 )
-            Layout.SIDE_BY_SIDE ->
+            BouncerSceneLayout.SIDE_BY_SIDE ->
                 SideBySideLayout(
                     viewModel = viewModel,
                     dialogFactory = dialogFactory,
                     isUserSwitcherVisible = isFullScreenUserSwitcherEnabled,
                     modifier = childModifier,
                 )
-            Layout.STACKED ->
+            BouncerSceneLayout.STACKED ->
                 StackedLayout(
                     viewModel = viewModel,
                     dialogFactory = dialogFactory,
                     isUserSwitcherVisible = isFullScreenUserSwitcherEnabled,
                     modifier = childModifier,
                 )
-            Layout.SPLIT ->
+            BouncerSceneLayout.SPLIT ->
                 SplitLayout(
                     viewModel = viewModel,
                     dialogFactory = dialogFactory,
@@ -728,56 +721,8 @@ private fun StackedLayout(
     }
 }
 
-@Composable
-private fun calculateLayout(
-    isSideBySideSupported: Boolean,
-): Layout {
-    val windowSizeClass = LocalWindowSizeClass.current
-    val width = windowSizeClass.widthSizeClass
-    val height = windowSizeClass.heightSizeClass
-    val isLarge = width > WindowWidthSizeClass.Compact && height > WindowHeightSizeClass.Compact
-    val isTall =
-        when (height) {
-            WindowHeightSizeClass.Expanded -> width < WindowWidthSizeClass.Expanded
-            WindowHeightSizeClass.Medium -> width < WindowWidthSizeClass.Medium
-            else -> false
-        }
-    val isSquare =
-        when (width) {
-            WindowWidthSizeClass.Compact -> height == WindowHeightSizeClass.Compact
-            WindowWidthSizeClass.Medium -> height == WindowHeightSizeClass.Medium
-            WindowWidthSizeClass.Expanded -> height == WindowHeightSizeClass.Expanded
-            else -> false
-        }
-    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-    return when {
-        // Small and tall devices (i.e. phone/folded in portrait) or square device not in landscape
-        // mode (unfolded with hinge along horizontal plane).
-        (!isLarge && isTall) || (isSquare && !isLandscape) -> Layout.STANDARD
-        // Small and wide devices (i.e. phone/folded in landscape).
-        !isLarge -> Layout.SPLIT
-        // Large and tall devices (i.e. tablet in portrait).
-        isTall -> Layout.STACKED
-        // Large and wide/square devices (i.e. tablet in landscape, unfolded).
-        else -> if (isSideBySideSupported) Layout.SIDE_BY_SIDE else Layout.STANDARD
-    }
-}
-
 interface BouncerSceneDialogFactory {
     operator fun invoke(): AlertDialog
-}
-
-/** Enumerates all known adaptive layout configurations. */
-private enum class Layout {
-    /** The default UI with the bouncer laid out normally. */
-    STANDARD,
-    /** The bouncer is displayed vertically stacked with the user switcher. */
-    STACKED,
-    /** The bouncer is displayed side-by-side with the user switcher or an empty space. */
-    SIDE_BY_SIDE,
-    /** The bouncer is split in two with both sides shown side-by-side. */
-    SPLIT,
 }
 
 /** Enumerates all supported user-input area visibilities. */
