@@ -467,6 +467,7 @@ applications that come with the platform
         <permission name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
         <permission name="android.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE" />
         <permission name="android.permission.MANAGE_APP_HIBERNATION"/>
+        <permission name="android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO" />
         <!-- Permission required for CTS test - ResourceObserverNativeTest -->
         <permission name="android.permission.REGISTER_MEDIA_RESOURCE_OBSERVER" />
         <!-- Permission required for CTS test - MediaCodecResourceTest -->

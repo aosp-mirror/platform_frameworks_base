@@ -869,6 +869,8 @@
     <!-- Permissions required for CTS test - CtsVoiceInteractionTestCases -->
     <uses-permission android:name="android.permission.RESET_HOTWORD_TRAINING_DATA_EGRESS_COUNT" />
     <uses-permission android:name="android.permission.RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA" />
+    <uses-permission android:name="android.permission.RECEIVE_SANDBOX_TRIGGER_AUDIO" />
+
     <uses-permission android:name="android.permission.GET_BINDING_UID_IMPORTANCE" />
 
     <application
