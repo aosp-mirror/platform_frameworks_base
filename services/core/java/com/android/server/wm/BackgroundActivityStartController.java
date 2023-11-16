@@ -29,6 +29,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
 import static com.android.server.wm.ActivityTaskSupervisor.getApplicationLabel;
+import static com.android.window.flags.Flags.balRequireOptInByPendingIntentCreator;
 import static com.android.window.flags.Flags.balShowToasts;
 import static com.android.window.flags.Flags.balShowToastsBlocked;
 import static com.android.server.wm.PendingRemoteAnimationRegistry.TIMEOUT_MS;
@@ -42,9 +43,14 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
 import android.app.BackgroundStartPrivileges;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.Overridable;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
@@ -79,6 +85,12 @@ public class BackgroundActivityStartController {
     private static final long ASM_GRACEPERIOD_TIMEOUT_MS = TIMEOUT_MS;
     private static final int ASM_GRACEPERIOD_MAX_REPEATS = 5;
     private static final int NO_PROCESS_UID = -1;
+    /** If enabled the creator will not allow BAL on its behalf by default. */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    @Overridable
+    private static final long DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_CREATOR =
+            296478951;
     public static final ActivityOptions ACTIVITY_OPTIONS_SYSTEM_DEFINED =
             ActivityOptions.makeBasic()
                     .setPendingIntentBackgroundActivityStartMode(
@@ -264,12 +276,9 @@ public class BackgroundActivityStartController {
                                 ? BackgroundStartPrivileges.NONE
                                 : BackgroundStartPrivileges.ALLOW_BAL;
             } else {
-                // for PendingIntents we restrict creator BAL based on target_sdk
-                mBalAllowedByPiCreator =
-                        checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
-                                == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED
-                                ? BackgroundStartPrivileges.NONE
-                                : BackgroundStartPrivileges.ALLOW_BAL;
+                // for PendingIntents we restrict BAL based on target_sdk
+                mBalAllowedByPiCreator = getBackgroundStartPrivilegesAllowedByCreator(
+                        callingUid, callingPackage, checkedOptions);
             }
             mBalAllowedByPiSender =
                     PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
@@ -303,6 +312,45 @@ public class BackgroundActivityStartController {
             }
         }
 
+        private BackgroundStartPrivileges getBackgroundStartPrivilegesAllowedByCreator(
+                int callingUid, String callingPackage, ActivityOptions checkedOptions) {
+            switch (checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()) {
+                case ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED:
+                    return BackgroundStartPrivileges.ALLOW_BAL;
+                case ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED:
+                    return BackgroundStartPrivileges.NONE;
+                case ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED:
+                    // no explicit choice by the app - let us decide what to do
+                    Slog.i(TAG, "balRequireOptInByPendingIntentCreator = "
+                            + balRequireOptInByPendingIntentCreator());
+                    if (!balRequireOptInByPendingIntentCreator()) {
+                        // if feature is disabled allow
+                        return BackgroundStartPrivileges.ALLOW_BAL;
+                    }
+                    if (callingPackage != null) {
+                        // determine based on the calling/creating package
+                        boolean changeEnabled = CompatChanges.isChangeEnabled(
+                                DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_CREATOR,
+                                callingPackage,
+                                UserHandle.getUserHandleForUid(callingUid));
+                        Slog.i(TAG, "changeEnabled = " + changeEnabled);
+                        return changeEnabled ? BackgroundStartPrivileges.NONE
+                                : BackgroundStartPrivileges.ALLOW_BAL;
+                    }
+                    // determine based on the calling/creating uid if we cannot determine the
+                    // actual package name (e.g. shared uid)
+                    boolean changeEnabled = CompatChanges.isChangeEnabled(
+                            DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_CREATOR,
+                            callingUid);
+                    Slog.i(TAG, "changeEnabled = " + changeEnabled);
+                    return changeEnabled ? BackgroundStartPrivileges.NONE
+                            : BackgroundStartPrivileges.ALLOW_BAL;
+                default:
+                    throw new IllegalStateException("unsupported BackgroundActivityStartMode: "
+                            + checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode());
+            }
+        }
+
         private String getDebugPackageName(String packageName, int uid) {
             if (packageName != null) {
                 return packageName; // use actual package
@@ -322,7 +370,7 @@ public class BackgroundActivityStartController {
         }
 
         private boolean isPendingIntent() {
-            return mOriginatingPendingIntent != null;
+            return mOriginatingPendingIntent != null && hasRealCaller();
         }
 
         private String dump(BalVerdict resultIfPiCreatorAllowsBal) {
@@ -341,18 +389,23 @@ public class BackgroundActivityStartController {
                     .append(getDebugPackageName(mCallingPackage, mCallingUid));
             sb.append("; callingUid: ").append(mCallingUid);
             sb.append("; callingPid: ").append(mCallingPid);
-            sb.append("; isPendingIntent: ").append(isPendingIntent());
             sb.append("; appSwitchState: ").append(mAppSwitchState);
             sb.append("; callingUidHasAnyVisibleWindow: ").append(mCallingUidHasAnyVisibleWindow);
             sb.append("; callingUidProcState: ").append(DebugUtils.valueToString(
                     ActivityManager.class, "PROCESS_STATE_", mCallingUidProcState));
             sb.append("; isCallingUidPersistentSystemProcess: ")
                     .append(mIsCallingUidPersistentSystemProcess);
+            sb.append("; forcedBalByPiSender: ").append(mForcedBalByPiSender);
+            sb.append("; intent: ").append(mIntent);
+            sb.append("; callerApp: ").append(mCallerApp);
+            if (mCallerApp != null) {
+                sb.append("; inVisibleTask: ").append(mCallerApp.hasActivityInVisibleTask());
+            }
             sb.append("; balAllowedByPiCreator: ").append(mBalAllowedByPiCreator);
+            sb.append("; resultIfPiCreatorAllowsBal: ").append(resultIfPiCreatorAllowsBal);
             sb.append("; hasRealCaller: ").append(hasRealCaller());
             sb.append("; isPendingIntent: ").append(isPendingIntent());
             if (hasRealCaller()) {
-                sb.append("; balAllowedByPiSender: ").append(mBalAllowedByPiSender);
                 sb.append("; realCallingPackage: ")
                         .append(getDebugPackageName(mRealCallingPackage, mRealCallingUid));
                 sb.append("; realCallingUid: ").append(mRealCallingUid);
@@ -364,24 +417,14 @@ public class BackgroundActivityStartController {
                 sb.append("; isRealCallingUidPersistentSystemProcess: ")
                         .append(mIsRealCallingUidPersistentSystemProcess);
                 sb.append("; originatingPendingIntent: ").append(mOriginatingPendingIntent);
-            }
-            sb.append("; mForcedBalByPiSender: ").append(mForcedBalByPiSender);
-            sb.append("; intent: ").append(mIntent);
-            sb.append("; callerApp: ").append(mCallerApp);
-            if (hasRealCaller()) {
                 sb.append("; realCallerApp: ").append(mRealCallerApp);
-            }
-            if (mCallerApp != null) {
-                sb.append("; inVisibleTask: ").append(mCallerApp.hasActivityInVisibleTask());
-            }
-            if (hasRealCaller()) {
                 if (mRealCallerApp != null) {
                     sb.append("; realInVisibleTask: ")
                             .append(mRealCallerApp.hasActivityInVisibleTask());
                 }
+                sb.append("; balAllowedByPiSender: ").append(mBalAllowedByPiSender);
                 sb.append("; resultIfPiSenderAllowsBal: ").append(resultIfPiSenderAllowsBal);
             }
-            sb.append("; resultIfPiCreatorAllowsBal: ").append(resultIfPiCreatorAllowsBal);
             sb.append("]");
             return sb.toString();
         }
@@ -416,10 +459,9 @@ public class BackgroundActivityStartController {
 
         public String toString() {
             StringBuilder builder = new StringBuilder();
-            builder.append(". BAL Code: ");
             builder.append(balCodeToString(mCode));
             if (DEBUG_ACTIVITY_STARTS) {
-                builder.append(" ");
+                builder.append(" (");
                 if (mBackground) {
                     builder.append("Background ");
                 }
@@ -433,6 +475,7 @@ public class BackgroundActivityStartController {
                     builder.append(" ");
                     builder.append(mProcessInfo);
                 }
+                builder.append(")");
             }
             return builder.toString();
         }
@@ -551,29 +594,40 @@ public class BackgroundActivityStartController {
                 && checkedOptions.getPendingIntentBackgroundActivityStartMode()
                 == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
             // Both caller and real caller allow with system defined behavior
+            if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
+                Slog.wtf(TAG,
+                        "With Android 15 BAL hardening this activity start may be blocked"
+                                + " if the PI creator upgrades target_sdk to 35+"
+                                + " AND the PI sender upgrades target_sdk to 34+! "
+                                + state.dump(resultForCaller, resultForRealCaller));
+                showBalRiskToast("BAL would be blocked", state);
+                // return the realCaller result for backwards compatibility
+                return statsLog(resultForRealCaller, state);
+            }
             Slog.wtf(TAG,
-                    "With Android 15 BAL hardening this activity start may be blocked"
-                            + " if the PI creator upgrades target_sdk to 35+"
-                            + " AND the PI sender upgrades target_sdk to 34+! "
-                            + " (missing opt in by PI creator)! "
+                    "Without Android 15 BAL hardening this activity start would be allowed"
+                            + " (missing opt in by PI creator or sender)! "
                             + state.dump(resultForCaller, resultForRealCaller));
-            showBalRiskToast("BAL would be blocked", state);
-            // return the realCaller result for backwards compatibility
-            return statsLog(resultForRealCaller, state);
-        }
-        if (resultForCaller.allows()
+            // fall through to abort
+        } else if (resultForCaller.allows()
                 && checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
                 == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
             // Allowed before V by creator
+            if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
+                Slog.wtf(TAG,
+                        "With Android 15 BAL hardening this activity start may be blocked"
+                                + " if the PI creator upgrades target_sdk to 35+! "
+                                + " (missing opt in by PI creator)! "
+                                + state.dump(resultForCaller, resultForRealCaller));
+                showBalRiskToast("BAL would be blocked", state);
+                return statsLog(resultForCaller, state);
+            }
             Slog.wtf(TAG,
-                    "With Android 15 BAL hardening this activity start may be blocked"
-                            + " if the PI creator upgrades target_sdk to 35+! "
+                    "Without Android 15 BAL hardening this activity start would be allowed"
                             + " (missing opt in by PI creator)! "
                             + state.dump(resultForCaller, resultForRealCaller));
-            showBalRiskToast("BAL would be blocked", state);
-            return statsLog(resultForCaller, state);
-        }
-        if (resultForRealCaller.allows()
+            // fall through to abort
+        } else if (resultForRealCaller.allows()
                 && checkedOptions.getPendingIntentBackgroundActivityStartMode()
                 == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
             // Allowed before U by sender
@@ -589,7 +643,7 @@ public class BackgroundActivityStartController {
             Slog.wtf(TAG, "Without Android 14 BAL hardening this activity start would be allowed"
                     + " (missing opt in by PI sender)! "
                     + state.dump(resultForCaller, resultForRealCaller));
-            // fall through
+            // fall through to abort
         }
         // anything that has fallen through would currently be aborted
         Slog.w(TAG, "Background activity launch blocked! "
