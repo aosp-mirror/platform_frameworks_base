@@ -111,19 +111,6 @@ public class AppOpsCheckingServiceLoggingDecorator implements AppOpsCheckingServ
     }
 
     @Override
-    public boolean areUidModesDefault(int uid) {
-        Log.i(LOG_TAG, "areUidModesDefault(uid = " + uid + ")");
-        return mService.areUidModesDefault(uid);
-    }
-
-    @Override
-    public boolean arePackageModesDefault(String packageName, int userId) {
-        Log.i(LOG_TAG, "arePackageModesDefault(packageName = " + packageName + ", userId = "
-                + userId + ")");
-        return mService.arePackageModesDefault(packageName, userId);
-    }
-
-    @Override
     public void clearAllModes() {
         Log.i(LOG_TAG, "clearAllModes()");
         mService.clearAllModes();

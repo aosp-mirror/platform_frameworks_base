@@ -124,21 +124,6 @@ public interface AppOpsCheckingServiceInterface {
     void removeUid(int uid);
 
     /**
-     * Returns true if all uid modes for this uid are
-     * in default state.
-     * @param uid user id
-     */
-    boolean areUidModesDefault(int uid);
-
-    /**
-     * Returns true if all package modes for this package name are
-     * in default state.
-     * @param packageName package name.
-     * @param userId user id associated with the package.
-     */
-    boolean arePackageModesDefault(String packageName, @UserIdInt int userId);
-
-    /**
      * Stop tracking app-op modes for all uid and packages.
      */
     void clearAllModes();
