@@ -561,7 +561,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private boolean mHasLayoutedSinceDown;
     private float mUpdateFlingVelocity;
     private boolean mUpdateFlingOnLayout;
-    private boolean mClosing;
     private boolean mTouchSlopExceeded;
     private int mTrackingPointer;
     private int mTouchSlop;
@@ -2935,10 +2934,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @VisibleForTesting
     void setClosing(boolean isClosing) {
-        if (mClosing != isClosing) {
-            mClosing = isClosing;
-            mShadeExpansionStateManager.notifyPanelCollapsingChanged(isClosing);
-        }
+        mShadeRepository.setLegacyIsClosing(isClosing);
         mAmbientState.setIsClosing(isClosing);
     }
 
@@ -3469,7 +3465,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         ipw.print("mHasLayoutedSinceDown="); ipw.println(mHasLayoutedSinceDown);
         ipw.print("mUpdateFlingVelocity="); ipw.println(mUpdateFlingVelocity);
         ipw.print("mUpdateFlingOnLayout="); ipw.println(mUpdateFlingOnLayout);
-        ipw.print("mClosing="); ipw.println(mClosing);
+        ipw.print("isClosing()="); ipw.println(isClosing());
         ipw.print("mTouchSlopExceeded="); ipw.println(mTouchSlopExceeded);
         ipw.print("mTrackingPointer="); ipw.println(mTrackingPointer);
         ipw.print("mTouchSlop="); ipw.println(mTouchSlop);
@@ -3808,7 +3804,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     }
 
     private void endClosing() {
-        if (mClosing) {
+        if (isClosing()) {
             setClosing(false);
             onClosingFinished();
         }
@@ -3928,7 +3924,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             mExpandedHeight = Math.min(h, maxPanelHeight);
             // If we are closing the panel and we are almost there due to a slow decelerating
             // interpolator, abort the animation.
-            if (mExpandedHeight < 1f && mExpandedHeight != 0f && mClosing) {
+            if (mExpandedHeight < 1f && mExpandedHeight != 0f && isClosing()) {
                 mExpandedHeight = 0f;
                 if (mHeightAnimator != null) {
                     mHeightAnimator.end();
@@ -4003,7 +3999,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public boolean isCollapsing() {
-        return mClosing || mIsLaunchAnimationRunning;
+        return isClosing() || mIsLaunchAnimationRunning;
     }
 
     public boolean isTracking() {
@@ -4012,7 +4008,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public boolean canBeCollapsed() {
-        return !isFullyCollapsed() && !isTracking() && !mClosing;
+        return !isFullyCollapsed() && !isTracking() && !isClosing();
     }
 
     @Override
@@ -4127,7 +4123,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @VisibleForTesting
     boolean isClosing() {
-        return mClosing;
+        return mShadeRepository.getLegacyIsClosing().getValue();
     }
 
     @Override
@@ -4838,11 +4834,11 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     mAnimatingOnDown = mHeightAnimator != null && !mIsSpringBackAnimation;
                     mMinExpandHeight = 0.0f;
                     mDownTime = mSystemClock.uptimeMillis();
-                    if (mAnimatingOnDown && mClosing) {
+                    if (mAnimatingOnDown && isClosing()) {
                         cancelHeightAnimator();
                         mTouchSlopExceeded = true;
                         mShadeLog.v("NotificationPanelViewController MotionEvent intercepted:"
-                                + " mAnimatingOnDown: true, mClosing: true");
+                                + " mAnimatingOnDown: true, isClosing(): true");
                         return true;
                     }
 
