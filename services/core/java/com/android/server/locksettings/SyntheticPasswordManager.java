@@ -90,10 +90,15 @@ import java.util.Set;
  *
  *  - The user's credential-encrypted storage is always protected by the SP.
  *
- *  - The user's auth-bound Keystore keys are protected by the SP, but only while an LSKF is set.
- *    This works by setting the user's Keystore and Gatekeeper passwords to SP-derived secrets, but
- *    only while an LSKF is set.  When the LSKF is removed, these passwords are cleared,
- *    invalidating the user's auth-bound keys.
+ *  - The user's Keystore superencryption keys are always protected by the SP.  These in turn
+ *    protect the Keystore keys that require user authentication, an unlocked device, or both.
+ *
+ *  - A secret derived from the synthetic password is enrolled in Gatekeeper for the user, but only
+ *    while the user has a (nonempty) LSKF.  This enrollment has an associated ID called the Secure
+ *    user ID or SID.  This use of Gatekeeper, which is separate from the use of GateKeeper that may
+ *    be used in the LSKF-based protector, makes it so that unlocking the synthetic password
+ *    generates a HardwareAuthToken (but only when the user has LSKF).  That HardwareAuthToken can
+ *    be provided to KeyMint to authorize the use of the user's authentication-bound Keystore keys.
  *
  * Files stored on disk for each user:
  *   For the SP itself, stored under NULL_PROTECTOR_ID:

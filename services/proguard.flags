@@ -45,10 +45,6 @@
    public static void write(...);
 }
 
-# Binder interfaces
--keep,allowoptimization,allowaccessmodification class * extends android.os.IInterface
--keep,allowoptimization,allowaccessmodification class * extends android.os.IHwInterface
-
 # Various classes subclassed in or referenced via JNI in ethernet-service
 -keep public class android.net.** { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.net.module.util.* { *; }
