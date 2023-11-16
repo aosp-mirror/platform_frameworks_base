@@ -1523,15 +1523,24 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     if (mSurfaceControl == null) return;
 
                     mRTLastReportedPosition.set(left, top, right, bottom);
+                    final float postScaleX = mRTLastReportedPosition.width()
+                            / (float) mRtSurfaceWidth;
+                    final float postScaleY = mRTLastReportedPosition.height()
+                            / (float) mRtSurfaceHeight;
                     onSetSurfacePositionAndScale(mPositionChangedTransaction, mSurfaceControl,
                             mRTLastReportedPosition.left /*positionLeft*/,
                             mRTLastReportedPosition.top /*positionTop*/,
-                            mRTLastReportedPosition.width()
-                                    / (float) mRtSurfaceWidth /*postScaleX*/,
-                            mRTLastReportedPosition.height()
-                                    / (float) mRtSurfaceHeight /*postScaleY*/);
+                            postScaleX, postScaleY);
 
-                    mRTLastSetCrop.set(clipLeft, clipTop, clipRight, clipBottom);
+                    mRTLastSetCrop.set((int) (clipLeft / postScaleX), (int) (clipTop / postScaleY),
+                            (int) Math.ceil(clipRight / postScaleX),
+                            (int) Math.ceil(clipBottom / postScaleY));
+                    if (DEBUG_POSITION) {
+                        Log.d(TAG, String.format("Setting layer crop = [%d, %d, %d, %d] "
+                                        + "from scale %f, %f", mRTLastSetCrop.left,
+                                mRTLastSetCrop.top, mRTLastSetCrop.right, mRTLastSetCrop.bottom,
+                                postScaleX, postScaleY));
+                    }
                     mPositionChangedTransaction.setCrop(mSurfaceControl, mRTLastSetCrop);
                     if (mRTLastSetCrop.isEmpty()) {
                         mPositionChangedTransaction.hide(mSurfaceControl);

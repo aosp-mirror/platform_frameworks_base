@@ -3280,7 +3280,8 @@ public final class SurfaceControl implements Parcelable {
                         "setCrop", this, sc, "crop=" + crop);
             }
             if (crop != null) {
-                Preconditions.checkArgument(crop.isValid(), "Crop isn't valid.");
+                Preconditions.checkArgument(crop.isValid(), "Crop " + crop
+                        + " isn't valid");
                 nativeSetWindowCrop(mNativeObject, sc.mNativeObject,
                         crop.left, crop.top, crop.right, crop.bottom);
             } else {
