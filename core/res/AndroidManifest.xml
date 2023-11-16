@@ -2372,7 +2372,7 @@
          them from running without explicit user action.
     -->
     <permission android:name="android.permission.QUARANTINE_APPS"
-        android:protectionLevel="internal|verifier" />
+        android:protectionLevel="signature|verifier" />
 
     <!-- Allows applications to discover and pair bluetooth devices.
          <p>Protection level: normal
