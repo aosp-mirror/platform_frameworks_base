@@ -63,6 +63,7 @@ aconfig_srcjars = [
     ":android.hardware.usb.flags-aconfig-java{.generated_srcjars}",
     ":android.tracing.flags-aconfig-java{.generated_srcjars}",
     ":android.appwidget.flags-aconfig-java{.generated_srcjars}",
+    ":android.webkit.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -746,5 +747,21 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.appwidget.flags-aconfig-java",
     aconfig_declarations: "android.appwidget.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// WebView
+aconfig_declarations {
+    name: "android.webkit.flags-aconfig",
+    package: "android.webkit",
+    srcs: [
+        "core/java/android/webkit/*.aconfig",
+        "services/core/java/com/android/server/webkit/*.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "android.webkit.flags-aconfig-java",
+    aconfig_declarations: "android.webkit.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }

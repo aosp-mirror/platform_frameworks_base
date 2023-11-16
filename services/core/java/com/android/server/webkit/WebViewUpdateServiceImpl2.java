@@ -63,8 +63,8 @@ import java.util.List;
  *
  * @hide
  */
-class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
-    private static final String TAG = WebViewUpdateServiceImpl.class.getSimpleName();
+class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
+    private static final String TAG = WebViewUpdateServiceImpl2.class.getSimpleName();
 
     private static class WebViewPackageMissingException extends Exception {
         WebViewPackageMissingException(String message) {
@@ -107,7 +107,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
 
     private final Object mLock = new Object();
 
-    WebViewUpdateServiceImpl(Context context, SystemInterface systemInterface) {
+    WebViewUpdateServiceImpl2(Context context, SystemInterface systemInterface) {
         mContext = context;
         mSystemInterface = systemInterface;
     }
@@ -378,7 +378,7 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
     public WebViewProviderInfo[] getValidWebViewPackages() {
         ProviderAndPackageInfo[] providersAndPackageInfos = getValidWebViewPackagesAndInfos();
         WebViewProviderInfo[] providers =
-            new WebViewProviderInfo[providersAndPackageInfos.length];
+                new WebViewProviderInfo[providersAndPackageInfos.length];
         for (int n = 0; n < providersAndPackageInfos.length; n++) {
             providers[n] = providersAndPackageInfos[n].provider;
         }
