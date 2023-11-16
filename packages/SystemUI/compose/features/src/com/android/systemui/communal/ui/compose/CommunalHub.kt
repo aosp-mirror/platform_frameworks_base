@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,6 +61,7 @@ import com.android.systemui.res.R
 fun CommunalHub(
     modifier: Modifier = Modifier,
     viewModel: BaseCommunalViewModel,
+    onOpenWidgetPicker: (() -> Unit)? = null,
 ) {
     val communalContent by viewModel.communalContent.collectAsState(initial = emptyList())
     Box(
@@ -81,7 +83,7 @@ fun CommunalHub(
                     modifier = Modifier.fillMaxHeight().width(Dimensions.CardWidth),
                     model = communalContent[index],
                     viewModel = viewModel,
-                    deleteOnClick = viewModel::onDeleteWidget,
+                    deleteOnClick = if (viewModel.isEditMode) viewModel::onDeleteWidget else null,
                     size =
                         SizeF(
                             Dimensions.CardWidth.value,
@@ -90,8 +92,14 @@ fun CommunalHub(
                 )
             }
         }
-        IconButton(onClick = viewModel::onOpenWidgetEditor) {
-            Icon(Icons.Default.Add, stringResource(R.string.button_to_open_widget_editor))
+        if (viewModel.isEditMode && onOpenWidgetPicker != null) {
+            IconButton(onClick = onOpenWidgetPicker) {
+                Icon(Icons.Default.Add, stringResource(R.string.hub_mode_add_widget_button_text))
+            }
+        } else {
+            IconButton(onClick = viewModel::onOpenWidgetEditor) {
+                Icon(Icons.Default.Edit, stringResource(R.string.button_to_open_widget_editor))
+            }
         }
 
         // This spacer covers the edge of the LazyHorizontalGrid and prevents it from receiving
@@ -111,7 +119,7 @@ private fun CommunalContent(
     model: CommunalContentModel,
     viewModel: BaseCommunalViewModel,
     size: SizeF,
-    deleteOnClick: (id: Int) -> Unit,
+    deleteOnClick: ((id: Int) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     when (model) {
@@ -126,19 +134,22 @@ private fun CommunalContent(
 private fun WidgetContent(
     model: CommunalContentModel.Widget,
     size: SizeF,
-    deleteOnClick: (id: Int) -> Unit,
+    deleteOnClick: ((id: Int) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     // TODO(b/309009246): update background color
     Box(
         modifier = modifier.fillMaxSize().background(Color.White),
     ) {
-        IconButton(onClick = { deleteOnClick(model.appWidgetId) }) {
-            Icon(
-                Icons.Default.Close,
-                LocalContext.current.getString(R.string.button_to_remove_widget)
-            )
+        if (deleteOnClick != null) {
+            IconButton(onClick = { deleteOnClick(model.appWidgetId) }) {
+                Icon(
+                    Icons.Default.Close,
+                    LocalContext.current.getString(R.string.button_to_remove_widget)
+                )
+            }
         }
+
         AndroidView(
             modifier = modifier,
             factory = { context ->

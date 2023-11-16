@@ -62,6 +62,21 @@ object ComposeFacade : BaseComposeFacade {
         activity.setContent { PlatformTheme { PeopleScreen(viewModel, onResult) } }
     }
 
+    override fun setCommunalEditWidgetActivityContent(
+        activity: ComponentActivity,
+        viewModel: BaseCommunalViewModel,
+        onOpenWidgetPicker: () -> Unit,
+    ) {
+        activity.setContent {
+            PlatformTheme {
+                CommunalHub(
+                    viewModel = viewModel,
+                    onOpenWidgetPicker = onOpenWidgetPicker,
+                )
+            }
+        }
+    }
+
     override fun createFooterActionsView(
         context: Context,
         viewModel: FooterActionsViewModel,

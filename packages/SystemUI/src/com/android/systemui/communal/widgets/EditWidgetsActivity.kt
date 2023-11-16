@@ -20,17 +20,21 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
-import com.android.systemui.res.R
+import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
+import com.android.systemui.compose.ComposeFacade.setCommunalEditWidgetActivityContent
 import javax.inject.Inject
 
 /** An Activity for editing the widgets that appear in hub mode. */
-class EditWidgetsActivity @Inject constructor(private val communalInteractor: CommunalInteractor) :
-    ComponentActivity() {
+class EditWidgetsActivity
+@Inject
+constructor(
+    private val communalViewModel: CommunalEditModeViewModel,
+    private val communalInteractor: CommunalInteractor,
+) : ComponentActivity() {
     companion object {
         /**
          * Intent extra name for the {@link AppWidgetProviderInfo} of a widget to add to hub mode.
@@ -59,20 +63,19 @@ class EditWidgetsActivity @Inject constructor(private val communalInteractor: Co
                         "Failed to receive result from widget picker, code=${result.resultCode}"
                     )
             }
-            this@EditWidgetsActivity.finish()
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setShowWhenLocked(true)
-        setContentView(R.layout.edit_widgets)
-
-        val addWidgetsButton = findViewById<View>(R.id.add_widget)
-        addWidgetsButton?.setOnClickListener({
-            addWidgetActivityLauncher.launch(
-                Intent(applicationContext, WidgetPickerActivity::class.java)
-            )
-        })
+        setCommunalEditWidgetActivityContent(
+            activity = this,
+            viewModel = communalViewModel,
+            onOpenWidgetPicker = {
+                addWidgetActivityLauncher.launch(
+                    Intent(applicationContext, WidgetPickerActivity::class.java)
+                )
+            },
+        )
     }
 }

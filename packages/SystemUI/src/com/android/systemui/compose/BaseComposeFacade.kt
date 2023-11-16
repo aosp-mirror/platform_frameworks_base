@@ -58,6 +58,13 @@ interface BaseComposeFacade {
         onResult: (PeopleViewModel.Result) -> Unit,
     )
 
+    /** Bind the content of [activity] to [viewModel]. */
+    fun setCommunalEditWidgetActivityContent(
+        activity: ComponentActivity,
+        viewModel: BaseCommunalViewModel,
+        onOpenWidgetPicker: () -> Unit,
+    )
+
     /** Create a [View] to represent [viewModel] on screen. */
     fun createFooterActionsView(
         context: Context,

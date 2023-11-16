@@ -47,6 +47,14 @@ object ComposeFacade : BaseComposeFacade {
         throwComposeUnavailableError()
     }
 
+    override fun setCommunalEditWidgetActivityContent(
+        activity: ComponentActivity,
+        viewModel: BaseCommunalViewModel,
+        onOpenWidgetPicker: () -> Unit,
+    ) {
+        throwComposeUnavailableError()
+    }
+
     override fun createFooterActionsView(
         context: Context,
         viewModel: FooterActionsViewModel,

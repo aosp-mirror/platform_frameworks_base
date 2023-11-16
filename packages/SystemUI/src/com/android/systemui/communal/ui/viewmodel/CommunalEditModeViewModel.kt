@@ -18,31 +18,27 @@ package com.android.systemui.communal.ui.viewmodel
 
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
-import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.media.dagger.MediaModule
+import javax.inject.Inject
+import javax.inject.Named
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 
-/** The base view model for the communal hub. */
-abstract class BaseCommunalViewModel(
+/** The view model for communal hub in edit mode. */
+@SysUISingleton
+class CommunalEditModeViewModel
+@Inject
+constructor(
     private val communalInteractor: CommunalInteractor,
-    val mediaHost: MediaHost,
-) {
-    val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene
+    @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
+) : BaseCommunalViewModel(communalInteractor, mediaHost) {
 
-    fun onSceneChanged(scene: CommunalSceneKey) {
-        communalInteractor.onSceneChanged(scene)
-    }
+    override val isEditMode = true
 
-    /** A list of all the communal content to be displayed in the communal hub. */
-    abstract val communalContent: Flow<List<CommunalContentModel>>
+    // Only widgets are editable.
+    override val communalContent: Flow<List<CommunalContentModel>> =
+        communalInteractor.widgetContent
 
-    /** Whether in edit mode for the communal hub. */
-    open val isEditMode = false
-
-    /** Called as the UI requests deleting a widget. */
-    open fun onDeleteWidget(id: Int) {}
-
-    /** Called as the UI requests opening the widget editor. */
-    open fun onOpenWidgetEditor() {}
+    override fun onDeleteWidget(id: Int) = communalInteractor.deleteWidget(id)
 }
