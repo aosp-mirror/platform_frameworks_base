@@ -61,7 +61,6 @@ import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.res.R
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CommunalHub(
     modifier: Modifier = Modifier,
@@ -72,58 +71,12 @@ fun CommunalHub(
     Box(
         modifier = modifier.fillMaxSize().background(Color.White),
     ) {
-        var gridModifier = Modifier.height(Dimensions.GridHeight).align(Alignment.CenterStart)
-        val gridState = rememberLazyGridState()
-        var list = communalContent
-        var dragDropState: GridDragDropState? = null
-        if (viewModel.isEditMode && viewModel is CommunalEditModeViewModel) {
-            val contentListState = rememberContentListState(communalContent, viewModel)
-            list = contentListState.list
-            dragDropState = rememberGridDragDropState(gridState, contentListState)
-            gridModifier = gridModifier.dragContainer(dragDropState)
-        }
-        LazyHorizontalGrid(
-            modifier = gridModifier,
-            state = gridState,
-            rows = GridCells.Fixed(CommunalContentSize.FULL.span),
-            contentPadding = PaddingValues(horizontal = Dimensions.Spacing),
-            horizontalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
-            verticalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
-        ) {
-            items(
-                count = list.size,
-                key = { index -> list[index].key },
-                span = { index -> GridItemSpan(list[index].size.span) },
-            ) { index ->
-                val cardModifier = Modifier.fillMaxHeight().width(Dimensions.CardWidth)
-                val size =
-                    SizeF(
-                        Dimensions.CardWidth.value,
-                        list[index].size.dp().value,
-                    )
-                if (viewModel.isEditMode && dragDropState != null) {
-                    DraggableItem(dragDropState = dragDropState, enabled = true, index = index) {
-                            isDragging ->
-                        val elevation by animateDpAsState(if (isDragging) 4.dp else 1.dp)
-                        CommunalContent(
-                            modifier = cardModifier,
-                            deleteOnClick = viewModel::onDeleteWidget,
-                            elevation = elevation,
-                            model = list[index],
-                            viewModel = viewModel,
-                            size = size,
-                        )
-                    }
-                } else {
-                    CommunalContent(
-                        modifier = cardModifier,
-                        model = list[index],
-                        viewModel = viewModel,
-                        size = size,
-                    )
-                }
-            }
-        }
+        CommunalHubLazyGrid(
+            modifier = Modifier.height(Dimensions.GridHeight).align(Alignment.CenterStart),
+            communalContent = communalContent,
+            isEditMode = viewModel.isEditMode,
+            viewModel = viewModel,
+        )
         if (viewModel.isEditMode && onOpenWidgetPicker != null) {
             IconButton(onClick = onOpenWidgetPicker) {
                 Icon(Icons.Default.Add, stringResource(R.string.hub_mode_add_widget_button_text))
@@ -143,6 +96,68 @@ fun CommunalHub(
                 .width(Dimensions.Spacing)
                 .pointerInput(Unit) {}
         )
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun CommunalHubLazyGrid(
+    communalContent: List<CommunalContentModel>,
+    isEditMode: Boolean,
+    viewModel: BaseCommunalViewModel,
+    modifier: Modifier = Modifier,
+) {
+    var gridModifier = modifier
+    val gridState = rememberLazyGridState()
+    var list = communalContent
+    var dragDropState: GridDragDropState? = null
+    if (isEditMode && viewModel is CommunalEditModeViewModel) {
+        val contentListState = rememberContentListState(communalContent, viewModel)
+        list = contentListState.list
+        dragDropState = rememberGridDragDropState(gridState, contentListState)
+        gridModifier = gridModifier.dragContainer(dragDropState)
+    }
+    LazyHorizontalGrid(
+        modifier = gridModifier,
+        state = gridState,
+        rows = GridCells.Fixed(CommunalContentSize.FULL.span),
+        contentPadding = PaddingValues(horizontal = Dimensions.Spacing),
+        horizontalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
+        verticalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
+    ) {
+        items(
+            count = list.size,
+            key = { index -> list[index].key },
+            span = { index -> GridItemSpan(list[index].size.span) },
+        ) { index ->
+            val cardModifier = Modifier.fillMaxHeight().width(Dimensions.CardWidth)
+            val size =
+                SizeF(
+                    Dimensions.CardWidth.value,
+                    list[index].size.dp().value,
+                )
+            if (isEditMode && dragDropState != null) {
+                DraggableItem(dragDropState = dragDropState, enabled = true, index = index) {
+                    isDragging ->
+                    val elevation by animateDpAsState(if (isDragging) 4.dp else 1.dp)
+                    CommunalContent(
+                        modifier = cardModifier,
+                        deleteOnClick = viewModel::onDeleteWidget,
+                        elevation = elevation,
+                        model = list[index],
+                        viewModel = viewModel,
+                        size = size,
+                    )
+                }
+            } else {
+                CommunalContent(
+                    modifier = cardModifier,
+                    model = list[index],
+                    viewModel = viewModel,
+                    size = size,
+                )
+            }
+        }
     }
 }
 
