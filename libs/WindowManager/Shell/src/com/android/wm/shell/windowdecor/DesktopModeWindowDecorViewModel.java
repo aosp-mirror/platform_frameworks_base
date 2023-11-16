@@ -530,6 +530,11 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             if (mGestureDetector.onTouchEvent(e)) {
                 return true;
             }
+            if (e.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                // If a motion event is cancelled, reset mShouldClick so a click is not accidentally
+                // performed.
+                mShouldClick = false;
+            }
             switch (e.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN: {
                     mDragPointerId = e.getPointerId(0);
