@@ -156,7 +156,7 @@ public class NotificationBackgroundView extends View implements Dumpable {
                     new int[]{com.android.internal.R.attr.state_hovered},
                     new int[]{}},
 
-                    new int[]{0, 0, tintColor}
+                    new int[]{tintColor, tintColor, tintColor}
             );
             mBackground.setTintMode(PorterDuff.Mode.SRC_ATOP);
             mBackground.setTintList(stateList);
