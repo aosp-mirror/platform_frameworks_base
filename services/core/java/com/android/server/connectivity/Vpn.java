@@ -3385,6 +3385,13 @@ public class Vpn {
          *              given network to start a new IKE session.
          */
         private void startOrMigrateIkeSession(@Nullable Network underlyingNetwork) {
+            synchronized (Vpn.this) {
+                // Ignore stale runner.
+                if (mVpnRunner != this) return;
+                setVpnNetworkPreference(mSessionKey,
+                        createUserAndRestrictedProfilesRanges(mUserId,
+                                mConfig.allowedApplications, mConfig.disallowedApplications));
+            }
             if (underlyingNetwork == null) {
                 // For null underlyingNetwork case, there will not be a NetworkAgent available so
                 // no underlying network update is necessary here. Note that updating
@@ -3905,6 +3912,7 @@ public class Vpn {
                 updateState(DetailedState.FAILED, exception.getMessage());
             }
 
+            clearVpnNetworkPreference(mSessionKey);
             disconnectVpnRunner();
         }
 
@@ -4039,6 +4047,13 @@ public class Vpn {
             }
 
             resetIkeState();
+            if (errorCode != VpnManager.ERROR_CODE_NETWORK_LOST
+                    // Clear the VPN network preference when the retry delay is higher than 5s.
+                    // mRetryCount was increased when scheduleRetryNewIkeSession() is called,
+                    // therefore use mRetryCount - 1 here.
+                    && mDeps.getNextRetryDelayMs(mRetryCount - 1) > 5_000L) {
+                clearVpnNetworkPreference(mSessionKey);
+            }
         }
 
         /**
@@ -4085,13 +4100,17 @@ public class Vpn {
             mCarrierConfigManager.unregisterCarrierConfigChangeListener(
                     mCarrierConfigChangeListener);
             mConnectivityManager.unregisterNetworkCallback(mNetworkCallback);
-            clearVpnNetworkPreference(mSessionKey);
 
             mExecutor.shutdown();
         }
 
         @Override
         public void exitVpnRunner() {
+            // mSessionKey won't be changed since the Ikev2VpnRunner is created, so it's ok to use
+            // it outside the mExecutor. And clearing the VPN network preference here can prevent
+            // the case that the VPN network preference isn't cleared when Ikev2VpnRunner became
+            // stale.
+            clearVpnNetworkPreference(mSessionKey);
             try {
                 mExecutor.execute(() -> {
                     disconnectVpnRunner();
