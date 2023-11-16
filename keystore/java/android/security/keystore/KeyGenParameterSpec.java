@@ -1282,15 +1282,18 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * function (MGF1) with a digest.
          * The default digest for MGF1 is {@code SHA-1}, which will be specified during key creation
          * time if no digests have been explicitly provided.
-         * When using the key, the caller may not specify any digests that were not provided during
-         * key creation time. The caller may specify the default digest, {@code SHA-1}, if no
+         * {@code null} may not be specified as a parameter to this method: It is not possible to
+         * disable MGF1 digest, a default must be present for when the caller tries to use it.
+         *
+         * <p>When using the key, the caller may not specify any digests that were not provided
+         * during key creation time. The caller may specify the default digest, {@code SHA-1}, if no
          * digests were explicitly provided during key creation (but it is not necessary to do so).
          *
          * <p>See {@link KeyProperties}.{@code DIGEST} constants.
          */
         @NonNull
         @FlaggedApi("MGF1_DIGEST_SETTER")
-        public Builder setMgf1Digests(@Nullable @KeyProperties.DigestEnum String... mgf1Digests) {
+        public Builder setMgf1Digests(@NonNull @KeyProperties.DigestEnum String... mgf1Digests) {
             mMgf1Digests = Set.of(mgf1Digests);
             return this;
         }
