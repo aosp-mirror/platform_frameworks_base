@@ -16,23 +16,42 @@
 
 package android.util;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.EventLog.Event;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import junit.framework.AssertionFailedError;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Unit tests for {@link android.util.EventLog} */
+@SmallTest
+@RunWith(AndroidJUnit4.class)
 public class EventLogTest {
+    @Rule public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
+    public void testSimple() throws Throwable {
+        EventLog.writeEvent(42, 42);
+        EventLog.writeEvent(42, 42L);
+        EventLog.writeEvent(42, 42f);
+        EventLog.writeEvent(42, "forty-two");
+        EventLog.writeEvent(42, 42, "forty-two", null, 42);
+    }
+
+    @Test
+    @IgnoreUnderRavenwood(reason = "Reading not yet supported")
     public void testWithNewData() throws Throwable {
         Event event = createEvent(() -> {
             EventLog.writeEvent(314,  123);

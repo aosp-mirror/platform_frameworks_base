@@ -16,9 +16,13 @@
 
 package android.util;
 
-import androidx.test.filters.LargeTest;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -27,13 +31,16 @@ import java.util.Collections;
 import java.util.List;
 
 @LargeTest
-public class LocalLogTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class LocalLogTest {
 
+    @Test
     public void testA_localTimestamps() {
         boolean localTimestamps = true;
         doTestA(localTimestamps);
     }
 
+    @Test
     public void testA_nonLocalTimestamps() {
         boolean localTimestamps = false;
         doTestA(localTimestamps);
@@ -49,6 +56,7 @@ public class LocalLogTest extends TestCase {
         testcase(new LocalLog(10, localTimestamps), lines, want);
     }
 
+    @Test
     public void testB() {
         String[] lines = {
             "foo",
@@ -59,6 +67,7 @@ public class LocalLogTest extends TestCase {
         testcase(new LocalLog(0), lines, want);
     }
 
+    @Test
     public void testC() {
         String[] lines = {
             "dropped",

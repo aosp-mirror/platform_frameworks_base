@@ -15,10 +15,7 @@
  */
 package android.ravenwood.annotation;
 
-import static java.lang.annotation.ElementType.CONSTRUCTOR;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -31,7 +28,7 @@ import java.lang.annotation.Target;
  *
  * @hide
  */
-@Target({FIELD, METHOD, CONSTRUCTOR})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-public @interface RavenwoodKeep {
+public @interface RavenwoodKeepPartialClass {
 }
