@@ -23,6 +23,7 @@ import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.view.View
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -31,22 +32,28 @@ import com.android.keyguard.LockIconView
 import com.android.keyguard.LockIconViewController
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.binder.AlternateBouncerViewBinder
 import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.statusbar.NotificationShadeWindowController
 import dagger.Lazy
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+/** Includes both the device entry icon and the alternate bouncer scrim. */
 @ExperimentalCoroutinesApi
 class DefaultDeviceEntryIconSection
 @Inject
@@ -62,12 +69,22 @@ constructor(
     private val deviceEntryForegroundViewModel: Lazy<DeviceEntryForegroundViewModel>,
     private val deviceEntryBackgroundViewModel: Lazy<DeviceEntryBackgroundViewModel>,
     private val falsingManager: Lazy<FalsingManager>,
+    private val alternateBouncerViewModel: Lazy<AlternateBouncerViewModel>,
+    private val notificationShadeWindowController: Lazy<NotificationShadeWindowController>,
+    @Application private val scope: CoroutineScope,
 ) : KeyguardSection() {
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
+    private val alternateBouncerViewId = R.id.alternate_bouncer
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!keyguardBottomAreaRefactor() && !DeviceEntryUdfpsRefactor.isEnabled) {
             return
+        }
+
+        if (DeviceEntryUdfpsRefactor.isEnabled) {
+            // The alternate bouncer scrim needs to be below the device entry icon view, so
+            // we add the view here before adding the device entry icon view.
+            View.inflate(context, R.layout.alternate_bouncer, constraintLayout)
         }
 
         notificationPanelView.findViewById<View>(R.id.lock_icon_view).let {
@@ -93,6 +110,14 @@ constructor(
                     deviceEntryForegroundViewModel.get(),
                     deviceEntryBackgroundViewModel.get(),
                     falsingManager.get(),
+                )
+            }
+            constraintLayout.findViewById<FrameLayout?>(alternateBouncerViewId)?.let {
+                AlternateBouncerViewBinder.bind(
+                    it,
+                    alternateBouncerViewModel.get(),
+                    scope,
+                    notificationShadeWindowController.get(),
                 )
             }
         } else {

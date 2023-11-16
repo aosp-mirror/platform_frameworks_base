@@ -21,6 +21,7 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepositoryImpl
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
@@ -111,9 +112,11 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 mock(StatusBarStateController::class.java),
                 mock(KeyguardStateController::class.java),
                 keyguardBouncerRepository,
+                FakeFingerprintPropertyRepository(),
                 mock(BiometricSettingsRepository::class.java),
                 mock(SystemClock::class.java),
                 mKeyguardUpdateMonitor,
+                testScope.backgroundScope,
             )
         mKeyguardTransitionInteractor =
             KeyguardTransitionInteractorFactory.create(
