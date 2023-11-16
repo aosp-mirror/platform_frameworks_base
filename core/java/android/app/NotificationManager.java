@@ -1247,6 +1247,22 @@ public class NotificationManager {
     }
 
     /**
+     * Returns true if users can independently and fully manage {@link AutomaticZenRule} rules. This
+     * includes the ability to independently activate/deactivate rules and overwrite/freeze the
+     * behavior (policy) of the rule when activated.
+     * <p>
+     * If this method returns true, calls to
+     * {@link #updateAutomaticZenRule(String, AutomaticZenRule)} may fail and apps should defer
+     * rule management to system settings/uis.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public boolean areAutomaticZenRulesUserManaged() {
+        // modes ui is dependent on modes api
+        return Flags.modesApi() && Flags.modesUi();
+    }
+
+
+    /**
      * Returns AutomaticZenRules owned by the caller.
      *
      * <p>
