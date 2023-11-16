@@ -350,6 +350,7 @@ public class SettingsBackupTest {
                     Settings.Global.DSRM_DURATION_MILLIS,
                     Settings.Global.DSRM_ENABLED_ACTIONS,
                     Settings.Global.MODE_RINGER,
+                    Settings.Global.MUTE_ALARM_STREAM_WITH_RINGER_MODE,
                     Settings.Global.MULTI_SIM_DATA_CALL_SUBSCRIPTION,
                     Settings.Global.MULTI_SIM_SMS_PROMPT,
                     Settings.Global.MULTI_SIM_SMS_SUBSCRIPTION,

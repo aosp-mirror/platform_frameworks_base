@@ -14308,6 +14308,14 @@ public final class Settings {
         public static final String MODE_RINGER = "mode_ringer";
 
         /**
+         * Whether or not Alarm stream should always be muted with Ringer.
+         *
+         * @hide
+         */
+        public static final String MUTE_ALARM_STREAM_WITH_RINGER_MODE =
+                "mute_alarm_stream_with_ringer_mode";
+
+        /**
          * Overlay display devices setting.
          * The associated value is a specially formatted string that describes the
          * size and density of simulated secondary display devices.

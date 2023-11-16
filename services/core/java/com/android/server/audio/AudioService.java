@@ -43,6 +43,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 import static com.android.media.audio.Flags.alarmMinVolumeZero;
 import static com.android.media.audio.Flags.bluetoothMacAddressAnonymization;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
+import static com.android.media.audio.Flags.ringerModeAffectsAlarm;
 import static com.android.server.audio.SoundDoseHelper.ACTION_CHECK_MUSIC_ACTIVE;
 import static com.android.server.utils.EventLogger.Event.ALOGE;
 import static com.android.server.utils.EventLogger.Event.ALOGI;
@@ -605,6 +606,7 @@ public class AudioService extends IAudioService.Stub
     };
 
     private final boolean mUseFixedVolume;
+    private final boolean mRingerModeAffectsAlarm;
     private final boolean mUseVolumeGroupAliases;
 
     // If absolute volume is supported in AVRCP device
@@ -1297,6 +1299,9 @@ public class AudioService extends IAudioService.Stub
 
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
+
+        mRingerModeAffectsAlarm = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_audio_ringer_mode_affects_alarm_stream);
 
         mRecordMonitor = new RecordingActivityMonitor(mContext);
         mRecordMonitor.registerRecordingCallback(mVoiceRecordingActivityMonitor, true);
@@ -7015,6 +7020,19 @@ public class AudioService extends IAudioService.Stub
             ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_DTMF);
         }
 
+        if (ringerModeAffectsAlarm()) {
+            if (mRingerModeAffectsAlarm) {
+                boolean muteAlarmWithRinger =
+                        mSettings.getGlobalInt(mContentResolver,
+                        Settings.Global.MUTE_ALARM_STREAM_WITH_RINGER_MODE,
+                        /* def= */ 0) != 0;
+                if (muteAlarmWithRinger) {
+                    ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_ALARM);
+                } else {
+                    ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_ALARM);
+                }
+            }
+        }
         if (ringerModeAffectedStreams != mRingerModeAffectedStreams) {
             mSettings.putSystemIntForUser(mContentResolver,
                     Settings.System.MODE_RINGER_STREAMS_AFFECTED,
@@ -9674,6 +9692,8 @@ public class AudioService extends IAudioService.Stub
                     Settings.Global.ZEN_MODE), false, this);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.ZEN_MODE_CONFIG_ETAG), false, this);
+            mContentResolver.registerContentObserver(Settings.Global.getUriFor(
+                    Settings.Global.MUTE_ALARM_STREAM_WITH_RINGER_MODE), false, this);
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.MODE_RINGER_STREAMS_AFFECTED), false, this);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
