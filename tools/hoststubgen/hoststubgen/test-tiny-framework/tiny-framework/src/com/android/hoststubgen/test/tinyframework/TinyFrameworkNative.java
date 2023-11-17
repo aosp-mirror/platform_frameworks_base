@@ -32,4 +32,16 @@ public class TinyFrameworkNative {
     public static long nativeLongPlus_should_be_like_this(long arg1, long arg2) {
         return TinyFrameworkNative_host.nativeLongPlus(arg1, arg2);
     }
+
+    int value;
+
+    public void setValue(int v) {
+        this.value = v;
+    }
+
+    public native int nativeNonStaticAddToValue(int arg);
+
+    public int nativeNonStaticAddToValue_should_be_like_this(int arg) {
+        return TinyFrameworkNative_host.nativeNonStaticAddToValue(this, arg);
+    }
 }

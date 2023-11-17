@@ -28,4 +28,10 @@ public class TinyFrameworkNative_host {
     public static long nativeLongPlus(long arg1, long arg2) {
         return arg1 + arg2;
     }
+
+    // Note, the method must be static even for a non-static native method, but instead it
+    // must take the "source" instance as the first argument.
+    public static int nativeNonStaticAddToValue(TinyFrameworkNative source, int arg) {
+        return source.value + arg;
+    }
 }

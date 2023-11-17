@@ -152,6 +152,13 @@ public class TinyFrameworkClassTest {
     }
 
     @Test
+    public void testNativeSubstitutionClass_nonStatic() {
+        TinyFrameworkNative instance = new TinyFrameworkNative();
+        instance.setValue(5);
+        assertThat(instance.nativeNonStaticAddToValue(3)).isEqualTo(8);
+    }
+
+    @Test
     public void testExitLog() {
         thrown.expect(RuntimeException.class);
         thrown.expectMessage("Outer exception");
