@@ -160,8 +160,15 @@ constructor(
     var mUdfpsKeyguardViewControllerLegacy: UdfpsKeyguardViewControllerLegacy? = null
 
     /** The touch helper responsible for the drag down animation. */
-    val touchHelper = DragDownHelper(falsingManager, falsingCollector, this,
-            naturalScrollingSettingObserver, context)
+    val touchHelper =
+        DragDownHelper(
+            falsingManager,
+            falsingCollector,
+            this,
+            naturalScrollingSettingObserver,
+            shadeRepository,
+            context
+        )
 
     private val splitShadeOverScroller: SplitShadeLockScreenOverScroller by lazy {
         splitShadeOverScrollerFactory.create({ qS }, { nsslController })
@@ -756,6 +763,7 @@ class DragDownHelper(
     private val falsingCollector: FalsingCollector,
     private val dragDownCallback: LockscreenShadeTransitionController,
     private val naturalScrollingSettingObserver: NaturalScrollingSettingObserver,
+    private val shadeRepository: ShadeRepository,
     context: Context
 ) : Gefingerpoken {
 
@@ -808,8 +816,9 @@ class DragDownHelper(
                 startingChild = null
                 initialTouchY = y
                 initialTouchX = x
-                isTrackpadReverseScroll = !naturalScrollingSettingObserver.isNaturalScrollingEnabled
-                        && isTrackpadScroll(true, event)
+                isTrackpadReverseScroll =
+                    !naturalScrollingSettingObserver.isNaturalScrollingEnabled &&
+                        isTrackpadScroll(true, event)
             }
             MotionEvent.ACTION_MOVE -> {
                 val h = (if (isTrackpadReverseScroll) -1 else 1) * (y - initialTouchY)
@@ -875,6 +884,7 @@ class DragDownHelper(
                     }
                     isDraggingDown = false
                     isTrackpadReverseScroll = false
+                    shadeRepository.setLegacyLockscreenShadeTracking(false)
                 } else {
                     stopDragging()
                     return false
