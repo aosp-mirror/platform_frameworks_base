@@ -5818,6 +5818,17 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.tv.ad.TvAdManager} for interacting with TV client-side advertisement
+     * services on the device.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.tv.ad.TvAdManager
+     */
+    @FlaggedApi(android.media.tv.flags.Flags.FLAG_ENABLE_AD_SERVICE_FW)
+    public static final String TV_AD_SERVICE = "tv_ad";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.media.tv.TunerResourceManager} for interacting with TV
      * tuner resources on the device.
      *
