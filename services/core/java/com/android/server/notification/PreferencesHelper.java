@@ -2143,10 +2143,7 @@ public class PreferencesHelper implements RankingConfig {
      * @return State of the full screen intent permission for this package.
      */
     @VisibleForTesting
-    int getFsiState(String pkg, int uid, boolean requestedFSIPermission, boolean isFlagEnabled) {
-        if (!isFlagEnabled) {
-            return 0;
-        }
+    int getFsiState(String pkg, int uid, boolean requestedFSIPermission) {
         if (!requestedFSIPermission) {
             return PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED;
         }
@@ -2167,10 +2164,8 @@ public class PreferencesHelper implements RankingConfig {
      * the user.
      */
     @VisibleForTesting
-    boolean isFsiPermissionUserSet(String pkg, int uid, int fsiState, int currentPermissionFlags,
-                                   boolean isStickyHunFlagEnabled) {
-        if (!isStickyHunFlagEnabled
-                || fsiState == PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED) {
+    boolean isFsiPermissionUserSet(String pkg, int uid, int fsiState, int currentPermissionFlags) {
+        if (fsiState == PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED) {
             return false;
         }
         return (currentPermissionFlags & PackageManager.FLAG_PERMISSION_USER_SET) != 0;
@@ -2213,22 +2208,18 @@ public class PreferencesHelper implements RankingConfig {
                     pkgsWithPermissionsToHandle.remove(key);
                 }
 
-                final boolean isStickyHunFlagEnabled = SystemUiSystemPropertiesFlags.getResolver()
-                        .isEnabled(NotificationFlags.SHOW_STICKY_HUN_FOR_DENIED_FSI);
-
                 final boolean requestedFSIPermission = mPermissionHelper.hasRequestedPermission(
                         android.Manifest.permission.USE_FULL_SCREEN_INTENT, r.pkg, r.uid);
 
-                final int fsiState = getFsiState(r.pkg, r.uid, requestedFSIPermission,
-                        isStickyHunFlagEnabled);
+                final int fsiState = getFsiState(r.pkg, r.uid, requestedFSIPermission);
 
                 final int currentPermissionFlags = mPm.getPermissionFlags(
                         android.Manifest.permission.USE_FULL_SCREEN_INTENT, r.pkg,
                         UserHandle.getUserHandleForUid(r.uid));
 
                 final boolean fsiIsUserSet =
-                        isFsiPermissionUserSet(r.pkg, r.uid, fsiState, currentPermissionFlags,
-                                isStickyHunFlagEnabled);
+                        isFsiPermissionUserSet(r.pkg, r.uid, fsiState,
+                                currentPermissionFlags);
 
                 events.add(FrameworkStatsLog.buildStatsEvent(
                         PACKAGE_NOTIFICATION_PREFERENCES,
