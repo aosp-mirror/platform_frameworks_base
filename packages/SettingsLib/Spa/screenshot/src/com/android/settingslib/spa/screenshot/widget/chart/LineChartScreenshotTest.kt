@@ -16,7 +16,7 @@
 
 package com.android.settingslib.spa.screenshot.widget.chart
 
-import com.android.settingslib.spa.screenshot.util.SettingsScreenshotTestRule
+import com.android.settingslib.spa.screenshot.util.settingsScreenshotTestRule
 import com.android.settingslib.spa.widget.chart.LineChart
 import com.android.settingslib.spa.widget.chart.LineChartData
 import com.android.settingslib.spa.widget.chart.LineChartModel
@@ -41,9 +41,8 @@ class LineChartScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
     @get:Rule
     val screenshotRule =
-        SettingsScreenshotTestRule(
+        settingsScreenshotTestRule(
             emulationSpec,
-            "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
         )
 
     @Test
