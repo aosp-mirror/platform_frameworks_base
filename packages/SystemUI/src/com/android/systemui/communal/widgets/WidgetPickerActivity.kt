@@ -43,7 +43,6 @@ constructor(
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.widget_picker)
-        setShowWhenLocked(true)
 
         loadWidgets()
     }

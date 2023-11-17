@@ -22,7 +22,7 @@ import android.view.View
 import android.view.WindowInsets
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.LifecycleOwner
-import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.FooterActionsViewModel
 import com.android.systemui.scene.shared.model.Scene
@@ -47,6 +47,14 @@ object ComposeFacade : BaseComposeFacade {
         throwComposeUnavailableError()
     }
 
+    override fun setCommunalEditWidgetActivityContent(
+        activity: ComponentActivity,
+        viewModel: BaseCommunalViewModel,
+        onOpenWidgetPicker: () -> Unit,
+    ) {
+        throwComposeUnavailableError()
+    }
+
     override fun createFooterActionsView(
         context: Context,
         viewModel: FooterActionsViewModel,
@@ -67,12 +75,12 @@ object ComposeFacade : BaseComposeFacade {
 
     override fun createCommunalView(
         context: Context,
-        viewModel: CommunalViewModel,
+        viewModel: BaseCommunalViewModel,
     ): View {
         throwComposeUnavailableError()
     }
 
-    override fun createCommunalContainer(context: Context, viewModel: CommunalViewModel): View {
+    override fun createCommunalContainer(context: Context, viewModel: BaseCommunalViewModel): View {
         throwComposeUnavailableError()
     }
 

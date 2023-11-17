@@ -65,7 +65,6 @@ object CommunalInteractorFactory {
                 widgetRepository,
                 mediaRepository,
                 smartspaceRepository,
-                withDeps.communalTutorialInteractor,
                 appWidgetHost,
                 editWidgetsActivityStarter,
             ),
