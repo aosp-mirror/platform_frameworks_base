@@ -33,7 +33,6 @@ import android.content.pm.UserInfo;
 import android.net.ConnectivityManager;
 import android.net.INetd;
 import android.net.IVpnManager;
-import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkStack;
 import android.net.UnderlyingNetworkInfo;
@@ -437,16 +436,9 @@ public class VpnManagerService extends IVpnManager.Stub {
             throw new UnsupportedOperationException("Legacy VPN is deprecated");
         }
         int user = UserHandle.getUserId(mDeps.getCallingUid());
-        // Note that if the caller is not system (uid >= Process.FIRST_APPLICATION_UID),
-        // the code might not work well since getActiveNetwork might return null if the uid is
-        // blocked by NetworkPolicyManagerService.
-        final LinkProperties egress = mCm.getLinkProperties(mCm.getActiveNetwork());
-        if (egress == null) {
-            throw new IllegalStateException("Missing active network connection");
-        }
         synchronized (mVpns) {
             throwIfLockdownEnabled();
-            mVpns.get(user).startLegacyVpn(profile, null /* underlying */, egress);
+            mVpns.get(user).startLegacyVpn(profile);
         }
     }
 
