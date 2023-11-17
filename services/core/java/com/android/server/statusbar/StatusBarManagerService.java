@@ -1836,12 +1836,13 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     }
 
     @Override
-    public void hideCurrentInputMethodForBubbles() {
+    public void hideCurrentInputMethodForBubbles(int displayId) {
         enforceStatusBarService();
         final long token = Binder.clearCallingIdentity();
         try {
-            InputMethodManagerInternal.get().hideCurrentInputMethod(
-                    SoftInputShowHideReason.HIDE_BUBBLES);
+            // TODO(b/308479256): Check if hiding "all" IMEs is OK or not.
+            InputMethodManagerInternal.get().hideAllInputMethods(
+                    SoftInputShowHideReason.HIDE_BUBBLES, displayId);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

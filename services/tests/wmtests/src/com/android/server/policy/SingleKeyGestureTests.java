@@ -30,9 +30,9 @@ import static org.junit.Assert.assertTrue;
 
 import android.app.Instrumentation;
 import android.content.Context;
-import android.os.Looper;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.Process;
 import android.os.SystemClock;
 import android.view.KeyEvent;
@@ -109,7 +109,7 @@ public class SingleKeyGestureTests {
                     }
 
                     @Override
-                    public void onPress(long downTime) {
+                    public void onPress(long downTime, int displayId) {
                         if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
                             return;
                         }
@@ -131,7 +131,7 @@ public class SingleKeyGestureTests {
                     }
 
                     @Override
-                    void onMultiPress(long downTime, int count) {
+                    void onMultiPress(long downTime, int count, int displayId) {
                         if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
                             return;
                         }
@@ -141,7 +141,7 @@ public class SingleKeyGestureTests {
                     }
 
                     @Override
-                    void onKeyUp(long eventTime, int multiPressCount) {
+                    void onKeyUp(long eventTime, int multiPressCount, int displayId) {
                         mKeyUpQueue.add(new KeyUpData(KEYCODE_POWER, multiPressCount));
                     }
                 });
@@ -159,7 +159,7 @@ public class SingleKeyGestureTests {
                     }
 
                     @Override
-                    public void onPress(long downTime) {
+                    public void onPress(long downTime, int displayId) {
                         if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
                             return;
                         }
@@ -167,7 +167,7 @@ public class SingleKeyGestureTests {
                     }
 
                     @Override
-                    void onMultiPress(long downTime, int count) {
+                    void onMultiPress(long downTime, int count, int displayId) {
                         if (mDetector.beganFromNonInteractive() && !mAllowNonInteractiveForPress) {
                             return;
                         }
@@ -177,7 +177,7 @@ public class SingleKeyGestureTests {
                     }
 
                     @Override
-                    void onKeyUp(long eventTime, int multiPressCount) {
+                    void onKeyUp(long eventTime, int multiPressCount, int displayId) {
                         mKeyUpQueue.add(new KeyUpData(KEYCODE_BACK, multiPressCount));
                     }
 
@@ -398,7 +398,7 @@ public class SingleKeyGestureTests {
         final SingleKeyGestureDetector.SingleKeyRule rule =
                 new SingleKeyGestureDetector.SingleKeyRule(KEYCODE_POWER) {
                     @Override
-                    void onPress(long downTime) {
+                    void onPress(long downTime, int displayId) {
                         mShortPressed.countDown();
                     }
                 };
