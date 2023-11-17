@@ -412,6 +412,21 @@ public class BluetoothEventManagerTest {
     }
 
     @Test
+    public void dispatchActiveDeviceChanged_activeFromSubDevice_mainCachedDeviceActive() {
+        CachedBluetoothDevice subDevice = new CachedBluetoothDevice(mContext, mLocalProfileManager,
+                mDevice3);
+        mCachedDevice1.setSubDevice(subDevice);
+        when(mCachedDeviceManager.getCachedDevicesCopy()).thenReturn(
+                Collections.singletonList(mCachedDevice1));
+        mCachedDevice1.onProfileStateChanged(mHearingAidProfile,
+                BluetoothProfile.STATE_CONNECTED);
+
+        assertThat(mCachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).isFalse();
+        mBluetoothEventManager.dispatchActiveDeviceChanged(subDevice, BluetoothProfile.HEARING_AID);
+        assertThat(mCachedDevice1.isActiveDevice(BluetoothProfile.HEARING_AID)).isTrue();
+    }
+
+    @Test
     public void showUnbondMessage_reasonAuthTimeout_showCorrectedErrorCode() {
         mIntent = new Intent(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mBluetoothDevice);
