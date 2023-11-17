@@ -70,7 +70,6 @@ import android.app.IRequestFinishCallback;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
 import android.app.compat.CompatChanges;
-import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.EnterPipRequestedItem;
 import android.app.servertransaction.PipStateTransactionItem;
 import android.compat.annotation.ChangeId;
@@ -1018,7 +1017,7 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
 
         try {
-            mService.getLifecycleManager().scheduleTransaction(r.app.getThread(),
+            mService.getLifecycleManager().scheduleTransactionItem(r.app.getThread(),
                     EnterPipRequestedItem.obtain(r.token));
             return true;
         } catch (Exception e) {
@@ -1038,9 +1037,8 @@ class ActivityClientController extends IActivityClientController.Stub {
         }
 
         try {
-            final ClientTransaction transaction = ClientTransaction.obtain(r.app.getThread());
-            transaction.addCallback(PipStateTransactionItem.obtain(r.token, pipState));
-            mService.getLifecycleManager().scheduleTransaction(transaction);
+            mService.getLifecycleManager().scheduleTransactionItem(r.app.getThread(),
+                    PipStateTransactionItem.obtain(r.token, pipState));
         } catch (Exception e) {
             Slog.w(TAG, "Failed to send pip state transaction item: "
                     + r.intent.getComponent(), e);

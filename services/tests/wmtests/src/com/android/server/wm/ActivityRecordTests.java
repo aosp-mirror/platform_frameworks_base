@@ -490,7 +490,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         ensureActivityConfiguration(activity);
 
         verify(mClientLifecycleManager, never())
-                .scheduleTransaction(any(), isA(ActivityConfigurationChangeItem.class));
+                .scheduleTransactionItem(any(), isA(ActivityConfigurationChangeItem.class));
     }
 
     @Test
@@ -519,7 +519,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         // The configuration change is still sent to the activity, even if it doesn't relaunch.
         final ActivityConfigurationChangeItem expected =
                 ActivityConfigurationChangeItem.obtain(activity.token, newConfig);
-        verify(mClientLifecycleManager).scheduleTransaction(
+        verify(mClientLifecycleManager).scheduleTransactionItem(
                 eq(activity.app.getThread()), eq(expected));
     }
 
@@ -592,7 +592,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertEquals(expectedOrientation, currentConfig.orientation);
         final ActivityConfigurationChangeItem expected =
                 ActivityConfigurationChangeItem.obtain(activity.token, currentConfig);
-        verify(mClientLifecycleManager).scheduleTransaction(activity.app.getThread(), expected);
+        verify(mClientLifecycleManager).scheduleTransactionItem(activity.app.getThread(), expected);
         verify(displayRotation).onSetRequestedOrientation();
     }
 
@@ -812,7 +812,8 @@ public class ActivityRecordTests extends WindowTestsBase {
             final ActivityConfigurationChangeItem expected =
                     ActivityConfigurationChangeItem.obtain(activity.token,
                             activity.getConfiguration());
-            verify(mClientLifecycleManager).scheduleTransaction(activity.app.getThread(), expected);
+            verify(mClientLifecycleManager).scheduleTransactionItem(
+                    activity.app.getThread(), expected);
         } finally {
             stack.getDisplayArea().removeChild(stack);
         }
@@ -1785,7 +1786,7 @@ public class ActivityRecordTests extends WindowTestsBase {
             clearInvocations(mClientLifecycleManager);
             activity.getTask().removeImmediately("test");
             try {
-                verify(mClientLifecycleManager).scheduleTransaction(any(),
+                verify(mClientLifecycleManager).scheduleTransactionItem(any(),
                         isA(DestroyActivityItem.class));
             } catch (RemoteException ignored) {
             }
