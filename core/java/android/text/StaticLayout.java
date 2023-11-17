@@ -118,6 +118,7 @@ public class StaticLayout extends Layout {
             b.mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
             b.mJustificationMode = Layout.JUSTIFICATION_MODE_NONE;
             b.mLineBreakConfig = LineBreakConfig.NONE;
+            b.mMinimumFontMetrics = null;
             return b;
         }
 
@@ -130,6 +131,7 @@ public class StaticLayout extends Layout {
             b.mText = null;
             b.mLeftIndents = null;
             b.mRightIndents = null;
+            b.mMinimumFontMetrics = null;
             sPool.release(b);
         }
 
@@ -139,6 +141,7 @@ public class StaticLayout extends Layout {
             mPaint = null;
             mLeftIndents = null;
             mRightIndents = null;
+            mMinimumFontMetrics = null;
         }
 
         public Builder setText(CharSequence source) {
