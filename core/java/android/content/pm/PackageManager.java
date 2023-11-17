@@ -6404,9 +6404,8 @@ public abstract class PackageManager {
     /**
      * Permission flags set when granting or revoking a permission.
      *
-     * @hide
+     * @removed mistakenly exposed as system-api previously
      */
-    @SystemApi
     @IntDef(prefix = { "FLAG_PERMISSION_" }, value = {
             FLAG_PERMISSION_USER_SET,
             FLAG_PERMISSION_USER_FIXED,
