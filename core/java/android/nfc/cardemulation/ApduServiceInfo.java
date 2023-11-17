@@ -21,6 +21,7 @@
 package android.nfc.cardemulation;
 
 import android.annotation.FlaggedApi;
+import android.compat.annotation.UnsupportedAppUsage;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -134,8 +135,9 @@ public final class ApduServiceInfo implements Parcelable {
     /**
      * @hide
      */
+    @UnsupportedAppUsage
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
-            List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
+            ArrayList<AidGroup> staticAidGroups, ArrayList<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, int bannerResource, int uid,
             String settingsActivityName, String offHost, String staticOffHost) {
         this(info, onHost, description, staticAidGroups, dynamicAidGroups,
@@ -147,7 +149,7 @@ public final class ApduServiceInfo implements Parcelable {
      * @hide
      */
     public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
-            List<AidGroup> staticAidGroups, List<AidGroup> dynamicAidGroups,
+            ArrayList<AidGroup> staticAidGroups, ArrayList<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, int bannerResource, int uid,
             String settingsActivityName, String offHost, String staticOffHost,
             boolean isEnabled) {
