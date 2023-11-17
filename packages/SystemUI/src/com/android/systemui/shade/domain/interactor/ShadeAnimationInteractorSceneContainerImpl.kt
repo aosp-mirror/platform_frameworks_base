@@ -20,6 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.model.ObservableTransitionState
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.shade.data.repository.ShadeAnimationRepository
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -32,8 +33,9 @@ import kotlinx.coroutines.flow.map
 class ShadeAnimationInteractorSceneContainerImpl
 @Inject
 constructor(
+    shadeAnimationRepository: ShadeAnimationRepository,
     sceneInteractor: SceneInteractor,
-) : ShadeAnimationInteractor {
+) : ShadeAnimationInteractor(shadeAnimationRepository) {
     @OptIn(ExperimentalCoroutinesApi::class)
     override val isAnyCloseAnimationRunning =
         sceneInteractor.transitionState

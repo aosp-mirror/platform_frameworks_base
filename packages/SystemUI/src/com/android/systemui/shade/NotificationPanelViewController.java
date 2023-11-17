@@ -61,7 +61,6 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.os.Trace;
 import android.os.UserManager;
 import android.os.VibrationEffect;
@@ -164,6 +163,7 @@ import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.shared.model.WakefulnessModel;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.data.repository.ShadeRepository;
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.CommandQueue;
@@ -352,6 +352,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final ShadeRepository mShadeRepository;
+    private final ShadeAnimationInteractor mShadeAnimationInteractor;
     private final FalsingTapListener mFalsingTapListener = this::falsingAdditionalTapRequired;
     private final AccessibilityDelegate mAccessibilityDelegate = new ShadeAccessibilityDelegate();
     private final NotificationGutsManager mGutsManager;
@@ -362,7 +363,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private long mDownTime;
     private boolean mTouchSlopExceededBeforeDown;
-    private boolean mIsLaunchAnimationRunning;
     private float mOverExpansion;
     private CentralSurfaces mCentralSurfaces;
     private HeadsUpManager mHeadsUpManager;
@@ -707,7 +707,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             CommandQueue commandQueue,
             VibratorHelper vibratorHelper,
             LatencyTracker latencyTracker,
-            PowerManager powerManager,
             AccessibilityManager accessibilityManager,
             @DisplayId int displayId,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -776,6 +775,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             ActivityStarter activityStarter,
             SharedNotificationContainerInteractor sharedNotificationContainerInteractor,
             ActiveNotificationsInteractor activeNotificationsInteractor,
+            ShadeAnimationInteractor shadeAnimationInteractor,
             KeyguardViewConfigurator keyguardViewConfigurator,
             KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
             SplitShadeStateController splitShadeStateController,
@@ -794,6 +794,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mLockscreenGestureLogger = lockscreenGestureLogger;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mShadeRepository = shadeRepository;
+        mShadeAnimationInteractor = shadeAnimationInteractor;
         mShadeLog = shadeLogger;
         mGutsManager = gutsManager;
         mDreamingToLockscreenTransitionViewModel = dreamingToLockscreenTransitionViewModel;
@@ -2923,13 +2924,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
     }
 
-    @Override
-    public void setIsLaunchAnimationRunning(boolean running) {
-        boolean wasRunning = mIsLaunchAnimationRunning;
-        mIsLaunchAnimationRunning = running;
-        if (wasRunning != mIsLaunchAnimationRunning) {
-            mShadeExpansionStateManager.notifyLaunchingActivityChanged(running);
-        }
+    private boolean isLaunchingActivity() {
+        return mShadeAnimationInteractor.isLaunchingActivity().getValue();
     }
 
     @VisibleForTesting
@@ -3117,7 +3113,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public boolean shouldHideStatusBarIconsWhenExpanded() {
-        if (mIsLaunchAnimationRunning) {
+        if (isLaunchingActivity()) {
             return mHideIconsDuringLaunchAnimation;
         }
         if (mHeadsUpAppearanceController != null
@@ -3383,7 +3379,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         ipw.print("mDownTime="); ipw.println(mDownTime);
         ipw.print("mTouchSlopExceededBeforeDown="); ipw.println(mTouchSlopExceededBeforeDown);
-        ipw.print("mIsLaunchAnimationRunning="); ipw.println(mIsLaunchAnimationRunning);
+        ipw.print("mIsLaunchAnimationRunning="); ipw.println(isLaunchingActivity());
         ipw.print("mOverExpansion="); ipw.println(mOverExpansion);
         ipw.print("mExpandedHeight="); ipw.println(mExpandedHeight);
         ipw.print("isTracking()="); ipw.println(isTracking());
@@ -3999,7 +3995,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public boolean isCollapsing() {
-        return isClosing() || mIsLaunchAnimationRunning;
+        return isClosing() || isLaunchingActivity();
     }
 
     public boolean isTracking() {

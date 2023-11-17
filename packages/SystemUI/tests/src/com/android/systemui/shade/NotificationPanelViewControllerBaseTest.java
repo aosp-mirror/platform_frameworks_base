@@ -126,7 +126,10 @@ import com.android.systemui.res.R;
 import com.android.systemui.scene.SceneTestUtils;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.FakeShadeRepository;
+import com.android.systemui.shade.data.repository.ShadeAnimationRepository;
 import com.android.systemui.shade.data.repository.ShadeRepository;
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.domain.interactor.ShadeInteractorImpl;
 import com.android.systemui.shade.domain.interactor.ShadeInteractorLegacyImpl;
@@ -345,6 +348,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     protected FakeKeyguardRepository mFakeKeyguardRepository;
     protected KeyguardInteractor mKeyguardInteractor;
+    protected ShadeAnimationInteractor mShadeAnimationInteractor;
     protected SceneTestUtils mUtils = new SceneTestUtils(this);
     protected TestScope mTestScope = mUtils.getTestScope();
     protected ShadeInteractor mShadeInteractor;
@@ -391,6 +395,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         mKeyguardBottomAreaInteractor = new KeyguardBottomAreaInteractor(mFakeKeyguardRepository);
         mKeyguardInteractor = keyguardInteractorDeps.getKeyguardInteractor();
         mShadeRepository = new FakeShadeRepository();
+        mShadeAnimationInteractor = new ShadeAnimationInteractorLegacyImpl(
+                new ShadeAnimationRepository(), mShadeRepository);
         mPowerInteractor = keyguardInteractorDeps.getPowerInteractor();
         when(mKeyguardTransitionInteractor.isInTransitionToStateWhere(any())).thenReturn(
                 StateFlowKt.MutableStateFlow(false));
@@ -649,7 +655,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mStatusBarWindowStateController,
                 mNotificationShadeWindowController,
                 mDozeLog, mDozeParameters, mCommandQueue, mVibratorHelper,
-                mLatencyTracker, mPowerManager, mAccessibilityManager, 0, mUpdateMonitor,
+                mLatencyTracker, mAccessibilityManager, 0, mUpdateMonitor,
                 mMetricsLogger,
                 mShadeLog,
                 mConfigurationController,
@@ -712,6 +718,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mActivityStarter,
                 mSharedNotificationContainerInteractor,
                 mActiveNotificationsInteractor,
+                mShadeAnimationInteractor,
                 mKeyguardViewConfigurator,
                 mKeyguardFaceAuthInteractor,
                 new ResourcesSplitShadeStateController(),
