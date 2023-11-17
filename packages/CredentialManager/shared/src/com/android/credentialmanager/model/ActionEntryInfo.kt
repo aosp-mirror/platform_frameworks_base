@@ -14,16 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.common
+package com.android.credentialmanager.model
 
 import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.drawable.Drawable
 
-open class BaseEntry (
-    val providerId: String,
-    val entryKey: String,
-    val entrySubkey: String,
-    val pendingIntent: PendingIntent?,
-    val fillInIntent: Intent?,
-    val shouldTerminateUiUponSuccessfulProviderResult: Boolean,
+class ActionEntryInfo(
+    providerId: String,
+    entryKey: String,
+    entrySubkey: String,
+    pendingIntent: PendingIntent?,
+    fillInIntent: Intent?,
+    val title: String,
+    val icon: Drawable,
+    val subTitle: String?,
+) : EntryInfo(
+    providerId,
+    entryKey,
+    entrySubkey,
+    pendingIntent,
+    fillInIntent,
+    shouldTerminateUiUponSuccessfulProviderResult = true,
 )

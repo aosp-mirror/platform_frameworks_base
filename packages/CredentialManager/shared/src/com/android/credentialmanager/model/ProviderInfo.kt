@@ -14,8 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.common
+package com.android.credentialmanager.model
 
-enum class CredentialType {
-    UNKNOWN, PASSKEY, PASSWORD,
-}
+import android.graphics.drawable.Drawable
+
+data class ProviderInfo(
+    /**
+     * Unique id (component name) of this provider.
+     * Not for display purpose - [displayName] should be used for ui rendering.
+     */
+    val id: String,
+    val icon: Drawable,
+    val displayName: String,
+    val credentialEntryList: List<CredentialEntryInfo>,
+    val authenticationEntryList: List<AuthenticationEntryInfo>,
+    val remoteEntry: RemoteEntryInfo?,
+    val actionEntryList: List<ActionEntryInfo>,
+)

@@ -48,9 +48,9 @@ import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
 import com.android.credentialmanager.GetFlowUtils
-import com.android.credentialmanager.getflow.CredentialEntryInfo
+import com.android.credentialmanager.model.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderDisplayInfo
-import com.android.credentialmanager.getflow.ProviderInfo
+import com.android.credentialmanager.model.ProviderInfo
 import com.android.credentialmanager.getflow.toProviderDisplayInfo
 import org.json.JSONObject
 import java.util.concurrent.Executors
@@ -200,7 +200,8 @@ class CredentialAutofillService : AutofillService() {
         providerDisplayInfo.sortedUserNameToCredentialEntryList.forEach usernameLoop@ {
             val primaryEntry = it.sortedCredentialEntryList.first()
             val pendingIntent = primaryEntry.pendingIntent
-            if (pendingIntent == null || primaryEntry.fillInIntent == null) {
+            val fillInIntent = primaryEntry.fillInIntent
+            if (pendingIntent == null || fillInIntent == null) {
                 // FillInIntent will not be null because autofillId was retrieved from it.
                 Log.e(TAG, "PendingIntent was missing from the entry.")
                 return@usernameLoop
@@ -245,7 +246,7 @@ class CredentialAutofillService : AutofillService() {
                                             presentationBuilder.build())
                                             .build())
                             .setAuthentication(pendingIntent.intentSender)
-                            .setAuthenticationExtras(primaryEntry.fillInIntent.extras)
+                            .setAuthenticationExtras(fillInIntent.extras)
                             .build())
             datasetAdded = true
         }

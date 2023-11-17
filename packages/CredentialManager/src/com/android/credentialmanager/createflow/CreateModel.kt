@@ -16,12 +16,11 @@
 
 package com.android.credentialmanager.createflow
 
-import android.app.PendingIntent
-import android.content.Intent
 import android.graphics.drawable.Drawable
-import com.android.credentialmanager.common.BaseEntry
-import com.android.credentialmanager.common.CredentialType
-import java.time.Instant
+import com.android.credentialmanager.model.EntryInfo
+import com.android.credentialmanager.model.CredentialType
+import com.android.credentialmanager.model.CreateOptionInfo
+import com.android.credentialmanager.model.RemoteInfo
 
 data class CreateCredentialUiState(
   val enabledProviders: List<EnabledProviderInfo>,
@@ -75,44 +74,6 @@ class DisabledProviderInfo(
   displayName: String,
 ) : ProviderInfo(icon, id, displayName)
 
-class CreateOptionInfo(
-    providerId: String,
-    entryKey: String,
-    entrySubkey: String,
-    pendingIntent: PendingIntent?,
-    fillInIntent: Intent?,
-    val userProviderDisplayName: String,
-    val profileIcon: Drawable?,
-    val passwordCount: Int?,
-    val passkeyCount: Int?,
-    val totalCredentialCount: Int?,
-    val lastUsedTime: Instant,
-    val footerDescription: String?,
-    val allowAutoSelect: Boolean,
-) : BaseEntry(
-    providerId,
-    entryKey,
-    entrySubkey,
-    pendingIntent,
-    fillInIntent,
-    shouldTerminateUiUponSuccessfulProviderResult = true,
-)
-
-class RemoteInfo(
-  providerId: String,
-  entryKey: String,
-  entrySubkey: String,
-  pendingIntent: PendingIntent?,
-  fillInIntent: Intent?,
-) : BaseEntry(
-    providerId,
-    entryKey,
-    entrySubkey,
-    pendingIntent,
-    fillInIntent,
-    shouldTerminateUiUponSuccessfulProviderResult = true,
-)
-
 data class RequestDisplayInfo(
   val title: String,
   val subtitle: String?,
@@ -131,8 +92,8 @@ data class RequestDisplayInfo(
  * user selects a different entry on the more option page.
  */
 data class ActiveEntry (
-  val activeProvider: EnabledProviderInfo,
-  val activeEntryInfo: BaseEntry,
+    val activeProvider: EnabledProviderInfo,
+    val activeEntryInfo: EntryInfo,
 )
 
 /** The name of the current screen. */
