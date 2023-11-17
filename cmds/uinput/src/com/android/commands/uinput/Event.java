@@ -30,7 +30,7 @@ import src.com.android.commands.uinput.InputAbsInfo;
 public class Event {
     private static final String TAG = "UinputEvent";
 
-    enum Command {
+    public enum Command {
         REGISTER,
         DELAY,
         INJECT,
@@ -188,8 +188,8 @@ public class Event {
             mEvent.mId = id;
         }
 
-        public void setCommand(String command) {
-            mEvent.mCommand = Command.valueOf(command.toUpperCase());
+        public void setCommand(Command command) {
+            mEvent.mCommand = command;
         }
 
         public void setName(String name) {

@@ -57,7 +57,8 @@ public class JsonStyleParser {
                     String name = mReader.nextName();
                     switch (name) {
                         case "id" -> eb.setId(readInt());
-                        case "command" -> eb.setCommand(mReader.nextString());
+                        case "command" -> eb.setCommand(
+                                Event.Command.valueOf(mReader.nextString().toUpperCase()));
                         case "name" -> eb.setName(mReader.nextString());
                         case "vid" -> eb.setVid(readInt());
                         case "pid" -> eb.setPid(readInt());
