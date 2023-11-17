@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.interruption
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE
@@ -35,6 +36,10 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class NotificationInterruptStateProviderWrapperTest : VisualInterruptionDecisionProviderTestBase() {
+    init {
+        setFlagsRule.disableFlags(Flags.FLAG_VISUAL_INTERRUPTIONS_REFACTOR)
+    }
+
     override val provider by lazy {
         NotificationInterruptStateProviderWrapper(
             NotificationInterruptStateProviderImpl(

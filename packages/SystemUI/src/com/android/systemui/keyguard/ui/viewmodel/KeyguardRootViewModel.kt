@@ -21,11 +21,11 @@ import android.content.Context
 import android.util.MathUtils
 import android.view.View.VISIBLE
 import com.android.app.animation.Interpolators
+import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -49,6 +49,7 @@ import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -98,6 +99,10 @@ constructor(
             .map { VISIBLE }
 
     val goneToAodTransition = keyguardTransitionInteractor.goneToAodTransition
+
+    /** the shared notification container position *on the lockscreen* */
+    val notificationPositionOnLockscreen: StateFlow<SharedNotificationContainerPosition>
+        get() = keyguardInteractor.sharedNotificationContainerPosition
 
     /** An observable for the alpha level for the entire keyguard root view. */
     val alpha: Flow<Float> =
@@ -249,8 +254,9 @@ constructor(
         if (previewMode.value.isInPreviewMode) {
             return
         }
-        keyguardInteractor.sharedNotificationContainerPosition.value =
+        keyguardInteractor.setSharedNotificationContainerPosition(
             SharedNotificationContainerPosition(top, bottom)
+        )
     }
 
     /** Is there an expanded pulse, are we animating in response? */
@@ -280,7 +286,7 @@ constructor(
                         dozeParameters.displayNeedsBlanking -> false
                         // We only want the appear animations to happen when the notifications
                         // get fully hidden, since otherwise the un-hide animation overlaps.
-                        featureFlags.isEnabled(Flags.NEW_AOD_TRANSITION) -> true
+                        newAodTransition() -> true
                         else -> fullyHidden
                     }
                 AnimatableEvent(fullyHidden, animate)

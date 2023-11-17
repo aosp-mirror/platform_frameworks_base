@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
@@ -94,7 +95,6 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                     FakeFeatureFlagsClassicModule {
                         setDefault(Flags.FACE_AUTH_REFACTOR)
                         set(Flags.FULL_SCREEN_USER_SWITCHER, value = false)
-                        setDefault(Flags.NEW_AOD_TRANSITION)
                     },
                 mocks =
                     TestMocksModule(
@@ -115,6 +115,7 @@ class NotificationIconContainerAlwaysOnDisplayViewModelTest : SysuiTestCase() {
                 lastSleepReason = WakeSleepReason.OTHER,
             )
         }
+        mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
     }
 
     @Test

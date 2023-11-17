@@ -56,6 +56,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -83,9 +84,17 @@ constructor(
     shadeRepository: ShadeRepository,
     sceneInteractorProvider: Provider<SceneInteractor>,
 ) {
-    /** Position information for the shared notification container. */
-    val sharedNotificationContainerPosition =
+    // TODO(b/296118689): move to a repository
+    private val _sharedNotificationContainerPosition =
         MutableStateFlow(SharedNotificationContainerPosition())
+
+    /** Position information for the shared notification container. */
+    val sharedNotificationContainerPosition: StateFlow<SharedNotificationContainerPosition> =
+        _sharedNotificationContainerPosition.asStateFlow()
+
+    fun setSharedNotificationContainerPosition(position: SharedNotificationContainerPosition) {
+        _sharedNotificationContainerPosition.value = position
+    }
 
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at

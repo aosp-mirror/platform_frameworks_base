@@ -223,6 +223,8 @@ private:
 
     void drawPoints(const float* points, int count, const Paint& paint, SkCanvas::PointMode mode);
 
+    bool useGainmapShader(Bitmap& bitmap);
+
     class Clip;
 
     std::unique_ptr<SkCanvas> mCanvasOwned;  // Might own a canvas we allocated.

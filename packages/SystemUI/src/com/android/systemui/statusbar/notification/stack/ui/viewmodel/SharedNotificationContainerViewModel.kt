@@ -18,6 +18,7 @@
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -25,7 +26,10 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -33,12 +37,14 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 
 /** View-model for the shared notification container, used by both the shade and keyguard spaces */
 class SharedNotificationContainerViewModel
 @Inject
 constructor(
     private val interactor: SharedNotificationContainerInteractor,
+    @Application applicationScope: CoroutineScope,
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
@@ -103,32 +109,38 @@ constructor(
      *
      * When the shade is expanding, the position is controlled by... the shade.
      */
-    val position: Flow<SharedNotificationContainerPosition> =
-        isOnLockscreenWithoutShade.flatMapLatest { onLockscreen ->
-            if (onLockscreen) {
-                combine(
-                    keyguardInteractor.sharedNotificationContainerPosition,
-                    configurationBasedDimensions
-                ) { position, config ->
-                    if (config.useSplitShade) {
-                        position.copy(top = 0f)
-                    } else {
-                        position
+    val position: StateFlow<SharedNotificationContainerPosition> =
+        isOnLockscreenWithoutShade
+            .flatMapLatest { onLockscreen ->
+                if (onLockscreen) {
+                    combine(
+                        keyguardInteractor.sharedNotificationContainerPosition,
+                        configurationBasedDimensions
+                    ) { position, config ->
+                        if (config.useSplitShade) {
+                            position.copy(top = 0f)
+                        } else {
+                            position
+                        }
+                    }
+                } else {
+                    interactor.topPosition.sample(shadeInteractor.qsExpansion, ::Pair).map {
+                        (top, qsExpansion) ->
+                        // When QS expansion > 0, it should directly set the top padding so do not
+                        // animate it
+                        val animate = qsExpansion == 0f
+                        keyguardInteractor.sharedNotificationContainerPosition.value.copy(
+                            top = top,
+                            animate = animate
+                        )
                     }
                 }
-            } else {
-                interactor.topPosition.sample(shadeInteractor.qsExpansion, ::Pair).map {
-                    (top, qsExpansion) ->
-                    // When QS expansion > 0, it should directly set the top padding so do not
-                    // animate it
-                    val animate = qsExpansion == 0f
-                    keyguardInteractor.sharedNotificationContainerPosition.value.copy(
-                        top = top,
-                        animate = animate
-                    )
-                }
             }
-        }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = SharedNotificationContainerPosition(0f, 0f),
+            )
 
     /**
      * Under certain scenarios, such as swiping up on the lockscreen, the container will need to be

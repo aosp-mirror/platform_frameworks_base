@@ -70,6 +70,8 @@ import java.util.concurrent.TimeUnit;
 @SmallTest
 public class FrameTrackerTest {
     private static final String CUJ_POSTFIX = "";
+    private static final long FRAME_TIME_60Hz = (long) 1e9 / 60;
+
     private ViewAttachTestActivity mActivity;
 
     @Rule
@@ -170,6 +172,7 @@ public class FrameTrackerTest {
         verify(tracker, never()).triggerPerfetto();
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
                 eq(42), /* displayId */
+                eq(DisplayRefreshRate.REFRESH_RATE_60_HZ),
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(0L) /* missedFrames */,
@@ -207,6 +210,7 @@ public class FrameTrackerTest {
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
                 eq(42), /* displayId */
+                eq(DisplayRefreshRate.REFRESH_RATE_60_HZ),
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(1L) /* missedFrames */,
@@ -244,6 +248,7 @@ public class FrameTrackerTest {
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
                 eq(42), /* displayId */
+                eq(DisplayRefreshRate.REFRESH_RATE_60_HZ),
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(0L) /* missedFrames */,
@@ -281,6 +286,7 @@ public class FrameTrackerTest {
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
                 eq(42), /* displayId */
+                eq(DisplayRefreshRate.REFRESH_RATE_60_HZ),
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(1L) /* missedFrames */,
@@ -321,6 +327,7 @@ public class FrameTrackerTest {
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
                 eq(42), /* displayId */
+                eq(DisplayRefreshRate.REFRESH_RATE_60_HZ),
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(1L) /* missedFrames */,
@@ -363,6 +370,7 @@ public class FrameTrackerTest {
         verify(tracker, never()).triggerPerfetto();
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
                 eq(42), /* displayId */
+                eq(DisplayRefreshRate.REFRESH_RATE_60_HZ),
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE]),
                 eq(2L) /* totalFrames */,
                 eq(0L) /* missedFrames */,
@@ -491,6 +499,7 @@ public class FrameTrackerTest {
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
                 eq(42), /* displayId */
+                eq(DisplayRefreshRate.REFRESH_RATE_60_HZ),
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_WALLPAPER_TRANSITION]),
                 eq(2L) /* totalFrames */,
                 eq(1L) /* missedFrames */,
@@ -528,6 +537,7 @@ public class FrameTrackerTest {
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
                 eq(42), /* displayId */
+                eq(DisplayRefreshRate.REFRESH_RATE_60_HZ),
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_WALLPAPER_TRANSITION]),
                 eq(2L) /* totalFrames */,
                 eq(0L) /* missedFrames */,
@@ -565,6 +575,7 @@ public class FrameTrackerTest {
 
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
                 eq(42), /* displayId */
+                eq(DisplayRefreshRate.REFRESH_RATE_60_HZ),
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_WALLPAPER_TRANSITION]),
                 eq(2L) /* totalFrames */,
                 eq(0L) /* missedFrames */,
@@ -596,6 +607,7 @@ public class FrameTrackerTest {
         verify(tracker).triggerPerfetto();
         verify(mStatsLog).write(eq(UI_INTERACTION_FRAME_INFO_REPORTED),
                 eq(42), /* displayId */
+                eq(DisplayRefreshRate.REFRESH_RATE_60_HZ),
                 eq(CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_WALLPAPER_TRANSITION]),
                 eq(6L) /* totalFrames */,
                 eq(5L) /* missedFrames */,
@@ -648,7 +660,7 @@ public class FrameTrackerTest {
         final ArgumentCaptor<Runnable> captor = ArgumentCaptor.forClass(Runnable.class);
         doNothing().when(tracker).postCallback(captor.capture());
         mListenerCapture.getValue().onJankDataAvailable(new JankData[] {
-                new JankData(vsyncId, jankType)
+                new JankData(vsyncId, jankType, FRAME_TIME_60Hz)
         });
         captor.getValue().run();
     }

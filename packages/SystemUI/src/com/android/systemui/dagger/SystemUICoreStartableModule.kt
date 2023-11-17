@@ -37,7 +37,6 @@ import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyguard.KeyguardViewConfigurator
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.data.quickaffordance.MuteQuickAffordanceCoreStartable
-import com.android.systemui.keyguard.ui.binder.AlternateBouncerBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardDismissActionBinder
 import com.android.systemui.keyguard.ui.binder.KeyguardDismissBinder
 import com.android.systemui.log.SessionTracker
@@ -91,11 +90,6 @@ abstract class SystemUICoreStartableModule {
     @IntoMap
     @ClassKey(AuthController::class)
     abstract fun bindAuthController(service: AuthController): CoreStartable
-
-    @Binds
-    @IntoMap
-    @ClassKey(AlternateBouncerBinder::class)
-    abstract fun bindAlternateBouncerBinder(impl: AlternateBouncerBinder): CoreStartable
 
     /** Inject into BiometricNotificationService */
     @Binds

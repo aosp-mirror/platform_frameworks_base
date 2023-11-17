@@ -195,6 +195,7 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
                 mKeyguardUnlockAnimationController,
                 mSecureSettings,
                 mExecutor,
+                mExecutor,
                 mDumpManager,
                 mClockEventController,
                 mLogBuffer,

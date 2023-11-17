@@ -1951,8 +1951,9 @@ public:
         jobjectArray jJankDataArray = env->NewObjectArray(jankData.size(),
                 gJankDataClassInfo.clazz, nullptr);
         for (size_t i = 0; i < jankData.size(); i++) {
-            jobject jJankData = env->NewObject(gJankDataClassInfo.clazz,
-                    gJankDataClassInfo.ctor, jankData[i].frameVsyncId, jankData[i].jankType);
+            jobject jJankData = env->NewObject(gJankDataClassInfo.clazz, gJankDataClassInfo.ctor,
+                                               jankData[i].frameVsyncId, jankData[i].jankType,
+                                               jankData[i].frameIntervalNs);
             env->SetObjectArrayElement(jJankDataArray, i, jJankData);
             env->DeleteLocalRef(jJankData);
         }
@@ -2523,8 +2524,7 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     jclass jankDataClazz =
                 FindClassOrDie(env, "android/view/SurfaceControl$JankData");
     gJankDataClassInfo.clazz = MakeGlobalRefOrDie(env, jankDataClazz);
-    gJankDataClassInfo.ctor =
-            GetMethodIDOrDie(env, gJankDataClassInfo.clazz, "<init>", "(JI)V");
+    gJankDataClassInfo.ctor = GetMethodIDOrDie(env, gJankDataClassInfo.clazz, "<init>", "(JIJ)V");
     jclass onJankDataListenerClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$OnJankDataListener");
     gJankDataListenerClassInfo.clazz = MakeGlobalRefOrDie(env, onJankDataListenerClazz);

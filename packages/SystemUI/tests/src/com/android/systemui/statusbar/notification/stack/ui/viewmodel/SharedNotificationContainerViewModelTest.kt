@@ -253,8 +253,9 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             // Start on lockscreen
             showLockscreen()
 
-            keyguardInteractor.sharedNotificationContainerPosition.value =
+            keyguardInteractor.setSharedNotificationContainerPosition(
                 SharedNotificationContainerPosition(top = 1f, bottom = 2f)
+            )
 
             assertThat(position)
                 .isEqualTo(SharedNotificationContainerPosition(top = 1f, bottom = 2f))
@@ -273,8 +274,9 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             // Start on lockscreen
             showLockscreen()
 
-            keyguardInteractor.sharedNotificationContainerPosition.value =
+            keyguardInteractor.setSharedNotificationContainerPosition(
                 SharedNotificationContainerPosition(top = 1f, bottom = 2f)
+            )
             runCurrent()
 
             // Top should be overridden to 0f
@@ -327,8 +329,9 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.sharedNotificationContainerPosition.value =
+            keyguardInteractor.setSharedNotificationContainerPosition(
                 SharedNotificationContainerPosition(top = 1f, bottom = 2f)
+            )
 
             assertThat(maxNotifications).isEqualTo(10)
 
@@ -349,8 +352,9 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.sharedNotificationContainerPosition.value =
+            keyguardInteractor.setSharedNotificationContainerPosition(
                 SharedNotificationContainerPosition(top = 1f, bottom = 2f)
+            )
 
             assertThat(maxNotifications).isEqualTo(10)
 
@@ -383,8 +387,9 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.sharedNotificationContainerPosition.value =
+            keyguardInteractor.setSharedNotificationContainerPosition(
                 SharedNotificationContainerPosition(top = 1f, bottom = 2f)
+            )
 
             // -1 means No Limit
             assertThat(maxNotifications).isEqualTo(-1)

@@ -223,6 +223,12 @@ public class AppOpsService extends IAppOpsService.Stub {
     // Constant meaning that any UID should be matched when dispatching callbacks
     private static final int UID_ANY = -2;
 
+    private static final int[] ADB_NON_SETTABLE_APP_IDS = {
+            Process.ROOT_UID,
+            Process.SYSTEM_UID,
+            Process.SHELL_UID,
+    };
+
     private static final int[] OPS_RESTRICTED_ON_SUSPEND = {
             OP_PLAY_AUDIO,
             OP_RECORD_AUDIO,
@@ -4935,17 +4941,32 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     if (!shell.targetsUid && shell.packageName != null) {
+                        if (ArrayUtils.contains(ADB_NON_SETTABLE_APP_IDS,
+                                UserHandle.getAppId(shell.packageUid))) {
+                            err.println("Error: Cannot set app ops for uid " + shell.packageUid);
+                            return -1;
+                        }
                         shell.mInterface.setMode(shell.op, shell.packageUid, shell.packageName,
                                 mode);
                     } else if (shell.targetsUid && shell.packageName != null) {
                         try {
                             final int uid = shell.mInternal.mContext.getPackageManager()
                                     .getPackageUidAsUser(shell.packageName, shell.userId);
+                            if (ArrayUtils.contains(ADB_NON_SETTABLE_APP_IDS,
+                                    UserHandle.getAppId(uid))) {
+                                err.println("Error: Cannot set app ops for uid " + uid);
+                                return -1;
+                            }
                             shell.mInterface.setUidMode(shell.op, uid, mode);
                         } catch (PackageManager.NameNotFoundException e) {
                             return -1;
                         }
                     } else {
+                        if (ArrayUtils.contains(ADB_NON_SETTABLE_APP_IDS,
+                                UserHandle.getAppId(shell.nonpackageUid))) {
+                            err.println("Error: Cannot set app ops for uid " + shell.nonpackageUid);
+                            return -1;
+                        }
                         shell.mInterface.setUidMode(shell.op, shell.nonpackageUid, mode);
                     }
                     return 0;

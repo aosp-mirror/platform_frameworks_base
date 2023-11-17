@@ -145,16 +145,6 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
             opSparseArray
         }
 
-    override fun areUidModesDefault(uid: Int): Boolean {
-        val modes = getUidModes(uid)
-        return modes == null || modes.isEmpty()
-    }
-
-    override fun arePackageModesDefault(packageName: String, userId: Int): Boolean {
-        val modes = service.getState { getPackageModes(packageName, userId) }
-        return modes == null || modes.isEmpty()
-    }
-
     override fun clearAllModes() {
         // We don't need to implement this because it's only called in AppOpsService#readState
         // and we have our own persistence.

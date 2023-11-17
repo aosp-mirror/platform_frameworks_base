@@ -17,11 +17,13 @@
 package com.android.compose.animation.scene
 
 import androidx.annotation.VisibleForTesting
+import androidx.compose.runtime.Stable
 
 /**
  * A base class to create unique keys, associated to an [identity] that is used to check the
  * equality of two key instances.
  */
+@Stable
 sealed class Key(val debugName: String, val identity: Any) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

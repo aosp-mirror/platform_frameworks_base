@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <getopt.h>
 
 #include <linux/fb.h>
 #include <sys/ioctl.h>
@@ -32,6 +33,7 @@
 
 #include <ftl/concat.h>
 #include <ftl/optional.h>
+#include <gui/DisplayCaptureArgs.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SyncScreenCaptureListener.h>
@@ -48,14 +50,17 @@ using namespace android;
 #define COLORSPACE_DISPLAY_P3 2
 
 void usage(const char* pname, ftl::Optional<DisplayId> displayIdOpt) {
-    fprintf(stderr,
-            "usage: %s [-hp] [-d display-id] [FILENAME]\n"
-            "   -h: this message\n"
-            "   -p: save the file as a png.\n"
-            "   -d: specify the display ID to capture%s\n"
-            "       see \"dumpsys SurfaceFlinger --display-id\" for valid display IDs.\n"
-            "If FILENAME ends with .png it will be saved as a png.\n"
-            "If FILENAME is not given, the results will be printed to stdout.\n",
+    fprintf(stderr, R"(
+usage: %s [-hp] [-d display-id] [FILENAME]
+   -h: this message
+   -p: save the file as a png.
+   -d: specify the display ID to capture%s
+       see "dumpsys SurfaceFlinger --display-id" for valid display IDs.
+   --hint-for-seamless If set will use the hintForSeamless path in SF
+
+If FILENAME ends with .png it will be saved as a png.
+If FILENAME is not given, the results will be printed to stdout.
+)",
             pname,
             displayIdOpt
                     .transform([](DisplayId id) {
@@ -64,6 +69,21 @@ void usage(const char* pname, ftl::Optional<DisplayId> displayIdOpt) {
                     .value_or(std::string())
                     .c_str());
 }
+
+// For options that only exist in long-form. Anything in the
+// 0-255 range is reserved for short options (which just use their ASCII value)
+namespace LongOpts {
+enum {
+    Reserved = 255,
+    HintForSeamless,
+};
+}
+
+static const struct option LONG_OPTIONS[] = {
+        {"png", no_argument, nullptr, 'p'},
+        {"help", no_argument, nullptr, 'h'},
+        {"hint-for-seamless", no_argument, nullptr, LongOpts::HintForSeamless},
+        {0, 0, 0, 0}};
 
 static int32_t flinger2bitmapFormat(PixelFormat f)
 {
@@ -134,10 +154,11 @@ int main(int argc, char** argv)
         return 1;
     }
     std::optional<DisplayId> displayIdOpt;
+    gui::CaptureArgs captureArgs;
     const char* pname = argv[0];
     bool png = false;
     int c;
-    while ((c = getopt(argc, argv, "phd:")) != -1) {
+    while ((c = getopt_long(argc, argv, "phd:", LONG_OPTIONS, nullptr)) != -1) {
         switch (c) {
             case 'p':
                 png = true;
@@ -165,6 +186,9 @@ int main(int argc, char** argv)
                 }
                 usage(pname, displayIdOpt);
                 return 1;
+            case LongOpts::HintForSeamless:
+                captureArgs.hintForSeamlessTransition = true;
+                break;
         }
     }
 
@@ -215,7 +239,7 @@ int main(int argc, char** argv)
     ProcessState::self()->startThreadPool();
 
     sp<SyncScreenCaptureListener> captureListener = new SyncScreenCaptureListener();
-    ScreenshotClient::captureDisplay(*displayIdOpt, captureListener);
+    ScreenshotClient::captureDisplay(*displayIdOpt, captureArgs, captureListener);
 
     ScreenCaptureResults captureResults = captureListener->waitForResults();
     if (!captureResults.fenceResult.ok()) {

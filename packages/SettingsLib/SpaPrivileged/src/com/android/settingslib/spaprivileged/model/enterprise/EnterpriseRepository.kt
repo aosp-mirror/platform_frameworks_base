@@ -16,20 +16,22 @@
 
 package com.android.settingslib.spaprivileged.model.enterprise
 
-import android.app.admin.DevicePolicyManager
 import android.app.admin.DevicePolicyResources.Strings.Settings.PERSONAL_CATEGORY_HEADER
 import android.app.admin.DevicePolicyResources.Strings.Settings.PRIVATE_CATEGORY_HEADER
 import android.app.admin.DevicePolicyResources.Strings.Settings.WORK_CATEGORY_HEADER
 import android.content.Context
 import android.content.pm.UserInfo
 import com.android.settingslib.R
+import com.android.settingslib.spaprivileged.framework.common.devicePolicyManager
 
-class EnterpriseRepository(private val context: Context) {
-    private val resources by lazy {
-        checkNotNull(context.getSystemService(DevicePolicyManager::class.java)).resources
-    }
+interface IEnterpriseRepository {
+    fun getEnterpriseString(updatableStringId: String, resId: Int): String
+}
 
-    fun getEnterpriseString(updatableStringId: String, resId: Int): String =
+class EnterpriseRepository(private val context: Context) : IEnterpriseRepository {
+    private val resources by lazy { context.devicePolicyManager.resources }
+
+    override fun getEnterpriseString(updatableStringId: String, resId: Int): String =
         checkNotNull(resources.getString(updatableStringId) { context.getString(resId) })
 
     fun getProfileTitle(userInfo: UserInfo): String = if (userInfo.isManagedProfile) {

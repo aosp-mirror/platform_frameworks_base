@@ -1592,6 +1592,12 @@
     <!-- Whether attributions provided are meant to be user-visible. -->
     <attr name="attributionsAreUserVisible" format="boolean" />
 
+    <!-- If a preloaded APK is marked updatableSystem = false, any request for an update will be rejected.
+         If an APK marked updatableSystem = false is being installed, regardless of the updatableSystem state
+         of the version it's replacing, the install will be rejected.
+         This is a private attribute, used without android: namespace. -->
+    <attr name="updatableSystem" format="boolean" />
+
     <!-- Specify the type of foreground service. Multiple types can be specified by ORing the flags
          together. -->
     <attr name="foregroundServiceType">

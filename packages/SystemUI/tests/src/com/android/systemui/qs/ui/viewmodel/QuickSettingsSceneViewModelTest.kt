@@ -101,6 +101,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                     ),
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
+                notifications = utils.notificationsPlaceholderViewModel(),
             )
     }
 

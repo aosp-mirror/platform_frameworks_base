@@ -106,8 +106,6 @@ import com.android.systemui.statusbar.notification.collection.inflation.Notifica
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
-import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper;
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
 import com.android.systemui.statusbar.notification.people.PeopleHubModule;
 import com.android.systemui.statusbar.notification.row.dagger.ExpandableNotificationRowComponent;
@@ -374,11 +372,4 @@ public abstract class SystemUIModule {
     @Binds
     abstract LargeScreenShadeInterpolator largeScreensShadeInterpolator(
             LargeScreenShadeInterpolatorImpl impl);
-
-    @SysUISingleton
-    @Provides
-    static VisualInterruptionDecisionProvider provideVisualInterruptionDecisionProvider(
-            NotificationInterruptStateProvider innerProvider) {
-        return new NotificationInterruptStateProviderWrapper(innerProvider);
-    }
 }

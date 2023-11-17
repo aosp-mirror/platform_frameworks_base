@@ -182,7 +182,7 @@ public class TaskSnapshotWindow {
         try {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                     "Removing taskSnapshot surface, mHasDrawn=%b", mHasDrawn);
-            mSession.remove(mWindow);
+            mSession.remove(mWindow.asBinder());
         } catch (RemoteException e) {
             // nothing
         }

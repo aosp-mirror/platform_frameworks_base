@@ -45,6 +45,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.pm.UserInfo;
+import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -135,6 +136,53 @@ public class UserJourneyLoggerTest {
     }
 
     @Test
+    public void testCreatePrivateProfileUserJourney() {
+        final UserLifecycleEventOccurredCaptor report1 = new UserLifecycleEventOccurredCaptor();
+        final UserJourneyLogger.UserJourneySession session =
+                mUserJourneyLogger.logUserJourneyBegin(-1, USER_JOURNEY_USER_CREATE);
+
+        report1.captureAndAssert(
+                mUserJourneyLogger,
+                session.mSessionId,
+                -1,
+                USER_LIFECYCLE_EVENT_CREATE_USER,
+                EVENT_STATE_BEGIN,
+                ERROR_CODE_UNSPECIFIED,
+                1);
+
+        final UserLifecycleJourneyReportedCaptor report2 = new UserLifecycleJourneyReportedCaptor();
+        final int profileUserId = 10;
+        UserInfo targetUser =
+                new UserInfo(
+                        profileUserId,
+                        "test private target user",
+                        /* iconPath= */ null,
+                        UserInfo.FLAG_PROFILE,
+                        UserManager.USER_TYPE_PROFILE_PRIVATE);
+        mUserJourneyLogger.logUserCreateJourneyFinish(0, targetUser);
+
+        report1.captureAndAssert(
+                mUserJourneyLogger,
+                session.mSessionId,
+                profileUserId,
+                USER_LIFECYCLE_EVENT_CREATE_USER,
+                EVENT_STATE_FINISH,
+                ERROR_CODE_UNSPECIFIED,
+                2);
+
+        report2.captureAndAssert(
+                mUserJourneyLogger,
+                session.mSessionId,
+                USER_JOURNEY_USER_CREATE,
+                0,
+                profileUserId,
+                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__PROFILE_PRIVATE,
+                UserInfo.FLAG_PROFILE,
+                ERROR_CODE_UNSPECIFIED,
+                1);
+    }
+
+    @Test
     public void testRemoveUserJourney() {
         final UserLifecycleEventOccurredCaptor report1 = new UserLifecycleEventOccurredCaptor();
         final UserJourneyLogger.UserJourneySession session = mUserJourneyLogger
@@ -158,6 +206,54 @@ public class UserJourneyLoggerTest {
                 USER_JOURNEY_USER_REMOVE, 0, 10,
                 FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_SECONDARY,
                 0x00000402, ERROR_CODE_UNSPECIFIED, 1);
+    }
+
+    @Test
+    public void testRemovePrivateProfileUserJourneyWithError() {
+        final UserLifecycleEventOccurredCaptor report1 = new UserLifecycleEventOccurredCaptor();
+        final int profileUserId = 10;
+        final UserJourneyLogger.UserJourneySession session =
+                mUserJourneyLogger.logUserJourneyBegin(profileUserId, USER_JOURNEY_USER_REMOVE);
+
+        report1.captureAndAssert(
+                mUserJourneyLogger,
+                session.mSessionId,
+                profileUserId,
+                USER_LIFECYCLE_EVENT_REMOVE_USER,
+                EVENT_STATE_BEGIN,
+                ERROR_CODE_UNSPECIFIED,
+                1);
+
+        final UserLifecycleJourneyReportedCaptor report2 = new UserLifecycleJourneyReportedCaptor();
+        final UserInfo targetUser =
+                new UserInfo(
+                        profileUserId,
+                        "test private target user",
+                        /* iconPath= */ null,
+                        UserInfo.FLAG_PROFILE,
+                        UserManager.USER_TYPE_PROFILE_PRIVATE);
+        mUserJourneyLogger.logUserJourneyFinishWithError(
+                0, targetUser, USER_JOURNEY_USER_REMOVE, ERROR_CODE_INCOMPLETE_OR_TIMEOUT);
+
+        report1.captureAndAssert(
+                mUserJourneyLogger,
+                session.mSessionId,
+                profileUserId,
+                USER_LIFECYCLE_EVENT_REMOVE_USER,
+                EVENT_STATE_ERROR,
+                ERROR_CODE_INCOMPLETE_OR_TIMEOUT,
+                2);
+
+        report2.captureAndAssert(
+                mUserJourneyLogger,
+                session.mSessionId,
+                USER_JOURNEY_USER_REMOVE,
+                0,
+                profileUserId,
+                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__PROFILE_PRIVATE,
+                UserInfo.FLAG_PROFILE,
+                ERROR_CODE_INCOMPLETE_OR_TIMEOUT,
+                1);
     }
 
     @Test

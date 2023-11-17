@@ -16,11 +16,13 @@
 
 package com.android.compose.animation.scene
 
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 /** The state of a [SceneTransitionLayout]. */
+@Stable
 class SceneTransitionLayoutState(initialScene: SceneKey) {
     /**
      * The current [TransitionState]. All values read here are backed by the Snapshot system.
@@ -29,7 +31,6 @@ class SceneTransitionLayoutState(initialScene: SceneKey) {
      * [SceneTransitionLayoutState.observableTransitionState] instead.
      */
     var transitionState: TransitionState by mutableStateOf(TransitionState.Idle(initialScene))
-        internal set
 
     /**
      * Whether we are transitioning, optionally restricting the check to the transition between
@@ -46,8 +47,15 @@ class SceneTransitionLayoutState(initialScene: SceneKey) {
         return (from == null || transition.fromScene == from) &&
             (to == null || transition.toScene == to)
     }
+
+    /** Whether we are transitioning from [scene] to [other], or from [other] to [scene]. */
+    fun isTransitioningBetween(scene: SceneKey, other: SceneKey): Boolean {
+        return isTransitioning(from = scene, to = other) ||
+            isTransitioning(from = other, to = scene)
+    }
 }
 
+@Stable
 sealed interface TransitionState {
     /**
      * The current effective scene. If a new transition was triggered, it would start from this

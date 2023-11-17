@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -426,5 +427,31 @@ class ElementTest {
         val barElement = layoutImpl.elements.getValue(TestElements.Bar)
         assertThat(barElement.sceneValues.keys).containsExactly(TestScenes.SceneA)
         assertThat(fooElement.sceneValues).isEmpty()
+    }
+
+    @Test
+    fun existingElementsDontRecomposeWhenTransitionStateChanges() {
+        var fooCompositions = 0
+
+        rule.testTransition(
+            fromSceneContent = {
+                SideEffect { fooCompositions++ }
+                Box(Modifier.element(TestElements.Foo))
+            },
+            toSceneContent = {},
+            transition = {
+                spec = tween(4 * 16)
+
+                scaleSize(TestElements.Foo, width = 2f, height = 0.5f)
+                translate(TestElements.Foo, x = 10.dp, y = 10.dp)
+                fade(TestElements.Foo)
+            }
+        ) {
+            before { assertThat(fooCompositions).isEqualTo(1) }
+            at(16) { assertThat(fooCompositions).isEqualTo(1) }
+            at(32) { assertThat(fooCompositions).isEqualTo(1) }
+            at(48) { assertThat(fooCompositions).isEqualTo(1) }
+            after { assertThat(fooCompositions).isEqualTo(1) }
+        }
     }
 }

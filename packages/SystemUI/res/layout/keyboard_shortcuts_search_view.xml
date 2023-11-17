@@ -53,7 +53,7 @@
             android:hint="@string/keyboard_shortcut_search_list_hint"
             android:textColorHint="?android:attr/textColorTertiary" />
 
-        <ImageView
+        <ImageButton
             android:id="@+id/keyboard_shortcuts_search_cancel"
             android:layout_gravity="center_vertical|end"
             android:layout_width="wrap_content"
@@ -61,7 +61,10 @@
             android:layout_marginEnd="49dp"
             android:padding="16dp"
             android:contentDescription="@string/keyboard_shortcut_clear_text"
-            android:src="@drawable/ic_shortcutlist_search_button_cancel" />
+            android:src="@drawable/ic_shortcutlist_search_button_cancel"
+            android:background="@drawable/shortcut_search_cancel_button"
+            style="@android:style/Widget.Material.Button.Borderless.Small"
+            android:pointerIcon="arrow" />
     </FrameLayout>
 
     <HorizontalScrollView
@@ -82,15 +85,13 @@
                 android:id="@+id/shortcut_system"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
                 style="@style/ShortCutButton"
-                android:text="@string/keyboard_shortcut_search_category_system"/>
+                android:text="@string/keyboard_shortcut_search_category_system" />
 
             <Button
                 android:id="@+id/shortcut_input"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
                 style="@style/ShortCutButton"
                 android:text="@string/keyboard_shortcut_search_category_input"/>
 
@@ -98,7 +99,6 @@
                 android:id="@+id/shortcut_open_apps"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
                 style="@style/ShortCutButton"
                 android:text="@string/keyboard_shortcut_search_category_open_apps"/>
 
@@ -106,7 +106,6 @@
                 android:id="@+id/shortcut_specific_app"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
                 style="@style/ShortCutButton"
                 android:text="@string/keyboard_shortcut_search_category_current_app"/>
         </LinearLayout>

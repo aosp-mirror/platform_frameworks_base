@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Hiện"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Có thể ứng dụng không dùng được chế độ chia đôi màn hình"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Ứng dụng không hỗ trợ chế độ chia đôi màn hình"</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Ứng dụng này chỉ có thể mở trong 1 cửa sổ"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Ứng dụng có thể không hoạt động trên màn hình phụ."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Ứng dụng không hỗ trợ khởi chạy trên màn hình phụ."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Trình chia đôi màn hình"</string>

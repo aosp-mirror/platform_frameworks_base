@@ -25,6 +25,7 @@ import androidx.wear.compose.material.MaterialTheme
 import com.android.credentialmanager.ui.WearApp
 import com.google.android.horologist.annotations.ExperimentalHorologistApi
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.system.exitProcess
 
 @AndroidEntryPoint(ComponentActivity::class)
 class CredentialSelectorActivity : Hilt_CredentialSelectorActivity() {
@@ -34,25 +35,21 @@ class CredentialSelectorActivity : Hilt_CredentialSelectorActivity() {
     @OptIn(ExperimentalHorologistApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setTheme(android.R.style.Theme_DeviceDefault)
         setContent {
             MaterialTheme {
                 WearApp(
                     viewModel = viewModel,
-                    onCloseApp = ::finish,
+                    onCloseApp = { exitProcess(0) },
                 )
             }
         }
-        viewModel.onNewIntent(intent)
+        viewModel.updateRequest(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-
-        val previousIntent = getIntent()
         setIntent(intent)
-
-        viewModel.onNewIntent(intent, previousIntent)
+        viewModel.updateRequest(intent)
     }
 }

@@ -197,6 +197,10 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth gekoppel."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"Bluetooth-toestelikoon"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"Klik om toestelbesonderhede op te stel."</string>
+    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
+    <skip />
+    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
+    <skip />
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"Batterypersentasie is onbekend."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"Gekoppel aan <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"Gekoppel aan <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -255,6 +259,10 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Gebruik Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Gekoppel"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Gestoor"</string>
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> batterykrag"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Oudio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Kopstuk"</string>

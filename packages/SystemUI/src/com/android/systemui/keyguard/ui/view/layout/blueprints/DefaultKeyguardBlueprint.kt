@@ -33,7 +33,6 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusBarSec
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSection
 import com.android.systemui.keyguard.ui.view.layout.sections.KeyguardSectionsModule.Companion.KEYGUARD_AMBIENT_INDICATION_AREA_SECTION
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
-import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Named
@@ -62,14 +61,13 @@ constructor(
     aodBurnInSection: AodBurnInSection,
     communalTutorialIndicatorSection: CommunalTutorialIndicatorSection,
     clockSection: ClockSection,
-    smartspaceSection: SmartspaceSection
+    smartspaceSection: SmartspaceSection,
 ) : KeyguardBlueprint {
     override val id: String = DEFAULT
 
     override val sections =
         listOfNotNull(
             defaultIndicationAreaSection,
-            defaultDeviceEntryIconSection,
             defaultShortcutsSection,
             defaultAmbientIndicationAreaSection.getOrNull(),
             defaultSettingsPopupMenuSection,
@@ -80,7 +78,8 @@ constructor(
             aodBurnInSection,
             communalTutorialIndicatorSection,
             clockSection,
-            smartspaceSection
+            smartspaceSection,
+            defaultDeviceEntryIconSection, // Add LAST: Intentionally has z-order above other views.
         )
 
     companion object {

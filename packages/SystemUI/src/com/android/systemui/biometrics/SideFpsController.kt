@@ -62,6 +62,7 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.res.R
 import com.android.systemui.util.boundsOnScreen
@@ -190,7 +191,10 @@ constructor(
     }
 
     private fun listenForAlternateBouncerVisibility() {
-        alternateBouncerInteractor.setAlternateBouncerUIAvailable(true, "SideFpsController")
+        if (!DeviceEntryUdfpsRefactor.isEnabled) {
+            alternateBouncerInteractor.setAlternateBouncerUIAvailable(true, "SideFpsController")
+        }
+
         scope.launch {
             alternateBouncerInteractor.isVisible.collect { isVisible: Boolean ->
                 if (isVisible) {

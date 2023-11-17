@@ -31,6 +31,9 @@ import com.android.systemui.statusbar.notification.interruption.VisualInterrupti
 class NotificationInterruptStateProviderWrapper(
     private val wrapped: NotificationInterruptStateProvider
 ) : VisualInterruptionDecisionProvider {
+    init {
+        VisualInterruptionRefactor.assertInLegacyMode()
+    }
 
     @VisibleForTesting
     enum class DecisionImpl(override val shouldInterrupt: Boolean) : Decision {

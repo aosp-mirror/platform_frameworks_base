@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"မသိုဝှက်ရန်"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"မျက်နှာပြင် ခွဲ၍ပြသခြင်းဖြင့် အက်ပ်သည် အလုပ်မလုပ်ပါ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"အက်ပ်တွင် မျက်နှာပြင် ခွဲ၍ပြသခြင်းကို မပံ့ပိုးပါ"</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"ဤအက်ပ်ကို ဝင်းဒိုး ၁ ခုတွင်သာ ဖွင့်နိုင်သည်"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"ဤအက်ပ်အနေဖြင့် ဒုတိယဖန်သားပြင်ပေါ်တွင် အလုပ်လုပ်မည် မဟုတ်ပါ။"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"ဤအက်ပ်အနေဖြင့် ဖွင့်ရန်စနစ်ကို ဒုတိယဖန်သားပြင်မှ အသုံးပြုရန် ပံ့ပိုးမထားပါ။"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"မျက်နှာပြင် ခွဲ၍ပြသခြင်း ပိုင်းခြားစနစ်"</string>

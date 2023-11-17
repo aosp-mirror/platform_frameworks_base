@@ -17164,6 +17164,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @UnsupportedAppUsage
     public boolean isOnboardingBugreportV2FlagEnabled() {
         return onboardingBugreportV2Enabled();
     }

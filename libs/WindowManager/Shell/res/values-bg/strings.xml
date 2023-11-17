@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"Отмяна на съхраняването"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"Приложението може да не работи в режим на разделен екран"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"Приложението не поддържа разделен екран"</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"Това приложение може да се отвори само в 1 прозорец"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"Възможно е приложението да не работи на алтернативни дисплеи."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"Приложението не поддържа използването на алтернативни дисплеи."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"Разделител в режима за разделен екран"</string>

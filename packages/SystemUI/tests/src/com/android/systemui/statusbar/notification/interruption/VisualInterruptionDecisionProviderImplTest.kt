@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.interruption
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.BUBBLE
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionType.PEEK
@@ -28,6 +29,10 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class VisualInterruptionDecisionProviderImplTest : VisualInterruptionDecisionProviderTestBase() {
+    init {
+        setFlagsRule.enableFlags(Flags.FLAG_VISUAL_INTERRUPTIONS_REFACTOR)
+    }
+
     override val provider by lazy {
         VisualInterruptionDecisionProviderImpl(
             ambientDisplayConfiguration,

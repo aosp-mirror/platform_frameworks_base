@@ -81,7 +81,7 @@ android_ravenwood_libgroup {
         "hoststubgen-helper-framework-runtime.ravenwood",
         "junit",
         "truth",
-        "ravenwood-junit",
+        "ravenwood-junit-impl",
         "android.test.mock",
     ],
 }

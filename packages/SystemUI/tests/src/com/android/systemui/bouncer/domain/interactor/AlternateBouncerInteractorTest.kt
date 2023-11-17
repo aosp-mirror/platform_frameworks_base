@@ -19,11 +19,13 @@ package com.android.systemui.bouncer.domain.interactor
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepositoryImpl
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -31,7 +33,7 @@ import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -47,8 +49,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     private lateinit var underTest: AlternateBouncerInteractor
     private lateinit var bouncerRepository: KeyguardBouncerRepository
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
-    private lateinit var deviceEntryFingerprintAuthRepository:
-        FakeDeviceEntryFingerprintAuthRepository
+    private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var systemClock: SystemClock
@@ -61,19 +62,21 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
         bouncerRepository =
             KeyguardBouncerRepositoryImpl(
                 FakeSystemClock(),
-                TestCoroutineScope(),
+                TestScope().backgroundScope,
                 bouncerLogger,
             )
         biometricSettingsRepository = FakeBiometricSettingsRepository()
-        deviceEntryFingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository()
+        fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
         underTest =
             AlternateBouncerInteractor(
                 statusBarStateController,
                 keyguardStateController,
                 bouncerRepository,
+                fingerprintPropertyRepository,
                 biometricSettingsRepository,
                 systemClock,
                 keyguardUpdateMonitor,
+                TestScope().backgroundScope,
             )
     }
 
@@ -156,7 +159,17 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    fun canShowAlternateBouncerForFingerprint_rearFps() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
+        givenCanShowAlternateBouncer()
+        fingerprintPropertyRepository.supportsRearFps() // does not support alternate bouncer
+
+        assertFalse(underTest.canShowAlternateBouncerForFingerprint())
+    }
+
+    @Test
     fun alternateBouncerUiAvailable_fromMultipleSources() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         assertFalse(bouncerRepository.alternateBouncerUIAvailable.value)
 
         // GIVEN there are two different sources indicating the alternate bouncer is available
@@ -178,7 +191,12 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     }
 
     private fun givenCanShowAlternateBouncer() {
-        bouncerRepository.setAlternateBouncerUIAvailable(true)
+        if (DeviceEntryUdfpsRefactor.isEnabled) {
+            fingerprintPropertyRepository.supportsUdfps()
+        } else {
+            bouncerRepository.setAlternateBouncerUIAvailable(true)
+        }
+
         biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
         biometricSettingsRepository.setIsFingerprintAuthCurrentlyAllowed(true)
         whenever(keyguardUpdateMonitor.isFingerprintLockedOut).thenReturn(false)

@@ -646,12 +646,7 @@ public final class UsbPortStatus implements Parcelable {
      * @return array including {@link #COMPLIANCE_WARNING_OTHER},
      *         {@link #COMPLIANCE_WARNING_DEBUG_ACCESSORY},
      *         {@link #COMPLIANCE_WARNING_BC_1_2},
-     *         {@link #COMPLIANCE_WARNING_MISSING_RP},
-     *         {@link #COMPLIANCE_WARNING_INPUT_POWER_LIMITED},
-     *         {@link #COMPLIANCE_WARNING_MISSING_DATA_LINES},
-     *         {@link #COMPLIANCE_WARNING_ENUMERATION_FAIL},
-     *         {@link #COMPLIANCE_WARNING_FLAKY_CONNECTION},
-     *         {@link #COMPLIANCE_WARNING_UNRELIABLE_IO}.
+     *         {@link #COMPLIANCE_WARNING_MISSING_RP}.
      */
     @CheckResult
     @NonNull

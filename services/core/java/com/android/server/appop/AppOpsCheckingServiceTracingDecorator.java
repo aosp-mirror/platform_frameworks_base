@@ -168,28 +168,6 @@ public class AppOpsCheckingServiceTracingDecorator implements AppOpsCheckingServ
     }
 
     @Override
-    public boolean areUidModesDefault(int uid) {
-        Trace.traceBegin(TRACE_TAG,
-                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#areUidModesDefault");
-        try {
-            return mService.areUidModesDefault(uid);
-        } finally {
-            Trace.traceEnd(TRACE_TAG);
-        }
-    }
-
-    @Override
-    public boolean arePackageModesDefault(String packageName, @UserIdInt int userId) {
-        Trace.traceBegin(TRACE_TAG,
-                "TaggedTracingAppOpsCheckingServiceInterfaceImpl#arePackageModesDefault");
-        try {
-            return mService.arePackageModesDefault(packageName, userId);
-        } finally {
-            Trace.traceEnd(TRACE_TAG);
-        }
-    }
-
-    @Override
     public void clearAllModes() {
         Trace.traceBegin(TRACE_TAG,
                 "TaggedTracingAppOpsCheckingServiceInterfaceImpl#clearAllModes");

@@ -528,14 +528,12 @@ public class ScreenCapture {
         private final IBinder mDisplayToken;
         private final int mWidth;
         private final int mHeight;
-        private final boolean mUseIdentityTransform;
 
         private DisplayCaptureArgs(Builder builder) {
             super(builder);
             mDisplayToken = builder.mDisplayToken;
             mWidth = builder.mWidth;
             mHeight = builder.mHeight;
-            mUseIdentityTransform = builder.mUseIdentityTransform;
         }
 
         /**
@@ -545,7 +543,6 @@ public class ScreenCapture {
             private IBinder mDisplayToken;
             private int mWidth;
             private int mHeight;
-            private boolean mUseIdentityTransform;
 
             /**
              * Construct a new {@link LayerCaptureArgs} with the set parameters. The builder
@@ -583,17 +580,6 @@ public class ScreenCapture {
             public Builder setSize(int width, int height) {
                 mWidth = width;
                 mHeight = height;
-                return this;
-            }
-
-            /**
-             * Replace the rotation transform of the display with the identity transformation while
-             * taking the screenshot. This ensures the screenshot is taken in the ROTATION_0
-             * orientation. Set this value to false if the screenshot should be taken in the
-             * current screen orientation.
-             */
-            public Builder setUseIdentityTransform(boolean useIdentityTransform) {
-                mUseIdentityTransform = useIdentityTransform;
                 return this;
             }
 

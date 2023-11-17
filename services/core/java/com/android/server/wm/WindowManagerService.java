@@ -1972,7 +1972,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void removeWindow(Session session, IWindow client) {
+    void removeClientToken(Session session, IBinder client) {
         synchronized (mGlobalLock) {
             WindowState win = windowForClientLocked(session, client, false);
             if (win != null) {
@@ -8526,6 +8526,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
             return null;
+        }
+
+        @Override
+        public void captureDisplay(int displayId, @Nullable ScreenCapture.CaptureArgs captureArgs,
+                                   ScreenCapture.ScreenCaptureListener listener) {
+            WindowManagerService.this.captureDisplay(displayId, captureArgs, listener);
         }
 
         @Override

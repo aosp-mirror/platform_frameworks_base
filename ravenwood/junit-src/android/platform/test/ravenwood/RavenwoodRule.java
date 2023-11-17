@@ -16,7 +16,6 @@
 
 package android.platform.test.ravenwood;
 
-import android.os.Process;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 
 import org.junit.Assume;
@@ -35,12 +34,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RavenwoodRule implements TestRule {
     private static AtomicInteger sNextPid = new AtomicInteger(100);
 
+    private static final int SYSTEM_UID = 1000;
+    private static final int NOBODY_UID = 9999;
+    private static final int FIRST_APPLICATION_UID = 10000;
+
     /**
      * Unless the test author requests differently, run as "nobody", and give each collection of
      * tests its own unique PID.
      */
-    private int mUid = android.os.Process.NOBODY_UID;
-    private int mPid = sNextPid.getAndIncrement();
+    int mUid = NOBODY_UID;
+    int mPid = sNextPid.getAndIncrement();
 
     public RavenwoodRule() {
     }
@@ -56,7 +59,7 @@ public class RavenwoodRule implements TestRule {
          * test. Has no effect under non-Ravenwood environments.
          */
         public Builder setProcessSystem() {
-            mRule.mUid = android.os.Process.SYSTEM_UID;
+            mRule.mUid = SYSTEM_UID;
             return this;
         }
 
@@ -65,7 +68,7 @@ public class RavenwoodRule implements TestRule {
          * test. Has no effect under non-Ravenwood environments.
          */
         public Builder setProcessApp() {
-            mRule.mUid = android.os.Process.FIRST_APPLICATION_UID;
+            mRule.mUid = FIRST_APPLICATION_UID;
             return this;
         }
 
@@ -82,16 +85,6 @@ public class RavenwoodRule implements TestRule {
         return System.getProperty("java.class.path").contains("ravenwood");
     }
 
-    private void init() {
-        android.os.Process.init$ravenwood(mUid, mPid);
-        android.os.Binder.init$ravenwood();
-    }
-
-    private void reset() {
-        android.os.Process.reset$ravenwood();
-        android.os.Binder.reset$ravenwood();
-    }
-
     @Override
     public Statement apply(Statement base, Description description) {
         return new Statement() {
@@ -102,13 +95,13 @@ public class RavenwoodRule implements TestRule {
                     Assume.assumeFalse(isUnderRavenwood);
                 }
                 if (isUnderRavenwood) {
-                    init();
+                    RavenwoodRuleImpl.init(RavenwoodRule.this);
                 }
                 try {
                     base.evaluate();
                 } finally {
                     if (isUnderRavenwood) {
-                        reset();
+                        RavenwoodRuleImpl.reset(RavenwoodRule.this);
                     }
                 }
             }

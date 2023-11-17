@@ -25,6 +25,7 @@ import com.android.systemui.authentication.shared.model.AuthenticationMethodMode
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.res.R
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
@@ -37,28 +38,38 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito.verify
+import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BouncerInteractorTest : SysuiTestCase() {
 
+    @Mock private lateinit var keyguardFaceAuthInteractor: KeyguardFaceAuthInteractor
+
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
     private val authenticationInteractor = utils.authenticationInteractor()
-    private val underTest =
-        utils.bouncerInteractor(
-            authenticationInteractor = authenticationInteractor,
-        )
+
+    private lateinit var underTest: BouncerInteractor
 
     @Before
     fun setUp() {
+        MockitoAnnotations.initMocks(this)
         overrideResource(R.string.keyguard_enter_your_pin, MESSAGE_ENTER_YOUR_PIN)
         overrideResource(R.string.keyguard_enter_your_password, MESSAGE_ENTER_YOUR_PASSWORD)
         overrideResource(R.string.keyguard_enter_your_pattern, MESSAGE_ENTER_YOUR_PATTERN)
         overrideResource(R.string.kg_wrong_pin, MESSAGE_WRONG_PIN)
         overrideResource(R.string.kg_wrong_password, MESSAGE_WRONG_PASSWORD)
         overrideResource(R.string.kg_wrong_pattern, MESSAGE_WRONG_PATTERN)
+
+        underTest =
+            utils.bouncerInteractor(
+                authenticationInteractor = authenticationInteractor,
+                keyguardFaceAuthInteractor = keyguardFaceAuthInteractor,
+            )
     }
 
     @Test
@@ -323,6 +334,13 @@ class BouncerInteractorTest : SysuiTestCase() {
             assertThat(utils.powerRepository.userTouchRegistered).isFalse()
             underTest.onIntentionalUserInput()
             assertThat(utils.powerRepository.userTouchRegistered).isTrue()
+        }
+
+    @Test
+    fun intentionalUserInputEvent_notifiesFaceAuthInteractor() =
+        testScope.runTest {
+            underTest.onIntentionalUserInput()
+            verify(keyguardFaceAuthInteractor).onPrimaryBouncerUserInput()
         }
 
     private fun assertTryAgainMessage(

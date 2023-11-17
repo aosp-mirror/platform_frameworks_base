@@ -1711,6 +1711,10 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да прати интеракције са апликацијом или сензором хардвера и користи апликације уместо вас."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволи"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Одбиј"</string>
+    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
+    <skip />
+    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
+    <skip />
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Додирните неку функцију да бисте почели да је користите:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Одаберите функције које ћете користити са дугметом Приступачност"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Одаберите функције за пречицу тастером јачине звука"</string>
@@ -1905,6 +1909,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Викенд"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Догађај"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Спавање"</string>
+    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <skip />
+    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> искључује неке звуке"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Дошло је до интерног проблема у вези са уређајем и можда ће бити нестабилан док не обавите ресетовање на фабричка подешавања."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Дошло је до интерног проблема у вези са уређајем. Потражите детаље од произвођача."</string>
@@ -2337,6 +2345,8 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон је блокиран"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Пресликавање на екран није могуће"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Употребите други кабл и пробајте поново"</string>
+    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
+    <skip />
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Кабл не подржава екране"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"USB-C кабл се не повезује правилно са екранима"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>

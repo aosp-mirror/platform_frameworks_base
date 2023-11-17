@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"取消保護"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"應用程式可能無法在分割螢幕中運作"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"應用程式不支援分割螢幕"</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"此應用程式只可在 1 個視窗中開啟"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"應用程式可能無法在次要顯示屏上運作。"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"應用程式無法在次要顯示屏上啟動。"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"分割螢幕分隔線"</string>

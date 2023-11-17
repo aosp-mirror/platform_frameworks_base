@@ -15,7 +15,7 @@
  */
 package com.android.systemui.statusbar.phone;
 
-import static com.android.systemui.flags.Flags.NEW_AOD_TRANSITION;
+import static com.android.systemui.Flags.newAodTransition;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -106,9 +106,6 @@ public class LegacyNotificationIconAreaControllerImpl implements
     private NotificationIconContainer mAodIcons;
     private final ArrayList<Rect> mTintAreas = new ArrayList<>();
     private final Context mContext;
-
-    private final boolean mNewAodTransition;
-
     private int mAodIconAppearTranslation;
 
     private boolean mAnimationsEnabled;
@@ -145,7 +142,6 @@ public class LegacyNotificationIconAreaControllerImpl implements
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mStatusBarStateController = statusBarStateController;
-        mNewAodTransition = featureFlags.isEnabled(NEW_AOD_TRANSITION);
         mStatusBarStateController.addCallback(this);
         mMediaManager = notificationMediaManager;
         mDozeParameters = dozeParameters;
@@ -600,7 +596,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
         boolean animate = true;
         if (!mBypassController.getBypassEnabled()) {
             animate = mDozeParameters.getAlwaysOn() && !mDozeParameters.getDisplayNeedsBlanking();
-            if (!mNewAodTransition) {
+            if (!newAodTransition()) {
                 // We only want the appear animations to happen when the notifications get fully
                 // hidden, since otherwise the unhide animation overlaps
                 animate &= fullyHidden;
@@ -640,7 +636,7 @@ public class LegacyNotificationIconAreaControllerImpl implements
             mAodIconsVisible = visible;
             mAodIcons.animate().cancel();
             if (animate) {
-                if (mNewAodTransition) {
+                if (newAodTransition()) {
                     // Let's make sure the icon are translated to 0, since we cancelled it above
                     animateInAodIconTranslation();
                     if (mAodIconsVisible) {

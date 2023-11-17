@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"दिखाएं"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"मुमकिन है कि ऐप्लिकेशन, स्प्लिट स्क्रीन मोड में काम न करे"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"यह ऐप्लिकेशन, स्प्लिट स्क्रीन मोड पर काम नहीं करता"</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"इस ऐप्लिकेशन को सिर्फ़ एक विंडो में खोला जा सकता है"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"हो सकता है कि ऐप प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर काम न करे."</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"प्राइमरी (मुख्य) डिस्प्ले के अलावा बाकी दूसरे डिस्प्ले पर ऐप लॉन्च नहीं किया जा सकता."</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"स्प्लिट स्क्रीन डिवाइडर मोड"</string>

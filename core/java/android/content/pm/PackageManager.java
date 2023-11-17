@@ -1481,6 +1481,7 @@ public abstract class PackageManager {
             INSTALL_STAGED,
             INSTALL_REQUEST_UPDATE_OWNERSHIP,
             INSTALL_IGNORE_DEXOPT_PROFILE,
+            INSTALL_UNARCHIVE_DRAFT,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstallFlags {}
@@ -1723,6 +1724,16 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_IGNORE_DEXOPT_PROFILE = 1 << 28;
+
+    /**
+     * If set, then the session is a draft session created for an upcoming unarchival by its
+     * installer.
+     *
+     * @see PackageInstaller#requestUnarchive(String)
+     *
+     * @hide
+     */
+    public static final int INSTALL_UNARCHIVE_DRAFT = 1 << 29;
 
     /**
      * Flag parameter for {@link #installPackage} to force a non-staged update of an APEX. This is
@@ -9790,7 +9801,8 @@ public abstract class PackageManager {
      * launcher to support customization that they might need to handle the suspended state.
      *
      * <p>The caller must hold {@link Manifest.permission#SUSPEND_APPS} to use this API except for
-     * device owner and profile owner.
+     * device owner and profile owner or the {@link Manifest.permission#QUARANTINE_APPS} if the
+     * caller is using {@link #FLAG_SUSPEND_QUARANTINED}.
      *
      * @param packageNames The names of the packages to set the suspended status.
      * @param suspended If set to {@code true}, the packages will be suspended, if set to
@@ -9818,7 +9830,10 @@ public abstract class PackageManager {
      */
     @SystemApi
     @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED)
-    @RequiresPermission(value=Manifest.permission.SUSPEND_APPS, conditional=true)
+    @RequiresPermission(anyOf = {
+            Manifest.permission.SUSPEND_APPS,
+            Manifest.permission.QUARANTINE_APPS
+    }, conditional = true)
     @SuppressLint("NullableCollection")
     @Nullable
     public String[] setPackagesSuspended(@Nullable String[] packageNames, boolean suspended,

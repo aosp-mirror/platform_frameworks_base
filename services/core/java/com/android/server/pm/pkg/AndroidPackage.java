@@ -1393,6 +1393,13 @@ public interface AndroidPackage {
     /** @hide */
     boolean isApex();
 
+
+    /**
+     * @see R.styleable#AndroidManifestApplication_updatableSystem
+     * @hide
+     */
+    boolean isUpdatableSystem();
+
     /**
      * @see ApplicationInfo#enabled
      * @see R.styleable#AndroidManifestApplication_enabled

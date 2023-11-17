@@ -1711,6 +1711,10 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Cette fonctionnalité peut faire le suivi de vos interactions avec une application ou un capteur matériel et interagir avec des applications en votre nom."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Autoriser"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Refuser"</string>
+    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
+    <skip />
+    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
+    <skip />
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toucher une fonctionnalité pour commencer à l\'utiliser :"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Choisir les fonctionnalités à utiliser à l\'aide du bouton d\'accessibilité"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Choisir les fonctionnalités à utiliser avec le raccourci des touches de volume"</string>
@@ -1905,6 +1909,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fin de semaine"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Événement"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sommeil"</string>
+    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <skip />
+    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> désactive certains sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Un problème interne est survenu avec votre appareil. Il se peut qu\'il soit instable jusqu\'à ce que vous le réinitialisiez à ses paramètres par défaut."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Un problème interne est survenu avec votre appareil. Communiquez avec le fabricant pour obtenir plus de détails."</string>
@@ -2337,6 +2345,8 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Le microphone est bloqué"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Impossible de dupliquer l\'écran"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Utilisez un câble différent et réessayez"</string>
+    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
+    <skip />
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Le câble peut ne pas être compatible avec les écrans"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Votre câble USB-C peut ne pas se connecter correctement aux écrans"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>

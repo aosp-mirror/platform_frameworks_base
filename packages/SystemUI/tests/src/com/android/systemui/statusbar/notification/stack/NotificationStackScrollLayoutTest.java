@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.stack;
 import static android.view.View.GONE;
 import static android.view.WindowInsets.Type.ime;
 
+import static com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_GENTLE;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.RUBBER_BAND_FACTOR_NORMAL;
@@ -162,7 +163,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         //  in the constructor.
         mFeatureFlags.setDefault(Flags.SENSITIVE_REVEAL_ANIM);
         mFeatureFlags.setDefault(Flags.ANIMATED_NOTIFICATION_SHADE_INSETS);
-        mFeatureFlags.setDefault(Flags.NEW_AOD_TRANSITION);
+        mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION);
         mFeatureFlags.setDefault(Flags.UNCLEARED_TRANSIENT_HUN_FIX);
 
         // Inject dependencies before initializing the layout

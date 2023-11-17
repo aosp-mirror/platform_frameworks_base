@@ -1710,6 +1710,10 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ມັນສາມາດຕິດຕາມການໂຕ້ຕອບຂອງທ່ານກັບແອັບ ຫຼື ເຊັນເຊີຮາດແວໃດໜຶ່ງ ແລະ ໂຕ້ຕອບກັບແອັບໃນນາມຂອງທ່ານໄດ້."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ອະນຸຍາດ"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ປະຕິເສດ"</string>
+    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
+    <skip />
+    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
+    <skip />
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ແຕະໃສ່ຄຸນສົມບັດໃດໜຶ່ງເພື່ອເລີ່ມການນຳໃຊ້ມັນ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ເລືອກຄຸນສົມບັດເພື່ອໃຊ້ກັບປຸ່ມການຊ່ວຍເຂົ້າເຖິງ"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ເລືອກຄຸນສົມບັດເພື່ອໃຊ້ກັບທາງລັດປຸ່ມລະດັບສຽງ"</string>
@@ -1904,6 +1908,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ທ້າຍອາທິດ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ການນັດໝາຍ"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ການນອນ"</string>
+    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <skip />
+    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ປິດສຽງບາງຢ່າງໄວ້"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ມັນ​ອາດ​ຈະ​ບໍ່​ສະ​ຖຽນ​ຈົນ​ກວ່າ​ທ່ານ​ຕັ້ງ​ເປັນ​ຂໍ້​ມູນ​ໂຮງ​ງານ​ຄືນ​ແລ້ວ."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ. ຕິດ​ຕໍ່ຜູ້​ຜະ​ລິດ​ຂອງ​ທ່ານ​ສຳ​ລັບ​ລາຍ​ລະ​ອຽດ​ຕ່າງໆ."</string>
@@ -2336,6 +2344,8 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ໄມໂຄຣໂຟນຖືກບລັອກໄວ້"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ບໍ່ສາມາດສະທ້ອນໄປຫາຈໍສະແດງຜົນໄດ້"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"ກະລຸນາໃຊ້ສາຍອື່ນແລ້ວລອງໃໝ່"</string>
+    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
+    <skip />
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ສາຍອາດບໍ່ຮອງຮັບຈໍສະແດງຜົນ"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"ສາຍ USB-C ຂອງທ່ານອາດບໍ່ໄດ້ເຊື່ອມຕໍ່ກັບຈໍສະແດງຜົນຢ່າງຖືກຕ້ອງ"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ໜ້າຈໍຄູ່"</string>

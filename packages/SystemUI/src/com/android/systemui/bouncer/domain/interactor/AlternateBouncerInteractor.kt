@@ -17,14 +17,23 @@
 package com.android.systemui.bouncer.domain.interactor
 
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
+import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates business logic for interacting with the lock-screen alternate bouncer. */
 @SysUISingleton
@@ -34,13 +43,29 @@ constructor(
     private val statusBarStateController: StatusBarStateController,
     private val keyguardStateController: KeyguardStateController,
     private val bouncerRepository: KeyguardBouncerRepository,
+    fingerprintPropertyRepository: FingerprintPropertyRepository,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val systemClock: SystemClock,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    @Application scope: CoroutineScope,
 ) {
     var receivedDownTouch = false
     val isVisible: Flow<Boolean> = bouncerRepository.alternateBouncerVisible
     private val alternateBouncerUiAvailableFromSource: HashSet<String> = HashSet()
+    private val alternateBouncerSupported: StateFlow<Boolean> =
+        if (DeviceEntryUdfpsRefactor.isEnabled) {
+            fingerprintPropertyRepository.sensorType
+                .map { sensorType ->
+                    sensorType.isUdfps() || sensorType == FingerprintSensorType.POWER_BUTTON
+                }
+                .stateIn(
+                    scope = scope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = false,
+                )
+        } else {
+            bouncerRepository.alternateBouncerUIAvailable
+        }
 
     /**
      * Sets the correct bouncer states to show the alternate bouncer if it can show.
@@ -71,6 +96,7 @@ constructor(
     }
 
     fun setAlternateBouncerUIAvailable(isAvailable: Boolean, token: String) {
+        DeviceEntryUdfpsRefactor.assertInLegacyMode()
         if (isAvailable) {
             alternateBouncerUiAvailableFromSource.add(token)
         } else {
@@ -82,7 +108,7 @@ constructor(
     }
 
     fun canShowAlternateBouncerForFingerprint(): Boolean {
-        return bouncerRepository.alternateBouncerUIAvailable.value &&
+        return alternateBouncerSupported.value &&
             biometricSettingsRepository.isFingerprintAuthCurrentlyAllowed.value &&
             !keyguardUpdateMonitor.isFingerprintLockedOut &&
             !keyguardStateController.isUnlocked &&

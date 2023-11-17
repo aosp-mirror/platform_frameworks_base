@@ -8,6 +8,13 @@ flag {
 }
 
 flag {
+  name: "modes_ui"
+  namespace: "systemui"
+  description: "This flag controls new and updated DND UIs; dependent on flag modes_api"
+  bug: "270703654"
+}
+
+flag {
   name: "api_tvextender"
   namespace: "systemui"
   description: "Guards new android.app.Notification.TvExtender api"

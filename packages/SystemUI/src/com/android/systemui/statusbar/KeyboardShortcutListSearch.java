@@ -60,6 +60,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -114,7 +115,6 @@ public final class KeyboardShortcutListSearch {
     private Button mButtonInput;
     private Button mButtonOpenApps;
     private Button mButtonSpecificApp;
-    private ImageView mEditTextCancel;
     private TextView mNoSearchResults;
 
     private final SparseArray<String> mSpecialCharacterNames = new SparseArray<>();
@@ -895,8 +895,9 @@ public final class KeyboardShortcutListSearch {
                         // Do nothing.
                     }
                 });
-        mEditTextCancel = keyboardShortcutsView.findViewById(R.id.keyboard_shortcuts_search_cancel);
-        mEditTextCancel.setOnClickListener(v -> mSearchEditText.setText(null));
+        ImageButton editTextCancel = keyboardShortcutsView.findViewById(
+                R.id.keyboard_shortcuts_search_cancel);
+        editTextCancel.setOnClickListener(v -> mSearchEditText.setText(null));
     }
 
     private void populateKeyboardShortcutSearchList(LinearLayout keyboardShortcutsLayout) {
@@ -1276,12 +1277,12 @@ public final class KeyboardShortcutListSearch {
 
     private int getColorOfTextColorOnAccent() {
         return Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.textColorOnAccent);
+                mContext, com.android.internal.R.attr.materialColorOnPrimary);
     }
 
     private int getColorOfTextColorSecondary() {
         return Utils.getColorAttrDefaultColor(
-                mContext, com.android.internal.R.attr.textColorSecondary);
+                mContext, com.android.internal.R.attr.materialColorOnSurface);
     }
 
     // Create the new data structure for handling the N-to-1 key mapping and other complex case.

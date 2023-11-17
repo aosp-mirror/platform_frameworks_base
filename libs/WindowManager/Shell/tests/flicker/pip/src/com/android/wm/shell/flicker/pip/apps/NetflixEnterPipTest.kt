@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip.apps
 
+import android.Manifest
 import android.platform.test.annotations.Postsubmit
 import android.tools.common.NavBar
 import android.tools.common.Rotation
@@ -61,6 +62,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class NetflixEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition(flicker) {
     override val standardAppHelper: NetflixAppHelper = NetflixAppHelper(instrumentation)
+
+    override val permissions: Array<String> = arrayOf(Manifest.permission.POST_NOTIFICATIONS)
 
     override val defaultEnterPip: FlickerBuilder.() -> Unit = {
         setup {
