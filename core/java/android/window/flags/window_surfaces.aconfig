@@ -48,3 +48,11 @@ flag {
     is_fixed_read_only: true
     bug: "262477923"
 }
+
+flag {
+    namespace: "window_surfaces"
+    name: "secure_window_state"
+    description: "Move SC secure flag to WindowState level"
+    is_fixed_read_only: true
+    bug: "308662081"
+}

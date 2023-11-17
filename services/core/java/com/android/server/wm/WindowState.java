@@ -109,6 +109,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RESIZE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_SYNC_ENGINE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_INSETS;
+import static com.android.internal.protolog.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_ENTER;
 import static com.android.server.policy.WindowManagerPolicy.TRANSIT_EXIT;
@@ -177,6 +178,7 @@ import static com.android.server.wm.WindowStateProto.UNRESTRICTED_KEEP_CLEAR_ARE
 import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
+import static com.android.window.flags.Flags.secureWindowState;
 import static com.android.window.flags.Flags.surfaceTrustedOverlay;
 
 import android.annotation.CallSuper;
@@ -1194,6 +1196,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.setInitialSurfaceControlProperties(b);
         if (surfaceTrustedOverlay() && isWindowTrustedOverlay()) {
             getPendingTransaction().setTrustedOverlay(mSurfaceControl, true);
+        }
+        if (secureWindowState()) {
+            getPendingTransaction().setSecure(mSurfaceControl, isSecureLocked());
         }
     }
 
@@ -6039,5 +6044,26 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     public boolean cancelAndRedraw() {
         // Cancel any draw requests during a sync.
         return mPrepareSyncSeqId > 0;
+    }
+
+    void setSecureLocked(boolean isSecure) {
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isSecure=%b: %s", isSecure, getName());
+        if (secureWindowState()) {
+            if (mSurfaceControl == null) {
+                return;
+            }
+            getPendingTransaction().setSecure(mSurfaceControl, isSecure);
+        } else {
+            if (mWinAnimator.mSurfaceController == null
+                    || mWinAnimator.mSurfaceController.mSurfaceControl == null) {
+                return;
+            }
+            getPendingTransaction().setSecure(mWinAnimator.mSurfaceController.mSurfaceControl,
+                    isSecure);
+        }
+        if (mDisplayContent != null) {
+            mDisplayContent.refreshImeSecureFlag(getSyncTransaction());
+        }
+        mWmService.scheduleAnimationLocked();
     }
 }

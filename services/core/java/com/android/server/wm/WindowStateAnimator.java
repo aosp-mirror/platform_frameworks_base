@@ -44,6 +44,7 @@ import static com.android.server.wm.WindowManagerService.logWithStack;
 import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
 import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
 import static com.android.server.wm.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
+import static com.android.window.flags.Flags.secureWindowState;
 
 import android.content.Context;
 import android.graphics.PixelFormat;
@@ -286,8 +287,10 @@ class WindowStateAnimator {
         int flags = SurfaceControl.HIDDEN;
         final WindowManager.LayoutParams attrs = w.mAttrs;
 
-        if (w.isSecureLocked()) {
-            flags |= SurfaceControl.SECURE;
+        if (!secureWindowState()) {
+            if (w.isSecureLocked()) {
+                flags |= SurfaceControl.SECURE;
+            }
         }
 
         if ((mWin.mAttrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0) {
@@ -486,13 +489,6 @@ class WindowStateAnimator {
             return;
         }
         mSurfaceController.setOpaque(isOpaque);
-    }
-
-    void setSecureLocked(boolean isSecure) {
-        if (mSurfaceController == null) {
-            return;
-        }
-        mSurfaceController.setSecure(isSecure);
     }
 
     void setColorSpaceAgnosticLocked(boolean agnostic) {
