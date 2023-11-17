@@ -458,6 +458,15 @@ constructor(
                     // the
                     // location of the previous state to still be up to date when the animation
                     // starts
+                    if (
+                        newState == StatusBarState.SHADE_LOCKED &&
+                            oldState == StatusBarState.KEYGUARD &&
+                            fullShadeTransitionProgress < 1.0f
+                    ) {
+                        // Since the new state is SHADE_LOCKED, we need to set the transition amount
+                        // to maximum if the progress is not 1f.
+                        setTransitionToFullShadeAmount(distanceForFullShadeTransition.toFloat())
+                    }
                     statusbarState = newState
                     updateDesiredLocation()
                 }
