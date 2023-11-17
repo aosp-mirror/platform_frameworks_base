@@ -16,7 +16,7 @@
 
 package com.android.settingslib.spa.screenshot.widget.ui
 
-import com.android.settingslib.spa.screenshot.util.SettingsScreenshotTestRule
+import com.android.settingslib.spa.screenshot.util.settingsScreenshotTestRule
 import com.android.settingslib.spa.widget.ui.Spinner
 import com.android.settingslib.spa.widget.ui.SpinnerOption
 import org.junit.Rule
@@ -38,9 +38,8 @@ class SpinnerScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
     @get:Rule
     val screenshotRule =
-        SettingsScreenshotTestRule(
+        settingsScreenshotTestRule(
             emulationSpec,
-            "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
         )
 
     @Test
