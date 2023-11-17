@@ -8265,6 +8265,10 @@
             android:exported="true">
         </provider>
 
+        <meta-data
+            android:name="com.android.server.patch.25239169"
+            android:value="true" />
+
     </application>
 
 </manifest>
