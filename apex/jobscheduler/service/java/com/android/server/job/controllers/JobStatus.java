@@ -1054,6 +1054,12 @@ public final class JobStatus {
         return mLoggingJobId;
     }
 
+    /** Returns a trace tag using debug information provided by the app. */
+    @Nullable
+    public String getAppTraceTag() {
+        return job.getTraceTag();
+    }
+
     /** Returns whether this job was scheduled by one app on behalf of another. */
     public boolean isProxyJob() {
         return mIsProxyJob;
@@ -2761,6 +2767,15 @@ public final class JobStatus {
             }
             if (job.hasLateConstraint()) {
                 pw.println("Has late constraint");
+            }
+
+            if (job.getTraceTag() != null) {
+                pw.print("Trace tag: ");
+                pw.println(job.getTraceTag());
+            }
+            if (job.getDebugTags().size() > 0) {
+                pw.print("Debug tags: ");
+                pw.println(job.getDebugTags());
             }
 
             pw.decreaseIndent();
