@@ -19,7 +19,6 @@ package com.android.systemui.qs.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
@@ -39,14 +38,11 @@ import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsPro
 import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class QuickSettingsSceneViewModelTest : SysuiTestCase() {
@@ -90,46 +86,13 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
 
-        val authenticationInteractor = utils.authenticationInteractor()
-
         underTest =
             QuickSettingsSceneViewModel(
-                deviceEntryInteractor =
-                    utils.deviceEntryInteractor(
-                        authenticationInteractor = authenticationInteractor,
-                        sceneInteractor = sceneInteractor,
-                    ),
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = utils.notificationsPlaceholderViewModel(),
             )
     }
-
-    @Test
-    fun onContentClicked_deviceUnlocked_switchesToGone() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.deviceEntryRepository.setUnlocked(true)
-            runCurrent()
-
-            underTest.onContentClicked()
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Gone))
-        }
-
-    @Test
-    fun onContentClicked_deviceLockedSecurely_switchesToBouncer() =
-        testScope.runTest {
-            val currentScene by collectLastValue(sceneInteractor.desiredScene)
-            utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            utils.deviceEntryRepository.setUnlocked(false)
-            runCurrent()
-
-            underTest.onContentClicked()
-
-            assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
-        }
 
     @Test
     fun destinationsNotCustomizing() =

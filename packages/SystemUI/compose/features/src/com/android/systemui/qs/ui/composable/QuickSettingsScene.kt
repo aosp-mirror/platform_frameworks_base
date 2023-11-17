@@ -23,7 +23,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -51,6 +52,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.composable.ComposableScene
 import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
+import com.android.systemui.shade.ui.composable.Shade
 import com.android.systemui.shade.ui.composable.ShadeHeader
 import com.android.systemui.statusbar.phone.StatusBarIconController
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager
@@ -104,53 +106,59 @@ private fun SceneScope.QuickSettingsScene(
 ) {
     // TODO(b/280887232): implement the real UI.
     Box(modifier = modifier.fillMaxSize()) {
-        val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
-        val collapsedHeaderHeight =
-            with(LocalDensity.current) { ShadeHeader.Dimensions.CollapsedHeight.roundToPx() }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier =
-                Modifier.fillMaxSize()
-                    .clickable(onClick = { viewModel.onContentClicked() })
-                    .padding(start = 16.dp, end = 16.dp, bottom = 48.dp)
-        ) {
-            when (LocalWindowSizeClass.current.widthSizeClass) {
-                WindowWidthSizeClass.Compact ->
-                    AnimatedVisibility(
-                        visible = !isCustomizing,
-                        enter =
-                            expandVertically(
-                                animationSpec = tween(1000),
-                                initialHeight = { collapsedHeaderHeight },
-                            ) + fadeIn(tween(1000)),
-                        exit =
-                            shrinkVertically(
-                                animationSpec = tween(1000),
-                                targetHeight = { collapsedHeaderHeight },
-                                shrinkTowards = Alignment.Top,
-                            ) + fadeOut(tween(1000)),
-                    ) {
-                        ExpandedShadeHeader(
+        Box(modifier = Modifier.fillMaxSize()) {
+            val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsState()
+            val collapsedHeaderHeight =
+                with(LocalDensity.current) { ShadeHeader.Dimensions.CollapsedHeight.roundToPx() }
+            Spacer(
+                modifier =
+                    Modifier.element(Shade.Elements.ScrimBackground)
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.scrim, shape = Shade.Shapes.Scrim)
+            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier =
+                    Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp, bottom = 48.dp)
+            ) {
+                when (LocalWindowSizeClass.current.widthSizeClass) {
+                    WindowWidthSizeClass.Compact ->
+                        AnimatedVisibility(
+                            visible = !isCustomizing,
+                            enter =
+                                expandVertically(
+                                    animationSpec = tween(1000),
+                                    initialHeight = { collapsedHeaderHeight },
+                                ) + fadeIn(tween(1000)),
+                            exit =
+                                shrinkVertically(
+                                    animationSpec = tween(1000),
+                                    targetHeight = { collapsedHeaderHeight },
+                                    shrinkTowards = Alignment.Top,
+                                ) + fadeOut(tween(1000)),
+                        ) {
+                            ExpandedShadeHeader(
+                                viewModel = viewModel.shadeHeaderViewModel,
+                                createTintedIconManager = createTintedIconManager,
+                                createBatteryMeterViewController = createBatteryMeterViewController,
+                                statusBarIconController = statusBarIconController,
+                            )
+                        }
+                    else ->
+                        CollapsedShadeHeader(
                             viewModel = viewModel.shadeHeaderViewModel,
                             createTintedIconManager = createTintedIconManager,
                             createBatteryMeterViewController = createBatteryMeterViewController,
                             statusBarIconController = statusBarIconController,
                         )
-                    }
-                else ->
-                    CollapsedShadeHeader(
-                        viewModel = viewModel.shadeHeaderViewModel,
-                        createTintedIconManager = createTintedIconManager,
-                        createBatteryMeterViewController = createBatteryMeterViewController,
-                        statusBarIconController = statusBarIconController,
-                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                QuickSettings(
+                    modifier = Modifier.fillMaxHeight(),
+                    viewModel.qsSceneAdapter,
+                    QSSceneAdapter.State.QS
+                )
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            QuickSettings(
-                modifier = Modifier.fillMaxHeight(),
-                viewModel.qsSceneAdapter,
-                QSSceneAdapter.State.QS
-            )
         }
         HeadsUpNotificationSpace(
             viewModel = viewModel.notifications,
