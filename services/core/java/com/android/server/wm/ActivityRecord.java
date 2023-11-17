@@ -1556,9 +1556,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // Transition change for the activity moving into a TaskFragment of different bounds.
-        return newParent.isOrganizedTaskFragment()
-                && !newParent.getBounds().equals(oldParent.getBounds());
+        final boolean isInPip2 = ActivityTaskManagerService.isPip2ExperimentEnabled()
+                && inPinnedWindowingMode();
+        if (!newParent.isOrganizedTaskFragment() && !isInPip2) {
+            // Parent TaskFragment isn't associated with a TF organizer and we are not in PiP2,
+            // so do not allow for initializeChangeTransition() on parent changes
+            return false;
+        }
+        // Transition change for the activity moving into TaskFragment of different bounds.
+        return !newParent.getBounds().equals(oldParent.getBounds());
     }
 
     @Override

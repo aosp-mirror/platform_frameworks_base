@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.pip2.phone;
 
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.WindowManager.TRANSIT_OPEN;
 
@@ -50,7 +49,7 @@ import com.android.wm.shell.transition.Transitions;
 public class PipTransition extends PipTransitionController {
     private static final String TAG = PipTransition.class.getSimpleName();
 
-    private PipScheduler mPipScheduler;
+    private final PipScheduler mPipScheduler;
     @Nullable
     private WindowContainerToken mPipTaskToken;
     @Nullable
@@ -168,14 +167,9 @@ public class PipTransition extends PipTransitionController {
             }
             mPipTaskToken = pipChange.getContainer();
 
-            // cache the PiP task token and the relevant leashes
+            // cache the PiP task token and leash
             mPipScheduler.setPipTaskToken(mPipTaskToken);
             mPipScheduler.setPinnedTaskLeash(pipChange.getLeash());
-            // check if we entered PiP from a multi-activity task and set the original task leash
-            final int lastParentTaskId = pipChange.getTaskInfo().lastParentTaskIdBeforePip;
-            final boolean isSingleActivity = lastParentTaskId == INVALID_TASK_ID;
-            mPipScheduler.setOriginalTaskLeash(isSingleActivity ? null :
-                    findChangeByTaskId(info, lastParentTaskId).getLeash());
 
             startTransaction.apply();
             finishCallback.onTransitionFinished(null);
@@ -195,17 +189,6 @@ public class PipTransition extends PipTransitionController {
         for (TransitionInfo.Change change : info.getChanges()) {
             if (change.getTaskInfo() != null
                     && change.getTaskInfo().getWindowingMode() == WINDOWING_MODE_PINNED) {
-                return change;
-            }
-        }
-        return null;
-    }
-
-    @Nullable
-    private TransitionInfo.Change findChangeByTaskId(TransitionInfo info, int taskId) {
-        for (TransitionInfo.Change change : info.getChanges()) {
-            if (change.getTaskInfo() != null
-                    && change.getTaskInfo().taskId == taskId) {
                 return change;
             }
         }
