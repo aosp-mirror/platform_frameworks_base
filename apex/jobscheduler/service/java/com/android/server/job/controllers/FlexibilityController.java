@@ -43,6 +43,8 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArrayMap;
+import android.util.SparseLongArray;
+import android.util.TimeUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -68,11 +70,6 @@ public final class FlexibilityController extends StateController {
             | CONSTRAINT_CHARGING
             | CONSTRAINT_IDLE;
 
-    /** List of flexible constraints a job can opt into. */
-    static final int OPTIONAL_FLEXIBLE_CONSTRAINTS = CONSTRAINT_BATTERY_NOT_LOW
-            | CONSTRAINT_CHARGING
-            | CONSTRAINT_IDLE;
-
     /** List of all job flexible constraints whose satisfaction is job specific. */
     private static final int JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS = CONSTRAINT_CONNECTIVITY;
 
@@ -82,9 +79,6 @@ public final class FlexibilityController extends StateController {
 
     private static final int NUM_JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS =
             Integer.bitCount(JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS);
-
-    static final int NUM_OPTIONAL_FLEXIBLE_CONSTRAINTS =
-            Integer.bitCount(OPTIONAL_FLEXIBLE_CONSTRAINTS);
 
     static final int NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS =
             Integer.bitCount(SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS);
@@ -102,6 +96,9 @@ public final class FlexibilityController extends StateController {
 
     private long mRescheduledJobDeadline = FcConfig.DEFAULT_RESCHEDULED_JOB_DEADLINE_MS;
     private long mMaxRescheduledDeadline = FcConfig.DEFAULT_MAX_RESCHEDULED_DEADLINE_MS;
+
+    private long mUnseenConstraintGracePeriodMs =
+            FcConfig.DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS;
 
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -131,6 +128,9 @@ public final class FlexibilityController extends StateController {
     @VisibleForTesting
     @GuardedBy("mLock")
     int mSatisfiedFlexibleConstraints;
+
+    @GuardedBy("mLock")
+    private final SparseLongArray mLastSeenConstraintTimesElapsed = new SparseLongArray();
 
     @VisibleForTesting
     @GuardedBy("mLock")
@@ -258,25 +258,68 @@ public final class FlexibilityController extends StateController {
     boolean isFlexibilitySatisfiedLocked(JobStatus js) {
         return !mFlexibilityEnabled
                 || mService.getUidBias(js.getSourceUid()) == JobInfo.BIAS_TOP_APP
-                || getNumSatisfiedRequiredConstraintsLocked(js)
-                        >= js.getNumRequiredFlexibleConstraints()
+                || hasEnoughSatisfiedConstraintsLocked(js)
                 || mService.isCurrentlyRunningLocked(js);
     }
 
+    /**
+     * Returns whether there are enough constraints satisfied to allow running the job from flex's
+     * perspective. This takes into account unseen constraint combinations and expectations around
+     * whether additional constraints can ever be satisfied.
+     */
     @VisibleForTesting
     @GuardedBy("mLock")
-    int getNumSatisfiedRequiredConstraintsLocked(JobStatus js) {
-        return Integer.bitCount(mSatisfiedFlexibleConstraints)
-                // Connectivity is job-specific, so must be handled separately.
-                + (js.canApplyTransportAffinities()
-                        && js.areTransportAffinitiesSatisfied() ? 1 : 0);
+    boolean hasEnoughSatisfiedConstraintsLocked(@NonNull JobStatus js) {
+        final int satisfiedConstraints = mSatisfiedFlexibleConstraints
+                & (SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS
+                        | (js.areTransportAffinitiesSatisfied() ? CONSTRAINT_CONNECTIVITY : 0));
+        final int numSatisfied = Integer.bitCount(satisfiedConstraints);
+        if (numSatisfied >= js.getNumRequiredFlexibleConstraints()) {
+            return true;
+        }
+        // We don't yet have the full number of required flex constraints. See if we should expect
+        // to be able to reach it. If not, then there's no point waiting anymore.
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        if (nowElapsed < mUnseenConstraintGracePeriodMs) {
+            // Too soon after boot. Not enough time to start predicting. Wait longer.
+            return false;
+        }
+
+        // The intention is to not force jobs to wait for constraint combinations that have never
+        // been seen together in a while. The job may still be allowed to wait for other constraint
+        // combinations. Thus, the logic is:
+        // If all the constraint combinations that have a count higher than the current satisfied
+        // count have not been seen recently enough, then assume they won't be seen anytime soon,
+        // so don't force the job to wait longer. If any combinations with a higher count have been
+        // seen recently, then the job can potentially wait for those combinations.
+        final int irrelevantConstraints = ~(SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS
+                | (js.canApplyTransportAffinities() ? CONSTRAINT_CONNECTIVITY : 0));
+        for (int i = mLastSeenConstraintTimesElapsed.size() - 1; i >= 0; --i) {
+            final int constraints = mLastSeenConstraintTimesElapsed.keyAt(i);
+            if ((constraints & irrelevantConstraints) != 0) {
+                // Ignore combinations that couldn't satisfy this job's needs.
+                continue;
+            }
+            final long lastSeenElapsed = mLastSeenConstraintTimesElapsed.valueAt(i);
+            final boolean seenRecently =
+                    nowElapsed - lastSeenElapsed <= mUnseenConstraintGracePeriodMs;
+            if (Integer.bitCount(constraints) > numSatisfied && seenRecently) {
+                // We've seen a set of constraints with a higher count than what is currently
+                // satisfied recently enough, which means we can expect to see it again at some
+                // point. Keep waiting for now.
+                return false;
+            }
+        }
+
+        // We haven't seen any constraint set with more satisfied than the current satisfied count.
+        // There's no reason to expect additional constraints to be satisfied. Let the job run.
+        return true;
     }
 
     /**
      * Sets the controller's constraint to a given state.
      * Changes flexibility constraint satisfaction for affected jobs.
      */
-    @VisibleForTesting
     void setConstraintSatisfied(int constraint, boolean state, long nowElapsed) {
         synchronized (mLock) {
             final boolean old = (mSatisfiedFlexibleConstraints & constraint) != 0;
@@ -286,14 +329,34 @@ public final class FlexibilityController extends StateController {
 
             if (DEBUG) {
                 Slog.d(TAG, "setConstraintSatisfied: "
-                       + " constraint: " + constraint + " state: " + state);
+                        + " constraint: " + constraint + " state: " + state);
+            }
+
+            // Mark now as the last time we saw this set of constraints.
+            mLastSeenConstraintTimesElapsed.put(mSatisfiedFlexibleConstraints, nowElapsed);
+            if (!state) {
+                // Mark now as the last time we saw this particular constraint.
+                // (Good for logging/dump purposes).
+                mLastSeenConstraintTimesElapsed.put(constraint, nowElapsed);
             }
 
             mSatisfiedFlexibleConstraints =
                     (mSatisfiedFlexibleConstraints & ~constraint) | (state ? constraint : 0);
-            // Push the job update to the handler to avoid blocking other controllers and
-            // potentially batch back-to-back controller state updates together.
-            mHandler.obtainMessage(MSG_UPDATE_JOBS).sendToTarget();
+
+            if ((JOB_SPECIFIC_FLEXIBLE_CONSTRAINTS & constraint) != 0) {
+                // Job-specific constraint --> don't need to proceed with logic below that
+                // works with system-wide constraints.
+                return;
+            }
+
+            if (mFlexibilityEnabled) {
+                // Only attempt to update jobs if the flex logic is enabled. Otherwise, the status
+                // of the jobs won't change, so all the work will be a waste.
+
+                // Push the job update to the handler to avoid blocking other controllers and
+                // potentially batch back-to-back controller state updates together.
+                mHandler.obtainMessage(MSG_UPDATE_JOBS).sendToTarget();
+            }
         }
     }
 
@@ -543,7 +606,6 @@ public final class FlexibilityController extends StateController {
                     if (!predicate.test(js)) {
                         continue;
                     }
-                    pw.print("#");
                     js.printUniqueId(pw);
                     pw.print(" from ");
                     UserHandle.formatUid(pw, js.getSourceUid());
@@ -645,7 +707,7 @@ public final class FlexibilityController extends StateController {
                         final long nowElapsed = sElapsedRealtimeClock.millis();
                         final ArraySet<JobStatus> changedJobs = new ArraySet<>();
 
-                        for (int o = 0; o <= NUM_OPTIONAL_FLEXIBLE_CONSTRAINTS; ++o) {
+                        for (int o = 0; o <= NUM_SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS; ++o) {
                             final ArraySet<JobStatus> jobsByNumConstraints = mFlexibilityTracker
                                     .getJobsByNumRequiredConstraints(o);
 
@@ -687,6 +749,8 @@ public final class FlexibilityController extends StateController {
                 FC_CONFIG_PREFIX + "max_rescheduled_deadline_ms";
         static final String KEY_RESCHEDULED_JOB_DEADLINE_MS =
                 FC_CONFIG_PREFIX + "rescheduled_job_deadline_ms";
+        static final String KEY_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS =
+                FC_CONFIG_PREFIX + "unseen_constraint_grace_period_ms";
 
         static final boolean DEFAULT_FLEXIBILITY_ENABLED = false;
         @VisibleForTesting
@@ -698,6 +762,8 @@ public final class FlexibilityController extends StateController {
         final int[] DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS = {50, 60, 70, 80};
         private static final long DEFAULT_RESCHEDULED_JOB_DEADLINE_MS = HOUR_IN_MILLIS;
         private static final long DEFAULT_MAX_RESCHEDULED_DEADLINE_MS = 5 * DAY_IN_MILLIS;
+        @VisibleForTesting
+        static final long DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS = 3 * DAY_IN_MILLIS;
 
         /**
          * If false the controller will not track new jobs
@@ -717,6 +783,11 @@ public final class FlexibilityController extends StateController {
         public long RESCHEDULED_JOB_DEADLINE_MS = DEFAULT_RESCHEDULED_JOB_DEADLINE_MS;
         /** The max deadline for rescheduled jobs. */
         public long MAX_RESCHEDULED_DEADLINE_MS = DEFAULT_MAX_RESCHEDULED_DEADLINE_MS;
+        /**
+         * How long to wait after last seeing a constraint combination before no longer waiting for
+         * it in order to run jobs.
+         */
+        public long UNSEEN_CONSTRAINT_GRACE_PERIOD_MS = DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS;
 
         @GuardedBy("mLock")
         public void processConstantLocked(@NonNull DeviceConfig.Properties properties,
@@ -780,6 +851,14 @@ public final class FlexibilityController extends StateController {
                         mShouldReevaluateConstraints = true;
                     }
                     break;
+                case KEY_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS:
+                    UNSEEN_CONSTRAINT_GRACE_PERIOD_MS =
+                            properties.getLong(key, DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS);
+                    if (mUnseenConstraintGracePeriodMs != UNSEEN_CONSTRAINT_GRACE_PERIOD_MS) {
+                        mUnseenConstraintGracePeriodMs = UNSEEN_CONSTRAINT_GRACE_PERIOD_MS;
+                        mShouldReevaluateConstraints = true;
+                    }
+                    break;
                 case KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS:
                     String dropPercentString = properties.getString(key, "");
                     PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS =
@@ -834,6 +913,8 @@ public final class FlexibilityController extends StateController {
                     PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS).println();
             pw.print(KEY_RESCHEDULED_JOB_DEADLINE_MS, RESCHEDULED_JOB_DEADLINE_MS).println();
             pw.print(KEY_MAX_RESCHEDULED_DEADLINE_MS, MAX_RESCHEDULED_DEADLINE_MS).println();
+            pw.print(KEY_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS, UNSEEN_CONSTRAINT_GRACE_PERIOD_MS)
+                    .println();
 
             pw.decreaseIndent();
         }
@@ -854,12 +935,34 @@ public final class FlexibilityController extends StateController {
     @Override
     @GuardedBy("mLock")
     public void dumpControllerStateLocked(IndentingPrintWriter pw, Predicate<JobStatus> predicate) {
-        pw.println("# Constraints Satisfied: " + Integer.bitCount(mSatisfiedFlexibleConstraints));
-        pw.print("Satisfied Flexible Constraints: ");
+        pw.print("Satisfied Flexible Constraints:");
         JobStatus.dumpConstraints(pw, mSatisfiedFlexibleConstraints);
         pw.println();
         pw.println();
 
+        final long nowElapsed = sElapsedRealtimeClock.millis();
+        pw.println("Time since constraint combos last seen:");
+        pw.increaseIndent();
+        for (int i = 0; i < mLastSeenConstraintTimesElapsed.size(); ++i) {
+            final int constraints = mLastSeenConstraintTimesElapsed.keyAt(i);
+            if (constraints == mSatisfiedFlexibleConstraints) {
+                pw.print("0ms");
+            } else {
+                TimeUtils.formatDuration(
+                        mLastSeenConstraintTimesElapsed.valueAt(i), nowElapsed, pw);
+            }
+            pw.print(":");
+            if (constraints != 0) {
+                // dumpConstraints prepends with a space, so no need to add a space after the :
+                JobStatus.dumpConstraints(pw, constraints);
+            } else {
+                pw.print(" none");
+            }
+            pw.println();
+        }
+        pw.decreaseIndent();
+
+        pw.println();
         mFlexibilityTracker.dump(pw, predicate);
         pw.println();
         mFlexibilityAlarmQueue.dump(pw);

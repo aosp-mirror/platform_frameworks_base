@@ -640,21 +640,26 @@ public final class ConnectivityController extends RestrictingController implemen
         if (mCcConfig.mShouldReprocessNetworkCapabilities
                 || (mFlexibilityController.isEnabled() != mCcConfig.mFlexIsEnabled)) {
             AppSchedulingModuleThread.getHandler().post(() -> {
-                boolean shouldUpdateJobs = false;
-                for (int i = 0; i < mAvailableNetworks.size(); ++i) {
-                    CachedNetworkMetadata metadata = mAvailableNetworks.valueAt(i);
-                    if (metadata == null || metadata.networkCapabilities == null) {
-                        continue;
+                boolean flexAffinitiesChanged = false;
+                boolean flexAffinitiesSatisfied = false;
+                synchronized (mLock) {
+                    for (int i = 0; i < mAvailableNetworks.size(); ++i) {
+                        CachedNetworkMetadata metadata = mAvailableNetworks.valueAt(i);
+                        if (metadata == null) {
+                            continue;
+                        }
+                        if (updateTransportAffinitySatisfaction(metadata)) {
+                            // Something changed. Update jobs.
+                            flexAffinitiesChanged = true;
+                        }
+                        flexAffinitiesSatisfied |= metadata.satisfiesTransportAffinities;
                     }
-                    boolean satisfies = satisfiesTransportAffinities(metadata.networkCapabilities);
-                    if (metadata.satisfiesTransportAffinities != satisfies) {
-                        metadata.satisfiesTransportAffinities = satisfies;
-                        // Something changed. Update jobs.
-                        shouldUpdateJobs = true;
+                    if (flexAffinitiesChanged) {
+                        mFlexibilityController.setConstraintSatisfied(
+                                JobStatus.CONSTRAINT_CONNECTIVITY,
+                                flexAffinitiesSatisfied, sElapsedRealtimeClock.millis());
+                        updateAllTrackedJobsLocked(false);
                     }
-                }
-                if (shouldUpdateJobs) {
-                    updateAllTrackedJobsLocked(false);
                 }
             });
         }
@@ -1056,6 +1061,22 @@ public final class ConnectivityController extends RestrictingController implemen
         // Is the network a relaxed match?
         if (isRelaxedSatisfied(jobStatus, network, capabilities, constants)) return true;
 
+        return false;
+    }
+
+    /**
+     * Updates {@link CachedNetworkMetadata#satisfiesTransportAffinities} in the given
+     * {@link CachedNetworkMetadata} object.
+     * @return true if the satisfaction changed
+     */
+    private boolean updateTransportAffinitySatisfaction(
+            @NonNull CachedNetworkMetadata cachedNetworkMetadata) {
+        final boolean satisfiesAffinities =
+                satisfiesTransportAffinities(cachedNetworkMetadata.networkCapabilities);
+        if (cachedNetworkMetadata.satisfiesTransportAffinities != satisfiesAffinities) {
+            cachedNetworkMetadata.satisfiesTransportAffinities = satisfiesAffinities;
+            return true;
+        }
         return false;
     }
 
@@ -1552,7 +1573,9 @@ public final class ConnectivityController extends RestrictingController implemen
                     }
                 }
                 cnm.networkCapabilities = capabilities;
-                cnm.satisfiesTransportAffinities = satisfiesTransportAffinities(capabilities);
+                if (updateTransportAffinitySatisfaction(cnm)) {
+                    maybeUpdateFlexConstraintLocked(cnm);
+                }
                 maybeRegisterSignalStrengthCallbackLocked(capabilities);
                 updateTrackedJobsLocked(-1, network);
                 postAdjustCallbacks();
@@ -1566,8 +1589,13 @@ public final class ConnectivityController extends RestrictingController implemen
             }
             synchronized (mLock) {
                 final CachedNetworkMetadata cnm = mAvailableNetworks.remove(network);
-                if (cnm != null && cnm.networkCapabilities != null) {
-                    maybeUnregisterSignalStrengthCallbackLocked(cnm.networkCapabilities);
+                if (cnm != null) {
+                    if (cnm.networkCapabilities != null) {
+                        maybeUnregisterSignalStrengthCallbackLocked(cnm.networkCapabilities);
+                    }
+                    if (cnm.satisfiesTransportAffinities) {
+                        maybeUpdateFlexConstraintLocked(null);
+                    }
                 }
                 for (int u = 0; u < mCurrentDefaultNetworkCallbacks.size(); ++u) {
                     UidDefaultNetworkCallback callback = mCurrentDefaultNetworkCallbacks.valueAt(u);
@@ -1636,6 +1664,37 @@ public final class ConnectivityController extends RestrictingController implemen
                     idTm.unregisterTelephonyCallback(callback);
                 } else {
                     Slog.wtf(TAG, "Callback for sub " + subId + " didn't exist?!?!");
+                }
+            }
+        }
+
+        /**
+         * Maybe call {@link FlexibilityController#setConstraintSatisfied(int, boolean, long)}
+         * if the network affinity state has changed.
+         */
+        @GuardedBy("mLock")
+        private void maybeUpdateFlexConstraintLocked(
+                @Nullable CachedNetworkMetadata cachedNetworkMetadata) {
+            if (cachedNetworkMetadata != null
+                    && cachedNetworkMetadata.satisfiesTransportAffinities) {
+                mFlexibilityController.setConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY,
+                        true, sElapsedRealtimeClock.millis());
+            } else {
+                // This network doesn't satisfy transport affinities. Check if any other
+                // available networks do satisfy the affinities before saying that the
+                // transport affinity is no longer satisfied for flex.
+                boolean isTransportAffinitySatisfied = false;
+                for (int i = mAvailableNetworks.size() - 1; i >= 0; --i) {
+                    final CachedNetworkMetadata cnm = mAvailableNetworks.valueAt(i);
+                    if (cnm != null && cnm.satisfiesTransportAffinities) {
+                        isTransportAffinitySatisfied = true;
+                        break;
+                    }
+                }
+                if (!isTransportAffinitySatisfied) {
+                    mFlexibilityController.setConstraintSatisfied(
+                            JobStatus.CONSTRAINT_CONNECTIVITY, false,
+                            sElapsedRealtimeClock.millis());
                 }
             }
         }
