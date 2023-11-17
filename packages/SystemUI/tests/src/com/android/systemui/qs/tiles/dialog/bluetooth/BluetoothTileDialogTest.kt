@@ -228,16 +228,16 @@ class BluetoothTileDialogTest : SysuiTestCase() {
                 showPairNewDevice = true
             )
 
-            val seeAllLayout = bluetoothTileDialog.requireViewById<View>(R.id.see_all_layout_group)
-            val pairNewLayout =
-                bluetoothTileDialog.requireViewById<View>(R.id.pair_new_device_layout_group)
+            val seeAllButton = bluetoothTileDialog.requireViewById<View>(R.id.see_all_button)
+            val pairNewButton =
+                bluetoothTileDialog.requireViewById<View>(R.id.pair_new_device_button)
             val recyclerView = bluetoothTileDialog.requireViewById<RecyclerView>(R.id.device_list)
             val adapter = recyclerView?.adapter as BluetoothTileDialog.Adapter
 
-            assertThat(seeAllLayout).isNotNull()
-            assertThat(seeAllLayout.visibility).isEqualTo(GONE)
-            assertThat(pairNewLayout).isNotNull()
-            assertThat(pairNewLayout.visibility).isEqualTo(VISIBLE)
+            assertThat(seeAllButton).isNotNull()
+            assertThat(seeAllButton.visibility).isEqualTo(GONE)
+            assertThat(pairNewButton).isNotNull()
+            assertThat(pairNewButton.visibility).isEqualTo(VISIBLE)
             assertThat(adapter.itemCount).isEqualTo(1)
         }
     }
