@@ -1004,6 +1004,24 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mTmpApplySurfaceChangesTransactionState.obscured;
         final RootWindowContainer root = mWmService.mRoot;
 
+        if (w.mHasSurface) {
+            // Take care of the window being ready to display.
+            final boolean committed = w.mWinAnimator.commitFinishDrawingLocked();
+            if (isDefaultDisplay && committed) {
+                if (w.hasWallpaper()) {
+                    ProtoLog.v(WM_DEBUG_WALLPAPER,
+                            "First draw done in potential wallpaper target %s", w);
+                    mWallpaperMayChange = true;
+                    pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
+                    if (DEBUG_LAYOUT_REPEATS) {
+                        surfacePlacer.debugLayoutRepeats(
+                                "wallpaper and commitFinishDrawingLocked true",
+                                pendingLayoutChanges);
+                    }
+                }
+            }
+        }
+
         // Update effect.
         w.mObscured = mTmpApplySurfaceChangesTransactionState.obscured;
 
@@ -1090,29 +1108,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         w.handleWindowMovedIfNeeded();
 
-        final WindowStateAnimator winAnimator = w.mWinAnimator;
-
         //Slog.i(TAG, "Window " + this + " clearing mContentChanged - done placing");
         w.resetContentChanged();
-
-        // Moved from updateWindowsAndWallpaperLocked().
-        if (w.mHasSurface) {
-            // Take care of the window being ready to display.
-            final boolean committed = winAnimator.commitFinishDrawingLocked();
-            if (isDefaultDisplay && committed) {
-                if (w.hasWallpaper()) {
-                    ProtoLog.v(WM_DEBUG_WALLPAPER,
-                            "First draw done in potential wallpaper target %s", w);
-                    mWallpaperMayChange = true;
-                    pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
-                    if (DEBUG_LAYOUT_REPEATS) {
-                        surfacePlacer.debugLayoutRepeats(
-                                "wallpaper and commitFinishDrawingLocked true",
-                                pendingLayoutChanges);
-                    }
-                }
-            }
-        }
 
         final ActivityRecord activity = w.mActivityRecord;
         if (activity != null && activity.isVisibleRequested()) {
