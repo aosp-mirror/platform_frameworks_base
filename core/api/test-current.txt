@@ -1165,6 +1165,7 @@ package android.content.pm {
   public static final class UserProperties.Builder {
     ctor public UserProperties.Builder();
     method @NonNull public android.content.pm.UserProperties build();
+    method @NonNull public android.content.pm.UserProperties.Builder setCrossProfileContentSharingStrategy(int);
     method @NonNull public android.content.pm.UserProperties.Builder setShowInQuietMode(int);
     method @NonNull public android.content.pm.UserProperties.Builder setShowInSharingSurfaces(int);
   }

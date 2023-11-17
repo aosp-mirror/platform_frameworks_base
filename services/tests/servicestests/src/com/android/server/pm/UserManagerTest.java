@@ -23,7 +23,6 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
-import static org.testng.Assert.assertTrue;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -219,6 +218,8 @@ public final class UserManagerTest {
                 .isEqualTo(cloneUserProperties.isMediaSharedWithParent());
         assertThat(typeProps.isCredentialShareableWithParent())
                 .isEqualTo(cloneUserProperties.isCredentialShareableWithParent());
+        assertThat(typeProps.getCrossProfileContentSharingStrategy())
+                .isEqualTo(cloneUserProperties.getCrossProfileContentSharingStrategy());
         assertThrows(SecurityException.class, cloneUserProperties::getDeleteAppWithParent);
         assertThrows(SecurityException.class, cloneUserProperties::getAlwaysVisible);
         compareDrawables(mUserManager.getUserBadge(),
@@ -338,6 +339,8 @@ public final class UserManagerTest {
         assertThat(typeProps.isAuthAlwaysRequiredToDisableQuietMode())
                 .isEqualTo(privateProfileUserProperties
                         .isAuthAlwaysRequiredToDisableQuietMode());
+        assertThat(typeProps.getCrossProfileContentSharingStrategy())
+                .isEqualTo(privateProfileUserProperties.getCrossProfileContentSharingStrategy());
         assertThrows(SecurityException.class, privateProfileUserProperties::getDeleteAppWithParent);
         compareDrawables(mUserManager.getUserBadge(),
                 Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));

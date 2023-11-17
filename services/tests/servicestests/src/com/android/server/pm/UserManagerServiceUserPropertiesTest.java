@@ -71,6 +71,7 @@ public class UserManagerServiceUserPropertiesTest {
                 .setAuthAlwaysRequiredToDisableQuietMode(false)
                 .setDeleteAppWithParent(false)
                 .setAlwaysVisible(false)
+                .setCrossProfileContentSharingStrategy(0)
                 .build();
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
@@ -86,6 +87,7 @@ public class UserManagerServiceUserPropertiesTest {
         actualProps.setAuthAlwaysRequiredToDisableQuietMode(true);
         actualProps.setDeleteAppWithParent(true);
         actualProps.setAlwaysVisible(true);
+        actualProps.setCrossProfileContentSharingStrategy(1);
 
         // Write the properties to xml.
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -199,6 +201,8 @@ public class UserManagerServiceUserPropertiesTest {
                 copy::isMediaSharedWithParent, true);
         assertEqualGetterOrThrows(orig::isCredentialShareableWithParent,
                 copy::isCredentialShareableWithParent, true);
+        assertEqualGetterOrThrows(orig::getCrossProfileContentSharingStrategy,
+                copy::getCrossProfileContentSharingStrategy, true);
     }
 
     /**
@@ -256,5 +260,7 @@ public class UserManagerServiceUserPropertiesTest {
                 .isEqualTo(actual.isAuthAlwaysRequiredToDisableQuietMode());
         assertThat(expected.getDeleteAppWithParent()).isEqualTo(actual.getDeleteAppWithParent());
         assertThat(expected.getAlwaysVisible()).isEqualTo(actual.getAlwaysVisible());
+        assertThat(expected.getCrossProfileContentSharingStrategy())
+                .isEqualTo(actual.getCrossProfileContentSharingStrategy());
     }
 }
