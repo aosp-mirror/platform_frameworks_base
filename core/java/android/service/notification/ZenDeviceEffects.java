@@ -178,6 +178,16 @@ public final class ZenDeviceEffects implements Parcelable {
         return mMaximizeDoze;
     }
 
+    /**
+     * Whether any of the effects are set up.
+     * @hide
+     */
+    public boolean hasEffects() {
+        return mGrayscale || mSuppressAmbientDisplay || mDimWallpaper || mNightMode
+                || mDisableAutoBrightness || mDisableTapToWake || mDisableTiltToWake
+                || mDisableTouch || mMinimizeRadioUsage || mMaximizeDoze;
+    }
+
     /** {@link Parcelable.Creator} that instantiates {@link ZenDeviceEffects} objects. */
     @NonNull
     public static final Creator<ZenDeviceEffects> CREATOR = new Creator<ZenDeviceEffects>() {

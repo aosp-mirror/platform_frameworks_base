@@ -16,6 +16,8 @@
 
 package com.android.server.notification;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -28,8 +30,10 @@ import android.content.ComponentName;
 import android.net.Uri;
 import android.provider.Settings;
 import android.service.notification.Condition;
+import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeDiff;
+import android.service.notification.ZenModeDiff.RuleDiff;
 import android.service.notification.ZenPolicy;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -42,10 +46,14 @@ import com.android.server.UiServiceTestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @SmallTest
@@ -55,6 +63,15 @@ public class ZenModeDiffTest extends UiServiceTestCase {
     // version is not included in the diff; manual & automatic rules have special handling
     public static final Set<String> ZEN_MODE_CONFIG_EXEMPT_FIELDS =
             Set.of("version", "manualRule", "automaticRules");
+
+    // Differences for flagged fields are only generated if the flag is enabled.
+    // TODO: b/310620812 - Remove this exempt list when flag is inlined.
+    private static final Set<String> ZEN_RULE_EXEMPT_FIELDS =
+            android.app.Flags.modesApi()
+                    ? Set.of()
+                    : Set.of(RuleDiff.FIELD_TYPE, RuleDiff.FIELD_TRIGGER_DESCRIPTION,
+                            RuleDiff.FIELD_ICON_RES, RuleDiff.FIELD_ALLOW_MANUAL,
+                            RuleDiff.FIELD_ZEN_DEVICE_EFFECTS);
 
     @Test
     public void testRuleDiff_addRemoveSame() {
@@ -86,7 +103,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
         ArrayMap<String, Object> expectedTo = new ArrayMap<>();
         List<Field> fieldsForDiff = getFieldsForDiffCheck(
-                ZenModeConfig.ZenRule.class, Set.of()); // actually no exempt fields for ZenRule
+                ZenModeConfig.ZenRule.class, ZEN_RULE_EXEMPT_FIELDS);
         generateFieldDiffs(r1, r2, fieldsForDiff, expectedFrom, expectedTo);
 
         ZenModeDiff.RuleDiff d = new ZenModeDiff.RuleDiff(r1, r2);
@@ -230,16 +247,21 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         rule.name = "name";
         rule.snoozing = true;
         rule.pkg = "a";
-        rule.allowManualInvocation = true;
-        rule.type = AutomaticZenRule.TYPE_SCHEDULE_TIME;
-        rule.iconResId = 123;
-        rule.triggerDescription = "At night";
+        if (android.app.Flags.modesApi()) {
+            rule.allowManualInvocation = true;
+            rule.type = AutomaticZenRule.TYPE_SCHEDULE_TIME;
+            rule.iconResId = 123;
+            rule.triggerDescription = "At night";
+            rule.zenDeviceEffects = new ZenDeviceEffects.Builder()
+                    .setShouldDimWallpaper(true)
+                    .build();
+        }
         return rule;
     }
 
     // Get the fields on which we would want to check a diff. The requirements are: not final or/
     // static (as these should/can never change), and not in a specific list that's exempted.
-    private List<Field> getFieldsForDiffCheck(Class c, Set<String> exemptNames)
+    private List<Field> getFieldsForDiffCheck(Class<?> c, Set<String> exemptNames)
             throws SecurityException {
         Field[] fields = c.getDeclaredFields();
         ArrayList<Field> out = new ArrayList<>();
@@ -272,7 +294,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
             f.setAccessible(true);
             // Just double-check also that the fields actually are for the class declared
             assertEquals(f.getDeclaringClass(), a.getClass());
-            Class t = f.getType();
+            Class<?> t = f.getType();
             // handle the full set of primitive types first
             if (boolean.class.equals(t)) {
                 f.setBoolean(a, true);
@@ -305,8 +327,8 @@ public class ZenModeDiffTest extends UiServiceTestCase {
                 f.set(a, null);
                 expectedA.put(f.getName(), null);
                 try {
-                    f.set(b, t.getDeclaredConstructor().newInstance());
-                    expectedB.put(f.getName(), t.getDeclaredConstructor().newInstance());
+                    f.set(b, newInstanceOf(t));
+                    expectedB.put(f.getName(), newInstanceOf(t));
                 } catch (Exception e) {
                     // No default constructor, or blithely attempting to construct something doesn't
                     // work for some reason. If the default value isn't null, then keep it.
@@ -320,5 +342,35 @@ public class ZenModeDiffTest extends UiServiceTestCase {
                 }
             }
         }
+    }
+
+    private static Object newInstanceOf(Class<?> clazz) throws ReflectiveOperationException {
+        try {
+            Constructor<?> defaultConstructor = clazz.getDeclaredConstructor();
+            return defaultConstructor.newInstance();
+        } catch (Exception e) {
+            // No default constructor, continue below.
+        }
+
+        // Look for a suitable builder.
+        Optional<Class<?>> clazzBuilder =
+                Arrays.stream(clazz.getDeclaredClasses())
+                        .filter(maybeBuilder -> maybeBuilder.getSimpleName().equals("Builder"))
+                        .filter(maybeBuilder ->
+                                Arrays.stream(maybeBuilder.getMethods()).anyMatch(
+                                        m -> m.getName().equals("build")
+                                                && m.getParameterCount() == 0
+                                                && m.getReturnType().equals(clazz)))
+                        .findFirst();
+        if (clazzBuilder.isPresent()) {
+            Object builder = newInstanceOf(clazzBuilder.get());
+            Method buildMethod = builder.getClass().getMethod("build");
+            Object built = buildMethod.invoke(builder);
+            assertThat(built).isInstanceOf(clazz);
+            return built;
+        }
+
+        throw new ReflectiveOperationException(
+                "Sorry! Couldn't figure out how to create an instance of " + clazz.getName());
     }
 }
