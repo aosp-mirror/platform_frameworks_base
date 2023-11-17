@@ -43,6 +43,7 @@ import android.app.PackageInstallObserver;
 import android.app.PropertyInvalidatedCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.usage.StorageStatsManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -710,12 +711,31 @@ public abstract class PackageManager {
      */
     @SystemApi
     public interface OnPermissionsChangedListener {
+        /**
+         * Called when the permissions for a UID change for the default device.
+         *
+         * @param uid The UID with a change.
+         * @see Context#DEVICE_ID_DEFAULT
+         */
+        void onPermissionsChanged(int uid);
 
         /**
-         * Called when the permissions for a UID change.
-         * @param uid The UID with a change.
+         * Called when the permissions for a UID change for a device, including virtual devices.
+         *
+         * @param uid The UID of permission change event.
+         * @param persistentDeviceId The persistent device ID of permission change event.
+         *
+         * @see VirtualDeviceManager.VirtualDevice#getPersistentDeviceId()
+         * @see VirtualDeviceManager#PERSISTENT_DEVICE_ID_DEFAULT
          */
-        public void onPermissionsChanged(int uid);
+        @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+        default void onPermissionsChanged(int uid, @NonNull String persistentDeviceId) {
+            Objects.requireNonNull(persistentDeviceId);
+            if (Objects.equals(persistentDeviceId,
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT)) {
+                onPermissionsChanged(uid);
+            }
+        }
     }
 
     /** @hide */

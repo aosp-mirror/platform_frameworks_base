@@ -19,6 +19,7 @@ package com.android.server.permission.access.permission
 import android.Manifest
 import android.app.ActivityManager
 import android.app.AppOpsManager
+import android.companion.virtual.VirtualDeviceManager
 import android.compat.annotation.ChangeId
 import android.compat.annotation.EnabledAfter
 import android.content.Context
@@ -169,6 +170,7 @@ class PermissionService(private val service: AccessCheckingService) :
         onPermissionsChangeListeners = OnPermissionsChangeListeners(FgThread.get().looper)
         onPermissionFlagsChangedListener = OnPermissionFlagsChangedListener()
         policy.addOnPermissionFlagsChangedListener(onPermissionFlagsChangedListener)
+        devicePolicy.addOnPermissionFlagsChangedListener(onPermissionFlagsChangedListener)
     }
 
     override fun getAllPermissionGroups(flags: Int): List<PermissionGroupInfo> {
@@ -2616,10 +2618,11 @@ class PermissionService(private val service: AccessCheckingService) :
 
     /** Callback invoked when interesting actions have been taken on a permission. */
     private inner class OnPermissionFlagsChangedListener :
-        AppIdPermissionPolicy.OnPermissionFlagsChangedListener() {
+        AppIdPermissionPolicy.OnPermissionFlagsChangedListener,
+        DevicePermissionPolicy.OnDevicePermissionFlagsChangedListener {
         private var isPermissionFlagsChanged = false
 
-        private val runtimePermissionChangedUids = MutableIntSet()
+        private val runtimePermissionChangedUidDevices = MutableIntMap<MutableSet<String>>()
         // Mapping from UID to whether only notifications permissions are revoked.
         private val runtimePermissionRevokedUids = SparseBooleanArray()
         private val gidsChangedUids = MutableIntSet()
@@ -2642,6 +2645,24 @@ class PermissionService(private val service: AccessCheckingService) :
             oldFlags: Int,
             newFlags: Int
         ) {
+            onDevicePermissionFlagsChanged(
+                appId,
+                userId,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT,
+                permissionName,
+                oldFlags,
+                newFlags
+            )
+        }
+
+        override fun onDevicePermissionFlagsChanged(
+            appId: Int,
+            userId: Int,
+            deviceId: String,
+            permissionName: String,
+            oldFlags: Int,
+            newFlags: Int
+        ) {
             isPermissionFlagsChanged = true
 
             val uid = UserHandle.getUid(userId, appId)
@@ -2655,12 +2676,12 @@ class PermissionService(private val service: AccessCheckingService) :
                 // permission flags have changed for a non-runtime permission, now we no longer do
                 // that because permission flags are only for runtime permissions and the listeners
                 // aren't being notified of non-runtime permission grant state changes anyway.
-                runtimePermissionChangedUids += uid
                 if (wasPermissionGranted && !isPermissionGranted) {
                     runtimePermissionRevokedUids[uid] =
                         permissionName in NOTIFICATIONS_PERMISSIONS &&
                             runtimePermissionRevokedUids.get(uid, true)
                 }
+                runtimePermissionChangedUidDevices.getOrPut(uid) { mutableSetOf() } += deviceId
             }
 
             if (permission.hasGids && !wasPermissionGranted && isPermissionGranted) {
@@ -2674,10 +2695,12 @@ class PermissionService(private val service: AccessCheckingService) :
                 isPermissionFlagsChanged = false
             }
 
-            runtimePermissionChangedUids.forEachIndexed { _, uid ->
-                onPermissionsChangeListeners.onPermissionsChanged(uid)
+            runtimePermissionChangedUidDevices.forEachIndexed { _, uid, deviceIds ->
+                deviceIds.forEach { deviceId ->
+                    onPermissionsChangeListeners.onPermissionsChanged(uid, deviceId)
+                }
             }
-            runtimePermissionChangedUids.clear()
+            runtimePermissionChangedUidDevices.clear()
 
             if (!isKillRuntimePermissionRevokedUidsSkipped) {
                 val reason =
@@ -2749,15 +2772,16 @@ class PermissionService(private val service: AccessCheckingService) :
             when (msg.what) {
                 MSG_ON_PERMISSIONS_CHANGED -> {
                     val uid = msg.arg1
-                    handleOnPermissionsChanged(uid)
+                    val deviceId = msg.obj as String
+                    handleOnPermissionsChanged(uid, deviceId)
                 }
             }
         }
 
-        private fun handleOnPermissionsChanged(uid: Int) {
+        private fun handleOnPermissionsChanged(uid: Int, deviceId: String) {
             listeners.broadcast { listener ->
                 try {
-                    listener.onPermissionsChanged(uid)
+                    listener.onPermissionsChanged(uid, deviceId)
                 } catch (e: RemoteException) {
                     Slog.e(LOG_TAG, "Error when calling OnPermissionsChangeListener", e)
                 }
@@ -2772,9 +2796,9 @@ class PermissionService(private val service: AccessCheckingService) :
             listeners.unregister(listener)
         }
 
-        fun onPermissionsChanged(uid: Int) {
+        fun onPermissionsChanged(uid: Int, deviceId: String) {
             if (listeners.registeredCallbackCount > 0) {
-                obtainMessage(MSG_ON_PERMISSIONS_CHANGED, uid, 0).sendToTarget()
+                obtainMessage(MSG_ON_PERMISSIONS_CHANGED, uid, 0, deviceId).sendToTarget()
             }
         }
 
