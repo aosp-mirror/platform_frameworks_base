@@ -1922,6 +1922,36 @@ public class UserManager {
     public static final String DISALLOW_THREAD_NETWORK = "no_thread_network";
 
     /**
+     * This user restriction specifies if the user is able to add SIMs to the device.
+     *
+     * <p>
+     * This restriction blocks the download of embedded SIMs, and disables any physical SIMs.
+     * If any embedded SIMs are already on the device, then they are removed. This restriction
+     * does not affect SIMs provisioned to the device by device owners or profile owners.
+     *
+     * <p>
+     * This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile.
+     * In both cases, the restriction applies globally on the device.
+     *
+     * <p>
+     * Holders of the permission
+     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
+     * can set this restriction using the DevicePolicyManager APIs mentioned below.
+     *
+     * <p>Default is <code>false</code>.
+     *
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    @FlaggedApi(android.app.admin.flags.Flags.FLAG_ESIM_MANAGEMENT_ENABLED)
+    public static final String DISALLOW_SIM_GLOBALLY =
+            "no_sim_globally";
+
+    /**
      * List of key values that can be passed into the various user restriction related methods
      * in {@link UserManager} & {@link DevicePolicyManager}.
      * Note: This is slightly different from the real set of user restrictions listed in {@link
@@ -2008,6 +2038,7 @@ public class UserManager {
             DISALLOW_GRANT_ADMIN,
             DISALLOW_NEAR_FIELD_COMMUNICATION_RADIO,
             DISALLOW_THREAD_NETWORK,
+            DISALLOW_SIM_GLOBALLY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UserRestrictionKey {}
