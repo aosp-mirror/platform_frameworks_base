@@ -81,6 +81,8 @@ import com.android.systemui.biometrics.udfps.InteractionEvent;
 import com.android.systemui.biometrics.udfps.NormalizedTouchData;
 import com.android.systemui.biometrics.udfps.SinglePointerTouchProcessor;
 import com.android.systemui.biometrics.udfps.TouchProcessorResult;
+import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayViewModel;
+import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dump.DumpManager;
@@ -105,6 +107,8 @@ import com.android.systemui.util.concurrency.FakeExecution;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.time.SystemClock;
+
+import dagger.Lazy;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -241,6 +245,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
     private FpsUnlockTracker mFpsUnlockTracker;
     @Mock
     private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
+    @Mock
+    private Lazy<DeviceEntryUdfpsTouchOverlayViewModel> mDeviceEntryUdfpsTouchOverlayViewModel;
+    @Mock
+    private Lazy<DefaultUdfpsTouchOverlayViewModel> mDefaultUdfpsTouchOverlayViewModel;
 
     @Before
     public void setUp() {
@@ -334,7 +342,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mUdfpsKeyguardViewModels,
                 mSelectedUserInteractor,
                 mFpsUnlockTracker,
-                mKeyguardTransitionInteractor
+                mKeyguardTransitionInteractor,
+                mDeviceEntryUdfpsTouchOverlayViewModel,
+                mDefaultUdfpsTouchOverlayViewModel
+
         );
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();

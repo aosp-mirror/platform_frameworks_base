@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.deviceentry.data.repository
+
+package com.android.systemui.keyevent.data.repository
 
 import dagger.Module
 
-@Module(includes = [FakeDeviceEntryRepositoryModule::class]) object FakeDeviceEntryDataLayerModule
+@Module(includes = [FakeKeyEventRepositoryModule::class]) object FakeKeyEventDataLayerModule

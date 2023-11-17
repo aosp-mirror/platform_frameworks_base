@@ -46,7 +46,10 @@ import androidx.annotation.VisibleForTesting
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
+import com.android.systemui.biometrics.ui.binder.UdfpsTouchOverlayBinder
 import com.android.systemui.biometrics.ui.view.UdfpsTouchOverlay
+import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayViewModel
+import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
@@ -62,6 +65,7 @@ import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
+import dagger.Lazy
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 private const val TAG = "UdfpsControllerOverlay"
@@ -102,6 +106,8 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
     private val udfpsKeyguardAccessibilityDelegate: UdfpsKeyguardAccessibilityDelegate,
     private val transitionInteractor: KeyguardTransitionInteractor,
     private val selectedUserInteractor: SelectedUserInteractor,
+    private val deviceEntryUdfpsTouchOverlayViewModel: Lazy<DeviceEntryUdfpsTouchOverlayViewModel>,
+    private val defaultUdfpsTouchOverlayViewModel: Lazy<DefaultUdfpsTouchOverlayViewModel>,
 ) {
     private var overlayViewLegacy: UdfpsView? = null
         private set
@@ -184,12 +190,19 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                             importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
                         }
                         windowManager.addView(this, coreLayoutParams.updateDimensions(null))
+                        when (requestReason) {
+                            REASON_AUTH_KEYGUARD ->
+                                UdfpsTouchOverlayBinder.bind(
+                                    view = this,
+                                    viewModel = deviceEntryUdfpsTouchOverlayViewModel.get(),
+                                )
+                            else ->
+                                UdfpsTouchOverlayBinder.bind(
+                                    view = this,
+                                    viewModel = defaultUdfpsTouchOverlayViewModel.get(),
+                                )
+                        }
                     }
-                    // TODO (b/305234447): Bind view model to UdfpsTouchOverlay here to control
-                    // the visibility (sometimes, even if UDFPS is running, the UDFPS UI can be
-                    // obscured and we don't want to accept touches. ie: for enrollment don't accept
-                    // touches when the shade is expanded and for keyguard: don't accept touches
-                    // depending on the keyguard & shade state
                 } else {
                     overlayViewLegacy = (inflater.inflate(
                             R.layout.udfps_view, null, false

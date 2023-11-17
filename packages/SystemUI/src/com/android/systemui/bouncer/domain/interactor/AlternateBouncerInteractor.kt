@@ -18,7 +18,6 @@ package com.android.systemui.bouncer.domain.interactor
 
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
-import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -30,10 +29,9 @@ import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Encapsulates business logic for interacting with the lock-screen alternate bouncer. */
 @SysUISingleton
@@ -54,15 +52,19 @@ constructor(
     private val alternateBouncerUiAvailableFromSource: HashSet<String> = HashSet()
     private val alternateBouncerSupported: StateFlow<Boolean> =
         if (DeviceEntryUdfpsRefactor.isEnabled) {
-            fingerprintPropertyRepository.sensorType
-                .map { sensorType ->
-                    sensorType.isUdfps() || sensorType == FingerprintSensorType.POWER_BUTTON
-                }
-                .stateIn(
-                    scope = scope,
-                    started = SharingStarted.Eagerly,
-                    initialValue = false,
-                )
+            // The device entry udfps refactor doesn't currently support the alternate bouncer.
+            // TODO: Re-enable when b/287599719 is ready.
+            MutableStateFlow(false).asStateFlow()
+            //            fingerprintPropertyRepository.sensorType
+            //                .map { sensorType ->
+            //                    sensorType.isUdfps() || sensorType ==
+            // FingerprintSensorType.POWER_BUTTON
+            //                }
+            //                .stateIn(
+            //                    scope = scope,
+            //                    started = SharingStarted.Eagerly,
+            //                    initialValue = false,
+            //                )
         } else {
             bouncerRepository.alternateBouncerUIAvailable
         }

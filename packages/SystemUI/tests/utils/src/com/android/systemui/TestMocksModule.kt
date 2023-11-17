@@ -29,7 +29,9 @@ import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle
+import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.dagger.BiometricLog
 import com.android.systemui.log.dagger.BroadcastDispatcherLog
 import com.android.systemui.log.dagger.SceneFrameworkLog
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
@@ -54,6 +56,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.phone.ScrimController
+import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.statusbar.window.StatusBarWindowController
@@ -106,12 +109,16 @@ data class TestMocksModule(
     val unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider> =
         Optional.empty(),
     @get:Provides val zenModeController: ZenModeController = mock(),
+    @get:Provides val systemUIDialogManager: SystemUIDialogManager = mock(),
+    @get:Provides val deviceEntryIconTransitions: Set<DeviceEntryIconTransition> = emptySet(),
 
     // log buffers
     @get:[Provides BroadcastDispatcherLog]
     val broadcastDispatcherLogger: LogBuffer = mock(),
     @get:[Provides SceneFrameworkLog]
     val sceneLogger: LogBuffer = mock(),
+    @get:[Provides BiometricLog]
+    val biometricLogger: LogBuffer = mock(),
     @get:Provides val lsShadeTransitionLogger: LSShadeTransitionLogger = mock(),
 
     // framework mocks
