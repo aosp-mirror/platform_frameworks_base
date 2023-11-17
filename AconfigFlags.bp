@@ -263,6 +263,23 @@ java_aconfig_library {
 }
 
 // VirtualDeviceManager
+cc_aconfig_library {
+    name: "android.companion.virtualdevice.flags-aconfig-cc",
+    aconfig_declarations: "android.companion.virtualdevice.flags-aconfig",
+}
+
+java_aconfig_library {
+    name: "android.companion.virtualdevice.flags-aconfig-java",
+    aconfig_declarations: "android.companion.virtualdevice.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+aconfig_declarations {
+    name: "android.companion.virtualdevice.flags-aconfig",
+    package: "android.companion.virtualdevice.flags",
+    srcs: ["core/java/android/companion/virtual/flags/*.aconfig"],
+}
+
 java_aconfig_library {
     name: "android.companion.virtual.flags-aconfig-java",
     aconfig_declarations: "android.companion.virtual.flags-aconfig",
