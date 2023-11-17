@@ -3,6 +3,7 @@
 #include <string>
 
 #include <android/graphics/jni_runtime.h>
+#include <sys/stat.h>
 #include "core_jni_helpers.h"
 #include "jni.h"
 #include "unicode/locid.h"
@@ -77,6 +78,11 @@ static int register_jni_procs(const RegJNIRec array[], size_t count, JNIEnv* env
 
 using namespace android;
 
+int fileExists(const char* filename) {
+    struct stat buffer;
+    return (stat(filename, &buffer) == 0);
+}
+
 JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
     javaVM = vm;
     JNIEnv* env = nullptr;
@@ -116,6 +122,10 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
                                                            env->NewStringUTF("icu.dir"),
                                                            env->NewStringUTF(""));
     const char* path = env->GetStringUTFChars(stringPath, 0);
+    if (!fileExists(path)) {
+        fprintf(stderr, "Invalid ICU dat file path '%s'\n", path);
+        return JNI_ERR;
+    }
     u_setDataDirectory(path);
     env->ReleaseStringUTFChars(stringPath, path);
 
