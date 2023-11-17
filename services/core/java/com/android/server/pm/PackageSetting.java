@@ -772,6 +772,10 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         return readUserState(userId).isInstalled();
     }
 
+    boolean isArchived(int userId) {
+        return PackageArchiver.isArchived(readUserState(userId));
+    }
+
     int getInstallReason(int userId) {
         return readUserState(userId).getInstallReason();
     }

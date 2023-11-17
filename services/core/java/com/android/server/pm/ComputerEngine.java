@@ -2454,7 +2454,8 @@ public class ComputerEngine implements Computer {
      */
     public final boolean shouldFilterApplication(@Nullable PackageStateInternal ps,
             int callingUid, @Nullable ComponentName component,
-            @PackageManager.ComponentType int componentType, int userId, boolean filterUninstall) {
+            @PackageManager.ComponentType int componentType, int userId, boolean filterUninstall,
+            boolean filterArchived) {
         if (Process.isSdkSandboxUid(callingUid)) {
             int clientAppUid = Process.getAppUidForSdkSandboxUid(callingUid);
             // SDK sandbox should be able to see it's client app
@@ -2468,14 +2469,20 @@ public class ComputerEngine implements Computer {
         }
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         final boolean callerIsInstantApp = instantAppPkgName != null;
+        final boolean packageArchivedForUser = ps != null && PackageArchiver.isArchived(
+                ps.getUserStateOrDefault(userId));
         // Don't treat hiddenUntilInstalled as an uninstalled state, phone app needs to access
         // these hidden application details to customize carrier apps. Also, allowing the system
         // caller accessing to application across users.
         if (ps == null
                 || (filterUninstall
-                        && !isSystemOrRootOrShell(callingUid)
-                        && !ps.isHiddenUntilInstalled()
-                        && !ps.getUserStateOrDefault(userId).isInstalled())) {
+                && !isSystemOrRootOrShell(callingUid)
+                && !ps.isHiddenUntilInstalled()
+                && !ps.getUserStateOrDefault(userId).isInstalled()
+                // Archived packages behave like uninstalled packages. So if filterUninstall is
+                // set to true, we dismiss filtering some uninstalled package only if it is
+                // archived and filterArchived is set as false.
+                && (!packageArchivedForUser || filterArchived))) {
             // If caller is instant app or sdk sandbox and ps is null, pretend the application
             // exists, but, needs to be filtered
             return (callerIsInstantApp || filterUninstall || Process.isSdkSandboxUid(callingUid));
@@ -2523,7 +2530,20 @@ public class ComputerEngine implements Computer {
     }
 
     /**
-     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean)
+     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean,
+     * boolean)
+     */
+    public final boolean shouldFilterApplication(@Nullable PackageStateInternal ps,
+            int callingUid, @Nullable ComponentName component,
+            @PackageManager.ComponentType int componentType, int userId, boolean filterUninstall) {
+        return shouldFilterApplication(
+                ps, callingUid, component, componentType, userId, filterUninstall,
+                true /* filterArchived */);
+    }
+
+    /**
+     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean,
+     * boolean)
      */
     public final boolean shouldFilterApplication(@Nullable PackageStateInternal ps,
             int callingUid, @Nullable ComponentName component,
@@ -2533,7 +2553,8 @@ public class ComputerEngine implements Computer {
     }
 
     /**
-     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean)
+     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean,
+     * boolean)
      */
     public final boolean shouldFilterApplication(
             @Nullable PackageStateInternal ps, int callingUid, int userId) {
@@ -2542,7 +2563,8 @@ public class ComputerEngine implements Computer {
     }
 
     /**
-     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean)
+     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean,
+     * boolean)
      */
     public final boolean shouldFilterApplication(@NonNull SharedUserSetting sus,
             int callingUid, int userId) {
@@ -2557,7 +2579,8 @@ public class ComputerEngine implements Computer {
     }
 
     /**
-     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean)
+     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean,
+     * boolean)
      */
     public final boolean shouldFilterApplicationIncludingUninstalled(
             @Nullable PackageStateInternal ps, int callingUid, int userId) {
@@ -2566,7 +2589,19 @@ public class ComputerEngine implements Computer {
     }
 
     /**
-     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean)
+     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean,
+     * boolean)
+     */
+    public final boolean shouldFilterApplicationIncludingUninstalledNotArchived(
+            @Nullable PackageStateInternal ps, int callingUid, int userId) {
+        return shouldFilterApplication(
+                ps, callingUid, null, TYPE_UNKNOWN, userId, true /* filterUninstall */,
+                false /* filterArchived */);
+    }
+
+    /**
+     * @see #shouldFilterApplication(PackageStateInternal, int, ComponentName, int, int, boolean,
+     * boolean)
      */
     public final boolean shouldFilterApplicationIncludingUninstalled(
             @NonNull SharedUserSetting sus, int callingUid, int userId) {
@@ -5014,7 +5049,7 @@ public class ComputerEngine implements Computer {
         String installerPackageName = installSource.mInstallerPackageName;
         if (installerPackageName != null) {
             final PackageStateInternal ps = mSettings.getPackage(installerPackageName);
-            if (ps == null || shouldFilterApplicationIncludingUninstalled(ps, callingUid,
+            if (ps == null || shouldFilterApplicationIncludingUninstalledNotArchived(ps, callingUid,
                     UserHandle.getUserId(callingUid))) {
                 installerPackageName = null;
             }
@@ -5032,7 +5067,8 @@ public class ComputerEngine implements Computer {
             return InstallSource.EMPTY;
         }
 
-        if (ps == null || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
+        if (ps == null || shouldFilterApplicationIncludingUninstalledNotArchived(ps, callingUid,
+                userId)) {
             return null;
         }
 

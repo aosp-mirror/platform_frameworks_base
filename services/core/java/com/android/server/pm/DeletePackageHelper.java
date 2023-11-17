@@ -439,7 +439,7 @@ final class DeletePackageHelper {
         if (outInfo != null) {
             // Remember which users are affected, before the installed states are modified
             outInfo.mRemovedUsers = (systemApp || userId == UserHandle.USER_ALL)
-                    ? ps.queryInstalledUsers(allUserHandles, /* installed= */true)
+                    ? ps.queryUsersInstalledOrHasData(allUserHandles)
                     : new int[]{userId};
         }
 
