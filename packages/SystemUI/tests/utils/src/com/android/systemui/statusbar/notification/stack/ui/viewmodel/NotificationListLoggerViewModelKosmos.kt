@@ -14,11 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.stack.ui.viewbinder
+package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.statusbar.notification.collection.NotifCollection
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 
-var Kosmos.notifCollection by Fixture { mock<NotifCollection>() }
+val Kosmos.notificationListLoggerViewModel by Fixture {
+    NotificationLoggerViewModel(
+        keyguardInteractor = keyguardInteractor,
+        windowRootViewVisibilityInteractor = windowRootViewVisibilityInteractor,
+        activeNotificationsInteractor = activeNotificationsInteractor,
+    )
+}

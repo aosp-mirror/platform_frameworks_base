@@ -20,11 +20,20 @@ import com.android.systemui.statusbar.notification.data.model.activeNotification
 
 /**
  * Make the repository hold [count] active notifications for testing. The keys of the notifications
- * are "0", "1", ..., (count - 1).toString().
+ * are "0", "1", ..., (count - 1).toString(). The ranks are the same values in Int.
  */
 fun ActiveNotificationListRepository.setActiveNotifs(count: Int) {
     this.activeNotifications.value =
         ActiveNotificationsStore.Builder()
-            .apply { repeat(count) { i -> addEntry(activeNotificationModel(key = i.toString())) } }
+            .apply {
+                val rankingsMap = mutableMapOf<String, Int>()
+                repeat(count) { i ->
+                    val key = "$i"
+                    addEntry(activeNotificationModel(key = key))
+                    rankingsMap[key] = i
+                }
+
+                setRankingsMap(rankingsMap)
+            }
             .build()
 }

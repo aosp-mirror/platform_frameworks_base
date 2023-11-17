@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifStackC
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
 import com.android.systemui.statusbar.notification.row.NotifBindPipelineInitializer
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.wm.shell.bubbles.Bubbles
 import dagger.Lazy
@@ -53,7 +54,9 @@ import javax.inject.Inject
  * any initialization work that notifications require.
  */
 @SysUISingleton
-class NotificationsControllerImpl @Inject constructor(
+class NotificationsControllerImpl
+@Inject
+constructor(
     private val notificationListener: NotificationListener,
     private val commonNotifCollection: Lazy<CommonNotifCollection>,
     private val notifPipeline: Lazy<NotifPipeline>,
@@ -61,7 +64,7 @@ class NotificationsControllerImpl @Inject constructor(
     private val targetSdkResolver: TargetSdkResolver,
     private val notifPipelineInitializer: Lazy<NotifPipelineInitializer>,
     private val notifBindPipelineInitializer: NotifBindPipelineInitializer,
-    private val notificationLogger: NotificationLogger,
+    private val notificationLoggerOptional: Optional<NotificationLogger>,
     private val notificationRowBinder: NotificationRowBinderImpl,
     private val notificationsMediaManager: NotificationMediaManager,
     private val headsUpViewBinder: HeadsUpViewBinder,
@@ -80,28 +83,35 @@ class NotificationsControllerImpl @Inject constructor(
     ) {
         notificationListener.registerAsSystemService()
 
-        notifPipeline.get().addCollectionListener(object : NotifCollectionListener {
-            override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
-                listContainer.cleanUpViewStateForEntry(entry)
-            }
-        })
+        notifPipeline
+            .get()
+            .addCollectionListener(
+                object : NotifCollectionListener {
+                    override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
+                        listContainer.cleanUpViewStateForEntry(entry)
+                    }
+                }
+            )
 
         notificationRowBinder.setNotificationClicker(
-            clickerBuilder.build(bubblesOptional, notificationActivityStarter))
+            clickerBuilder.build(bubblesOptional, notificationActivityStarter)
+        )
         notificationRowBinder.setUpWithPresenter(presenter, listContainer)
         headsUpViewBinder.setPresenter(presenter)
         notifBindPipelineInitializer.initialize()
         animatedImageNotificationManager.bind()
 
-        notifPipelineInitializer.get().initialize(
-                notificationListener,
-                notificationRowBinder,
-                listContainer,
-                stackController)
+        notifPipelineInitializer
+            .get()
+            .initialize(notificationListener, notificationRowBinder, listContainer, stackController)
 
         targetSdkResolver.initialize(notifPipeline.get())
         notificationsMediaManager.setUpWithPresenter(presenter)
-        notificationLogger.setUpWithContainer(listContainer)
+        if (!NotificationsLiveDataStoreRefactor.isEnabled) {
+            notificationLoggerOptional.ifPresent { logger ->
+                logger.setUpWithContainer(listContainer)
+            }
+        }
         peopleSpaceWidgetManager.attach(notificationListener)
     }
 
@@ -120,11 +130,11 @@ class NotificationsControllerImpl @Inject constructor(
             notificationListener.snoozeNotification(sbn.key, snoozeOption.snoozeCriterion.id)
         } else {
             notificationListener.snoozeNotification(
-                    sbn.key,
-                    snoozeOption.minutesToSnoozeFor * 60 * 1000.toLong())
+                sbn.key,
+                snoozeOption.minutesToSnoozeFor * 60 * 1000.toLong()
+            )
         }
     }
 
-    override fun getActiveNotificationsCount(): Int =
-        notifLiveDataStore.activeNotifCount.value
+    override fun getActiveNotificationsCount(): Int = notifLiveDataStore.activeNotifCount.value
 }

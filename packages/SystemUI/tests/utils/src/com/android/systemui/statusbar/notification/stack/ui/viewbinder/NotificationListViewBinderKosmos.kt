@@ -23,8 +23,10 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.notificationIconContainerShelfViewBinder
+import com.android.systemui.statusbar.notification.stack.ui.view.notificationStatsLogger
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationListViewModel
 import com.android.systemui.statusbar.phone.notificationIconAreaController
+import java.util.Optional
 
 val Kosmos.notificationListViewBinder by Fixture {
     NotificationListViewBinder(
@@ -35,5 +37,6 @@ val Kosmos.notificationListViewBinder by Fixture {
         iconAreaController = notificationIconAreaController,
         metricsLogger = metricsLogger,
         nicBinder = notificationIconContainerShelfViewBinder,
+        loggerOptional = Optional.of(notificationStatsLogger),
     )
 }

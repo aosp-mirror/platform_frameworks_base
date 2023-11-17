@@ -113,6 +113,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
 import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation;
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
@@ -129,9 +130,12 @@ import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -245,6 +249,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private float mOverScrolledBottomPixels;
     private NotificationLogger.OnChildLocationsChangedListener mListener;
+    private OnNotificationLocationsChangedListener mLocationsChangedListener;
     private OnOverscrollTopChangedListener mOverscrollTopChangedListener;
     private ExpandableView.OnHeightChangedListener mOnHeightChangedListener;
     private Runnable mOnHeightChangedRunnable;
@@ -389,6 +394,14 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             }
         }
     };
+
+    private final Callable<Map<String, Integer>> collectVisibleLocationsCallable =
+            new Callable<>() {
+                @Override
+                public Map<String, Integer> call() {
+                    return collectVisibleNotificationLocations();
+                }
+            };
 
     private boolean mPulsing;
     private boolean mScrollable;
@@ -1242,8 +1255,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
+    /**
+     * @param listener to be notified after the location of Notification children might have
+     *                 changed.
+     */
+    public void setNotificationLocationsChangedListener(
+            @Nullable OnNotificationLocationsChangedListener listener) {
+        if (NotificationsLiveDataStoreRefactor.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+        mLocationsChangedListener = listener;
+    }
+
     public void setChildLocationsChangedListener(
             NotificationLogger.OnChildLocationsChangedListener listener) {
+        NotificationsLiveDataStoreRefactor.assertInLegacyMode();
         mListener = listener;
     }
 
@@ -4398,13 +4424,38 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             child.applyViewState();
         }
 
-        if (mListener != null) {
-            mListener.onChildLocationsChanged();
+        if (NotificationsLiveDataStoreRefactor.isEnabled()) {
+            if (mLocationsChangedListener != null) {
+                mLocationsChangedListener.onChildLocationsChanged(collectVisibleLocationsCallable);
+            }
+        } else {
+            if (mListener != null) {
+                mListener.onChildLocationsChanged();
+            }
         }
+
         runAnimationFinishedRunnables();
         setAnimationRunning(false);
         updateBackground();
         updateViewShadows();
+    }
+
+    /**
+     * Retrieves a map of visible [{@link ExpandableViewState#location}]s of the actively displayed
+     * Notification children associated by their Notification keys.
+     * Locations are collected recursively including locations from the child views of Notification
+     * Groups, that are visible.
+     */
+    private Map<String, Integer> collectVisibleNotificationLocations() {
+        Map<String, Integer> visibilities = new HashMap<>();
+        int numChildren = getChildCount();
+        for (int i = 0; i < numChildren; i++) {
+            ExpandableView child = getChildAtIndex(i);
+            if (child instanceof ExpandableNotificationRow row) {
+                row.collectVisibleLocations(visibilities);
+            }
+        }
+        return visibilities;
     }
 
     private void updateViewShadows() {
@@ -5901,7 +5952,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
     }
 
-    protected void setLogger(StackStateLogger logger) {
+    /**
+     * Sets a {@link StackStateLogger} which is notified as the {@link StackStateAnimator} updates
+     * the views.
+     */
+    protected void setStackStateLogger(StackStateLogger logger) {
         mStateAnimator.setLogger(logger);
     }
 
@@ -5936,6 +5991,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
          * @param open     Should the fling open or close the overscroll view.
          */
         void flingTopOverscroll(float velocity, boolean open);
+    }
+
+    /**
+     * A listener that is notified when some ExpandableNotificationRow locations might have changed.
+     */
+    public interface OnNotificationLocationsChangedListener {
+        /**
+         * Called when the location of ExpandableNotificationRows might have changed.
+         *
+         * @param locations mapping of Notification keys to locations.
+         */
+        void onChildLocationsChanged(Callable<Map<String, Integer>> locations);
     }
 
     private void updateSpeedBumpIndex() {

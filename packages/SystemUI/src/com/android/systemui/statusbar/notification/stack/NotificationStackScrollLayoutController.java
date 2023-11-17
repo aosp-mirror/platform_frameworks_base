@@ -751,7 +751,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     private void setUpView() {
-        mView.setLogger(mStackStateLogger);
+        mView.setStackStateLogger(mStackStateLogger);
         mView.setController(this);
         mView.setLogger(mLogger);
         mView.setTouchHandler(new TouchHandler());

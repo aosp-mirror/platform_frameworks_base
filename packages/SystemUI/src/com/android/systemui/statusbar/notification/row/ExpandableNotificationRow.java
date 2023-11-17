@@ -118,6 +118,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
@@ -988,6 +989,25 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
+     * Recursively collects the [{@link ExpandableViewState#location}]s populating the provided
+     * map.
+     * The visibility of each child is determined by the {@link View#getVisibility()}.
+     * Locations are added to the provided map including locations from child views, that are
+     * visible.
+     */
+    public void collectVisibleLocations(Map<String, Integer> locationsMap) {
+        if (getVisibility() == View.VISIBLE) {
+            locationsMap.put(getEntry().getKey(), getViewState().location);
+            if (mChildrenContainer != null) {
+                List<ExpandableNotificationRow> children = mChildrenContainer.getAttachedChildren();
+                for (int i = 0; i < children.size(); i++) {
+                    children.get(i).collectVisibleLocations(locationsMap);
+                }
+            }
+        }
+    }
+
+    /**
      * Updates states of all children.
      */
     public void updateChildrenStates() {
@@ -1615,7 +1635,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         /**
          * Called when the notification is expanded / collapsed.
          */
-        void logNotificationExpansion(String key, boolean userAction, boolean expanded);
+        void logNotificationExpansion(String key, int location, boolean userAction,
+                boolean expanded);
 
         /**
          * Called when a notification which was previously kept in its parent for the
@@ -3312,7 +3333,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (nowExpanded != wasExpanded) {
             updateShelfIconColor();
             if (mLogger != null) {
-                mLogger.logNotificationExpansion(mLoggingKey, userAction, nowExpanded);
+                mLogger.logNotificationExpansion(mLoggingKey, getViewState().location, userAction,
+                        nowExpanded);
             }
             if (mIsSummaryWithChildren) {
                 mChildrenContainer.onExpansionChanged();
