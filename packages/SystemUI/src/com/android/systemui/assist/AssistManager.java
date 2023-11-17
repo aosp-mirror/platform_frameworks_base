@@ -7,6 +7,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.SearchManager;
+import android.app.StatusBarManager;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -439,6 +440,14 @@ public class AssistManager {
                     public void onStartPerceiving() {
                         mAssistUtils.enableVisualQueryDetection(
                                 mVisualQueryDetectionAttentionListener);
+                        final StatusBarManager statusBarManager =
+                                mContext.getSystemService(StatusBarManager.class);
+                        if (statusBarManager != null) {
+                            statusBarManager.setIcon("assist_attention",
+                                    R.drawable.ic_assistant_attention_indicator,
+                                    0, "Attention Icon for Assistant");
+                            statusBarManager.setIconVisibility("assist_attention", false);
+                        }
                     }
 
                     @Override
@@ -447,11 +456,20 @@ public class AssistManager {
                         // accordingly).
                         handleVisualAttentionChanged(false);
                         mAssistUtils.disableVisualQueryDetection();
+                        final StatusBarManager statusBarManager =
+                                mContext.getSystemService(StatusBarManager.class);
+                        if (statusBarManager != null) {
+                            statusBarManager.removeIcon("assist_attention");
+                        }
                     }
                 });
     }
 
     private void handleVisualAttentionChanged(boolean attentionGained) {
+        final StatusBarManager statusBarManager = mContext.getSystemService(StatusBarManager.class);
+        if (statusBarManager != null) {
+            statusBarManager.setIconVisibility("assist_attention", attentionGained);
+        }
         mVisualQueryAttentionListeners.forEach(
                 attentionGained
                         ? VisualQueryAttentionListener::onAttentionGained
