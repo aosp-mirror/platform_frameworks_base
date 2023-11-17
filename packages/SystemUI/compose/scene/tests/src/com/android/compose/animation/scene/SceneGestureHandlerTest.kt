@@ -191,8 +191,13 @@ class SceneGestureHandlerTest {
         runMonotonicClockTest { TestGestureScope(coroutineScope = this).block() }
     }
 
-    private fun DraggableHandler.onDragStarted() {
-        onDragStarted(layoutSize = LAYOUT_SIZE, startedPosition = Offset.Zero)
+    private fun DraggableHandler.onDragStarted(
+        overSlop: Float = 0f,
+        startedPosition: Offset = Offset.Zero,
+    ) {
+        onDragStarted(startedPosition, overSlop)
+        // MultiPointerDraggable will always call onDelta with the initial overSlop right after
+        onDelta(overSlop)
     }
 
     @Test fun testPreconditions() = runGestureTest { assertIdle(currentScene = SceneA) }
@@ -291,6 +296,86 @@ class SceneGestureHandlerTest {
     }
 
     @Test
+    fun onDragStartedWithoutActionsInBothDirections_stayIdle() = runGestureTest {
+        horizontalSceneGestureHandler.draggable.onDragStarted(up(0.3f))
+        assertIdle(currentScene = SceneA)
+        horizontalSceneGestureHandler.draggable.onDragStarted(down(0.3f))
+        assertIdle(currentScene = SceneA)
+    }
+
+    @Test
+    fun onDragIntoNoAction_startTransitionToOppositeDirection() = runGestureTest {
+        navigateToSceneC()
+
+        // We are on SceneC which has no action in Down direction
+        draggable.onDragStarted(down(0.1f))
+        assertTransition(
+            currentScene = SceneC,
+            fromScene = SceneC,
+            toScene = SceneB,
+            progress = -0.1f
+        )
+
+        // Reverse drag direction, it will consume the previous drag
+        draggable.onDelta(up(0.1f))
+        assertTransition(
+            currentScene = SceneC,
+            fromScene = SceneC,
+            toScene = SceneB,
+            progress = 0.0f
+        )
+
+        // Continue reverse drag direction, it should record progress to Scene B
+        draggable.onDelta(up(0.1f))
+        assertTransition(
+            currentScene = SceneC,
+            fromScene = SceneC,
+            toScene = SceneB,
+            progress = 0.1f
+        )
+    }
+
+    @Test
+    fun onDragFromEdge_startTransitionToEdgeAction() = runGestureTest {
+        navigateToSceneC()
+
+        // Start dragging from the bottom
+        draggable.onDragStarted(up(0.1f), Offset(SCREEN_SIZE * 0.5f, SCREEN_SIZE))
+        assertTransition(
+            currentScene = SceneC,
+            fromScene = SceneC,
+            toScene = SceneA,
+            progress = 0.1f
+        )
+    }
+
+    @Test
+    fun onDragToExactlyZero_toSceneIsSet() = runGestureTest {
+        draggable.onDragStarted(down(0.3f))
+        assertTransition(
+            currentScene = SceneA,
+            fromScene = SceneA,
+            toScene = SceneC,
+            progress = 0.3f
+        )
+        draggable.onDelta(up(0.3f))
+        assertTransition(
+            currentScene = SceneA,
+            fromScene = SceneA,
+            toScene = SceneC,
+            progress = 0.0f
+        )
+    }
+
+    private fun TestGestureScope.navigateToSceneC() {
+        assertIdle(currentScene = SceneA)
+        draggable.onDragStarted(down(1f))
+        draggable.onDragStopped(0f)
+        advanceUntilIdle()
+        assertIdle(currentScene = SceneC)
+    }
+
+    @Test
     fun onAccelaratedScroll_scrollToThirdScene() = runGestureTest {
         // Drag A -> B with progress 0.2
         draggable.onDragStarted()
@@ -339,17 +424,17 @@ class SceneGestureHandlerTest {
         )
 
         // The stop animation is not started yet
-        assertThat(sceneGestureHandler.isAnimatingOffset).isFalse()
+        assertThat(sceneGestureHandler.swipeTransition.isAnimatingOffset).isFalse()
 
         runCurrent()
 
-        assertThat(sceneGestureHandler.isAnimatingOffset).isTrue()
+        assertThat(sceneGestureHandler.swipeTransition.isAnimatingOffset).isTrue()
         assertThat(sceneGestureHandler.isDrivingTransition).isTrue()
         assertTransition(currentScene = SceneC)
 
         // Start a new gesture while the offset is animating
         draggable.onDragStarted()
-        assertThat(sceneGestureHandler.isAnimatingOffset).isFalse()
+        assertThat(sceneGestureHandler.swipeTransition.isAnimatingOffset).isFalse()
     }
 
     @Test

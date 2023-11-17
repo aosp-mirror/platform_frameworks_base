@@ -38,7 +38,7 @@ class PriorityNestedScrollConnection(
     private val canStartPostScroll: (offsetAvailable: Offset, offsetBeforeStart: Offset) -> Boolean,
     private val canStartPostFling: (velocityAvailable: Velocity) -> Boolean,
     private val canContinueScroll: () -> Boolean,
-    private val onStart: () -> Unit,
+    private val onStart: (offsetAvailable: Offset) -> Unit,
     private val onScroll: (offsetAvailable: Offset) -> Offset,
     private val onStop: (velocityAvailable: Velocity) -> Velocity,
 ) : NestedScrollConnection {
@@ -131,7 +131,7 @@ class PriorityNestedScrollConnection(
 
         // Note: onStop will be called if we cannot continue to scroll (step 3a), or the finger is
         // lifted (step 3b), or this object has been destroyed (step 3c).
-        onStart()
+        onStart(available)
 
         return onScroll(available)
     }
@@ -156,7 +156,7 @@ fun PriorityNestedScrollConnection(
     canStartPostScroll: (offsetAvailable: Float, offsetBeforeStart: Float) -> Boolean,
     canStartPostFling: (velocityAvailable: Float) -> Boolean,
     canContinueScroll: () -> Boolean,
-    onStart: () -> Unit,
+    onStart: (offsetAvailable: Float) -> Unit,
     onScroll: (offsetAvailable: Float) -> Float,
     onStop: (velocityAvailable: Float) -> Float,
 ) =
@@ -172,7 +172,7 @@ fun PriorityNestedScrollConnection(
                 canStartPostFling(velocityAvailable.toFloat())
             },
             canContinueScroll = canContinueScroll,
-            onStart = onStart,
+            onStart = { offsetAvailable -> onStart(offsetAvailable.toFloat()) },
             onScroll = { offsetAvailable: Offset ->
                 onScroll(offsetAvailable.toFloat()).toOffset()
             },

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@file:Suppress("NOTHING_TO_INLINE")
+
 package com.android.compose.animation.scene
 
 import android.util.Log
@@ -26,7 +28,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import com.android.compose.nestedscroll.PriorityNestedScrollConnection
@@ -48,29 +49,19 @@ internal class SceneGestureHandler(
             layoutImpl.state.transitionState = value
         }
 
-    /**
-     * The transition controlled by this gesture handler. It will be set as the [transitionState] in
-     * the [SceneTransitionLayoutImpl] whenever this handler is driving the current transition.
-     *
-     * Note: the initialScene here does not matter, it's only used for initializing the transition
-     * and will be replaced when a drag event starts.
-     */
-    internal val swipeTransition = SwipeTransition(initialScene = currentScene)
+    internal var swipeTransition: SwipeTransition = SwipeTransition(currentScene, currentScene, 1f)
+        private set
+
+    private fun updateTransition(newTransition: SwipeTransition, force: Boolean = false) {
+        if (isDrivingTransition || force) transitionState = newTransition
+        swipeTransition = newTransition
+    }
 
     internal val currentScene: Scene
         get() = layoutImpl.scene(transitionState.currentScene)
 
     internal val isDrivingTransition
         get() = transitionState == swipeTransition
-
-    internal var isAnimatingOffset
-        get() = swipeTransition.isAnimatingOffset
-        private set(value) {
-            swipeTransition.isAnimatingOffset = value
-        }
-
-    internal val swipeTransitionToScene
-        get() = swipeTransition._toScene
 
     /**
      * The velocity threshold at which the intent of the user is to swipe up or down. It is the same
@@ -86,11 +77,17 @@ internal class SceneGestureHandler(
 
     internal var gestureWithPriority: Any? = null
 
-    internal fun onDragStarted(pointersDown: Int, layoutSize: IntSize, startedPosition: Offset?) {
+    /** The [UserAction]s associated to the current swipe. */
+    private var actionUpOrLeft: UserAction? = null
+    private var actionDownOrRight: UserAction? = null
+    private var actionUpOrLeftNoEdge: UserAction? = null
+    private var actionDownOrRightNoEdge: UserAction? = null
+
+    internal fun onDragStarted(pointersDown: Int, startedPosition: Offset?, overSlop: Float) {
         if (isDrivingTransition) {
             // This [transition] was already driving the animation: simply take over it.
             // Stop animating and start from where the current offset.
-            swipeTransition.stopOffsetAnimation()
+            swipeTransition.cancelOffsetAnimation()
             return
         }
 
@@ -106,37 +103,29 @@ internal class SceneGestureHandler(
         }
 
         val fromScene = currentScene
+        setCurrentActions(fromScene, startedPosition, pointersDown)
 
-        swipeTransition._currentScene = fromScene
-        swipeTransition._fromScene = fromScene
+        if (fromScene.upOrLeft() == null && fromScene.downOrRight() == null) {
+            return
+        }
 
-        // We don't know where we are transitioning to yet given that the drag just started, so set
-        // it to fromScene, which will effectively be treated the same as Idle(fromScene).
-        swipeTransition._toScene = fromScene
+        val (targetScene, distance) = fromScene.findTargetSceneAndDistance(overSlop)
 
-        swipeTransition.stopOffsetAnimation()
-        swipeTransition.dragOffset = 0f
+        updateTransition(SwipeTransition(fromScene, targetScene, distance), force = true)
+    }
 
-        // Use the layout size in the swipe orientation for swipe distance.
-        // TODO(b/290184746): Also handle custom distances for transitions. With smaller distances,
-        // we will also have to make sure that we correctly handle overscroll.
-        swipeTransition.absoluteDistance =
-            when (orientation) {
-                Orientation.Horizontal -> layoutSize.width
-                Orientation.Vertical -> layoutSize.height
-            }.toFloat()
-
+    private fun setCurrentActions(fromScene: Scene, startedPosition: Offset?, pointersDown: Int) {
         val fromEdge =
             startedPosition?.let { position ->
                 layoutImpl.edgeDetector.edge(
-                    layoutSize,
+                    fromScene.targetSize,
                     position.round(),
                     layoutImpl.density,
                     orientation,
                 )
             }
 
-        swipeTransition.actionUpOrLeft =
+        val upOrLeft =
             Swipe(
                 direction =
                     when (orientation) {
@@ -147,7 +136,7 @@ internal class SceneGestureHandler(
                 fromEdge = fromEdge,
             )
 
-        swipeTransition.actionDownOrRight =
+        val downOrRight =
             Swipe(
                 direction =
                     when (orientation) {
@@ -159,106 +148,112 @@ internal class SceneGestureHandler(
             )
 
         if (fromEdge == null) {
-            swipeTransition.actionUpOrLeftNoEdge = null
-            swipeTransition.actionDownOrRightNoEdge = null
+            actionUpOrLeft = null
+            actionDownOrRight = null
+            actionUpOrLeftNoEdge = upOrLeft
+            actionDownOrRightNoEdge = downOrRight
         } else {
-            swipeTransition.actionUpOrLeftNoEdge =
-                (swipeTransition.actionUpOrLeft as Swipe).copy(fromEdge = null)
-            swipeTransition.actionDownOrRightNoEdge =
-                (swipeTransition.actionDownOrRight as Swipe).copy(fromEdge = null)
-        }
-
-        if (swipeTransition.absoluteDistance > 0f) {
-            transitionState = swipeTransition
+            actionUpOrLeft = upOrLeft
+            actionDownOrRight = downOrRight
+            actionUpOrLeftNoEdge = upOrLeft.copy(fromEdge = null)
+            actionDownOrRightNoEdge = downOrRight.copy(fromEdge = null)
         }
     }
 
-    internal fun onDrag(delta: Float) {
-        if (delta == 0f) return
+    /**
+     * Use the layout size in the swipe orientation for swipe distance.
+     *
+     * TODO(b/290184746): Also handle custom distances for transitions. With smaller distances, we
+     *   will also have to make sure that we correctly handle overscroll.
+     */
+    private fun Scene.getAbsoluteDistance(): Float {
+        return when (orientation) {
+            Orientation.Horizontal -> targetSize.width
+            Orientation.Vertical -> targetSize.height
+        }.toFloat()
+    }
 
+    internal fun onDrag(delta: Float) {
+        if (delta == 0f || !isDrivingTransition) return
         swipeTransition.dragOffset += delta
 
-        // First check transition.fromScene should be changed for the case where the user quickly
-        // swiped twice in a row to accelerate the transition and go from A => B then B => C really
-        // fast.
-        maybeHandleAcceleratedSwipe()
-
-        val offset = swipeTransition.dragOffset
-        val fromScene = swipeTransition._fromScene
+        val (fromScene, acceleratedOffset) =
+            computeFromSceneConsideringAcceleratedSwipe(swipeTransition)
+        swipeTransition.dragOffset += acceleratedOffset
 
         // Compute the target scene depending on the current offset.
-        val target = fromScene.findTargetSceneAndDistance(offset)
+        val (targetScene, distance) =
+            fromScene.findTargetSceneAndDistance(swipeTransition.dragOffset)
 
-        if (swipeTransition._toScene.key != target.sceneKey) {
-            swipeTransition._toScene = layoutImpl.scenes.getValue(target.sceneKey)
-        }
-
-        if (swipeTransition._distance != target.distance) {
-            swipeTransition._distance = target.distance
+        // TODO(b/290184746): support long scroll A => B => C? especially for non fullscreen scenes
+        if (
+            fromScene.key != swipeTransition.fromScene || targetScene.key != swipeTransition.toScene
+        ) {
+            updateTransition(
+                SwipeTransition(fromScene, targetScene, distance).apply {
+                    this.dragOffset = swipeTransition.dragOffset
+                }
+            )
         }
     }
 
     /**
      * Change fromScene in the case where the user quickly swiped multiple times in the same
      * direction to accelerate the transition from A => B then B => C.
+     *
+     * @return the new fromScene and a dragOffset to be added in case the scene has changed
+     *
+     * TODO(b/290184746): the second drag needs to pass B to work. Add support for flinging twice
+     *   before B has been reached
      */
-    private fun maybeHandleAcceleratedSwipe() {
+    private inline fun computeFromSceneConsideringAcceleratedSwipe(
+        swipeTransition: SwipeTransition,
+    ): Pair<Scene, Float> {
         val toScene = swipeTransition._toScene
         val fromScene = swipeTransition._fromScene
+        val absoluteDistance = swipeTransition.distance.absoluteValue
 
         // If the swipe was not committed, don't do anything.
         if (fromScene == toScene || swipeTransition._currentScene != toScene) {
-            return
+            return Pair(fromScene, 0f)
         }
 
         // If the offset is past the distance then let's change fromScene so that the user can swipe
         // to the next screen or go back to the previous one.
         val offset = swipeTransition.dragOffset
-        val absoluteDistance = swipeTransition.absoluteDistance
-        if (offset <= -absoluteDistance && swipeTransition.upOrLeft(fromScene) == toScene.key) {
-            swipeTransition.dragOffset += absoluteDistance
-            swipeTransition._fromScene = toScene
-        } else if (
-            offset >= absoluteDistance && swipeTransition.downOrRight(fromScene) == toScene.key
-        ) {
-            swipeTransition.dragOffset -= absoluteDistance
-            swipeTransition._fromScene = toScene
+        return if (offset <= -absoluteDistance && fromScene.upOrLeft() == toScene.key) {
+            Pair(toScene, absoluteDistance)
+        } else if (offset >= absoluteDistance && fromScene.downOrRight() == toScene.key) {
+            Pair(toScene, -absoluteDistance)
+        } else {
+            Pair(fromScene, 0f)
         }
-
-        // Important note: toScene and distance will be updated right after this function is called,
-        // using fromScene and dragOffset.
     }
 
-    private class TargetScene(
-        val sceneKey: SceneKey,
-        val distance: Float,
-    )
-
-    private fun Scene.findTargetSceneAndDistance(directionOffset: Float): TargetScene {
-        val upOrLeft = swipeTransition.upOrLeft(this)
-        val downOrRight = swipeTransition.downOrRight(this)
+    // TODO(b/290184746): there are two bugs here:
+    // 1. if both upOrLeft and downOrRight become `null` during a transition this will crash
+    // 2. if one of them changes during a transition, the transition will jump cut to the new target
+    private inline fun Scene.findTargetSceneAndDistance(
+        directionOffset: Float
+    ): Pair<Scene, Float> {
+        val upOrLeft = upOrLeft()
+        val downOrRight = downOrRight()
+        val absoluteDistance = getAbsoluteDistance()
 
         // Compute the target scene depending on the current offset.
-        return when {
-            directionOffset < 0f && upOrLeft != null -> {
-                TargetScene(
-                    sceneKey = upOrLeft,
-                    distance = -swipeTransition.absoluteDistance,
-                )
-            }
-            directionOffset > 0f && downOrRight != null -> {
-                TargetScene(
-                    sceneKey = downOrRight,
-                    distance = swipeTransition.absoluteDistance,
-                )
-            }
-            else -> {
-                TargetScene(
-                    sceneKey = key,
-                    distance = 0f,
-                )
-            }
+        return if ((directionOffset < 0f && upOrLeft != null) || downOrRight == null) {
+            Pair(layoutImpl.scene(upOrLeft!!), -absoluteDistance)
+        } else {
+            Pair(layoutImpl.scene(downOrRight), absoluteDistance)
         }
+    }
+
+    private fun Scene.upOrLeft(): SceneKey? {
+        return userActions[actionUpOrLeft] ?: userActions[actionUpOrLeftNoEdge]
+    }
+
+    private fun Scene.downOrRight(): SceneKey? {
+        return userActions[actionDownOrRight] ?: userActions[actionDownOrRightNoEdge]
     }
 
     internal fun onDragStopped(velocity: Float, canChangeScene: Boolean) {
@@ -291,11 +286,6 @@ internal class SceneGestureHandler(
             // velocity and offset of the transition, then we launch the animation.
 
             val toScene = swipeTransition._toScene
-            if (fromScene == toScene) {
-                // We were not animating.
-                transitionState = TransitionState.Idle(fromScene.key)
-                return
-            }
 
             // Compute the destination scene (and therefore offset) to settle in.
             val offset = swipeTransition.dragOffset
@@ -322,12 +312,14 @@ internal class SceneGestureHandler(
 
             if (startFromIdlePosition) {
                 // If there is a next scene, we start the overscroll animation.
-                val target = fromScene.findTargetSceneAndDistance(velocity)
-                val isValidTarget = target.distance != 0f && target.sceneKey != fromScene.key
+                val (targetScene, distance) = fromScene.findTargetSceneAndDistance(velocity)
+                val isValidTarget = distance != 0f && targetScene.key != fromScene.key
                 if (isValidTarget) {
-                    swipeTransition._toScene = layoutImpl.scene(target.sceneKey)
-                    swipeTransition._distance = target.distance
-
+                    updateTransition(
+                        SwipeTransition(fromScene, targetScene, distance).apply {
+                            _currentScene = swipeTransition._currentScene
+                        }
+                    )
                     animateTo(targetScene = fromScene, targetOffset = 0f)
                 } else {
                     // We will not animate
@@ -382,10 +374,10 @@ internal class SceneGestureHandler(
     ) {
         swipeTransition.startOffsetAnimation {
             coroutineScope.launch {
-                if (!isAnimatingOffset) {
+                if (!swipeTransition.isAnimatingOffset) {
                     swipeTransition.offsetAnimatable.snapTo(swipeTransition.dragOffset)
                 }
-                isAnimatingOffset = true
+                swipeTransition.isAnimatingOffset = true
 
                 swipeTransition.offsetAnimatable.animateTo(
                     targetOffset,
@@ -397,7 +389,7 @@ internal class SceneGestureHandler(
                     initialVelocity = initialVelocity,
                 )
 
-                isAnimatingOffset = false
+                swipeTransition.finishOffsetAnimation()
 
                 // Now that the animation is done, the state should be idle. Note that if the state
                 // was changed since this animation started, some external code changed it and we
@@ -410,29 +402,26 @@ internal class SceneGestureHandler(
         }
     }
 
-    internal class SwipeTransition(initialScene: Scene) : TransitionState.Transition {
-        var _currentScene by mutableStateOf(initialScene)
+    internal class SwipeTransition(
+        val _fromScene: Scene,
+        val _toScene: Scene,
+        /**
+         * The signed distance between [fromScene] and [toScene]. It is negative if [fromScene] is
+         * above or to the left of [toScene].
+         */
+        val distance: Float
+    ) : TransitionState.Transition {
+        var _currentScene by mutableStateOf(_fromScene)
         override val currentScene: SceneKey
             get() = _currentScene.key
 
-        var _fromScene by mutableStateOf(initialScene)
-        override val fromScene: SceneKey
-            get() = _fromScene.key
+        override val fromScene: SceneKey = _fromScene.key
 
-        var _toScene by mutableStateOf(initialScene)
-        override val toScene: SceneKey
-            get() = _toScene.key
+        override val toScene: SceneKey = _toScene.key
 
         override val progress: Float
             get() {
                 val offset = if (isAnimatingOffset) offsetAnimatable.value else dragOffset
-                if (distance == 0f) {
-                    // This can happen only if fromScene == toScene.
-                    error(
-                        "Transition.progress should be called only when Transition.fromScene != " +
-                            "Transition.toScene"
-                    )
-                }
                 return offset / distance
             }
 
@@ -459,45 +448,21 @@ internal class SceneGestureHandler(
 
         /** Ends any previous [offsetAnimationJob] and runs the new [job]. */
         fun startOffsetAnimation(job: () -> Job) {
-            stopOffsetAnimation()
+            cancelOffsetAnimation()
             offsetAnimationJob = job()
         }
 
-        /** Stops any ongoing offset animation. */
-        fun stopOffsetAnimation() {
+        /** Cancel any ongoing offset animation. */
+        fun cancelOffsetAnimation() {
             offsetAnimationJob?.cancel()
+            finishOffsetAnimation()
+        }
 
+        fun finishOffsetAnimation() {
             if (isAnimatingOffset) {
                 isAnimatingOffset = false
                 dragOffset = offsetAnimatable.value
             }
-        }
-
-        /** The absolute distance between [fromScene] and [toScene]. */
-        var absoluteDistance = 0f
-
-        /**
-         * The signed distance between [fromScene] and [toScene]. It is negative if [fromScene] is
-         * above or to the left of [toScene].
-         */
-        var _distance by mutableFloatStateOf(0f)
-        val distance: Float
-            get() = _distance
-
-        /** The [UserAction]s associated to this swipe. */
-        var actionUpOrLeft: UserAction = Back
-        var actionDownOrRight: UserAction = Back
-        var actionUpOrLeftNoEdge: UserAction? = null
-        var actionDownOrRightNoEdge: UserAction? = null
-
-        fun upOrLeft(scene: Scene): SceneKey? {
-            return scene.userActions[actionUpOrLeft]
-                ?: actionUpOrLeftNoEdge?.let { scene.userActions[it] }
-        }
-
-        fun downOrRight(scene: Scene): SceneKey? {
-            return scene.userActions[actionDownOrRight]
-                ?: actionDownOrRightNoEdge?.let { scene.userActions[it] }
         }
     }
 
@@ -509,9 +474,9 @@ internal class SceneGestureHandler(
 private class SceneDraggableHandler(
     private val gestureHandler: SceneGestureHandler,
 ) : DraggableHandler {
-    override fun onDragStarted(layoutSize: IntSize, startedPosition: Offset, pointersDown: Int) {
+    override fun onDragStarted(startedPosition: Offset, overSlop: Float, pointersDown: Int) {
         gestureHandler.gestureWithPriority = this
-        gestureHandler.onDragStarted(pointersDown, layoutSize, startedPosition)
+        gestureHandler.onDragStarted(pointersDown, startedPosition, overSlop)
     }
 
     override fun onDelta(pixels: Float) {
@@ -589,7 +554,7 @@ internal class SceneNestedScrollHandler(
                 // The progress value can go beyond this range in the case of overscroll.
                 val shouldSnapToIdle = isProgressCloseTo(0f) || isProgressCloseTo(1f)
                 if (shouldSnapToIdle) {
-                    gestureHandler.swipeTransition.stopOffsetAnimation()
+                    gestureHandler.swipeTransition.cancelOffsetAnimation()
                     gestureHandler.transitionState =
                         TransitionState.Idle(gestureHandler.swipeTransition.currentScene)
                 }
@@ -639,12 +604,12 @@ internal class SceneNestedScrollHandler(
                 behavior.canStartOnPostFling && hasNextScene(velocityAvailable)
             },
             canContinueScroll = { true },
-            onStart = {
+            onStart = { offsetAvailable ->
                 gestureHandler.gestureWithPriority = this
                 gestureHandler.onDragStarted(
                     pointersDown = 1,
-                    layoutSize = gestureHandler.currentScene.targetSize,
                     startedPosition = null,
+                    overSlop = offsetAvailable,
                 )
             },
             onScroll = { offsetAvailable ->
