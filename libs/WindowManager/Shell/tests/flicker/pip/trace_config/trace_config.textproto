@@ -63,11 +63,7 @@ data_sources: {
       atrace_categories: "sched_process_exit"
       atrace_apps: "com.android.server.wm.flicker.testapp"
       atrace_apps: "com.android.systemui"
-      atrace_apps: "com.android.wm.shell.flicker"
-      atrace_apps: "com.android.wm.shell.flicker.other"
-      atrace_apps: "com.android.wm.shell.flicker.bubbles"
       atrace_apps: "com.android.wm.shell.flicker.pip"
-      atrace_apps: "com.android.wm.shell.flicker.splitscreen"
       atrace_apps: "com.google.android.apps.nexuslauncher"
     }
   }
