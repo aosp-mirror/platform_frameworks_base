@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.KeyEvent;
 
 /**
@@ -57,7 +58,10 @@ public class VirtualKeyboard extends VirtualInputDevice {
                     "Unsupported key code " + event.getKeyCode()
                         + " sent to a VirtualKeyboard input device.");
             }
-            mVirtualDevice.sendKeyEvent(mToken, event);
+            if (!mVirtualDevice.sendKeyEvent(mToken, event)) {
+                Log.w(TAG, "Failed to send key event to virtual keyboard "
+                        + mConfig.getInputDeviceName());
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

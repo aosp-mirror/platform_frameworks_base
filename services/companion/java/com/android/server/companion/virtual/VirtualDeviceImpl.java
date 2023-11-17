@@ -694,6 +694,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mInputController.createDpad(config.getInputDeviceName(), config.getVendorId(),
                     config.getProductId(), deviceToken,
                     getTargetDisplayIdForInput(config.getAssociatedDisplayId()));
+        } catch (InputController.DeviceCreationException e) {
+            throw new IllegalArgumentException(e);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -705,15 +707,17 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         super.createVirtualKeyboard_enforcePermission();
         Objects.requireNonNull(config);
         checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
-        synchronized (mVirtualDeviceLock) {
-            mLocaleList = LocaleList.forLanguageTags(config.getLanguageTag());
-        }
         final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createKeyboard(config.getInputDeviceName(), config.getVendorId(),
                     config.getProductId(), deviceToken,
                     getTargetDisplayIdForInput(config.getAssociatedDisplayId()),
                     config.getLanguageTag(), config.getLayoutType());
+            synchronized (mVirtualDeviceLock) {
+                mLocaleList = LocaleList.forLanguageTags(config.getLanguageTag());
+            }
+        } catch (InputController.DeviceCreationException e) {
+            throw new IllegalArgumentException(e);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -729,6 +733,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         try {
             mInputController.createMouse(config.getInputDeviceName(), config.getVendorId(),
                     config.getProductId(), deviceToken, config.getAssociatedDisplayId());
+        } catch (InputController.DeviceCreationException e) {
+            throw new IllegalArgumentException(e);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -741,19 +747,13 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         super.createVirtualTouchscreen_enforcePermission();
         Objects.requireNonNull(config);
         checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
-        int screenHeight = config.getHeight();
-        int screenWidth = config.getWidth();
-        if (screenHeight <= 0 || screenWidth <= 0) {
-            throw new IllegalArgumentException(
-                    "Cannot create a virtual touchscreen, screen dimensions must be positive. Got: "
-                            + "(" + screenWidth + ", " + screenHeight + ")");
-        }
-
         final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createTouchscreen(config.getInputDeviceName(), config.getVendorId(),
                     config.getProductId(), deviceToken, config.getAssociatedDisplayId(),
-                    screenHeight, screenWidth);
+                    config.getHeight(), config.getWidth());
+        } catch (InputController.DeviceCreationException e) {
+            throw new IllegalArgumentException(e);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -766,21 +766,15 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         super.createVirtualNavigationTouchpad_enforcePermission();
         Objects.requireNonNull(config);
         checkVirtualInputDeviceDisplayIdAssociation(config.getAssociatedDisplayId());
-        int touchpadHeight = config.getHeight();
-        int touchpadWidth = config.getWidth();
-        if (touchpadHeight <= 0 || touchpadWidth <= 0) {
-            throw new IllegalArgumentException(
-                "Cannot create a virtual navigation touchpad, touchpad dimensions must be positive."
-                    + " Got: (" + touchpadHeight + ", " + touchpadWidth + ")");
-        }
-
         final long ident = Binder.clearCallingIdentity();
         try {
             mInputController.createNavigationTouchpad(
                     config.getInputDeviceName(), config.getVendorId(),
                     config.getProductId(), deviceToken,
                     getTargetDisplayIdForInput(config.getAssociatedDisplayId()),
-                    touchpadHeight, touchpadWidth);
+                    config.getHeight(), config.getWidth());
+        } catch (InputController.DeviceCreationException e) {
+            throw new IllegalArgumentException(e);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
