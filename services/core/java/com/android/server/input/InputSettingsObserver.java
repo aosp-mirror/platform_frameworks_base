@@ -47,9 +47,6 @@ class InputSettingsObserver extends ContentObserver {
     private final NativeInputManagerService mNative;
     private final Map<Uri, Consumer<String /* reason*/>> mObservers;
 
-    // Cache prevent notifying same KeyRepeatInfo data to native code multiple times.
-    private KeyRepeatInfo mLastKeyRepeatInfoSettingsUpdate;
-
     InputSettingsObserver(Context context, Handler handler, InputManagerService service,
             NativeInputManagerService nativeIms) {
         super(handler);
@@ -84,9 +81,9 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_KEY_PRESSES),
                         (reason) -> updateShowKeyPresses()),
                 Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_TIMEOUT_MS),
-                        (reason) -> updateKeyRepeatInfo(getLatestLongPressTimeoutValue())),
+                        (reason) -> updateKeyRepeatInfo()),
                 Map.entry(Settings.Secure.getUriFor(Settings.Secure.KEY_REPEAT_DELAY_MS),
-                        (reason) -> updateKeyRepeatInfo(getLatestLongPressTimeoutValue())),
+                        (reason) -> updateKeyRepeatInfo()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_ROTARY_INPUT),
                         (reason) -> updateShowRotaryInput()));
     }
@@ -182,46 +179,32 @@ class InputSettingsObserver extends ContentObserver {
     }
 
     private void updateLongPressTimeout(String reason) {
-        final int longPressTimeoutValue = getLatestLongPressTimeoutValue();
-
-        // Before the key repeat timeout was introduced, some users relied on changing
-        // LONG_PRESS_TIMEOUT settings to also change the key repeat timeout. To support this
-        // backward compatibility, we'll preemptively update key repeat info here, in case where
-        // key repeat timeout was never set, and user is still relying on long press timeout value.
-        updateKeyRepeatInfo(longPressTimeoutValue);
+        // Not using ViewConfiguration.getLongPressTimeout here because it may return a stale value.
+        final int longPressTimeoutMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.LONG_PRESS_TIMEOUT, ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT,
+                UserHandle.USER_CURRENT);
 
         final boolean featureEnabledFlag =
                 DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT,
                         DEEP_PRESS_ENABLED, true /* default */);
         final boolean enabled =
                 featureEnabledFlag
-                        && longPressTimeoutValue <= ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
+                        && longPressTimeoutMs <= ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT;
         Log.i(TAG, (enabled ? "Enabling" : "Disabling") + " motion classifier because " + reason
                 + ": feature " + (featureEnabledFlag ? "enabled" : "disabled")
-                + ", long press timeout = " + longPressTimeoutValue);
+                + ", long press timeout = " + longPressTimeoutMs + " ms");
         mNative.setMotionClassifierEnabled(enabled);
     }
 
-    private void updateKeyRepeatInfo(int fallbackKeyRepeatTimeoutValue) {
-        // Not using ViewConfiguration.getKeyRepeatTimeout here because it may return a stale value.
+    private void updateKeyRepeatInfo() {
+        // Use ViewConfiguration getters only as fallbacks because they may return stale values.
         final int timeoutMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.KEY_REPEAT_TIMEOUT_MS, fallbackKeyRepeatTimeoutValue,
+                Settings.Secure.KEY_REPEAT_TIMEOUT_MS, ViewConfiguration.getKeyRepeatTimeout(),
                 UserHandle.USER_CURRENT);
         final int delayMs = Settings.Secure.getIntForUser(mContext.getContentResolver(),
                 Settings.Secure.KEY_REPEAT_DELAY_MS, ViewConfiguration.getKeyRepeatDelay(),
                 UserHandle.USER_CURRENT);
-        if (mLastKeyRepeatInfoSettingsUpdate == null || !mLastKeyRepeatInfoSettingsUpdate.isEqualTo(
-                timeoutMs, delayMs)) {
-            mNative.setKeyRepeatConfiguration(timeoutMs, delayMs);
-            mLastKeyRepeatInfoSettingsUpdate = new KeyRepeatInfo(timeoutMs, delayMs);
-        }
-    }
-
-    // Not using ViewConfiguration.getLongPressTimeout here because it may return a stale value.
-    private int getLatestLongPressTimeoutValue() {
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.LONG_PRESS_TIMEOUT, ViewConfiguration.DEFAULT_LONG_PRESS_TIMEOUT,
-                UserHandle.USER_CURRENT);
+        mNative.setKeyRepeatConfiguration(timeoutMs, delayMs);
     }
 
     private void updateMaximumObscuringOpacityForTouch() {
@@ -232,20 +215,5 @@ class InputSettingsObserver extends ContentObserver {
             return;
         }
         mNative.setMaximumObscuringOpacityForTouch(opacity);
-    }
-
-    private static class KeyRepeatInfo {
-        private final int mKeyRepeatTimeoutMs;
-        private final int mKeyRepeatDelayMs;
-
-        private KeyRepeatInfo(int keyRepeatTimeoutMs, int keyRepeatDelayMs) {
-            this.mKeyRepeatTimeoutMs = keyRepeatTimeoutMs;
-            this.mKeyRepeatDelayMs = keyRepeatDelayMs;
-        }
-
-        public boolean isEqualTo(int keyRepeatTimeoutMs, int keyRepeatDelayMs) {
-            return mKeyRepeatTimeoutMs == keyRepeatTimeoutMs
-                    && mKeyRepeatDelayMs == keyRepeatDelayMs;
-        }
     }
 }
