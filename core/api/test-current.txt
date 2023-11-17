@@ -3589,6 +3589,10 @@ package android.view {
     method @Nullable public android.view.View getStatusBarBackgroundView();
   }
 
+  public static final class WindowInsets.Type {
+    method @NonNull public static String toString(int);
+  }
+
   public interface WindowManager extends android.view.ViewManager {
     method public default int getDisplayImePolicy(int);
     method public static boolean hasWindowExtensionsEnabled();
