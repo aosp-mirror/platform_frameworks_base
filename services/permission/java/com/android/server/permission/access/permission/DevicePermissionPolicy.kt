@@ -61,6 +61,38 @@ class DevicePermissionPolicy : SchemePolicy() {
         }
     }
 
+    fun MutateStateScope.removeInactiveDevicesPermission(activePersistentDeviceIds: Set<String>) {
+        newState.userStates.forEachIndexed { _, userId, userState ->
+            userState.appIdDevicePermissionFlags.forEachReversedIndexed { _, appId, _ ->
+                val appIdDevicePermissionFlags =
+                    newState.mutateUserState(userId)!!.mutateAppIdDevicePermissionFlags()
+                val devicePermissionFlags =
+                    appIdDevicePermissionFlags.mutate(appId) ?: return@forEachReversedIndexed
+
+                val removePersistentDeviceIds = mutableSetOf<String>()
+                devicePermissionFlags.forEachIndexed { _, deviceId, _ ->
+                    if (!activePersistentDeviceIds.contains(deviceId)) {
+                        removePersistentDeviceIds.add(deviceId)
+                    }
+                }
+
+                removePersistentDeviceIds.forEach { deviceId -> devicePermissionFlags -= deviceId }
+            }
+        }
+    }
+
+    fun MutateStateScope.onDeviceIdRemoved(deviceId: String) {
+        newState.userStates.forEachIndexed { _, userId, userState ->
+            userState.appIdDevicePermissionFlags.forEachReversedIndexed { _, appId, _ ->
+                val appIdDevicePermissionFlags =
+                    newState.mutateUserState(userId)!!.mutateAppIdDevicePermissionFlags()
+                val devicePermissionFlags =
+                    appIdDevicePermissionFlags.mutate(appId) ?: return@forEachReversedIndexed
+                devicePermissionFlags -= deviceId
+            }
+        }
+    }
+
     override fun MutateStateScope.onStorageVolumeMounted(
         volumeUuid: String?,
         packageNames: List<String>,

@@ -2314,6 +2314,18 @@ class PermissionService(private val service: AccessCheckingService) :
         service.onSystemReady()
         virtualDeviceManagerInternal =
             LocalServices.getService(VirtualDeviceManagerInternal::class.java)
+
+        virtualDeviceManagerInternal?.allPersistentDeviceIds?.let { persistentDeviceIds ->
+            service.mutateState {
+                with(devicePolicy) { removeInactiveDevicesPermission(persistentDeviceIds) }
+            }
+        }
+
+        // trim permission states for the external devices, when they are removed.
+        virtualDeviceManagerInternal?.registerPersistentDeviceIdRemovedListener { persistentDeviceId
+            ->
+            service.mutateState { with(devicePolicy) { onDeviceIdRemoved(persistentDeviceId) } }
+        }
         permissionControllerManager =
             PermissionControllerManager(context, PermissionThread.getHandler())
     }
@@ -2681,8 +2693,8 @@ class PermissionService(private val service: AccessCheckingService) :
                         permissionName in NOTIFICATIONS_PERMISSIONS &&
                             runtimePermissionRevokedUids.get(uid, true)
                 }
-                runtimePermissionChangedUidDevices
-                    .getOrPut(uid) { mutableSetOf() } += persistentDeviceId
+                runtimePermissionChangedUidDevices.getOrPut(uid) { mutableSetOf() } +=
+                    persistentDeviceId
             }
 
             if (permission.hasGids && !wasPermissionGranted && isPermissionGranted) {
@@ -2799,8 +2811,7 @@ class PermissionService(private val service: AccessCheckingService) :
 
         fun onPermissionsChanged(uid: Int, persistentDeviceId: String) {
             if (listeners.registeredCallbackCount > 0) {
-                obtainMessage(MSG_ON_PERMISSIONS_CHANGED, uid, 0, persistentDeviceId)
-                    .sendToTarget()
+                obtainMessage(MSG_ON_PERMISSIONS_CHANGED, uid, 0, persistentDeviceId).sendToTarget()
             }
         }
 
