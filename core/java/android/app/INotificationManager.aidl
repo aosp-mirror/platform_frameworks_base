@@ -24,6 +24,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationHistory;
 import android.app.NotificationManager;
+import android.app.ICallNotificationEventCallback;
 import android.content.AttributionSource;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -247,4 +248,10 @@ interface INotificationManager
 
     @EnforcePermission("MANAGE_TOAST_RATE_LIMITING")
     void setToastRateLimitingEnabled(boolean enable);
+
+    @EnforcePermission(allOf={"INTERACT_ACROSS_USERS", "ACCESS_NOTIFICATIONS"})
+    void registerCallNotificationEventListener(String packageName, in UserHandle userHandle, in ICallNotificationEventCallback listener);
+    @EnforcePermission(allOf={"INTERACT_ACROSS_USERS", "ACCESS_NOTIFICATIONS"})
+    void unregisterCallNotificationEventListener(String packageName, in UserHandle userHandle, in ICallNotificationEventCallback listener);
+
 }
