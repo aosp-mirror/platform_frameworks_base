@@ -2549,15 +2549,14 @@ public class Vpn {
      * secondary thread to perform connection work, returning quickly.
      *
      * Should only be called to respond to Binder requests as this enforces caller permission. Use
-     * {@link #startLegacyVpnPrivileged(VpnProfile, Network, LinkProperties)} to skip the
+     * {@link #startLegacyVpnPrivileged(VpnProfile)} to skip the
      * permission check only when the caller is trusted (or the call is initiated by the system).
      */
-    public void startLegacyVpn(VpnProfile profile, @Nullable Network underlying,
-            LinkProperties egress) {
+    public void startLegacyVpn(VpnProfile profile) {
         enforceControlPermission();
         final long token = Binder.clearCallingIdentity();
         try {
-            startLegacyVpnPrivileged(profile, underlying, egress);
+            startLegacyVpnPrivileged(profile);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -2616,13 +2615,12 @@ public class Vpn {
     }
 
     /**
-     * Like {@link #startLegacyVpn(VpnProfile, Network, LinkProperties)}, but does not
-     * check permissions under the assumption that the caller is the system.
+     * Like {@link #startLegacyVpn(VpnProfile)}, but does not check permissions under
+     * the assumption that the caller is the system.
      *
      * Callers are responsible for checking permissions if needed.
      */
-    public void startLegacyVpnPrivileged(VpnProfile profileToStart,
-            @Nullable Network underlying, @NonNull LinkProperties egress) {
+    public void startLegacyVpnPrivileged(VpnProfile profileToStart) {
         final VpnProfile profile = profileToStart.clone();
         UserInfo user = mUserManager.getUserInfo(mUserId);
         if (user.isRestricted() || mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN,
