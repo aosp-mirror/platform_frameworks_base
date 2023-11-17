@@ -18085,7 +18085,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             (WindowProcessController) procsToKill.get(i);
                     final ProcessRecord pr = (ProcessRecord) wpc.mOwner;
                     if (ActivityManager.isProcStateBackground(pr.mState.getSetProcState())
-                            && pr.mReceivers.numberOfCurReceivers() == 0) {
+                            && pr.mReceivers.numberOfCurReceivers() == 0
+                            && !pr.mState.hasStartedServices()) {
                         pr.killLocked("remove task", ApplicationExitInfo.REASON_USER_REQUESTED,
                                 ApplicationExitInfo.SUBREASON_REMOVE_TASK, true);
                     } else {

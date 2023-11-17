@@ -3228,7 +3228,8 @@ public class OomAdjuster {
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, msg);
             }
             if (app.getWaitingToKill() != null && app.mReceivers.numberOfCurReceivers() == 0
-                    && ActivityManager.isProcStateBackground(state.getSetProcState())) {
+                    && ActivityManager.isProcStateBackground(state.getSetProcState())
+                    && !state.hasStartedServices()) {
                 app.killLocked(app.getWaitingToKill(), ApplicationExitInfo.REASON_USER_REQUESTED,
                         ApplicationExitInfo.SUBREASON_REMOVE_TASK, true);
                 success = false;
