@@ -5270,6 +5270,7 @@
 
   <!-- For ActivityManager PSS profiling configurability -->
   <java-symbol type="bool" name="config_am_disablePssProfiling" />
+  <java-symbol type="dimen" name="config_am_pssToRssThresholdModifier" />
 
   <java-symbol type="raw" name="default_ringtone_vibration_effect" />
 

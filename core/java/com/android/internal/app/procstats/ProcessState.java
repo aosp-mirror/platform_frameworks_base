@@ -690,18 +690,6 @@ public final class ProcessState {
         }
     }
 
-    public void reportCachedKill(ArrayMap<String, ProcessStateHolder> pkgList, long pss) {
-        ensureNotDead();
-        mCommonProcess.addCachedKill(1, pss, pss, pss);
-        if (!mCommonProcess.mMultiPackage) {
-            return;
-        }
-
-        for (int ip=pkgList.size()-1; ip>=0; ip--) {
-            pullFixedProc(pkgList, ip).addCachedKill(1, pss, pss, pss);
-        }
-    }
-
     public ProcessState pullFixedProc(String pkgName) {
         if (mMultiPackage) {
             // The array map is still pointing to a common process state

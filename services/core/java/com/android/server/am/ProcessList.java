@@ -94,6 +94,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.DropBoxManager;
+import android.os.Flags;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -4594,6 +4595,8 @@ public final class ProcessList {
                         r.mProfile.getLastPss() * 1024, new StringBuilder()));
                 proto.write(ProcessOomProto.Detail.LAST_SWAP_PSS, DebugUtils.sizeValueToString(
                         r.mProfile.getLastSwapPss() * 1024, new StringBuilder()));
+                // TODO(b/296454553): This proto field should be replaced with last cached RSS once
+                // AppProfiler is no longer collecting PSS.
                 proto.write(ProcessOomProto.Detail.LAST_CACHED_PSS, DebugUtils.sizeValueToString(
                         r.mProfile.getLastCachedPss() * 1024, new StringBuilder()));
                 proto.write(ProcessOomProto.Detail.CACHED, state.isCached());
@@ -4725,12 +4728,20 @@ public final class ProcessList {
                 pw.print("    ");
                 pw.print("state: cur="); pw.print(makeProcStateString(state.getCurProcState()));
                 pw.print(" set="); pw.print(makeProcStateString(state.getSetProcState()));
-                pw.print(" lastPss=");
-                DebugUtils.printSizeValue(pw, r.mProfile.getLastPss() * 1024);
-                pw.print(" lastSwapPss=");
-                DebugUtils.printSizeValue(pw, r.mProfile.getLastSwapPss() * 1024);
-                pw.print(" lastCachedPss=");
-                DebugUtils.printSizeValue(pw, r.mProfile.getLastCachedPss() * 1024);
+                // These values won't be collected if the flag is enabled.
+                if (!Flags.removeAppProfilerPssCollection()) {
+                    pw.print(" lastPss=");
+                    DebugUtils.printSizeValue(pw, r.mProfile.getLastPss() * 1024);
+                    pw.print(" lastSwapPss=");
+                    DebugUtils.printSizeValue(pw, r.mProfile.getLastSwapPss() * 1024);
+                    pw.print(" lastCachedPss=");
+                    DebugUtils.printSizeValue(pw, r.mProfile.getLastCachedPss() * 1024);
+                } else {
+                    pw.print(" lastRss=");
+                    DebugUtils.printSizeValue(pw, r.mProfile.getLastRss() * 1024);
+                    pw.print(" lastCachedRss=");
+                    DebugUtils.printSizeValue(pw, r.mProfile.getLastCachedRss() * 1024);
+                }
                 pw.println();
                 pw.print(prefix);
                 pw.print("    ");
