@@ -53,8 +53,7 @@ public class BubbleOverflowTest extends ShellTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mPositioner = new TestableBubblePositioner(mContext,
-                mContext.getSystemService(WindowManager.class));
+        mPositioner = new TestableBubblePositioner(mContext, mock(WindowManager.class));
         when(mBubbleController.getPositioner()).thenReturn(mPositioner);
         when(mBubbleController.getStackView()).thenReturn(mock(BubbleStackView.class));
 

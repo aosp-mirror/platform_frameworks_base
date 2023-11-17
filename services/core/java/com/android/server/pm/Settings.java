@@ -4970,6 +4970,10 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 pw.print(prefix); pw.print("  privateFlags="); printFlags(pw,
                         privateFlags, PRIVATE_FLAG_DUMP_SPEC); pw.println();
             }
+            if (!pkg.isUpdatableSystem()) {
+                pw.print(prefix); pw.print("  updatableSystem=false");
+                pw.println();
+            }
             if (pkg.hasPreserveLegacyExternalStorage()) {
                 pw.print(prefix); pw.print("  hasPreserveLegacyExternalStorage=true");
                 pw.println();

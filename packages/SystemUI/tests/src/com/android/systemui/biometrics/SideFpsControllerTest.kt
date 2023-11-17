@@ -55,6 +55,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
 import com.android.systemui.biometrics.data.repository.FakeDisplayStateRepository
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
@@ -151,9 +152,11 @@ class SideFpsControllerTest : SysuiTestCase() {
                 mock(StatusBarStateController::class.java),
                 mock(KeyguardStateController::class.java),
                 keyguardBouncerRepository,
+                FakeFingerprintPropertyRepository(),
                 FakeBiometricSettingsRepository(),
                 FakeSystemClock(),
                 mock(KeyguardUpdateMonitor::class.java),
+                testScope.backgroundScope,
             )
         displayStateInteractor =
             DisplayStateInteractorImpl(

@@ -160,6 +160,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String CONDITION_ATT_LINE2 = "line2";
     private static final String CONDITION_ATT_ICON = "icon";
     private static final String CONDITION_ATT_STATE = "state";
+    private static final String CONDITION_ATT_SOURCE = "source";
     private static final String CONDITION_ATT_FLAGS = "flags";
 
     private static final String ZEN_POLICY_TAG = "zen_policy";
@@ -687,7 +688,12 @@ public class ZenModeConfig implements Parcelable {
         final int state = safeInt(parser, CONDITION_ATT_STATE, -1);
         final int flags = safeInt(parser, CONDITION_ATT_FLAGS, -1);
         try {
-            return new Condition(id, summary, line1, line2, icon, state, flags);
+            if (Flags.modesApi()) {
+                final int source = safeInt(parser, CONDITION_ATT_SOURCE, Condition.SOURCE_UNKNOWN);
+                return new Condition(id, summary, line1, line2, icon, state, source, flags);
+            } else {
+                return new Condition(id, summary, line1, line2, icon, state, flags);
+            }
         } catch (IllegalArgumentException e) {
             Slog.w(TAG, "Unable to read condition xml", e);
             return null;
@@ -701,6 +707,9 @@ public class ZenModeConfig implements Parcelable {
         out.attribute(null, CONDITION_ATT_LINE2, c.line2);
         out.attributeInt(null, CONDITION_ATT_ICON, c.icon);
         out.attributeInt(null, CONDITION_ATT_STATE, c.state);
+        if (Flags.modesApi()) {
+            out.attributeInt(null, CONDITION_ATT_SOURCE, c.source);
+        }
         out.attributeInt(null, CONDITION_ATT_FLAGS, c.flags);
     }
 

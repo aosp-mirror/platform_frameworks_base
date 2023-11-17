@@ -276,11 +276,11 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public void remove(android.view.IWindow window) throws RemoteException {
-        mRealWm.remove(window);
+    public void remove(IBinder clientToken) throws RemoteException {
+        mRealWm.remove(clientToken);
         State state;
         synchronized (this) {
-            state = mStateForWindow.remove(window.asBinder());
+            state = mStateForWindow.remove(clientToken);
         }
         if (state == null) {
             throw new IllegalArgumentException(

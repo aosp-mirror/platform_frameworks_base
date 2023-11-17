@@ -197,6 +197,10 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"Bluetooth ਕਨੈਕਟ ਕੀਤੀ।"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"ਬਲੂਟੁੱਥ ਡੀਵਾਈਸ ਦਾ ਪ੍ਰਤੀਕ"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"ਡੀਵਾਈਸ ਦੇ ਵੇਰਵੇ ਦਾ ਸੰਰੂਪਣ ਕਰਨ ਲਈ ਕਲਿੱਕ ਕਰੋ"</string>
+    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
+    <skip />
+    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
+    <skip />
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ਬੈਟਰੀ ਪ੍ਰਤੀਸ਼ਤ ਅਗਿਆਤ ਹੈ।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ।"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> ਨਾਲ ਕਨੈਕਟ ਕੀਤਾ ਗਿਆ।"</string>
@@ -255,6 +259,10 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ਬਲੂਟੁੱਥ ਵਰਤੋ"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ਕਨੈਕਟ ਹੈ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ਰੱਖਿਅਤ ਕੀਤਾ ਗਿਆ"</string>
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ਬੈਟਰੀ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ਆਡੀਓ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ਹੈੱਡਸੈੱਟ"</string>
@@ -396,12 +404,9 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ਤੇਜ਼ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ਵਿੱਚ ਪੂਰਾ ਚਾਰਜ ਹੋਵੇਗਾ"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ਹੌਲੀ ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ਵਿੱਚ ਪੂਰਾ ਚਾਰਜ ਹੋਵੇਗਾ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ਚਾਰਜ ਹੋ ਰਿਹਾ ਹੈ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ਵਿੱਚ ਪੂਰਾ ਚਾਰਜ ਹੋਵੇਗਾ"</string>
-    <!-- no translation found for communal_tutorial_indicator_text (4503010353591430123) -->
-    <skip />
-    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
-    <skip />
-    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
-    <skip />
+    <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"ਭਾਈਚਾਰਕ ਟਿਊਟੋਰੀਅਲ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਖੱਬੇ ਪਾਸੇ ਵੱਲ ਸਵਾਈਪ ਕਰੋ"</string>
+    <string name="button_to_open_widget_picker" msgid="8007261659745030810">"ਵਿਜੇਟ ਚੋਣਕਾਰ ਨੂੰ ਖੋਲ੍ਹੋ"</string>
+    <string name="button_to_remove_widget" msgid="1511255853677835341">"ਵਿਜੇਟ ਨੂੰ ਹਟਾਓ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ਵਰਤੋਂਕਾਰ ਸਵਿੱਚ ਕਰੋ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ਪੁੱਲਡਾਊਨ ਮੀਨੂ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ਇਸ ਸੈਸ਼ਨ ਵਿਚਲੀਆਂ ਸਾਰੀਆਂ ਐਪਾਂ ਅਤੇ ਡਾਟਾ ਨੂੰ ਮਿਟਾ ਦਿੱਤਾ ਜਾਏਗਾ।"</string>
@@ -1210,8 +1215,6 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"ਹਾਲ ਹੀ ਵਿੱਚ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) ਵੱਲੋਂ ਵਰਤਿਆ ਗਿਆ"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ਵੱਲੋਂ ਵਰਤੋਂ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ਹਾਲ ਹੀ ਵਿੱਚ <xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ਵੱਲੋਂ ਵਰਤਿਆ ਗਿਆ"</string>
-    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
-    <skip />
-    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
-    <skip />
+    <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ਕੀ-ਬੋਰਡ ਬੈਕਲਾਈਟ"</string>
+    <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ਵਿੱਚੋਂ %1$d ਪੱਧਰ"</string>
 </resources>

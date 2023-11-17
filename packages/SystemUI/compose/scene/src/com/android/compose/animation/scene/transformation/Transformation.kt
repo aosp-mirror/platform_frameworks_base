@@ -16,7 +16,6 @@
 
 package com.android.compose.animation.scene.transformation
 
-import androidx.compose.ui.Modifier
 import com.android.compose.animation.scene.Element
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.Scene
@@ -51,19 +50,6 @@ internal class SharedElementTransformation(
     internal val enabled: Boolean,
     internal val scenePicker: SharedElementScenePicker,
 ) : Transformation
-
-/** A transformation that is applied on the element during the whole transition. */
-internal interface ModifierTransformation : Transformation {
-    /** Apply the transformation to [element]. */
-    // TODO(b/290184746): Figure out a public API for custom transformations that don't have access
-    // to these internal classes.
-    fun Modifier.transform(
-        layoutImpl: SceneTransitionLayoutImpl,
-        scene: Scene,
-        element: Element,
-        sceneValues: Element.TargetValues,
-    ): Modifier
-}
 
 /** A transformation that changes the value of an element property, like its size or offset. */
 internal sealed interface PropertyTransformation<T> : Transformation {

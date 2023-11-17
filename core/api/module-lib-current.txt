@@ -639,3 +639,12 @@ package android.util {
 
 }
 
+package android.view.accessibility {
+
+  public final class AccessibilityManager {
+    method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean startFlashNotificationSequence(@NonNull android.content.Context, int);
+    method @FlaggedApi("android.view.accessibility.flash_notification_system_api") public boolean stopFlashNotificationSequence(@NonNull android.content.Context);
+  }
+
+}
+

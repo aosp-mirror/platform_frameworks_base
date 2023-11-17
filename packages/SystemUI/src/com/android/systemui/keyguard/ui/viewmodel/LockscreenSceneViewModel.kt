@@ -21,6 +21,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.scene.shared.model.SceneKey
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
@@ -37,6 +38,8 @@ constructor(
     deviceEntryInteractor: DeviceEntryInteractor,
     communalInteractor: CommunalInteractor,
     val longPress: KeyguardLongPressViewModel,
+    val keyguardRoot: KeyguardRootViewModel,
+    val notifications: NotificationsPlaceholderViewModel,
 ) {
     /** The key of the scene we should switch to when swiping up. */
     val upDestinationSceneKey: StateFlow<SceneKey> =

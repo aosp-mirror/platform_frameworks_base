@@ -20,44 +20,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.CoreStartable
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.scrim.ScrimView
-import com.android.systemui.shade.NotificationShadeWindowView
 import com.android.systemui.statusbar.NotificationShadeWindowController
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-
-@ExperimentalCoroutinesApi
-@SysUISingleton
-class AlternateBouncerBinder
-@Inject
-constructor(
-    private val notificationShadeWindowView: NotificationShadeWindowView,
-    private val alternateBouncerViewModel: AlternateBouncerViewModel,
-    @Application private val scope: CoroutineScope,
-    private val notificationShadeWindowController: NotificationShadeWindowController,
-) : CoreStartable {
-    override fun start() {
-        if (!DeviceEntryUdfpsRefactor.isEnabled) {
-            return
-        }
-
-        AlternateBouncerViewBinder.bind(
-            notificationShadeWindowView.requireViewById(R.id.alternate_bouncer),
-            alternateBouncerViewModel,
-            scope,
-            notificationShadeWindowController,
-        )
-    }
-}
 
 /**
  * Binds the alternate bouncer view to its view-model.

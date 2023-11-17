@@ -197,6 +197,10 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"બ્લૂટૂથ કનેક્ટ થયું."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"બ્લૂટૂથ ડિવાઇસનું આઇકન"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"ડિવાઇસની વિગત ગોઠવવા માટે ક્લિક કરો"</string>
+    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
+    <skip />
+    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
+    <skip />
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"બૅટરીની ટકાવારી અજાણ છે."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> થી કનેક્ટ થયાં."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> થી કનેક્ટ કરેલ."</string>
@@ -255,6 +259,10 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"બ્લૂટૂથનો ઉપયોગ કરો"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"કનેક્ટેડ છે"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"સાચવેલું"</string>
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> બૅટરી"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ઑડિયો"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"હૅડસેટ"</string>
@@ -397,10 +405,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ધીમેથી ચાર્જ થઈ રહ્યું છે • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>માં ચાર્જ થઈ જશે"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ચાર્જ થઈ રહ્યું છે • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>માં પૂરું ચાર્જ થઈ જશે"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"કૉમ્યુનલ ટ્યૂટૉરિઅલ શરૂ કરવા માટે ડાબે સ્વાઇપ કરો"</string>
-    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
-    <skip />
-    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
-    <skip />
+    <string name="button_to_open_widget_picker" msgid="8007261659745030810">"વિજેટ પિકર ખોલો"</string>
+    <string name="button_to_remove_widget" msgid="1511255853677835341">"કોઈ વિજેટ કાઢી નાખો"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"વપરાશકર્તા સ્વિચ કરો"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"પુલડાઉન મેનૂ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"આ સત્રમાંની તમામ ઍપ અને ડેટા કાઢી નાખવામાં આવશે."</string>
@@ -723,7 +729,7 @@
     <string name="switch_bar_off" msgid="5669805115416379556">"બંધ"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"ઉપલબ્ધ નથી"</string>
     <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"વધુ જાણો"</string>
-    <string name="nav_bar" msgid="4642708685386136807">"નેવિગેશન બાર"</string>
+    <string name="nav_bar" msgid="4642708685386136807">"નૅવિગેશન બાર"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"લેઆઉટ"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"અતિરિક્ત ડાબો બટન પ્રકાર"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"અતિરિક્ત જમણો બટન પ્રકાર"</string>
@@ -742,7 +748,7 @@
     <string name="save" msgid="3392754183673848006">"સાચવો"</string>
     <string name="reset" msgid="8715144064608810383">"રીસેટ કરો"</string>
     <string name="clipboard" msgid="8517342737534284617">"ક્લિપબોર્ડ"</string>
-    <string name="accessibility_key" msgid="3471162841552818281">"કસ્ટમ નેવિગેશન બટન"</string>
+    <string name="accessibility_key" msgid="3471162841552818281">"કસ્ટમ નૅવિગેશન બટન"</string>
     <string name="left_keycode" msgid="8211040899126637342">"ડાબો કીકોડ"</string>
     <string name="right_keycode" msgid="2480715509844798438">"જમણો કીકોડ"</string>
     <string name="left_icon" msgid="5036278531966897006">"ડાબું આઇકન"</string>
@@ -1209,8 +1215,6 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) દ્વારા તાજેતરમાં ઉપયોગ કરવામાં આવ્યો"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) દ્વારા ઉપયોગ ચાલુ છે"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) દ્વારા તાજેતરમાં ઉપયોગ કરવામાં આવ્યો"</string>
-    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
-    <skip />
-    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
-    <skip />
+    <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"કીબોર્ડની બૅકલાઇટ"</string>
+    <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dમાંથી %1$d લેવલ"</string>
 </resources>

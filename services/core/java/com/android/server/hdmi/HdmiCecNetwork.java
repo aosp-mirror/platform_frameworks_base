@@ -921,6 +921,9 @@ public class HdmiCecNetwork {
      * port id.
      */
     int portIdToPath(int portId) {
+        if (portId == Constants.CEC_SWITCH_HOME) {
+            return getPhysicalAddress();
+        }
         HdmiPortInfo portInfo = getPortInfo(portId);
         if (portInfo == null) {
             Slog.e(TAG, "Cannot find the port info: " + portId);

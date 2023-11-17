@@ -19,8 +19,10 @@ package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
+import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import kotlinx.coroutines.DisposableHandle
@@ -33,6 +35,7 @@ object SharedNotificationContainerBinder {
     fun bind(
         view: SharedNotificationContainer,
         viewModel: SharedNotificationContainerViewModel,
+        sceneContainerFlags: SceneContainerFlags,
         controller: NotificationStackScrollLayoutController,
         notificationStackSizeCalculator: NotificationStackSizeCalculator,
     ): DisposableHandle {
@@ -68,10 +71,12 @@ object SharedNotificationContainerBinder {
                             .collect { controller.setMaxDisplayedNotifications(it) }
                     }
 
-                    launch {
-                        viewModel.position.collect {
-                            val animate = it.animate || controller.isAddOrRemoveAnimationPending()
-                            controller.updateTopPadding(it.top, animate)
+                    if (!sceneContainerFlags.flexiNotifsEnabled()) {
+                        launch {
+                            viewModel.position.collect {
+                                val animate = it.animate || controller.isAddOrRemoveAnimationPending
+                                controller.updateTopPadding(it.top, animate)
+                            }
                         }
                     }
 

@@ -111,6 +111,11 @@ public class ApkChecksums {
     private static final Certificate[] EMPTY_CERTIFICATE_ARRAY = {};
 
     /**
+     * Arbitrary size restriction for the signature, used to sign the checksums.
+     */
+    private static final int MAX_SIGNATURE_SIZE_BYTES = 35 * 1024;
+
+    /**
      * Check back in 1 second after we detected we needed to wait for the APK to be fully available.
      */
     private static final long PROCESS_REQUIRED_CHECKSUMS_DELAY_MILLIS = 1000;
@@ -260,6 +265,10 @@ public class ApkChecksums {
      */
     public static @NonNull Certificate[] verifySignature(Checksum[] checksums, byte[] signature)
             throws NoSuchAlgorithmException, IOException, SignatureException {
+        if (signature == null || signature.length > MAX_SIGNATURE_SIZE_BYTES) {
+            throw new SignatureException("Invalid signature");
+        }
+
         final byte[] blob;
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
             writeChecksums(os, checksums);

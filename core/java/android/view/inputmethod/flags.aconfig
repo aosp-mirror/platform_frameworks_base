@@ -23,3 +23,11 @@ flag {
     bug: "301713309"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "concurrent_input_methods"
+    namespace: "input_method"
+    description: "Feature flag for concurrent multi-session IME"
+    bug: "284527000"
+    is_fixed_read_only: true
+}

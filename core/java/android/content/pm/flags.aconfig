@@ -80,3 +80,10 @@ flag {
     description: "Feature flag to retrieve resolved path of the base APK during an app install."
     bug: "269728874"
 }
+
+flag {
+    name: "lightweight_invisible_label_detection"
+    namespace: "package_manager_service"
+    description: "Feature flag to detect the invisible labels in Launcher Apps"
+    bug: "299586370"
+}

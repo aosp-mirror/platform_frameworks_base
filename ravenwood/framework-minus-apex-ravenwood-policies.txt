@@ -129,7 +129,3 @@ class android.net.UriCodec stubclass
 # Context: just enough to support wrapper, no further functionality
 class android.content.Context stub
     method <init> ()V stub
-
-# Text
-class android.text.TextUtils stub
-    method isEmpty (Ljava/lang/CharSequence;)Z stub

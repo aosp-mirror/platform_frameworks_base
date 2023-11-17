@@ -24,6 +24,7 @@ import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.android.systemui.scene.shared.model.UserAction
 import com.android.systemui.shade.ui.viewmodel.ShadeHeaderViewModel
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
 
@@ -35,6 +36,7 @@ constructor(
     private val deviceEntryInteractor: DeviceEntryInteractor,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
     val qsSceneAdapter: QSSceneAdapter,
+    val notifications: NotificationsPlaceholderViewModel,
 ) {
     /** Notifies that some content in quick settings was clicked. */
     fun onContentClicked() = deviceEntryInteractor.attemptDeviceEntry()

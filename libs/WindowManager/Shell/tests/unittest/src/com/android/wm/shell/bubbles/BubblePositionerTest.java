@@ -16,17 +16,33 @@
 
 package com.android.wm.shell.bubbles;
 
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.view.View.LAYOUT_DIRECTION_LTR;
+import static android.view.View.LAYOUT_DIRECTION_RTL;
+
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
 
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Insets;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+import android.testing.TestableResources;
+import android.util.DisplayMetrics;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 
 import androidx.test.filters.SmallTest;
 
@@ -36,20 +52,36 @@ import com.android.wm.shell.ShellTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Tests operations and the resulting state managed by {@link BubblePositioner}.
  */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class BubblePositionerTest extends ShellTestCase {
 
+    private static final int MIN_WIDTH_FOR_TABLET = 600;
+
     private BubblePositioner mPositioner;
+    private Configuration mConfiguration;
+
+    @Mock
+    private WindowManager mWindowManager;
+    @Mock
+    private WindowMetrics mWindowMetrics;
 
     @Before
     public void setUp() {
-        WindowManager windowManager = mContext.getSystemService(WindowManager.class);
-        mPositioner = new BubblePositioner(mContext, windowManager);
+        MockitoAnnotations.initMocks(this);
+
+        mConfiguration = spy(new Configuration());
+        TestableResources testableResources = mContext.getOrCreateTestableResources();
+        testableResources.overrideConfiguration(mConfiguration);
+
+        mPositioner = new BubblePositioner(mContext, mWindowManager);
     }
 
     @Test
@@ -59,11 +91,11 @@ public class BubblePositionerTest extends ShellTestCase {
         Rect availableRect = new Rect(screenBounds);
         availableRect.inset(insets);
 
-        DeviceConfig deviceConfig = new ConfigBuilder()
+        new WindowManagerConfig()
                 .setInsets(insets)
                 .setScreenBounds(screenBounds)
-                .build();
-        mPositioner.update(deviceConfig);
+                .setUpConfig();
+        mPositioner.update();
 
         assertThat(mPositioner.getAvailableRect()).isEqualTo(availableRect);
         assertThat(mPositioner.isLandscape()).isFalse();
@@ -73,16 +105,16 @@ public class BubblePositionerTest extends ShellTestCase {
 
     @Test
     public void testShowBubblesVertically_phonePortrait() {
-        DeviceConfig deviceConfig = new ConfigBuilder().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setOrientation(ORIENTATION_PORTRAIT).setUpConfig();
+        mPositioner.update();
 
         assertThat(mPositioner.showBubblesVertically()).isFalse();
     }
 
     @Test
     public void testShowBubblesVertically_phoneLandscape() {
-        DeviceConfig deviceConfig = new ConfigBuilder().setLandscape().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setOrientation(ORIENTATION_LANDSCAPE).setUpConfig();
+        mPositioner.update();
 
         assertThat(mPositioner.isLandscape()).isTrue();
         assertThat(mPositioner.showBubblesVertically()).isTrue();
@@ -90,8 +122,8 @@ public class BubblePositionerTest extends ShellTestCase {
 
     @Test
     public void testShowBubblesVertically_tablet() {
-        DeviceConfig deviceConfig = new ConfigBuilder().setLargeScreen().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setLargeScreen().setUpConfig();
+        mPositioner.update();
 
         assertThat(mPositioner.showBubblesVertically()).isTrue();
     }
@@ -99,8 +131,8 @@ public class BubblePositionerTest extends ShellTestCase {
     /** If a resting position hasn't been set, calling it will return the default position. */
     @Test
     public void testGetRestingPosition_returnsDefaultPosition() {
-        DeviceConfig deviceConfig = new ConfigBuilder().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setUpConfig();
+        mPositioner.update();
 
         PointF restingPosition = mPositioner.getRestingPosition();
         PointF defaultPosition = mPositioner.getDefaultStartPosition();
@@ -111,8 +143,8 @@ public class BubblePositionerTest extends ShellTestCase {
     /** If a resting position has been set, it'll return that instead of the default position. */
     @Test
     public void testGetRestingPosition_returnsRestingPosition() {
-        DeviceConfig deviceConfig = new ConfigBuilder().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setUpConfig();
+        mPositioner.update();
 
         PointF restingPosition = new PointF(100, 100);
         mPositioner.setRestingPosition(restingPosition);
@@ -123,8 +155,8 @@ public class BubblePositionerTest extends ShellTestCase {
     /** Test that the default resting position on phone is in upper left. */
     @Test
     public void testGetRestingPosition_bubble_onPhone() {
-        DeviceConfig deviceConfig = new ConfigBuilder().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setUpConfig();
+        mPositioner.update();
 
         RectF allowableStackRegion =
                 mPositioner.getAllowableStackPositionRegion(1 /* bubbleCount */);
@@ -136,8 +168,8 @@ public class BubblePositionerTest extends ShellTestCase {
 
     @Test
     public void testGetRestingPosition_bubble_onPhone_RTL() {
-        DeviceConfig deviceConfig = new ConfigBuilder().setRtl().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setLayoutDirection(LAYOUT_DIRECTION_RTL).setUpConfig();
+        mPositioner.update();
 
         RectF allowableStackRegion =
                 mPositioner.getAllowableStackPositionRegion(1 /* bubbleCount */);
@@ -150,8 +182,8 @@ public class BubblePositionerTest extends ShellTestCase {
     /** Test that the default resting position on tablet is middle left. */
     @Test
     public void testGetRestingPosition_chatBubble_onTablet() {
-        DeviceConfig deviceConfig = new ConfigBuilder().setLargeScreen().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setLargeScreen().setUpConfig();
+        mPositioner.update();
 
         RectF allowableStackRegion =
                 mPositioner.getAllowableStackPositionRegion(1 /* bubbleCount */);
@@ -163,8 +195,9 @@ public class BubblePositionerTest extends ShellTestCase {
 
     @Test
     public void testGetRestingPosition_chatBubble_onTablet_RTL() {
-        DeviceConfig deviceConfig = new ConfigBuilder().setLargeScreen().setRtl().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setLargeScreen().setLayoutDirection(
+                LAYOUT_DIRECTION_RTL).setUpConfig();
+        mPositioner.update();
 
         RectF allowableStackRegion =
                 mPositioner.getAllowableStackPositionRegion(1 /* bubbleCount */);
@@ -177,8 +210,8 @@ public class BubblePositionerTest extends ShellTestCase {
     /** Test that the default resting position on tablet is middle right. */
     @Test
     public void testGetDefaultPosition_appBubble_onTablet() {
-        DeviceConfig deviceConfig = new ConfigBuilder().setLargeScreen().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setLargeScreen().setUpConfig();
+        mPositioner.update();
 
         RectF allowableStackRegion =
                 mPositioner.getAllowableStackPositionRegion(1 /* bubbleCount */);
@@ -190,8 +223,9 @@ public class BubblePositionerTest extends ShellTestCase {
 
     @Test
     public void testGetRestingPosition_appBubble_onTablet_RTL() {
-        DeviceConfig deviceConfig = new ConfigBuilder().setLargeScreen().setRtl().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setLargeScreen().setLayoutDirection(
+                LAYOUT_DIRECTION_RTL).setUpConfig();
+        mPositioner.update();
 
         RectF allowableStackRegion =
                 mPositioner.getAllowableStackPositionRegion(1 /* bubbleCount */);
@@ -203,8 +237,9 @@ public class BubblePositionerTest extends ShellTestCase {
 
     @Test
     public void testHasUserModifiedDefaultPosition_false() {
-        DeviceConfig deviceConfig = new ConfigBuilder().setLargeScreen().setRtl().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setLargeScreen().setLayoutDirection(
+                LAYOUT_DIRECTION_RTL).setUpConfig();
+        mPositioner.update();
 
         assertThat(mPositioner.hasUserModifiedDefaultPosition()).isFalse();
 
@@ -215,8 +250,9 @@ public class BubblePositionerTest extends ShellTestCase {
 
     @Test
     public void testHasUserModifiedDefaultPosition_true() {
-        DeviceConfig deviceConfig = new ConfigBuilder().setLargeScreen().setRtl().build();
-        mPositioner.update(deviceConfig);
+        new WindowManagerConfig().setLargeScreen().setLayoutDirection(
+                LAYOUT_DIRECTION_RTL).setUpConfig();
+        mPositioner.update();
 
         assertThat(mPositioner.hasUserModifiedDefaultPosition()).isFalse();
 
@@ -230,12 +266,12 @@ public class BubblePositionerTest extends ShellTestCase {
         Insets insets = Insets.of(10, 20, 5, 15);
         Rect screenBounds = new Rect(0, 0, 1800, 2600);
 
-        DeviceConfig deviceConfig = new ConfigBuilder()
+        new WindowManagerConfig()
                 .setLargeScreen()
                 .setInsets(insets)
                 .setScreenBounds(screenBounds)
-                .build();
-        mPositioner.update(deviceConfig);
+                .setUpConfig();
+        mPositioner.update();
 
         Intent intent = new Intent(Intent.ACTION_VIEW).setPackage(mContext.getPackageName());
         Bubble bubble = Bubble.createAppBubble(intent, new UserHandle(1), null, directExecutor());
@@ -275,47 +311,58 @@ public class BubblePositionerTest extends ShellTestCase {
      * Sets up window manager to return config values based on what you need for the test.
      * By default it sets up a portrait phone without any insets.
      */
-    private static class ConfigBuilder {
+    private class WindowManagerConfig {
         private Rect mScreenBounds = new Rect(0, 0, 1000, 2000);
         private boolean mIsLargeScreen = false;
-        private boolean mIsSmallTablet = false;
-        private boolean mIsLandscape = false;
-        private boolean mIsRtl = false;
+        private int mOrientation = ORIENTATION_PORTRAIT;
+        private int mLayoutDirection = LAYOUT_DIRECTION_LTR;
         private Insets mInsets = Insets.of(0, 0, 0, 0);
 
-        public ConfigBuilder setScreenBounds(Rect screenBounds) {
+        public WindowManagerConfig setScreenBounds(Rect screenBounds) {
             mScreenBounds = screenBounds;
             return this;
         }
 
-        public ConfigBuilder setLargeScreen() {
+        public WindowManagerConfig setLargeScreen() {
             mIsLargeScreen = true;
             return this;
         }
 
-        public ConfigBuilder setSmallTablet() {
-            mIsSmallTablet = true;
+        public WindowManagerConfig setOrientation(int orientation) {
+            mOrientation = orientation;
             return this;
         }
 
-        public ConfigBuilder setLandscape() {
-            mIsLandscape = true;
+        public WindowManagerConfig setLayoutDirection(int layoutDirection) {
+            mLayoutDirection = layoutDirection;
             return this;
         }
 
-        public ConfigBuilder setRtl() {
-            mIsRtl = true;
-            return this;
-        }
-
-        public ConfigBuilder setInsets(Insets insets) {
+        public WindowManagerConfig setInsets(Insets insets) {
             mInsets = insets;
             return this;
         }
 
-        private DeviceConfig build() {
-            return new DeviceConfig(mIsLargeScreen, mIsSmallTablet, mIsLandscape, mIsRtl,
-                    mScreenBounds, mInsets);
+        public void setUpConfig() {
+            mConfiguration.smallestScreenWidthDp = mIsLargeScreen
+                    ? MIN_WIDTH_FOR_TABLET
+                    : MIN_WIDTH_FOR_TABLET - 1;
+            mConfiguration.orientation = mOrientation;
+            mConfiguration.screenWidthDp = pxToDp(mScreenBounds.width());
+            mConfiguration.screenHeightDp = pxToDp(mScreenBounds.height());
+
+            when(mConfiguration.getLayoutDirection()).thenReturn(mLayoutDirection);
+            WindowInsets windowInsets = mock(WindowInsets.class);
+            when(windowInsets.getInsetsIgnoringVisibility(anyInt())).thenReturn(mInsets);
+            when(mWindowMetrics.getWindowInsets()).thenReturn(windowInsets);
+            when(mWindowMetrics.getBounds()).thenReturn(mScreenBounds);
+            when(mWindowManager.getCurrentWindowMetrics()).thenReturn(mWindowMetrics);
+        }
+
+        private int pxToDp(float px) {
+            int dpi = mContext.getResources().getDisplayMetrics().densityDpi;
+            float dp = px / ((float) dpi / DisplayMetrics.DENSITY_DEFAULT);
+            return (int) dp;
         }
     }
 }

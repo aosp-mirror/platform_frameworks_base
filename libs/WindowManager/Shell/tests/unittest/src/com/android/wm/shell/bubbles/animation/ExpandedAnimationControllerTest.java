@@ -66,8 +66,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     public void setUp() throws Exception {
         super.setUp();
 
-        mPositioner = new BubblePositioner(getContext(),
-                getContext().getSystemService(WindowManager.class));
+        mPositioner = new BubblePositioner(getContext(), mock(WindowManager.class));
         mPositioner.updateInternal(Configuration.ORIENTATION_PORTRAIT,
                 Insets.of(0, 0, 0, 0),
                 new Rect(0, 0, mDisplayWidth, mDisplayHeight));

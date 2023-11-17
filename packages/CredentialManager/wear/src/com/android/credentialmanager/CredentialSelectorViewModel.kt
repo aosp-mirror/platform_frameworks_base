@@ -20,28 +20,27 @@ import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.android.credentialmanager.model.Request
-import com.android.credentialmanager.repository.RequestRepository
+import com.android.credentialmanager.client.CredentialManagerClient
 import com.android.credentialmanager.ui.mappers.toGet
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class CredentialSelectorViewModel @Inject constructor(
-    private val requestRepository: RequestRepository,
+    private val credentialManagerClient: CredentialManagerClient,
 ) : ViewModel() {
 
-    val uiState: StateFlow<CredentialSelectorUiState> = requestRepository.requests
+    val uiState: StateFlow<CredentialSelectorUiState> = credentialManagerClient.requests
         .map { request ->
             when (request) {
                 null -> CredentialSelectorUiState.Idle
                 is Request.Cancel -> CredentialSelectorUiState.Cancel(request.appName)
-                Request.Close -> CredentialSelectorUiState.Close
-                Request.Create -> CredentialSelectorUiState.Create
+                is Request.Close -> CredentialSelectorUiState.Close
+                is Request.Create -> CredentialSelectorUiState.Create
                 is Request.Get -> request.toGet()
             }
         }
@@ -51,10 +50,8 @@ class CredentialSelectorViewModel @Inject constructor(
             initialValue = CredentialSelectorUiState.Idle,
         )
 
-    fun onNewIntent(intent: Intent, previousIntent: Intent? = null) {
-        viewModelScope.launch {
-            requestRepository.processRequest(intent = intent, previousIntent = previousIntent)
-        }
+    fun updateRequest(intent: Intent) {
+            credentialManagerClient.updateRequest(intent = intent)
     }
 }
 

@@ -197,6 +197,10 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ब्लुटुथ जडान भयो।"</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"ब्लुटुथ डिभाइस जनाउने आइकन"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"डिभाइसको विवरण कन्फिगर गर्न क्लिक गर्नुहोस्"</string>
+    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
+    <skip />
+    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
+    <skip />
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ब्याट्रीमा कति प्रतिशत चार्ज छ भन्ने कुराको जानाकरी छैन।"</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> मा जडित।"</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> मा कनेक्ट गरियो।"</string>
@@ -255,6 +259,10 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ब्लुटुथ प्रयोग गर्नुहोस्"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"कनेक्ट गरिएको छ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"सेभ गरिएको छ"</string>
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ब्याट्री"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"अडियो"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"हेडसेट"</string>
@@ -397,10 +405,8 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • बिस्तारै चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा पूरै चार्ज हुन्छ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • चार्ज हुँदै छ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> मा फुल चार्ज हुने छ"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"कम्युनल ट्युटोरियल सुरु गर्न बायाँतिर स्वाइप गर्नुहोस्"</string>
-    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
-    <skip />
-    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
-    <skip />
+    <string name="button_to_open_widget_picker" msgid="8007261659745030810">"विजेट पिकर खोल्नुहोस्"</string>
+    <string name="button_to_remove_widget" msgid="1511255853677835341">"कुनै विजेट हटाउनुहोस्"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"प्रयोगकर्ता फेर्नुहोस्"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"पुलडाउन मेनु"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"यो सत्रमा भएका सबै एपहरू र डेटा मेटाइने छ।"</string>
@@ -1209,8 +1215,6 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>) ले हालसालै प्रयोग गरेको"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ले प्रयोग गरिरहेको छ"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"<xliff:g id="APP_NAME">%1$s</xliff:g> (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>) ले हालसालै प्रयोग गरेको"</string>
-    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
-    <skip />
-    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
-    <skip />
+    <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"किबोर्ड ब्याकलाइट"</string>
+    <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d मध्ये %1$d औँ स्तर"</string>
 </resources>

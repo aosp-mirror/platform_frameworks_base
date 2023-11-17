@@ -99,6 +99,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.PrintWriterPrinter;
@@ -781,6 +782,12 @@ public class DisplayPolicy {
             if (!mDisplayContent.isDefaultDisplay) {
                 return;
             }
+            if (awake) {
+                mService.mAtmService.mVisibleDozeUiProcess = null;
+            } else if (mScreenOnFully && mNotificationShade != null) {
+                // Screen is still on, so it may be showing an always-on UI.
+                mService.mAtmService.mVisibleDozeUiProcess = mNotificationShade.getProcess();
+            }
             mService.mAtmService.mKeyguardController.updateDeferTransitionForAod(
                     mAwake /* waiting */);
         }
@@ -826,12 +833,24 @@ public class DisplayPolicy {
     }
 
     public void screenTurnedOn(ScreenOnListener screenOnListener) {
+        WindowProcessController visibleDozeUiProcess = null;
         synchronized (mLock) {
             mScreenOnEarly = true;
             mScreenOnFully = false;
             mKeyguardDrawComplete = false;
             mWindowManagerDrawComplete = false;
             mScreenOnListener = screenOnListener;
+            if (!mAwake && mNotificationShade != null) {
+                // The screen is turned on without awake state. It is usually triggered by an
+                // adding notification, so make the UI process have a higher priority.
+                visibleDozeUiProcess = mNotificationShade.getProcess();
+                mService.mAtmService.mVisibleDozeUiProcess = visibleDozeUiProcess;
+            }
+        }
+        // The method calls AM directly, so invoke it outside the lock.
+        if (visibleDozeUiProcess != null) {
+            Trace.instant(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurnedOnWhileDozing");
+            mService.mAtmService.setProcessAnimatingWhileDozing(visibleDozeUiProcess);
         }
     }
 
@@ -842,6 +861,7 @@ public class DisplayPolicy {
             mKeyguardDrawComplete = false;
             mWindowManagerDrawComplete = false;
             mScreenOnListener = null;
+            mService.mAtmService.mVisibleDozeUiProcess = null;
         }
     }
 

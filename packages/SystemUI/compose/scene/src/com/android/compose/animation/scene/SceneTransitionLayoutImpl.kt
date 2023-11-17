@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +42,7 @@ import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 
+@Stable
 internal class SceneTransitionLayoutImpl(
     onChangeScene: (SceneKey) -> Unit,
     builder: SceneTransitionLayoutScope.() -> Unit,

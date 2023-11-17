@@ -234,6 +234,9 @@ constructor(
                 disabledByPolicy = viewModelState.enabledState == QSTileState.EnabledState.DISABLED
                 expandedAccessibilityClassName = viewModelState.expandedAccessibilityClassName
 
+                // Use LoopedAnimatable2DrawableWrapper to achieve animated tile icon
+                isTransient = false
+
                 when (viewModelState.sideViewIcon) {
                     is QSTileState.SideViewIcon.Custom -> {
                         sideViewCustomDrawable =

@@ -71,7 +71,7 @@ import java.util.List;
  * Based on the user response the package is then installed by launching InstallAppConfirm
  * sub activity. All state transitions are handled in this activity
  */
-public class PackageInstallerActivity extends AlertActivity {
+public class PackageInstallerActivity extends Activity {
     private static final String TAG = "PackageInstaller";
 
     private static final int REQUEST_TRUST_EXTERNAL_SOURCE = 1;
@@ -135,11 +135,13 @@ public class PackageInstallerActivity extends AlertActivity {
     // Would the mOk button be enabled if this activity would be resumed
     private boolean mEnableOk = false;
 
+    private AlertDialog mDialog;
+
     private void startInstallConfirm() {
         TextView viewToEnable;
 
         if (mAppInfo != null) {
-            viewToEnable = requireViewById(R.id.install_confirm_question_update);
+            viewToEnable = mDialog.requireViewById(R.id.install_confirm_question_update);
 
             final CharSequence existingUpdateOwnerLabel = getExistingUpdateOwnerLabel();
             final CharSequence requestedUpdateOwnerLabel = getApplicationLabel(mCallingPackage);
@@ -157,7 +159,7 @@ public class PackageInstallerActivity extends AlertActivity {
             }
         } else {
             // This is a new application with no permissions.
-            viewToEnable = requireViewById(R.id.install_confirm_question);
+            viewToEnable = mDialog.requireViewById(R.id.install_confirm_question);
         }
 
         viewToEnable.setVisibility(View.VISIBLE);
@@ -480,10 +482,11 @@ public class PackageInstallerActivity extends AlertActivity {
     }
 
     private void bindUi() {
-        mAlert.setIcon(mAppSnippet.icon);
-        mAlert.setTitle(mAppSnippet.label);
-        mAlert.setView(R.layout.install_content_view);
-        mAlert.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.install),
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setIcon(mAppSnippet.icon);
+        builder.setTitle(mAppSnippet.label);
+        builder.setView(R.layout.install_content_view);
+        builder.setPositiveButton(getString(R.string.install),
                 (ignored, ignored2) -> {
                     if (mOk.isEnabled()) {
                         if (mSessionId != -1) {
@@ -493,20 +496,26 @@ public class PackageInstallerActivity extends AlertActivity {
                             startInstall();
                         }
                     }
-                }, null);
-        mAlert.setButton(DialogInterface.BUTTON_NEGATIVE, getString(R.string.cancel),
+                });
+        builder.setNegativeButton(getString(R.string.cancel),
                 (ignored, ignored2) -> {
                     // Cancel and finish
                     setActivityResult(RESULT_CANCELED);
                     finish();
-                }, null);
-        setupAlert();
+                });
+        builder.setOnCancelListener(dialog -> {
+            // Cancel and finish
+            setActivityResult(RESULT_CANCELED);
+            finish();
+        });
+        mDialog = builder.create();
+        mDialog.show();
 
-        mOk = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
+        mOk = mDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         mOk.setEnabled(false);
 
         if (!mOk.isInTouchMode()) {
-            mAlert.getButton(DialogInterface.BUTTON_NEGATIVE).requestFocus();
+            mDialog.getButton(DialogInterface.BUTTON_NEGATIVE).requestFocus();
         }
     }
 

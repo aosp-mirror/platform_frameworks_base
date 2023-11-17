@@ -36,7 +36,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * Rule instance information for zen mode.
+ * Rule instance information for a zen (aka DND or Attention Management) mode.
  */
 public final class AutomaticZenRule implements Parcelable {
     /* @hide */
@@ -45,7 +45,9 @@ public final class AutomaticZenRule implements Parcelable {
     private static final int DISABLED = 0;
 
     /**
-     * Rule is of an unknown type. This is the default value if not provided by the owning app.
+     * Rule is of an unknown type. This is the default value if not provided by the owning app,
+     * and the value returned if the true type was added in an API level lower than the calling
+     * app's targetSdk.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static final int TYPE_UNKNOWN = -1;
@@ -378,7 +380,7 @@ public final class AutomaticZenRule implements Parcelable {
      * Gets the type of the rule.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
-    public int getType() {
+    public @Type int getType() {
         return mType;
     }
 
@@ -594,7 +596,7 @@ public final class AutomaticZenRule implements Parcelable {
         private ComponentName mOwner;
         private Uri mConditionId;
         private int mInterruptionFilter;
-        private boolean mEnabled;
+        private boolean mEnabled = true;
         private ComponentName mConfigurationActivity = null;
         private ZenPolicy mPolicy = null;
         private ZenDeviceEffects mDeviceEffects = null;
@@ -627,38 +629,63 @@ public final class AutomaticZenRule implements Parcelable {
             mConditionId = conditionId;
         }
 
+        /**
+         * Sets the name of this rule.
+         */
         public @NonNull Builder setName(@NonNull String name) {
             mName = name;
             return this;
         }
 
+        /**
+         * Sets the component (service or activity) that owns this rule.
+         */
         public @NonNull Builder setOwner(@Nullable ComponentName owner) {
             mOwner = owner;
             return this;
         }
 
+        /**
+         * Sets the representation of the state that causes this rule to become active.
+         */
         public @NonNull Builder setConditionId(@NonNull Uri conditionId) {
             mConditionId = conditionId;
             return this;
         }
 
+        /**
+         * Sets the interruption filter that is applied when this rule is active.
+         */
         public @NonNull Builder setInterruptionFilter(
                 @InterruptionFilter int interruptionFilter) {
             mInterruptionFilter = interruptionFilter;
             return this;
         }
 
+        /**
+         * Enables this rule. Rules are enabled by default.
+         */
         public @NonNull Builder setEnabled(boolean enabled) {
             mEnabled = enabled;
             return this;
         }
 
+        /**
+         * Sets the configuration activity - an activity that handles
+         * {@link NotificationManager#ACTION_AUTOMATIC_ZEN_RULE} that shows the user more
+         * information about this rule and/or allows them to configure it. This is required to be
+         * non-null for rules that are not backed by a
+         * {@link android.service.notification.ConditionProviderService}.
+         */
         public @NonNull Builder setConfigurationActivity(
                 @Nullable ComponentName configurationActivity) {
             mConfigurationActivity = configurationActivity;
             return this;
         }
 
+        /**
+         * Sets the zen policy.
+         */
         public @NonNull Builder setZenPolicy(@Nullable ZenPolicy policy) {
             mPolicy = policy;
             return this;

@@ -736,6 +736,9 @@ public final class CameraExtensionCharacteristics {
                     return generateJpegSupportedSizes(
                             extenders.second.getSupportedPostviewResolutions(sz),
                                     streamMap);
+                }  else if (format == ImageFormat.JPEG_R) {
+                    // Jpeg_R/UltraHDR is currently not supported in the basic extension case
+                    return new ArrayList<>();
                 } else {
                     throw new IllegalArgumentException("Unsupported format: " + format);
                 }
@@ -891,6 +894,9 @@ public final class CameraExtensionCharacteristics {
                         } else {
                             return generateSupportedSizes(null, format, streamMap);
                         }
+                    } else if (format == ImageFormat.JPEG_R) {
+                        // Jpeg_R/UltraHDR is currently not supported in the basic extension case
+                        return new ArrayList<>();
                     } else {
                         throw new IllegalArgumentException("Unsupported format: " + format);
                     }

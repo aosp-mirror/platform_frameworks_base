@@ -68,7 +68,7 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
     }
 
     @Override
-    public void onDragPositioningStart(int ctrlType, float x, float y) {
+    public Rect onDragPositioningStart(int ctrlType, float x, float y) {
         mCtrlType = ctrlType;
         mTaskBoundsAtDragStart.set(
                 mWindowDecoration.mTaskInfo.configuration.windowConfiguration.getBounds());
@@ -87,6 +87,7 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
             mDisplayController.getDisplayLayout(mWindowDecoration.mDisplay.getDisplayId())
                     .getStableBounds(mStableBounds);
         }
+        return mRepositionTaskBounds;
     }
 
     @Override

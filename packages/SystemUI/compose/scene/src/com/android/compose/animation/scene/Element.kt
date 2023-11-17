@@ -17,6 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,16 +26,17 @@ import androidx.compose.runtime.snapshots.Snapshot
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.isSpecified
 import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.geometry.lerp
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.layout.IntermediateMeasureScope
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.intermediateLayout
+import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Constraints
@@ -46,6 +48,7 @@ import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.launch
 
 /** An element on screen, that can be composed in one or more scenes. */
+@Stable
 internal class Element(val key: ElementKey) {
     /**
      * The last values of this element, coming from any scene. Note that this value will be unstable
@@ -90,6 +93,7 @@ internal class Element(val key: ElementKey) {
     }
 
     /** The target values of this element in a given scene. */
+    @Stable
     class TargetValues(val scene: SceneKey) {
         val lastValues = Values()
 
@@ -107,6 +111,7 @@ internal class Element(val key: ElementKey) {
     }
 
     /** A shared value of this element. */
+    @Stable
     class SharedValue<T>(val key: ValueKey, initialValue: T) {
         var value by mutableStateOf(initialValue)
     }
@@ -126,6 +131,7 @@ data class Scale(val scaleX: Float, val scaleY: Float, val pivot: Offset = Offse
 
 /** The implementation of [SceneScope.element]. */
 @OptIn(ExperimentalComposeUiApi::class)
+@Stable
 internal fun Modifier.element(
     layoutImpl: SceneTransitionLayoutImpl,
     scene: Scene,
@@ -144,24 +150,9 @@ internal fun Modifier.element(
                 ?: Element.TargetValues(scene.key).also { element.sceneValues[scene.key] = it }
     }
 
-    return this.then(ElementModifier(layoutImpl, element, sceneValues))
-        .drawWithContent {
-            if (shouldDrawElement(layoutImpl, scene, element)) {
-                val drawScale = getDrawScale(layoutImpl, element, scene, sceneValues)
-                if (drawScale == Scale.Default) {
-                    drawContent()
-                } else {
-                    scale(
-                        drawScale.scaleX,
-                        drawScale.scaleY,
-                        if (drawScale.pivot.isUnspecified) center else drawScale.pivot,
-                    ) {
-                        this@drawWithContent.drawContent()
-                    }
-                }
-            }
-        }
-        .modifierTransformations(layoutImpl, scene, element, sceneValues)
+    return this.then(ElementModifier(layoutImpl, scene, element, sceneValues))
+        // TODO(b/311132415): Move this into ElementNode once we can create a delegate
+        // IntermediateLayoutModifierNode.
         .intermediateLayout { measurable, constraints ->
             val placeable =
                 measure(layoutImpl, scene, element, sceneValues, measurable, constraints)
@@ -178,22 +169,25 @@ internal fun Modifier.element(
  */
 private data class ElementModifier(
     private val layoutImpl: SceneTransitionLayoutImpl,
+    private val scene: Scene,
     private val element: Element,
     private val sceneValues: Element.TargetValues,
 ) : ModifierNodeElement<ElementNode>() {
-    override fun create(): ElementNode = ElementNode(layoutImpl, element, sceneValues)
+    override fun create(): ElementNode = ElementNode(layoutImpl, scene, element, sceneValues)
 
     override fun update(node: ElementNode) {
-        node.update(layoutImpl, element, sceneValues)
+        node.update(layoutImpl, scene, element, sceneValues)
     }
 }
 
 internal class ElementNode(
     layoutImpl: SceneTransitionLayoutImpl,
+    scene: Scene,
     element: Element,
     sceneValues: Element.TargetValues,
-) : Modifier.Node() {
+) : Modifier.Node(), DrawModifierNode {
     private var layoutImpl: SceneTransitionLayoutImpl = layoutImpl
+    private var scene: Scene = scene
     private var element: Element = element
     private var sceneValues: Element.TargetValues = sceneValues
 
@@ -239,14 +233,33 @@ internal class ElementNode(
 
     fun update(
         layoutImpl: SceneTransitionLayoutImpl,
+        scene: Scene,
         element: Element,
         sceneValues: Element.TargetValues,
     ) {
         removeNodeFromSceneValues()
         this.layoutImpl = layoutImpl
+        this.scene = scene
         this.element = element
         this.sceneValues = sceneValues
         addNodeToSceneValues()
+    }
+
+    override fun ContentDrawScope.draw() {
+        if (shouldDrawElement(layoutImpl, scene, element)) {
+            val drawScale = getDrawScale(layoutImpl, element, scene, sceneValues)
+            if (drawScale == Scale.Default) {
+                drawContent()
+            } else {
+                scale(
+                    drawScale.scaleX,
+                    drawScale.scaleY,
+                    if (drawScale.pivot.isUnspecified) center else drawScale.pivot,
+                ) {
+                    this@draw.drawContent()
+                }
+            }
+        }
     }
 }
 
@@ -329,39 +342,6 @@ internal fun sharedElementTransformation(
     }
 
     return sharedInFromScene
-}
-
-/**
- * Chain the [com.android.compose.animation.scene.transformation.ModifierTransformation] applied
- * throughout the current transition, if any.
- */
-private fun Modifier.modifierTransformations(
-    layoutImpl: SceneTransitionLayoutImpl,
-    scene: Scene,
-    element: Element,
-    sceneValues: Element.TargetValues,
-): Modifier {
-    when (val state = layoutImpl.state.transitionState) {
-        is TransitionState.Idle -> return this
-        is TransitionState.Transition -> {
-            val fromScene = state.fromScene
-            val toScene = state.toScene
-            if (fromScene == toScene) {
-                // Same as idle.
-                return this
-            }
-
-            return layoutImpl.transitions
-                .transitionSpec(fromScene, state.toScene)
-                .transformations(element.key, scene.key)
-                .modifier
-                .fold(this) { modifier, transformation ->
-                    with(transformation) {
-                        modifier.transform(layoutImpl, scene, element, sceneValues)
-                    }
-                }
-        }
-    }
 }
 
 /**

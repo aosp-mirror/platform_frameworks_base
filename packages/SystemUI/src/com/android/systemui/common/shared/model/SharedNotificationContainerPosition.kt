@@ -23,4 +23,6 @@ data class SharedNotificationContainerPosition(
 
     /** Whether any modifications to top/bottom are smoothly animated */
     val animate: Boolean = false,
-)
+) {
+    val height: Float = bottom - top
+}

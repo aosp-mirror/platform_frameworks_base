@@ -1712,6 +1712,10 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Služba může sledovat vaše interakce s aplikací nebo hardwarovým senzorem a komunikovat s aplikacemi namísto vás."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Povolit"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Zakázat"</string>
+    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
+    <skip />
+    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
+    <skip />
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Chcete-li některou funkci začít používat, klepněte na ni:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Vyberte funkce, které budete používat s tlačítkem přístupnosti"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Vyberte funkce, které budete používat se zkratkou tlačítka hlasitosti"</string>
@@ -1906,6 +1910,10 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Víkend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Událost"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Spánek"</string>
+    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
+    <skip />
+    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
+    <skip />
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vypíná určité zvuky"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"V zařízení došlo k internímu problému. Dokud neprovedete obnovení továrních dat, může být nestabilní."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"V zařízení došlo k internímu problému. Další informace vám sdělí výrobce."</string>
@@ -2338,6 +2346,8 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon je zablokován"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Nelze zrcadlit na displej"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Použijte jiný kabel a zkuste to znovu"</string>
+    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
+    <skip />
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kabel možná nepodporuje displeje"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Váš kabel USB-C se možná nedokáže správně připojit k displejům"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>

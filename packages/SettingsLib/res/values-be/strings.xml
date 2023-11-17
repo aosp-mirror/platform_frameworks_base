@@ -437,8 +437,8 @@
     <string name="transcode_notification" msgid="5560515979793436168">"Паказваць апавяшчэнні пра перакадзіраванне"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Адключыць кэш перакадзіравання"</string>
     <string name="widevine_settings_title" msgid="4023329801172572917">"Налады Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Прымусовае выкарыстанне альтэрнатывы L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Выберыце, ці трэба прымусова выкарыстоўваць альтэрнатыву L3"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Прымусовы пераход на ўзровень бяспекі 3"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Выберыце, каб прымусова пераходзіць на ўзровень бяспекі 3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Запушчаныя службы"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Прагляд запушчаных службаў i кіраванне iмi"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Рэалізацыя WebView"</string>

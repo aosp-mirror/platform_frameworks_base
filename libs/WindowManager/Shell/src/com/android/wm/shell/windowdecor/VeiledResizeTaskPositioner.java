@@ -85,7 +85,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
     }
 
     @Override
-    public void onDragPositioningStart(int ctrlType, float x, float y) {
+    public Rect onDragPositioningStart(int ctrlType, float x, float y) {
         mCtrlType = ctrlType;
         mTaskBoundsAtDragStart.set(
                 mDesktopWindowDecoration.mTaskInfo.configuration.windowConfiguration.getBounds());
@@ -107,6 +107,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
             mDisplayController.getDisplayLayout(mDesktopWindowDecoration.mDisplay.getDisplayId())
                     .getStableBounds(mStableBounds);
         }
+        return mRepositionTaskBounds;
     }
 
     @Override

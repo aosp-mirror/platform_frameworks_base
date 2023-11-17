@@ -149,30 +149,6 @@ public class AppOpsServiceTestingShim implements AppOpsCheckingServiceInterface 
     }
 
     @Override
-    public boolean areUidModesDefault(int uid) {
-        boolean oldVal = mOldImplementation.areUidModesDefault(uid);
-        boolean newVal = mNewImplementation.areUidModesDefault(uid);
-
-        if (oldVal != newVal) {
-            signalImplDifference("areUidModesDefault");
-        }
-
-        return newVal;
-    }
-
-    @Override
-    public boolean arePackageModesDefault(String packageName, int userId) {
-        boolean oldVal = mOldImplementation.arePackageModesDefault(packageName, userId);
-        boolean newVal = mNewImplementation.arePackageModesDefault(packageName, userId);
-
-        if (oldVal != newVal) {
-            signalImplDifference("arePackageModesDefault");
-        }
-
-        return newVal;
-    }
-
-    @Override
     public void clearAllModes() {
         mOldImplementation.clearAllModes();
         mNewImplementation.clearAllModes();

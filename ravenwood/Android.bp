@@ -25,10 +25,30 @@ java_library {
 }
 
 java_library {
-    name: "ravenwood-junit",
-    srcs: ["junit-src/**/*.java"],
+    name: "ravenwood-junit-impl",
+    srcs: [
+        "junit-src/**/*.java",
+        "junit-impl-src/**/*.java",
+    ],
     libs: [
         "framework-minus-apex.ravenwood",
+        "junit",
+    ],
+    visibility: ["//frameworks/base"],
+}
+
+// Carefully compiles against only test_current to support tests that
+// want to verify they're unbundled.  The "impl" library above is what
+// ships inside the Ravenwood environment to actually drive any API
+// access to implementation details.
+java_library {
+    name: "ravenwood-junit",
+    srcs: [
+        "junit-src/**/*.java",
+        "junit-stub-src/**/*.java",
+    ],
+    sdk_version: "test_current",
+    libs: [
         "junit",
     ],
     visibility: ["//visibility:public"],

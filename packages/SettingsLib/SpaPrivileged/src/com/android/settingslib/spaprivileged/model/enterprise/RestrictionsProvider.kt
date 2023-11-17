@@ -16,7 +16,6 @@
 
 package com.android.settingslib.spaprivileged.model.enterprise
 
-import android.app.admin.DevicePolicyResources.Strings.Settings
 import android.content.Context
 import android.os.UserHandle
 import android.os.UserManager
@@ -25,54 +24,15 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.settingslib.RestrictedLockUtils
-import com.android.settingslib.RestrictedLockUtils.EnforcedAdmin
 import com.android.settingslib.RestrictedLockUtilsInternal
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import com.android.settingslib.widget.restricted.R
 
 data class Restrictions(
     val userId: Int = UserHandle.myUserId(),
     val keys: List<String>,
 )
-
-sealed interface RestrictedMode
-
-data object NoRestricted : RestrictedMode
-
-data object BaseUserRestricted : RestrictedMode
-
-interface BlockedByAdmin : RestrictedMode {
-    fun getSummary(checked: Boolean?): String
-    fun sendShowAdminSupportDetailsIntent()
-}
-
-private data class BlockedByAdminImpl(
-    private val context: Context,
-    private val enforcedAdmin: EnforcedAdmin,
-) : BlockedByAdmin {
-    private val enterpriseRepository by lazy { EnterpriseRepository(context) }
-
-    override fun getSummary(checked: Boolean?) = when (checked) {
-        true -> enterpriseRepository.getEnterpriseString(
-            updatableStringId = Settings.ENABLED_BY_ADMIN_SWITCH_SUMMARY,
-            resId = R.string.enabled_by_admin,
-        )
-
-        false -> enterpriseRepository.getEnterpriseString(
-            updatableStringId = Settings.DISABLED_BY_ADMIN_SWITCH_SUMMARY,
-            resId = R.string.disabled_by_admin,
-        )
-
-        else -> ""
-    }
-
-    override fun sendShowAdminSupportDetailsIntent() {
-        RestrictedLockUtils.sendShowAdminSupportDetailsIntent(context, enforcedAdmin)
-    }
-}
 
 interface RestrictionsProvider {
     @Composable

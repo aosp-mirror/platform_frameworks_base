@@ -36,6 +36,7 @@ import java.util.Collection;
  * Receives call backs for changes to content.
  * Must be implemented by objects which are added to a {@link ContentObservable}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class ContentObserver {
     /**
      * Starting in {@link android.os.Build.VERSION_CODES#R}, there is a new
@@ -49,7 +50,6 @@ public abstract class ContentObserver {
     @ChangeId
     @EnabledAfter(targetSdkVersion=android.os.Build.VERSION_CODES.Q)
     private static final long ADD_CONTENT_OBSERVER_FLAGS = 150939131L;
-
     private final Object mLock = new Object();
     private Transport mTransport; // guarded by mLock
 
@@ -216,13 +216,22 @@ public abstract class ContentObserver {
         // There are dozens of people relying on the hidden API inside the
         // system UID, so hard-code the old behavior for all of them; for
         // everyone else we gate based on a specific change
-        if (!CompatChanges.isChangeEnabled(ADD_CONTENT_OBSERVER_FLAGS)
+        if (!isChangeEnabledAddContentObserverFlags()
                 || android.os.Process.myUid() == android.os.Process.SYSTEM_UID) {
             // Deliver userId through argument to preserve hidden API behavior
             onChange(selfChange, uris, flags, UserHandle.of(userId));
         } else {
             onChange(selfChange, uris, flags);
         }
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static boolean isChangeEnabledAddContentObserverFlags() {
+        return CompatChanges.isChangeEnabled(ADD_CONTENT_OBSERVER_FLAGS);
+    }
+
+    private static boolean isChangeEnabledAddContentObserverFlags$ravenwood() {
+        return true;
     }
 
     /**

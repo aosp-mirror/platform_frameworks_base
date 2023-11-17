@@ -19,6 +19,7 @@ package android.database;
 /**
  * An exception indicating that a cursor is out of bounds.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class CursorIndexOutOfBoundsException extends IndexOutOfBoundsException {
 
     public CursorIndexOutOfBoundsException(int index, int size) {

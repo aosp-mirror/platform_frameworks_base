@@ -436,13 +436,16 @@ public final class SurfaceControl implements Parcelable {
         // Jank due to unknown reasons.
         public static final int UNKNOWN = 0x80;
 
-        public JankData(long frameVsyncId, @JankType int jankType) {
+        public JankData(long frameVsyncId, @JankType int jankType, long frameIntervalNs) {
             this.frameVsyncId = frameVsyncId;
             this.jankType = jankType;
+            this.frameIntervalNs = frameIntervalNs;
+
         }
 
         public final long frameVsyncId;
         public final @JankType int jankType;
+        public final long frameIntervalNs;
     }
 
     /**
@@ -3280,7 +3283,8 @@ public final class SurfaceControl implements Parcelable {
                         "setCrop", this, sc, "crop=" + crop);
             }
             if (crop != null) {
-                Preconditions.checkArgument(crop.isValid(), "Crop isn't valid.");
+                Preconditions.checkArgument(crop.isValid(), "Crop " + crop
+                        + " isn't valid");
                 nativeSetWindowCrop(mNativeObject, sc.mNativeObject,
                         crop.left, crop.top, crop.right, crop.bottom);
             } else {

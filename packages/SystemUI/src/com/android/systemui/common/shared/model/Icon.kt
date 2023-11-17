@@ -36,3 +36,7 @@ sealed class Icon {
         override val contentDescription: ContentDescription?,
     ) : Icon()
 }
+
+/** Creates [Icon.Loaded] for a given drawable with an optional [contentDescription]. */
+fun Drawable.asIcon(contentDescription: ContentDescription? = null): Icon =
+    Icon.Loaded(this, contentDescription)

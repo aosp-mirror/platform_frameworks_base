@@ -197,6 +197,10 @@
     <string name="accessibility_bluetooth_connected" msgid="4745196874551115205">"ಬ್ಲೂಟೂತ್‌‌ ಸಂಪರ್ಕಗೊಂಡಿದೆ."</string>
     <string name="accessibility_bluetooth_device_icon" msgid="9163840051642587982">"ಬ್ಲೂಟೂತ್ ಸಾಧನ ಐಕಾನ್"</string>
     <string name="accessibility_bluetooth_device_settings_gear" msgid="3314916468105272540">"ಸಾಧನದ ವಿವರಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಲು ಕ್ಲಿಕ್ ಮಾಡಿ"</string>
+    <!-- no translation found for accessibility_bluetooth_device_settings_see_all (9111952496905423543) -->
+    <skip />
+    <!-- no translation found for accessibility_bluetooth_device_settings_pair_new_device (2435184865793496966) -->
+    <skip />
     <string name="accessibility_battery_unknown" msgid="1807789554617976440">"ಬ್ಯಾಟರಿ ಶೇಕಡಾವಾರು ತಿಳಿದಿಲ್ಲ."</string>
     <string name="accessibility_bluetooth_name" msgid="7300973230214067678">"<xliff:g id="BLUETOOTH">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಪಡಿಸಲಾಗಿದೆ."</string>
     <string name="accessibility_cast_name" msgid="7344437925388773685">"<xliff:g id="CAST">%s</xliff:g> ಗೆ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ."</string>
@@ -255,6 +259,10 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ಬ್ಲೂಟೂತ್ ಬಳಸಿ"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ಸೇವ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_disconnect (415980329093277342) -->
+    <skip />
+    <!-- no translation found for accessibility_quick_settings_bluetooth_device_tap_to_activate (3724301751036877403) -->
+    <skip />
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g> ಬ್ಯಾಟರಿ"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"ಆಡಿಯೋ"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"ಹೆಡ್‌ಸೆಟ್"</string>
@@ -396,12 +404,9 @@
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ವೇಗವಾಗಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ಸಮಯದಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ನಿಧಾನವಾಗಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ಸಮಯದಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ • <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> ದಲ್ಲಿ ಪೂರ್ಣಗೊಳ್ಳುತ್ತದೆ"</string>
-    <!-- no translation found for communal_tutorial_indicator_text (4503010353591430123) -->
-    <skip />
-    <!-- no translation found for button_to_open_widget_picker (8007261659745030810) -->
-    <skip />
-    <!-- no translation found for button_to_remove_widget (1511255853677835341) -->
-    <skip />
+    <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"ಸಮುದಾಯದ ಟ್ಯುಟೋರಿಯಲ್ ಅನ್ನು ಪ್ರಾರಂಭಿಸಲು ಎಡಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ"</string>
+    <string name="button_to_open_widget_picker" msgid="8007261659745030810">"ವಿಜೆಟ್ ಪಿಕರ್‌ ತೆರೆಯಿರಿ"</string>
+    <string name="button_to_remove_widget" msgid="1511255853677835341">"ವಿಜೆಟ್ ತೆಗೆದುಹಾಕಿ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ಬಳಕೆದಾರರನ್ನು ಬದಲಿಸಿ"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ಪುಲ್‌ಡೌನ್ ಮೆನು"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ಈ ಸೆಷನ್‌ನಲ್ಲಿನ ಎಲ್ಲ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಲಾಗುತ್ತದೆ."</string>
@@ -509,7 +514,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"ಧ್ವನಿ &amp; ವೈಬ್ರೇಷನ್"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"ವಾಲ್ಯೂಮ್ ಅನ್ನು ಸುರಕ್ಷಿತ ಮಟ್ಟಕ್ಕೆ ತಗ್ಗಿಸಲಾಗಿದೆ"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"ಹೆಡ್‌ಫೋನ್‌ನ ವಾಲ್ಯೂಮ್‌ ಶಿಫಾರಸು ಮಾಡಿದ್ದಕ್ಕಿಂತಲೂ ಹೆಚ್ಚಿನ ಸಮಯದವರೆಗೆ ಅಧಿಕವಾಗಿದೆ"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"ಶಿಫಾರಸು ಮಾಡಿದ್ದಕ್ಕಿಂತಲೂ ದೀರ್ಘಕಾಲ ಹೆಡ್‌ಫೋನ್‌ನ ವಾಲ್ಯೂಮ್‌ ಹೆಚ್ಚಿಗೆ ಇದೆ"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"ಹೆಡ್‌ಫೋನ್‌ನ ವಾಲ್ಯೂಮ್ ಈ ವಾರದ‌ ಮಟ್ಟಿಗೆ ಸುರಕ್ಷಿತ ಮಿತಿಯನ್ನು ಮೀರಿದೆ"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"ಆಲಿಸುತ್ತಿರಿ"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"ವಾಲ್ಯೂಮ್ ತಗ್ಗಿಸಿ"</string>
@@ -1210,8 +1215,6 @@
     <string name="privacy_dialog_recent_app_usage_1" msgid="2551340497722370109">"ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_NAME">%1$s</xliff:g> ಇದನ್ನು ಬಳಸಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_dialog_active_app_usage_2" msgid="2770926061339921767">"<xliff:g id="APP_NAME">%1$s</xliff:g> ನಿಂದ ಬಳಕೆಯಲ್ಲಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
     <string name="privacy_dialog_recent_app_usage_2" msgid="2874689735085367167">"ಇತ್ತೀಚೆಗೆ <xliff:g id="APP_NAME">%1$s</xliff:g> ಇದನ್ನು ಬಳಸಿದೆ (<xliff:g id="ATTRIBUTION_LABEL">%2$s</xliff:g> • <xliff:g id="PROXY_LABEL">%3$s</xliff:g>)"</string>
-    <!-- no translation found for keyboard_backlight_dialog_title (8273102932345564724) -->
-    <skip />
-    <!-- no translation found for keyboard_backlight_value (7336398765584393538) -->
-    <skip />
+    <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"ಕೀಬೋರ್ಡ್ ಬ್ಯಾಕ್‌ಲೈಟ್"</string>
+    <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$d ರಲ್ಲಿ %1$d ಮಟ್ಟ"</string>
 </resources>

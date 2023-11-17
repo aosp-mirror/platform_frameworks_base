@@ -32,43 +32,36 @@ import com.android.settingslib.spaprivileged.test.R
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Spy
-import org.mockito.junit.MockitoJUnit
-import org.mockito.junit.MockitoRule
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class AppOpPermissionAppListTest {
-    @get:Rule val mockito: MockitoRule = MockitoJUnit.rule()
+    @get:Rule
+    val composeTestRule = createComposeRule()
 
-    @get:Rule val composeTestRule = createComposeRule()
+    private val packageManagers = mock<IPackageManagers>()
 
-    @Spy private val context: Context = ApplicationProvider.getApplicationContext()
+    private val appOpsManager = mock<AppOpsManager>()
 
-    @Mock private lateinit var packageManagers: IPackageManagers
-
-    @Mock private lateinit var appOpsManager: AppOpsManager
-
-    @Mock private lateinit var packageManager: PackageManager
-
-    private lateinit var listModel: TestAppOpPermissionAppListModel
-
-    @Before
-    fun setUp() {
-        whenever(context.appOpsManager).thenReturn(appOpsManager)
-        whenever(context.packageManager).thenReturn(packageManager)
-        doNothing().whenever(packageManager)
-                .updatePermissionFlags(any(), any(), any(), any(), any())
-        listModel = TestAppOpPermissionAppListModel()
+    private val packageManager = mock<PackageManager> {
+        doNothing().whenever(mock).updatePermissionFlags(any(), any(), any(), any(), any())
     }
+
+    private val context: Context = spy(ApplicationProvider.getApplicationContext()) {
+        on { appOpsManager } doReturn appOpsManager
+        on { packageManager } doReturn packageManager
+    }
+
+    private val listModel = TestAppOpPermissionAppListModel()
 
     @Test
     fun transformItem_recordHasCorrectApp() {

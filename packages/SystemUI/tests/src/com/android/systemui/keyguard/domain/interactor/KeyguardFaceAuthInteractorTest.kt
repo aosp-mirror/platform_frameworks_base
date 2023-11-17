@@ -30,6 +30,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FaceSensorInfo
 import com.android.systemui.biometrics.data.repository.FakeFacePropertyRepository
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
 import com.android.systemui.biometrics.shared.model.LockoutMode
 import com.android.systemui.biometrics.shared.model.SensorStrength
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
@@ -153,9 +154,11 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                     mock(StatusBarStateController::class.java),
                     mock(KeyguardStateController::class.java),
                     bouncerRepository,
+                    FakeFingerprintPropertyRepository(),
                     fakeBiometricSettingsRepository,
                     FakeSystemClock(),
                     keyguardUpdateMonitor,
+                    testScope.backgroundScope,
                 ),
                 keyguardTransitionInteractor,
                 featureFlags,

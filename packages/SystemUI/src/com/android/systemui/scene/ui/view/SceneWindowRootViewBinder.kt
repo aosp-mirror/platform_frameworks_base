@@ -31,10 +31,13 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.Scene
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
+import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
+import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import java.time.Instant
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -47,6 +50,8 @@ object SceneWindowRootViewBinder {
         viewModel: SceneContainerViewModel,
         windowInsets: StateFlow<WindowInsets?>,
         containerConfig: SceneContainerConfig,
+        sharedNotificationContainer: SharedNotificationContainer,
+        flags: SceneContainerFlags,
         scenes: Set<Scene>,
         onVisibilityChangedInternal: (isVisible: Boolean) -> Unit,
     ) {
@@ -90,6 +95,13 @@ object SceneWindowRootViewBinder {
 
                     val legacyView = view.requireViewById<View>(R.id.legacy_window_root)
                     view.addView(createVisibilityToggleView(legacyView))
+
+                    if (flags.flexiNotifsEnabled()) {
+                        (sharedNotificationContainer.parent as? ViewGroup)?.removeView(
+                            sharedNotificationContainer
+                        )
+                        view.addView(sharedNotificationContainer)
+                    }
 
                     launch {
                         viewModel.isVisible.collect { isVisible ->

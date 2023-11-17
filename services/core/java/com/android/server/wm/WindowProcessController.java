@@ -1864,6 +1864,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     @HotPath(caller = HotPath.OOM_ADJUSTMENT)
+    public boolean isShowingUiWhileDozing() {
+        return this == mAtm.mVisibleDozeUiProcess;
+    }
+
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public boolean isPreviousProcess() {
         return this == mAtm.mPreviousProcess;
     }

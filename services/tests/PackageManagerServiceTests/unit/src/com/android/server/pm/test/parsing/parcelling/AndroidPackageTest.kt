@@ -270,7 +270,8 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         AndroidPackage::getMinAspectRatio,
         AndroidPackage::hasPreserveLegacyExternalStorage,
         AndroidPackage::hasRequestForegroundServiceExemption,
-        AndroidPackage::hasRequestRawExternalStorageAccess
+        AndroidPackage::hasRequestRawExternalStorageAccess,
+        AndroidPackage::isUpdatableSystem
     )
 
     override fun extraParams() = listOf(

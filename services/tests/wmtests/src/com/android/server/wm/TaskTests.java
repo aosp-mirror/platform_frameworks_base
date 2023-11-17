@@ -574,6 +574,7 @@ public class TaskTests extends WindowTestsBase {
         spyOn(root);
         spyOn(root.mLetterboxUiController);
 
+        doReturn(true).when(root).fillsParent();
         doReturn(true).when(root.mLetterboxUiController)
                 .shouldEnableUserAspectRatioSettings();
         doReturn(false).when(root).inSizeCompatMode();
@@ -596,6 +597,12 @@ public class TaskTests extends WindowTestsBase {
         assertFalse(task.getTaskInfo()
                 .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
         doReturn(false).when(root).inSizeCompatMode();
+
+        // When the top activity is transparent, the button is not enabled
+        doReturn(false).when(root).fillsParent();
+        assertFalse(task.getTaskInfo()
+                .appCompatTaskInfo.topActivityEligibleForUserAspectRatioButton);
+        doReturn(true).when(root).fillsParent();
     }
 
     /**

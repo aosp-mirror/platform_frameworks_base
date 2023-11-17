@@ -30,10 +30,13 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
+import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
 import javax.inject.Inject
 
@@ -43,18 +46,24 @@ class SplitShadeNotificationStackScrollLayoutSection
 constructor(
     context: Context,
     private val featureFlags: FeatureFlags,
+    sceneContainerFlags: SceneContainerFlags,
     notificationPanelView: NotificationPanelView,
     sharedNotificationContainer: SharedNotificationContainer,
     sharedNotificationContainerViewModel: SharedNotificationContainerViewModel,
+    notificationStackAppearanceViewModel: NotificationStackAppearanceViewModel,
+    ambientState: AmbientState,
     controller: NotificationStackScrollLayoutController,
     notificationStackSizeCalculator: NotificationStackSizeCalculator,
     private val smartspaceViewModel: KeyguardSmartspaceViewModel,
 ) :
     NotificationStackScrollLayoutSection(
         context,
+        sceneContainerFlags,
         notificationPanelView,
         sharedNotificationContainer,
         sharedNotificationContainerViewModel,
+        notificationStackAppearanceViewModel,
+        ambientState,
         controller,
         notificationStackSizeCalculator,
     ) {

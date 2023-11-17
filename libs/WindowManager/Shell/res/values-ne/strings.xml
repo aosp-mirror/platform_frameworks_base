@@ -34,8 +34,7 @@
     <string name="accessibility_action_pip_unstash" msgid="7467499339610437646">"अनस्ट्यास गर्नुहोस्"</string>
     <string name="dock_forced_resizable" msgid="7429086980048964687">"यो एपले स्प्लिट स्क्रिन मोडमा काम नगर्न सक्छ"</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="2733543750291266047">"यो एप स्प्लिट स्क्रिन मोडमा प्रयोग गर्न मिल्दैन"</string>
-    <!-- no translation found for dock_multi_instances_not_supported_text (5011042177901502928) -->
-    <skip />
+    <string name="dock_multi_instances_not_supported_text" msgid="5011042177901502928">"यो एप एउटा विन्डोमा मात्र खोल्न मिल्छ"</string>
     <string name="forced_resizable_secondary_display" msgid="1768046938673582671">"यो एपले सहायक प्रदर्शनमा काम नगर्नसक्छ।"</string>
     <string name="activity_launch_on_secondary_display_failed_text" msgid="4226485344988071769">"अनुप्रयोगले सहायक प्रदर्शनहरूमा लञ्च सुविधालाई समर्थन गर्दैन।"</string>
     <string name="accessibility_divider" msgid="6407584574218956849">"स्प्लिट स्क्रिन डिभाइडर"</string>

@@ -43,6 +43,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.TestLooperManager;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -67,6 +68,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -99,6 +101,10 @@ public class Instrumentation {
     private static final long CONNECT_TIMEOUT_MILLIS = 60_000;
 
     private static final boolean VERBOSE = Log.isLoggable(TAG, Log.VERBOSE);
+
+    // If set, will print the stack trace for activity starts within the process
+    static final boolean DEBUG_START_ACTIVITY = Build.IS_DEBUGGABLE &&
+            SystemProperties.getBoolean("persist.wm.debug.start_activity", false);
 
     /**
      * @hide
@@ -577,6 +583,9 @@ public class Instrumentation {
      */
     @NonNull
     public Activity startActivitySync(@NonNull Intent intent, @Nullable Bundle options) {
+        if (DEBUG_START_ACTIVITY) {
+            Log.d(TAG, "startActivity: intent=" + intent + " options=" + options, new Throwable());
+        }
         validateNotAppThread();
 
         final Activity activity;
@@ -1891,6 +1900,10 @@ public class Instrumentation {
     public ActivityResult execStartActivity(
             Context who, IBinder contextThread, IBinder token, Activity target,
             Intent intent, int requestCode, Bundle options) {
+        if (DEBUG_START_ACTIVITY) {
+            Log.d(TAG, "startActivity: who=" + who + " source=" + target + " intent=" + intent
+                    + " requestCode=" + requestCode + " options=" + options, new Throwable());
+        }
         Objects.requireNonNull(intent);
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         Uri referrer = target != null ? target.onProvideReferrer() : null;
@@ -1971,6 +1984,14 @@ public class Instrumentation {
     public int execStartActivitiesAsUser(Context who, IBinder contextThread,
             IBinder token, Activity target, Intent[] intents, Bundle options,
             int userId) {
+        if (DEBUG_START_ACTIVITY) {
+            StringJoiner joiner = new StringJoiner(", ");
+            for (Intent i : intents) {
+                joiner.add(i.toString());
+            }
+            Log.d(TAG, "startActivities: who=" + who + " source=" + target + " userId=" + userId
+                    + " intents=[" + joiner + "] options=" + options, new Throwable());
+        }
         Objects.requireNonNull(intents);
         for (int i = intents.length - 1; i >= 0; i--) {
             Objects.requireNonNull(intents[i]);
@@ -2055,6 +2076,11 @@ public class Instrumentation {
     public ActivityResult execStartActivity(
         Context who, IBinder contextThread, IBinder token, String target,
         Intent intent, int requestCode, Bundle options) {
+        if (DEBUG_START_ACTIVITY) {
+            Log.d(TAG, "startActivity: who=" + who + " target=" + target
+                    + " intent=" + intent + " requestCode=" + requestCode
+                    + " options=" + options, new Throwable());
+        }
         Objects.requireNonNull(intent);
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (isSdkSandboxAllowedToStartActivities()) {
@@ -2130,6 +2156,11 @@ public class Instrumentation {
     public ActivityResult execStartActivity(
             Context who, IBinder contextThread, IBinder token, String resultWho,
             Intent intent, int requestCode, Bundle options, UserHandle user) {
+        if (DEBUG_START_ACTIVITY) {
+            Log.d(TAG, "startActivity: who=" + who + " user=" + user + " intent=" + intent
+                    + " requestCode=" + requestCode + " resultWho=" + resultWho
+                    + " options=" + options, new Throwable());
+        }
         Objects.requireNonNull(intent);
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (isSdkSandboxAllowedToStartActivities()) {
@@ -2184,6 +2215,12 @@ public class Instrumentation {
             Context who, IBinder contextThread, IBinder token, Activity target,
             Intent intent, int requestCode, Bundle options,
             boolean ignoreTargetSecurity, int userId) {
+        if (DEBUG_START_ACTIVITY) {
+            Log.d(TAG, "startActivity: who=" + who + " source=" + target + " userId=" + userId
+                    + " intent=" + intent + " requestCode=" + requestCode
+                    + " ignoreTargetSecurity=" + ignoreTargetSecurity + " options=" + options,
+                    new Throwable());
+        }
         Objects.requireNonNull(intent);
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (isSdkSandboxAllowedToStartActivities()) {
@@ -2239,6 +2276,10 @@ public class Instrumentation {
     public void execStartActivityFromAppTask(
             Context who, IBinder contextThread, IAppTask appTask,
             Intent intent, Bundle options) {
+        if (DEBUG_START_ACTIVITY) {
+            Log.d(TAG, "startActivity: who=" + who + " intent=" + intent
+                    + " options=" + options, new Throwable());
+        }
         Objects.requireNonNull(intent);
         IApplicationThread whoThread = (IApplicationThread) contextThread;
         if (isSdkSandboxAllowedToStartActivities()) {

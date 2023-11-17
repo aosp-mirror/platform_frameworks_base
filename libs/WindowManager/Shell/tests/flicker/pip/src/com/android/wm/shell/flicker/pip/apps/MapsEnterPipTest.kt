@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip.apps
 
+import android.Manifest
 import android.content.Context
 import android.location.Criteria
 import android.location.Location
@@ -63,6 +64,9 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class MapsEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition(flicker) {
     override val standardAppHelper: MapsAppHelper = MapsAppHelper(instrumentation)
+
+    override val permissions: Array<String> = arrayOf(Manifest.permission.POST_NOTIFICATIONS,
+        Manifest.permission.ACCESS_FINE_LOCATION)
 
     val locationManager: LocationManager =
         instrumentation.context.getSystemService(Context.LOCATION_SERVICE) as LocationManager

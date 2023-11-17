@@ -40,6 +40,7 @@ import com.android.systemui.keyguard.ui.view.layout.sections.DefaultStatusViewSe
 import com.android.systemui.keyguard.ui.view.layout.sections.SmartspaceSection
 import com.android.systemui.keyguard.ui.view.layout.sections.SplitShadeGuidelines
 import com.android.systemui.util.mockito.whenever
+import java.util.Optional
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,7 +49,6 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
-import java.util.Optional
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
@@ -59,8 +59,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Mock private lateinit var defaultIndicationAreaSection: DefaultIndicationAreaSection
     @Mock private lateinit var mDefaultDeviceEntryIconSection: DefaultDeviceEntryIconSection
     @Mock private lateinit var defaultShortcutsSection: DefaultShortcutsSection
-    @Mock
-    private lateinit var defaultAmbientIndicationAreaSection: Optional<KeyguardSection>
+    @Mock private lateinit var defaultAmbientIndicationAreaSection: Optional<KeyguardSection>
     @Mock private lateinit var defaultSettingsPopupMenuSection: DefaultSettingsPopupMenuSection
     @Mock private lateinit var defaultStatusViewSection: DefaultStatusViewSection
     @Mock private lateinit var defaultStatusBarViewSection: DefaultStatusBarSection
@@ -115,6 +114,13 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
 
         verify(mDefaultDeviceEntryIconSection).addViews(constraintLayout)
         verify(someSection).removeViews(constraintLayout)
+    }
+
+    @Test
+    fun deviceEntryIconIsOnTop() {
+        val constraintLayout = ConstraintLayout(context, null)
+        underTest.replaceViews(null, constraintLayout)
+        underTest.sections.forEach { verify(it)?.addViews(constraintLayout) }
     }
 
     @Test

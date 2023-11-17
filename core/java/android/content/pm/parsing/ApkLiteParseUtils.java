@@ -424,6 +424,7 @@ public class ApkLiteParseUtils {
                 0);
         int revisionCode = parser.getAttributeIntValue(ANDROID_RES_NAMESPACE, "revisionCode", 0);
         boolean coreApp = parser.getAttributeBooleanValue(null, "coreApp", false);
+        boolean updatableSystem = parser.getAttributeBooleanValue(null, "updatableSystem", true);
         boolean isolatedSplits = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                 "isolatedSplits", false);
         boolean isFeatureSplit = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
@@ -505,14 +506,18 @@ public class ApkLiteParseUtils {
                         continue;
                     }
 
-                    if (TAG_PROFILEABLE.equals(parser.getName())) {
-                        profilableByShell = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
-                                "shell", profilableByShell);
-                    } else if (TAG_RECEIVER.equals(parser.getName())) {
-                        hasDeviceAdminReceiver |= isDeviceAdminReceiver(
-                                parser, hasBindDeviceAdminPermission);
-                    } else if (TAG_SDK_LIBRARY.equals(parser.getName())) {
-                        isSdkLibrary = true;
+                    switch (parser.getName()) {
+                        case TAG_PROFILEABLE:
+                            profilableByShell = parser.getAttributeBooleanValue(
+                                    ANDROID_RES_NAMESPACE, "shell", profilableByShell);
+                            break;
+                        case TAG_RECEIVER:
+                            hasDeviceAdminReceiver |= isDeviceAdminReceiver(parser,
+                                    hasBindDeviceAdminPermission);
+                            break;
+                        case TAG_SDK_LIBRARY:
+                            isSdkLibrary = true;
+                            break;
                     }
                 }
             } else if (TAG_OVERLAY.equals(parser.getName())) {
@@ -614,7 +619,7 @@ public class ApkLiteParseUtils {
                         overlayIsStatic, overlayPriority, requiredSystemPropertyName,
                         requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
-                        hasDeviceAdminReceiver, isSdkLibrary));
+                        hasDeviceAdminReceiver, isSdkLibrary, updatableSystem));
     }
 
     private static boolean isDeviceAdminReceiver(
