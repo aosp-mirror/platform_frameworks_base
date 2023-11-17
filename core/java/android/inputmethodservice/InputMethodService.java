@@ -149,6 +149,7 @@ import android.window.OnBackInvokedDispatcher;
 import android.window.WindowMetricsHelper;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.IInlineSuggestionsRequestCallback;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethod;
@@ -3994,6 +3995,16 @@ public class InputMethodService extends AbstractInputMethodService {
         Log.w(TAG, "getInputMethodWindowRecommendedHeight() is deprecated and now always returns 0."
                 + " Do not use this method.");
         return 0;
+    }
+
+    /**
+     * Returns whether the IME navigation bar is currently shown, for testing purposes.
+     *
+     * @hide
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    public final boolean isImeNavigationBarShownForTesting() {
+        return mNavigationBarController.isShown();
     }
 
     /**
