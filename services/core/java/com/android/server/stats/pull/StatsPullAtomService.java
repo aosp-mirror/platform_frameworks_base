@@ -1421,6 +1421,7 @@ public class StatsPullAtomService extends SystemService {
 
         final NetworkStats nonTaggedStats =
                 NetworkStatsUtils.fromPublicNetworkStats(queryNonTaggedStats);
+        queryNonTaggedStats.close();
         if (!includeTags) return nonTaggedStats;
 
         final android.app.usage.NetworkStats queryTaggedStats =
@@ -1429,6 +1430,7 @@ public class StatsPullAtomService extends SystemService {
                         currentTimeInMillis);
         final NetworkStats taggedStats =
                 NetworkStatsUtils.fromPublicNetworkStats(queryTaggedStats);
+        queryTaggedStats.close();
         return nonTaggedStats.add(taggedStats);
     }
 
