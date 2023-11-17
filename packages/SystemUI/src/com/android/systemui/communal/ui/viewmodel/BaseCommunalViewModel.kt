@@ -43,6 +43,9 @@ abstract class BaseCommunalViewModel(
     /** Called as the UI requests deleting a widget. */
     open fun onDeleteWidget(id: Int) {}
 
+    /** Called as the UI requests reordering widgets. */
+    open fun onReorderWidgets(ids: List<Int>) {}
+
     /** Called as the UI requests opening the widget editor. */
     open fun onOpenWidgetEditor() {}
 }

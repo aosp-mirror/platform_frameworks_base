@@ -19,6 +19,8 @@ package com.android.systemui.communal.ui.compose
 import android.os.Bundle
 import android.util.SizeF
 import android.widget.FrameLayout
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,11 +33,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -45,7 +49,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -53,6 +56,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalContentSize
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.CommunalEditModeViewModel
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
 import com.android.systemui.media.controls.ui.MediaHostState
 import com.android.systemui.res.R
@@ -67,31 +71,12 @@ fun CommunalHub(
     Box(
         modifier = modifier.fillMaxSize().background(Color.White),
     ) {
-        LazyHorizontalGrid(
-            modifier = modifier.height(Dimensions.GridHeight).align(Alignment.CenterStart),
-            rows = GridCells.Fixed(CommunalContentSize.FULL.span),
-            contentPadding = PaddingValues(horizontal = Dimensions.Spacing),
-            horizontalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
-            verticalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
-        ) {
-            items(
-                count = communalContent.size,
-                key = { index -> communalContent[index].key },
-                span = { index -> GridItemSpan(communalContent[index].size.span) },
-            ) { index ->
-                CommunalContent(
-                    modifier = Modifier.fillMaxHeight().width(Dimensions.CardWidth),
-                    model = communalContent[index],
-                    viewModel = viewModel,
-                    deleteOnClick = if (viewModel.isEditMode) viewModel::onDeleteWidget else null,
-                    size =
-                        SizeF(
-                            Dimensions.CardWidth.value,
-                            communalContent[index].size.dp().value,
-                        ),
-                )
-            }
-        }
+        CommunalHubLazyGrid(
+            modifier = Modifier.height(Dimensions.GridHeight).align(Alignment.CenterStart),
+            communalContent = communalContent,
+            isEditMode = viewModel.isEditMode,
+            viewModel = viewModel,
+        )
         if (viewModel.isEditMode && onOpenWidgetPicker != null) {
             IconButton(onClick = onOpenWidgetPicker) {
                 Icon(Icons.Default.Add, stringResource(R.string.hub_mode_add_widget_button_text))
@@ -114,16 +99,80 @@ fun CommunalHub(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun CommunalHubLazyGrid(
+    communalContent: List<CommunalContentModel>,
+    isEditMode: Boolean,
+    viewModel: BaseCommunalViewModel,
+    modifier: Modifier = Modifier,
+) {
+    var gridModifier = modifier
+    val gridState = rememberLazyGridState()
+    var list = communalContent
+    var dragDropState: GridDragDropState? = null
+    if (isEditMode && viewModel is CommunalEditModeViewModel) {
+        val contentListState = rememberContentListState(communalContent, viewModel)
+        list = contentListState.list
+        dragDropState = rememberGridDragDropState(gridState, contentListState)
+        gridModifier = gridModifier.dragContainer(dragDropState)
+    }
+    LazyHorizontalGrid(
+        modifier = gridModifier,
+        state = gridState,
+        rows = GridCells.Fixed(CommunalContentSize.FULL.span),
+        contentPadding = PaddingValues(horizontal = Dimensions.Spacing),
+        horizontalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
+        verticalArrangement = Arrangement.spacedBy(Dimensions.Spacing),
+    ) {
+        items(
+            count = list.size,
+            key = { index -> list[index].key },
+            span = { index -> GridItemSpan(list[index].size.span) },
+        ) { index ->
+            val cardModifier = Modifier.fillMaxHeight().width(Dimensions.CardWidth)
+            val size =
+                SizeF(
+                    Dimensions.CardWidth.value,
+                    list[index].size.dp().value,
+                )
+            if (isEditMode && dragDropState != null) {
+                DraggableItem(dragDropState = dragDropState, enabled = true, index = index) {
+                    isDragging ->
+                    val elevation by animateDpAsState(if (isDragging) 4.dp else 1.dp)
+                    CommunalContent(
+                        modifier = cardModifier,
+                        deleteOnClick = viewModel::onDeleteWidget,
+                        elevation = elevation,
+                        model = list[index],
+                        viewModel = viewModel,
+                        size = size,
+                    )
+                }
+            } else {
+                CommunalContent(
+                    modifier = cardModifier,
+                    model = list[index],
+                    viewModel = viewModel,
+                    size = size,
+                )
+            }
+        }
+    }
+}
+
 @Composable
 private fun CommunalContent(
     model: CommunalContentModel,
     viewModel: BaseCommunalViewModel,
     size: SizeF,
-    deleteOnClick: ((id: Int) -> Unit)?,
     modifier: Modifier = Modifier,
+    elevation: Dp = 0.dp,
+    deleteOnClick: ((id: Int) -> Unit)? = null,
 ) {
     when (model) {
-        is CommunalContentModel.Widget -> WidgetContent(model, size, deleteOnClick, modifier)
+        is CommunalContentModel.Widget ->
+            WidgetContent(model, size, elevation, deleteOnClick, modifier)
         is CommunalContentModel.Smartspace -> SmartspaceContent(model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
         is CommunalContentModel.Umo -> Umo(viewModel, modifier)
@@ -134,22 +183,20 @@ private fun CommunalContent(
 private fun WidgetContent(
     model: CommunalContentModel.Widget,
     size: SizeF,
+    elevation: Dp,
     deleteOnClick: ((id: Int) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     // TODO(b/309009246): update background color
-    Box(
+    Card(
         modifier = modifier.fillMaxSize().background(Color.White),
+        elevation = CardDefaults.cardElevation(draggedElevation = elevation),
     ) {
         if (deleteOnClick != null) {
             IconButton(onClick = { deleteOnClick(model.appWidgetId) }) {
-                Icon(
-                    Icons.Default.Close,
-                    LocalContext.current.getString(R.string.button_to_remove_widget)
-                )
+                Icon(Icons.Default.Close, stringResource(R.string.button_to_remove_widget))
             }
         }
-
         AndroidView(
             modifier = modifier,
             factory = { context ->
@@ -210,7 +257,7 @@ private fun CommunalContentSize.dp(): Dp {
     }
 }
 
-private object Dimensions {
+object Dimensions {
     val CardWidth = 464.dp
     val CardHeightFull = 630.dp
     val CardHeightHalf = 307.dp

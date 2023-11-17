@@ -124,6 +124,39 @@ class CommunalWidgetDaoTest : SysuiTestCase() {
             assertThat(widgets()).containsExactly(communalItemRankEntry2, communalWidgetItemEntry2)
         }
 
+    @Test
+    fun reorderWidget_emitsWidgetsInNewOrder() =
+        testScope.runTest {
+            val widgetsToAdd = listOf(widgetInfo1, widgetInfo2)
+            val widgets = collectLastValue(communalWidgetDao.getWidgets())
+
+            widgetsToAdd.forEach {
+                val (widgetId, provider, priority) = it
+                communalWidgetDao.addWidget(
+                    widgetId = widgetId,
+                    provider = provider,
+                    priority = priority,
+                )
+            }
+            assertThat(widgets())
+                .containsExactly(
+                    communalItemRankEntry1,
+                    communalWidgetItemEntry1,
+                    communalItemRankEntry2,
+                    communalWidgetItemEntry2
+                )
+
+            val widgetIdsInNewOrder = listOf(widgetInfo2.widgetId, widgetInfo1.widgetId)
+            communalWidgetDao.updateWidgetOrder(widgetIdsInNewOrder)
+            assertThat(widgets())
+                .containsExactly(
+                    communalItemRankEntry2,
+                    communalWidgetItemEntry2,
+                    communalItemRankEntry1,
+                    communalWidgetItemEntry1
+                )
+        }
+
     data class FakeWidgetMetadata(
         val widgetId: Int,
         val provider: ComponentName,

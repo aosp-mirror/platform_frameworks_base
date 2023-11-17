@@ -202,6 +202,20 @@ class CommunalWidgetRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun reorderWidgets_queryDb() =
+        testScope.runTest {
+            userUnlocked(true)
+            val repository = initCommunalWidgetRepository()
+            runCurrent()
+
+            val ids = listOf(104, 103, 101)
+            repository.updateWidgetOrder(ids)
+            runCurrent()
+
+            verify(communalWidgetDao).updateWidgetOrder(ids)
+        }
+
+    @Test
     fun broadcastReceiver_communalDisabled_doNotRegisterUserUnlockedBroadcastReceiver() =
         testScope.runTest {
             communalEnabled(false)

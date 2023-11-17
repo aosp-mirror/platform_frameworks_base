@@ -91,7 +91,8 @@ constructor(
 interface CommunalWidgetDao {
     @Query(
         "SELECT * FROM communal_widget_table JOIN communal_item_rank_table " +
-            "ON communal_item_rank_table.uid = communal_widget_table.item_id"
+            "ON communal_item_rank_table.uid = communal_widget_table.item_id " +
+            "ORDER BY communal_item_rank_table.rank DESC"
     )
     fun getWidgets(): Flow<Map<CommunalItemRank, CommunalWidgetItem>>
 
@@ -111,6 +112,17 @@ interface CommunalWidgetDao {
 
     @Query("INSERT INTO communal_item_rank_table(rank) VALUES(:rank)")
     fun insertItemRank(rank: Int): Long
+
+    @Query("UPDATE communal_item_rank_table SET rank = :order WHERE uid = :itemUid")
+    fun updateItemRank(itemUid: Long, order: Int)
+
+    @Transaction
+    fun updateWidgetOrder(ids: List<Int>) {
+        ids.forEachIndexed { index, it ->
+            val widget = getWidgetByIdNow(it)
+            updateItemRank(widget.itemId, ids.size - index)
+        }
+    }
 
     @Transaction
     fun addWidget(widgetId: Int, provider: ComponentName, priority: Int): Long {
