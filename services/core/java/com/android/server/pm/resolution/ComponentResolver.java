@@ -943,6 +943,12 @@ public class ComponentResolver extends ComponentResolverLocked implements
                 return false;
             }
 
+            if (packageState.isSystem()) {
+                // A system app can be considered in the stopped state only if it was originally
+                // scanned in the stopped state.
+                return packageState.isScannedAsStoppedSystemApp() &&
+                    packageState.getUserStateOrDefault(userId).isStopped();
+            }
             return packageState.getUserStateOrDefault(userId).isStopped();
         }
     }
