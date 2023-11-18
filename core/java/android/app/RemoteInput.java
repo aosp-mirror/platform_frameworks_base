@@ -429,7 +429,7 @@ public final class RemoteInput implements Parcelable {
         if (clipDataIntent == null) {
             return null;
         }
-        return clipDataIntent.getExtras().getParcelable(EXTRA_RESULTS_DATA, android.os.Bundle.class);
+        return clipDataIntent.getParcelableExtra(EXTRA_RESULTS_DATA, android.os.Bundle.class);
     }
 
     /**
