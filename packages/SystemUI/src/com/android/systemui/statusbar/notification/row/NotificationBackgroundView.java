@@ -27,6 +27,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -42,9 +43,11 @@ import java.util.Arrays;
  * A view that can be used for both the dimmed and normal background of an notification.
  */
 public class NotificationBackgroundView extends View implements Dumpable {
+    private static final String TAG = "NotificationBackgroundView";
 
     private final boolean mDontModifyCorners;
     private Drawable mBackground;
+    private Drawable mBackgroundDrawableToTint;
     private int mClipTopAmount;
     private int mClipBottomAmount;
     private int mTintColor;
@@ -131,6 +134,7 @@ public class NotificationBackgroundView extends View implements Dumpable {
             unscheduleDrawable(mBackground);
         }
         mBackground = background;
+        mBackgroundDrawableToTint = findBackgroundDrawableToTint(mBackground);
         mRippleColor = null;
         mBackground.mutate();
         if (mBackground != null) {
@@ -144,25 +148,46 @@ public class NotificationBackgroundView extends View implements Dumpable {
         invalidate();
     }
 
+    // setCustomBackground should be called from ActivatableNotificationView.initBackground
+    // with R.drawable.notification_material_bg, which is a layer-list with a lower layer
+    // for the background color (annotated with an ID so we can find it) and an upper layer
+    // to blend in the stateful @color/notification_overlay_color.
+    //
+    // If the notification is tinted, we want to set a tint list on *just that lower layer* that
+    // will replace the default materialColorSurfaceContainerHigh *without* wiping out the stateful
+    // tints in the upper layer that make the hovered and pressed states visible.
+    //
+    // This function fishes that lower layer out, or makes a fuss in logcat if it can't find it.
+    private @Nullable Drawable findBackgroundDrawableToTint(@Nullable Drawable background) {
+        if (background == null) {
+            return null;
+        }
+
+        if (!(background instanceof LayerDrawable)) {
+            Log.wtf(TAG, "background is not a LayerDrawable: " + background);
+            return background;
+        }
+
+        final Drawable backgroundColorLayer = ((LayerDrawable) background).findDrawableByLayerId(
+                R.id.notification_background_color_layer);
+
+        if (backgroundColorLayer == null) {
+            Log.wtf(TAG, "background is missing background color layer: " + background);
+            return background;
+        }
+
+        return backgroundColorLayer;
+    }
+
     public void setCustomBackground(int drawableResId) {
         final Drawable d = mContext.getDrawable(drawableResId);
         setCustomBackground(d);
     }
 
     public void setTint(int tintColor) {
-        if (tintColor != 0) {
-            ColorStateList stateList = new ColorStateList(new int[][]{
-                    new int[]{com.android.internal.R.attr.state_pressed},
-                    new int[]{com.android.internal.R.attr.state_hovered},
-                    new int[]{}},
+        mBackgroundDrawableToTint.setTint(tintColor);
+        mBackgroundDrawableToTint.setTintMode(PorterDuff.Mode.SRC_ATOP);
 
-                    new int[]{tintColor, tintColor, tintColor}
-            );
-            mBackground.setTintMode(PorterDuff.Mode.SRC_ATOP);
-            mBackground.setTintList(stateList);
-        } else {
-            mBackground.setTintList(null);
-        }
         mTintColor = tintColor;
         invalidate();
     }
