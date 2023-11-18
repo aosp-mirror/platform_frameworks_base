@@ -16,8 +16,11 @@
 
 package android.content.pm;
 
+import android.annotation.CurrentTimeMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -242,6 +245,14 @@ public class PackageInfo implements Parcelable {
     @SuppressWarnings({"ArrayReturn", "NullableCollection"})
     @Nullable
     public Attribution[] attributions;
+
+    /**
+     * The time at which the app was archived for the user.  Units are as
+     * per {@link System#currentTimeMillis()}.
+     * @hide
+     */
+    @CurrentTimeMillisLong
+    private long mArchiveTimeMillis;
 
     /**
      * Flag for {@link #requestedPermissionsFlags}: the requested permission
@@ -508,6 +519,24 @@ public class PackageInfo implements Parcelable {
         return overlayTarget != null && mOverlayIsStatic;
     }
 
+    /**
+     * Returns the time at which the app was archived for the user.  Units are as
+     * per {@link System#currentTimeMillis()}.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public @CurrentTimeMillisLong long getArchiveTimeMillis() {
+        return mArchiveTimeMillis;
+    }
+
+    /**
+     * @hide
+     */
+    public void setArchiveTimeMillis(@CurrentTimeMillisLong long value) {
+        mArchiveTimeMillis = value;
+    }
+
     @Override
     public String toString() {
         return "PackageInfo{"
@@ -575,6 +604,7 @@ public class PackageInfo implements Parcelable {
         }
         dest.writeBoolean(isApex);
         dest.writeBoolean(isActiveApex);
+        dest.writeLong(mArchiveTimeMillis);
         dest.restoreAllowSquashing(prevAllowSquashing);
     }
 
@@ -640,5 +670,6 @@ public class PackageInfo implements Parcelable {
         }
         isApex = source.readBoolean();
         isActiveApex = source.readBoolean();
+        mArchiveTimeMillis = source.readLong();
     }
 }

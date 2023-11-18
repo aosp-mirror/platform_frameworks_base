@@ -770,6 +770,11 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         onChanged();
     }
 
+    void setArchiveTimeMillis(long value, int userId) {
+        modifyUserState(userId).setArchiveTimeMillis(value);
+        onChanged();
+    }
+
     boolean getInstalled(int userId) {
         return readUserState(userId).isInstalled();
     }
