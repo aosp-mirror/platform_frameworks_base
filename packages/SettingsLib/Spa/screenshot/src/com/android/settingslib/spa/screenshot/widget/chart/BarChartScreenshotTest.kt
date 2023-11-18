@@ -17,7 +17,7 @@
 package com.android.settingslib.spa.screenshot.widget.chart
 
 import androidx.compose.material3.MaterialTheme
-import com.android.settingslib.spa.screenshot.util.SettingsScreenshotTestRule
+import com.android.settingslib.spa.screenshot.util.settingsScreenshotTestRule
 import com.android.settingslib.spa.widget.chart.BarChart
 import com.android.settingslib.spa.widget.chart.BarChartData
 import com.android.settingslib.spa.widget.chart.BarChartModel
@@ -41,9 +41,8 @@ class BarChartScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
     @get:Rule
     val screenshotRule =
-        SettingsScreenshotTestRule(
+        settingsScreenshotTestRule(
             emulationSpec,
-            "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
         )
 
     @Test

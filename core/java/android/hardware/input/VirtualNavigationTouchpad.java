@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.companion.virtual.IVirtualDevice;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * A virtual navigation touchpad representing a touch-based input mechanism on a remote device.
@@ -53,7 +54,10 @@ public class VirtualNavigationTouchpad extends VirtualInputDevice {
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void sendTouchEvent(@NonNull VirtualTouchEvent event) {
         try {
-            mVirtualDevice.sendTouchEvent(mToken, event);
+            if (!mVirtualDevice.sendTouchEvent(mToken, event)) {
+                Log.w(TAG, "Failed to send touch event to virtual navigation touchpad "
+                        + mConfig.getInputDeviceName());
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

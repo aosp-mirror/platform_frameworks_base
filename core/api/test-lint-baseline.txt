@@ -511,6 +511,16 @@ DeprecationMismatch: javax.microedition.khronos.egl.EGL10#eglCreatePixmapSurface
     Method javax.microedition.khronos.egl.EGL10.eglCreatePixmapSurface(javax.microedition.khronos.egl.EGLDisplay, javax.microedition.khronos.egl.EGLConfig, Object, int[]): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
 
 
+InvalidNullabilityOverride: android.window.WindowProviderService#getSystemService(String) parameter #0:
+    Invalid nullability on parameter `name` in method `getSystemService`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+InvalidNullabilityOverride: android.window.WindowProviderService#onConfigurationChanged(android.content.res.Configuration) parameter #0:
+    Invalid nullability on parameter `configuration` in method `onConfigurationChanged`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+InvalidNullabilityOverride: android.window.WindowProviderService#registerComponentCallbacks(android.content.ComponentCallbacks) parameter #0:
+    Invalid nullability on parameter `callback` in method `registerComponentCallbacks`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+InvalidNullabilityOverride: android.window.WindowProviderService#unregisterComponentCallbacks(android.content.ComponentCallbacks) parameter #0:
+    Invalid nullability on parameter `callback` in method `unregisterComponentCallbacks`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+
+
 KotlinKeyword: android.app.Notification#when:
     Avoid field names that are Kotlin hard keywords ("when"); see https://android.github.io/kotlin-guides/interop.html#no-hard-keywords
 

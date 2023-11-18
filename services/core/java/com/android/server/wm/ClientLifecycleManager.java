@@ -40,35 +40,51 @@ class ClientLifecycleManager {
      * @throws RemoteException
      *
      * @see ClientTransaction
+     * @deprecated use {@link #scheduleTransactionItem(IApplicationThread, ClientTransactionItem)}.
      */
+    @Deprecated
     void scheduleTransaction(@NonNull ClientTransaction transaction) throws RemoteException {
         final IApplicationThread client = transaction.getClient();
-        transaction.schedule();
-        if (!(client instanceof Binder)) {
-            // If client is not an instance of Binder - it's a remote call and at this point it is
-            // safe to recycle the object. All objects used for local calls will be recycled after
-            // the transaction is executed on client in ActivityThread.
-            transaction.recycle();
+        try {
+            transaction.schedule();
+        } finally {
+            if (!(client instanceof Binder)) {
+                // If client is not an instance of Binder - it's a remote call and at this point it
+                // is safe to recycle the object. All objects used for local calls will be recycled
+                // after the transaction is executed on client in ActivityThread.
+                transaction.recycle();
+            }
         }
     }
 
     /**
      * Schedules a single transaction item, either a callback or a lifecycle request, delivery to
      * client application.
-     * @param client Target client.
-     * @param transactionItem A transaction item to deliver a message.
      * @throws RemoteException
-     *
      * @see ClientTransactionItem
      */
-    void scheduleTransaction(@NonNull IApplicationThread client,
+    void scheduleTransactionItem(@NonNull IApplicationThread client,
             @NonNull ClientTransactionItem transactionItem) throws RemoteException {
         final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
-        if (transactionItem instanceof ActivityLifecycleItem) {
+        if (transactionItem.isActivityLifecycleItem()) {
             clientTransaction.setLifecycleStateRequest((ActivityLifecycleItem) transactionItem);
         } else {
             clientTransaction.addCallback(transactionItem);
         }
+        scheduleTransaction(clientTransaction);
+    }
+
+    /**
+     * Schedules a single transaction item with a lifecycle request, delivery to client application.
+     * @throws RemoteException
+     * @see ClientTransactionItem
+     */
+    void scheduleTransactionAndLifecycleItems(@NonNull IApplicationThread client,
+            @NonNull ClientTransactionItem transactionItem,
+            @NonNull ActivityLifecycleItem lifecycleItem) throws RemoteException {
+        final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
+        clientTransaction.addCallback(transactionItem);
+        clientTransaction.setLifecycleStateRequest(lifecycleItem);
         scheduleTransaction(clientTransaction);
     }
 }

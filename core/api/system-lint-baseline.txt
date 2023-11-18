@@ -517,6 +517,18 @@ GenericException: android.service.autofill.augmented.FillWindow#finalize():
     Methods must not throw generic exceptions (`java.lang.Throwable`)
 
 
+InvalidNullabilityOverride: android.service.textclassifier.TextClassifierService#onUnbind(android.content.Intent) parameter #0:
+    Invalid nullability on parameter `intent` in method `onUnbind`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+InvalidNullabilityOverride: android.service.voice.HotwordDetectionService#getSystemService(String) parameter #0:
+    Invalid nullability on parameter `name` in method `getSystemService`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+InvalidNullabilityOverride: android.service.voice.VisualQueryDetectionService#getSystemService(String) parameter #0:
+    Invalid nullability on parameter `name` in method `getSystemService`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+InvalidNullabilityOverride: android.service.voice.VisualQueryDetectionService#openFileInput(String):
+    Invalid nullability on method `openFileInput` return. Overrides of unannotated super method cannot be Nullable.
+InvalidNullabilityOverride: android.service.voice.VisualQueryDetectionService#openFileInput(String) parameter #0:
+    Invalid nullability on parameter `filename` in method `openFileInput`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+
+
 KotlinKeyword: android.app.Notification#when:
     Avoid field names that are Kotlin hard keywords ("when"); see https://android.github.io/kotlin-guides/interop.html#no-hard-keywords
 

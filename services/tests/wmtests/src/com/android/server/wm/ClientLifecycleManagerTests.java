@@ -16,18 +16,32 @@
 
 package com.android.server.wm;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+
 import android.app.IApplicationThread;
+import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.ClientTransactionItem;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Build/Install/Run:
@@ -37,23 +51,77 @@ import org.junit.Test;
 @Presubmit
 public class ClientLifecycleManagerTests {
 
-    @Test
-    public void testScheduleAndRecycleBinderClientTransaction() throws Exception {
-        ClientTransaction item = spy(ClientTransaction.obtain(mock(IApplicationThread.class)));
+    @Mock
+    private IApplicationThread mClient;
+    @Mock
+    private IApplicationThread.Stub mNonBinderClient;
+    @Mock
+    private ClientTransactionItem mTransactionItem;
+    @Mock
+    private ActivityLifecycleItem mLifecycleItem;
+    @Captor
+    private ArgumentCaptor<ClientTransaction> mTransactionCaptor;
 
-        ClientLifecycleManager clientLifecycleManager = new ClientLifecycleManager();
-        clientLifecycleManager.scheduleTransaction(item);
+    private ClientLifecycleManager mLifecycleManager;
 
-        verify(item, times(1)).recycle();
+    @Before
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+
+        mLifecycleManager = spy(new ClientLifecycleManager());
+
+        doReturn(true).when(mLifecycleItem).isActivityLifecycleItem();
     }
 
     @Test
-    public void testScheduleNoRecycleNonBinderClientTransaction() throws Exception {
-        ClientTransaction item = spy(ClientTransaction.obtain(mock(IApplicationThread.Stub.class)));
+    public void testScheduleTransaction_recycleBinderClientTransaction() throws Exception {
+        final ClientTransaction item = spy(ClientTransaction.obtain(mClient));
 
-        ClientLifecycleManager clientLifecycleManager = new ClientLifecycleManager();
-        clientLifecycleManager.scheduleTransaction(item);
+        mLifecycleManager.scheduleTransaction(item);
 
-        verify(item, times(0)).recycle();
+        verify(item).recycle();
+    }
+
+    @Test
+    public void testScheduleTransaction_notRecycleNonBinderClientTransaction() throws Exception {
+        final ClientTransaction item = spy(ClientTransaction.obtain(mNonBinderClient));
+
+        mLifecycleManager.scheduleTransaction(item);
+
+        verify(item, never()).recycle();
+    }
+
+    @Test
+    public void testScheduleTransactionItem() throws RemoteException {
+        doNothing().when(mLifecycleManager).scheduleTransaction(any());
+        mLifecycleManager.scheduleTransactionItem(mClient, mTransactionItem);
+
+        verify(mLifecycleManager).scheduleTransaction(mTransactionCaptor.capture());
+        ClientTransaction transaction = mTransactionCaptor.getValue();
+        assertEquals(1, transaction.getCallbacks().size());
+        assertEquals(mTransactionItem, transaction.getCallbacks().get(0));
+        assertNull(transaction.getLifecycleStateRequest());
+        assertNull(transaction.getTransactionItems());
+
+        clearInvocations(mLifecycleManager);
+        mLifecycleManager.scheduleTransactionItem(mClient, mLifecycleItem);
+
+        verify(mLifecycleManager).scheduleTransaction(mTransactionCaptor.capture());
+        transaction = mTransactionCaptor.getValue();
+        assertNull(transaction.getCallbacks());
+        assertEquals(mLifecycleItem, transaction.getLifecycleStateRequest());
+    }
+
+    @Test
+    public void testScheduleTransactionAndLifecycleItems() throws RemoteException {
+        doNothing().when(mLifecycleManager).scheduleTransaction(any());
+        mLifecycleManager.scheduleTransactionAndLifecycleItems(mClient, mTransactionItem,
+                mLifecycleItem);
+
+        verify(mLifecycleManager).scheduleTransaction(mTransactionCaptor.capture());
+        final ClientTransaction transaction = mTransactionCaptor.getValue();
+        assertEquals(1, transaction.getCallbacks().size());
+        assertEquals(mTransactionItem, transaction.getCallbacks().get(0));
+        assertEquals(mLifecycleItem, transaction.getLifecycleStateRequest());
     }
 }

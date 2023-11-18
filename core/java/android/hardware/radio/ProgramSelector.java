@@ -109,7 +109,10 @@ public final class ProgramSelector implements Parcelable {
     /** @deprecated use {@link ProgramIdentifier} instead */
     @Deprecated
     public static final int PROGRAM_TYPE_VENDOR_END = 1999;
-    /** @deprecated use {@link ProgramIdentifier} instead */
+    /**
+     * @deprecated use {@link ProgramIdentifier} instead
+     * @removed mistakenly exposed previously
+     */
     @Deprecated
     @IntDef(prefix = { "PROGRAM_TYPE_" }, value = {
         PROGRAM_TYPE_INVALID,
@@ -397,6 +400,7 @@ public final class ProgramSelector implements Parcelable {
      */
     @Deprecated
     public static final int IDENTIFIER_TYPE_VENDOR_PRIMARY_END = IDENTIFIER_TYPE_VENDOR_END;
+    /** @removed mistakenly exposed previously */
     @IntDef(prefix = { "IDENTIFIER_TYPE_" }, value = {
         IDENTIFIER_TYPE_INVALID,
         IDENTIFIER_TYPE_AMFM_FREQUENCY,

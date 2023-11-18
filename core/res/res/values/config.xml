@@ -6806,6 +6806,10 @@
     <!-- Whether or not ActivityManager PSS profiling is disabled. -->
     <bool name="config_am_disablePssProfiling">false</bool>
 
+    <!-- The modifier used to adjust AM's PSS threshold for downgrading services to service B if
+         RSS is being collected instead. -->
+    <item name="config_am_pssToRssThresholdModifier" format="float" type="dimen">1.5</item>
+
     <!-- Whether unlocking and waking a device are sequenced -->
     <bool name="config_orderUnlockAndWake">false</bool>
 

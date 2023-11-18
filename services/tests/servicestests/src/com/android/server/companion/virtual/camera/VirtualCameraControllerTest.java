@@ -57,12 +57,11 @@ public class VirtualCameraControllerTest {
     private static final int CAMERA_DISPLAY_NAME_RES_ID_1 = 10;
     private static final int CAMERA_WIDTH_1 = 100;
     private static final int CAMERA_HEIGHT_1 = 200;
-    private static final int CAMERA_FORMAT_1 = ImageFormat.RGB_565;
 
     private static final int CAMERA_DISPLAY_NAME_RES_ID_2 = 11;
     private static final int CAMERA_WIDTH_2 = 400;
     private static final int CAMERA_HEIGHT_2 = 600;
-    private static final int CAMERA_FORMAT_2 = ImageFormat.YUY2;
+    private static final int CAMERA_FORMAT = ImageFormat.YUV_420_888;
 
     @Mock
     private IVirtualCameraService mVirtualCameraServiceMock;
@@ -81,7 +80,7 @@ public class VirtualCameraControllerTest {
     @Test
     public void registerCamera_registersCamera() throws Exception {
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT_1, CAMERA_DISPLAY_NAME_RES_ID_1));
+                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_DISPLAY_NAME_RES_ID_1));
 
         ArgumentCaptor<VirtualCameraConfiguration> configurationCaptor =
                 ArgumentCaptor.forClass(VirtualCameraConfiguration.class);
@@ -89,13 +88,13 @@ public class VirtualCameraControllerTest {
         VirtualCameraConfiguration virtualCameraConfiguration = configurationCaptor.getValue();
         assertThat(virtualCameraConfiguration.supportedStreamConfigs.length).isEqualTo(1);
         assertVirtualCameraConfiguration(virtualCameraConfiguration, CAMERA_WIDTH_1,
-                CAMERA_HEIGHT_1, CAMERA_FORMAT_1);
+                CAMERA_HEIGHT_1, CAMERA_FORMAT);
     }
 
     @Test
     public void unregisterCamera_unregistersCamera() throws Exception {
         VirtualCameraConfig config = createVirtualCameraConfig(
-                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT_1, CAMERA_DISPLAY_NAME_RES_ID_1);
+                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_DISPLAY_NAME_RES_ID_1);
         mVirtualCameraController.unregisterCamera(config);
 
         verify(mVirtualCameraServiceMock).unregisterCamera(any());
@@ -104,9 +103,9 @@ public class VirtualCameraControllerTest {
     @Test
     public void close_unregistersAllCameras() throws Exception {
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT_1, CAMERA_DISPLAY_NAME_RES_ID_1));
+                CAMERA_WIDTH_1, CAMERA_HEIGHT_1, CAMERA_FORMAT, CAMERA_DISPLAY_NAME_RES_ID_1));
         mVirtualCameraController.registerCamera(createVirtualCameraConfig(
-                CAMERA_WIDTH_2, CAMERA_HEIGHT_2, CAMERA_FORMAT_2, CAMERA_DISPLAY_NAME_RES_ID_2));
+                CAMERA_WIDTH_2, CAMERA_HEIGHT_2, CAMERA_FORMAT, CAMERA_DISPLAY_NAME_RES_ID_2));
 
         ArgumentCaptor<VirtualCameraConfiguration> configurationCaptor =
                 ArgumentCaptor.forClass(VirtualCameraConfiguration.class);
@@ -117,9 +116,9 @@ public class VirtualCameraControllerTest {
                 configurationCaptor.getAllValues();
         assertThat(virtualCameraConfigurations).hasSize(2);
         assertVirtualCameraConfiguration(virtualCameraConfigurations.get(0), CAMERA_WIDTH_1,
-                CAMERA_HEIGHT_1, CAMERA_FORMAT_1);
+                CAMERA_HEIGHT_1, CAMERA_FORMAT);
         assertVirtualCameraConfiguration(virtualCameraConfigurations.get(1), CAMERA_WIDTH_2,
-                CAMERA_HEIGHT_2, CAMERA_FORMAT_2);
+                CAMERA_HEIGHT_2, CAMERA_FORMAT);
     }
 
     private VirtualCameraConfig createVirtualCameraConfig(

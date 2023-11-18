@@ -21,7 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.runtime.Composable
-import com.android.settingslib.spa.screenshot.util.SettingsScreenshotTestRule
+import com.android.settingslib.spa.screenshot.util.settingsScreenshotTestRule
 import com.android.settingslib.spa.widget.preference.ProgressBarPreference
 import com.android.settingslib.spa.widget.preference.ProgressBarPreferenceModel
 import com.android.settingslib.spa.widget.preference.ProgressBarWithDataPreference
@@ -45,9 +45,8 @@ class ProgressBarPreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
     @get:Rule
     val screenshotRule =
-        SettingsScreenshotTestRule(
+        settingsScreenshotTestRule(
             emulationSpec,
-            "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
         )
 
     @Test

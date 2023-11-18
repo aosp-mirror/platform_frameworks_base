@@ -94,3 +94,18 @@ class SettingsScreenshotTestRule(
         screenshotRule.assertBitmapAgainstGolden(view.drawIntoBitmap(), goldenIdentifier, matcher)
     }
 }
+
+/** Create a [SettingsScreenshotTestRule] for settings screenshot tests. */
+fun settingsScreenshotTestRule(
+    emulationSpec: DeviceEmulationSpec,
+): SettingsScreenshotTestRule {
+    val assetPath = if (Build.FINGERPRINT.contains("robolectric")) {
+        "frameworks/base/packages/SettingsLib/Spa/screenshot/robotests/assets"
+    } else {
+        "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
+    }
+    return SettingsScreenshotTestRule(
+        emulationSpec,
+        assetPath
+    )
+}

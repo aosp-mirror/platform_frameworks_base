@@ -553,6 +553,7 @@ cc_defaults {
         "utils/Blur.cpp",
         "utils/Color.cpp",
         "utils/LinearAllocator.cpp",
+        "utils/TypefaceUtils.cpp",
         "utils/VectorDrawableUtils.cpp",
         "AnimationContext.cpp",
         "Animator.cpp",

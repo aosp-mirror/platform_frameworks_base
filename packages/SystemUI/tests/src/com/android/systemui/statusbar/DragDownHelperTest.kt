@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingOb
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.shade.data.repository.FakeShadeRepository
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -61,6 +62,7 @@ class DragDownHelperTest : SysuiTestCase() {
                 falsingCollector,
                 dragDownloadCallback,
                 naturalScrollingSettingObserver,
+                FakeShadeRepository(),
                 mContext,
         ).also {
             it.expandCallback = expandCallback

@@ -19,14 +19,10 @@ package com.android.systemui
 import com.android.internal.logging.InstanceId
 import com.android.internal.logging.InstanceIdSequence
 
-/**
- * Fake [InstanceId] generator.
- */
+/** Fake [InstanceId] generator. */
 class InstanceIdSequenceFake(instanceIdMax: Int) : InstanceIdSequence(instanceIdMax) {
 
-    /**
-     * Last id used to generate a [InstanceId]. `-1` if no [InstanceId] has been generated.
-     */
+    /** Last id used to generate a [InstanceId]. `-1` if no [InstanceId] has been generated. */
     var lastInstanceId = -1
         private set
 

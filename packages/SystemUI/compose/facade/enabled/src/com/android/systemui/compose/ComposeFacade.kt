@@ -32,7 +32,7 @@ import com.android.systemui.common.ui.compose.windowinsets.DisplayCutout
 import com.android.systemui.common.ui.compose.windowinsets.DisplayCutoutProvider
 import com.android.systemui.communal.ui.compose.CommunalContainer
 import com.android.systemui.communal.ui.compose.CommunalHub
-import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import com.android.systemui.qs.footer.ui.compose.FooterActions
@@ -60,6 +60,21 @@ object ComposeFacade : BaseComposeFacade {
         onResult: (PeopleViewModel.Result) -> Unit,
     ) {
         activity.setContent { PlatformTheme { PeopleScreen(viewModel, onResult) } }
+    }
+
+    override fun setCommunalEditWidgetActivityContent(
+        activity: ComponentActivity,
+        viewModel: BaseCommunalViewModel,
+        onOpenWidgetPicker: () -> Unit,
+    ) {
+        activity.setContent {
+            PlatformTheme {
+                CommunalHub(
+                    viewModel = viewModel,
+                    onOpenWidgetPicker = onOpenWidgetPicker,
+                )
+            }
+        }
     }
 
     override fun createFooterActionsView(
@@ -98,14 +113,14 @@ object ComposeFacade : BaseComposeFacade {
 
     override fun createCommunalView(
         context: Context,
-        viewModel: CommunalViewModel,
+        viewModel: BaseCommunalViewModel,
     ): View {
         return ComposeView(context).apply {
             setContent { PlatformTheme { CommunalHub(viewModel = viewModel) } }
         }
     }
 
-    override fun createCommunalContainer(context: Context, viewModel: CommunalViewModel): View {
+    override fun createCommunalContainer(context: Context, viewModel: BaseCommunalViewModel): View {
         return ComposeView(context).apply {
             setContent { PlatformTheme { CommunalContainer(viewModel = viewModel) } }
         }

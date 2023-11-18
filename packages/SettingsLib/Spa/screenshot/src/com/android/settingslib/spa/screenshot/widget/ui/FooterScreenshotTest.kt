@@ -16,7 +16,7 @@
 
 package com.android.settingslib.spa.screenshot.widget.ui
 
-import com.android.settingslib.spa.screenshot.util.SettingsScreenshotTestRule
+import com.android.settingslib.spa.screenshot.util.settingsScreenshotTestRule
 import com.android.settingslib.spa.widget.ui.Footer
 import org.junit.Rule
 import org.junit.Test
@@ -37,9 +37,8 @@ class FooterScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
     @get:Rule
     val screenshotRule =
-        SettingsScreenshotTestRule(
+        settingsScreenshotTestRule(
             emulationSpec,
-            "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
         )
 
     @Test

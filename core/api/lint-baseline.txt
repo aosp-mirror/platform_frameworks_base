@@ -389,6 +389,12 @@ DeprecationMismatch: javax.microedition.khronos.egl.EGL10#eglCreatePixmapSurface
     Method javax.microedition.khronos.egl.EGL10.eglCreatePixmapSurface(javax.microedition.khronos.egl.EGLDisplay, javax.microedition.khronos.egl.EGLConfig, Object, int[]): @Deprecated annotation (present) and @deprecated doc tag (not present) do not match
 
 
+InvalidNullabilityOverride: android.app.Notification.TvExtender#extend(android.app.Notification.Builder) parameter #0:
+    Invalid nullability on parameter `builder` in method `extend`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+InvalidNullabilityOverride: android.media.midi.MidiUmpDeviceService#onBind(android.content.Intent) parameter #0:
+    Invalid nullability on parameter `intent` in method `onBind`. Parameters of overrides cannot be NonNull if the super parameter is unannotated.
+
+
 RequiresPermission: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
     Method 'getAccountsByTypeAndFeatures' documentation mentions permissions without declaring @RequiresPermission
 RequiresPermission: android.accounts.AccountManager#hasFeatures(android.accounts.Account, String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):

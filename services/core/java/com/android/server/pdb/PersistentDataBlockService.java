@@ -355,15 +355,7 @@ public class PersistentDataBlockService extends SystemService {
     private boolean computeAndWriteDigestLocked() {
         byte[] digest = computeDigestLocked(null);
         if (digest != null) {
-            FileChannel channel;
-            try {
-                channel = getBlockOutputChannel();
-            } catch (IOException e) {
-                Slog.e(TAG, "partition not available?", e);
-                return false;
-            }
-
-            try {
+            try (FileChannel channel = getBlockOutputChannel()) {
                 ByteBuffer buf = ByteBuffer.allocate(DIGEST_SIZE_BYTES);
                 buf.put(digest);
                 buf.flip();
@@ -424,8 +416,7 @@ public class PersistentDataBlockService extends SystemService {
     @VisibleForTesting
     void formatPartitionLocked(boolean setOemUnlockEnabled) {
 
-        try {
-            FileChannel channel = getBlockOutputChannel();
+        try (FileChannel channel = getBlockOutputChannel()) {
             // Format the data selectively.
             //
             // 1. write header, set length = 0
@@ -471,8 +462,7 @@ public class PersistentDataBlockService extends SystemService {
 
     private void doSetOemUnlockEnabledLocked(boolean enabled) {
 
-        try {
-            FileChannel channel = getBlockOutputChannel();
+        try (FileChannel channel = getBlockOutputChannel()) {
 
             channel.position(getBlockDeviceSize() - 1);
 
@@ -554,14 +544,6 @@ public class PersistentDataBlockService extends SystemService {
                 return (int) -maxBlockSize;
             }
 
-            FileChannel channel;
-            try {
-                channel = getBlockOutputChannel();
-            } catch (IOException e) {
-                Slog.e(TAG, "partition not available?", e);
-               return -1;
-            }
-
             ByteBuffer headerAndData = ByteBuffer.allocate(
                                            data.length + HEADER_SIZE + DIGEST_SIZE_BYTES);
             headerAndData.put(new byte[DIGEST_SIZE_BYTES]);
@@ -574,7 +556,7 @@ public class PersistentDataBlockService extends SystemService {
                     return -1;
                 }
 
-                try {
+                try (FileChannel channel = getBlockOutputChannel()) {
                     channel.write(headerAndData);
                     channel.force(true);
                 } catch (IOException e) {
@@ -831,8 +813,7 @@ public class PersistentDataBlockService extends SystemService {
                 if (!mIsWritable) {
                     return;
                 }
-                try {
-                    FileChannel channel = getBlockOutputChannel();
+                try (FileChannel channel = getBlockOutputChannel()) {
                     channel.position(offset);
                     channel.write(dataBuffer);
                     channel.force(true);

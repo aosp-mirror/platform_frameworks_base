@@ -322,7 +322,6 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
                             xPx = 30f * coordinate.x + 15,
                             yPx = 30f * coordinate.y + 15,
                             containerSizePx = 90,
-                            verticalOffsetPx = 0f,
                         )
                     }
 
@@ -369,7 +368,6 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
             xPx = dotSize * coordinate.x + 15f,
             yPx = dotSize * coordinate.y + 15f,
             containerSizePx = containerSize,
-            verticalOffsetPx = 0f,
         )
     }
 

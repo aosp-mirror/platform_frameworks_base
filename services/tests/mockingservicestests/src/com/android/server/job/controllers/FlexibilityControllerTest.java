@@ -19,19 +19,25 @@ package com.android.server.job.controllers;
 import static android.app.job.JobInfo.BIAS_FOREGROUND_SERVICE;
 import static android.app.job.JobInfo.BIAS_TOP_APP;
 import static android.app.job.JobInfo.NETWORK_TYPE_ANY;
+import static android.app.job.JobInfo.NETWORK_TYPE_CELLULAR;
+import static android.app.job.JobInfo.NETWORK_TYPE_NONE;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS;
+import static com.android.server.job.controllers.FlexibilityController.FcConfig.DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_DEADLINE_PROXIMITY_LIMIT;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_FALLBACK_FLEXIBILITY_DEADLINE;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_FLEXIBILITY_ENABLED;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS;
 import static com.android.server.job.controllers.FlexibilityController.NUM_FLEXIBLE_CONSTRAINTS;
+import static com.android.server.job.controllers.FlexibilityController.SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_BATTERY_NOT_LOW;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CHARGING;
+import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CONNECTIVITY;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_FLEXIBLE;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_IDLE;
 import static com.android.server.job.controllers.JobStatus.MIN_WINDOW_FOR_FLEXIBILITY_MS;
@@ -54,6 +60,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.net.NetworkRequest;
 import android.os.Looper;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
@@ -693,15 +700,59 @@ public class FlexibilityControllerTest {
 
     @Test
     public void testTransportAffinity() {
-        JobInfo.Builder jb = createJob(0).setRequiredNetworkType(NETWORK_TYPE_ANY);
-        JobStatus js = createJobStatus("testTopAppBypass", jb);
+        JobStatus jsAny = createJobStatus("testTransportAffinity",
+                createJob(0).setRequiredNetworkType(NETWORK_TYPE_ANY));
+        JobStatus jsCell = createJobStatus("testTransportAffinity",
+                createJob(0).setRequiredNetworkType(NETWORK_TYPE_CELLULAR));
+        JobStatus jsWifi = createJobStatus("testTransportAffinity",
+                createJob(0).setRequiredNetwork(
+                        new NetworkRequest.Builder()
+                                .addTransportType(TRANSPORT_WIFI)
+                                .build()));
+        // Disable the unseen constraint logic.
+        mFlexibilityController.setConstraintSatisfied(
+                SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS, true, FROZEN_TIME);
+        mFlexibilityController.setConstraintSatisfied(
+                SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS, false, FROZEN_TIME);
+        // Require only a single constraint
+        jsAny.adjustNumRequiredFlexibleConstraints(-3);
+        jsCell.adjustNumRequiredFlexibleConstraints(-2);
+        jsWifi.adjustNumRequiredFlexibleConstraints(-2);
         synchronized (mFlexibilityController.mLock) {
-            js.setTransportAffinitiesSatisfied(false);
-            assertEquals(0, mFlexibilityController.getNumSatisfiedRequiredConstraintsLocked(js));
-            js.setTransportAffinitiesSatisfied(true);
-            assertEquals(1, mFlexibilityController.getNumSatisfiedRequiredConstraintsLocked(js));
-            js.setTransportAffinitiesSatisfied(false);
-            assertEquals(0, mFlexibilityController.getNumSatisfiedRequiredConstraintsLocked(js));
+            jsAny.setTransportAffinitiesSatisfied(false);
+            jsCell.setTransportAffinitiesSatisfied(false);
+            jsWifi.setTransportAffinitiesSatisfied(false);
+            mFlexibilityController.setConstraintSatisfied(
+                    CONSTRAINT_CONNECTIVITY, false, FROZEN_TIME);
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsAny));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsCell));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsWifi));
+
+            // A good network exists, but the network hasn't been assigned to any of the jobs
+            jsAny.setTransportAffinitiesSatisfied(false);
+            jsCell.setTransportAffinitiesSatisfied(false);
+            jsWifi.setTransportAffinitiesSatisfied(false);
+            mFlexibilityController.setConstraintSatisfied(
+                    CONSTRAINT_CONNECTIVITY, true, FROZEN_TIME);
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsAny));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsCell));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsWifi));
+
+            // The good network has been assigned to the relevant jobs
+            jsAny.setTransportAffinitiesSatisfied(true);
+            jsCell.setTransportAffinitiesSatisfied(false);
+            jsWifi.setTransportAffinitiesSatisfied(true);
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsAny));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsCell));
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsWifi));
+
+            // One job loses access to the network.
+            jsAny.setTransportAffinitiesSatisfied(true);
+            jsCell.setTransportAffinitiesSatisfied(false);
+            jsWifi.setTransportAffinitiesSatisfied(false);
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsAny));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsCell));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(jsWifi));
         }
     }
 
@@ -764,6 +815,131 @@ public class FlexibilityControllerTest {
                 assertSatisfiedJobsMatchSatisfiedConstraints(
                         mFlexibilityController.mFlexibilityTracker.getArrayList(), constraints);
             }
+        }
+    }
+
+    @Test
+    public void testHasEnoughSatisfiedConstraints_unseenConstraints_soonAfterBoot() {
+        // Add connectivity to require 4 constraints
+        JobStatus js = createJobStatus("testHasEnoughSatisfiedConstraints",
+                createJob(0).setRequiredNetworkType(NETWORK_TYPE_ANY));
+
+        // Too soon after boot
+        JobSchedulerService.sElapsedRealtimeClock =
+                Clock.fixed(Instant.ofEpochMilli(100 - 1), ZoneOffset.UTC);
+        synchronized (mFlexibilityController.mLock) {
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(js));
+        }
+        JobSchedulerService.sElapsedRealtimeClock =
+                Clock.fixed(Instant.ofEpochMilli(DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS - 1),
+                        ZoneOffset.UTC);
+        synchronized (mFlexibilityController.mLock) {
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(js));
+        }
+
+        // Long after boot
+
+        // No constraints ever seen. Don't bother waiting
+        JobSchedulerService.sElapsedRealtimeClock =
+                Clock.fixed(Instant.ofEpochMilli(DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS),
+                        ZoneOffset.UTC);
+        synchronized (mFlexibilityController.mLock) {
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(js));
+        }
+    }
+
+    @Test
+    public void testHasEnoughSatisfiedConstraints_unseenConstraints_longAfterBoot() {
+        // Add connectivity to require 4 constraints
+        JobStatus connJs = createJobStatus("testHasEnoughSatisfiedConstraints",
+                createJob(0).setRequiredNetworkType(NETWORK_TYPE_ANY));
+        JobStatus nonConnJs = createJobStatus("testHasEnoughSatisfiedConstraints",
+                createJob(0).setRequiredNetworkType(NETWORK_TYPE_NONE));
+
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_BATTERY_NOT_LOW, true,
+                2 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10);
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_CHARGING, true,
+                3 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10);
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_IDLE, true,
+                4 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10);
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_CONNECTIVITY, true,
+                5 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10);
+
+        // Long after boot
+        // All constraints satisfied right now
+        JobSchedulerService.sElapsedRealtimeClock =
+                Clock.fixed(Instant.ofEpochMilli(DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS),
+                        ZoneOffset.UTC);
+        synchronized (mFlexibilityController.mLock) {
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+
+        // Go down to 2 satisfied
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_CONNECTIVITY, false,
+                6 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10);
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_IDLE, false,
+                7 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10);
+        // 3 & 4 constraints were seen recently enough, so the job should wait
+        synchronized (mFlexibilityController.mLock) {
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+
+        // 4 constraints still in the grace period. Wait.
+        JobSchedulerService.sElapsedRealtimeClock =
+                Clock.fixed(
+                        Instant.ofEpochMilli(16 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10),
+                        ZoneOffset.UTC);
+        synchronized (mFlexibilityController.mLock) {
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+
+        // 3 constraints still in the grace period. Wait.
+        JobSchedulerService.sElapsedRealtimeClock =
+                Clock.fixed(
+                        Instant.ofEpochMilli(17 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10),
+                        ZoneOffset.UTC);
+        synchronized (mFlexibilityController.mLock) {
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+
+        // 3 constraints haven't been seen recently. Don't wait.
+        JobSchedulerService.sElapsedRealtimeClock =
+                Clock.fixed(
+                        Instant.ofEpochMilli(
+                                17 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10 + 1),
+                        ZoneOffset.UTC);
+        synchronized (mFlexibilityController.mLock) {
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+
+        // Add then remove connectivity. Resets expectation of 3 constraints for connectivity jobs.
+        // Connectivity job should wait while the non-connectivity job can run.
+        // of getting back to 4 constraints.
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_CONNECTIVITY, true,
+                18 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10);
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_CONNECTIVITY, false,
+                19 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10);
+        JobSchedulerService.sElapsedRealtimeClock =
+                Clock.fixed(
+                        Instant.ofEpochMilli(
+                                19 * DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS / 10 + 1),
+                        ZoneOffset.UTC);
+        synchronized (mFlexibilityController.mLock) {
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
         }
     }
 

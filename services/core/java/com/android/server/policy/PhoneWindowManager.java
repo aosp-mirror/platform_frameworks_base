@@ -1073,7 +1073,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    private void powerPress(long eventTime, int count) {
+    private void powerPress(long eventTime, int count, int displayId) {
         // SideFPS still needs to know about suppressed power buttons, in case it needs to block
         // an auth attempt.
         if (count == 1) {
@@ -1126,8 +1126,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case SHORT_PRESS_POWER_CLOSE_IME_OR_GO_HOME: {
                     if (mDismissImeOnBackKeyPressed) {
-                        InputMethodManagerInternal.get().hideCurrentInputMethod(
-                                    SoftInputShowHideReason.HIDE_POWER_BUTTON_GO_HOME);
+                        // TODO(b/308479256): Check if hiding "all" IMEs is OK or not.
+                        InputMethodManagerInternal.get().hideAllInputMethods(
+                                SoftInputShowHideReason.HIDE_POWER_BUTTON_GO_HOME, displayId);
                     } else {
                         shortPressPowerGoHome();
                     }
@@ -2662,11 +2663,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         @Override
-        void onPress(long downTime) {
+        void onPress(long downTime, int displayId) {
             if (mShouldEarlyShortPressOnPower) {
                 return;
             }
-            powerPress(downTime, 1 /*count*/);
+            powerPress(downTime, 1 /*count*/, displayId);
         }
 
         @Override
@@ -2696,14 +2697,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         @Override
-        void onMultiPress(long downTime, int count) {
-            powerPress(downTime, count);
+        void onMultiPress(long downTime, int count, int displayId) {
+            powerPress(downTime, count, displayId);
         }
 
         @Override
-        void onKeyUp(long eventTime, int count) {
+        void onKeyUp(long eventTime, int count, int displayId) {
             if (mShouldEarlyShortPressOnPower && count == 1) {
-                powerPress(eventTime, 1 /*pressCount*/);
+                powerPress(eventTime, 1 /*pressCount*/, displayId);
             }
         }
     }
@@ -2727,7 +2728,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         @Override
-        void onPress(long downTime) {
+        void onPress(long downTime, int unusedDisplayId) {
             mBackKeyHandled |= backKeyPress();
         }
 
@@ -2756,7 +2757,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         @Override
-        void onPress(long downTime) {
+        void onPress(long downTime, int unusedDisplayId) {
             if (mShouldEarlyShortPressOnStemPrimary) {
                 return;
             }
@@ -2769,12 +2770,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         @Override
-        void onMultiPress(long downTime, int count) {
+        void onMultiPress(long downTime, int count, int unusedDisplayId) {
             stemPrimaryPress(count);
         }
 
         @Override
-        void onKeyUp(long eventTime, int count) {
+        void onKeyUp(long eventTime, int count, int unusedDisplayId) {
             if (count == 1) {
                 // Save info about the most recent task on the first press of the stem key. This
                 // may be used later to switch to the most recent app using double press gesture.

@@ -168,15 +168,11 @@ constructor(
         // When to limit notifications: on lockscreen with an unexpanded shade. Also, recalculate
         // when the notification stack has changed internally
         val limitedNotifications =
-            combineTransform(
-                isOnLockscreen,
+            combine(
                 position,
-                shadeInteractor.shadeExpansion,
                 interactor.notificationStackChanged.onStart { emit(Unit) },
-            ) { isOnLockscreen, position, shadeExpansion, _ ->
-                if (isOnLockscreen && shadeExpansion == 0f) {
-                    emit(calculateSpace(position.bottom - position.top))
-                }
+            ) { position, _ ->
+                calculateSpace(position.bottom - position.top)
             }
 
         // When to show unlimited notifications: When the shade is fully expanded and the user is
@@ -190,11 +186,14 @@ constructor(
                     emit(-1)
                 }
             }
-
-        return merge(
-                limitedNotifications,
-                unlimitedNotifications,
-            )
+        return isOnLockscreenWithoutShade
+            .flatMapLatest { isOnLockscreenWithoutShade ->
+                if (isOnLockscreenWithoutShade) {
+                    limitedNotifications
+                } else {
+                    unlimitedNotifications
+                }
+            }
             .distinctUntilChanged()
     }
 

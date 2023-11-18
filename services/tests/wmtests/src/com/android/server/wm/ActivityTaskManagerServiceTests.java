@@ -127,7 +127,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         final ArgumentCaptor<ClientTransactionItem> clientTransactionItemCaptor =
                 ArgumentCaptor.forClass(ClientTransactionItem.class);
-        verify(mockLifecycleManager).scheduleTransaction(any(),
+        verify(mockLifecycleManager).scheduleTransactionItem(any(),
                 clientTransactionItemCaptor.capture());
         final ClientTransactionItem transactionItem = clientTransactionItemCaptor.getValue();
         // Check that only an enter pip request item callback was scheduled.
@@ -144,7 +144,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        verify(mClientLifecycleManager, never()).scheduleTransaction(any(), any());
+        verify(mClientLifecycleManager, never()).scheduleTransactionItem(any(), any());
     }
 
     @Test
@@ -156,7 +156,7 @@ public class ActivityTaskManagerServiceTests extends WindowTestsBase {
 
         mAtm.mActivityClientController.requestPictureInPictureMode(activity);
 
-        verify(mClientLifecycleManager, never()).scheduleTransaction(any(), any());
+        verify(mClientLifecycleManager, never()).scheduleTransactionItem(any(), any());
     }
 
     @Test

@@ -25,6 +25,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 import android.app.Instrumentation;
 import android.content.Context;
@@ -48,6 +49,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.apps.inputmethod.simpleime.ims.InputMethodServiceWrapper;
 import com.android.apps.inputmethod.simpleime.testing.TestActivity;
+import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 
 import org.junit.After;
 import org.junit.Before;
@@ -633,6 +635,82 @@ public class InputMethodServiceTest {
 
         assertEquals(Insets.NONE, mInputMethodService.getWindow().getWindow().getDecorView()
                 .getRootWindowInsets().getInsetsIgnoringVisibility(captionBar()));
+    }
+
+    /**
+     * This checks that trying to show and hide the navigation bar takes effect
+     * when the IME does draw the IME navigation bar.
+     */
+    @Test
+    public void testShowHideImeNavigationBar_doesDrawImeNavBar() throws Exception {
+        boolean hasNavigationBar = WindowManagerGlobal.getWindowManagerService()
+                .hasNavigationBar(mInputMethodService.getDisplayId());
+        assumeTrue("Must have a navigation bar", hasNavigationBar);
+
+        setShowImeWithHardKeyboard(true /* enabled */);
+
+        // Show IME
+        verifyInputViewStatusOnMainSync(
+                () -> {
+                    mInputMethodService.getInputMethodInternal().onNavButtonFlagsChanged(
+                            InputMethodNavButtonFlags.IME_DRAWS_IME_NAV_BAR
+                                    | InputMethodNavButtonFlags.SHOW_IME_SWITCHER_WHEN_IME_IS_SHOWN
+                    );
+                    assertThat(mActivity.showImeWithInputMethodManager(0 /* flags */)).isTrue();
+                },
+                true /* expected */,
+                true /* inputViewStarted */);
+        assertThat(mInputMethodService.isInputViewShown()).isTrue();
+        assertThat(mInputMethodService.isImeNavigationBarShownForTesting()).isTrue();
+
+        // Try to hide IME nav bar
+        mInstrumentation.runOnMainSync(() -> mInputMethodService.getWindow().getWindow()
+                .getInsetsController().hide(captionBar()));
+        mInstrumentation.waitForIdleSync();
+        assertThat(mInputMethodService.isImeNavigationBarShownForTesting()).isFalse();
+
+        // Try to show IME nav bar
+        mInstrumentation.runOnMainSync(() -> mInputMethodService.getWindow().getWindow()
+                .getInsetsController().show(captionBar()));
+        mInstrumentation.waitForIdleSync();
+        assertThat(mInputMethodService.isImeNavigationBarShownForTesting()).isTrue();
+    }
+    /**
+     * This checks that trying to show and hide the navigation bar has no effect
+     * when the IME does not draw the IME navigation bar.
+     *
+     * Note: The IME navigation bar is *never* visible in 3 button navigation mode.
+     */
+    @Test
+    public void testShowHideImeNavigationBar_doesNotDrawImeNavBar() throws Exception {
+        boolean hasNavigationBar = WindowManagerGlobal.getWindowManagerService()
+                .hasNavigationBar(mInputMethodService.getDisplayId());
+        assumeTrue("Must have a navigation bar", hasNavigationBar);
+
+        setShowImeWithHardKeyboard(true /* enabled */);
+
+        // Show IME
+        verifyInputViewStatusOnMainSync(() -> {
+            mInputMethodService.getInputMethodInternal().onNavButtonFlagsChanged(
+                    0 /* navButtonFlags */);
+            assertThat(mActivity.showImeWithInputMethodManager(0 /* flags */)).isTrue();
+        },
+                true /* expected */,
+                true /* inputViewStarted */);
+        assertThat(mInputMethodService.isInputViewShown()).isTrue();
+        assertThat(mInputMethodService.isImeNavigationBarShownForTesting()).isFalse();
+
+        // Try to hide IME nav bar
+        mInstrumentation.runOnMainSync(() -> mInputMethodService.getWindow().getWindow()
+                .getInsetsController().hide(captionBar()));
+        mInstrumentation.waitForIdleSync();
+        assertThat(mInputMethodService.isImeNavigationBarShownForTesting()).isFalse();
+
+        // Try to show IME nav bar
+        mInstrumentation.runOnMainSync(() -> mInputMethodService.getWindow().getWindow()
+                .getInsetsController().show(captionBar()));
+        mInstrumentation.waitForIdleSync();
+        assertThat(mInputMethodService.isImeNavigationBarShownForTesting()).isFalse();
     }
 
     private void verifyInputViewStatus(

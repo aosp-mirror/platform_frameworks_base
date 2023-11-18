@@ -394,7 +394,7 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
             boolean taskAppearedSent = t.mTaskAppearedSent;
             if (taskAppearedSent) {
                 if (t.getSurfaceControl() != null) {
-                    t.migrateToNewSurfaceControl(t.getPendingTransaction());
+                    t.migrateToNewSurfaceControl(t.getSyncTransaction());
                 }
                 t.mTaskAppearedSent = false;
             }

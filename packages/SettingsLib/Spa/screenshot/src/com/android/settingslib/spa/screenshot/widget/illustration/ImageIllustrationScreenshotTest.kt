@@ -17,7 +17,7 @@
 package com.android.settingslib.spa.screenshot.widget.illustration
 
 import com.android.settingslib.spa.screenshot.R
-import com.android.settingslib.spa.screenshot.util.SettingsScreenshotTestRule
+import com.android.settingslib.spa.screenshot.util.settingsScreenshotTestRule
 import com.android.settingslib.spa.widget.illustration.Illustration
 import com.android.settingslib.spa.widget.illustration.IllustrationModel
 import com.android.settingslib.spa.widget.illustration.ResourceType
@@ -40,9 +40,8 @@ class ImageIllustrationScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
     @get:Rule
     val screenshotRule =
-        SettingsScreenshotTestRule(
+        settingsScreenshotTestRule(
             emulationSpec,
-            "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
         )
 
     @Test

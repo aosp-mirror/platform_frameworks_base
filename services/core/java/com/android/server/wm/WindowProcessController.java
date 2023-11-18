@@ -1666,7 +1666,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private void scheduleClientTransactionItem(@NonNull IApplicationThread thread,
             @NonNull ClientTransactionItem transactionItem) {
         try {
-            mAtm.getLifecycleManager().scheduleTransaction(thread, transactionItem);
+            mAtm.getLifecycleManager().scheduleTransactionItem(thread, transactionItem);
         } catch (Exception e) {
             Slog.e(TAG_CONFIGURATION, "Failed to schedule ClientTransactionItem="
                     + transactionItem + " owner=" + mOwner, e);

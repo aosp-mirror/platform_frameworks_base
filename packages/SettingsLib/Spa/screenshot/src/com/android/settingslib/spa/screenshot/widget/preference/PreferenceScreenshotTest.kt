@@ -21,7 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Autorenew
 import androidx.compose.material.icons.outlined.DisabledByDefault
 import androidx.compose.runtime.Composable
-import com.android.settingslib.spa.screenshot.util.SettingsScreenshotTestRule
+import com.android.settingslib.spa.screenshot.util.settingsScreenshotTestRule
 import com.android.settingslib.spa.widget.preference.Preference
 import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.ui.SettingsIcon
@@ -48,9 +48,8 @@ class PreferenceScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
     @get:Rule
     val screenshotRule =
-        SettingsScreenshotTestRule(
+        settingsScreenshotTestRule(
             emulationSpec,
-            "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
         )
 
     @Test

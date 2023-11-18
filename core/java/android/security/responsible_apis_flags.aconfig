@@ -1,0 +1,22 @@
+package: "android.security"
+
+flag {
+    name: "extend_ecm_to_all_settings"
+    namespace: "responsible_apis"
+    description: "Allow all app settings to be restrictable via configuration"
+    bug: "297372999"
+}
+
+flag {
+    name: "asm_restrictions_enabled"
+    namespace: "responsible_apis"
+    description: "Enables ASM restrictions for activity starts and finishes"
+    bug: "230590090"
+}
+
+flag {
+    name: "asm_toasts_enabled"
+    namespace: "responsible_apis"
+    description: "Enables toasts when ASM restrictions are triggered"
+    bug: "230590090"
+}

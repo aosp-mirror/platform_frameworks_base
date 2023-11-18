@@ -33,6 +33,7 @@ import android.os.Parcel;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.service.notification.Condition;
+import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.EventInfo;
 import android.service.notification.ZenPolicy;
@@ -327,7 +328,6 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.conditionId = CONDITION_ID;
         rule.condition = CONDITION;
         rule.enabled = ENABLED;
-        rule.creationTime = 123;
         rule.id = "id";
         rule.zenMode = INTERRUPTION_FILTER;
         rule.modified = true;
@@ -335,6 +335,18 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.snoozing = true;
         rule.pkg = OWNER.getPackageName();
         rule.zenPolicy = POLICY;
+        rule.zenDeviceEffects = new ZenDeviceEffects.Builder()
+                .setShouldDisplayGrayscale(false)
+                .setShouldSuppressAmbientDisplay(true)
+                .setShouldDimWallpaper(false)
+                .setShouldUseNightMode(true)
+                .setShouldDisableAutoBrightness(false)
+                .setShouldDisableTapToWake(true)
+                .setShouldDisableTiltToWake(false)
+                .setShouldDisableTouch(true)
+                .setShouldMinimizeRadioUsage(false)
+                .setShouldMaximizeDoze(true)
+                .build();
         rule.creationTime = CREATION_TIME;
 
         rule.allowManualInvocation = ALLOW_MANUAL;
@@ -362,6 +374,8 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(rule.name, fromXml.name);
         assertEquals(rule.zenMode, fromXml.zenMode);
         assertEquals(rule.creationTime, fromXml.creationTime);
+        assertEquals(rule.zenPolicy, fromXml.zenPolicy);
+        assertEquals(rule.zenDeviceEffects, fromXml.zenDeviceEffects);
 
         assertEquals(rule.allowManualInvocation, fromXml.allowManualInvocation);
         assertEquals(rule.type, fromXml.type);

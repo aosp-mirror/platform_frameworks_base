@@ -100,7 +100,7 @@ public class InputControllerTest {
     }
 
     @Test
-    public void registerInputDevice_deviceCreation_hasDeviceId() {
+    public void registerInputDevice_deviceCreation_hasDeviceId() throws Exception {
         final IBinder device1Token = new Binder("device1");
         mInputController.createMouse("mouse", /*vendorId= */ 1, /*productId= */ 1, device1Token,
                 /* displayId= */ 1);
@@ -124,7 +124,7 @@ public class InputControllerTest {
     }
 
     @Test
-    public void unregisterInputDevice_allMiceUnregistered_clearPointerDisplayId() {
+    public void unregisterInputDevice_allMiceUnregistered_clearPointerDisplayId() throws Exception {
         final IBinder deviceToken = new Binder();
         mInputController.createMouse("name", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
                 /* displayId= */ 1);
@@ -137,7 +137,8 @@ public class InputControllerTest {
     }
 
     @Test
-    public void unregisterInputDevice_anotherMouseExists_setPointerDisplayIdOverride() {
+    public void unregisterInputDevice_anotherMouseExists_setPointerDisplayIdOverride()
+            throws Exception {
         final IBinder deviceToken = new Binder();
         mInputController.createMouse("mouse1", /*vendorId= */ 1, /*productId= */ 1, deviceToken,
                 /* displayId= */ 1);
@@ -153,7 +154,7 @@ public class InputControllerTest {
     }
 
     @Test
-    public void createNavigationTouchpad_hasDeviceId() {
+    public void createNavigationTouchpad_hasDeviceId() throws Exception {
         final IBinder deviceToken = new Binder();
         mInputController.createNavigationTouchpad("name", /*vendorId= */ 1, /*productId= */ 1,
                 deviceToken, /* displayId= */ 1, /* touchpadHeight= */ 50, /* touchpadWidth= */ 50);
@@ -166,7 +167,7 @@ public class InputControllerTest {
     }
 
     @Test
-    public void createNavigationTouchpad_setsTypeAssociation() {
+    public void createNavigationTouchpad_setsTypeAssociation() throws Exception {
         final IBinder deviceToken = new Binder();
         mInputController.createNavigationTouchpad("name", /*vendorId= */ 1, /*productId= */ 1,
                 deviceToken, /* displayId= */ 1, /* touchpadHeight= */ 50, /* touchpadWidth= */ 50);
@@ -176,7 +177,7 @@ public class InputControllerTest {
     }
 
     @Test
-    public void createAndUnregisterNavigationTouchpad_unsetsTypeAssociation() {
+    public void createAndUnregisterNavigationTouchpad_unsetsTypeAssociation() throws Exception {
         final IBinder deviceToken = new Binder();
         mInputController.createNavigationTouchpad("name", /*vendorId= */ 1, /*productId= */ 1,
                 deviceToken, /* displayId= */ 1, /* touchpadHeight= */ 50, /* touchpadWidth= */ 50);
@@ -188,7 +189,7 @@ public class InputControllerTest {
     }
 
     @Test
-    public void createKeyboard_addAndRemoveKeyboardLayoutAssociation() {
+    public void createKeyboard_addAndRemoveKeyboardLayoutAssociation() throws Exception {
         final IBinder deviceToken = new Binder("device");
 
         mInputController.createKeyboard("keyboard", /*vendorId= */2, /*productId= */ 2, deviceToken,
@@ -201,56 +202,7 @@ public class InputControllerTest {
     }
 
     @Test
-    public void createInputDevice_tooLongNameRaisesException() {
-        final IBinder deviceToken = new Binder("device");
-        // The underlying uinput implementation only supports device names up to 80 bytes. This
-        // string is all ASCII characters, therefore if we have more than 80 ASCII characters we
-        // will have more than 80 bytes.
-        String deviceName =
-                "This.is.a.very.long.device.name.that.exceeds.the.maximum.length.of.80.bytes"
-                        + ".by.a.couple.bytes";
-
-        assertThrows(RuntimeException.class, () -> {
-            mInputController.createDpad(deviceName, /*vendorId= */3, /*productId=*/3, deviceToken,
-                    1);
-        });
-    }
-
-    @Test
-    public void createInputDevice_tooLongDeviceNameRaisesException() {
-        final IBinder deviceToken = new Binder("device");
-        // The underlying uinput implementation only supports device names up to 80 bytes (including
-        // a 0-byte terminator).
-        // This string is 79 characters and 80 bytes (including the 0-byte terminator)
-        String deviceName =
-                "This.is.a.very.long.device.name.that.exceeds.the.maximum.length01234567890123456";
-
-        assertThrows(RuntimeException.class, () -> {
-            mInputController.createDpad(deviceName, /*vendorId= */3, /*productId=*/3, deviceToken,
-                    1);
-        });
-    }
-
-    @Test
-    public void createInputDevice_stringWithLessThanMaxCharsButMoreThanMaxBytesRaisesException() {
-        final IBinder deviceToken = new Binder("device1");
-
-        // Has only 39 characters but is 109 bytes as utf-8
-        String device_name =
-                "░▄▄▄▄░\n" +
-                "▀▀▄██►\n" +
-                "▀▀███►\n" +
-                "░▀███►░█►\n" +
-                "▒▄████▀▀";
-
-        assertThrows(RuntimeException.class, () -> {
-            mInputController.createDpad(device_name, /*vendorId= */5, /*productId=*/5,
-                    deviceToken, 1);
-        });
-    }
-
-    @Test
-    public void createInputDevice_duplicateNamesAreNotAllowed() {
+    public void createInputDevice_duplicateNamesAreNotAllowed() throws Exception {
         final IBinder deviceToken1 = new Binder("deviceToken1");
         final IBinder deviceToken2 = new Binder("deviceToken2");
 
@@ -258,9 +210,9 @@ public class InputControllerTest {
 
         mInputController.createDpad(sharedDeviceName, /*vendorId= */4, /*productId=*/4,
                 deviceToken1, 1);
-        assertThrows("Device names need to be unique", RuntimeException.class, () -> {
-            mInputController.createDpad(sharedDeviceName, /*vendorId= */5, /*productId=*/5,
-                    deviceToken2, 2);
-        });
+        assertThrows("Device names need to be unique",
+                InputController.DeviceCreationException.class,
+                () -> mInputController.createDpad(
+                        sharedDeviceName, /*vendorId= */5, /*productId=*/5, deviceToken2, 2));
     }
 }

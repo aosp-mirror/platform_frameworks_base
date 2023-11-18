@@ -119,8 +119,12 @@ fun getDirectOuterClassName(className: String): String? {
  * Write bytecode to push all the method arguments to the stack.
  * The number of arguments and their type are taken from [methodDescriptor].
  */
-fun writeByteCodeToPushArguments(methodDescriptor: String, writer: MethodVisitor) {
-    var i = -1
+fun writeByteCodeToPushArguments(
+        methodDescriptor: String,
+        writer: MethodVisitor,
+        argOffset: Int = 0,
+        ) {
+    var i = argOffset - 1
     Type.getArgumentTypes(methodDescriptor).forEach { type ->
         i++
 
@@ -156,6 +160,18 @@ fun writeByteCodeToReturn(methodDescriptor: String, writer: MethodVisitor) {
             else -> writer.visitInsn(Opcodes.ARETURN)
         }
     }
+}
+
+/**
+ * Given a method descriptor, insert an [argType] as the first argument to it.
+ */
+fun prependArgTypeToMethodDescriptor(methodDescriptor: String, argType: Type): String {
+    val returnType = Type.getReturnType(methodDescriptor)
+    val argTypes = Type.getArgumentTypes(methodDescriptor).toMutableList()
+
+    argTypes.add(0, argType)
+
+    return Type.getMethodDescriptor(returnType, *argTypes.toTypedArray())
 }
 
 /**
