@@ -25,17 +25,16 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.DialogFragment;
 import com.android.packageinstaller.R;
 import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
+import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired;
 import com.android.packageinstaller.v2.ui.InstallActionListener;
 
-public class SimpleErrorFragment extends DialogFragment {
+/**
+ * Dialog to show when the source of apk can not be identified.
+ */
+public class AnonymousSourceFragment extends DialogFragment {
 
-    private static final String TAG = SimpleErrorFragment.class.getSimpleName();
-    private final int mMessageResId;
+    public static String TAG = AnonymousSourceFragment.class.getSimpleName();
     private InstallActionListener mInstallActionListener;
-
-    public SimpleErrorFragment(int messageResId) {
-        mMessageResId = messageResId;
-    }
 
     @Override
     public void onAttach(@NonNull Context context) {
@@ -47,16 +46,18 @@ public class SimpleErrorFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         return new AlertDialog.Builder(getActivity())
-            .setMessage(mMessageResId)
-            .setPositiveButton(R.string.ok,
-                (dialog, which) ->
-                    mInstallActionListener.onNegativeResponse(InstallStage.STAGE_ABORTED))
-            .create();
+            .setMessage(R.string.anonymous_source_warning)
+            .setPositiveButton(R.string.anonymous_source_continue,
+                ((dialog, which) -> mInstallActionListener.onPositiveResponse(
+                    InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE)))
+            .setNegativeButton(R.string.cancel,
+                ((dialog, which) -> mInstallActionListener.onNegativeResponse(
+                    InstallStage.STAGE_USER_ACTION_REQUIRED))).create();
     }
 
     @Override
-    public void onCancel(DialogInterface dialog) {
+    public void onCancel(@NonNull DialogInterface dialog) {
         super.onCancel(dialog);
-        mInstallActionListener.onNegativeResponse(InstallStage.STAGE_ABORTED);
+        mInstallActionListener.onNegativeResponse(InstallStage.STAGE_USER_ACTION_REQUIRED);
     }
 }
