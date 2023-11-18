@@ -53,7 +53,6 @@ static struct {
     jfieldID displayToken;
     jfieldID width;
     jfieldID height;
-    jfieldID useIdentityTransform;
 } gDisplayCaptureArgsClassInfo;
 
 static struct {
@@ -194,9 +193,6 @@ static DisplayCaptureArgs displayCaptureArgsFromObject(JNIEnv* env,
             env->GetIntField(displayCaptureArgsObject, gDisplayCaptureArgsClassInfo.width);
     captureArgs.height =
             env->GetIntField(displayCaptureArgsObject, gDisplayCaptureArgsClassInfo.height);
-    captureArgs.useIdentityTransform =
-            env->GetBooleanField(displayCaptureArgsObject,
-                                 gDisplayCaptureArgsClassInfo.useIdentityTransform);
     return captureArgs;
 }
 
@@ -325,8 +321,6 @@ int register_android_window_ScreenCapture(JNIEnv* env) {
             GetFieldIDOrDie(env, displayCaptureArgsClazz, "mWidth", "I");
     gDisplayCaptureArgsClassInfo.height =
             GetFieldIDOrDie(env, displayCaptureArgsClazz, "mHeight", "I");
-    gDisplayCaptureArgsClassInfo.useIdentityTransform =
-            GetFieldIDOrDie(env, displayCaptureArgsClazz, "mUseIdentityTransform", "Z");
 
     jclass layerCaptureArgsClazz =
             FindClassOrDie(env, "android/window/ScreenCapture$LayerCaptureArgs");

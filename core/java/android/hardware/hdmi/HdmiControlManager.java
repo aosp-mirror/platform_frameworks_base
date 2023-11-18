@@ -149,6 +149,7 @@ public final class HdmiControlManager {
     public static final int POWER_STATUS_TRANSIENT_TO_ON = 2;
     public static final int POWER_STATUS_TRANSIENT_TO_STANDBY = 3;
 
+    /** @removed mistakenly exposed previously */
     @IntDef ({
         RESULT_SUCCESS,
         RESULT_TIMEOUT,

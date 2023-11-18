@@ -64,6 +64,10 @@ import com.android.systemui.statusbar.notification.init.NotificationsControllerS
 import com.android.systemui.statusbar.notification.interruption.KeyguardNotificationVisibilityProviderModule;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderImpl;
+import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProviderImpl;
+import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLogger;
 import com.android.systemui.statusbar.notification.logging.NotificationPanelLoggerImpl;
@@ -268,4 +272,24 @@ public interface NotificationsModule {
     /** */
     @Binds
     NotifLiveDataStore bindNotifLiveDataStore(NotifLiveDataStoreImpl notifLiveDataStoreImpl);
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static VisualInterruptionDecisionProvider provideVisualInterruptionDecisionProvider(
+            Provider<NotificationInterruptStateProviderImpl> oldImplProvider,
+            Provider<VisualInterruptionDecisionProviderImpl> newImplProvider) {
+        if (VisualInterruptionRefactor.isEnabled()) {
+            return newImplProvider.get();
+        } else {
+            return new NotificationInterruptStateProviderWrapper(oldImplProvider.get());
+        }
+    }
+
+    /** */
+    @Binds
+    @IntoMap
+    @ClassKey(VisualInterruptionDecisionProvider.class)
+    CoreStartable startVisualInterruptionDecisionProvider(
+            VisualInterruptionDecisionProvider provider);
 }

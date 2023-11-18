@@ -32,7 +32,7 @@ import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.communal.shared.model.CommunalSceneKey
-import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
+import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
 import kotlinx.coroutines.flow.transform
 
 object Communal {
@@ -59,7 +59,7 @@ val sceneTransitions = transitions {
 @Composable
 fun CommunalContainer(
     modifier: Modifier = Modifier,
-    viewModel: CommunalViewModel,
+    viewModel: BaseCommunalViewModel,
 ) {
     val currentScene: SceneKey by
         viewModel.currentScene
@@ -129,7 +129,7 @@ private fun BlankScene(
 /** Scene containing the glanceable hub UI. */
 @Composable
 private fun SceneScope.CommunalScene(
-    viewModel: CommunalViewModel,
+    viewModel: BaseCommunalViewModel,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier.element(Communal.Elements.Content)) { CommunalHub(viewModel = viewModel) }

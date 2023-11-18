@@ -60,6 +60,10 @@ constructor(
     private val uiEventLogger: UiEventLogger,
     private val userTracker: UserTracker,
 ) : VisualInterruptionDecisionProvider {
+    init {
+        check(!VisualInterruptionRefactor.isUnexpectedlyInLegacyMode())
+    }
+
     interface Loggable {
         val uiEventId: UiEventEnum?
         val eventLogData: EventLogData?

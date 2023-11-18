@@ -123,6 +123,7 @@ public class SettingsToPropertiesMapper {
         "angle",
         "app_widgets",
         "arc_next",
+        "avic",
         "bluetooth",
         "build",
         "biometrics",
@@ -140,6 +141,7 @@ public class SettingsToPropertiesMapper {
         "context_hub",
         "core_experiments_team_internal",
         "core_graphics",
+        "dck_framework",
         "game",
         "haptics",
         "hardware_backed_security_mainline",
@@ -184,6 +186,7 @@ public class SettingsToPropertiesMapper {
         "wear_security",
         "wear_system_health",
         "wear_systems",
+        "wear_sysui",
         "window_surfaces",
         "windowing_frontend",
     };

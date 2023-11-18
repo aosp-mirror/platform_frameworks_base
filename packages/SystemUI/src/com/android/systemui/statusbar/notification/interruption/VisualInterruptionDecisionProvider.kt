@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.interruption
 
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.CoreStartable
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 
 /**
@@ -26,7 +27,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
  * pulsing while the device is dozing), displaying the notification as a bubble, and launching a
  * full-screen intent for the notification.
  */
-interface VisualInterruptionDecisionProvider {
+interface VisualInterruptionDecisionProvider : CoreStartable {
     /**
      * Represents the decision to visually interrupt or not.
      *
@@ -53,7 +54,7 @@ interface VisualInterruptionDecisionProvider {
     }
 
     /** Initializes the provider. */
-    fun start() {}
+    override fun start() {}
 
     /**
      * Adds a [NotificationInterruptSuppressor] that can suppress visual interruptions.

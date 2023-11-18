@@ -654,12 +654,27 @@ public class Transitions implements RemoteCallable<Transitions>,
         info.setUnreleasedWarningCallSiteForAllSurfaces("Transitions.onTransitionReady");
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "onTransitionReady (#%d) %s: %s",
                 info.getDebugId(), transitionToken, info);
-        final int activeIdx = findByToken(mPendingTransitions, transitionToken);
+        int activeIdx = findByToken(mPendingTransitions, transitionToken);
         if (activeIdx < 0) {
-            throw new IllegalStateException("Got transitionReady for non-pending transition "
+            final ActiveTransition existing = getKnownTransition(transitionToken);
+            if (existing != null) {
+                Log.e(TAG, "Got duplicate transitionReady for " + transitionToken);
+                // The transition is already somewhere else in the pipeline, so just return here.
+                t.apply();
+                existing.mFinishT.merge(finishT);
+                return;
+            }
+            // This usually means the system is in a bad state and may not recover; however,
+            // there's an incentive to propagate bad states rather than crash, so we're kinda
+            // required to do the same thing I guess.
+            Log.wtf(TAG, "Got transitionReady for non-pending transition "
                     + transitionToken + ". expecting one of "
                     + Arrays.toString(mPendingTransitions.stream().map(
                             activeTransition -> activeTransition.mToken).toArray()));
+            final ActiveTransition fallback = new ActiveTransition();
+            fallback.mToken = transitionToken;
+            mPendingTransitions.add(fallback);
+            activeIdx = mPendingTransitions.size() - 1;
         }
         // Move from pending to ready
         final ActiveTransition active = mPendingTransitions.remove(activeIdx);
@@ -1050,34 +1065,43 @@ public class Transitions implements RemoteCallable<Transitions>,
         processReadyQueue(track);
     }
 
-    private boolean isTransitionKnown(IBinder token) {
+    /**
+     * Checks to see if the transition specified by `token` is already known. If so, it will be
+     * returned.
+     */
+    @Nullable
+    private ActiveTransition getKnownTransition(IBinder token) {
         for (int i = 0; i < mPendingTransitions.size(); ++i) {
-            if (mPendingTransitions.get(i).mToken == token) return true;
+            final ActiveTransition active = mPendingTransitions.get(i);
+            if (active.mToken == token) return active;
         }
         for (int i = 0; i < mReadyDuringSync.size(); ++i) {
-            if (mReadyDuringSync.get(i).mToken == token) return true;
+            final ActiveTransition active = mReadyDuringSync.get(i);
+            if (active.mToken == token) return active;
         }
         for (int t = 0; t < mTracks.size(); ++t) {
             final Track tr = mTracks.get(t);
             for (int i = 0; i < tr.mReadyTransitions.size(); ++i) {
-                if (tr.mReadyTransitions.get(i).mToken == token) return true;
+                final ActiveTransition active = tr.mReadyTransitions.get(i);
+                if (active.mToken == token) return active;
             }
             final ActiveTransition active = tr.mActiveTransition;
             if (active == null) continue;
-            if (active.mToken == token) return true;
+            if (active.mToken == token) return active;
             if (active.mMerged == null) continue;
             for (int m = 0; m < active.mMerged.size(); ++m) {
-                if (active.mMerged.get(m).mToken == token) return true;
+                final ActiveTransition merged = active.mMerged.get(m);
+                if (merged.mToken == token) return merged;
             }
         }
-        return false;
+        return null;
     }
 
     void requestStartTransition(@NonNull IBinder transitionToken,
             @Nullable TransitionRequestInfo request) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition requested (#%d): %s %s",
                 request.getDebugId(), transitionToken, request);
-        if (isTransitionKnown(transitionToken)) {
+        if (getKnownTransition(transitionToken) != null) {
             throw new RuntimeException("Transition already started " + transitionToken);
         }
         final ActiveTransition active = new ActiveTransition();
@@ -1161,7 +1185,7 @@ public class Transitions implements RemoteCallable<Transitions>,
      */
     private void finishForSync(ActiveTransition reason,
             int trackIdx, @Nullable ActiveTransition forceFinish) {
-        if (!isTransitionKnown(reason.mToken)) {
+        if (getKnownTransition(reason.mToken) == null) {
             Log.d(TAG, "finishForSleep: already played sync transition " + reason);
             return;
         }

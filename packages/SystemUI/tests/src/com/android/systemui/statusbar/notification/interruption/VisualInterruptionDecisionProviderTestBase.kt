@@ -44,6 +44,7 @@ import android.graphics.drawable.Icon
 import android.hardware.display.FakeAmbientDisplayConfiguration
 import android.os.Looper
 import android.os.PowerManager
+import android.platform.test.flag.junit.SetFlagsRule
 import android.provider.Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED
 import android.provider.Settings.Global.HEADS_UP_OFF
 import android.provider.Settings.Global.HEADS_UP_ON
@@ -83,10 +84,15 @@ import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.`when` as whenever
 
 abstract class VisualInterruptionDecisionProviderTestBase : SysuiTestCase() {
+    @JvmField
+    @Rule
+    val setFlagsRule = SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT)
+
     private val fakeLogBuffer =
         LogBuffer(
             name = "FakeLog",

@@ -643,6 +643,21 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDisplayHasContent() {
+        final WindowState window = createWindow(null, TYPE_APPLICATION_OVERLAY, "window");
+        setDrawnState(WindowStateAnimator.COMMIT_DRAW_PENDING, window);
+        assertFalse(mDisplayContent.getLastHasContent());
+        // The pending draw state should be committed and the has-content state is also updated.
+        mDisplayContent.applySurfaceChangesTransaction();
+        assertTrue(window.isDrawn());
+        assertTrue(mDisplayContent.getLastHasContent());
+        // If the only window is no longer visible, has-content will be false.
+        setDrawnState(WindowStateAnimator.NO_SURFACE, window);
+        mDisplayContent.applySurfaceChangesTransaction();
+        assertFalse(mDisplayContent.getLastHasContent());
+    }
+
+    @Test
     public void testImeIsAttachedToDisplayForLetterboxedApp() {
         final DisplayContent dc = mDisplayContent;
         final WindowState ws = createWindow(null, TYPE_APPLICATION, dc, "app window");

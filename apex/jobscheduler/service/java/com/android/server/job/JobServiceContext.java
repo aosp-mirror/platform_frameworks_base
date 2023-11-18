@@ -557,6 +557,11 @@ public final class JobServiceContext implements ServiceConnection {
                 Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                         traceTag, getId());
             }
+            if (job.getAppTraceTag() != null) {
+                // Use the job's ID to distinguish traces since the ID will be unique per app.
+                Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, "JobScheduler",
+                        job.getAppTraceTag(), job.getJobId());
+            }
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
@@ -1615,6 +1620,10 @@ public final class JobServiceContext implements ServiceConnection {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     getId());
+        }
+        if (completedJob.getAppTraceTag() != null) {
+            Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, "JobScheduler",
+                    completedJob.getJobId());
         }
         try {
             mBatteryStats.noteJobFinish(mRunningJob.getBatteryName(), mRunningJob.getSourceUid(),

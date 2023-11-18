@@ -61,6 +61,9 @@ interface CommunalWidgetRepository {
 
     /** Delete a widget by id from app widget service and the database. */
     fun deleteWidget(widgetId: Int) {}
+
+    /** Update the order of widgets in the database. */
+    fun updateWidgetOrder(ids: List<Int>) {}
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -162,6 +165,15 @@ constructor(
             communalWidgetDao.deleteWidgetById(widgetId)
             appWidgetHost.deleteAppWidgetId(widgetId)
             logger.i("Deleted widget with id $widgetId.")
+        }
+    }
+
+    override fun updateWidgetOrder(ids: List<Int>) {
+        applicationScope.launch(bgDispatcher) {
+            communalWidgetDao.updateWidgetOrder(ids)
+            logger.i({ "Updated the order of widget list with ids: $str1." }) {
+                str1 = ids.toString()
+            }
         }
     }
 

@@ -46,6 +46,7 @@ import android.view.SurfaceControlViewHost;
 import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.inputmethod.ImeTracker;
+import android.window.ScreenCapture;
 
 import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.server.input.InputManagerService;
@@ -977,6 +978,14 @@ public abstract class WindowManagerInternal {
 
     /** Returns the SurfaceControl accessibility services should use for accessibility overlays. */
     public abstract SurfaceControl getA11yOverlayLayer(int displayId);
+
+    /**
+     * Captures the entire display specified by the displayId using the args provided. If the args
+     * are null or if the sourceCrop is invalid or null, the entire display bounds will be captured.
+     */
+    public abstract void captureDisplay(int displayId,
+                                        @Nullable ScreenCapture.CaptureArgs captureArgs,
+                                        ScreenCapture.ScreenCaptureListener listener);
 
     /**
      * Device has a software navigation bar (separate from the status bar) on specific display.

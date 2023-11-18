@@ -1706,7 +1706,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
     }
 
     /** Listener for permission flags changes. */
-    abstract class OnPermissionFlagsChangedListener {
+    interface OnPermissionFlagsChangedListener {
         /**
          * Called when a permission flags change has been made to the upcoming new state.
          *
@@ -1714,7 +1714,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
          * and only call external code after [onStateMutated] when the new state has actually become
          * the current state visible to external code.
          */
-        abstract fun onPermissionFlagsChanged(
+        fun onPermissionFlagsChanged(
             appId: Int,
             userId: Int,
             permissionName: String,
@@ -1727,6 +1727,6 @@ class AppIdPermissionPolicy : SchemePolicy() {
          *
          * Implementations should keep this method fast to avoid stalling the locked state mutation.
          */
-        abstract fun onStateMutated()
+        fun onStateMutated()
     }
 }

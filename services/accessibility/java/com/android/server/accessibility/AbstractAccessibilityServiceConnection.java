@@ -34,6 +34,8 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCE
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
+import static com.android.window.flags.Flags.removeCaptureDisplay;
+
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
@@ -1440,42 +1442,86 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                     AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY, callback);
             return;
         }
-
         final long identity = Binder.clearCallingIdentity();
-        try {
-            mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
-                final ScreenshotHardwareBuffer screenshotBuffer = LocalServices
-                        .getService(DisplayManagerInternal.class).userScreenshot(displayId);
-                if (screenshotBuffer != null) {
-                    sendScreenshotSuccess(screenshotBuffer, callback);
-                } else {
-                    sendScreenshotFailure(
-                            AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY, callback);
-                }
-            }, null).recycleOnUse());
-        } finally {
-            Binder.restoreCallingIdentity(identity);
+        if (removeCaptureDisplay()) {
+            try {
+                ScreenCapture.ScreenCaptureListener screenCaptureListener = new
+                        ScreenCapture.ScreenCaptureListener(
+                        (screenshotBuffer, result) -> {
+                            if (screenshotBuffer != null && result == 0) {
+                                sendScreenshotSuccess(screenshotBuffer, callback);
+                            } else {
+                                sendScreenshotFailure(
+                                        AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY,
+                                        callback);
+                            }
+                        }
+                );
+                mWindowManagerService.captureDisplay(displayId, null, screenCaptureListener);
+            } catch (Exception e) {
+                sendScreenshotFailure(AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY,
+                        callback);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        } else {
+            try {
+                mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
+                    final ScreenshotHardwareBuffer screenshotBuffer = LocalServices
+                            .getService(DisplayManagerInternal.class).userScreenshot(displayId);
+                    if (screenshotBuffer != null) {
+                        sendScreenshotSuccess(screenshotBuffer, callback);
+                    } else {
+                        sendScreenshotFailure(
+                                AccessibilityService.ERROR_TAKE_SCREENSHOT_INVALID_DISPLAY,
+                                callback);
+                    }
+                }, null).recycleOnUse());
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
         }
     }
 
     private void sendScreenshotSuccess(ScreenshotHardwareBuffer screenshotBuffer,
             RemoteCallback callback) {
-        final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
-        final ParcelableColorSpace colorSpace =
-                new ParcelableColorSpace(screenshotBuffer.getColorSpace());
+        if (removeCaptureDisplay()) {
+            mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
+                final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
+                final ParcelableColorSpace colorSpace =
+                        new ParcelableColorSpace(screenshotBuffer.getColorSpace());
 
-        final Bundle payload = new Bundle();
-        payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS,
-                AccessibilityService.TAKE_SCREENSHOT_SUCCESS);
-        payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
-                hardwareBuffer);
-        payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
-        payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP,
-                SystemClock.uptimeMillis());
+                final Bundle payload = new Bundle();
+                payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS,
+                        AccessibilityService.TAKE_SCREENSHOT_SUCCESS);
+                payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
+                        hardwareBuffer);
+                payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
+                payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP,
+                        SystemClock.uptimeMillis());
 
-        // Send back the result.
-        callback.sendResult(payload);
-        hardwareBuffer.close();
+                // Send back the result.
+                callback.sendResult(payload);
+                hardwareBuffer.close();
+            }, null).recycleOnUse());
+        } else {
+            final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
+            final ParcelableColorSpace colorSpace =
+                    new ParcelableColorSpace(screenshotBuffer.getColorSpace());
+
+            final Bundle payload = new Bundle();
+            payload.putInt(KEY_ACCESSIBILITY_SCREENSHOT_STATUS,
+                    AccessibilityService.TAKE_SCREENSHOT_SUCCESS);
+            payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_HARDWAREBUFFER,
+                    hardwareBuffer);
+            payload.putParcelable(KEY_ACCESSIBILITY_SCREENSHOT_COLORSPACE, colorSpace);
+            payload.putLong(KEY_ACCESSIBILITY_SCREENSHOT_TIMESTAMP,
+                    SystemClock.uptimeMillis());
+
+            // Send back the result.
+            callback.sendResult(payload);
+            hardwareBuffer.close();
+        }
     }
 
     private void sendScreenshotFailure(@AccessibilityService.ScreenshotErrorCode int errorCode,

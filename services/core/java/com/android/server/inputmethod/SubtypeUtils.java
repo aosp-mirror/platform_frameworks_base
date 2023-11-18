@@ -86,8 +86,7 @@ final class SubtypeUtils {
                     continue;
                 }
             }
-            if (mode == SUBTYPE_MODE_ANY || TextUtils.isEmpty(mode)
-                    || mode.equalsIgnoreCase(subtype.getMode())) {
+            if (TextUtils.isEmpty(mode) || mode.equalsIgnoreCase(subtype.getMode())) {
                 return true;
             }
         }

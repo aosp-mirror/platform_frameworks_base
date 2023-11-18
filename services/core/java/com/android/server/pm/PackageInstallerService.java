@@ -18,7 +18,9 @@ package com.android.server.pm;
 
 import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_DELETED_BY_DO;
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
+import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
 import static android.os.Process.INVALID_UID;
+import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
 
@@ -633,17 +635,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         + "to use a data loader");
             }
 
+            // Draft sessions cannot be created through the public API.
+            params.installFlags &= ~PackageManager.INSTALL_UNARCHIVE_DRAFT;
             return createSessionInternal(params, installerPackageName, callingAttributionTag,
-                    userId);
+                    Binder.getCallingUid(), userId);
         } catch (IOException e) {
             throw ExceptionUtils.wrap(e);
         }
     }
 
-    private int createSessionInternal(SessionParams params, String installerPackageName,
-            String installerAttributionTag, int userId)
+    int createSessionInternal(SessionParams params, String installerPackageName,
+            String installerAttributionTag, int callingUid, int userId)
             throws IOException {
-        final int callingUid = Binder.getCallingUid();
         final Computer snapshot = mPm.snapshotComputer();
         snapshot.enforceCrossUserPermission(callingUid, userId, true, true, "createSession");
 
@@ -692,7 +695,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             // initiatingPackageName
             installerPackageName = SHELL_PACKAGE_NAME;
         } else {
-            if (callingUid != Process.SYSTEM_UID) {
+            if (callingUid != SYSTEM_UID) {
                 // The supplied installerPackageName must always belong to the calling app.
                 mAppOps.checkPackage(callingUid, installerPackageName);
             }
@@ -707,6 +710,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
             params.installFlags &= ~PackageManager.INSTALL_FROM_ADB;
             params.installFlags &= ~PackageManager.INSTALL_ALL_USERS;
+            params.installFlags &= ~PackageManager.INSTALL_ARCHIVED;
             params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
             if ((params.installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0
                     && !mPm.isCallerVerifier(snapshot, callingUid)) {
@@ -903,6 +907,16 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
+        int requestedInstallerPackageUid = INVALID_UID;
+        if (requestedInstallerPackageName != null) {
+            requestedInstallerPackageUid = snapshot.getPackageUid(requestedInstallerPackageName,
+                    0 /* flags */, userId);
+        }
+        if (requestedInstallerPackageUid == INVALID_UID) {
+            // Requested installer package is invalid, reset it
+            requestedInstallerPackageName = null;
+        }
+
         final int sessionId;
         final PackageInstallerSession session;
         synchronized (mSessions) {
@@ -923,8 +937,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 throw new IllegalStateException(
                         "Too many historical sessions for UID " + callingUid);
             }
+            final int existingDraftSessionId =
+                    getExistingDraftSessionId(requestedInstallerPackageUid, params, userId);
 
-            sessionId = allocateSessionIdLocked();
+            sessionId = existingDraftSessionId != SessionInfo.INVALID_ID ? existingDraftSessionId
+                    : allocateSessionIdLocked();
         }
 
         final long createdMillis = System.currentTimeMillis();
@@ -944,15 +961,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             if (!PackageManagerServiceUtils.isRootOrShell(callingUid)) {
                 params.forceQueryableOverride = false;
             }
-        }
-        int requestedInstallerPackageUid = INVALID_UID;
-        if (requestedInstallerPackageName != null) {
-            requestedInstallerPackageUid = snapshot.getPackageUid(requestedInstallerPackageName,
-                    0 /* flags */, userId);
-        }
-        if (requestedInstallerPackageUid == INVALID_UID) {
-            // Requested installer package is invalid, reset it
-            requestedInstallerPackageName = null;
         }
 
         final var dpmi = LocalServices.getService(DevicePolicyManagerInternal.class);
@@ -986,6 +994,68 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             Slog.d(TAG, "Created session id=" + sessionId + " staged=" + params.isStaged);
         }
         return sessionId;
+    }
+
+    int getExistingDraftSessionId(int installerUid,
+            @NonNull SessionParams sessionParams, int userId) {
+        synchronized (mSessions) {
+            return getExistingDraftSessionIdInternal(installerUid, sessionParams, userId);
+        }
+    }
+
+    @GuardedBy("mSessions")
+    private int getExistingDraftSessionIdInternal(int installerUid,
+            SessionParams sessionParams, int userId) {
+        String appPackageName = sessionParams.appPackageName;
+        if (!Flags.archiving() || installerUid == INVALID_UID || appPackageName == null) {
+            return SessionInfo.INVALID_ID;
+        }
+
+        PackageStateInternal ps = mPm.snapshotComputer().getPackageStateInternal(appPackageName,
+                SYSTEM_UID);
+        if (ps == null || !PackageArchiver.isArchived(ps.getUserStateOrDefault(userId))) {
+            return SessionInfo.INVALID_ID;
+        }
+
+        // If unarchiveId is present we match based on it. If unarchiveId is missing we
+        // choose a draft session too to ensure we don't end up with duplicate sessions
+        // if the installer doesn't set this field.
+        if (sessionParams.unarchiveId > 0) {
+            PackageInstallerSession session = mSessions.get(sessionParams.unarchiveId);
+            if (session != null
+                    && isValidDraftSession(session, appPackageName, installerUid, userId)) {
+                return session.sessionId;
+            }
+
+            return SessionInfo.INVALID_ID;
+        }
+
+        for (int i = 0; i < mSessions.size(); i++) {
+            PackageInstallerSession session = mSessions.valueAt(i);
+            if (session != null
+                    && isValidDraftSession(session, appPackageName, installerUid, userId)) {
+                return session.sessionId;
+            }
+        }
+
+        return SessionInfo.INVALID_ID;
+    }
+
+    private boolean isValidDraftSession(@NonNull PackageInstallerSession session,
+            @NonNull String appPackageName, int installerUid, int userId) {
+        return (session.getInstallFlags() & PackageManager.INSTALL_UNARCHIVE_DRAFT) != 0
+                && appPackageName.equals(session.params.appPackageName)
+                && session.userId == userId
+                && installerUid == session.getInstallerUid();
+    }
+
+    void cleanupDraftIfUnclaimed(int sessionId) {
+        synchronized (mSessions) {
+            PackageInstallerSession session = mPm.mInstallerService.getSession(sessionId);
+            if (session != null && (session.getInstallFlags() & INSTALL_UNARCHIVE_DRAFT) != 0) {
+                session.abandon();
+            }
+        }
     }
 
     private boolean isStagedInstallerAllowed(String installerName) {
@@ -1053,7 +1123,8 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     }
 
     private boolean checkOpenSessionAccess(final PackageInstallerSession session) {
-        if (session == null) {
+        if (session == null
+                || (session.getInstallFlags() & PackageManager.INSTALL_UNARCHIVE_DRAFT) != 0) {
             return false;
         }
         if (isCallingUidOwner(session)) {
@@ -1248,10 +1319,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 final PackageInstallerSession session = mSessions.valueAt(i);
 
                 SessionInfo info =
-                        session.generateInfoForCaller(false /*withIcon*/, Process.SYSTEM_UID);
+                        session.generateInfoForCaller(false /*withIcon*/, SYSTEM_UID);
                 if (Objects.equals(info.getInstallerPackageName(), installerPackageName)
                         && session.userId == userId && !session.hasParentSessionId()
-                        && isCallingUidOwner(session)) {
+                        && isCallingUidOwner(session)
+                        && (session.getInstallFlags() & PackageManager.INSTALL_UNARCHIVE_DRAFT)
+                            == 0) {
                     result.add(info);
                 }
             }
@@ -1602,7 +1675,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         PackageInstallerSession session = null;
         try {
             var sessionId = createSessionInternal(params, installerPackageName,
-                    null /*installerAttributionTag*/, userId);
+                    null /*installerAttributionTag*/, Binder.getCallingUid(), userId);
             session = openSessionInternal(sessionId);
             session.addFile(LOCATION_DATA_APP, "base", 0 /*lengthBytes*/, metadata.toByteArray(),
                     null /*signature*/);
@@ -2017,7 +2090,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 // we don't scrub the data here as this is sent only to the installer several
                 // privileged system packages
                 sendSessionUpdatedBroadcast(
-                        session.generateInfoForCaller(false/*icon*/, Process.SYSTEM_UID),
+                        session.generateInfoForCaller(false/*icon*/, SYSTEM_UID),
                         session.userId);
             }
         }

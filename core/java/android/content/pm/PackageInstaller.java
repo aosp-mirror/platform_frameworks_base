@@ -363,6 +363,19 @@ public class PackageInstaller {
             "android.content.pm.extra.UNARCHIVE_PACKAGE_NAME";
 
     /**
+     * Extra field for the unarchive ID. Sent as
+     * part of the {@link android.content.Intent#ACTION_UNARCHIVE_PACKAGE} intent.
+     *
+     * @see Session#setUnarchiveId(int)
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ARCHIVING)
+    public static final String EXTRA_UNARCHIVE_ID =
+            "android.content.pm.extra.UNARCHIVE_ID";
+
+    /**
      * If true, the requestor of the unarchival has specified that the app should be unarchived
      * for {@link android.os.UserHandle#ALL}.
      *
@@ -2268,6 +2281,8 @@ public class PackageInstaller {
      * @throws PackageManager.NameNotFoundException If {@code packageName} isn't found or not
      *                                              visible to the caller or if the package has no
      *                                              installer on the device anymore to unarchive it.
+     * @throws IOException If parameters were unsatisfiable, such as lack of disk space.
+     *
      * @hide
      */
     @RequiresPermission(anyOf = {
@@ -2276,11 +2291,12 @@ public class PackageInstaller {
     @SystemApi
     @FlaggedApi(Flags.FLAG_ARCHIVING)
     public void requestUnarchive(@NonNull String packageName)
-            throws PackageManager.NameNotFoundException {
+            throws IOException, PackageManager.NameNotFoundException {
         try {
             mInstaller.requestUnarchive(packageName, mInstallerPackageName,
                     new UserHandle(mUserId));
         } catch (ParcelableException e) {
+            e.maybeRethrow(IOException.class);
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -2548,6 +2564,8 @@ public class PackageInstaller {
         public boolean applicationEnabledSettingPersistent = false;
         /** {@hide} */
         public int developmentInstallFlags = 0;
+        /** {@hide} */
+        public int unarchiveId = -1;
 
         private final ArrayMap<String, Integer> mPermissionStates;
 
@@ -2599,6 +2617,7 @@ public class PackageInstaller {
             packageSource = source.readInt();
             applicationEnabledSettingPersistent = source.readBoolean();
             developmentInstallFlags = source.readInt();
+            unarchiveId = source.readInt();
         }
 
         /** {@hide} */
@@ -2632,6 +2651,7 @@ public class PackageInstaller {
             ret.packageSource = packageSource;
             ret.applicationEnabledSettingPersistent = applicationEnabledSettingPersistent;
             ret.developmentInstallFlags = developmentInstallFlags;
+            ret.unarchiveId = unarchiveId;
             return ret;
         }
 
@@ -3270,6 +3290,22 @@ public class PackageInstaller {
             }
         }
 
+        /**
+         * Used to set the unarchive ID received as part of an
+         * {@link Intent#ACTION_UNARCHIVE_PACKAGE}.
+         *
+         * <p> The ID should be retrieved from the unarchive intent and passed into the
+         * session that's being created to unarchive the app in question. Used to link the unarchive
+         * intent and the install session to disambiguate.
+         *
+         * @hide
+         */
+        @FlaggedApi(Flags.FLAG_ARCHIVING)
+        @SystemApi
+        public void setUnarchiveId(int unarchiveId) {
+            this.unarchiveId = unarchiveId;
+        }
+
         /** @hide */
         @NonNull
         public ArrayMap<String, Integer> getPermissionStates() {
@@ -3327,6 +3363,7 @@ public class PackageInstaller {
             pw.printPair("applicationEnabledSettingPersistent",
                     applicationEnabledSettingPersistent);
             pw.printHexPair("developmentInstallFlags", developmentInstallFlags);
+            pw.printPair("unarchiveId", unarchiveId);
             pw.println();
         }
 
@@ -3370,6 +3407,7 @@ public class PackageInstaller {
             dest.writeInt(packageSource);
             dest.writeBoolean(applicationEnabledSettingPersistent);
             dest.writeInt(developmentInstallFlags);
+            dest.writeInt(unarchiveId);
         }
 
         public static final Parcelable.Creator<SessionParams>

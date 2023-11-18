@@ -123,6 +123,7 @@ public class RadioManager {
     /** AM HD radio or DRM band.
      * @see BandDescriptor */
     public static final int BAND_AM_HD = 3;
+    /** @removed mistakenly exposed previously */
     @IntDef(prefix = { "BAND_" }, value = {
         BAND_INVALID,
         BAND_AM,

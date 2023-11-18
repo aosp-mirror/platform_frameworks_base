@@ -31,6 +31,7 @@
 #include <minikin/FontFamily.h>
 #include <minikin/LocaleList.h>
 #include <ui/FatVector.h>
+#include <utils/TypefaceUtils.h>
 
 #include <memory>
 
@@ -125,7 +126,7 @@ static bool addSkTypeface(NativeFamilyBuilder* builder, sk_sp<SkData>&& data, in
     args.setCollectionIndex(ttcIndex);
     args.setVariationDesignPosition({skVariation.data(), static_cast<int>(skVariation.size())});
 
-    sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
+    sk_sp<SkFontMgr> fm = android::FreeTypeFontMgr();
     sk_sp<SkTypeface> face(fm->makeFromStream(std::move(fontData), args));
     if (face == NULL) {
         ALOGE("addFont failed to create font, invalid request");

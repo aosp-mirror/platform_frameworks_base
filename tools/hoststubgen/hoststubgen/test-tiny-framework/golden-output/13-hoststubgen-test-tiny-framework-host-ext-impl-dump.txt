@@ -2108,7 +2108,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 0, methods: 6, attributes: 3
+  interfaces: 0, fields: 1, methods: 9, attributes: 3
+  int value;
+    descriptor: I
+    flags: (0x0000)
+
   private static {};
     descriptor: ()V
     flags: (0x000a) ACC_PRIVATE, ACC_STATIC
@@ -2193,6 +2197,56 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
         Start  Length  Slot  Name   Signature
            11       6     0  arg1   J
            11       6     2  arg2   J
+
+  public void setValue(int);
+    descriptor: (I)V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=2, args_size=2
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
+         x: ldc           #x                 // String setValue
+         x: ldc           #x                 // String (I)V
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: aload_0
+        x: iload_1
+        x: putfield      #x                 // Field value:I
+        x: return
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+           11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
+           11       6     1     v   I
+
+  public int nativeNonStaticAddToValue(int);
+    descriptor: (I)I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=2, locals=2, args_size=2
+         x: aload_0
+         x: iload_1
+         x: invokestatic  #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host.nativeNonStaticAddToValue:(Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;I)I
+         x: ireturn
+
+  public int nativeNonStaticAddToValue_should_be_like_this(int);
+    descriptor: (I)I
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=4, locals=2, args_size=2
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
+         x: ldc           #x                 // String nativeNonStaticAddToValue_should_be_like_this
+         x: ldc           #x                 // String (I)I
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: aload_0
+        x: iload_1
+        x: invokestatic  #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host.nativeNonStaticAddToValue:(Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;I)I
+        x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+           11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
+           11       6     1   arg   I
 }
 SourceFile: "TinyFrameworkNative.java"
 RuntimeVisibleAnnotations:
@@ -2215,7 +2269,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 0, methods: 4, attributes: 3
+  interfaces: 0, fields: 0, methods: 5, attributes: 3
   private static {};
     descriptor: ()V
     flags: (0x000a) ACC_PRIVATE, ACC_STATIC
@@ -2300,6 +2354,33 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
         Start  Length  Slot  Name   Signature
            26       4     0  arg1   J
            26       4     2  arg2   J
+
+  public static int nativeNonStaticAddToValue(com.android.hoststubgen.test.tinyframework.TinyFrameworkNative, int);
+    descriptor: (Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;I)I
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=4, locals=2, args_size=2
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host
+         x: ldc           #x                 // String nativeNonStaticAddToValue
+         x: ldc           #x                 // String (Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;I)I
+         x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.callMethodCallHook:(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+        x: ldc           #x                 // String com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host
+        x: ldc           #x                 // String nativeNonStaticAddToValue
+        x: ldc           #x                 // String (Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;I)I
+        x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.getStackWalker:()Ljava/lang/StackWalker;
+        x: invokevirtual #x                 // Method java/lang/StackWalker.getCallerClass:()Ljava/lang/Class;
+        x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onNonStubMethodCalled:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)V
+        x: aload_0
+        x: getfield      #x                 // Field com/android/hoststubgen/test/tinyframework/TinyFrameworkNative.value:I
+        x: iload_1
+        x: iadd
+        x: ireturn
+      LineNumberTable:
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+           26       7     0 source   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
+           26       7     1   arg   I
 }
 SourceFile: "TinyFrameworkNative_host.java"
 RuntimeVisibleAnnotations:

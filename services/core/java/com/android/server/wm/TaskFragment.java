@@ -1793,7 +1793,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             EventLogTags.writeWmPauseActivity(prev.mUserId, System.identityHashCode(prev),
                     prev.shortComponentName, "userLeaving=" + userLeaving, reason);
 
-            mAtmService.getLifecycleManager().scheduleTransaction(prev.app.getThread(),
+            mAtmService.getLifecycleManager().scheduleTransactionItem(prev.app.getThread(),
                     PauseActivityItem.obtain(prev.token, prev.finishing, userLeaving,
                             prev.configChangeFlags, pauseImmediately, autoEnteringPip));
         } catch (Exception e) {

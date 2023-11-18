@@ -17,34 +17,43 @@
 package com.android.systemui.communal.ui.viewmodel
 
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalTutorialInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
-import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.dagger.MediaModule
 import javax.inject.Inject
 import javax.inject.Named
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 
+/** The default view model used for showing the communal hub. */
 @SysUISingleton
 class CommunalViewModel
 @Inject
 constructor(
     private val communalInteractor: CommunalInteractor,
-    @Named(MediaModule.COMMUNAL_HUB) val mediaHost: MediaHost,
-) {
-    val currentScene: StateFlow<CommunalSceneKey> = communalInteractor.desiredScene
-    fun onSceneChanged(scene: CommunalSceneKey) {
-        communalInteractor.onSceneChanged(scene)
-    }
+    tutorialInteractor: CommunalTutorialInteractor,
+    @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
+) : BaseCommunalViewModel(communalInteractor, mediaHost) {
 
-    /** A list of all the communal content to be displayed in the communal hub. */
-    val communalContent: Flow<List<CommunalContentModel>> = communalInteractor.communalContent
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override val communalContent: Flow<List<CommunalContentModel>> =
+        tutorialInteractor.isTutorialAvailable.flatMapLatest { isTutorialMode ->
+            if (isTutorialMode) {
+                return@flatMapLatest flowOf(communalInteractor.tutorialContent)
+            }
+            combine(
+                communalInteractor.smartspaceContent,
+                communalInteractor.umoContent,
+                communalInteractor.widgetContent,
+            ) { smartspace, umo, widgets ->
+                smartspace + umo + widgets
+            }
+        }
 
-    /** Delete a widget by id. */
-    fun onDeleteWidget(id: Int) = communalInteractor.deleteWidget(id)
-
-    /** Open the widget editor */
-    fun onOpenWidgetEditor() = communalInteractor.showWidgetEditor()
+    override fun onOpenWidgetEditor() = communalInteractor.showWidgetEditor()
 }

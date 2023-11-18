@@ -33,6 +33,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -367,6 +368,18 @@ public class VirtualDeviceManagerServiceTest {
                 mIThermalServiceMock,
                 new Handler(TestableLooper.get(this).getLooper()));
         when(mContext.getSystemService(Context.POWER_SERVICE)).thenReturn(powerManager);
+
+        when(mNativeWrapperMock.writeButtonEvent(anyLong(), anyInt(), anyInt(), anyLong()))
+                .thenReturn(true);
+        when(mNativeWrapperMock.writeRelativeEvent(anyLong(), anyFloat(), anyFloat(), anyLong()))
+                .thenReturn(true);
+        when(mNativeWrapperMock.writeScrollEvent(anyLong(), anyFloat(), anyFloat(), anyLong()))
+                .thenReturn(true);
+        when(mNativeWrapperMock.writeKeyEvent(anyLong(), anyInt(), anyInt(), anyLong()))
+                .thenReturn(true);
+        when(mNativeWrapperMock.writeTouchEvent(anyLong(), anyInt(), anyInt(), anyInt(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong()))
+                .thenReturn(true);
 
         mInputManagerMockHelper = new InputManagerMockHelper(
                 TestableLooper.get(this), mNativeWrapperMock, mIInputManagerMock);
@@ -1183,12 +1196,12 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void sendKeyEvent_noFd() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () ->
-                        mDeviceImpl.sendKeyEvent(BINDER, new VirtualKeyEvent.Builder()
-                                .setKeyCode(KeyEvent.KEYCODE_A)
-                                .setAction(VirtualKeyEvent.ACTION_DOWN).build()));
+        assertThat(mDeviceImpl.sendKeyEvent(BINDER,
+                new VirtualKeyEvent.Builder()
+                        .setKeyCode(KeyEvent.KEYCODE_A)
+                        .setAction(VirtualKeyEvent.ACTION_DOWN)
+                        .build()))
+                .isFalse();
     }
 
     @Test
@@ -1201,24 +1214,24 @@ public class VirtualDeviceManagerServiceTest {
                 InputController.InputDeviceDescriptor.TYPE_KEYBOARD, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
 
-        mDeviceImpl.sendKeyEvent(BINDER, new VirtualKeyEvent.Builder()
-                .setKeyCode(keyCode)
-                .setAction(action)
-                .setEventTimeNanos(eventTimeNanos)
-                .build());
+        assertThat(mDeviceImpl.sendKeyEvent(BINDER,
+                new VirtualKeyEvent.Builder()
+                        .setKeyCode(keyCode)
+                        .setAction(action)
+                        .setEventTimeNanos(eventTimeNanos)
+                        .build()))
+                .isTrue();
         verify(mNativeWrapperMock).writeKeyEvent(fd, keyCode, action, eventTimeNanos);
     }
 
     @Test
     public void sendButtonEvent_noFd() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () ->
-                        mDeviceImpl.sendButtonEvent(BINDER,
-                                new VirtualMouseButtonEvent.Builder()
-                                        .setButtonCode(VirtualMouseButtonEvent.BUTTON_BACK)
-                                        .setAction(VirtualMouseButtonEvent.ACTION_BUTTON_PRESS)
-                                        .build()));
+        assertThat(mDeviceImpl.sendButtonEvent(BINDER,
+                new VirtualMouseButtonEvent.Builder()
+                        .setButtonCode(VirtualMouseButtonEvent.BUTTON_BACK)
+                        .setAction(VirtualMouseButtonEvent.ACTION_BUTTON_PRESS)
+                        .build()))
+                .isFalse();
     }
 
     @Test
@@ -1231,11 +1244,13 @@ public class VirtualDeviceManagerServiceTest {
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
         doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
-        mDeviceImpl.sendButtonEvent(BINDER, new VirtualMouseButtonEvent.Builder()
-                .setButtonCode(buttonCode)
-                .setAction(action)
-                .setEventTimeNanos(eventTimeNanos)
-                .build());
+        assertThat(mDeviceImpl.sendButtonEvent(BINDER,
+                new VirtualMouseButtonEvent.Builder()
+                        .setButtonCode(buttonCode)
+                        .setAction(action)
+                        .setEventTimeNanos(eventTimeNanos)
+                        .build()))
+                .isTrue();
         verify(mNativeWrapperMock).writeButtonEvent(fd, buttonCode, action, eventTimeNanos);
     }
 
@@ -1257,12 +1272,12 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void sendRelativeEvent_noFd() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () ->
-                        mDeviceImpl.sendRelativeEvent(BINDER,
-                                new VirtualMouseRelativeEvent.Builder().setRelativeX(
-                                        0.0f).setRelativeY(0.0f).build()));
+        assertThat(mDeviceImpl.sendRelativeEvent(BINDER,
+                new VirtualMouseRelativeEvent.Builder()
+                        .setRelativeX(0.0f)
+                        .setRelativeY(0.0f)
+                        .build()))
+                .isFalse();
     }
 
     @Test
@@ -1275,13 +1290,16 @@ public class VirtualDeviceManagerServiceTest {
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS, DEVICE_NAME_1,
                 INPUT_DEVICE_ID);
         doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
-        mDeviceImpl.sendRelativeEvent(BINDER, new VirtualMouseRelativeEvent.Builder()
-                .setRelativeX(x)
-                .setRelativeY(y)
-                .setEventTimeNanos(eventTimeNanos)
-                .build());
+        assertThat(mDeviceImpl.sendRelativeEvent(BINDER,
+                new VirtualMouseRelativeEvent.Builder()
+                        .setRelativeX(x)
+                        .setRelativeY(y)
+                        .setEventTimeNanos(eventTimeNanos)
+                        .build()))
+                .isTrue();
         verify(mNativeWrapperMock).writeRelativeEvent(fd, x, y, eventTimeNanos);
     }
+
 
     @Test
     public void sendRelativeEvent_hasFd_wrongDisplay_throwsIllegalStateException() {
@@ -1301,13 +1319,12 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void sendScrollEvent_noFd() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () ->
-                        mDeviceImpl.sendScrollEvent(BINDER,
-                                new VirtualMouseScrollEvent.Builder()
-                                        .setXAxisMovement(-1f)
-                                        .setYAxisMovement(1f).build()));
+        assertThat(mDeviceImpl.sendScrollEvent(BINDER,
+                new VirtualMouseScrollEvent.Builder()
+                        .setXAxisMovement(-1f)
+                        .setYAxisMovement(1f)
+                        .build()))
+                .isFalse();
     }
 
     @Test
@@ -1320,13 +1337,16 @@ public class VirtualDeviceManagerServiceTest {
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS, DEVICE_NAME_1,
                 INPUT_DEVICE_ID);
         doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
-        mDeviceImpl.sendScrollEvent(BINDER, new VirtualMouseScrollEvent.Builder()
-                .setXAxisMovement(x)
-                .setYAxisMovement(y)
-                .setEventTimeNanos(eventTimeNanos)
-                .build());
+        assertThat(mDeviceImpl.sendScrollEvent(BINDER,
+                new VirtualMouseScrollEvent.Builder()
+                        .setXAxisMovement(x)
+                        .setYAxisMovement(y)
+                        .setEventTimeNanos(eventTimeNanos)
+                        .build()))
+                .isTrue();
         verify(mNativeWrapperMock).writeScrollEvent(fd, x, y, eventTimeNanos);
     }
+
 
     @Test
     public void sendScrollEvent_hasFd_wrongDisplay_throwsIllegalStateException() {
@@ -1346,16 +1366,15 @@ public class VirtualDeviceManagerServiceTest {
 
     @Test
     public void sendTouchEvent_noFd() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () ->
-                        mDeviceImpl.sendTouchEvent(BINDER, new VirtualTouchEvent.Builder()
-                                .setX(0.0f)
-                                .setY(0.0f)
-                                .setAction(VirtualTouchEvent.ACTION_UP)
-                                .setPointerId(1)
-                                .setToolType(VirtualTouchEvent.TOOL_TYPE_FINGER)
-                                .build()));
+        assertThat(mDeviceImpl.sendTouchEvent(BINDER,
+                new VirtualTouchEvent.Builder()
+                        .setX(0.0f)
+                        .setY(0.0f)
+                        .setAction(VirtualTouchEvent.ACTION_UP)
+                        .setPointerId(1)
+                        .setToolType(VirtualTouchEvent.TOOL_TYPE_FINGER)
+                        .build()))
+                .isFalse();
     }
 
     @Test
@@ -1370,14 +1389,16 @@ public class VirtualDeviceManagerServiceTest {
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_TOUCHSCREEN, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
-        mDeviceImpl.sendTouchEvent(BINDER, new VirtualTouchEvent.Builder()
-                .setX(x)
-                .setY(y)
-                .setAction(action)
-                .setPointerId(pointerId)
-                .setToolType(toolType)
-                .setEventTimeNanos(eventTimeNanos)
-                .build());
+        assertThat(mDeviceImpl.sendTouchEvent(BINDER,
+                new VirtualTouchEvent.Builder()
+                        .setX(x)
+                        .setY(y)
+                        .setAction(action)
+                        .setPointerId(pointerId)
+                        .setToolType(toolType)
+                        .setEventTimeNanos(eventTimeNanos)
+                        .build()))
+                .isTrue();
         verify(mNativeWrapperMock).writeTouchEvent(fd, pointerId, toolType, action, x, y, Float.NaN,
                 Float.NaN, eventTimeNanos);
     }
@@ -1396,16 +1417,18 @@ public class VirtualDeviceManagerServiceTest {
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_TOUCHSCREEN, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
-        mDeviceImpl.sendTouchEvent(BINDER, new VirtualTouchEvent.Builder()
-                .setX(x)
-                .setY(y)
-                .setAction(action)
-                .setPointerId(pointerId)
-                .setToolType(toolType)
-                .setPressure(pressure)
-                .setMajorAxisSize(majorAxisSize)
-                .setEventTimeNanos(eventTimeNanos)
-                .build());
+        assertThat(mDeviceImpl.sendTouchEvent(BINDER,
+                new VirtualTouchEvent.Builder()
+                        .setX(x)
+                        .setY(y)
+                        .setAction(action)
+                        .setPointerId(pointerId)
+                        .setToolType(toolType)
+                        .setPressure(pressure)
+                        .setMajorAxisSize(majorAxisSize)
+                        .setEventTimeNanos(eventTimeNanos)
+                        .build()))
+                .isTrue();
         verify(mNativeWrapperMock).writeTouchEvent(fd, pointerId, toolType, action, x, y, pressure,
                 majorAxisSize, eventTimeNanos);
     }

@@ -71,7 +71,8 @@ public final class UidBatteryConsumer extends BatteryConsumer {
     static final int COLUMN_INDEX_PACKAGE_WITH_HIGHEST_DRAIN = COLUMN_INDEX_UID + 1;
     static final int COLUMN_INDEX_TIME_IN_FOREGROUND = COLUMN_INDEX_UID + 2;
     static final int COLUMN_INDEX_TIME_IN_BACKGROUND = COLUMN_INDEX_UID + 3;
-    static final int COLUMN_COUNT = BatteryConsumer.COLUMN_COUNT + 4;
+    static final int COLUMN_INDEX_TIME_IN_FOREGROUND_SERVICE = COLUMN_INDEX_UID + 4;
+    static final int COLUMN_COUNT = BatteryConsumer.COLUMN_COUNT + 5;
 
     UidBatteryConsumer(BatteryConsumerData data) {
         super(data);
@@ -92,13 +93,31 @@ public final class UidBatteryConsumer extends BatteryConsumer {
 
     /**
      * Returns the amount of time in milliseconds this UID spent in the specified state.
+     * @deprecated use {@link #getTimeInProcessStateMs} instead.
      */
+    @Deprecated
     public long getTimeInStateMs(@State int state) {
         switch (state) {
             case STATE_BACKGROUND:
-                return mData.getInt(COLUMN_INDEX_TIME_IN_BACKGROUND);
+                return mData.getInt(COLUMN_INDEX_TIME_IN_BACKGROUND)
+                        + mData.getInt(COLUMN_INDEX_TIME_IN_FOREGROUND_SERVICE);
             case STATE_FOREGROUND:
                 return mData.getInt(COLUMN_INDEX_TIME_IN_FOREGROUND);
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the amount of time in milliseconds this UID spent in the specified process state.
+     */
+    public long getTimeInProcessStateMs(@ProcessState int state) {
+        switch (state) {
+            case PROCESS_STATE_BACKGROUND:
+                return mData.getInt(COLUMN_INDEX_TIME_IN_BACKGROUND);
+            case PROCESS_STATE_FOREGROUND:
+                return mData.getInt(COLUMN_INDEX_TIME_IN_FOREGROUND);
+            case PROCESS_STATE_FOREGROUND_SERVICE:
+                return mData.getInt(COLUMN_INDEX_TIME_IN_FOREGROUND_SERVICE);
         }
         return 0;
     }
@@ -158,9 +177,11 @@ public final class UidBatteryConsumer extends BatteryConsumer {
                     packageWithHighestDrain);
         }
         serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND,
-                getTimeInStateMs(STATE_FOREGROUND));
+                getTimeInProcessStateMs(PROCESS_STATE_FOREGROUND));
         serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_BACKGROUND,
-                getTimeInStateMs(STATE_BACKGROUND));
+                getTimeInProcessStateMs(PROCESS_STATE_BACKGROUND));
+        serializer.attributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND_SERVICE,
+                getTimeInProcessStateMs(PROCESS_STATE_FOREGROUND_SERVICE));
         mPowerComponents.writeToXml(serializer);
         serializer.endTag(null, BatteryUsageStats.XML_TAG_UID);
     }
@@ -180,10 +201,13 @@ public final class UidBatteryConsumer extends BatteryConsumer {
 
         consumerBuilder.setPackageWithHighestDrain(
                 parser.getAttributeValue(null, BatteryUsageStats.XML_ATTR_HIGHEST_DRAIN_PACKAGE));
-        consumerBuilder.setTimeInStateMs(STATE_FOREGROUND,
+        consumerBuilder.setTimeInProcessStateMs(PROCESS_STATE_FOREGROUND,
                 parser.getAttributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND));
-        consumerBuilder.setTimeInStateMs(STATE_BACKGROUND,
+        consumerBuilder.setTimeInProcessStateMs(PROCESS_STATE_BACKGROUND,
                 parser.getAttributeLong(null, BatteryUsageStats.XML_ATTR_TIME_IN_BACKGROUND));
+        consumerBuilder.setTimeInProcessStateMs(PROCESS_STATE_FOREGROUND_SERVICE,
+                parser.getAttributeLong(null,
+                        BatteryUsageStats.XML_ATTR_TIME_IN_FOREGROUND_SERVICE));
         while (!(eventType == XmlPullParser.END_TAG
                 && parser.getName().equals(BatteryUsageStats.XML_TAG_UID))
                 && eventType != XmlPullParser.END_DOCUMENT) {
@@ -255,7 +279,9 @@ public final class UidBatteryConsumer extends BatteryConsumer {
         /**
          * Sets the duration, in milliseconds, that this UID was active in a particular state,
          * such as foreground or background.
+         * @deprecated use {@link #setTimeInProcessStateMs} instead.
          */
+        @Deprecated
         @NonNull
         public Builder setTimeInStateMs(@State int state, long timeInStateMs) {
             switch (state) {
@@ -267,6 +293,28 @@ public final class UidBatteryConsumer extends BatteryConsumer {
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported state: " + state);
+            }
+            return this;
+        }
+
+        /**
+         * Sets the duration, in milliseconds, that this UID was active in a particular process
+         * state, such as foreground service.
+         */
+        @NonNull
+        public Builder setTimeInProcessStateMs(@ProcessState int state, long timeInProcessStateMs) {
+            switch (state) {
+                case PROCESS_STATE_FOREGROUND:
+                    mData.putLong(COLUMN_INDEX_TIME_IN_FOREGROUND, timeInProcessStateMs);
+                    break;
+                case PROCESS_STATE_BACKGROUND:
+                    mData.putLong(COLUMN_INDEX_TIME_IN_BACKGROUND, timeInProcessStateMs);
+                    break;
+                case PROCESS_STATE_FOREGROUND_SERVICE:
+                    mData.putLong(COLUMN_INDEX_TIME_IN_FOREGROUND_SERVICE, timeInProcessStateMs);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported process state: " + state);
             }
             return this;
         }
@@ -285,12 +333,15 @@ public final class UidBatteryConsumer extends BatteryConsumer {
         public Builder add(UidBatteryConsumer consumer) {
             mPowerComponentsBuilder.addPowerAndDuration(consumer.mPowerComponents);
 
-            setTimeInStateMs(STATE_FOREGROUND,
+            setTimeInProcessStateMs(PROCESS_STATE_FOREGROUND,
                     mData.getLong(COLUMN_INDEX_TIME_IN_FOREGROUND)
-                            + consumer.getTimeInStateMs(STATE_FOREGROUND));
-            setTimeInStateMs(STATE_BACKGROUND,
+                            + consumer.getTimeInProcessStateMs(PROCESS_STATE_FOREGROUND));
+            setTimeInProcessStateMs(PROCESS_STATE_BACKGROUND,
                     mData.getLong(COLUMN_INDEX_TIME_IN_BACKGROUND)
-                            + consumer.getTimeInStateMs(STATE_BACKGROUND));
+                            + consumer.getTimeInProcessStateMs(PROCESS_STATE_BACKGROUND));
+            setTimeInProcessStateMs(PROCESS_STATE_FOREGROUND_SERVICE,
+                    mData.getLong(COLUMN_INDEX_TIME_IN_FOREGROUND_SERVICE)
+                            + consumer.getTimeInProcessStateMs(PROCESS_STATE_FOREGROUND_SERVICE));
 
             if (mPackageWithHighestDrain == PACKAGE_NAME_UNINITIALIZED) {
                 mPackageWithHighestDrain = consumer.getPackageWithHighestDrain();

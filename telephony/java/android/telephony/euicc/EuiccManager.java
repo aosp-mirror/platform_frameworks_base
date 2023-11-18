@@ -552,9 +552,8 @@ public class EuiccManager {
 
     /**
      * Euicc OTA update status which can be got by {@link #getOtaStatus}
-     * @hide
+     * @removed mistakenly exposed as system-api previously
      */
-    @SystemApi
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"EUICC_OTA_"}, value = {
             EUICC_OTA_IN_PROGRESS,

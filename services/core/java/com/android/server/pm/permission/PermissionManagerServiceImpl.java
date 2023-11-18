@@ -70,6 +70,7 @@ import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManagerInternal;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.Context;
@@ -5327,7 +5328,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     IOnPermissionsChangeListener callback = mPermissionListeners
                             .getBroadcastItem(i);
                     try {
-                        callback.onPermissionsChanged(uid);
+                        callback.onPermissionsChanged(uid,
+                                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
                     } catch (RemoteException e) {
                         Log.e(TAG, "Permission listener is dead", e);
                     }

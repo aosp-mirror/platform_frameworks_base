@@ -43,12 +43,9 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
-import android.app.servertransaction.ClientTransaction;
 import android.app.servertransaction.RefreshCallbackItem;
 import android.app.servertransaction.ResumeActivityItem;
 import android.content.ComponentName;
@@ -529,8 +526,8 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabledForApp()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        when(mActivity.mLetterboxUiController.shouldRefreshActivityViaPauseForCameraCompat())
-                .thenReturn(true);
+        doReturn(true).when(mActivity.mLetterboxUiController)
+                .shouldRefreshActivityViaPauseForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ true);
@@ -571,14 +568,14 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
         verify(mActivity.mLetterboxUiController, times(refreshRequested ? 1 : 0))
                 .setIsRefreshAfterRotationRequested(true);
 
-        final ClientTransaction transaction = ClientTransaction.obtain(mActivity.app.getThread());
-        transaction.addCallback(RefreshCallbackItem.obtain(mActivity.token,
-                cycleThroughStop ? ON_STOP : ON_PAUSE));
-        transaction.setLifecycleStateRequest(ResumeActivityItem.obtain(mActivity.token,
-                /* isForward */ false, /* shouldSendCompatFakeFocus */ false));
+        final RefreshCallbackItem refreshCallbackItem = RefreshCallbackItem.obtain(mActivity.token,
+                cycleThroughStop ? ON_STOP : ON_PAUSE);
+        final ResumeActivityItem resumeActivityItem = ResumeActivityItem.obtain(mActivity.token,
+                /* isForward */ false, /* shouldSendCompatFakeFocus */ false);
 
         verify(mActivity.mAtmService.getLifecycleManager(), times(refreshRequested ? 1 : 0))
-                .scheduleTransaction(eq(transaction));
+                .scheduleTransactionAndLifecycleItems(mActivity.app.getThread(),
+                        refreshCallbackItem, resumeActivityItem);
     }
 
     private void assertNoForceRotationOrRefresh() throws Exception {

@@ -23,6 +23,7 @@ import android.app.IApplicationThread;
 import android.app.ProcessMemoryState.HostingComponentType;
 import android.content.pm.ApplicationInfo;
 import android.os.Debug;
+import android.os.Flags;
 import android.os.Process;
 import android.os.SystemClock;
 import android.util.DebugUtils;
@@ -32,7 +33,6 @@ import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ProcessList.ProcStateMemTracker;
 import com.android.server.power.stats.BatteryStatsImpl;
 
@@ -42,6 +42,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Profiling info of the process, such as PSS, cpu, etc.
+ *
+ * TODO(b/297542292): Update PSS names with RSS once AppProfiler's PSS profiling has been replaced.
  */
 final class ProcessProfileRecord {
     final ProcessRecord mApp;
@@ -76,7 +78,7 @@ final class ProcessProfileRecord {
      * Initial memory pss of process for idle maintenance.
      */
     @GuardedBy("mProfilerLock")
-    private long mInitialIdlePss;
+    private long mInitialIdlePssOrRss;
 
     /**
      * Last computed memory pss.
@@ -107,6 +109,14 @@ final class ProcessProfileRecord {
      */
     @GuardedBy("mProfilerLock")
     private long mLastRss;
+
+    /**
+     * Last computed rss when in cached state.
+     *
+     * This value is not set or retrieved unless Flags.removeAppProfilerPssCollection() is true.
+     */
+    @GuardedBy("mProfilerLock")
+    private long mLastCachedRss;
 
     /**
      * Cache of last retrieve memory info, to throttle how frequently apps can request it.
@@ -347,13 +357,13 @@ final class ProcessProfileRecord {
     }
 
     @GuardedBy("mProfilerLock")
-    long getInitialIdlePss() {
-        return mInitialIdlePss;
+    long getInitialIdlePssOrRss() {
+        return mInitialIdlePssOrRss;
     }
 
     @GuardedBy("mProfilerLock")
-    void setInitialIdlePss(long initialIdlePss) {
-        mInitialIdlePss = initialIdlePss;
+    void setInitialIdlePssOrRss(long initialIdlePssOrRss) {
+        mInitialIdlePssOrRss = initialIdlePssOrRss;
     }
 
     @GuardedBy("mProfilerLock")
@@ -374,6 +384,16 @@ final class ProcessProfileRecord {
     @GuardedBy("mProfilerLock")
     void setLastCachedPss(long lastCachedPss) {
         mLastCachedPss = lastCachedPss;
+    }
+
+    @GuardedBy("mProfilerLock")
+    long getLastCachedRss() {
+        return mLastCachedRss;
+    }
+
+    @GuardedBy("mProfilerLock")
+    void setLastCachedRss(long lastCachedRss) {
+        mLastCachedRss = lastCachedRss;
     }
 
     @GuardedBy("mProfilerLock")
@@ -530,26 +550,6 @@ final class ProcessProfileRecord {
         }
     }
 
-    void reportCachedKill() {
-        synchronized (mService.mProcessStats.mLock) {
-            final ProcessState tracker = mBaseProcessTracker;
-            if (tracker != null) {
-                final PackageList pkgList = mApp.getPkgList();
-                synchronized (pkgList) {
-                    tracker.reportCachedKill(pkgList.getPackageListLocked(), mLastCachedPss);
-                    pkgList.forEachPackageProcessStats(holder ->
-                            FrameworkStatsLog.write(FrameworkStatsLog.CACHED_KILL_REPORTED,
-                                getUidForAttribution(mApp),
-                                holder.state.getName(),
-                                holder.state.getPackage(),
-                                mLastCachedPss,
-                                holder.appVersion)
-                    );
-                }
-            }
-        }
-    }
-
     void setProcessTrackerState(int procState, int memFactor) {
         synchronized (mService.mProcessStats.mLock) {
             final ProcessState tracker = mBaseProcessTracker;
@@ -676,27 +676,46 @@ final class ProcessProfileRecord {
     @GuardedBy("mService")
     void dumpPss(PrintWriter pw, String prefix, long nowUptime) {
         synchronized (mProfilerLock) {
-            pw.print(prefix);
-            pw.print("lastPssTime=");
-            TimeUtils.formatDuration(mLastPssTime, nowUptime, pw);
-            pw.print(" pssProcState=");
-            pw.print(mPssProcState);
-            pw.print(" pssStatType=");
-            pw.print(mPssStatType);
-            pw.print(" nextPssTime=");
-            TimeUtils.formatDuration(mNextPssTime, nowUptime, pw);
-            pw.println();
-            pw.print(prefix);
-            pw.print("lastPss=");
-            DebugUtils.printSizeValue(pw, mLastPss * 1024);
-            pw.print(" lastSwapPss=");
-            DebugUtils.printSizeValue(pw, mLastSwapPss * 1024);
-            pw.print(" lastCachedPss=");
-            DebugUtils.printSizeValue(pw, mLastCachedPss * 1024);
-            pw.print(" lastCachedSwapPss=");
-            DebugUtils.printSizeValue(pw, mLastCachedSwapPss * 1024);
-            pw.print(" lastRss=");
-            DebugUtils.printSizeValue(pw, mLastRss * 1024);
+            // TODO(b/297542292): Remove this case once PSS profiling is replaced
+            if (!Flags.removeAppProfilerPssCollection()) {
+                pw.print(prefix);
+                pw.print("lastPssTime=");
+                TimeUtils.formatDuration(mLastPssTime, nowUptime, pw);
+                pw.print(" pssProcState=");
+                pw.print(mPssProcState);
+                pw.print(" pssStatType=");
+                pw.print(mPssStatType);
+                pw.print(" nextPssTime=");
+                TimeUtils.formatDuration(mNextPssTime, nowUptime, pw);
+                pw.println();
+                pw.print(prefix);
+                pw.print("lastPss=");
+                DebugUtils.printSizeValue(pw, mLastPss * 1024);
+                pw.print(" lastSwapPss=");
+                DebugUtils.printSizeValue(pw, mLastSwapPss * 1024);
+                pw.print(" lastCachedPss=");
+                DebugUtils.printSizeValue(pw, mLastCachedPss * 1024);
+                pw.print(" lastCachedSwapPss=");
+                DebugUtils.printSizeValue(pw, mLastCachedSwapPss * 1024);
+                pw.print(" lastRss=");
+                DebugUtils.printSizeValue(pw, mLastRss * 1024);
+            } else {
+                pw.print(prefix);
+                pw.print("lastRssTime=");
+                TimeUtils.formatDuration(mLastPssTime, nowUptime, pw);
+                pw.print(" rssProcState=");
+                pw.print(mPssProcState);
+                pw.print(" rssStatType=");
+                pw.print(mPssStatType);
+                pw.print(" nextRssTime=");
+                TimeUtils.formatDuration(mNextPssTime, nowUptime, pw);
+                pw.println();
+                pw.print(prefix);
+                pw.print("lastRss=");
+                DebugUtils.printSizeValue(pw, mLastRss * 1024);
+                pw.print(" lastCachedRss=");
+                DebugUtils.printSizeValue(pw, mLastCachedRss * 1024);
+            }
             pw.println();
             pw.print(prefix);
             pw.print("trimMemoryLevel=");

@@ -182,6 +182,10 @@ public class PackageArchiverTest {
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getResourcesForApplication(eq(PACKAGE))).thenReturn(
                 mock(Resources.class));
+        when(mInstallerService.createSessionInternal(any(), any(), any(), anyInt(),
+                anyInt())).thenReturn(1);
+        when(mInstallerService.getExistingDraftSessionId(anyInt(), any(), anyInt())).thenReturn(
+                PackageInstaller.SessionInfo.INVALID_ID);
         doReturn(new ParceledListSlice<>(List.of(mock(ResolveInfo.class))))
                 .when(mPackageManagerService).queryIntentReceivers(any(), any(), any(), anyLong(),
                         eq(mUserId));
@@ -475,6 +479,7 @@ public class PackageArchiverTest {
                 /* initialExtras= */ isNull());
         Intent intent = intentCaptor.getValue();
         assertThat(intent.getFlags() & FLAG_RECEIVER_FOREGROUND).isNotEqualTo(0);
+        assertThat(intent.getIntExtra(PackageInstaller.EXTRA_UNARCHIVE_ID, -1)).isEqualTo(1);
         assertThat(intent.getStringExtra(PackageInstaller.EXTRA_UNARCHIVE_PACKAGE_NAME)).isEqualTo(
                 PACKAGE);
         assertThat(

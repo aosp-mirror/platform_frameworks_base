@@ -160,9 +160,16 @@ public class Device {
             switch (msg.what) {
                 case MSG_OPEN_UINPUT_DEVICE:
                     SomeArgs args = (SomeArgs) msg.obj;
-                    mPtr = nativeOpenUinputDevice((String) args.arg1, args.argi1, args.argi2,
+                    String name = (String) args.arg1;
+                    mPtr = nativeOpenUinputDevice(name, args.argi1, args.argi2,
                             args.argi3, args.argi4, args.argi5, (String) args.arg2,
                             new DeviceCallback());
+                    if (mPtr == 0) {
+                        RuntimeException ex = new RuntimeException(
+                                "Could not create uinput device \"" + name + "\"");
+                        Log.e(TAG, "Couldn't create uinput device, exiting.", ex);
+                        throw ex;
+                    }
                     break;
                 case MSG_INJECT_EVENT:
                     if (mPtr != 0) {

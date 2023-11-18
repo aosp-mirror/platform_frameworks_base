@@ -283,7 +283,10 @@ static void configure(JNIEnv* env, jclass /* clazz */, jint handle, jint code,
     std::vector<int32_t> configs = toVector(env, rawConfigs);
     // Configure uinput device, with user specified code and value.
     for (auto& config : configs) {
-        ::ioctl(static_cast<int>(handle), _IOW(UINPUT_IOCTL_BASE, code, int), config);
+        if (::ioctl(static_cast<int>(handle), _IOW(UINPUT_IOCTL_BASE, code, int), config) < 0) {
+            ALOGE("Error configuring device (ioctl %d, value 0x%x): %s", code, config,
+                  strerror(errno));
+        }
     }
 }
 

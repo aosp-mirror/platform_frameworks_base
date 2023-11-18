@@ -3991,9 +3991,7 @@ public final class ViewRootImpl implements ViewParent,
         // when the values are applicable.
         setPreferredFrameRate(mPreferredFrameRate);
         setPreferredFrameRateCategory(mPreferredFrameRateCategory);
-        mLastPreferredFrameRateCategory = mPreferredFrameRateCategory;
         mPreferredFrameRateCategory = FRAME_RATE_CATEGORY_NO_PREFERENCE;
-        mLastPreferredFrameRate = mPreferredFrameRate;
         mPreferredFrameRate = 0;
     }
 
@@ -11982,8 +11980,11 @@ public final class ViewRootImpl implements ViewParent,
                 ? FRAME_RATE_CATEGORY_HIGH : preferredFrameRateCategory;
 
         try {
-            mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
-                    frameRateCategory, false).apply();
+            if (mLastPreferredFrameRateCategory != frameRateCategory) {
+                mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
+                    frameRateCategory, false).applyAsyncUnsafe();
+                mLastPreferredFrameRateCategory = frameRateCategory;
+            }
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate category", e);
         }
@@ -12003,8 +12004,11 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         try {
-            mFrameRateTransaction.setFrameRate(mSurfaceControl,
-                    preferredFrameRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT).apply();
+            if (mLastPreferredFrameRate != preferredFrameRate) {
+                mFrameRateTransaction.setFrameRate(mSurfaceControl, preferredFrameRate,
+                    Surface.FRAME_RATE_COMPATIBILITY_DEFAULT).applyAsyncUnsafe();
+                mLastPreferredFrameRate = preferredFrameRate;
+            }
         } catch (Exception e) {
             Log.e(mTag, "Unable to set frame rate", e);
         }

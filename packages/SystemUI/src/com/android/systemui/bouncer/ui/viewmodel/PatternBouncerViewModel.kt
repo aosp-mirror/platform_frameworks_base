@@ -94,24 +94,23 @@ class PatternBouncerViewModel(
      * @param yPx The vertical coordinate of the position of the user's pointer, in pixels.
      * @param containerSizePx The size of the container of the dot grid, in pixels. It's assumed
      *   that the dot grid is perfectly square such that width and height are equal.
-     * @param verticalOffsetPx How far down from `0` does the dot grid start on the display.
      */
-    fun onDrag(xPx: Float, yPx: Float, containerSizePx: Int, verticalOffsetPx: Float) {
+    fun onDrag(xPx: Float, yPx: Float, containerSizePx: Int) {
         val cellWidthPx = containerSizePx / columnCount
         val cellHeightPx = containerSizePx / rowCount
 
-        if (xPx < 0 || yPx < verticalOffsetPx) {
+        if (xPx < 0 || yPx < 0) {
             return
         }
 
         val dotColumn = (xPx / cellWidthPx).toInt()
-        val dotRow = ((yPx - verticalOffsetPx) / cellHeightPx).toInt()
+        val dotRow = (yPx / cellHeightPx).toInt()
         if (dotColumn > columnCount - 1 || dotRow > rowCount - 1) {
             return
         }
 
         val dotPixelX = dotColumn * cellWidthPx + cellWidthPx / 2
-        val dotPixelY = dotRow * cellHeightPx + cellHeightPx / 2 + verticalOffsetPx
+        val dotPixelY = dotRow * cellHeightPx + cellHeightPx / 2
 
         val distance = sqrt((xPx - dotPixelX).pow(2) + (yPx - dotPixelY).pow(2))
         val hitRadius = hitFactor * min(cellWidthPx, cellHeightPx) / 2

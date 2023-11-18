@@ -167,6 +167,10 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         _isKeyguardOccluded.value = isOccluded
     }
 
+    fun setKeyguardUnlocked(isUnlocked: Boolean) {
+        _isKeyguardUnlocked.value = isUnlocked
+    }
+
     override fun setIsDozing(isDozing: Boolean) {
         _isDozing.value = isDozing
     }

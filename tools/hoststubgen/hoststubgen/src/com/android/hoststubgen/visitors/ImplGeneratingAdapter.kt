@@ -19,6 +19,7 @@ import com.android.hoststubgen.asm.CLASS_INITIALIZER_DESC
 import com.android.hoststubgen.asm.CLASS_INITIALIZER_NAME
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.isVisibilityPrivateOrPackagePrivate
+import com.android.hoststubgen.asm.prependArgTypeToMethodDescriptor
 import com.android.hoststubgen.asm.writeByteCodeToPushArguments
 import com.android.hoststubgen.asm.writeByteCodeToReturn
 import com.android.hoststubgen.filters.FilterPolicy
@@ -285,7 +286,7 @@ class ImplGeneratingAdapter(
      * class.
      */
     private inner class NativeSubstitutingMethodAdapter(
-            access: Int,
+            val access: Int,
             private val name: String,
             private val descriptor: String,
             signature: String?,
@@ -300,12 +301,33 @@ class ImplGeneratingAdapter(
         }
 
         override fun visitEnd() {
-            writeByteCodeToPushArguments(descriptor, this)
+            var targetDescriptor = descriptor
+            var argOffset = 0
+
+            // For non-static native method, we need to tweak it a bit.
+            if ((access and Opcodes.ACC_STATIC) == 0) {
+                // Push `this` as the first argument.
+                this.visitVarInsn(Opcodes.ALOAD, 0)
+
+                // Update the descriptor -- add this class's type as the first argument
+                // to the method descriptor.
+                val thisType = Type.getType("L" + currentClassName + ";")
+
+                targetDescriptor = prependArgTypeToMethodDescriptor(
+                        descriptor,
+                        thisType,
+                )
+
+                // Shift the original arguments by one.
+                argOffset = 1
+            }
+
+            writeByteCodeToPushArguments(descriptor, this, argOffset)
 
             visitMethodInsn(Opcodes.INVOKESTATIC,
                     nativeSubstitutionClass,
                     name,
-                    descriptor,
+                    targetDescriptor,
                     false)
 
             writeByteCodeToReturn(descriptor, this)

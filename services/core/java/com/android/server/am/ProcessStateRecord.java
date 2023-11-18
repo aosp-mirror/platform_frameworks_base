@@ -29,6 +29,7 @@ import static com.android.server.am.ProcessRecord.TAG;
 import android.annotation.ElapsedRealtimeLong;
 import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.os.Flags;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Slog;
@@ -1366,7 +1367,12 @@ final class ProcessStateRecord {
         }
         if (mNotCachedSinceIdle) {
             pw.print(prefix); pw.print("notCachedSinceIdle="); pw.print(mNotCachedSinceIdle);
-            pw.print(" initialIdlePss="); pw.println(mApp.mProfile.getInitialIdlePss());
+            if (!Flags.removeAppProfilerPssCollection()) {
+                pw.print(" initialIdlePss=");
+            } else {
+                pw.print(" initialIdleRss=");
+            }
+            pw.println(mApp.mProfile.getInitialIdlePssOrRss());
         }
         if (hasTopUi() || hasOverlayUi() || mRunningRemoteAnimation) {
             pw.print(prefix); pw.print("hasTopUi="); pw.print(hasTopUi());

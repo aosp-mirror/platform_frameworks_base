@@ -39,11 +39,11 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.integerResource
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Easings
 import com.android.compose.modifiers.thenIf
@@ -78,12 +78,6 @@ internal fun PatternBouncer(
     val dotRadius = with(LocalDensity.current) { (DOT_DIAMETER_DP / 2).dp.toPx() }
     val lineColor = MaterialTheme.colorScheme.primary
     val lineStrokeWidth = with(LocalDensity.current) { LINE_STROKE_WIDTH_DP.dp.toPx() }
-
-    var containerSize: IntSize by remember { mutableStateOf(IntSize(0, 0)) }
-    val horizontalSpacing = containerSize.width / colCount
-    val verticalSpacing = containerSize.height / rowCount
-    val spacing = min(horizontalSpacing, verticalSpacing).toFloat()
-    val verticalOffset = containerSize.height - spacing * rowCount
 
     // All dots that should be rendered on the grid.
     val dots: List<PatternDotViewModel> by viewModel.dots.collectAsState()
@@ -195,13 +189,14 @@ internal fun PatternBouncer(
 
     // This is the position of the input pointer.
     var inputPosition: Offset? by remember { mutableStateOf(null) }
+    var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
 
     Canvas(
         modifier
             // Need to clip to bounds to make sure that the lines don't follow the input pointer
             // when it leaves the bounds of the dot grid.
             .clipToBounds()
-            .onSizeChanged { containerSize = it }
+            .onGloballyPositioned { coordinates -> gridCoordinates = coordinates }
             .thenIf(isInputEnabled) {
                 Modifier.pointerInput(Unit) {
                         awaitEachGesture {
@@ -232,62 +227,72 @@ internal fun PatternBouncer(
                             viewModel.onDrag(
                                 xPx = change.position.x,
                                 yPx = change.position.y,
-                                containerSizePx = containerSize.width,
-                                verticalOffsetPx = verticalOffset,
+                                containerSizePx = size.width,
                             )
                         }
                     }
             }
     ) {
-        if (isAnimationEnabled) {
-            // Draw lines between dots.
-            selectedDots.forEachIndexed { index, dot ->
-                if (index > 0) {
-                    val previousDot = selectedDots[index - 1]
-                    val lineFadeOutAnimationProgress = lineFadeOutAnimatables[previousDot]!!.value
-                    val startLerp = 1 - lineFadeOutAnimationProgress
-                    val from = pixelOffset(previousDot, spacing, verticalOffset)
-                    val to = pixelOffset(dot, spacing, verticalOffset)
-                    val lerpedFrom =
-                        Offset(
-                            x = from.x + (to.x - from.x) * startLerp,
-                            y = from.y + (to.y - from.y) * startLerp,
+        gridCoordinates?.let { nonNullCoordinates ->
+            val containerSize = nonNullCoordinates.size
+            val horizontalSpacing = containerSize.width.toFloat() / colCount
+            val verticalSpacing = containerSize.height.toFloat() / rowCount
+            val spacing = min(horizontalSpacing, verticalSpacing)
+            val verticalOffset = containerSize.height - spacing * rowCount
+
+            if (isAnimationEnabled) {
+                // Draw lines between dots.
+                selectedDots.forEachIndexed { index, dot ->
+                    if (index > 0) {
+                        val previousDot = selectedDots[index - 1]
+                        val lineFadeOutAnimationProgress =
+                            lineFadeOutAnimatables[previousDot]!!.value
+                        val startLerp = 1 - lineFadeOutAnimationProgress
+                        val from = pixelOffset(previousDot, spacing, verticalOffset)
+                        val to = pixelOffset(dot, spacing, verticalOffset)
+                        val lerpedFrom =
+                            Offset(
+                                x = from.x + (to.x - from.x) * startLerp,
+                                y = from.y + (to.y - from.y) * startLerp,
+                            )
+                        drawLine(
+                            start = lerpedFrom,
+                            end = to,
+                            cap = StrokeCap.Round,
+                            alpha = lineFadeOutAnimationProgress * lineAlpha(spacing),
+                            color = lineColor,
+                            strokeWidth = lineStrokeWidth,
                         )
-                    drawLine(
-                        start = lerpedFrom,
-                        end = to,
-                        cap = StrokeCap.Round,
-                        alpha = lineFadeOutAnimationProgress * lineAlpha(spacing),
-                        color = lineColor,
-                        strokeWidth = lineStrokeWidth,
-                    )
+                    }
+                }
+
+                // Draw the line between the most recently-selected dot and the input pointer
+                // position.
+                inputPosition?.let { lineEnd ->
+                    currentDot?.let { dot ->
+                        val from = pixelOffset(dot, spacing, verticalOffset)
+                        val lineLength =
+                            sqrt((from.y - lineEnd.y).pow(2) + (from.x - lineEnd.x).pow(2))
+                        drawLine(
+                            start = from,
+                            end = lineEnd,
+                            cap = StrokeCap.Round,
+                            alpha = lineAlpha(spacing, lineLength),
+                            color = lineColor,
+                            strokeWidth = lineStrokeWidth,
+                        )
+                    }
                 }
             }
 
-            // Draw the line between the most recently-selected dot and the input pointer position.
-            inputPosition?.let { lineEnd ->
-                currentDot?.let { dot ->
-                    val from = pixelOffset(dot, spacing, verticalOffset)
-                    val lineLength = sqrt((from.y - lineEnd.y).pow(2) + (from.x - lineEnd.x).pow(2))
-                    drawLine(
-                        start = from,
-                        end = lineEnd,
-                        cap = StrokeCap.Round,
-                        alpha = lineAlpha(spacing, lineLength),
-                        color = lineColor,
-                        strokeWidth = lineStrokeWidth,
-                    )
-                }
+            // Draw each dot on the grid.
+            dots.forEach { dot ->
+                drawCircle(
+                    center = pixelOffset(dot, spacing, verticalOffset),
+                    color = dotColor,
+                    radius = dotRadius * (dotScalingAnimatables[dot]?.value ?: 1f),
+                )
             }
-        }
-
-        // Draw each dot on the grid.
-        dots.forEach { dot ->
-            drawCircle(
-                center = pixelOffset(dot, spacing, verticalOffset),
-                color = dotColor,
-                radius = dotRadius * (dotScalingAnimatables[dot]?.value ?: 1f),
-            )
         }
     }
 }

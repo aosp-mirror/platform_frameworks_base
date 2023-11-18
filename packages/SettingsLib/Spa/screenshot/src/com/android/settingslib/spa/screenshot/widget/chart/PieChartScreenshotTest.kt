@@ -16,7 +16,7 @@
 
 package com.android.settingslib.spa.screenshot.widget.chart
 
-import com.android.settingslib.spa.screenshot.util.SettingsScreenshotTestRule
+import com.android.settingslib.spa.screenshot.util.settingsScreenshotTestRule
 import com.android.settingslib.spa.widget.chart.PieChart
 import com.android.settingslib.spa.widget.chart.PieChartData
 import com.android.settingslib.spa.widget.chart.PieChartModel
@@ -39,9 +39,8 @@ class PieChartScreenshotTest(emulationSpec: DeviceEmulationSpec) {
 
     @get:Rule
     val screenshotRule =
-        SettingsScreenshotTestRule(
+        settingsScreenshotTestRule(
             emulationSpec,
-            "frameworks/base/packages/SettingsLib/Spa/screenshot/assets"
         )
 
     @Test
