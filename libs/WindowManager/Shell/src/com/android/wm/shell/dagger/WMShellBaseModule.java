@@ -221,34 +221,57 @@ public abstract class WMShellBaseModule {
             Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
-            CompatUIController compatUI,
+            Optional<CompatUIController> compatUI,
             Optional<UnfoldAnimationController> unfoldAnimationController,
             Optional<RecentTasksController> recentTasksOptional,
-            @ShellMainThread ShellExecutor mainExecutor
-    ) {
+            @ShellMainThread ShellExecutor mainExecutor) {
         if (!context.getResources().getBoolean(R.bool.config_registerShellTaskOrganizerOnInit)) {
             // TODO(b/238217847): Force override shell init if registration is disabled
             shellInit = new ShellInit(mainExecutor);
         }
-        return new ShellTaskOrganizer(shellInit, shellCommandHandler, compatUI,
-                unfoldAnimationController, recentTasksOptional, mainExecutor);
+        return new ShellTaskOrganizer(
+                shellInit,
+                shellCommandHandler,
+                compatUI.orElse(null),
+                unfoldAnimationController,
+                recentTasksOptional,
+                mainExecutor);
     }
 
     @WMSingleton
     @Provides
-    static CompatUIController provideCompatUIController(Context context,
+    static Optional<CompatUIController> provideCompatUIController(
+            Context context,
             ShellInit shellInit,
             ShellController shellController,
-            DisplayController displayController, DisplayInsetsController displayInsetsController,
-            DisplayImeController imeController, SyncTransactionQueue syncQueue,
-            @ShellMainThread ShellExecutor mainExecutor, Lazy<Transitions> transitionsLazy,
-            DockStateReader dockStateReader, CompatUIConfiguration compatUIConfiguration,
+            DisplayController displayController,
+            DisplayInsetsController displayInsetsController,
+            DisplayImeController imeController,
+            SyncTransactionQueue syncQueue,
+            @ShellMainThread ShellExecutor mainExecutor,
+            Lazy<Transitions> transitionsLazy,
+            DockStateReader dockStateReader,
+            CompatUIConfiguration compatUIConfiguration,
             CompatUIShellCommandHandler compatUIShellCommandHandler,
             AccessibilityManager accessibilityManager) {
-        return new CompatUIController(context, shellInit, shellController, displayController,
-                displayInsetsController, imeController, syncQueue, mainExecutor, transitionsLazy,
-                dockStateReader, compatUIConfiguration, compatUIShellCommandHandler,
-                accessibilityManager);
+        if (!context.getResources().getBoolean(R.bool.config_enableCompatUIController)) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                new CompatUIController(
+                        context,
+                        shellInit,
+                        shellController,
+                        displayController,
+                        displayInsetsController,
+                        imeController,
+                        syncQueue,
+                        mainExecutor,
+                        transitionsLazy,
+                        dockStateReader,
+                        compatUIConfiguration,
+                        compatUIShellCommandHandler,
+                        accessibilityManager));
     }
 
     @WMSingleton

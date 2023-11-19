@@ -256,4 +256,10 @@ public interface PackageUserState {
      * @hide
      */
     boolean dataExists();
+
+    /**
+     * Timestamp of when the app is archived on the user.
+     * @hide
+     */
+    long getArchiveTimeMillis();
 }

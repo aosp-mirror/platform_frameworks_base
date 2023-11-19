@@ -113,7 +113,7 @@
             android:layout_width="@dimen/dream_overlay_status_bar_icon_size"
             android:layout_height="match_parent"
             android:layout_marginStart="@dimen/dream_overlay_status_icon_margin"
-            android:src="@drawable/dream_overlay_assistant_attention_indicator"
+            android:src="@drawable/ic_assistant_attention_indicator"
             android:visibility="gone"
             android:contentDescription="@string/assistant_attention_content_description" />
 
