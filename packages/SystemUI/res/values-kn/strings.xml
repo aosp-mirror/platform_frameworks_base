@@ -480,7 +480,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"ಧ್ವನಿ &amp; ವೈಬ್ರೇಷನ್"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"ವಾಲ್ಯೂಮ್ ಅನ್ನು ಸುರಕ್ಷಿತ ಮಟ್ಟಕ್ಕೆ ತಗ್ಗಿಸಲಾಗಿದೆ"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"ಹೆಡ್‌ಫೋನ್‌ನ ವಾಲ್ಯೂಮ್‌ ಶಿಫಾರಸು ಮಾಡಿದ್ದಕ್ಕಿಂತಲೂ ಹೆಚ್ಚಿನ ಸಮಯದವರೆಗೆ ಅಧಿಕವಾಗಿದೆ"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"ಶಿಫಾರಸು ಮಾಡಿದ್ದಕ್ಕಿಂತಲೂ ದೀರ್ಘಕಾಲ ಹೆಡ್‌ಫೋನ್‌ನ ವಾಲ್ಯೂಮ್‌ ಹೆಚ್ಚಿಗೆ ಇದೆ"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"ಹೆಡ್‌ಫೋನ್‌ನ ವಾಲ್ಯೂಮ್ ಈ ವಾರದ‌ ಮಟ್ಟಿಗೆ ಸುರಕ್ಷಿತ ಮಿತಿಯನ್ನು ಮೀರಿದೆ"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"ಆಲಿಸುತ್ತಿರಿ"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"ವಾಲ್ಯೂಮ್ ತಗ್ಗಿಸಿ"</string>

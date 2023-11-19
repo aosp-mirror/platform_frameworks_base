@@ -1687,7 +1687,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"إزالة"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"هل تريد رفع مستوى الصوت فوق المستوى الموصى به؟\n\nقد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
     <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"هل تريد مواصلة الاستماع بصوت عالٍ؟\n\nكان مستوى صوت سمّاعة الرأس مرتفعًا لمدة أطول مما يُنصَح به، وقد يضر هذا بسمعك."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"تم رصد صوت مرتفع.\n\nكان مستوى صوت سمّاعة الرأس مرتفعًا لمدة أطول مما يُنصَح به، وقد يضر هذا بسمعك."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"تم رصد صوت مرتفع\n\nكان مستوى صوت سمّاعة الرأس مرتفعًا لمدة أطول مما يُنصَح به، وقد يضر هذا بسمعك."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"هل تريد استخدام اختصار \"سهولة الاستخدام\"؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"عند تفعيل الاختصار، يؤدي الضغط على زرّي التحكّم في مستوى الصوت معًا لمدة 3 ثوانٍ إلى تفعيل إحدى ميزات إمكانية الوصول."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"هل تريد تفعيل الاختصار لميزات إمكانية الوصول؟"</string>
