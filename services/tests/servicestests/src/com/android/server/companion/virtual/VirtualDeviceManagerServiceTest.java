@@ -1255,22 +1255,6 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
-    public void sendButtonEvent_hasFd_wrongDisplay_throwsIllegalStateException() {
-        final int fd = 1;
-        final int buttonCode = VirtualMouseButtonEvent.BUTTON_BACK;
-        final int action = VirtualMouseButtonEvent.ACTION_BUTTON_PRESS;
-        mInputController.addDeviceForTesting(BINDER, fd,
-                InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS, DEVICE_NAME_1,
-                INPUT_DEVICE_ID);
-        assertThrows(
-                IllegalStateException.class,
-                () ->
-                        mDeviceImpl.sendButtonEvent(BINDER, new VirtualMouseButtonEvent.Builder()
-                                .setButtonCode(buttonCode)
-                                .setAction(action).build()));
-    }
-
-    @Test
     public void sendRelativeEvent_noFd() {
         assertThat(mDeviceImpl.sendRelativeEvent(BINDER,
                 new VirtualMouseRelativeEvent.Builder()
@@ -1302,22 +1286,6 @@ public class VirtualDeviceManagerServiceTest {
 
 
     @Test
-    public void sendRelativeEvent_hasFd_wrongDisplay_throwsIllegalStateException() {
-        final int fd = 1;
-        final float x = -0.2f;
-        final float y = 0.7f;
-        mInputController.addDeviceForTesting(BINDER, fd,
-                InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS, DEVICE_NAME_1,
-                INPUT_DEVICE_ID);
-        assertThrows(
-                IllegalStateException.class,
-                () ->
-                        mDeviceImpl.sendRelativeEvent(BINDER,
-                                new VirtualMouseRelativeEvent.Builder()
-                                        .setRelativeX(x).setRelativeY(y).build()));
-    }
-
-    @Test
     public void sendScrollEvent_noFd() {
         assertThat(mDeviceImpl.sendScrollEvent(BINDER,
                 new VirtualMouseScrollEvent.Builder()
@@ -1347,22 +1315,6 @@ public class VirtualDeviceManagerServiceTest {
         verify(mNativeWrapperMock).writeScrollEvent(fd, x, y, eventTimeNanos);
     }
 
-
-    @Test
-    public void sendScrollEvent_hasFd_wrongDisplay_throwsIllegalStateException() {
-        final int fd = 1;
-        final float x = 0.5f;
-        final float y = 1f;
-        mInputController.addDeviceForTesting(BINDER, fd,
-                InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS, DEVICE_NAME_1,
-                INPUT_DEVICE_ID);
-        assertThrows(
-                IllegalStateException.class,
-                () ->
-                        mDeviceImpl.sendScrollEvent(BINDER, new VirtualMouseScrollEvent.Builder()
-                                .setXAxisMovement(x)
-                                .setYAxisMovement(y).build()));
-    }
 
     @Test
     public void sendTouchEvent_noFd() {

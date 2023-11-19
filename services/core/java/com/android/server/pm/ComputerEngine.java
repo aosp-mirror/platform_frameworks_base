@@ -1533,6 +1533,7 @@ public class ComputerEngine implements Computer {
                     ai, flags, state, userId);
             pi.signingInfo = ps.getSigningInfo();
             pi.signatures = getDeprecatedSignatures(pi.signingInfo.getSigningDetails(), flags);
+            pi.setArchiveTimeMillis(state.getArchiveTimeMillis());
 
             if (DEBUG_PACKAGE_INFO) {
                 Log.v(TAG, "ps.pkg is n/a for ["

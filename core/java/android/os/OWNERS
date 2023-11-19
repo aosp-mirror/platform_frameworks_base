@@ -87,3 +87,7 @@ per-file DdmSyncStageUpdater.java = sanglardf@google.com, rpaquay@google.com
 
 # PerformanceHintManager
 per-file PerformanceHintManager.java = file:/ADPF_OWNERS
+
+# IThermal interfaces
+per-file IThermal* = file:/THERMAL_OWNERS
+

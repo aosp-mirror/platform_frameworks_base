@@ -58,7 +58,7 @@ public class InstallViewModel extends AndroidViewModel {
                 if (installStage.getStageCode() != InstallStage.STAGE_READY) {
                     mCurrentInstallStage.setValue(installStage);
                 } else {
-                    // Proceed with user confirmation here.
+                    checkIfAllowedAndInitiateInstall();
                 }
             });
         }
@@ -66,5 +66,36 @@ public class InstallViewModel extends AndroidViewModel {
 
     public MutableLiveData<Integer> getStagingProgress() {
         return mRepository.getStagingProgress();
+    }
+
+    private void checkIfAllowedAndInitiateInstall() {
+        InstallStage stage = mRepository.requestUserConfirmation();
+        mCurrentInstallStage.setValue(stage);
+    }
+
+    public void forcedSkipSourceCheck() {
+        InstallStage stage = mRepository.forcedSkipSourceCheck();
+        mCurrentInstallStage.setValue(stage);
+    }
+
+    public void cleanupInstall() {
+        mRepository.cleanupInstall();
+    }
+
+    public void reattemptInstall() {
+        InstallStage stage = mRepository.reattemptInstall();
+        mCurrentInstallStage.setValue(stage);
+    }
+
+    public void initiateInstall() {
+        // Since installing is an async operation, we will get the install result later in time.
+        // Result of the installation will be set in InstallRepository#mInstallResult.
+        // As such, mCurrentInstallStage will need to add another MutableLiveData as a data source
+        mRepository.initiateInstall();
+        mCurrentInstallStage.addSource(mRepository.getInstallResult(), installStage -> {
+            if (installStage != null) {
+                mCurrentInstallStage.setValue(installStage);
+            }
+        });
     }
 }

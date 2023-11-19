@@ -17,26 +17,42 @@
 package com.android.packageinstaller.v2.model;
 
 import static com.android.packageinstaller.v2.model.PackageUtil.canPackageQuery;
+import static com.android.packageinstaller.v2.model.PackageUtil.generateStubPackageInfo;
+import static com.android.packageinstaller.v2.model.PackageUtil.getAppSnippet;
+import static com.android.packageinstaller.v2.model.PackageUtil.getPackageInfo;
+import static com.android.packageinstaller.v2.model.PackageUtil.getPackageNameForUid;
 import static com.android.packageinstaller.v2.model.PackageUtil.isCallerSessionOwner;
 import static com.android.packageinstaller.v2.model.PackageUtil.isInstallPermissionGrantedOrRequested;
 import static com.android.packageinstaller.v2.model.PackageUtil.isPermissionGranted;
+import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_DONE;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_INTERNAL_ERROR;
 import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.ABORT_REASON_POLICY;
+import static com.android.packageinstaller.v2.model.installstagedata.InstallAborted.DLG_PACKAGE_ERROR;
+import static com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE;
+import static com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired.USER_ACTION_REASON_INSTALL_CONFIRMATION;
+import static com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired.USER_ACTION_REASON_UNKNOWN_SOURCE;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AppOpsManager;
+import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.InstallSourceInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.ApplicationInfoFlags;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.EventLog;
@@ -44,22 +60,34 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
+import com.android.packageinstaller.R;
+import com.android.packageinstaller.v2.model.EventResultPersister.OutOfIdsException;
+import com.android.packageinstaller.v2.model.PackageUtil.AppSnippet;
 import com.android.packageinstaller.v2.model.installstagedata.InstallAborted;
+import com.android.packageinstaller.v2.model.installstagedata.InstallFailed;
+import com.android.packageinstaller.v2.model.installstagedata.InstallInstalling;
 import com.android.packageinstaller.v2.model.installstagedata.InstallReady;
 import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
 import com.android.packageinstaller.v2.model.installstagedata.InstallStaging;
+import com.android.packageinstaller.v2.model.installstagedata.InstallSuccess;
+import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired;
+import java.io.File;
 import java.io.IOException;
 
 public class InstallRepository {
 
     private static final String SCHEME_PACKAGE = "package";
+    private static final String BROADCAST_ACTION =
+        "com.android.packageinstaller.ACTION_INSTALL_COMMIT";
     private static final String TAG = InstallRepository.class.getSimpleName();
     private final Context mContext;
     private final PackageManager mPackageManager;
     private final PackageInstaller mPackageInstaller;
     private final UserManager mUserManager;
     private final DevicePolicyManager mDevicePolicyManager;
+    private final AppOpsManager mAppOpsManager;
     private final MutableLiveData<InstallStage> mStagingResult = new MutableLiveData<>();
+    private final MutableLiveData<InstallStage> mInstallResult = new MutableLiveData<>();
     private final boolean mLocalLOGV = false;
     private Intent mIntent;
     private boolean mIsSessionInstall;
@@ -75,6 +103,12 @@ public class InstallRepository {
     private int mCallingUid;
     private String mCallingPackage;
     private SessionStager mSessionStager;
+    private AppOpRequestInfo mAppOpRequestInfo;
+    private AppSnippet mAppSnippet;
+    /**
+     * PackageInfo of the app being installed on device.
+     */
+    private PackageInfo mNewPackageInfo;
 
     public InstallRepository(Context context) {
         mContext = context;
@@ -82,6 +116,7 @@ public class InstallRepository {
         mPackageInstaller = mPackageManager.getPackageInstaller();
         mDevicePolicyManager = context.getSystemService(DevicePolicyManager.class);
         mUserManager = context.getSystemService(UserManager.class);
+        mAppOpsManager = context.getSystemService(AppOpsManager.class);
     }
 
     /**
@@ -124,6 +159,9 @@ public class InstallRepository {
         final ApplicationInfo sourceInfo = getSourceInfo(mCallingPackage);
         // Uid of the source package, with a preference to uid from ApplicationInfo
         final int originatingUid = sourceInfo != null ? sourceInfo.uid : mCallingUid;
+        mAppOpRequestInfo = new AppOpRequestInfo(
+            getPackageNameForUid(mContext, originatingUid, mCallingPackage),
+            originatingUid, callingAttributionTag);
 
         if (mCallingUid == Process.INVALID_UID && sourceInfo == null) {
             // Caller's identity could not be determined. Abort the install
@@ -337,6 +375,466 @@ public class InstallRepository {
         return params;
     }
 
+    /**
+     * Processes Install session, file:// or package:// URI to generate data pertaining to user
+     * confirmation for an install. This method also checks if the source app has the AppOp granted
+     * to install unknown apps. If an AppOp is to be requested, cache the user action prompt data to
+     * be reused once appOp has been granted
+     *
+     * @return <ul>
+     *     <li>InstallAborted </li>
+     *         <ul>
+     *             <li> If install session is invalid (not sealed or resolvedBaseApk path
+     *             is invalid) </li>
+     *             <li> Source app doesn't have visibility to target app </li>
+     *             <li> The APK is invalid </li>
+     *             <li> URI is invalid </li>
+     *             <li> Can't get ApplicationInfo for source app, to request AppOp </li>
+     *         </ul>
+     *    <li> InstallUserActionRequired</li>
+     *         <ul>
+     *             <li> If AppOP is granted and user action is required to proceed
+     *             with install </li>
+     *             <li> If AppOp grant is to be requested from the user</li>
+     *         </ul>
+     *  </ul>
+     */
+    public InstallStage requestUserConfirmation() {
+        if (mIsTrustedSource) {
+            if (mLocalLOGV) {
+                Log.i(TAG, "install allowed");
+            }
+            // Returns InstallUserActionRequired stage if install details could be successfully
+            // computed, else it returns InstallAborted.
+            return generateConfirmationSnippet();
+        } else {
+            InstallStage unknownSourceStage = handleUnknownSources(mAppOpRequestInfo);
+            if (unknownSourceStage.getStageCode() == InstallStage.STAGE_READY) {
+                // Source app already has appOp granted.
+                return generateConfirmationSnippet();
+            } else {
+                return unknownSourceStage;
+            }
+        }
+    }
+
+
+    private InstallStage generateConfirmationSnippet() {
+        final Object packageSource;
+        int pendingUserActionReason = -1;
+        if (PackageInstaller.ACTION_CONFIRM_INSTALL.equals(mIntent.getAction())) {
+            final SessionInfo info = mPackageInstaller.getSessionInfo(mSessionId);
+            String resolvedPath = info != null ? info.getResolvedBaseApkPath() : null;
+
+            if (info == null || !info.isSealed() || resolvedPath == null) {
+                Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
+                return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
+            }
+            packageSource = Uri.fromFile(new File(resolvedPath));
+            // TODO: Not sure where is this used yet. PIA.java passes it to
+            //  InstallInstalling if not null
+            // mOriginatingURI = null;
+            // mReferrerURI = null;
+            pendingUserActionReason = info.getPendingUserActionReason();
+        } else if (PackageInstaller.ACTION_CONFIRM_PRE_APPROVAL.equals(mIntent.getAction())) {
+            final SessionInfo info = mPackageInstaller.getSessionInfo(mSessionId);
+
+            if (info == null || !info.isPreApprovalRequested()) {
+                Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
+                return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
+            }
+            packageSource = info;
+            // mOriginatingURI = null;
+            // mReferrerURI = null;
+            pendingUserActionReason = info.getPendingUserActionReason();
+        } else {
+            // Two possible origins:
+            // 1. Installation with SCHEME_PACKAGE.
+            // 2. Installation with "file://" for session created by this app
+            if (mIntent.getData() != null && mIntent.getData().getScheme().equals(SCHEME_PACKAGE)) {
+                packageSource = mIntent.getData();
+            } else {
+                SessionInfo stagedSessionInfo = mPackageInstaller.getSessionInfo(mStagedSessionId);
+                packageSource = Uri.fromFile(new File(stagedSessionInfo.getResolvedBaseApkPath()));
+            }
+            // mOriginatingURI = mIntent.getParcelableExtra(Intent.EXTRA_ORIGINATING_URI);
+            // mReferrerURI = mIntent.getParcelableExtra(Intent.EXTRA_REFERRER);
+            pendingUserActionReason = PackageInstaller.REASON_CONFIRM_PACKAGE_CHANGE;
+        }
+
+        // if there's nothing to do, quietly slip into the ether
+        if (packageSource == null) {
+            Log.w(TAG, "Unspecified source");
+            return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR)
+                .setResultIntent(new Intent().putExtra(Intent.EXTRA_INSTALL_RESULT,
+                    PackageManager.INSTALL_FAILED_INVALID_URI))
+                .setActivityResultCode(Activity.RESULT_FIRST_USER)
+                .build();
+        }
+
+        return processAppSnippet(packageSource, pendingUserActionReason);
+    }
+
+    /**
+     * Parse the Uri (post-commit install session) or use the SessionInfo (pre-commit install
+     * session) to set up the installer for this install.
+     *
+     * @param source The source of package URI or SessionInfo
+     * @return {@code true} iff the installer could be set up
+     */
+    private InstallStage processAppSnippet(Object source, int userActionReason) {
+        if (source instanceof Uri) {
+            return processPackageUri((Uri) source, userActionReason);
+        } else if (source instanceof SessionInfo) {
+            return processSessionInfo((SessionInfo) source, userActionReason);
+        }
+        return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
+    }
+
+    /**
+     * Parse the Uri and set up the installer for this package.
+     *
+     * @param packageUri The URI to parse
+     * @return {@code true} iff the installer could be set up
+     */
+    private InstallStage processPackageUri(final Uri packageUri, int userActionReason) {
+        final String scheme = packageUri.getScheme();
+        final String packageName = packageUri.getSchemeSpecificPart();
+
+        if (scheme == null) {
+            return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
+        }
+
+        if (mLocalLOGV) {
+            Log.i(TAG, "processPackageUri(): uri = " + packageUri + ", scheme = " + scheme);
+        }
+
+        switch (scheme) {
+            case SCHEME_PACKAGE -> {
+                for (UserHandle handle : mUserManager.getUserHandles(true)) {
+                    PackageManager pmForUser = mContext.createContextAsUser(handle, 0)
+                        .getPackageManager();
+                    try {
+                        if (pmForUser.canPackageQuery(mCallingPackage, packageName)) {
+                            mNewPackageInfo = pmForUser.getPackageInfo(packageName,
+                                PackageManager.GET_PERMISSIONS
+                                    | PackageManager.MATCH_UNINSTALLED_PACKAGES);
+                        }
+                    } catch (NameNotFoundException ignored) {
+                    }
+                }
+                if (mNewPackageInfo == null) {
+                    Log.w(TAG, "Requested package " + packageUri.getSchemeSpecificPart()
+                        + " not available. Discontinuing installation");
+                    return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR)
+                        .setErrorDialogType(DLG_PACKAGE_ERROR)
+                        .setResultIntent(new Intent().putExtra(Intent.EXTRA_INSTALL_RESULT,
+                            PackageManager.INSTALL_FAILED_INVALID_APK))
+                        .setActivityResultCode(Activity.RESULT_FIRST_USER)
+                        .build();
+                }
+                mAppSnippet = getAppSnippet(mContext, mNewPackageInfo);
+                if (mLocalLOGV) {
+                    Log.i(TAG, "Created snippet for " + mAppSnippet.getLabel());
+                }
+            }
+            case ContentResolver.SCHEME_FILE -> {
+                File sourceFile = new File(packageUri.getPath());
+                mNewPackageInfo = getPackageInfo(mContext, sourceFile,
+                    PackageManager.GET_PERMISSIONS);
+
+                // Check for parse errors
+                if (mNewPackageInfo == null) {
+                    Log.w(TAG, "Parse error when parsing manifest. Discontinuing installation");
+                    return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR)
+                        .setErrorDialogType(DLG_PACKAGE_ERROR)
+                        .setResultIntent(new Intent().putExtra(Intent.EXTRA_INSTALL_RESULT,
+                            PackageManager.INSTALL_FAILED_INVALID_APK))
+                        .setActivityResultCode(Activity.RESULT_FIRST_USER)
+                        .build();
+                }
+                if (mLocalLOGV) {
+                    Log.i(TAG, "Creating snippet for local file " + sourceFile);
+                }
+                mAppSnippet = getAppSnippet(mContext, mNewPackageInfo.applicationInfo, sourceFile);
+            }
+            default -> {
+                Log.e(TAG, "Unexpected URI scheme " + packageUri);
+                return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
+            }
+        }
+
+        return new InstallUserActionRequired.Builder(
+            USER_ACTION_REASON_INSTALL_CONFIRMATION, mAppSnippet)
+            .setDialogMessage(getUpdateMessage(mNewPackageInfo, userActionReason))
+            .setAppUpdating(isAppUpdating(mNewPackageInfo))
+            .build();
+    }
+
+    /**
+     * Use the SessionInfo and set up the installer for pre-commit install session.
+     *
+     * @param sessionInfo The SessionInfo to compose
+     * @return {@code true} iff the installer could be set up
+     */
+    private InstallStage processSessionInfo(@NonNull SessionInfo sessionInfo,
+        int userActionReason) {
+        mNewPackageInfo = generateStubPackageInfo(sessionInfo.getAppPackageName());
+
+        mAppSnippet = getAppSnippet(mContext, sessionInfo);
+        return new InstallUserActionRequired.Builder(
+            USER_ACTION_REASON_INSTALL_CONFIRMATION, mAppSnippet)
+            .setAppUpdating(isAppUpdating(mNewPackageInfo))
+            .setDialogMessage(getUpdateMessage(mNewPackageInfo, userActionReason))
+            .build();
+    }
+
+    private String getUpdateMessage(PackageInfo pkgInfo, int userActionReason) {
+        if (isAppUpdating(pkgInfo)) {
+            final CharSequence existingUpdateOwnerLabel = getExistingUpdateOwnerLabel(pkgInfo);
+            final CharSequence requestedUpdateOwnerLabel = getApplicationLabel(mCallingPackage);
+
+            if (!TextUtils.isEmpty(existingUpdateOwnerLabel)
+                && userActionReason == PackageInstaller.REASON_REMIND_OWNERSHIP) {
+                return mContext.getString(R.string.install_confirm_question_update_owner_reminder,
+                    requestedUpdateOwnerLabel, existingUpdateOwnerLabel);
+            }
+        }
+        return null;
+    }
+
+    private CharSequence getExistingUpdateOwnerLabel(PackageInfo pkgInfo) {
+        try {
+            final String packageName = pkgInfo.packageName;
+            final InstallSourceInfo sourceInfo = mPackageManager.getInstallSourceInfo(packageName);
+            final String existingUpdateOwner = sourceInfo.getUpdateOwnerPackageName();
+            return getApplicationLabel(existingUpdateOwner);
+        } catch (NameNotFoundException e) {
+            return null;
+        }
+    }
+
+    private CharSequence getApplicationLabel(String packageName) {
+        try {
+            final ApplicationInfo appInfo = mPackageManager.getApplicationInfo(packageName,
+                ApplicationInfoFlags.of(0));
+            return mPackageManager.getApplicationLabel(appInfo);
+        } catch (NameNotFoundException e) {
+            return null;
+        }
+    }
+
+    private boolean isAppUpdating(PackageInfo newPkgInfo) {
+        String pkgName = newPkgInfo.packageName;
+        // Check if there is already a package on the device with this name
+        // but it has been renamed to something else.
+        String[] oldName = mPackageManager.canonicalToCurrentPackageNames(new String[]{pkgName});
+        if (oldName != null && oldName.length > 0 && oldName[0] != null) {
+            pkgName = oldName[0];
+            newPkgInfo.packageName = pkgName;
+            newPkgInfo.applicationInfo.packageName = pkgName;
+        }
+        // Check if package is already installed. display confirmation dialog if replacing pkg
+        try {
+            // This is a little convoluted because we want to get all uninstalled
+            // apps, but this may include apps with just data, and if it is just
+            // data we still want to count it as "installed".
+            ApplicationInfo appInfo = mPackageManager.getApplicationInfo(pkgName,
+                PackageManager.MATCH_UNINSTALLED_PACKAGES);
+            if ((appInfo.flags & ApplicationInfo.FLAG_INSTALLED) == 0) {
+                return false;
+            }
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Once the user returns from Settings related to installing from unknown sources, reattempt
+     * the installation if the source app is granted permission to install other apps. Abort the
+     * installation if the source app is still not granted installing permission.
+     * @return {@link InstallUserActionRequired} containing data required to ask user confirmation
+     * to proceed with the install.
+     * {@link InstallAborted} if there was an error while recomputing, or the source still
+     * doesn't have install permission.
+     */
+    public InstallStage reattemptInstall() {
+        InstallStage unknownSourceStage = handleUnknownSources(mAppOpRequestInfo);
+        if (unknownSourceStage.getStageCode() == InstallStage.STAGE_READY) {
+            // Source app now has appOp granted.
+            return generateConfirmationSnippet();
+        } else if (unknownSourceStage.getStageCode() == InstallStage.STAGE_ABORTED) {
+            // There was some error in determining the AppOp code for the source app.
+            // Abort installation
+            return unknownSourceStage;
+        } else {
+            // AppOpsManager again returned a MODE_ERRORED or MODE_DEFAULT op code. This was
+            // unexpected while reattempting the install. Let's abort it.
+            Log.e(TAG, "AppOp still not granted.");
+            return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
+        }
+    }
+
+    private InstallStage handleUnknownSources(AppOpRequestInfo requestInfo) {
+        if (requestInfo.getCallingPackage() == null) {
+            Log.i(TAG, "No source found for package " + mNewPackageInfo.packageName);
+            return new InstallUserActionRequired.Builder(
+                USER_ACTION_REASON_ANONYMOUS_SOURCE, null)
+                .build();
+        }
+        // Shouldn't use static constant directly, see b/65534401.
+        final String appOpStr =
+            AppOpsManager.permissionToOp(Manifest.permission.REQUEST_INSTALL_PACKAGES);
+        final int appOpMode = mAppOpsManager.noteOpNoThrow(appOpStr,
+            requestInfo.getOriginatingUid(),
+            requestInfo.getCallingPackage(), requestInfo.getAttributionTag(),
+            "Started package installation activity");
+
+        if (mLocalLOGV) {
+            Log.i(TAG, "handleUnknownSources(): appMode=" + appOpMode);
+        }
+        switch (appOpMode) {
+            case AppOpsManager.MODE_DEFAULT:
+                mAppOpsManager.setMode(appOpStr, requestInfo.getOriginatingUid(),
+                    requestInfo.getCallingPackage(), AppOpsManager.MODE_ERRORED);
+                // fall through
+            case AppOpsManager.MODE_ERRORED:
+                try {
+                    ApplicationInfo sourceInfo =
+                        mPackageManager.getApplicationInfo(requestInfo.getCallingPackage(), 0);
+                    AppSnippet sourceAppSnippet = getAppSnippet(mContext, sourceInfo);
+                    return new InstallUserActionRequired.Builder(
+                        USER_ACTION_REASON_UNKNOWN_SOURCE, sourceAppSnippet)
+                        .setDialogMessage(requestInfo.getCallingPackage())
+                        .build();
+                } catch (NameNotFoundException e) {
+                    Log.e(TAG, "Did not find appInfo for " + requestInfo.getCallingPackage());
+                    return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
+                }
+            case AppOpsManager.MODE_ALLOWED:
+                return new InstallReady();
+            default:
+                Log.e(TAG, "Invalid app op mode " + appOpMode
+                    + " for OP_REQUEST_INSTALL_PACKAGES found for uid "
+                    + requestInfo.getOriginatingUid());
+                return new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR).build();
+        }
+    }
+
+
+    /**
+     * Kick off the installation. Register a broadcast listener to get the result of the
+     * installation and commit the staged session here. If the installation was session based,
+     * signal the PackageInstaller that the user has granted permission to proceed with the install
+     */
+    public void initiateInstall() {
+        if (mSessionId > 0) {
+            mPackageInstaller.setPermissionsResult(mSessionId, true);
+            mInstallResult.setValue(new InstallAborted.Builder(ABORT_REASON_DONE)
+                .setActivityResultCode(Activity.RESULT_OK).build());
+            return;
+        }
+
+        Uri uri = mIntent.getData();
+        if (uri != null && SCHEME_PACKAGE.equals(uri.getScheme())) {
+            try {
+                mPackageManager.installExistingPackage(mNewPackageInfo.packageName);
+                setStageBasedOnResult(PackageInstaller.STATUS_SUCCESS, -1, null, -1);
+            } catch (PackageManager.NameNotFoundException e) {
+                setStageBasedOnResult(PackageInstaller.STATUS_FAILURE,
+                    PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null, -1);
+            }
+            return;
+        }
+
+        if (mStagedSessionId <= 0) {
+            // How did we even land here?
+            Log.e(TAG, "Invalid local session and caller initiated session");
+            mInstallResult.setValue(new InstallAborted.Builder(ABORT_REASON_INTERNAL_ERROR)
+                .build());
+            return;
+        }
+
+        int installId;
+        try {
+            mInstallResult.setValue(new InstallInstalling(mAppSnippet));
+            installId = InstallEventReceiver.addObserver(mContext,
+                EventResultPersister.GENERATE_NEW_ID, this::setStageBasedOnResult);
+        } catch (OutOfIdsException e) {
+            setStageBasedOnResult(PackageInstaller.STATUS_FAILURE,
+                PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null, -1);
+            return;
+        }
+
+        Intent broadcastIntent = new Intent(BROADCAST_ACTION);
+        broadcastIntent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        broadcastIntent.setPackage(mContext.getPackageName());
+        broadcastIntent.putExtra(EventResultPersister.EXTRA_ID, installId);
+
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+            mContext, installId, broadcastIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
+
+        try {
+            PackageInstaller.Session session = mPackageInstaller.openSession(mStagedSessionId);
+            session.commit(pendingIntent.getIntentSender());
+        } catch (Exception e) {
+            Log.e(TAG, "Session " + mStagedSessionId + " could not be opened.", e);
+            mPackageInstaller.abandonSession(mStagedSessionId);
+            setStageBasedOnResult(PackageInstaller.STATUS_FAILURE,
+                PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null, -1);
+        }
+    }
+
+    private void setStageBasedOnResult(int statusCode, int legacyStatus, String message,
+        int serviceId) {
+        if (statusCode == PackageInstaller.STATUS_SUCCESS) {
+            boolean shouldReturnResult = mIntent.getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
+
+            InstallSuccess.Builder successBuilder = new InstallSuccess.Builder(mAppSnippet)
+                .setShouldReturnResult(shouldReturnResult);
+            Intent resultIntent;
+            if (shouldReturnResult) {
+                resultIntent = new Intent()
+                    .putExtra(Intent.EXTRA_INSTALL_RESULT, PackageManager.INSTALL_SUCCEEDED);
+            } else {
+                resultIntent = mPackageManager
+                    .getLaunchIntentForPackage(mNewPackageInfo.packageName);
+            }
+            successBuilder.setResultIntent(resultIntent);
+
+            mInstallResult.setValue(successBuilder.build());
+        } else {
+            mInstallResult.setValue(
+                new InstallFailed(mAppSnippet, statusCode, legacyStatus, message));
+        }
+    }
+
+    public MutableLiveData<InstallStage> getInstallResult() {
+        return mInstallResult;
+    }
+
+    /**
+     * Cleanup the staged session. Also signal the packageinstaller that an install session is to
+     * be aborted
+     */
+    public void cleanupInstall() {
+        if (mSessionId > 0) {
+            mPackageInstaller.setPermissionsResult(mSessionId, false);
+        } else if (mStagedSessionId > 0) {
+            cleanupStagingSession();
+        }
+    }
+
+    /**
+     * When the identity of the install source could not be determined, user can skip checking the
+     * source and directly proceed with the install.
+     */
+    public InstallStage forcedSkipSourceCheck() {
+        return generateConfirmationSnippet();
+    }
+
     public MutableLiveData<Integer> getStagingProgress() {
         if (mSessionStager != null) {
             return mSessionStager.getProgress();
@@ -371,6 +869,31 @@ public class InstallRepository {
 
         public int getUid() {
             return mUid;
+        }
+    }
+
+    public static class AppOpRequestInfo {
+
+        private String mCallingPackage;
+        private String mAttributionTag;
+        private int mOrginatingUid;
+
+        public AppOpRequestInfo(String callingPackage, int orginatingUid, String attributionTag) {
+            mCallingPackage = callingPackage;
+            mOrginatingUid = orginatingUid;
+            mAttributionTag = attributionTag;
+        }
+
+        public String getCallingPackage() {
+            return mCallingPackage;
+        }
+
+        public String getAttributionTag() {
+            return mAttributionTag;
+        }
+
+        public int getOriginatingUid() {
+            return mOrginatingUid;
         }
     }
 }

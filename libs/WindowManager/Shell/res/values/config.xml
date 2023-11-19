@@ -141,4 +141,7 @@
         window. If false, the splash screen will be a solid color splash screen whenever the
         app has not provided a windowSplashScreenAnimatedIcon. -->
     <bool name="config_canUseAppIconForSplashScreen">true</bool>
+
+    <!-- Whether CompatUIController is enabled -->
+    <bool name="config_enableCompatUIController">true</bool>
 </resources>
