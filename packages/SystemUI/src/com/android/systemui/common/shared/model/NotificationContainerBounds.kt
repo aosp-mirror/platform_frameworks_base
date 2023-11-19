@@ -12,19 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.statusbar.notification.stack.data.repository
+package com.android.systemui.common.shared.model
 
-import com.android.systemui.common.shared.model.NotificationContainerBounds
-import com.android.systemui.dagger.SysUISingleton
-import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-
-/** A repository which holds state about and controlling the appearance of the notification stack */
-@SysUISingleton
-class NotificationStackAppearanceRepository @Inject constructor() {
-    /** The bounds of the notification stack in the current scene. */
-    val stackBounds = MutableStateFlow(NotificationContainerBounds(0f, 0f))
+/** Models the bounds of the notification container. */
+data class NotificationContainerBounds(
+    /** The position of the top of the container in its window coordinate system, in pixels. */
+    val top: Float = 0f,
+    /** The position of the bottom of the container in its window coordinate system, in pixels. */
+    val bottom: Float = 0f,
+    /** Whether any modifications to top/bottom should be smoothly animated. */
+    val isAnimated: Boolean = false,
+) {
+    /** The current height of the notification container. */
+    val height: Float = bottom - top
 }

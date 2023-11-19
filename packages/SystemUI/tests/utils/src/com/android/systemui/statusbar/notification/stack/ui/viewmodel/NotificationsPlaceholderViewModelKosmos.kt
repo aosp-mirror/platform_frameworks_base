@@ -14,8 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.scene.shared.flag
+package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.scene.shared.flag.sceneContainerFlags
+import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationStackAppearanceInteractor
 
-var Kosmos.sceneContainerFlags by Kosmos.Fixture { FakeSceneContainerFlags() }
+val Kosmos.notificationsPlaceholderViewModel by Fixture {
+    NotificationsPlaceholderViewModel(
+        interactor = notificationStackAppearanceInteractor,
+        flags = sceneContainerFlags,
+        featureFlags = featureFlagsClassic,
+    )
+}

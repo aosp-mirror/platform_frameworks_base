@@ -17,7 +17,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
+import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
@@ -32,10 +32,9 @@ constructor(
     stackAppearanceInteractor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
 ) {
-    /** The expansion fraction from the top of the notification shade */
+    /** The expansion fraction from the top of the notification shade. */
     val expandFraction: Flow<Float> = shadeInteractor.shadeExpansion
 
-    /** The position of the notification stack in the current scene */
-    val stackPosition: Flow<SharedNotificationContainerPosition> =
-        stackAppearanceInteractor.stackPosition
+    /** The bounds of the notification stack in the current scene. */
+    val stackBounds: Flow<NotificationContainerBounds> = stackAppearanceInteractor.stackBounds
 }

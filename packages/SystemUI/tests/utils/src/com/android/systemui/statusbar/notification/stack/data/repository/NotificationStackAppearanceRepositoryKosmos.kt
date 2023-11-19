@@ -12,19 +12,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package com.android.systemui.statusbar.notification.stack.data.repository
 
-import com.android.systemui.common.shared.model.NotificationContainerBounds
-import com.android.systemui.dagger.SysUISingleton
-import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 
-/** A repository which holds state about and controlling the appearance of the notification stack */
-@SysUISingleton
-class NotificationStackAppearanceRepository @Inject constructor() {
-    /** The bounds of the notification stack in the current scene. */
-    val stackBounds = MutableStateFlow(NotificationContainerBounds(0f, 0f))
+val Kosmos.notificationStackAppearanceRepository by Fixture {
+    NotificationStackAppearanceRepository()
 }

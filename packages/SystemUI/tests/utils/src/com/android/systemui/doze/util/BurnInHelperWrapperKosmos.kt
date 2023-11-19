@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.common.shared.model
+package com.android.systemui.doze.util
 
-/** Positioning info for the shared notification container */
-data class SharedNotificationContainerPosition(
-    val top: Float = 0f,
-    val bottom: Float = 0f,
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 
-    /** Whether any modifications to top/bottom are smoothly animated */
-    val animate: Boolean = false,
-) {
-    val height: Float = bottom - top
-}
+val Kosmos.burnInHelperWrapper by Fixture { BurnInHelperWrapper() }

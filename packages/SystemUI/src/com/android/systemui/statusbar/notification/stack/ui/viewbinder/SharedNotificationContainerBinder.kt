@@ -73,8 +73,9 @@ object SharedNotificationContainerBinder {
 
                     if (!sceneContainerFlags.flexiNotifsEnabled()) {
                         launch {
-                            viewModel.position.collect {
-                                val animate = it.animate || controller.isAddOrRemoveAnimationPending
+                            viewModel.bounds.collect {
+                                val animate =
+                                    it.isAnimated || controller.isAddOrRemoveAnimationPending
                                 controller.updateTopPadding(it.top, animate)
                             }
                         }

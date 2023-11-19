@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
+import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
@@ -46,8 +46,18 @@ constructor(
     /** DEBUG: whether the debug logging should be output. */
     val isDebugLoggingEnabled: Boolean = flags.flexiNotifsEnabled()
 
-    /** Sets the position of the notification stack in the current scene */
-    fun setPlaceholderPositionInWindow(top: Float, bottom: Float) {
-        interactor.setStackPosition(SharedNotificationContainerPosition(top, bottom))
+    /**
+     * Notifies that the bounds of the notification placeholder have changed.
+     *
+     * @param top The position of the top of the container in its window coordinate system, in
+     *   pixels.
+     * @param bottom The position of the bottom of the container in its window coordinate system, in
+     *   pixels.
+     */
+    fun onBoundsChanged(
+        top: Float,
+        bottom: Float,
+    ) {
+        interactor.setStackBounds(NotificationContainerBounds(top, bottom))
     }
 }

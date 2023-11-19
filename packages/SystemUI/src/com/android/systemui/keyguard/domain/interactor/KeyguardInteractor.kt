@@ -27,8 +27,8 @@ import com.android.keyguard.KeyguardClockSwitch.ClockSize
 import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.shared.model.Position
-import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
@@ -82,15 +82,14 @@ constructor(
     sceneInteractorProvider: Provider<SceneInteractor>,
 ) {
     // TODO(b/296118689): move to a repository
-    private val _sharedNotificationContainerPosition =
-        MutableStateFlow(SharedNotificationContainerPosition())
+    private val _sharedNotificationContainerBounds = MutableStateFlow(NotificationContainerBounds())
 
-    /** Position information for the shared notification container. */
-    val sharedNotificationContainerPosition: StateFlow<SharedNotificationContainerPosition> =
-        _sharedNotificationContainerPosition.asStateFlow()
+    /** Bounds of the notification container. */
+    val notificationContainerBounds: StateFlow<NotificationContainerBounds> =
+        _sharedNotificationContainerBounds.asStateFlow()
 
-    fun setSharedNotificationContainerPosition(position: SharedNotificationContainerPosition) {
-        _sharedNotificationContainerPosition.value = position
+    fun setNotificationContainerBounds(position: NotificationContainerBounds) {
+        _sharedNotificationContainerBounds.value = position
     }
 
     /**
