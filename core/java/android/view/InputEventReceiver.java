@@ -54,6 +54,7 @@ public abstract class InputEventReceiver {
             InputChannel inputChannel, MessageQueue messageQueue);
     private static native void nativeDispose(long receiverPtr);
     private static native void nativeFinishInputEvent(long receiverPtr, int seq, boolean handled);
+    private static native boolean nativeProbablyHasInput(long receiverPtr);
     private static native void nativeReportTimeline(long receiverPtr, int inputEventId,
             long gpuCompletedTime, long presentTime);
     private static native boolean nativeConsumeBatchedInputEvents(long receiverPtr,
@@ -89,6 +90,17 @@ public abstract class InputEventReceiver {
         } finally {
             super.finalize();
         }
+    }
+
+    /**
+     * Checks the receiver for input availability.
+     * May return false negatives.
+     */
+    public boolean probablyHasInput() {
+        if (mReceiverPtr == 0) {
+            return false;
+        }
+        return nativeProbablyHasInput(mReceiverPtr);
     }
 
     /**

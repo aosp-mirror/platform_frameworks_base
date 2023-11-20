@@ -82,6 +82,7 @@ public:
     status_t initialize();
     void dispose();
     status_t finishInputEvent(uint32_t seq, bool handled);
+    bool probablyHasInput();
     status_t reportTimeline(int32_t inputEventId, nsecs_t gpuCompletedTime, nsecs_t presentTime);
     status_t consumeEvents(JNIEnv* env, bool consumeBatches, nsecs_t frameTime,
             bool* outConsumedBatch);
@@ -163,6 +164,10 @@ status_t NativeInputEventReceiver::finishInputEvent(uint32_t seq, bool handled) 
     };
     mOutboundQueue.push_back(finish);
     return processOutboundEvents();
+}
+
+bool NativeInputEventReceiver::probablyHasInput() {
+    return mInputConsumer.probablyHasInput();
 }
 
 status_t NativeInputEventReceiver::reportTimeline(int32_t inputEventId, nsecs_t gpuCompletedTime,
@@ -547,6 +552,12 @@ static void nativeFinishInputEvent(JNIEnv* env, jclass clazz, jlong receiverPtr,
     }
 }
 
+static bool nativeProbablyHasInput(JNIEnv* env, jclass clazz, jlong receiverPtr) {
+    sp<NativeInputEventReceiver> receiver =
+            reinterpret_cast<NativeInputEventReceiver*>(receiverPtr);
+    return receiver->probablyHasInput();
+}
+
 static void nativeReportTimeline(JNIEnv* env, jclass clazz, jlong receiverPtr, jint inputEventId,
                                  jlong gpuCompletedTime, jlong presentTime) {
     if (IdGenerator::getSource(inputEventId) != IdGenerator::Source::INPUT_READER) {
@@ -597,6 +608,7 @@ static const JNINativeMethod gMethods[] = {
          (void*)nativeInit},
         {"nativeDispose", "(J)V", (void*)nativeDispose},
         {"nativeFinishInputEvent", "(JIZ)V", (void*)nativeFinishInputEvent},
+        {"nativeProbablyHasInput", "(J)Z", (void*)nativeProbablyHasInput},
         {"nativeReportTimeline", "(JIJJ)V", (void*)nativeReportTimeline},
         {"nativeConsumeBatchedInputEvents", "(JJ)Z", (void*)nativeConsumeBatchedInputEvents},
         {"nativeDump", "(JLjava/lang/String;)Ljava/lang/String;", (void*)nativeDump},
