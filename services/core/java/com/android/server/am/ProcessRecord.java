@@ -69,8 +69,10 @@ import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Full information about a particular process that
@@ -1612,5 +1614,51 @@ class ProcessRecord implements WindowProcessListener {
 
     public boolean wasForceStopped() {
         return mWasForceStopped;
+    }
+
+    /**
+     * Traverses all client processes and feed them to consumer.
+     */
+    @GuardedBy("mProcLock")
+    void forEachClient(@NonNull Consumer<ProcessRecord> consumer) {
+        for (int i = mServices.numberOfRunningServices() - 1; i >= 0; i--) {
+            final ServiceRecord s = mServices.getRunningServiceAt(i);
+            final ArrayMap<IBinder, ArrayList<ConnectionRecord>> serviceConnections =
+                    s.getConnections();
+            for (int j = serviceConnections.size() - 1; j >= 0; j--) {
+                final ArrayList<ConnectionRecord> clist = serviceConnections.valueAt(j);
+                for (int k = clist.size() - 1; k >= 0; k--) {
+                    final ConnectionRecord cr = clist.get(k);
+                    consumer.accept(cr.binding.client);
+                }
+            }
+        }
+        for (int i = mProviders.numberOfProviders() - 1; i >= 0; i--) {
+            final ContentProviderRecord cpr = mProviders.getProviderAt(i);
+            for (int j = cpr.connections.size() - 1; j >= 0; j--) {
+                final ContentProviderConnection conn = cpr.connections.get(j);
+                consumer.accept(conn.client);
+            }
+        }
+        // If this process is a sandbox itself, also add the app on whose behalf
+        // its running
+        if (isSdkSandbox) {
+            for (int is = mServices.numberOfRunningServices() - 1; is >= 0; is--) {
+                ServiceRecord s = mServices.getRunningServiceAt(is);
+                ArrayMap<IBinder, ArrayList<ConnectionRecord>> serviceConnections =
+                        s.getConnections();
+                for (int conni = serviceConnections.size() - 1; conni >= 0; conni--) {
+                    ArrayList<ConnectionRecord> clist = serviceConnections.valueAt(conni);
+                    for (int i = clist.size() - 1; i >= 0; i--) {
+                        ConnectionRecord cr = clist.get(i);
+                        ProcessRecord attributedApp = cr.binding.attributedClient;
+                        if (attributedApp == null || attributedApp == this) {
+                            continue;
+                        }
+                        consumer.accept(attributedApp);
+                    }
+                }
+            }
+        }
     }
 }
