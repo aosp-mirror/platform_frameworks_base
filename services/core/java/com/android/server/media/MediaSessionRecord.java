@@ -527,12 +527,27 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     @Override
     public boolean canHandleVolumeKey() {
         if (isPlaybackTypeLocal()) {
+            if (DEBUG) {
+                Log.d(TAG, "Local MediaSessionRecord can handle volume key");
+            }
             return true;
         }
         if (mVolumeControlType == VOLUME_CONTROL_FIXED) {
+            if (DEBUG) {
+                Log.d(
+                        TAG,
+                        "Local MediaSessionRecord with FIXED volume control can't handle volume"
+                            + " key");
+            }
             return false;
         }
         if (mVolumeAdjustmentForRemoteGroupSessions) {
+            if (DEBUG) {
+                Log.d(
+                        TAG,
+                        "Volume adjustment for remote group sessions allowed so MediaSessionRecord"
+                            + " can handle volume key");
+            }
             return true;
         }
         // See b/228021646 for details.
@@ -540,7 +555,18 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         List<RoutingSessionInfo> sessions = mRouter2Manager.getRoutingSessions(mPackageName);
         boolean foundNonSystemSession = false;
         boolean remoteSessionAllowVolumeAdjustment = true;
+        if (DEBUG) {
+            Log.d(
+                    TAG,
+                    "Found "
+                            + sessions.size()
+                            + " routing sessions for package name "
+                            + mPackageName);
+        }
         for (RoutingSessionInfo session : sessions) {
+            if (DEBUG) {
+                Log.d(TAG, "Found routingSessionInfo: " + session);
+            }
             if (!session.isSystemSession()) {
                 foundNonSystemSession = true;
                 if (session.getVolumeHandling() == PLAYBACK_VOLUME_FIXED) {
@@ -549,9 +575,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             }
         }
         if (!foundNonSystemSession) {
-            Log.d(TAG, "Package " + mPackageName
-                    + " has a remote media session but no associated routing session");
+            if (DEBUG) {
+                Log.d(
+                        TAG,
+                        "Package "
+                                + mPackageName
+                                + " has a remote media session but no associated routing session");
+            }
         }
+
         return foundNonSystemSession && remoteSessionAllowVolumeAdjustment;
     }
 
