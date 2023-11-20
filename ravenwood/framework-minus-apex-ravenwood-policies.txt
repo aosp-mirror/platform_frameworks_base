@@ -78,6 +78,7 @@ class android.util.Patterns stubclass
 class android.util.UtilConfig stubclass
 
 # Internals
+class com.android.internal.util.FastMath stubclass
 class com.android.internal.util.FastPrintWriter stubclass
 class com.android.internal.util.GrowingArrayUtils stubclass
 class com.android.internal.util.LineBreakBufferedWriter stubclass

@@ -46,3 +46,9 @@ android.text.TextUtils
 android.text.TextUtils$SimpleStringSplitter
 
 android.accounts.Account
+
+android.graphics.Insets
+android.graphics.Point
+android.graphics.PointF
+android.graphics.Rect
+android.graphics.RectF

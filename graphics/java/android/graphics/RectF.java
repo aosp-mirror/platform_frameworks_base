@@ -32,6 +32,7 @@ import java.io.PrintWriter;
  * the rectangle's width and height. Note: most methods do not check to see that
  * the coordinates are sorted correctly (i.e. left <= right and top <= bottom).
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class RectF implements Parcelable {
     public float left;
     public float top;
