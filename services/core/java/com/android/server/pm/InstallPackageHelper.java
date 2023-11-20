@@ -3349,9 +3349,7 @@ final class InstallPackageHelper {
             if (disabledPs == null) {
                 logCriticalInfo(Log.WARN, "System package " + packageName
                         + " no longer exists; its data will be wiped");
-                mInjector.getHandler().post(
-                        () -> mRemovePackageHelper.removePackageData(ps, userIds));
-                expectingBetter.put(ps.getPackageName(), ps.getPath());
+                mRemovePackageHelper.removePackageData(ps, userIds);
             } else {
                 // we still have a disabled system package, but, it still might have
                 // been removed. check the code path still exists and check there's
