@@ -52,6 +52,7 @@ import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
@@ -78,9 +79,9 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -150,7 +151,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     @NonNull private final Provider<UdfpsKeyguardViewModels> mUdfpsKeyguardViewModels;
     @NonNull private final VibratorHelper mVibrator;
-    @NonNull private final FeatureFlags mFeatureFlags;
     @NonNull private final FalsingManager mFalsingManager;
     @NonNull private final PowerManager mPowerManager;
     @NonNull private final AccessibilityManager mAccessibilityManager;
@@ -281,7 +281,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                             fromUdfpsView
                         ),
                         mActivityLaunchAnimator,
-                        mFeatureFlags,
                         mPrimaryBouncerInteractor,
                         mAlternateBouncerInteractor,
                         mUdfpsKeyguardAccessibilityDelegate,
@@ -318,10 +317,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         return;
                     }
                     mAcquiredReceived = true;
-                    final UdfpsView view = mOverlay.getOverlayView();
-                    if (view != null && isOptical()) {
-                        unconfigureDisplay(view);
-                    }
+                    final View view = mOverlay.getTouchOverlay();
+                    unconfigureDisplay(view);
                     tryAodSendFingerUp();
                 });
             }
@@ -339,7 +336,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 if (mOverlay == null || mOverlay.isHiding()) {
                     return;
                 }
-                mOverlay.getOverlayView().setDebugMessage(message);
+                if (!DeviceEntryUdfpsRefactor.isEnabled()) {
+                    ((UdfpsView) mOverlay.getTouchOverlay()).setDebugMessage(message);
+                }
             });
         }
 
@@ -506,6 +505,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if ((mLockscreenShadeTransitionController.getQSDragProgress() != 0f
                 && !mAlternateBouncerInteractor.isVisibleState())
                 || mPrimaryBouncerInteractor.isInTransit()) {
+            Log.w(TAG, "ignoring touch due to qsDragProcess or primaryBouncerInteractor");
             return false;
         }
         if (event.getAction() == MotionEvent.ACTION_DOWN
@@ -563,7 +563,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                 }
                 mAttemptedToDismissKeyguard = false;
                 onFingerUp(requestId,
-                        mOverlay.getOverlayView(),
+                        mOverlay.getTouchOverlay(),
                         data.getPointerId(),
                         data.getX(),
                         data.getY(),
@@ -597,7 +597,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (shouldPilfer && !mPointerPilfered
                 && getBiometricSessionType() != SESSION_BIOMETRIC_PROMPT) {
             mInputManager.pilferPointers(
-                    mOverlay.getOverlayView().getViewRootImpl().getInputToken());
+                    mOverlay.getTouchOverlay().getViewRootImpl().getInputToken());
             mPointerPilfered = true;
         }
 
@@ -605,9 +605,15 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     }
 
     private boolean shouldTryToDismissKeyguard() {
-        return mOverlay != null
-                && mOverlay.getAnimationViewController()
-                instanceof UdfpsKeyguardViewControllerAdapter
+        boolean onKeyguard = false;
+        if (DeviceEntryUdfpsRefactor.isEnabled()) {
+            onKeyguard = mKeyguardStateController.isShowing();
+        } else {
+            onKeyguard = mOverlay != null
+                    && mOverlay.getAnimationViewController()
+                        instanceof UdfpsKeyguardViewControllerAdapter;
+        }
+        return onKeyguard
                 && mKeyguardStateController.canDismissLockScreen()
                 && !mAttemptedToDismissKeyguard;
     }
@@ -623,7 +629,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             @NonNull DumpManager dumpManager,
             @NonNull KeyguardUpdateMonitor keyguardUpdateMonitor,
-            @NonNull FeatureFlags featureFlags,
             @NonNull FalsingManager falsingManager,
             @NonNull PowerManager powerManager,
             @NonNull AccessibilityManager accessibilityManager,
@@ -670,7 +675,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mDumpManager = dumpManager;
         mDialogManager = dialogManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
-        mFeatureFlags = featureFlags;
         mFalsingManager = falsingManager;
         mPowerManager = powerManager;
         mAccessibilityManager = accessibilityManager;
@@ -737,9 +741,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @VisibleForTesting
     public void playStartHaptic() {
         if (mAccessibilityManager.isTouchExplorationEnabled()) {
-            if (mOverlay != null && mOverlay.getOverlayView() != null) {
+            if (mOverlay != null && mOverlay.getTouchOverlay() != null) {
                 mVibrator.performHapticFeedback(
-                        mOverlay.getOverlayView(),
+                        mOverlay.getTouchOverlay(),
                         HapticFeedbackConstants.CONTEXT_CLICK
                 );
             } else {
@@ -751,10 +755,11 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
     @Override
     public void dozeTimeTick() {
-        if (mOverlay != null) {
-            final UdfpsView view = mOverlay.getOverlayView();
+        if (mOverlay != null && mOverlay.getTouchOverlay() instanceof UdfpsView) {
+            DeviceEntryUdfpsRefactor.assertInLegacyMode();
+            final View view = mOverlay.getTouchOverlay();
             if (view != null) {
-                view.dozeTimeTick();
+                ((UdfpsView) view).dozeTimeTick();
             }
         }
     }
@@ -797,7 +802,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
         if (mOverlay != null) {
             // Reset the controller back to its starting state.
-            final UdfpsView oldView = mOverlay.getOverlayView();
+            final View oldView = mOverlay.getTouchOverlay();
             if (oldView != null) {
                 onFingerUp(mOverlay.getRequestId(), oldView);
             }
@@ -813,9 +818,21 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
     }
 
-    private void unconfigureDisplay(@NonNull UdfpsView view) {
-        if (view.isDisplayConfigured()) {
-            view.unconfigureDisplay();
+    private void unconfigureDisplay(View view) {
+        if (!isOptical()) {
+            return;
+        }
+        if (DeviceEntryUdfpsRefactor.isEnabled()) {
+            if (mUdfpsDisplayMode != null) {
+                mUdfpsDisplayMode.disable(null); // beverlt
+            }
+        } else {
+            if (view != null) {
+                UdfpsView udfpsView = (UdfpsView) view;
+                if (udfpsView.isDisplayConfigured()) {
+                    udfpsView.unconfigureDisplay();
+                }
+            }
         }
     }
 
@@ -837,10 +854,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             }
             mKeyguardViewManager.showPrimaryBouncer(true);
 
-            // play the same haptic as the LockIconViewController longpress
-            if (mOverlay != null && mOverlay.getOverlayView() != null) {
+            // play the same haptic as the DeviceEntryIcon longpress
+            if (mOverlay != null && mOverlay.getTouchOverlay() != null) {
                 mVibrator.performHapticFeedback(
-                        mOverlay.getOverlayView(),
+                        mOverlay.getTouchOverlay(),
                         UdfpsController.LONG_PRESS
                 );
             } else {
@@ -909,8 +926,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             return;
         }
         cancelAodSendFingerUpAction();
-        if (mOverlay != null && mOverlay.getOverlayView() != null) {
-            onFingerUp(mOverlay.getRequestId(), mOverlay.getOverlayView());
+        if (mOverlay != null && mOverlay.getTouchOverlay() != null) {
+            onFingerUp(mOverlay.getRequestId(), mOverlay.getTouchOverlay());
         }
     }
 
@@ -1004,12 +1021,17 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         mFingerprintManager.onPointerDown(requestId, mSensorProps.sensorId, pointerId, x, y,
                 minor, major, orientation, time, gestureStart, isAod);
         Trace.endAsyncSection("UdfpsController.e2e.onPointerDown", 0);
-        final UdfpsView view = mOverlay.getOverlayView();
+
+        final View view = mOverlay.getTouchOverlay();
         if (view != null && isOptical()) {
             if (mIgnoreRefreshRate) {
                 dispatchOnUiReady(requestId);
             } else {
-                view.configureDisplay(() -> dispatchOnUiReady(requestId));
+                if (DeviceEntryUdfpsRefactor.isEnabled()) {
+                    mUdfpsDisplayMode.enable(() -> dispatchOnUiReady(requestId));
+                } else {
+                    ((UdfpsView) view).configureDisplay(() -> dispatchOnUiReady(requestId));
+                }
             }
         }
 
@@ -1018,7 +1040,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         }
     }
 
-    private void onFingerUp(long requestId, @NonNull UdfpsView view) {
+    private void onFingerUp(long requestId, @NonNull View view) {
         onFingerUp(
                 requestId,
                 view,
@@ -1035,7 +1057,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
     private void onFingerUp(
             long requestId,
-            @NonNull UdfpsView view,
+            View view,
             int pointerId,
             float x,
             float y,
@@ -1056,9 +1078,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             }
         }
         mOnFingerDown = false;
-        if (isOptical()) {
-            unconfigureDisplay(view);
-        }
+        unconfigureDisplay(view);
         cancelAodSendFingerUpAction();
     }
 
