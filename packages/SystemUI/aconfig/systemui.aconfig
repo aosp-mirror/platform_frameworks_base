@@ -114,6 +114,13 @@ flag {
 }
 
 flag {
+    name: "unfold_animation_background_progress"
+    namespace: "systemui"
+    description: "Moves unfold animation progress calculation to a background thread"
+    bug: "277879146"
+}
+
+flag {
     name: "qs_new_pipeline"
     namespace: "systemui"
     description: "Use the new pipeline for Quick Settings. Should have no behavior changes."
