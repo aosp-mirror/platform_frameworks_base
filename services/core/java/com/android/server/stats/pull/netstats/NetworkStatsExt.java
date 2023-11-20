@@ -42,15 +42,17 @@ public class NetworkStatsExt {
     public final int oemManaged;
     @Nullable
     public final SubInfo subInfo;
+    public final boolean isTypeProxy; // True if matching ConnectivityManager#TYPE_PROXY
 
     public NetworkStatsExt(@NonNull NetworkStats stats, int[] transports, boolean slicedByFgbg) {
         this(stats, transports, slicedByFgbg, /*slicedByTag=*/false, /*slicedByMetered=*/false,
-                TelephonyManager.NETWORK_TYPE_UNKNOWN, /*subInfo=*/null, OEM_MANAGED_ALL);
+                TelephonyManager.NETWORK_TYPE_UNKNOWN, /*subInfo=*/null,
+                OEM_MANAGED_ALL, /*isTypeProxy=*/false);
     }
 
     public NetworkStatsExt(@NonNull NetworkStats stats, int[] transports, boolean slicedByFgbg,
             boolean slicedByTag, boolean slicedByMetered, int ratType,
-            @Nullable SubInfo subInfo, int oemManaged) {
+            @Nullable SubInfo subInfo, int oemManaged, boolean isTypeProxy) {
         this.stats = stats;
 
         // Sort transports array so that we can test for equality without considering order.
@@ -63,6 +65,7 @@ public class NetworkStatsExt {
         this.ratType = ratType;
         this.subInfo = subInfo;
         this.oemManaged = oemManaged;
+        this.isTypeProxy = isTypeProxy;
     }
 
     /**
@@ -72,6 +75,6 @@ public class NetworkStatsExt {
         return Arrays.equals(transports, other.transports) && slicedByFgbg == other.slicedByFgbg
                 && slicedByTag == other.slicedByTag && slicedByMetered == other.slicedByMetered
                 && ratType == other.ratType && Objects.equals(subInfo, other.subInfo)
-                && oemManaged == other.oemManaged;
+                && oemManaged == other.oemManaged && isTypeProxy == other.isTypeProxy;
     }
 }
