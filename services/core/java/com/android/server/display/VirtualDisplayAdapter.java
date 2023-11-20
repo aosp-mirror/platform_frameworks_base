@@ -43,7 +43,6 @@ import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Point;
-import android.hardware.display.DisplayManagerInternal.DisplayOffloadSession;
 import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.display.VirtualDisplayConfig;
 import android.media.projection.IMediaProjection;
@@ -380,7 +379,7 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
 
         @Override
         public Runnable requestDisplayStateLocked(int state, float brightnessState,
-                float sdrBrightnessState, DisplayOffloadSession displayOffloadSession) {
+                float sdrBrightnessState, DisplayOffloadSessionImpl displayOffloadSession) {
             if (state != mDisplayState) {
                 mDisplayState = state;
                 if (state == Display.STATE_OFF) {

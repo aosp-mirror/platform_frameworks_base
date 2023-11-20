@@ -2224,6 +2224,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     @Override
+    public void setBrightnessFromOffload(float brightness) {
+        // The old DPC is no longer supported
+    }
+
+    @Override
     public BrightnessInfo getBrightnessInfo() {
         synchronized (mCachedBrightnessInfo) {
             return new BrightnessInfo(

@@ -17,6 +17,7 @@
 package com.android.server.display.brightness;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
 import android.util.IndentingPrintWriter;
@@ -31,9 +32,11 @@ import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DozeBrightnessStrategy;
 import com.android.server.display.brightness.strategy.FollowerBrightnessStrategy;
 import com.android.server.display.brightness.strategy.InvalidBrightnessStrategy;
+import com.android.server.display.brightness.strategy.OffloadBrightnessStrategy;
 import com.android.server.display.brightness.strategy.OverrideBrightnessStrategy;
 import com.android.server.display.brightness.strategy.ScreenOffBrightnessStrategy;
 import com.android.server.display.brightness.strategy.TemporaryBrightnessStrategy;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
 
@@ -63,6 +66,10 @@ public class DisplayBrightnessStrategySelector {
     private final InvalidBrightnessStrategy mInvalidBrightnessStrategy;
     // Controls brightness when automatic (adaptive) brightness is running.
     private final AutomaticBrightnessStrategy mAutomaticBrightnessStrategy;
+    // Controls the brightness if adaptive brightness is on and there exists an active offload
+    // session. Brightness value is provided by the offload session.
+    @Nullable
+    private final OffloadBrightnessStrategy mOffloadBrightnessStrategy;
 
     // We take note of the old brightness strategy so that we can know when the strategy changes.
     private String mOldBrightnessStrategyName;
@@ -72,7 +79,8 @@ public class DisplayBrightnessStrategySelector {
     /**
      * The constructor of DozeBrightnessStrategy.
      */
-    public DisplayBrightnessStrategySelector(Context context, Injector injector, int displayId) {
+    public DisplayBrightnessStrategySelector(Context context, Injector injector, int displayId,
+            DisplayManagerFlags flags) {
         if (injector == null) {
             injector = new Injector();
         }
@@ -85,6 +93,11 @@ public class DisplayBrightnessStrategySelector {
         mFollowerBrightnessStrategy = injector.getFollowerBrightnessStrategy(displayId);
         mInvalidBrightnessStrategy = injector.getInvalidBrightnessStrategy();
         mAutomaticBrightnessStrategy = injector.getAutomaticBrightnessStrategy(context, displayId);
+        if (flags.isDisplayOffloadEnabled()) {
+            mOffloadBrightnessStrategy = injector.getOffloadBrightnessStrategy();
+        } else {
+            mOffloadBrightnessStrategy = null;
+        }
         mAllowAutoBrightnessWhileDozingConfig = context.getResources().getBoolean(
                 R.bool.config_allowAutoBrightnessWhileDozing);
         mOldBrightnessStrategyName = mInvalidBrightnessStrategy.getName();
@@ -114,6 +127,9 @@ public class DisplayBrightnessStrategySelector {
         } else if (BrightnessUtils.isValidBrightnessValue(
                 mTemporaryBrightnessStrategy.getTemporaryScreenBrightness())) {
             displayBrightnessStrategy = mTemporaryBrightnessStrategy;
+        } else if (mOffloadBrightnessStrategy != null && BrightnessUtils.isValidBrightnessValue(
+                mOffloadBrightnessStrategy.getOffloadScreenBrightness())) {
+            displayBrightnessStrategy = mOffloadBrightnessStrategy;
         }
 
         if (!mOldBrightnessStrategyName.equals(displayBrightnessStrategy.getName())) {
@@ -138,6 +154,11 @@ public class DisplayBrightnessStrategySelector {
         return mAutomaticBrightnessStrategy;
     }
 
+    @Nullable
+    public OffloadBrightnessStrategy getOffloadBrightnessStrategy() {
+        return mOffloadBrightnessStrategy;
+    }
+
     /**
      * Returns a boolean flag indicating if the light sensor is to be used to decide the screen
      * brightness when dozing
@@ -159,6 +180,9 @@ public class DisplayBrightnessStrategySelector {
                         + mAllowAutoBrightnessWhileDozingConfig);
         IndentingPrintWriter ipw = new IndentingPrintWriter(writer, " ");
         mTemporaryBrightnessStrategy.dump(ipw);
+        if (mOffloadBrightnessStrategy != null) {
+            mOffloadBrightnessStrategy.dump(ipw);
+        }
     }
 
     /**
@@ -209,6 +233,10 @@ public class DisplayBrightnessStrategySelector {
 
         AutomaticBrightnessStrategy getAutomaticBrightnessStrategy(Context context, int displayId) {
             return new AutomaticBrightnessStrategy(context, displayId);
+        }
+
+        OffloadBrightnessStrategy getOffloadBrightnessStrategy() {
+            return new OffloadBrightnessStrategy();
         }
     }
 }

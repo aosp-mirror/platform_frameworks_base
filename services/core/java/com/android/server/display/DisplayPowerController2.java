@@ -151,6 +151,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     private static final int MSG_SET_DWBC_STRONG_MODE = 14;
     private static final int MSG_SET_DWBC_COLOR_OVERRIDE = 15;
     private static final int MSG_SET_DWBC_LOGGING_ENABLED = 16;
+    private static final int MSG_SET_BRIGHTNESS_FROM_OFFLOAD = 17;
 
 
 
@@ -562,7 +563,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 new DisplayBrightnessController(context, null,
                         mDisplayId, mLogicalDisplay.getDisplayInfoLocked().brightnessDefault,
                         brightnessSetting, () -> postBrightnessChangeRunnable(),
-                        new HandlerExecutor(mHandler));
+                        new HandlerExecutor(mHandler), flags);
 
         mBrightnessClamperController = mInjector.getBrightnessClamperController(
                 mHandler, modeChangeCallback::run,
@@ -1394,7 +1395,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                         ? AutomaticBrightnessController.AUTO_BRIGHTNESS_OFF_DUE_TO_DISPLAY_STATE
                         : AutomaticBrightnessController.AUTO_BRIGHTNESS_DISABLED);
 
-        boolean updateScreenBrightnessSetting = false;
+        boolean updateScreenBrightnessSetting =
+                displayBrightnessState.shouldUpdateScreenBrightnessSetting();
         float currentBrightnessSetting = mDisplayBrightnessController.getCurrentBrightness();
         // Apply auto-brightness.
         int brightnessAdjustmentFlags = 0;
@@ -1851,6 +1853,13 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         Message msg = mHandler.obtainMessage(MSG_SET_TEMPORARY_AUTO_BRIGHTNESS_ADJUSTMENT,
                 Float.floatToIntBits(adjustment), 0 /*unused*/);
         msg.sendToTarget();
+    }
+
+    @Override
+    public void setBrightnessFromOffload(float brightness) {
+        Message msg = mHandler.obtainMessage(MSG_SET_BRIGHTNESS_FROM_OFFLOAD,
+                Float.floatToIntBits(brightness), 0 /*unused*/);
+        mHandler.sendMessageAtTime(msg, mClock.uptimeMillis());
     }
 
     @Override
@@ -2885,6 +2894,11 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
 
                 case MSG_SET_DWBC_LOGGING_ENABLED:
                     setDwbcLoggingEnabled(msg.arg1);
+                    break;
+                case MSG_SET_BRIGHTNESS_FROM_OFFLOAD:
+                    mDisplayBrightnessController.setBrightnessFromOffload(
+                            Float.intBitsToFloat(msg.arg1));
+                    updatePowerState();
                     break;
             }
         }

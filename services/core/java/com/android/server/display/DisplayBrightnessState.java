@@ -38,6 +38,7 @@ public final class DisplayBrightnessState {
     private final boolean mShouldUseAutoBrightness;
 
     private final boolean mIsSlowChange;
+    private final boolean mShouldUpdateScreenBrightnessSetting;
 
     private final float mCustomAnimationRate;
 
@@ -50,6 +51,7 @@ public final class DisplayBrightnessState {
         mIsSlowChange = builder.isSlowChange();
         mMaxBrightness = builder.getMaxBrightness();
         mCustomAnimationRate = builder.getCustomAnimationRate();
+        mShouldUpdateScreenBrightnessSetting = builder.shouldUpdateScreenBrightnessSetting();
     }
 
     /**
@@ -109,6 +111,13 @@ public final class DisplayBrightnessState {
         return mCustomAnimationRate;
     }
 
+    /**
+     * @return {@code true} if the screen brightness setting should be updated
+     */
+    public boolean shouldUpdateScreenBrightnessSetting() {
+        return mShouldUpdateScreenBrightnessSetting;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder("DisplayBrightnessState:");
@@ -123,6 +132,8 @@ public final class DisplayBrightnessState {
         stringBuilder.append("\n    isSlowChange:").append(mIsSlowChange);
         stringBuilder.append("\n    maxBrightness:").append(mMaxBrightness);
         stringBuilder.append("\n    customAnimationRate:").append(mCustomAnimationRate);
+        stringBuilder.append("\n    shouldUpdateScreenBrightnessSetting:")
+                .append(mShouldUpdateScreenBrightnessSetting);
         return stringBuilder.toString();
     }
 
@@ -149,13 +160,16 @@ public final class DisplayBrightnessState {
                 && mShouldUseAutoBrightness == otherState.getShouldUseAutoBrightness()
                 && mIsSlowChange == otherState.isSlowChange()
                 && mMaxBrightness == otherState.getMaxBrightness()
-                && mCustomAnimationRate == otherState.getCustomAnimationRate();
+                && mCustomAnimationRate == otherState.getCustomAnimationRate()
+                && mShouldUpdateScreenBrightnessSetting
+                    == otherState.shouldUpdateScreenBrightnessSetting();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mBrightness, mSdrBrightness, mBrightnessReason,
-                mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness, mCustomAnimationRate);
+                mShouldUseAutoBrightness, mIsSlowChange, mMaxBrightness, mCustomAnimationRate,
+                mShouldUpdateScreenBrightnessSetting);
     }
 
     /**
@@ -177,6 +191,7 @@ public final class DisplayBrightnessState {
         private boolean mIsSlowChange;
         private float mMaxBrightness;
         private float mCustomAnimationRate = CUSTOM_ANIMATION_RATE_NOT_SET;
+        private boolean mShouldUpdateScreenBrightnessSetting;
 
         /**
          * Create a builder starting with the values from the specified {@link
@@ -194,6 +209,8 @@ public final class DisplayBrightnessState {
             builder.setIsSlowChange(state.isSlowChange());
             builder.setMaxBrightness(state.getMaxBrightness());
             builder.setCustomAnimationRate(state.getCustomAnimationRate());
+            builder.setShouldUpdateScreenBrightnessSetting(
+                    state.shouldUpdateScreenBrightnessSetting());
             return builder;
         }
 
@@ -290,8 +307,8 @@ public final class DisplayBrightnessState {
         /**
          * See {@link DisplayBrightnessState#isSlowChange()}.
          */
-        public Builder setIsSlowChange(boolean shouldUseAutoBrightness) {
-            this.mIsSlowChange = shouldUseAutoBrightness;
+        public Builder setIsSlowChange(boolean isSlowChange) {
+            this.mIsSlowChange = isSlowChange;
             return this;
         }
 
@@ -331,6 +348,22 @@ public final class DisplayBrightnessState {
          */
         public float getCustomAnimationRate() {
             return mCustomAnimationRate;
+        }
+
+        /**
+         * See {@link DisplayBrightnessState#shouldUpdateScreenBrightnessSetting()}.
+         */
+        public boolean shouldUpdateScreenBrightnessSetting() {
+            return mShouldUpdateScreenBrightnessSetting;
+        }
+
+        /**
+         * See {@link DisplayBrightnessState#shouldUpdateScreenBrightnessSetting()}.
+         */
+        public Builder setShouldUpdateScreenBrightnessSetting(
+                boolean shouldUpdateScreenBrightnessSetting) {
+            mShouldUpdateScreenBrightnessSetting = shouldUpdateScreenBrightnessSetting;
+            return this;
         }
 
         /**
