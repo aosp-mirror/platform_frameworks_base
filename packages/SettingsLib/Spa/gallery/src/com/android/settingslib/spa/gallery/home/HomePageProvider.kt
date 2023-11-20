@@ -44,6 +44,7 @@ import com.android.settingslib.spa.gallery.page.SliderPageProvider
 import com.android.settingslib.spa.gallery.preference.PreferenceMainPageProvider
 import com.android.settingslib.spa.gallery.scaffold.SearchScaffoldPageProvider
 import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
+import com.android.settingslib.spa.gallery.ui.CopyablePageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 import com.android.settingslib.spa.widget.scaffold.HomeScaffold
 
@@ -71,6 +72,7 @@ object HomePageProvider : SettingsPageProvider {
             AlertDialogPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             EditorMainPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
             CardPageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
+            CopyablePageProvider.buildInjectEntry().setLink(fromPage = owner).build(),
         )
     }
 

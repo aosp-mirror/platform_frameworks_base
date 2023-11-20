@@ -36,10 +36,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.android.settingslib.development.DevelopmentSettingsEnabler
 import com.android.settingslib.spa.framework.compose.rememberDrawablePainter
 import com.android.settingslib.spa.framework.theme.SettingsDimension
+import com.android.settingslib.spa.widget.ui.CopyableBody
 import com.android.settingslib.spa.widget.ui.SettingsBody
 import com.android.settingslib.spa.widget.ui.SettingsTitle
 import com.android.settingslib.spaprivileged.R
@@ -71,26 +71,38 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
     @Composable
     private fun InstallType(app: ApplicationInfo) {
         if (!app.isInstantApp) return
-        Spacer(modifier = Modifier.height(4.dp))
-        SettingsBody(stringResource(com.android.settingslib.widget.preference.app.R.string.install_type_instant))
+        Spacer(modifier = Modifier.height(SettingsDimension.paddingSmall))
+        SettingsBody(
+            stringResource(
+                com.android.settingslib.widget.preference.app.R.string.install_type_instant
+            )
+        )
     }
 
     @Composable
     private fun AppVersion() {
-        if (packageInfo.versionName == null) return
-        Spacer(modifier = Modifier.height(4.dp))
-        SettingsBody(packageInfo.versionNameBidiWrapped)
+        val versionName = packageInfo.versionNameBidiWrapped ?: return
+        Spacer(modifier = Modifier.height(SettingsDimension.paddingSmall))
+        SettingsBody(versionName)
     }
 
     @Composable
     fun FooterAppVersion(showPackageName: Boolean = rememberIsDevelopmentSettingsEnabled()) {
-        if (packageInfo.versionName == null) return
+        val context = LocalContext.current
+        val footer = remember(showPackageName) {
+            val list = mutableListOf<String>()
+            packageInfo.versionNameBidiWrapped?.let {
+                list += context.getString(R.string.version_text, it)
+            }
+            if (showPackageName) {
+                list += packageInfo.packageName
+            }
+            list.joinToString(separator = System.lineSeparator())
+        }
+        if (footer.isBlank()) return
         HorizontalDivider()
         Column(modifier = Modifier.padding(SettingsDimension.itemPadding)) {
-            SettingsBody(stringResource(R.string.version_text, packageInfo.versionNameBidiWrapped))
-            if (showPackageName) {
-                SettingsBody(packageInfo.packageName)
-            }
+            CopyableBody(footer)
         }
     }
 
@@ -104,7 +116,7 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
 
     private companion object {
         /** Wrapped the version name, so its directionality still keep same when RTL. */
-        val PackageInfo.versionNameBidiWrapped: String
+        val PackageInfo.versionNameBidiWrapped: String?
             get() = BidiFormatter.getInstance().unicodeWrap(versionName)
     }
 }
