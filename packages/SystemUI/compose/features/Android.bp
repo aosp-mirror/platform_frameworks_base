@@ -31,7 +31,6 @@ android_library {
     ],
 
     static_libs: [
-        "CommunalLayoutLib",
         "SystemUI-core",
         "PlatformComposeCore",
         "PlatformComposeSceneTransitionLayout",
