@@ -114,9 +114,46 @@ public class FooterViewTest extends SysuiTestCase {
     }
 
     @Test
+    public void testSetClearAllButtonText_resourceOnlyFetchedOnce() {
+        int resId = R.string.clear_all_notifications_text;
+        mView.setClearAllButtonText(resId);
+        verify(mSpyContext).getString(eq(resId));
+
+        clearInvocations(mSpyContext);
+
+        assertThat(((TextView) mView.findViewById(R.id.dismiss_text))
+                .getText().toString()).contains("Clear all");
+
+        // Set it a few more times, it shouldn't lead to the resource being fetched again
+        mView.setClearAllButtonText(resId);
+        mView.setClearAllButtonText(resId);
+
+        verify(mSpyContext, never()).getString(anyInt());
+    }
+
+    @Test
+    public void testSetClearAllButtonDescription_resourceOnlyFetchedOnce() {
+        int resId = R.string.accessibility_clear_all;
+        mView.setClearAllButtonDescription(resId);
+        verify(mSpyContext).getString(eq(resId));
+
+        clearInvocations(mSpyContext);
+
+        assertThat(((TextView) mView.findViewById(R.id.dismiss_text))
+                .getContentDescription().toString()).contains("Clear all notifications");
+
+        // Set it a few more times, it shouldn't lead to the resource being fetched again
+        mView.setClearAllButtonDescription(resId);
+        mView.setClearAllButtonDescription(resId);
+
+        verify(mSpyContext, never()).getString(anyInt());
+    }
+
+    @Test
     public void testSetMessageString_resourceOnlyFetchedOnce() {
-        mView.setMessageString(R.string.unlock_to_see_notif_text);
-        verify(mSpyContext).getString(eq(R.string.unlock_to_see_notif_text));
+        int resId = R.string.unlock_to_see_notif_text;
+        mView.setMessageString(resId);
+        verify(mSpyContext).getString(eq(resId));
 
         clearInvocations(mSpyContext);
 
@@ -124,22 +161,23 @@ public class FooterViewTest extends SysuiTestCase {
                 .getText().toString()).contains("Unlock");
 
         // Set it a few more times, it shouldn't lead to the resource being fetched again
-        mView.setMessageString(R.string.unlock_to_see_notif_text);
-        mView.setMessageString(R.string.unlock_to_see_notif_text);
+        mView.setMessageString(resId);
+        mView.setMessageString(resId);
 
         verify(mSpyContext, never()).getString(anyInt());
     }
 
     @Test
     public void testSetMessageIcon_resourceOnlyFetchedOnce() {
-        mView.setMessageIcon(R.drawable.ic_friction_lock_closed);
-        verify(mSpyContext).getDrawable(eq(R.drawable.ic_friction_lock_closed));
+        int resId = R.drawable.ic_friction_lock_closed;
+        mView.setMessageIcon(resId);
+        verify(mSpyContext).getDrawable(eq(resId));
 
         clearInvocations(mSpyContext);
 
         // Set it a few more times, it shouldn't lead to the resource being fetched again
-        mView.setMessageIcon(R.drawable.ic_friction_lock_closed);
-        mView.setMessageIcon(R.drawable.ic_friction_lock_closed);
+        mView.setMessageIcon(resId);
+        mView.setMessageIcon(resId);
 
         verify(mSpyContext, never()).getDrawable(anyInt());
     }

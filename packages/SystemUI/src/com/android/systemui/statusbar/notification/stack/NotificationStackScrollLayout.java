@@ -4608,13 +4608,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         if (mManageButtonClickListener != null) {
             mFooterView.setManageButtonClickListener(mManageButtonClickListener);
         }
-        mFooterView.setClearAllButtonClickListener(v -> {
-            if (mFooterClearAllListener != null) {
-                mFooterClearAllListener.onClearAll();
-            }
-            clearNotifications(ROWS_ALL, true /* closeShade */);
-            footerView.setClearAllButtonVisible(false /* visible */, true /* animate */);
-        });
+        if (!FooterViewRefactor.isEnabled()) {
+            mFooterView.setClearAllButtonClickListener(v -> {
+                if (mFooterClearAllListener != null) {
+                    mFooterClearAllListener.onClearAll();
+                }
+                clearNotifications(ROWS_ALL, true /* closeShade */);
+                footerView.setClearAllButtonVisible(false /* visible */, true /* animate */);
+            });
+        }
         if (FooterViewRefactor.isEnabled()) {
             updateFooter();
         }
@@ -4687,9 +4689,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         }
         boolean animate = mIsExpanded && mAnimationsEnabled;
         mFooterView.setVisible(visible, animate);
-        mFooterView.setClearAllButtonVisible(showDismissView, animate);
         mFooterView.showHistory(showHistory);
         if (!FooterViewRefactor.isEnabled()) {
+            mFooterView.setClearAllButtonVisible(showDismissView, animate);
             mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
         }
     }
@@ -5355,11 +5357,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return viewsToRemove;
     }
 
+    /** Clear all clearable notifications when the user requests it. */
+    public void clearAllNotifications() {
+        clearNotifications(ROWS_ALL, /* closeShade = */ true);
+    }
+
     /**
      * Collects a list of visible rows, and animates them away in a staggered fashion as if they
      * were dismissed. Notifications are dismissed in the backend via onClearAllAnimationsEnd.
      */
-    @VisibleForTesting
     void clearNotifications(@SelectedRows int selection, boolean closeShade) {
         // Animate-swipe all dismissable notifications, then animate the shade closed
         final ArrayList<View> viewsToAnimateAway = getVisibleViewsToAnimateAway(selection);
@@ -5659,6 +5665,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     }
 
     void setFooterClearAllListener(FooterClearAllListener listener) {
+        FooterViewRefactor.assertInLegacyMode();
         mFooterClearAllListener = listener;
     }
 

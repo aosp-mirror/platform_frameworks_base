@@ -85,7 +85,9 @@ public class EmptyShadeView extends StackScrollerDecorView {
 
     public void setFooterVisibility(@Visibility int visibility) {
         mFooterVisibility = visibility;
-        setSecondaryVisible(visibility == View.VISIBLE, false);
+        setSecondaryVisible(/* visible = */ visibility == View.VISIBLE,
+                /* animate = */false,
+                /* onAnimationEnded = */ null);
     }
 
     public void setFooterText(@StringRes int text) {

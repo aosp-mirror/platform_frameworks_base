@@ -72,4 +72,58 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
             assertThat(areAnyNotificationsPresent).isFalse()
             assertThat(underTest.areAnyNotificationsPresentValue).isFalse()
         }
+
+    @Test
+    fun testHasClearableNotifications_whenHasClearableAlertingNotifs() =
+        testComponent.runTest {
+            val hasClearable by collectLastValue(underTest.hasClearableNotifications)
+
+            activeNotificationListRepository.notifStats.value =
+                NotifStats(
+                    numActiveNotifs = 2,
+                    hasNonClearableAlertingNotifs = false,
+                    hasClearableAlertingNotifs = true,
+                    hasNonClearableSilentNotifs = false,
+                    hasClearableSilentNotifs = false,
+                )
+            runCurrent()
+
+            assertThat(hasClearable).isTrue()
+        }
+
+    @Test
+    fun testHasClearableNotifications_whenHasClearableSilentNotifs() =
+        testComponent.runTest {
+            val hasClearable by collectLastValue(underTest.hasClearableNotifications)
+
+            activeNotificationListRepository.notifStats.value =
+                NotifStats(
+                    numActiveNotifs = 2,
+                    hasNonClearableAlertingNotifs = false,
+                    hasClearableAlertingNotifs = false,
+                    hasNonClearableSilentNotifs = false,
+                    hasClearableSilentNotifs = true,
+                )
+            runCurrent()
+
+            assertThat(hasClearable).isTrue()
+        }
+
+    @Test
+    fun testHasClearableNotifications_whenHasNoClearableNotifs() =
+        testComponent.runTest {
+            val hasClearable by collectLastValue(underTest.hasClearableNotifications)
+
+            activeNotificationListRepository.notifStats.value =
+                NotifStats(
+                    numActiveNotifs = 2,
+                    hasNonClearableAlertingNotifs = false,
+                    hasClearableAlertingNotifs = false,
+                    hasNonClearableSilentNotifs = false,
+                    hasClearableSilentNotifs = false,
+                )
+            runCurrent()
+
+            assertThat(hasClearable).isFalse()
+        }
 }

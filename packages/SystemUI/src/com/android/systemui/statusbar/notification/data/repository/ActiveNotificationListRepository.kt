@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore.Key
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationEntryModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
@@ -37,6 +38,9 @@ class ActiveNotificationListRepository @Inject constructor() {
 
     /** Are any already-seen notifications currently filtered out of the active list? */
     val hasFilteredOutSeenNotifications = MutableStateFlow(false)
+
+    /** Stats about the list of notifications attached to the shade */
+    val notifStats = MutableStateFlow(NotifStats.empty)
 }
 
 /** Represents the notification list, comprised of groups and individual notifications. */
