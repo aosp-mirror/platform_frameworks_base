@@ -258,7 +258,7 @@ public class PipBoundsState {
             ActivityTaskManager.getService().onPictureInPictureStateChanged(
                     new PictureInPictureUiState(stashedState != STASH_TYPE_NONE /* isStashed */)
             );
-        } catch (RemoteException e) {
+        } catch (RemoteException | IllegalStateException e) {
             ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: Unable to set alert PiP state change.", TAG);
         }
