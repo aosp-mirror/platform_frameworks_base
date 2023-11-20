@@ -20,12 +20,13 @@ import com.android.systemui.statusbar.notification.shared.ActiveNotificationGrou
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 class ActiveNotificationsInteractor
 @Inject
 constructor(
-    repository: ActiveNotificationListRepository,
+    private val repository: ActiveNotificationListRepository,
 ) {
     /** Notifications actively presented to the user in the notification stack, in order. */
     val topLevelRepresentativeNotifications: Flow<List<ActiveNotificationModel>> =
@@ -40,4 +41,15 @@ constructor(
                 }
             }
         }
+
+    /** Are any notifications being actively presented in the notification stack? */
+    val areAnyNotificationsPresent: Flow<Boolean> =
+        repository.activeNotifications.map { it.renderList.isNotEmpty() }.distinctUntilChanged()
+
+    /**
+     * The same as [areAnyNotificationsPresent], but without flows, for easy access in synchronous
+     * code.
+     */
+    val areAnyNotificationsPresentValue: Boolean
+        get() = repository.activeNotifications.value.renderList.isNotEmpty()
 }
