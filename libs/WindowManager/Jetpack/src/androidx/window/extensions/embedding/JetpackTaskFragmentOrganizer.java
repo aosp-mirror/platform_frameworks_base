@@ -375,7 +375,8 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
             return TaskFragmentAnimationParams.DEFAULT;
         }
         return new TaskFragmentAnimationParams.Builder()
-                .setAnimationBackgroundColor(splitAttributes.getAnimationBackgroundColor())
+                // TODO(b/263047900): Update extensions API.
+                // .setAnimationBackgroundColor(splitAttributes.getAnimationBackgroundColor())
                 .build();
     }
 }
