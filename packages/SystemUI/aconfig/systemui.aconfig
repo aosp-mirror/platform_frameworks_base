@@ -377,6 +377,13 @@ flag {
 }
 
 flag {
+    name: "screenshot_action_dismiss_system_windows"
+    namespace: "systemui"
+    description: "Dismiss existing system windows when starting action from screenshot UI"
+    bug: "309933761"
+}
+
+flag {
    name: "run_fingerprint_detect_on_dismissible_keyguard"
    namespace: "systemui"
    description: "Run fingerprint detect instead of authenticate if the keyguard is dismissible."
