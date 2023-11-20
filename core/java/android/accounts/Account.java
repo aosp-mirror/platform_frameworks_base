@@ -38,6 +38,7 @@ import java.util.Set;
  * {@link Parcelable} and also overrides {@link #equals} and {@link #hashCode}, making it
  * suitable for use as the key of a {@link java.util.Map}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Account implements Parcelable {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final String TAG = "Account";
@@ -104,16 +105,25 @@ public class Account implements Parcelable {
         if (accessId != null) {
             synchronized (sAccessedAccounts) {
                 if (sAccessedAccounts.add(this)) {
-                    try {
-                        IAccountManager accountManager = IAccountManager.Stub.asInterface(
-                                ServiceManager.getService(Context.ACCOUNT_SERVICE));
-                        accountManager.onAccountAccessed(accessId);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Error noting account access", e);
-                    }
+                    onAccountAccessed(accessId);
                 }
             }
         }
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static void onAccountAccessed(String accessId) {
+        try {
+            IAccountManager accountManager = IAccountManager.Stub.asInterface(
+                    ServiceManager.getService(Context.ACCOUNT_SERVICE));
+            accountManager.onAccountAccessed(accessId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error noting account access", e);
+        }
+    }
+
+    private static void onAccountAccessed$ravenwood(String accessId) {
+        // No AccountManager to communicate with; ignored
     }
 
     /** @hide */

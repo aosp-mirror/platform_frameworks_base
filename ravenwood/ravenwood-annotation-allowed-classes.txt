@@ -44,3 +44,5 @@ android.database.Observable
 
 android.text.TextUtils
 android.text.TextUtils$SimpleStringSplitter
+
+android.accounts.Account
