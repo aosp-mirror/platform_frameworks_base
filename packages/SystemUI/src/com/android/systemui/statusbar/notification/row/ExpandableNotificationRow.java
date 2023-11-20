@@ -2221,8 +2221,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                     if (mMenuRow != null) {
                         mMenuRow.resetMenu();
                     }
-                    mTranslateAnim = null;
                 }
+                mTranslateAnim = null;
             }
         });
         mTranslateAnim = translateAnim;
