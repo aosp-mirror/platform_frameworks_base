@@ -23,6 +23,7 @@ import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.assertTrue;
 
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -31,6 +32,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.pm.UserProperties;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -219,6 +221,8 @@ public final class UserManagerTest {
                 .isEqualTo(cloneUserProperties.isCredentialShareableWithParent());
         assertThrows(SecurityException.class, cloneUserProperties::getDeleteAppWithParent);
         assertThrows(SecurityException.class, cloneUserProperties::getAlwaysVisible);
+        compareDrawables(mUserManager.getUserBadge(),
+                Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
         // Verify clone user parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
@@ -335,7 +339,8 @@ public final class UserManagerTest {
                 .isEqualTo(privateProfileUserProperties
                         .isAuthAlwaysRequiredToDisableQuietMode());
         assertThrows(SecurityException.class, privateProfileUserProperties::getDeleteAppWithParent);
-
+        compareDrawables(mUserManager.getUserBadge(),
+                Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
         // Verify private profile parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
         UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
@@ -953,6 +958,8 @@ public final class UserManagerTest {
                 .isEqualTo(userTypeDetails.getBadgeNoBackground());
         assertThat(mUserManager.getUserStatusBarIconResId(userId))
                 .isEqualTo(userTypeDetails.getStatusBarIcon());
+        compareDrawables(mUserManager.getUserBadge(),
+                Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
         final int badgeIndex = userInfo.profileBadge;
         assertThat(mUserManager.getUserBadgeColor(userId)).isEqualTo(
@@ -1758,6 +1765,12 @@ public final class UserManagerTest {
     private boolean isMainUserPermanentAdmin() {
         return Resources.getSystem()
                 .getBoolean(com.android.internal.R.bool.config_isMainUserPermanentAdmin);
+    }
+
+    private void compareDrawables(Drawable actual, Drawable expected){
+        assertEquals(actual.getIntrinsicWidth(), expected.getIntrinsicWidth());
+        assertEquals(actual.getIntrinsicHeight(), expected.getIntrinsicHeight());
+        assertEquals(actual.getLevel(), expected.getLevel());
     }
 
 }
