@@ -444,6 +444,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
         verify(mClipboardOverlayView, never()).setMinimized(true);
         verify(mClipboardOverlayView).setMinimized(false);
+        verify(mClipboardOverlayView).getEnterAnimation();
         verify(mClipboardOverlayView).showTextPreview("Test Item", false);
     }
 
@@ -458,6 +459,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
 
         verify(mClipboardOverlayView).setMinimized(true);
         verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_SHOWN_MINIMIZED, 0, "abc");
+        verify(mClipboardOverlayView).getEnterAnimation();
         verify(mClipboardOverlayView, never()).setMinimized(false);
         verify(mClipboardOverlayView, never()).showTextPreview(any(), anyBoolean());
 
