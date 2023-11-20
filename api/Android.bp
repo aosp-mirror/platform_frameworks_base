@@ -413,3 +413,49 @@ build = [
     "ApiDocs.bp",
     "StubLibraries.bp",
 ]
+
+genrule_defaults {
+    name: "flag-api-mapping-generation-defaults",
+    cmd: "$(location extract-flagged-apis) $(in) $(out)",
+    tools: ["extract-flagged-apis"],
+}
+
+genrule {
+    name: "flag-api-mapping-PublicApi",
+    defaults: ["flag-api-mapping-generation-defaults"],
+    srcs: [":frameworks-base-api-current.txt"],
+    out: ["flag_api_map.textproto"],
+    dist: {
+        targets: ["droid"],
+    },
+}
+
+genrule {
+    name: "flag-api-mapping-SystemApi",
+    defaults: ["flag-api-mapping-generation-defaults"],
+    srcs: [":frameworks-base-api-system-current.txt"],
+    out: ["system_flag_api_map.textproto"],
+    dist: {
+        targets: ["droid"],
+    },
+}
+
+genrule {
+    name: "flag-api-mapping-ModuleLibApi",
+    defaults: ["flag-api-mapping-generation-defaults"],
+    srcs: [":frameworks-base-api-module-lib-current.txt"],
+    out: ["module_lib_flag_api_map.textproto"],
+    dist: {
+        targets: ["droid"],
+    },
+}
+
+genrule {
+    name: "flag-api-mapping-SystemServerApi",
+    defaults: ["flag-api-mapping-generation-defaults"],
+    srcs: [":frameworks-base-api-system-server-current.txt"],
+    out: ["system_server_flag_api_map.textproto"],
+    dist: {
+        targets: ["droid"],
+    },
+}
