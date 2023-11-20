@@ -17,8 +17,6 @@
 
 package android.os;
 
-import android.os.WorkDuration;
-
 /** {@hide} */
 oneway interface IHintSession {
     void updateTargetWorkDuration(long targetDurationNanos);
@@ -26,5 +24,4 @@ oneway interface IHintSession {
     void close();
     void sendHint(int hint);
     void setMode(int mode, boolean enabled);
-    void reportActualWorkDuration2(in WorkDuration[] workDurations);
 }

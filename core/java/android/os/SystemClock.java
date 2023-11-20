@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.app.IAlarmManager;
 import android.app.time.UnixEpochTime;
@@ -203,8 +202,8 @@ public final class SystemClock {
      * Returns nanoseconds since boot, not counting time spent in deep sleep.
      *
      * @return nanoseconds of non-sleep uptime since boot.
+     * @hide
      */
-    @FlaggedApi(Flags.FLAG_ADPF_GPU_REPORT_ACTUAL_WORK_DURATION)
     @CriticalNative
     @android.ravenwood.annotation.RavenwoodReplace
     public static native long uptimeNanos();
