@@ -228,8 +228,8 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             return;
         }
 
-        MediaRoute2Info deviceRoute = mDeviceRouteController.getDeviceRoute();
-        if (TextUtils.equals(routeId, deviceRoute.getId())) {
+        MediaRoute2Info selectedDeviceRoute = mDeviceRouteController.getSelectedRoute();
+        if (TextUtils.equals(routeId, selectedDeviceRoute.getId())) {
             mBluetoothRouteController.transferTo(null);
         } else {
             mBluetoothRouteController.transferTo(routeId);
@@ -278,11 +278,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 return null;
             }
 
-            MediaRoute2Info deviceRoute = mDeviceRouteController.getDeviceRoute();
+            MediaRoute2Info selectedDeviceRoute = mDeviceRouteController.getSelectedRoute();
 
             RoutingSessionInfo.Builder builder = new RoutingSessionInfo.Builder(
                     SYSTEM_SESSION_ID, packageName).setSystemSession(true);
-            builder.addSelectedRoute(deviceRoute.getId());
+            builder.addSelectedRoute(selectedDeviceRoute.getId());
             for (MediaRoute2Info route : mBluetoothRouteController.getAllBluetoothRoutes()) {
                 builder.addTransferableRoute(route.getId());
             }
@@ -314,7 +314,7 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         MediaRoute2ProviderInfo.Builder builder = new MediaRoute2ProviderInfo.Builder();
 
         // We must have a device route in the provider info.
-        builder.addRoute(mDeviceRouteController.getDeviceRoute());
+        builder.addRoute(mDeviceRouteController.getSelectedRoute());
 
         for (MediaRoute2Info route : mBluetoothRouteController.getAllBluetoothRoutes()) {
             builder.addRoute(route);
@@ -338,12 +338,12 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                     SYSTEM_SESSION_ID, "" /* clientPackageName */)
                     .setSystemSession(true);
 
-            MediaRoute2Info deviceRoute = mDeviceRouteController.getDeviceRoute();
-            MediaRoute2Info selectedRoute = deviceRoute;
+            MediaRoute2Info selectedDeviceRoute = mDeviceRouteController.getSelectedRoute();
+            MediaRoute2Info selectedRoute = selectedDeviceRoute;
             MediaRoute2Info selectedBtRoute = mBluetoothRouteController.getSelectedRoute();
             if (selectedBtRoute != null) {
                 selectedRoute = selectedBtRoute;
-                builder.addTransferableRoute(deviceRoute.getId());
+                builder.addTransferableRoute(selectedDeviceRoute.getId());
             }
             mSelectedRouteId = selectedRoute.getId();
             mDefaultRoute =

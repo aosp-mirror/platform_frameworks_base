@@ -72,13 +72,9 @@ import com.android.media.flags.Flags;
      */
     boolean selectRoute(@Nullable @MediaRoute2Info.Type Integer type);
 
-    /**
-     * Returns currently selected device (built-in or wired) route.
-     *
-     * @return non-null device route.
-     */
+    /** Returns the currently selected device (built-in or wired) route. */
     @NonNull
-    MediaRoute2Info getDeviceRoute();
+    MediaRoute2Info getSelectedRoute();
 
     /**
      * Updates device route volume.
