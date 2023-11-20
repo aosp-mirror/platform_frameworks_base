@@ -86,14 +86,14 @@ public class WindowMagnificationGestureHandlerTest {
     public static final float DEFAULT_TAP_X = 301;
     public static final float DEFAULT_TAP_Y = 299;
     public static final PointF DEFAULT_POINT = new PointF(DEFAULT_TAP_X, DEFAULT_TAP_Y);
-    private static final int DISPLAY_0 = MockWindowMagnificationConnection.TEST_DISPLAY;
+    private static final int DISPLAY_0 = MockMagnificationConnection.TEST_DISPLAY;
 
     @Rule
     public final TestableContext mContext = new TestableContext(
             InstrumentationRegistry.getInstrumentation().getContext());
 
     private MagnificationConnectionManager mMagnificationConnectionManager;
-    private MockWindowMagnificationConnection mMockConnection;
+    private MockMagnificationConnection mMockConnection;
     private SpyWindowMagnificationGestureHandler mWindowMagnificationGestureHandler;
     private WindowMagnificationGestureHandler mMockWindowMagnificationGestureHandler;
     @Mock
@@ -107,7 +107,7 @@ public class WindowMagnificationGestureHandlerTest {
         mMagnificationConnectionManager = new MagnificationConnectionManager(mContext, new Object(),
                 mock(MagnificationConnectionManager.Callback.class), mMockTrace,
                 new MagnificationScaleProvider(mContext));
-        mMockConnection = new MockWindowMagnificationConnection();
+        mMockConnection = new MockMagnificationConnection();
         mWindowMagnificationGestureHandler = new SpyWindowMagnificationGestureHandler(
                 mContext, mMagnificationConnectionManager, mMockTrace, mMockCallback,
                 /** detectSingleFingerTripleTap= */ true, /** detectTwoFingerTripleTap= */ true,

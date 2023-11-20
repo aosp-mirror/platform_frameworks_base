@@ -24,7 +24,7 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_FINGERPRINT;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_INPUT_FILTER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_PACKAGE_BROADCAST_RECEIVER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_USER_BROADCAST_RECEIVER;
-import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
 import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
 import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
@@ -135,7 +135,7 @@ import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
 import android.view.accessibility.IAccessibilityManager;
 import android.view.accessibility.IAccessibilityManagerClient;
-import android.view.accessibility.IWindowMagnificationConnection;
+import android.view.accessibility.IMagnificationConnection;
 import android.view.inputmethod.EditorInfo;
 
 import com.android.internal.R;
@@ -3431,7 +3431,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
-    private void updateWindowMagnificationConnectionIfNeeded(AccessibilityUserState userState) {
+    private void updateMagnificationConnectionIfNeeded(AccessibilityUserState userState) {
         if (!mMagnificationController.supportWindowMagnification()) {
             return;
         }
@@ -4110,12 +4110,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public void setWindowMagnificationConnection(
-            IWindowMagnificationConnection connection) throws RemoteException {
+    public void setMagnificationConnection(
+            IMagnificationConnection connection) throws RemoteException {
         if (mTraceManager.isA11yTracingEnabledForTypes(
-                FLAGS_ACCESSIBILITY_MANAGER | FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
-            mTraceManager.logTrace(LOG_TAG + ".setWindowMagnificationConnection",
-                    FLAGS_ACCESSIBILITY_MANAGER | FLAGS_WINDOW_MAGNIFICATION_CONNECTION,
+                FLAGS_ACCESSIBILITY_MANAGER | FLAGS_MAGNIFICATION_CONNECTION)) {
+            mTraceManager.logTrace(LOG_TAG + ".setMagnificationConnection",
+                    FLAGS_ACCESSIBILITY_MANAGER | FLAGS_MAGNIFICATION_CONNECTION,
                     "connection=" + connection);
         }
 
@@ -4422,7 +4422,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 pw.append("visibleBgUserIds=").append(mVisibleBgUserIds.toString());
                 pw.println();
             }
-            pw.append("hasWindowMagnificationConnection=").append(
+            pw.append("hasMagnificationConnection=").append(
                     String.valueOf(getMagnificationConnectionManager().isConnected()));
             pw.println();
             mMagnificationProcessor.dump(pw, getValidDisplayList());
@@ -5132,7 +5132,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 updateMagnificationModeChangeSettingsLocked(userState, displayId);
             }
         }
-        updateWindowMagnificationConnectionIfNeeded(userState);
+        updateMagnificationConnectionIfNeeded(userState);
         // Remove magnification button UI when the magnification capability is not all mode or
         // magnification is disabled.
         if (!(userState.isMagnificationSingleFingerTripleTapEnabledLocked()

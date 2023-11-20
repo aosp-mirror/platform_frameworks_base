@@ -503,10 +503,10 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRequestWindowMagnificationConnection() {
-        mCommandQueue.requestWindowMagnificationConnection(true);
+    public void testRequestMagnificationConnection() {
+        mCommandQueue.requestMagnificationConnection(true);
         waitForIdleSync();
-        verify(mCallbacks).requestWindowMagnificationConnection(true);
+        verify(mCallbacks).requestMagnificationConnection(true);
     }
 
     @Test

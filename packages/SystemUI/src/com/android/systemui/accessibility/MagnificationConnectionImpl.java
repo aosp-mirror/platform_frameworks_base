@@ -21,8 +21,8 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
 import com.android.systemui.dagger.qualifiers.Main;
@@ -30,9 +30,9 @@ import com.android.systemui.dagger.qualifiers.Main;
 /**
  * Implementation of window magnification connection.
  *
- * @see IWindowMagnificationConnection
+ * @see IMagnificationConnection
  */
-class MagnificationConnectionImpl extends IWindowMagnificationConnection.Stub {
+class MagnificationConnectionImpl extends IMagnificationConnection.Stub {
 
     private static final String TAG = "WindowMagnificationConnectionImpl";
 

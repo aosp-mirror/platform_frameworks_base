@@ -130,7 +130,7 @@ public class MagnificationControllerTest {
     @Captor
     private ArgumentCaptor<MagnificationAnimationCallback> mCallbackArgumentCaptor;
 
-    private MockWindowMagnificationConnection mMockConnection;
+    private MockMagnificationConnection mMockConnection;
     private MagnificationConnectionManager mMagnificationConnectionManager;
     private MockContentResolver mMockResolver;
     private MagnificationController mMagnificationController;
@@ -208,7 +208,7 @@ public class MagnificationControllerTest {
         mMagnificationConnectionManager = spy(
                 new MagnificationConnectionManager(mContext, globalLock,
                         mWindowMagnificationCallbackDelegate, mTraceManager, mScaleProvider));
-        mMockConnection = new MockWindowMagnificationConnection(true);
+        mMockConnection = new MockMagnificationConnection(true);
         mMagnificationConnectionManager.setConnection(mMockConnection.getConnection());
 
         mMagnificationController = spy(new MagnificationController(mService, globalLock, mContext,

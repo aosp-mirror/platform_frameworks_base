@@ -31,8 +31,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.Display;
+import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
 import java.util.ArrayList;
@@ -42,12 +42,12 @@ import java.util.List;
  * Mocks the basic logic of window magnification in System UI. We assume the screen size is
  * unlimited, so source bounds is always on the center of the mirror window bounds.
  */
-class MockWindowMagnificationConnection {
+class MockMagnificationConnection {
 
     public static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
     public static final int TEST_DISPLAY_2 = Display.DEFAULT_DISPLAY + 1;
     private final List mValidDisplayIds;
-    private final IWindowMagnificationConnection mConnection;
+    private final IMagnificationConnection mConnection;
     private final Binder mBinder;
     private final boolean mSuspendCallback;
     private boolean mHasPendingCallback = false;
@@ -60,17 +60,17 @@ class MockWindowMagnificationConnection {
     private Rect mSourceBounds = new Rect();
     private IRemoteMagnificationAnimationCallback mAnimationCallback;
 
-    MockWindowMagnificationConnection() throws RemoteException {
+    MockMagnificationConnection() throws RemoteException {
         this(false);
     }
 
-    MockWindowMagnificationConnection(boolean suspendCallback) throws RemoteException {
+    MockMagnificationConnection(boolean suspendCallback) throws RemoteException {
         mValidDisplayIds = new ArrayList();
         mValidDisplayIds.add(TEST_DISPLAY);
         mValidDisplayIds.add(TEST_DISPLAY_2);
 
         mSuspendCallback = suspendCallback;
-        mConnection = mock(IWindowMagnificationConnection.class);
+        mConnection = mock(IMagnificationConnection.class);
         mBinder = mock(Binder.class);
         when(mConnection.asBinder()).thenReturn(mBinder);
         doAnswer((invocation) -> {
@@ -154,7 +154,7 @@ class MockWindowMagnificationConnection {
         }
     }
 
-    IWindowMagnificationConnection getConnection() {
+    IMagnificationConnection getConnection() {
         return mConnection;
     }
 

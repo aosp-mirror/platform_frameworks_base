@@ -34,8 +34,8 @@ import android.view.Display;
 import android.view.SurfaceControl;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnection;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
@@ -55,7 +55,7 @@ import javax.inject.Inject;
 /**
  * Class to handle the interaction with
  * {@link com.android.server.accessibility.AccessibilityManagerService}. It invokes
- * {@link AccessibilityManager#setWindowMagnificationConnection(IWindowMagnificationConnection)}
+ * {@link AccessibilityManager#setMagnificationConnection(IMagnificationConnection)}
  * when {@code IStatusBar#requestWindowMagnificationConnection(boolean)} is called.
  */
 @SysUISingleton
@@ -484,11 +484,11 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
     }
 
     @Override
-    public void requestWindowMagnificationConnection(boolean connect) {
+    public void requestMagnificationConnection(boolean connect) {
         if (connect) {
-            setWindowMagnificationConnection();
+            setMagnificationConnection();
         } else {
-            clearWindowMagnificationConnection();
+            clearMagnificationConnection();
         }
     }
 
@@ -499,17 +499,17 @@ public class Magnification implements CoreStartable, CommandQueue.Callbacks {
                 magnificationController -> magnificationController.dump(pw));
     }
 
-    private void setWindowMagnificationConnection() {
+    private void setMagnificationConnection() {
         if (mMagnificationConnectionImpl == null) {
             mMagnificationConnectionImpl = new MagnificationConnectionImpl(this,
                     mHandler);
         }
-        mAccessibilityManager.setWindowMagnificationConnection(
+        mAccessibilityManager.setMagnificationConnection(
                 mMagnificationConnectionImpl);
     }
 
-    private void clearWindowMagnificationConnection() {
-        mAccessibilityManager.setWindowMagnificationConnection(null);
+    private void clearMagnificationConnection() {
+        mAccessibilityManager.setMagnificationConnection(null);
         //TODO: destroy controllers.
     }
 }

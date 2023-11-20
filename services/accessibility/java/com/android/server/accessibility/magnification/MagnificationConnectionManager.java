@@ -16,7 +16,7 @@
 
 package com.android.server.accessibility.magnification;
 
-import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK;
 import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
@@ -42,7 +42,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.MotionEvent;
-import android.view.accessibility.IWindowMagnificationConnection;
+import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
@@ -61,8 +61,8 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 /**
  * A class to manipulate magnification through {@link MagnificationConnectionWrapper}
- * create by {@link #setConnection(IWindowMagnificationConnection)}. To set the connection with
- * SysUI, call {@code StatusBarManagerInternal#requestWindowMagnificationConnection(boolean)}.
+ * create by {@link #setConnection(IMagnificationConnection)}. To set the connection with
+ * SysUI, call {@code StatusBarManagerInternal#requestMagnificationConnection(boolean)}.
  * The applied magnification scale is constrained by
  * {@link MagnificationScaleProvider#constrainScale(float)}
  */
@@ -93,13 +93,13 @@ public class MagnificationConnectionManager implements
     })
     public @interface WindowPosition {}
 
-    /** Window magnification connection is connecting. */
+    /** Magnification connection is connecting. */
     private static final int CONNECTING = 0;
-    /** Window magnification connection is connected. */
+    /** Magnification connection is connected. */
     private static final int CONNECTED = 1;
-    /** Window magnification connection is disconnecting. */
+    /** Magnification connection is disconnecting. */
     private static final int DISCONNECTING = 2;
-    /** Window magnification connection is disconnected. */
+    /** Magnification connection is disconnected. */
     private static final int DISCONNECTED = 3;
 
     @Retention(RetentionPolicy.SOURCE)
@@ -195,7 +195,7 @@ public class MagnificationConnectionManager implements
         void onSourceBoundsChanged(int displayId, Rect bounds);
 
         /**
-         * Called from {@link IWindowMagnificationConnection} to request changing the magnification
+         * Called from {@link IMagnificationConnection} to request changing the magnification
          * mode on the given display.
          *
          * @param displayId the logical display id
@@ -218,11 +218,11 @@ public class MagnificationConnectionManager implements
     }
 
     /**
-     * Sets {@link IWindowMagnificationConnection}.
+     * Sets {@link IMagnificationConnection}.
      *
-     * @param connection {@link IWindowMagnificationConnection}
+     * @param connection {@link IMagnificationConnection}
      */
-    public void setConnection(@Nullable IWindowMagnificationConnection connection) {
+    public void setConnection(@Nullable IMagnificationConnection connection) {
         if (DBG) {
             Slog.d(TAG, "setConnection :" + connection + ", mConnectionState="
                     + connectionStateToString(mConnectionState));
@@ -266,7 +266,7 @@ public class MagnificationConnectionManager implements
     }
 
     /**
-     * @return {@code true} if {@link IWindowMagnificationConnection} is available
+     * @return {@code true} if {@link IMagnificationConnection} is available
      */
     public boolean isConnected() {
         synchronized (mLock) {
@@ -275,21 +275,21 @@ public class MagnificationConnectionManager implements
     }
 
     /**
-     * Requests {@link IWindowMagnificationConnection} through
-     * {@link StatusBarManagerInternal#requestWindowMagnificationConnection(boolean)} and
+     * Requests {@link IMagnificationConnection} through
+     * {@link StatusBarManagerInternal#requestMagnificationConnection(boolean)} and
      * destroys all window magnifications if necessary.
      *
      * @param connect {@code true} if needs connection, otherwise set the connection to null and
      *                destroy all window magnifications.
-     * @return {@code true} if {@link IWindowMagnificationConnection} state is going to change.
+     * @return {@code true} if {@link IMagnificationConnection} state is going to change.
      */
     public boolean requestConnection(boolean connect) {
         if (DBG) {
             Slog.d(TAG, "requestConnection :" + connect);
         }
-        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
-            mTrace.logTrace(TAG + ".requestWindowMagnificationConnection",
-                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION, "connect=" + connect);
+        if (mTrace.isA11yTracingEnabledForTypes(FLAGS_MAGNIFICATION_CONNECTION)) {
+            mTrace.logTrace(TAG + ".requestMagnificationConnection",
+                    FLAGS_MAGNIFICATION_CONNECTION, "connect=" + connect);
         }
         synchronized (mLock) {
             if ((connect && (mConnectionState == CONNECTED || mConnectionState == CONNECTING))
@@ -329,7 +329,7 @@ public class MagnificationConnectionManager implements
             final StatusBarManagerInternal service = LocalServices.getService(
                     StatusBarManagerInternal.class);
             if (service != null) {
-                return service.requestWindowMagnificationConnection(connect);
+                return service.requestMagnificationConnection(connect);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);
