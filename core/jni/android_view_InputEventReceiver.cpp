@@ -184,11 +184,11 @@ status_t NativeInputEventReceiver::reportTimeline(int32_t inputEventId, nsecs_t 
 void NativeInputEventReceiver::setFdEvents(int events) {
     if (mFdEvents != events) {
         mFdEvents = events;
-        int fd = mInputConsumer.getChannel()->getFd();
+        auto&& fd = mInputConsumer.getChannel()->getFd();
         if (events) {
-            mMessageQueue->getLooper()->addFd(fd, 0, events, this, nullptr);
+            mMessageQueue->getLooper()->addFd(fd.get(), 0, events, this, nullptr);
         } else {
-            mMessageQueue->getLooper()->removeFd(fd);
+            mMessageQueue->getLooper()->removeFd(fd.get());
         }
     }
 }
