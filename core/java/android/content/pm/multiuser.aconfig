@@ -42,3 +42,10 @@ flag {
     description: "Allow using all cpu cores during a user switch."
     bug: "308105403"
 }
+
+flag {
+    name: "enable_biometrics_to_unlock_private_space"
+    namespace: "profile_experiences"
+    description: "Add support to unlock the private space using biometrics"
+    bug: "312184187"
+}
