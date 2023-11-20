@@ -25,11 +25,11 @@ import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONL
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Slog;
 
@@ -61,9 +61,11 @@ class BackgroundLaunchProcessController {
     @GuardedBy("this")
     private @Nullable ArrayMap<Binder, IBinder> mBackgroundActivityStartTokens;
 
-    /** Set of UIDs of clients currently bound to this process. */
+    /** Set of UIDs of clients currently bound to this process and opt in to allow this process to
+     * launch background activity.
+     */
     @GuardedBy("this")
-    private @Nullable IntArray mBoundClientUids;
+    private @Nullable IntArray mBalOptInBoundClientUids;
 
     BackgroundLaunchProcessController(@NonNull IntPredicate uidHasActiveVisibleWindowPredicate,
             @Nullable BackgroundActivityStartCallback callback) {
@@ -169,9 +171,9 @@ class BackgroundLaunchProcessController {
 
     private boolean isBoundByForegroundUid() {
         synchronized (this) {
-            if (mBoundClientUids != null) {
-                for (int i = mBoundClientUids.size() - 1; i >= 0; i--) {
-                    if (mUidHasActiveVisibleWindowPredicate.test(mBoundClientUids.get(i))) {
+            if (mBalOptInBoundClientUids != null) {
+                for (int i = mBalOptInBoundClientUids.size() - 1; i >= 0; i--) {
+                    if (mUidHasActiveVisibleWindowPredicate.test(mBalOptInBoundClientUids.get(i))) {
                         return true;
                     }
                 }
@@ -180,19 +182,23 @@ class BackgroundLaunchProcessController {
         return false;
     }
 
-    void setBoundClientUids(ArraySet<Integer> boundClientUids) {
+    void clearBalOptInBoundClientUids() {
         synchronized (this) {
-            if (boundClientUids == null || boundClientUids.isEmpty()) {
-                mBoundClientUids = null;
-                return;
-            }
-            if (mBoundClientUids == null) {
-                mBoundClientUids = new IntArray();
+            if (mBalOptInBoundClientUids == null) {
+                mBalOptInBoundClientUids = new IntArray();
             } else {
-                mBoundClientUids.clear();
+                mBalOptInBoundClientUids.clear();
             }
-            for (int i = boundClientUids.size() - 1; i >= 0; i--) {
-                mBoundClientUids.add(boundClientUids.valueAt(i));
+        }
+    }
+
+    void addBoundClientUid(int clientUid, String clientPackageName, int bindFlags) {
+        if ((bindFlags & Context.BIND_DENY_ACTIVITY_STARTS) == 0) {
+            if (mBalOptInBoundClientUids == null) {
+                mBalOptInBoundClientUids = new IntArray();
+            }
+            if (mBalOptInBoundClientUids.indexOf(clientUid) == -1) {
+                mBalOptInBoundClientUids.add(clientUid);
             }
         }
     }
@@ -258,10 +264,10 @@ class BackgroundLaunchProcessController {
                     pw.println(mBackgroundActivityStartTokens.valueAt(i));
                 }
             }
-            if (mBoundClientUids != null && mBoundClientUids.size() > 0) {
+            if (mBalOptInBoundClientUids != null && mBalOptInBoundClientUids.size() > 0) {
                 pw.print(prefix);
                 pw.print("BoundClientUids:");
-                pw.println(Arrays.toString(mBoundClientUids.toArray()));
+                pw.println(Arrays.toString(mBalOptInBoundClientUids.toArray()));
             }
         }
     }
