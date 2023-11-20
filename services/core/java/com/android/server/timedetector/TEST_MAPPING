@@ -7,10 +7,7 @@
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
-    }
-  ],
-  // TODO(b/182461754): Change to "presubmit" when go/test-mapping-slo-guide allows.
-  "postsubmit": [
+    },
     {
       "name": "FrameworksTimeServicesTests"
     }
