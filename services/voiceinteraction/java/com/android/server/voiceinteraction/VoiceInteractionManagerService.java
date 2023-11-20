@@ -2437,8 +2437,6 @@ public class VoiceInteractionManagerService extends SystemService {
                     synchronized (VoiceInteractionManagerServiceStub.this) {
                         Slog.i(TAG, "Force stopping current voice recognizer: "
                                 + getCurRecognizer(userHandle));
-                        // TODO: Figure out why the interactor was being cleared and document it.
-                        setCurInteractor(null, userHandle);
                         initRecognizer(userHandle);
                     }
                 }
