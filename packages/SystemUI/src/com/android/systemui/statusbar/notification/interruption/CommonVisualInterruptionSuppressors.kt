@@ -204,6 +204,11 @@ class BubbleNotAllowedSuppressor() :
     override fun shouldSuppress(entry: NotificationEntry) = !entry.canBubble()
 }
 
+class BubbleAppSuspendedSuppressor :
+    VisualInterruptionFilter(types = setOf(BUBBLE), reason = "app is suspended") {
+    override fun shouldSuppress(entry: NotificationEntry) = entry.ranking.isSuspended
+}
+
 class BubbleNoMetadataSuppressor() :
     VisualInterruptionFilter(types = setOf(BUBBLE), reason = "has no or invalid bubble metadata") {
 

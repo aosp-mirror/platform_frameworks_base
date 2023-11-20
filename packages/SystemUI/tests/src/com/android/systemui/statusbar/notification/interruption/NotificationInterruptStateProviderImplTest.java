@@ -999,11 +999,25 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         assertThat(mNotifInterruptionStateProvider.shouldBubbleUp(createBubble())).isFalse();
     }
 
+    @Test
+    public void shouldNotBubbleUp_suspended() {
+        assertThat(mNotifInterruptionStateProvider.shouldBubbleUp(createSuspendedBubble()))
+                .isFalse();
+    }
+
+    private NotificationEntry createSuspendedBubble() {
+        return createBubble(null, null, true);
+    }
+
     private NotificationEntry createBubble() {
-        return createBubble(null, null);
+        return createBubble(null, null, false);
     }
 
     private NotificationEntry createBubble(String groupKey, Integer groupAlert) {
+        return createBubble(groupKey, groupAlert, false);
+    }
+
+    private NotificationEntry createBubble(String groupKey, Integer groupAlert, Boolean suspended) {
         Notification.BubbleMetadata data = new Notification.BubbleMetadata.Builder(
                 PendingIntent.getActivity(mContext, 0,
                         new Intent().setPackage(mContext.getPackageName()),
@@ -1031,6 +1045,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                 .setNotification(n)
                 .setImportance(IMPORTANCE_HIGH)
                 .setCanBubble(true)
+                .setSuspended(suspended)
                 .build();
     }
 
