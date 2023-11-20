@@ -220,7 +220,7 @@ public class PinnerServiceTest {
 
     private void setDeviceConfigPinnedAnonSize(long size) {
         mFakeDeviceConfigInterface.setProperty(
-                DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                DeviceConfig.NAMESPACE_RUNTIME_NATIVE,
                 "pin_shared_anon_size",
                 String.valueOf(size),
                 /*makeDefault=*/false);
