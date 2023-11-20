@@ -12214,6 +12214,7 @@ package android.service.notification {
     method public boolean hasExpanded();
     method public boolean hasInteracted();
     method public boolean hasSeen();
+    method @FlaggedApi("android.app.lifetime_extension_refactor") public boolean hasSmartReplied();
     method public boolean hasSnoozed();
     method public boolean hasViewedSettings();
     method public void setDirectReplied();
@@ -12221,6 +12222,7 @@ package android.service.notification {
     method public void setDismissalSurface(int);
     method public void setExpanded();
     method public void setSeen();
+    method @FlaggedApi("android.app.lifetime_extension_refactor") public void setSmartReplied();
     method public void setSnoozed();
     method public void setViewedSettings();
     method public void writeToParcel(android.os.Parcel, int);
