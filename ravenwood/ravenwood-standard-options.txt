@@ -18,6 +18,9 @@
 --keep-annotation
     android.ravenwood.annotation.RavenwoodKeep
 
+--keep-annotation
+    android.ravenwood.annotation.RavenwoodKeepPartialClass
+
 --keep-class-annotation
     android.ravenwood.annotation.RavenwoodKeepWholeClass
 
@@ -35,3 +38,6 @@
 
 --class-load-hook-annotation
     android.ravenwood.annotation.RavenwoodClassLoadHook
+
+--keep-static-initializer-annotation
+    android.ravenwood.annotation.RavenwoodKeepStaticInitializer
