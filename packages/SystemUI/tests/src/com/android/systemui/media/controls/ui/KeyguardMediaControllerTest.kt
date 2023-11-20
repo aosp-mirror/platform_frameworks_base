@@ -94,6 +94,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
                 fakeHandler,
                 configurationController,
                 ResourcesSplitShadeStateController(),
+                mock<KeyguardMediaControllerLogger>(),
                 mock<DumpManager>()
             )
         keyguardMediaController.attachSinglePaneContainer(mediaContainerView)
@@ -104,7 +105,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     fun testHiddenWhenHostIsHidden() {
         whenever(mediaHost.visible).thenReturn(false)
 
-        keyguardMediaController.refreshMediaPosition()
+        keyguardMediaController.refreshMediaPosition(TEST_REASON)
 
         assertThat(mediaContainerView.visibility).isEqualTo(GONE)
     }
@@ -118,7 +119,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
 
     private fun testStateVisibility(state: Int, visibility: Int) {
         whenever(statusBarStateController.state).thenReturn(state)
-        keyguardMediaController.refreshMediaPosition()
+        keyguardMediaController.refreshMediaPosition(TEST_REASON)
         assertThat(mediaContainerView.visibility).isEqualTo(visibility)
     }
 
@@ -126,7 +127,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     fun testHiddenOnKeyguard_whenMediaOnLockScreenDisabled() {
         settings.putInt(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, 0)
 
-        keyguardMediaController.refreshMediaPosition()
+        keyguardMediaController.refreshMediaPosition(TEST_REASON)
 
         assertThat(mediaContainerView.visibility).isEqualTo(GONE)
     }
@@ -135,7 +136,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     fun testAvailableOnKeyguard_whenMediaOnLockScreenEnabled() {
         settings.putInt(Settings.Secure.MEDIA_CONTROLS_LOCK_SCREEN, 1)
 
-        keyguardMediaController.refreshMediaPosition()
+        keyguardMediaController.refreshMediaPosition(TEST_REASON)
 
         assertThat(mediaContainerView.visibility).isEqualTo(VISIBLE)
     }
@@ -233,5 +234,9 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     private fun setDozing() {
         whenever(statusBarStateController.isDozing).thenReturn(true)
         statusBarStateListener.onDozingChanged(true)
+    }
+
+    private companion object {
+        private const val TEST_REASON = "test reason"
     }
 }

@@ -1302,7 +1302,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mQsController.updateResources();
         mNotificationsQSContainerController.updateResources();
         updateKeyguardStatusViewAlignment(/* animate= */false);
-        mKeyguardMediaController.refreshMediaPosition();
+        mKeyguardMediaController.refreshMediaPosition(
+                "NotificationPanelViewController.updateResources");
 
         if (splitShadeChanged) {
             onSplitShadeEnabledChanged();
