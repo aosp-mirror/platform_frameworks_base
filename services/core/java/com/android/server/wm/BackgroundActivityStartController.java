@@ -716,17 +716,18 @@ public class BackgroundActivityStartController {
         // is allowed, or apps like live wallpaper with non app visible window will be allowed.
         final boolean appSwitchAllowedOrFg =
                 appSwitchState == APP_SWITCH_ALLOW || appSwitchState == APP_SWITCH_FG_ONLY;
-        final boolean allowCallingUidStartActivity =
-                ((appSwitchAllowedOrFg || mService.mActiveUids.hasNonAppVisibleWindow(callingUid))
-                        && callingUidHasAnyVisibleWindow)
-                        || isCallingUidPersistentSystemProcess;
-        if (allowCallingUidStartActivity) {
+        if (appSwitchAllowedOrFg && callingUidHasAnyVisibleWindow) {
             return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
-                    /*background*/ false,
-                    "callingUidHasAnyVisibleWindow = "
-                            + callingUid
-                            + ", isCallingUidPersistentSystemProcess = "
-                            + isCallingUidPersistentSystemProcess);
+                    /*background*/ false, "callingUid has visible window");
+        }
+        if (mService.mActiveUids.hasNonAppVisibleWindow(callingUid)) {
+            return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
+                    /*background*/ false, "callingUid has non-app visible window");
+        }
+
+        if (isCallingUidPersistentSystemProcess) {
+            return new BalVerdict(BAL_ALLOW_ALLOWLISTED_COMPONENT,
+                    /*background*/ false, "callingUid is persistent system process");
         }
 
         // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
