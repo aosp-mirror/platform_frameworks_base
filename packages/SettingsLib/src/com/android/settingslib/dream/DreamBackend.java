@@ -351,7 +351,17 @@ public class DreamBackend {
         if (cn != null && cn.indexOf('/') < 0) {
             cn = resolveInfo.serviceInfo.packageName + "/" + cn;
         }
-        return cn == null ? null : ComponentName.unflattenFromString(cn);
+        // Ensure that the component is from the same package as the dream service. If not,
+        // treat the component as invalid and return null instead.
+        final ComponentName result = cn != null ? ComponentName.unflattenFromString(cn) : null;
+        if (result != null
+                && !result.getPackageName().equals(resolveInfo.serviceInfo.packageName)) {
+            Log.w(TAG,
+                    "Inconsistent package name in component: " + result.getPackageName()
+                            + ", should be: " + resolveInfo.serviceInfo.packageName);
+            return null;
+        }
+        return result;
     }
 
     private static void logd(String msg, Object... args) {
