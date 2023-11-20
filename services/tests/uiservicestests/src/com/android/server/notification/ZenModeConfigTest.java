@@ -75,7 +75,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
     private final String TRIGGER_DESC = "Every Night, 10pm to 6am";
     private final int TYPE = TYPE_BEDTIME;
     private final boolean ALLOW_MANUAL = true;
-    private final int ICON_RES_ID = 1234;
+    private final String ICON_RES_NAME = "icon_res";
     private final int INTERRUPTION_FILTER = Settings.Global.ZEN_MODE_ALARMS;
     private final boolean ENABLED = true;
     private final int CREATION_TIME = 123;
@@ -347,7 +347,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
         rule.allowManualInvocation = ALLOW_MANUAL;
         rule.type = TYPE;
-        rule.iconResId = ICON_RES_ID;
+        rule.iconResName = ICON_RES_NAME;
         rule.triggerDescription = TRIGGER_DESC;
 
         Parcel parcel = Parcel.obtain();
@@ -369,7 +369,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(rule.zenMode, parceled.zenMode);
 
         assertEquals(rule.allowManualInvocation, parceled.allowManualInvocation);
-        assertEquals(rule.iconResId, parceled.iconResId);
+        assertEquals(rule.iconResName, parceled.iconResName);
         assertEquals(rule.type, parceled.type);
         assertEquals(rule.triggerDescription, parceled.triggerDescription);
         assertEquals(rule.zenPolicy, parceled.zenPolicy);
@@ -448,7 +448,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
 
         rule.allowManualInvocation = ALLOW_MANUAL;
         rule.type = TYPE;
-        rule.iconResId = ICON_RES_ID;
+        rule.iconResName = ICON_RES_NAME;
         rule.triggerDescription = TRIGGER_DESC;
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -477,7 +477,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(rule.allowManualInvocation, fromXml.allowManualInvocation);
         assertEquals(rule.type, fromXml.type);
         assertEquals(rule.triggerDescription, fromXml.triggerDescription);
-        assertEquals(rule.iconResId, fromXml.iconResId);
+        assertEquals(rule.iconResName, fromXml.iconResName);
     }
 
     @Test

@@ -299,7 +299,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         if (android.app.Flags.modesApi()) {
             rule.allowManualInvocation = true;
             rule.type = AutomaticZenRule.TYPE_SCHEDULE_TIME;
-            rule.iconResId = 123;
+            rule.iconResName = "res";
             rule.triggerDescription = "At night";
             rule.zenDeviceEffects = new ZenDeviceEffects.Builder()
                     .setShouldDimWallpaper(true)
