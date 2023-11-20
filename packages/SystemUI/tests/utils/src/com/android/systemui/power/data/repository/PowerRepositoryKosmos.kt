@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.user.domain.interactor
+package com.android.systemui.power.data.repository
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.user.data.repository.userRepository
 
-val Kosmos.refreshUsersScheduler by
-    Kosmos.Fixture {
-        RefreshUsersScheduler(applicationCoroutineScope, testDispatcher, userRepository)
-    }
+var Kosmos.powerRepository: PowerRepository by Kosmos.Fixture { fakePowerRepository }
+val Kosmos.fakePowerRepository by Kosmos.Fixture { FakePowerRepository() }

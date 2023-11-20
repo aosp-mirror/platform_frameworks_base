@@ -14,14 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.user.domain.interactor
+package com.android.systemui.keyguard.domain.interactor
 
+import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.user.data.repository.userRepository
+import dagger.Lazy
 
-val Kosmos.refreshUsersScheduler by
+val Kosmos.keyguardTransitionInteractor: KeyguardTransitionInteractor by
     Kosmos.Fixture {
-        RefreshUsersScheduler(applicationCoroutineScope, testDispatcher, userRepository)
+        KeyguardTransitionInteractor(
+            scope = applicationCoroutineScope,
+            repository = keyguardTransitionRepository,
+            keyguardInteractor = Lazy { keyguardInteractor },
+            fromLockscreenTransitionInteractor = Lazy { fromLockscreenTransitionInteractor },
+            fromPrimaryBouncerTransitionInteractor =
+                Lazy { fromPrimaryBouncerTransitionInteractor },
+        )
     }

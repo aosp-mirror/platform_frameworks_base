@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.user.domain.interactor
+package android.content
 
+import com.android.systemui.SysuiTestableContext
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.user.data.repository.userRepository
+import com.android.systemui.kosmos.testCase
 
-val Kosmos.refreshUsersScheduler by
-    Kosmos.Fixture {
-        RefreshUsersScheduler(applicationCoroutineScope, testDispatcher, userRepository)
-    }
+val Kosmos.testableContext: SysuiTestableContext by Kosmos.Fixture { testCase.context }
+var Kosmos.applicationContext: Context by Kosmos.Fixture { testableContext }

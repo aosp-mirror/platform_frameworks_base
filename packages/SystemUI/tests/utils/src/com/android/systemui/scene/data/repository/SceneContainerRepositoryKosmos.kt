@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.user.domain.interactor
+package com.android.systemui.scene.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.user.data.repository.userRepository
+import com.android.systemui.scene.shared.model.sceneContainerConfig
 
-val Kosmos.refreshUsersScheduler by
-    Kosmos.Fixture {
-        RefreshUsersScheduler(applicationCoroutineScope, testDispatcher, userRepository)
-    }
+val Kosmos.sceneContainerRepository by
+    Kosmos.Fixture { SceneContainerRepository(applicationCoroutineScope, sceneContainerConfig) }

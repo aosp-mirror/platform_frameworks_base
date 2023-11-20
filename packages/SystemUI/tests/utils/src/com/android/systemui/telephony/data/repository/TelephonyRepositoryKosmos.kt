@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.user.domain.interactor
+package com.android.systemui.telephony.data.repository
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.user.data.repository.userRepository
 
-val Kosmos.refreshUsersScheduler by
-    Kosmos.Fixture {
-        RefreshUsersScheduler(applicationCoroutineScope, testDispatcher, userRepository)
-    }
+var Kosmos.telephonyRepository: TelephonyRepository by Kosmos.Fixture { fakeTelephonyRepository }
+val Kosmos.fakeTelephonyRepository by Kosmos.Fixture { FakeTelephonyRepository() }

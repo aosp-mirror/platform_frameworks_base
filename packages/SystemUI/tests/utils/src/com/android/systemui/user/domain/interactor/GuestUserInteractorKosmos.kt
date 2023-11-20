@@ -16,28 +16,32 @@
 
 package com.android.systemui.user.domain.interactor
 
+import android.app.admin.devicePolicyManager
+import android.content.applicationContext
+import android.os.userManager
+import com.android.internal.logging.uiEventLogger
+import com.android.systemui.guestResetOrExitSessionReceiver
+import com.android.systemui.guestResumeSessionReceiver
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.context
-import com.android.systemui.kosmos.lifecycleScope
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.kosmos.userManager
+import com.android.systemui.statusbar.policy.deviceProvisionedController
 import com.android.systemui.user.data.repository.userRepository
-import com.android.systemui.util.mockito.mock
 
 val Kosmos.guestUserInteractor by
     Kosmos.Fixture {
         GuestUserInteractor(
-            applicationContext = context,
-            applicationScope = lifecycleScope,
+            applicationContext = applicationContext,
+            applicationScope = applicationCoroutineScope,
             mainDispatcher = testDispatcher,
             backgroundDispatcher = testDispatcher,
             manager = userManager,
-            deviceProvisionedController = mock(),
             repository = userRepository,
-            devicePolicyManager = mock(),
+            deviceProvisionedController = deviceProvisionedController,
+            devicePolicyManager = devicePolicyManager,
             refreshUsersScheduler = refreshUsersScheduler,
-            uiEventLogger = mock(),
-            resumeSessionReceiver = mock(),
-            resetOrExitSessionReceiver = mock(),
+            uiEventLogger = uiEventLogger,
+            resumeSessionReceiver = guestResumeSessionReceiver,
+            resetOrExitSessionReceiver = guestResetOrExitSessionReceiver,
         )
     }

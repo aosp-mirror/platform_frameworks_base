@@ -14,14 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.systemui.user.domain.interactor
+package com.android.systemui.power.domain.interactor
 
+import com.android.systemui.classifier.falsingCollector
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.kosmos.testDispatcher
-import com.android.systemui.user.data.repository.userRepository
+import com.android.systemui.plugins.statusbar.statusBarStateController
+import com.android.systemui.power.data.repository.powerRepository
+import com.android.systemui.statusbar.phone.screenOffAnimationController
 
-val Kosmos.refreshUsersScheduler by
+val Kosmos.powerInteractor by
     Kosmos.Fixture {
-        RefreshUsersScheduler(applicationCoroutineScope, testDispatcher, userRepository)
+        PowerInteractor(
+            repository = powerRepository,
+            falsingCollector = falsingCollector,
+            screenOffAnimationController = screenOffAnimationController,
+            statusBarStateController = statusBarStateController,
+        )
     }
