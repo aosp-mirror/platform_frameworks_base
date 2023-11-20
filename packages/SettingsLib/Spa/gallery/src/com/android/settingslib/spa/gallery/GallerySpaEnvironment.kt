@@ -49,6 +49,7 @@ import com.android.settingslib.spa.gallery.preference.SwitchPreferencePageProvid
 import com.android.settingslib.spa.gallery.preference.TwoTargetSwitchPreferencePageProvider
 import com.android.settingslib.spa.gallery.scaffold.SearchScaffoldPageProvider
 import com.android.settingslib.spa.gallery.ui.CategoryPageProvider
+import com.android.settingslib.spa.gallery.ui.CopyablePageProvider
 import com.android.settingslib.spa.gallery.ui.SpinnerPageProvider
 import com.android.settingslib.spa.slice.SpaSliceBroadcastReceiver
 
@@ -100,6 +101,7 @@ class GallerySpaEnvironment(context: Context) : SpaEnvironment(context) {
                 SettingsTextFieldPasswordPageProvider,
                 SearchScaffoldPageProvider,
                 CardPageProvider,
+                CopyablePageProvider,
             ),
             rootPages = listOf(
                 HomePageProvider.createSettingsPage(),
