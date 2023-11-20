@@ -4269,7 +4269,8 @@ public class AudioService extends IAudioService.Stub
         if (device == null) {
             // call was already logged in setDeviceVolume()
             sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_SET_STREAM_VOL, streamType,
-                    index/*val1*/, flags/*val2*/, callingPackage));
+                    index/*val1*/, flags/*val2*/, getStreamVolume(streamType) /*val3*/,
+                    callingPackage));
         }
         setStreamVolume(streamType, index, flags, device,
                 callingPackage, callingPackage, attributionTag,
@@ -8784,7 +8785,7 @@ public class AudioService extends IAudioService.Stub
                         mVolumeChanged.putExtra(AudioManager.EXTRA_VOLUME_STREAM_TYPE_ALIAS,
                                 mStreamVolumeAlias[mStreamType]);
                         AudioService.sVolumeLogger.enqueue(new VolChangedBroadcastEvent(
-                                mStreamType, mStreamVolumeAlias[mStreamType], index));
+                                mStreamType, mStreamVolumeAlias[mStreamType], index, oldIndex));
                         sendBroadcastToAll(mVolumeChanged, mVolumeChangedOptions);
                     }
                 }
