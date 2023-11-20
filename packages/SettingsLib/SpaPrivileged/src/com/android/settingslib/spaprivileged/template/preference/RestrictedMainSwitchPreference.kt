@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package com.android.settingslib.spaprivileged.template.preference
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
-import com.android.settingslib.spa.widget.preference.SwitchPreference
+import com.android.settingslib.spa.widget.preference.MainSwitchPreference
 import com.android.settingslib.spa.widget.preference.SwitchPreferenceModel
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
@@ -26,25 +26,22 @@ import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProvid
 import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitchPreferenceModel.Companion.RestrictedSwitchWrapper
 
 @Composable
-fun RestrictedSwitchPreference(
-    model: SwitchPreferenceModel,
-    restrictions: Restrictions,
-) {
-    RestrictedSwitchPreference(model, restrictions, ::RestrictionsProviderImpl)
+fun RestrictedMainSwitchPreference(model: SwitchPreferenceModel, restrictions: Restrictions) {
+    RestrictedMainSwitchPreference(model, restrictions, ::RestrictionsProviderImpl)
 }
 
 @VisibleForTesting
 @Composable
-internal fun RestrictedSwitchPreference(
+internal fun RestrictedMainSwitchPreference(
     model: SwitchPreferenceModel,
     restrictions: Restrictions,
     restrictionsProviderFactory: RestrictionsProviderFactory,
 ) {
     if (restrictions.keys.isEmpty()) {
-        SwitchPreference(model)
+        MainSwitchPreference(model)
         return
     }
     restrictionsProviderFactory.RestrictedSwitchWrapper(model, restrictions) {
-        SwitchPreference(it)
+        MainSwitchPreference(it)
     }
 }
