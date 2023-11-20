@@ -17,7 +17,6 @@
 package com.android.systemui.qs.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
@@ -33,14 +32,10 @@ import kotlinx.coroutines.flow.map
 class QuickSettingsSceneViewModel
 @Inject
 constructor(
-    private val deviceEntryInteractor: DeviceEntryInteractor,
     val shadeHeaderViewModel: ShadeHeaderViewModel,
     val qsSceneAdapter: QSSceneAdapter,
     val notifications: NotificationsPlaceholderViewModel,
 ) {
-    /** Notifies that some content in quick settings was clicked. */
-    fun onContentClicked() = deviceEntryInteractor.attemptDeviceEntry()
-
     val destinationScenes =
         qsSceneAdapter.isCustomizing.map { customizing ->
             if (customizing) {
