@@ -63,7 +63,7 @@ public class HideInCommentsChecker extends BugChecker implements
 
     @Override
     public Description matchCompilationUnit(CompilationUnitTree tree, VisitorState state) {
-        final Map<Integer, Tree> javadocableTrees = findJavadocableTrees(tree);
+        final Map<Integer, Tree> javadocableTrees = findJavadocableTrees(tree, state);
         final String sourceCode = state.getSourceCode().toString();
         for (ErrorProneToken token : ErrorProneTokens.getTokens(sourceCode, state.context)) {
             for (Tokens.Comment comment : token.comments()) {
@@ -112,9 +112,9 @@ public class HideInCommentsChecker extends BugChecker implements
     }
 
 
-    private Map<Integer, Tree> findJavadocableTrees(CompilationUnitTree tree) {
+    private Map<Integer, Tree> findJavadocableTrees(CompilationUnitTree tree, VisitorState state) {
         Map<Integer, Tree> javadoccableTrees = new HashMap<>();
-        new SuppressibleTreePathScanner<Void, Void>() {
+        new SuppressibleTreePathScanner<Void, Void>(state) {
             @Override
             public Void visitClass(ClassTree classTree, Void unused) {
                 javadoccableTrees.put(getStartPosition(classTree), classTree);
