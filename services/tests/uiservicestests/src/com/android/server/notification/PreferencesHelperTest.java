@@ -5733,17 +5733,9 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testGetFsiState_flagDisabled_zero() {
-        final int fsiState = mHelper.getFsiState("pkg", /* uid= */ 0,
-                /* requestedFsiPermission */ true, /* isFlagEnabled= */ false);
-
-        assertEquals(0, fsiState);
-    }
-
-    @Test
     public void testGetFsiState_appDidNotRequest_enumNotRequested() {
         final int fsiState = mHelper.getFsiState("pkg", /* uid= */ 0,
-                /* requestedFsiPermission */ false, /* isFlagEnabled= */ true);
+                /* requestedFsiPermission */ false);
 
         assertEquals(PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED, fsiState);
     }
@@ -5754,7 +5746,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .thenReturn(PermissionManager.PERMISSION_GRANTED);
 
         final int fsiState = mHelper.getFsiState("pkg", /* uid= */ 0,
-                /* requestedFsiPermission= */ true, /* isFlagEnabled= */ true);
+                /* requestedFsiPermission= */ true);
 
         assertEquals(PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED, fsiState);
     }
@@ -5765,7 +5757,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .thenReturn(PermissionManager.PERMISSION_SOFT_DENIED);
 
         final int fsiState = mHelper.getFsiState("pkg", /* uid= */ 0,
-                /* requestedFsiPermission = */ true, /* isFlagEnabled= */ true);
+                /* requestedFsiPermission = */ true);
 
         assertEquals(PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__DENIED, fsiState);
     }
@@ -5776,7 +5768,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 .thenReturn(PermissionManager.PERMISSION_HARD_DENIED);
 
         final int fsiState = mHelper.getFsiState("pkg", /* uid= */ 0,
-                /* requestedFsiPermission = */ true, /* isFlagEnabled= */ true);
+                /* requestedFsiPermission = */ true);
 
         assertEquals(PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__DENIED, fsiState);
     }
@@ -5785,18 +5777,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testIsFsiPermissionUserSet_appDidNotRequest_false() {
         final boolean isUserSet = mHelper.isFsiPermissionUserSet("pkg", /* uid= */ 0,
                 /* fsiState = */ PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__NOT_REQUESTED,
-                /* currentPermissionFlags= */ PackageManager.FLAG_PERMISSION_USER_SET,
-                /* isStickyHunFlagEnabled= */ true);
-
-        assertFalse(isUserSet);
-    }
-
-    @Test
-    public void testIsFsiPermissionUserSet_flagDisabled_false() {
-        final boolean isUserSet = mHelper.isFsiPermissionUserSet("pkg", /* uid= */ 0,
-                /* fsiState = */ PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED,
-                /* currentPermissionFlags= */ PackageManager.FLAG_PERMISSION_USER_SET,
-                /* isStickyHunFlagEnabled= */ false);
+                /* currentPermissionFlags= */ PackageManager.FLAG_PERMISSION_USER_SET);
 
         assertFalse(isUserSet);
     }
@@ -5805,8 +5786,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testIsFsiPermissionUserSet_userSet_true() {
         final boolean isUserSet = mHelper.isFsiPermissionUserSet("pkg", /* uid= */ 0,
                 /* fsiState = */ PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED,
-                /* currentPermissionFlags= */ PackageManager.FLAG_PERMISSION_USER_SET,
-                /* isStickyHunFlagEnabled= */ true);
+                /* currentPermissionFlags= */ PackageManager.FLAG_PERMISSION_USER_SET);
 
         assertTrue(isUserSet);
     }
@@ -5815,8 +5795,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public void testIsFsiPermissionUserSet_notUserSet_false() {
         final boolean isUserSet = mHelper.isFsiPermissionUserSet("pkg", /* uid= */ 0,
                 /* fsiState = */ PACKAGE_NOTIFICATION_PREFERENCES__FSI_STATE__GRANTED,
-                /* currentPermissionFlags= */ ~PackageManager.FLAG_PERMISSION_USER_SET,
-                /* isStickyHunFlagEnabled= */ true);
+                /* currentPermissionFlags= */ ~PackageManager.FLAG_PERMISSION_USER_SET);
 
         assertFalse(isUserSet);
     }
