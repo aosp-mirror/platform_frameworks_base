@@ -32,7 +32,6 @@ java_genrule {
     cmd: "$(location hoststubgen) " +
         "@$(location ravenwood/ravenwood-standard-options.txt) " +
 
-        "--out-stub-jar $(location ravenwood_stub.jar) " +
         "--out-impl-jar $(location ravenwood.jar) " +
 
         "--gen-keep-all-file $(location hoststubgen_keep_all.txt) " +
@@ -49,7 +48,6 @@ java_genrule {
     ],
     out: [
         "ravenwood.jar",
-        "ravenwood_stub.jar", // It's not used. TODO: Update hoststubgen to make it optional.
 
         // Following files are created just as FYI.
         "hoststubgen_keep_all.txt",
