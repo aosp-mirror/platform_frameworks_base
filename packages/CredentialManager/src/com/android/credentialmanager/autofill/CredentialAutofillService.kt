@@ -52,6 +52,7 @@ import com.android.credentialmanager.model.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderDisplayInfo
 import com.android.credentialmanager.model.ProviderInfo
 import com.android.credentialmanager.getflow.toProviderDisplayInfo
+import com.android.credentialmanager.ktx.credentialEntry
 import org.json.JSONObject
 import java.util.concurrent.Executors
 
@@ -122,8 +123,7 @@ class CredentialAutofillService : AutofillService() {
         val entryIconMap: MutableMap<String, Icon> = mutableMapOf()
         candidateProviderDataList.forEach { provider ->
             provider.credentialEntries.forEach { entry ->
-                val credentialEntry = GetFlowUtils.parseCredentialEntryFromSlice(entry.slice)
-                when (credentialEntry) {
+                when (val credentialEntry = entry.slice.credentialEntry) {
                     is PasswordCredentialEntry -> {
                         entryIconMap[entry.key + entry.subkey] = credentialEntry.icon
                     }
