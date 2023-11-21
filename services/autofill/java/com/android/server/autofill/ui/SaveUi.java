@@ -21,6 +21,7 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityOptions;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -205,7 +206,10 @@ final class SaveUi {
                         intent,
                         PendingIntent.FLAG_MUTABLE
                                 | PendingIntent.FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT,
-                        /* options= */ null, UserHandle.CURRENT);
+                        ActivityOptions.makeBasic()
+                                .setPendingIntentCreatorBackgroundActivityStartMode(
+                                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                                .toBundle(), UserHandle.CURRENT);
                 if (sDebug) {
                     Slog.d(TAG, "startActivity add save UI restored with intent=" + intent);
                 }
