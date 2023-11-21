@@ -4869,8 +4869,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         } else {
             Slog.wtf(TAG, "Mismatched or missing ProcessRecord: " + app + ". Pid: " + pid
                     + ". Uid: " + uid);
-            killProcess(pid);
-            killProcessGroup(uid, pid);
+            if (pid > 0) {
+                killProcess(pid);
+                killProcessGroup(uid, pid);
+            }
             mProcessList.noteAppKill(pid, uid,
                     ApplicationExitInfo.REASON_INITIALIZATION_FAILURE,
                     ApplicationExitInfo.SUBREASON_UNKNOWN,
