@@ -980,6 +980,11 @@
     -->
     <integer name="config_sfpsSensorWidth">200</integer>
 
+    <!-- Component name for Home Panel Dream -->
+    <string name="config_homePanelDreamComponent" translatable="false">
+        @null
+    </string>
+
     <!--
     They are service names that, if enabled, will cause the magnification settings button
     to never hide after timeout.

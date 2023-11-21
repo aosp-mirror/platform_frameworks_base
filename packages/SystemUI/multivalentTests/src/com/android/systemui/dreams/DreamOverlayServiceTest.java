@@ -76,6 +76,9 @@ import org.mockito.MockitoAnnotations;
 public class DreamOverlayServiceTest extends SysuiTestCase {
     private static final ComponentName LOW_LIGHT_COMPONENT = new ComponentName("package",
             "lowlight");
+
+    private static final ComponentName HOME_CONTROL_PANEL_DREAM_COMPONENT =
+            new ComponentName("package", "homeControlPanel");
     private static final String DREAM_COMPONENT = "package/dream";
     private static final String WINDOW_NAME = "test";
     private final FakeSystemClock mFakeSystemClock = new FakeSystemClock();
@@ -194,6 +197,7 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
                 mUiEventLogger,
                 mTouchInsetManager,
                 LOW_LIGHT_COMPONENT,
+                HOME_CONTROL_PANEL_DREAM_COMPONENT,
                 mDreamOverlayCallbackController,
                 WINDOW_NAME);
     }
@@ -314,6 +318,19 @@ public class DreamOverlayServiceTest extends SysuiTestCase {
 
         assertThat(mService.getDreamComponent()).isEqualTo(LOW_LIGHT_COMPONENT);
         verify(mStateController).setLowLightActive(true);
+    }
+
+    @Test
+    public void testHomeControlPanelSetsByStartDream() throws RemoteException {
+        final IDreamOverlayClient client = getClient();
+
+        // Inform the overlay service of dream starting.
+        client.startDream(mWindowParams, mDreamOverlayCallback,
+                HOME_CONTROL_PANEL_DREAM_COMPONENT.flattenToString(),
+                false /*shouldShowComplication*/);
+        mMainExecutor.runAllReady();
+        assertThat(mService.getDreamComponent()).isEqualTo(HOME_CONTROL_PANEL_DREAM_COMPONENT);
+        verify(mStateController).setHomeControlPanelActive(true);
     }
 
     @Test
