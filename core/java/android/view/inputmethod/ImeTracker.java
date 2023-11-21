@@ -20,8 +20,8 @@ import static android.view.InsetsController.ANIMATION_TYPE_HIDE;
 import static android.view.InsetsController.ANIMATION_TYPE_SHOW;
 
 import static com.android.internal.inputmethod.InputMethodDebug.softInputDisplayReasonToString;
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_IME_INSETS_HIDE_ANIMATION;
-import static com.android.internal.jank.InteractionJankMonitor.CUJ_IME_INSETS_SHOW_ANIMATION;
+import static com.android.internal.jank.Cuj.CUJ_IME_INSETS_HIDE_ANIMATION;
+import static com.android.internal.jank.Cuj.CUJ_IME_INSETS_SHOW_ANIMATION;
 import static com.android.internal.util.LatencyTracker.ACTION_REQUEST_IME_HIDDEN;
 import static com.android.internal.util.LatencyTracker.ACTION_REQUEST_IME_SHOWN;
 
@@ -758,7 +758,7 @@ public interface ImeTracker {
          * A helper method to translate animation type to CUJ type for IME animations.
          *
          * @param animType the animation type.
-         * @return the integer in {@link com.android.internal.jank.InteractionJankMonitor.CujType},
+         * @return the integer in {@link com.android.internal.jank.Cuj.CujType},
          * or {@code -1} if the animation type is not supported for tracking yet.
          */
         private static int getImeInsetsCujFromAnimation(@AnimationType int animType) {

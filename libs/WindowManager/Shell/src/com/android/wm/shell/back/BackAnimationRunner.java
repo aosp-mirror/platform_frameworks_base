@@ -28,7 +28,7 @@ import android.view.RemoteAnimationTarget;
 import android.window.IBackAnimationRunner;
 import android.window.IOnBackInvokedCallback;
 
-import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.jank.Cuj.CujType;
 import com.android.wm.shell.common.InteractionJankMonitorUtils;
 
 /**
@@ -42,7 +42,7 @@ public class BackAnimationRunner {
 
     private final IOnBackInvokedCallback mCallback;
     private final IRemoteAnimationRunner mRunner;
-    private final @InteractionJankMonitor.CujType int mCujType;
+    private final @CujType int mCujType;
     private final Context mContext;
 
     // Whether we are waiting to receive onAnimationStart
@@ -55,7 +55,7 @@ public class BackAnimationRunner {
             @NonNull IOnBackInvokedCallback callback,
             @NonNull IRemoteAnimationRunner runner,
             @NonNull Context context,
-            @InteractionJankMonitor.CujType int cujType) {
+            @CujType int cujType) {
         mCallback = callback;
         mRunner = runner;
         mCujType = cujType;
