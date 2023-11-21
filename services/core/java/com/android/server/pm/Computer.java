@@ -259,6 +259,19 @@ public interface Computer extends PackageDataSnapshot {
      */
     boolean shouldFilterApplicationIncludingUninstalled(@Nullable PackageStateInternal ps,
             int callingUid, int userId);
+
+    /**
+     * Different from
+     * {@link #shouldFilterApplicationIncludingUninstalled(PackageStateInternal, int, int)}, the
+     * function returns {@code true} if:
+     * <ul>
+     * <li>The target package is not archived.
+     * <li>The package cannot be found in the device or has been uninstalled in the current user.
+     * </ul>
+     */
+    boolean shouldFilterApplicationIncludingUninstalledNotArchived(
+            @Nullable PackageStateInternal ps,
+            int callingUid, int userId);
     /**
      * Different from {@link #shouldFilterApplication(SharedUserSetting, int, int)}, the function
      * returns {@code true} if packages with the same shared user are all uninstalled in the current
