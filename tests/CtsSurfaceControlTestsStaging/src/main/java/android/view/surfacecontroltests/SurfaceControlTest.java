@@ -124,4 +124,12 @@ public class SurfaceControlTest {
         activity.testSurfaceControlFrameRateSelectionStrategy(
                 SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     }
+
+    @Test
+    public void testSurfaceControlFrameRateSelectionStrategyDoNotPropagate()
+            throws InterruptedException {
+        GraphicsActivity activity = mActivityRule.getActivity();
+        activity.testSurfaceControlFrameRateSelectionStrategy(
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_DO_NOT_PROPAGATE);
+    }
 }

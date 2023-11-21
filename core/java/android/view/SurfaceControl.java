@@ -860,13 +860,16 @@ public final class SurfaceControl implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_SELECTION_STRATEGY_"},
             value = {FRAME_RATE_SELECTION_STRATEGY_SELF,
-                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN})
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN,
+                    FRAME_RATE_SELECTION_STRATEGY_DO_NOT_PROPAGATE})
     public @interface FrameRateSelectionStrategy {}
 
     // From window.h. Keep these in sync.
     /**
      * Default value. The layer uses its own frame rate specifications, assuming it has any
-     * specifications, instead of its parent's.
+     * specifications, instead of its parent's. If it does not have its own frame rate
+     * specifications, it will try to use its parent's.
+     *
      * However, {@link #FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} on an ancestor layer
      * supersedes this behavior, meaning that this layer will inherit the frame rate specifications
      * of that ancestor layer.
@@ -879,11 +882,20 @@ public final class SurfaceControl implements Parcelable {
      * layers.
      * The layer with this strategy has the {@link #FRAME_RATE_SELECTION_STRATEGY_SELF} behavior
      * for itself. This does mean that any parent or ancestor layer that also has the strategy
-     * {@link FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} will override this layer's
+     * {@link #FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} will override this layer's
      * frame rate specifications.
      * @hide
      */
     public static final int FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN = 1;
+
+    /**
+     * The layer's frame rate specifications will never propagate to its descendant
+     * layers.
+     * {@link #FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} on an ancestor layer supersedes
+     * this behavior.
+     * @hide
+     */
+    public static final int FRAME_RATE_SELECTION_STRATEGY_DO_NOT_PROPAGATE = 2;
 
     /**
      * Builder class for {@link SurfaceControl} objects.
