@@ -18,7 +18,6 @@ package com.android.credentialmanager.mapper
 
 import android.content.Intent
 import android.credentials.ui.Entry
-import android.credentials.ui.GetCredentialProviderData
 import androidx.credentials.provider.PasswordCredentialEntry
 import com.android.credentialmanager.factory.fromSlice
 import com.android.credentialmanager.ktx.getCredentialProviderDataList
@@ -32,12 +31,10 @@ import com.google.common.collect.ImmutableMap
 fun Intent.toGet(): Request.Get {
     val credentialEntries = mutableListOf<Pair<String, Entry>>()
     for (providerData in getCredentialProviderDataList) {
-        if (providerData is GetCredentialProviderData) {
-            for (credentialEntry in providerData.credentialEntries) {
-                credentialEntries.add(
-                    Pair(providerData.providerFlattenedComponentName, credentialEntry)
-                )
-            }
+        for (credentialEntry in providerData.credentialEntries) {
+            credentialEntries.add(
+                Pair(providerData.providerFlattenedComponentName, credentialEntry)
+            )
         }
     }
 
