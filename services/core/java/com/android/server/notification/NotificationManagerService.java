@@ -184,6 +184,7 @@ import android.companion.AssociationRequest;
 import android.companion.ICompanionDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.LoggingOnly;
 import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
@@ -555,7 +556,7 @@ public class NotificationManagerService extends SystemService {
      * creation and activation of an implicit {@link android.app.AutomaticZenRule}.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     static final long MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES = 308670109L;
 
     private static final Duration POST_WAKE_LOCK_TIMEOUT = Duration.ofSeconds(30);
