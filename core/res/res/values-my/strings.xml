@@ -1908,10 +1908,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"စနေ၊ တနင်္ဂနွေ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"အစီအစဉ်"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"အိပ်နေချိန်"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
-    <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ဖွင့်"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ပိတ်"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> သည် အချို့အသံကို ပိတ်နေသည်"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေပြီး၊ မူလစက်ရုံထုတ်အခြေအနေအဖြစ် ပြန်လည်ရယူနိုင်သည်အထိ အခြေအနေမတည်ငြိမ်နိုင်ပါ။"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"သင့်ကိရိယာအတွင်းပိုင်းတွင် ပြဿနာရှိနေ၏။ အသေးစိတ်သိရန်အတွက် ပစ္စည်းထုတ်လုပ်သူအား ဆက်သွယ်ပါ။"</string>
@@ -2344,8 +2342,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"မိုက်ခရိုဖုန်း ပိတ်ထားသည်"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ဖန်သားပြင်တွင် စကရင်ပွား၍ မရပါ"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"အခြားကေဘယ်ကြိုးသုံးပြီး ထပ်စမ်းကြည့်ပါ"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"သင့်စက်ပစ္စည်း ပူလွန်းနေသဖြင့် ၎င်းမအေးသေးမီ ဖန်သားပြင်သို့ စကရင်ပွား၍မရပါ"</string>
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ကေဘယ်ကြိုးက ဖန်သားပြင်များကို မပံ့ပိုးခြင်း ဖြစ်နိုင်သည်"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"သင့် USB-C ကေဘယ်ကြိုးသည် ဖန်သားပြင်များနှင့် မှန်ကန်စွာ ချိတ်ဆက်မထားခြင်း ဖြစ်နိုင်သည်"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>

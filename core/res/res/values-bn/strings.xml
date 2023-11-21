@@ -1908,10 +1908,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"সপ্তাহান্ত"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ইভেন্ট"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ঘুমানোর সময়"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
-    <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"চালু আছে"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"বন্ধ আছে"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> কিছু সাউন্ডকে মিউট করে দিচ্ছে"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে, এবং আপনি যতক্ষণ না পর্যন্ত এটিকে ফ্যাক্টরি ডেটা রিসেট করছেন ততক্ষণ এটি ঠিকভাবে কাজ নাও করতে পারে৷"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে৷ বিস্তারিত জানার জন্য প্রস্তুতকারকের সাথে যোগাযোগ করুন৷"</string>
@@ -2344,8 +2342,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"মাইক্রোফোন ব্লক করা হয়েছে"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ডিসপ্লে মিরর করা যাচ্ছে না"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"অন্য কোনও কেবল ব্যবহার করে আবার চেষ্টা করুন"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"আপনার ডিভাইস খুব গরম হয়ে আছে এবং সেটি ঠাণ্ডা না হওয়া পর্যন্ত ডিসপ্লে মিরর করা যাবে না"</string>
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"কেবল, ডিসপ্লের সাথে কাজ নাও করতে পারে"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"আপনার USB-C কেবল, ডিসপ্লেতে সঠিকভাবে কানেক্ট নাও হতে পারে"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
