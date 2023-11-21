@@ -78,6 +78,9 @@ class android.util.Log	!com.android.hoststubgen.nativesubstitution.Log_host
 class com.android.internal.util.FastPrintWriter         keepclass
 class com.android.internal.util.LineBreakBufferedWriter keepclass
 
+class android.util.EventLog stubclass
+class android.util.EventLog !com.android.hoststubgen.nativesubstitution.EventLog_host
+class android.util.EventLog$Event stubclass
 
 # Expose Context because it's referred to by AndroidTestCase, but don't need to expose any of
 # its members.

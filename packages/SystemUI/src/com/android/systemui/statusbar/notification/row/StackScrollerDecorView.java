@@ -54,7 +54,7 @@ public abstract class StackScrollerDecorView extends ExpandableView {
         mContent = findContentView();
         mSecondaryView = findSecondaryView();
         setVisible(false /* visible */, false /* animate */);
-        setSecondaryVisible(false /* visible */, false /* animate */);
+        setSecondaryVisible(false /* visible */, false /* animate */, null /* onAnimationEnd */);
         setOutlineProvider(null);
     }
 
@@ -155,15 +155,23 @@ public abstract class StackScrollerDecorView extends ExpandableView {
     /**
      * Set the secondary view of this layout to visible.
      *
-     * @param visible should the secondary view be visible
-     * @param animate should the change be animated
+     * @param visible          True if the contents should be visible.
+     * @param animate          True if we should fade to new visibility.
+     * @param onAnimationEnded Callback to run after visibility updates, takes a boolean as a
+     *                         parameter that represents whether the animation was cancelled.
      */
-    protected void setSecondaryVisible(boolean visible, boolean animate) {
+    protected void setSecondaryVisible(boolean visible, boolean animate,
+            Consumer<Boolean> onAnimationEnded) {
         if (mIsSecondaryVisible != visible) {
             mSecondaryAnimating = animate;
             mIsSecondaryVisible = visible;
-            setViewVisible(mSecondaryView, visible, animate,
-                    (cancelled) -> onSecondaryVisibilityAnimationEnd());
+            Consumer<Boolean> onAnimationEndedWrapper = (cancelled) -> {
+                onContentVisibilityAnimationEnd();
+                if (onAnimationEnded != null) {
+                    onAnimationEnded.accept(cancelled);
+                }
+            };
+            setViewVisible(mSecondaryView, visible, animate, onAnimationEndedWrapper);
         }
 
         if (!mSecondaryAnimating) {

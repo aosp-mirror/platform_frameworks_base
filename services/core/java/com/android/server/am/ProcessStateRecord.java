@@ -379,12 +379,6 @@ final class ProcessStateRecord {
     private boolean mReachable;
 
     /**
-     * Whether or not this process is reversed reachable from given process.
-     */
-    @GuardedBy("mService")
-    private boolean mReversedReachable;
-
-    /**
      * The most recent time when the last visible activity within this process became invisible.
      *
      * <p> It'll be set to 0 if there is never a visible activity, or Long.MAX_VALUE if there is
@@ -994,16 +988,6 @@ final class ProcessStateRecord {
     @GuardedBy("mService")
     void setReachable(boolean reachable) {
         mReachable = reachable;
-    }
-
-    @GuardedBy("mService")
-    boolean isReversedReachable() {
-        return mReversedReachable;
-    }
-
-    @GuardedBy("mService")
-    void setReversedReachable(boolean reversedReachable) {
-        mReversedReachable = reversedReachable;
     }
 
     @GuardedBy("mService")

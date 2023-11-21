@@ -56,6 +56,14 @@ class NotificationInterruptLogger @Inject constructor(
         }
     }
 
+    fun logSuspendedAppBubble(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+        }, {
+            "No bubble up: notification: app $str1 is suspended"
+        })
+    }
+
     fun logNoBubbleNoMetadata(entry: NotificationEntry) {
         buffer.log(TAG, DEBUG, {
             str1 = entry.logKey

@@ -76,6 +76,7 @@ import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.Slog;
 import android.view.KeyEvent;
 
 import com.android.server.LocalServices;
@@ -348,16 +349,19 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         } else {
             if (mVolumeControlType == VOLUME_CONTROL_FIXED) {
                 if (DEBUG) {
-                    Log.d(TAG, "Session does not support volume adjustment");
+                    Slog.d(TAG, "Session does not support volume adjustment");
                 }
             } else if (direction == AudioManager.ADJUST_TOGGLE_MUTE
                     || direction == AudioManager.ADJUST_MUTE
                     || direction == AudioManager.ADJUST_UNMUTE) {
-                Log.w(TAG, "Muting remote playback is not supported");
+                Slog.w(TAG, "Muting remote playback is not supported");
             } else {
                 if (DEBUG) {
-                    Log.w(TAG, "adjusting volume, pkg=" + packageName + ", asSystemService="
-                            + asSystemService + ", dir=" + direction);
+                    Slog.w(
+                            TAG,
+                            "adjusting volume, pkg=" + packageName
+                                    + ", asSystemService=" + asSystemService
+                                    + ", dir=" + direction);
                 }
                 mSessionCb.adjustVolume(packageName, pid, uid, asSystemService, direction);
 
@@ -371,8 +375,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 }
 
                 if (DEBUG) {
-                    Log.d(TAG, "Adjusted optimistic volume to " + mOptimisticVolume + " max is "
-                            + mMaxVolume);
+                    Slog.d(
+                            TAG,
+                            "Adjusted optimistic volume to " + mOptimisticVolume
+                                    + " max is " + mMaxVolume);
                 }
             }
             // Always notify, even if the volume hasn't changed. This is important to ensure that
@@ -388,23 +394,33 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         if (mVolumeType == PLAYBACK_TYPE_LOCAL) {
             int stream = getVolumeStream(mAudioAttrs);
             final int volumeValue = value;
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mAudioManager.setStreamVolumeForUid(stream, volumeValue, flags,
-                                opPackageName, uid, pid,
-                                mContext.getApplicationInfo().targetSdkVersion);
-                    } catch (IllegalArgumentException | SecurityException e) {
-                        Log.e(TAG, "Cannot set volume: stream=" + stream + ", value=" + volumeValue
-                                + ", flags=" + flags, e);
-                    }
-                }
-            });
+            mHandler.post(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                mAudioManager.setStreamVolumeForUid(
+                                        stream,
+                                        volumeValue,
+                                        flags,
+                                        opPackageName,
+                                        uid,
+                                        pid,
+                                        mContext.getApplicationInfo().targetSdkVersion);
+                            } catch (IllegalArgumentException | SecurityException e) {
+                                Slog.e(
+                                        TAG,
+                                        "Cannot set volume: stream=" + stream
+                                                + ", value=" + volumeValue
+                                                + ", flags=" + flags,
+                                        e);
+                            }
+                        }
+                    });
         } else {
             if (mVolumeControlType != VOLUME_CONTROL_ABSOLUTE) {
                 if (DEBUG) {
-                    Log.d(TAG, "Session does not support setting volume");
+                    Slog.d(TAG, "Session does not support setting volume");
                 }
             } else {
                 value = Math.max(0, Math.min(value, mMaxVolume));
@@ -419,8 +435,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 }
 
                 if (DEBUG) {
-                    Log.d(TAG, "Set optimistic volume to " + mOptimisticVolume + " max is "
-                            + mMaxVolume);
+                    Slog.d(
+                            TAG,
+                            "Set optimistic volume to " + mOptimisticVolume
+                                    + " max is " + mMaxVolume);
                 }
             }
             // Always notify, even if the volume hasn't changed.
@@ -527,12 +545,27 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
     @Override
     public boolean canHandleVolumeKey() {
         if (isPlaybackTypeLocal()) {
+            if (DEBUG) {
+                Slog.d(TAG, "Local MediaSessionRecord can handle volume key");
+            }
             return true;
         }
         if (mVolumeControlType == VOLUME_CONTROL_FIXED) {
+            if (DEBUG) {
+                Slog.d(
+                        TAG,
+                        "Local MediaSessionRecord with FIXED volume control can't handle volume"
+                                + " key");
+            }
             return false;
         }
         if (mVolumeAdjustmentForRemoteGroupSessions) {
+            if (DEBUG) {
+                Slog.d(
+                        TAG,
+                        "Volume adjustment for remote group sessions allowed so MediaSessionRecord"
+                                + " can handle volume key");
+            }
             return true;
         }
         // See b/228021646 for details.
@@ -540,7 +573,18 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         List<RoutingSessionInfo> sessions = mRouter2Manager.getRoutingSessions(mPackageName);
         boolean foundNonSystemSession = false;
         boolean remoteSessionAllowVolumeAdjustment = true;
+        if (DEBUG) {
+            Slog.d(
+                    TAG,
+                    "Found "
+                            + sessions.size()
+                            + " routing sessions for package name "
+                            + mPackageName);
+        }
         for (RoutingSessionInfo session : sessions) {
+            if (DEBUG) {
+                Slog.d(TAG, "Found routingSessionInfo: " + session);
+            }
             if (!session.isSystemSession()) {
                 foundNonSystemSession = true;
                 if (session.getVolumeHandling() == PLAYBACK_VOLUME_FIXED) {
@@ -549,9 +593,14 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             }
         }
         if (!foundNonSystemSession) {
-            Log.d(TAG, "Package " + mPackageName
-                    + " has a remote media session but no associated routing session");
+            if (DEBUG) {
+                Slog.d(
+                        TAG,
+                        "Package " + mPackageName
+                                + " has a remote media session but no associated routing session");
+            }
         }
+
         return foundNonSystemSession && remoteSessionAllowVolumeAdjustment;
     }
 
@@ -637,8 +686,11 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             final boolean asSystemService, final boolean useSuggested,
             final int previousFlagPlaySound) {
         if (DEBUG) {
-            Log.w(TAG, "adjusting local volume, stream=" + stream + ", dir=" + direction
-                    + ", asSystemService=" + asSystemService + ", useSuggested=" + useSuggested);
+            Slog.w(
+                    TAG,
+                    "adjusting local volume, stream=" + stream + ", dir=" + direction
+                            + ", asSystemService=" + asSystemService
+                            + ", useSuggested=" + useSuggested);
         }
         // Must use opPackageName for adjusting volumes with UID.
         final String opPackageName;
@@ -653,40 +705,61 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
             uid = callingUid;
             pid = callingPid;
         }
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (useSuggested) {
-                        if (AudioSystem.isStreamActive(stream, 0)) {
-                            mAudioManager.adjustSuggestedStreamVolumeForUid(stream,
-                                    direction, flags, opPackageName, uid, pid,
-                                    mContext.getApplicationInfo().targetSdkVersion);
-                        } else {
-                            mAudioManager.adjustSuggestedStreamVolumeForUid(
-                                    AudioManager.USE_DEFAULT_STREAM_TYPE, direction,
-                                    flags | previousFlagPlaySound, opPackageName, uid, pid,
-                                    mContext.getApplicationInfo().targetSdkVersion);
+        mHandler.post(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (useSuggested) {
+                                if (AudioSystem.isStreamActive(stream, 0)) {
+                                    mAudioManager.adjustSuggestedStreamVolumeForUid(
+                                            stream,
+                                            direction,
+                                            flags,
+                                            opPackageName,
+                                            uid,
+                                            pid,
+                                            mContext.getApplicationInfo().targetSdkVersion);
+                                } else {
+                                    mAudioManager.adjustSuggestedStreamVolumeForUid(
+                                            AudioManager.USE_DEFAULT_STREAM_TYPE,
+                                            direction,
+                                            flags | previousFlagPlaySound,
+                                            opPackageName,
+                                            uid,
+                                            pid,
+                                            mContext.getApplicationInfo().targetSdkVersion);
+                                }
+                            } else {
+                                mAudioManager.adjustStreamVolumeForUid(
+                                        stream,
+                                        direction,
+                                        flags,
+                                        opPackageName,
+                                        uid,
+                                        pid,
+                                        mContext.getApplicationInfo().targetSdkVersion);
+                            }
+                        } catch (IllegalArgumentException | SecurityException e) {
+                            Slog.e(
+                                    TAG,
+                                    "Cannot adjust volume: direction=" + direction
+                                            + ", stream=" + stream + ", flags=" + flags
+                                            + ", opPackageName=" + opPackageName + ", uid=" + uid
+                                            + ", useSuggested=" + useSuggested
+                                            + ", previousFlagPlaySound=" + previousFlagPlaySound,
+                                    e);
                         }
-                    } else {
-                        mAudioManager.adjustStreamVolumeForUid(stream, direction, flags,
-                                opPackageName, uid, pid,
-                                mContext.getApplicationInfo().targetSdkVersion);
                     }
-                } catch (IllegalArgumentException | SecurityException e) {
-                    Log.e(TAG, "Cannot adjust volume: direction=" + direction + ", stream="
-                            + stream + ", flags=" + flags + ", opPackageName=" + opPackageName
-                            + ", uid=" + uid + ", useSuggested=" + useSuggested
-                            + ", previousFlagPlaySound=" + previousFlagPlaySound, e);
-                }
-            }
-        });
+                });
     }
 
     private void logCallbackException(
             String msg, ISessionControllerCallbackHolder holder, Exception e) {
-        Log.v(TAG, msg + ", this=" + this + ", callback package=" + holder.mPackageName
-                + ", exception=" + e);
+        Slog.v(
+                TAG,
+                msg + ", this=" + this + ", callback package=" + holder.mPackageName
+                        + ", exception=" + e);
     }
 
     private void pushPlaybackStateUpdate() {
@@ -1083,7 +1156,9 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         throw new IllegalArgumentException(
                                 "The media button receiver cannot be set to an activity.");
                     } else {
-                        Log.w(TAG, "Ignoring invalid media button receiver targeting an activity.");
+                        Slog.w(
+                                TAG,
+                                "Ignoring invalid media button receiver targeting an activity.");
                         return;
                     }
                 }
@@ -1119,7 +1194,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                     if (CompatChanges.isChangeEnabled(THROW_FOR_INVALID_BROADCAST_RECEIVER, uid)) {
                         throw new IllegalArgumentException("Invalid component name: " + receiver);
                     } else {
-                        Log.w(
+                        Slog.w(
                                 TAG,
                                 "setMediaButtonBroadcastReceiver(): "
                                         + "Ignoring invalid component name="
@@ -1258,7 +1333,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 if (attributes != null) {
                     mAudioAttrs = attributes;
                 } else {
-                    Log.e(TAG, "Received null audio attributes, using existing attributes");
+                    Slog.e(TAG, "Received null audio attributes, using existing attributes");
                 }
             }
             if (typeChanged) {
@@ -1320,7 +1395,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 }
                 return true;
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in sendMediaRequest.", e);
+                Slog.e(TAG, "Remote failure in sendMediaRequest.", e);
             }
             return false;
         }
@@ -1343,7 +1418,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 }
                 return true;
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in sendMediaRequest.", e);
+                Slog.e(TAG, "Remote failure in sendMediaRequest.", e);
             }
             return false;
         }
@@ -1356,7 +1431,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onCommand(packageName, pid, uid, command, args, cb);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in sendCommand.", e);
+                Slog.e(TAG, "Remote failure in sendCommand.", e);
             }
         }
 
@@ -1368,7 +1443,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onCustomAction(packageName, pid, uid, action, args);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in sendCustomAction.", e);
+                Slog.e(TAG, "Remote failure in sendCustomAction.", e);
             }
         }
 
@@ -1379,7 +1454,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onPrepare(packageName, pid, uid);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in prepare.", e);
+                Slog.e(TAG, "Remote failure in prepare.", e);
             }
         }
 
@@ -1391,7 +1466,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onPrepareFromMediaId(packageName, pid, uid, mediaId, extras);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in prepareFromMediaId.", e);
+                Slog.e(TAG, "Remote failure in prepareFromMediaId.", e);
             }
         }
 
@@ -1403,7 +1478,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onPrepareFromSearch(packageName, pid, uid, query, extras);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in prepareFromSearch.", e);
+                Slog.e(TAG, "Remote failure in prepareFromSearch.", e);
             }
         }
 
@@ -1414,7 +1489,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onPrepareFromUri(packageName, pid, uid, uri, extras);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in prepareFromUri.", e);
+                Slog.e(TAG, "Remote failure in prepareFromUri.", e);
             }
         }
 
@@ -1425,7 +1500,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onPlay(packageName, pid, uid);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in play.", e);
+                Slog.e(TAG, "Remote failure in play.", e);
             }
         }
 
@@ -1437,7 +1512,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onPlayFromMediaId(packageName, pid, uid, mediaId, extras);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in playFromMediaId.", e);
+                Slog.e(TAG, "Remote failure in playFromMediaId.", e);
             }
         }
 
@@ -1449,7 +1524,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onPlayFromSearch(packageName, pid, uid, query, extras);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in playFromSearch.", e);
+                Slog.e(TAG, "Remote failure in playFromSearch.", e);
             }
         }
 
@@ -1460,7 +1535,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onPlayFromUri(packageName, pid, uid, uri, extras);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in playFromUri.", e);
+                Slog.e(TAG, "Remote failure in playFromUri.", e);
             }
         }
 
@@ -1471,7 +1546,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onSkipToTrack(packageName, pid, uid, id);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in skipToTrack", e);
+                Slog.e(TAG, "Remote failure in skipToTrack", e);
             }
         }
 
@@ -1482,7 +1557,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onPause(packageName, pid, uid);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in pause.", e);
+                Slog.e(TAG, "Remote failure in pause.", e);
             }
         }
 
@@ -1493,7 +1568,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onStop(packageName, pid, uid);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in stop.", e);
+                Slog.e(TAG, "Remote failure in stop.", e);
             }
         }
 
@@ -1504,7 +1579,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onNext(packageName, pid, uid);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in next.", e);
+                Slog.e(TAG, "Remote failure in next.", e);
             }
         }
 
@@ -1515,7 +1590,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onPrevious(packageName, pid, uid);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in previous.", e);
+                Slog.e(TAG, "Remote failure in previous.", e);
             }
         }
 
@@ -1526,7 +1601,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onFastForward(packageName, pid, uid);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in fastForward.", e);
+                Slog.e(TAG, "Remote failure in fastForward.", e);
             }
         }
 
@@ -1537,7 +1612,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onRewind(packageName, pid, uid);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in rewind.", e);
+                Slog.e(TAG, "Remote failure in rewind.", e);
             }
         }
 
@@ -1548,7 +1623,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onSeekTo(packageName, pid, uid, pos);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in seekTo.", e);
+                Slog.e(TAG, "Remote failure in seekTo.", e);
             }
         }
 
@@ -1559,7 +1634,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onRate(packageName, pid, uid, rating);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in rate.", e);
+                Slog.e(TAG, "Remote failure in rate.", e);
             }
         }
 
@@ -1570,7 +1645,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onSetPlaybackSpeed(packageName, pid, uid, speed);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in setPlaybackSpeed.", e);
+                Slog.e(TAG, "Remote failure in setPlaybackSpeed.", e);
             }
         }
 
@@ -1587,7 +1662,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                     mCb.onAdjustVolume(packageName, pid, uid, direction);
                 }
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in adjustVolume.", e);
+                Slog.e(TAG, "Remote failure in adjustVolume.", e);
             }
         }
 
@@ -1598,7 +1673,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         pid, uid, packageName, reason);
                 mCb.onSetVolumeTo(packageName, pid, uid, value);
             } catch (RemoteException e) {
-                Log.e(TAG, "Remote failure in setVolumeTo.", e);
+                Slog.e(TAG, "Remote failure in setVolumeTo.", e);
             }
         }
 
@@ -1641,8 +1716,10 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         cb, packageName, Binder.getCallingUid(), () -> unregisterCallback(cb));
                     mControllerCallbackHolders.add(holder);
                     if (DEBUG) {
-                        Log.d(TAG, "registering controller callback " + cb + " from controller"
-                                + packageName);
+                        Slog.d(
+                                TAG,
+                                "registering controller callback " + cb
+                                        + " from controller" + packageName);
                     }
                     // Avoid callback leaks
                     try {
@@ -1651,7 +1728,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         cb.asBinder().linkToDeath(holder.mDeathMonitor, 0);
                     } catch (RemoteException e) {
                         unregisterCallback(cb);
-                        Log.w(TAG, "registerCallback failed to linkToDeath", e);
+                        Slog.w(TAG, "registerCallback failed to linkToDeath", e);
                     }
                 }
             }
@@ -1666,12 +1743,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                         cb.asBinder().unlinkToDeath(
                           mControllerCallbackHolders.get(index).mDeathMonitor, 0);
                     } catch (NoSuchElementException e) {
-                        Log.w(TAG, "error unlinking to binder death", e);
+                        Slog.w(TAG, "error unlinking to binder death", e);
                     }
                     mControllerCallbackHolders.remove(index);
                 }
                 if (DEBUG) {
-                    Log.d(TAG, "unregistering callback " + cb.asBinder());
+                    Slog.d(TAG, "unregistering callback " + cb.asBinder());
                 }
             }
         }

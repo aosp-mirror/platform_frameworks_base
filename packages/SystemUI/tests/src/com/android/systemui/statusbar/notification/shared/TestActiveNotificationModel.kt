@@ -15,7 +15,6 @@
 
 package com.android.systemui.statusbar.notification.shared
 
-import android.graphics.drawable.Icon
 import com.google.common.truth.Correspondence
 
 val byKey: Correspondence<ActiveNotificationModel, String> =
@@ -38,30 +37,3 @@ val byIsLastMessageFromReply: Correspondence<ActiveNotificationModel, Boolean> =
     )
 val byIsPulsing: Correspondence<ActiveNotificationModel, Boolean> =
     Correspondence.transforming({ it?.isPulsing }, "has an isPulsing value of")
-
-fun activeNotificationModel(
-    key: String,
-    groupKey: String? = null,
-    isAmbient: Boolean = false,
-    isRowDismissed: Boolean = false,
-    isSilent: Boolean = false,
-    isLastMessageFromReply: Boolean = false,
-    isSuppressedFromStatusBar: Boolean = false,
-    isPulsing: Boolean = false,
-    aodIcon: Icon? = null,
-    shelfIcon: Icon? = null,
-    statusBarIcon: Icon? = null,
-) =
-    ActiveNotificationModel(
-        key = key,
-        groupKey = groupKey,
-        isAmbient = isAmbient,
-        isRowDismissed = isRowDismissed,
-        isSilent = isSilent,
-        isLastMessageFromReply = isLastMessageFromReply,
-        isSuppressedFromStatusBar = isSuppressedFromStatusBar,
-        isPulsing = isPulsing,
-        aodIcon = aodIcon,
-        shelfIcon = shelfIcon,
-        statusBarIcon = statusBarIcon,
-    )

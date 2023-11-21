@@ -105,7 +105,8 @@ class AppInfoTest {
             }
         }
 
-        composeTestRule.onNodeWithText("version $VERSION_NAME").assertIsDisplayed()
+        composeTestRule.onNodeWithText(text = "version $VERSION_NAME", substring = true)
+            .assertIsDisplayed()
     }
 
     @Test
@@ -119,10 +120,10 @@ class AppInfoTest {
 
         composeTestRule.setContent {
             CompositionLocalProvider(LocalContext provides context) {
-                appInfoProvider.FooterAppVersion(true)
+                appInfoProvider.FooterAppVersion(showPackageName = true)
             }
         }
-        composeTestRule.onNodeWithText(PACKAGE_NAME).assertIsDisplayed()
+        composeTestRule.onNodeWithText(text = PACKAGE_NAME, substring = true).assertIsDisplayed()
     }
 
 
@@ -137,10 +138,10 @@ class AppInfoTest {
 
         composeTestRule.setContent {
             CompositionLocalProvider(LocalContext provides context) {
-                appInfoProvider.FooterAppVersion(false)
+                appInfoProvider.FooterAppVersion(showPackageName = false)
             }
         }
-        composeTestRule.onNodeWithText(PACKAGE_NAME).assertDoesNotExist()
+        composeTestRule.onNodeWithText(text = PACKAGE_NAME, substring = true).assertDoesNotExist()
     }
 
     private companion object {

@@ -18,4 +18,5 @@ package com.android.systemui.user.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.userRepository by Kosmos.Fixture { FakeUserRepository() }
+var Kosmos.userRepository: UserRepository by Kosmos.Fixture { fakeUserRepository }
+val Kosmos.fakeUserRepository by Kosmos.Fixture { FakeUserRepository() }

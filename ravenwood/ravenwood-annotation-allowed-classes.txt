@@ -2,6 +2,12 @@
 
 com.android.internal.util.ArrayUtils
 
+android.util.DataUnit
+android.util.EventLog
+android.util.IntArray
+android.util.LongArray
+android.util.Slog
+android.util.TimeUtils
 android.util.Xml
 
 android.os.Binder

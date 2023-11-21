@@ -75,7 +75,6 @@ import static com.android.server.wm.Task.REPARENT_MOVE_ROOT_TASK_TO_FRONT;
 import static com.android.server.wm.TaskFragment.TASK_FRAGMENT_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
-import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_FREEZE_TIMEOUT;
@@ -788,23 +787,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final DisplayContent defaultDisplay = mWmService.getDefaultDisplayContentLocked();
         final WindowSurfacePlacer surfacePlacer = mWmService.mWindowPlacerLocked;
 
-        if (SHOW_LIGHT_TRANSACTIONS) {
-            Slog.i(TAG,
-                    ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
-        }
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "applySurfaceChanges");
-        mWmService.openSurfaceTransaction();
         try {
             applySurfaceChangesTransaction();
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
-            mWmService.closeSurfaceTransaction("performLayoutAndPlaceSurfaces");
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-            if (SHOW_LIGHT_TRANSACTIONS) {
-                Slog.i(TAG,
-                        "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
-            }
         }
 
         // Send any pending task-info changes that were queued-up during a layout deferment
@@ -998,9 +987,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Give the display manager a chance to adjust properties like display rotation if it needs
         // to.
         mWmService.mDisplayManagerInternal.performTraversal(t);
-        if (t != defaultDc.mSyncTransaction) {
-            SurfaceControl.mergeToGlobalTransaction(t);
-        }
     }
 
     /**

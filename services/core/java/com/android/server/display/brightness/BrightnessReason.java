@@ -39,7 +39,8 @@ public final class BrightnessReason {
     public static final int REASON_BOOST = 8;
     public static final int REASON_SCREEN_OFF_BRIGHTNESS_SENSOR = 9;
     public static final int REASON_FOLLOWER = 10;
-    public static final int REASON_MAX = REASON_FOLLOWER;
+    public static final int REASON_OFFLOAD = 11;
+    public static final int REASON_MAX = REASON_OFFLOAD;
 
     public static final int MODIFIER_DIMMED = 0x1;
     public static final int MODIFIER_LOW_POWER = 0x2;
@@ -196,6 +197,8 @@ public final class BrightnessReason {
                 return "screen_off_brightness_sensor";
             case REASON_FOLLOWER:
                 return "follower";
+            case REASON_OFFLOAD:
+                return "offload";
             default:
                 return Integer.toString(reason);
         }

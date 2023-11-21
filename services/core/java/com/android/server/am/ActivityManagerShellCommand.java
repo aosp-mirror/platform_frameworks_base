@@ -552,7 +552,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     mAsync = true;
                 } else if (opt.equals("--splashscreen-show-icon")) {
                     mShowSplashScreen = true;
-                } else if (opt.equals("--dismiss-keyguard-if-insecure")) {
+                } else if (opt.equals("--dismiss-keyguard-if-insecure")
+                      || opt.equals("--dismiss-keyguard")) {
                     mDismissKeyguardIfInsecure = true;
                 } else {
                     return false;

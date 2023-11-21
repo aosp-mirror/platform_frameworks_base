@@ -17,12 +17,14 @@ class android.util.MapCollections stubclass
 class android.util.Log stubclass
 class android.util.Log !com.android.hoststubgen.nativesubstitution.Log_host
 class android.util.LogPrinter stubclass
+class android.util.LocalLog stubclass
 
 # String Manipulation
 class android.util.Printer stubclass
 class android.util.PrintStreamPrinter stubclass
 class android.util.PrintWriterPrinter stubclass
 class android.util.StringBuilderPrinter stubclass
+class android.util.IndentingPrintWriter stubclass
 
 # Properties
 class android.util.Property stubclass
@@ -76,6 +78,7 @@ class android.util.Patterns stubclass
 class android.util.UtilConfig stubclass
 
 # Internals
+class com.android.internal.util.FastPrintWriter stubclass
 class com.android.internal.util.GrowingArrayUtils stubclass
 class com.android.internal.util.LineBreakBufferedWriter stubclass
 class com.android.internal.util.Preconditions stubclass

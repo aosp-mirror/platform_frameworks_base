@@ -3586,20 +3586,29 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 params.setDontKillApp(false);
             }
 
+            boolean existingSplitReplacedOrRemoved = false;
             // Inherit splits if not overridden.
             if (!ArrayUtils.isEmpty(existing.getSplitNames())) {
                 for (int i = 0; i < existing.getSplitNames().length; i++) {
                     final String splitName = existing.getSplitNames()[i];
                     final File splitFile = new File(existing.getSplitApkPaths()[i]);
                     final boolean splitRemoved = removeSplitList.contains(splitName);
-                    if (!stagedSplits.contains(splitName) && !splitRemoved) {
+                    final boolean splitReplaced = stagedSplits.contains(splitName);
+                    if (!splitReplaced && !splitRemoved) {
                         inheritFileLocked(splitFile);
                         // Collect the requiredSplitTypes and staged splitTypes from splits
                         CollectionUtils.addAll(requiredSplitTypes,
                                 existing.getRequiredSplitTypes()[i]);
                         CollectionUtils.addAll(stagedSplitTypes, existing.getSplitTypes()[i]);
+                    } else {
+                        existingSplitReplacedOrRemoved = true;
                     }
                 }
+            }
+            if (existingSplitReplacedOrRemoved
+                    && (params.installFlags & PackageManager.INSTALL_DONT_KILL_APP) != 0) {
+                // Some splits are being replaced or removed. Make sure the app is restarted.
+                params.setDontKillApp(false);
             }
 
             // Inherit compiled oat directory.

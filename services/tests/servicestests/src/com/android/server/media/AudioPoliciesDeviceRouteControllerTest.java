@@ -90,7 +90,7 @@ public class AudioPoliciesDeviceRouteControllerTest {
 
     @Test
     public void getDeviceRoute_noSelectedRoutes_returnsDefaultDevice() {
-        MediaRoute2Info route2Info = mController.getDeviceRoute();
+        MediaRoute2Info route2Info = mController.getSelectedRoute();
 
         assertThat(route2Info.getName()).isEqualTo(ROUTE_NAME_DEFAULT);
         assertThat(route2Info.getType()).isEqualTo(MediaRoute2Info.TYPE_BUILTIN_SPEAKER);
@@ -105,7 +105,7 @@ public class AudioPoliciesDeviceRouteControllerTest {
         audioRoutesInfo.mainType = AudioRoutesInfo.MAIN_HEADPHONES;
         callAudioRoutesObserver(audioRoutesInfo);
 
-        MediaRoute2Info route2Info = mController.getDeviceRoute();
+        MediaRoute2Info route2Info = mController.getSelectedRoute();
         assertThat(route2Info.getName()).isEqualTo(ROUTE_NAME_HEADPHONES);
         assertThat(route2Info.getType()).isEqualTo(MediaRoute2Info.TYPE_WIRED_HEADPHONES);
     }
@@ -117,7 +117,7 @@ public class AudioPoliciesDeviceRouteControllerTest {
 
         mController.selectRoute(MediaRoute2Info.TYPE_DOCK);
 
-        MediaRoute2Info route2Info = mController.getDeviceRoute();
+        MediaRoute2Info route2Info = mController.getSelectedRoute();
         assertThat(route2Info.getName()).isEqualTo(ROUTE_NAME_DOCK);
         assertThat(route2Info.getType()).isEqualTo(MediaRoute2Info.TYPE_DOCK);
     }
@@ -135,7 +135,7 @@ public class AudioPoliciesDeviceRouteControllerTest {
 
         mController.selectRoute(MediaRoute2Info.TYPE_DOCK);
 
-        MediaRoute2Info route2Info = mController.getDeviceRoute();
+        MediaRoute2Info route2Info = mController.getSelectedRoute();
         assertThat(route2Info.getName()).isEqualTo(ROUTE_NAME_DOCK);
         assertThat(route2Info.getType()).isEqualTo(MediaRoute2Info.TYPE_DOCK);
     }
@@ -155,7 +155,7 @@ public class AudioPoliciesDeviceRouteControllerTest {
 
         mController.selectRoute(null);
 
-        MediaRoute2Info route2Info = mController.getDeviceRoute();
+        MediaRoute2Info route2Info = mController.getSelectedRoute();
         assertThat(route2Info.getName()).isEqualTo(ROUTE_NAME_HEADPHONES);
         assertThat(route2Info.getType()).isEqualTo(MediaRoute2Info.TYPE_WIRED_HEADPHONES);
     }
@@ -171,7 +171,7 @@ public class AudioPoliciesDeviceRouteControllerTest {
 
         mController.selectRoute(MediaRoute2Info.TYPE_BLUETOOTH_A2DP);
 
-        MediaRoute2Info route2Info = mController.getDeviceRoute();
+        MediaRoute2Info route2Info = mController.getSelectedRoute();
         assertThat(route2Info.getName()).isEqualTo(ROUTE_NAME_HEADPHONES);
         assertThat(route2Info.getType()).isEqualTo(MediaRoute2Info.TYPE_WIRED_HEADPHONES);
     }
@@ -202,7 +202,7 @@ public class AudioPoliciesDeviceRouteControllerTest {
 
         mController.updateVolume(VOLUME_SAMPLE_1);
 
-        MediaRoute2Info route2Info = mController.getDeviceRoute();
+        MediaRoute2Info route2Info = mController.getSelectedRoute();
         assertThat(route2Info.getType()).isEqualTo(MediaRoute2Info.TYPE_WIRED_HEADPHONES);
         assertThat(route2Info.getVolume()).isEqualTo(VOLUME_SAMPLE_1);
     }
@@ -222,7 +222,7 @@ public class AudioPoliciesDeviceRouteControllerTest {
 
         mController.selectRoute(MediaRoute2Info.TYPE_DOCK);
 
-        MediaRoute2Info route2Info = mController.getDeviceRoute();
+        MediaRoute2Info route2Info = mController.getSelectedRoute();
         assertThat(route2Info.getType()).isEqualTo(MediaRoute2Info.TYPE_DOCK);
         assertThat(route2Info.getVolume()).isEqualTo(VOLUME_SAMPLE_1);
     }
