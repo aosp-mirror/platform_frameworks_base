@@ -16,6 +16,8 @@
 
 package android.hardware.input;
 
+import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
+
 import android.Manifest;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
@@ -58,6 +60,11 @@ public class InputSettings {
      */
     public static final float DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH = .8f;
 
+    /**
+     * The maximum allowed Accessibility bounce keys threshold.
+     * @hide
+     */
+    public static final int MAX_ACCESSIBILITY_BOUNCE_KEYS_THRESHOLD_MILLIS = 5000;
 
     private InputSettings() {
     }
@@ -328,4 +335,70 @@ public class InputSettings {
                        .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon)
                || InputProperties.force_enable_stylus_pointer_icon().orElse(false);
     }
+
+    /**
+     * Whether Accessibility bounce keys is enabled.
+     *
+     * <p>
+     * ‘Bounce keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to configure the device to ignore rapid, repeated keypresses of the
+     * same key.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isAccessibilityBounceKeysEnabled(@NonNull Context context) {
+        return getAccessibilityBounceKeysThreshold(context) != 0;
+    }
+
+    /**
+     * Get Accessibility bounce keys threshold duration in milliseconds.
+     *
+     * <p>
+     * ‘Bounce keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to configure the device to ignore rapid, repeated keypresses of the
+     * same key.
+     * </p>
+     *
+     * @hide
+     */
+    public static int getAccessibilityBounceKeysThreshold(@NonNull Context context) {
+        if (!keyboardA11yBounceKeysFlag()) {
+            return 0;
+        }
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS, 0, UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Set Accessibility bounce keys threshold duration in milliseconds.
+     * @param thresholdTimeMillis time duration for which a key down will be ignored after a
+     *                            previous key up for the same key on the same device between 0 and
+     *                            {@link MAX_ACCESSIBILITY_BOUNCE_KEYS_THRESHOLD_MILLIS}
+     *
+     * <p>
+     * ‘Bounce keys’ is an accessibility feature to aid users who have physical disabilities,
+     * that allows the user to configure the device to ignore rapid, repeated keypresses of the
+     * same key.
+     * </p>
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setAccessibilityBounceKeysThreshold(@NonNull Context context,
+            int thresholdTimeMillis) {
+        if (!keyboardA11yBounceKeysFlag()) {
+            return;
+        }
+        if (thresholdTimeMillis < 0
+                || thresholdTimeMillis > MAX_ACCESSIBILITY_BOUNCE_KEYS_THRESHOLD_MILLIS) {
+            throw new IllegalArgumentException(
+                    "Provided Bounce keys threshold should be in range [0, "
+                            + MAX_ACCESSIBILITY_BOUNCE_KEYS_THRESHOLD_MILLIS + "]");
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS, thresholdTimeMillis,
+                UserHandle.USER_CURRENT);
+    }
+
 }

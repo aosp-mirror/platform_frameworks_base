@@ -3487,6 +3487,13 @@ public class InputManagerService extends IInputManager.Stub
         wm.addView(view, lp);
     }
 
+    /**
+     * Sets Accessibility bounce keys threshold in milliseconds.
+     */
+    public void setAccessibilityBounceKeysThreshold(int thresholdTimeMs) {
+        mNative.setAccessibilityBounceKeysThreshold(thresholdTimeMs);
+    }
+
     interface KeyboardBacklightControllerInterface {
         default void incrementKeyboardBacklight(int deviceId) {}
         default void decrementKeyboardBacklight(int deviceId) {}

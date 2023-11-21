@@ -87,6 +87,7 @@ namespace input_flags = com::android::input::flags;
 namespace android {
 
 static const bool ENABLE_POINTER_CHOREOGRAPHER = input_flags::enable_pointer_choreographer();
+static const bool ENABLE_INPUT_FILTER_RUST = input_flags::enable_input_filter_rust_impl();
 
 // The exponent used to calculate the pointer speed scaling factor.
 // The scaling factor is calculated as 2 ^ (speed * exponent),
@@ -2693,6 +2694,15 @@ static void nativeSetStylusPointerIconEnabled(JNIEnv* env, jobject nativeImplObj
     im->setStylusPointerIconEnabled(enabled);
 }
 
+static void nativeSetAccessibilityBounceKeysThreshold(JNIEnv* env, jobject nativeImplObj,
+                                                      jint thresholdTimeMs) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    if (ENABLE_INPUT_FILTER_RUST) {
+        im->getInputManager()->getInputFilter().setAccessibilityBounceKeysThreshold(
+                static_cast<nsecs_t>(thresholdTimeMs) * 1000000);
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2790,6 +2800,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetStylusButtonMotionEventsEnabled},
         {"getMouseCursorPosition", "()[F", (void*)nativeGetMouseCursorPosition},
         {"setStylusPointerIconEnabled", "(Z)V", (void*)nativeSetStylusPointerIconEnabled},
+        {"setAccessibilityBounceKeysThreshold", "(I)V",
+         (void*)nativeSetAccessibilityBounceKeysThreshold},
 };
 
 #define FIND_CLASS(var, className) \
