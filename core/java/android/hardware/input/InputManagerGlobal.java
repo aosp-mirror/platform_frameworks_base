@@ -951,7 +951,8 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#getSensorList(int)
+     * Get information about all of the sensors supported by an input device
+     * @see InputDeviceSensorManager
      */
     InputSensorInfo[] getSensorList(int deviceId) {
         try {
@@ -962,7 +963,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#enableSensor(int, int, int, int)
+     * @see InputDeviceSensorManager
      */
     boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
             int maxBatchReportLatencyUs) {
@@ -975,7 +976,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#disableSensor(int, int)
+     * @see InputDeviceSensorManager
      */
     void disableSensor(int deviceId, int sensorType) {
         try {
@@ -986,7 +987,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#flushSensor(int, int)
+     * @see InputDeviceSensorManager
      */
     boolean flushSensor(int deviceId, int sensorType) {
         try {
@@ -997,7 +998,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#registerSensorListener(IInputSensorEventListener)
+     * @see InputDeviceSensorManager
      */
     boolean registerSensorListener(IInputSensorEventListener listener) {
         try {
@@ -1008,7 +1009,7 @@ public final class InputManagerGlobal {
     }
 
     /**
-     * @see InputManager#unregisterSensorListener(IInputSensorEventListener)
+     * @see InputDeviceSensorManager
      */
     void unregisterSensorListener(IInputSensorEventListener listener) {
         try {
