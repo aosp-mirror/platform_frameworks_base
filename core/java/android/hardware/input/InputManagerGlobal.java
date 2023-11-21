@@ -100,6 +100,9 @@ public final class InputManagerGlobal {
     @GuardedBy("mKeyboardBacklightListenerLock")
     @Nullable private IKeyboardBacklightListener mKeyboardBacklightListener;
 
+    // InputDeviceSensorManager gets notified synchronously from the binder thread when input
+    // devices change, so it must be synchronized with the input device listeners.
+    @GuardedBy("mInputDeviceListeners")
     @Nullable private InputDeviceSensorManager mInputDeviceSensorManager;
 
     private static InputManagerGlobal sInstance;
@@ -250,6 +253,9 @@ public final class InputManagerGlobal {
                         Log.d(TAG, "Device removed: " + deviceId);
                     }
                     mInputDevices.removeAt(i);
+                    if (mInputDeviceSensorManager != null) {
+                        mInputDeviceSensorManager.onInputDeviceRemoved(deviceId);
+                    }
                     sendMessageToInputDeviceListenersLocked(
                             InputDeviceListenerDelegate.MSG_DEVICE_REMOVED, deviceId);
                 }
@@ -267,6 +273,9 @@ public final class InputManagerGlobal {
                                 Log.d(TAG, "Device changed: " + deviceId);
                             }
                             mInputDevices.setValueAt(index, null);
+                            if (mInputDeviceSensorManager != null) {
+                                mInputDeviceSensorManager.onInputDeviceChanged(deviceId);
+                            }
                             sendMessageToInputDeviceListenersLocked(
                                     InputDeviceListenerDelegate.MSG_DEVICE_CHANGED, deviceId);
                         }
@@ -276,6 +285,9 @@ public final class InputManagerGlobal {
                         Log.d(TAG, "Device added: " + deviceId);
                     }
                     mInputDevices.put(deviceId, null);
+                    if (mInputDeviceSensorManager != null) {
+                        mInputDeviceSensorManager.onInputDeviceAdded(deviceId);
+                    }
                     sendMessageToInputDeviceListenersLocked(
                             InputDeviceListenerDelegate.MSG_DEVICE_ADDED, deviceId);
                 }
@@ -930,10 +942,12 @@ public final class InputManagerGlobal {
      */
     @NonNull
     public SensorManager getInputDeviceSensorManager(int deviceId) {
-        if (mInputDeviceSensorManager == null) {
-            mInputDeviceSensorManager = new InputDeviceSensorManager(this);
+        synchronized (mInputDeviceListeners) {
+            if (mInputDeviceSensorManager == null) {
+                mInputDeviceSensorManager = new InputDeviceSensorManager(this);
+            }
+            return mInputDeviceSensorManager.getSensorManager(deviceId);
         }
-        return mInputDeviceSensorManager.getSensorManager(deviceId);
     }
 
     /**

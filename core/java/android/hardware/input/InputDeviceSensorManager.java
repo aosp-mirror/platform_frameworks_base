@@ -17,6 +17,7 @@
 package android.hardware.input;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.HardwareBuffer;
 import android.hardware.Sensor;
 import android.hardware.SensorAdditionalInfo;
@@ -49,7 +50,7 @@ import java.util.Map;
  * sensors.
  * @hide
  */
-public class InputDeviceSensorManager implements InputManager.InputDeviceListener {
+public class InputDeviceSensorManager {
     private static final String TAG = "InputDeviceSensorManager";
     private static final boolean DEBUG = false;
 
@@ -67,18 +68,15 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
     @GuardedBy("mInputSensorLock")
     private final ArrayList<InputSensorEventListenerDelegate> mInputSensorEventListeners =
             new ArrayList<InputSensorEventListenerDelegate>();
-    private final HandlerThread mSensorThread;
-    private final Handler mSensorHandler;
+
+    // The sensor thread is only initialized if there is a listener added without a handler.
+    @GuardedBy("mInputSensorLock")
+    @Nullable
+    private HandlerThread mSensorThread;
 
     public InputDeviceSensorManager(InputManagerGlobal inputManagerGlobal) {
         mGlobal = inputManagerGlobal;
 
-        mSensorThread = new HandlerThread("SensorThread");
-        mSensorThread.start();
-        mSensorHandler = new Handler(mSensorThread.getLooper());
-
-        // Register the input device listener
-        mGlobal.registerInputDeviceListener(this, mSensorHandler);
         // Initialize the sensor list
         initializeSensors();
     }
@@ -105,7 +103,6 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
         }
     }
 
-    @Override
     public void onInputDeviceAdded(int deviceId) {
         synchronized (mInputSensorLock) {
             if (!mSensors.containsKey(deviceId)) {
@@ -117,14 +114,12 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
         }
     }
 
-    @Override
     public void onInputDeviceRemoved(int deviceId) {
         synchronized (mInputSensorLock) {
             mSensors.remove(deviceId);
         }
     }
 
-    @Override
     public void onInputDeviceChanged(int deviceId) {
         synchronized (mInputSensorLock) {
             mSensors.remove(deviceId);
@@ -261,8 +256,8 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
         private final SparseArray<SensorEvent> mSensorEvents = new SparseArray<SensorEvent>();
 
         InputSensorEventListenerDelegate(SensorEventListener listener, Sensor sensor,
-                int delayUs, int maxBatchReportLatencyUs, Handler handler) {
-            super(handler != null ? handler.getLooper() : Looper.myLooper());
+                int delayUs, int maxBatchReportLatencyUs, Looper looper) {
+            super(looper);
             mListener = listener;
             mDelayUs = delayUs;
             mMaxBatchReportLatencyUs = maxBatchReportLatencyUs;
@@ -477,8 +472,7 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
             if (idx < 0) {
                 InputSensorEventListenerDelegate d =
                         new InputSensorEventListenerDelegate(listener, sensor, delayUs,
-                                maxBatchReportLatencyUs,
-                                handler == null ? mSensorHandler : handler);
+                                maxBatchReportLatencyUs, getLooperForListenerLocked(handler));
                 mInputSensorEventListeners.add(d);
             } else {
                 // The listener is already registered, see if it wants to listen to more sensors.
@@ -487,6 +481,19 @@ public class InputDeviceSensorManager implements InputManager.InputDeviceListene
         }
 
         return true;
+    }
+
+    @GuardedBy("mInputSensorLock")
+    @NonNull
+    private Looper getLooperForListenerLocked(@Nullable Handler requestedHandler) {
+        if (requestedHandler != null) {
+            return requestedHandler.getLooper();
+        }
+        if (mSensorThread == null) {
+            mSensorThread = new HandlerThread("SensorThread");
+            mSensorThread.start();
+        }
+        return mSensorThread.getLooper();
     }
 
     private void unregisterListenerInternal(SensorEventListener listener, Sensor sensor) {
