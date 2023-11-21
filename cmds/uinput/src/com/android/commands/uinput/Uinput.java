@@ -60,6 +60,10 @@ public class Uinput {
                 stream = new FileInputStream(f);
             }
             (new Uinput(stream)).run();
+        } catch (EvemuParser.ParsingException e) {
+            System.err.println(e.makeErrorMessage());
+            error(e.makeErrorMessage(), e);
+            System.exit(1);
         } catch (Exception e) {
             error("Uinput injection failed.", e);
             System.exit(1);

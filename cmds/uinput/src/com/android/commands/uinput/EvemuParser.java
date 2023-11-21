@@ -19,8 +19,8 @@ package com.android.commands.uinput;
 import android.annotation.Nullable;
 import android.util.SparseArray;
 
-import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.LineNumberReader;
 import java.io.Reader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -47,10 +47,11 @@ public class EvemuParser implements EventParser {
     private static final int REGISTRATION_DELAY_MILLIS = 500;
 
     private static class CommentAwareReader {
-        private final BufferedReader mReader;
+        private final LineNumberReader mReader;
+        private String mPreviousLine;
         private String mNextLine;
 
-        CommentAwareReader(BufferedReader in) throws IOException {
+        CommentAwareReader(LineNumberReader in) throws IOException {
             mReader = in;
             mNextLine = findNextLine();
         }
@@ -90,11 +91,45 @@ public class EvemuParser implements EventParser {
 
         /** Moves to the next line of the file. */
         public void advance() throws IOException {
+            mPreviousLine = mNextLine;
             mNextLine = findNextLine();
         }
 
         public boolean isAtEndOfFile() {
             return mNextLine == null;
+        }
+
+        /** Returns the previous line, for error messages. */
+        public String getPreviousLine() {
+            return mPreviousLine;
+        }
+
+        /** Returns the number of the <b>previous</b> line. */
+        public int getPreviousLineNumber() {
+            return mReader.getLineNumber() - 1;
+        }
+    }
+
+    public static class ParsingException extends RuntimeException {
+        private final int mLineNumber;
+        private final String mLine;
+
+        ParsingException(String message, CommentAwareReader reader) {
+            this(message, reader.getPreviousLine(), reader.getPreviousLineNumber());
+        }
+
+        ParsingException(String message, String line, int lineNumber) {
+            super(message);
+            mLineNumber = lineNumber;
+            mLine = line;
+        }
+
+        /** Returns a nicely formatted error message, including the line number and line. */
+        public String makeErrorMessage() {
+            return String.format("""
+                    Parsing error on line %d: %s
+                    --> %s
+                    """, mLineNumber, getMessage(), mLine);
         }
     }
 
@@ -107,7 +142,7 @@ public class EvemuParser implements EventParser {
     private final Queue<Event> mQueuedEvents = new ArrayDeque<>(2);
 
     public EvemuParser(Reader in) throws IOException {
-        mReader = new CommentAwareReader(new BufferedReader(in));
+        mReader = new CommentAwareReader(new LineNumberReader(in));
         mQueuedEvents.add(parseRegistrationEvent());
 
         // The kernel takes a little time to set up an evdev device after the initial
@@ -133,20 +168,22 @@ public class EvemuParser implements EventParser {
             return null;
         }
 
-        final String[] parts = expectLineWithParts("E", 4);
+        final String line = expectLine("E");
+        final String[] parts = expectParts(line, 4);
         final String[] timeParts = parts[0].split("\\.");
         if (timeParts.length != 2) {
-            throw new RuntimeException("Invalid timestamp (does not contain a '.')");
+            throw new ParsingException(
+                    "Invalid timestamp '" + parts[0] + "' (should contain a single '.')", mReader);
         }
         // TODO(b/310958309): use timeMicros to set the timestamp on the event being sent.
         final long timeMicros =
-                Long.parseLong(timeParts[0]) * 1_000_000 + Integer.parseInt(timeParts[1]);
+                parseLong(timeParts[0], 10) * 1_000_000 + parseInt(timeParts[1], 10);
         final Event.Builder eb = new Event.Builder();
         eb.setId(DEVICE_ID);
         eb.setCommand(Event.Command.INJECT);
-        final int eventType = Integer.parseInt(parts[1], 16);
-        final int eventCode = Integer.parseInt(parts[2], 16);
-        final int value = Integer.parseInt(parts[3]);
+        final int eventType = parseInt(parts[1], 16);
+        final int eventCode = parseInt(parts[2], 16);
+        final int value = parseInt(parts[3], 10);
         eb.setInjections(new int[] {eventType, eventCode, value});
 
         if (mLastEventTimeMicros == -1) {
@@ -184,10 +221,11 @@ public class EvemuParser implements EventParser {
         eb.setCommand(Event.Command.REGISTER);
         eb.setName(expectLine("N"));
 
-        final String[] idStrings = expectLineWithParts("I", 4);
-        eb.setBusId(Integer.parseInt(idStrings[0], 16));
-        eb.setVid(Integer.parseInt(idStrings[1], 16));
-        eb.setPid(Integer.parseInt(idStrings[2], 16));
+        final String idsLine = expectLine("I");
+        final String[] idStrings = expectParts(idsLine, 4);
+        eb.setBusId(parseInt(idStrings[0], 16));
+        eb.setVid(parseInt(idStrings[1], 16));
+        eb.setPid(parseInt(idStrings[2], 16));
         // TODO(b/302297266): support setting the version ID, and set it to idStrings[3].
 
         final SparseArray<int[]> config = new SparseArray<>();
@@ -215,33 +253,39 @@ public class EvemuParser implements EventParser {
     }
 
     private int[] parseProperties() throws IOException {
-        final List<String> propBitmapParts = new ArrayList<>();
+        final ArrayList<Integer> propBitmapParts = new ArrayList<>();
         String line = acceptLine("P");
         while (line != null) {
-            propBitmapParts.addAll(List.of(line.strip().split(" ")));
+            String[] parts = line.strip().split(" ");
+            propBitmapParts.ensureCapacity(propBitmapParts.size() + parts.length);
+            for (String part : parts) {
+                propBitmapParts.add(parseBitmapPart(part, line));
+            }
             line = acceptLine("P");
         }
-        return hexStringBitmapToEventCodes(propBitmapParts);
+        return bitmapToEventCodes(propBitmapParts);
     }
 
     private void parseAxisBitmaps(SparseArray<int[]> config) throws IOException {
-        final Map<Integer, List<String>> axisBitmapParts = new HashMap<>();
+        final Map<Integer, ArrayList<Integer>> axisBitmapParts = new HashMap<>();
         String line = acceptLine("B");
         while (line != null) {
             final String[] parts = line.strip().split(" ");
             if (parts.length < 2) {
-                throw new RuntimeException(
+                throw new ParsingException(
                         "Expected event type and at least one bitmap byte on 'B:' line; only found "
-                                + parts.length + " elements");
+                                + parts.length + " elements", mReader);
             }
-            final int eventType = Integer.parseInt(parts[0], 16);
+            final int eventType = parseInt(parts[0], 16);
             // EV_SYN cannot be configured through uinput, so skip it.
             if (eventType != Event.EV_SYN) {
                 if (!axisBitmapParts.containsKey(eventType)) {
                     axisBitmapParts.put(eventType, new ArrayList<>());
                 }
+                ArrayList<Integer> bitmapParts = axisBitmapParts.get(eventType);
+                bitmapParts.ensureCapacity(bitmapParts.size() + parts.length);
                 for (int i = 1; i < parts.length; i++) {
-                    axisBitmapParts.get(eventType).add(parts[i]);
+                    axisBitmapParts.get(eventType).add(parseBitmapPart(parts[i], line));
                 }
             }
             line = acceptLine("B");
@@ -253,7 +297,7 @@ public class EvemuParser implements EventParser {
             }
             final Event.UinputControlCode controlCode =
                     Event.UinputControlCode.forEventType(entry.getKey());
-            final int[] eventCodes = hexStringBitmapToEventCodes(entry.getValue());
+            final int[] eventCodes = bitmapToEventCodes(entry.getValue());
             if (controlCode != null && eventCodes.length > 0) {
                 config.append(controlCode.getValue(), eventCodes);
                 eventTypesToSet.add(entry.getKey());
@@ -263,24 +307,33 @@ public class EvemuParser implements EventParser {
                 Event.UinputControlCode.UI_SET_EVBIT.getValue(), unboxIntList(eventTypesToSet));
     }
 
+    private int parseBitmapPart(String part, String line) {
+        int b = parseInt(part, 16);
+        if (b < 0x0 || b > 0xff) {
+            throw new ParsingException("Bitmap part '" + part
+                    + "' invalid; parts must be hexadecimal values between 00 and ff.", mReader);
+        }
+        return b;
+    }
+
     private SparseArray<InputAbsInfo> parseAbsInfos() throws IOException {
         final SparseArray<InputAbsInfo> absInfos = new SparseArray<>();
         String line = acceptLine("A");
         while (line != null) {
             final String[] parts = line.strip().split(" ");
             if (parts.length < 5 || parts.length > 6) {
-                throw new RuntimeException(
-                        "'A:' lines should have the format 'A: <index (hex)> <min> <max> <fuzz> "
+                throw new ParsingException(
+                        "AbsInfo lines should have the format 'A: <index (hex)> <min> <max> <fuzz> "
                                 + "<flat> [<resolution>]'; expected 5 or 6 numbers but found "
-                                + parts.length);
+                                + parts.length, mReader);
             }
-            final int axisCode = Integer.parseInt(parts[0], 16);
+            final int axisCode = parseInt(parts[0], 16);
             final InputAbsInfo info = new InputAbsInfo();
-            info.minimum = Integer.parseInt(parts[1]);
-            info.maximum = Integer.parseInt(parts[2]);
-            info.fuzz = Integer.parseInt(parts[3]);
-            info.flat = Integer.parseInt(parts[4]);
-            info.resolution = parts.length > 5 ? Integer.parseInt(parts[5]) : 0;
+            info.minimum = parseInt(parts[1], 10);
+            info.maximum = parseInt(parts[2], 10);
+            info.fuzz = parseInt(parts[3], 10);
+            info.flat = parseInt(parts[4], 10);
+            info.resolution = parts.length > 5 ? parseInt(parts[5], 10) : 0;
             absInfos.append(axisCode, info);
             line = acceptLine("A");
         }
@@ -305,7 +358,9 @@ public class EvemuParser implements EventParser {
     private String expectLine(String type) throws IOException {
         final String line = acceptLine(type);
         if (line == null) {
-            throw new RuntimeException("Expected line of type '" + type + "'");
+            throw new ParsingException("Expected line of type '" + type + "'. (Lines should be in "
+                    + "the order N, I, P, B, A, L, S, E.)",
+                    mReader.peekLine(), mReader.getPreviousLineNumber() + 1);
         } else {
             return line;
         }
@@ -325,9 +380,8 @@ public class EvemuParser implements EventParser {
         }
         final String[] lineParts = line.split(": ", 2);
         if (lineParts.length < 2) {
-            // TODO(b/302297266): make a proper exception class for syntax errors, including line
-            // numbers, etc.. (We can use LineNumberReader to track them.)
-            throw new RuntimeException("Line without ': '");
+            throw new ParsingException("Missing type separator ': '",
+                    line, mReader.getPreviousLineNumber() + 1);
         }
         if (lineParts[0].equals(type)) {
             mReader.advance();
@@ -337,31 +391,37 @@ public class EvemuParser implements EventParser {
         }
     }
 
-    /**
-     * Like {@link #expectLine(String)}, but also checks that the contents of the line is formed of
-     * {@code numParts} space-separated parts.
-     *
-     * @param type the type of the line to expect, represented by the letter before the ':'.
-     * @param numParts the number of parts to expect.
-     * @return the part of the line after the ": ", split into {@code numParts} sections.
-     */
-    private String[] expectLineWithParts(String type, int numParts) throws IOException {
-        final String[] parts = expectLine(type).strip().split(" ");
+    private String[] expectParts(String line, int numParts) {
+        final String[] parts = line.strip().split(" ");
         if (parts.length != numParts) {
-            throw new RuntimeException("Expected a '" + type + "' line with " + numParts
-                    + " parts, found one with " + parts.length);
+            throw new ParsingException(
+                    "Expected a line with " + numParts + " space-separated parts, but found one "
+                            + "with " + parts.length, mReader);
         }
         return parts;
     }
 
-    private static int[] hexStringBitmapToEventCodes(List<String> strs) {
+    private int parseInt(String s, int radix) {
+        try {
+            return Integer.parseInt(s, radix);
+        } catch (NumberFormatException ex) {
+            throw new ParsingException(
+                    "'" + s + "' is not a valid integer of base " + radix, mReader);
+        }
+    }
+
+    private long parseLong(String s, int radix) {
+        try {
+            return Long.parseLong(s, radix);
+        } catch (NumberFormatException ex) {
+            throw new ParsingException("'" + s + "' is not a valid long of base " + radix, mReader);
+        }
+    }
+
+    private static int[] bitmapToEventCodes(List<Integer> bytes) {
         final List<Integer> codes = new ArrayList<>();
-        for (int iByte = 0; iByte < strs.size(); iByte++) {
-            int b = Integer.parseInt(strs.get(iByte), 16);
-            if (b < 0x0 || b > 0xff) {
-                throw new RuntimeException("Bitmap part '" + strs.get(iByte)
-                        + "' invalid; parts must be between 00 and ff.");
-            }
+        for (int iByte = 0; iByte < bytes.size(); iByte++) {
+            int b = bytes.get(iByte);
             for (int iBit = 0; iBit < 8; iBit++) {
                 if ((b & 1) != 0) {
                     codes.add(iByte * 8 + iBit);
