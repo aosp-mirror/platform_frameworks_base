@@ -18,12 +18,11 @@ package com.android.server.pm.parsing
 
 import android.annotation.RawRes
 import android.content.Context
-import com.android.server.pm.pkg.parsing.ParsingPackage
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import android.content.pm.parsing.result.ParseResult
 import android.platform.test.annotations.Presubmit
 import androidx.test.InstrumentationRegistry
-import com.android.server.pm.parsing.pkg.ParsedPackage
+import com.android.internal.pm.parsing.pkg.ParsedPackage
+import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.pm.test.service.server.R
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage

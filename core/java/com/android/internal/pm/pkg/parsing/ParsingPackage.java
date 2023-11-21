@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.parsing;
+package com.android.internal.pm.pkg.parsing;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
@@ -32,6 +32,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.R;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.component.ParsedActivity;
 import com.android.internal.pm.pkg.component.ParsedApexSystemService;
 import com.android.internal.pm.pkg.component.ParsedAttribution;
@@ -43,7 +44,6 @@ import com.android.internal.pm.pkg.component.ParsedProcess;
 import com.android.internal.pm.pkg.component.ParsedProvider;
 import com.android.internal.pm.pkg.component.ParsedService;
 import com.android.internal.pm.pkg.component.ParsedUsesPermission;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 
 import java.security.PublicKey;
 import java.util.List;

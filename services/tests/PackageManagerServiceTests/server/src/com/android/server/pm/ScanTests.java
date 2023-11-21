@@ -50,13 +50,13 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.PackageImpl;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import org.hamcrest.BaseMatcher;

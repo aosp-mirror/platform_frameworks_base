@@ -41,10 +41,10 @@ import android.util.apk.ApkSignatureVerifier;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.InstallLocationUtils;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.PackageParser2;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.rollback.RollbackManagerInternal;
 
 import java.io.File;
