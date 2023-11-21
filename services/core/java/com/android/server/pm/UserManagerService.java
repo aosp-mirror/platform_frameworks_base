@@ -1592,6 +1592,19 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private void showConfirmCredentialToDisableQuietMode(
             @UserIdInt int userId, @Nullable IntentSender target) {
+        if (android.app.admin.flags.Flags.quietModeCredentialBugFix()) {
+            // TODO (b/308121702) It may be brittle to rely on user states to check profile state
+            int state;
+            synchronized (mUserStates) {
+                state = mUserStates.get(userId, UserState.STATE_NONE);
+            }
+            if (state != UserState.STATE_NONE) {
+                Slog.i(LOG_TAG,
+                        "showConfirmCredentialToDisableQuietMode() called too early, user " + userId
+                                + " is still alive.");
+                return;
+            }
+        }
         // otherwise, we show a profile challenge to trigger decryption of the user
         final KeyguardManager km = (KeyguardManager) mContext.getSystemService(
                 Context.KEYGUARD_SERVICE);

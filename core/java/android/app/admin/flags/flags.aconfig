@@ -48,3 +48,10 @@ flag {
   description: "Update DumpSys to include information about migrated APIs in DPE"
   bug: "304999634"
 }
+
+flag {
+  name: "quiet_mode_credential_bug_fix"
+  namespace: "enterprise"
+  description: "Guards a bugfix that ends the credential input flow if the managed user has not stopped."
+  bug: "293441361"
+}
