@@ -22,10 +22,10 @@ cd ..
 READY_TEST_MODULES=(
   HostStubGenTest-framework-all-test-host-test
   hoststubgen-test-tiny-test
+  CtsUtilTestCasesRavenwood
 )
 
 MUST_BUILD_MODULES=(
-    run-ravenwood-test
     "${NOT_READY_TEST_MODULES[*]}"
     HostStubGenTest-framework-test
 )
@@ -51,8 +51,6 @@ run ./scripts/build-framework-hostside-jars-and-extract.sh
 # run ./scripts/build-framework-hostside-jars-without-genrules.sh
 
 # These tests should all pass.
-run-ravenwood-test ${READY_TEST_MODULES[*]}
-
-run atest CtsUtilTestCasesRavenwood
+run atest ${READY_TEST_MODULES[*]}
 
 echo ""${0##*/}" finished, with no unexpected failures. Ready to submit!"
