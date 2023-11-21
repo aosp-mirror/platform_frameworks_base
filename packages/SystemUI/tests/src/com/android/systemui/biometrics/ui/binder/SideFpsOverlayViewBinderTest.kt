@@ -75,6 +75,7 @@ import com.android.systemui.unfold.compat.ScreenSizeFoldProvider
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import java.util.Optional
@@ -82,6 +83,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -235,15 +237,18 @@ class SideFpsOverlayViewBinderTest : SysuiTestCase() {
                 windowManager,
                 displayStateInteractor,
                 Optional.of(fingerprintInteractiveToAuthProvider),
+                mock(),
                 SideFpsLogger(logcatLogBuffer("SfpsLogger"))
             )
 
         sideFpsProgressBarViewModel =
             SideFpsProgressBarViewModel(
                 mContext,
-                deviceEntryFingerprintAuthRepository,
+                mock(),
                 sfpsSensorInteractor,
+                mock(),
                 displayStateInteractor,
+                UnconfinedTestDispatcher(),
                 testScope.backgroundScope,
             )
 

@@ -28,13 +28,16 @@ import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.isDefaultOrientation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFingerprintAuthInteractor
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.phone.DozeServiceHost
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -43,6 +46,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
@@ -54,9 +58,13 @@ class SideFpsProgressBarViewModel
 @Inject
 constructor(
     private val context: Context,
-    private val fpAuthRepository: DeviceEntryFingerprintAuthRepository,
+    private val fpAuthRepository: DeviceEntryFingerprintAuthInteractor,
     private val sfpsSensorInteractor: SideFpsSensorInteractor,
+    // todo (b/317432075) Injecting DozeServiceHost directly instead of using it through
+    //  DozeInteractor as DozeServiceHost already depends on DozeInteractor.
+    private val dozeServiceHost: DozeServiceHost,
     displayStateInteractor: DisplayStateInteractor,
+    @Main private val mainDispatcher: CoroutineDispatcher,
     @Application private val applicationScope: CoroutineScope,
 ) {
     private val _progress = MutableStateFlow(0.0f)
@@ -168,18 +176,21 @@ constructor(
                     return@collectLatest
                 }
                 animatorJob =
-                    fpAuthRepository.authenticationStatus
-                        .onEach { authStatus ->
+                    combine(
+                            sfpsSensorInteractor.authenticationDuration,
+                            fpAuthRepository.authenticationStatus,
+                            ::Pair
+                        )
+                        .onEach { (authDuration, authStatus) ->
                             when (authStatus) {
                                 is AcquiredFingerprintAuthenticationStatus -> {
                                     if (authStatus.fingerprintCaptureStarted) {
                                         _visible.value = true
+                                        dozeServiceHost.fireSideFpsAcquisitionStarted()
                                         _animator?.cancel()
                                         _animator =
                                             ValueAnimator.ofFloat(0.0f, 1.0f)
-                                                .setDuration(
-                                                    sfpsSensorInteractor.authenticationDuration
-                                                )
+                                                .setDuration(authDuration)
                                                 .apply {
                                                     addUpdateListener {
                                                         _progress.value = it.animatedValue as Float
@@ -209,6 +220,7 @@ constructor(
                                 else -> Unit
                             }
                         }
+                        .flowOn(mainDispatcher)
                         .onCompletion { _animator?.cancel() }
                         .launchIn(applicationScope)
             }
