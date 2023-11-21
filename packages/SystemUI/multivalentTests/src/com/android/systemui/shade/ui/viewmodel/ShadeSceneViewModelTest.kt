@@ -77,7 +77,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             scope = testScope.backgroundScope,
         )
 
-    private val qsFlexiglassAdapter = FakeQSSceneAdapter { _, _ -> mock() }
+    private val qsFlexiglassAdapter = FakeQSSceneAdapter { mock() }
 
     private lateinit var shadeHeaderViewModel: ShadeHeaderViewModel
 

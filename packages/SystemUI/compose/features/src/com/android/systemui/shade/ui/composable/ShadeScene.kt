@@ -38,7 +38,6 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.notifications.ui.composable.NotificationStack
-import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.scene.shared.model.Direction
 import com.android.systemui.scene.shared.model.SceneKey
@@ -157,7 +156,6 @@ private fun SceneScope.ShadeScene(
             QuickSettings(
                 modifier = Modifier.wrapContentHeight(),
                 viewModel.qsSceneAdapter,
-                QSSceneAdapter.State.QQS
             )
             Spacer(modifier = Modifier.height(16.dp))
             NotificationStack(
