@@ -630,7 +630,7 @@ object Flags {
 
     // TODO(b/277201412): Tracking Bug
     @JvmField
-    val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION = releasedFlag("split_shade_subpixel_optimization")
+    val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION = unreleasedFlag("split_shade_subpixel_optimization")
 
     // TODO(b/288868056): Tracking Bug
     @JvmField
