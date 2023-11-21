@@ -18,6 +18,7 @@ package android.provider;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -36,6 +37,7 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
 import android.app.AutomaticZenRule;
+import android.app.Flags;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.SearchManager;
@@ -1902,6 +1904,36 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_CONDITION_PROVIDER_SETTINGS
             = "android.settings.ACTION_CONDITION_PROVIDER_SETTINGS";
+
+    /**
+     * Activity Action: Shows the settings page for an {@link AutomaticZenRule} mode.
+     * <p>
+     * Users can change the behavior of the mode when it's activated and access the owning app's
+     * additional configuration screen, where triggering criteria can be modified (see
+     * {@link AutomaticZenRule#setConfigurationActivity(ComponentName)}).
+     * <p>
+     * A matching Activity will only be found if
+     * {@link NotificationManager#areAutomaticZenRulesUserManaged()} is true.
+     * <p>
+     * Input: Intent's data URI set with an application name, using the "package" schema (like
+     * "package:com.my.app").
+     * Input: The id of the rule, provided in {@link #EXTRA_AUTOMATIC_ZEN_RULE_ID}.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_AUTOMATIC_ZEN_RULE_SETTINGS
+            = "android.settings.AUTOMATIC_ZEN_RULE_SETTINGS";
+
+    /**
+     * Activity Extra: The String id of the {@link AutomaticZenRule mode} settings to display.
+     * <p>
+     * This must be passed as an extra field to the {@link #ACTION_AUTOMATIC_ZEN_RULE_SETTINGS}.
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public static final String EXTRA_AUTOMATIC_ZEN_RULE_ID
+            = "android.provider.extra.AUTOMATIC_ZEN_RULE_ID";
 
     /**
      * Activity Action: Show settings for video captioning.
