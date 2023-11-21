@@ -212,11 +212,6 @@ android_library {
     lint: {
         extra_check_modules: ["SystemUILintChecker"],
     },
-    errorprone: {
-        javacflags: [
-            "-Xep:InvalidPatternSyntax:WARN",
-        ],
-    },
 }
 
 filegroup {
@@ -432,11 +427,6 @@ android_library {
         test: true,
         extra_check_modules: ["SystemUILintChecker"],
     },
-    errorprone: {
-        javacflags: [
-            "-Xep:InvalidPatternSyntax:WARN",
-        ],
-    },
 }
 
 android_app {
@@ -474,12 +464,6 @@ android_app {
     },
 
     plugins: ["dagger2-compiler"],
-
-    errorprone: {
-        javacflags: [
-            "-Xep:InvalidPatternSyntax:WARN",
-        ],
-    },
 }
 
 android_robolectric_test {
