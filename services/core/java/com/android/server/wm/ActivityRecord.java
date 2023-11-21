@@ -694,7 +694,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mCurrentLaunchCanTurnScreenOn = true;
 
     /** Whether our surface was set to be showing in the last call to {@link #prepareSurfaces} */
-    private boolean mLastSurfaceShowing;
+    boolean mLastSurfaceShowing;
 
     /**
      * The activity is opaque and fills the entire space of this task.
@@ -5380,11 +5380,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Finish should only ever commit visibility=false, so we can check full containment
                 // rather than just direct membership.
                 inFinishingTransition = mTransitionController.inFinishingTransition(this);
-                if (!inFinishingTransition && (visible || !mDisplayContent.isSleeping())) {
+                if (!inFinishingTransition) {
                     if (visible) {
-                        mTransitionController.onVisibleWithoutCollectingTransition(this,
-                                Debug.getCallers(1, 1));
-                    } else {
+                        if (!mDisplayContent.isSleeping() || canShowWhenLocked()) {
+                            mTransitionController.onVisibleWithoutCollectingTransition(this,
+                                    Debug.getCallers(1, 1));
+                        }
+                    } else if (!mDisplayContent.isSleeping()) {
                         Slog.w(TAG, "Set invisible without transition " + this);
                     }
                 }
