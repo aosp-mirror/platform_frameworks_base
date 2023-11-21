@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
     var cb = ApiFile.parseApi(listOf(File(args[0])))
     val flagToApi = mutableMapOf<String, MutableList<String>>()
     cb.getPackages()
-        .allTopLevelClasses()
+        .allClasses()
         .filter { it.methods().size > 0 }
         .forEach {
             for (method in it.methods()) {
