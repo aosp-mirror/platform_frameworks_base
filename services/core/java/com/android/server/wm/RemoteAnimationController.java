@@ -307,7 +307,6 @@ class RemoteAnimationController implements DeathRecipient {
             mIsFinishing = true;
             unlinkToDeathOfRunner();
             releaseFinishedCallback();
-            mService.openSurfaceTransaction();
             try {
                 ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS,
                         "onAnimationFinished(): Notify animation finished:");
@@ -348,7 +347,6 @@ class RemoteAnimationController implements DeathRecipient {
                 Slog.e(TAG, "Failed to finish remote animation", e);
                 throw e;
             } finally {
-                mService.closeSurfaceTransaction("RemoteAnimationController#finished");
                 mIsFinishing = false;
             }
             // Reset input for all activities when the remote animation is finished.

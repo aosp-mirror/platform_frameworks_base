@@ -66,10 +66,6 @@ public class SystemUiSystemPropertiesFlags {
         public static final Flag SHOW_STICKY_HUN_FOR_DENIED_FSI =
                 releasedFlag("persist.sysui.notification.show_sticky_hun_for_denied_fsi");
 
-        /** Gating the redaction of OTP notifications on the lockscreen */
-        public static final Flag OTP_REDACTION =
-                devFlag("persist.sysui.notification.otp_redaction");
-
         /** Gating the logging of DND state change events. */
         public static final Flag LOG_DND_STATE_EVENTS =
                 releasedFlag("persist.sysui.notification.log_dnd_state_events");

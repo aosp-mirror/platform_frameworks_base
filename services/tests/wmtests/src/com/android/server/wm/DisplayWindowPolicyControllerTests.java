@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -186,7 +187,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* options */null,
                 /* inTask */null,
                 /* inTaskFragment */ null,
-                /* balCode */ BackgroundActivityStartController.BAL_ALLOW_DEFAULT,
+                BalVerdict.ALLOW_BY_DEFAULT,
                 /* intentGrants */null,
                 /* realCaiingUid */ -1);
 
@@ -216,7 +217,7 @@ public class DisplayWindowPolicyControllerTests extends WindowTestsBase {
                 /* options= */null,
                 /* inTask= */null,
                 /* inTaskFragment= */ null,
-                /* balCode= */ BackgroundActivityStartController.BAL_ALLOW_DEFAULT,
+                BalVerdict.ALLOW_BY_DEFAULT,
                 /* intentGrants= */null,
                 /* realCaiingUid */ -1);
 

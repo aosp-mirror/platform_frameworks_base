@@ -11,15 +11,17 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
-package com.android.systemui.util.animation
+package com.android.systemui.util.animation.data.repository
 
-import com.android.systemui.util.animation.data.repository.AnimationStatusRepository
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 
-class FakeAnimationStatusRepository : AnimationStatusRepository {
+class FakeAnimationStatusRepository @Inject constructor() : AnimationStatusRepository {
 
     // Replay 1 element as real repository always emits current status as a first element
     private val animationsEnabled: MutableSharedFlow<Boolean> = MutableSharedFlow(replay = 1)
@@ -29,4 +31,9 @@ class FakeAnimationStatusRepository : AnimationStatusRepository {
     fun onAnimationStatusChanged(enabled: Boolean) {
         animationsEnabled.tryEmit(enabled)
     }
+}
+
+@Module
+interface FakeAnimationStatusRepositoryModule {
+    @Binds fun bindFake(fake: FakeAnimationStatusRepository): AnimationStatusRepository
 }

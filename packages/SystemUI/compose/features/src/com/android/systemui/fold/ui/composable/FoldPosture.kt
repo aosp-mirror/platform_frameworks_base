@@ -23,19 +23,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
-
-sealed interface FoldPosture {
-    /** A foldable device that's fully closed/folded or a device that doesn't support folding. */
-    data object Folded : FoldPosture
-    /** A foldable that's halfway open with the hinge held vertically. */
-    data object Book : FoldPosture
-    /** A foldable that's halfway open with the hinge held horizontally. */
-    data object Tabletop : FoldPosture
-    /** A foldable that's fully unfolded / flat. */
-    data object FullyUnfolded : FoldPosture
-}
+import com.android.systemui.fold.ui.helper.FoldPosture
+import com.android.systemui.fold.ui.helper.foldPostureInternal
 
 /** Returns the [FoldPosture] of the device currently. */
 @Composable
@@ -48,32 +38,6 @@ fun foldPosture(): State<FoldPosture> {
         initialValue = FoldPosture.Folded,
         key1 = layoutInfo,
     ) {
-        value =
-            layoutInfo
-                ?.displayFeatures
-                ?.firstNotNullOfOrNull { it as? FoldingFeature }
-                .let { foldingFeature ->
-                    when (foldingFeature?.state) {
-                        null -> FoldPosture.Folded
-                        FoldingFeature.State.HALF_OPENED ->
-                            foldingFeature.orientation.toHalfwayPosture()
-                        FoldingFeature.State.FLAT ->
-                            if (foldingFeature.isSeparating) {
-                                // Dual screen device.
-                                foldingFeature.orientation.toHalfwayPosture()
-                            } else {
-                                FoldPosture.FullyUnfolded
-                            }
-                        else -> error("Unsupported state \"${foldingFeature.state}\"")
-                    }
-                }
-    }
-}
-
-private fun FoldingFeature.Orientation.toHalfwayPosture(): FoldPosture {
-    return when (this) {
-        FoldingFeature.Orientation.HORIZONTAL -> FoldPosture.Tabletop
-        FoldingFeature.Orientation.VERTICAL -> FoldPosture.Book
-        else -> error("Unsupported orientation \"$this\"")
+        value = foldPostureInternal(layoutInfo)
     }
 }

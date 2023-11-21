@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-package android.os;
+package com.android.systemui.common.data
 
-parcelable WorkDuration cpp_header "android/WorkDuration.h";
+import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
+import dagger.Binds
+import dagger.Module
+
+@Module
+abstract class CommonDataLayerModule {
+    @Binds abstract fun bindRepository(impl: ConfigurationRepositoryImpl): ConfigurationRepository
+}

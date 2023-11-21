@@ -12,20 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
-
-package com.android.systemui.communal.ui.view
+package com.android.systemui.biometrics.ui.view
 
 import android.content.Context
 import android.util.AttributeSet
-import android.widget.LinearLayout
-import com.android.systemui.res.R
+import android.widget.FrameLayout
 
-/** Wraps around a widget rendered in communal mode. */
-class CommunalWidgetWrapper(context: Context, attrs: AttributeSet? = null) :
-    LinearLayout(context, attrs) {
-    init {
-        id = R.id.communal_widget_wrapper
-    }
-}
+/**
+ * A translucent (not visible to the user) view that receives touches to send to FingerprintManager
+ * for fingerprint authentication.
+ */
+class UdfpsTouchOverlay(context: Context, attrs: AttributeSet?) : FrameLayout(context, attrs)

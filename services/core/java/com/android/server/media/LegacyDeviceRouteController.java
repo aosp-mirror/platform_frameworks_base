@@ -107,7 +107,7 @@ import java.util.Objects;
 
     @Override
     @NonNull
-    public synchronized MediaRoute2Info getDeviceRoute() {
+    public synchronized MediaRoute2Info getSelectedRoute() {
         return mDeviceRoute;
     }
 

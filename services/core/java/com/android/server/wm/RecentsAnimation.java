@@ -307,7 +307,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 mService.stopAppSwitches();
             }
 
-            mWindowManager.inSurfaceTransaction(() -> {
+            inSurfaceTransaction(() -> {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER,
                         "RecentsAnimation#onAnimationFinished_inSurfaceTransaction");
                 mService.deferWindowLayout();
@@ -417,6 +417,11 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 }
             });
         }
+    }
+
+    // No-op wrapper to keep legacy code.
+    private static void inSurfaceTransaction(Runnable exec) {
+        exec.run();
     }
 
     /** Gives the owner of recents animation higher priority. */

@@ -35,6 +35,7 @@ android_test {
         "androidx.test.ext.junit",
         "truth",
         "servicestests-utils",
+        "ravenwood-junit",
     ],
 
     libs: [
@@ -49,4 +50,23 @@ android_test {
 
     test_suites: ["device-tests"],
 
+}
+
+android_ravenwood_test {
+    name: "FrameworksUtilTestsRavenwood",
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+    ],
+    srcs: [
+        "src/android/util/DataUnitTest.java",
+        "src/android/util/EventLogTest.java",
+        "src/android/util/IndentingPrintWriterTest.java",
+        "src/android/util/IntArrayTest.java",
+        "src/android/util/LocalLogTest.java",
+        "src/android/util/LongArrayTest.java",
+        "src/android/util/SlogTest.java",
+        "src/android/util/TimeUtilsTest.java",
+    ],
+    auto_gen_config: true,
 }

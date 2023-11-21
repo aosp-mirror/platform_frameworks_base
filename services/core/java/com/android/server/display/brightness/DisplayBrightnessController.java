@@ -31,6 +31,7 @@ import com.android.server.display.BrightnessSetting;
 import com.android.server.display.DisplayBrightnessState;
 import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
+import com.android.server.display.feature.DisplayManagerFlags;
 
 import java.io.PrintWriter;
 
@@ -104,7 +105,8 @@ public final class DisplayBrightnessController {
      */
     public DisplayBrightnessController(Context context, Injector injector, int displayId,
             float defaultScreenBrightness, BrightnessSetting brightnessSetting,
-            Runnable onBrightnessChangeRunnable, HandlerExecutor brightnessChangeExecutor) {
+            Runnable onBrightnessChangeRunnable, HandlerExecutor brightnessChangeExecutor,
+            DisplayManagerFlags flags) {
         if (injector == null) {
             injector = new Injector();
         }
@@ -116,7 +118,7 @@ public final class DisplayBrightnessController {
         mCurrentScreenBrightness = getScreenBrightnessSetting();
         mOnBrightnessChangeRunnable = onBrightnessChangeRunnable;
         mDisplayBrightnessStrategySelector = injector.getDisplayBrightnessStrategySelector(context,
-                displayId);
+                displayId, flags);
         mBrightnessChangeExecutor = brightnessChangeExecutor;
         mPersistBrightnessNitsForDefaultDisplay = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_persistBrightnessNitsForDefaultDisplay);
@@ -168,6 +170,18 @@ public final class DisplayBrightnessController {
         synchronized (mLock) {
             mDisplayBrightnessStrategySelector.getFollowerDisplayBrightnessStrategy()
                     .setBrightnessToFollow(brightnessToFollow, slowChange);
+        }
+    }
+
+    /**
+     * Sets the brightness from the offload session.
+     */
+    public void setBrightnessFromOffload(float brightness) {
+        synchronized (mLock) {
+            if (mDisplayBrightnessStrategySelector.getOffloadBrightnessStrategy() != null) {
+                mDisplayBrightnessStrategySelector.getOffloadBrightnessStrategy()
+                        .setOffloadScreenBrightness(brightness);
+            }
         }
     }
 
@@ -423,8 +437,9 @@ public final class DisplayBrightnessController {
     @VisibleForTesting
     static class Injector {
         DisplayBrightnessStrategySelector getDisplayBrightnessStrategySelector(Context context,
-                int displayId) {
-            return new DisplayBrightnessStrategySelector(context, /* injector= */ null, displayId);
+                int displayId, DisplayManagerFlags flags) {
+            return new DisplayBrightnessStrategySelector(context, /* injector= */ null, displayId,
+                    flags);
         }
     }
 

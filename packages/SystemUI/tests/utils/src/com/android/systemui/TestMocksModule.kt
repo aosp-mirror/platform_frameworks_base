@@ -55,7 +55,9 @@ import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
+import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.statusbar.window.StatusBarWindowController
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.mock
 import com.android.wm.shell.bubbles.Bubbles
 import dagger.Binds
@@ -100,6 +102,10 @@ data class TestMocksModule(
     @get:Provides val keyguardViewController: KeyguardViewController = mock(),
     @get:Provides val dialogLaunchAnimator: DialogLaunchAnimator = mock(),
     @get:Provides val sysuiState: SysUiState = mock(),
+    @get:Provides
+    val unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider> =
+        Optional.empty(),
+    @get:Provides val zenModeController: ZenModeController = mock(),
 
     // log buffers
     @get:[Provides BroadcastDispatcherLog]

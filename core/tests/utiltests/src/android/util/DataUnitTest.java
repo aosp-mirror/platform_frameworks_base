@@ -16,12 +16,18 @@
 
 package android.util;
 
-import androidx.test.filters.SmallTest;
+import static org.junit.Assert.assertEquals;
 
-import junit.framework.TestCase;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
-public class DataUnitTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class DataUnitTest {
+    @Test
     public void testSi() throws Exception {
         assertEquals(12_000L, DataUnit.KILOBYTES.toBytes(12));
         assertEquals(12_000_000L, DataUnit.MEGABYTES.toBytes(12));
@@ -29,6 +35,7 @@ public class DataUnitTest extends TestCase {
         assertEquals(12_000_000_000_000L, DataUnit.TERABYTES.toBytes(12));
     }
 
+    @Test
     public void testIec() throws Exception {
         assertEquals(12_288L, DataUnit.KIBIBYTES.toBytes(12));
         assertEquals(12_582_912L, DataUnit.MEBIBYTES.toBytes(12));

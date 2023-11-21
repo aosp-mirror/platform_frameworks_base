@@ -209,7 +209,7 @@ abstract class DisplayDevice {
             int state,
             float brightnessState,
             float sdrBrightnessState,
-            @Nullable DisplayOffloadSession displayOffloadSession) {
+            @Nullable DisplayOffloadSessionImpl displayOffloadSession) {
         return null;
     }
 

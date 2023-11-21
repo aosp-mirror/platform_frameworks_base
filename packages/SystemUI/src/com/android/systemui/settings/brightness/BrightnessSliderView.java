@@ -33,7 +33,6 @@ import androidx.annotation.Nullable;
 
 import com.android.settingslib.RestrictedLockUtils;
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.res.R;
 
 /**
@@ -42,7 +41,6 @@ import com.android.systemui.res.R;
  */
 public class BrightnessSliderView extends FrameLayout {
 
-    private ActivityStarter mActivityStarter;
     @NonNull
     private ToggleSeekBar mSlider;
     private DispatchTouchEventListener mListener;
@@ -59,10 +57,6 @@ public class BrightnessSliderView extends FrameLayout {
         super(context, attrs);
     }
 
-    public void setActivityStarter(@NonNull ActivityStarter activityStarter) {
-        mActivityStarter = activityStarter;
-    }
-
     // Inflated from quick_settings_brightness_dialog
     @Override
     protected void onFinishInflate() {
@@ -71,7 +65,6 @@ public class BrightnessSliderView extends FrameLayout {
 
         mSlider = requireViewById(R.id.slider);
         mSlider.setAccessibilityLabel(getContentDescription().toString());
-        mSlider.setActivityStarter(mActivityStarter);
 
         // Finds the progress drawable. Assumes brightness_progress_drawable.xml
         try {

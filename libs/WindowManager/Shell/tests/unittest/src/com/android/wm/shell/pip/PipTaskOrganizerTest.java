@@ -66,6 +66,7 @@ import com.android.wm.shell.splitscreen.SplitScreenController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -283,7 +284,7 @@ public class PipTaskOrganizerTest extends ShellTestCase {
         doReturn(mMockPipSurfaceTransactionHelper).when(mMockPipSurfaceTransactionHelper)
                 .round(any(), any(), anyBoolean());
         doReturn(mMockPipSurfaceTransactionHelper).when(mMockPipSurfaceTransactionHelper)
-                .scale(any(), any(), any(), any(), anyFloat());
+                .scale(any(), any(), any(), ArgumentMatchers.<Rect>any(), anyFloat());
         doReturn(mMockPipSurfaceTransactionHelper).when(mMockPipSurfaceTransactionHelper)
                 .alpha(any(), any(), anyFloat());
         doNothing().when(mMockPipSurfaceTransactionHelper).onDensityOrFontScaleChanged(any());

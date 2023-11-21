@@ -18,37 +18,222 @@ package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
+import com.android.systemui.SysUITestComponent
+import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.TestMocksModule
+import com.android.systemui.collectLastValue
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.power.data.repository.FakePowerRepository
+import com.android.systemui.power.shared.model.WakeSleepReason
+import com.android.systemui.power.shared.model.WakefulnessState
+import com.android.systemui.runCurrent
+import com.android.systemui.runTest
+import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
-import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
+import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule
+import com.android.systemui.statusbar.phone.DozeParameters
+import com.android.systemui.user.domain.interactor.HeadlessSystemUserModeModule
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.ui.isAnimating
+import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.test.runTest
+import dagger.BindsInstance
+import dagger.Component
+import java.util.Optional
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class FooterViewModelTest : SysuiTestCase() {
-    private val repository = ActiveNotificationListRepository()
-    private val interactor = SeenNotificationsInteractor(repository)
-    private val underTest = FooterViewModel(interactor)
+    private lateinit var footerViewModel: FooterViewModel
 
-    @Test
-    fun testMessageVisible_whenFilteredNotifications() = runTest {
-        val message by collectLastValue(underTest.message)
+    @SysUISingleton
+    @Component(
+        modules =
+            [
+                SysUITestModule::class,
+                ActivatableNotificationViewModelModule::class,
+                FooterViewModelModule::class,
+                HeadlessSystemUserModeModule::class,
+            ]
+    )
+    interface TestComponent : SysUITestComponent<Optional<FooterViewModel>> {
+        val activeNotificationListRepository: ActiveNotificationListRepository
+        val configurationRepository: FakeConfigurationRepository
+        val keyguardRepository: FakeKeyguardRepository
+        val keyguardTransitionRepository: FakeKeyguardTransitionRepository
+        val shadeRepository: FakeShadeRepository
+        val powerRepository: FakePowerRepository
 
-        repository.hasFilteredOutSeenNotifications.value = true
+        @Component.Factory
+        interface Factory {
+            fun create(
+                @BindsInstance test: SysuiTestCase,
+                featureFlags: FakeFeatureFlagsClassicModule,
+                mocks: TestMocksModule,
+            ): TestComponent
+        }
+    }
 
-        assertThat(message?.visible).isTrue()
+    private val dozeParameters: DozeParameters = mock()
+
+    private val testComponent: TestComponent =
+        DaggerFooterViewModelTest_TestComponent.factory()
+            .create(
+                test = this,
+                featureFlags =
+                    FakeFeatureFlagsClassicModule {
+                        set(com.android.systemui.flags.Flags.FULL_SCREEN_USER_SWITCHER, true)
+                    },
+                mocks =
+                    TestMocksModule(
+                        dozeParameters = dozeParameters,
+                    )
+            )
+
+    @Before
+    fun setUp() {
+        MockitoAnnotations.initMocks(this)
+
+        mSetFlagsRule.enableFlags(Flags.FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR)
+
+        // The underTest in the component is Optional, because that matches the provider we
+        // currently have for the footer view model.
+        footerViewModel = testComponent.underTest.get()
     }
 
     @Test
-    fun testMessageVisible_whenNoFilteredNotifications() = runTest {
-        val message by collectLastValue(underTest.message)
+    fun testMessageVisible_whenFilteredNotifications() =
+        testComponent.runTest {
+            val message by collectLastValue(footerViewModel.message)
 
-        repository.hasFilteredOutSeenNotifications.value = false
+            activeNotificationListRepository.hasFilteredOutSeenNotifications.value = true
 
-        assertThat(message?.visible).isFalse()
-    }
+            assertThat(message?.visible).isTrue()
+        }
+
+    @Test
+    fun testMessageVisible_whenNoFilteredNotifications() =
+        testComponent.runTest {
+            val message by collectLastValue(footerViewModel.message)
+
+            activeNotificationListRepository.hasFilteredOutSeenNotifications.value = false
+
+            assertThat(message?.visible).isFalse()
+        }
+
+    @Test
+    fun testClearAllButtonVisible_whenHasClearableNotifs() =
+        testComponent.runTest {
+            val button by collectLastValue(footerViewModel.clearAllButton)
+
+            activeNotificationListRepository.notifStats.value =
+                NotifStats(
+                    numActiveNotifs = 2,
+                    hasNonClearableAlertingNotifs = false,
+                    hasClearableAlertingNotifs = true,
+                    hasNonClearableSilentNotifs = false,
+                    hasClearableSilentNotifs = true,
+                )
+            runCurrent()
+
+            assertThat(button?.isVisible?.value).isTrue()
+        }
+
+    @Test
+    fun testClearAllButtonVisible_whenHasNoClearableNotifs() =
+        testComponent.runTest {
+            val button by collectLastValue(footerViewModel.clearAllButton)
+
+            activeNotificationListRepository.notifStats.value =
+                NotifStats(
+                    numActiveNotifs = 2,
+                    hasNonClearableAlertingNotifs = false,
+                    hasClearableAlertingNotifs = false,
+                    hasNonClearableSilentNotifs = false,
+                    hasClearableSilentNotifs = false,
+                )
+            runCurrent()
+
+            assertThat(button?.isVisible?.value).isFalse()
+        }
+
+    @Test
+    fun testClearAllButtonAnimating_whenShadeExpandedAndTouchable() =
+        testComponent.runTest {
+            val button by collectLastValue(footerViewModel.clearAllButton)
+            runCurrent()
+
+            // WHEN shade is expanded
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            shadeRepository.setLegacyShadeExpansion(1f)
+            // AND QS not expanded
+            shadeRepository.setQsExpansion(0f)
+            // AND device is awake
+            powerRepository.updateWakefulness(
+                rawState = WakefulnessState.AWAKE,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.OTHER,
+            )
+            runCurrent()
+
+            // AND there are clearable notifications
+            activeNotificationListRepository.notifStats.value =
+                NotifStats(
+                    numActiveNotifs = 2,
+                    hasNonClearableAlertingNotifs = false,
+                    hasClearableAlertingNotifs = true,
+                    hasNonClearableSilentNotifs = false,
+                    hasClearableSilentNotifs = true,
+                )
+            runCurrent()
+
+            // THEN button visibility should animate
+            assertThat(button?.isVisible?.isAnimating).isTrue()
+        }
+
+    @Test
+    fun testClearAllButtonAnimating_whenShadeNotExpanded() =
+        testComponent.runTest {
+            val button by collectLastValue(footerViewModel.clearAllButton)
+            runCurrent()
+
+            // WHEN shade is collapsed
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
+            shadeRepository.setLegacyShadeExpansion(0f)
+            // AND QS not expanded
+            shadeRepository.setQsExpansion(0f)
+            // AND device is awake
+            powerRepository.updateWakefulness(
+                rawState = WakefulnessState.AWAKE,
+                lastWakeReason = WakeSleepReason.POWER_BUTTON,
+                lastSleepReason = WakeSleepReason.OTHER,
+            )
+            runCurrent()
+
+            // AND there are clearable notifications
+            activeNotificationListRepository.notifStats.value =
+                NotifStats(
+                    numActiveNotifs = 2,
+                    hasNonClearableAlertingNotifs = false,
+                    hasClearableAlertingNotifs = true,
+                    hasNonClearableSilentNotifs = false,
+                    hasClearableSilentNotifs = true,
+                )
+            runCurrent()
+
+            // THEN button visibility should not animate
+            assertThat(button?.isVisible?.isAnimating).isFalse()
+        }
 }

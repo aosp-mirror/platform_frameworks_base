@@ -41,6 +41,8 @@ import java.util.List;
 /**
  * A class containing utility methods related to time zones.
  */
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
+@android.ravenwood.annotation.RavenwoodKeepStaticInitializer
 public class TimeUtils {
     /** @hide */ public TimeUtils() {}
     /** {@hide} */
@@ -180,6 +182,7 @@ public class TimeUtils {
     private static char[] sFormatStr = new char[HUNDRED_DAY_FIELD_LEN+10];
     private static char[] sTmpFormatStr = new char[HUNDRED_DAY_FIELD_LEN+10];
 
+    @android.ravenwood.annotation.RavenwoodKeep
     static private int accumField(int amt, int suffix, boolean always, int zeropad) {
         if (amt > 999) {
             int num = 0;
@@ -202,6 +205,7 @@ public class TimeUtils {
         return 0;
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     static private int printFieldLocked(char[] formatStr, int amt, char suffix, int pos,
             boolean always, int zeropad) {
         if (always || amt > 0) {
@@ -242,6 +246,7 @@ public class TimeUtils {
         return pos;
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     private static int formatDurationLocked(long duration, int fieldLen) {
         if (sFormatStr.length < fieldLen) {
             sFormatStr = new char[fieldLen];
@@ -314,6 +319,7 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void formatDuration(long duration, StringBuilder builder) {
         synchronized (sFormatSync) {
             int len = formatDurationLocked(duration, 0);
@@ -322,6 +328,7 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void formatDuration(long duration, StringBuilder builder, int fieldLen) {
         synchronized (sFormatSync) {
             int len = formatDurationLocked(duration, fieldLen);
@@ -331,6 +338,7 @@ public class TimeUtils {
 
     /** @hide Just for debugging; not internationalized. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void formatDuration(long duration, PrintWriter pw, int fieldLen) {
         synchronized (sFormatSync) {
             int len = formatDurationLocked(duration, fieldLen);
@@ -340,6 +348,7 @@ public class TimeUtils {
 
     /** @hide Just for debugging; not internationalized. */
     @TestApi
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String formatDuration(long duration) {
         synchronized (sFormatSync) {
             int len = formatDurationLocked(duration, 0);
@@ -349,11 +358,13 @@ public class TimeUtils {
 
     /** @hide Just for debugging; not internationalized. */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void formatDuration(long duration, PrintWriter pw) {
         formatDuration(duration, pw, 0);
     }
 
     /** @hide Just for debugging; not internationalized. */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void formatDuration(long time, long now, StringBuilder sb) {
         if (time == 0) {
             sb.append("--");
@@ -363,6 +374,7 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void formatDuration(long time, long now, PrintWriter pw) {
         if (time == 0) {
             pw.print("--");
@@ -372,16 +384,19 @@ public class TimeUtils {
     }
 
     /** @hide Just for debugging; not internationalized. */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String formatUptime(long time) {
         return formatTime(time, SystemClock.uptimeMillis());
     }
 
     /** @hide Just for debugging; not internationalized. */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String formatRealtime(long time) {
         return formatTime(time, SystemClock.elapsedRealtime());
     }
 
     /** @hide Just for debugging; not internationalized. */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String formatTime(long time, long referenceTime) {
         long diff = time - referenceTime;
         if (diff > 0) {
@@ -402,6 +417,7 @@ public class TimeUtils {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String logTimeOfDay(long millis) {
         Calendar c = Calendar.getInstance();
         if (millis >= 0) {
@@ -413,6 +429,7 @@ public class TimeUtils {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String formatForLogging(long millis) {
         if (millis <= 0) {
             return "unknown";
@@ -426,6 +443,7 @@ public class TimeUtils {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void dumpTime(PrintWriter pw, long time) {
         pw.print(sDumpDateFormat.format(new Date(time)));
     }
@@ -457,6 +475,7 @@ public class TimeUtils {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void dumpTimeWithDelta(PrintWriter pw, long time, long now) {
         pw.print(sDumpDateFormat.format(new Date(time)));
         if (time == now) {

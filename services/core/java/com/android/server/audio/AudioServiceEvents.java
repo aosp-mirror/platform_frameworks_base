@@ -151,11 +151,13 @@ public class AudioServiceEvents {
         final int mStreamType;
         final int mAliasStreamType;
         final int mIndex;
+        final int mOldIndex;
 
-        VolChangedBroadcastEvent(int stream, int alias, int index) {
+        VolChangedBroadcastEvent(int stream, int alias, int index, int oldIndex) {
             mStreamType = stream;
             mAliasStreamType = alias;
             mIndex = index;
+            mOldIndex = oldIndex;
         }
 
         @Override
@@ -163,7 +165,8 @@ public class AudioServiceEvents {
             return new StringBuilder("sending VOLUME_CHANGED stream:")
                     .append(AudioSystem.streamToString(mStreamType))
                     .append(" index:").append(mIndex)
-                    .append(" alias:").append(AudioSystem.streamToString(mAliasStreamType))
+                    .append(" (was:").append(mOldIndex)
+                    .append(") alias:").append(AudioSystem.streamToString(mAliasStreamType))
                     .toString();
         }
     }
@@ -234,19 +237,35 @@ public class AudioServiceEvents {
         final int mStream;
         final int mVal1;
         final int mVal2;
+        final int mVal3;
         final String mCaller;
         final String mGroupName;
+
+        /** used for VOL_SET_STREAM_VOL */
+        VolumeEvent(int op, int stream, int val1, int val2, int val3, String caller) {
+            mOp = op;
+            mStream = stream;
+            mVal1 = val1;
+            mVal2 = val2;
+            mVal3 = val3;
+            mCaller = caller;
+            // unused
+            mGroupName = null;
+            logMetricEvent();
+        }
 
         /** used for VOL_ADJUST_VOL_UID,
          *           VOL_ADJUST_SUGG_VOL,
          *           VOL_ADJUST_STREAM_VOL,
-         *           VOL_SET_STREAM_VOL */
+         */
         VolumeEvent(int op, int stream, int val1, int val2, String caller) {
             mOp = op;
             mStream = stream;
             mVal1 = val1;
             mVal2 = val2;
             mCaller = caller;
+            // unused
+            mVal3 = -1;
             mGroupName = null;
             logMetricEvent();
         }
@@ -257,6 +276,7 @@ public class AudioServiceEvents {
             mVal1 = index;
             mVal2 = gainDb;
             // unused
+            mVal3 = -1;
             mStream = -1;
             mCaller = null;
             mGroupName = null;
@@ -269,6 +289,7 @@ public class AudioServiceEvents {
             mVal1 = index;
             // unused
             mVal2 = 0;
+            mVal3 = -1;
             mStream = -1;
             mCaller = null;
             mGroupName = null;
@@ -282,6 +303,7 @@ public class AudioServiceEvents {
             mVal1 = index;
             mVal2 = voiceActive ? 1 : 0;
             // unused
+            mVal3 = -1;
             mCaller = null;
             mGroupName = null;
             logMetricEvent();
@@ -294,6 +316,7 @@ public class AudioServiceEvents {
             mVal1 = index;
             mVal2 = mode;
             // unused
+            mVal3 = -1;
             mCaller = null;
             mGroupName = null;
             logMetricEvent();
@@ -308,6 +331,8 @@ public class AudioServiceEvents {
             mVal2 = flags;
             mCaller = caller;
             mGroupName = group;
+            // unused
+            mVal3 = -1;
             logMetricEvent();
         }
 
@@ -317,8 +342,10 @@ public class AudioServiceEvents {
             mStream = stream;
             mVal1 = state ? 1 : 0;
             mVal2 = 0;
+            // unused
             mCaller = null;
             mGroupName = null;
+            mVal3 = -1;
             logMetricEvent();
         }
 
@@ -328,6 +355,8 @@ public class AudioServiceEvents {
             mStream = -1;
             mVal1 = state ? 1 : 0;
             mVal2 = 0;
+            // unused
+            mVal3 = -1;
             mCaller = null;
             mGroupName = null;
             logMetricEvent();
@@ -386,6 +415,7 @@ public class AudioServiceEvents {
                             .set(MediaMetrics.Property.EVENT, "setStreamVolume")
                             .set(MediaMetrics.Property.FLAGS, mVal2)
                             .set(MediaMetrics.Property.INDEX, mVal1)
+                            .set(MediaMetrics.Property.OLD_INDEX, mVal3)
                             .set(MediaMetrics.Property.STREAM_TYPE,
                                     AudioSystem.streamToString(mStream))
                             .record();
@@ -478,6 +508,7 @@ public class AudioServiceEvents {
                             .append(AudioSystem.streamToString(mStream))
                             .append(" index:").append(mVal1)
                             .append(" flags:0x").append(Integer.toHexString(mVal2))
+                            .append(" oldIndex:").append(mVal3)
                             .append(") from ").append(mCaller)
                             .toString();
                 case VOL_SET_HEARING_AID_VOL:

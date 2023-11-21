@@ -45,7 +45,7 @@ import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
 import com.android.settingslib.spaprivileged.model.enterprise.rememberRestrictedMode
-import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitchPreference
+import com.android.settingslib.spaprivileged.template.preference.RestrictedSwitchPreferenceModel
 import kotlinx.coroutines.flow.Flow
 
 private const val ENTRY_NAME = "AppList"
@@ -157,7 +157,7 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
         }
         val restrictedMode by restrictionsProviderFactory.rememberRestrictedMode(restrictions)
         val allowed = listModel.isAllowed(record)
-        return RestrictedSwitchPreference.getSummary(
+        return RestrictedSwitchPreferenceModel.getSummary(
             context = context,
             restrictedModeSupplier = { restrictedMode },
             summaryIfNoRestricted = { getSummaryIfNoRestricted(allowed()) },

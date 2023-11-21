@@ -43,10 +43,10 @@ import com.android.systemui.power.shared.model.WakefulnessState
 import com.android.systemui.runCurrent
 import com.android.systemui.runTest
 import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpNotificationIconViewStateRepository
-import com.android.systemui.statusbar.notification.shared.activeNotificationModel
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher
 import com.android.systemui.statusbar.phone.data.repository.FakeDarkIconRepository

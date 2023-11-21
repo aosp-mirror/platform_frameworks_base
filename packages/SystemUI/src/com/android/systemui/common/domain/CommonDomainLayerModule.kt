@@ -11,20 +11,17 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
-package com.android.systemui.common
+
+package com.android.systemui.common.domain
 
 import com.android.systemui.common.domain.interactor.ConfigurationInteractor
 import com.android.systemui.common.domain.interactor.ConfigurationInteractorImpl
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
-import com.android.systemui.common.ui.data.repository.ConfigurationRepositoryImpl
 import dagger.Binds
 import dagger.Module
 
 @Module
-abstract class CommonModule {
-    @Binds abstract fun bindRepository(impl: ConfigurationRepositoryImpl): ConfigurationRepository
-
+abstract class CommonDomainLayerModule {
     @Binds abstract fun bindInteractor(impl: ConfigurationInteractorImpl): ConfigurationInteractor
 }

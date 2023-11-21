@@ -141,3 +141,10 @@ flag {
     description: "Move LightRevealScrim to recommended architecture"
     bug: "281655028"
 }
+
+flag {
+   name: "media_in_scene_container"
+   namespace: "systemui"
+   description: "Enable media in the scene container framework"
+   bug: "296122467"
+}

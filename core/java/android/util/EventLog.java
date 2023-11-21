@@ -48,6 +48,9 @@ import java.util.regex.Pattern;
  * They carry a payload of one or more int, long, or String values.  The
  * event-log-tags file defines the payload contents for each type code.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
+        "com.android.hoststubgen.nativesubstitution.EventLog_host")
 public class EventLog {
     /** @hide */ public EventLog() {}
 
@@ -416,6 +419,7 @@ public class EventLog {
     /**
      * Read TAGS_FILE, populating sTagCodes and sTagNames, if not already done.
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     private static synchronized void readTagsFile() {
         if (sTagCodes != null && sTagNames != null) return;
 
@@ -441,8 +445,7 @@ public class EventLog {
                 try {
                     int num = Integer.parseInt(m.group(1));
                     String name = m.group(2);
-                    sTagCodes.put(name, num);
-                    sTagNames.put(num, name);
+                    registerTagLocked(num, name);
                 } catch (NumberFormatException e) {
                     Log.wtf(TAG, "Error in " + TAGS_FILE + ": " + line, e);
                 }
@@ -453,5 +456,21 @@ public class EventLog {
         } finally {
             try { if (reader != null) reader.close(); } catch (IOException e) {}
         }
+    }
+
+    private static void registerTagLocked(int num, String name) {
+        sTagCodes.put(name, num);
+        sTagNames.put(num, name);
+    }
+
+    private static synchronized void readTagsFile$ravenwood() {
+        // TODO: restore parsing logic once we carry into runtime
+        sTagCodes = new HashMap<String, Integer>();
+        sTagNames = new HashMap<Integer, String>();
+
+        // Hard-code a few common tags
+        registerTagLocked(524288, "sysui_action");
+        registerTagLocked(524290, "sysui_count");
+        registerTagLocked(524291, "sysui_histogram");
     }
 }

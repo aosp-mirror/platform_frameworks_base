@@ -128,8 +128,7 @@ class ZenModeInteractorTest : SysuiTestCase() {
         testComponent.runTest {
             val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
 
-            repository.consolidatedNotificationPolicy.value =
-                policyWithSuppressedVisualEffects(Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST)
+            repository.setSuppressedVisualEffects(Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST)
             repository.zenMode.value = Settings.Global.ZEN_MODE_OFF
             runCurrent()
 
@@ -141,8 +140,7 @@ class ZenModeInteractorTest : SysuiTestCase() {
         testComponent.runTest {
             val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
 
-            repository.consolidatedNotificationPolicy.value =
-                policyWithSuppressedVisualEffects(Policy.SUPPRESSED_EFFECT_STATUS_BAR)
+            repository.setSuppressedVisualEffects(Policy.SUPPRESSED_EFFECT_STATUS_BAR)
             repository.zenMode.value = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
             runCurrent()
 
@@ -154,19 +152,10 @@ class ZenModeInteractorTest : SysuiTestCase() {
         testComponent.runTest {
             val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
 
-            repository.consolidatedNotificationPolicy.value =
-                policyWithSuppressedVisualEffects(Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST)
+            repository.setSuppressedVisualEffects(Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST)
             repository.zenMode.value = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
             runCurrent()
 
             assertThat(hidden).isTrue()
         }
 }
-
-fun policyWithSuppressedVisualEffects(suppressedVisualEffects: Int) =
-    Policy(
-        /* priorityCategories = */ 0,
-        /* priorityCallSenders = */ 0,
-        /* priorityMessageSenders = */ 0,
-        /* suppressedVisualEffects = */ suppressedVisualEffects
-    )

@@ -67,10 +67,8 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal.OomAdjReason;
 import android.content.pm.ServiceInfo;
-import android.os.IBinder;
 import android.os.SystemClock;
 import android.os.Trace;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
@@ -80,7 +78,6 @@ import com.android.server.ServiceThread;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -504,6 +501,28 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         }
     }
 
+    /**
+     * A helper consumer for collecting processes that have not been reached yet. To avoid object
+     * allocations every OomAdjuster update, the results will be stored in
+     * {@link UnreachedProcessCollector#processList}. The process list reader is responsible
+     * for setting it before usage, as well as, clearing the reachable state of each process in the
+     * list.
+     */
+    private static class UnreachedProcessCollector implements Consumer<ProcessRecord> {
+        public ArrayList<ProcessRecord> processList = null;
+        @Override
+        public void accept(ProcessRecord process) {
+            if (process.mState.isReachable()) {
+                return;
+            }
+            process.mState.setReachable(true);
+            processList.add(process);
+        }
+    }
+
+    private final UnreachedProcessCollector mUnreachedProcessCollector =
+            new UnreachedProcessCollector();
+
     OomAdjusterModernImpl(ActivityManagerService service, ProcessList processList,
             ActiveUids activeUids) {
         this(service, processList, activeUids, createAdjusterThread());
@@ -755,23 +774,8 @@ public class OomAdjusterModernImpl extends OomAdjuster {
         // We'll need to collect the upstream processes of the target apps here, because those
         // processes would potentially impact the procstate/adj via bindings.
         if (!fullUpdate) {
-            final boolean containsCycle = collectReversedReachableProcessesLocked(targetProcesses,
-                    clientProcesses);
+            collectExcludedClientProcessesLocked(targetProcesses, clientProcesses);
 
-            // If any of its upstream processes are in a cycle,
-            // move them into the candidate targets.
-            if (containsCycle) {
-                // Add all client apps to the target process list.
-                for (int i = 0, size = clientProcesses.size(); i < size; i++) {
-                    final ProcessRecord client = clientProcesses.get(i);
-                    final UidRecord uidRec = client.getUidRecord();
-                    targetProcesses.add(client);
-                    if (uidRec != null) {
-                        uids.put(uidRec.getUid(), uidRec);
-                    }
-                }
-                clientProcesses.clear();
-            }
             for (int i = 0, size = targetProcesses.size(); i < size; i++) {
                 final ProcessRecord app = targetProcesses.valueAt(i);
                 app.mState.resetCachedInfo();
@@ -807,102 +811,36 @@ public class OomAdjusterModernImpl extends OomAdjuster {
     }
 
     /**
-     * Collect the reversed reachable processes from the given {@code apps}, the result will be
-     * returned in the given {@code processes}, which will <em>NOT</em> include the processes from
-     * the given {@code apps}.
+     * Collect the client processes from the given {@code apps}, the result will be returned in the
+     * given {@code clientProcesses}, which will <em>NOT</em> include the processes from the given
+     * {@code apps}.
      */
     @GuardedBy("mService")
-    private boolean collectReversedReachableProcessesLocked(ArraySet<ProcessRecord> apps,
+    private void collectExcludedClientProcessesLocked(ArraySet<ProcessRecord> apps,
             ArrayList<ProcessRecord> clientProcesses) {
-        final ArrayDeque<ProcessRecord> queue = mTmpQueue;
-        queue.clear();
-        clientProcesses.clear();
-        for (int i = 0, size = apps.size(); i < size; i++) {
+        // Mark all of the provided apps as reachable to avoid including them in the client list.
+        final int appsSize = apps.size();
+        for (int i = 0; i < appsSize; i++) {
             final ProcessRecord app = apps.valueAt(i);
             app.mState.setReachable(true);
-            app.mState.setReversedReachable(true);
-            queue.offer(app);
         }
 
-        // Track if any of them reachables could include a cycle
-        boolean containsCycle = false;
-
-        // Scan upstreams of the process record
-        for (ProcessRecord pr = queue.poll(); pr != null; pr = queue.poll()) {
-            if (!pr.mState.isReachable()) {
-                // If not in the given initial set of apps, add it.
-                clientProcesses.add(pr);
-            }
-            final ProcessServiceRecord psr = pr.mServices;
-            for (int i = psr.numberOfRunningServices() - 1; i >= 0; i--) {
-                final ServiceRecord s = psr.getRunningServiceAt(i);
-                final ArrayMap<IBinder, ArrayList<ConnectionRecord>> serviceConnections =
-                        s.getConnections();
-                for (int j = serviceConnections.size() - 1; j >= 0; j--) {
-                    final ArrayList<ConnectionRecord> clist = serviceConnections.valueAt(j);
-                    for (int k = clist.size() - 1; k >= 0; k--) {
-                        final ConnectionRecord cr = clist.get(k);
-                        final ProcessRecord client = cr.binding.client;
-                        containsCycle |= client.mState.isReversedReachable();
-                        if (client.mState.isReversedReachable()) {
-                            continue;
-                        }
-                        queue.offer(client);
-                        client.mState.setReversedReachable(true);
-                    }
-                }
-            }
-            final ProcessProviderRecord ppr = pr.mProviders;
-            for (int i = ppr.numberOfProviders() - 1; i >= 0; i--) {
-                final ContentProviderRecord cpr = ppr.getProviderAt(i);
-                for (int j = cpr.connections.size() - 1; j >= 0; j--) {
-                    final ContentProviderConnection conn = cpr.connections.get(j);
-                    final ProcessRecord client = conn.client;
-                    containsCycle |= client.mState.isReversedReachable();
-                    if (client.mState.isReversedReachable()) {
-                        continue;
-                    }
-                    queue.offer(client);
-                    client.mState.setReversedReachable(true);
-                }
-            }
-            // If this process is a sandbox itself, also add the app on whose behalf
-            // its running
-            if (pr.isSdkSandbox) {
-                for (int is = psr.numberOfRunningServices() - 1; is >= 0; is--) {
-                    ServiceRecord s = psr.getRunningServiceAt(is);
-                    ArrayMap<IBinder, ArrayList<ConnectionRecord>> serviceConnections =
-                            s.getConnections();
-                    for (int conni = serviceConnections.size() - 1; conni >= 0; conni--) {
-                        ArrayList<ConnectionRecord> clist = serviceConnections.valueAt(conni);
-                        for (int i = clist.size() - 1; i >= 0; i--) {
-                            ConnectionRecord cr = clist.get(i);
-                            ProcessRecord attributedApp = cr.binding.attributedClient;
-                            if (attributedApp == null || attributedApp == pr) {
-                                continue;
-                            }
-                            containsCycle |= attributedApp.mState.isReversedReachable();
-                            if (attributedApp.mState.isReversedReachable()) {
-                                continue;
-                            }
-                            queue.offer(attributedApp);
-                            attributedApp.mState.setReversedReachable(true);
-                        }
-                    }
-                }
-            }
+        clientProcesses.clear();
+        mUnreachedProcessCollector.processList = clientProcesses;
+        for (int i = 0; i < appsSize; i++) {
+            final ProcessRecord app = apps.valueAt(i);
+            app.forEachClient(mUnreachedProcessCollector);
         }
+        mUnreachedProcessCollector.processList = null;
 
         // Reset the temporary bits.
         for (int i = clientProcesses.size() - 1; i >= 0; i--) {
-            clientProcesses.get(i).mState.setReversedReachable(false);
+            clientProcesses.get(i).mState.setReachable(false);
         }
         for (int i = 0, size = apps.size(); i < size; i++) {
             final ProcessRecord app = apps.valueAt(i);
             app.mState.setReachable(false);
-            app.mState.setReversedReachable(false);
         }
-        return containsCycle;
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -916,10 +854,6 @@ public class OomAdjusterModernImpl extends OomAdjuster {
 
         final int procStateTarget = mProcessRecordProcStateNodes.size() - 1;
         final int adjTarget = mProcessRecordAdjNodes.size() - 1;
-
-        final int appUid = !fullUpdate && targetProcesses.size() > 0
-                ? targetProcesses.valueAt(0).uid : -1;
-        final int logUid = mService.mCurOomAdjUid;
 
         mAdjSeq++;
         // All apps to be updated will be moved to the lowest slot.
@@ -974,7 +908,7 @@ public class OomAdjusterModernImpl extends OomAdjuster {
             // We don't update the adj list since we're resetting it below.
         }
 
-        // Now nodes are set into their slots, without facting in the bindings.
+        // Now nodes are set into their slots, without factoring in the bindings.
         // The nodes between the `lastNode` pointer and the TAIL should be the new nodes.
         //
         // The whole rationale here is that, the bindings from client to host app, won't elevate

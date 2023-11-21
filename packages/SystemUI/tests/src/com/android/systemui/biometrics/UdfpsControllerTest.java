@@ -73,6 +73,7 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.util.LatencyTracker;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
@@ -286,6 +287,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // Create a fake background executor.
         mBiometricExecutor = new FakeExecutor(new FakeSystemClock());
 
+        mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         initUdfpsController(mOpticalProps);
     }
 
@@ -304,7 +306,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager,
                 mDumpManager,
                 mKeyguardUpdateMonitor,
-                mFeatureFlags,
                 mFalsingManager,
                 mPowerManager,
                 mAccessibilityManager,

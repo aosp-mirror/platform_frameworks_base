@@ -131,6 +131,7 @@ public class TvPipBoundsState extends PipBoundsState {
         mTvFixedPipOrientation = ORIENTATION_UNDETERMINED;
         mTvPipGravity = mDefaultGravity;
         mPreviousCollapsedGravity = mDefaultGravity;
+        mIsTvPipExpanded = false;
         mTvPipManuallyCollapsed = false;
     }
 

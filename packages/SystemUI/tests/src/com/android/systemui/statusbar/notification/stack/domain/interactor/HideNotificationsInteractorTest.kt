@@ -34,9 +34,11 @@ import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.unfold.TestUnfoldTransitionProvider
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepositoryImpl
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractorImpl
-import com.android.systemui.util.animation.FakeAnimationStatusRepository
+import com.android.systemui.util.animation.data.repository.FakeAnimationStatusRepository
 import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
+import java.time.Duration
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.test.TestScope
@@ -47,8 +49,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
-import java.time.Duration
-import java.util.Optional
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest

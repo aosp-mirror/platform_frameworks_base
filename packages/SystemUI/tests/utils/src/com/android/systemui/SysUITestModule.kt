@@ -15,6 +15,7 @@
  */
 package com.android.systemui
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Resources
 import android.testing.TestableContext
@@ -78,6 +79,9 @@ interface SysUITestModule {
         @Provides
         fun provideFakeBroadcastDispatcher(test: SysuiTestCase): FakeBroadcastDispatcher =
             test.fakeBroadcastDispatcher
+
+        @Provides
+        fun provideContentResolver(context: Context): ContentResolver = context.contentResolver
 
         @Provides
         fun provideBaseShadeInteractor(

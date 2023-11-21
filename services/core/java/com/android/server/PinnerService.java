@@ -158,6 +158,10 @@ public final class PinnerService extends SystemService {
     @GuardedBy("this")
     private ArraySet<Integer> mPinKeys;
 
+    // Note that we don't use the `_BOOT` namespace for anonymous pinnings, as we want
+    // them to be responsive to dynamic flag changes for experimentation.
+    private static final String DEVICE_CONFIG_NAMESPACE_ANON_SIZE =
+            DeviceConfig.NAMESPACE_RUNTIME_NATIVE;
     private static final String DEVICE_CONFIG_KEY_ANON_SIZE = "pin_shared_anon_size";
     private static final long DEFAULT_ANON_SIZE =
             SystemProperties.getLong("pinner.pin_shared_anon_size", 0);
@@ -188,11 +192,11 @@ public final class PinnerService extends SystemService {
         }
     };
 
-    private DeviceConfig.OnPropertiesChangedListener mDeviceConfigListener =
+    private final DeviceConfig.OnPropertiesChangedListener mDeviceConfigAnonSizeListener =
             new DeviceConfig.OnPropertiesChangedListener() {
                 @Override
                 public void onPropertiesChanged(DeviceConfig.Properties properties) {
-                    if (DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT.equals(properties.getNamespace())
+                    if (DEVICE_CONFIG_NAMESPACE_ANON_SIZE.equals(properties.getNamespace())
                             && properties.getKeyset().contains(DEVICE_CONFIG_KEY_ANON_SIZE)) {
                         refreshPinAnonConfig();
                     }
@@ -246,9 +250,9 @@ public final class PinnerService extends SystemService {
         registerUserSetupCompleteListener();
 
         mDeviceConfigInterface.addOnPropertiesChangedListener(
-                DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                DEVICE_CONFIG_NAMESPACE_ANON_SIZE,
                 new HandlerExecutor(mPinnerHandler),
-                mDeviceConfigListener);
+                mDeviceConfigAnonSizeListener);
     }
 
     @Override
@@ -733,7 +737,7 @@ public final class PinnerService extends SystemService {
     private void refreshPinAnonConfig() {
         long newPinAnonSize =
                 mDeviceConfigInterface.getLong(
-                        DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT,
+                        DEVICE_CONFIG_NAMESPACE_ANON_SIZE,
                         DEVICE_CONFIG_KEY_ANON_SIZE,
                         DEFAULT_ANON_SIZE);
         newPinAnonSize = Math.max(0, Math.min(newPinAnonSize, MAX_ANON_SIZE));

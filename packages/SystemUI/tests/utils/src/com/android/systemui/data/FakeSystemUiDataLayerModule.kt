@@ -26,12 +26,14 @@ import com.android.systemui.shade.data.repository.FakeShadeDataLayerModule
 import com.android.systemui.statusbar.data.FakeStatusBarDataLayerModule
 import com.android.systemui.telephony.data.FakeTelephonyDataLayerModule
 import com.android.systemui.user.data.FakeUserDataLayerModule
+import com.android.systemui.util.animation.data.FakeAnimationUtilDataLayerModule
 import dagger.Module
 
 @Module(
     includes =
         [
             FakeAccessibilityDataLayerModule::class,
+            FakeAnimationUtilDataLayerModule::class,
             FakeAuthenticationDataLayerModule::class,
             FakeBouncerDataLayerModule::class,
             FakeCommonDataLayerModule::class,

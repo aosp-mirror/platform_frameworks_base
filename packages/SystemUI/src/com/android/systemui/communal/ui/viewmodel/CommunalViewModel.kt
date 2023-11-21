@@ -39,7 +39,6 @@ constructor(
     tutorialInteractor: CommunalTutorialInteractor,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
 ) : BaseCommunalViewModel(communalInteractor, mediaHost) {
-
     @OptIn(ExperimentalCoroutinesApi::class)
     override val communalContent: Flow<List<CommunalContentModel>> =
         tutorialInteractor.isTutorialAvailable.flatMapLatest { isTutorialMode ->
