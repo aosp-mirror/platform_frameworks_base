@@ -29,6 +29,8 @@ import static com.android.server.media.MediaKeyDispatcher.isTripleTapOverridden;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
+import android.app.ForegroundServiceDelegationOptions;
 import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -59,6 +61,7 @@ import android.media.session.ISessionManager;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
+import android.media.session.PlaybackState;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -144,6 +147,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private AudioManager mAudioManager;
     private boolean mHasFeatureLeanback;
     private ActivityManagerLocal mActivityManagerLocal;
+    private ActivityManagerInternal mActivityManagerInternal;
 
     // The FullUserRecord of the current users. (i.e. The foreground user that isn't a profile)
     // It's always not null after the MediaSessionService is started.
@@ -229,6 +233,7 @@ public class MediaSessionService extends SystemService implements Monitor {
         mContext.registerReceiver(mNotificationListenerEnabledChangedReceiver, filter);
 
         mActivityManagerLocal = LocalManagerRegistry.getManager(ActivityManagerLocal.class);
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
     }
 
     @Override
@@ -285,8 +290,28 @@ public class MediaSessionService extends SystemService implements Monitor {
                 }
                 user.mPriorityStack.onSessionActiveStateChanged(record);
             }
-
+            notifyActivityManagerWithActiveStateChanges(record, record.isActive());
             mHandler.postSessionsChanged(record);
+        }
+    }
+
+    private void notifyActivityManagerWithActiveStateChanges(
+            MediaSessionRecordImpl record, boolean isActive) {
+        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
+        ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
+                record.getForegroundServiceDelegationOptions();
+        if (foregroundServiceDelegationOptions == null) {
+            // This record doesn't support FGS delegation. In practice, this is MediaSession2.
+            return;
+        }
+        if (isActive) {
+            mActivityManagerInternal.startForegroundServiceDelegate(
+                    foregroundServiceDelegationOptions, /* connection= */ null);
+        } else {
+            mActivityManagerInternal.stopForegroundServiceDelegate(
+                    foregroundServiceDelegationOptions);
         }
     }
 
@@ -371,8 +396,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
     }
 
-    void onSessionPlaybackStateChanged(MediaSessionRecordImpl record,
-            boolean shouldUpdatePriority) {
+    void onSessionPlaybackStateChanged(
+            MediaSessionRecordImpl record,
+            boolean shouldUpdatePriority,
+            @Nullable PlaybackState playbackState) {
         synchronized (mLock) {
             FullUserRecord user = getFullUserRecordLocked(record.getUserId());
             if (user == null || !user.mPriorityStack.contains(record)) {
@@ -380,6 +407,27 @@ public class MediaSessionService extends SystemService implements Monitor {
                 return;
             }
             user.mPriorityStack.onPlaybackStateChanged(record, shouldUpdatePriority);
+            notifyActivityManagerWithPlaybackStateChanges(record, playbackState);
+        }
+    }
+
+    private void notifyActivityManagerWithPlaybackStateChanges(
+            MediaSessionRecordImpl record, PlaybackState playbackState) {
+        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
+        ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
+                record.getForegroundServiceDelegationOptions();
+        if (foregroundServiceDelegationOptions == null || playbackState == null) {
+            // This record doesn't support FGS delegation. In practice, this is MediaSession2.
+            return;
+        }
+        if (playbackState.shouldAllowServiceToRunInForeground()) {
+            mActivityManagerInternal.startForegroundServiceDelegate(
+                    foregroundServiceDelegationOptions, /* connection= */ null);
+        } else {
+            mActivityManagerInternal.stopForegroundServiceDelegate(
+                    foregroundServiceDelegationOptions);
         }
     }
 
@@ -543,7 +591,21 @@ public class MediaSessionService extends SystemService implements Monitor {
         }
 
         session.close();
+        notifyActivityManagerWithSessionDestroyed(session);
         mHandler.postSessionsChanged(session);
+    }
+
+    private void notifyActivityManagerWithSessionDestroyed(MediaSessionRecordImpl record) {
+        if (!Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
+        ForegroundServiceDelegationOptions foregroundServiceDelegationOptions =
+                record.getForegroundServiceDelegationOptions();
+        if (foregroundServiceDelegationOptions == null) {
+            // This record doesn't support FGS delegation. In practice, this is MediaSession2.
+            return;
+        }
+        mActivityManagerInternal.stopForegroundServiceDelegate(foregroundServiceDelegationOptions);
     }
 
     void tempAllowlistTargetPkgIfPossible(int targetUid, String targetPackage,

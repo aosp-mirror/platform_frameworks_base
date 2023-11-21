@@ -77,3 +77,9 @@ flag {
      bug: "279555229"
 }
 
+flag {
+    name: "enable_notifying_activity_manager_with_media_session_status_change"
+    namespace: "media_solutions"
+    description: "Notify ActivityManager with the changes in playback state of the media session."
+    bug: "295518668"
+}
