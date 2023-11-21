@@ -567,7 +567,7 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Forbundet via ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Forbundet via eARC"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"Fjernsyn som standardoutput"</string>
+    <string name="tv_media_transfer_default" msgid="38102257053315304">"Fjernsyn som standard"</string>
     <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"HDMI-udgang"</string>
     <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"Interne højttalere"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Der kunne ikke oprettes forbindelse. Sluk og tænd enheden"</string>
