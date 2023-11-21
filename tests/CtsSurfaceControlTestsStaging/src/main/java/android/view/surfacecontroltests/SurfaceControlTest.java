@@ -16,11 +16,8 @@
 
 package android.view.surfacecontroltests;
 
-import static org.junit.Assume.assumeTrue;
-
 import android.Manifest;
 import android.hardware.display.DisplayManager;
-import android.os.SystemProperties;
 import android.support.test.uiautomator.UiDevice;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -53,10 +50,6 @@ public class SurfaceControlTest {
         GraphicsActivity activity = mActivityRule.getActivity();
 
         UiDevice uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-
-        // TODO(b/290634611): clean this up once SF new front end is enabled by default
-        assumeTrue(SystemProperties.getBoolean(
-                "persist.debug.sf.enable_layer_lifecycle_manager", false));
 
         uiDevice.wakeUp();
         uiDevice.executeShellCommand("wm dismiss-keyguard");
