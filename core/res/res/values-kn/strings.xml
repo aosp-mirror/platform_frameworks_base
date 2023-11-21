@@ -2027,7 +2027,7 @@
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೆ?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_1">%2$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೆ?"</string>
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"ಈ ಮುಂದಿನ ಐಟಂಗಳನ್ನು "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೆ: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
-    <string name="autofill_save_yes" msgid="8035743017382012850">"ಉಳಿಸಿ"</string>
+    <string name="autofill_save_yes" msgid="8035743017382012850">"ಸೇವ್ ಮಾಡಿ"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"ಬೇಡ"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ಸದ್ಯಕ್ಕೆ ಬೇಡ"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"ಎಂದೂ ಬೇಡ"</string>
