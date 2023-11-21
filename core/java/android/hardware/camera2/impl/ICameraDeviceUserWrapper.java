@@ -16,19 +16,12 @@
 
 package android.hardware.camera2.impl;
 
-import static android.hardware.camera2.CameraAccessException.CAMERA_DISABLED;
-import static android.hardware.camera2.CameraAccessException.CAMERA_DISCONNECTED;
-import static android.hardware.camera2.CameraAccessException.CAMERA_IN_USE;
-import static android.hardware.camera2.CameraAccessException.CAMERA_ERROR;
-import static android.hardware.camera2.CameraAccessException.MAX_CAMERAS_IN_USE;
-import static android.hardware.camera2.CameraAccessException.CAMERA_DEPRECATED_HAL;
-
 import android.hardware.ICameraService;
-import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.ICameraDeviceCallbacks;
+import android.hardware.camera2.ICameraDeviceUser;
 import android.hardware.camera2.ICameraOfflineSession;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.OutputConfiguration;
@@ -194,6 +187,28 @@ public class ICameraDeviceUserWrapper {
             if (e.errorCode == ICameraService.ERROR_INVALID_OPERATION) {
                 throw new UnsupportedOperationException("Session configuration query not " +
                         "supported");
+            } else if (e.errorCode == ICameraService.ERROR_ILLEGAL_ARGUMENT) {
+                throw new IllegalArgumentException("Invalid session configuration");
+            }
+
+            throw e;
+        } catch (Throwable t) {
+            CameraManager.throwAsPublicException(t);
+            throw new UnsupportedOperationException("Unexpected exception", t);
+        }
+    }
+
+    /**
+     * Fetches the CameraCharacteristics for a given session configuration.
+     */
+    public CameraMetadataNative getSessionCharacteristics(SessionConfiguration sessionConfig)
+            throws CameraAccessException {
+        try {
+            return mRemoteDevice.getSessionCharacteristics(sessionConfig);
+        } catch (ServiceSpecificException e) {
+            if (e.errorCode == ICameraService.ERROR_INVALID_OPERATION) {
+                throw new UnsupportedOperationException("Session characteristics query not "
+                    + "supported");
             } else if (e.errorCode == ICameraService.ERROR_ILLEGAL_ARGUMENT) {
                 throw new IllegalArgumentException("Invalid session configuration");
             }
