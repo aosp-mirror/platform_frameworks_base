@@ -14,8 +14,6 @@ import android.view.SurfaceControl
 import android.window.TransitionInfo
 import android.window.TransitionInfo.FLAG_IS_WALLPAPER
 import androidx.test.filters.SmallTest
-import com.android.server.testutils.any
-import com.android.server.testutils.mock
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestRunningTaskInfoBuilder
@@ -28,8 +26,10 @@ import java.util.function.Supplier
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyZeroInteractions
