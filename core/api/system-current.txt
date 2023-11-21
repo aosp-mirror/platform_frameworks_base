@@ -11783,6 +11783,14 @@ package android.service.carrier {
 
 }
 
+package android.service.chooser {
+
+  @FlaggedApi("android.service.chooser.support_nfc_resolver") public class CustomChoosers {
+    method @FlaggedApi("android.service.chooser.support_nfc_resolver") @NonNull public static android.content.Intent createNfcResolverIntent(@NonNull android.content.Intent, @Nullable CharSequence, @NonNull java.util.List<android.content.pm.ResolveInfo>);
+  }
+
+}
+
 package android.service.cloudsearch {
 
   public abstract class CloudSearchService extends android.app.Service {

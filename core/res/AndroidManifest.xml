@@ -7898,6 +7898,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity android:name="com.android.internal.app.NfcResolverActivity"
+                android:theme="@style/Theme.Dialog.Alert"
+                android:finishOnCloseSystemDialogs="true"
+                android:excludeFromRecents="true"
+                android:multiprocess="true"
+                android:permission="android.permission.SHOW_CUSTOMIZED_RESOLVER"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.chooser.action.SHOW_CUSTOMIZED_RESOLVER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <activity android:name="com.android.internal.app.IntentForwarderActivity"
                 android:finishOnCloseSystemDialogs="true"
                 android:theme="@style/Theme.DeviceDefault.Resolver"
