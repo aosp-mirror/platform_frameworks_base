@@ -112,6 +112,7 @@ public class AppTransitionController {
     private final WindowManagerService mService;
     private final DisplayContent mDisplayContent;
     private final WallpaperController mWallpaperControllerLocked;
+    private boolean mAssignChildLayersDeferred = false;
     private RemoteAnimationDefinition mRemoteAnimationDefinition = null;
 
     private static final int TYPE_NONE = 0;
@@ -139,6 +140,14 @@ public class AppTransitionController {
 
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
         mRemoteAnimationDefinition = definition;
+    }
+
+    /**
+     * Defers the {@link DisplayContent#assignChildLayers(SurfaceControl.Transaction)} to a later
+     * stage when animation starts.
+     */
+    public void deferAssignChildLayers() {
+        mAssignChildLayersDeferred = true;
     }
 
     /**
@@ -175,6 +184,10 @@ public class AppTransitionController {
                 || !transitionGoodToGo(mDisplayContent.mChangingContainers, mTempTransitionReasons)
                 || !transitionGoodToGoForTaskFragments()) {
             return;
+        }
+        if (mAssignChildLayersDeferred) {
+            mDisplayContent.assignChildLayers(mDisplayContent.getSyncTransaction());
+            mAssignChildLayersDeferred = false;
         }
         final boolean isRecentsInOpening = mDisplayContent.mOpeningApps.stream().anyMatch(
                 ConfigurationContainer::isActivityTypeRecents);
