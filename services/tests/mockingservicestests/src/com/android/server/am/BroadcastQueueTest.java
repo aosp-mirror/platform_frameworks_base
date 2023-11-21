@@ -125,6 +125,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
@@ -707,6 +708,9 @@ public class BroadcastQueueTest {
     private void waitForIdle() throws Exception {
         mLooper.release();
         mQueue.waitForIdle(LOG_WRITER_INFO);
+        final CountDownLatch latch = new CountDownLatch(1);
+        mHandlerThread.getThreadHandler().post(latch::countDown);
+        latch.await();
         mLooper = Objects.requireNonNull(InstrumentationRegistry.getInstrumentation()
                 .acquireLooperManager(mHandlerThread.getLooper()));
     }
@@ -2342,6 +2346,7 @@ public class BroadcastQueueTest {
 
         mUidObserver.onUidStateChanged(receiverGreenApp.info.uid,
                 ActivityManager.PROCESS_STATE_TOP, 0, ActivityManager.PROCESS_CAPABILITY_NONE);
+        waitForIdle();
 
         final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
         final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
@@ -2375,6 +2380,7 @@ public class BroadcastQueueTest {
 
         mUidObserver.onUidStateChanged(receiverGreenApp.info.uid,
                 ActivityManager.PROCESS_STATE_TOP, 0, ActivityManager.PROCESS_CAPABILITY_NONE);
+        waitForIdle();
 
         final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
 
