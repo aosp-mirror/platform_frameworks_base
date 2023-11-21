@@ -1863,8 +1863,8 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.HEARING_AID_MEDIA_ROUTING,
                 SecureSettingsProto.Accessibility.HEARING_AID_MEDIA_ROUTING);
         dumpSetting(s, p,
-                Settings.Secure.HEARING_AID_SYSTEM_SOUNDS_ROUTING,
-                SecureSettingsProto.Accessibility.HEARING_AID_SYSTEM_SOUNDS_ROUTING);
+                Settings.Secure.HEARING_AID_NOTIFICATION_ROUTING,
+                SecureSettingsProto.Accessibility.HEARING_AID_NOTIFICATION_ROUTING);
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_FONT_SCALING_HAS_BEEN_CHANGED);

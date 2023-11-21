@@ -93,7 +93,7 @@ message SecureSettingsProto {
         optional SettingProto hearing_aid_ringtone_routing = 46 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto hearing_aid_call_routing = 47 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto hearing_aid_media_routing = 48 [ (android.privacy).dest = DEST_AUTOMATIC ];
-        optional SettingProto hearing_aid_system_sounds_routing = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto hearing_aid_notification_routing = 49 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto accessibility_magnification_joystick_enabled = 50 [ (android.privacy).dest = DEST_AUTOMATIC ];
         // Settings for font scaling
         optional SettingProto accessibility_font_scaling_has_been_changed = 51 [ (android.privacy).dest = DEST_AUTOMATIC ];
