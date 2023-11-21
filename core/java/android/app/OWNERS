@@ -72,6 +72,7 @@ per-file *Notification* = file:/packages/SystemUI/OWNERS
 per-file *Zen* = file:/packages/SystemUI/OWNERS
 per-file *StatusBar* = file:/packages/SystemUI/OWNERS
 per-file *UiModeManager* = file:/packages/SystemUI/OWNERS
+per-file notification.aconfig = file:/packages/SystemUI/OWNERS
 
 # PackageManager
 per-file ApplicationPackageManager.java = file:/services/core/java/com/android/server/pm/OWNERS
