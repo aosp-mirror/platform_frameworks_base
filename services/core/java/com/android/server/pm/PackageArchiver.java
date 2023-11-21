@@ -37,6 +37,7 @@ import android.app.BroadcastOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ArchivedActivityParcel;
 import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.LauncherActivityInfo;
@@ -184,6 +185,7 @@ public class PackageArchiver {
             throws PackageManager.NameNotFoundException {
         PackageStateInternal ps = getPackageState(packageName, mPm.snapshotComputer(),
                 Binder.getCallingUid(), userId);
+        verifyNotSystemApp(ps.getFlags());
         String responsibleInstallerPackage = getResponsibleInstallerPackage(ps);
         verifyInstaller(responsibleInstallerPackage, userId);
         verifyOptOutStatus(packageName,
@@ -318,6 +320,13 @@ public class PackageArchiver {
         return intentReceivers != null && !intentReceivers.getList().isEmpty();
     }
 
+    private void verifyNotSystemApp(int flags) throws PackageManager.NameNotFoundException {
+        if ((flags & ApplicationInfo.FLAG_SYSTEM) != 0 || (
+                (flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)) {
+            throw new PackageManager.NameNotFoundException("System apps cannot be archived.");
+        }
+    }
+
     /**
      * Returns true if the app is archivable.
      */
@@ -337,6 +346,11 @@ public class PackageArchiver {
                     Binder.getCallingUid(), userId);
         } catch (PackageManager.NameNotFoundException e) {
             throw new ParcelableException(e);
+        }
+
+        if ((ps.getFlags() & ApplicationInfo.FLAG_SYSTEM) != 0 || (
+                (ps.getFlags() & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)) {
+            return false;
         }
 
         if (isAppOptedOutOfArchiving(packageName, ps.getAppId())) {
