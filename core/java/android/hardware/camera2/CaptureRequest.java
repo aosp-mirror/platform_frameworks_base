@@ -2688,7 +2688,7 @@ public final class CaptureRequest extends CameraMetadata<CaptureRequest.Key<?>>
      * set to TORCH;
      * <code>[1-android.flash.info.singleStrengthMaxLevel]</code> when the {@link CaptureRequest#FLASH_MODE android.flash.mode} is
      * set to SINGLE</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#CONTROL_AE_MODE
      * @see CaptureRequest#FLASH_MODE

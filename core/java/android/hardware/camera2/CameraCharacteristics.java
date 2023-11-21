@@ -1414,7 +1414,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * otherwise the value will be equal to 1.
      * Note that this level is just a number of supported levels (the granularity of control).
      * There is no actual physical power units tied to this level.</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#FLASH_MODE
      */
@@ -1430,7 +1430,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * or equal to <code>android.flash.info.singleStrengthMaxLevel</code>.
      * Note for devices that do not support the manual flash strength control
      * feature, this level will always be equal to 1.</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p>This key is available on all devices.</p>
      */
     @PublicKey
     @NonNull
@@ -1450,7 +1450,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * android.flash.info.singleStrengthMaxLevel i.e. the ratio of
      * android.flash.info.torchStrengthMaxLevel:android.flash.info.singleStrengthMaxLevel
      * is not guaranteed to be the ratio of actual brightness.</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p>This key is available on all devices.</p>
      *
      * @see CaptureRequest#FLASH_MODE
      */
@@ -1466,7 +1466,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * or equal to android.flash.info.torchStrengthMaxLevel.
      * Note for the devices that do not support the manual flash strength control feature,
      * this level will always be equal to 1.</p>
-     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * <p>This key is available on all devices.</p>
      */
     @PublicKey
     @NonNull
