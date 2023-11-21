@@ -94,6 +94,7 @@ import sun.misc.Unsafe;
  * <p>Files to pin are specified in the config_defaultPinnerServiceFiles
  * overlay.</p>
  * <p>Pin the default camera application if specified in config_pinnerCameraApp.</p>
+ * <p>(Optional) Pin experimental carveout regions based on DeviceConfig flags.</p>
  */
 public final class PinnerService extends SystemService {
     private static final boolean DEBUG = false;
