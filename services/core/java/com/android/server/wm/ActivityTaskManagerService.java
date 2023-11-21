@@ -1224,29 +1224,38 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             final long origId = Binder.clearCallingIdentity();
             // TODO(b/64750076): Check if calling pid should really be -1.
-            final int res = getActivityStartController()
-                    .obtainStarter(intent, "startNextMatchingActivity")
-                    .setCaller(r.app.getThread())
-                    .setResolvedType(r.resolvedType)
-                    .setActivityInfo(aInfo)
-                    .setResultTo(resultTo != null ? resultTo.appToken : null)
-                    .setResultWho(resultWho)
-                    .setRequestCode(requestCode)
-                    .setCallingPid(-1)
-                    .setCallingUid(r.launchedFromUid)
-                    .setCallingPackage(r.launchedFromPackage)
-                    .setCallingFeatureId(r.launchedFromFeatureId)
-                    .setRealCallingPid(-1)
-                    .setRealCallingUid(r.launchedFromUid)
-                    .setActivityOptions(options)
-                    .execute();
-            Binder.restoreCallingIdentity(origId);
-
-            r.finishing = wasFinishing;
-            if (res != ActivityManager.START_SUCCESS) {
-                return false;
+            try {
+                if (options == null) {
+                    options = new SafeActivityOptions(ActivityOptions.makeBasic());
+                }
+                // Fixes b/230492947
+                // Prevents background activity launch through #startNextMatchingActivity
+                // An activity going into the background could still go back to the foreground
+                // if the intent used matches both:
+                // - the activity in the background
+                // - a second activity.
+                options.getOptions(r).setAvoidMoveToFront();
+                final int res = getActivityStartController()
+                        .obtainStarter(intent, "startNextMatchingActivity")
+                        .setCaller(r.app.getThread())
+                        .setResolvedType(r.resolvedType)
+                        .setActivityInfo(aInfo)
+                        .setResultTo(resultTo != null ? resultTo.appToken : null)
+                        .setResultWho(resultWho)
+                        .setRequestCode(requestCode)
+                        .setCallingPid(-1)
+                        .setCallingUid(r.launchedFromUid)
+                        .setCallingPackage(r.launchedFromPackage)
+                        .setCallingFeatureId(r.launchedFromFeatureId)
+                        .setRealCallingPid(-1)
+                        .setRealCallingUid(r.launchedFromUid)
+                        .setActivityOptions(options)
+                        .execute();
+                r.finishing = wasFinishing;
+                return res == ActivityManager.START_SUCCESS;
+            } finally {
+                Binder.restoreCallingIdentity(origId);
             }
-            return true;
         }
     }
 
