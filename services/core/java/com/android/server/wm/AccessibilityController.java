@@ -107,6 +107,7 @@ import com.android.server.wm.AccessibilityWindowsPopulator.AccessibilityWindow;
 import com.android.server.wm.WindowManagerInternal.AccessibilityControllerInternal;
 import com.android.server.wm.WindowManagerInternal.MagnificationCallbacks;
 import com.android.server.wm.WindowManagerInternal.WindowsForAccessibilityCallback;
+import com.android.window.flags.Flags;
 
 import java.io.File;
 import java.io.IOException;
@@ -757,6 +758,11 @@ final class AccessibilityController {
                 case WindowManagerPolicy.TRANSIT_SHOW: {
                     if (!isMagnifierActivated) {
                         break;
+                    }
+                    if (Flags.doNotCheckIntersectionWhenNonMagnifiableWindowTransitions()) {
+                        if (!windowState.shouldMagnify()) {
+                            break;
+                        }
                     }
                     switch (type) {
                         case WindowManager.LayoutParams.TYPE_APPLICATION:
