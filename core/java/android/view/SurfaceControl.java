@@ -859,29 +859,31 @@ public final class SurfaceControl implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"FRAME_RATE_SELECTION_STRATEGY_"},
-            value = {FRAME_RATE_SELECTION_STRATEGY_SELF,
+            value = {FRAME_RATE_SELECTION_STRATEGY_PROPAGATE,
                     FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN,
-                    FRAME_RATE_SELECTION_STRATEGY_DO_NOT_PROPAGATE})
+                    FRAME_RATE_SELECTION_STRATEGY_SELF})
     public @interface FrameRateSelectionStrategy {}
 
     // From window.h. Keep these in sync.
     /**
      * Default value. The layer uses its own frame rate specifications, assuming it has any
      * specifications, instead of its parent's. If it does not have its own frame rate
-     * specifications, it will try to use its parent's.
+     * specifications, it will try to use its parent's. It will propagate its specifications to any
+     * descendants that do not have their own.
      *
      * However, {@link #FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} on an ancestor layer
-     * supersedes this behavior, meaning that this layer will inherit the frame rate specifications
-     * of that ancestor layer.
+     * supersedes this behavior, meaning that this layer will inherit frame rate specifications
+     * regardless of whether it has its own.
      * @hide
      */
-    public static final int FRAME_RATE_SELECTION_STRATEGY_SELF = 0;
+    public static final int FRAME_RATE_SELECTION_STRATEGY_PROPAGATE = 0;
 
     /**
      * The layer's frame rate specifications will propagate to and override those of its descendant
      * layers.
-     * The layer with this strategy has the {@link #FRAME_RATE_SELECTION_STRATEGY_SELF} behavior
-     * for itself. This does mean that any parent or ancestor layer that also has the strategy
+     *
+     * The layer itself has the {@link #FRAME_RATE_SELECTION_STRATEGY_PROPAGATE} behavior.
+     * Thus, ancestor layer that also has the strategy
      * {@link #FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} will override this layer's
      * frame rate specifications.
      * @hide
@@ -889,13 +891,13 @@ public final class SurfaceControl implements Parcelable {
     public static final int FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN = 1;
 
     /**
-     * The layer's frame rate specifications will never propagate to its descendant
-     * layers.
-     * {@link #FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} on an ancestor layer supersedes
-     * this behavior.
+     * The layer's frame rate specifications will not propagate to its descendant
+     * layers, even if the descendant layer has no frame rate specifications.
+     * However, {@link #FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN} on an ancestor
+     * layer supersedes this behavior.
      * @hide
      */
-    public static final int FRAME_RATE_SELECTION_STRATEGY_DO_NOT_PROPAGATE = 2;
+    public static final int FRAME_RATE_SELECTION_STRATEGY_SELF = 2;
 
     /**
      * Builder class for {@link SurfaceControl} objects.

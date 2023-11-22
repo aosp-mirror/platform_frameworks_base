@@ -712,8 +712,8 @@ public class GraphicsActivity extends Activity {
             int initialNumEvents = mModeChangedEvents.size();
             parent.setFrameRateSelectionStrategy(parentStrategy);
 
-            // For DoNotPropagate case, we want to test that child gets default behavior
-            if (parentStrategy == SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_DO_NOT_PROPAGATE) {
+            // For Self case, we want to test that child gets default behavior
+            if (parentStrategy == SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_SELF) {
                 parent.setFrameRateCategory(Surface.FRAME_RATE_CATEGORY_NO_PREFERENCE);
             } else {
                 parent.setFrameRate(parentFrameRate);

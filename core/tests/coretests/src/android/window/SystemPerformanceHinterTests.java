@@ -21,7 +21,7 @@ import static android.os.PerformanceHintManager.Session.CPU_LOAD_UP;
 import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN;
-import static android.view.SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_SELF;
+import static android.view.SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_PROPAGATE;
 import static android.window.SystemPerformanceHinter.HINT_ADPF;
 import static android.window.SystemPerformanceHinter.HINT_ALL;
 import static android.window.SystemPerformanceHinter.HINT_SF_EARLY_WAKEUP;
@@ -170,7 +170,7 @@ public class SystemPerformanceHinterTests {
         // Verify we call SF
         verify(mTransaction).setFrameRateSelectionStrategy(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
+                eq(FRAME_RATE_SELECTION_STRATEGY_PROPAGATE));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
                 eq(FRAME_RATE_CATEGORY_DEFAULT),
@@ -262,7 +262,7 @@ public class SystemPerformanceHinterTests {
         // Verify we call SF and perf manager to clean up
         verify(mTransaction).setFrameRateSelectionStrategy(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
+                eq(FRAME_RATE_SELECTION_STRATEGY_PROPAGATE));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
                 eq(FRAME_RATE_CATEGORY_DEFAULT),
@@ -283,7 +283,7 @@ public class SystemPerformanceHinterTests {
             // Verify we call SF and perf manager to clean up
             verify(mTransaction).setFrameRateSelectionStrategy(
                     eq(mDefaultDisplayRoot),
-                    eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
+                    eq(FRAME_RATE_SELECTION_STRATEGY_PROPAGATE));
             verify(mTransaction).setFrameRateCategory(
                     eq(mDefaultDisplayRoot),
                     eq(FRAME_RATE_CATEGORY_DEFAULT),
@@ -334,7 +334,7 @@ public class SystemPerformanceHinterTests {
         // Verify we call SF and perf manager to clean up
         verify(mTransaction).setFrameRateSelectionStrategy(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
+                eq(FRAME_RATE_SELECTION_STRATEGY_PROPAGATE));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
                 eq(FRAME_RATE_CATEGORY_DEFAULT),
@@ -385,7 +385,7 @@ public class SystemPerformanceHinterTests {
         session1.close();
         verify(mTransaction).setFrameRateSelectionStrategy(
                 eq(mDefaultDisplayRoot),
-                eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
+                eq(FRAME_RATE_SELECTION_STRATEGY_PROPAGATE));
         verify(mTransaction).setFrameRateCategory(
                 eq(mDefaultDisplayRoot),
                 eq(FRAME_RATE_CATEGORY_DEFAULT),
@@ -410,7 +410,7 @@ public class SystemPerformanceHinterTests {
                 anyInt());
         verify(mTransaction).setFrameRateSelectionStrategy(
                 eq(mSecondaryDisplayRoot),
-                eq(FRAME_RATE_SELECTION_STRATEGY_SELF));
+                eq(FRAME_RATE_SELECTION_STRATEGY_PROPAGATE));
         verify(mTransaction).setFrameRateCategory(
                 eq(mSecondaryDisplayRoot),
                 eq(FRAME_RATE_CATEGORY_DEFAULT),

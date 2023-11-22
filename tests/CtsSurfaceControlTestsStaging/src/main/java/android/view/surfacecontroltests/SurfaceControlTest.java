@@ -111,10 +111,11 @@ public class SurfaceControlTest {
     }
 
     @Test
-    public void testSurfaceControlFrameRateSelectionStrategySelf() throws InterruptedException {
+    public void testSurfaceControlFrameRateSelectionStrategyPropagate()
+            throws InterruptedException {
         GraphicsActivity activity = mActivityRule.getActivity();
         activity.testSurfaceControlFrameRateSelectionStrategy(
-                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_SELF);
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_PROPAGATE);
     }
 
     @Test
@@ -126,10 +127,10 @@ public class SurfaceControlTest {
     }
 
     @Test
-    public void testSurfaceControlFrameRateSelectionStrategyDoNotPropagate()
+    public void testSurfaceControlFrameRateSelectionStrategySelf()
             throws InterruptedException {
         GraphicsActivity activity = mActivityRule.getActivity();
         activity.testSurfaceControlFrameRateSelectionStrategy(
-                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_DO_NOT_PROPAGATE);
+                SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_SELF);
     }
 }
