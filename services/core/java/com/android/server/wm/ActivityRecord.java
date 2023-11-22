@@ -970,6 +970,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean mWaitForEnteringPinnedMode;
 
     final ActivityRecordInputSink mActivityRecordInputSink;
+    // System activities with INTERNAL_SYSTEM_WINDOW can disable ActivityRecordInputSink.
+    boolean mActivityRecordInputSinkEnabled = true;
 
     // Activities with this uid are allowed to not create an input sink while being in the same
     // task and directly above this ActivityRecord. This field is updated whenever a new activity
