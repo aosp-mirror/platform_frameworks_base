@@ -122,6 +122,9 @@ java_library_static {
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/wm/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
+
+        // Java/AIDL sources to be moved out to CrashRecovery module
+        ":services-crashrecovery-sources",
     ],
 
     libs: [
@@ -153,7 +156,7 @@ java_library_static {
         "android.hardware.boot-V1.0-java", // HIDL
         "android.hardware.boot-V1.1-java", // HIDL
         "android.hardware.boot-V1.2-java", // HIDL
-        "android.hardware.boot-V1-java",   // AIDL
+        "android.hardware.boot-V1-java", // AIDL
         "android.hardware.broadcastradio-V2.0-java", // HIDL
         "android.hardware.broadcastradio-V1-java", // AIDL
         "android.hardware.health-V1.0-java", // HIDL
