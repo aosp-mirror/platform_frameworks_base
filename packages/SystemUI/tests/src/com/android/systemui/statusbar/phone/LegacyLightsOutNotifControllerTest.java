@@ -54,7 +54,7 @@ import java.util.Objects;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
-public class LightsOutNotifControllerTest extends SysuiTestCase {
+public class LegacyLightsOutNotifControllerTest extends SysuiTestCase {
     private static final int LIGHTS_ON = 0;
     private static final int LIGHTS_OUT = APPEARANCE_LOW_PROFILE_BARS;
 
@@ -68,7 +68,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
     @Captor private ArgumentCaptor<CommandQueue.Callbacks> mCallbacksCaptor;
 
     private View mLightsOutView;
-    private LightsOutNotifController mLightsOutNotifController;
+    private LegacyLightsOutNotifController mLightsOutNotifController;
     private int mDisplayId;
     private Observer<Boolean> mHaActiveNotifsObserver;
     private CommandQueue.Callbacks mCallbacks;
@@ -83,7 +83,7 @@ public class LightsOutNotifControllerTest extends SysuiTestCase {
         when(mNotifLiveDataStore.getHasActiveNotifs()).thenReturn(mHasActiveNotifs);
         when(mHasActiveNotifs.getValue()).thenReturn(false);
 
-        mLightsOutNotifController = new LightsOutNotifController(
+        mLightsOutNotifController = new LegacyLightsOutNotifController(
                 mLightsOutView,
                 mWindowManager,
                 mNotifLiveDataStore,
