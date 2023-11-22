@@ -4214,6 +4214,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Slog.v(TAG_APP, "Keeping entry during removeHistory for activity " + this);
             }
         }
+        if (task != null && task.mKillProcessesOnDestroyed) {
+            mTaskSupervisor.removeTimeoutOfKillProcessesOnProcessDied(this, task);
+        }
         // upgrade transition trigger to task if this is the last activity since it means we are
         // closing the task.
         final WindowContainer trigger = remove && task != null && task.getChildCount() == 1

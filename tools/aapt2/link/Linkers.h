@@ -20,12 +20,12 @@
 #include <set>
 #include <unordered_set>
 
-#include "android-base/macros.h"
-#include "androidfw/ConfigDescription.h"
-#include "androidfw/StringPiece.h"
-
 #include "Resource.h"
 #include "SdkConstants.h"
+#include "android-base/macros.h"
+#include "android-base/result.h"
+#include "androidfw/ConfigDescription.h"
+#include "androidfw/StringPiece.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlDom.h"
 
@@ -90,28 +90,6 @@ class PrivateAttributeMover : public IResourceTableConsumer {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(PrivateAttributeMover);
-};
-
-class ResourceConfigValue;
-
-class ProductFilter : public IResourceTableConsumer {
- public:
-  using ResourceConfigValueIter = std::vector<std::unique_ptr<ResourceConfigValue>>::iterator;
-
-  explicit ProductFilter(std::unordered_set<std::string> products) : products_(products) {
-  }
-
-  ResourceConfigValueIter SelectProductToKeep(const ResourceNameRef& name,
-                                              const ResourceConfigValueIter begin,
-                                              const ResourceConfigValueIter end,
-                                              android::IDiagnostics* diag);
-
-  bool Consume(IAaptContext* context, ResourceTable* table) override;
-
- private:
-  DISALLOW_COPY_AND_ASSIGN(ProductFilter);
-
-  std::unordered_set<std::string> products_;
 };
 
 // Removes namespace nodes and URI information from the XmlResource.

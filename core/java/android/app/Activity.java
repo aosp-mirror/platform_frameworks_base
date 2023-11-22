@@ -31,6 +31,7 @@ import android.annotation.CallSuper;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.FlaggedApi;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.LayoutRes;
@@ -79,6 +80,7 @@ import android.graphics.drawable.Icon;
 import android.media.AudioManager;
 import android.media.session.MediaController;
 import android.net.Uri;
+import android.nfc.Flags;
 import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
@@ -8915,6 +8917,7 @@ public class Activity extends ContextThemeWrapper
      * @hide
      */
     @UnsupportedAppUsage
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public final boolean isResumed() {
         return mResumed;

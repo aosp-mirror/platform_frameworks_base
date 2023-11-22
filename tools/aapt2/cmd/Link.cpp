@@ -66,6 +66,7 @@
 #include "optimize/ResourceDeduper.h"
 #include "optimize/VersionCollapser.h"
 #include "process/IResourceTableConsumer.h"
+#include "process/ProductFilter.h"
 #include "process/SymbolTable.h"
 #include "split/TableSplitter.h"
 #include "trace/TraceBuffer.h"
@@ -2127,7 +2128,7 @@ class Linker {
                                          << "can't select products when building static library");
       }
     } else {
-      ProductFilter product_filter(options_.products);
+      ProductFilter product_filter(options_.products, /* remove_default_config_values = */ false);
       if (!product_filter.Consume(context_, &final_table_)) {
         context_->GetDiagnostics()->Error(android::DiagMessage() << "failed stripping products");
         return 1;
@@ -2508,6 +2509,28 @@ int LinkCommand::Action(const std::vector<std::string>& args) {
     options_.split_constraints.push_back({});
     if (!ParseSplitParameter(split_arg, context.GetDiagnostics(), &options_.split_paths.back(),
         &options_.split_constraints.back())) {
+      return 1;
+    }
+  }
+
+  // Parse the feature flag values. An argument that starts with '@' points to a file to read flag
+  // values from.
+  std::vector<std::string> all_feature_flags_args;
+  for (const std::string& arg : feature_flags_args_) {
+    if (util::StartsWith(arg, "@")) {
+      const std::string path = arg.substr(1, arg.size() - 1);
+      std::string error;
+      if (!file::AppendArgsFromFile(path, &all_feature_flags_args, &error)) {
+        context.GetDiagnostics()->Error(android::DiagMessage(path) << error);
+        return 1;
+      }
+    } else {
+      all_feature_flags_args.push_back(arg);
+    }
+  }
+
+  for (const std::string& arg : all_feature_flags_args) {
+    if (ParseFeatureFlagsParameter(arg, context.GetDiagnostics(), &options_.feature_flag_values)) {
       return 1;
     }
   }

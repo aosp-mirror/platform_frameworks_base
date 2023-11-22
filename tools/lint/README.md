@@ -103,10 +103,15 @@ out/soong/.intermediates/frameworks/base/services/autofill/services.autofill/and
 
 As noted above, this baseline file contains warnings too, which might be undesirable. For example,
 CI tools might surface these warnings in code reviews. In order to create this file without
-warnings, we need to pass another flag to lint: `--nowarn`. The easiest way to do this is to
-locally change the soong code in
-[lint.go](http://cs/aosp-master/build/soong/java/lint.go;l=451;rcl=2e778d5bc4a8d1d77b4f4a3029a4a254ad57db75)
-adding `cmd.Flag("--nowarn")` and running lint again.
+warnings, we need to pass another flag to lint: `--nowarn`. One option is to add the flag to your
+Android.bp file and then run lint again:
+
+```
+  lint: {
+    extra_check_modules: ["AndroidFrameworkLintChecker"],
+    flags: ["--nowarn"],
+  }
+```
 
 # Documentation
 

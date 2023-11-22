@@ -20,6 +20,8 @@ android_test {
         "androidx.test.ext.junit",
         "androidx.test.rules",
         "android-ex-camera2",
+        "android.media.playback.flags-aconfig-java",
+        "flag-junit",
         "testables",
         "testng",
         "truth",

@@ -101,8 +101,8 @@ NativeInputEventSender::~NativeInputEventSender() {
 }
 
 status_t NativeInputEventSender::initialize() {
-    int receiveFd = mInputPublisher.getChannel()->getFd();
-    mMessageQueue->getLooper()->addFd(receiveFd, 0, ALOOPER_EVENT_INPUT, this, NULL);
+    auto&& receiveFd = mInputPublisher.getChannel()->getFd();
+    mMessageQueue->getLooper()->addFd(receiveFd.get(), 0, ALOOPER_EVENT_INPUT, this, NULL);
     return OK;
 }
 
@@ -111,7 +111,7 @@ void NativeInputEventSender::dispose() {
         ALOGD("channel '%s' ~ Disposing input event sender.", getInputChannelName().c_str());
     }
 
-    mMessageQueue->getLooper()->removeFd(mInputPublisher.getChannel()->getFd());
+    mMessageQueue->getLooper()->removeFd(mInputPublisher.getChannel()->getFd().get());
 }
 
 status_t NativeInputEventSender::sendKeyEvent(uint32_t seq, const KeyEvent* event) {

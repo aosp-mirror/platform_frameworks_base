@@ -165,6 +165,9 @@ public class PeopleTileViewHelper {
                     + "\\p{Emoji}(\\p{EMod}|\\x{FE0F}\\x{20E3}?|[\\x{E0020}-\\x{E007E}]+\\x{E007F})"
                     + "?)*";
 
+    // Not all JDKs support emoji patterns, including the one errorprone runs under, which
+    // makes it think that this is an invalid pattern.
+    @SuppressWarnings("InvalidPatternSyntax")
     private static final Pattern EMOJI_PATTERN = Pattern.compile(UNICODE_EMOJI_REGEX);
 
     public static final String EMPTY_STRING = "";

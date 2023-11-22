@@ -15,6 +15,8 @@
  */
 package android.hardware.location;
 
+import static java.util.Objects.requireNonNull;
+
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -1111,12 +1113,12 @@ public final class ContextHubManager {
         }
     };
 
-    /** @throws ServiceNotFoundException
-     * @hide */
-    public ContextHubManager(Context context, Looper mainLooper) throws ServiceNotFoundException {
+    /** @hide */
+    public ContextHubManager(@NonNull IContextHubService service, @NonNull Looper mainLooper) {
+        requireNonNull(service, "service cannot be null");
+        requireNonNull(mainLooper, "mainLooper cannot be null");
+        mService = service;
         mMainLooper = mainLooper;
-        mService = IContextHubService.Stub.asInterface(
-                ServiceManager.getServiceOrThrow(Context.CONTEXTHUB_SERVICE));
         try {
             mService.registerCallback(mClientCallback);
         } catch (RemoteException e) {

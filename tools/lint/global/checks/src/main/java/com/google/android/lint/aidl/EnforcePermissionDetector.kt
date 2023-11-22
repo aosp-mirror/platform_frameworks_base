@@ -30,29 +30,34 @@ import com.android.tools.lint.detector.api.JavaContext
 import com.android.tools.lint.detector.api.Scope
 import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
+import com.google.android.lint.findCallExpression
 import com.intellij.psi.PsiAnnotation
 import com.intellij.psi.PsiArrayInitializerMemberValue
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiMethod
-import org.jetbrains.uast.UAnnotation
+import org.jetbrains.uast.UBlockExpression
+import org.jetbrains.uast.UDeclarationsExpression
 import org.jetbrains.uast.UElement
+import org.jetbrains.uast.UExpression
 import org.jetbrains.uast.UMethod
-import org.jetbrains.uast.toUElement
+import org.jetbrains.uast.skipParenthesizedExprDown
+
+import java.util.EnumSet
 
 /**
- * Lint Detector that ensures that any method overriding a method annotated
- * with @EnforcePermission is also annotated with the exact same annotation.
- * The intent is to surface the effective permission checks to the service
- * implementations.
+ * Lint Detector that ensures consistency when using the @EnforcePermission
+ * annotation. Multiple verifications are implemented:
  *
- * This is done with 2 mechanisms:
  *  1. Visit any annotation usage, to ensure that any derived class will have
- *     the correct annotation on each methods. This is for the top to bottom
- *     propagation.
- *  2. Visit any annotation, to ensure that if a method is annotated, it has
+ *     the correct annotation on each methods. Even if the subclass does not
+ *     have the annotation, visitAnnotationUsage will be called which allows us
+ *     to capture the issue.
+ *  2. Visit any method, to ensure that if a method is annotated, it has
  *     its ancestor also annotated. This is to avoid having an annotation on a
  *     Java method without the corresponding annotation on the AIDL interface.
+ *  3. When annotated, ensures that the first instruction is to call the helper
+ *     method (or the parent helper).
  */
 class EnforcePermissionDetector : Detector(), SourceCodeScanner {
 
@@ -60,9 +65,8 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
         return listOf(ANNOTATION_ENFORCE_PERMISSION)
     }
 
-    override fun getApplicableUastTypes(): List<Class<out UElement>> {
-        return listOf(UAnnotation::class.java)
-    }
+    override fun getApplicableUastTypes(): List<Class<out UElement?>> =
+            listOf(UMethod::class.java)
 
     private fun annotationValueGetChildren(elem: PsiElement): Array<PsiElement> {
         if (elem is PsiArrayInitializerMemberValue)
@@ -93,7 +97,7 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
             val v1 = ConstantEvaluator.evaluate(context, value1)
             val v2 = ConstantEvaluator.evaluate(context, value2)
             if (v1 != null && v2 != null) {
-                if (v1 != v2) {
+                if (v1 != v2 && !isOneShortPermissionOfOther(v1, v2)) {
                     return false
                 }
             } else {
@@ -105,7 +109,7 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
                 for (j in children1.indices) {
                     val c1 = ConstantEvaluator.evaluate(context, children1[j])
                     val c2 = ConstantEvaluator.evaluate(context, children2[j])
-                    if (c1 != c2) {
+                    if (c1 != c2 && !isOneShortPermissionOfOther(c1, c2)) {
                         return false
                     }
                 }
@@ -114,6 +118,12 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
         return true
     }
 
+    private fun isOneShortPermissionOfOther(
+        permission1: Any?,
+        permission2: Any?
+    ): Boolean = permission1 == (permission2 as? String)?.removePrefix(PERMISSION_PREFIX_LITERAL) ||
+            permission2 == (permission1 as? String)?.removePrefix(PERMISSION_PREFIX_LITERAL)
+
     private fun compareMethods(
         context: JavaContext,
         element: UElement,
@@ -121,11 +131,6 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
         overriddenMethod: PsiMethod,
         checkEquivalence: Boolean = true
     ) {
-        // If method is not from a Stub subclass, this method shouldn't use @EP at all.
-        // This is handled by EnforcePermissionHelperDetector.
-        if (!isContainedInSubclassOfStub(context, overridingMethod.toUElement() as? UMethod)) {
-            return
-        }
         val overridingAnnotation = overridingMethod.getAnnotation(ANNOTATION_ENFORCE_PERMISSION)
         val overriddenAnnotation = overriddenMethod.getAnnotation(ANNOTATION_ENFORCE_PERMISSION)
         val location = context.getLocation(element)
@@ -161,40 +166,112 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
     ) {
         if (usageInfo.type == AnnotationUsageType.METHOD_OVERRIDE &&
             annotationInfo.origin == AnnotationOrigin.METHOD) {
+            /* Ignore implementations that are not a sub-class of Stub (i.e., Proxy). */
+            val uMethod = element as? UMethod ?: return
+            if (getContainingAidlInterface(context, uMethod) == null) {
+                return
+            }
             val overridingMethod = element.sourcePsi as PsiMethod
             val overriddenMethod = usageInfo.referenced as PsiMethod
             compareMethods(context, element, overridingMethod, overriddenMethod)
         }
     }
 
-    override fun createUastHandler(context: JavaContext): UElementHandler {
-        return object : UElementHandler() {
-            override fun visitAnnotation(node: UAnnotation) {
-                if (node.qualifiedName != ANNOTATION_ENFORCE_PERMISSION) {
-                    return
-                }
-                val method = node.uastParent as? UMethod ?: return
-                val overridingMethod = method as PsiMethod
-                val parents = overridingMethod.findSuperMethods()
-                for (overriddenMethod in parents) {
-                    // The equivalence check can be skipped, if both methods are
-                    // annotated, it will be verified by visitAnnotationUsage.
-                    compareMethods(context, method, overridingMethod,
-                        overriddenMethod, checkEquivalence = false)
-                }
+    override fun createUastHandler(context: JavaContext): UElementHandler = AidlStubHandler(context)
+
+    private inner class AidlStubHandler(val context: JavaContext) : UElementHandler() {
+        override fun visitMethod(node: UMethod) {
+            if (context.evaluator.isAbstract(node)) return
+            if (!node.hasAnnotation(ANNOTATION_ENFORCE_PERMISSION)) return
+
+            val stubClass = containingStub(context, node)
+            if (stubClass == null) {
+                context.report(
+                    ISSUE_MISUSING_ENFORCE_PERMISSION,
+                    node,
+                    context.getLocation(node),
+                    "The class of ${node.name} does not inherit from an AIDL generated Stub class"
+                )
+                return
+            }
+
+            /* Check that we are connected to the super class */
+            val overridingMethod = node as PsiMethod
+            val parents = overridingMethod.findSuperMethods(stubClass)
+            if (parents.isEmpty()) {
+                context.report(
+                    ISSUE_MISUSING_ENFORCE_PERMISSION,
+                    node,
+                    context.getLocation(node),
+                    "The method ${node.name} does not override an AIDL generated method"
+                )
+                return
+            }
+            for (overriddenMethod in parents) {
+                // The equivalence check can be skipped, if both methods are
+                // annotated, it will be verified by visitAnnotationUsage.
+                compareMethods(context, node, overridingMethod,
+                    overriddenMethod, checkEquivalence = false)
+            }
+
+            /* Check that the helper is called as a first instruction */
+            val targetExpression = getHelperMethodCallSourceString(node)
+            val message =
+                "Method must start with $targetExpression or super.${node.name}(), if applicable"
+
+            val firstExpression = (node.uastBody as? UBlockExpression)
+                    ?.expressions?.firstOrNull()
+
+            if (firstExpression == null) {
+                context.report(
+                    ISSUE_ENFORCE_PERMISSION_HELPER,
+                    context.getLocation(node),
+                    message,
+                )
+                return
+            }
+
+            val firstExpressionSource = firstExpression.skipParenthesizedExprDown()
+              .asSourceString()
+              .filterNot(Char::isWhitespace)
+
+            if (firstExpressionSource != targetExpression &&
+                  firstExpressionSource != "super.$targetExpression") {
+                // calling super.<methodName>() is also legal
+                val directSuper = context.evaluator.getSuperMethod(node)
+                val firstCall = findCallExpression(firstExpression)?.resolve()
+                if (directSuper != null && firstCall == directSuper) return
+
+                val locationTarget = getLocationTarget(firstExpression)
+                val expressionLocation = context.getLocation(locationTarget)
+
+                context.report(
+                    ISSUE_ENFORCE_PERMISSION_HELPER,
+                    context.getLocation(node),
+                    message,
+                    getHelperMethodFix(node, expressionLocation),
+                )
             }
         }
     }
 
     companion object {
+
+        private const val HELPER_SUFFIX = "_enforcePermission"
+
         val EXPLANATION = """
-            The @EnforcePermission annotation is used to indicate that the underlying binder code
-            has already verified the caller's permissions before calling the appropriate method. The
-            verification code is usually generated by the AIDL compiler, which also takes care of
-            annotating the generated Java code.
+            The @EnforcePermission annotation is used to delegate the verification of the caller's
+            permissions to a generated AIDL method.
 
             In order to surface that information to platform developers, the same annotation must be
             used on the implementation class or methods.
+
+            The @EnforcePermission annotation can only be used on methods whose class extends from
+            the Stub class generated by the AIDL compiler. When @EnforcePermission is applied, the
+            AIDL compiler generates a Stub method to do the permission check called yourMethodName$HELPER_SUFFIX.
+
+            yourMethodName$HELPER_SUFFIX must be executed before any other operation. To do that, you can
+            either call it directly, or call it indirectly via super.yourMethodName().
             """
 
         val ISSUE_MISSING_ENFORCE_PERMISSION: Issue = Issue.create(
@@ -206,7 +283,7 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
             severity = Severity.ERROR,
             implementation = Implementation(
                     EnforcePermissionDetector::class.java,
-                    Scope.JAVA_FILE_SCOPE
+                    EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
             )
         )
 
@@ -219,8 +296,47 @@ class EnforcePermissionDetector : Detector(), SourceCodeScanner {
             severity = Severity.ERROR,
             implementation = Implementation(
                     EnforcePermissionDetector::class.java,
-                    Scope.JAVA_FILE_SCOPE
+                    EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
             )
         )
+
+        val ISSUE_ENFORCE_PERMISSION_HELPER: Issue = Issue.create(
+            id = "MissingEnforcePermissionHelper",
+            briefDescription = """Missing permission-enforcing method call in AIDL method
+                |annotated with @EnforcePermission""".trimMargin(),
+            explanation = EXPLANATION,
+            category = Category.SECURITY,
+            priority = 6,
+            severity = Severity.ERROR,
+            implementation = Implementation(
+                    EnforcePermissionDetector::class.java,
+                    EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
+            )
+        )
+
+        val ISSUE_MISUSING_ENFORCE_PERMISSION: Issue = Issue.create(
+            id = "MisusingEnforcePermissionAnnotation",
+            briefDescription = "@EnforcePermission cannot be used here",
+            explanation = EXPLANATION,
+            category = Category.SECURITY,
+            priority = 6,
+            severity = Severity.ERROR,
+            implementation = Implementation(
+                    EnforcePermissionDetector::class.java,
+                    EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
+            )
+        )
+
+        /**
+         * handles an edge case with UDeclarationsExpression, where sourcePsi is null,
+         * resulting in an incorrect Location if used directly
+         */
+        private fun getLocationTarget(firstExpression: UExpression): PsiElement? {
+            if (firstExpression.sourcePsi != null) return firstExpression.sourcePsi
+            if (firstExpression is UDeclarationsExpression) {
+                return firstExpression.declarations.firstOrNull()?.sourcePsi
+            }
+            return null
+        }
     }
 }

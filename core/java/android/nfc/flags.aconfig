@@ -20,3 +20,31 @@ flag {
     description: "Flag for NFC user restriction"
     bug: "291187960"
 }
+
+flag {
+    name: "nfc_observe_mode"
+    namespace: "nfc"
+    description: "Enable NFC Observe Mode"
+    bug: "294217286"
+}
+
+flag {
+    name: "nfc_read_polling_loop"
+    namespace: "nfc"
+    description: "Enable NFC Polling Loop Notifications"
+    bug: "294217286"
+}
+
+flag {
+    name: "nfc_observe_mode_st_shim"
+    namespace: "nfc"
+    description: "Enable NFC Observe Mode ST shim"
+    bug: "294217286"
+}
+
+flag {
+    name: "nfc_read_polling_loop_st_shim"
+    namespace: "nfc"
+    description: "Enable NFC Polling Loop Notifications ST shim"
+    bug: "294217286"
+}

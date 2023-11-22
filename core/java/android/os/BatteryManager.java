@@ -21,6 +21,7 @@ import static android.os.Flags.FLAG_STATE_OF_HEALTH_PUBLIC;
 import android.Manifest.permission;
 import android.annotation.FlaggedApi;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -236,6 +237,7 @@ public class BatteryManager {
                                             OsProtoEnums.CHARGING_POLICY_ADAPTIVE_LONGLIFE; // = 4
 
     /** @hide */
+    @SuppressLint("UnflaggedApi") // TestApi without associated feature.
     @TestApi
     public static final int BATTERY_PLUGGED_ANY =
             BATTERY_PLUGGED_AC | BATTERY_PLUGGED_USB | BATTERY_PLUGGED_WIRELESS

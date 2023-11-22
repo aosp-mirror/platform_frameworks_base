@@ -129,3 +129,6 @@ option java_package com.android.server.am
 
 # Intent Sender redirect for UserHandle.USER_CURRENT
 30110 am_intent_sender_redirect_user (userId|1|5)
+
+# Caller information to clear application data
+30120 am_clear_app_data_caller (pid|1),(uid|1),(package|3)
