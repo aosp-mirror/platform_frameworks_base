@@ -24,9 +24,11 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,6 +37,7 @@ import java.util.List;
  * from which to read {@link android.app.usage.UsageEvents.Event} objects.
  */
 public final class UsageEvents implements Parcelable {
+    private static final String TAG = "UsageEvents";
 
     /** @hide */
     public static final String INSTANT_APP_PACKAGE_NAME = "android.instant_app";
@@ -786,10 +789,20 @@ public final class UsageEvents implements Parcelable {
     }
 
     private void readUsageEventsFromParcelWithParceledList(Parcel in) {
+        mEventCount = in.readInt();
         mIndex = in.readInt();
-        mEventsToWrite = in.readParcelable(UsageEvents.class.getClassLoader(),
-            ParcelableUsageEventList.class).getList();
-        mEventCount = mEventsToWrite.size();
+        ParcelableUsageEventList slice = in.readParcelable(getClass().getClassLoader(),
+                ParcelableUsageEventList.class);
+        if (slice != null) {
+            mEventsToWrite = slice.getList();
+        } else {
+            mEventsToWrite = new ArrayList<>();
+        }
+
+        if (mEventCount != mEventsToWrite.size()) {
+            Log.w(TAG, "Partial usage event list received: " + mEventCount + " != "
+                    + mEventsToWrite.size());
+        }
     }
 
     private void readUsageEventsFromParcelWithBlob(Parcel in) {
@@ -1065,6 +1078,7 @@ public final class UsageEvents implements Parcelable {
     }
 
     private void writeUsageEventsToParcelWithParceledList(Parcel dest, int flags) {
+        dest.writeInt(mEventCount);
         dest.writeInt(mIndex);
         dest.writeParcelable(new ParcelableUsageEventList(mEventsToWrite), flags);
     }

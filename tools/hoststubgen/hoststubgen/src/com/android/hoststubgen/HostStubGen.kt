@@ -237,8 +237,8 @@ class HostStubGen(val options: HostStubGenOptions) {
      */
     private fun convert(
             inJar: String,
-            outStubJar: String,
-            outImplJar: String,
+            outStubJar: String?,
+            outImplJar: String?,
             filter: OutputFilter,
             enableChecker: Boolean,
             classes: ClassNodes,
@@ -254,8 +254,8 @@ class HostStubGen(val options: HostStubGenOptions) {
         log.withIndent {
             // Open the input jar file and process each entry.
             ZipFile(inJar).use { inZip ->
-                ZipOutputStream(FileOutputStream(outStubJar)).use { stubOutStream ->
-                    ZipOutputStream(FileOutputStream(outImplJar)).use { implOutStream ->
+                maybeWithZipOutputStream(outStubJar) { stubOutStream ->
+                    maybeWithZipOutputStream(outImplJar) { implOutStream ->
                         val inEntries = inZip.entries()
                         while (inEntries.hasMoreElements()) {
                             val entry = inEntries.nextElement()
@@ -265,12 +265,19 @@ class HostStubGen(val options: HostStubGenOptions) {
                         log.i("Converted all entries.")
                     }
                 }
-                log.i("Created stub: $outStubJar")
-                log.i("Created impl: $outImplJar")
+                outStubJar?.let { log.i("Created stub: $it") }
+                outImplJar?.let { log.i("Created impl: $it") }
             }
         }
         val end = System.currentTimeMillis()
         log.v("Done transforming the jar in %.1f second(s).", (end - start) / 1000.0)
+    }
+
+    private fun <T> maybeWithZipOutputStream(filename: String?, block: (ZipOutputStream?) -> T): T {
+        if (filename == null) {
+            return block(null)
+        }
+        return ZipOutputStream(FileOutputStream(filename)).use(block)
     }
 
     /**
@@ -279,8 +286,8 @@ class HostStubGen(val options: HostStubGenOptions) {
     private fun convertSingleEntry(
             inZip: ZipFile,
             entry: ZipEntry,
-            stubOutStream: ZipOutputStream,
-            implOutStream: ZipOutputStream,
+            stubOutStream: ZipOutputStream?,
+            implOutStream: ZipOutputStream?,
             filter: OutputFilter,
             packageRedirector: PackageRedirectRemapper,
             enableChecker: Boolean,
@@ -316,8 +323,8 @@ class HostStubGen(val options: HostStubGenOptions) {
             // Unknown type, we just copy it to both output zip files.
             // TODO: We probably shouldn't do it for stub jar?
             log.v("Copying: %s", entry.name)
-            copyZipEntry(inZip, entry, stubOutStream)
-            copyZipEntry(inZip, entry, implOutStream)
+            stubOutStream?.let { copyZipEntry(inZip, entry, it) }
+            implOutStream?.let { copyZipEntry(inZip, entry, it) }
         }
     }
 
@@ -346,8 +353,8 @@ class HostStubGen(val options: HostStubGenOptions) {
     private fun processSingleClass(
             inZip: ZipFile,
             entry: ZipEntry,
-            stubOutStream: ZipOutputStream,
-            implOutStream: ZipOutputStream,
+            stubOutStream: ZipOutputStream?,
+            implOutStream: ZipOutputStream?,
             filter: OutputFilter,
             packageRedirector: PackageRedirectRemapper,
             enableChecker: Boolean,
@@ -361,7 +368,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             return
         }
         // Generate stub first.
-        if (classPolicy.policy.needsInStub) {
+        if (stubOutStream != null && classPolicy.policy.needsInStub) {
             log.v("Creating stub class: %s Policy: %s", classInternalName, classPolicy)
             log.withIndent {
                 BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
@@ -374,8 +381,8 @@ class HostStubGen(val options: HostStubGenOptions) {
                 }
             }
         }
-        log.v("Creating impl class: %s Policy: %s", classInternalName, classPolicy)
-        if (classPolicy.policy.needsInImpl) {
+        if (implOutStream != null && classPolicy.policy.needsInImpl) {
+            log.v("Creating impl class: %s Policy: %s", classInternalName, classPolicy)
             log.withIndent {
                 BufferedInputStream(inZip.getInputStream(entry)).use { bis ->
                     val newEntry = ZipEntry(entry.name)

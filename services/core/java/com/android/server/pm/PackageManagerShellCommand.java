@@ -4689,10 +4689,12 @@ class PackageManagerShellCommand extends ShellCommand {
 
         final int translatedUserId =
                 translateUserId(userId, UserHandle.USER_SYSTEM, "runArchive");
+        final LocalIntentReceiver receiver = new LocalIntentReceiver();
 
         try {
             mInterface.getPackageInstaller().requestUnarchive(packageName,
-                    /* callerPackageName= */ "", new UserHandle(translatedUserId));
+                    /* callerPackageName= */ "", receiver.getIntentSender(),
+                    new UserHandle(translatedUserId));
         } catch (Exception e) {
             pw.println("Failure [" + e.getMessage() + "]");
             return 1;

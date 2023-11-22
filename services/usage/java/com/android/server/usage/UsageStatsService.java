@@ -1953,6 +1953,13 @@ public class UsageStatsService extends SystemService implements
             }
         }
 
+        // Flags status.
+        pw.println("Flags:");
+        pw.println("    " + Flags.FLAG_USER_INTERACTION_TYPE_API
+                + ": " + Flags.userInteractionTypeApi());
+        pw.println("    " + Flags.FLAG_USE_PARCELED_LIST
+                + ": " + Flags.useParceledList());
+
         final int[] userIds;
         synchronized (mLock) {
             final int userCount = mUserState.size();

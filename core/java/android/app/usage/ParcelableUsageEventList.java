@@ -48,13 +48,16 @@ public final class ParcelableUsageEventList implements Parcelable {
 
     private List<Event> mList;
 
-    public ParcelableUsageEventList(List<Event> list) {
+    public ParcelableUsageEventList(@NonNull List<Event> list) {
+        if (list == null) {
+            throw new IllegalArgumentException("Empty list");
+        }
         mList = list;
     }
 
     private ParcelableUsageEventList(Parcel in) {
         final int N = in.readInt();
-        mList = new ArrayList<>();
+        mList = new ArrayList<>(N);
         if (DEBUG) Log.d(TAG, "Retrieving " + N + " items");
         if (N <= 0) {
             return;

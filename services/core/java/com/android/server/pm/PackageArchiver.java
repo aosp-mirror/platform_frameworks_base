@@ -37,6 +37,7 @@ import android.app.BroadcastOptions;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.ArchivedActivityParcel;
 import android.content.pm.ArchivedPackageParcel;
 import android.content.pm.LauncherActivityInfo;
@@ -140,6 +141,8 @@ public class PackageArchiver {
         }
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
                 "archiveApp");
+        verifyUninstallPermissions();
+
         CompletableFuture<ArchiveState> archiveStateFuture;
         try {
             archiveStateFuture = createArchiveState(packageName, userId);
@@ -182,6 +185,7 @@ public class PackageArchiver {
             throws PackageManager.NameNotFoundException {
         PackageStateInternal ps = getPackageState(packageName, mPm.snapshotComputer(),
                 Binder.getCallingUid(), userId);
+        verifyNotSystemApp(ps.getFlags());
         String responsibleInstallerPackage = getResponsibleInstallerPackage(ps);
         verifyInstaller(responsibleInstallerPackage, userId);
         verifyOptOutStatus(packageName,
@@ -316,6 +320,13 @@ public class PackageArchiver {
         return intentReceivers != null && !intentReceivers.getList().isEmpty();
     }
 
+    private void verifyNotSystemApp(int flags) throws PackageManager.NameNotFoundException {
+        if ((flags & ApplicationInfo.FLAG_SYSTEM) != 0 || (
+                (flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)) {
+            throw new PackageManager.NameNotFoundException("System apps cannot be archived.");
+        }
+    }
+
     /**
      * Returns true if the app is archivable.
      */
@@ -335,6 +346,11 @@ public class PackageArchiver {
                     Binder.getCallingUid(), userId);
         } catch (PackageManager.NameNotFoundException e) {
             throw new ParcelableException(e);
+        }
+
+        if ((ps.getFlags() & ApplicationInfo.FLAG_SYSTEM) != 0 || (
+                (ps.getFlags() & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)) {
+            return false;
         }
 
         if (isAppOptedOutOfArchiving(packageName, ps.getAppId())) {
@@ -372,9 +388,11 @@ public class PackageArchiver {
     void requestUnarchive(
             @NonNull String packageName,
             @NonNull String callerPackageName,
+            @NonNull IntentSender statusReceiver,
             @NonNull UserHandle userHandle) {
         Objects.requireNonNull(packageName);
         Objects.requireNonNull(callerPackageName);
+        Objects.requireNonNull(statusReceiver);
         Objects.requireNonNull(userHandle);
 
         Computer snapshot = mPm.snapshotComputer();
@@ -385,6 +403,8 @@ public class PackageArchiver {
         }
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
                 "unarchiveApp");
+        verifyInstallPermissions();
+
         PackageStateInternal ps;
         try {
             ps = getPackageState(packageName, snapshot, binderUid, userId);
@@ -400,9 +420,12 @@ public class PackageArchiver {
                                     packageName)));
         }
 
+        // TODO(b/305902395) Introduce a confirmation dialog if the requestor only holds
+        // REQUEST_INSTALL permission.
         int draftSessionId;
         try {
-            draftSessionId = createDraftSession(packageName, installerPackage, userId);
+            draftSessionId = createDraftSession(packageName, installerPackage, statusReceiver,
+                    userId);
         } catch (RuntimeException e) {
             if (e.getCause() instanceof IOException) {
                 throw ExceptionUtils.wrap((IOException) e.getCause());
@@ -415,11 +438,36 @@ public class PackageArchiver {
                 () -> unarchiveInternal(packageName, userHandle, installerPackage, draftSessionId));
     }
 
-    private int createDraftSession(String packageName, String installerPackage, int userId) {
+    private void verifyInstallPermissions() {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED && mContext.checkCallingOrSelfPermission(
+                Manifest.permission.REQUEST_INSTALL_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the com.android.permission.INSTALL_PACKAGES "
+                    + "or com.android.permission.REQUEST_INSTALL_PACKAGES permission to request "
+                    + "an unarchival.");
+        }
+    }
+
+    private void verifyUninstallPermissions() {
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED && mContext.checkCallingOrSelfPermission(
+                Manifest.permission.REQUEST_DELETE_PACKAGES)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("You need the com.android.permission.DELETE_PACKAGES "
+                    + "or com.android.permission.REQUEST_DELETE_PACKAGES permission to request "
+                    + "an archival.");
+        }
+    }
+
+    private int createDraftSession(String packageName, String installerPackage,
+            IntentSender statusReceiver, int userId) {
         PackageInstaller.SessionParams sessionParams = new PackageInstaller.SessionParams(
                 PackageInstaller.SessionParams.MODE_FULL_INSTALL);
         sessionParams.setAppPackageName(packageName);
         sessionParams.installFlags = INSTALL_UNARCHIVE_DRAFT;
+        sessionParams.unarchiveIntentSender = statusReceiver;
+
         int installerUid = mPm.snapshotComputer().getPackageUid(installerPackage, 0, userId);
         // Handles case of repeated unarchival calls for the same package.
         int existingSessionId = mPm.mInstallerService.getExistingDraftSessionId(installerUid,

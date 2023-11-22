@@ -23,6 +23,7 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.ColorInt;
 import android.annotation.DurationMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -70,6 +71,7 @@ import android.util.Pair;
 import com.android.internal.telephony.ISetOpportunisticDataCallback;
 import com.android.internal.telephony.ISub;
 import com.android.internal.telephony.PhoneConstants;
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.telephony.util.HandlerExecutor;
 import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.Preconditions;
@@ -95,7 +97,22 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
- * Subscription manager provides the mobile subscription information.
+ * Subscription manager provides the mobile subscription information that are associated with the
+ * calling user profile {@link UserHandle} for Android SDK 35(V) and above, while Android SDK 34(U)
+ * and below can see all subscriptions as it does today.
+ *
+ * <p>For example, if we have
+ * <ul>
+ *     <li> Subscription 1 associated with personal profile.
+ *     <li> Subscription 2 associated with work profile.
+ * </ul>
+ * Then for SDK 35+, if the caller identity is personal profile, then
+ * {@link #getActiveSubscriptionInfoList} will return subscription 1 only and vice versa.
+ *
+ * <p>If the caller needs to see all subscriptions across user profiles,
+ * use {@link #createForAllUserProfiles} to convert the instance to see all. Additional permission
+ * may be required as documented on the each API.
+ *
  */
 @SystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
@@ -1446,6 +1463,16 @@ public class SubscriptionManager {
         }
     }
 
+    /**
+     * {@code true} if the SubscriptionManager instance should see all subscriptions regardless its
+     * association with particular user profile.
+     *
+     * <p> It only applies to Android SDK 35(V) and above. For Android SDK 34(U) and below, the
+     * caller can see all subscription across user profiles as it does today today even if it's
+     * {@code false}.
+     */
+    private boolean mIsForAllUserProfiles = false;
+
     /** @hide */
     @UnsupportedAppUsage
     public SubscriptionManager(Context context) {
@@ -1776,8 +1803,23 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get the SubscriptionInfo(s) of the currently active SIM(s). The records will be sorted
-     * by {@link SubscriptionInfo#getSimSlotIndex} then by {@link SubscriptionInfo#getSubscriptionId}.
+     * Get the SubscriptionInfo(s) of the currently active SIM(s) associated with the current caller
+     * user profile {@link UserHandle} for Android SDK 35(V) and above, while Android SDK 34(U)
+     * and below can see all subscriptions as it does today.
+     *
+     * <p>For example, if we have
+     * <ul>
+     *     <li> Subscription 1 associated with personal profile.
+     *     <li> Subscription 2 associated with work profile.
+     * </ul>
+     * Then for SDK 35+, if the caller identity is personal profile, then this will return
+     * subscription 1 only and vice versa.
+     *
+     * <p>If the caller needs to see all subscriptions across user profiles,
+     * use {@link #createForAllUserProfiles} to convert this instance to see all.
+     *
+     * <p> The records will be sorted by {@link SubscriptionInfo#getSimSlotIndex} then by
+     * {@link SubscriptionInfo#getSubscriptionId}.
      *
      * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
      * or that the calling app has carrier privileges (see
@@ -1800,8 +1842,25 @@ public class SubscriptionManager {
      * </ul>
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    // @RequiresPermission(TODO(b/308809058))
     public List<SubscriptionInfo> getActiveSubscriptionInfoList() {
-        return getActiveSubscriptionInfoList(/* userVisibleonly */true);
+        List<SubscriptionInfo> activeList = null;
+
+        try {
+            ISub iSub = TelephonyManager.getSubscriptionService();
+            if (iSub != null) {
+                activeList = iSub.getActiveSubscriptionInfoList(mContext.getOpPackageName(),
+                        mContext.getAttributionTag(), mIsForAllUserProfiles);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        if (activeList != null) {
+            activeList = activeList.stream().filter(subInfo -> isSubscriptionVisible(subInfo))
+                    .collect(Collectors.toList());
+        }
+        return activeList;
     }
 
     /**
@@ -1835,6 +1894,26 @@ public class SubscriptionManager {
     }
 
     /**
+     * Convert this subscription manager instance into one that can see all subscriptions across
+     * user profiles.
+     *
+     * @return a SubscriptionManager that can see all subscriptions regardless its user profile
+     * association.
+     *
+     * @see #getActiveSubscriptionInfoList
+     * @see #getActiveSubscriptionInfoCount
+     * @see UserHandle
+     */
+    @FlaggedApi(Flags.FLAG_WORK_PROFILE_API_SPLIT)
+    // @RequiresPermission(TODO(b/308809058))
+    // The permission check for accessing all subscriptions will be enforced upon calling the
+    // individual APIs linked above.
+    @NonNull public SubscriptionManager createForAllUserProfiles() {
+        mIsForAllUserProfiles = true;
+        return this;
+    }
+
+    /**
     * This is similar to {@link #getActiveSubscriptionInfoList()}, but if userVisibleOnly
     * is true, it will filter out the hidden subscriptions.
     *
@@ -1847,7 +1926,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 activeList = iSub.getActiveSubscriptionInfoList(mContext.getOpPackageName(),
-                        mContext.getAttributionTag());
+                        mContext.getAttributionTag(), true /*isForAllUserProfiles*/);
             }
         } catch (RemoteException ex) {
             // ignore it
@@ -2002,13 +2081,19 @@ public class SubscriptionManager {
     }
 
     /**
-     * Get the active subscription count.
+     * Get the active subscription count associated with the current caller user profile for
+     * Android SDK 35(V) and above, while Android SDK 34(U) and below can see all subscriptions as
+     * it does today.
+     *
+     * <p>If the caller needs to see all subscriptions across user profiles,
+     * use {@link #createForAllUserProfiles} to convert this instance to see all.
      *
      * @return The current number of active subscriptions.
      *
      * @see #getActiveSubscriptionInfoList()
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    // @RequiresPermission(TODO(b/308809058))
     public int getActiveSubscriptionInfoCount() {
         int result = 0;
 
@@ -2016,7 +2101,7 @@ public class SubscriptionManager {
             ISub iSub = TelephonyManager.getSubscriptionService();
             if (iSub != null) {
                 result = iSub.getActiveSubInfoCount(mContext.getOpPackageName(),
-                        mContext.getAttributionTag());
+                        mContext.getAttributionTag(), mIsForAllUserProfiles);
             }
         } catch (RemoteException ex) {
             // ignore it

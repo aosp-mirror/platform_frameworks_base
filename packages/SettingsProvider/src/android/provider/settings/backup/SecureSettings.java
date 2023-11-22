@@ -249,6 +249,8 @@ public class SecureSettings {
         Settings.Secure.HUB_MODE_TUTORIAL_STATE,
         Settings.Secure.STYLUS_BUTTONS_ENABLED,
         Settings.Secure.STYLUS_HANDWRITING_ENABLED,
-        Settings.Secure.DEFAULT_NOTE_TASK_PROFILE
+        Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
+        Settings.Secure.CREDENTIAL_SERVICE,
+        Settings.Secure.CREDENTIAL_SERVICE_PRIMARY
     };
 }

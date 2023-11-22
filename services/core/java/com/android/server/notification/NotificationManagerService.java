@@ -4021,11 +4021,8 @@ public class NotificationManagerService extends SystemService {
                 Slog.e(TAG, "Failed to getApplicationInfo() in canUseFullScreenIntent()", e);
                 return false;
             }
-            final boolean showStickyHunIfDenied = mFlagResolver.isEnabled(
-                    SystemUiSystemPropertiesFlags.NotificationFlags
-                            .SHOW_STICKY_HUN_FOR_DENIED_FSI);
             return checkUseFullScreenIntentPermission(attributionSource, applicationInfo,
-                    showStickyHunIfDenied /* isAppOpPermission */, false /* forDataDelivery */);
+                    false /* forDataDelivery */);
         }
 
         @Override
@@ -7274,28 +7271,12 @@ public class NotificationManagerService extends SystemService {
         notification.flags &= ~FLAG_FSI_REQUESTED_BUT_DENIED;
 
         if (notification.fullScreenIntent != null) {
-            final boolean forceDemoteFsiToStickyHun = mFlagResolver.isEnabled(
-                    SystemUiSystemPropertiesFlags.NotificationFlags.FSI_FORCE_DEMOTE);
-            if (forceDemoteFsiToStickyHun) {
+            final AttributionSource attributionSource =
+                    new AttributionSource.Builder(notificationUid).setPackageName(pkg).build();
+            final boolean canUseFullScreenIntent = checkUseFullScreenIntentPermission(
+                    attributionSource, ai, true /* forDataDelivery */);
+            if (!canUseFullScreenIntent) {
                 makeStickyHun(notification, pkg, userId);
-            } else {
-                final AttributionSource attributionSource =
-                        new AttributionSource.Builder(notificationUid).setPackageName(pkg).build();
-                final boolean showStickyHunIfDenied = mFlagResolver.isEnabled(
-                        SystemUiSystemPropertiesFlags.NotificationFlags
-                                .SHOW_STICKY_HUN_FOR_DENIED_FSI);
-                final boolean canUseFullScreenIntent = checkUseFullScreenIntentPermission(
-                        attributionSource, ai, showStickyHunIfDenied /* isAppOpPermission */,
-                        true /* forDataDelivery */);
-                if (!canUseFullScreenIntent) {
-                    if (showStickyHunIfDenied) {
-                        makeStickyHun(notification, pkg, userId);
-                    } else {
-                        notification.fullScreenIntent = null;
-                        Slog.w(TAG, "Package " + pkg + ": Use of fullScreenIntent requires the"
-                                + "USE_FULL_SCREEN_INTENT permission");
-                    }
-                }
             }
         }
 
@@ -7402,27 +7383,20 @@ public class NotificationManagerService extends SystemService {
     }
 
     private boolean checkUseFullScreenIntentPermission(@NonNull AttributionSource attributionSource,
-            @NonNull ApplicationInfo applicationInfo, boolean isAppOpPermission,
+            @NonNull ApplicationInfo applicationInfo,
             boolean forDataDelivery) {
         if (applicationInfo.targetSdkVersion < Build.VERSION_CODES.Q) {
             return true;
         }
-        if (isAppOpPermission) {
-            final int permissionResult;
-            if (forDataDelivery) {
-                permissionResult = mPermissionManager.checkPermissionForDataDelivery(
-                        permission.USE_FULL_SCREEN_INTENT, attributionSource, /* message= */ null);
-            } else {
-                permissionResult = mPermissionManager.checkPermissionForPreflight(
-                        permission.USE_FULL_SCREEN_INTENT, attributionSource);
-            }
-            return permissionResult == PermissionManager.PERMISSION_GRANTED;
+        final int permissionResult;
+        if (forDataDelivery) {
+            permissionResult = mPermissionManager.checkPermissionForDataDelivery(
+                    permission.USE_FULL_SCREEN_INTENT, attributionSource, /* message= */ null);
         } else {
-            final int permissionResult = getContext().checkPermission(
-                    permission.USE_FULL_SCREEN_INTENT, attributionSource.getPid(),
-                    attributionSource.getUid());
-            return permissionResult == PERMISSION_GRANTED;
+            permissionResult = mPermissionManager.checkPermissionForPreflight(
+                    permission.USE_FULL_SCREEN_INTENT, attributionSource);
         }
+        return permissionResult == PermissionManager.PERMISSION_GRANTED;
     }
 
     private void checkRemoteViews(String pkg, String tag, int id, Notification notification) {

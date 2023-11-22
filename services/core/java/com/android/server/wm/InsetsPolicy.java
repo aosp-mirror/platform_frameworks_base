@@ -101,10 +101,8 @@ class InsetsPolicy {
         mPolicy = displayContent.getDisplayPolicy();
         final Resources r = mPolicy.getContext().getResources();
         mHideNavBarForKeyboard = r.getBoolean(R.bool.config_hideNavBarForKeyboard);
-        mTransientControlTarget = new ControlTarget(
-                stateController, displayContent.mWmService.mH, "TransientControlTarget");
-        mPermanentControlTarget = new ControlTarget(
-                stateController, displayContent.mWmService.mH, "PermanentControlTarget");
+        mTransientControlTarget = new ControlTarget(displayContent, "TransientControlTarget");
+        mPermanentControlTarget = new ControlTarget(displayContent, "PermanentControlTarget");
     }
 
     /** Updates the target which can control system bars. */
@@ -699,24 +697,35 @@ class InsetsPolicy {
         }
     }
 
-    private static class ControlTarget implements InsetsControlTarget {
+    private static class ControlTarget implements InsetsControlTarget, Runnable {
 
+        private final Handler mHandler;
+        private final Object mGlobalLock;
         private final InsetsState mState = new InsetsState();
-        private final InsetsController mInsetsController;
         private final InsetsStateController mStateController;
+        private final InsetsController mInsetsController;
         private final String mName;
 
-        ControlTarget(InsetsStateController stateController, Handler handler, String name) {
-            mStateController = stateController;
-            mInsetsController = new InsetsController(new Host(handler, name));
+        ControlTarget(DisplayContent displayContent, String name) {
+            mHandler = displayContent.mWmService.mH;
+            mGlobalLock = displayContent.mWmService.mGlobalLock;
+            mStateController = displayContent.getInsetsStateController();
+            mInsetsController = new InsetsController(new Host(mHandler, name));
             mName = name;
         }
 
         @Override
         public void notifyInsetsControlChanged() {
-            mState.set(mStateController.getRawInsetsState(), true /* copySources */);
-            mInsetsController.onStateChanged(mState);
-            mInsetsController.onControlsChanged(mStateController.getControlsForDispatch(this));
+            mHandler.post(this);
+        }
+
+        @Override
+        public void run() {
+            synchronized (mGlobalLock) {
+                mState.set(mStateController.getRawInsetsState(), true /* copySources */);
+                mInsetsController.onStateChanged(mState);
+                mInsetsController.onControlsChanged(mStateController.getControlsForDispatch(this));
+            }
         }
 
         @Override

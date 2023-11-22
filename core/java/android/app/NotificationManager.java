@@ -51,6 +51,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
@@ -1253,7 +1254,8 @@ public class NotificationManager {
      * <p>
      * If this method returns true, calls to
      * {@link #updateAutomaticZenRule(String, AutomaticZenRule)} may fail and apps should defer
-     * rule management to system settings/uis.
+     * rule management to system settings/uis via
+     * {@link Settings#ACTION_AUTOMATIC_ZEN_RULE_SETTINGS}.
      */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public boolean areAutomaticZenRulesUserManaged() {

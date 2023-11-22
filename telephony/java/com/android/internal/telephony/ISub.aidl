@@ -66,6 +66,8 @@ interface ISub {
      *
      * @param callingPackage The package maing the call.
      * @param callingFeatureId The feature in the package
+     * @param isForAllProfiles whether the caller intends to see all subscriptions regardless
+     *                      association.
      * @return Sorted list of the currently {@link SubscriptionInfo} records available on the device.
      * <ul>
      * <li>
@@ -83,14 +85,17 @@ interface ISub {
      * </ul>
      */
     List<SubscriptionInfo> getActiveSubscriptionInfoList(String callingPackage,
-            String callingFeatureId);
+            String callingFeatureId, boolean isForAllProfiles);
 
     /**
      * @param callingPackage The package making the call.
      * @param callingFeatureId The feature in the package.
+     * @param isForAllProfile whether the caller intends to see all subscriptions regardless
+     *                      association.
      * @return the number of active subscriptions
      */
-    int getActiveSubInfoCount(String callingPackage, String callingFeatureId);
+    int getActiveSubInfoCount(String callingPackage, String callingFeatureId,
+            boolean isForAllProfile);
 
     /**
      * @return the maximum number of subscriptions this device will support at any one time.

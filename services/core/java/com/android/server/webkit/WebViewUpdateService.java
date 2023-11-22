@@ -16,6 +16,8 @@
 
 package com.android.server.webkit;
 
+import static android.webkit.Flags.updateServiceV2;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -51,7 +53,7 @@ public class WebViewUpdateService extends SystemService {
     private static final String TAG = "WebViewUpdateService";
 
     private BroadcastReceiver mWebViewUpdatedReceiver;
-    private WebViewUpdateServiceImpl mImpl;
+    private WebViewUpdateServiceInterface mImpl;
 
     static final int PACKAGE_CHANGED = 0;
     static final int PACKAGE_ADDED = 1;
@@ -60,7 +62,11 @@ public class WebViewUpdateService extends SystemService {
 
     public WebViewUpdateService(Context context) {
         super(context);
-        mImpl = new WebViewUpdateServiceImpl(context, SystemImpl.getInstance());
+        if (updateServiceV2()) {
+            mImpl = new WebViewUpdateServiceImpl2(context, SystemImpl.getInstance());
+        } else {
+            mImpl = new WebViewUpdateServiceImpl(context, SystemImpl.getInstance());
+        }
     }
 
     @Override
