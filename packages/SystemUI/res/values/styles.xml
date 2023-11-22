@@ -420,6 +420,11 @@
     <!-- Cannot double inherit. Use Theme.SystemUI.QuickSettings in code to match -->
     <style name="BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/Animation.BrightnessDialog</item>
+    </style>
+
+    <style name="Animation.BrightnessDialog">
+        <item name="android:windowExitAnimation">@anim/instant_fade_out</item>
     </style>
 
     <style name="Theme.SystemUI.ContrastDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
