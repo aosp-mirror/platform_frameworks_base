@@ -150,7 +150,7 @@ void RenderThread::frameCallback(int64_t vsyncId, int64_t frameDeadline, int64_t
         ATRACE_FORMAT("queue mFrameCallbackTask to run after %.2fms",
                       toFloatMillis(runAt - SteadyClock::now()).count());
         queue().postAt(toNsecs_t(runAt.time_since_epoch()).count(),
-                       [=]() { dispatchFrameCallbacks(); });
+                       [this]() { dispatchFrameCallbacks(); });
     }
 }
 
