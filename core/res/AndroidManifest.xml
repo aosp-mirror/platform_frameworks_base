@@ -2301,6 +2301,7 @@
     <!-- Allows system apps to call methods to register itself as a mDNS offload engine.
         <p>Not for use by third-party or privileged applications.
         @SystemApi
+        @FlaggedApi("com.android.net.flags.register_nsd_offload_engine")
         @hide This should only be used by system apps.
     -->
     <permission android:name="android.permission.REGISTER_NSD_OFFLOAD_ENGINE"
