@@ -864,6 +864,23 @@ public class VirtualDeviceManagerService extends SystemService {
         }
 
         @Override
+        public @NonNull Set<String> getAllPersistentDeviceIds() {
+            Set<String> persistentIds = new ArraySet<>();
+            synchronized (mVirtualDeviceManagerLock) {
+                for (int i = 0; i < mActiveAssociations.size(); ++i) {
+                    AssociationInfo associationInfo = mActiveAssociations.get(i);
+                    if (VIRTUAL_DEVICE_COMPANION_DEVICE_PROFILES.contains(
+                            associationInfo.getDeviceProfile())) {
+                        persistentIds.add(
+                                VirtualDeviceImpl.createPersistentDeviceId(
+                                        associationInfo.getId()));
+                    }
+                }
+            }
+            return persistentIds;
+        }
+
+        @Override
         public void registerAppsOnVirtualDeviceListener(
                 @NonNull AppsOnVirtualDeviceListener listener) {
             synchronized (mVirtualDeviceManagerLock) {
