@@ -13,6 +13,7 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.SurfaceControl
 import android.window.TransitionInfo
 import android.window.TransitionInfo.FLAG_IS_WALLPAPER
+import android.window.WindowContainerTransaction
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTestCase
@@ -20,9 +21,11 @@ import com.android.wm.shell.TestRunningTaskInfoBuilder
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP
+import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
 import java.util.function.Supplier
+import junit.framework.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -110,6 +113,40 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
         // Instead, start the cancel transition.
         verify(transitions)
             .startTransition(eq(TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP), any(), eq(handler))
+    }
+
+    @Test
+    fun startDragToDesktop_aborted_finishDropped() {
+        val task = createTask()
+        val dragAnimator = mock<MoveToDesktopAnimator>()
+        // Simulate transition is started.
+        val transition = startDragToDesktopTransition(task, dragAnimator)
+        // But the transition was aborted.
+        handler.onTransitionConsumed(transition, aborted = true, mock())
+
+        // Attempt to finish the failed drag start.
+        handler.finishDragToDesktopTransition(WindowContainerTransaction())
+
+        // Should not be attempted and state should be reset.
+        verify(transitions, never())
+                .startTransition(eq(TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP), any(), any())
+        assertFalse(handler.inProgress)
+    }
+
+    @Test
+    fun startDragToDesktop_aborted_cancelDropped() {
+        val task = createTask()
+        val dragAnimator = mock<MoveToDesktopAnimator>()
+        // Simulate transition is started.
+        val transition = startDragToDesktopTransition(task, dragAnimator)
+        // But the transition was aborted.
+        handler.onTransitionConsumed(transition, aborted = true, mock())
+
+        // Attempt to finish the failed drag start.
+        handler.cancelDragToDesktopTransition()
+
+        // Should not be attempted and state should be reset.
+        assertFalse(handler.inProgress)
     }
 
     @Test
