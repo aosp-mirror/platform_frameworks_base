@@ -940,50 +940,47 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     private void orientSecondaryHomeHandle() {
         if (!canShowSecondaryHandle()) {
+            if (mStartingQuickSwitchRotation == -1) {
+                resetSecondaryHandle();
+            }
             return;
         }
 
-        if (mStartingQuickSwitchRotation == -1) {
-            resetSecondaryHandle();
-        } else {
-            int deltaRotation = deltaRotation(mCurrentRotation, mStartingQuickSwitchRotation);
-            if (mStartingQuickSwitchRotation == -1 || deltaRotation == -1) {
-                // Curious if starting quickswitch can change between the if check and our delta
-                Log.d(TAG, "secondary nav delta rotation: " + deltaRotation
-                        + " current: " + mCurrentRotation
-                        + " starting: " + mStartingQuickSwitchRotation);
-            }
-            int height = 0;
-            int width = 0;
-            Rect dispSize = mWindowManager.getCurrentWindowMetrics().getBounds();
-            mOrientationHandle.setDeltaRotation(deltaRotation);
-            switch (deltaRotation) {
-                case Surface.ROTATION_90:
-                case Surface.ROTATION_270:
-                    height = dispSize.height();
-                    width = mView.getHeight();
-                    break;
-                case Surface.ROTATION_180:
-                case Surface.ROTATION_0:
-                    // TODO(b/152683657): Need to determine best UX for this
-                    if (!mShowOrientedHandleForImmersiveMode) {
-                        resetSecondaryHandle();
-                        return;
-                    }
-                    width = dispSize.width();
-                    height = mView.getHeight();
-                    break;
-            }
-
-            mOrientationParams.gravity =
-                    deltaRotation == Surface.ROTATION_0 ? Gravity.BOTTOM :
-                            (deltaRotation == Surface.ROTATION_90 ? Gravity.LEFT : Gravity.RIGHT);
-            mOrientationParams.height = height;
-            mOrientationParams.width = width;
-            mWindowManager.updateViewLayout(mOrientationHandle, mOrientationParams);
-            mView.setVisibility(View.GONE);
-            mOrientationHandle.setVisibility(View.VISIBLE);
+        int deltaRotation = deltaRotation(mCurrentRotation, mStartingQuickSwitchRotation);
+        if (mStartingQuickSwitchRotation == -1 || deltaRotation == -1) {
+            // Curious if starting quickswitch can change between the if check and our delta
+            Log.d(TAG, "secondary nav delta rotation: " + deltaRotation
+                    + " current: " + mCurrentRotation
+                    + " starting: " + mStartingQuickSwitchRotation);
         }
+        int height = 0;
+        int width = 0;
+        Rect dispSize = mWindowManager.getCurrentWindowMetrics().getBounds();
+        mOrientationHandle.setDeltaRotation(deltaRotation);
+        switch (deltaRotation) {
+            case Surface.ROTATION_90, Surface.ROTATION_270:
+                height = dispSize.height();
+                width = mView.getHeight();
+                break;
+            case Surface.ROTATION_180, Surface.ROTATION_0:
+                // TODO(b/152683657): Need to determine best UX for this
+                if (!mShowOrientedHandleForImmersiveMode) {
+                    resetSecondaryHandle();
+                    return;
+                }
+                width = dispSize.width();
+                height = mView.getHeight();
+                break;
+        }
+
+        mOrientationParams.gravity =
+                deltaRotation == Surface.ROTATION_0 ? Gravity.BOTTOM :
+                        (deltaRotation == Surface.ROTATION_90 ? Gravity.LEFT : Gravity.RIGHT);
+        mOrientationParams.height = height;
+        mOrientationParams.width = width;
+        mWindowManager.updateViewLayout(mOrientationHandle, mOrientationParams);
+        mView.setVisibility(View.GONE);
+        mOrientationHandle.setVisibility(View.VISIBLE);
     }
 
     private void resetSecondaryHandle() {
@@ -1786,7 +1783,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
     }
 
     private boolean canShowSecondaryHandle() {
-        return mNavBarMode == NAV_BAR_MODE_GESTURAL && mOrientationHandle != null;
+        return mNavBarMode == NAV_BAR_MODE_GESTURAL && mOrientationHandle != null
+                && mStartingQuickSwitchRotation != -1;
     }
 
     private final UserTracker.Callback mUserChangedCallback =
