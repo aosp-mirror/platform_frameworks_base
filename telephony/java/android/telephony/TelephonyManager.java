@@ -18500,8 +18500,8 @@ public class TelephonyManager {
 
     /**
      * Get last known cell identity.
-     * Require {@link android.Manifest.permission#ACCESS_FINE_LOCATION} and
-     * com.android.phone.permission.ACCESS_LAST_KNOWN_CELL_ID, otherwise throws SecurityException.
+     * Require appropriate permissions, otherwise throws SecurityException.
+     *
      * If there is current registered network this value will be same as the registered cell
      * identity. If the device goes out of service the previous cell identity is cached and
      * will be returned. If the cache age of the Cell identity is more than 24 hours
@@ -18509,6 +18509,8 @@ public class TelephonyManager {
      * @return last known cell identity {@CellIdentity}.
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     @RequiresPermission(allOf = {Manifest.permission.ACCESS_FINE_LOCATION,
             "com.android.phone.permission.ACCESS_LAST_KNOWN_CELL_ID"})
     public @Nullable CellIdentity getLastKnownCellIdentity() {
@@ -18586,13 +18588,11 @@ public class TelephonyManager {
      * an overall "device can make voice calls" boolean, they can use {@link
      * ServiceState#getNetworkRegistrationInfo} to check CS registration state.
      *
-     * <p>TODO(b/215240050) In the future, this API will be removed and replaced with a new superset
-     * API to disentangle the "true" {@link ServiceState} meaning of "this is the connection status
-     * to the tower" from IMS registration state and over-the-top voice calling capabilities.
-     *
      * @hide
      */
     @TestApi
+    @SystemApi
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     @RequiresPermission(Manifest.permission.BIND_TELECOM_CONNECTION_SERVICE)
     public void setVoiceServiceStateOverride(boolean hasService) {
         try {

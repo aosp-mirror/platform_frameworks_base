@@ -511,6 +511,7 @@ applications that come with the platform
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
         <!-- Permission required for CTS test - CtsTelephonyTestCases -->
         <permission name="android.permission.BIND_TELECOM_CONNECTION_SERVICE" />
+        <permission name="android.permission.ACCESS_LAST_KNOWN_CELL_ID" />
         <!-- Permission required for CTS test - CtsAppTestCases -->
         <permission name="android.permission.CAPTURE_MEDIA_OUTPUT" />
         <permission name="android.permission.CAPTURE_TUNER_AUDIO_INPUT" />

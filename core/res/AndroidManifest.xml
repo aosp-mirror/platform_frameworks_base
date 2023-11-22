@@ -3042,6 +3042,17 @@
     <permission android:name="android.permission.ACCESS_RCS_USER_CAPABILITY_EXCHANGE"
         android:protectionLevel="internal|role" />
 
+    <!-- Used to provide the Telecom framework with access to the last known call ID.
+         <p>Protection level: signature
+         @SystemApi
+         @FlaggedApi("com.android.server.telecom.flags.telecom_resolve_hidden_dependencies")
+         @hide
+    -->
+    <permission android:name="android.permission.ACCESS_LAST_KNOWN_CELL_ID"
+        android:protectionLevel="signature"
+        android:label="@string/permlab_accessLastKnownCellId"
+        android:description="@string/permdesc_accessLastKnownCellId"/>
+
     <!-- ================================== -->
     <!-- Permissions for sdcard interaction -->
     <!-- ================================== -->

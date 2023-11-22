@@ -748,6 +748,7 @@
     <uses-permission android:name="android.permission.BIND_TELECOM_CONNECTION_SERVICE" />
     <uses-permission android:name="android.permission.MODIFY_CELL_BROADCASTS" />
     <uses-permission android:name="android.permission.SATELLITE_COMMUNICATION" />
+    <uses-permission android:name="android.permission.ACCESS_LAST_KNOWN_CELL_ID" />
 
     <!-- Permission required for CTS test - CtsPersistentDataBlockManagerTestCases -->
     <uses-permission android:name="android.permission.ACCESS_PDB_STATE" />
