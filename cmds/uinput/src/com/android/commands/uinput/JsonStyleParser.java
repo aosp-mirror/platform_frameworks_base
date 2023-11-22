@@ -22,7 +22,7 @@ import android.util.Log;
 import android.util.SparseArray;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -34,12 +34,12 @@ import src.com.android.commands.uinput.InputAbsInfo;
 /**
  * A class that parses the JSON-like event format described in the README to build {@link Event}s.
  */
-public class JsonStyleParser {
+public class JsonStyleParser implements EventParser {
     private static final String TAG = "UinputJsonStyleParser";
 
     private JsonReader mReader;
 
-    public JsonStyleParser(InputStreamReader in) {
+    public JsonStyleParser(Reader in) {
         mReader = new JsonReader(in);
         mReader.setLenient(true);
     }
@@ -62,7 +62,7 @@ public class JsonStyleParser {
                         case "name" -> eb.setName(mReader.nextString());
                         case "vid" -> eb.setVid(readInt());
                         case "pid" -> eb.setPid(readInt());
-                        case "bus" -> eb.setBus(readBus());
+                        case "bus" -> eb.setBusId(readBus());
                         case "events" -> {
                             int[] injections = readInjectedEvents().stream()
                                     .mapToInt(Integer::intValue).toArray();
@@ -139,9 +139,35 @@ public class JsonStyleParser {
         });
     }
 
-    private Event.Bus readBus() throws IOException {
+    private int readBus() throws IOException {
         String val = mReader.nextString();
-        return Event.Bus.valueOf(val.toUpperCase());
+        // See include/uapi/linux/input.h in the kernel for the source of these constants.
+        return switch (val.toUpperCase()) {
+            case "PCI" -> 0x01;
+            case "ISAPNP" -> 0x02;
+            case "USB" -> 0x03;
+            case "HIL" -> 0x04;
+            case "BLUETOOTH" -> 0x05;
+            case "VIRTUAL" -> 0x06;
+            case "ISA" -> 0x10;
+            case "I8042" -> 0x11;
+            case "XTKBD" -> 0x12;
+            case "RS232" -> 0x13;
+            case "GAMEPORT" -> 0x14;
+            case "PARPORT" -> 0x15;
+            case "AMIGA" -> 0x16;
+            case "ADB" -> 0x17;
+            case "I2C" -> 0x18;
+            case "HOST" -> 0x19;
+            case "GSC" -> 0x1A;
+            case "ATARI" -> 0x1B;
+            case "SPI" -> 0x1C;
+            case "RMI" -> 0x1D;
+            case "CEC" -> 0x1E;
+            case "INTEL_ISHTP" -> 0x1F;
+            case "AMD_SFH" -> 0x20;
+            default -> throw new IllegalArgumentException("Invalid bus ID " + val);
+        };
     }
 
     private SparseArray<int[]> readConfiguration()
