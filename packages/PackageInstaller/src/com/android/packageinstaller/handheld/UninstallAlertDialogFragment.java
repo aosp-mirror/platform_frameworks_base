@@ -30,6 +30,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Flags;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -157,6 +158,12 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
                     mIsClonedApp = true;
                     messageBuilder.append(getString(
                             R.string.uninstall_application_text_current_user_clone_profile));
+                } else if (Flags.allowPrivateProfile()
+                        && customUserManager.isPrivateProfile()
+                        && customUserManager.isSameProfileGroup(dialogInfo.user, myUserHandle)) {
+                    messageBuilder.append(getString(
+                            R.string.uninstall_application_text_current_user_private_profile,
+                            userName));
                 } else {
                     messageBuilder.append(
                             getString(R.string.uninstall_application_text_user, userName));
