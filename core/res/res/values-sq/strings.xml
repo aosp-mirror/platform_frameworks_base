@@ -1908,10 +1908,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fundjava"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Ngjarje"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Në gjumë"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
-    <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aktivizuar"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Çaktivizuar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> po çaktivizon disa tinguj"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Ka një problem të brendshëm me pajisjen tënde. Ajo mund të jetë e paqëndrueshme derisa të rivendosësh të dhënat në gjendje fabrike."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Ka një problem të brendshëm me pajisjen tënde. Kontakto prodhuesin tënd për detaje."</string>
@@ -2344,8 +2342,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofoni është i bllokuar"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"Nuk mund të pasqyrojë tek ekrani"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"Përdor një kabllo tjetër dhe provo përsëri"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"Pajisja është shumë e nxehtë dhe nuk mund të pasqyrojë në ekran derisa të ftohet"</string>
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"Kablloja nuk mund të mbështetë ekranet"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"Kablloja jote USB-C mund të mos lidhet siç duhet me ekranet"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
