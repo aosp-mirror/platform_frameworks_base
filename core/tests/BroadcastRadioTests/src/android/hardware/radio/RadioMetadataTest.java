@@ -22,10 +22,7 @@ import static org.junit.Assert.assertThrows;
 
 import android.graphics.Bitmap;
 import android.os.Parcel;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -52,7 +49,7 @@ public final class RadioMetadataTest {
     private Bitmap mBitmapValue;
 
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void describeContents_forClock() {
@@ -128,8 +125,8 @@ public final class RadioMetadataTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void putStringArray_withIllegalKey_throwsException() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         String invalidStringArrayKey = RadioMetadata.METADATA_KEY_HD_STATION_NAME_LONG;
 
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
@@ -142,8 +139,9 @@ public final class RadioMetadataTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void putStringArray_withNullKey_throwsException() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
         NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
             mBuilder.putStringArray(/* key= */ null, UFIDS_VALUE);
         });
@@ -153,8 +151,9 @@ public final class RadioMetadataTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void putStringArray_withNullString_throwsException() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
         NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
             mBuilder.putStringArray(RadioMetadata.METADATA_KEY_UFIDS, /* value= */ null);
         });
@@ -281,8 +280,8 @@ public final class RadioMetadataTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void getStringArray_withKeyInMetadata() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         String key = RadioMetadata.METADATA_KEY_UFIDS;
         RadioMetadata metadata = mBuilder.putStringArray(key, UFIDS_VALUE).build();
 
@@ -291,8 +290,8 @@ public final class RadioMetadataTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void getStringArray_withKeyNotInMetadata() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         String key = RadioMetadata.METADATA_KEY_UFIDS;
         RadioMetadata metadata = mBuilder.build();
 
@@ -305,8 +304,8 @@ public final class RadioMetadataTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void getStringArray_withNullKey() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         RadioMetadata metadata = mBuilder.build();
 
         NullPointerException thrown = assertThrows(NullPointerException.class, () -> {
@@ -318,8 +317,8 @@ public final class RadioMetadataTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void getStringArray_withInvalidKey() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         String invalidClockKey = RadioMetadata.METADATA_KEY_HD_STATION_NAME_LONG;
         RadioMetadata metadata = mBuilder.build();
 
@@ -413,7 +412,6 @@ public final class RadioMetadataTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void writeToParcel_forRadioMetadata() {
         RadioMetadata metadataExpected = mBuilder
                 .putInt(RadioMetadata.METADATA_KEY_RDS_PI, INT_KEY_VALUE)
@@ -430,8 +428,8 @@ public final class RadioMetadataTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void writeToParcel_forRadioMetadata_withStringArrayTypeMetadata() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         RadioMetadata metadataExpected = mBuilder
                 .putInt(RadioMetadata.METADATA_KEY_RDS_PI, INT_KEY_VALUE)
                 .putString(RadioMetadata.METADATA_KEY_ARTIST, ARTIST_KEY_VALUE)
@@ -443,7 +441,7 @@ public final class RadioMetadataTest {
         parcel.setDataPosition(0);
 
         RadioMetadata metadataFromParcel = RadioMetadata.CREATOR.createFromParcel(parcel);
-        assertWithMessage("Radio metadata created from parcel")
+        assertWithMessage("Radio metadata created from parcel with string array type metadata")
                 .that(metadataFromParcel).isEqualTo(metadataExpected);
     }
 }

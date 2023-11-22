@@ -53,10 +53,7 @@ import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.os.UserHandle;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -164,7 +161,7 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     @Rule
     public final Expect expect = Expect.create();
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
@@ -1231,8 +1228,8 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void onConfigFlagUpdated_withRequiredFlagEnabled_invokesCallbacks() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         openAidlClients(/* numClients= */ 1);
 
         mHalTunerCallback.onConfigFlagUpdated(ConfigFlag.FORCE_ANALOG_FM, true);
@@ -1242,9 +1239,9 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void onConfigFlagUpdated_withRequiredFlagDisabled_doesNotInvokeCallbacks()
             throws Exception {
+        mSetFlagsRule.disableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         openAidlClients(/* numClients= */ 1);
 
         mHalTunerCallback.onConfigFlagUpdated(ConfigFlag.FORCE_ANALOG_FM, true);
