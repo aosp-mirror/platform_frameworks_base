@@ -43,20 +43,21 @@ import com.android.credentialmanager.model.ActionEntryInfo
 import com.android.credentialmanager.model.AuthenticationEntryInfo
 import com.android.credentialmanager.model.CredentialEntryInfo
 import com.android.credentialmanager.model.CredentialType
-import com.android.credentialmanager.model.Password
 import com.android.credentialmanager.model.ProviderInfo
 import com.android.credentialmanager.model.RemoteEntryInfo
 import com.android.credentialmanager.TAG
 
-fun Password.getIntentSenderRequest(
+fun CredentialEntryInfo.getIntentSenderRequest(
     isAutoSelected: Boolean = false
-): IntentSenderRequest {
-    val entryIntent = entry.frameworkExtrasIntent
-    entryIntent?.putExtra(IS_AUTO_SELECTED_KEY, isAutoSelected)
+): IntentSenderRequest? {
+    val entryIntent = fillInIntent?.putExtra(IS_AUTO_SELECTED_KEY, isAutoSelected)
 
-    return IntentSenderRequest.Builder(
-        pendingIntent = passwordCredentialEntry.pendingIntent
-    ).setFillInIntent(entryIntent).build()
+    return pendingIntent?.let{
+        IntentSenderRequest
+            .Builder(pendingIntent = it)
+            .setFillInIntent(entryIntent)
+            .build()
+    }
 }
 
 // Returns the list (potentially empty) of enabled provider.
