@@ -90,9 +90,7 @@ void SkiaPipeline::renderLayers(const LightGeometry& lightGeometry,
     LightingInfo::updateLighting(lightGeometry, lightInfo);
     ATRACE_NAME("draw layers");
     renderLayersImpl(*layerUpdateQueue, opaque);
-#ifdef __ANDROID__  // Layoutlib does not support Layers
     layerUpdateQueue->clear();
-#endif
 }
 
 void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque) {
@@ -165,7 +163,7 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
         }
 #endif
     }
-#ifdef __ANDROID__  // Layoutlib dose not support Layers
+#ifdef __ANDROID__  // Layoutlib dose not support Gr
     if (cachedContext.get()) {
         ATRACE_NAME("flush layers");
         cachedContext->flushAndSubmit();
@@ -175,7 +173,6 @@ void SkiaPipeline::renderLayersImpl(const LayerUpdateQueue& layers, bool opaque)
 
 bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
                                        ErrorHandler* errorHandler) {
-#ifdef __ANDROID__  // Layoutlib dose not support Layers
     // compute the size of the surface (i.e. texture) to be allocated for this layer
     const int surfaceWidth = ceilf(node->getWidth() / float(LAYER_SIZE)) * LAYER_SIZE;
     const int surfaceHeight = ceilf(node->getHeight() / float(LAYER_SIZE)) * LAYER_SIZE;
@@ -186,10 +183,14 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
         info = SkImageInfo::Make(surfaceWidth, surfaceHeight, getSurfaceColorType(),
                                  kPremul_SkAlphaType, getSurfaceColorSpace());
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
+#ifdef __ANDROID__  // Layoutlib does not support Gr
         SkASSERT(mRenderThread.getGrContext() != nullptr);
         node->setLayerSurface(SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
                                                           SkBudgeted::kYes, info, 0,
                                                           this->getSurfaceOrigin(), &props));
+#else
+        node->setLayerSurface(SkSurface::MakeRaster(info, &props));
+#endif
         if (node->getLayerSurface()) {
             // update the transform in window of the layer to reset its origin wrt light source
             // position
@@ -197,6 +198,7 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
             damageAccumulator.computeCurrentTransform(&windowTransform);
             node->getSkiaLayer()->inverseTransformInWindow.loadInverse(windowTransform);
         } else {
+#ifdef __ANDROID__  // Layoutlib does not support Gr
             String8 cachesOutput;
             mRenderThread.cacheManager().dumpMemoryUsage(cachesOutput,
                                                          &mRenderThread.renderState());
@@ -210,10 +212,10 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
                     << (int)(mRenderThread.getGrContext() != nullptr);
                 errorHandler->onError(err.str());
             }
+#endif
         }
         return true;
     }
-#endif
     return false;
 }
 
@@ -315,7 +317,6 @@ bool SkiaPipeline::setupMultiFrameCapture() {
 }
 #endif
 
-#ifdef __ANDROID__  // Layoutlib does not support Layers
 // recurse through the rendernode's children, add any nodes which are layers to the queue.
 static void collectLayers(RenderNode* node, LayerUpdateQueue* layers) {
     SkiaDisplayList* dl = node->getDisplayList().asSkiaDl();
@@ -358,16 +359,15 @@ static void recordLayers(const LayerUpdateQueue& layers,
     }
     LightingInfo::setLightCenterRaw(savedLightCenter);
 }
-#endif
 
 SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface, RenderNode* root,
     const LayerUpdateQueue& dirtyLayers) {
     if (CC_LIKELY(!Properties::skpCaptureEnabled)) {
         return surface->getCanvas(); // Bail out early when capture is not turned on.
     }
-#ifdef __ANDROID__  // Layoutlib does not support multiframe capture
     // Note that shouldStartNewFileCapture tells us if this is the *first* frame of a capture.
     bool firstFrameOfAnim = false;
+#ifdef __ANDROID__  // Layoutlib does not support multiframe capture
     if (shouldStartNewFileCapture() && mCaptureMode == CaptureMode::MultiFrameSKP) {
         // set a reminder to record every layer near the end of this method, after we have set up
         // the nway canvas.
@@ -402,7 +402,6 @@ SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface, RenderNode* root,
     mNwayCanvas->addCanvas(surface->getCanvas());
     mNwayCanvas->addCanvas(pictureCanvas);
 
-#ifdef __ANDROID__  // Layoutlib does not support Layers
     if (firstFrameOfAnim) {
         // On the first frame of any mskp capture we want to record any layers that are needed in
         // frame but may have been rendered offscreen before recording began.
@@ -415,7 +414,6 @@ SkCanvas* SkiaPipeline::tryCapture(SkSurface* surface, RenderNode* root,
         // on non-first frames, we record any normal layer draws (dirty regions)
         recordLayers(dirtyLayers, mNwayCanvas.get());
     }
-#endif
 
     return mNwayCanvas.get();
 }
