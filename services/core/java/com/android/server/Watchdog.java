@@ -98,10 +98,16 @@ public class Watchdog implements Dumpable {
     //         applications may not work with a debug build. CTS will fail.
     private static final long DEFAULT_TIMEOUT = DB ? 10 * 1000 : 60 * 1000;
 
+    // This ratio is used to compute the pre-watchdog timeout (2 means that the pre-watchdog timeout
+    // will be half the full timeout).
+    //
+    // The pre-watchdog event is similar to a full watchdog except it does not crash system server.
+    private static final int PRE_WATCHDOG_TIMEOUT_RATIO = 2;
+
     // These are temporally ordered: larger values as lateness increases
     private static final int COMPLETED = 0;
     private static final int WAITING = 1;
-    private static final int WAITED_HALF = 2;
+    private static final int WAITED_UNTIL_PRE_WATCHDOG = 2;
     private static final int OVERDUE = 3;
 
     // Track watchdog timeout history and break the crash loop if there is.
@@ -310,10 +316,10 @@ public class Watchdog implements Dumpable {
                 return COMPLETED;
             } else {
                 long latency = SystemClock.uptimeMillis() - mStartTimeMillis;
-                if (latency < mWaitMaxMillis / 2) {
+                if (latency < mWaitMaxMillis / PRE_WATCHDOG_TIMEOUT_RATIO) {
                     return WAITING;
                 } else if (latency < mWaitMaxMillis) {
-                    return WAITED_HALF;
+                    return WAITED_UNTIL_PRE_WATCHDOG;
                 }
             }
             return OVERDUE;
@@ -368,8 +374,9 @@ public class Watchdog implements Dumpable {
         public void pauseForLocked(int pauseMillis, String reason) {
             mPauseEndTimeMillis = SystemClock.uptimeMillis() + pauseMillis;
             // Mark as completed, because there's a chance we called this after the watchog
-            // thread loop called Object#wait after 'WAITED_HALF'. In that case we want to ensure
-            // the next call to #getCompletionStateLocked for this checker returns 'COMPLETED'
+            // thread loop called Object#wait after 'WAITED_UNTIL_PRE_WATCHDOG'. In that case we
+            // want to ensure the next call to #getCompletionStateLocked for this checker returns
+            // 'COMPLETED'
             mCompleted = true;
             Slog.i(TAG, "Pausing of HandlerChecker: " + mName + " for reason: "
                     + reason + ". Pause end time: " + mPauseEndTimeMillis);
@@ -379,8 +386,9 @@ public class Watchdog implements Dumpable {
         public void pauseLocked(String reason) {
             mPauseCount++;
             // Mark as completed, because there's a chance we called this after the watchog
-            // thread loop called Object#wait after 'WAITED_HALF'. In that case we want to ensure
-            // the next call to #getCompletionStateLocked for this checker returns 'COMPLETED'
+            // thread loop called Object#wait after 'WAITED_UNTIL_PRE_WATCHDOG'. In that case we
+            // want to ensure the next call to #getCompletionStateLocked for this checker returns
+            // 'COMPLETED'
             mCompleted = true;
             Slog.i(TAG, "Pausing HandlerChecker: " + mName + " for reason: "
                     + reason + ". Pause count: " + mPauseCount);
@@ -797,11 +805,11 @@ public class Watchdog implements Dumpable {
             String subject = "";
             boolean allowRestart = true;
             int debuggerWasConnected = 0;
-            boolean doWaitedHalfDump = false;
+            boolean doWaitedPreDump = false;
             // The value of mWatchdogTimeoutMillis might change while we are executing the loop.
             // We store the current value to use a consistent value for all handlers.
             final long watchdogTimeoutMillis = mWatchdogTimeoutMillis;
-            final long checkIntervalMillis = watchdogTimeoutMillis / 2;
+            final long checkIntervalMillis = watchdogTimeoutMillis / PRE_WATCHDOG_TIMEOUT_RATIO;
             final ArrayList<Integer> pids;
             synchronized (mLock) {
                 long timeout = checkIntervalMillis;
@@ -848,15 +856,16 @@ public class Watchdog implements Dumpable {
                 } else if (waitState == WAITING) {
                     // still waiting but within their configured intervals; back off and recheck
                     continue;
-                } else if (waitState == WAITED_HALF) {
+                } else if (waitState == WAITED_UNTIL_PRE_WATCHDOG) {
                     if (!waitedHalf) {
-                        Slog.i(TAG, "WAITED_HALF");
+                        Slog.i(TAG, "WAITED_UNTIL_PRE_WATCHDOG");
                         waitedHalf = true;
-                        // We've waited half, but we'd need to do the stack trace dump w/o the lock.
-                        blockedCheckers = getCheckersWithStateLocked(WAITED_HALF);
+                        // We've waited until the pre-watchdog, but we'd need to do the stack trace
+                        // dump w/o the lock.
+                        blockedCheckers = getCheckersWithStateLocked(WAITED_UNTIL_PRE_WATCHDOG);
                         subject = describeCheckersLocked(blockedCheckers);
                         pids = new ArrayList<>(mInterestingJavaPids);
-                        doWaitedHalfDump = true;
+                        doWaitedPreDump = true;
                     } else {
                         continue;
                     }
@@ -874,12 +883,12 @@ public class Watchdog implements Dumpable {
             // First collect stack traces from all threads of the system process.
             //
             // Then, if we reached the full timeout, kill this process so that the system will
-            // restart. If we reached half of the timeout, just log some information and continue.
-            logWatchog(doWaitedHalfDump, subject, pids);
+            // restart. If we reached pre-watchdog timeout, just log some information and continue.
+            logWatchog(doWaitedPreDump, subject, pids);
 
-            if (doWaitedHalfDump) {
-                // We have waited for only half of the timeout, we continue to wait for the duration
-                // of the full timeout before killing the process.
+            if (doWaitedPreDump) {
+                // We have waited for only pre-watchdog timeout, we continue to wait for the
+                // duration of the full timeout before killing the process.
                 continue;
             }
 
@@ -928,8 +937,8 @@ public class Watchdog implements Dumpable {
         }
     }
 
-    private void logWatchog(boolean halfWatchdog, String subject, ArrayList<Integer> pids) {
-        // Get critical event log before logging the half watchdog so that it doesn't
+    private void logWatchog(boolean preWatchdog, String subject, ArrayList<Integer> pids) {
+        // Get critical event log before logging the pre-watchdog so that it doesn't
         // occur in the log.
         String criticalEvents =
                 CriticalEventLog.getInstance().logLinesForSystemServerTraceFile();
@@ -941,7 +950,7 @@ public class Watchdog implements Dumpable {
         }
 
         final String dropboxTag;
-        if (halfWatchdog) {
+        if (preWatchdog) {
             dropboxTag = "pre_watchdog";
             CriticalEventLog.getInstance().logHalfWatchdog(subject);
             FrameworkStatsLog.write(FrameworkStatsLog.SYSTEM_SERVER_PRE_WATCHDOG_OCCURRED);
@@ -971,7 +980,7 @@ public class Watchdog implements Dumpable {
         report.append(processCpuTracker.printCurrentState(anrTime, 10));
         report.append(tracesFileException.getBuffer());
 
-        if (!halfWatchdog) {
+        if (!preWatchdog) {
             // Trigger the kernel to dump all blocked threads, and backtraces on all CPUs to the
             // kernel log
             doSysRq('w');
