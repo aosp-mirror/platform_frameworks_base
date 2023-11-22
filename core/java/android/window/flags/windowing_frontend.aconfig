@@ -8,6 +8,13 @@ flag {
 }
 
 flag {
+  name: "edge_to_edge_by_default"
+  namespace: "windowing_frontend"
+  description: "Make app go edge-to-edge by default when targeting SDK 35 or greater"
+  bug: "309578419"
+}
+
+flag {
     name: "defer_display_updates"
     namespace: "window_manager"
     description: "Feature flag for deferring DisplayManager updates to WindowManager if Shell transition is running"
