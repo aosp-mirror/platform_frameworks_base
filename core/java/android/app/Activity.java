@@ -7604,15 +7604,17 @@ public class Activity extends ContextThemeWrapper
      * @param taskDescription The TaskDescription properties that describe the task with this activity
      */
     public void setTaskDescription(ActivityManager.TaskDescription taskDescription) {
-        if (mTaskDescription != taskDescription) {
-            mTaskDescription.copyFromPreserveHiddenFields(taskDescription);
-            // Scale the icon down to something reasonable if it is provided
-            if (taskDescription.getIconFilename() == null && taskDescription.getIcon() != null) {
-                final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
-                final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size,
-                        true);
-                mTaskDescription.setIcon(Icon.createWithBitmap(icon));
-            }
+        if (taskDescription == null || mTaskDescription.equals(taskDescription)) {
+            return;
+        }
+
+        mTaskDescription.copyFromPreserveHiddenFields(taskDescription);
+        // Scale the icon down to something reasonable if it is provided
+        if (taskDescription.getIconFilename() == null && taskDescription.getIcon() != null) {
+            final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
+            final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size,
+                    true);
+            mTaskDescription.setIcon(Icon.createWithBitmap(icon));
         }
         ActivityClient.getInstance().setTaskDescription(mToken, mTaskDescription);
     }
