@@ -829,7 +829,7 @@ public class TrustManagerService extends SystemService {
             }
 
             final boolean trusted;
-            if (android.security.Flags.fixUnlockedDeviceRequiredKeys()) {
+            if (android.security.Flags.fixUnlockedDeviceRequiredKeysV2()) {
                 trusted = getUserTrustStateInner(id) == TrustState.TRUSTED;
             } else {
                 trusted = aggregateIsTrusted(id);
