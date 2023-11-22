@@ -20,11 +20,12 @@ import com.android.keyguard.KeyguardUnfoldTransition
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.NotificationPanelUnfoldAnimationController
 import com.android.systemui.statusbar.phone.StatusBarMoveFromCenterAnimationController
-import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityManager
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
+import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityManager
 import com.android.systemui.util.kotlin.getOrNull
 import dagger.BindsInstance
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
@@ -54,10 +55,12 @@ class SysUIUnfoldModule {
     @Provides
     @SysUISingleton
     fun provideSysUIUnfoldComponent(
-        provider: Optional<UnfoldTransitionProgressProvider>,
-        rotationProvider: Optional<NaturalRotationUnfoldProgressProvider>,
-        @Named(UNFOLD_STATUS_BAR) scopedProvider: Optional<ScopedUnfoldTransitionProgressProvider>,
-        factory: SysUIUnfoldComponent.Factory
+            provider: Optional<UnfoldTransitionProgressProvider>,
+            rotationProvider: Optional<NaturalRotationUnfoldProgressProvider>,
+            @Named(UNFOLD_STATUS_BAR) scopedProvider:
+            Optional<ScopedUnfoldTransitionProgressProvider>,
+            unfoldLatencyTracker: Lazy<UnfoldLatencyTracker>,
+            factory: SysUIUnfoldComponent.Factory
     ): Optional<SysUIUnfoldComponent> {
         val p1 = provider.getOrNull()
         val p2 = rotationProvider.getOrNull()
@@ -65,7 +68,7 @@ class SysUIUnfoldModule {
         return if (p1 == null || p2 == null || p3 == null) {
             Optional.empty()
         } else {
-            Optional.of(factory.create(p1, p2, p3))
+            Optional.of(factory.create(p1, p2, p3, unfoldLatencyTracker.get()))
         }
     }
 }
@@ -73,13 +76,13 @@ class SysUIUnfoldModule {
 @SysUIUnfoldScope
 @Subcomponent
 interface SysUIUnfoldComponent {
-
     @Subcomponent.Factory
     interface Factory {
         fun create(
-            @BindsInstance p1: UnfoldTransitionProgressProvider,
-            @BindsInstance p2: NaturalRotationUnfoldProgressProvider,
-            @BindsInstance p3: ScopedUnfoldTransitionProgressProvider
+                @BindsInstance p1: UnfoldTransitionProgressProvider,
+                @BindsInstance p2: NaturalRotationUnfoldProgressProvider,
+                @BindsInstance p3: ScopedUnfoldTransitionProgressProvider,
+                @BindsInstance p4: UnfoldLatencyTracker,
         ): SysUIUnfoldComponent
     }
 
@@ -98,4 +101,8 @@ interface SysUIUnfoldComponent {
     fun getUnfoldLightRevealOverlayAnimation(): UnfoldLightRevealOverlayAnimation
 
     fun getUnfoldKeyguardVisibilityManager(): UnfoldKeyguardVisibilityManager
+
+    fun getUnfoldLatencyTracker(): UnfoldLatencyTracker
+
+    fun getNaturalRotationUnfoldProgressProvider(): NaturalRotationUnfoldProgressProvider
 }
