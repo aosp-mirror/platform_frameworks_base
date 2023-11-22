@@ -87,3 +87,10 @@ flag {
     description: "Feature flag to detect the invisible labels in Launcher Apps"
     bug: "299586370"
 }
+
+flag {
+    name: "read_install_info"
+    namespace: "package_manager_service"
+    description: "Feature flag to read install related information from an APK."
+    bug: "275658500"
+}
