@@ -1683,21 +1683,24 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 archivedPackageParcel);
 
         // Create and commit install archived session.
-        PackageInstallerSession session = null;
-        try {
-            var sessionId = createSessionInternal(params, installerPackageName,
-                    null /*installerAttributionTag*/, Binder.getCallingUid(), userId);
-            session = openSessionInternal(sessionId);
-            session.addFile(LOCATION_DATA_APP, "base", 0 /*lengthBytes*/, metadata.toByteArray(),
-                    null /*signature*/);
-            session.commit(statusReceiver, false /*forTransfer*/);
-        } catch (IOException e) {
-            throw ExceptionUtils.wrap(e);
-        } finally {
-            if (session != null) {
-                session.close();
+        // Session belongs to the system_server and would not appear anywhere in the Public APIs.
+        Binder.withCleanCallingIdentity(() -> {
+            PackageInstallerSession session = null;
+            try {
+                var sessionId = createSessionInternal(params, installerPackageName, null
+                        /*installerAttributionTag*/, Binder.getCallingUid(), userId);
+                session = openSessionInternal(sessionId);
+                session.addFile(LOCATION_DATA_APP, "base", 0 /*lengthBytes*/,
+                        metadata.toByteArray(), null /*signature*/);
+                session.commit(statusReceiver, false /*forTransfer*/);
+            } catch (IOException e) {
+                throw ExceptionUtils.wrap(e);
+            } finally {
+                if (session != null) {
+                    session.close();
+                }
             }
-        }
+        });
     }
 
     // TODO(b/307299702) Implement error dialog and propagate userActionIntent.
