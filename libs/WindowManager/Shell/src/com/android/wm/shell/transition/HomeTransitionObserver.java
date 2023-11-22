@@ -17,6 +17,7 @@
 package com.android.wm.shell.transition;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 
 import static com.android.wm.shell.transition.Transitions.TransitionObserver;
 
@@ -61,9 +62,10 @@ public class HomeTransitionObserver implements TransitionObserver,
             }
 
             final int mode = change.getMode();
+            final boolean isBackGesture = change.hasFlags(FLAG_BACK_GESTURE_ANIMATED);
             if (taskInfo.getActivityType() == ACTIVITY_TYPE_HOME
-                    && TransitionUtil.isOpenOrCloseMode(mode)) {
-                notifyHomeVisibilityChanged(TransitionUtil.isOpeningType(mode));
+                    && (TransitionUtil.isOpenOrCloseMode(mode) || isBackGesture)) {
+                notifyHomeVisibilityChanged(TransitionUtil.isOpeningType(mode) || isBackGesture);
             }
         }
     }
