@@ -37,6 +37,7 @@ import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
+import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler
 import com.android.systemui.keyguard.ui.binder.AlternateBouncerViewBinder
 import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
@@ -48,6 +49,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.gesture.TapGestureDetector
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -55,7 +57,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Includes both the device entry icon and the alternate bouncer scrim. */
 @ExperimentalCoroutinesApi
-class DefaultDeviceEntryIconSection
+class DefaultDeviceEntrySection
 @Inject
 constructor(
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
@@ -72,6 +74,8 @@ constructor(
     private val alternateBouncerViewModel: Lazy<AlternateBouncerViewModel>,
     private val notificationShadeWindowController: Lazy<NotificationShadeWindowController>,
     @Application private val scope: CoroutineScope,
+    private val swipeUpAnywhereGestureHandler: Lazy<SwipeUpAnywhereGestureHandler>,
+    private val tapGestureDetector: Lazy<TapGestureDetector>,
 ) : KeyguardSection() {
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
     private val alternateBouncerViewId = R.id.alternate_bouncer
@@ -118,6 +122,9 @@ constructor(
                     alternateBouncerViewModel.get(),
                     scope,
                     notificationShadeWindowController.get(),
+                    falsingManager.get(),
+                    swipeUpAnywhereGestureHandler.get(),
+                    tapGestureDetector.get(),
                 )
             }
         } else {
