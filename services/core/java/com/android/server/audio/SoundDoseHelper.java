@@ -1297,7 +1297,8 @@ public class SoundDoseHelper {
         }
         final int index = safeMediaVolumeIndex(nativeDeviceType);
         mAudioService.setStreamVolumeWithAttributionInt(STREAM_MUSIC, index / 10, /*flags*/ 0, ada,
-                mContext.getOpPackageName(), /*attributionTag=*/null);
+                mContext.getOpPackageName(), /*attributionTag=*/null,
+                true /*canChangeMuteAndUpdateController*/);
     }
 
     // StreamVolumeCommand contains the information needed to defer the process of
