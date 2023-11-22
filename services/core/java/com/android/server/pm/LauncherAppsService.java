@@ -1531,7 +1531,8 @@ public class LauncherAppsService extends SystemService {
                 throw new ActivityNotFoundException("Activity could not be found");
             }
 
-            final Intent launchIntent = getMainActivityLaunchIntent(component, user);
+            final Intent launchIntent = getMainActivityLaunchIntent(component, user,
+                    false /* includeArchivedApps */);
             if (launchIntent == null) {
                 throw new SecurityException("Attempt to launch activity without "
                         + " category Intent.CATEGORY_LAUNCHER " + component);
@@ -1577,7 +1578,8 @@ public class LauncherAppsService extends SystemService {
                 return;
             }
 
-            Intent launchIntent = getMainActivityLaunchIntent(component, user);
+            Intent launchIntent = getMainActivityLaunchIntent(component, user,
+                    true /* includeArchivedApps */);
             if (launchIntent == null) {
                 throw new SecurityException("Attempt to launch activity without "
                         + " category Intent.CATEGORY_LAUNCHER " + component);
@@ -1593,7 +1595,8 @@ public class LauncherAppsService extends SystemService {
         /**
          * Returns the main activity launch intent for the given component package.
          */
-        private Intent getMainActivityLaunchIntent(ComponentName component, UserHandle user) {
+        private Intent getMainActivityLaunchIntent(ComponentName component, UserHandle user,
+                boolean includeArchivedApps) {
             Intent launchIntent = new Intent(Intent.ACTION_MAIN);
             launchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -1631,6 +1634,14 @@ public class LauncherAppsService extends SystemService {
                         canLaunch = true;
                         break;
                     }
+                }
+                if (!canLaunch
+                        && includeArchivedApps
+                        && Flags.archiving()
+                        && getMatchingArchivedAppActivityInfo(component, user) != null) {
+                    launchIntent.setPackage(null);
+                    launchIntent.setComponent(component);
+                    canLaunch = true;
                 }
                 if (!canLaunch) {
                     return null;
