@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -71,32 +72,48 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
 
         @Override
         public void dispatchLoudnessCodecParameterChange(int piid, PersistableBundle params) {
+            if (DEBUG) {
+                Log.d(TAG, "dispatchLoudnessCodecParameterChange for piid " + piid
+                        + " persistable bundle: " + params);
+            }
             mLoudnessListenerMgr.callListeners(listener -> {
                 synchronized (mLock) {
                     mConfiguratorListener.computeIfPresent(listener, (l, lcConfig) -> {
                         // send the appropriate bundle for the user to update
                         if (lcConfig.getAssignedTrackPiid() == piid) {
-                            final List<MediaCodec> mediaCodecs =
-                                    lcConfig.getRegisteredMediaCodecList();
-                            for (MediaCodec mediaCodec : mediaCodecs) {
-                                final String infoKey = Integer.toString(mediaCodec.hashCode());
+                            final HashMap<LoudnessCodecInfo, Set<MediaCodec>> mediaCodecsMap =
+                                    lcConfig.getRegisteredMediaCodecs();
+                            for (LoudnessCodecInfo codecInfo : mediaCodecsMap.keySet()) {
+                                final String infoKey = Integer.toString(codecInfo.hashCode());
+                                Bundle bundle = null;
                                 if (params.containsKey(infoKey)) {
-                                    Bundle bundle = new Bundle(
-                                            params.getPersistableBundle(infoKey));
-                                    if (DEBUG) {
-                                        Log.d(TAG,
-                                                "Received for piid " + piid + " bundle: " + bundle);
+                                    bundle = new Bundle(params.getPersistableBundle(infoKey));
+                                }
+
+                                final Set<MediaCodec> mediaCodecs = mediaCodecsMap.get(codecInfo);
+                                for (MediaCodec mediaCodec : mediaCodecs) {
+                                    final String mediaCodecKey = Integer.toString(
+                                            mediaCodec.hashCode());
+                                    if (bundle == null && !params.containsKey(mediaCodecKey)) {
+                                        continue;
+                                    }
+                                    boolean canBreak = false;
+                                    if (bundle == null) {
+                                        // key was set by media codec hash to update single codec
+                                        bundle = new Bundle(
+                                                params.getPersistableBundle(mediaCodecKey));
+                                        canBreak = true;
                                     }
                                     bundle =
                                             LoudnessCodecUpdatesDispatcherStub.filterLoudnessParams(
-                                                    l.onLoudnessCodecUpdate(mediaCodec, bundle));
-                                    if (DEBUG) {
-                                        Log.d(TAG, "User changed for piid " + piid
-                                                + " to filtered bundle: " + bundle);
-                                    }
+                                                    l.onLoudnessCodecUpdate(mediaCodec,
+                                                            bundle));
 
                                     if (!bundle.isDefinitelyEmpty()) {
                                         mediaCodec.setParameters(bundle);
+                                    }
+                                    if (canBreak) {
+                                        break;
                                     }
                                 }
                             }
@@ -221,9 +238,10 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
     }
 
     /** @hide */
-    public void addLoudnessCodecInfo(int piid, @NonNull LoudnessCodecInfo mcInfo) {
+    public void addLoudnessCodecInfo(int piid, int mediaCodecHash,
+            @NonNull LoudnessCodecInfo mcInfo) {
         try {
-            mAudioService.addLoudnessCodecInfo(piid, mcInfo);
+            mAudioService.addLoudnessCodecInfo(piid, mediaCodecHash, mcInfo);
         }  catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

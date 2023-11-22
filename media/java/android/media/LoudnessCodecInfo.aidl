@@ -37,7 +37,6 @@ parcelable LoudnessCodecInfo {
         CODEC_METADATA_TYPE_DTS_UHD = 6
     }
 
-    int mediaCodecHashCode;
     CodecMetadataType metadataType;
     boolean isDownmixing;
 }

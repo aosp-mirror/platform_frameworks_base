@@ -10667,8 +10667,8 @@ public class AudioService extends IAudioService.Stub
 
     /** @see LoudnessCodecConfigurator#addMediaCodec(MediaCodec) */
     @Override
-    public void addLoudnessCodecInfo(int piid, LoudnessCodecInfo codecInfo) {
-        mLoudnessCodecHelper.addLoudnessCodecInfo(piid, codecInfo);
+    public void addLoudnessCodecInfo(int piid, int mediaCodecHash, LoudnessCodecInfo codecInfo) {
+        mLoudnessCodecHelper.addLoudnessCodecInfo(piid, mediaCodecHash, codecInfo);
     }
 
     /** @see LoudnessCodecConfigurator#removeMediaCodec(MediaCodec) */
