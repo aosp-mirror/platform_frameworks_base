@@ -46,9 +46,6 @@ sealed class AuthMethodBouncerViewModel(
      */
     val animateFailure: StateFlow<Boolean> = _animateFailure.asStateFlow()
 
-    /** Whether the input method editor (for example, the software keyboard) is visible. */
-    private var isImeVisible: Boolean = false
-
     /** The authentication method that corresponds to this view model. */
     abstract val authenticationMethod: AuthenticationMethodModel
 
@@ -68,7 +65,7 @@ sealed class AuthMethodBouncerViewModel(
     /**
      * Notifies that the UI has been hidden from the user (after any transitions have completed).
      */
-    fun onHidden() {
+    open fun onHidden() {
         clearInput()
         interactor.resetMessage()
     }
@@ -76,18 +73,6 @@ sealed class AuthMethodBouncerViewModel(
     /** Notifies that the user has placed down a pointer. */
     fun onDown() {
         interactor.onDown()
-    }
-
-    /**
-     * Notifies that the input method editor (for example, the software keyboard) has been shown or
-     * hidden.
-     */
-    suspend fun onImeVisibilityChanged(isVisible: Boolean) {
-        if (isImeVisible && !isVisible) {
-            interactor.onImeHidden()
-        }
-
-        isImeVisible = isVisible
     }
 
     /**

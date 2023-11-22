@@ -105,9 +105,9 @@ constructor(
     val isUserSwitcherVisible: Boolean
         get() = repository.isUserSwitcherVisible
 
-    private val _onImeHidden = MutableSharedFlow<Unit>()
-    /** Provide the onImeHidden events from the bouncer */
-    val onImeHidden: SharedFlow<Unit> = _onImeHidden
+    private val _onImeHiddenByUser = MutableSharedFlow<Unit>()
+    /** Emits a [Unit] each time the IME (keyboard) is hidden by the user. */
+    val onImeHiddenByUser: SharedFlow<Unit> = _onImeHiddenByUser
 
     init {
         if (flags.isEnabled()) {
@@ -230,9 +230,9 @@ constructor(
         repository.setMessage(errorMessage(authenticationInteractor.getAuthenticationMethod()))
     }
 
-    /** Notifies the interactor that the input method editor has been hidden. */
-    suspend fun onImeHidden() {
-        _onImeHidden.emit(Unit)
+    /** Notifies that the input method editor (software keyboard) has been hidden by the user. */
+    suspend fun onImeHiddenByUser() {
+        _onImeHiddenByUser.emit(Unit)
     }
 
     private fun promptMessage(authMethod: AuthenticationMethodModel): String {

@@ -30,6 +30,7 @@ import com.android.systemui.authentication.data.repository.FakeAuthenticationRep
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.bouncer.domain.interactor.BouncerActionButtonInteractor
 import com.android.systemui.bouncer.ui.viewmodel.BouncerViewModel
+import com.android.systemui.bouncer.ui.viewmodel.PasswordBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
@@ -775,11 +776,11 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     private suspend fun TestScope.dismissIme(
         showImeBeforeDismissing: Boolean = true,
     ) {
-        bouncerViewModel.authMethodViewModel.value?.apply {
+        (bouncerViewModel.authMethodViewModel.value as? PasswordBouncerViewModel)?.let {
             if (showImeBeforeDismissing) {
-                onImeVisibilityChanged(true)
+                it.onImeVisibilityChanged(true)
             }
-            onImeVisibilityChanged(false)
+            it.onImeVisibilityChanged(false)
             runCurrent()
         }
     }

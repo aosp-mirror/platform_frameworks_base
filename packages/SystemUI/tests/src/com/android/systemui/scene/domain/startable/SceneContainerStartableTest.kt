@@ -467,7 +467,7 @@ class SceneContainerStartableTest : SysuiTestCase() {
             underTest.start()
             runCurrent()
 
-            bouncerInteractor.onImeHidden()
+            bouncerInteractor.onImeHiddenByUser()
             runCurrent()
 
             assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
