@@ -328,7 +328,7 @@ public class BroadcastQueueTest {
                 eq(ActivityManager.PROCESS_STATE_LAST_ACTIVITY), any());
 
         mConstants = new BroadcastConstants(Settings.Global.BROADCAST_FG_CONSTANTS);
-        mConstants.TIMEOUT = 100;
+        mConstants.TIMEOUT = 200;
         mConstants.ALLOW_BG_ACTIVITY_START_TIMEOUT = 0;
         mConstants.PENDING_COLD_START_CHECK_INTERVAL_MILLIS = 500;
 
