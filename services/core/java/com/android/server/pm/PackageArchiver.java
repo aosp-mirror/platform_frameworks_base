@@ -16,6 +16,10 @@
 
 package com.android.server.pm;
 
+import static android.app.ActivityManager.START_ABORTED;
+import static android.app.ActivityManager.START_CLASS_NOT_FOUND;
+import static android.app.ActivityManager.START_PERMISSION_DENIED;
+import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.content.pm.ArchivedActivityInfo.bytesFromBitmap;
@@ -34,7 +38,10 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.IIntentReceiver;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ApplicationInfo;
@@ -58,6 +65,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
 import android.os.ParcelableException;
 import android.os.Process;
 import android.os.SELinux;
@@ -71,6 +79,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.ArchiveState.ArchiveActivityInfo;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.pm.pkg.PackageUserStateInternal;
@@ -183,6 +192,113 @@ public class PackageArchiver {
                             sendFailureStatus(intentSender, packageName, e.getMessage());
                             return null;
                         });
+    }
+
+    /**
+     * Starts unarchival for the package corresponding to the startActivity intent. Note that this
+     * will work only if the caller is the default/Home Launcher or if activity is started via Shell
+     * identity.
+     */
+    @NonNull
+    public int requestUnarchiveOnActivityStart(@Nullable Intent intent,
+            @Nullable String callerPackageName, int userId, int callingUid) {
+        String packageName = getPackageNameFromIntent(intent);
+        if (packageName == null) {
+            Slog.e(TAG, "packageName cannot be null for unarchival!");
+            return START_CLASS_NOT_FOUND;
+        }
+        if (callerPackageName == null) {
+            Slog.e(TAG, "callerPackageName cannot be null for unarchival!");
+            return START_CLASS_NOT_FOUND;
+        }
+        if (!isCallingPackageValid(callerPackageName, callingUid, userId)) {
+            // Return early as the calling UID does not match caller package's UID.
+            return START_CLASS_NOT_FOUND;
+        }
+        String currentLauncherPackageName = getCurrentLauncherPackageName(userId);
+        if ((currentLauncherPackageName == null || !callerPackageName.equals(
+                currentLauncherPackageName)) && callingUid != Process.SHELL_UID) {
+            // TODO(b/311619990): Remove dependency on SHELL_UID for testing
+            Slog.e(TAG, TextUtils.formatSimple(
+                    "callerPackageName: %s does not qualify for archival of package: " + "%s!",
+                    callerPackageName, packageName));
+            return START_PERMISSION_DENIED;
+        }
+        // TODO(b/302114464): Handle edge cases & also divert to a dialog based on
+        //  permissions + compat options
+        Slog.i(TAG, TextUtils.formatSimple("Unarchival is starting for: %s", packageName));
+        try {
+            final IIntentSender.Stub mLocalSender = new IIntentSender.Stub() {
+                @Override
+                public void send(int code, Intent intent, String resolvedType,
+                        IBinder allowlistToken,
+                        IIntentReceiver finishedReceiver, String requiredPermission,
+                        Bundle options) {
+                    // TODO(b/302114464): Handle intent sender status codes
+                }
+            };
+
+            requestUnarchive(packageName, callerPackageName,
+                    new IntentSender((IIntentSender) mLocalSender), UserHandle.of(userId));
+        } catch (Throwable t) {
+            Slog.e(TAG, TextUtils.formatSimple(
+                    "Unexpected error occurred while unarchiving package %s: %s.", packageName,
+                    t.getLocalizedMessage()));
+            return START_ABORTED;
+        }
+        return START_SUCCESS;
+    }
+
+    /**
+     * Returns true if the componentName targeted by the intent corresponds to that of an archived
+     * app.
+     */
+    public boolean isIntentResolvedToArchivedApp(Intent intent, int userId) {
+        String packageName = getPackageNameFromIntent(intent);
+        if (packageName == null || intent.getComponent() == null) {
+            return false;
+        }
+        PackageState packageState = mPm.snapshotComputer().getPackageStateInternal(packageName);
+        if (packageState == null) {
+            return false;
+        }
+        PackageUserState userState = packageState.getUserStateOrDefault(userId);
+        if (!PackageArchiver.isArchived(userState)) {
+            return false;
+        }
+        List<ArchiveState.ArchiveActivityInfo> archiveActivityInfoList =
+                userState.getArchiveState().getActivityInfos();
+        for (int i = 0; i < archiveActivityInfoList.size(); i++) {
+            if (archiveActivityInfoList.get(i)
+                    .getOriginalComponentName().equals(intent.getComponent())) {
+                return true;
+            }
+        }
+        Slog.e(TAG, TextUtils.formatSimple(
+                "Package: %s is archived but component to start main activity"
+                        + " cannot be found!", packageName));
+        return false;
+    }
+
+    @Nullable
+    private String getCurrentLauncherPackageName(int userId) {
+        ComponentName defaultLauncherComponent = mPm.snapshotComputer().getDefaultHomeActivity(
+                userId);
+        if (defaultLauncherComponent != null) {
+            return defaultLauncherComponent.getPackageName();
+        }
+        return null;
+    }
+
+    private boolean isCallingPackageValid(String callingPackage, int callingUid, int userId) {
+        int packageUid;
+        packageUid = mPm.snapshotComputer().getPackageUid(callingPackage, 0L, userId);
+        if (packageUid != callingUid) {
+            Slog.w(TAG, TextUtils.formatSimple("Calling package: %s does not belong to uid: %d",
+                    callingPackage, callingUid));
+            return false;
+        }
+        return true;
     }
 
     /** Creates archived state for the package and user. */
@@ -403,7 +519,7 @@ public class PackageArchiver {
         Computer snapshot = mPm.snapshotComputer();
         int userId = userHandle.getIdentifier();
         int binderUid = Binder.getCallingUid();
-        if (!PackageManagerServiceUtils.isRootOrShell(binderUid)) {
+        if (!PackageManagerServiceUtils.isSystemOrRootOrShell(binderUid)) {
             verifyCaller(snapshot.getPackageUid(callerPackageName, 0, userId), binderUid);
         }
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
@@ -778,6 +894,20 @@ public class PackageArchiver {
         // Technically we could just read the bytes, but we want to be sure we store the
         // right format.
         return bytesFromBitmap(BitmapFactory.decodeFile(path.toString()));
+    }
+
+    @Nullable
+    private static String getPackageNameFromIntent(@Nullable Intent intent) {
+        if (intent == null) {
+            return null;
+        }
+        if (intent.getPackage() != null) {
+            return intent.getPackage();
+        }
+        if (intent.getComponent() != null) {
+            return intent.getComponent().getPackageName();
+        }
+        return null;
     }
 
     /**
