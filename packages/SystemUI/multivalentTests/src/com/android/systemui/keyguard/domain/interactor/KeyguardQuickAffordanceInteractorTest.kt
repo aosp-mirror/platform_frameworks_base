@@ -339,6 +339,31 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun quickAffordanceAlwaysVisible_notVisible_restrictedByPolicyManager() =
+        testScope.runTest {
+            whenever(devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId))
+                .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL)
+
+            repository.setKeyguardShowing(false)
+            repository.setIsDozing(true)
+            homeControls.setState(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                    icon = ICON,
+                    activationState = ActivationState.Active,
+                )
+            )
+
+            val collectedValue by
+                collectLastValue(
+                    underTest.quickAffordanceAlwaysVisible(
+                        KeyguardQuickAffordancePosition.BOTTOM_START
+                    )
+                )
+
+            assertThat(collectedValue).isInstanceOf(KeyguardQuickAffordanceModel.Hidden::class.java)
+        }
+
+    @Test
     fun quickAffordanceAlwaysVisible_evenWhenLockScreenNotShowingAndDozing() =
         testScope.runTest {
             repository.setKeyguardShowing(false)
