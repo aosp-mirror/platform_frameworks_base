@@ -6434,20 +6434,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void stopIfPossible() {
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Stopping: " + this);
-        final Task rootTask = getRootTask();
+        if (finishing) {
+            Slog.e(TAG, "Request to stop a finishing activity: " + this);
+            destroyIfPossible("stopIfPossible-finishing");
+            return;
+        }
         if (isNoHistory()) {
-            if (!finishing) {
-                if (!rootTask.shouldSleepActivities()) {
-                    ProtoLog.d(WM_DEBUG_STATES, "no-history finish of %s", this);
-                    if (finishIfPossible("stop-no-history", false /* oomAdj */)
-                            != FINISH_RESULT_CANCELLED) {
-                        resumeKeyDispatchingLocked();
-                        return;
-                    }
-                } else {
-                    ProtoLog.d(WM_DEBUG_STATES, "Not finishing noHistory %s on stop "
-                            + "because we're just sleeping", this);
+            if (!task.shouldSleepActivities()) {
+                ProtoLog.d(WM_DEBUG_STATES, "no-history finish of %s", this);
+                if (finishIfPossible("stop-no-history", false /* oomAdj */)
+                        != FINISH_RESULT_CANCELLED) {
+                    resumeKeyDispatchingLocked();
+                    return;
                 }
+            } else {
+                ProtoLog.d(WM_DEBUG_STATES, "Not finishing noHistory %s on stop "
+                        + "because we're just sleeping", this);
             }
         }
 
