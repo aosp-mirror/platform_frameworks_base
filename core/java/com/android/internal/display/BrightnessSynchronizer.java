@@ -16,9 +16,14 @@
 
 package com.android.internal.display;
 
+import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
+
+import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.hardware.display.BrightnessInfo;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.net.Uri;
@@ -54,8 +59,7 @@ public class BrightnessSynchronizer {
     private static final int MSG_RUN_UPDATE = 1;
 
     // The tolerance within which we consider brightness values approximately equal to eachother.
-    // This value is approximately 1/3 of the smallest possible brightness value.
-    public static final float EPSILON = 0.001f;
+    public static final float EPSILON = 0.0001f;
 
     private static int sBrightnessUpdateCount = 1;
 
@@ -70,16 +74,22 @@ public class BrightnessSynchronizer {
     private BrightnessUpdate mCurrentUpdate;
     private BrightnessUpdate mPendingUpdate;
 
-    public BrightnessSynchronizer(Context context) {
-        this(context, Looper.getMainLooper(), SystemClock::uptimeMillis);
+    // Feature flag that will eventually be removed
+    private final boolean mIntRangeUserPerceptionEnabled;
+
+    public BrightnessSynchronizer(Context context, boolean intRangeUserPerceptionEnabled) {
+        this(context, Looper.getMainLooper(), SystemClock::uptimeMillis,
+                intRangeUserPerceptionEnabled);
     }
 
     @VisibleForTesting
-    public BrightnessSynchronizer(Context context, Looper looper, Clock clock) {
+    public BrightnessSynchronizer(Context context, Looper looper, Clock clock,
+            boolean intRangeUserPerceptionEnabled) {
         mContext = context;
         mClock = clock;
         mBrightnessSyncObserver = new BrightnessSyncObserver();
         mHandler = new BrightnessSynchronizerHandler(looper);
+        mIntRangeUserPerceptionEnabled = intRangeUserPerceptionEnabled;
     }
 
     /**
@@ -128,6 +138,7 @@ public class BrightnessSynchronizer {
         pw.println("  mLatestFloatBrightness=" + mLatestFloatBrightness);
         pw.println("  mCurrentUpdate=" + mCurrentUpdate);
         pw.println("  mPendingUpdate=" + mPendingUpdate);
+        pw.println("  mIntRangeUserPerceptionEnabled=" + mIntRangeUserPerceptionEnabled);
     }
 
     /**
@@ -284,6 +295,78 @@ public class BrightnessSynchronizer {
     }
 
     /**
+     * Converts between the int brightness setting and the float brightness system. The int
+     * brightness setting is between 0-255 and matches the brightness slider - e.g. 128 is 50% on
+     * the slider. Accounts for special values such as OFF and invalid values. Accounts for
+     * brightness limits; the maximum value here represents the max value allowed on the slider.
+     */
+    @RequiresPermission(CONTROL_DISPLAY_BRIGHTNESS)
+    public static float brightnessIntSettingToFloat(Context context, int brightnessInt) {
+        if (brightnessInt == PowerManager.BRIGHTNESS_OFF) {
+            return PowerManager.BRIGHTNESS_OFF_FLOAT;
+        } else if (brightnessInt == PowerManager.BRIGHTNESS_INVALID) {
+            return PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        } else {
+            final float minInt = PowerManager.BRIGHTNESS_OFF + 1;
+            final float maxInt = PowerManager.BRIGHTNESS_ON;
+
+            // Normalize to the range [0, 1]
+            float userPerceptionBrightness = MathUtils.norm(minInt, maxInt, brightnessInt);
+
+            // Convert from user-perception to linear scale
+            float linearBrightness = BrightnessUtils.convertGammaToLinear(userPerceptionBrightness);
+
+            // Interpolate to the range [0, currentlyAllowedMax]
+            final Display display = context.getDisplay();
+            if (display == null) {
+                return PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            }
+            final BrightnessInfo info = display.getBrightnessInfo();
+            if (info == null) {
+                return PowerManager.BRIGHTNESS_INVALID_FLOAT;
+            }
+            return MathUtils.lerp(info.brightnessMinimum, info.brightnessMaximum, linearBrightness);
+        }
+    }
+
+    /**
+     * Translates specified value from the float brightness system to the setting int brightness
+     * system. The value returned is between 0-255 and matches the brightness slider - e.g. 128 is
+     * 50% on the slider. Accounts for special values such as OFF and invalid values. Accounts for
+     * brightness limits; the maximum value here represents the max value currently allowed on
+     * the slider.
+     */
+    @RequiresPermission(CONTROL_DISPLAY_BRIGHTNESS)
+    public static int brightnessFloatToIntSetting(Context context, float brightnessFloat) {
+        if (floatEquals(brightnessFloat, PowerManager.BRIGHTNESS_OFF_FLOAT)) {
+            return PowerManager.BRIGHTNESS_OFF;
+        } else if (Float.isNaN(brightnessFloat)) {
+            return PowerManager.BRIGHTNESS_INVALID;
+        } else {
+            // Normalize to the range [0, 1]
+            final Display display = context.getDisplay();
+            if (display == null) {
+                return PowerManager.BRIGHTNESS_INVALID;
+            }
+            final BrightnessInfo info = display.getBrightnessInfo();
+            if (info == null) {
+                return PowerManager.BRIGHTNESS_INVALID;
+            }
+            float linearBrightness =
+                    MathUtils.norm(info.brightnessMinimum, info.brightnessMaximum, brightnessFloat);
+
+            // Convert from linear to user-perception scale
+            float userPerceptionBrightness = BrightnessUtils.convertLinearToGamma(linearBrightness);
+
+            // Interpolate to the range [0, 255]
+            final float minInt = PowerManager.BRIGHTNESS_OFF + 1;
+            final float maxInt = PowerManager.BRIGHTNESS_ON;
+            float intBrightness = MathUtils.lerp(minInt, maxInt, userPerceptionBrightness);
+            return Math.round(intBrightness);
+        }
+    }
+
+    /**
      * Encapsulates a brightness change event and contains logic for synchronizing the appropriate
      * settings for the specified brightness change.
      */
@@ -417,18 +500,28 @@ public class BrightnessSynchronizer {
             return mUpdatedTypes != 0x0;
         }
 
+        @SuppressLint("AndroidFrameworkRequiresPermission")
         private int getBrightnessAsInt() {
             if (mSourceType == TYPE_INT) {
                 return (int) mBrightness;
             }
-            return brightnessFloatToInt(mBrightness);
+            if (mIntRangeUserPerceptionEnabled) {
+                return brightnessFloatToIntSetting(mContext, mBrightness);
+            } else {
+                return brightnessFloatToInt(mBrightness);
+            }
         }
 
+        @SuppressLint("AndroidFrameworkRequiresPermission")
         private float getBrightnessAsFloat() {
             if (mSourceType == TYPE_FLOAT) {
                 return mBrightness;
             }
-            return brightnessIntToFloat((int) mBrightness);
+            if (mIntRangeUserPerceptionEnabled) {
+                return brightnessIntSettingToFloat(mContext, (int) mBrightness);
+            } else {
+                return brightnessIntToFloat((int) mBrightness);
+            }
         }
 
         private String toStringLabel(int type, float brightness) {
