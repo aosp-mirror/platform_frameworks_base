@@ -28,6 +28,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.TrustRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.utils.os.FakeHandler
@@ -53,6 +54,7 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     @Mock private lateinit var dismissCallbackRegistry: DismissCallbackRegistry
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
+    @Mock private lateinit var faceAuthInteractor: KeyguardFaceAuthInteractor
     private val mainHandler = FakeHandler(Looper.getMainLooper())
     private lateinit var underTest: PrimaryBouncerInteractor
 
@@ -75,6 +77,7 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
                 Mockito.mock(TrustRepository::class.java),
                 TestScope().backgroundScope,
                 mSelectedUserInteractor,
+                faceAuthInteractor,
             )
     }
 

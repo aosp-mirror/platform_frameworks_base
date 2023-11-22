@@ -251,6 +251,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                             FakeTrustRepository(),
                             testScope.backgroundScope,
                             mSelectedUserInteractor,
+                            mock(),
                         ),
                     facePropertyRepository = FakeFacePropertyRepository(),
                     deviceEntryFingerprintAuthRepository =

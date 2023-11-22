@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.bouncer.data.repository.keyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.configurationRepository
-import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -33,7 +32,6 @@ val Kosmos.keyguardInteractor by
             repository = keyguardRepository,
             commandQueue = commandQueue,
             powerInteractor = powerInteractor,
-            featureFlags = featureFlagsClassic,
             sceneContainerFlags = sceneContainerFlags,
             bouncerRepository = keyguardBouncerRepository,
             configurationRepository = configurationRepository,

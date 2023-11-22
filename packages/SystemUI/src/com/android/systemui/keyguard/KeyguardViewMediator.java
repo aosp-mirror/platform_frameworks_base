@@ -3401,7 +3401,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             }
 
             if (mPowerGestureIntercepted && mOccluded && isSecure()
-                    && mUpdateMonitor.isFaceEnrolled()) {
+                    && mUpdateMonitor.isFaceEnabledAndEnrolled()) {
                 flags |= StatusBarManager.DISABLE_RECENT;
             }
 

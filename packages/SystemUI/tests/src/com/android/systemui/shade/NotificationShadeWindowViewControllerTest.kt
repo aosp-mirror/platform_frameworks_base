@@ -65,6 +65,7 @@ import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsReposi
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -97,6 +98,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
@@ -111,9 +113,8 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.MockitoAnnotations
-import java.util.Optional
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -265,6 +266,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                             FakeTrustRepository(),
                             testScope.backgroundScope,
                             mSelectedUserInteractor,
+                            mock(KeyguardFaceAuthInteractor::class.java)
                         ),
                     facePropertyRepository = FakeFacePropertyRepository(),
                     deviceEntryFingerprintAuthRepository =

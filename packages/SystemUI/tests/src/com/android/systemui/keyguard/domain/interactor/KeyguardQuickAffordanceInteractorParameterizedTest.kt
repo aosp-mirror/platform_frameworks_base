@@ -31,7 +31,6 @@ import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceProviderClientFactory
@@ -302,10 +301,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 dumpManager = mock(),
                 userHandle = UserHandle.SYSTEM,
             )
-        val featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.FACE_AUTH_REFACTOR, true)
-            }
+        val featureFlags = FakeFeatureFlags()
         val testDispatcher = StandardTestDispatcher()
         testScope = TestScope(testDispatcher)
         underTest =
@@ -357,7 +353,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 }
 
             underTest.onQuickAffordanceTriggered(
-                configKey = "${KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId()}::${key}",
+                configKey = "${KeyguardQuickAffordancePosition.BOTTOM_START.toSlotId()}::$key",
                 expandable = expandable,
                 slotId = "",
             )

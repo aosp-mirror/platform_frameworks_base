@@ -30,8 +30,6 @@ import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
@@ -45,6 +43,7 @@ import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.kotlin.sample
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -71,10 +70,9 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val repository: DeviceEntryFaceAuthRepository,
-    private val primaryBouncerInteractor: PrimaryBouncerInteractor,
+    private val primaryBouncerInteractor: Lazy<PrimaryBouncerInteractor>,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
-    private val featureFlags: FeatureFlags,
     private val faceAuthenticationLogger: FaceAuthenticationLogger,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val deviceEntryFingerprintAuthRepository: DeviceEntryFingerprintAuthRepository,
@@ -88,16 +86,16 @@ constructor(
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
 
     override fun start() {
-        if (!isEnabled()) {
-            return
-        }
-        // This is required because fingerprint state required for the face auth repository is
-        // backed by KeyguardUpdateMonitor. KeyguardUpdateMonitor constructor accesses the biometric
-        // state which makes lazy injection not an option.
+        // Todo(b/310594096): there is a dependency cycle introduced by the repository depending on
+        //  KeyguardBypassController, which in turn depends on KeyguardUpdateMonitor through
+        //  its other dependencies. Once bypassEnabled state is available through a repository, we
+        //  can break that cycle and inject this interactor directly into KeyguardUpdateMonitor
         keyguardUpdateMonitor.setFaceAuthInteractor(this)
         observeFaceAuthStateUpdates()
         faceAuthenticationLogger.interactorStarted()
-        primaryBouncerInteractor.isShowing
+        primaryBouncerInteractor
+            .get()
+            .isShowing
             .whenItFlipsToTrue()
             .onEach {
                 faceAuthenticationLogger.bouncerVisibilityChanged()
@@ -176,7 +174,7 @@ constructor(
                         FaceAuthUiEvent.FACE_AUTH_UPDATED_USER_SWITCHING,
                         // Fallback to detection if bouncer is not showing so that we can detect a
                         // face and then show the bouncer to the user if face auth can't run
-                        fallbackToDetect = !primaryBouncerInteractor.isBouncerShowing()
+                        fallbackToDetect = !primaryBouncerInteractor.get().isBouncerShowing()
                     )
                 }
             }
@@ -231,9 +229,8 @@ constructor(
 
     override fun canFaceAuthRun(): Boolean = repository.canRunFaceAuth.value
 
-    override fun isEnabled(): Boolean {
-        return featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)
-    }
+    override fun isFaceAuthStrong(): Boolean =
+        facePropertyRepository.sensorInfo.value?.strength == SensorStrength.STRONG
 
     override fun onPrimaryBouncerUserInput() {
         repository.cancel()
@@ -248,28 +245,23 @@ constructor(
     override val detectionStatus = repository.detectionStatus
 
     private fun runFaceAuth(uiEvent: FaceAuthUiEvent, fallbackToDetect: Boolean) {
-        if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
-            if (repository.isLockedOut.value) {
-                faceAuthenticationStatusOverride.value =
-                    ErrorFaceAuthenticationStatus(
-                        BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT,
-                        context.resources.getString(R.string.keyguard_face_unlock_unavailable)
-                    )
-            } else {
-                faceAuthenticationStatusOverride.value = null
-                faceAuthenticationLogger.authRequested(uiEvent)
-                repository.requestAuthenticate(uiEvent, fallbackToDetection = fallbackToDetect)
-            }
+        if (repository.isLockedOut.value) {
+            faceAuthenticationStatusOverride.value =
+                ErrorFaceAuthenticationStatus(
+                    BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT,
+                    context.resources.getString(R.string.keyguard_face_unlock_unavailable)
+                )
         } else {
-            faceAuthenticationLogger.ignoredFaceAuthTrigger(
-                uiEvent,
-                ignoredReason = "Skipping face auth request because feature flag is false"
-            )
+            faceAuthenticationStatusOverride.value = null
+            faceAuthenticationLogger.authRequested(uiEvent)
+            repository.requestAuthenticate(uiEvent, fallbackToDetection = fallbackToDetect)
         }
     }
 
     override fun isFaceAuthEnabledAndEnrolled(): Boolean =
         biometricSettingsRepository.isFaceAuthEnrolledAndEnabled.value
+
+    override fun isAuthenticated(): Boolean = repository.isAuthenticated.value
 
     private fun observeFaceAuthStateUpdates() {
         authenticationStatus
@@ -281,6 +273,21 @@ constructor(
         detectionStatus
             .onEach { detectionStatusUpdate ->
                 listeners.forEach { it.onDetectionStatusChanged(detectionStatusUpdate) }
+            }
+            .flowOn(mainDispatcher)
+            .launchIn(applicationScope)
+        repository.isLockedOut
+            .onEach { lockedOut -> listeners.forEach { it.onLockoutStateChanged(lockedOut) } }
+            .flowOn(mainDispatcher)
+            .launchIn(applicationScope)
+        repository.isAuthRunning
+            .onEach { running -> listeners.forEach { it.onRunningStateChanged(running) } }
+            .flowOn(mainDispatcher)
+            .launchIn(applicationScope)
+
+        biometricSettingsRepository.isFaceAuthEnrolledAndEnabled
+            .onEach { enrolledAndEnabled ->
+                listeners.forEach { it.onAuthEnrollmentStateChanged(enrolledAndEnabled) }
             }
             .flowOn(mainDispatcher)
             .launchIn(applicationScope)

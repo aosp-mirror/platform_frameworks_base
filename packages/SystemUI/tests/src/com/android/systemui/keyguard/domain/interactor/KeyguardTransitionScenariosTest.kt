@@ -121,11 +121,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
 
         whenever(keyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(PIN)
 
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.FACE_AUTH_REFACTOR, true)
-                set(Flags.KEYGUARD_WM_STATE_REFACTOR, false)
-            }
+        featureFlags = FakeFeatureFlags().apply { set(Flags.KEYGUARD_WM_STATE_REFACTOR, false) }
 
         keyguardInteractor = createKeyguardInteractor()
 
