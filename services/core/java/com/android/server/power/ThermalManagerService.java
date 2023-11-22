@@ -759,6 +759,36 @@ public class ThermalManagerService extends SystemService {
                     case "NPU":
                         type = Temperature.TYPE_NPU;
                         break;
+                    case "TPU":
+                        type = Temperature.TYPE_TPU;
+                        break;
+                    case "DISPLAY":
+                        type = Temperature.TYPE_DISPLAY;
+                        break;
+                    case "MODEM":
+                        type = Temperature.TYPE_MODEM;
+                        break;
+                    case "SOC":
+                        type = Temperature.TYPE_SOC;
+                        break;
+                    case "WIFI":
+                        type = Temperature.TYPE_WIFI;
+                        break;
+                    case "CAMERA":
+                        type = Temperature.TYPE_CAMERA;
+                        break;
+                    case "FLASHLIGHT":
+                        type = Temperature.TYPE_FLASHLIGHT;
+                        break;
+                    case "SPEAKER":
+                        type = Temperature.TYPE_SPEAKER;
+                        break;
+                    case "AMBIENT":
+                        type = Temperature.TYPE_AMBIENT;
+                        break;
+                    case "POGO":
+                        type = Temperature.TYPE_POGO;
+                        break;
                     default:
                         pw.println("Invalid temperature type: " + typeName);
                         return -1;
