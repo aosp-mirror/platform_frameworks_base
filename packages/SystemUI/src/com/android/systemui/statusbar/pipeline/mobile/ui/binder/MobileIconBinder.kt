@@ -154,8 +154,13 @@ object MobileIconBinder {
                                 dataTypeId,
                             )
                             dataTypeId?.let { IconViewBinder.bind(dataTypeId, networkTypeView) }
+                            val prevVis = networkTypeContainer.visibility
                             networkTypeContainer.visibility =
                                 if (dataTypeId != null) VISIBLE else GONE
+
+                            if (prevVis != networkTypeContainer.visibility) {
+                                view.requestLayout()
+                            }
                         }
                     }
 
