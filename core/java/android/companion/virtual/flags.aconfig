@@ -23,6 +23,13 @@ flag {
 }
 
 flag {
+  name: "consistent_display_flags"
+  namespace: "virtual_devices"
+  description: "Make virtual display flags consistent with display manager"
+  bug: "300905478"
+}
+
+flag {
   name: "vdm_custom_home"
   namespace: "virtual_devices"
   description: "Enable custom home API"
