@@ -23,9 +23,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
-
 import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
-
 import static java.lang.Character.MIN_VALUE;
 
 import android.annotation.AnimRes;
@@ -7597,17 +7595,15 @@ public class Activity extends ContextThemeWrapper
      * @param taskDescription The TaskDescription properties that describe the task with this activity
      */
     public void setTaskDescription(ActivityManager.TaskDescription taskDescription) {
-        if (taskDescription == null || mTaskDescription.equals(taskDescription)) {
-            return;
-        }
-
-        mTaskDescription.copyFromPreserveHiddenFields(taskDescription);
-        // Scale the icon down to something reasonable if it is provided
-        if (taskDescription.getIconFilename() == null && taskDescription.getIcon() != null) {
-            final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
-            final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size,
-                    true);
-            mTaskDescription.setIcon(Icon.createWithBitmap(icon));
+        if (mTaskDescription != taskDescription) {
+            mTaskDescription.copyFromPreserveHiddenFields(taskDescription);
+            // Scale the icon down to something reasonable if it is provided
+            if (taskDescription.getIconFilename() == null && taskDescription.getIcon() != null) {
+                final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
+                final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size,
+                        true);
+                mTaskDescription.setIcon(Icon.createWithBitmap(icon));
+            }
         }
         ActivityClient.getInstance().setTaskDescription(mToken, mTaskDescription);
     }
