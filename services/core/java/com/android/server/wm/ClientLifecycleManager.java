@@ -58,6 +58,23 @@ class ClientLifecycleManager {
     }
 
     /**
+     * Similar to {@link #scheduleTransactionItem}, but is called without WM lock.
+     *
+     * @see WindowProcessController#setReportedProcState(int)
+     */
+    void scheduleTransactionItemUnlocked(@NonNull IApplicationThread client,
+            @NonNull ClientTransactionItem transactionItem) throws RemoteException {
+        // Immediately dispatching to client, and must not access WMS.
+        final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
+        if (transactionItem.isActivityLifecycleItem()) {
+            clientTransaction.setLifecycleStateRequest((ActivityLifecycleItem) transactionItem);
+        } else {
+            clientTransaction.addCallback(transactionItem);
+        }
+        scheduleTransaction(clientTransaction);
+    }
+
+    /**
      * Schedules a single transaction item, either a callback or a lifecycle request, delivery to
      * client application.
      * @throws RemoteException
@@ -65,6 +82,7 @@ class ClientLifecycleManager {
      */
     void scheduleTransactionItem(@NonNull IApplicationThread client,
             @NonNull ClientTransactionItem transactionItem) throws RemoteException {
+        // TODO(b/260873529): queue the transaction items.
         final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
         if (transactionItem.isActivityLifecycleItem()) {
             clientTransaction.setLifecycleStateRequest((ActivityLifecycleItem) transactionItem);
@@ -82,6 +100,7 @@ class ClientLifecycleManager {
     void scheduleTransactionAndLifecycleItems(@NonNull IApplicationThread client,
             @NonNull ClientTransactionItem transactionItem,
             @NonNull ActivityLifecycleItem lifecycleItem) throws RemoteException {
+        // TODO(b/260873529): replace with #scheduleTransactionItem after launch for cleanup.
         final ClientTransaction clientTransaction = ClientTransaction.obtain(client);
         clientTransaction.addCallback(transactionItem);
         clientTransaction.setLifecycleStateRequest(lifecycleItem);
