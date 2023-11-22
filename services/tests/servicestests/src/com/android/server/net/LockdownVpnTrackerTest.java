@@ -221,7 +221,7 @@ public class LockdownVpnTrackerTest {
         callCallbacksForNetworkConnect(defaultCallback, mNetwork);
 
         // Vpn is starting
-        verify(mVpn).startLegacyVpnPrivileged(mProfile, mNetwork, TEST_CELL_LP);
+        verify(mVpn).startLegacyVpnPrivileged(mProfile);
         verify(mNotificationManager).notify(any(), eq(SystemMessage.NOTE_VPN_STATUS),
                 argThat(notification -> isExpectedNotification(notification,
                         R.string.vpn_lockdown_connecting, R.drawable.vpn_disconnected)));
@@ -242,7 +242,7 @@ public class LockdownVpnTrackerTest {
         // LockdownVpnTracker#handleStateChangedLocked. This is a bug.
         // TODO: consider fixing this.
         verify(mVpn, never()).stopVpnRunnerPrivileged();
-        verify(mVpn, never()).startLegacyVpnPrivileged(any(), any(), any());
+        verify(mVpn, never()).startLegacyVpnPrivileged(any());
         verify(mNotificationManager, never()).cancel(any(), eq(SystemMessage.NOTE_VPN_STATUS));
     }
 
@@ -302,7 +302,7 @@ public class LockdownVpnTrackerTest {
 
         // Vpn is restarted.
         verify(mVpn).stopVpnRunnerPrivileged();
-        verify(mVpn).startLegacyVpnPrivileged(mProfile, mNetwork2, wifiLp);
+        verify(mVpn).startLegacyVpnPrivileged(mProfile);
         verify(mNotificationManager, never()).cancel(any(), eq(SystemMessage.NOTE_VPN_STATUS));
         verify(mNotificationManager).notify(any(), eq(SystemMessage.NOTE_VPN_STATUS),
                 argThat(notification -> isExpectedNotification(notification,
