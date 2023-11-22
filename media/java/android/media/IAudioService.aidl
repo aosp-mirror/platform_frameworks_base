@@ -500,10 +500,6 @@ interface IAudioService {
             in String packageName, int uid, int pid, in UserHandle userHandle,
             int targetSdkVersion);
 
-    oneway void adjustVolume(int direction, int flags);
-
-    oneway void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags);
-
     boolean isMusicActive(in boolean remotely);
 
     int getDeviceMaskForStream(in int streamType);
