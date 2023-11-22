@@ -16,6 +16,8 @@
 
 package android.webkit;
 
+import static android.webkit.Flags.updateServiceV2;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -205,6 +207,9 @@ public final class WebViewDelegate {
      * Returns whether WebView should run in multiprocess mode.
      */
     public boolean isMultiProcessEnabled() {
+        if (updateServiceV2()) {
+            return true;
+        }
         try {
             return WebViewFactory.getUpdateService().isMultiProcessEnabled();
         } catch (RemoteException e) {
