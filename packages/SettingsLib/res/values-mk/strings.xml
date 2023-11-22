@@ -437,8 +437,8 @@
     <string name="transcode_notification" msgid="5560515979793436168">"Прикажувај известувања за транскодирање"</string>
     <string name="transcode_disable_cache" msgid="3160069309377467045">"Оневозможи го кешот на транскодирањето"</string>
     <string name="widevine_settings_title" msgid="4023329801172572917">"Поставки за Widevine"</string>
-    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Резервен план за Force L3"</string>
-    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Изберете за да се овозможи резервен план за Force L3"</string>
+    <string name="force_l3_fallback_title" msgid="4987972688770202547">"Наметни алтернативно безбедносно ниво L3"</string>
+    <string name="force_l3_fallback_summary" msgid="3080790841069996016">"Изберете за да се наметне алтернативно безбедносно ниво L3"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Активни услуги"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Погледнете и контролирајте услуги што се моментално активни"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Примена на WebView"</string>
