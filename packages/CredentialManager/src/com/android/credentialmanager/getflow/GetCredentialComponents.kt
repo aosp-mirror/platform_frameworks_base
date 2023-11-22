@@ -50,7 +50,7 @@ import com.android.credentialmanager.CredentialSelectorViewModel
 import com.android.credentialmanager.R
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.CredentialType
-import com.android.credentialmanager.model.ProviderInfo
+import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
 import com.android.credentialmanager.common.ui.ActionButton
@@ -69,10 +69,10 @@ import com.android.credentialmanager.common.ui.HeadlineIcon
 import com.android.credentialmanager.common.ui.LargeLabelTextOnSurfaceVariant
 import com.android.credentialmanager.common.ui.Snackbar
 import com.android.credentialmanager.logging.GetCredentialEvent
-import com.android.credentialmanager.model.ActionEntryInfo
-import com.android.credentialmanager.model.AuthenticationEntryInfo
-import com.android.credentialmanager.model.CredentialEntryInfo
-import com.android.credentialmanager.model.RemoteEntryInfo
+import com.android.credentialmanager.model.get.ActionEntryInfo
+import com.android.credentialmanager.model.get.AuthenticationEntryInfo
+import com.android.credentialmanager.model.get.CredentialEntryInfo
+import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.credentialmanager.userAndDisplayNameForPasskey
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 

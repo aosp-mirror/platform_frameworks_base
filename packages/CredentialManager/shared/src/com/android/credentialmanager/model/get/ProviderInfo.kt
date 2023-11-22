@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.model
+package com.android.credentialmanager.model.get
 
 import android.graphics.drawable.Drawable
 

@@ -14,27 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.model
+package com.android.credentialmanager.model.get
 
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import java.time.Instant
+import com.android.credentialmanager.model.EntryInfo
 
-class CreateOptionInfo(
+class ActionEntryInfo(
     providerId: String,
     entryKey: String,
     entrySubkey: String,
     pendingIntent: PendingIntent?,
     fillInIntent: Intent?,
-    val userProviderDisplayName: String,
-    val profileIcon: Drawable?,
-    val passwordCount: Int?,
-    val passkeyCount: Int?,
-    val totalCredentialCount: Int?,
-    val lastUsedTime: Instant,
-    val footerDescription: String?,
-    val allowAutoSelect: Boolean,
+    val title: String,
+    val icon: Drawable,
+    val subTitle: String?,
 ) : EntryInfo(
     providerId,
     entryKey,

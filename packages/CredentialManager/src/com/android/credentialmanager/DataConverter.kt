@@ -32,13 +32,13 @@ import com.android.credentialmanager.common.Constants
 import com.android.credentialmanager.model.CredentialType
 import com.android.credentialmanager.createflow.ActiveEntry
 import com.android.credentialmanager.createflow.CreateCredentialUiState
-import com.android.credentialmanager.model.CreateOptionInfo
+import com.android.credentialmanager.model.creation.CreateOptionInfo
 import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.createflow.DisabledProviderInfo
 import com.android.credentialmanager.createflow.EnabledProviderInfo
-import com.android.credentialmanager.model.RemoteInfo
+import com.android.credentialmanager.model.creation.RemoteInfo
 import com.android.credentialmanager.createflow.RequestDisplayInfo
-import com.android.credentialmanager.model.ProviderInfo
+import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.ktx.toProviderList
 import androidx.credentials.CreateCredentialRequest
 import androidx.credentials.CreateCustomCredentialRequest
@@ -465,7 +465,8 @@ class CreateFlowUtils {
             val result: MutableList<CreateOptionInfo> = mutableListOf()
             creationEntries.forEach {
                 val createEntry = CreateEntry.fromSlice(it.slice) ?: return@forEach
-                result.add(CreateOptionInfo(
+                result.add(
+                    CreateOptionInfo(
                     providerId = providerId,
                     entryKey = it.key,
                     entrySubkey = it.subkey,
@@ -484,7 +485,8 @@ class CreateFlowUtils {
                         it.hasHint("androidx.credentials.provider.createEntry.SLICE_HINT_AUTO_" +
                             "SELECT_ALLOWED")
                     }?.text == "true",
-                ))
+                )
+                )
             }
             return result.sortedWith(
                 compareByDescending { it.lastUsedTime }

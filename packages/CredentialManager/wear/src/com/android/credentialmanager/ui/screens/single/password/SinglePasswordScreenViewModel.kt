@@ -28,7 +28,7 @@ import com.android.credentialmanager.TAG
 import com.android.credentialmanager.ktx.getIntentSenderRequest
 import com.android.credentialmanager.model.Request
 import com.android.credentialmanager.client.CredentialManagerClient
-import com.android.credentialmanager.model.CredentialEntryInfo
+import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.ui.model.PasswordUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

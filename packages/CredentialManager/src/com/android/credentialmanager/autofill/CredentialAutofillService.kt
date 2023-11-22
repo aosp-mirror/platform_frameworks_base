@@ -48,9 +48,9 @@ import androidx.credentials.provider.CustomCredentialEntry
 import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
 import com.android.credentialmanager.GetFlowUtils
-import com.android.credentialmanager.model.CredentialEntryInfo
+import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderDisplayInfo
-import com.android.credentialmanager.model.ProviderInfo
+import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.getflow.toProviderDisplayInfo
 import com.android.credentialmanager.ktx.credentialEntry
 import org.json.JSONObject
@@ -172,11 +172,11 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun processProvidersForAutofillId(
-            filLRequest: FillRequest,
-            autofillId: AutofillId,
-            providerList: List<ProviderInfo>,
-            entryIconMap: Map<String, Icon>,
-            fillResponseBuilder: FillResponse.Builder
+        filLRequest: FillRequest,
+        autofillId: AutofillId,
+        providerList: List<ProviderInfo>,
+        entryIconMap: Map<String, Icon>,
+        fillResponseBuilder: FillResponse.Builder
     ): Boolean {
         if (providerList.isEmpty()) {
             return false
@@ -323,8 +323,8 @@ class CredentialAutofillService : AutofillService() {
     }
 
     private fun copyProviderInfo(
-            providerInfo: ProviderInfo,
-            credentialList: List<CredentialEntryInfo>
+        providerInfo: ProviderInfo,
+        credentialList: List<CredentialEntryInfo>
     ): ProviderInfo {
         return ProviderInfo(
                 providerInfo.id,

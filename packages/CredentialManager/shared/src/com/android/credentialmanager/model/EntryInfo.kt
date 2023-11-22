@@ -19,7 +19,7 @@ package com.android.credentialmanager.model
 import android.app.PendingIntent
 import android.content.Intent
 
-sealed class EntryInfo (
+open class EntryInfo (
     val providerId: String,
     val entryKey: String,
     val entrySubkey: String,

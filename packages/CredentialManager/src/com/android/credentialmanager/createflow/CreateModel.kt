@@ -19,18 +19,18 @@ package com.android.credentialmanager.createflow
 import android.graphics.drawable.Drawable
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.CredentialType
-import com.android.credentialmanager.model.CreateOptionInfo
-import com.android.credentialmanager.model.RemoteInfo
+import com.android.credentialmanager.model.creation.CreateOptionInfo
+import com.android.credentialmanager.model.creation.RemoteInfo
 
 data class CreateCredentialUiState(
-  val enabledProviders: List<EnabledProviderInfo>,
-  val disabledProviders: List<DisabledProviderInfo>? = null,
-  val currentScreenState: CreateScreenState,
-  val requestDisplayInfo: RequestDisplayInfo,
-  val sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
-  val activeEntry: ActiveEntry? = null,
-  val remoteEntry: RemoteInfo? = null,
-  val foundCandidateFromUserDefaultProvider: Boolean,
+    val enabledProviders: List<EnabledProviderInfo>,
+    val disabledProviders: List<DisabledProviderInfo>? = null,
+    val currentScreenState: CreateScreenState,
+    val requestDisplayInfo: RequestDisplayInfo,
+    val sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
+    val activeEntry: ActiveEntry? = null,
+    val remoteEntry: RemoteInfo? = null,
+    val foundCandidateFromUserDefaultProvider: Boolean,
 )
 
 internal fun isFlowAutoSelectable(

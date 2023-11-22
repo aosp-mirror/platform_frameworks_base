@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.model
+package com.android.credentialmanager.model.get
 
 import android.app.PendingIntent
 import android.content.Intent
+import com.android.credentialmanager.model.EntryInfo
 
-class RemoteInfo(
+class RemoteEntryInfo(
     providerId: String,
     entryKey: String,
     entrySubkey: String,

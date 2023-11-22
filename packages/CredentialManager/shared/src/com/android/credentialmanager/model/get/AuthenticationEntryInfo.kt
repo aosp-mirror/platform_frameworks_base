@@ -14,35 +14,31 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.model
+package com.android.credentialmanager.model.get
 
 import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.drawable.Drawable
-import java.time.Instant
+import com.android.credentialmanager.model.EntryInfo
 
-class CredentialEntryInfo(
+class AuthenticationEntryInfo(
     providerId: String,
     entryKey: String,
     entrySubkey: String,
     pendingIntent: PendingIntent?,
     fillInIntent: Intent?,
-    /** Type of this credential used for sorting. Not localized so must not be directly displayed. */
-    val credentialType: CredentialType,
-    /** Localized type value of this credential used for display purpose. */
-    val credentialTypeDisplayName: String,
+    val title: String,
     val providerDisplayName: String,
-    val userName: String,
-    val displayName: String?,
-    val icon: Drawable?,
-    val shouldTintIcon: Boolean,
-    val lastUsedTimeMillis: Instant?,
-    val isAutoSelectable: Boolean,
+    val icon: Drawable,
+    // The entry had been unlocked and turned out to be empty. Used to determine whether to
+    // show "Tap to unlock" or "No sign-in info" for this entry.
+    val isUnlockedAndEmpty: Boolean,
+    // True if the entry was the last one unlocked. Used to show the no sign-in info snackbar.
+    val isLastUnlocked: Boolean,
 ) : EntryInfo(
     providerId,
-    entryKey,
-    entrySubkey,
+    entryKey, entrySubkey,
     pendingIntent,
     fillInIntent,
-    shouldTerminateUiUponSuccessfulProviderResult = true,
+    shouldTerminateUiUponSuccessfulProviderResult = false,
 )

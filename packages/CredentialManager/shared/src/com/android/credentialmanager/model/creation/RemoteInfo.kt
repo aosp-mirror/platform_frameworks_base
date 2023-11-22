@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.model
+package com.android.credentialmanager.model.creation
 
 import android.app.PendingIntent
 import android.content.Intent
-import android.graphics.drawable.Drawable
+import com.android.credentialmanager.model.EntryInfo
 
-class ActionEntryInfo(
+class RemoteInfo(
     providerId: String,
     entryKey: String,
     entrySubkey: String,
     pendingIntent: PendingIntent?,
     fillInIntent: Intent?,
-    val title: String,
-    val icon: Drawable,
-    val subTitle: String?,
 ) : EntryInfo(
     providerId,
     entryKey,

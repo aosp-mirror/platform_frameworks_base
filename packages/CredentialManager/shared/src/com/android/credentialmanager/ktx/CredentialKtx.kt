@@ -39,12 +39,12 @@ import androidx.credentials.provider.PasswordCredentialEntry
 import androidx.credentials.provider.PublicKeyCredentialEntry
 import androidx.credentials.provider.RemoteEntry
 import com.android.credentialmanager.IS_AUTO_SELECTED_KEY
-import com.android.credentialmanager.model.ActionEntryInfo
-import com.android.credentialmanager.model.AuthenticationEntryInfo
-import com.android.credentialmanager.model.CredentialEntryInfo
+import com.android.credentialmanager.model.get.ActionEntryInfo
+import com.android.credentialmanager.model.get.AuthenticationEntryInfo
+import com.android.credentialmanager.model.get.CredentialEntryInfo
 import com.android.credentialmanager.model.CredentialType
-import com.android.credentialmanager.model.ProviderInfo
-import com.android.credentialmanager.model.RemoteEntryInfo
+import com.android.credentialmanager.model.get.ProviderInfo
+import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.credentialmanager.TAG
 
 fun CredentialEntryInfo.getIntentSenderRequest(

@@ -68,8 +68,8 @@ import com.android.credentialmanager.common.ui.SheetContainerCard
 import com.android.credentialmanager.common.ui.PasskeyBenefitRow
 import com.android.credentialmanager.common.ui.HeadlineText
 import com.android.credentialmanager.logging.CreateCredentialEvent
-import com.android.credentialmanager.model.CreateOptionInfo
-import com.android.credentialmanager.model.RemoteInfo
+import com.android.credentialmanager.model.creation.CreateOptionInfo
+import com.android.credentialmanager.model.creation.RemoteInfo
 import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 

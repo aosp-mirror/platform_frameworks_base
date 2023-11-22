@@ -18,6 +18,7 @@ package com.android.credentialmanager.model
 
 import android.os.IBinder
 import android.os.ResultReceiver
+import com.android.credentialmanager.model.get.ProviderInfo
 
 /**
  * Represents the request made by the CredentialManager API.

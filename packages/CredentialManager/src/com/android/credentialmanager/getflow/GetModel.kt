@@ -17,12 +17,12 @@
 package com.android.credentialmanager.getflow
 
 import android.graphics.drawable.Drawable
-import com.android.credentialmanager.model.ProviderInfo
+import com.android.credentialmanager.model.get.ProviderInfo
 import com.android.credentialmanager.model.EntryInfo
 import com.android.credentialmanager.model.CredentialType
-import com.android.credentialmanager.model.AuthenticationEntryInfo
-import com.android.credentialmanager.model.CredentialEntryInfo
-import com.android.credentialmanager.model.RemoteEntryInfo
+import com.android.credentialmanager.model.get.AuthenticationEntryInfo
+import com.android.credentialmanager.model.get.CredentialEntryInfo
+import com.android.credentialmanager.model.get.RemoteEntryInfo
 import com.android.internal.util.Preconditions
 
 data class GetCredentialUiState(
