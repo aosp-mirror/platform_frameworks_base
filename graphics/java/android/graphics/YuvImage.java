@@ -339,7 +339,8 @@ public class YuvImage {
       return nativeCompressToJpegR(mData, mColorSpace.getDataSpace(),
                                    sdr.getYuvData(), sdr.getColorSpace().getDataSpace(),
                                    mWidth, mHeight, quality, stream,
-                                   new byte[WORKING_COMPRESS_STORAGE], exif);
+                                   new byte[WORKING_COMPRESS_STORAGE], exif,
+                                   mStrides, sdr.getStrides());
   }
 
 
@@ -451,5 +452,6 @@ public class YuvImage {
 
     private static native boolean nativeCompressToJpegR(byte[] hdr, int hdrColorSpaceId,
             byte[] sdr, int sdrColorSpaceId, int width, int height, int quality,
-            OutputStream stream, byte[] tempStorage, byte[] exif);
+            OutputStream stream, byte[] tempStorage, byte[] exif,
+            int[] hdrStrides, int[] sdrStrides);
 }

@@ -92,11 +92,14 @@ public:
      *  @param height Height of the Yuv data in terms of pixels.
      *  @param jpegQuality Picture quality in [0, 100].
      *  @param exif Buffer holds EXIF package.
+     *  @param hdrStrides The number of row bytes in each image plane of the HDR input.
+     *  @param sdrStrides The number of row bytes in each image plane of the SDR input.
      *  @return true if successfully compressed the stream.
      */
     bool encode(JNIEnv* env,
             SkWStream* stream, void* hdr, int hdrColorSpace, void* sdr, int sdrColorSpace,
-            int width, int height, int jpegQuality, ScopedByteArrayRO* exif);
+            int width, int height, int jpegQuality, ScopedByteArrayRO* exif,
+            ScopedIntArrayRO* hdrStrides, ScopedIntArrayRO* sdrStrides);
 
     /** Map data space (defined in DataSpace.java and data_space.h) to the color gamut
      *  used in JPEG/R
