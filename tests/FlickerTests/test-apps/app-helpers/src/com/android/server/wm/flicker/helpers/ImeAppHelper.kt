@@ -50,7 +50,7 @@ constructor(
         waitIMEShown(wmHelper)
     }
 
-    protected fun waitIMEShown(wmHelper: WindowManagerStateHelper) {
+    fun waitIMEShown(wmHelper: WindowManagerStateHelper) {
         wmHelper.StateSyncBuilder().withImeShown().waitForAndVerify()
     }
 
@@ -62,18 +62,5 @@ constructor(
     open fun closeIME(wmHelper: WindowManagerStateHelper) {
         uiDevice.pressBack()
         wmHelper.StateSyncBuilder().withImeGone().waitForAndVerify()
-    }
-
-    open fun finishActivity(wmHelper: WindowManagerStateHelper) {
-        val finishButton =
-            uiDevice.wait(
-                Until.findObject(By.res(packageName, "finish_activity_btn")),
-                FIND_TIMEOUT
-            )
-        requireNotNull(finishButton) {
-            "Finish activity button not found, probably IME activity is not on the screen?"
-        }
-        finishButton.click()
-        wmHelper.StateSyncBuilder().withActivityRemoved(this).waitForAndVerify()
     }
 }
