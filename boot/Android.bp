@@ -84,10 +84,6 @@ custom_platform_bootclasspath {
             module: "com.android.conscrypt-bootclasspath-fragment",
         },
         {
-            apex: "com.android.crashrecovery",
-            module: "com.android.crashrecovery-bootclasspath-fragment",
-        },
-        {
             apex: "com.android.devicelock",
             module: "com.android.devicelock-bootclasspath-fragment",
         },

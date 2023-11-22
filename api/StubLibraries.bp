@@ -29,9 +29,6 @@
 
 droidstubs {
     name: "api-stubs-docs-non-updatable",
-    srcs: [
-        ":framework-minus-apex-aconfig-srcjars",
-    ],
     defaults: [
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
@@ -91,9 +88,6 @@ module_libs = [
 
 droidstubs {
     name: "system-api-stubs-docs-non-updatable",
-    srcs: [
-        ":framework-minus-apex-aconfig-srcjars",
-    ],
     defaults: [
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
@@ -134,9 +128,6 @@ droidstubs {
 
 droidstubs {
     name: "test-api-stubs-docs-non-updatable",
-    srcs: [
-        ":framework-minus-apex-aconfig-srcjars",
-    ],
     defaults: [
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
@@ -184,9 +175,6 @@ droidstubs {
 
 droidstubs {
     name: "module-lib-api-stubs-docs-non-updatable",
-    srcs: [
-        ":framework-minus-apex-aconfig-srcjars",
-    ],
     defaults: [
         "android-non-updatable-stubs-defaults",
         "module-classpath-stubs-defaults",
@@ -363,17 +351,7 @@ java_library {
         "android-non-updatable_from_source_defaults",
     ],
     srcs: [":module-lib-api-stubs-docs-non-updatable"],
-    libs: [
-        // We cannot depend on all-modules-module-lib-stubs, because the module-lib stubs
-        // depend on this stub. We resolve dependencies on APIs in modules by depending
-        // on a prebuilt of the whole platform (sdk_system_current_android).
-        // That prebuilt does not include module-lib APIs, so use the prebuilt module-lib
-        // stubs for modules that export module-lib stubs that the non-updatable part
-        // depends on.
-        "sdk_module-lib_current_framework-tethering",
-        "sdk_module-lib_current_framework-connectivity-t",
-        "sdk_system_current_android",
-    ],
+    libs: non_updatable_api_deps_on_modules,
     dist: {
         dir: "apistubs/android/module-lib",
     },

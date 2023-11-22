@@ -20,10 +20,10 @@ import com.android.tools.lint.checks.infrastructure.LintDetectorTest
 import com.android.tools.lint.checks.infrastructure.TestLintTask
 
 class EnforcePermissionHelperDetectorTest : LintDetectorTest() {
-    override fun getDetector() = EnforcePermissionHelperDetector()
+    override fun getDetector() = EnforcePermissionDetector()
     override fun getIssues() = listOf(
-        EnforcePermissionHelperDetector.ISSUE_ENFORCE_PERMISSION_HELPER,
-        EnforcePermissionHelperDetector.ISSUE_MISUSING_ENFORCE_PERMISSION
+        EnforcePermissionDetector.ISSUE_ENFORCE_PERMISSION_HELPER,
+        EnforcePermissionDetector.ISSUE_MISUSING_ENFORCE_PERMISSION
     )
 
     override fun lint(): TestLintTask = super.lint().allowMissingSdk()

@@ -21,6 +21,7 @@ import android.os.RemoteCallback;
 /**
  * @hide
  */
+@PermissionManuallyEnforced
 oneway interface IExplicitHealthCheckService
 {
     void setCallback(in @nullable RemoteCallback callback);

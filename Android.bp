@@ -136,6 +136,9 @@ filegroup {
         // For the generated R.java and Manifest.java
         ":framework-res{.aapt.srcjar}",
 
+        // Java/AIDL sources to be moved out to CrashRecovery module
+        ":framework-crashrecovery-sources",
+
         // etc.
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
@@ -396,6 +399,7 @@ java_defaults {
         "soundtrigger_middleware-aidl-java",
         "modules-utils-binary-xml",
         "modules-utils-build",
+        "modules-utils-fastxmlserializer",
         "modules-utils-preconditions",
         "modules-utils-statemachine",
         "modules-utils-synchronous-result-receiver",
@@ -603,23 +607,11 @@ java_library {
     ],
 }
 
-packages_to_document = [
-    "android",
-    "dalvik",
-    "java",
-    "javax",
-    "junit",
-    "org.apache.http",
-    "org.json",
-    "org.w3c.dom",
-    "org.xml.sax",
-    "org.xmlpull",
-]
-
 filegroup {
     name: "android-non-updatable-stub-sources",
     srcs: [
         ":framework-mime-sources", // mimemap builds separately but has no separate droidstubs.
+        ":framework-minus-apex-aconfig-srcjars",
         ":framework-non-updatable-sources",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
@@ -627,198 +619,6 @@ filegroup {
         "**/package.html",
     ],
     visibility: ["//frameworks/base/api"],
-}
-
-// Defaults for all stubs that include the non-updatable framework. These defaults do not include
-// module symbols, so will not compile correctly on their own. Users must add module APIs to the
-// classpath (or sources) somehow.
-stubs_defaults {
-    name: "android-non-updatable-stubs-defaults",
-    srcs: [":android-non-updatable-stub-sources"],
-    sdk_version: "none",
-    system_modules: "none",
-    java_version: "1.8",
-    arg_files: [":frameworks-base-core-AndroidManifest.xml"],
-    aidl: {
-        include_dirs: [
-            "frameworks/av/aidl",
-            "frameworks/base/media/aidl",
-            "frameworks/base/telephony/java",
-            "frameworks/native/libs/permission/aidl",
-            "packages/modules/Bluetooth/framework/aidl-export",
-            "packages/modules/Connectivity/framework/aidl-export",
-            "packages/modules/Media/apex/aidl/stable",
-            "hardware/interfaces/biometrics/common/aidl",
-            "hardware/interfaces/biometrics/fingerprint/aidl",
-            "hardware/interfaces/graphics/common/aidl",
-            "hardware/interfaces/keymaster/aidl",
-            "system/hardware/interfaces/media/aidl",
-        ],
-    },
-    // These are libs from framework-internal-utils that are required (i.e. being referenced)
-    // from framework-non-updatable-sources. Add more here when there's a need.
-    // DO NOT add the entire framework-internal-utils. It might cause unnecessary circular
-    // dependencies gets bigger.
-    libs: [
-        "android.hardware.cas-V1.2-java",
-        "android.hardware.health-V1.0-java-constants",
-        "android.hardware.radio-V1.5-java",
-        "android.hardware.radio-V1.6-java",
-        "android.hardware.thermal-V1.0-java-constants",
-        "android.hardware.thermal-V2.0-java",
-        "android.hardware.tv.input-V1.0-java-constants",
-        "android.hardware.usb-V1.0-java-constants",
-        "android.hardware.usb-V1.1-java-constants",
-        "android.hardware.usb.gadget-V1.0-java",
-        "android.hardware.vibrator-V1.3-java",
-        "framework-protos",
-    ],
-    flags: [
-        "--api-lint-ignore-prefix android.icu.",
-        "--api-lint-ignore-prefix java.",
-        "--api-lint-ignore-prefix junit.",
-        "--api-lint-ignore-prefix org.",
-        "--error NoSettingsProvider",
-        "--error UnhiddenSystemApi",
-        "--error UnflaggedApi",
-        "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.*",
-        "--hide BroadcastBehavior",
-        "--hide CallbackInterface",
-        "--hide DeprecationMismatch",
-        "--hide HiddenSuperclass",
-        "--hide MissingPermission",
-        "--hide RequiresPermission",
-        "--hide SdkConstant",
-        "--hide Todo",
-        "--hide-package android.audio.policy.configuration.V7_0",
-        "--hide-package com.android.server",
-        "--manifest $(location :frameworks-base-core-AndroidManifest.xml)",
-    ],
-    filter_packages: packages_to_document,
-    high_mem: true, // Lots of sources => high memory use, see b/170701554
-    installable: false,
-    annotations_enabled: true,
-    previous_api: ":android.api.public.latest",
-    merge_annotations_dirs: ["metalava-manual"],
-    defaults_visibility: ["//frameworks/base/api"],
-    visibility: ["//frameworks/base/api"],
-}
-
-// Defaults with module APIs in the classpath (mostly from prebuilts).
-// Suitable for compiling android-non-updatable.
-stubs_defaults {
-    name: "module-classpath-stubs-defaults",
-    aidl: {
-        include_dirs: [
-            "packages/modules/Bluetooth/framework/aidl-export",
-            "packages/modules/Connectivity/framework/aidl-export",
-            "packages/modules/Media/apex/aidl/stable",
-        ],
-    },
-    libs: [
-        "art.module.public.api",
-        "sdk_module-lib_current_framework-tethering",
-        "sdk_module-lib_current_framework-connectivity-t",
-        "sdk_public_current_framework-bluetooth",
-        // There are a few classes from modules used by the core that
-        // need to be resolved by metalava. We use a prebuilt stub of the
-        // full sdk to ensure we can resolve them. If a new class gets added,
-        // the prebuilts/sdk/current needs to be updated.
-        "sdk_system_current_android",
-        // NOTE: The below can be removed once the prebuilt stub contains IKE.
-        "sdk_system_current_android.net.ipsec.ike",
-    ],
-}
-
-// Defaults for the java_sdk_libraries of unbundled jars from framework.
-// java_sdk_libraries using these defaults should also add themselves to the
-// non_updatable_modules list in frameworks/base/api/api.go
-java_defaults {
-    name: "framework-non-updatable-unbundled-defaults",
-    defaults: ["framework-non-updatable-lint-defaults"],
-
-    sdk_version: "core_platform",
-
-    // Api scope settings
-    public: {
-        enabled: true,
-        sdk_version: "module_current",
-        libs: ["android_module_lib_stubs_current"],
-    },
-    system: {
-        enabled: true,
-        sdk_version: "module_current",
-        libs: ["android_module_lib_stubs_current"],
-    },
-    module_lib: {
-        enabled: true,
-        sdk_version: "module_current",
-        libs: ["android_module_lib_stubs_current"],
-    },
-    test: {
-        enabled: true,
-        sdk_version: "test_frameworks_core_current",
-        libs: ["android_test_frameworks_core_stubs_current"],
-    },
-
-    stub_only_libs: [
-        "framework-protos",
-    ],
-    impl_only_libs: [
-        "framework-minus-apex-headers", // full access to framework-minus-apex including hidden API
-        "framework-annotations-lib",
-    ],
-    visibility: ["//visibility:public"],
-    stubs_library_visibility: ["//visibility:public"],
-    stubs_source_visibility: ["//visibility:private"],
-    impl_library_visibility: [
-        ":__pkg__",
-        "//frameworks/base",
-        "//frameworks/base/api", // For framework-all
-    ],
-    defaults_visibility: [
-        "//frameworks/base/location",
-    ],
-    plugins: [
-        "error_prone_android_framework",
-    ],
-    errorprone: {
-        javacflags: [
-            "-Xep:AndroidFrameworkCompatChange:ERROR",
-            "-Xep:AndroidFrameworkUid:ERROR",
-        ],
-    },
-
-    // Include manual annotations in API txt files
-    merge_annotations_dirs: ["metalava-manual"],
-
-    // Use the source of annotations that affect metalava doc generation, since
-    // the relevant generation instructions are themselves in javadoc, which is
-    // not present in class files.
-    api_srcs: [":framework-metalava-annotations"],
-
-    // Framework modules are not generally shared libraries, i.e. they are not
-    // intended, and must not be allowed, to be used in a <uses-library> manifest
-    // entry.
-    shared_library: false,
-
-    // Prevent dependencies that do not specify an sdk_version from accessing the
-    // implementation library by default and force them to use stubs instead.
-    default_to_stubs: true,
-
-    // Subdirectory for the artifacts that are copied to the dist directory
-    dist_group: "android",
-
-    droiddoc_options: [
-        "--error UnhiddenSystemApi " +
-            "--hide CallbackInterface " +
-            "--hide HiddenTypedefConstant " +
-            "--hide RequiresPermission " +
-            "--enhance-documentation " +
-            "--hide-package com.android.server ",
-    ],
-
-    annotations_enabled: true,
 }
 
 build = [

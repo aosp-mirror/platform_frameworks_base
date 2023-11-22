@@ -1144,9 +1144,6 @@ class BroadcastProcessQueue {
             } else if (mProcessPersistent) {
                 mRunnableAt = runnableAt + constants.DELAY_PERSISTENT_PROC_MILLIS;
                 mRunnableAtReason = REASON_PERSISTENT;
-            } else if (UserHandle.isCore(uid)) {
-                mRunnableAt = runnableAt;
-                mRunnableAtReason = REASON_CORE_UID;
             } else if (mCountOrdered > 0) {
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_ORDERED;
@@ -1193,6 +1190,9 @@ class BroadcastProcessQueue {
                 // is already cached, they'll be deferred on the line above
                 mRunnableAt = runnableAt;
                 mRunnableAtReason = REASON_CONTAINS_RESULT_TO;
+            } else if (UserHandle.isCore(uid)) {
+                mRunnableAt = runnableAt;
+                mRunnableAtReason = REASON_CORE_UID;
             } else {
                 mRunnableAt = runnableAt + constants.DELAY_NORMAL_MILLIS;
                 mRunnableAtReason = REASON_NORMAL;

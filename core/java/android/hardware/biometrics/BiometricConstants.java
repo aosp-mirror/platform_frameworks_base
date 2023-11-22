@@ -18,6 +18,7 @@ package android.hardware.biometrics;
 
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
@@ -296,4 +297,15 @@ public interface BiometricConstants {
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({BIOMETRIC_LOCKOUT_NONE, BIOMETRIC_LOCKOUT_TIMED, BIOMETRIC_LOCKOUT_PERMANENT})
     @interface LockoutMode {}
+
+    //
+    // Other miscellaneous constants
+    //
+
+    /**
+     * Returned from {@link BiometricManager#getLastAuthenticationTime(int)} when there has
+     * been no successful authentication for the given authenticator since boot.
+     */
+    @FlaggedApi(Flags.FLAG_LAST_AUTHENTICATION_TIME)
+    long BIOMETRIC_NO_AUTHENTICATION = -1;
 }

@@ -1161,6 +1161,11 @@ public class Intent implements Parcelable, Cloneable {
      * numbers.  Applications can <strong>dial</strong> emergency numbers using
      * {@link #ACTION_DIAL}, however.
      *
+     * <p>Note: This Intent can only be used to dial call forwarding MMI codes if the application
+     * using this intent is set as the default or system dialer. The system will treat any other
+     * application using this Intent for the purpose of dialing call forwarding MMI codes as if the
+     * {@link #ACTION_DIAL} Intent was used instead.
+     *
      * <p>Note: An app filling the {@link android.app.role.RoleManager#ROLE_DIALER} role should use
      * {@link android.telecom.TelecomManager#placeCall(Uri, Bundle)} to place calls rather than
      * relying on this intent.
