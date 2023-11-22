@@ -258,7 +258,7 @@ public class TinyFrameworkClassTest {
         assertThat(TinyFrameworkEnumSimple.valueOf("DOG").ordinal()).isEqualTo(1);
 
         assertThat(TinyFrameworkEnumSimple.values()).isEqualTo(
-                new TinyFrameworkEnumSimple[] {
+                new TinyFrameworkEnumSimple[]{
                         TinyFrameworkEnumSimple.CAT,
                         TinyFrameworkEnumSimple.DOG,
                 }
@@ -278,11 +278,17 @@ public class TinyFrameworkClassTest {
         assertThat(TinyFrameworkEnumComplex.valueOf("BLUE").ordinal()).isEqualTo(2);
 
         assertThat(TinyFrameworkEnumComplex.values()).isEqualTo(
-                new TinyFrameworkEnumComplex[] {
+                new TinyFrameworkEnumComplex[]{
                         TinyFrameworkEnumComplex.RED,
                         TinyFrameworkEnumComplex.GREEN,
                         TinyFrameworkEnumComplex.BLUE,
                 }
         );
+    }
+
+    @Test
+    public void testAidlHeuristics() {
+        assertThat(IPretendingAidl.Stub.addOne(1)).isEqualTo(2);
+        assertThat(IPretendingAidl.Proxy.addTwo(1)).isEqualTo(3);
     }
 }
