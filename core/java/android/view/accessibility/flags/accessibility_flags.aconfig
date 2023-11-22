@@ -57,3 +57,10 @@ flag {
     description: "Updates the Always-On A11yService state when the user changes the enablement of the shortcut."
     bug: "298869916"
 }
+
+flag {
+    name: "enable_system_pinch_zoom_gesture"
+    namespace: "accessibility"
+    description: "Feature flag for system pinch zoom gesture detector and related opt-out apis"
+    bug: "283323770"
+}
