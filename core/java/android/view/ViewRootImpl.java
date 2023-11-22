@@ -120,6 +120,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.ContentObserver;
 import android.graphics.BLASTBufferQueue;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -389,6 +390,9 @@ public final class ViewRootImpl implements ViewParent,
      * to view root for apps using legacy back behavior.
      */
     private CompatOnBackInvokedCallback mCompatOnBackInvokedCallback;
+
+    @Nullable
+    private ContentObserver mForceInvertObserver;
 
     /**
      * Callback for notifying about global configuration changes.
@@ -1598,6 +1602,24 @@ public final class ViewRootImpl implements ViewParent,
                         | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
                         | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED,
                         mBasePackageName);
+
+        if (forceInvertColor()) {
+            if (mForceInvertObserver == null) {
+                mForceInvertObserver = new ContentObserver(mHandler) {
+                    @Override
+                    public void onChange(boolean selfChange) {
+                        updateForceDarkMode();
+                    }
+                };
+                mContext.getContentResolver().registerContentObserver(
+                        Settings.Secure.getUriFor(
+                                Settings.Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED
+                        ),
+                        false,
+                        mForceInvertObserver,
+                        UserHandle.myUserId());
+            }
+        }
     }
 
     /**
@@ -1611,6 +1633,14 @@ public final class ViewRootImpl implements ViewParent,
         DisplayManagerGlobal
                 .getInstance()
                 .unregisterDisplayListener(mDisplayListener);
+
+        if (forceInvertColor()) {
+            if (mForceInvertObserver != null) {
+                mContext.getContentResolver().unregisterContentObserver(mForceInvertObserver);
+                mForceInvertObserver = null;
+            }
+        }
+
         if (mExtraDisplayListenerLogging) {
             Slog.w(mTag, "Unregister listeners: " + mBasePackageName, new Throwable());
         }
