@@ -15,9 +15,11 @@
  *
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
-import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
+import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -27,6 +29,7 @@ import com.android.systemui.statusbar.notification.stack.domain.interactor.Share
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,7 +38,6 @@ import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
@@ -109,18 +111,18 @@ constructor(
      *
      * When the shade is expanding, the position is controlled by... the shade.
      */
-    val position: StateFlow<SharedNotificationContainerPosition> =
+    val bounds: StateFlow<NotificationContainerBounds> =
         isOnLockscreenWithoutShade
             .flatMapLatest { onLockscreen ->
                 if (onLockscreen) {
                     combine(
-                        keyguardInteractor.sharedNotificationContainerPosition,
+                        keyguardInteractor.notificationContainerBounds,
                         configurationBasedDimensions
-                    ) { position, config ->
+                    ) { bounds, config ->
                         if (config.useSplitShade) {
-                            position.copy(top = 0f)
+                            bounds.copy(top = 0f)
                         } else {
-                            position
+                            bounds
                         }
                     }
                 } else {
@@ -129,9 +131,9 @@ constructor(
                         // When QS expansion > 0, it should directly set the top padding so do not
                         // animate it
                         val animate = qsExpansion == 0f
-                        keyguardInteractor.sharedNotificationContainerPosition.value.copy(
+                        keyguardInteractor.notificationContainerBounds.value.copy(
                             top = top,
-                            animate = animate
+                            isAnimated = animate
                         )
                     }
                 }
@@ -139,7 +141,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = SharedNotificationContainerPosition(0f, 0f),
+                initialValue = NotificationContainerBounds(0f, 0f),
             )
 
     /**
@@ -169,7 +171,7 @@ constructor(
         // when the notification stack has changed internally
         val limitedNotifications =
             combine(
-                position,
+                bounds,
                 interactor.notificationStackChanged.onStart { emit(Unit) },
             ) { position, _ ->
                 calculateSpace(position.bottom - position.top)
