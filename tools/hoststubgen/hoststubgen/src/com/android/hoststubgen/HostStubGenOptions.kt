@@ -28,10 +28,10 @@ class HostStubGenOptions(
         var inJar: String = "",
 
         /** Output stub jar file */
-        var outStubJar: String = "",
+        var outStubJar: String? = null,
 
         /** Output implementation jar file */
-        var outImplJar: String = "",
+        var outImplJar: String? = null,
 
         var inputJarDumpFile: String? = null,
 
@@ -71,7 +71,7 @@ class HostStubGenOptions(
         var enablePreTrace: Boolean = false,
         var enablePostTrace: Boolean = false,
 
-        var enableNonStubMethodCallDetection: Boolean = true,
+        var enableNonStubMethodCallDetection: Boolean = false,
 ) {
     companion object {
 
@@ -209,11 +209,14 @@ class HostStubGenOptions(
             if (ret.inJar.isEmpty()) {
                 throw ArgumentsException("Required option missing: --in-jar")
             }
-            if (ret.outStubJar.isEmpty()) {
-                throw ArgumentsException("Required option missing: --out-stub-jar")
+            if (ret.outStubJar == null && ret.outImplJar == null) {
+                log.w("Neither --out-stub-jar nor --out-impl-jar is set." +
+                        " $COMMAND_NAME will not generate jar files.")
             }
-            if (ret.outImplJar.isEmpty()) {
-                throw ArgumentsException("Required option missing: --out-impl-jar")
+
+            if (ret.enableNonStubMethodCallDetection) {
+                log.w("--enable-non-stub-method-check is not fully implemented yet." +
+                    " See the todo in doesMethodNeedNonStubCallCheck().")
             }
 
             return ret

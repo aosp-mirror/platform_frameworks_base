@@ -598,7 +598,6 @@ public final class JobStatus {
             long lastSuccessfulRunTime, long lastFailedRunTime, long cumulativeExecutionTimeMs,
             int internalFlags,
             int dynamicConstraints) {
-        this.job = job;
         this.callingUid = callingUid;
         this.standbyBucket = standbyBucket;
         mNamespace = namespace;
@@ -625,6 +624,22 @@ public final class JobStatus {
             this.sourcePackageName = sourcePackageName;
             this.sourceTag = tag;
         }
+
+        // This needs to be done before setting the field variable.
+        if (job.getRequiredNetwork() != null) {
+            // Later, when we check if a given network satisfies the required
+            // network, we need to know the UID that is requesting it, so push
+            // the source UID into place.
+            final JobInfo.Builder builder = new JobInfo.Builder(job);
+            builder.setRequiredNetwork(new NetworkRequest.Builder(job.getRequiredNetwork())
+                    .setUids(Collections.singleton(new Range<>(this.sourceUid, this.sourceUid)))
+                    .build());
+            // Don't perform validation checks at this point since we've already passed the
+            // initial validation check.
+            job = builder.build(false, false);
+        }
+
+        this.job = job;
 
         final String bnNamespace = namespace == null ? "" :  "@" + namespace + "@";
         this.batteryName = this.sourceTag != null
@@ -707,21 +722,6 @@ public final class JobStatus {
         mInternalFlags = internalFlags;
 
         updateNetworkBytesLocked();
-
-        if (job.getRequiredNetwork() != null) {
-            // Later, when we check if a given network satisfies the required
-            // network, we need to know the UID that is requesting it, so push
-            // our source UID into place.
-            final JobInfo.Builder builder = new JobInfo.Builder(job);
-            final NetworkRequest.Builder requestBuilder =
-                    new NetworkRequest.Builder(job.getRequiredNetwork());
-            requestBuilder.setUids(
-                    Collections.singleton(new Range<Integer>(this.sourceUid, this.sourceUid)));
-            builder.setRequiredNetwork(requestBuilder.build());
-            // Don't perform validation checks at this point since we've already passed the
-            // initial validation check.
-            job = builder.build(false, false);
-        }
 
         updateMediaBackupExemptionStatus();
     }

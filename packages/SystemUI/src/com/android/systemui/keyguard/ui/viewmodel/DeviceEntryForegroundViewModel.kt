@@ -31,6 +31,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
@@ -49,12 +50,22 @@ constructor(
         transitionInteractor.startedKeyguardState.map { keyguardState ->
             keyguardState == KeyguardState.AOD
         }
+
+    private fun getColor(usingBackgroundProtection: Boolean): Int {
+        return if (usingBackgroundProtection) {
+            Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary)
+        } else {
+            Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColorAccent)
+        }
+    }
+
     private val color: Flow<Int> =
-        configurationRepository.onAnyConfigurationChange
-            .map { Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary) }
-            .onStart {
-                emit(Utils.getColorAttrDefaultColor(context, android.R.attr.textColorPrimary))
-            }
+        deviceEntryIconViewModel.useBackgroundProtection.flatMapLatest { useBgProtection ->
+            configurationRepository.onAnyConfigurationChange
+                .map { getColor(useBgProtection) }
+                .onStart { emit(getColor(useBgProtection)) }
+        }
+
     private val useAodIconVariant: Flow<Boolean> =
         combine(isShowingAod, deviceEntryUdfpsInteractor.isUdfpsSupported) {
                 isTransitionToAod,

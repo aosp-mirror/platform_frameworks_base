@@ -54,18 +54,6 @@ public class SystemUiSystemPropertiesFlags {
      */
     public static final class NotificationFlags {
 
-        /**
-         * FOR DEVELOPMENT / TESTING ONLY!!!
-         * Forcibly demote *ALL* FSI notifications as if no apps have the app op permission.
-         * NOTE: enabling this implies SHOW_STICKY_HUN_FOR_DENIED_FSI in SystemUI
-         */
-        public static final Flag FSI_FORCE_DEMOTE =
-                devFlag("persist.sysui.notification.fsi_force_demote");
-
-        /** Gating the feature which shows FSI-denied notifications as Sticky HUNs */
-        public static final Flag SHOW_STICKY_HUN_FOR_DENIED_FSI =
-                releasedFlag("persist.sysui.notification.show_sticky_hun_for_denied_fsi");
-
         /** Gating the logging of DND state change events. */
         public static final Flag LOG_DND_STATE_EVENTS =
                 releasedFlag("persist.sysui.notification.log_dnd_state_events");

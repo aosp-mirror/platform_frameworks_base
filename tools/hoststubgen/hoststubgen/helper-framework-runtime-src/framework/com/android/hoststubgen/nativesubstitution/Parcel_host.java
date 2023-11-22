@@ -27,9 +27,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Tentative, partial implementation of the Parcel native methods, using Java's
- * {@link ByteBuffer}. It turned out there's enough semantics differences between Parcel
- * and {@link ByteBuffer}, so it didn't actually work.
- * (e.g. Parcel seems to allow moving the data position to be beyond its size? Which
+ * {@code byte[]}.
+ * (We don't use a {@link ByteBuffer} because there's enough semantics differences between Parcel
+ * and {@link ByteBuffer}, and it didn't work out.
+ * e.g. Parcel seems to allow moving the data position to be beyond its size? Which
  * {@link ByteBuffer} wouldn't allow...)
  */
 public class Parcel_host {

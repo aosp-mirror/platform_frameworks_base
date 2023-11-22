@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# This command is expected to be executed with: atest hoststubgen-invoke-test
+
 set -e # Exit when any command files
 
 # This script runs HostStubGen directly with various arguments and make sure
@@ -35,6 +37,12 @@ if [[ "$TEMP" == "" ]] ; then
   mkdir -p $TEMP
 fi
 
+cleanup_temp() {
+  rm -fr $TEMP/*
+}
+
+cleanup_temp
+
 JAR=hoststubgen-test-tiny-framework.jar
 STUB=$TEMP/stub.jar
 IMPL=$TEMP/impl.jar
@@ -47,12 +55,10 @@ HOSTSTUBGEN_OUT=$TEMP/output.txt
 # HostStubGen result in it.
 HOSTSTUBGEN_RC=0
 
-# Define the functions to
-
-
 # Note, because the build rule will only install hoststubgen.jar, but not the wrapper script,
 # we need to execute it manually with the java command.
 hoststubgen() {
+  echo "Running hoststubgen with: $*"
   java -jar ./hoststubgen.jar "$@"
 }
 
@@ -62,7 +68,7 @@ run_hoststubgen() {
 
   echo "# Test: $test_name"
 
-  rm -f $HOSTSTUBGEN_OUT
+  cleanup_temp
 
   local filter_arg=""
 
@@ -73,11 +79,21 @@ run_hoststubgen() {
     cat $ANNOTATION_FILTER
   fi
 
+  local stub_arg=""
+  local impl_arg=""
+
+  if [[ "$STUB" != "" ]] ; then
+    stub_arg="--out-stub-jar $STUB"
+  fi
+  if [[ "$IMPL" != "" ]] ; then
+    impl_arg="--out-impl-jar $IMPL"
+  fi
+
   hoststubgen \
       --debug \
       --in-jar $JAR \
-      --out-stub-jar $STUB \
-      --out-impl-jar $IMPL \
+      $stub_arg \
+      $impl_arg \
       --stub-annotation \
           android.hosttest.annotation.HostSideTestStub \
       --keep-annotation \
@@ -105,6 +121,21 @@ run_hoststubgen() {
   return 0
 }
 
+assert_file_generated() {
+  local file="$1"
+  if [[ "$file" == "" ]] ; then
+    if [[ -f "$file" ]] ; then
+      echo "HostStubGen shouldn't have generated $file"
+      return 1
+    fi
+  else
+    if ! [[ -f "$file" ]] ; then
+      echo "HostStubGen didn't generate $file"
+      return 1
+    fi
+  fi
+}
+
 run_hoststubgen_for_success() {
   run_hoststubgen "$@"
 
@@ -112,6 +143,9 @@ run_hoststubgen_for_success() {
     echo "HostStubGen expected to finish successfully, but failed with $rc"
     return 1
   fi
+
+  assert_file_generated "$STUB"
+  assert_file_generated "$IMPL"
 }
 
 run_hoststubgen_for_failure() {
@@ -189,6 +223,11 @@ run_hoststubgen_for_success "One specific class disallowed, but it doesn't use a
 * # All other classes allowed
 "
 
+STUB="" run_hoststubgen_for_success "No stub generation" ""
+
+IMPL="" run_hoststubgen_for_success "No impl generation" ""
+
+STUB="" IMPL="" run_hoststubgen_for_success "No stub, no impl generation" ""
 
 
 echo "All tests passed"

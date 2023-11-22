@@ -17,15 +17,11 @@
 package com.android.systemui.user.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.lifecycleScope
+import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.user.data.repository.userRepository
 
 val Kosmos.refreshUsersScheduler by
     Kosmos.Fixture {
-        RefreshUsersScheduler(
-            applicationScope = lifecycleScope,
-            mainDispatcher = testDispatcher,
-            repository = userRepository,
-        )
+        RefreshUsersScheduler(applicationCoroutineScope, testDispatcher, userRepository)
     }

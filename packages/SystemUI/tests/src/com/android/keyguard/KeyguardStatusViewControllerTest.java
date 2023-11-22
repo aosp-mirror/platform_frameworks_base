@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import static junit.framework.Assert.assertEquals;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.animation.AnimatorTestRule;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -40,6 +43,7 @@ import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -50,6 +54,9 @@ import java.lang.reflect.Field;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @RunWith(AndroidTestingRunner.class)
 public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControllerBaseTest {
+
+    @Rule
+    public final AnimatorTestRule mAnimatorTestRule = new AnimatorTestRule();
 
     @Test
     public void dozeTimeTick_updatesSlice() {
@@ -229,5 +236,35 @@ public class KeyguardStatusViewControllerTest extends KeyguardStatusViewControll
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Test
+    public void statusAreaHeightChange_animatesHeightOutputChange() {
+        // Init & Capture Layout Listener
+        mController.onInit();
+        mController.onViewAttached();
+
+        when(mDozeParameters.getAlwaysOn()).thenReturn(true);
+        ArgumentCaptor<View.OnLayoutChangeListener> captor =
+                ArgumentCaptor.forClass(View.OnLayoutChangeListener.class);
+        verify(mKeyguardStatusAreaView).addOnLayoutChangeListener(captor.capture());
+        View.OnLayoutChangeListener listener = captor.getValue();
+
+        // Setup and validate initial height
+        when(mKeyguardStatusView.getHeight()).thenReturn(200);
+        when(mKeyguardClockSwitchController.getNotificationIconAreaHeight()).thenReturn(10);
+        assertEquals(190, mController.getLockscreenHeight());
+
+        // Trigger Change and validate value unchanged immediately
+        when(mKeyguardStatusAreaView.getHeight()).thenReturn(100);
+        when(mKeyguardStatusView.getHeight()).thenReturn(300);      // Include child height
+        listener.onLayoutChange(mKeyguardStatusAreaView,
+            /* new layout */ 100, 300, 200, 400,
+            /* old layout */ 100, 300, 200, 300);
+        assertEquals(190, mController.getLockscreenHeight());
+
+        // Complete animation, validate height increased
+        mAnimatorTestRule.advanceTimeBy(200);
+        assertEquals(290, mController.getLockscreenHeight());
     }
 }

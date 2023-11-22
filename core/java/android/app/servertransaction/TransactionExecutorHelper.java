@@ -235,7 +235,9 @@ public class TransactionExecutorHelper {
      *   Configuration - ActivityResult - Configuration - ActivityResult
      * index 1 will be returned, because ActivityResult request on position 1 will be the last
      * request that moves activity to the RESUMED state where it will eventually end.
+     * @deprecated to be removed with {@link TransactionExecutor#executeCallbacks}.
      */
+    @Deprecated
     static int lastCallbackRequestingState(@NonNull ClientTransaction transaction) {
         final List<ClientTransactionItem> callbacks = transaction.getCallbacks();
         if (callbacks == null || callbacks.isEmpty()

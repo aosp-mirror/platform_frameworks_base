@@ -14,12 +14,6 @@ tests.
 $ atest --no-bazel-mode HostStubGenTest-framework-test-host-test
 ```
 
-- With `run-ravenwood-test`
-
-```
-$ run-ravenwood-test HostStubGenTest-framework-test-host-test
-```
-
 - Advanced option: `run-test-without-atest.sh` runs the test without using `atest` or `run-ravenwood-test`
 
 ```

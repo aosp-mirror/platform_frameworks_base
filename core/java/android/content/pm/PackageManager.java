@@ -34,6 +34,7 @@ import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
+import android.annotation.WorkerThread;
 import android.annotation.XmlRes;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
@@ -96,6 +97,7 @@ import com.android.internal.util.DataClass;
 import dalvik.system.VMRuntime;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.cert.Certificate;
@@ -108,6 +110,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Class for retrieving various kinds of information related to the application
@@ -11425,5 +11428,61 @@ public abstract class PackageManager {
     public void unregisterPackageMonitorCallback(@NonNull IRemoteCallback callback) {
         throw new UnsupportedOperationException(
                 "unregisterPackageMonitorCallback not implemented in subclass");
+    }
+
+    /**
+     * Retrieve AndroidManifest.xml information for the given application apk path.
+     *
+     * <p>Example:
+     *
+     * <pre><code>
+     * Bundle result;
+     * try {
+     *     result = getContext().getPackageManager().parseAndroidManifest(apkFilePath,
+     *             xmlResourceParser -> {
+     *                 Bundle bundle = new Bundle();
+     *                 // Search the start tag
+     *                 int type;
+     *                 while ((type = xmlResourceParser.next()) != XmlPullParser.START_TAG
+     *                         &amp;&amp; type != XmlPullParser.END_DOCUMENT) {
+     *                 }
+     *                 if (type != XmlPullParser.START_TAG) {
+     *                     return bundle;
+     *                 }
+     *
+     *                 // Start to read the tags and attributes from the xmlResourceParser
+     *                 if (!xmlResourceParser.getName().equals("manifest")) {
+     *                     return bundle;
+     *                 }
+     *                 String packageName = xmlResourceParser.getAttributeValue(null, "package");
+     *                 bundle.putString("package", packageName);
+     *
+     *                 // Continue to read the tags and attributes from the xmlResourceParser
+     *
+     *                 return bundle;
+     *             });
+     * } catch (IOException e) {
+     * }
+     * </code></pre>
+     *
+     * Note: When the parserFunction is invoked, the client can read the AndroidManifest.xml
+     * information by the XmlResourceParser object. After leaving the parserFunction, the
+     * XmlResourceParser object will be closed.
+     *
+     * @param apkFilePath The path of an application apk file.
+     * @param parserFunction The parserFunction will be invoked with the XmlResourceParser object
+     *        after getting the AndroidManifest.xml of an application package.
+     *
+     * @return Returns the result of the {@link Function#apply(Object)}.
+     *
+     * @throws IOException if the AndroidManifest.xml of an application package cannot be
+     *             read or accessed.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_GET_PACKAGE_INFO)
+    @WorkerThread
+    public <T> T parseAndroidManifest(@NonNull String apkFilePath,
+            @NonNull Function<XmlResourceParser, T> parserFunction) throws IOException {
+        throw new UnsupportedOperationException(
+                "parseAndroidManifest not implemented in subclass");
     }
 }

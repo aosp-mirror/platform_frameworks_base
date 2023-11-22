@@ -340,6 +340,60 @@ public class SettingsValidatorsTest {
         failIfOffendersPresent(offenders, "Settings.Secure");
     }
 
+    @Test
+    public void testCredentialServiceValidator_returnsTrueIfNull() {
+        assertTrue(SettingsValidators.CREDENTIAL_SERVICE_VALIDATOR.validate(null));
+    }
+
+    @Test
+    public void testCredentialServiceValidator_returnsTrueIfEmpty() {
+        assertTrue(SettingsValidators.CREDENTIAL_SERVICE_VALIDATOR.validate(""));
+    }
+
+    @Test
+    public void testCredentialServiceValidator_returnsTrueIfSingleComponentName() {
+        assertTrue(SettingsValidators.CREDENTIAL_SERVICE_VALIDATOR.validate(
+            "android.credentials/android.credentials.Test"));
+    }
+
+    @Test
+    public void testCredentialServiceValidator_returnsTrueIfMultipleComponentName() {
+        assertTrue(SettingsValidators.CREDENTIAL_SERVICE_VALIDATOR.validate(
+            "android.credentials/android.credentials.Test"
+            + ":android.credentials/.Test2"));
+    }
+
+    @Test
+    public void testCredentialServiceValidator_returnsFalseIfInvalidComponentName() {
+        assertFalse(SettingsValidators.CREDENTIAL_SERVICE_VALIDATOR.validate("test"));
+    }
+
+    @Test
+    public void testAutofillServiceValidator_returnsTrueIfNull() {
+        assertTrue(SettingsValidators.AUTOFILL_SERVICE_VALIDATOR.validate(null));
+    }
+
+    @Test
+    public void testAutofillServiceValidator_returnsTrueIfEmpty() {
+        assertTrue(SettingsValidators.AUTOFILL_SERVICE_VALIDATOR.validate(""));
+    }
+
+    @Test
+    public void testAutofillServiceValidator_returnsTrueIfPlaceholder() {
+        assertTrue(SettingsValidators.AUTOFILL_SERVICE_VALIDATOR.validate("credential-provider"));
+    }
+
+    @Test
+    public void testAutofillServiceValidator_returnsTrueIfSingleComponentName() {
+        assertTrue(SettingsValidators.AUTOFILL_SERVICE_VALIDATOR.validate(
+            "android.credentials/android.credentials.Test"));
+    }
+
+    @Test
+    public void testAutofillServiceValidator_returnsFalseIfInvalidComponentName() {
+        assertFalse(SettingsValidators.AUTOFILL_SERVICE_VALIDATOR.validate("test"));
+    }
+
     private void failIfOffendersPresent(String offenders, String settingsType) {
         if (offenders.length() > 0) {
             fail("All " + settingsType + " settings that are backed up have to have a non-null"
