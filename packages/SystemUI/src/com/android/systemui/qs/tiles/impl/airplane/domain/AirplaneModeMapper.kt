@@ -16,8 +16,9 @@
 
 package com.android.systemui.qs.tiles.impl.airplane.domain
 
-import android.content.Context
+import android.content.res.Resources
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.airplane.domain.model.AirplaneModeTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
@@ -26,29 +27,27 @@ import com.android.systemui.res.R
 import javax.inject.Inject
 
 /** Maps [AirplaneModeTileModel] to [QSTileState]. */
-class AirplaneModeMapper @Inject constructor(private val context: Context) :
+class AirplaneModeMapper @Inject constructor(@Main private val resources: Resources) :
     QSTileDataToStateMapper<AirplaneModeTileModel> {
 
     override fun map(config: QSTileConfig, data: AirplaneModeTileModel): QSTileState =
-        QSTileState.build(context, config.uiConfig) {
+        QSTileState.build(resources, config.uiConfig) {
             val icon =
-                Icon.Loaded(
-                    context.getDrawable(
-                        if (data.isEnabled) {
-                            R.drawable.qs_airplane_icon_on
-                        } else {
-                            R.drawable.qs_airplane_icon_off
-                        }
-                    )!!,
+                Icon.Resource(
+                    if (data.isEnabled) {
+                        R.drawable.qs_airplane_icon_on
+                    } else {
+                        R.drawable.qs_airplane_icon_off
+                    },
                     contentDescription = null
                 )
             this.icon = { icon }
             if (data.isEnabled) {
                 activationState = QSTileState.ActivationState.ACTIVE
-                secondaryLabel = context.resources.getStringArray(R.array.tile_states_airplane)[2]
+                secondaryLabel = resources.getStringArray(R.array.tile_states_airplane)[2]
             } else {
                 activationState = QSTileState.ActivationState.INACTIVE
-                secondaryLabel = context.resources.getStringArray(R.array.tile_states_airplane)[1]
+                secondaryLabel = resources.getStringArray(R.array.tile_states_airplane)[1]
             }
             contentDescription = label
             supportedActions =
