@@ -27,6 +27,7 @@ import static android.service.notification.NotificationServiceProto.ROOT_CONFIG;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
@@ -73,6 +74,7 @@ import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ConditionProviderService;
+import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.notification.ZenModeProto;
@@ -105,6 +107,8 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -128,6 +132,21 @@ public class ZenModeHelper {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     static final long SEND_ACTIVATION_AZR_STATUSES = 308673617L;
+
+    /** A rule addition or update that is initiated by the System or SystemUI. */
+    static final int FROM_SYSTEM_OR_SYSTEMUI = 1;
+    /** A rule addition or update that is initiated by the user (through system settings). */
+    static final int FROM_USER = 2;
+    /** A rule addition or update that is initiated by an app (via NotificationManager APIs). */
+    static final int FROM_APP = 3;
+
+    @IntDef(prefix = { "FROM_" }, value = {
+            FROM_SYSTEM_OR_SYSTEMUI,
+            FROM_USER,
+            FROM_APP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ChangeOrigin {}
 
     // pkg|userId => uid
     @VisibleForTesting protected final ArrayMap<String, Integer> mRulesUidCache = new ArrayMap<>();
@@ -378,7 +397,7 @@ public class ZenModeHelper {
     }
 
     public String addAutomaticZenRule(String pkg, AutomaticZenRule automaticZenRule,
-            String reason, int callingUid, boolean fromSystemOrSystemUi) {
+            String reason, int callingUid, @ChangeOrigin int origin) {
         if (!ZenModeConfig.SYSTEM_AUTHORITY.equals(pkg)) {
             PackageItemInfo component = getServiceInfo(automaticZenRule.getOwner());
             if (component == null) {
@@ -412,10 +431,10 @@ public class ZenModeHelper {
             }
             newConfig = mConfig.copy();
             ZenRule rule = new ZenRule();
-            populateZenRule(pkg, automaticZenRule, rule, true);
+            populateZenRule(pkg, automaticZenRule, rule, true, origin);
             newConfig.automaticRules.put(rule.id, rule);
             if (setConfigLocked(newConfig, reason, rule.component, true, callingUid,
-                    fromSystemOrSystemUi)) {
+                    origin == FROM_SYSTEM_OR_SYSTEMUI)) {
                 return rule.id;
             } else {
                 throw new AndroidRuntimeException("Could not create rule");
@@ -424,7 +443,7 @@ public class ZenModeHelper {
     }
 
     public boolean updateAutomaticZenRule(String ruleId, AutomaticZenRule automaticZenRule,
-            String reason, int callingUid, boolean fromSystemOrSystemUi) {
+            String reason, int callingUid, @ChangeOrigin int origin) {
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
             if (mConfig == null) return false;
@@ -452,9 +471,9 @@ public class ZenModeHelper {
                 }
             }
 
-            populateZenRule(rule.pkg, automaticZenRule, rule, false);
+            populateZenRule(rule.pkg, automaticZenRule, rule, false, origin);
             return setConfigLocked(newConfig, reason, rule.component, true, callingUid,
-                    fromSystemOrSystemUi);
+                    origin == FROM_SYSTEM_OR_SYSTEMUI);
         }
     }
 
@@ -790,7 +809,7 @@ public class ZenModeHelper {
         }
     }
 
-    protected void updateDefaultZenRules(int callingUid, boolean fromSystemOrSystemUi) {
+    protected void updateDefaultZenRules(int callingUid) {
         updateDefaultAutomaticRuleNames();
         synchronized (mConfigLock) {
             for (ZenRule defaultRule : mDefaultConfig.automaticRules.values()) {
@@ -807,7 +826,7 @@ public class ZenModeHelper {
                         // update default rule (if locale changed, name of rule will change)
                         currRule.name = defaultRule.name;
                         updateAutomaticZenRule(defaultRule.id, zenRuleToAutomaticZenRule(currRule),
-                                "locale changed", callingUid, fromSystemOrSystemUi);
+                                "locale changed", callingUid, FROM_SYSTEM_OR_SYSTEMUI);
                     }
                 }
             }
@@ -850,7 +869,11 @@ public class ZenModeHelper {
     }
 
     private static void populateZenRule(String pkg, AutomaticZenRule automaticZenRule, ZenRule rule,
-            boolean isNew) {
+            boolean isNew, @ChangeOrigin int origin) {
+        // TODO: b/308671593,b/311406021 - Handle origins more precisely:
+        //  - FROM_USER can override anything and updates bitmask of user-modified fields;
+        //  - FROM_SYSTEM_OR_SYSTEMUI can override anything and preserves bitmask;
+        //  - FROM_APP can only update if not user-modified.
         if (rule.enabled != automaticZenRule.isEnabled()) {
             rule.snoozing = false;
         }
@@ -861,7 +884,10 @@ public class ZenModeHelper {
         rule.modified = automaticZenRule.isModified();
         rule.zenPolicy = automaticZenRule.getZenPolicy();
         if (Flags.modesApi()) {
-            rule.zenDeviceEffects = automaticZenRule.getDeviceEffects();
+            rule.zenDeviceEffects = fixZenDeviceEffects(
+                    rule.zenDeviceEffects,
+                    automaticZenRule.getDeviceEffects(),
+                    origin);
         }
         rule.zenMode = NotificationManager.zenModeFromInterruptionFilter(
                 automaticZenRule.getInterruptionFilter(), Global.ZEN_MODE_OFF);
@@ -879,6 +905,50 @@ public class ZenModeHelper {
             rule.iconResId = automaticZenRule.getIconResId();
             rule.triggerDescription = automaticZenRule.getTriggerDescription();
             rule.type = automaticZenRule.getType();
+        }
+    }
+
+    /** "
+     * Fix" {@link ZenDeviceEffects} that are being stored as part of a new or updated ZenRule.
+     *
+     * <ul>
+     *     <li> Apps cannot turn on hidden effects (those tagged as {@code @hide}) since they are
+     *     intended for platform-specific rules (e.g. wearables). If it's a new rule, we blank them
+     *     out; if it's an update, we preserve the previous values.
+     * </ul>
+     */
+    @Nullable
+    private static ZenDeviceEffects fixZenDeviceEffects(@Nullable ZenDeviceEffects oldEffects,
+            @Nullable ZenDeviceEffects newEffects, @ChangeOrigin int origin) {
+        // TODO: b/308671593,b/311406021 - Handle origins more precisely:
+        //  - FROM_USER can override anything and updates bitmask of user-modified fields;
+        //  - FROM_SYSTEM_OR_SYSTEMUI can override anything and preserves bitmask;
+        //  - FROM_APP can only update if not user-modified.
+        if (origin == FROM_SYSTEM_OR_SYSTEMUI || origin == FROM_USER) {
+            return newEffects;
+        }
+
+        if (newEffects == null) {
+            return null;
+        }
+        if (oldEffects != null) {
+            return new ZenDeviceEffects.Builder(newEffects)
+                    .setShouldDisableAutoBrightness(oldEffects.shouldDisableAutoBrightness())
+                    .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
+                    .setShouldDisableTiltToWake(oldEffects.shouldDisableTiltToWake())
+                    .setShouldDisableTouch(oldEffects.shouldDisableTouch())
+                    .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
+                    .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
+                    .build();
+        } else {
+            return new ZenDeviceEffects.Builder(newEffects)
+                    .setShouldDisableAutoBrightness(false)
+                    .setShouldDisableTapToWake(false)
+                    .setShouldDisableTiltToWake(false)
+                    .setShouldDisableTouch(false)
+                    .setShouldMinimizeRadioUsage(false)
+                    .setShouldMaximizeDoze(false)
+                    .build();
         }
     }
 
