@@ -65,6 +65,7 @@ import android.text.TextUtils;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.ArchiveState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.PackageUserStateImpl;
@@ -81,6 +82,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @SmallTest
 @Presubmit
@@ -113,6 +115,8 @@ public class PackageArchiverTest {
     private PackageInstallerService mInstallerService;
     @Mock
     private PackageStateInternal mPackageState;
+    @Mock
+    private PackageStateInternal mCallerPackageState;
     @Mock
     private Bitmap mIcon;
 
@@ -155,6 +159,11 @@ public class PackageArchiverTest {
                 mPackageState);
         when(mComputer.getPackageStateFiltered(eq(INSTALLER_PACKAGE), anyInt(),
                 anyInt())).thenReturn(mock(PackageStateInternal.class));
+        when(mComputer.getPackageStateFiltered(eq(CALLER_PACKAGE), anyInt(), anyInt())).thenReturn(
+                mCallerPackageState);
+        AndroidPackage androidPackage = mock(AndroidPackage.class);
+        when(mCallerPackageState.getAndroidPackage()).thenReturn(androidPackage);
+        when(androidPackage.getRequestedPermissions()).thenReturn(Set.of());
         when(mPackageState.getPackageName()).thenReturn(PACKAGE);
         when(mPackageState.getInstallSource()).thenReturn(mInstallSource);
         mPackageSetting = createBasicPackageSetting();
