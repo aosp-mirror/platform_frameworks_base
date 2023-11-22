@@ -224,9 +224,9 @@ public class EvemuParser implements EventParser {
         final String idsLine = expectLine("I");
         final String[] idStrings = expectParts(idsLine, 4);
         eb.setBusId(parseInt(idStrings[0], 16));
-        eb.setVid(parseInt(idStrings[1], 16));
-        eb.setPid(parseInt(idStrings[2], 16));
-        // TODO(b/302297266): support setting the version ID, and set it to idStrings[3].
+        eb.setVendorId(parseInt(idStrings[1], 16));
+        eb.setProductId(parseInt(idStrings[2], 16));
+        eb.setVersionId(parseInt(idStrings[3], 16));
 
         final SparseArray<int[]> config = new SparseArray<>();
         config.append(Event.UinputControlCode.UI_SET_PROPBIT.getValue(), parseProperties());

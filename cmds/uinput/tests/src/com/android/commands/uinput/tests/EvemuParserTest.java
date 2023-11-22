@@ -70,7 +70,7 @@ public class EvemuParserTest {
         assertThat(event.getBus()).isEqualTo(0x0001);
         assertThat(event.getVendorId()).isEqualTo(0x1234);
         assertThat(event.getProductId()).isEqualTo(0x5678);
-        // TODO(b/302297266): check version ID once it's supported
+        assertThat(event.getVersionId()).isEqualTo(0x9abc);
     }
 
     @Test

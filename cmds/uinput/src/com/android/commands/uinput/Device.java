@@ -61,8 +61,9 @@ public class Device {
         System.loadLibrary("uinputcommand_jni");
     }
 
-    private static native long nativeOpenUinputDevice(String name, int id, int vid, int pid,
-            int bus, int ffEffectsMax, String port, DeviceCallback callback);
+    private static native long nativeOpenUinputDevice(String name, int id, int vendorId,
+            int productId, int versionId, int bus, int ffEffectsMax, String port,
+            DeviceCallback callback);
     private static native void nativeCloseUinputDevice(long ptr);
     private static native void nativeInjectEvent(long ptr, int type, int code, int value);
     private static native void nativeConfigure(int handle, int code, int[] configs);
@@ -71,7 +72,7 @@ public class Device {
     private static native int nativeGetEvdevEventCodeByLabel(int type, String label);
     private static native int nativeGetEvdevInputPropByLabel(String label);
 
-    public Device(int id, String name, int vid, int pid, int bus,
+    public Device(int id, String name, int vendorId, int productId, int versionId, int bus,
             SparseArray<int[]> configuration, int ffEffectsMax,
             SparseArray<InputAbsInfo> absInfo, String port) {
         mId = id;
@@ -83,19 +84,20 @@ public class Device {
         mOutputStream = System.out;
         SomeArgs args = SomeArgs.obtain();
         args.argi1 = id;
-        args.argi2 = vid;
-        args.argi3 = pid;
-        args.argi4 = bus;
-        args.argi5 = ffEffectsMax;
+        args.argi2 = vendorId;
+        args.argi3 = productId;
+        args.argi4 = versionId;
+        args.argi5 = bus;
+        args.argi6 = ffEffectsMax;
         if (name != null) {
             args.arg1 = name;
         } else {
-            args.arg1 = id + ":" + vid + ":" + pid;
+            args.arg1 = id + ":" + vendorId + ":" + productId;
         }
         if (port != null) {
             args.arg2 = port;
         } else {
-            args.arg2 = "uinput:" + id + ":" + vid + ":" + pid;
+            args.arg2 = "uinput:" + id + ":" + vendorId + ":" + productId;
         }
 
         mHandler.obtainMessage(MSG_OPEN_UINPUT_DEVICE, args).sendToTarget();
@@ -161,8 +163,10 @@ public class Device {
                 case MSG_OPEN_UINPUT_DEVICE:
                     SomeArgs args = (SomeArgs) msg.obj;
                     String name = (String) args.arg1;
-                    mPtr = nativeOpenUinputDevice(name, args.argi1, args.argi2,
-                            args.argi3, args.argi4, args.argi5, (String) args.arg2,
+                    mPtr = nativeOpenUinputDevice(name, args.argi1 /* id */,
+                            args.argi2 /* vendorId */, args.argi3 /* productId */,
+                            args.argi4 /* versionId */, args.argi5 /* bus */,
+                            args.argi6 /* ffEffectsMax */, (String) args.arg2 /* port */,
                             new DeviceCallback());
                     if (mPtr == 0) {
                         RuntimeException ex = new RuntimeException(
