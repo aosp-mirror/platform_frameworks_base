@@ -109,6 +109,7 @@ class android.os.Bundle stubclass
 class android.os.PersistableBundle stubclass
 
 # Misc
+class android.os.HandlerExecutor stubclass
 class android.os.PatternMatcher stubclass
 class android.os.ParcelUuid stubclass
 

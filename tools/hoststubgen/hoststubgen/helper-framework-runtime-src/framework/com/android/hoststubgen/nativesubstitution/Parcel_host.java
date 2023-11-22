@@ -37,7 +37,7 @@ public class Parcel_host {
     private Parcel_host() {
     }
 
-    private static final AtomicLong sNextId = new AtomicLong(0);
+    private static final AtomicLong sNextId = new AtomicLong(1);
 
     private static final Map<Long, Parcel_host> sInstances = new ConcurrentHashMap<>();
 
