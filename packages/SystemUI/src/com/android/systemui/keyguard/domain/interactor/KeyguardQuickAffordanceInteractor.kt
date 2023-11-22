@@ -46,6 +46,7 @@ import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAfforda
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -66,6 +67,7 @@ class KeyguardQuickAffordanceInteractor
 @Inject
 constructor(
     private val keyguardInteractor: KeyguardInteractor,
+    private val shadeInteractor: ShadeInteractor,
     private val lockPatternUtils: LockPatternUtils,
     private val keyguardStateController: KeyguardStateController,
     private val userTracker: UserTracker,
@@ -100,9 +102,10 @@ constructor(
             quickAffordanceAlwaysVisible(position),
             keyguardInteractor.isDozing,
             keyguardInteractor.isKeyguardShowing,
+            shadeInteractor.anyExpansion,
             biometricSettingsRepository.isCurrentUserInLockdown,
-        ) { affordance, isDozing, isKeyguardShowing, isUserInLockdown ->
-            if (!isDozing && isKeyguardShowing && !isUserInLockdown) {
+        ) { affordance, isDozing, isKeyguardShowing, qsExpansion, isUserInLockdown ->
+            if (!isDozing && isKeyguardShowing && (qsExpansion < 1.0f) && !isUserInLockdown) {
                 affordance
             } else {
                 KeyguardQuickAffordanceModel.Hidden
