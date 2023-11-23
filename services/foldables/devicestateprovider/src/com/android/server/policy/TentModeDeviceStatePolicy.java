@@ -33,6 +33,8 @@ import android.hardware.display.DisplayManager;
 import com.android.server.devicestate.DeviceStatePolicy;
 import com.android.server.devicestate.DeviceStateProvider;
 import com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration;
+import com.android.server.policy.feature.flags.FeatureFlags;
+import com.android.server.policy.feature.flags.FeatureFlagsImpl;
 
 /**
  * Device state policy for a foldable device that supports tent mode: a mode when the device
@@ -55,6 +57,8 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
 
     private final DeviceStateProvider mProvider;
 
+    private final boolean mIsDualDisplayBlockingEnabled;
+
     /**
      * Creates TentModeDeviceStatePolicy
      *
@@ -67,6 +71,12 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
      */
     public TentModeDeviceStatePolicy(@NonNull Context context,
             @NonNull Sensor hingeAngleSensor, @NonNull Sensor hallSensor, int closeAngleDegrees) {
+        this(new FeatureFlagsImpl(), context, hingeAngleSensor, hallSensor, closeAngleDegrees);
+    }
+
+    public TentModeDeviceStatePolicy(@NonNull FeatureFlags featureFlags, @NonNull Context context,
+                                     @NonNull Sensor hingeAngleSensor, @NonNull Sensor hallSensor,
+                                     int closeAngleDegrees) {
         super(context);
 
         final SensorManager sensorManager = mContext.getSystemService(SensorManager.class);
@@ -74,8 +84,10 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
 
         final DeviceStateConfiguration[] configuration = createConfiguration(closeAngleDegrees);
 
-        mProvider = new FoldableDeviceStateProvider(mContext, sensorManager, hingeAngleSensor,
-                hallSensor, displayManager, configuration);
+        mIsDualDisplayBlockingEnabled = featureFlags.enableDualDisplayBlocking();
+
+        mProvider = new FoldableDeviceStateProvider(mContext, sensorManager,
+                hingeAngleSensor, hallSensor, displayManager, configuration);
     }
 
     private DeviceStateConfiguration[] createConfiguration(int closeAngleDegrees) {
@@ -83,24 +95,27 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
                 createClosedConfiguration(closeAngleDegrees),
                 createConfig(DEVICE_STATE_HALF_OPENED,
                         /* name= */ "HALF_OPENED",
-                        (provider) -> {
+                        /* activeStatePredicate= */ (provider) -> {
                             final float hingeAngle = provider.getHingeAngle();
                             return hingeAngle >= MAX_CLOSED_ANGLE_DEGREES
                                     && hingeAngle <= TABLE_TOP_MODE_SWITCH_ANGLE_DEGREES;
                         }),
                 createConfig(DEVICE_STATE_OPENED,
                         /* name= */ "OPENED",
-                        (provider) -> true),
+                        /* activeStatePredicate= */ (provider) -> true),
                 createConfig(DEVICE_STATE_REAR_DISPLAY_STATE,
                         /* name= */ "REAR_DISPLAY_STATE",
                         /* flags= */ FLAG_EMULATED_ONLY,
-                        (provider) -> false),
+                        /* activeStatePredicate= */ (provider) -> false),
                 createConfig(DEVICE_STATE_CONCURRENT_INNER_DEFAULT,
                         /* name= */ "CONCURRENT_INNER_DEFAULT",
                         /* flags= */ FLAG_EMULATED_ONLY | FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP
                                 | FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL
                                 | FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE,
-                        (provider) -> false)
+                        /* activeStatePredicate= */ (provider) -> false,
+                        /* availabilityPredicate= */
+                        provider -> !mIsDualDisplayBlockingEnabled
+                                || provider.hasNoConnectedExternalDisplay())
         };
     }
 
@@ -111,7 +126,7 @@ public class TentModeDeviceStatePolicy extends DeviceStatePolicy {
                     DEVICE_STATE_CLOSED,
                     /* name= */ "CLOSED",
                     /* flags= */ FLAG_CANCEL_OVERRIDE_REQUESTS,
-                    (provider) -> {
+                    /* activeStatePredicate= */ (provider) -> {
                         final float hingeAngle = provider.getHingeAngle();
                         return hingeAngle <= closeAngleDegrees;
                     }
