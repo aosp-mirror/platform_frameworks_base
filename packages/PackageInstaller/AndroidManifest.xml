@@ -156,6 +156,15 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name=".v2.model.UninstallEventReceiver"
+            android:permission="android.permission.INSTALL_PACKAGES"
+            android:exported="false"
+            android:enabled="false">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.packageinstaller.ACTION_UNINSTALL_COMMIT" />
+            </intent-filter>
+        </receiver>
+
         <receiver android:name=".PackageInstalledReceiver"
                 android:exported="false">
             <intent-filter android:priority="1">
