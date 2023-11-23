@@ -16,12 +16,14 @@
 
 package com.android.packageinstaller;
 
+import static android.content.pm.Flags.usePiaV2;
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
 
 import android.Manifest;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -57,14 +59,21 @@ public class InstallStart extends Activity {
 
     private final boolean mLocalLOGV = false;
 
-    // TODO (sumedhsen): Replace with an Android Feature Flag once implemented
-    private static final boolean USE_PIA_V2 = false;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (USE_PIA_V2) {
+        mPackageManager = getPackageManager();
+        if (usePiaV2()) {
+            Log.i(TAG, "Using Pia V2");
+
+            mPackageManager.setComponentEnabledSetting(new ComponentName(this,
+                    com.android.packageinstaller.InstallEventReceiver.class),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
+            mPackageManager.setComponentEnabledSetting(new ComponentName(this,
+                    com.android.packageinstaller.v2.model.InstallEventReceiver.class),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+
             Intent piaV2 = new Intent(getIntent());
             piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_NAME, getCallingPackage());
             piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_UID, getLaunchedFromUid());
@@ -74,7 +83,6 @@ public class InstallStart extends Activity {
             finish();
             return;
         }
-        mPackageManager = getPackageManager();
         mUserManager = getSystemService(UserManager.class);
 
         Intent intent = getIntent();
