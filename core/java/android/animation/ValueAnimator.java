@@ -1289,6 +1289,8 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         if (mAnimationEndRequested) {
             return;
         }
+        final boolean postNotifyEndListener = sPostNotifyEndListenerEnabled && mListeners != null
+                && mLastFrameTime > 0;
         removeAnimationCallback();
 
         mAnimationEndRequested = true;
@@ -1303,13 +1305,18 @@ public class ValueAnimator extends Animator implements AnimationHandler.Animatio
         mStartTime = -1;
         mRunning = false;
         mStarted = false;
-        notifyEndListeners(mReversing);
-        // mReversing needs to be reset *after* notifying the listeners for the end callbacks.
-        mReversing = false;
+        notifyEndListenersFromEndAnimation(mReversing, postNotifyEndListener);
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_VIEW, getNameForTrace(),
                     System.identityHashCode(this));
         }
+    }
+
+    @Override
+    void completeEndAnimation(boolean isReversing, String notifyListenerTraceName) {
+        super.completeEndAnimation(isReversing, notifyListenerTraceName);
+        // mReversing needs to be reset *after* notifying the listeners for the end callbacks.
+        mReversing = false;
     }
 
     /**

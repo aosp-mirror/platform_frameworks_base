@@ -30,6 +30,7 @@ import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_CA
 import static com.android.internal.jank.InteractionJankMonitor.ACTION_SESSION_END;
 import static com.android.internal.jank.InteractionJankMonitor.EXECUTOR_TASK_TIMEOUT;
 
+import android.animation.AnimationHandler;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -344,7 +345,8 @@ public class FrameTracker implements HardwareRendererObserver.OnFrameMetricsAvai
     @UiThread
     public boolean end(@Reasons int reason) {
         if (mCancelled || mEndVsyncId != INVALID_ID) return false;
-        mEndVsyncId = mChoreographer.getVsyncId();
+        mEndVsyncId = AnimationHandler.getInstance().getLastAnimationFrameVsyncId(
+                mChoreographer.getVsyncId());
         // Cancel the session if:
         // 1. The session begins and ends at the same vsync id.
         // 2. The session never begun.
