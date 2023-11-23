@@ -33,6 +33,7 @@ import androidx.annotation.Nullable;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -46,9 +47,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * parameter updates are defined by the CTA-2075 standard.
  * <p>A new object should be instantiated for each {@link AudioTrack} with the help
  * of {@link #create()} or {@link #create(Executor, OnLoudnessCodecUpdateListener)}.
- *
- * TODO: remove hide once API is final
- * @hide
  */
 @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
 public class LoudnessCodecConfigurator {
@@ -56,9 +54,6 @@ public class LoudnessCodecConfigurator {
 
     /**
      * Listener used for receiving asynchronous loudness metadata updates.
-     *
-     * TODO: remove hide once API is final
-     * @hide
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
     public interface OnLoudnessCodecUpdateListener {
@@ -75,9 +70,6 @@ public class LoudnessCodecConfigurator {
          * @return a Bundle which contains the original computed codecValues
          * aggregated with user edits. The platform will configure the associated
          * MediaCodecs with the returned Bundle params.
-         *
-         * TODO: remove hide once API is final
-         * @hide
          */
         @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
         @NonNull
@@ -111,9 +103,6 @@ public class LoudnessCodecConfigurator {
      * Otherwise, use {@link #create(Executor, OnLoudnessCodecUpdateListener)}.
      *
      * @return the {@link LoudnessCodecConfigurator} instance
-     *
-     * TODO: remove hide once API is final
-     * @hide
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
     public static @NonNull LoudnessCodecConfigurator create() {
@@ -132,9 +121,6 @@ public class LoudnessCodecConfigurator {
      * @param listener used for receiving updates
      *
      * @return the {@link LoudnessCodecConfigurator} instance
-     *
-     * TODO: remove hide once API is final
-     * @hide
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
     public static @NonNull LoudnessCodecConfigurator create(
@@ -199,12 +185,9 @@ public class LoudnessCodecConfigurator {
      *                   method will have the effect of clearing the existing set
      *                   {@link AudioTrack} and will stop receiving asynchronous
      *                   loudness updates
-     *
-     * TODO: remove hide once API is final
-     * @hide
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
-    public void setAudioTrack(AudioTrack audioTrack) {
+    public void setAudioTrack(@Nullable AudioTrack audioTrack) {
         List<LoudnessCodecInfo> codecInfos;
         int piid = PLAYER_PIID_INVALID;
         int oldPiid = PLAYER_PIID_INVALID;
@@ -249,10 +232,11 @@ public class LoudnessCodecConfigurator {
      * previously added.
      *
      * @param mediaCodec the codec to start receiving asynchronous loudness
-     *                   updates
-     *
-     * TODO: remove hide once API is final
-     * @hide
+     *                   updates. The codec has to be in a configured or started
+     *                   state in order to add it for loudness updates.
+     * @throws IllegalArgumentException if the {@code mediaCodec} was not configured,
+     *                                  does not contain loudness metadata or if it
+     *                                  was already added before
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
     public void addMediaCodec(@NonNull MediaCodec mediaCodec) {
@@ -261,30 +245,31 @@ public class LoudnessCodecConfigurator {
         int piid = PLAYER_PIID_INVALID;
         final LoudnessCodecInfo mcInfo = getCodecInfo(mc);
 
-        if (mcInfo != null) {
-            synchronized (mConfiguratorLock) {
-                final AtomicBoolean containsCodec = new AtomicBoolean(false);
-                Set<MediaCodec> newSet = mMediaCodecs.computeIfPresent(mcInfo, (info, codecSet) -> {
-                    containsCodec.set(!codecSet.add(mc));
-                    return codecSet;
-                });
-                if (newSet == null) {
-                    newSet = new HashSet<>();
-                    newSet.add(mc);
-                    mMediaCodecs.put(mcInfo, newSet);
-                }
-                if (containsCodec.get()) {
-                    Log.v(TAG, "Loudness configurator already added media codec " + mediaCodec);
-                    return;
-                }
-                if (mAudioTrack != null) {
-                    piid = mAudioTrack.getPlayerIId();
-                }
+        if (mcInfo == null) {
+            throw new IllegalArgumentException("Could not extract codec loudness information");
+        }
+        synchronized (mConfiguratorLock) {
+            final AtomicBoolean containsCodec = new AtomicBoolean(false);
+            Set<MediaCodec> newSet = mMediaCodecs.computeIfPresent(mcInfo, (info, codecSet) -> {
+                containsCodec.set(!codecSet.add(mc));
+                return codecSet;
+            });
+            if (newSet == null) {
+                newSet = new HashSet<>();
+                newSet.add(mc);
+                mMediaCodecs.put(mcInfo, newSet);
             }
+            if (containsCodec.get()) {
+                throw new IllegalArgumentException(
+                        "Loudness configurator already added " + mediaCodec);
+            }
+            if (mAudioTrack != null) {
+                piid = mAudioTrack.getPlayerIId();
+            }
+        }
 
-            if (piid != PLAYER_PIID_INVALID) {
-                mLcDispatcher.addLoudnessCodecInfo(piid, mediaCodec.hashCode(), mcInfo);
-            }
+        if (piid != PLAYER_PIID_INVALID) {
+            mLcDispatcher.addLoudnessCodecInfo(piid, mediaCodec.hashCode(), mcInfo);
         }
     }
 
@@ -296,38 +281,44 @@ public class LoudnessCodecConfigurator {
      * <p>No elements will be removed if the passed mediaCodec was not added before.
      *
      * @param mediaCodec the element to remove for receiving asynchronous updates
-     *
-     * TODO: remove hide once API is final
-     * @hide
+     * @throws IllegalArgumentException if the {@code mediaCodec} was not configured,
+     *                                  does not contain loudness metadata or if it
+     *                                  was not added before
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
     public void removeMediaCodec(@NonNull MediaCodec mediaCodec) {
         int piid = PLAYER_PIID_INVALID;
         LoudnessCodecInfo mcInfo;
+        AtomicBoolean removedMc = new AtomicBoolean(false);
         AtomicBoolean removeInfo = new AtomicBoolean(false);
 
         mcInfo = getCodecInfo(Objects.requireNonNull(mediaCodec,
                 "MediaCodec for removeMediaCodec cannot be null"));
 
-        if (mcInfo != null) {
-            synchronized (mConfiguratorLock) {
-                if (mAudioTrack != null) {
-                    piid = mAudioTrack.getPlayerIId();
+        if (mcInfo == null) {
+            throw new IllegalArgumentException("Could not extract codec loudness information");
+        }
+        synchronized (mConfiguratorLock) {
+            if (mAudioTrack != null) {
+                piid = mAudioTrack.getPlayerIId();
+            }
+            mMediaCodecs.computeIfPresent(mcInfo, (format, mcs) -> {
+                removedMc.set(mcs.remove(mediaCodec));
+                if (mcs.isEmpty()) {
+                    // remove the entry
+                    removeInfo.set(true);
+                    return null;
                 }
-                mMediaCodecs.computeIfPresent(mcInfo, (format, mcs) -> {
-                    mcs.remove(mediaCodec);
-                    if (mcs.isEmpty()) {
-                        // remove the entry
-                        removeInfo.set(true);
-                        return null;
-                    }
-                    return mcs;
-                });
+                return mcs;
+            });
+            if (!removedMc.get()) {
+                throw new IllegalArgumentException(
+                        "Loudness configurator does not contain " + mediaCodec);
             }
+        }
 
-            if (piid != PLAYER_PIID_INVALID && removeInfo.get()) {
-                mLcDispatcher.removeLoudnessCodecInfo(piid, mcInfo);
-            }
+        if (piid != PLAYER_PIID_INVALID && removeInfo.get()) {
+            mLcDispatcher.removeLoudnessCodecInfo(piid, mcInfo);
         }
     }
 
@@ -342,9 +333,6 @@ public class LoudnessCodecConfigurator {
      *
      * @return the {@link Bundle} containing the current loudness parameters. Caller is
      * responsible to update the {@link MediaCodec}
-     *
-     * TODO: remove hide once API is final
-     * @hide
      */
     @FlaggedApi(FLAG_LOUDNESS_CONFIGURATOR_API)
     @NonNull
@@ -375,7 +363,7 @@ public class LoudnessCodecConfigurator {
     }
 
     /** @hide */
-    /*package*/ HashMap<LoudnessCodecInfo, Set<MediaCodec>> getRegisteredMediaCodecs() {
+    /*package*/ Map<LoudnessCodecInfo, Set<MediaCodec>> getRegisteredMediaCodecs() {
         synchronized (mConfiguratorLock) {
             return mMediaCodecs;
         }
@@ -397,37 +385,42 @@ public class LoudnessCodecConfigurator {
             return null;
         }
 
-        final MediaFormat inputFormat = mediaCodec.getInputFormat();
-        final String mimeType = inputFormat.getString(MediaFormat.KEY_MIME);
-        if (MediaFormat.MIMETYPE_AUDIO_AAC.equalsIgnoreCase(mimeType)) {
-            // check both KEY_AAC_PROFILE and KEY_PROFILE as some codecs may only recognize one of
-            // these two keys
-            int aacProfile = -1;
-            int profile = -1;
-            try {
-                aacProfile = inputFormat.getInteger(MediaFormat.KEY_AAC_PROFILE);
-            } catch (NullPointerException e) {
-                // does not contain KEY_AAC_PROFILE. do nothing
-            }
-            try {
-                profile = inputFormat.getInteger(MediaFormat.KEY_PROFILE);
-            } catch (NullPointerException e) {
-                // does not contain KEY_PROFILE. do nothing
-            }
-            if (aacProfile == MediaCodecInfo.CodecProfileLevel.AACObjectXHE
-                    || profile == MediaCodecInfo.CodecProfileLevel.AACObjectXHE) {
-                lci.metadataType = CODEC_METADATA_TYPE_MPEG_D;
+        try {
+            final MediaFormat inputFormat = mediaCodec.getInputFormat();
+            final String mimeType = inputFormat.getString(MediaFormat.KEY_MIME);
+            if (MediaFormat.MIMETYPE_AUDIO_AAC.equalsIgnoreCase(mimeType)) {
+                // check both KEY_AAC_PROFILE and KEY_PROFILE as some codecs may only recognize
+                // one of these two keys
+                int aacProfile = -1;
+                int profile = -1;
+                try {
+                    aacProfile = inputFormat.getInteger(MediaFormat.KEY_AAC_PROFILE);
+                } catch (NullPointerException e) {
+                    // does not contain KEY_AAC_PROFILE. do nothing
+                }
+                try {
+                    profile = inputFormat.getInteger(MediaFormat.KEY_PROFILE);
+                } catch (NullPointerException e) {
+                    // does not contain KEY_PROFILE. do nothing
+                }
+                if (aacProfile == MediaCodecInfo.CodecProfileLevel.AACObjectXHE
+                        || profile == MediaCodecInfo.CodecProfileLevel.AACObjectXHE) {
+                    lci.metadataType = CODEC_METADATA_TYPE_MPEG_D;
+                } else {
+                    lci.metadataType = CODEC_METADATA_TYPE_MPEG_4;
+                }
             } else {
-                lci.metadataType = CODEC_METADATA_TYPE_MPEG_4;
+                Log.w(TAG, "MediaCodec mime type not supported for loudness annotation");
+                return null;
             }
-        } else {
-            Log.w(TAG, "MediaCodec mime type not supported for loudness annotation");
+
+            final MediaFormat outputFormat = mediaCodec.getOutputFormat();
+            lci.isDownmixing = outputFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
+                    < inputFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "MediaCodec is not configured", e);
             return null;
         }
-
-        final MediaFormat outputFormat = mediaCodec.getOutputFormat();
-        lci.isDownmixing = outputFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
-                < inputFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
 
         return lci;
     }
