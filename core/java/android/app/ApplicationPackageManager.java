@@ -2934,6 +2934,15 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     @Override
+    public String getSuspendingPackage(String suspendedPackage) {
+        try {
+            return mPM.getSuspendingPackage(suspendedPackage, getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
     public boolean isPackageSuspendedForUser(String packageName, int userId) {
         try {
             return mPM.isPackageSuspendedForUser(packageName, userId);
