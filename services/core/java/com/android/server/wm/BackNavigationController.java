@@ -429,9 +429,12 @@ class BackNavigationController {
             final TaskFragment prevTFAdjacent = prevTF.getAdjacentTaskFragment();
             if (prevTFAdjacent != null) {
                 if (prevTFAdjacent == currTF) {
-                    // Cannot predict what will happen when app receive back key, skip animation.
                     outPrevActivities.clear();
-                    return false;
+                    // No more activity in previous task fragment, so it can predict if previous
+                    // task exists. Otherwise, unable to predict what will happen when app receive
+                    // back key, skip animation.
+                    return prevTF.getActivity((below) -> !below.finishing, prevActivity,
+                            false /*includeBoundary*/, true /*traverseTopToBottom*/) == null;
                 } else {
                     final ActivityRecord prevActivityAdjacent =
                             prevTFAdjacent.getTopNonFinishingActivity();
