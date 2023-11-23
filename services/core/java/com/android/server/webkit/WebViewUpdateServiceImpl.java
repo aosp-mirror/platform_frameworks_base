@@ -385,6 +385,13 @@ class WebViewUpdateServiceImpl implements WebViewUpdateServiceInterface {
         return providers;
     }
 
+    @Override
+    public WebViewProviderInfo getDefaultWebViewPackage() {
+        throw new IllegalStateException(
+                "getDefaultWebViewPackage shouldn't be called if update_service_v2 flag is"
+                        + " disabled.");
+    }
+
     private static class ProviderAndPackageInfo {
         public final WebViewProviderInfo provider;
         public final PackageInfo packageInfo;

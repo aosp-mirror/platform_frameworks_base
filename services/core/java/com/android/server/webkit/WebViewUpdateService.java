@@ -258,6 +258,11 @@ public class WebViewUpdateService extends SystemService {
         }
 
         @Override // Binder call
+        public WebViewProviderInfo getDefaultWebViewPackage() {
+            return WebViewUpdateService.this.mImpl.getDefaultWebViewPackage();
+        }
+
+        @Override // Binder call
         public WebViewProviderInfo[] getAllWebViewPackages() {
             return WebViewUpdateService.this.mImpl.getWebViewPackages();
         }

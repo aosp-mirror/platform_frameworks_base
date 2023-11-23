@@ -28,6 +28,7 @@ import android.content.pm.Signature;
 import android.os.Build;
 import android.os.Bundle;
 import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.test.suitebuilder.annotation.MediumTest;
@@ -1448,5 +1449,22 @@ public class WebViewUpdateServiceTest {
 
         checkPreparationPhasesForPackage(currentSdkPackage.packageName,
                 1 /* first preparation phase */);
+    }
+
+    @Test
+    @RequiresFlagsEnabled("android.webkit.update_service_v2")
+    public void testDefaultWebViewPackageIsTheFirstAvailableByDefault() {
+        String nonDefaultPackage = "nonDefaultPackage";
+        String defaultPackage1 = "defaultPackage1";
+        String defaultPackage2 = "defaultPackage2";
+        WebViewProviderInfo[] packages =
+                new WebViewProviderInfo[] {
+                    new WebViewProviderInfo(nonDefaultPackage, "", false, false, null),
+                    new WebViewProviderInfo(defaultPackage1, "", true, false, null),
+                    new WebViewProviderInfo(defaultPackage2, "", true, false, null)
+                };
+        setupWithPackages(packages);
+        assertEquals(
+                defaultPackage1, mWebViewUpdateServiceImpl.getDefaultWebViewPackage().packageName);
     }
 }
