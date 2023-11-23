@@ -16,6 +16,8 @@
 
 package com.android.server.webkit;
 
+import static android.webkit.Flags.updateServiceV2;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -25,6 +27,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.Signature;
 import android.os.Build;
 import android.os.Bundle;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.util.Base64;
 import android.webkit.UserPackage;
@@ -35,6 +40,7 @@ import android.webkit.WebViewProviderResponse;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
@@ -55,10 +61,13 @@ import java.util.concurrent.CountDownLatch;
 public class WebViewUpdateServiceTest {
     private final static String TAG = WebViewUpdateServiceTest.class.getSimpleName();
 
-    private WebViewUpdateServiceImpl mWebViewUpdateServiceImpl;
+    private WebViewUpdateServiceInterface mWebViewUpdateServiceImpl;
     private TestSystemImpl mTestSystemImpl;
 
     private static final String WEBVIEW_LIBRARY_FLAG = "com.android.webview.WebViewLibrary";
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     /**
      * Creates a new instance.
@@ -92,8 +101,13 @@ public class WebViewUpdateServiceTest {
         TestSystemImpl testing = new TestSystemImpl(packages, numRelros, isDebuggable,
                 multiProcessDefault);
         mTestSystemImpl = Mockito.spy(testing);
-        mWebViewUpdateServiceImpl =
-            new WebViewUpdateServiceImpl(null /*Context*/, mTestSystemImpl);
+        if (updateServiceV2()) {
+            mWebViewUpdateServiceImpl =
+                    new WebViewUpdateServiceImpl2(null /*Context*/, mTestSystemImpl);
+        } else {
+            mWebViewUpdateServiceImpl =
+                    new WebViewUpdateServiceImpl(null /*Context*/, mTestSystemImpl);
+        }
     }
 
     private void setEnabledAndValidPackageInfos(WebViewProviderInfo[] providers) {
@@ -1310,11 +1324,13 @@ public class WebViewUpdateServiceTest {
     }
 
     @Test
+    @RequiresFlagsDisabled("android.webkit.update_service_v2")
     public void testMultiProcessEnabledByDefault() {
         testMultiProcessByDefault(true /* enabledByDefault */);
     }
 
     @Test
+    @RequiresFlagsDisabled("android.webkit.update_service_v2")
     public void testMultiProcessDisabledByDefault() {
         testMultiProcessByDefault(false /* enabledByDefault */);
     }
@@ -1344,6 +1360,7 @@ public class WebViewUpdateServiceTest {
     }
 
     @Test
+    @RequiresFlagsDisabled("android.webkit.update_service_v2")
     public void testMultiProcessEnabledByDefaultWithSettingsValue() {
         testMultiProcessByDefaultWithSettingsValue(
                 true /* enabledByDefault */, Integer.MIN_VALUE, false /* expectEnabled */);
@@ -1356,6 +1373,7 @@ public class WebViewUpdateServiceTest {
     }
 
     @Test
+    @RequiresFlagsDisabled("android.webkit.update_service_v2")
     public void testMultiProcessDisabledByDefaultWithSettingsValue() {
         testMultiProcessByDefaultWithSettingsValue(
                 false /* enabledByDefault */, Integer.MIN_VALUE, false /* expectEnabled */);
