@@ -120,7 +120,6 @@ class SceneTestUtils(
     val testScope = kosmos.testScope
     val featureFlags =
         FakeFeatureFlagsClassic().apply {
-            set(Flags.FACE_AUTH_REFACTOR, false)
             set(Flags.FULL_SCREEN_USER_SWITCHER, false)
             set(Flags.NSSL_DEBUG_LINES, false)
         }
@@ -245,7 +244,6 @@ class SceneTestUtils(
         return KeyguardInteractor(
             repository = repository,
             commandQueue = FakeCommandQueue(),
-            featureFlags = featureFlags,
             sceneContainerFlags = sceneContainerFlags,
             bouncerRepository = FakeKeyguardBouncerRepository(),
             configurationRepository = configurationRepository,

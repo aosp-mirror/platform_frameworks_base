@@ -103,6 +103,7 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.AuxiliaryResolveInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
@@ -128,6 +129,7 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
+import com.android.server.pm.PackageArchiver;
 import com.android.server.power.ShutdownCheckPoints;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
@@ -955,6 +957,17 @@ class ActivityStarter {
                 if (requestCode >= 0 && !sourceRecord.finishing) {
                     resultRecord = sourceRecord;
                 }
+            }
+        }
+
+        if (Flags.archiving()) {
+            PackageArchiver packageArchiver = mService
+                    .getPackageManagerInternalLocked()
+                    .getPackageArchiver();
+            if (packageArchiver.isIntentResolvedToArchivedApp(intent, mRequest.userId)) {
+                return packageArchiver
+                        .requestUnarchiveOnActivityStart(
+                                intent, callingPackage, mRequest.userId, realCallingUid);
             }
         }
 

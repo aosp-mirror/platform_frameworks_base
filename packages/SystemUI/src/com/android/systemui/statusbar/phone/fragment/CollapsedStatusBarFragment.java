@@ -43,7 +43,6 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.ShadeExpansionStateManager;
@@ -139,7 +138,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final OngoingCallController mOngoingCallController;
     private final SystemStatusAnimationScheduler mAnimationScheduler;
     private final StatusBarLocationPublisher mLocationPublisher;
-    private final FeatureFlagsClassic mFeatureFlags;
     private final NotificationIconAreaController mNotificationIconAreaController;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
@@ -228,7 +226,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             StatusBarLocationPublisher locationPublisher,
             NotificationIconAreaController notificationIconAreaController,
             ShadeExpansionStateManager shadeExpansionStateManager,
-            FeatureFlagsClassic featureFlags,
             StatusBarIconController statusBarIconController,
             DarkIconManager.Factory darkIconManagerFactory,
             CollapsedStatusBarViewModel collapsedStatusBarViewModel,
@@ -258,7 +255,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mLocationPublisher = locationPublisher;
         mNotificationIconAreaController = notificationIconAreaController;
         mShadeExpansionStateManager = shadeExpansionStateManager;
-        mFeatureFlags = featureFlags;
         mStatusBarIconController = statusBarIconController;
         mCollapsedStatusBarViewModel = collapsedStatusBarViewModel;
         mCollapsedStatusBarViewBinder = collapsedStatusBarViewBinder;

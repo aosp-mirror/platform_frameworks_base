@@ -28,7 +28,6 @@ import com.android.systemui.collectValues
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
-import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.flags.Flags.FULL_SCREEN_USER_SWITCHER
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -94,10 +93,7 @@ class LockscreenToAodTransitionViewModelTest : SysuiTestCase() {
             .create(
                 test = this,
                 featureFlags =
-                    FakeFeatureFlagsClassicModule {
-                        set(FACE_AUTH_REFACTOR, true)
-                        set(FULL_SCREEN_USER_SWITCHER, true)
-                    },
+                    FakeFeatureFlagsClassicModule { set(FULL_SCREEN_USER_SWITCHER, true) },
                 mocks = TestMocksModule(),
             )
 

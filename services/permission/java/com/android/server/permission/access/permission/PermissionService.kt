@@ -2175,9 +2175,9 @@ class PermissionService(private val service: AccessCheckingService) :
 
                     userState.appIdDevicePermissionFlags[appId]?.forEachIndexed {
                         _,
-                        deviceId,
+                        persistentDeviceId,
                         devicePermissionFlags ->
-                        println("Permissions (Device $deviceId):")
+                        println("Permissions (Device $persistentDeviceId):")
                         withIndent {
                             devicePermissionFlags.forEachIndexed { _, permissionName, flags ->
                                 val isGranted = PermissionFlags.isPermissionGranted(flags)
@@ -2658,7 +2658,7 @@ class PermissionService(private val service: AccessCheckingService) :
         override fun onDevicePermissionFlagsChanged(
             appId: Int,
             userId: Int,
-            deviceId: String,
+            persistentDeviceId: String,
             permissionName: String,
             oldFlags: Int,
             newFlags: Int
@@ -2681,7 +2681,8 @@ class PermissionService(private val service: AccessCheckingService) :
                         permissionName in NOTIFICATIONS_PERMISSIONS &&
                             runtimePermissionRevokedUids.get(uid, true)
                 }
-                runtimePermissionChangedUidDevices.getOrPut(uid) { mutableSetOf() } += deviceId
+                runtimePermissionChangedUidDevices
+                    .getOrPut(uid) { mutableSetOf() } += persistentDeviceId
             }
 
             if (permission.hasGids && !wasPermissionGranted && isPermissionGranted) {
@@ -2695,9 +2696,9 @@ class PermissionService(private val service: AccessCheckingService) :
                 isPermissionFlagsChanged = false
             }
 
-            runtimePermissionChangedUidDevices.forEachIndexed { _, uid, deviceIds ->
-                deviceIds.forEach { deviceId ->
-                    onPermissionsChangeListeners.onPermissionsChanged(uid, deviceId)
+            runtimePermissionChangedUidDevices.forEachIndexed { _, uid, persistentDeviceIds ->
+                persistentDeviceIds.forEach { persistentDeviceId ->
+                    onPermissionsChangeListeners.onPermissionsChanged(uid, persistentDeviceId)
                 }
             }
             runtimePermissionChangedUidDevices.clear()
@@ -2772,16 +2773,16 @@ class PermissionService(private val service: AccessCheckingService) :
             when (msg.what) {
                 MSG_ON_PERMISSIONS_CHANGED -> {
                     val uid = msg.arg1
-                    val deviceId = msg.obj as String
-                    handleOnPermissionsChanged(uid, deviceId)
+                    val persistentDeviceId = msg.obj as String
+                    handleOnPermissionsChanged(uid, persistentDeviceId)
                 }
             }
         }
 
-        private fun handleOnPermissionsChanged(uid: Int, deviceId: String) {
+        private fun handleOnPermissionsChanged(uid: Int, persistentDeviceId: String) {
             listeners.broadcast { listener ->
                 try {
-                    listener.onPermissionsChanged(uid, deviceId)
+                    listener.onPermissionsChanged(uid, persistentDeviceId)
                 } catch (e: RemoteException) {
                     Slog.e(LOG_TAG, "Error when calling OnPermissionsChangeListener", e)
                 }
@@ -2796,9 +2797,10 @@ class PermissionService(private val service: AccessCheckingService) :
             listeners.unregister(listener)
         }
 
-        fun onPermissionsChanged(uid: Int, deviceId: String) {
+        fun onPermissionsChanged(uid: Int, persistentDeviceId: String) {
             if (listeners.registeredCallbackCount > 0) {
-                obtainMessage(MSG_ON_PERMISSIONS_CHANGED, uid, 0, deviceId).sendToTarget()
+                obtainMessage(MSG_ON_PERMISSIONS_CHANGED, uid, 0, persistentDeviceId)
+                    .sendToTarget()
             }
         }
 

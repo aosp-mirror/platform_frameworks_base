@@ -36,7 +36,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.data.repository.StatusBarModeRepository
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
@@ -68,7 +68,7 @@ class OngoingCallController @Inject constructor(
     private val dumpManager: DumpManager,
     private val statusBarWindowController: StatusBarWindowController,
     private val swipeStatusBarAwayGestureHandler: SwipeStatusBarAwayGestureHandler,
-    private val statusBarModeRepository: StatusBarModeRepository,
+    private val statusBarModeRepository: StatusBarModeRepositoryStore,
 ) : CallbackController<OngoingCallListener>, Dumpable, CoreStartable {
     private var isFullscreen: Boolean = false
     /** Non-null if there's an active call notification. */
@@ -129,7 +129,7 @@ class OngoingCallController @Inject constructor(
         dumpManager.registerDumpable(this)
         notifCollection.addCollectionListener(notifListener)
         scope.launch {
-            statusBarModeRepository.isInFullscreenMode.collect {
+            statusBarModeRepository.defaultDisplay.isInFullscreenMode.collect {
                 isFullscreen = it
                 updateChipClickListener()
                 updateGestureListening()

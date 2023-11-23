@@ -1020,7 +1020,7 @@ public class ZenModeHelper {
         }
         pw.printf("allow(alarms=%b,media=%b,system=%b,calls=%b,callsFrom=%s,repeatCallers=%b,"
                 + "messages=%b,messagesFrom=%s,conversations=%b,conversationsFrom=%s,"
-                        + "events=%b,reminders=%b)\n",
+                        + "events=%b,reminders=%b",
                 config.allowAlarms, config.allowMedia, config.allowSystem,
                 config.allowCalls, ZenModeConfig.sourceToString(config.allowCallsFrom),
                 config.allowRepeatCallers, config.allowMessages,
@@ -1028,6 +1028,10 @@ public class ZenModeHelper {
                 config.allowConversations,
                 ZenPolicy.conversationTypeToString(config.allowConversationsFrom),
                 config.allowEvents, config.allowReminders);
+        if (Flags.modesApi()) {
+            pw.printf(",priorityChannels=%b", config.allowPriorityChannels);
+        }
+        pw.printf(")\n");
         pw.print(prefix);
         pw.printf("  disallow(visualEffects=%s)\n", config.suppressedVisualEffects);
         pw.print(prefix); pw.print("  manualRule="); pw.println(config.manualRule);

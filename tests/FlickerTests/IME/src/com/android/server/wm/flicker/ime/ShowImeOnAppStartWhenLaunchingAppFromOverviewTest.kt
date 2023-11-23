@@ -23,7 +23,6 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
-import android.tools.device.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.BaseTest
 import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.setRotation
@@ -46,6 +45,7 @@ class ShowImeOnAppStartWhenLaunchingAppFromOverviewTest(flicker: LegacyFlickerTe
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup {
+            tapl.expectedRotationCheckEnabled = false
             tapl.workspace.switchToOverview().dismissAllTasks()
             testApp.launchViaIntent(wmHelper)
             testApp.openIME(wmHelper)
@@ -54,7 +54,7 @@ class ShowImeOnAppStartWhenLaunchingAppFromOverviewTest(flicker: LegacyFlickerTe
             wmHelper.StateSyncBuilder().withRecentsActivityVisible().waitForAndVerify()
         }
         transitions {
-            device.reopenAppFromOverview(wmHelper)
+            tapl.overview.currentTask.open()
             wmHelper.StateSyncBuilder().withFullScreenApp(testApp).withImeShown().waitForAndVerify()
         }
         teardown { testApp.exit(wmHelper) }

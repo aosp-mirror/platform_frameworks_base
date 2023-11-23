@@ -34,6 +34,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RavenwoodRule implements TestRule {
     private static AtomicInteger sNextPid = new AtomicInteger(100);
 
+    private static final boolean IS_UNDER_RAVENWOOD = RavenwoodRuleImpl.isUnderRavenwood();
+
     private static final int SYSTEM_UID = 1000;
     private static final int NOBODY_UID = 9999;
     private static final int FIRST_APPLICATION_UID = 10000;
@@ -44,6 +46,8 @@ public class RavenwoodRule implements TestRule {
      */
     int mUid = NOBODY_UID;
     int mPid = sNextPid.getAndIncrement();
+
+    boolean mProvideMainThread = false;
 
     public RavenwoodRule() {
     }
@@ -72,6 +76,15 @@ public class RavenwoodRule implements TestRule {
             return this;
         }
 
+        /**
+         * Configure a "main" thread to be available for the duration of the test, as defined
+         * by {@code Looper.getMainLooper()}. Has no effect under non-Ravenwood environments.
+         */
+        public Builder setProvideMainThread(boolean provideMainThread) {
+            mRule.mProvideMainThread = provideMainThread;
+            return this;
+        }
+
         public RavenwoodRule build() {
             return mRule;
         }
@@ -81,8 +94,7 @@ public class RavenwoodRule implements TestRule {
      * Return if the current process is running under a Ravenwood test environment.
      */
     public boolean isUnderRavenwood() {
-        // TODO: give ourselves a better environment signal
-        return System.getProperty("java.class.path").contains("ravenwood");
+        return IS_UNDER_RAVENWOOD;
     }
 
     @Override
@@ -90,17 +102,16 @@ public class RavenwoodRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
-                final boolean isUnderRavenwood = isUnderRavenwood();
                 if (description.getAnnotation(IgnoreUnderRavenwood.class) != null) {
-                    Assume.assumeFalse(isUnderRavenwood);
+                    Assume.assumeFalse(IS_UNDER_RAVENWOOD);
                 }
-                if (isUnderRavenwood) {
+                if (IS_UNDER_RAVENWOOD) {
                     RavenwoodRuleImpl.init(RavenwoodRule.this);
                 }
                 try {
                     base.evaluate();
                 } finally {
-                    if (isUnderRavenwood) {
+                    if (IS_UNDER_RAVENWOOD) {
                         RavenwoodRuleImpl.reset(RavenwoodRule.this);
                     }
                 }

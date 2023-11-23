@@ -71,6 +71,18 @@
             "file_patterns": ["BinaryTransparencyService\\.java"]
         },
         {
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.PinnerServiceTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                }
+            ],
+            "file_patterns": ["PinnerService\\.java"]
+        },
+        {
             "name": "BinaryTransparencyHostTest",
             "file_patterns": ["BinaryTransparencyService\\.java"]
         },
@@ -139,6 +151,18 @@
         },
         {
             "name": "CtsSuspendAppsTestCases"
+        },
+        {
+            "name": "FrameworksServicesTests",
+            "options": [
+                {
+                    "include-filter": "com.android.server.PinnerServiceTest"
+                },
+                {
+                    "exclude-annotation": "org.junit.Ignore"
+                }
+            ],
+            "file_patterns": ["PinnerService\\.java"]
         }
     ]
 }

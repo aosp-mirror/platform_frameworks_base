@@ -428,15 +428,24 @@ public interface ImeTracker {
     ImeTracker LOGGER = new ImeTracker() {
 
         {
-            // Set logging flag initial value.
-            mLogProgress = SystemProperties.getBoolean("persist.debug.imetracker", false);
-            // Update logging flag dynamically.
-            SystemProperties.addChangeCallback(() ->
-                    mLogProgress = SystemProperties.getBoolean("persist.debug.imetracker", false));
+            // Read initial system properties.
+            reloadSystemProperties();
+            // Update when system properties change.
+            SystemProperties.addChangeCallback(this::reloadSystemProperties);
         }
 
-        /** Whether progress should be logged. */
+        /** Whether {@link #onProgress} calls should be logged. */
         private boolean mLogProgress;
+
+        /** Whether the stack trace at the request call site should be logged. */
+        private boolean mLogStackTrace;
+
+        private void reloadSystemProperties() {
+            mLogProgress = SystemProperties.getBoolean(
+                    "persist.debug.imetracker", false);
+            mLogStackTrace = SystemProperties.getBoolean(
+                    "persist.debug.imerequest.logstacktrace", false);
+        }
 
         @NonNull
         @Override
@@ -447,7 +456,8 @@ public interface ImeTracker {
                     reason);
 
             Log.i(TAG, token.mTag + ": onRequestShow at " + Debug.originToString(origin)
-                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason));
+                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason),
+                    mLogStackTrace ? new Throwable() : null);
 
             return token;
         }
@@ -461,7 +471,8 @@ public interface ImeTracker {
                     reason);
 
             Log.i(TAG, token.mTag + ": onRequestHide at " + Debug.originToString(origin)
-                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason));
+                    + " reason " + InputMethodDebug.softInputDisplayReasonToString(reason),
+                    mLogStackTrace ? new Throwable() : null);
 
             return token;
         }

@@ -189,7 +189,8 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
 
         boolean suggestToKeepAppData;
         try {
-            PackageInfo pkgInfo = pm.getPackageInfo(pkg, 0);
+            PackageInfo pkgInfo = pm.getPackageInfo(pkg,
+                    PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ARCHIVED_PACKAGES));
 
             suggestToKeepAppData = pkgInfo.applicationInfo.hasFragileUserData();
         } catch (PackageManager.NameNotFoundException e) {

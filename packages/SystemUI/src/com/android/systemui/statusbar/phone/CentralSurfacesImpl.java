@@ -33,7 +33,6 @@ import static com.android.systemui.statusbar.NotificationLockscreenUserManager.P
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
 import android.annotation.Nullable;
-import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
@@ -200,7 +199,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.data.model.StatusBarMode;
-import com.android.systemui.statusbar.data.repository.StatusBarModeRepository;
+import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
@@ -388,7 +387,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final StatusBarInitializer mStatusBarInitializer;
     private final StatusBarWindowController mStatusBarWindowController;
-    private final StatusBarModeRepository mStatusBarModeRepository;
+    private final StatusBarModeRepositoryStore mStatusBarModeRepository;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @VisibleForTesting
     DozeServiceHost mDozeServiceHost;
@@ -606,7 +605,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             StatusBarInitializer statusBarInitializer,
             StatusBarWindowController statusBarWindowController,
             StatusBarWindowStateController statusBarWindowStateController,
-            StatusBarModeRepository statusBarModeRepository,
+            StatusBarModeRepositoryStore statusBarModeRepository,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             StatusBarSignalPolicy statusBarSignalPolicy,
             PulseExpansionHandler pulseExpansionHandler,
@@ -900,7 +899,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         setUpPresenter();
 
         if ((result.mTransientBarTypes & WindowInsets.Type.statusBars()) != 0) {
-            mStatusBarModeRepository.showTransient();
+            mStatusBarModeRepository.getDefaultDisplay().showTransient();
         }
         mCommandQueueCallbacks.onSystemBarAttributesChanged(mDisplayId, result.mAppearance,
                 result.mAppearanceRegions, result.mNavbarColorManagedByIme, result.mBehavior,
@@ -1147,9 +1146,10 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
         mDemoModeController.addCallback(mDemoModeCallback);
         mJavaAdapter.alwaysCollectFlow(
-                mStatusBarModeRepository.isTransientShown(), this::onTransientShownChanged);
+                mStatusBarModeRepository.getDefaultDisplay().isTransientShown(),
+                this::onTransientShownChanged);
         mJavaAdapter.alwaysCollectFlow(
-                mStatusBarModeRepository.getStatusBarMode(),
+                mStatusBarModeRepository.getDefaultDisplay().getStatusBarMode(),
                 this::updateBarMode);
 
         mCommandQueueCallbacks = mCommandQueueCallbacksLazy.get();
@@ -1209,7 +1209,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
 
             @Override
             public void hide() {
-                mStatusBarModeRepository.clearTransient();
+                mStatusBarModeRepository.getDefaultDisplay().clearTransient();
             }
         });
 
@@ -1657,7 +1657,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         if (mDemoModeController.isInDemoMode()) return;
         if (mStatusBarTransitions != null) {
             checkBarMode(
-                    mStatusBarModeRepository.getStatusBarMode().getValue(),
+                    mStatusBarModeRepository.getDefaultDisplay().getStatusBarMode().getValue(),
                     mStatusBarWindowState,
                     mStatusBarTransitions);
         }
@@ -1668,7 +1668,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     /** Temporarily hides Bubbles if the status bar is hidden. */
     @Override
     public void updateBubblesVisibility() {
-        StatusBarMode mode = mStatusBarModeRepository.getStatusBarMode().getValue();
+        StatusBarMode mode =
+                mStatusBarModeRepository.getDefaultDisplay().getStatusBarMode().getValue();
         mBubblesOptional.ifPresent(bubbles -> bubbles.onStatusBarVisibilityChanged(
                 mode != StatusBarMode.LIGHTS_OUT
                         && mode != StatusBarMode.LIGHTS_OUT_TRANSPARENT
@@ -2927,45 +2928,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         }
     }
 
-    /**
-     * Dismiss the keyguard then execute an action.
-     *
-     * @param action The action to execute after dismissing the keyguard.
-     * @param collapsePanel Whether we should collapse the panel after dismissing the keyguard.
-     * @param willAnimateOnKeyguard Whether {@param action} will run an animation on the keyguard if
-     *                              we are locked.
-     */
-    private void executeActionDismissingKeyguard(Runnable action, boolean afterKeyguardGone,
-            boolean collapsePanel, boolean willAnimateOnKeyguard) {
-        if (!mDeviceProvisionedController.isDeviceProvisioned()) return;
-
-        OnDismissAction onDismissAction = new OnDismissAction() {
-            @Override
-            public boolean onDismiss() {
-                new Thread(() -> {
-                    try {
-                        // The intent we are sending is for the application, which
-                        // won't have permission to immediately start an activity after
-                        // the user switches to home.  We know it is safe to do at this
-                        // point, so make sure new activity switches are now allowed.
-                        ActivityManager.getService().resumeAppSwitches();
-                    } catch (RemoteException e) {
-                    }
-                    action.run();
-                }).start();
-
-                return collapsePanel ? mShadeController.collapseShade() : willAnimateOnKeyguard;
-            }
-
-            @Override
-            public boolean willRunAnimationOnKeyguard() {
-                return willAnimateOnKeyguard;
-            }
-        };
-        mActivityStarter.dismissKeyguardThenExecute(onDismissAction, /* cancel= */ null,
-                afterKeyguardGone);
-    }
-
     private void clearNotificationEffects() {
         try {
             mBarService.clearNotificationEffects();
@@ -2993,7 +2955,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     // End Extra BaseStatusBarMethods.
 
     boolean isTransientShown() {
-        return mStatusBarModeRepository.isTransientShown().getValue();
+        return mStatusBarModeRepository.getDefaultDisplay().isTransientShown().getValue();
     }
 
     private void updateLightRevealScrimVisibility() {

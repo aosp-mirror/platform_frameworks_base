@@ -130,7 +130,7 @@ public interface KeyguardStateController extends CallbackController<Callback> {
     /**
      * If there are faces enrolled and user enabled face auth on keyguard.
      */
-    default boolean isFaceEnrolled() {
+    default boolean isFaceEnrolledAndEnabled() {
         return false;
     }
 
@@ -265,7 +265,7 @@ public interface KeyguardStateController extends CallbackController<Callback> {
 
         /**
          * Triggered when face auth becomes available or unavailable. Value should be queried with
-         * {@link KeyguardStateController#isFaceEnrolled()}.
+         * {@link KeyguardStateController#isFaceEnrolledAndEnabled()}.
          */
         default void onFaceEnrolledChanged() {}
 

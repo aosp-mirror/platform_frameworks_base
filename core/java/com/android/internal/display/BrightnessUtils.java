@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.display;
+package com.android.internal.display;
 
 import android.util.MathUtils;
 

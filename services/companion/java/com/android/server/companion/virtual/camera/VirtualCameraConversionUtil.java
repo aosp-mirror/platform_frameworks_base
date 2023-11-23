@@ -69,6 +69,11 @@ public final class VirtualCameraConversionUtil {
             }
 
             @Override
+            public void onProcessCaptureRequest(int streamId, int frameId) throws RemoteException {
+                camera.onProcessCaptureRequest(streamId, frameId, /*metadata=*/ null);
+            }
+
+            @Override
             public void onStreamClosed(int streamId) throws RemoteException {
                 camera.onStreamClosed(streamId);
             }

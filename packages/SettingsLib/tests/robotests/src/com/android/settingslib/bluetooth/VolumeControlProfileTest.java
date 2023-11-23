@@ -54,18 +54,14 @@ import java.util.concurrent.Executor;
 public class VolumeControlProfileTest {
 
     private static final int TEST_VOLUME_OFFSET = 10;
+    private static final int TEST_VOLUME_VALUE = 10;
 
-    @Rule
-    public final MockitoRule mockito = MockitoJUnit.rule();
+    @Rule public final MockitoRule mockito = MockitoJUnit.rule();
 
-    @Mock
-    private CachedBluetoothDeviceManager mDeviceManager;
-    @Mock
-    private LocalBluetoothProfileManager mProfileManager;
-    @Mock
-    private BluetoothDevice mBluetoothDevice;
-    @Mock
-    private BluetoothVolumeControl mService;
+    @Mock private CachedBluetoothDeviceManager mDeviceManager;
+    @Mock private LocalBluetoothProfileManager mProfileManager;
+    @Mock private BluetoothDevice mBluetoothDevice;
+    @Mock private BluetoothVolumeControl mService;
 
     private final Context mContext = ApplicationProvider.getApplicationContext();
     private BluetoothProfile.ServiceListener mServiceListener;
@@ -177,14 +173,14 @@ public class VolumeControlProfileTest {
     @Test
     public void getConnectedDevices_returnCorrectList() {
         mServiceListener.onServiceConnected(BluetoothProfile.VOLUME_CONTROL, mService);
-        int[] connectedStates = new int[] {
-                BluetoothProfile.STATE_CONNECTED,
-                BluetoothProfile.STATE_CONNECTING,
-                BluetoothProfile.STATE_DISCONNECTING};
-        List<BluetoothDevice> connectedList = Arrays.asList(
-                mBluetoothDevice,
-                mBluetoothDevice,
-                mBluetoothDevice);
+        int[] connectedStates =
+                new int[] {
+                    BluetoothProfile.STATE_CONNECTED,
+                    BluetoothProfile.STATE_CONNECTING,
+                    BluetoothProfile.STATE_DISCONNECTING
+                };
+        List<BluetoothDevice> connectedList =
+                Arrays.asList(mBluetoothDevice, mBluetoothDevice, mBluetoothDevice);
         when(mService.getDevicesMatchingConnectionStates(connectedStates))
                 .thenReturn(connectedList);
 
@@ -219,6 +215,16 @@ public class VolumeControlProfileTest {
         mProfile.setVolumeOffset(mBluetoothDevice, TEST_VOLUME_OFFSET);
 
         verify(mService).setVolumeOffset(mBluetoothDevice, TEST_VOLUME_OFFSET);
+    }
+
+    @Test
+    public void setDeviceVolume_verifyIsCalled() {
+        mServiceListener.onServiceConnected(BluetoothProfile.VOLUME_CONTROL, mService);
+
+        mProfile.setDeviceVolume(mBluetoothDevice, TEST_VOLUME_VALUE, /* isGroupOp= */ true);
+
+        verify(mService)
+                .setDeviceVolume(mBluetoothDevice, TEST_VOLUME_VALUE, /* isGroupOp= */ true);
     }
 
     @Test

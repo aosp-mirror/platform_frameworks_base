@@ -40,3 +40,11 @@ flag {
     is_fixed_read_only: true
     bug: "293445881"
 }
+
+flag {
+    namespace: "window_surfaces"
+    name: "allow_disable_activity_record_input_sink"
+    description: "Whether to allow system activity to disable ActivityRecordInputSink"
+    is_fixed_read_only: true
+    bug: "262477923"
+}

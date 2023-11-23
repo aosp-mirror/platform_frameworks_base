@@ -1908,10 +1908,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"週末"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"活動"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"睡眠"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
-    <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"已啟用"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"已停用"</string>
     <string name="muted_by" msgid="91464083490094950">"「<xliff:g id="THIRD_PARTY">%1$s</xliff:g>」正在關閉部分音效"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"你的裝置發生內部問題，必須將裝置恢復原廠設定才能解除不穩定狀態。"</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"你的裝置發生內部問題，詳情請洽裝置製造商。"</string>

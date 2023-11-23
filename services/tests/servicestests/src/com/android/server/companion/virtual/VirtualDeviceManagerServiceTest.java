@@ -773,6 +773,30 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void getAllPersistentDeviceIds_respectsCurrentAssociations() {
+        mVdms.onCdmAssociationsChanged(List.of(mAssociationInfo));
+        TestableLooper.get(this).processAllMessages();
+
+        assertThat(mLocalService.getAllPersistentDeviceIds())
+                .containsExactly(mDeviceImpl.getPersistentDeviceId());
+
+        mVdms.onCdmAssociationsChanged(List.of(
+                createAssociationInfo(2, AssociationRequest.DEVICE_PROFILE_APP_STREAMING),
+                createAssociationInfo(3, AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION),
+                createAssociationInfo(4, AssociationRequest.DEVICE_PROFILE_WATCH)));
+        TestableLooper.get(this).processAllMessages();
+
+        assertThat(mLocalService.getAllPersistentDeviceIds()).containsExactly(
+                VirtualDeviceImpl.createPersistentDeviceId(2),
+                VirtualDeviceImpl.createPersistentDeviceId(3));
+
+        mVdms.onCdmAssociationsChanged(Collections.emptyList());
+        TestableLooper.get(this).processAllMessages();
+
+        assertThat(mLocalService.getAllPersistentDeviceIds()).isEmpty();
+    }
+
+    @Test
     public void onAppsOnVirtualDeviceChanged_singleVirtualDevice_listenersNotified() {
         ArraySet<Integer> uids = new ArraySet<>(Arrays.asList(UID_1, UID_2));
         mLocalService.registerAppsOnVirtualDeviceListener(mAppsOnVirtualDeviceListener);

@@ -22,7 +22,6 @@ import android.os.UserHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.common.shared.model.ContentDescription
@@ -31,7 +30,6 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dock.DockManager
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceProviderClientFactory
@@ -48,6 +46,7 @@ import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
@@ -102,9 +101,11 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         overrideResource(
             R.array.config_keyguardQuickAffordanceDefaults,
             arrayOf(
-                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START + ":" +
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START +
+                    ":" +
                     BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS,
-                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END + ":" +
+                KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END +
+                    ":" +
                     BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
             )
         )
@@ -168,10 +169,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 dumpManager = mock(),
                 userHandle = UserHandle.SYSTEM,
             )
-        featureFlags =
-            FakeFeatureFlags().apply {
-                set(Flags.FACE_AUTH_REFACTOR, true)
-            }
+        featureFlags = FakeFeatureFlags()
 
         val withDeps =
             KeyguardInteractorFactory.create(
@@ -216,9 +214,8 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
             assertThat(collectedValue())
                 .isInstanceOf(KeyguardQuickAffordanceModel.Visible::class.java)
             val visibleModel = collectedValue() as KeyguardQuickAffordanceModel.Visible
-            assertThat(visibleModel.configKey).isEqualTo(
-                "${KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START}::${configKey}"
-            )
+            assertThat(visibleModel.configKey)
+                .isEqualTo("${KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START}::$configKey")
             assertThat(visibleModel.icon).isEqualTo(ICON)
             assertThat(visibleModel.icon.contentDescription)
                 .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
@@ -243,9 +240,8 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
             assertThat(collectedValue())
                 .isInstanceOf(KeyguardQuickAffordanceModel.Visible::class.java)
             val visibleModel = collectedValue() as KeyguardQuickAffordanceModel.Visible
-            assertThat(visibleModel.configKey).isEqualTo(
-                "${KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END}::${configKey}"
-            )
+            assertThat(visibleModel.configKey)
+                .isEqualTo("${KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END}::$configKey")
             assertThat(visibleModel.icon).isEqualTo(ICON)
             assertThat(visibleModel.icon.contentDescription)
                 .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))
@@ -364,9 +360,8 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
             assertThat(collectedValue())
                 .isInstanceOf(KeyguardQuickAffordanceModel.Visible::class.java)
             val visibleModel = collectedValue() as KeyguardQuickAffordanceModel.Visible
-            assertThat(visibleModel.configKey).isEqualTo(
-                "${KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START}::${configKey}"
-            )
+            assertThat(visibleModel.configKey)
+                .isEqualTo("${KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START}::$configKey")
             assertThat(visibleModel.icon).isEqualTo(ICON)
             assertThat(visibleModel.icon.contentDescription)
                 .isEqualTo(ContentDescription.Resource(res = CONTENT_DESCRIPTION_RESOURCE_ID))

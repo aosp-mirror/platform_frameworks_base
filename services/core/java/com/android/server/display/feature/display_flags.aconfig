@@ -104,3 +104,11 @@ flag {
     bug: "211737588"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "brightness_int_range_user_perception"
+    namespace: "display_manager"
+    description: "Feature flag for converting the brightness integer range to the user perception scale"
+    bug: "183655602"
+    is_fixed_read_only: true
+}

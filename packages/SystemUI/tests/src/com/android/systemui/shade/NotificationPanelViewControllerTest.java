@@ -31,7 +31,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
@@ -56,7 +55,6 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.test.filters.SmallTest;
 
-import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl;
@@ -1075,33 +1073,6 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
 
         verify(mKeyguardFaceAuthInteractor).onNotificationPanelClicked();
-        verify(mUpdateMonitor).requestFaceAuth(
-                FaceAuthApiRequestReason.NOTIFICATION_PANEL_CLICKED);
-    }
-
-    @Test
-    public void onEmptySpaceClicked_whenDozingAndOnKeyguard_doesNotRequestFaceAuth() {
-        StatusBarStateController.StateListener statusBarStateListener =
-                mNotificationPanelViewController.getStatusBarStateListener();
-        statusBarStateListener.onStateChanged(KEYGUARD);
-        mNotificationPanelViewController.setDozing(true, false);
-
-        // This sets the dozing state that is read when onMiddleClicked is eventually invoked.
-        mTouchHandler.onTouch(mock(View.class), mDownMotionEvent);
-        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
-
-        verify(mUpdateMonitor, never()).requestFaceAuth(anyString());
-    }
-
-    @Test
-    public void onEmptySpaceClicked_whenStatusBarShadeLocked_doesNotRequestFaceAuth() {
-        StatusBarStateController.StateListener statusBarStateListener =
-                mNotificationPanelViewController.getStatusBarStateListener();
-        statusBarStateListener.onStateChanged(SHADE_LOCKED);
-
-        mEmptySpaceClickListenerCaptor.getValue().onEmptySpaceClicked(0, 0);
-
-        verify(mUpdateMonitor, never()).requestFaceAuth(anyString());
     }
 
     @Test

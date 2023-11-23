@@ -181,6 +181,18 @@
 
         <receiver android:name="androidx.profileinstaller.ProfileInstallReceiver"
             tools:node="remove" />
+
+        <activity android:name=".UnarchiveActivity"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
+                  android:excludeFromRecents="true"
+                  android:noHistory="true"
+                  android:exported="true">
+            <intent-filter android:priority="1">
+                <action android:name="android.intent.action.UNARCHIVE_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

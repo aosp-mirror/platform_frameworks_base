@@ -18,7 +18,6 @@ package com.android.keyguard;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
-import static com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 
@@ -151,7 +150,6 @@ public class LockIconViewControllerBaseTest extends SysuiTestCase {
         mSetFlagsRule.disableFlags(Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR);
 
         mFeatureFlags = new FakeFeatureFlags();
-        mFeatureFlags.set(FACE_AUTH_REFACTOR, false);
         mFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
         mFeatureFlags.set(LOCKSCREEN_ENABLE_LANDSCAPE, false);
 

@@ -1065,17 +1065,8 @@ public class AudioManager {
      * @see #isVolumeFixed()
      */
     public void adjustVolume(int direction, @PublicVolumeFlags int flags) {
-        if (autoPublicVolumeApiHardening()) {
-            final IAudioService service = getService();
-            try {
-                service.adjustVolume(direction, flags);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
-            helper.sendAdjustVolumeBy(USE_DEFAULT_STREAM_TYPE, direction, flags);
-        }
+        MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
+        helper.sendAdjustVolumeBy(USE_DEFAULT_STREAM_TYPE, direction, flags);
     }
 
     /**
@@ -1104,17 +1095,8 @@ public class AudioManager {
      */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType,
             @PublicVolumeFlags int flags) {
-        if (autoPublicVolumeApiHardening()) {
-            final IAudioService service = getService();
-            try {
-                service.adjustSuggestedStreamVolume(direction, suggestedStreamType, flags);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
-            helper.sendAdjustVolumeBy(suggestedStreamType, direction, flags);
-        }
+        MediaSessionLegacyHelper helper = MediaSessionLegacyHelper.getHelper(getContext());
+        helper.sendAdjustVolumeBy(suggestedStreamType, direction, flags);
     }
 
     /** @hide */

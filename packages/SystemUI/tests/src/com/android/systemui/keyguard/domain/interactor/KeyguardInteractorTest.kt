@@ -24,8 +24,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags.FACE_AUTH_REFACTOR
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
@@ -54,7 +52,6 @@ class KeyguardInteractorTest : SysuiTestCase() {
     private val repository = testUtils.keyguardRepository
     private val sceneInteractor = testUtils.sceneInteractor()
     private val commandQueue = FakeCommandQueue()
-    private val featureFlags = FakeFeatureFlagsClassic().apply { set(FACE_AUTH_REFACTOR, true) }
     private val bouncerRepository = FakeKeyguardBouncerRepository()
     private val configurationRepository = FakeConfigurationRepository()
     private val shadeRepository = FakeShadeRepository()
@@ -66,7 +63,6 @@ class KeyguardInteractorTest : SysuiTestCase() {
             repository = repository,
             commandQueue = commandQueue,
             powerInteractor = PowerInteractorFactory.create().powerInteractor,
-            featureFlags = featureFlags,
             sceneContainerFlags = testUtils.sceneContainerFlags,
             bouncerRepository = bouncerRepository,
             configurationRepository = configurationRepository,

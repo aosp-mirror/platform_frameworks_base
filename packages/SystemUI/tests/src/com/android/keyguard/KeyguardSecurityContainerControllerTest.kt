@@ -47,6 +47,7 @@ import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.log.SessionTracker
@@ -137,6 +138,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     @Mock private lateinit var viewMediatorCallback: ViewMediatorCallback
     @Mock private lateinit var audioManager: AudioManager
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
+    @Mock private lateinit var faceAuthInteractor: KeyguardFaceAuthInteractor
     @Mock private lateinit var faceAuthAccessibilityDelegate: FaceAuthAccessibilityDelegate
     @Mock private lateinit var deviceProvisionedController: DeviceProvisionedController
     @Mock private lateinit var postureController: DevicePostureController
@@ -257,7 +259,7 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
                 telephonyManager,
                 viewMediatorCallback,
                 audioManager,
-                mock(),
+                faceAuthInteractor,
                 mock(),
                 { JavaAdapter(sceneTestUtils.testScope.backgroundScope) },
                 mSelectedUserInteractor,
@@ -576,49 +578,12 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onSwipeUp_whenFaceDetectionIsNotRunning_initiatesFaceAuth() {
+    fun onSwipeUp_forwardsItToFaceAuthInteractor() {
         val registeredSwipeListener = registeredSwipeListener
-        whenever(keyguardUpdateMonitor.isFaceDetectionRunning).thenReturn(false)
         setupGetSecurityView(SecurityMode.Password)
         registeredSwipeListener.onSwipeUp()
-        verify(keyguardUpdateMonitor).requestFaceAuth(FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER)
-    }
 
-    @Test
-    fun onSwipeUp_whenFaceDetectionIsRunning_doesNotInitiateFaceAuth() {
-        val registeredSwipeListener = registeredSwipeListener
-        whenever(keyguardUpdateMonitor.isFaceDetectionRunning).thenReturn(true)
-        registeredSwipeListener.onSwipeUp()
-        verify(keyguardUpdateMonitor, never())
-            .requestFaceAuth(FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER)
-    }
-
-    @Test
-    fun onSwipeUp_whenFaceDetectionIsTriggered_hidesBouncerMessage() {
-        val registeredSwipeListener = registeredSwipeListener
-        whenever(
-                keyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER)
-            )
-            .thenReturn(true)
-        setupGetSecurityView(SecurityMode.Password)
-        clearInvocations(viewFlipperController)
-        registeredSwipeListener.onSwipeUp()
-        viewControllerImmediately
-        verify(keyguardPasswordViewControllerMock)
-            .showMessage(/* message= */ null, /* colorState= */ null, /* animated= */ true)
-    }
-
-    @Test
-    fun onSwipeUp_whenFaceDetectionIsNotTriggered_retainsBouncerMessage() {
-        val registeredSwipeListener = registeredSwipeListener
-        whenever(
-                keyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER)
-            )
-            .thenReturn(false)
-        setupGetSecurityView(SecurityMode.Password)
-        registeredSwipeListener.onSwipeUp()
-        verify(keyguardPasswordViewControllerMock, never())
-            .showMessage(/* message= */ null, /* colorState= */ null, /* animated= */ true)
+        verify(faceAuthInteractor).onSwipeUpOnBouncer()
     }
 
     @Test

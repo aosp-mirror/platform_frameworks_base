@@ -388,13 +388,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         final IApplicationThread thread = mThread;
         if (prevProcState >= CACHED_CONFIG_PROC_STATE && repProcState < CACHED_CONFIG_PROC_STATE
                 && thread != null && mHasCachedConfiguration) {
-            final Configuration config;
+            final ConfigurationChangeItem configurationChangeItem;
             synchronized (mLastReportedConfiguration) {
-                config = new Configuration(mLastReportedConfiguration);
+                onConfigurationChangePreScheduled(mLastReportedConfiguration);
+                configurationChangeItem = ConfigurationChangeItem.obtain(
+                        mLastReportedConfiguration, mLastTopActivityDeviceId);
             }
             // Schedule immediately to make sure the app component (e.g. receiver, service) can get
             // the latest configuration in their lifecycle callbacks (e.g. onReceive, onCreate).
-            scheduleConfigurationChange(thread, config);
+            try {
+                // No WM lock here.
+                mAtm.getLifecycleManager().scheduleTransactionItemUnlocked(
+                        thread, configurationChangeItem);
+            } catch (Exception e) {
+                Slog.e(TAG_CONFIGURATION, "Failed to schedule ConfigurationChangeItem="
+                        + configurationChangeItem + " owner=" + mOwner, e);
+            }
         }
     }
 
@@ -1634,11 +1643,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
 
-        scheduleConfigurationChange(thread, config);
+        onConfigurationChangePreScheduled(config);
+        scheduleClientTransactionItem(thread, ConfigurationChangeItem.obtain(
+                config, mLastTopActivityDeviceId));
     }
 
-    private void scheduleConfigurationChange(@NonNull IApplicationThread thread,
-            @NonNull Configuration config) {
+    private void onConfigurationChangePreScheduled(@NonNull Configuration config) {
         ProtoLog.v(WM_DEBUG_CONFIGURATION, "Sending to proc %s new config %s", mName,
                 config);
         if (Build.IS_DEBUGGABLE && mHasImeService) {
@@ -1646,8 +1656,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             Slog.v(TAG_CONFIGURATION, "Sending to IME proc " + mName + " new config " + config);
         }
         mHasCachedConfiguration = false;
-        scheduleClientTransactionItem(thread, ConfigurationChangeItem.obtain(
-                config, mLastTopActivityDeviceId));
     }
 
     @VisibleForTesting

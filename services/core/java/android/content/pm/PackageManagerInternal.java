@@ -48,6 +48,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.KnownPackages;
+import com.android.server.pm.PackageArchiver;
 import com.android.server.pm.PackageList;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.dex.DynamicCodeLogger;
@@ -1442,4 +1443,10 @@ public abstract class PackageManagerInternal {
      */
     public abstract void sendPackageDataClearedBroadcast(@NonNull String packageName,
             int uid, int userId, boolean isRestore, boolean isInstantApp);
+
+    /**
+     * Returns an instance of {@link PackageArchiver} to be used for archiving related operations.
+     */
+    @NonNull
+    public abstract PackageArchiver getPackageArchiver();
 }

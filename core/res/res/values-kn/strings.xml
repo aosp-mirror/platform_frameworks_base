@@ -1710,10 +1710,8 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"ಇದು ಆ್ಯಪ್ ಅಥವಾ ಹಾರ್ಡ್‌ವೇರ್ ಸೆನ್ಸರ್‌ನ ಜೊತೆಗಿನ ನಿಮ್ಮ ಸಂವಹನಗಳನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಬಹುದು, ಮತ್ತು ನಿಮ್ಮ ಪರವಾಗಿ ಆ್ಯಪ್‌ಗಳ ಜೊತೆ ಸಂವಹನ ನಡೆಸಬಹುದು."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"ಅನುಮತಿಸಿ"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"ನಿರಾಕರಿಸಿ"</string>
-    <!-- no translation found for accessibility_dialog_button_uninstall (2952465517671708108) -->
-    <skip />
-    <!-- no translation found for accessibility_dialog_touch_filtered_warning (3741940116597822451) -->
-    <skip />
+    <string name="accessibility_dialog_button_uninstall" msgid="2952465517671708108">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
+    <string name="accessibility_dialog_touch_filtered_warning" msgid="3741940116597822451">"ಆ್ಯಪ್‌ವೊಂದು ಅನುಮತಿ ವಿನಂತಿಯನ್ನು ಮರೆಮಾಚುತ್ತಿರುವ ಕಾರಣ ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆಯನ್ನು ಪರಿಶೀಲಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ವೈಶಿಷ್ಟ್ದ ಬಳಸುವುದನ್ನು ಪ್ರಾರಂಭಿಸಲು ಅದನ್ನು ಟ್ಯಾಪ್ ಮಾಡಿ:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"ಆ್ಯಕ್ಸೆಸಿಬಿಲಿಟಿ ಬಟನ್ ಜೊತೆಗೆ ಬಳಸಲು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
     <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"ವಾಲ್ಯೂಮ್ ಕೀ ಶಾರ್ಟ್‌ಕಟ್ ಜೊತೆಗೆ ಬಳಸಲು ವೈಶಿಷ್ಟ್ಯಗಳನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -1908,10 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ವಾರಾಂತ್ಯ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ಈವೆಂಟ್"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ನಿದ್ರೆಯ ಸಮಯ"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
-    <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ಆನ್ ಆಗಿದೆ"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ಆಫ್ ಆಗಿದೆ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ಧ್ವನಿ ಮ್ಯೂಟ್ ಮಾಡುತ್ತಿದ್ದಾರೆ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ ಹಾಗೂ ನೀವು ಫ್ಯಾಕ್ಟರಿ ಡೇಟಾವನ್ನು ರೀಸೆಟ್ ಮಾಡುವವರೆಗೂ ಅದು ಅಸ್ಥಿರವಾಗಬಹುದು."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಆಂತರಿಕ ಸಮಸ್ಯೆಯಿದೆ. ವಿವರಗಳಿಗಾಗಿ ನಿಮ್ಮ ತಯಾರಕರನ್ನು ಸಂಪರ್ಕಿಸಿ."</string>
@@ -2044,7 +2040,7 @@
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೆ?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_1">%2$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೆ?"</string>
     <string name="autofill_update_title_with_3types" msgid="8285767070604652626">"ಈ ಮುಂದಿನ ಐಟಂಗಳನ್ನು "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೆ: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
-    <string name="autofill_save_yes" msgid="8035743017382012850">"ಉಳಿಸಿ"</string>
+    <string name="autofill_save_yes" msgid="8035743017382012850">"ಸೇವ್ ಮಾಡಿ"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"ಬೇಡ"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ಸದ್ಯಕ್ಕೆ ಬೇಡ"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"ಎಂದೂ ಬೇಡ"</string>
@@ -2344,8 +2340,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ಡಿಸ್‌ಪ್ಲೇಗೆ ಪ್ರತಿಬಿಂಬಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"ಬೇರೆ ಕೇಬಲ್ ಬಳಸಿ ಹಾಗೂ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"ನಿಮ್ಮ ಸಾಧನವು ತುಂಬಾ ಬಿಸಿಯಾಗಿದೆ ಮತ್ತು ಅದು ತಣ್ಣಗಾಗುವವರೆಗೆ ಡಿಸ್‌ಪ್ಲೇಗೆ ಪ್ರತಿಬಿಂಬಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"ಡಿಸ್‌ಪ್ಲೇಗಳನ್ನು ಕೇಬಲ್ ಬೆಂಬಲಿಸದಿರಬಹುದು"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"ನಿಮ್ಮ USB-C ಕೇಬಲ್ ಡಿಸ್‌ಪ್ಲೇಗಳಿಗೆ ಸರಿಯಾಗಿ ಕನೆಕ್ಟ್ ಆಗದಿರಬಹುದು"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>

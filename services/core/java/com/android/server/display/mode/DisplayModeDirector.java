@@ -21,8 +21,8 @@ import static android.hardware.display.DisplayManagerInternal.REFRESH_RATE_LIMIT
 import static android.os.PowerManager.BRIGHTNESS_INVALID_FLOAT;
 import static android.view.Display.Mode.INVALID_MODE_ID;
 
+import static com.android.internal.display.RefreshRateSettingsUtils.findHighestRefreshRate;
 import static com.android.server.display.DisplayDeviceConfig.DEFAULT_LOW_REFRESH_RATE;
-import static com.android.internal.display.RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay;
 
 import android.annotation.IntegerRes;
 import android.annotation.NonNull;
@@ -959,11 +959,16 @@ public class DisplayModeDirector {
     }
 
     @VisibleForTesting
+    DisplayObserver getDisplayObserver() {
+        return mDisplayObserver;
+    }
+
+    @VisibleForTesting
     DesiredDisplayModeSpecs getDesiredDisplayModeSpecsWithInjectedFpsSettings(
             float minRefreshRate, float peakRefreshRate, float defaultRefreshRate) {
         synchronized (mLock) {
-            mSettingsObserver.updateRefreshRateSettingLocked(
-                    minRefreshRate, peakRefreshRate, defaultRefreshRate);
+            mSettingsObserver.updateRefreshRateSettingLocked(minRefreshRate, peakRefreshRate,
+                    defaultRefreshRate, Display.DEFAULT_DISPLAY);
             return getDesiredDisplayModeSpecs(Display.DEFAULT_DISPLAY);
         }
     }
@@ -1297,9 +1302,23 @@ public class DisplayModeDirector {
             mBrightnessObserver.onLowPowerModeEnabledLocked(inLowPowerMode);
         }
 
+        /**
+         * Update refresh rate settings for all displays
+         */
         private void updateRefreshRateSettingLocked() {
+            Display[] displays = mInjector.getDisplays();
+            for (int i = 0; i < displays.length; i++) {
+                updateRefreshRateSettingLocked(displays[i].getDisplayId());
+            }
+        }
+
+        /**
+         * Update refresh rate settings for a specific display
+         * @param displayId The display ID
+         */
+        private void updateRefreshRateSettingLocked(int displayId) {
             final ContentResolver cr = mContext.getContentResolver();
-            float highestRefreshRate = findHighestRefreshRateForDefaultDisplay(mContext);
+            float highestRefreshRate = findHighestRefreshRate(mContext, displayId);
 
             float minRefreshRate = Settings.System.getFloatForUser(cr,
                     Settings.System.MIN_REFRESH_RATE, 0f, cr.getUserId());
@@ -1327,11 +1346,12 @@ public class DisplayModeDirector {
                 }
             }
 
-            updateRefreshRateSettingLocked(minRefreshRate, peakRefreshRate, mDefaultRefreshRate);
+            updateRefreshRateSettingLocked(minRefreshRate, peakRefreshRate, mDefaultRefreshRate,
+                    displayId);
         }
 
-        private void updateRefreshRateSettingLocked(
-                float minRefreshRate, float peakRefreshRate, float defaultRefreshRate) {
+        private void updateRefreshRateSettingLocked(float minRefreshRate, float peakRefreshRate,
+                float defaultRefreshRate, int displayId) {
             // TODO(b/156304339): The logic in here, aside from updating the refresh rate votes, is
             // used to predict if we're going to be doing frequent refresh rate switching, and if
             // so, enable the brightness observer. The logic here is more complicated and fragile
@@ -1339,9 +1359,9 @@ public class DisplayModeDirector {
             Vote peakVote = peakRefreshRate == 0f
                     ? null
                     : Vote.forRenderFrameRates(0f, Math.max(minRefreshRate, peakRefreshRate));
-            mVotesStorage.updateGlobalVote(Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
+            mVotesStorage.updateVote(displayId, Vote.PRIORITY_USER_SETTING_PEAK_RENDER_FRAME_RATE,
                     peakVote);
-            mVotesStorage.updateGlobalVote(Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
+            mVotesStorage.updateVote(displayId, Vote.PRIORITY_USER_SETTING_MIN_RENDER_FRAME_RATE,
                     Vote.forRenderFrameRates(minRefreshRate, Float.POSITIVE_INFINITY));
             Vote defaultVote =
                     defaultRefreshRate == 0f
@@ -1498,7 +1518,8 @@ public class DisplayModeDirector {
         }
     }
 
-    private final class DisplayObserver implements DisplayManager.DisplayListener {
+    @VisibleForTesting
+    public final class DisplayObserver implements DisplayManager.DisplayListener {
         // Note that we can never call into DisplayManager or any of the non-POD classes it
         // returns, while holding mLock since it may call into DMS, which might be simultaneously
         // calling into us already holding its own lock.
@@ -1590,6 +1611,7 @@ public class DisplayModeDirector {
             updateDisplayModes(displayId, displayInfo);
             updateLayoutLimitedFrameRate(displayId, displayInfo);
             updateUserSettingDisplayPreferredSize(displayInfo);
+            mSettingsObserver.updateRefreshRateSettingLocked(displayId);
         }
 
         @Nullable

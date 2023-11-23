@@ -317,7 +317,7 @@ class ActiveUnlockConfig @Inject constructor(
         }
 
         keyguardUpdateMonitor?.let {
-            val anyFaceEnrolled = it.isFaceEnrolled
+            val anyFaceEnrolled = it.isFaceEnabledAndEnrolled
             val anyFingerprintEnrolled = it.isUnlockWithFingerprintPossible(
                     selectedUserInteractor.getSelectedUserId())
             val udfpsEnrolled = it.isUdfpsEnrolled
@@ -372,7 +372,7 @@ class ActiveUnlockConfig @Inject constructor(
         keyguardUpdateMonitor?.let {
             pw.println("   shouldRequestActiveUnlockOnUnlockIntentFromBiometricEnrollment=" +
                     "${shouldRequestActiveUnlockOnUnlockIntentFromBiometricEnrollment()}")
-            pw.println("   faceEnrolled=${it.isFaceEnrolled}")
+            pw.println("   isFaceEnabledAndEnrolled=${it.isFaceEnabledAndEnrolled}")
             pw.println("   fpUnlockPossible=${
                 it.isUnlockWithFingerprintPossible(selectedUserInteractor.getSelectedUserId())}")
             pw.println("   udfpsEnrolled=${it.isUdfpsEnrolled}")

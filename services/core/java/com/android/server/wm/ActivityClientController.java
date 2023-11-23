@@ -55,6 +55,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.TAG_SWITCH;
 import static com.android.server.wm.ActivityTaskManagerService.enforceNotIsolatedCaller;
+import static com.android.window.flags.Flags.allowDisableActivityRecordInputSink;
 
 import android.Manifest;
 import android.annotation.ColorInt;
@@ -1686,6 +1687,22 @@ class ActivityClientController extends IActivityClientController.Stub {
             if (r == null) return false;
 
             return r.mRequestedLaunchingTaskFragmentToken == taskFragmentToken;
+        }
+    }
+
+    @Override
+    public void setActivityRecordInputSinkEnabled(IBinder activityToken, boolean enabled) {
+        if (!allowDisableActivityRecordInputSink()) {
+            return;
+        }
+
+        mService.mAmInternal.enforceCallingPermission(
+                Manifest.permission.INTERNAL_SYSTEM_WINDOW, "setActivityRecordInputSinkEnabled");
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.forTokenLocked(activityToken);
+            if (r != null) {
+                r.mActivityRecordInputSinkEnabled = enabled;
+            }
         }
     }
 }

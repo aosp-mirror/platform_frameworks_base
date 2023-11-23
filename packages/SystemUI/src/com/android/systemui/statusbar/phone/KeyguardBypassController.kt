@@ -98,7 +98,7 @@ open class KeyguardBypassController : Dumpable, StackScrollAlgorithm.BypassContr
                 FACE_UNLOCK_BYPASS_NEVER -> false
                 else -> field
             }
-            return enabled && mKeyguardStateController.isFaceEnrolled &&
+            return enabled && mKeyguardStateController.isFaceEnrolledAndEnabled &&
                     isPostureAllowedForFaceAuth()
         }
         private set(value) {

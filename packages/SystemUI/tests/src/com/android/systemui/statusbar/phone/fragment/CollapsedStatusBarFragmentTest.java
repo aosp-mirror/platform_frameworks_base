@@ -46,7 +46,6 @@ import com.android.systemui.animation.AnimatorTestRule;
 import com.android.systemui.common.ui.ConfigurationState;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.flags.FeatureFlagsClassic;
 import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogcatEchoTracker;
 import com.android.systemui.plugins.DarkIconDispatcher;
@@ -695,7 +694,6 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mLocationPublisher,
                 mMockNotificationAreaController,
                 mShadeExpansionStateManager,
-                mock(FeatureFlagsClassic.class),
                 mStatusBarIconController,
                 mIconManagerFactory,
                 mCollapsedStatusBarViewModel,

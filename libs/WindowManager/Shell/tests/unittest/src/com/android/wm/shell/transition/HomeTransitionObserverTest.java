@@ -18,8 +18,10 @@ package com.android.wm.shell.transition;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
+import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
@@ -144,6 +146,26 @@ public class HomeTransitionObserverTest extends ShellTestCase {
 
         verify(mListener, times(0)).onHomeVisibilityChanged(anyBoolean());
     }
+
+    @Test
+    public void testHomeActivityWithBackGestureNotifiesHomeIsVisible() throws RemoteException {
+        TransitionInfo info = mock(TransitionInfo.class);
+        TransitionInfo.Change change = mock(TransitionInfo.Change.class);
+        ActivityManager.RunningTaskInfo taskInfo = mock(ActivityManager.RunningTaskInfo.class);
+        when(change.getTaskInfo()).thenReturn(taskInfo);
+        when(info.getChanges()).thenReturn(new ArrayList<>(List.of(change)));
+
+        when(change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)).thenReturn(true);
+        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_CHANGE);
+
+        mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
+                info,
+                mock(SurfaceControl.Transaction.class),
+                mock(SurfaceControl.Transaction.class));
+
+        verify(mListener, times(1)).onHomeVisibilityChanged(true);
+    }
+
 
     /**
      * Helper class to initialize variables for the rest.

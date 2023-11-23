@@ -25,12 +25,14 @@ import android.window.TransitionRequestInfo
 import android.window.WindowContainerToken
 import android.window.WindowContainerTransaction
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
+import com.android.wm.shell.protolog.ShellProtoLogGroup
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_CANCEL_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP
 import com.android.wm.shell.transition.Transitions.TransitionHandler
+import com.android.wm.shell.util.KtProtoLog
 import com.android.wm.shell.util.TransitionUtil
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.android.wm.shell.windowdecor.MoveToDesktopAnimator
@@ -68,6 +70,10 @@ class DragToDesktopTransitionHandler(
     private var splitScreenController: SplitScreenController? = null
     private var transitionState: TransitionState? = null
 
+    /** Whether a drag-to-desktop transition is in progress. */
+    val inProgress: Boolean
+        get() = transitionState != null
+
     /** Sets a listener to receive callback about events during the transition animation. */
     fun setDragToDesktopStateListener(listener: DragToDesktopStateListener) {
         dragToDesktopStateListener = listener
@@ -92,19 +98,22 @@ class DragToDesktopTransitionHandler(
             dragToDesktopAnimator: MoveToDesktopAnimator,
             windowDecoration: DesktopModeWindowDecoration
     ) {
-        if (transitionState != null) {
+        if (inProgress) {
             error("A drag to desktop is already in progress")
         }
 
         val options = ActivityOptions.makeBasic().apply {
             setTransientLaunch()
             setSourceInfo(SourceInfo.TYPE_DESKTOP_ANIMATION, SystemClock.uptimeMillis())
+            pendingIntentCreatorBackgroundActivityStartMode =
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
         }
         val pendingIntent = PendingIntent.getActivity(
                 context,
                 0 /* requestCode */,
                 launchHomeIntent,
-                FLAG_MUTABLE or FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT or FILL_IN_COMPONENT
+                FLAG_MUTABLE or FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT or FILL_IN_COMPONENT,
+                options.toBundle()
         )
         val wct = WindowContainerTransaction()
         wct.sendPendingIntent(pendingIntent, launchHomeIntent, options.toBundle())
@@ -135,6 +144,12 @@ class DragToDesktopTransitionHandler(
      * inside the desktop drop zone.
      */
     fun finishDragToDesktopTransition(wct: WindowContainerTransaction) {
+        if (requireTransitionState().startAborted) {
+            // Don't attempt to complete the drag-to-desktop since the start transition didn't
+            // succeed as expected. Just reset the state as if nothing happened.
+            clearState()
+            return
+        }
         transitions.startTransition(TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP, wct, this)
     }
 
@@ -147,6 +162,12 @@ class DragToDesktopTransitionHandler(
      */
     fun cancelDragToDesktopTransition() {
         val state = requireTransitionState()
+        if (state.startAborted) {
+            // Don't attempt to cancel the drag-to-desktop since the start transition didn't
+            // succeed as expected. Just reset the state as if nothing happened.
+            clearState()
+            return
+        }
         state.cancelled = true
         if (state.draggedTaskChange != null) {
             // Regular case, transient launch of Home happened as is waiting for the cancel
@@ -409,6 +430,21 @@ class DragToDesktopTransitionHandler(
         return null
     }
 
+    override fun onTransitionConsumed(
+        transition: IBinder,
+        aborted: Boolean,
+        finishTransaction: SurfaceControl.Transaction?
+    ) {
+        val state = transitionState ?: return
+        if (aborted && state.startTransitionToken == transition) {
+            KtProtoLog.v(
+                ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE,
+                "DragToDesktop: onTransitionConsumed() start transition aborted"
+            )
+            state.startAborted = true
+        }
+    }
+
     private fun isHomeChange(change: Change): Boolean {
         return change.taskInfo?.activityType == ACTIVITY_TYPE_HOME
     }
@@ -508,6 +544,7 @@ class DragToDesktopTransitionHandler(
         abstract var homeToken: WindowContainerToken?
         abstract var draggedTaskChange: Change?
         abstract var cancelled: Boolean
+        abstract var startAborted: Boolean
 
         data class FromFullscreen(
                 override val draggedTaskId: Int,
@@ -520,6 +557,7 @@ class DragToDesktopTransitionHandler(
                 override var homeToken: WindowContainerToken? = null,
                 override var draggedTaskChange: Change? = null,
                 override var cancelled: Boolean = false,
+                override var startAborted: Boolean = false,
         ) : TransitionState()
         data class FromSplit(
                 override val draggedTaskId: Int,
@@ -532,6 +570,7 @@ class DragToDesktopTransitionHandler(
                 override var homeToken: WindowContainerToken? = null,
                 override var draggedTaskChange: Change? = null,
                 override var cancelled: Boolean = false,
+                override var startAborted: Boolean = false,
                 var splitRootChange: Change? = null,
         ) : TransitionState()
     }

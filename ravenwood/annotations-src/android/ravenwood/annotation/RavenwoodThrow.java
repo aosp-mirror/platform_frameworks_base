@@ -34,4 +34,13 @@ import java.lang.annotation.Target;
 @Target({METHOD, CONSTRUCTOR})
 @Retention(RetentionPolicy.CLASS)
 public @interface RavenwoodThrow {
+    /**
+     * One or more classes that aren't yet supported by Ravenwood, which is why this method throws.
+     */
+    Class<?>[] blockedBy() default {};
+
+    /**
+     * General free-form description of why this method throws.
+     */
+    String reason() default "";
 }

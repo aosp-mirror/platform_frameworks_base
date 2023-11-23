@@ -1033,7 +1033,7 @@ public class KeyguardIndicationController {
         if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
             if (mAlternateBouncerInteractor.isVisibleState()) {
                 return; // udfps affordance is highlighted, no need to show action to unlock
-            } else if (mKeyguardUpdateMonitor.isFaceEnrolled()
+            } else if (mKeyguardUpdateMonitor.isFaceEnabledAndEnrolled()
                     && !mKeyguardUpdateMonitor.getIsFaceAuthenticated()) {
                 String message;
                 if (mAccessibilityManager.isEnabled()
@@ -1215,7 +1215,7 @@ public class KeyguardIndicationController {
                             mContext.getString(R.string.keyguard_suggest_fingerprint)
                     );
                 } else if (fpAuthFailed
-                        && mKeyguardUpdateMonitor.getUserUnlockedWithFace(getCurrentUser())) {
+                        && mKeyguardUpdateMonitor.isCurrentUserUnlockedWithFace()) {
                     // face had already previously unlocked the device, so instead of showing a
                     // fingerprint error, tell them they have already unlocked with face auth
                     // and how to enter their device

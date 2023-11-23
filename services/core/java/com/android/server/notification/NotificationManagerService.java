@@ -184,6 +184,7 @@ import android.companion.AssociationRequest;
 import android.companion.ICompanionDeviceManager;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.LoggingOnly;
 import android.content.AttributionSource;
 import android.content.BroadcastReceiver;
@@ -555,7 +556,7 @@ public class NotificationManagerService extends SystemService {
      * creation and activation of an implicit {@link android.app.AutomaticZenRule}.
      */
     @ChangeId
-    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     static final long MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES = 308670109L;
 
     private static final Duration POST_WAKE_LOCK_TIMEOUT = Duration.ofSeconds(30);
@@ -822,6 +823,22 @@ public class NotificationManagerService extends SystemService {
                             && pair.first.getNotification() != null
                             && Objects.equals(channelId,
                             pair.first.getNotification().getChannelId())) {
+                        bufferIter.remove();
+                    }
+                }
+            }
+        }
+
+        // Removes all notifications with the specified user & package.
+        public void removePackageNotifications(String pkg, @UserIdInt int userId) {
+            synchronized (mBufferLock) {
+                Iterator<Pair<StatusBarNotification, Integer>> bufferIter = descendingIterator();
+                while (bufferIter.hasNext()) {
+                    final Pair<StatusBarNotification, Integer> pair = bufferIter.next();
+                    if (pair.first != null
+                            && userId == pair.first.getNormalizedUserId()
+                            && pkg != null && pkg.equals(pair.first.getPackageName())
+                            && pair.first.getNotification() != null) {
                         bufferIter.remove();
                     }
                 }
@@ -1902,7 +1919,6 @@ public class NotificationManagerService extends SystemService {
                         unhideNotificationsForPackages(pkgList, uidList);
                     }
                 }
-
                 mHandler.scheduleOnPackageChanged(removingPackage, changeUserId, pkgList, uidList);
             }
         }
@@ -4216,7 +4232,8 @@ public class NotificationManagerService extends SystemService {
             boolean previouslyExisted = mPreferencesHelper.deleteNotificationChannel(
                     pkg, callingUid, channelId, callingUid, isSystemOrSystemUi);
             if (previouslyExisted) {
-                // Remove from both recent notification archive and notification history
+                // Remove from both recent notification archive (recently dismissed notifications)
+                // and notification history
                 mArchive.removeChannelNotifications(pkg, callingUser, channelId);
                 mHistoryManager.deleteNotificationChannel(pkg, callingUid, channelId);
                 mListeners.notifyNotificationChannelChanged(pkg,
@@ -4456,6 +4473,10 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public boolean areChannelsBypassingDnd() {
+            if (android.app.Flags.modesApi()) {
+                return mZenModeHelper.getConsolidatedNotificationPolicy().allowPriorityChannels()
+                        && mPreferencesHelper.areChannelsBypassingDnd();
+            }
             return mPreferencesHelper.areChannelsBypassingDnd();
         }
 
@@ -9418,7 +9439,11 @@ public class NotificationManagerService extends SystemService {
             for (int i = 0; i < size; i++) {
                 final String pkg = pkgList[i];
                 final int uid = uidList[i];
-                mHistoryManager.onPackageRemoved(UserHandle.getUserId(uid), pkg);
+                final int userHandle = UserHandle.getUserId(uid);
+                // Removes this package's notifications from both recent notification archive
+                // (recently dismissed notifications) and notification history.
+                mArchive.removePackageNotifications(pkg, userHandle);
+                mHistoryManager.onPackageRemoved(userHandle, pkg);
             }
         }
         if (preferencesChanged) {

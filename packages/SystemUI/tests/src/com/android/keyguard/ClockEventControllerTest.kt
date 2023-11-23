@@ -125,10 +125,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 repository = repository,
             )
 
-        withDeps.featureFlags.apply {
-            set(Flags.REGION_SAMPLING, false)
-            set(Flags.FACE_AUTH_REFACTOR, false)
-        }
+        withDeps.featureFlags.apply { set(Flags.REGION_SAMPLING, false) }
         underTest =
             ClockEventController(
                 withDeps.keyguardInteractor,

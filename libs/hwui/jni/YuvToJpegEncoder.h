@@ -2,6 +2,7 @@
 #define _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_
 
 #include <android/data_space.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 #include <ultrahdr/jpegr.h>
 
 extern "C" {
@@ -90,11 +91,12 @@ public:
      *  @param width Width of the Yuv data in terms of pixels.
      *  @param height Height of the Yuv data in terms of pixels.
      *  @param jpegQuality Picture quality in [0, 100].
+     *  @param exif Buffer holds EXIF package.
      *  @return true if successfully compressed the stream.
      */
     bool encode(JNIEnv* env,
             SkWStream* stream, void* hdr, int hdrColorSpace, void* sdr, int sdrColorSpace,
-            int width, int height, int jpegQuality);
+            int width, int height, int jpegQuality, ScopedByteArrayRO* exif);
 
     /** Map data space (defined in DataSpace.java and data_space.h) to the color gamut
      *  used in JPEG/R

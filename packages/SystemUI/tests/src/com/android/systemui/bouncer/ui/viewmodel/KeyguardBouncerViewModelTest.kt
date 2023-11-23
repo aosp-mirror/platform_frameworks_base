@@ -32,6 +32,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.TrustRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.utils.os.FakeHandler
@@ -61,6 +62,7 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
     @Mock private lateinit var dismissCallbackRegistry: DismissCallbackRegistry
     @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock private lateinit var faceAuthInteractor: KeyguardFaceAuthInteractor
 
     lateinit var bouncerInteractor: PrimaryBouncerInteractor
     private val mainHandler = FakeHandler(Looper.getMainLooper())
@@ -86,6 +88,7 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
                 Mockito.mock(TrustRepository::class.java),
                 TestScope().backgroundScope,
                 mSelectedUserInteractor,
+                faceAuthInteractor,
             )
         underTest = KeyguardBouncerViewModel(bouncerView, bouncerInteractor)
     }

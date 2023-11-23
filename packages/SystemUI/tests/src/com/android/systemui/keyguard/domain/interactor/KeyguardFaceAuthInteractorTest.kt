@@ -41,8 +41,6 @@ import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dump.logcatLogBuffer
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
@@ -109,8 +107,6 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
         val scheduler = TestCoroutineScheduler()
         val dispatcher = StandardTestDispatcher(scheduler)
         testScope = TestScope(dispatcher)
-        val featureFlags = FakeFeatureFlags()
-        featureFlags.set(Flags.FACE_AUTH_REFACTOR, true)
         bouncerRepository = FakeKeyguardBouncerRepository()
         faceAuthRepository = FakeDeviceEntryFaceAuthRepository()
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
@@ -135,21 +131,24 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 dispatcher,
                 faceAuthRepository,
-                PrimaryBouncerInteractor(
-                    bouncerRepository,
-                    mock(BouncerView::class.java),
-                    mock(Handler::class.java),
-                    mock(KeyguardStateController::class.java),
-                    mock(KeyguardSecurityModel::class.java),
-                    mock(PrimaryBouncerCallbackInteractor::class.java),
-                    mock(FalsingCollector::class.java),
-                    mock(DismissCallbackRegistry::class.java),
-                    context,
-                    keyguardUpdateMonitor,
-                    FakeTrustRepository(),
-                    testScope.backgroundScope,
-                    mSelectedUserInteractor,
-                ),
+                {
+                    PrimaryBouncerInteractor(
+                        bouncerRepository,
+                        mock(BouncerView::class.java),
+                        mock(Handler::class.java),
+                        mock(KeyguardStateController::class.java),
+                        mock(KeyguardSecurityModel::class.java),
+                        mock(PrimaryBouncerCallbackInteractor::class.java),
+                        mock(FalsingCollector::class.java),
+                        mock(DismissCallbackRegistry::class.java),
+                        context,
+                        keyguardUpdateMonitor,
+                        FakeTrustRepository(),
+                        testScope.backgroundScope,
+                        mSelectedUserInteractor,
+                        underTest,
+                    )
+                },
                 AlternateBouncerInteractor(
                     mock(StatusBarStateController::class.java),
                     mock(KeyguardStateController::class.java),
@@ -161,7 +160,6 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                     testScope.backgroundScope,
                 ),
                 keyguardTransitionInteractor,
-                featureFlags,
                 FaceAuthenticationLogger(logcatLogBuffer("faceAuthBuffer")),
                 keyguardUpdateMonitor,
                 fakeDeviceEntryFingerprintAuthRepository,

@@ -224,7 +224,6 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 mKeyguardRepository,
                 new FakeCommandQueue(),
                 powerInteractor,
-                featureFlags,
                 sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
                 configurationRepository,

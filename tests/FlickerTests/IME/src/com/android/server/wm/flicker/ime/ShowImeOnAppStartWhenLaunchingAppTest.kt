@@ -93,7 +93,7 @@ class ShowImeOnAppStartWhenLaunchingAppTest(flicker: LegacyFlickerTest) : BaseTe
         }
         transitions {
             testApp.launchViaIntent(wmHelper)
-            wmHelper.StateSyncBuilder().withImeShown().waitForAndVerify()
+            testApp.waitIMEShown(wmHelper)
         }
     }
 

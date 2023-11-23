@@ -154,7 +154,6 @@ import android.media.permission.SafeCloseable;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.media.projection.IMediaProjectionManager;
-import android.media.session.MediaSessionManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -311,9 +310,6 @@ public class AudioService extends IAudioService.Stub
     final Context mContext;
     private final ContentResolver mContentResolver;
     private final AppOpsManager mAppOps;
-
-    /** do not use directly, use getMediaSessionManager() which handles lazy initialization */
-    @Nullable private volatile MediaSessionManager mMediaSessionManager;
 
     // the platform type affects volume and silent mode behavior
     private final int mPlatformType;
@@ -945,8 +941,6 @@ public class AudioService extends IAudioService.Stub
 
     private final SoundDoseHelper mSoundDoseHelper;
 
-    private final HardeningEnforcer mHardeningEnforcer;
-
     private final Object mSupportedSystemUsagesLock = new Object();
     @GuardedBy("mSupportedSystemUsagesLock")
     private @AttributeSystemUsage int[] mSupportedSystemUsages =
@@ -1321,8 +1315,6 @@ public class AudioService extends IAudioService.Stub
         mDisplayManager = context.getSystemService(DisplayManager.class);
 
         mMusicFxHelper = new MusicFxHelper(mContext, mAudioHandler);
-
-        mHardeningEnforcer = new HardeningEnforcer(mContext, isPlatformAutomotive());
     }
 
     private void initVolumeStreamStates() {
@@ -1394,6 +1386,7 @@ public class AudioService extends IAudioService.Stub
 
         // check on volume initialization
         checkVolumeRangeInitialization("AudioService()");
+
     }
 
     private SubscriptionManager.OnSubscriptionsChangedListener mSubscriptionChangedListener =
@@ -1405,14 +1398,6 @@ public class AudioService extends IAudioService.Stub
                             0, 0, null, 0);
                 }
             };
-
-    private MediaSessionManager getMediaSessionManager() {
-        if (mMediaSessionManager == null) {
-            mMediaSessionManager = (MediaSessionManager) mContext
-                    .getSystemService(Context.MEDIA_SESSION_SERVICE);
-        }
-        return mMediaSessionManager;
-    }
 
     /**
      * Initialize intent receives and settings observers for this service.
@@ -3442,10 +3427,6 @@ public class AudioService extends IAudioService.Stub
      * Part of service interface, check permissions here */
     public void adjustStreamVolumeWithAttribution(int streamType, int direction, int flags,
             String callingPackage, String attributionTag) {
-        if (mHardeningEnforcer.blockVolumeMethod(
-                HardeningEnforcer.METHOD_AUDIO_MANAGER_ADJUST_STREAM_VOLUME)) {
-            return;
-        }
         if ((streamType == AudioManager.STREAM_ACCESSIBILITY) && !canChangeAccessibilityVolume()) {
             Log.w(TAG, "Trying to call adjustStreamVolume() for a11y without"
                     + "CHANGE_ACCESSIBILITY_VOLUME / callingPackage=" + callingPackage);
@@ -3999,7 +3980,8 @@ public class AudioService extends IAudioService.Stub
             }
             setStreamVolume(groupedStream, index, flags, /*device*/ null,
                     callingPackage, callingPackage,
-                    attributionTag, Binder.getCallingUid(), true /*hasModifyAudioSettings*/);
+                    attributionTag, Binder.getCallingUid(), true /*hasModifyAudioSettings*/,
+                    true /*canChangeMuteAndUpdateController*/);
         }
     }
 
@@ -4118,7 +4100,9 @@ public class AudioService extends IAudioService.Stub
             setStreamVolumeWithAttributionInt(vi.getStreamType(),
                     mStreamStates[vi.getStreamType()].getMinIndex(),
                     /*flags*/ 0,
-                    ada, callingPackage, null);
+                    ada, callingPackage, null,
+                    //TODO handle unmuting of current audio device
+                    false /*canChangeMuteAndUpdateController*/);
             return;
         }
 
@@ -4144,7 +4128,8 @@ public class AudioService extends IAudioService.Stub
             }
         }
         setStreamVolumeWithAttributionInt(vi.getStreamType(), index, /*flags*/ 0,
-                ada, callingPackage, null);
+                ada, callingPackage, null,
+                false /*canChangeMuteAndUpdateController*/);
     }
 
     /** Retain API for unsupported app usage */
@@ -4222,12 +4207,8 @@ public class AudioService extends IAudioService.Stub
      * Part of service interface, check permissions here */
     public void setStreamVolumeWithAttribution(int streamType, int index, int flags,
             String callingPackage, String attributionTag) {
-        if (mHardeningEnforcer.blockVolumeMethod(
-                HardeningEnforcer.METHOD_AUDIO_MANAGER_SET_STREAM_VOLUME)) {
-            return;
-        }
         setStreamVolumeWithAttributionInt(streamType, index, flags, /*device*/ null,
-                callingPackage, attributionTag);
+                callingPackage, attributionTag, true /*canChangeMuteAndUpdateController*/);
     }
 
     /**
@@ -4240,10 +4221,18 @@ public class AudioService extends IAudioService.Stub
      *               for which volume is being changed
      * @param callingPackage client side-provided package name of caller, not to be trusted
      * @param attributionTag client side-provided attribution name, not to be trusted
+     * @param canChangeMuteAndUpdateController true if the calling method is a path where
+     *          the volume change is allowed to update the mute state as well as update
+     *          the volume controller (the UI). This is intended to be true for a call coming
+     *          from AudioManager.setStreamVolume (which is here
+     *          {@link #setStreamVolumeForUid(int, int, int, String, int, int, UserHandle, int)},
+     *          and false when coming from AudioDeviceVolumeManager.setDeviceVolume (which is here
+     *          {@link #setDeviceVolume(VolumeInfo, AudioDeviceAttributes, String)}
      */
     protected void setStreamVolumeWithAttributionInt(int streamType, int index, int flags,
-            @Nullable AudioDeviceAttributes device,
-            String callingPackage, String attributionTag) {
+            @Nullable AudioDeviceAttributes ada,
+            String callingPackage, String attributionTag,
+            boolean canChangeMuteAndUpdateController) {
         if ((streamType == AudioManager.STREAM_ACCESSIBILITY) && !canChangeAccessibilityVolume()) {
             Log.w(TAG, "Trying to call setStreamVolume() for a11y without"
                     + " CHANGE_ACCESSIBILITY_VOLUME  callingPackage=" + callingPackage);
@@ -4266,15 +4255,18 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        if (device == null) {
+        if (ada == null) {
             // call was already logged in setDeviceVolume()
+            final int deviceType = getDeviceForStream(streamType);
             sVolumeLogger.enqueue(new VolumeEvent(VolumeEvent.VOL_SET_STREAM_VOL, streamType,
-                    index/*val1*/, flags/*val2*/, getStreamVolume(streamType) /*val3*/,
+                    index/*val1*/, flags/*val2*/, getStreamVolume(streamType, deviceType) /*val3*/,
                     callingPackage));
+            ada = new AudioDeviceAttributes(deviceType /*nativeType*/, "" /*address*/);
         }
-        setStreamVolume(streamType, index, flags, device,
+        setStreamVolume(streamType, index, flags, ada,
                 callingPackage, callingPackage, attributionTag,
-                Binder.getCallingUid(), callingOrSelfHasAudioSettingsPermission());
+                Binder.getCallingUid(), callingOrSelfHasAudioSettingsPermission(),
+                canChangeMuteAndUpdateController);
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_ULTRASOUND)
@@ -4562,9 +4554,11 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void setStreamVolume(int streamType, int index, int flags,
-            @Nullable AudioDeviceAttributes ada,
+            @NonNull AudioDeviceAttributes ada,
             String callingPackage, String caller, String attributionTag, int uid,
-            boolean hasModifyAudioSettings) {
+            boolean hasModifyAudioSettings,
+            boolean canChangeMuteAndUpdateController) {
+
         if (DEBUG_VOL) {
             Log.d(TAG, "setStreamVolume(stream=" + streamType+", index=" + index
                     + ", dev=" + ada
@@ -4578,9 +4572,7 @@ public class AudioService extends IAudioService.Stub
         int streamTypeAlias = mStreamVolumeAlias[streamType];
         VolumeStreamState streamState = mStreamStates[streamTypeAlias];
 
-        final int device = (ada == null)
-                ? getDeviceForStream(streamType)
-                : ada.getInternalType();
+        final int device = ada.getInternalType();
         int oldIndex;
 
         // skip a2dp absolute volume control request when the device
@@ -4667,7 +4659,7 @@ public class AudioService extends IAudioService.Stub
             onSetStreamVolume(streamType, index, flags, device, caller, hasModifyAudioSettings,
                     // ada is non-null when called from setDeviceVolume,
                     // which shouldn't update the mute state
-                    ada == null /*canChangeMute*/);
+                    canChangeMuteAndUpdateController /*canChangeMute*/);
             index = mStreamStates[streamType].getIndex(device);
         }
 
@@ -4677,7 +4669,7 @@ public class AudioService extends IAudioService.Stub
                 maybeSendSystemAudioStatusCommand(false);
             }
         }
-        if (ada == null) {
+        if (canChangeMuteAndUpdateController) {
             // only non-null when coming here from setDeviceVolume
             // TODO change test to check early if device is current device or not
             sendVolumeUpdate(streamType, oldIndex, index, flags, device);
@@ -5080,7 +5072,6 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#setMasterMute(boolean, int) */
     public void setMasterMute(boolean mute, int flags, String callingPackage, int userId,
             String attributionTag) {
-
         super.setMasterMute_enforcePermission();
 
         setMasterMuteInternal(mute, flags, callingPackage,
@@ -5091,6 +5082,10 @@ public class AudioService extends IAudioService.Stub
     public int getStreamVolume(int streamType) {
         ensureValidStreamType(streamType);
         int device = getDeviceForStream(streamType);
+        return getStreamVolume(streamType, device);
+    }
+
+    private int getStreamVolume(int streamType, int device) {
         synchronized (VolumeStreamState.class) {
             int index = mStreamStates[streamType].getIndex(device);
 
@@ -5446,10 +5441,6 @@ public class AudioService extends IAudioService.Stub
     }
 
     public void setRingerModeExternal(int ringerMode, String caller) {
-        if (mHardeningEnforcer.blockVolumeMethod(
-                HardeningEnforcer.METHOD_AUDIO_MANAGER_SET_RINGER_MODE)) {
-            return;
-        }
         if (isAndroidNPlus(caller) && wouldToggleZenMode(ringerMode)
                 && !mNm.isNotificationPolicyAccessGrantedForPackage(caller)) {
             throw new SecurityException("Not allowed to change Do Not Disturb state");
@@ -6202,35 +6193,6 @@ public class AudioService extends IAudioService.Stub
                 AudioDeviceVolumeManager.ADJUST_MODE_NORMAL);
     }
 
-    /**
-      * @see AudioManager#adjustVolume(int, int)
-      * This method is redirected from AudioManager to AudioService for API hardening rules
-      * enforcement then to MediaSession for implementation.
-      */
-    @Override
-    public void adjustVolume(int direction, int flags) {
-        if (mHardeningEnforcer.blockVolumeMethod(
-                HardeningEnforcer.METHOD_AUDIO_MANAGER_ADJUST_VOLUME)) {
-            return;
-        }
-        getMediaSessionManager().dispatchAdjustVolume(AudioManager.USE_DEFAULT_STREAM_TYPE,
-                    direction, flags);
-    }
-
-    /**
-     * @see AudioManager#adjustSuggestedStreamVolume(int, int, int)
-     * This method is redirected from AudioManager to AudioService for API hardening rules
-     * enforcement then to MediaSession for implementation.
-     */
-    @Override
-    public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags) {
-        if (mHardeningEnforcer.blockVolumeMethod(
-                HardeningEnforcer.METHOD_AUDIO_MANAGER_ADJUST_SUGGESTED_STREAM_VOLUME)) {
-            return;
-        }
-        getMediaSessionManager().dispatchAdjustVolume(suggestedStreamType, direction, flags);
-    }
-
     /** @see AudioManager#setStreamVolumeForUid(int, int, int, String, int, int, int) */
     @Override
     public void setStreamVolumeForUid(int streamType, int index, int flags,
@@ -6242,7 +6204,8 @@ public class AudioService extends IAudioService.Stub
 
         setStreamVolume(streamType, index, flags, /*device*/ null,
                 packageName, packageName, null, uid,
-                hasAudioSettingsPermission(uid, pid));
+                hasAudioSettingsPermission(uid, pid),
+                true /*canChangeMuteAndUpdateController*/);
     }
 
     //==========================================================================================

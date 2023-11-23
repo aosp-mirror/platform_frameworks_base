@@ -40,10 +40,7 @@ import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioMetadata;
 import android.hardware.radio.UniqueProgramIdentifier;
 import android.os.ServiceSpecificException;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
@@ -159,7 +156,7 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     @Rule
     public final Expect expect = Expect.create();
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
@@ -317,9 +314,10 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void identifierToHalProgramIdentifier_withFlagEnabled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         ProgramSelector.Identifier hdLocationId = createHdStationLocationIdWithFlagEnabled();
+
         ProgramIdentifier halHdLocationId =
                 ConversionUtils.identifierToHalProgramIdentifier(hdLocationId);
 
@@ -336,10 +334,11 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void identifierFromHalProgramIdentifier_withFlagEnabled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         ProgramSelector.Identifier hdLocationIdExpected =
                 createHdStationLocationIdWithFlagEnabled();
+
         ProgramSelector.Identifier hdLocationId =
                 ConversionUtils.identifierFromHalProgramIdentifier(TEST_HAL_HD_STATION_LOCATION_ID);
 
@@ -348,8 +347,9 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void identifierFromHalProgramIdentifier_withFlagDisabled_returnsNull() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
         ProgramSelector.Identifier hdLocationId =
                 ConversionUtils.identifierFromHalProgramIdentifier(TEST_HAL_HD_STATION_LOCATION_ID);
 
@@ -432,8 +432,8 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void programSelectorMeetsSdkVersionRequirement_withLowerVersionSecondaryId() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         ProgramSelector hdSelector = createHdSelectorWithFlagEnabled();
 
         expect.withMessage("Selector %s with secondary id requiring higher-version SDK version",
@@ -449,8 +449,8 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void programSelectorMeetsSdkVersionRequirement_withRequiredVersionAndFlagEnabled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         ProgramSelector hdSelector = createHdSelectorWithFlagEnabled();
 
         expect.withMessage("Selector %s with required SDK version and feature flag enabled",
@@ -548,8 +548,8 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void configFlagMeetsSdkVersionRequirement_withRequiredSdkVersionAndFlagEnabled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         int halForceAmAnalogFlag = ConfigFlag.FORCE_ANALOG_FM;
 
         expect.withMessage("Force Analog FM flag with required SDK version and feature flag"
@@ -558,8 +558,8 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void configFlagMeetsSdkVersionRequirement_withRequiredSdkVersionAndFlagDisabled() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         int halForceAmAnalogFlag = ConfigFlag.FORCE_ANALOG_FM;
 
         expect.withMessage("Force Analog FM with required SDK version and with feature flag"
@@ -586,8 +586,9 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void radioMetadataFromHalMetadata_withFlagEnabled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
         RadioMetadata convertedMetadata = ConversionUtils.radioMetadataFromHalMetadata(
                 new Metadata[]{TEST_HAL_SONG_TITLE, TEST_HAL_HD_SUBCHANNELS, TEST_HAL_ALBUM_ART});
 
@@ -605,8 +606,9 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void radioMetadataFromHalMetadata_withFlagDisabled() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
         RadioMetadata convertedMetadata = ConversionUtils.radioMetadataFromHalMetadata(
                 new Metadata[]{TEST_HAL_SONG_TITLE, TEST_HAL_HD_SUBCHANNELS, TEST_HAL_ALBUM_ART});
 

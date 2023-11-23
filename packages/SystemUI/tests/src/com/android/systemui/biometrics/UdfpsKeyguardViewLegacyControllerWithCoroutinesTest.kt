@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -106,6 +107,7 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 FakeTrustRepository(),
                 testScope.backgroundScope,
                 mSelectedUserInteractor,
+                mock(KeyguardFaceAuthInteractor::class.java),
             )
         mAlternateBouncerInteractor =
             AlternateBouncerInteractor(

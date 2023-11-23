@@ -32,9 +32,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.os.Parcel;
 import android.os.RemoteException;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArrayMap;
 
 import org.junit.Rule;
@@ -168,7 +166,7 @@ public final class RadioManagerTest {
     private ICloseHandle mCloseHandleMock;
 
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void getType_forBandDescriptor() {
@@ -962,22 +960,25 @@ public final class RadioManagerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void isSignalAcquired_forProgramInfo() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
         assertWithMessage("Signal acquisition status for HD program info")
                 .that(HD_PROGRAM_INFO.isSignalAcquired()).isTrue();
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void isHdSisAvailable_forProgramInfo() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
         assertWithMessage("SIS information acquisition status for HD program")
                 .that(HD_PROGRAM_INFO.isHdSisAvailable()).isTrue();
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void isHdAudioAvailable_forProgramInfo() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
+
         assertWithMessage("Audio acquisition status for HD program")
                 .that(HD_PROGRAM_INFO.isHdAudioAvailable()).isFalse();
     }

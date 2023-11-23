@@ -23,8 +23,6 @@ import com.android.systemui.bouncer.data.repository.KeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -54,7 +52,6 @@ class UdfpsAodViewModelTest : SysuiTestCase() {
     private lateinit var configRepository: FakeConfigurationRepository
     private lateinit var bouncerRepository: KeyguardBouncerRepository
     private lateinit var keyguardRepository: FakeKeyguardRepository
-    private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var shadeRepository: FakeShadeRepository
     private lateinit var keyguardInteractor: KeyguardInteractor
 
@@ -67,16 +64,12 @@ class UdfpsAodViewModelTest : SysuiTestCase() {
         overrideResource(com.android.systemui.res.R.dimen.lock_icon_padding, defaultPadding)
         testScope = TestScope()
         shadeRepository = FakeShadeRepository()
-        featureFlags = FakeFeatureFlags().apply { set(Flags.FACE_AUTH_REFACTOR, false) }
-        KeyguardInteractorFactory.create(
-                featureFlags = featureFlags,
-            )
-            .also {
-                keyguardInteractor = it.keyguardInteractor
-                keyguardRepository = it.repository
-                configRepository = it.configurationRepository
-                bouncerRepository = it.bouncerRepository
-            }
+        KeyguardInteractorFactory.create().also {
+            keyguardInteractor = it.keyguardInteractor
+            keyguardRepository = it.repository
+            configRepository = it.configurationRepository
+            bouncerRepository = it.bouncerRepository
+        }
         val udfpsKeyguardInteractor =
             UdfpsKeyguardInteractor(
                 configRepository,

@@ -683,7 +683,7 @@
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"ଇଥରନେଟ୍।"</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"କୌଣସି କଲିଂ ନାହିଁ।"</string>
     <string name="avatar_picker_title" msgid="8492884172713170652">"ଏକ ପ୍ରୋଫାଇଲ ଛବି ବାଛନ୍ତୁ"</string>
-    <string name="default_user_icon_description" msgid="6554047177298972638">"ଡିଫଲ୍ଟ ଉପଯୋଗକର୍ତ୍ତା ଆଇକନ"</string>
+    <string name="default_user_icon_description" msgid="6554047177298972638">"ଡିଫଲ୍ଟ ୟୁଜର ଆଇକନ"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"ଫିଜିକାଲ କୀବୋର୍ଡ"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"କୀବୋର୍ଡ ଲେଆଉଟ ବାଛନ୍ତୁ"</string>
     <string name="keyboard_layout_default_label" msgid="1997292217218546957">"ଡିଫଲ୍ଟ"</string>

@@ -6976,6 +6976,11 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        public PackageArchiver getPackageArchiver() {
+            return mInstallerService.mPackageArchiver;
+        }
+
+        @Override
         public void sendPackageRestartedBroadcast(@NonNull String packageName,
                 int uid, @Intent.Flags int flags) {
             final int userId = UserHandle.getUserId(uid);
