@@ -428,7 +428,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 if (isTaskInSplitScreen(mTaskId)) {
                     mSplitScreenController.moveTaskToFullscreen(mTaskId);
                 } else {
-                    mDesktopTasksController.ifPresent(c -> c.moveToFullscreen(mTaskId));
+                    mDesktopTasksController.ifPresent(c ->
+                            c.moveToFullscreen(mTaskId, mWindowDecorByTaskId.get(mTaskId)));
                 }
             } else if (id == R.id.split_screen_button) {
                 decoration.closeHandleMenu();
