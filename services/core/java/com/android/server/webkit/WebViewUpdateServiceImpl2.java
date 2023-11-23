@@ -85,9 +85,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
     private static final int VALIDITY_INCORRECT_SIGNATURE = 3;
     private static final int VALIDITY_NO_LIBRARY_FLAG = 4;
 
-    private static final int MULTIPROCESS_SETTING_ON_VALUE = Integer.MAX_VALUE;
-    private static final int MULTIPROCESS_SETTING_OFF_VALUE = Integer.MIN_VALUE;
-
     private final SystemInterface mSystemInterface;
     private final Context mContext;
 
@@ -166,7 +163,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
 
     @Override
     public void prepareWebViewInSystemServer() {
-        mSystemInterface.notifyZygote(isMultiProcessEnabled());
         try {
             synchronized (mLock) {
                 mCurrentWebViewPackage = findPreferredWebViewPackage();
@@ -366,9 +362,7 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
 
         // Once we've notified the system that the provider has changed and started RELRO creation,
         // try to restart the zygote so that it will be ready when apps use it.
-        if (isMultiProcessEnabled()) {
-            AsyncTask.THREAD_POOL_EXECUTOR.execute(this::startZygoteWhenReady);
-        }
+        AsyncTask.THREAD_POOL_EXECUTOR.execute(this::startZygoteWhenReady);
     }
 
     /**
@@ -632,25 +626,14 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
 
     @Override
     public boolean isMultiProcessEnabled() {
-        int settingValue = mSystemInterface.getMultiProcessSetting(mContext);
-        if (mSystemInterface.isMultiProcessDefaultEnabled()) {
-            // Multiprocess should be enabled unless the user has turned it off manually.
-            return settingValue > MULTIPROCESS_SETTING_OFF_VALUE;
-        } else {
-            // Multiprocess should not be enabled, unless the user has turned it on manually.
-            return settingValue >= MULTIPROCESS_SETTING_ON_VALUE;
-        }
+        throw new IllegalStateException(
+                "isMultiProcessEnabled shouldn't be called if update_service_v2 flag is set.");
     }
 
     @Override
     public void enableMultiProcess(boolean enable) {
-        PackageInfo current = getCurrentWebViewPackage();
-        mSystemInterface.setMultiProcessSetting(mContext,
-                enable ? MULTIPROCESS_SETTING_ON_VALUE : MULTIPROCESS_SETTING_OFF_VALUE);
-        mSystemInterface.notifyZygote(enable);
-        if (current != null) {
-            mSystemInterface.killPackageDependents(current.packageName);
-        }
+        throw new IllegalStateException(
+                "enableMultiProcess shouldn't be called if update_service_v2 flag is set.");
     }
 
     /**
@@ -659,7 +642,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
     @Override
     public void dumpState(PrintWriter pw) {
         pw.println("Current WebView Update Service state");
-        pw.println(String.format("  Multiprocess enabled: %b", isMultiProcessEnabled()));
         synchronized (mLock) {
             if (mCurrentWebViewPackage == null) {
                 pw.println("  Current WebView package is null");
