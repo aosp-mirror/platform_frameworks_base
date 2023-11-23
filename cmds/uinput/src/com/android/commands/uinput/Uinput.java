@@ -60,6 +60,10 @@ public class Uinput {
                 stream = new FileInputStream(f);
             }
             (new Uinput(stream)).run();
+        } catch (EvemuParser.ParsingException e) {
+            System.err.println(e.makeErrorMessage());
+            error(e.makeErrorMessage(), e);
+            System.exit(1);
         } catch (Exception e) {
             error("Uinput injection failed.", e);
             System.exit(1);
@@ -142,8 +146,9 @@ public class Uinput {
                     "Tried to send command \"" + e.getCommand() + "\" to an unregistered device!");
         }
         int id = e.getId();
-        Device d = new Device(id, e.getName(), e.getVendorId(), e.getProductId(), e.getBus(),
-                e.getConfiguration(), e.getFfEffectsMax(), e.getAbsInfo(), e.getPort());
+        Device d = new Device(id, e.getName(), e.getVendorId(), e.getProductId(),
+                e.getVersionId(), e.getBus(), e.getConfiguration(), e.getFfEffectsMax(),
+                e.getAbsInfo(), e.getPort());
         mDevices.append(id, d);
     }
 

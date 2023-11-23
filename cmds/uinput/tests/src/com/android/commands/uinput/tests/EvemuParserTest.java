@@ -19,6 +19,8 @@ package com.android.commands.uinput.tests;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.fail;
+
 import android.platform.test.annotations.Postsubmit;
 import android.util.SparseArray;
 
@@ -68,7 +70,7 @@ public class EvemuParserTest {
         assertThat(event.getBus()).isEqualTo(0x0001);
         assertThat(event.getVendorId()).isEqualTo(0x1234);
         assertThat(event.getProductId()).isEqualTo(0x5678);
-        // TODO(b/302297266): check version ID once it's supported
+        assertThat(event.getVersionId()).isEqualTo(0x9abc);
     }
 
     @Test
@@ -238,6 +240,25 @@ public class EvemuParserTest {
 
         assertInjectEvent(parser.getNextEvent(), 0x1, 0x15, 1);
         assertInjectEvent(parser.getNextEvent(), 0x0, 0x0, 0);
+    }
+
+    @Test
+    public void testErrorLineNumberReporting() throws IOException {
+        StringReader reader = new StringReader("""
+                # EVEMU 1.3
+                N: ACME Widget
+                # Comment to make sure they're taken into account when numbering lines
+                I: 0001 1234 5678 9abc
+                00 00 00 00 00 00 00 00  # Missing a type
+                E: 0.000001 0001 0015 0001   # KEY_Y press
+                E: 0.000001 0000 0000 0000   # SYN_REPORT
+                """);
+        try {
+            new EvemuParser(reader);
+            fail("Parser should have thrown an error about the line with the missing type.");
+        } catch (EvemuParser.ParsingException ex) {
+            assertThat(ex.makeErrorMessage()).startsWith("Parsing error on line 5:");
+        }
     }
 
     @Test
