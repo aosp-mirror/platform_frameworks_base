@@ -47,7 +47,10 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.audio.AudioServiceEvents.LoudnessEvent;
+import com.android.server.utils.EventLogger;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -56,6 +59,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Class to handle the updates in loudness parameters and responsible to generate parameters that
@@ -109,11 +113,18 @@ public class LoudnessCodecHelper {
                 pid = (Integer) cookie;
             }
             if (pid != null) {
-                mLoudnessCodecHelper.removePid(pid);
+                if (DEBUG) {
+                    Log.d(TAG, "Client with pid " + pid + " died, removing from receiving updates");
+                }
+                sLogger.enqueue(LoudnessEvent.getClientDied(pid));
+                mLoudnessCodecHelper.onClientPidDied(pid);
             }
             super.onCallbackDied(callback, cookie);
         }
     }
+
+    private static final EventLogger sLogger = new EventLogger(
+            AudioService.LOG_NB_EVENTS_LOUDNESS_CODEC, "Loudness updates");
 
     private final LoudnessRemoteCallbackList mLoudnessUpdateDispatchers =
             new LoudnessRemoteCallbackList(this);
@@ -290,7 +301,10 @@ public class LoudnessCodecHelper {
             Set<LoudnessCodecInfo> infoSet = new HashSet<>(codecInfoList);
             mStartedPiids.put(piid, infoSet);
 
-            mPiidToPidCache.put(piid, Binder.getCallingPid());
+            int pid = Binder.getCallingPid();
+            mPiidToPidCache.put(piid, pid);
+
+            sLogger.enqueue(LoudnessEvent.getStartPiid(piid, pid));
         }
 
         try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
@@ -304,12 +318,15 @@ public class LoudnessCodecHelper {
         if (DEBUG) {
             Log.d(TAG, "stopLoudnessCodecUpdates: piid " + piid);
         }
+
         synchronized (mLock) {
             if (!mStartedPiids.contains(piid)) {
                 Log.w(TAG, "Loudness updates are already stopped for piid " + piid);
                 return;
             }
             mStartedPiids.remove(piid);
+
+            sLogger.enqueue(LoudnessEvent.getStopPiid(piid, mPiidToPidCache.get(piid, -1)));
             mPiidToDeviceIdCache.delete(piid);
             mPiidToPidCache.delete(piid);
         }
@@ -363,24 +380,6 @@ public class LoudnessCodecHelper {
             }
             final Set<LoudnessCodecInfo> infoSet = mStartedPiids.get(piid);
             infoSet.remove(codecInfo);
-        }
-    }
-
-    void removePid(int pid) {
-        if (DEBUG) {
-            Log.d(TAG, "Removing pid " + pid + " from receiving updates");
-        }
-        synchronized (mLock) {
-            for (int i = 0; i < mPiidToPidCache.size(); ++i) {
-                int piid = mPiidToPidCache.keyAt(i);
-                if (mPiidToPidCache.get(piid) == pid) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Removing piid  " + piid);
-                    }
-                    mStartedPiids.delete(piid);
-                    mPiidToDeviceIdCache.delete(piid);
-                }
-            }
         }
     }
 
@@ -452,7 +451,43 @@ public class LoudnessCodecHelper {
         updateApcList.forEach(apc -> updateCodecParametersForConfiguration(apc));
     }
 
-    /** Updates and dispatches the new loudness parameters for all its registered codecs.
+    /** Updates and dispatches the new loudness parameters for all its registered codecs. */
+    void dump(PrintWriter pw) {
+        // Registered clients
+        pw.println("\nRegistered clients:\n");
+        synchronized (mLock) {
+            for (int i = 0; i < mStartedPiids.size(); ++i) {
+                int piid = mStartedPiids.keyAt(i);
+                int pid = mPiidToPidCache.get(piid, -1);
+                final Set<LoudnessCodecInfo> codecInfos = mStartedPiids.get(piid);
+                pw.println(String.format("Player piid %d pid %d active codec types %s\n", piid,
+                        pid, codecInfos.stream().map(Object::toString).collect(
+                                Collectors.joining(", "))));
+            }
+            pw.println();
+        }
+
+        sLogger.dump(pw);
+        pw.println();
+    }
+
+    private void onClientPidDied(int pid) {
+        synchronized (mLock) {
+            for (int i = 0; i < mPiidToPidCache.size(); ++i) {
+                int piid = mPiidToPidCache.keyAt(i);
+                if (mPiidToPidCache.get(piid) == pid) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Removing piid  " + piid);
+                    }
+                    mStartedPiids.delete(piid);
+                    mPiidToDeviceIdCache.delete(piid);
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates and dispatches the new loudness parameters for the {@code codecInfos} set.
      *
      * @param apc the player configuration for which the loudness parameters are updated.
      */

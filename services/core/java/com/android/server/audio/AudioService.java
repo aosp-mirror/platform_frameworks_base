@@ -11372,6 +11372,8 @@ public class AudioService extends IAudioService.Stub
     static final int LOG_NB_EVENTS_SPATIAL = 30;
     static final int LOG_NB_EVENTS_SOUND_DOSE = 30;
 
+    static final int LOG_NB_EVENTS_LOUDNESS_CODEC = 30;
+
     static final EventLogger
             sLifecycleLogger = new EventLogger(LOG_NB_EVENTS_LIFECYCLE,
             "audio services lifecycle");
@@ -11570,6 +11572,10 @@ public class AudioService extends IAudioService.Stub
         pw.println("isSpatializerEnabled:" + isSpatializerEnabled() + " (routing dependent)");
         mSpatializerHelper.dump(pw);
         sSpatialLogger.dump(pw);
+
+        pw.println("\n");
+        pw.println("\nLoudness alignment:");
+        mLoudnessCodecHelper.dump(pw);
 
         mAudioSystem.dump(pw);
     }

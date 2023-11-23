@@ -622,6 +622,55 @@ public class AudioServiceEvents {
         }
     }
 
+    static final class LoudnessEvent extends EventLogger.Event {
+        static final int START_PIID = 0;
+
+        static final int STOP_PIID = 1;
+
+        static final int CLIENT_DIED = 2;
+
+        final int mEventType;
+        final int mIntValue1;
+        final int mIntValue2;
+
+        private LoudnessEvent(int event, int i1, int i2) {
+            mEventType = event;
+            mIntValue1 = i1;
+            mIntValue2 = i2;
+        }
+
+        static LoudnessEvent getStartPiid(int piid, int pid) {
+            return new LoudnessEvent(START_PIID, piid, pid);
+        }
+
+        static LoudnessEvent getStopPiid(int piid, int pid) {
+            return new LoudnessEvent(STOP_PIID, piid, pid);
+        }
+
+        static LoudnessEvent getClientDied(int pid) {
+            return new LoudnessEvent(CLIENT_DIED, 0 /* ignored */, pid);
+        }
+
+
+        @Override
+        public String eventToString() {
+            switch (mEventType) {
+                case START_PIID:
+                    return String.format(
+                            "Start loudness updates for piid %d for client pid %d",
+                            mIntValue1, mIntValue2);
+                case STOP_PIID:
+                    return String.format(
+                            "Stop loudness updates for piid %d for client pid %d",
+                            mIntValue1, mIntValue2);
+                case CLIENT_DIED:
+                    return String.format("Loudness client with pid %d died", mIntValue2);
+
+            }
+            return new StringBuilder("FIXME invalid event type:").append(mEventType).toString();
+        }
+    }
+
     /**
      * Class to log stream type mute/unmute events
      */

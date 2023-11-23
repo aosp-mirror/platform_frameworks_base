@@ -23,7 +23,7 @@ package android.media;
  *
  * {@hide}
  */
-@JavaDerive(equals = true)
+@JavaDerive(equals = true, toString = true)
 parcelable LoudnessCodecInfo {
     /** Supported codec metadata types for loudness updates. */
     @Backing(type="int")
