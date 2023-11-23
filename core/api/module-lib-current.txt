@@ -136,6 +136,7 @@ package android.content {
 package android.content.pm {
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
+    method @FlaggedApi("android.content.pm.sdk_lib_independence") @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getOptionalSharedLibraryInfos();
     method @NonNull public java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraryInfos();
     field public static final int HIDDEN_API_ENFORCEMENT_DEFAULT = -1; // 0xffffffff
     field public static final int HIDDEN_API_ENFORCEMENT_DISABLED = 0; // 0x0

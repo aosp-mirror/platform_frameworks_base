@@ -3864,19 +3864,15 @@ public class ComputerEngine implements Computer {
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
-
-                var usingSharedLibraryPair =
-                        getPackagesUsingSharedLibrary(libInfo, flags, callingUid, userId);
                 SharedLibraryInfo resLibInfo = new SharedLibraryInfo(libInfo.getPath(),
                         libInfo.getPackageName(), libInfo.getAllCodePaths(),
                         libInfo.getName(), libInfo.getLongVersion(),
                         libInfo.getType(), declaringPackage,
-                        usingSharedLibraryPair.first,
                         (libInfo.getDependencies() == null
                                 ? null
                                 : new ArrayList<>(libInfo.getDependencies())),
-                        libInfo.isNative());
-
+                        libInfo.isNative(),
+                        getPackagesUsingSharedLibrary(libInfo, flags, callingUid, userId));
                 if (result == null) {
                     result = new ArrayList<>();
                 }

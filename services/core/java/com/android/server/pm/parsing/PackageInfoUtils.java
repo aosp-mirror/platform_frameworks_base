@@ -28,6 +28,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.Flags;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageItemInfo;
@@ -474,7 +475,34 @@ public class PackageInfoUtils {
         }
         info.sharedLibraryFiles = usesLibraryFiles.isEmpty()
                 ? null : usesLibraryFiles.toArray(new String[0]);
-        info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
+
+
+        if (!Flags.sdkLibIndependence()) {
+            info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
+            info.optionalSharedLibraryInfos = null;
+        } else {
+            // sharedLibraryInfos contains all shared libraries that the app depends on (including
+            // the optional sdk libraries)
+            info.sharedLibraryInfos = usesLibraryInfos.isEmpty() ? null : usesLibraryInfos;
+            String[] libsNames = pkgSetting.getUsesSdkLibraries();
+            boolean[] libsOptional = pkgSetting.getUsesSdkLibrariesOptional();
+            List<SharedLibraryInfo> optionalSdkLibraries = null;
+            if (!ArrayUtils.isEmpty(libsOptional) && !ArrayUtils.isEmpty(libsNames)
+                    && libsNames.length == libsOptional.length) {
+                for (SharedLibraryInfo info1 : usesLibraryInfos) {
+                    if (info1.getType() == SharedLibraryInfo.TYPE_SDK_PACKAGE) {
+                        int index = ArrayUtils.indexOf(libsNames, info1.getName());
+                        if (index >= 0 && libsOptional[index]) {
+                            if (optionalSdkLibraries == null) {
+                                optionalSdkLibraries = new ArrayList<>();
+                            }
+                            optionalSdkLibraries.add(info1);
+                        }
+                    }
+                }
+            }
+            info.optionalSharedLibraryInfos = optionalSdkLibraries;
+        }
         if (info.category == ApplicationInfo.CATEGORY_UNDEFINED) {
             info.category = pkgSetting.getCategoryOverride();
         }
