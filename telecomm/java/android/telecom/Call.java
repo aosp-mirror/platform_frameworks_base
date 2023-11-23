@@ -2951,11 +2951,11 @@ public final class Call {
 
         for(String key : bundle.keySet()) {
             if (key != null) {
-                final Object value = bundle.get(key);
-                final Object newValue = newBundle.get(key);
                 if (!newBundle.containsKey(key)) {
                     return false;
                 }
+                final Object value = bundle.get(key);
+                final Object newValue = newBundle.get(key);
                 if (value instanceof Bundle && newValue instanceof Bundle) {
                     if (!areBundlesEqual((Bundle) value, (Bundle) newValue)) {
                         return false;
