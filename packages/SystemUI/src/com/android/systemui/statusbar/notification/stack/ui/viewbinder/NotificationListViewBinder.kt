@@ -28,6 +28,7 @@ import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.NotificationShelf
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ShelfNotificationIconViewStore
@@ -62,14 +63,17 @@ constructor(
         viewController: NotificationStackScrollLayoutController
     ) {
         bindShelf(view)
-        bindFooter(view)
-        bindEmptyShade(view)
         bindHideList(viewController, viewModel)
 
-        view.repeatWhenAttached {
-            lifecycleScope.launch {
-                viewModel.isImportantForAccessibility.collect { isImportantForAccessibility ->
-                    view.setImportantForAccessibilityYesNo(isImportantForAccessibility)
+        if (FooterViewRefactor.isEnabled) {
+            bindFooter(view)
+            bindEmptyShade(view)
+
+            view.repeatWhenAttached {
+                lifecycleScope.launch {
+                    viewModel.isImportantForAccessibility.collect { isImportantForAccessibility ->
+                        view.setImportantForAccessibilityYesNo(isImportantForAccessibility)
+                    }
                 }
             }
         }
