@@ -24,6 +24,8 @@ import android.util.Printer;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
+import java.util.Objects;
+
 /**
   * Class used to run a message loop for a thread.  Threads by default do
   * not have a message loop associated with them; to create one, call
@@ -54,6 +56,7 @@ import android.util.proto.ProtoOutputStream;
   *      }
   *  }</pre>
   */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class Looper {
     /*
      * API Implementation Note:
@@ -140,6 +143,30 @@ public final class Looper {
     public static Looper getMainLooper() {
         synchronized (Looper.class) {
             return sMainLooper;
+        }
+    }
+
+    /**
+     * Force the application's main looper to the given value.  The main looper is typically
+     * configured automatically by the OS, so this capability is only intended to enable testing.
+     *
+     * @hide
+     */
+    public static void setMainLooperForTest(@NonNull Looper looper) {
+        synchronized (Looper.class) {
+            sMainLooper = Objects.requireNonNull(looper);
+        }
+    }
+
+    /**
+     * Clear the application's main looper to be undefined.  The main looper is typically
+     * configured automatically by the OS, so this capability is only intended to enable testing.
+     *
+     * @hide
+     */
+    public static void clearMainLooperForTest() {
+        synchronized (Looper.class) {
+            sMainLooper = null;
         }
     }
 
@@ -282,11 +309,7 @@ public final class Looper {
 
         // Allow overriding a threshold with a system prop. e.g.
         // adb shell 'setprop log.looper.1000.main.slow 1 && stop && start'
-        final int thresholdOverride =
-                SystemProperties.getInt("log.looper."
-                        + Process.myUid() + "."
-                        + Thread.currentThread().getName()
-                        + ".slow", -1);
+        final int thresholdOverride = getThresholdOverride();
 
         me.mSlowDeliveryDetected = false;
 
@@ -295,6 +318,18 @@ public final class Looper {
                 return;
             }
         }
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static int getThresholdOverride() {
+        return SystemProperties.getInt("log.looper."
+                + Process.myUid() + "."
+                + Thread.currentThread().getName()
+                + ".slow", -1);
+    }
+
+    private static int getThresholdOverride$ravenwood() {
+        return -1;
     }
 
     private static boolean showSlowLog(long threshold, long measureStart, long measureEnd,

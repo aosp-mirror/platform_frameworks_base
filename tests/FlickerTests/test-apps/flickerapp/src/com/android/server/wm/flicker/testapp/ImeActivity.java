@@ -16,12 +16,51 @@
 
 package com.android.server.wm.flicker.testapp;
 
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+
+import static com.android.server.wm.flicker.testapp.ActivityOptions.Ime.Default.ACTION_FINISH_ACTIVITY;
+import static com.android.server.wm.flicker.testapp.ActivityOptions.Ime.Default.ACTION_START_DIALOG_THEMED_ACTIVITY;
+import static com.android.server.wm.flicker.testapp.ActivityOptions.Ime.Default.ACTION_TOGGLE_ORIENTATION;
+
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.WindowManager;
-import android.widget.Button;
 
 public class ImeActivity extends Activity {
+
+    private static final String TAG = "ImeActivity";
+
+    /** Receiver used to handle actions coming from the test helper methods. */
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            switch (intent.getAction()) {
+                case ACTION_FINISH_ACTIVITY -> finish();
+                case ACTION_START_DIALOG_THEMED_ACTIVITY -> startActivity(
+                        new Intent(context, DialogThemedActivity.class));
+                case ACTION_TOGGLE_ORIENTATION -> {
+                    mIsPortrait = !mIsPortrait;
+                    setRequestedOrientation(mIsPortrait
+                            ? SCREEN_ORIENTATION_PORTRAIT
+                            : SCREEN_ORIENTATION_UNSPECIFIED);
+                }
+                default -> Log.w(TAG, "Unhandled action=" + intent.getAction());
+            }
+        }
+    };
+
+    /**
+     * Used to toggle activity orientation between portrait when {@code true} and
+     * unspecified otherwise.
+     */
+    private boolean mIsPortrait = false;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,9 +69,17 @@ public class ImeActivity extends Activity {
                 .LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         getWindow().setAttributes(p);
         setContentView(R.layout.activity_ime);
-        Button button = findViewById(R.id.finish_activity_btn);
-        button.setOnClickListener(view -> {
-            finish();
-        });
+
+        final var filter = new IntentFilter();
+        filter.addAction(ACTION_FINISH_ACTIVITY);
+        filter.addAction(ACTION_START_DIALOG_THEMED_ACTIVITY);
+        filter.addAction(ACTION_TOGGLE_ORIENTATION);
+        registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED);
+    }
+
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(mBroadcastReceiver);
+        super.onDestroy();
     }
 }

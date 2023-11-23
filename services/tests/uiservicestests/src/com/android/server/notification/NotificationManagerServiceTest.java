@@ -65,6 +65,7 @@ import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Build.VERSION_CODES.O_MR1;
 import static android.os.Build.VERSION_CODES.P;
+import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.os.PowerManager.PARTIAL_WAKE_LOCK;
 import static android.os.PowerWhitelistManager.REASON_NOTIFICATION_SERVICE;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
@@ -72,7 +73,6 @@ import static android.os.UserHandle.USER_SYSTEM;
 import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
-import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
 import static android.service.notification.Adjustment.KEY_USER_SENTIMENT;
@@ -306,7 +306,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
-
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -813,6 +812,20 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mPackageIntentReceiver.onReceive(getContext(), intent);
     }
 
+    private void simulatePackageRemovedBroadcast(String pkg, int uid) {
+        // mimics receive broadcast that package is removed, but doesn't remove the package.
+        final Bundle extras = new Bundle();
+        extras.putStringArray(Intent.EXTRA_CHANGED_PACKAGE_LIST,
+                new String[]{pkg});
+        extras.putIntArray(Intent.EXTRA_CHANGED_UID_LIST, new int[]{uid});
+
+        final Intent intent = new Intent(Intent.ACTION_PACKAGE_REMOVED);
+        intent.setData(Uri.parse("package:" + pkg));
+        intent.putExtras(extras);
+
+        mPackageIntentReceiver.onReceive(getContext(), intent);
+    }
+
     private void simulatePackageDistractionBroadcast(int flag, String[] pkgs, int[] uids) {
         // mimics receive broadcast that package is (un)distracting
         // but does not actually register that info with packagemanager
@@ -876,6 +889,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
             e.printStackTrace();
         }
         mTestNotificationChannel.setAllowBubbles(channelEnabled);
+    }
+
+    private void setUpPrefsForHistory(int uid, boolean globalEnabled) {
+        // Sets NOTIFICATION_HISTORY_ENABLED setting for calling process uid
+        Settings.Secure.putIntForUser(mContext.getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, globalEnabled ? 1 : 0, uid);
+        // Sets NOTIFICATION_HISTORY_ENABLED setting for uid 0
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, globalEnabled ? 1 : 0);
+
+        // Forces an update by calling observe on mSettingsObserver, which picks up the settings
+        // changes above.
+        mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START, mMainLooper);
+
+        assertEquals(globalEnabled, Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.NOTIFICATION_HISTORY_ENABLED, 0 /* =def */, uid) != 0);
     }
 
     private StatusBarNotification generateSbn(String pkg, int uid, long postTime, int userId) {
@@ -9828,6 +9857,43 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(mHistoryManager, times(1)).onPackageRemoved(UserHandle.getUserId(uids[0]), pkgs[0]);
         verify(mHistoryManager, times(1)).onPackageRemoved(UserHandle.getUserId(uids[1]), pkgs[1]);
+    }
+
+    @Test
+    public void testHandleOnPackageRemoved_ClearsHistory() throws RemoteException {
+        // Enables Notification History setting
+        setUpPrefsForHistory(mUid, true /* =enabled */);
+
+        // Posts a notification to the mTestNotificationChannel.
+        final NotificationRecord notif = generateNotificationRecord(
+                mTestNotificationChannel, 1, null, false);
+        mService.addNotification(notif);
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(
+                notif.getSbn().getPackageName());
+        assertEquals(1, notifs.length);
+
+        // Cancels all notifications.
+        mService.cancelAllNotificationsInt(mUid, 0, PKG, null, 0, 0,
+                notif.getUserId(), REASON_CANCEL);
+        waitForIdle();
+        notifs = mBinderService.getActiveNotifications(notif.getSbn().getPackageName());
+        assertEquals(0, notifs.length);
+
+        // Checks that notification history's recently canceled archive contains the notification.
+        notifs = mBinderService.getHistoricalNotificationsWithAttribution(PKG,
+                        mContext.getAttributionTag(), 5 /* count */, false /* includeSnoozed */);
+        waitForIdle();
+        assertEquals(1, notifs.length);
+
+        // Remove sthe package that contained the channel
+        simulatePackageRemovedBroadcast(PKG, mUid);
+        waitForIdle();
+
+        // Checks that notification history no longer contains the notification.
+        notifs = mBinderService.getHistoricalNotificationsWithAttribution(
+                PKG, mContext.getAttributionTag(), 5 /* count */, false /* includeSnoozed */);
+        waitForIdle();
+        assertEquals(0, notifs.length);
     }
 
     @Test

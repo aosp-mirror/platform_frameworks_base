@@ -62,7 +62,7 @@ class StatusBarModeRepositoryImplTest : SysuiTestCase() {
     private val ongoingCallRepository = OngoingCallRepository()
 
     private val underTest =
-        StatusBarModeRepositoryImpl(
+        StatusBarModePerDisplayRepositoryImpl(
                 testScope.backgroundScope,
                 DISPLAY_ID,
                 commandQueue,

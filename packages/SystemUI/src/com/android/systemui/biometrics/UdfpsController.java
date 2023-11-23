@@ -64,7 +64,6 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
 import com.android.internal.util.LatencyTracker;
-import com.android.keyguard.FaceAuthApiRequestReason;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
@@ -103,8 +102,6 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.time.SystemClock;
 
-import kotlin.Unit;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -113,6 +110,8 @@ import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+
+import kotlin.Unit;
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
@@ -589,7 +588,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
         // Always pilfer pointers that are within sensor area or when alternate bouncer is showing
         if (mActivePointerId != MotionEvent.INVALID_POINTER_ID
-                || mAlternateBouncerInteractor.isVisibleState()) {
+                || (mAlternateBouncerInteractor.isVisibleState()
+                && !DeviceEntryUdfpsRefactor.isEnabled())) {
             shouldPilfer = true;
         }
 
@@ -1013,9 +1013,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             playStartHaptic();
 
             mKeyguardFaceAuthInteractor.onUdfpsSensorTouched();
-            if (!mKeyguardUpdateMonitor.isFaceDetectionRunning()) {
-                mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.UDFPS_POINTER_DOWN);
-            }
         }
         mOnFingerDown = true;
         mFingerprintManager.onPointerDown(requestId, mSensorProps.sensorId, pointerId, x, y,

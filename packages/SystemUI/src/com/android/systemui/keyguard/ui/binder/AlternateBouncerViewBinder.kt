@@ -20,23 +20,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.classifier.Classifier
 import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
+import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.scrim.ScrimView
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.gesture.TapGestureDetector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
-/**
- * Binds the alternate bouncer view to its view-model.
- *
- * To use this properly, users should maintain a one-to-one relationship between the [View] and the
- * view-binding, binding each view only once. It is okay and expected for the same instance of the
- * view-model to be reused for multiple view/view-binder bindings.
- */
+/** Binds the alternate bouncer view to its view-model. */
 @ExperimentalCoroutinesApi
 object AlternateBouncerViewBinder {
 
@@ -47,6 +45,9 @@ object AlternateBouncerViewBinder {
         viewModel: AlternateBouncerViewModel,
         scope: CoroutineScope,
         notificationShadeWindowController: NotificationShadeWindowController,
+        falsingManager: FalsingManager,
+        swipeUpAnywhereGestureHandler: SwipeUpAnywhereGestureHandler,
+        tapGestureDetector: TapGestureDetector,
     ) {
         DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()
         scope.launch {
@@ -64,9 +65,25 @@ object AlternateBouncerViewBinder {
                 scrim.viewAlpha = 0f
 
                 launch {
-                    viewModel.onClickListener.collect {
-                        // TODO (b/287599719): Support swiping to dismiss altBouncer
-                        alternateBouncerViewContainer.setOnClickListener(it)
+                    viewModel.registerForDismissGestures.collect { registerForDismissGestures ->
+                        if (registerForDismissGestures) {
+                            swipeUpAnywhereGestureHandler.addOnGestureDetectedCallback(swipeTag) { _
+                                ->
+                                if (
+                                    !falsingManager.isFalseTouch(Classifier.ALTERNATE_BOUNCER_SWIPE)
+                                ) {
+                                    viewModel.showPrimaryBouncer()
+                                }
+                            }
+                            tapGestureDetector.addOnGestureDetectedCallback(tapTag) { _ ->
+                                if (!falsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
+                                    viewModel.showPrimaryBouncer()
+                                }
+                            }
+                        } else {
+                            swipeUpAnywhereGestureHandler.removeOnGestureDetectedCallback(swipeTag)
+                            tapGestureDetector.removeOnGestureDetectedCallback(tapTag)
+                        }
                     }
                 }
 
@@ -83,3 +100,6 @@ object AlternateBouncerViewBinder {
         }
     }
 }
+
+private const val swipeTag = "AlternateBouncer-SWIPE"
+private const val tapTag = "AlternateBouncer-TAP"

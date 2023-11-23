@@ -372,26 +372,6 @@ constructor(
         )
     }
 
-    override fun executeRunnableDismissingKeyguard(
-        runnable: Runnable?,
-        cancelAction: Runnable?,
-        dismissShade: Boolean,
-        afterKeyguardGone: Boolean,
-        deferred: Boolean,
-        willAnimateOnKeyguard: Boolean,
-        customMessage: String?,
-    ) {
-        activityStarterInternal.executeRunnableDismissingKeyguard(
-            runnable = runnable,
-            cancelAction = cancelAction,
-            dismissShade = dismissShade,
-            afterKeyguardGone = afterKeyguardGone,
-            deferred = deferred,
-            willAnimateOnKeyguard = willAnimateOnKeyguard,
-            customMessage = customMessage,
-        )
-    }
-
     override fun postQSRunnableDismissingKeyguard(runnable: Runnable?) {
         postOnUiThread {
             statusBarStateController.setLeaveOpenOnKeyguardHide(true)

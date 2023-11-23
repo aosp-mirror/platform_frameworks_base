@@ -26,8 +26,10 @@ import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
 
 import android.app.AutomaticZenRule;
+import android.app.Flags;
 import android.content.ComponentName;
 import android.net.Uri;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ZenDeviceEffects;
@@ -43,6 +45,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.UiServiceTestCase;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -52,6 +55,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -60,6 +64,7 @@ import java.util.Set;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class ZenModeDiffTest extends UiServiceTestCase {
+    // Base set of exempt fields independent of fields that are enabled/disabled via flags.
     // version is not included in the diff; manual & automatic rules have special handling
     public static final Set<String> ZEN_MODE_CONFIG_EXEMPT_FIELDS =
             Set.of("version", "manualRule", "automaticRules");
@@ -72,6 +77,13 @@ public class ZenModeDiffTest extends UiServiceTestCase {
                     : Set.of(RuleDiff.FIELD_TYPE, RuleDiff.FIELD_TRIGGER_DESCRIPTION,
                             RuleDiff.FIELD_ICON_RES, RuleDiff.FIELD_ALLOW_MANUAL,
                             RuleDiff.FIELD_ZEN_DEVICE_EFFECTS);
+
+    // allowPriorityChannels is flagged by android.app.modes_api
+    public static final Set<String> ZEN_MODE_CONFIG_FLAGGED_FIELDS =
+            Set.of("allowPriorityChannels");
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void testRuleDiff_addRemoveSame() {
@@ -140,6 +152,35 @@ public class ZenModeDiffTest extends UiServiceTestCase {
 
     @Test
     public void testConfigDiff_fieldDiffs() throws Exception {
+        // these two start the same
+        ZenModeConfig c1 = new ZenModeConfig();
+        ZenModeConfig c2 = new ZenModeConfig();
+
+        // maps mapping field name -> expected output value as we set diffs
+        ArrayMap<String, Object> expectedFrom = new ArrayMap<>();
+        ArrayMap<String, Object> expectedTo = new ArrayMap<>();
+        List<Field> fieldsForDiff = getFieldsForDiffCheck(
+                ZenModeConfig.class, getConfigExemptAndFlaggedFields());
+        generateFieldDiffs(c1, c2, fieldsForDiff, expectedFrom, expectedTo);
+
+        ZenModeDiff.ConfigDiff d = new ZenModeDiff.ConfigDiff(c1, c2);
+        assertTrue(d.hasDiff());
+
+        // Now diff them and check that each of the fields has a diff
+        for (Field f : fieldsForDiff) {
+            String name = f.getName();
+            assertNotNull("diff not found for field: " + name, d.getDiffForField(name));
+            assertTrue(d.getDiffForField(name).hasDiff());
+            assertTrue("unexpected field: " + name, expectedFrom.containsKey(name));
+            assertTrue("unexpected field: " + name, expectedTo.containsKey(name));
+            assertEquals(expectedFrom.get(name), d.getDiffForField(name).from());
+            assertEquals(expectedTo.get(name), d.getDiffForField(name).to());
+        }
+    }
+
+    @Test
+    public void testConfigDiff_fieldDiffs_flagOn() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
         // these two start the same
         ZenModeConfig c1 = new ZenModeConfig();
         ZenModeConfig c2 = new ZenModeConfig();
@@ -229,6 +270,14 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         assertNull(automaticDiffs.get("ruleId").getDiffForField("component").to());
         assertNotNull(automaticDiffs.get("ruleId").getDiffForField("pkg"));
         assertEquals("different", automaticDiffs.get("ruleId").getDiffForField("pkg").to());
+    }
+
+    // Helper method that merges the base exempt fields with fields that are flagged
+    private Set getConfigExemptAndFlaggedFields() {
+        Set merged = new HashSet();
+        merged.addAll(ZEN_MODE_CONFIG_EXEMPT_FIELDS);
+        merged.addAll(ZEN_MODE_CONFIG_FLAGGED_FIELDS);
+        return merged;
     }
 
     // Helper methods for working with configs, policies, rules

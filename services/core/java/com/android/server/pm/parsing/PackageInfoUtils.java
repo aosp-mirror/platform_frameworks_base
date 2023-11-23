@@ -411,6 +411,9 @@ public class PackageInfoUtils {
             ai.overlayPaths = overlayPaths.getOverlayPaths().toArray(new String[0]);
         }
         ai.isArchived = PackageArchiver.isArchived(state);
+        if (ai.isArchived) {
+            ai.nonLocalizedLabel = state.getArchiveState().getActivityInfos().get(0).getTitle();
+        }
     }
 
     @Nullable

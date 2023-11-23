@@ -81,6 +81,7 @@ object KeyguardDismissInteractorFactory {
                 trustRepository,
                 testScope.backgroundScope,
                 mock(SelectedUserInteractor::class.java),
+                mock(KeyguardFaceAuthInteractor::class.java),
             )
         val alternateBouncerInteractor =
             AlternateBouncerInteractor(

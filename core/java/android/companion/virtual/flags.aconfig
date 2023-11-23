@@ -1,3 +1,12 @@
+# Do not add new flags to this file.
+#
+# Due to "virtual" keyword in the package name flags
+# added to this file cannot be accessed from C++
+# code.
+#
+# Use frameworks/base/core/java/android/companion/virtual/flags/flags.aconfig
+# instead.
+
 package: "android.companion.virtual.flags"
 
 flag {

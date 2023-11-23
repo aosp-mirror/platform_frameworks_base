@@ -34,9 +34,7 @@ import android.content.pm.ApplicationInfo;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.RemoteException;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArraySet;
 
 import com.google.common.truth.Expect;
@@ -150,7 +148,7 @@ public final class ProgramListTest {
     @Rule
     public final Expect mExpect = Expect.create();
     @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     @Test
     public void getIdentifierTypes_forFilter() {
@@ -631,8 +629,8 @@ public final class ProgramListTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void getProgramInfos() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         createRadioTuner();
         mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
         registerListCallbacks(/* numCallbacks= */ 1);
@@ -648,8 +646,8 @@ public final class ProgramListTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HD_RADIO_IMPROVED)
     public void getProgramInfos_withIdNotFound() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_HD_RADIO_IMPROVED);
         createRadioTuner();
         mProgramList = mRadioTuner.getDynamicProgramList(TEST_FILTER);
         registerListCallbacks(/* numCallbacks= */ 1);

@@ -36,6 +36,7 @@ import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.notification.collection.NotifLiveDataStore;
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentScope;
 import com.android.systemui.util.ViewController;
 
@@ -51,7 +52,7 @@ import javax.inject.Named;
  * whether there are notifications when the device is in {@link View#SYSTEM_UI_FLAG_LOW_PROFILE}.
  */
 @StatusBarFragmentScope
-public class LightsOutNotifController extends ViewController<View> {
+public class LegacyLightsOutNotifController extends ViewController<View> {
     private final CommandQueue mCommandQueue;
     private final NotifLiveDataStore mNotifDataStore;
     private final WindowManager mWindowManager;
@@ -63,7 +64,7 @@ public class LightsOutNotifController extends ViewController<View> {
     private int mDisplayId;
 
     @Inject
-    LightsOutNotifController(
+    LegacyLightsOutNotifController(
             @Named(LIGHTS_OUT_NOTIF_VIEW) View lightsOutNotifView,
             WindowManager windowManager,
             NotifLiveDataStore notifDataStore,
@@ -72,7 +73,12 @@ public class LightsOutNotifController extends ViewController<View> {
         mWindowManager = windowManager;
         mNotifDataStore = notifDataStore;
         mCommandQueue = commandQueue;
+    }
 
+    @Override
+    protected void onInit() {
+        super.onInit();
+        NotificationsLiveDataStoreRefactor.assertInLegacyMode();
     }
 
     @Override

@@ -20,6 +20,7 @@ import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIO
 import static android.Manifest.permission.DETECT_SCREEN_CAPTURE;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
@@ -7603,15 +7604,17 @@ public class Activity extends ContextThemeWrapper
      * @param taskDescription The TaskDescription properties that describe the task with this activity
      */
     public void setTaskDescription(ActivityManager.TaskDescription taskDescription) {
-        if (mTaskDescription != taskDescription) {
-            mTaskDescription.copyFromPreserveHiddenFields(taskDescription);
-            // Scale the icon down to something reasonable if it is provided
-            if (taskDescription.getIconFilename() == null && taskDescription.getIcon() != null) {
-                final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
-                final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size,
-                        true);
-                mTaskDescription.setIcon(Icon.createWithBitmap(icon));
-            }
+        if (taskDescription == null || mTaskDescription.equals(taskDescription)) {
+            return;
+        }
+
+        mTaskDescription.copyFromPreserveHiddenFields(taskDescription);
+        // Scale the icon down to something reasonable if it is provided
+        if (taskDescription.getIconFilename() == null && taskDescription.getIcon() != null) {
+            final int size = ActivityManager.getLauncherLargeIconSizeInner(this);
+            final Bitmap icon = Bitmap.createScaledBitmap(taskDescription.getIcon(), size, size,
+                    true);
+            mTaskDescription.setIcon(Icon.createWithBitmap(icon));
         }
         ActivityClient.getInstance().setTaskDescription(mToken, mTaskDescription);
     }
@@ -9437,6 +9440,15 @@ public class Activity extends ContextThemeWrapper
      */
     public void enableTaskLocaleOverride() {
         ActivityClient.getInstance().enableTaskLocaleOverride(mToken);
+    }
+
+    /**
+     * Request ActivityRecordInputSink to enable or disable blocking input events.
+     * @hide
+     */
+    @RequiresPermission(INTERNAL_SYSTEM_WINDOW)
+    public void setActivityRecordInputSinkEnabled(boolean enabled) {
+        ActivityClient.getInstance().setActivityRecordInputSinkEnabled(mToken, enabled);
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {

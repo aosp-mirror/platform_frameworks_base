@@ -30,6 +30,10 @@ import com.android.systemui.qs.tiles.impl.flashlight.domain.FlashlightMapper
 import com.android.systemui.qs.tiles.impl.flashlight.domain.interactor.FlashlightTileDataInteractor
 import com.android.systemui.qs.tiles.impl.flashlight.domain.interactor.FlashlightTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.flashlight.domain.model.FlashlightTileModel
+import com.android.systemui.qs.tiles.impl.location.domain.LocationTileMapper
+import com.android.systemui.qs.tiles.impl.location.domain.interactor.LocationTileDataInteractor
+import com.android.systemui.qs.tiles.impl.location.domain.interactor.LocationTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.location.domain.model.LocationTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
@@ -54,8 +58,9 @@ interface PolicyModule {
 
     companion object {
         const val FLASHLIGHT_TILE_SPEC = "flashlight"
+        const val LOCATION_TILE_SPEC = "location"
 
-        /** Inject config */
+        /** Inject flashlight config */
         @Provides
         @IntoMap
         @StringKey(FLASHLIGHT_TILE_SPEC)
@@ -82,6 +87,38 @@ interface PolicyModule {
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(FLASHLIGHT_TILE_SPEC),
+                userActionInteractor,
+                stateInteractor,
+                mapper,
+            )
+
+        /** Inject location config */
+        @Provides
+        @IntoMap
+        @StringKey(LOCATION_TILE_SPEC)
+        fun provideLocationTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(LOCATION_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_location_icon_off,
+                        labelRes = R.string.quick_settings_location_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        /** Inject LocationTile into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(LOCATION_TILE_SPEC)
+        fun provideLocationTileViewModel(
+            factory: QSTileViewModelFactory.Static<LocationTileModel>,
+            mapper: LocationTileMapper,
+            stateInteractor: LocationTileDataInteractor,
+            userActionInteractor: LocationTileUserActionInteractor
+        ): QSTileViewModel =
+            factory.create(
+                TileSpec.create(LOCATION_TILE_SPEC),
                 userActionInteractor,
                 stateInteractor,
                 mapper,

@@ -86,7 +86,7 @@ class KeyguardBypassControllerTest : SysuiTestCase() {
         featureFlags.set(Flags.FULL_SCREEN_USER_SWITCHER, true)
 
         whenever(packageManager.hasSystemFeature(PackageManager.FEATURE_FACE)).thenReturn(true)
-        whenever(keyguardStateController.isFaceEnrolled).thenReturn(true)
+        whenever(keyguardStateController.isFaceEnrolledAndEnabled).thenReturn(true)
     }
 
     @After

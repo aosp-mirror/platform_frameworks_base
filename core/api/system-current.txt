@@ -307,7 +307,7 @@ package android {
     field public static final String RECOVER_KEYSTORE = "android.permission.RECOVER_KEYSTORE";
     field public static final String REGISTER_CALL_PROVIDER = "android.permission.REGISTER_CALL_PROVIDER";
     field public static final String REGISTER_CONNECTION_MANAGER = "android.permission.REGISTER_CONNECTION_MANAGER";
-    field public static final String REGISTER_NSD_OFFLOAD_ENGINE = "android.permission.REGISTER_NSD_OFFLOAD_ENGINE";
+    field @FlaggedApi("com.android.net.flags.register_nsd_offload_engine") public static final String REGISTER_NSD_OFFLOAD_ENGINE = "android.permission.REGISTER_NSD_OFFLOAD_ENGINE";
     field public static final String REGISTER_SIM_SUBSCRIPTION = "android.permission.REGISTER_SIM_SUBSCRIPTION";
     field public static final String REGISTER_STATS_PULL_ATOM = "android.permission.REGISTER_STATS_PULL_ATOM";
     field public static final String REMOTE_DISPLAY_PROVIDER = "android.permission.REMOTE_DISPLAY_PROVIDER";

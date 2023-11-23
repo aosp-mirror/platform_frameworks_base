@@ -135,7 +135,7 @@ public class BiometricsUnlockControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         when(mKeyguardStateController.isShowing()).thenReturn(true);
         when(mUpdateMonitor.isDeviceInteractive()).thenReturn(true);
-        when(mKeyguardStateController.isFaceEnrolled()).thenReturn(true);
+        when(mKeyguardStateController.isFaceEnrolledAndEnabled()).thenReturn(true);
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
         when(mKeyguardBypassController.onBiometricAuthenticated(any(), anyBoolean()))
                 .thenReturn(true);

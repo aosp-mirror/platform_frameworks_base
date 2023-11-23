@@ -85,7 +85,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     private boolean mTrustManaged;
     private boolean mTrusted;
     private boolean mDebugUnlocked = false;
-    private boolean mFaceEnrolled;
+    private boolean mFaceEnrolledAndEnabled;
 
     private float mDismissAmount = 0f;
     private boolean mDismissingFromTouch = false;
@@ -260,16 +260,16 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
                 || (Build.IS_DEBUGGABLE && DEBUG_AUTH_WITH_ADB && mDebugUnlocked);
         boolean trustManaged = mKeyguardUpdateMonitor.getUserTrustIsManaged(user);
         boolean trusted = mKeyguardUpdateMonitor.getUserHasTrust(user);
-        boolean faceEnrolled = mKeyguardUpdateMonitor.isFaceEnrolled(user);
+        boolean faceEnabledAndEnrolled = mKeyguardUpdateMonitor.isFaceEnabledAndEnrolled();
         boolean changed = secure != mSecure || canDismissLockScreen != mCanDismissLockScreen
                 || trustManaged != mTrustManaged || mTrusted != trusted
-                || mFaceEnrolled != faceEnrolled;
+                || mFaceEnrolledAndEnabled != faceEnabledAndEnrolled;
         if (changed || updateAlways) {
             mSecure = secure;
             mCanDismissLockScreen = canDismissLockScreen;
             mTrusted = trusted;
             mTrustManaged = trustManaged;
-            mFaceEnrolled = faceEnrolled;
+            mFaceEnrolledAndEnabled = faceEnabledAndEnrolled;
             mLogger.logKeyguardStateUpdate(
                     mSecure, mCanDismissLockScreen, mTrusted, mTrustManaged);
             notifyUnlockedChanged();
@@ -290,8 +290,8 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
     }
 
     @Override
-    public boolean isFaceEnrolled() {
-        return mFaceEnrolled;
+    public boolean isFaceEnrolledAndEnabled() {
+        return mFaceEnrolledAndEnabled;
     }
 
     @Override
@@ -416,7 +416,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         pw.println("  mTrustManaged: " + mTrustManaged);
         pw.println("  mTrusted: " + mTrusted);
         pw.println("  mDebugUnlocked: " + mDebugUnlocked);
-        pw.println("  mFaceEnrolled: " + mFaceEnrolled);
+        pw.println("  mFaceEnrolled: " + mFaceEnrolledAndEnabled);
         pw.println("  isKeyguardFadingAway: " + isKeyguardFadingAway());
         pw.println("  isKeyguardGoingAway: " + isKeyguardGoingAway());
         pw.println("  isLaunchTransitionFadingAway: " + isLaunchTransitionFadingAway());

@@ -395,11 +395,13 @@ final class RemovePackageHelper {
                 mPm.mSettings.removeRenamedPackageLPw(deletedPs.getRealName());
             }
             if (changedUsers.size() > 0) {
-                final PreferredActivityHelper preferredActivityHelper =
-                        new PreferredActivityHelper(mPm, mBroadcastHelper);
-                preferredActivityHelper.updateDefaultHomeNotLocked(mPm.snapshotComputer(),
-                        changedUsers);
-                mBroadcastHelper.sendPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
+                mPm.mInjector.getBackgroundHandler().post(() -> {
+                    final PreferredActivityHelper preferredActivityHelper =
+                            new PreferredActivityHelper(mPm, mBroadcastHelper);
+                    preferredActivityHelper.updateDefaultHomeNotLocked(mPm.snapshotComputer(),
+                            changedUsers);
+                    mBroadcastHelper.sendPreferredActivityChangedBroadcast(UserHandle.USER_ALL);
+                });
             }
         } else if (!deletedPs.isSystem() && outInfo != null && !outInfo.mIsUpdate
                 && outInfo.mRemovedUsers != null && !outInfo.mIsExternal) {

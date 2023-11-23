@@ -1636,13 +1636,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     /**
-     * Request to authenticate using face.
-     */
-    public void requestFace(boolean request) {
-        mKeyguardUpdateManager.requestFaceAuthOnOccludingApp(request);
-    }
-
-    /**
      * Request to authenticate using the fingerprint sensor.  If the fingerprint sensor is udfps,
      * uses the color provided by udfpsColor for the fingerprint icon.
      */

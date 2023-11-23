@@ -1182,8 +1182,8 @@ public class BinaryTransparencyService extends SystemService {
 
         // we are only interested in doing things at PHASE_BOOT_COMPLETED
         if (phase == PHASE_BOOT_COMPLETED) {
-            Slog.i(TAG, "Boot completed. Getting VBMeta Digest.");
-            getVBMetaDigestInformation();
+            Slog.i(TAG, "Boot completed. Getting boot integrity data.");
+            collectBootIntegrityInfo();
 
             // Log to statsd
             // TODO(b/264061957): For now, biometric system properties are always collected if users
@@ -1458,10 +1458,19 @@ public class BinaryTransparencyService extends SystemService {
         }
     }
 
-    private void getVBMetaDigestInformation() {
+    private void collectBootIntegrityInfo() {
         mVbmetaDigest = SystemProperties.get(SYSPROP_NAME_VBETA_DIGEST, VBMETA_DIGEST_UNAVAILABLE);
         Slog.d(TAG, String.format("VBMeta Digest: %s", mVbmetaDigest));
         FrameworkStatsLog.write(FrameworkStatsLog.VBMETA_DIGEST_REPORTED, mVbmetaDigest);
+
+        if (android.security.Flags.binaryTransparencySepolicyHash()) {
+            byte[] sepolicyHash = PackageUtils.computeSha256DigestForLargeFileAsBytes(
+                    "/sys/fs/selinux/policy", PackageUtils.createLargeFileBuffer());
+            String sepolicyHashEncoded = HexEncoding.encodeToString(sepolicyHash, false);
+            Slog.d(TAG, "sepolicy hash: " + sepolicyHashEncoded);
+            FrameworkStatsLog.write(FrameworkStatsLog.BOOT_INTEGRITY_INFO_REPORTED,
+                    sepolicyHashEncoded, mVbmetaDigest);
+        }
     }
 
     /**

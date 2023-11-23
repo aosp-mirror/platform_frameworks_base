@@ -82,6 +82,10 @@ public class DisplayManagerFlags {
             com.android.graphics.surfaceflinger.flags.Flags.FLAG_ENABLE_SMALL_AREA_DETECTION,
             com.android.graphics.surfaceflinger.flags.Flags::enableSmallAreaDetection);
 
+    private final FlagState mBrightnessIntRangeUserPerceptionFlagState = new FlagState(
+            Flags.FLAG_BRIGHTNESS_INT_RANGE_USER_PERCEPTION,
+            Flags::brightnessIntRangeUserPerception);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -162,6 +166,10 @@ public class DisplayManagerFlags {
         return mSmallAreaDetectionFlagState.isEnabled();
     }
 
+    public boolean isBrightnessIntRangeUserPerceptionEnabled() {
+        return mBrightnessIntRangeUserPerceptionFlagState.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -179,6 +187,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mNbmControllerFlagState);
         pw.println(" " + mPowerThrottlingClamperFlagState);
         pw.println(" " + mSmallAreaDetectionFlagState);
+        pw.println(" " + mBrightnessIntRangeUserPerceptionFlagState);
     }
 
     private static class FlagState {

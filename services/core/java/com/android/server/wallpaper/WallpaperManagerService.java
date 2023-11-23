@@ -284,7 +284,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         + " needsUpdate=" + needsUpdate);
             }
 
-            int notifyColorsWhich = 0;
             synchronized (mLock) {
                 notifyCallbacksLocked(wallpaper);
 
@@ -338,7 +337,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     // If this was the system wallpaper, rebind...
                     bindWallpaperComponentLocked(mImageWallpaper, true, false, wallpaper,
                             callback);
-                    notifyColorsWhich |= wallpaper.mWhich;
                 }
 
                 if (lockWallpaperChanged) {
@@ -358,7 +356,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
                     bindWallpaperComponentLocked(mImageWallpaper, true /* force */,
                             false /* fromUser */, wallpaper, callback);
-                    notifyColorsWhich |= FLAG_LOCK;
                 } else if (isAppliedToLock) {
                     // This is system-plus-lock: we need to wipe the lock bookkeeping since
                     // we're falling back to displaying the system wallpaper there.
@@ -372,7 +369,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     }
                     clearWallpaperBitmaps(mWallpaper.userId, FLAG_LOCK);
                     mLockWallpaperMap.remove(wallpaper.userId);
-                    notifyColorsWhich |= FLAG_LOCK;
                 }
 
                 saveSettingsLocked(wallpaper.userId);
@@ -382,9 +378,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
 
             // Outside of the lock since it will synchronize itself
-            if (notifyColorsWhich != 0) {
-                notifyWallpaperColorsChanged(wallpaper, notifyColorsWhich);
-            }
+            notifyWallpaperColorsChanged(wallpaper);
         }
 
         @Override
@@ -406,16 +400,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-    void notifyWallpaperColorsChanged(@NonNull WallpaperData wallpaper, int which) {
+    void notifyWallpaperColorsChanged(@NonNull WallpaperData wallpaper) {
         if (DEBUG) {
             Slog.i(TAG, "Notifying wallpaper colors changed");
         }
         if (wallpaper.connection != null) {
-            wallpaper.connection.forEachDisplayConnector(connector -> {
-                notifyWallpaperColorsChangedOnDisplay(wallpaper, which, connector.mDisplayId);
-            });
-        } else { // Lock wallpaper does not have WallpaperConnection.
-            notifyWallpaperColorsChangedOnDisplay(wallpaper, which, DEFAULT_DISPLAY);
+            wallpaper.connection.forEachDisplayConnector(connector ->
+                    notifyWallpaperColorsChangedOnDisplay(wallpaper, connector.mDisplayId));
         }
     }
 
@@ -430,7 +421,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         return listeners;
     }
 
-    private void notifyWallpaperColorsChangedOnDisplay(@NonNull WallpaperData wallpaper, int which,
+    private void notifyWallpaperColorsChangedOnDisplay(@NonNull WallpaperData wallpaper,
             int displayId) {
         boolean needsExtraction;
         synchronized (mLock) {
@@ -445,17 +436,20 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
 
             if (DEBUG) {
-                Slog.v(TAG, "notifyWallpaperColorsChangedOnDisplay " + which);
+                Slog.v(TAG, "notifyWallpaperColorsChangedOnDisplay " + wallpaper.mWhich);
             }
 
             needsExtraction = wallpaper.primaryColors == null || wallpaper.mIsColorExtractedFromDim;
         }
 
+        boolean notify = true;
         if (needsExtraction) {
-            extractColors(wallpaper);
+            notify = extractColors(wallpaper);
         }
-        notifyColorListeners(getAdjustedWallpaperColorsOnDimming(wallpaper), which,
-                wallpaper.userId, displayId);
+        if (notify) {
+            notifyColorListeners(getAdjustedWallpaperColorsOnDimming(wallpaper),
+                    wallpaper.mWhich, wallpaper.userId, displayId);
+        }
     }
 
     private static <T extends IInterface> boolean emptyCallbackList(RemoteCallbackList<T> list) {
@@ -505,8 +499,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
      * In this case, using the crop is more than enough. Live wallpapers are just ignored.
      *
      * @param wallpaper a wallpaper representation
+     * @return true unless the wallpaper changed during the color computation
      */
-    private void extractColors(WallpaperData wallpaper) {
+    private boolean extractColors(WallpaperData wallpaper) {
         String cropFile = null;
         boolean defaultImageWallpaper = false;
         int wallpaperId;
@@ -518,13 +513,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         if (wallpaper.equals(mFallbackWallpaper)) {
             synchronized (mLock) {
-                if (mFallbackWallpaper.primaryColors != null) return;
+                if (mFallbackWallpaper.primaryColors != null) return true;
             }
             final WallpaperColors colors = extractDefaultImageWallpaperColors(wallpaper);
             synchronized (mLock) {
                 mFallbackWallpaper.primaryColors = colors;
             }
-            return;
+            return true;
         }
 
         synchronized (mLock) {
@@ -554,7 +549,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         if (colors == null) {
             Slog.w(TAG, "Cannot extract colors because wallpaper could not be read.");
-            return;
+            return true;
         }
 
         synchronized (mLock) {
@@ -563,8 +558,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 // Now that we have the colors, let's save them into the xml
                 // to avoid having to run this again.
                 saveSettingsLocked(wallpaper.userId);
+                return true;
             } else {
                 Slog.w(TAG, "Not setting primary colors since wallpaper changed");
+                return false;
             }
         }
     }
@@ -1138,19 +1135,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
          */
         @Override
         public void onWallpaperColorsChanged(WallpaperColors primaryColors, int displayId) {
-            int which;
             synchronized (mLock) {
                 // Do not broadcast changes on ImageWallpaper since it's handled
                 // internally by this class.
                 if (mImageWallpaper.equals(mWallpaper.wallpaperComponent)) {
                     return;
                 }
-                which = mWallpaper.mWhich;
                 mWallpaper.primaryColors = primaryColors;
             }
-            if (which != 0) {
-                notifyWallpaperColorsChangedOnDisplay(mWallpaper, which, displayId);
-            }
+            notifyWallpaperColorsChangedOnDisplay(mWallpaper, displayId);
         }
 
         @Override
@@ -1794,9 +1787,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             // Offload color extraction to another thread since switchUser will be called
             // from the main thread.
             FgThread.getHandler().post(() -> {
-                notifyWallpaperColorsChanged(systemWallpaper, FLAG_SYSTEM);
-                notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
-                notifyWallpaperColorsChanged(mFallbackWallpaper, FLAG_SYSTEM);
+                notifyWallpaperColorsChanged(systemWallpaper);
+                if (lockWallpaper != systemWallpaper) notifyWallpaperColorsChanged(lockWallpaper);
+                notifyWallpaperColorsChanged(mFallbackWallpaper);
             });
         } finally {
             t.traceEnd();
@@ -1872,12 +1865,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (which == FLAG_SYSTEM || data == null) {
                 data = mWallpaperMap.get(userId);
             }
-        }
-
-        // When clearing a wallpaper, broadcast new valid colors
-        if (data != null) {
-            notifyWallpaperColorsChanged(data, which);
-            notifyWallpaperColorsChanged(mFallbackWallpaper, FLAG_SYSTEM);
         }
     }
 
@@ -2650,7 +2637,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
             }
             for (WallpaperData wp: pendingColorExtraction) {
-                notifyWallpaperColorsChanged(wp, wp.mWhich);
+                notifyWallpaperColorsChanged(wp);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -3030,8 +3017,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
 
         if (shouldNotifyColors) {
-            notifyWallpaperColorsChanged(newWallpaper, which);
-            notifyWallpaperColorsChanged(mFallbackWallpaper, FLAG_SYSTEM);
+            notifyWallpaperColorsChanged(newWallpaper);
         }
         return bindSuccess;
     }

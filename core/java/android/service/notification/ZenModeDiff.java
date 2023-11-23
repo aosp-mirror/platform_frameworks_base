@@ -18,6 +18,7 @@ package android.service.notification;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.app.Flags;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -221,6 +222,7 @@ public class ZenModeDiff {
         public static final String FIELD_ALLOW_CONVERSATIONS_FROM = "allowConversationsFrom";
         public static final String FIELD_SUPPRESSED_VISUAL_EFFECTS = "suppressedVisualEffects";
         public static final String FIELD_ARE_CHANNELS_BYPASSING_DND = "areChannelsBypassingDnd";
+        public static final String FIELD_ALLOW_PRIORITY_CHANNELS = "allowPriorityChannels";
         private static final Set<String> PEOPLE_TYPE_FIELDS =
                 Set.of(FIELD_ALLOW_CALLS_FROM, FIELD_ALLOW_MESSAGES_FROM);
 
@@ -296,6 +298,12 @@ public class ZenModeDiff {
             if (from.areChannelsBypassingDnd != to.areChannelsBypassingDnd) {
                 addField(FIELD_ARE_CHANNELS_BYPASSING_DND,
                         new FieldDiff<>(from.areChannelsBypassingDnd, to.areChannelsBypassingDnd));
+            }
+            if (Flags.modesApi()) {
+                if (from.allowPriorityChannels != to.allowPriorityChannels) {
+                    addField(FIELD_ALLOW_PRIORITY_CHANNELS,
+                            new FieldDiff<>(from.allowPriorityChannels, to.allowPriorityChannels));
+                }
             }
 
             // Compare automatic and manual rules

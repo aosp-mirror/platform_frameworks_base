@@ -30,6 +30,7 @@ import com.android.systemui.biometrics.AuthController
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.keyguard.ui.SwipeUpAnywhereGestureHandler
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryBackgroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
@@ -38,6 +39,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -53,7 +55,7 @@ import org.mockito.MockitoAnnotations
 @ExperimentalCoroutinesApi
 @RunWith(JUnit4::class)
 @SmallTest
-class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
+class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var authController: AuthController
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var windowManager: WindowManager
@@ -61,7 +63,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
     private lateinit var featureFlags: FakeFeatureFlags
     @Mock private lateinit var lockIconViewController: LockIconViewController
     @Mock private lateinit var falsingManager: FalsingManager
-    private lateinit var underTest: DefaultDeviceEntryIconSection
+    private lateinit var underTest: DefaultDeviceEntrySection
 
     @Before
     fun setup() {
@@ -72,7 +74,7 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
         featureFlags =
             FakeFeatureFlagsClassic().apply { set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false) }
         underTest =
-            DefaultDeviceEntryIconSection(
+            DefaultDeviceEntrySection(
                 keyguardUpdateMonitor,
                 authController,
                 windowManager,
@@ -87,6 +89,8 @@ class DefaultDeviceEntryIconSectionTest : SysuiTestCase() {
                 { mock(AlternateBouncerViewModel::class.java) },
                 { mock(NotificationShadeWindowController::class.java) },
                 TestScope().backgroundScope,
+                { mock(SwipeUpAnywhereGestureHandler::class.java) },
+                { mock(TapGestureDetector::class.java) },
             )
     }
 

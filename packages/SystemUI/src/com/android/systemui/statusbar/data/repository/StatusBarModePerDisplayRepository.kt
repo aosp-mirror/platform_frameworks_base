@@ -25,10 +25,8 @@ import android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BA
 import android.view.WindowInsetsController.Appearance
 import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
-import com.android.systemui.CoreStartable
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.DisplayId
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener
 import com.android.systemui.statusbar.data.model.StatusBarAppearance
@@ -38,13 +36,10 @@ import com.android.systemui.statusbar.phone.LetterboxAppearanceCalculator
 import com.android.systemui.statusbar.phone.StatusBarBoundsProvider
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingCallRepository
-import dagger.Binds
-import dagger.Module
-import dagger.multibindings.ClassKey
-import dagger.multibindings.IntoMap
-import dagger.multibindings.IntoSet
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import java.io.PrintWriter
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -61,7 +56,7 @@ import kotlinx.coroutines.flow.stateIn
  * Note: These status bar modes are status bar *window* states that are sent to us from
  * WindowManager, not determined internally.
  */
-interface StatusBarModeRepository {
+interface StatusBarModePerDisplayRepository {
     /**
      * True if the status bar window is showing transiently and will disappear soon, and false
      * otherwise. ("Otherwise" in this case means the status bar is persistently hidden OR
@@ -108,16 +103,15 @@ interface StatusBarModeRepository {
     fun clearTransient()
 }
 
-@SysUISingleton
-class StatusBarModeRepositoryImpl
-@Inject
+class StatusBarModePerDisplayRepositoryImpl
+@AssistedInject
 constructor(
     @Application scope: CoroutineScope,
-    @DisplayId thisDisplayId: Int,
+    @Assisted("displayId") thisDisplayId: Int,
     private val commandQueue: CommandQueue,
     private val letterboxAppearanceCalculator: LetterboxAppearanceCalculator,
     ongoingCallRepository: OngoingCallRepository,
-) : StatusBarModeRepository, CoreStartable, OnStatusBarViewInitializedListener {
+) : StatusBarModePerDisplayRepository, OnStatusBarViewInitializedListener, Dumpable {
 
     private val commandQueueCallback =
         object : CommandQueue.Callbacks {
@@ -166,7 +160,7 @@ constructor(
             }
         }
 
-    override fun start() {
+    fun start() {
         commandQueue.addCallback(commandQueueCallback)
     }
 
@@ -340,16 +334,7 @@ constructor(
     )
 }
 
-@Module
-interface StatusBarModeRepositoryModule {
-    @Binds fun bindImpl(impl: StatusBarModeRepositoryImpl): StatusBarModeRepository
-
-    @Binds
-    @IntoMap
-    @ClassKey(StatusBarModeRepositoryImpl::class)
-    fun bindCoreStartable(impl: StatusBarModeRepositoryImpl): CoreStartable
-
-    @Binds
-    @IntoSet
-    fun bindViewInitListener(impl: StatusBarModeRepositoryImpl): OnStatusBarViewInitializedListener
+@AssistedFactory
+interface StatusBarModePerDisplayRepositoryFactory {
+    fun create(@Assisted("displayId") displayId: Int): StatusBarModePerDisplayRepositoryImpl
 }

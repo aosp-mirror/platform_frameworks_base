@@ -16,11 +16,15 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.binder
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -61,8 +65,48 @@ class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBa
                         listener.onTransitionFromLockscreenToDreamStarted()
                     }
                 }
+
+                if (NotificationsLiveDataStoreRefactor.isEnabled) {
+                    val displayId = view.display.displayId
+                    val lightsOutView: View = view.requireViewById(R.id.notification_lights_out)
+                    launch {
+                        viewModel.areNotificationsLightsOut(displayId).collect { show ->
+                            animateLightsOutView(lightsOutView, show)
+                        }
+                    }
+                }
             }
         }
+    }
+
+    private fun animateLightsOutView(view: View, visible: Boolean) {
+        view.animate().cancel()
+
+        val alpha = if (visible) 1f else 0f
+        val duration = if (visible) 750L else 250L
+        val visibility = if (visible) View.VISIBLE else View.GONE
+
+        if (visible) {
+            view.alpha = 0f
+            view.visibility = View.VISIBLE
+        }
+
+        view
+            .animate()
+            .alpha(alpha)
+            .setDuration(duration)
+            .setListener(
+                object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        view.alpha = alpha
+                        view.visibility = visibility
+                        // Unset the listener, otherwise this may persist for
+                        // another view property animation
+                        view.animate().setListener(null)
+                    }
+                }
+            )
+            .start()
     }
 }
 

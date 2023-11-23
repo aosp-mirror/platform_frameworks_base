@@ -60,7 +60,6 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.SceneTestUtils;
@@ -166,7 +165,6 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mKeyguardRepository,
                 mCommandQueue,
                 PowerInteractorFactory.create().getPowerInteractor(),
-                mFeatureFlags,
                 mSceneTestUtils.getSceneContainerFlags(),
                 new FakeKeyguardBouncerRepository(),
                 new FakeConfigurationRepository(),

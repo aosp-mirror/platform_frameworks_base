@@ -40,6 +40,9 @@ import java.util.ArrayList;
  * <p>You can retrieve the MessageQueue for the current thread with
  * {@link Looper#myQueue() Looper.myQueue()}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
+@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
+        "com.android.hoststubgen.nativesubstitution.MessageQueue_host")
 public final class MessageQueue {
     private static final String TAG = "MessageQueue";
     private static final boolean DEBUG = false;
@@ -194,6 +197,7 @@ public final class MessageQueue {
      * @see OnFileDescriptorEventListener
      * @see #removeOnFileDescriptorEventListener
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.os.ParcelFileDescriptor.class)
     public void addOnFileDescriptorEventListener(@NonNull FileDescriptor fd,
             @OnFileDescriptorEventListener.Events int events,
             @NonNull OnFileDescriptorEventListener listener) {
@@ -221,6 +225,7 @@ public final class MessageQueue {
      * @see OnFileDescriptorEventListener
      * @see #addOnFileDescriptorEventListener
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.os.ParcelFileDescriptor.class)
     public void removeOnFileDescriptorEventListener(@NonNull FileDescriptor fd) {
         if (fd == null) {
             throw new IllegalArgumentException("fd must not be null");
@@ -231,6 +236,7 @@ public final class MessageQueue {
         }
     }
 
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.os.ParcelFileDescriptor.class)
     private void updateOnFileDescriptorEventListenerLocked(FileDescriptor fd, int events,
             OnFileDescriptorEventListener listener) {
         final int fdNum = fd.getInt$();

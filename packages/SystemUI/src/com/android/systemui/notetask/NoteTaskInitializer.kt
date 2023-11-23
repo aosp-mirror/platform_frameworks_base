@@ -27,6 +27,7 @@ import android.view.ViewConfiguration
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.notetask.NoteTaskEntryPoint.KEYBOARD_SHORTCUT
 import com.android.systemui.notetask.NoteTaskEntryPoint.TAIL_BUTTON
 import com.android.systemui.settings.UserTracker
@@ -52,6 +53,8 @@ constructor(
 
     /** Initializes note task related features and glue it with other parts of the SystemUI. */
     fun initialize() {
+        debugLog { "initialize: isEnabled=$isEnabled, hasBubbles=${optionalBubbles.isEmpty}" }
+
         // Guard against feature not being enabled or mandatory dependencies aren't available.
         if (!isEnabled || optionalBubbles.isEmpty) return
 
@@ -134,12 +137,15 @@ constructor(
      * Tracks a [KeyEvent], and determines if it should trigger an action to show the note task.
      * Returns a [NoteTaskEntryPoint] if an action should be taken, and null otherwise.
      */
-    private fun KeyEvent.toNoteTaskEntryPointOrNull(): NoteTaskEntryPoint? =
-        when {
+    private fun KeyEvent.toNoteTaskEntryPointOrNull(): NoteTaskEntryPoint? {
+        val entryPoint = when {
             keyCode == KEYCODE_STYLUS_BUTTON_TAIL && isTailButtonNotesGesture() -> TAIL_BUTTON
             keyCode == KEYCODE_N && isMetaPressed && isCtrlPressed -> KEYBOARD_SHORTCUT
             else -> null
         }
+        debugLog { "toNoteTaskEntryPointOrNull: entryPoint=$entryPoint" }
+        return entryPoint
+    }
 
     private var lastStylusButtonTailUpEventTime: Long = -MULTI_PRESS_TIMEOUT
 
@@ -155,8 +161,10 @@ constructor(
         val isMultiPress = (downTime - lastStylusButtonTailUpEventTime) < MULTI_PRESS_TIMEOUT
         val isLongPress = (eventTime - downTime) >= LONG_PRESS_TIMEOUT
         lastStylusButtonTailUpEventTime = eventTime
+
         // For now, trigger action immediately on UP of a single press, without waiting for
         // the multi-press timeout to expire.
+        debugLog { "isTailButtonNotesGesture: isMultiPress=$isMultiPress, isLongPress=$isLongPress" }
         return !isMultiPress && !isLongPress
     }
 

@@ -16,6 +16,7 @@
 
 package com.android.commands.uinput;
 
+import android.annotation.Nullable;
 import android.util.SparseArray;
 
 import java.util.Arrays;
@@ -39,6 +40,7 @@ public class Event {
 
     // Constants representing evdev event types, from include/uapi/linux/input-event-codes.h in the
     // kernel.
+    public static final int EV_SYN = 0x00;
     public static final int EV_KEY = 0x01;
     public static final int EV_REL = 0x02;
     public static final int EV_ABS = 0x03;
@@ -69,19 +71,23 @@ public class Event {
         public int getValue() {
             return mValue;
         }
-    }
 
-    // These constants come from "include/uapi/linux/input.h" in the kernel
-    enum Bus {
-        USB(0x03), BLUETOOTH(0x05);
-        private final int mValue;
-
-        Bus(int value) {
-            mValue = value;
-        }
-
-        int getValue() {
-            return mValue;
+        /**
+         * Returns the control code for the given evdev event type, or {@code null} if there is no
+         * control code for that type.
+         */
+        public static @Nullable UinputControlCode forEventType(int eventType) {
+            return switch (eventType) {
+                case EV_KEY -> UI_SET_KEYBIT;
+                case EV_REL -> UI_SET_RELBIT;
+                case EV_ABS -> UI_SET_ABSBIT;
+                case EV_MSC -> UI_SET_MSCBIT;
+                case EV_SW -> UI_SET_SWBIT;
+                case EV_LED -> UI_SET_LEDBIT;
+                case EV_SND -> UI_SET_SNDBIT;
+                case EV_FF -> UI_SET_FFBIT;
+                default -> null;
+            };
         }
     }
 
@@ -90,7 +96,7 @@ public class Event {
     private String mName;
     private int mVid;
     private int mPid;
-    private Bus mBus;
+    private int mBusId;
     private int[] mInjections;
     private SparseArray<int[]> mConfiguration;
     private int mDurationMillis;
@@ -120,7 +126,7 @@ public class Event {
     }
 
     public int getBus() {
-        return mBus.getValue();
+        return mBusId;
     }
 
     public int[] getInjections() {
@@ -168,7 +174,7 @@ public class Event {
             + ", name=" + mName
             + ", vid=" + mVid
             + ", pid=" + mPid
-            + ", bus=" + mBus
+            + ", busId=" + mBusId
             + ", events=" + Arrays.toString(mInjections)
             + ", configuration=" + mConfiguration
             + ", duration=" + mDurationMillis + "ms"
@@ -218,8 +224,8 @@ public class Event {
             mEvent.mPid = pid;
         }
 
-        public void setBus(Bus bus) {
-            mEvent.mBus = bus;
+        public void setBusId(int busId) {
+            mEvent.mBusId = busId;
         }
 
         public void setDurationMillis(int durationMillis) {

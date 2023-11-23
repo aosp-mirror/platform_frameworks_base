@@ -4693,7 +4693,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
         try {
             mInterface.getPackageInstaller().requestUnarchive(packageName,
-                    /* callerPackageName= */ "", receiver.getIntentSender(),
+                    mContext.getPackageName(), receiver.getIntentSender(),
                     new UserHandle(translatedUserId));
         } catch (Exception e) {
             pw.println("Failure [" + e.getMessage() + "]");

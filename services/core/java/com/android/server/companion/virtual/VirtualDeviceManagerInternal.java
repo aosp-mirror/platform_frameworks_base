@@ -157,4 +157,10 @@ public abstract class VirtualDeviceManagerInternal {
      * @see VirtualDevice#getPersistentDeviceId()
      */
     public abstract @Nullable String getPersistentIdForDevice(int deviceId);
+
+    /**
+     * Returns all current persistent device IDs, including the ones for which no virtual device
+     * exists, as long as one may have existed or can be created.
+     */
+    public abstract @NonNull Set<String> getAllPersistentDeviceIds();
 }

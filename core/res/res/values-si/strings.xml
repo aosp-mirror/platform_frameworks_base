@@ -1908,10 +1908,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"සති අන්තය"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"සිදුවීම"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"නිදා ගනිමින්"</string>
-    <!-- no translation found for zen_mode_implicit_activated (2634285680776672994) -->
-    <skip />
-    <!-- no translation found for zen_mode_implicit_deactivated (8688441768371501750) -->
-    <skip />
+    <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ක්‍රියාත්මකයි"</string>
+    <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ක්‍රියාවිරහිතයි"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> සමහර ශබ්ද නිහඬ කරමින්"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ඔබේ උපාංගය සමගින් ගැටලුවක් ඇති අතර, ඔබේ කර්මාන්තශාලා දත්ත යළි සකසන තෙක් එය අස්ථායි විය හැකිය."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"ඔබේ උපාංගය සමගින් අභ්‍යන්තර ගැටලුවක් ඇත. විස්තර සඳහා ඔබේ නිෂ්පාදක අමතන්න."</string>
@@ -2344,8 +2342,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"මයික්‍රෆෝනය අවහිර කර ඇත"</string>
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"සංදර්ශකයට දර්පණය කළ නොහැක"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"වෙනස් කේබලයක් භාවිතා කර නැවත උත්සාහ කරන්න"</string>
-    <!-- no translation found for connected_display_thermally_unavailable_notification_content (9205758199439955949) -->
-    <skip />
+    <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"ඔබේ උපාංගය ඉතා උණුසුම් වන අතර එය සිසිල් වන තෙක් සංදර්ශකය වෙත පිළිබිඹු කළ නොහැක"</string>
     <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"කේබලය සංදර්ශක වෙත සහාය නොදැක්විය හැක"</string>
     <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"ඔබේ USB-C කේබලයට සංදර්ශකවලට නිසි ලෙස සම්බන්ධ නොවිය හැක"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>

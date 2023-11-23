@@ -18,7 +18,7 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         android:color="?android:attr/colorControlHighlight">
-    <item>
+    <item android:id="@+id/notification_background_color_layer">
         <shape>
             <solid android:color="?androidprv:attr/materialColorSurfaceContainerHigh" />
         </shape>

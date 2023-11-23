@@ -74,24 +74,6 @@ constructor(
         open(expectedPackage)
     }
 
-    fun startDialogThemedActivity(wmHelper: WindowManagerStateHelper) {
-        val button =
-            uiDevice.wait(
-                Until.findObject(By.res(packageName, "start_dialog_themed_activity_btn")),
-                FIND_TIMEOUT
-            )
-
-        requireNotNull(button) {
-            "Button not found, this usually happens when the device " +
-                "was left in an unknown state (e.g. Screen turned off)"
-        }
-        button.click()
-        wmHelper
-            .StateSyncBuilder()
-            .withFullScreenApp(ActivityOptions.DialogThemedActivity.COMPONENT.toFlickerComponent())
-            .waitForAndVerify()
-    }
-
     fun dismissDialog(wmHelper: WindowManagerStateHelper) {
         val dialog = uiDevice.wait(Until.findObject(By.text("Dialog for test")), FIND_TIMEOUT)
 
@@ -125,21 +107,5 @@ constructor(
             }
         }
         return false
-    }
-
-    fun toggleFixPortraitOrientation(wmHelper: WindowManagerStateHelper) {
-        val button =
-            uiDevice.wait(
-                Until.findObject(By.res(packageName, "toggle_fixed_portrait_btn")),
-                FIND_TIMEOUT
-            )
-        require(button != null) {
-            "Button not found, this usually happens when the device " +
-                "was left in an unknown state (e.g. Screen turned off)"
-        }
-        button.click()
-        instrumentation.waitForIdleSync()
-        // Ensure app relaunching transition finish and the IME has shown
-        waitIMEShown(wmHelper)
     }
 }

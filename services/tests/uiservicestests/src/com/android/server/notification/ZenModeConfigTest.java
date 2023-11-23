@@ -107,7 +107,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testZenPolicyToNotificationPolicy() {
+    public void testZenPolicyToNotificationPolicy_classic() {
         ZenModeConfig config = getMutedAllConfig();
         config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_BADGE;
 
@@ -140,7 +140,59 @@ public class ZenModeConfigTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testZenConfigToZenPolicy() {
+    public void testZenPolicyToNotificationPolicy() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+        ZenModeConfig config = getMutedAllConfig();
+        config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_BADGE;
+
+        // Explicitly allow conversations from priority senders to make sure that goes through
+        // Explicitly disallow channels to make sure that goes through, too
+        ZenPolicy zenPolicy = new ZenPolicy.Builder()
+                .allowAlarms(true)
+                .allowReminders(true)
+                .allowEvents(true)
+                .allowConversations(CONVERSATION_SENDERS_IMPORTANT)
+                .showLights(false)
+                .showInAmbientDisplay(false)
+                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE)
+                .build();
+
+        Policy originalPolicy = config.toNotificationPolicy();
+        int priorityCategories = originalPolicy.priorityCategories;
+        int priorityCallSenders = originalPolicy.priorityCallSenders;
+        int priorityMessageSenders = originalPolicy.priorityMessageSenders;
+        int priorityConversationsSenders = CONVERSATION_SENDERS_IMPORTANT;
+        int suppressedVisualEffects = originalPolicy.suppressedVisualEffects;
+        priorityCategories |= Policy.PRIORITY_CATEGORY_ALARMS;
+        priorityCategories |= Policy.PRIORITY_CATEGORY_REMINDERS;
+        priorityCategories |= Policy.PRIORITY_CATEGORY_EVENTS;
+        priorityCategories |= Policy.PRIORITY_CATEGORY_CONVERSATIONS;
+        suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_LIGHTS;
+        suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
+
+        Policy expectedPolicy = new Policy(priorityCategories, priorityCallSenders,
+                priorityMessageSenders, suppressedVisualEffects,
+                Policy.STATE_PRIORITY_CHANNELS_BLOCKED, priorityConversationsSenders);
+        assertEquals(expectedPolicy, config.toNotificationPolicy(zenPolicy));
+
+        // make sure allowChannels=false has gotten through correctly (also covered above)
+        assertFalse(expectedPolicy.allowPriorityChannels());
+    }
+
+    @Test
+    public void testZenPolicyToNotificationPolicy_unsetChannelsTakesDefault() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+        ZenModeConfig config = new ZenModeConfig();
+        ZenPolicy zenPolicy = new ZenPolicy.Builder().build();
+
+        // When allowChannels is not set to anything in the ZenPolicy builder, make sure it takes
+        // the default value from the zen mode config.
+        Policy policy = config.toNotificationPolicy(zenPolicy);
+        assertEquals(config.allowPriorityChannels, policy.allowPriorityChannels());
+    }
+
+    @Test
+    public void testZenConfigToZenPolicy_classic() {
         ZenPolicy expected = new ZenPolicy.Builder()
                 .allowAlarms(true)
                 .allowReminders(true)
@@ -178,6 +230,51 @@ public class ZenModeConfigTest extends UiServiceTestCase {
                 actual.getPriorityConversationSenders());
         assertEquals(expected.getPriorityCallSenders(), actual.getPriorityCallSenders());
         assertEquals(expected.getPriorityMessageSenders(), actual.getPriorityMessageSenders());
+    }
+
+    @Test
+    public void testZenConfigToZenPolicy() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+        ZenPolicy expected = new ZenPolicy.Builder()
+                .allowAlarms(true)
+                .allowReminders(true)
+                .allowEvents(true)
+                .showLights(false)
+                .showBadges(false)
+                .showInAmbientDisplay(false)
+                .allowCalls(ZenPolicy.PEOPLE_TYPE_CONTACTS)
+                .allowMessages(ZenPolicy.PEOPLE_TYPE_STARRED)
+                .allowConversations(ZenPolicy.CONVERSATION_SENDERS_NONE)
+                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE)
+                .build();
+
+        ZenModeConfig config = getMutedAllConfig();
+        config.allowAlarms = true;
+        config.allowReminders = true;
+        config.allowEvents = true;
+        config.allowCalls = true;
+        config.allowCallsFrom = Policy.PRIORITY_SENDERS_CONTACTS;
+        config.allowMessages = true;
+        config.allowMessagesFrom = Policy.PRIORITY_SENDERS_STARRED;
+        config.allowConversations = false;
+        config.allowPriorityChannels = false;
+        config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_BADGE;
+        config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_LIGHTS;
+        config.suppressedVisualEffects |= Policy.SUPPRESSED_EFFECT_AMBIENT;
+        ZenPolicy actual = config.toZenPolicy();
+
+        assertEquals(expected.getVisualEffectBadge(), actual.getVisualEffectBadge());
+        assertEquals(expected.getPriorityCategoryAlarms(), actual.getPriorityCategoryAlarms());
+        assertEquals(expected.getPriorityCategoryReminders(),
+                actual.getPriorityCategoryReminders());
+        assertEquals(expected.getPriorityCategoryEvents(), actual.getPriorityCategoryEvents());
+        assertEquals(expected.getVisualEffectLights(), actual.getVisualEffectLights());
+        assertEquals(expected.getVisualEffectAmbient(), actual.getVisualEffectAmbient());
+        assertEquals(expected.getPriorityConversationSenders(),
+                actual.getPriorityConversationSenders());
+        assertEquals(expected.getPriorityCallSenders(), actual.getPriorityCallSenders());
+        assertEquals(expected.getPriorityMessageSenders(), actual.getPriorityMessageSenders());
+        assertEquals(expected.getAllowedChannels(), actual.getAllowedChannels());
     }
 
     @Test
@@ -453,7 +550,7 @@ public class ZenModeConfigTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testZenPolicyXml() throws Exception {
+    public void testZenPolicyXml_classic() throws Exception {
         ZenPolicy policy = new ZenPolicy.Builder()
                 .allowCalls(ZenPolicy.PEOPLE_TYPE_CONTACTS)
                 .allowMessages(ZenPolicy.PEOPLE_TYPE_NONE)
@@ -489,6 +586,59 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         assertEquals(policy.getPriorityCategorySystem(), fromXml.getPriorityCategorySystem());
         assertEquals(policy.getPriorityCategoryReminders(), fromXml.getPriorityCategoryReminders());
         assertEquals(policy.getPriorityCategoryEvents(), fromXml.getPriorityCategoryEvents());
+
+        assertEquals(policy.getVisualEffectFullScreenIntent(),
+                fromXml.getVisualEffectFullScreenIntent());
+        assertEquals(policy.getVisualEffectLights(), fromXml.getVisualEffectLights());
+        assertEquals(policy.getVisualEffectPeek(), fromXml.getVisualEffectPeek());
+        assertEquals(policy.getVisualEffectStatusBar(), fromXml.getVisualEffectStatusBar());
+        assertEquals(policy.getVisualEffectBadge(), fromXml.getVisualEffectBadge());
+        assertEquals(policy.getVisualEffectAmbient(), fromXml.getVisualEffectAmbient());
+        assertEquals(policy.getVisualEffectNotificationList(),
+                fromXml.getVisualEffectNotificationList());
+    }
+
+    @Test
+    public void testZenPolicyXml() throws Exception {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+
+        ZenPolicy policy = new ZenPolicy.Builder()
+                .allowCalls(ZenPolicy.PEOPLE_TYPE_CONTACTS)
+                .allowMessages(ZenPolicy.PEOPLE_TYPE_NONE)
+                .allowConversations(ZenPolicy.CONVERSATION_SENDERS_IMPORTANT)
+                .allowRepeatCallers(true)
+                .allowAlarms(true)
+                .allowMedia(false)
+                .allowSystem(true)
+                .allowReminders(false)
+                .allowEvents(true)
+                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE)
+                .hideAllVisualEffects()
+                .showVisualEffect(ZenPolicy.VISUAL_EFFECT_AMBIENT, true)
+                .build();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        writePolicyXml(policy, baos);
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        ZenPolicy fromXml = readPolicyXml(bais);
+
+        assertNotNull(fromXml);
+        assertEquals(policy.getPriorityCategoryCalls(), fromXml.getPriorityCategoryCalls());
+        assertEquals(policy.getPriorityCallSenders(), fromXml.getPriorityCallSenders());
+        assertEquals(policy.getPriorityCategoryMessages(), fromXml.getPriorityCategoryMessages());
+        assertEquals(policy.getPriorityMessageSenders(), fromXml.getPriorityMessageSenders());
+        assertEquals(policy.getPriorityCategoryConversations(),
+                fromXml.getPriorityCategoryConversations());
+        assertEquals(policy.getPriorityConversationSenders(),
+                fromXml.getPriorityConversationSenders());
+        assertEquals(policy.getPriorityCategoryRepeatCallers(),
+                fromXml.getPriorityCategoryRepeatCallers());
+        assertEquals(policy.getPriorityCategoryAlarms(), fromXml.getPriorityCategoryAlarms());
+        assertEquals(policy.getPriorityCategoryMedia(), fromXml.getPriorityCategoryMedia());
+        assertEquals(policy.getPriorityCategorySystem(), fromXml.getPriorityCategorySystem());
+        assertEquals(policy.getPriorityCategoryReminders(), fromXml.getPriorityCategoryReminders());
+        assertEquals(policy.getPriorityCategoryEvents(), fromXml.getPriorityCategoryEvents());
+        assertEquals(policy.getAllowedChannels(), fromXml.getAllowedChannels());
 
         assertEquals(policy.getVisualEffectFullScreenIntent(),
                 fromXml.getVisualEffectFullScreenIntent());

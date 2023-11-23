@@ -31,8 +31,6 @@ import com.android.systemui.common.shared.model.Position
 import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.CameraLaunchSourceModel
@@ -76,8 +74,7 @@ class KeyguardInteractor
 constructor(
     private val repository: KeyguardRepository,
     private val commandQueue: CommandQueue,
-    private val powerInteractor: PowerInteractor,
-    featureFlags: FeatureFlags,
+    powerInteractor: PowerInteractor,
     sceneContainerFlags: SceneContainerFlags,
     bouncerRepository: KeyguardBouncerRepository,
     configurationRepository: ConfigurationRepository,
@@ -197,22 +194,18 @@ constructor(
 
     /** Whether camera is launched over keyguard. */
     val isSecureCameraActive: Flow<Boolean> by lazy {
-        if (featureFlags.isEnabled(Flags.FACE_AUTH_REFACTOR)) {
-            combine(
-                    isKeyguardVisible,
-                    primaryBouncerShowing,
-                    onCameraLaunchDetected,
-                ) { isKeyguardVisible, isPrimaryBouncerShowing, cameraLaunchEvent ->
-                    when {
-                        isKeyguardVisible -> false
-                        isPrimaryBouncerShowing -> false
-                        else -> cameraLaunchEvent == CameraLaunchSourceModel.POWER_DOUBLE_TAP
-                    }
+        combine(
+                isKeyguardVisible,
+                primaryBouncerShowing,
+                onCameraLaunchDetected,
+            ) { isKeyguardVisible, isPrimaryBouncerShowing, cameraLaunchEvent ->
+                when {
+                    isKeyguardVisible -> false
+                    isPrimaryBouncerShowing -> false
+                    else -> cameraLaunchEvent == CameraLaunchSourceModel.POWER_DOUBLE_TAP
                 }
-                .onStart { emit(false) }
-        } else {
-            flowOf(false)
-        }
+            }
+            .onStart { emit(false) }
     }
 
     /** The approximate location on the screen of the fingerprint sensor, if one is available. */

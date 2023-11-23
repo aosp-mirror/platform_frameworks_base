@@ -119,6 +119,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="com.android.server.wm.ActivityRecordInputSinkTests$TestActivity"
+                  android:exported="true">
+        </activity>
     </application>
 
     <instrumentation

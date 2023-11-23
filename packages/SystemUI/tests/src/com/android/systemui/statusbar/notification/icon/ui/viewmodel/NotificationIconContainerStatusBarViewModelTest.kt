@@ -105,7 +105,6 @@ class NotificationIconContainerStatusBarViewModelTest : SysuiTestCase() {
                 test = this,
                 featureFlags =
                     FakeFeatureFlagsClassicModule {
-                        setDefault(Flags.FACE_AUTH_REFACTOR)
                         set(Flags.FULL_SCREEN_USER_SWITCHER, value = false)
                     },
                 mocks =

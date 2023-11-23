@@ -228,6 +228,14 @@ public class TelecomManager {
             "android.telecom.extra.DEFAULT_CALL_SCREENING_APP_COMPONENT_NAME";
 
     /**
+     * Optional extra to indicate a call should not be added to the call log.
+     *
+     * @hide
+     */
+    public static final String EXTRA_DO_NOT_LOG_CALL =
+            "android.telecom.extra.DO_NOT_LOG_CALL";
+
+    /**
      * Extra value used with {@link #ACTION_DEFAULT_CALL_SCREENING_APP_CHANGED} broadcast to
      * indicate whether an app is the default call screening app.
      * <p>

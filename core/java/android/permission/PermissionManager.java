@@ -1738,8 +1738,9 @@ public final class PermissionManager {
         }
 
         @Override
-        public void onPermissionsChanged(int uid, String deviceId) {
-            mHandler.obtainMessage(MSG_PERMISSIONS_CHANGED, uid, 0, deviceId).sendToTarget();
+        public void onPermissionsChanged(int uid, String persistentDeviceId) {
+            mHandler.obtainMessage(MSG_PERMISSIONS_CHANGED, uid, 0, persistentDeviceId)
+                    .sendToTarget();
         }
 
         @Override
@@ -1747,8 +1748,8 @@ public final class PermissionManager {
             switch (msg.what) {
                 case MSG_PERMISSIONS_CHANGED: {
                     final int uid = msg.arg1;
-                    final String deviceId = msg.obj.toString();
-                    mListener.onPermissionsChanged(uid, deviceId);
+                    final String persistentDeviceId = msg.obj.toString();
+                    mListener.onPermissionsChanged(uid, persistentDeviceId);
                     return true;
                 }
                 default:
