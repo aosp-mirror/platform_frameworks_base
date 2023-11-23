@@ -253,7 +253,7 @@ constructor(
                     Pair(isAuthenticated.isFalse(), "faceNotAuthenticated"),
                 )
                 .andAllFlows("canFaceAuthRun", faceAuthLog)
-                .flowOn(mainDispatcher)
+                .flowOn(backgroundDispatcher)
                 .stateIn(applicationScope, SharingStarted.Eagerly, false)
 
         // Face detection can run only when lockscreen bypass is enabled
@@ -280,7 +280,7 @@ constructor(
                     )
                 )
                 .andAllFlows("canFaceDetectRun", faceDetectLog)
-                .flowOn(mainDispatcher)
+                .flowOn(backgroundDispatcher)
                 .stateIn(applicationScope, SharingStarted.Eagerly, false)
         observeFaceAuthGatingChecks()
         observeFaceDetectGatingChecks()
