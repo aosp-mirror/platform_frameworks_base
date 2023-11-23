@@ -95,6 +95,8 @@
         <option name="pull-pattern-keys" value="perfetto_file_path"/>
         <option name="directory-keys"
                 value="/data/user/0/com.android.wm.shell.flicker.splitscreen/files"/>
+        <option name="directory-keys"
+                value="/data/user/0/com.android.wm.shell.flicker.service/files"/>
         <option name="collect-on-run-ended-only" value="true"/>
         <option name="clean-up" value="true"/>
     </metrics_collector>
