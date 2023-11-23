@@ -241,7 +241,6 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.R;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.Flag;
 import com.android.internal.config.sysui.TestableFlagResolver;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
@@ -5296,7 +5295,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 new Intent(Intent.ACTION_LOCALE_CHANGED));
 
         verify(mZenModeHelper, times(1)).updateDefaultZenRules(
-                anyInt(), anyBoolean());
+                anyInt());
     }
 
     @Test
@@ -8752,7 +8751,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in a package name of "android"
         verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule), anyString(),
-                anyInt(), eq(true)); // system call counts as "is system or system ui"
+                anyInt(), eq(ZenModeHelper.FROM_SYSTEM_OR_SYSTEMUI)); // system call
     }
 
     @Test
@@ -8774,7 +8773,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // verify that zen mode helper gets passed in a package name of "android"
         verify(mockZenModeHelper).addAutomaticZenRule(eq("android"), eq(rule), anyString(),
-                anyInt(),  eq(true));  // system call counts as "system or system ui"
+                anyInt(), eq(ZenModeHelper.FROM_SYSTEM_OR_SYSTEMUI));  // system call
     }
 
     @Test
@@ -8795,7 +8794,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         // verify that zen mode helper gets passed in the package name from the arg, not the owner
         verify(mockZenModeHelper).addAutomaticZenRule(
                 eq("another.package"), eq(rule), anyString(), anyInt(),
-                eq(false));  // doesn't count as a system/systemui call
+                eq(ZenModeHelper.FROM_APP));  // doesn't count as a system/systemui call
     }
 
     @Test
