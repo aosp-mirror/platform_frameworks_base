@@ -66,10 +66,10 @@ constructor(
 
     private fun upDestinationSceneKey(
         isUnlocked: Boolean,
-        canSwipeToDismiss: Boolean,
+        canSwipeToDismiss: Boolean?,
     ): SceneKey {
         return when {
-            canSwipeToDismiss -> SceneKey.Lockscreen
+            canSwipeToDismiss == true -> SceneKey.Lockscreen
             isUnlocked -> SceneKey.Gone
             else -> SceneKey.Lockscreen
         }

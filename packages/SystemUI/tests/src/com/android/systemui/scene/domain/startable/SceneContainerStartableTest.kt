@@ -145,6 +145,18 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
+    fun startsInLockscreenScene() =
+        testScope.runTest {
+            val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
+            prepareState()
+
+            underTest.start()
+            runCurrent()
+
+            assertThat(currentSceneKey).isEqualTo(SceneKey.Lockscreen)
+        }
+
+    @Test
     fun switchToLockscreenWhenDeviceLocks() =
         testScope.runTest {
             val currentSceneKey by collectLastValue(sceneInteractor.desiredScene.map { it.key })
