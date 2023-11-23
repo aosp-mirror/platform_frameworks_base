@@ -49,6 +49,11 @@ public interface BackAnimation {
             @BackEvent.SwipeEdge int swipeEdge);
 
     /**
+     * Called when the input pointers are pilfered.
+     */
+    void onPilferPointers();
+
+    /**
      * Sets whether the back gesture is past the trigger threshold or not.
      */
     void setTriggerBack(boolean triggerBack);
