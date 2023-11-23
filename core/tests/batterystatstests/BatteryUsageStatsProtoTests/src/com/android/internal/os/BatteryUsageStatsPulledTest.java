@@ -250,8 +250,8 @@ public class BatteryUsageStatsPulledTest {
         final UidBatteryConsumer.Builder uidBuilder = builder
                 .getOrCreateUidBatteryConsumerBuilder(UID_0)
                 .setPackageWithHighestDrain("myPackage0")
-                .setTimeInStateMs(UidBatteryConsumer.STATE_FOREGROUND, 1000)
-                .setTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND, 2000)
+                .setTimeInProcessStateMs(BatteryConsumer.PROCESS_STATE_FOREGROUND, 1000)
+                .setTimeInProcessStateMs(BatteryConsumer.PROCESS_STATE_BACKGROUND, 2000)
                 .setConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_SCREEN, 300)
                 .setConsumedPower(
@@ -285,7 +285,7 @@ public class BatteryUsageStatsPulledTest {
 
         builder.getOrCreateUidBatteryConsumerBuilder(UID_1)
                 .setPackageWithHighestDrain("myPackage1")
-                .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_FOREGROUND, 1234);
+                .setTimeInProcessStateMs(BatteryConsumer.PROCESS_STATE_FOREGROUND, 1234);
 
         builder.getOrCreateUidBatteryConsumerBuilder(UID_2)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN,
@@ -331,8 +331,10 @@ public class BatteryUsageStatsPulledTest {
         // significantly larger than 50 Kb
         for (int i = 0; i < 3000; i++) {
             builder.getOrCreateUidBatteryConsumerBuilder(i)
-                    .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_FOREGROUND, 1 * 60 * 1000)
-                    .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_BACKGROUND, 2 * 60 * 1000)
+                    .setTimeInProcessStateMs(
+                            BatteryConsumer.PROCESS_STATE_FOREGROUND, 1 * 60 * 1000)
+                    .setTimeInProcessStateMs(
+                            BatteryConsumer.PROCESS_STATE_BACKGROUND, 2 * 60 * 1000)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, 30)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 40);
         }
@@ -340,16 +342,16 @@ public class BatteryUsageStatsPulledTest {
         // Add a UID with much larger battery footprint
         final int largeConsumerUid = 3001;
         builder.getOrCreateUidBatteryConsumerBuilder(largeConsumerUid)
-                .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_FOREGROUND, 10 * 60 * 1000)
-                .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_BACKGROUND, 20 * 60 * 1000)
+                .setTimeInProcessStateMs(BatteryConsumer.PROCESS_STATE_FOREGROUND, 10 * 60 * 1000)
+                .setTimeInProcessStateMs(BatteryConsumer.PROCESS_STATE_BACKGROUND, 20 * 60 * 1000)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, 300)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 400);
 
         // Add a UID with much larger usage duration
         final int highUsageUid = 3002;
         builder.getOrCreateUidBatteryConsumerBuilder(highUsageUid)
-                .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_FOREGROUND, 60 * 60 * 1000)
-                .setTimeInStateMs(android.os.UidBatteryConsumer.STATE_BACKGROUND, 120 * 60 * 1000)
+                .setTimeInProcessStateMs(BatteryConsumer.PROCESS_STATE_FOREGROUND, 60 * 60 * 1000)
+                .setTimeInProcessStateMs(BatteryConsumer.PROCESS_STATE_BACKGROUND, 120 * 60 * 1000)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_SCREEN, 3)
                 .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 4);
 

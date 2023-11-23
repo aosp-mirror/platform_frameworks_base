@@ -84,6 +84,15 @@ public class BatteryUsageStatsProviderTest {
                 .isEqualTo(20 * MINUTE_IN_MS);
         assertThat(uidBatteryConsumer.getTimeInStateMs(UidBatteryConsumer.STATE_BACKGROUND))
                 .isEqualTo(40 * MINUTE_IN_MS);
+        assertThat(uidBatteryConsumer
+                .getTimeInProcessStateMs(UidBatteryConsumer.PROCESS_STATE_FOREGROUND))
+                .isEqualTo(20 * MINUTE_IN_MS);
+        assertThat(uidBatteryConsumer
+                .getTimeInProcessStateMs(UidBatteryConsumer.PROCESS_STATE_BACKGROUND))
+                .isEqualTo(20 * MINUTE_IN_MS);
+        assertThat(uidBatteryConsumer
+                .getTimeInProcessStateMs(UidBatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE))
+                .isEqualTo(20 * MINUTE_IN_MS);
         assertThat(uidBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_AUDIO))
                 .isWithin(PRECISION).of(2.0);
         assertThat(
