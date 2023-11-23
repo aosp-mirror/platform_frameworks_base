@@ -60,6 +60,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 /**
  * Build/Install/Run:
  *  atest WmTests:WindowContextListenerControllerTests
@@ -309,7 +314,7 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
             return null;
         }).when(display).getDisplayInfo(any(DisplayInfo.class));
 
-        mContainer.getDisplayContent().onDisplayChanged();
+        updateDisplay(mContainer.getDisplayContent());
 
         assertThat(mockToken.mConfiguration).isEqualTo(config1);
         assertThat(mockToken.mDisplayId).isEqualTo(mContainer.getDisplayContent().getDisplayId());
@@ -350,6 +355,16 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
         @Override
         public void onWindowTokenRemoved() {
             mRemoved = true;
+        }
+    }
+
+    private void updateDisplay(DisplayContent displayContent) {
+        CompletableFuture<Object> future = new CompletableFuture<>();
+        displayContent.requestDisplayUpdate(() -> future.complete(new Object()));
+        try {
+            future.get(15, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
         }
     }
 }

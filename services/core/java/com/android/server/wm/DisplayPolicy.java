@@ -1737,11 +1737,12 @@ public class DisplayPolicy {
     void onOverlayChanged() {
         updateCurrentUserResources();
         // Update the latest display size, cutout.
-        mDisplayContent.updateDisplayInfo();
-        onConfigurationChanged();
-        if (!CLIENT_TRANSIENT) {
-            mSystemGestures.onConfigurationChanged();
-        }
+        mDisplayContent.requestDisplayUpdate(() -> {
+            onConfigurationChanged();
+            if (!CLIENT_TRANSIENT) {
+                mSystemGestures.onConfigurationChanged();
+            }
+        });
     }
 
     /**

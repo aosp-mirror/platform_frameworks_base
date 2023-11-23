@@ -156,6 +156,8 @@ import static com.android.server.wm.WindowState.EXCLUSION_LEFT;
 import static com.android.server.wm.WindowState.EXCLUSION_RIGHT;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
+import static com.android.server.wm.utils.DisplayInfoOverrides.WM_OVERRIDE_FIELDS;
+import static com.android.server.wm.utils.DisplayInfoOverrides.copyDisplayInfoFields;
 import static com.android.server.wm.utils.RegionUtils.forEachRectReverse;
 import static com.android.server.wm.utils.RegionUtils.rectListToRegion;
 import static com.android.window.flags.Flags.explicitRefreshRateHints;
@@ -463,11 +465,20 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean mDisplayScalingDisabled;
     final Display mDisplay;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
+
+    /**
+     * Contains the last DisplayInfo override that was sent to DisplayManager or null if we haven't
+     * set an override yet
+     */
+    @Nullable
+    private DisplayInfo mLastDisplayInfoOverride;
+
     private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     private final DisplayPolicy mDisplayPolicy;
     private final DisplayRotation mDisplayRotation;
     @Nullable final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     DisplayFrames mDisplayFrames;
+    private final DisplayUpdater mDisplayUpdater;
 
     private boolean mInTouchMode;
 
@@ -621,7 +632,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     final DeviceStateController mDeviceStateController;
     final Consumer<DeviceStateController.DeviceState> mDeviceStateConsumer;
-    private final PhysicalDisplaySwitchTransitionLauncher mDisplaySwitchTransitionLauncher;
+    final PhysicalDisplaySwitchTransitionLauncher mDisplaySwitchTransitionLauncher;
     final RemoteDisplayChangeController mRemoteDisplayChangeController;
 
     /** Windows added since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
@@ -1142,6 +1153,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplay = display;
         mDisplayId = display.getDisplayId();
         mCurrentUniqueDisplayId = display.getUniqueId();
+        mDisplayUpdater = new ImmediateDisplayUpdater(this);
         mOffTokenAcquirer = mRootWindowContainer.mDisplayOffTokenAcquirer;
         mWallpaperController = new WallpaperController(mWmService, this);
         mWallpaperController.resetLargestDisplay(display);
@@ -2277,8 +2289,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         computeSizeRanges(mDisplayInfo, rotated, dw, dh, mDisplayMetrics.density, outConfig);
 
-        mWmService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(mDisplayId,
-                mDisplayInfo);
+        setDisplayInfoOverride();
 
         if (isDefaultDisplay) {
             mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(mDisplayMetrics,
@@ -2288,6 +2299,20 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         onDisplayInfoChanged();
 
         return mDisplayInfo;
+    }
+
+    /**
+     * Sets the current DisplayInfo in DisplayContent as an override to DisplayManager
+     */
+    private void setDisplayInfoOverride() {
+        mWmService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(mDisplayId,
+                mDisplayInfo);
+
+        if (mLastDisplayInfoOverride == null) {
+            mLastDisplayInfoOverride = new DisplayInfo();
+        }
+
+        mLastDisplayInfoOverride.copyFrom(mDisplayInfo);
     }
 
     DisplayCutout calculateDisplayCutoutForRotation(int rotation) {
@@ -2861,12 +2886,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return orientation;
     }
 
-    void updateDisplayInfo() {
+    void updateDisplayInfo(@NonNull DisplayInfo newDisplayInfo) {
         // Check if display metrics changed and update base values if needed.
-        updateBaseDisplayMetricsIfNeeded();
+        updateBaseDisplayMetricsIfNeeded(newDisplayInfo);
 
-        mDisplay.getDisplayInfo(mDisplayInfo);
-        mDisplay.getMetrics(mDisplayMetrics);
+        // Update mDisplayInfo with (newDisplayInfo + mLastDisplayInfoOverride) as
+        // updateBaseDisplayMetricsIfNeeded could have updated mLastDisplayInfoOverride
+        copyDisplayInfoFields(/* out= */ mDisplayInfo, /* base= */ newDisplayInfo,
+                /* override= */ mLastDisplayInfoOverride, /* fields= */ WM_OVERRIDE_FIELDS);
+        mDisplayInfo.getAppMetrics(mDisplayMetrics, mDisplay.getDisplayAdjustments());
 
         onDisplayInfoChanged();
         onDisplayChanged(this);
@@ -2952,9 +2980,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * If display metrics changed, overrides are not set and it's not just a rotation - update base
      * values.
      */
-    private void updateBaseDisplayMetricsIfNeeded() {
+    private void updateBaseDisplayMetricsIfNeeded(DisplayInfo newDisplayInfo) {
         // Get real display metrics without overrides from WM.
-        mWmService.mDisplayManagerInternal.getNonOverrideDisplayInfo(mDisplayId, mDisplayInfo);
+        mDisplayInfo.copyFrom(newDisplayInfo);
         final int currentRotation = getRotation();
         final int orientation = mDisplayInfo.rotation;
         final boolean rotated = (orientation == ROTATION_90 || orientation == ROTATION_270);
@@ -2986,7 +3014,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 // metrics are updated as rotation settings might depend on them
                 mWmService.mDisplayWindowSettings.applySettingsToDisplayLocked(this,
                         /* includeRotationSettings */ false);
-                mDisplaySwitchTransitionLauncher.requestDisplaySwitchTransitionIfNeeded(mDisplayId,
+                mDisplayUpdater.onDisplayContentDisplayPropertiesPreChanged(mDisplayId,
                         mInitialDisplayWidth, mInitialDisplayHeight, newWidth, newHeight);
                 mDisplayRotation.physicalDisplayChanged();
                 mDisplayPolicy.physicalDisplayChanged();
@@ -3022,8 +3050,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
             if (physicalDisplayChanged) {
                 mDisplayPolicy.physicalDisplayUpdated();
-                mDisplaySwitchTransitionLauncher.onDisplayUpdated(currentRotation, getRotation(),
-                        getDisplayAreaInfo());
+                mDisplayUpdater.onDisplayContentDisplayPropertiesPostChanged(currentRotation,
+                        getRotation(), getDisplayAreaInfo());
             }
         }
     }
@@ -5470,8 +5498,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mDisplayReady = true;
 
             if (mWmService.mDisplayManagerInternal != null) {
-                mWmService.mDisplayManagerInternal
-                        .setDisplayInfoOverrideFromWindowManager(mDisplayId, getDisplayInfo());
+                setDisplayInfoOverride();
                 configureDisplayPolicy();
             }
 
@@ -6114,9 +6141,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mMetricsLogger;
     }
 
-    void onDisplayChanged() {
+    /**
+     * Triggers an update of DisplayInfo from DisplayManager
+     * @param onDisplayChangeApplied callback that is called when the changes are applied
+     */
+    void requestDisplayUpdate(@NonNull Runnable onDisplayChangeApplied) {
+        mDisplayUpdater.updateDisplayInfo(onDisplayChangeApplied);
+    }
+
+    void onDisplayInfoUpdated(@NonNull DisplayInfo newDisplayInfo) {
         final int lastDisplayState = mDisplayInfo.state;
-        updateDisplayInfo();
+        updateDisplayInfo(newDisplayInfo);
 
         // The window policy is responsible for stopping activities on the default display.
         final int displayId = mDisplay.getDisplayId();
