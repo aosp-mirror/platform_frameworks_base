@@ -557,7 +557,7 @@ public class AppWidgetManager {
                             }
                         }).toArray(ComponentName[]::new));
             } catch (Exception e) {
-                Log.e(TAG, "Nofity service of inheritance info", e);
+                Log.e(TAG, "Notify service of inheritance info", e);
             }
         });
     }
