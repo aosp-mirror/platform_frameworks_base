@@ -68,6 +68,7 @@ aconfig_srcjars = [
     ":android.tracing.flags-aconfig-java{.generated_srcjars}",
     ":android.appwidget.flags-aconfig-java{.generated_srcjars}",
     ":android.webkit.flags-aconfig-java{.generated_srcjars}",
+    ":android.provider.flags-aconfig-java{.generated_srcjars}",
 ]
 
 filegroup {
@@ -843,5 +844,18 @@ aconfig_declarations {
 java_aconfig_library {
     name: "android.webkit.flags-aconfig-java",
     aconfig_declarations: "android.webkit.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Provider
+aconfig_declarations {
+    name: "android.provider.flags-aconfig",
+    package: "android.provider",
+    srcs: ["core/java/android/provider/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.provider.flags-aconfig-java",
+    aconfig_declarations: "android.provider.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
