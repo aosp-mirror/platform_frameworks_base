@@ -29,6 +29,7 @@ import static com.android.server.pm.UserTypeDetails.UNLIMITED_NUMBER_OF_USERS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
@@ -91,7 +92,8 @@ public class UserManagerServiceUserTypeTest {
                 .setCredentialShareableWithParent(false)
                 .setAuthAlwaysRequiredToDisableQuietMode(true)
                 .setShowInSettings(900)
-                .setHideInSettingsInQuietMode(true)
+                .setShowInSharingSurfaces(20)
+                .setShowInQuietMode(30)
                 .setInheritDevicePolicy(340)
                 .setDeleteAppWithParent(true)
                 .setAlwaysVisible(true);
@@ -107,9 +109,9 @@ public class UserManagerServiceUserTypeTest {
                 .setIconBadge(28)
                 .setBadgePlain(29)
                 .setBadgeNoBackground(30)
-                .setLabel(31)
                 .setMaxAllowedPerParent(32)
                 .setStatusBarIcon(33)
+                .setLabels(34, 35, 36)
                 .setDefaultRestrictions(restrictions)
                 .setDefaultSystemSettings(systemSettings)
                 .setDefaultSecureSettings(secureSettings)
@@ -124,9 +126,11 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(28, type.getIconBadge());
         assertEquals(29, type.getBadgePlain());
         assertEquals(30, type.getBadgeNoBackground());
-        assertEquals(31, type.getLabel());
         assertEquals(32, type.getMaxAllowedPerParent());
         assertEquals(33, type.getStatusBarIcon());
+        assertEquals(34, type.getLabel(0));
+        assertEquals(35, type.getLabel(1));
+        assertEquals(36, type.getLabel(2));
 
         assertTrue(UserRestrictionsUtils.areEqual(restrictions, type.getDefaultRestrictions()));
         assertNotSame(restrictions, type.getDefaultRestrictions());
@@ -164,7 +168,9 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(type.getDefaultUserPropertiesReference()
                 .isAuthAlwaysRequiredToDisableQuietMode());
         assertEquals(900, type.getDefaultUserPropertiesReference().getShowInSettings());
-        assertTrue(type.getDefaultUserPropertiesReference().getHideInSettingsInQuietMode());
+        assertEquals(20, type.getDefaultUserPropertiesReference().getShowInSharingSurfaces());
+        assertEquals(30,
+                type.getDefaultUserPropertiesReference().getShowInQuietMode());
         assertEquals(340, type.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
         assertTrue(type.getDefaultUserPropertiesReference().getDeleteAppWithParent());
@@ -203,7 +209,7 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(Resources.ID_NULL, type.getStatusBarIcon());
         assertEquals(Resources.ID_NULL, type.getBadgeLabel(0));
         assertEquals(Resources.ID_NULL, type.getBadgeColor(0));
-        assertEquals(Resources.ID_NULL, type.getLabel());
+        assertEquals(Resources.ID_NULL, type.getLabel(0));
         assertTrue(type.getDefaultRestrictions().isEmpty());
         assertTrue(type.getDefaultSystemSettings().isEmpty());
         assertTrue(type.getDefaultSecureSettings().isEmpty());
@@ -222,7 +228,9 @@ public class UserManagerServiceUserTypeTest {
         assertFalse(props.isCredentialShareableWithParent());
         assertFalse(props.getDeleteAppWithParent());
         assertFalse(props.getAlwaysVisible());
-        assertFalse(props.getHideInSettingsInQuietMode());
+        assertEquals(UserProperties.SHOW_IN_LAUNCHER_SEPARATE, props.getShowInSharingSurfaces());
+        assertEquals(UserProperties.SHOW_IN_QUIET_MODE_PAUSED,
+                props.getShowInQuietMode());
 
         assertFalse(type.hasBadge());
     }
@@ -311,8 +319,9 @@ public class UserManagerServiceUserTypeTest {
                 .setCredentialShareableWithParent(true)
                 .setAuthAlwaysRequiredToDisableQuietMode(false)
                 .setShowInSettings(20)
-                .setHideInSettingsInQuietMode(false)
                 .setInheritDevicePolicy(21)
+                .setShowInSharingSurfaces(22)
+                .setShowInQuietMode(24)
                 .setDeleteAppWithParent(true)
                 .setAlwaysVisible(false);
 
@@ -354,9 +363,11 @@ public class UserManagerServiceUserTypeTest {
         assertFalse(aospType.getDefaultUserPropertiesReference()
                 .isAuthAlwaysRequiredToDisableQuietMode());
         assertEquals(20, aospType.getDefaultUserPropertiesReference().getShowInSettings());
-        assertFalse(aospType.getDefaultUserPropertiesReference().getHideInSettingsInQuietMode());
         assertEquals(21, aospType.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
+        assertEquals(22, aospType.getDefaultUserPropertiesReference().getShowInSharingSurfaces());
+        assertEquals(24,
+                aospType.getDefaultUserPropertiesReference().getShowInQuietMode());
         assertTrue(aospType.getDefaultUserPropertiesReference().getDeleteAppWithParent());
         assertFalse(aospType.getDefaultUserPropertiesReference().getAlwaysVisible());
 
@@ -403,7 +414,10 @@ public class UserManagerServiceUserTypeTest {
         assertTrue(aospType.getDefaultUserPropertiesReference()
                 .isAuthAlwaysRequiredToDisableQuietMode());
         assertEquals(23, aospType.getDefaultUserPropertiesReference().getShowInSettings());
-        assertTrue(aospType.getDefaultUserPropertiesReference().getHideInSettingsInQuietMode());
+        assertEquals(22,
+                aospType.getDefaultUserPropertiesReference().getShowInSharingSurfaces());
+        assertEquals(24,
+                aospType.getDefaultUserPropertiesReference().getShowInQuietMode());
         assertEquals(450, aospType.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
         assertFalse(aospType.getDefaultUserPropertiesReference().getDeleteAppWithParent());
