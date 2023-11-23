@@ -2565,7 +2565,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     }
                 }
                 if (abort) {
-                    surface.remove(false /* prepareAnimation */);
+                    surface.remove(false /* prepareAnimation */, false /* hasImeSurface */);
                 }
             } else {
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Surface returned was null: %s",
@@ -2898,6 +2898,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final StartingSurfaceController.StartingSurface surface;
         final boolean animate;
+        final boolean hasImeSurface;
         if (mStartingData != null) {
             if (mStartingData.mWaitForSyncTransactionCommit
                     || mTransitionController.isCollecting(this)) {
@@ -2907,6 +2908,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             animate = prepareAnimation && mStartingData.needRevealAnimation()
                     && mStartingWindow.isVisibleByPolicy();
+            hasImeSurface = mStartingData.hasImeSurface();
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Schedule remove starting %s startingWindow=%s"
                             + " animate=%b Callers=%s", this, mStartingWindow, animate,
                     Debug.getCallers(5));
@@ -2926,7 +2928,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     this);
             return;
         }
-        surface.remove(animate);
+        surface.remove(animate, hasImeSurface);
     }
 
     /**

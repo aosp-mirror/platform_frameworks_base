@@ -69,8 +69,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
@@ -1915,28 +1913,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         setFixedRotationLaunchingApp(r, rotation);
         return true;
-    }
-
-    /** Returns {@code true} if the IME is possible to show on the launching activity. */
-    boolean mayImeShowOnLaunchingActivity(@NonNull ActivityRecord r) {
-        final WindowState win = r.findMainWindow(false /* exclude starting window */);
-        if (win == null) {
-            return false;
-        }
-        // See InputMethodManagerService#shouldRestoreImeVisibility that we expecting the IME
-        // should be hidden when the window set the hidden softInputMode.
-        final int softInputMode = win.mAttrs.softInputMode;
-        switch (softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE) {
-            case SOFT_INPUT_STATE_ALWAYS_HIDDEN:
-            case SOFT_INPUT_STATE_HIDDEN:
-                return false;
-        }
-        final boolean useIme = r.getWindow(
-                w -> WindowManager.LayoutParams.mayUseInputMethod(w.mAttrs.flags)) != null;
-        if (!useIme) {
-            return false;
-        }
-        return r.mLastImeShown || (r.mStartingData != null && r.mStartingData.hasImeSurface());
     }
 
     /** Returns {@code true} if the top activity is transformed with the new rotation of display. */

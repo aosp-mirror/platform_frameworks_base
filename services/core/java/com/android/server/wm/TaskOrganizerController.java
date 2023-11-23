@@ -673,7 +673,8 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         return true;
     }
 
-    void removeStartingWindow(Task task, ITaskOrganizer taskOrganizer, boolean prepareAnimation) {
+    void removeStartingWindow(Task task, ITaskOrganizer taskOrganizer, boolean prepareAnimation,
+            boolean hasImeSurface) {
         final Task rootTask = task.getRootTask();
         if (rootTask == null) {
             return;
@@ -693,13 +694,13 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         if (topActivity != null) {
             // Set defer remove mode for IME
             final DisplayContent dc = topActivity.getDisplayContent();
-            final WindowState imeWindow = dc.mInputMethodWindow;
-            if (topActivity.isVisibleRequested() && imeWindow != null
-                    && dc.mayImeShowOnLaunchingActivity(topActivity)
-                    && dc.isFixedRotationLaunchingApp(topActivity)) {
-                removalInfo.deferRemoveForImeMode = DEFER_MODE_ROTATION;
-            } else if (dc.mayImeShowOnLaunchingActivity(topActivity)) {
-                removalInfo.deferRemoveForImeMode = DEFER_MODE_NORMAL;
+            if (hasImeSurface) {
+                if (topActivity.isVisibleRequested() && dc.mInputMethodWindow != null
+                        && dc.isFixedRotationLaunchingApp(topActivity)) {
+                    removalInfo.deferRemoveForImeMode = DEFER_MODE_ROTATION;
+                } else {
+                    removalInfo.deferRemoveForImeMode = DEFER_MODE_NORMAL;
+                }
             } else {
                 removalInfo.deferRemoveForImeMode = DEFER_MODE_NONE;
             }
