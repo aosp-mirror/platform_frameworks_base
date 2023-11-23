@@ -55,6 +55,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
 import static com.android.server.wm.ActivityRecord.State.PAUSED;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESTARTING_PROCESS;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
@@ -1681,7 +1682,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             ArrayList<ActivityRecord> activities = null;
             for (int i = mStoppingActivities.size() - 1; i >= 0; i--) {
                 final ActivityRecord r = mStoppingActivities.get(i);
-                if (r.getTask() == task) {
+                if (!r.finishing && r.isState(RESUMED) && r.getTask() == task) {
                     if (activities == null) {
                         activities = new ArrayList<>();
                     }
