@@ -1302,6 +1302,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     @Override
     public void updateResources() {
+        Trace.beginSection("NSSLC#updateResources");
         final boolean newSplitShadeEnabled =
                 mSplitShadeStateController.shouldUseSplitNotificationShade(mResources);
         final boolean splitShadeChanged = mSplitShadeEnabled != newSplitShadeEnabled;
@@ -1318,6 +1319,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
         mSplitShadeFullTransitionDistance =
                 mResources.getDimensionPixelSize(R.dimen.split_shade_full_transition_distance);
+        Trace.endSection();
     }
 
     private void onSplitShadeEnabledChanged() {
