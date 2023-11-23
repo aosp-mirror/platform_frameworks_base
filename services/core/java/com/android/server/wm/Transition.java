@@ -1737,8 +1737,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Since we created root-leash but no longer reference it from core, release it now
         info.releaseAnimSurfaces();
 
-        mLogger.logOnSendAsync(mController.mLoggerHandler);
         if (mLogger.mInfo != null) {
+            mLogger.logOnSendAsync(mController.mLoggerHandler);
             mController.mTransitionTracer.logSentTransition(this, mTargets);
         }
     }
@@ -3305,7 +3305,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
          */
         void addGroup(WindowContainer wc) {
             if (mReadyGroups.containsKey(wc)) {
-                Slog.e(TAG, "Trying to add a ready-group twice: " + wc);
                 return;
             }
             mReadyGroups.put(wc, false);
