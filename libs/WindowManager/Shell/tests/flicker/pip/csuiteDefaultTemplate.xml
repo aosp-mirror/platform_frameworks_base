@@ -76,6 +76,17 @@
                 value="appops set com.android.shell android:mock_location deny"/>
     </target_preparer>
 
+    <!-- Use app crawler to log into Netflix -->
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command"
+                value="am start -n com.netflix.mediaclient/com.netflix.mediaclient.ui.login.LoginActivity"/>
+    </target_preparer>
+    <test class="com.android.tradefed.testtype.HostTest" >
+        <option name="set-option" value="package-name:com.netflix.mediaclient"/>
+        <option name="set-option" value="ui-automator-mode:true"/>
+        <option name="class" value="com.android.csuite.tests.AppCrawlTest" />
+    </test>
+
     <!-- Needed for pushing the trace config file -->
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer"/>
     <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
