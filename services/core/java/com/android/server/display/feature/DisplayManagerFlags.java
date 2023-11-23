@@ -86,6 +86,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_BRIGHTNESS_INT_RANGE_USER_PERCEPTION,
             Flags::brightnessIntRangeUserPerception);
 
+    private final FlagState mVsyncProximityVote = new FlagState(
+            Flags.FLAG_ENABLE_EXTERNAL_VSYNC_PROXIMITY_VOTE,
+            Flags::enableExternalVsyncProximityVote);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -170,6 +174,10 @@ public class DisplayManagerFlags {
         return mBrightnessIntRangeUserPerceptionFlagState.isEnabled();
     }
 
+    public boolean isExternalVsyncProximityVoteEnabled() {
+        return mVsyncProximityVote.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -188,6 +196,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mPowerThrottlingClamperFlagState);
         pw.println(" " + mSmallAreaDetectionFlagState);
         pw.println(" " + mBrightnessIntRangeUserPerceptionFlagState);
+        pw.println(" " + mVsyncProximityVote);
     }
 
     private static class FlagState {
