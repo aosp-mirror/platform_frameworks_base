@@ -93,7 +93,7 @@ void TouchSpotController::setSpots(const PointerCoords* spotCoords, const uint32
         const PointerCoords& c = spotCoords[spotIdToIndex[id]];
         ALOGD(" spot %d: position=(%0.3f, %0.3f), pressure=%0.3f, displayId=%" PRId32 ".", id,
               c.getAxisValue(AMOTION_EVENT_AXIS_X), c.getAxisValue(AMOTION_EVENT_AXIS_Y),
-              c.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE), displayId);
+              c.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE), mDisplayId);
     }
 #endif
 
