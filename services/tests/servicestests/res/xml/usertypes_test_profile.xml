@@ -40,6 +40,7 @@
             mediaSharedWithParent='true'
             credentialShareableWithParent='false'
             authAlwaysRequiredToDisableQuietMode='true'
+            allowStoppingUserWithDelayedLocking='true'
             showInSettings='23'
             hideInSettingsInQuietMode='true'
             inheritDevicePolicy='450'

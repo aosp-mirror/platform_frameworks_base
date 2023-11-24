@@ -17510,6 +17510,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      *         other {@code ActivityManager#USER_OP_*} codes for failure.
      *
      */
+    // TODO(b/302662311): Add javadoc changes corresponding to the user property that allows
+    // delayed locking behavior once the private space flag is finalized.
     @Override
     public int stopUserWithDelayedLocking(final int userId, boolean force,
             final IStopUserCallback callback) {

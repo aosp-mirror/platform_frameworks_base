@@ -342,8 +342,12 @@ public final class UserManagerTest {
         assertThat(typeProps.getCrossProfileContentSharingStrategy())
                 .isEqualTo(privateProfileUserProperties.getCrossProfileContentSharingStrategy());
         assertThrows(SecurityException.class, privateProfileUserProperties::getDeleteAppWithParent);
+        assertThrows(SecurityException.class,
+                privateProfileUserProperties::getAllowStoppingUserWithDelayedLocking);
+
         compareDrawables(mUserManager.getUserBadge(),
                 Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
+
         // Verify private profile parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
         UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);

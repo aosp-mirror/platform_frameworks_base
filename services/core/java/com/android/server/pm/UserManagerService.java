@@ -1519,7 +1519,7 @@ public class UserManagerService extends IUserManager.Stub {
 
         try {
             if (enableQuietMode) {
-                ActivityManager.getService().stopUser(userId, /* force= */ true, null);
+                stopUserForQuietMode(userId);
                 LocalServices.getService(ActivityManagerInternal.class)
                         .killForegroundAppsForUser(userId);
             } else {
@@ -1545,6 +1545,18 @@ public class UserManagerService extends IUserManager.Stub {
             broadcastProfileAvailabilityChanges(profile, parent.getUserHandle(),
                      enableQuietMode, true);
         }
+    }
+
+    private void stopUserForQuietMode(int userId) throws RemoteException {
+        if (android.os.Flags.allowPrivateProfile()
+                && android.multiuser.Flags.enableBiometricsToUnlockPrivateSpace()) {
+            // Allow delayed locking since some profile types want to be able to unlock again via
+            // biometrics.
+            ActivityManager.getService()
+                    .stopUserWithDelayedLocking(userId, /* force= */ true, null);
+            return;
+        }
+        ActivityManager.getService().stopUser(userId, /* force= */ true, null);
     }
 
     private void logQuietModeEnabled(@UserIdInt int userId, boolean enableQuietMode,
