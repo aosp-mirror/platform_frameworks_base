@@ -45,7 +45,6 @@ import android.provider.Settings
 import androidx.test.ext.truth.content.IntentSubject.assertThat
 import androidx.test.filters.SmallTest
 import androidx.test.runner.AndroidJUnit4
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.NoteTaskController.Companion.EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE
 import com.android.systemui.notetask.NoteTaskController.Companion.SHORTCUT_ID
@@ -56,6 +55,7 @@ import com.android.systemui.notetask.NoteTaskEntryPoint.TAIL_BUTTON
 import com.android.systemui.notetask.NoteTaskEntryPoint.WIDGET_PICKER_SHORTCUT
 import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
+import com.android.systemui.res.R
 import com.android.systemui.settings.FakeUserTracker
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -162,6 +162,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
             noteTaskBubblesController =
                 FakeNoteTaskBubbleController(context, testDispatcher, Optional.ofNullable(bubbles)),
             applicationScope = testScope,
+            bgCoroutineContext = testScope.backgroundScope.coroutineContext
         )
 
     // region onBubbleExpandChanged
