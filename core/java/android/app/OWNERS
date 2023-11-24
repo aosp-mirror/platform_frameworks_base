@@ -84,10 +84,6 @@ per-file IEphemeralResolver.aidl = file:/services/core/java/com/android/server/p
 per-file IInstantAppResolver.aidl = file:/services/core/java/com/android/server/pm/OWNERS
 per-file InstantAppResolveInfo.aidl = file:/services/core/java/com/android/server/pm/OWNERS
 
-# BackgroundInstallControlManager
-per-file BackgroundInstallControlManager.java = file:/services/core/java/com/android/server/pm/OWNERS
-per-file background_install_control_manager.aconfig = file:/services/core/java/com/android/server/pm/OWNERS
-
 # ResourcesManager
 per-file ResourcesManager.java = file:RESOURCES_OWNERS
 
