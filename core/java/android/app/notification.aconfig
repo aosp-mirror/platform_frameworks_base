@@ -24,8 +24,15 @@ flag {
 
 flag {
   name: "lifetime_extension_refactor"
-    namespace: "systemui"
-    description: "Enables moving notification lifetime extension management from SystemUI to "
-        "Notification Manager Service"
-    bug: "299448097"
+  namespace: "systemui"
+  description: "Enables moving notification lifetime extension management from SystemUI to "
+      "Notification Manager Service"
+  bug: "299448097"
+}
+
+flag {
+  name: "visit_risky_uris"
+  namespace: "systemui"
+  description: "Guards the security fix that ensures all URIs in intents and Person.java are valid"
+  bug: "281044385"
 }
