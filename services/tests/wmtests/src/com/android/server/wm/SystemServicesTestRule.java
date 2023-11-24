@@ -38,6 +38,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.nullable;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -57,7 +58,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.database.ContentObserver;
 import android.hardware.devicestate.DeviceStateManager;
-import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
 import android.net.Uri;
 import android.os.Handler;
@@ -102,6 +103,7 @@ import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -240,6 +242,12 @@ public class SystemServicesTestRule implements TestRule {
         doNothing().when(contentResolver)
                 .registerContentObserver(any(Uri.class), anyBoolean(), any(ContentObserver.class),
                         anyInt());
+
+        // Unit test should not register listener to the real service.
+        final DisplayManagerGlobal dmg = DisplayManagerGlobal.getInstance();
+        spyOn(dmg);
+        doNothing().when(dmg).registerDisplayListener(
+                any(), any(Executor.class), anyLong(), anyString());
     }
 
     private void setUpLocalServices() {
@@ -383,9 +391,6 @@ public class SystemServicesTestRule implements TestRule {
 
         mWmService.onInitReady();
         mAtmService.setWindowManager(mWmService);
-        // Avoid real display events interfering with the test. Also avoid leaking registration.
-        mContext.getSystemService(DisplayManager.class)
-                .unregisterDisplayListener(mAtmService.mRootWindowContainer);
         mWmService.mDisplayEnabled = true;
         mWmService.mDisplayReady = true;
         mAtmService.getTransitionController().mIsWaitingForDisplayEnabled = false;
