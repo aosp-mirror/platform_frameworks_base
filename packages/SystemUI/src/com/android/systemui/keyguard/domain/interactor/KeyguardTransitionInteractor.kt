@@ -302,4 +302,11 @@ constructor(
     fun isFinishedInState(state: KeyguardState): Flow<Boolean> {
         return finishedKeyguardState.map { it == state }.distinctUntilChanged()
     }
+
+    /**
+     * Whether we've FINISHED a transition to a state that matches the given predicate. Consider
+     * using [isFinishedInStateWhere] whenever possible instead
+     */
+    fun isFinishedInStateWhereValue(stateMatcher: (KeyguardState) -> Boolean) =
+        stateMatcher(finishedKeyguardState.replayCache.last())
 }

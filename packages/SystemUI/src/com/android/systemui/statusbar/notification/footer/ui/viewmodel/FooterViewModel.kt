@@ -30,9 +30,7 @@ import dagger.Module
 import dagger.Provides
 import java.util.Optional
 import javax.inject.Provider
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 
 /** ViewModel for [FooterView]. */
@@ -41,36 +39,32 @@ class FooterViewModel(
     seenNotificationsInteractor: SeenNotificationsInteractor,
     shadeInteractor: ShadeInteractor,
 ) {
-    val clearAllButton: Flow<FooterButtonViewModel> =
-        activeNotificationsInteractor.hasClearableNotifications
-            .sample(
-                combine(
-                        shadeInteractor.isShadeFullyExpanded,
-                        shadeInteractor.isShadeTouchable,
-                        ::Pair
-                    )
-                    .onStart { emit(Pair(false, false)) }
-            ) { hasClearableNotifications, (isShadeFullyExpanded, animationsEnabled) ->
-                val shouldAnimate = isShadeFullyExpanded && animationsEnabled
-                AnimatableEvent(hasClearableNotifications, shouldAnimate)
-            }
-            .toAnimatedValueFlow()
-            .map { visible ->
-                FooterButtonViewModel(
-                    labelId = R.string.clear_all_notifications_text,
-                    accessibilityDescriptionId = R.string.accessibility_clear_all,
-                    isVisible = visible,
-                )
-            }
+    val clearAllButton: FooterButtonViewModel =
+        FooterButtonViewModel(
+            labelId = R.string.clear_all_notifications_text,
+            accessibilityDescriptionId = R.string.accessibility_clear_all,
+            isVisible =
+                activeNotificationsInteractor.hasClearableNotifications
+                    .sample(
+                        combine(
+                                shadeInteractor.isShadeFullyExpanded,
+                                shadeInteractor.isShadeTouchable,
+                                ::Pair
+                            )
+                            .onStart { emit(Pair(false, false)) }
+                    ) { hasClearableNotifications, (isShadeFullyExpanded, animationsEnabled) ->
+                        val shouldAnimate = isShadeFullyExpanded && animationsEnabled
+                        AnimatableEvent(hasClearableNotifications, shouldAnimate)
+                    }
+                    .toAnimatedValueFlow(),
+        )
 
-    val message: Flow<FooterMessageViewModel> =
-        seenNotificationsInteractor.hasFilteredOutSeenNotifications.map { hasFilteredOutNotifs ->
-            FooterMessageViewModel(
-                messageId = R.string.unlock_to_see_notif_text,
-                iconId = R.drawable.ic_friction_lock_closed,
-                visible = hasFilteredOutNotifs,
-            )
-        }
+    val message: FooterMessageViewModel =
+        FooterMessageViewModel(
+            messageId = R.string.unlock_to_see_notif_text,
+            iconId = R.drawable.ic_friction_lock_closed,
+            isVisible = seenNotificationsInteractor.hasFilteredOutSeenNotifications,
+        )
 }
 
 @Module

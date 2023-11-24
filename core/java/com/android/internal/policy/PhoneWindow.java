@@ -3895,6 +3895,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setStatusBarColor(int color) {
+        if (mStatusBarColor == color && mForcedStatusBarColor) {
+            return;
+        }
         mStatusBarColor = color;
         mForcedStatusBarColor = true;
         if (mDecor != null) {
@@ -3913,6 +3916,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     @Override
     public void setNavigationBarColor(int color) {
+        if (mNavigationBarColor == color && mForcedNavigationBarColor) {
+            return;
+        }
         mNavigationBarColor = color;
         mForcedNavigationBarColor = true;
         if (mDecor != null) {

@@ -49,6 +49,18 @@
         {"exclude-annotation": "org.junit.Ignore"}
       ]
     }
+  ],
+  "postsubmit": [
+    {
+      "file_patterns": [
+        "[^/]*(LoudnessCodec)[^/]*\\.java"
+      ],
+      "name": "LoudnessCodecApiTest",
+      "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        }
+      ]
+    }
   ]
 }
-

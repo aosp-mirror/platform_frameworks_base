@@ -22,3 +22,10 @@ flag {
   is_fixed_read_only: true
 }
 
+flag {
+  name: "lifetime_extension_refactor"
+    namespace: "systemui"
+    description: "Enables moving notification lifetime extension management from SystemUI to "
+        "Notification Manager Service"
+    bug: "299448097"
+}

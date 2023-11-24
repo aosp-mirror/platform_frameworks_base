@@ -3537,7 +3537,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mDisplayManager.setBrightness(screenDisplayId, adjustedLinearBrightness);
 
                     Intent intent = new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION
+                            | Intent.FLAG_ACTIVITY_NO_USER_ACTION);
                     intent.putExtra(EXTRA_FROM_BRIGHTNESS_KEY, true);
                     startActivityAsUser(intent, UserHandle.CURRENT_OR_SELF);
                     logKeyboardSystemsEvent(event, KeyboardLogEvent.getBrightnessEvent(keyCode));

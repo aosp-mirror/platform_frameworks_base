@@ -3867,7 +3867,7 @@ package android.content.pm {
 
   public class PackageInstaller {
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
-    method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
+    method @FlaggedApi("android.content.pm.read_install_info") @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @FlaggedApi("android.content.pm.archiving") @RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES, android.Manifest.permission.REQUEST_INSTALL_PACKAGES}) public void reportUnarchivalStatus(int, int, long, @Nullable android.app.PendingIntent) throws android.content.pm.PackageManager.NameNotFoundException;
     method @FlaggedApi("android.content.pm.archiving") @RequiresPermission(anyOf={android.Manifest.permission.DELETE_PACKAGES, android.Manifest.permission.REQUEST_DELETE_PACKAGES}) public void requestArchive(@NonNull String, @NonNull android.content.IntentSender) throws android.content.pm.PackageManager.NameNotFoundException;
     method @FlaggedApi("android.content.pm.archiving") @RequiresPermission(anyOf={android.Manifest.permission.INSTALL_PACKAGES, android.Manifest.permission.REQUEST_INSTALL_PACKAGES}) public void requestUnarchive(@NonNull String, @NonNull android.content.IntentSender) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
@@ -3902,7 +3902,7 @@ package android.content.pm {
 
   public static class PackageInstaller.InstallInfo {
     method public long calculateInstalledSize(@NonNull android.content.pm.PackageInstaller.SessionParams) throws java.io.IOException;
-    method public long calculateInstalledSize(@NonNull android.content.pm.PackageInstaller.SessionParams, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
+    method @FlaggedApi("android.content.pm.read_install_info") public long calculateInstalledSize(@NonNull android.content.pm.PackageInstaller.SessionParams, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
     method public int getInstallLocation();
     method @NonNull public String getPackageName();
   }
@@ -4211,10 +4211,18 @@ package android.content.pm {
 
   public final class UserProperties implements android.os.Parcelable {
     method public int describeContents();
+    method public int getShowInQuietMode();
+    method public int getShowInSharingSurfaces();
     method public boolean isCredentialShareableWithParent();
     method public boolean isMediaSharedWithParent();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.UserProperties> CREATOR;
+    field public static final int SHOW_IN_QUIET_MODE_DEFAULT = 2; // 0x2
+    field public static final int SHOW_IN_QUIET_MODE_HIDDEN = 1; // 0x1
+    field public static final int SHOW_IN_QUIET_MODE_PAUSED = 0; // 0x0
+    field public static final int SHOW_IN_SHARING_SURFACES_NO = 2; // 0x2
+    field public static final int SHOW_IN_SHARING_SURFACES_SEPARATE = 1; // 0x1
+    field public static final int SHOW_IN_SHARING_SURFACES_WITH_PARENT = 0; // 0x0
   }
 
 }
@@ -10560,6 +10568,7 @@ package android.os {
     method @NonNull public java.util.List<android.os.UserHandle> getEnabledProfiles();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public android.os.UserHandle getMainUser();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public android.os.UserHandle getPreviousForegroundUser();
+    method @NonNull public String getProfileLabel();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public android.os.UserHandle getProfileParent(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public int getRemainingCreatableProfileCount(@NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public int getRemainingCreatableUserCount(@NonNull String);

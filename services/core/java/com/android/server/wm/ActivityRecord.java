@@ -694,7 +694,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private boolean mCurrentLaunchCanTurnScreenOn = true;
 
     /** Whether our surface was set to be showing in the last call to {@link #prepareSurfaces} */
-    private boolean mLastSurfaceShowing;
+    boolean mLastSurfaceShowing;
 
     /**
      * The activity is opaque and fills the entire space of this task.
@@ -2565,7 +2565,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     }
                 }
                 if (abort) {
-                    surface.remove(false /* prepareAnimation */);
+                    surface.remove(false /* prepareAnimation */, false /* hasImeSurface */);
                 }
             } else {
                 ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Surface returned was null: %s",
@@ -2898,6 +2898,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final StartingSurfaceController.StartingSurface surface;
         final boolean animate;
+        final boolean hasImeSurface;
         if (mStartingData != null) {
             if (mStartingData.mWaitForSyncTransactionCommit
                     || mTransitionController.isCollecting(this)) {
@@ -2907,6 +2908,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             animate = prepareAnimation && mStartingData.needRevealAnimation()
                     && mStartingWindow.isVisibleByPolicy();
+            hasImeSurface = mStartingData.hasImeSurface();
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Schedule remove starting %s startingWindow=%s"
                             + " animate=%b Callers=%s", this, mStartingWindow, animate,
                     Debug.getCallers(5));
@@ -2926,7 +2928,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     this);
             return;
         }
-        surface.remove(animate);
+        surface.remove(animate, hasImeSurface);
     }
 
     /**
@@ -5380,11 +5382,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Finish should only ever commit visibility=false, so we can check full containment
                 // rather than just direct membership.
                 inFinishingTransition = mTransitionController.inFinishingTransition(this);
-                if (!inFinishingTransition && (visible || !mDisplayContent.isSleeping())) {
+                if (!inFinishingTransition) {
                     if (visible) {
-                        mTransitionController.onVisibleWithoutCollectingTransition(this,
-                                Debug.getCallers(1, 1));
-                    } else {
+                        if (!mDisplayContent.isSleeping() || canShowWhenLocked()) {
+                            mTransitionController.onVisibleWithoutCollectingTransition(this,
+                                    Debug.getCallers(1, 1));
+                        }
+                    } else if (!mDisplayContent.isSleeping()) {
                         Slog.w(TAG, "Set invisible without transition " + this);
                     }
                 }
@@ -6434,20 +6438,22 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     void stopIfPossible() {
         if (DEBUG_SWITCH) Slog.d(TAG_SWITCH, "Stopping: " + this);
-        final Task rootTask = getRootTask();
+        if (finishing) {
+            Slog.e(TAG, "Request to stop a finishing activity: " + this);
+            destroyIfPossible("stopIfPossible-finishing");
+            return;
+        }
         if (isNoHistory()) {
-            if (!finishing) {
-                if (!rootTask.shouldSleepActivities()) {
-                    ProtoLog.d(WM_DEBUG_STATES, "no-history finish of %s", this);
-                    if (finishIfPossible("stop-no-history", false /* oomAdj */)
-                            != FINISH_RESULT_CANCELLED) {
-                        resumeKeyDispatchingLocked();
-                        return;
-                    }
-                } else {
-                    ProtoLog.d(WM_DEBUG_STATES, "Not finishing noHistory %s on stop "
-                            + "because we're just sleeping", this);
+            if (!task.shouldSleepActivities()) {
+                ProtoLog.d(WM_DEBUG_STATES, "no-history finish of %s", this);
+                if (finishIfPossible("stop-no-history", false /* oomAdj */)
+                        != FINISH_RESULT_CANCELLED) {
+                    resumeKeyDispatchingLocked();
+                    return;
                 }
+            } else {
+                ProtoLog.d(WM_DEBUG_STATES, "Not finishing noHistory %s on stop "
+                        + "because we're just sleeping", this);
             }
         }
 

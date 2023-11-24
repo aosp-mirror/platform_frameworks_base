@@ -319,8 +319,6 @@ public class BackgroundActivityStartController {
                     return BackgroundStartPrivileges.NONE;
                 case ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED:
                     // no explicit choice by the app - let us decide what to do
-                    Slog.i(TAG, "balRequireOptInByPendingIntentCreator = "
-                            + balRequireOptInByPendingIntentCreator());
                     if (!balRequireOptInByPendingIntentCreator()) {
                         // if feature is disabled allow
                         return BackgroundStartPrivileges.ALLOW_BAL;
@@ -331,7 +329,6 @@ public class BackgroundActivityStartController {
                                 DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_CREATOR,
                                 callingPackage,
                                 UserHandle.getUserHandleForUid(callingUid));
-                        Slog.i(TAG, "changeEnabled = " + changeEnabled);
                         return changeEnabled ? BackgroundStartPrivileges.NONE
                                 : BackgroundStartPrivileges.ALLOW_BAL;
                     }
@@ -340,7 +337,6 @@ public class BackgroundActivityStartController {
                     boolean changeEnabled = CompatChanges.isChangeEnabled(
                             DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_CREATOR,
                             callingUid);
-                    Slog.i(TAG, "changeEnabled = " + changeEnabled);
                     return changeEnabled ? BackgroundStartPrivileges.NONE
                             : BackgroundStartPrivileges.ALLOW_BAL;
                 default:

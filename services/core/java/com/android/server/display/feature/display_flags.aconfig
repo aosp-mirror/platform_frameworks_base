@@ -112,3 +112,11 @@ flag {
     bug: "183655602"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_external_vsync_proximity_vote"
+    namespace: "display_manager"
+    description: "Feature flag for external vsync proximity vote"
+    bug: "284866750"
+    is_fixed_read_only: true
+}

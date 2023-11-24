@@ -69,6 +69,7 @@ import android.os.StrictMode;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.util.Log;
+import android.view.DisplayInfo;
 import android.view.InputChannel;
 import android.view.SurfaceControl;
 
@@ -267,6 +268,12 @@ public class SystemServicesTestRule implements TestRule {
         // DisplayManagerInternal
         final DisplayManagerInternal dmi = mock(DisplayManagerInternal.class);
         doReturn(dmi).when(() -> LocalServices.getService(eq(DisplayManagerInternal.class)));
+        doAnswer(invocation -> {
+            int displayId = invocation.getArgument(0);
+            DisplayInfo displayInfo = invocation.getArgument(1);
+            mWmService.mRoot.getDisplayContent(displayId).getDisplay().getDisplayInfo(displayInfo);
+            return null;
+        }).when(dmi).getNonOverrideDisplayInfo(anyInt(), any());
 
         // ColorDisplayServiceInternal
         final ColorDisplayService.ColorDisplayServiceInternal cds =

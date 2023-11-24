@@ -9965,6 +9965,21 @@ public abstract class PackageManager {
     }
 
     /**
+     * Get the name of the package that suspended the given package. Packages can be suspended by
+     * device administrators or apps holding {@link android.Manifest.permission#MANAGE_USERS} or
+     * {@link android.Manifest.permission#SUSPEND_APPS}.
+     *
+     * @param suspendedPackage The package that has been suspended.
+     * @return Name of the package that suspended the given package. Returns {@code null} if the
+     * given package is not currently suspended and the platform package name - i.e.
+     * {@code "android"} - if the package was suspended by a device admin.
+     * @hide
+     */
+    public @Nullable String getSuspendingPackage(@NonNull String suspendedPackage) {
+        throw new UnsupportedOperationException("getSuspendingPackage not implemented");
+    }
+
+    /**
      * Query if an app is currently stopped.
      *
      * @return {@code true} if the given package is stopped, {@code false} otherwise

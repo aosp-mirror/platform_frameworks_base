@@ -73,11 +73,7 @@ public interface DevicePostureController extends CallbackController<Callback> {
 
     /** Callback to be notified about device posture changes. */
     interface Callback {
-        /**
-         * Called when the posture changes. If there are multiple active displays ("concurrent"),
-         * this will report the physical posture of the device (also known as the base device
-         * state).
-         */
+        /** Called when the posture changes. */
         void onPostureChanged(@DevicePostureInt int posture);
     }
 }

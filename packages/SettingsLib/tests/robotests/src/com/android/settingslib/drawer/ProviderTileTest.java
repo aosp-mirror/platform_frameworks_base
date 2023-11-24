@@ -259,13 +259,6 @@ public class ProviderTileTest {
     }
 
     @Test
-    public void isSearchable_noMetadata_isTrue() {
-        final Tile tile = new ProviderTile(mProviderInfo, "category", null);
-
-        assertThat(tile.isSearchable()).isTrue();
-    }
-
-    @Test
     public void isSearchable_notSet_isTrue() {
         final Tile tile = new ProviderTile(mProviderInfo, "category", mMetaData);
 

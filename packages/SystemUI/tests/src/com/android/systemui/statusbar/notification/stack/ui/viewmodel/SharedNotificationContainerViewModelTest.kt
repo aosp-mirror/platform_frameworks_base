@@ -15,36 +15,36 @@
  *
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.collectLastValue
-import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.common.shared.model.NotificationContainerBounds
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.flags.featureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
-import com.android.systemui.user.domain.UserDomainLayerModule
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -52,45 +52,29 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                UserDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent : SysUITestComponent<SharedNotificationContainerViewModel> {
-
-        val configurationRepository: FakeConfigurationRepository
-        val keyguardRepository: FakeKeyguardRepository
-        val keyguardInteractor: KeyguardInteractor
-        val keyguardTransitionRepository: FakeKeyguardTransitionRepository
-        val shadeRepository: FakeShadeRepository
-        val sharedNotificationContainerInteractor: SharedNotificationContainerInteractor
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-                mocks: TestMocksModule,
-            ): TestComponent
+    val kosmos =
+        testKosmos().apply {
+            featureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
-    }
+    val testScope = kosmos.testScope
+    val configurationRepository = kosmos.fakeConfigurationRepository
+    val keyguardRepository = kosmos.fakeKeyguardRepository
+    val keyguardInteractor = kosmos.keyguardInteractor
+    val keyguardRootViewModel = kosmos.keyguardRootViewModel
+    val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    val shadeRepository = kosmos.shadeRepository
+    val sharedNotificationContainerInteractor = kosmos.sharedNotificationContainerInteractor
 
-    private val testComponent: TestComponent =
-        DaggerSharedNotificationContainerViewModelTest_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags =
-                    FakeFeatureFlagsClassicModule { set(Flags.FULL_SCREEN_USER_SWITCHER, true) },
-                mocks = TestMocksModule(),
-            )
+    val underTest = kosmos.sharedNotificationContainerViewModel
+
+    @Before
+    fun setUp() {
+        overrideResource(R.bool.config_use_split_notification_shade, false)
+    }
 
     @Test
     fun validateMarginStartInSplitShade() =
-        testComponent.runTest {
+        testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, true)
             overrideResource(R.dimen.notification_panel_margin_horizontal, 20)
 
@@ -103,7 +87,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun validateMarginStart() =
-        testComponent.runTest {
+        testScope.runTest {
             overrideResource(R.bool.config_use_split_notification_shade, false)
             overrideResource(R.dimen.notification_panel_margin_horizontal, 20)
 
@@ -116,7 +100,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun validateMarginEnd() =
-        testComponent.runTest {
+        testScope.runTest {
             overrideResource(R.dimen.notification_panel_margin_horizontal, 50)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
@@ -128,7 +112,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun validateMarginBottom() =
-        testComponent.runTest {
+        testScope.runTest {
             overrideResource(R.dimen.notification_panel_margin_bottom, 50)
 
             val dimens by collectLastValue(underTest.configurationBasedDimensions)
@@ -140,7 +124,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun validateMarginTopWithLargeScreenHeader() =
-        testComponent.runTest {
+        testScope.runTest {
             overrideResource(R.bool.config_use_large_screen_shade_header, true)
             overrideResource(R.dimen.large_screen_shade_header_height, 50)
             overrideResource(R.dimen.notification_panel_margin_top, 0)
@@ -154,7 +138,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun validateMarginTop() =
-        testComponent.runTest {
+        testScope.runTest {
             overrideResource(R.bool.config_use_large_screen_shade_header, false)
             overrideResource(R.dimen.large_screen_shade_header_height, 50)
             overrideResource(R.dimen.notification_panel_margin_top, 0)
@@ -168,7 +152,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun isOnLockscreen() =
-        testComponent.runTest {
+        testScope.runTest {
             val isOnLockscreen by collectLastValue(underTest.isOnLockscreen)
 
             keyguardTransitionRepository.sendTransitionSteps(
@@ -206,7 +190,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun isOnLockscreenWithoutShade() =
-        testComponent.runTest {
+        testScope.runTest {
             val isOnLockscreenWithoutShade by collectLastValue(underTest.isOnLockscreenWithoutShade)
 
             // First on AOD
@@ -242,8 +226,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun positionOnLockscreenNotInSplitShade() =
-        testComponent.runTest {
-            val position by collectLastValue(underTest.position)
+        testScope.runTest {
+            val position by collectLastValue(underTest.bounds)
 
             // When not in split shade
             overrideResource(R.bool.config_use_split_notification_shade, false)
@@ -253,18 +237,17 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             // Start on lockscreen
             showLockscreen()
 
-            keyguardInteractor.setSharedNotificationContainerPosition(
-                SharedNotificationContainerPosition(top = 1f, bottom = 2f)
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 1f, bottom = 2f)
             )
 
-            assertThat(position)
-                .isEqualTo(SharedNotificationContainerPosition(top = 1f, bottom = 2f))
+            assertThat(position).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 2f))
         }
 
     @Test
     fun positionOnLockscreenInSplitShade() =
-        testComponent.runTest {
-            val position by collectLastValue(underTest.position)
+        testScope.runTest {
+            val position by collectLastValue(underTest.bounds)
 
             // When in split shade
             overrideResource(R.bool.config_use_split_notification_shade, true)
@@ -274,20 +257,19 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             // Start on lockscreen
             showLockscreen()
 
-            keyguardInteractor.setSharedNotificationContainerPosition(
-                SharedNotificationContainerPosition(top = 1f, bottom = 2f)
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 1f, bottom = 2f)
             )
             runCurrent()
 
             // Top should be overridden to 0f
-            assertThat(position)
-                .isEqualTo(SharedNotificationContainerPosition(top = 0f, bottom = 2f))
+            assertThat(position).isEqualTo(NotificationContainerBounds(top = 0f, bottom = 2f))
         }
 
     @Test
-    fun positionOnShade() =
-        testComponent.runTest {
-            val position by collectLastValue(underTest.position)
+    fun boundsOnShade() =
+        testScope.runTest {
+            val bounds by collectLastValue(underTest.bounds)
 
             // Start on lockscreen with shade expanded
             showLockscreenWithShadeExpanded()
@@ -295,16 +277,14 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             // When not in split shade
             sharedNotificationContainerInteractor.setTopPosition(10f)
 
-            assertThat(position)
-                .isEqualTo(
-                    SharedNotificationContainerPosition(top = 10f, bottom = 0f, animate = true)
-                )
+            assertThat(bounds)
+                .isEqualTo(NotificationContainerBounds(top = 10f, bottom = 0f, isAnimated = true))
         }
 
     @Test
-    fun positionOnQS() =
-        testComponent.runTest {
-            val position by collectLastValue(underTest.position)
+    fun boundsOnQS() =
+        testScope.runTest {
+            val bounds by collectLastValue(underTest.bounds)
 
             // Start on lockscreen with shade expanded
             showLockscreenWithQSExpanded()
@@ -312,15 +292,13 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             // When not in split shade
             sharedNotificationContainerInteractor.setTopPosition(10f)
 
-            assertThat(position)
-                .isEqualTo(
-                    SharedNotificationContainerPosition(top = 10f, bottom = 0f, animate = false)
-                )
+            assertThat(bounds)
+                .isEqualTo(NotificationContainerBounds(top = 10f, bottom = 0f, isAnimated = false))
         }
 
     @Test
     fun maxNotificationsOnLockscreen() =
-        testComponent.runTest {
+        testScope.runTest {
             var notificationCount = 10
             val maxNotifications by
                 collectLastValue(underTest.getMaxNotifications { notificationCount })
@@ -329,8 +307,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.setSharedNotificationContainerPosition(
-                SharedNotificationContainerPosition(top = 1f, bottom = 2f)
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 1f, bottom = 2f)
             )
 
             assertThat(maxNotifications).isEqualTo(10)
@@ -343,7 +321,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun maxNotificationsOnLockscreen_DoesNotUpdateWhenUserInteracting() =
-        testComponent.runTest {
+        testScope.runTest {
             var notificationCount = 10
             val maxNotifications by
                 collectLastValue(underTest.getMaxNotifications { notificationCount })
@@ -352,8 +330,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.setSharedNotificationContainerPosition(
-                SharedNotificationContainerPosition(top = 1f, bottom = 2f)
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 1f, bottom = 2f)
             )
 
             assertThat(maxNotifications).isEqualTo(10)
@@ -379,7 +357,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
     @Test
     fun maxNotificationsOnShade() =
-        testComponent.runTest {
+        testScope.runTest {
             val maxNotifications by collectLastValue(underTest.getMaxNotifications { 10 })
 
             // Show lockscreen with shade expanded
@@ -387,15 +365,26 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
 
             overrideResource(R.bool.config_use_split_notification_shade, false)
             configurationRepository.onAnyConfigurationChange()
-            keyguardInteractor.setSharedNotificationContainerPosition(
-                SharedNotificationContainerPosition(top = 1f, bottom = 2f)
+            keyguardInteractor.setNotificationContainerBounds(
+                NotificationContainerBounds(top = 1f, bottom = 2f)
             )
 
             // -1 means No Limit
             assertThat(maxNotifications).isEqualTo(-1)
         }
 
-    private suspend fun TestComponent.showLockscreen() {
+    @Test
+    fun updateBounds_fromKeyguardRoot() =
+        testScope.runTest {
+            val bounds by collectLastValue(underTest.bounds)
+
+            val top = 123f
+            val bottom = 456f
+            keyguardRootViewModel.onNotificationContainerBoundsChanged(top, bottom)
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top, bottom))
+        }
+
+    private suspend fun showLockscreen() {
         shadeRepository.setLockscreenShadeExpansion(0f)
         shadeRepository.setQsExpansion(0f)
         keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
@@ -406,7 +395,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         )
     }
 
-    private suspend fun TestComponent.showLockscreenWithShadeExpanded() {
+    private suspend fun showLockscreenWithShadeExpanded() {
         shadeRepository.setLockscreenShadeExpansion(1f)
         shadeRepository.setQsExpansion(0f)
         keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)
@@ -417,7 +406,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         )
     }
 
-    private suspend fun TestComponent.showLockscreenWithQSExpanded() {
+    private suspend fun showLockscreenWithQSExpanded() {
         shadeRepository.setLockscreenShadeExpansion(0f)
         shadeRepository.setQsExpansion(1f)
         keyguardRepository.setStatusBarState(StatusBarState.SHADE_LOCKED)

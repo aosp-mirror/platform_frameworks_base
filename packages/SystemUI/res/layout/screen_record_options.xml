@@ -47,6 +47,7 @@
             android:layout_weight="0"
             android:layout_gravity="end"
             android:id="@+id/screenrecord_audio_switch"
+            android:contentDescription="@string/screenrecord_audio_label"
             style="@style/ScreenRecord.Switch"
             android:importantForAccessibility="yes"/>
     </LinearLayout>
@@ -79,6 +80,7 @@
             android:minWidth="48dp"
             android:layout_height="48dp"
             android:id="@+id/screenrecord_taps_switch"
+            android:contentDescription="@string/screenrecord_taps_label"
             style="@style/ScreenRecord.Switch"
             android:importantForAccessibility="yes"/>
     </LinearLayout>

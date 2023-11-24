@@ -40,17 +40,17 @@ object NotificationStackAppearanceViewBinder {
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
                 launch {
-                    viewModel.stackPosition.collect {
+                    viewModel.stackBounds.collect { bounds ->
                         controller.updateTopPadding(
-                            it.top,
+                            bounds.top,
                             controller.isAddOrRemoveAnimationPending
                         )
                     }
                 }
                 launch {
-                    viewModel.expandFraction.collect {
-                        ambientState.expansionFraction = it
-                        controller.expandedHeight = it * controller.view.height
+                    viewModel.expandFraction.collect { expandFraction ->
+                        ambientState.expansionFraction = expandFraction
+                        controller.expandedHeight = expandFraction * controller.view.height
                     }
                 }
             }

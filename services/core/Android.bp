@@ -125,6 +125,9 @@ java_library_static {
         "java/com/android/server/am/EventLogTags.logtags",
         "java/com/android/server/wm/EventLogTags.logtags",
         "java/com/android/server/policy/EventLogTags.logtags",
+
+        // Java/AIDL sources to be moved out to CrashRecovery module
+        ":services-crashrecovery-sources",
     ],
 
     libs: [

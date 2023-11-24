@@ -17,6 +17,8 @@
 package com.android.server.display.mode;
 
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -102,17 +104,21 @@ public class SkinThermalStatusObserverTest {
         SparseArray<Vote> displayVotes = mStorage.getVotes(DISPLAY_ID);
         assertEquals(1, displayVotes.size());
 
-        Vote vote = displayVotes.get(
-                Vote.PRIORITY_SKIN_TEMPERATURE);
-        assertEquals(0, vote.refreshRateRanges.render.min, FLOAT_TOLERANCE);
-        assertEquals(60, vote.refreshRateRanges.render.max, FLOAT_TOLERANCE);
+        Vote vote = displayVotes.get(Vote.PRIORITY_SKIN_TEMPERATURE);
+
+        assertThat(vote).isInstanceOf(RefreshRateVote.RenderVote.class);
+        RefreshRateVote.RenderVote renderVote = (RefreshRateVote.RenderVote) vote;
+        assertEquals(0, renderVote.mMinRefreshRate, FLOAT_TOLERANCE);
+        assertEquals(60, renderVote.mMaxRefreshRate, FLOAT_TOLERANCE);
 
         SparseArray<Vote> otherDisplayVotes = mStorage.getVotes(DISPLAY_ID_OTHER);
         assertEquals(1, otherDisplayVotes.size());
 
         vote = otherDisplayVotes.get(Vote.PRIORITY_SKIN_TEMPERATURE);
-        assertEquals(0, vote.refreshRateRanges.render.min, FLOAT_TOLERANCE);
-        assertEquals(60, vote.refreshRateRanges.render.max, FLOAT_TOLERANCE);
+        assertThat(vote).isInstanceOf(RefreshRateVote.RenderVote.class);
+        renderVote = (RefreshRateVote.RenderVote) vote;
+        assertEquals(0, renderVote.mMinRefreshRate, FLOAT_TOLERANCE);
+        assertEquals(60, renderVote.mMaxRefreshRate, FLOAT_TOLERANCE);
     }
 
     @Test
@@ -167,8 +173,10 @@ public class SkinThermalStatusObserverTest {
         SparseArray<Vote> displayVotes = mStorage.getVotes(DISPLAY_ID);
         assertEquals(1, displayVotes.size());
         Vote vote = displayVotes.get(Vote.PRIORITY_SKIN_TEMPERATURE);
-        assertEquals(90, vote.refreshRateRanges.render.min, FLOAT_TOLERANCE);
-        assertEquals(120, vote.refreshRateRanges.render.max, FLOAT_TOLERANCE);
+        assertThat(vote).isInstanceOf(RefreshRateVote.RenderVote.class);
+        RefreshRateVote.RenderVote renderVote = (RefreshRateVote.RenderVote) vote;
+        assertEquals(90, renderVote.mMinRefreshRate, FLOAT_TOLERANCE);
+        assertEquals(120, renderVote.mMaxRefreshRate, FLOAT_TOLERANCE);
         assertEquals(0, mStorage.getVotes(DISPLAY_ID_OTHER).size());
     }
 
@@ -188,8 +196,10 @@ public class SkinThermalStatusObserverTest {
         SparseArray<Vote> displayVotes = mStorage.getVotes(DISPLAY_ID_ADDED);
 
         Vote vote = displayVotes.get(Vote.PRIORITY_SKIN_TEMPERATURE);
-        assertEquals(0, vote.refreshRateRanges.render.min, FLOAT_TOLERANCE);
-        assertEquals(60, vote.refreshRateRanges.render.max, FLOAT_TOLERANCE);
+        assertThat(vote).isInstanceOf(RefreshRateVote.RenderVote.class);
+        RefreshRateVote.RenderVote renderVote = (RefreshRateVote.RenderVote) vote;
+        assertEquals(0, renderVote.mMinRefreshRate, FLOAT_TOLERANCE);
+        assertEquals(60, renderVote.mMaxRefreshRate, FLOAT_TOLERANCE);
     }
 
     @Test

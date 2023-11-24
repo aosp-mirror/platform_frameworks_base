@@ -61,10 +61,12 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
 import com.android.systemui.monet.Style;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.SecureSettings;
 
 import com.google.common.util.concurrent.MoreExecutors;
@@ -88,7 +90,10 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
 
     private static final int USER_SYSTEM = UserHandle.USER_SYSTEM;
     private static final int USER_SECONDARY = 10;
-
+    @Mock
+    private JavaAdapter mJavaAdapter;
+    @Mock
+    private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private ThemeOverlayController mThemeOverlayController;
     @Mock
     private Executor mBgExecutor;
@@ -150,11 +155,12 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 .thenReturn(Color.YELLOW);
         when(mResources.getColor(eq(android.R.color.system_neutral2_500), any()))
                 .thenReturn(Color.BLACK);
+
         mThemeOverlayController = new ThemeOverlayController(mContext,
                 mBroadcastDispatcher, mBgHandler, mMainExecutor, mBgExecutor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
                 mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle,
-                mUiModeManager) {
+                mJavaAdapter, mKeyguardTransitionInteractor, mUiModeManager) {
             @VisibleForTesting
             protected boolean isNightMode() {
                 return false;
@@ -736,7 +742,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher, mBgHandler, executor, executor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
                 mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle,
-                mUiModeManager) {
+                mJavaAdapter, mKeyguardTransitionInteractor, mUiModeManager) {
             @VisibleForTesting
             protected boolean isNightMode() {
                 return false;
@@ -776,7 +782,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
                 mBroadcastDispatcher, mBgHandler, executor, executor, mThemeOverlayApplier,
                 mSecureSettings, mWallpaperManager, mUserManager, mDeviceProvisionedController,
                 mUserTracker, mDumpManager, mFeatureFlags, mResources, mWakefulnessLifecycle,
-                mUiModeManager) {
+                mJavaAdapter, mKeyguardTransitionInteractor, mUiModeManager) {
             @VisibleForTesting
             protected boolean isNightMode() {
                 return false;

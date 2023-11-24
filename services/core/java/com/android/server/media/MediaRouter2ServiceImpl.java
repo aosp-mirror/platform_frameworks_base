@@ -2486,6 +2486,13 @@ class MediaRouter2ServiceImpl {
         private void onRequestFailedOnHandler(@NonNull MediaRoute2Provider provider,
                 long uniqueRequestId, int reason) {
             if (handleSessionCreationRequestFailed(provider, uniqueRequestId, reason)) {
+                Slog.w(
+                        TAG,
+                        TextUtils.formatSimple(
+                                "onRequestFailedOnHandler | Finished handling session creation"
+                                    + " request failed for provider: %s, uniqueRequestId: %d,"
+                                    + " reason: %d",
+                                provider.getUniqueId(), uniqueRequestId, reason));
                 return;
             }
 
@@ -2515,6 +2522,12 @@ class MediaRouter2ServiceImpl {
 
             if (matchingRequest == null) {
                 // The failure is not about creating a session.
+                Slog.w(
+                        TAG,
+                        TextUtils.formatSimple(
+                                "handleSessionCreationRequestFailed | No matching request found for"
+                                    + " provider: %s, uniqueRequestId: %d, reason: %d",
+                                provider.getUniqueId(), uniqueRequestId, reason));
                 return false;
             }
 

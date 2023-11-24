@@ -1765,8 +1765,7 @@ public class NotificationManagerService extends SystemService {
             if (Intent.ACTION_LOCALE_CHANGED.equals(intent.getAction())) {
                 // update system notification channels
                 SystemNotificationChannels.createAll(context);
-                mZenModeHelper.updateDefaultZenRules(Binder.getCallingUid(),
-                        isCallerIsSystemOrSystemUi());
+                mZenModeHelper.updateDefaultZenRules(Binder.getCallingUid());
                 mPreferencesHelper.onLocaleChanged(context, ActivityManager.getCurrentUser());
             }
         }
@@ -5316,7 +5315,9 @@ public class NotificationManagerService extends SystemService {
 
             return mZenModeHelper.addAutomaticZenRule(rulePkg, automaticZenRule,
                     "addAutomaticZenRule", Binder.getCallingUid(),
-                    isCallerIsSystemOrSystemUi());
+                    // TODO: b/308670715: Distinguish FROM_APP from FROM_USER
+                    isCallerIsSystemOrSystemUi() ? ZenModeHelper.FROM_SYSTEM_OR_SYSTEMUI
+                            : ZenModeHelper.FROM_APP);
         }
 
         @Override
@@ -5334,7 +5335,9 @@ public class NotificationManagerService extends SystemService {
 
             return mZenModeHelper.updateAutomaticZenRule(id, automaticZenRule,
                     "updateAutomaticZenRule", Binder.getCallingUid(),
-                    isCallerIsSystemOrSystemUi());
+                    // TODO: b/308670715: Distinguish FROM_APP from FROM_USER
+                    isCallerIsSystemOrSystemUi() ? ZenModeHelper.FROM_SYSTEM_OR_SYSTEMUI
+                            : ZenModeHelper.FROM_APP);
         }
 
         @Override

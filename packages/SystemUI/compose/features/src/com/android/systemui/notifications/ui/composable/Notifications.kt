@@ -72,8 +72,8 @@ object Notifications {
 @Composable
 fun SceneScope.HeadsUpNotificationSpace(
     viewModel: NotificationsPlaceholderViewModel,
-    isPeekFromBottom: Boolean = false,
     modifier: Modifier = Modifier,
+    isPeekFromBottom: Boolean = false,
 ) {
     NotificationPlaceholder(
         viewModel = viewModel,
@@ -149,11 +149,11 @@ private fun SceneScope.NotificationPlaceholder(
     form: Form,
     modifier: Modifier = Modifier,
 ) {
-    val key = Notifications.Elements.NotificationPlaceholder
+    val elementKey = Notifications.Elements.NotificationPlaceholder
     Box(
         modifier =
             modifier
-                .element(key)
+                .element(elementKey)
                 .debugBackground(viewModel)
                 .onSizeChanged { size: IntSize ->
                     debugLog(viewModel) { "STACK onSizeChanged: size=$size" }
@@ -166,7 +166,7 @@ private fun SceneScope.NotificationPlaceholder(
                             " bounds=${coordinates.boundsInWindow()}"
                     }
                     val boundsInWindow = coordinates.boundsInWindow()
-                    viewModel.setPlaceholderPositionInWindow(
+                    viewModel.onBoundsChanged(
                         top = boundsInWindow.top,
                         bottom = boundsInWindow.bottom,
                     )
@@ -176,7 +176,7 @@ private fun SceneScope.NotificationPlaceholder(
             animateSharedFloatAsState(
                 value = if (form == Form.HunFromTop) 0f else 1f,
                 key = SharedExpansionValue,
-                element = key
+                element = elementKey
             )
         debugLog(viewModel) { "STACK composed: expansion=$animatedExpansion" }
         if (viewModel.isPlaceholderTextVisible) {

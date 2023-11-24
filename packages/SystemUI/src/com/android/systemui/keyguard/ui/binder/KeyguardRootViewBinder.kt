@@ -308,7 +308,7 @@ object KeyguardRootViewBinder {
     private class OnLayoutChange(private val viewModel: KeyguardRootViewModel) :
         OnLayoutChangeListener {
         override fun onLayoutChange(
-            v: View,
+            view: View,
             left: Int,
             top: Int,
             right: Int,
@@ -318,18 +318,16 @@ object KeyguardRootViewBinder {
             oldRight: Int,
             oldBottom: Int
         ) {
-            val nsslPlaceholder = v.findViewById(R.id.nssl_placeholder) as View?
-            if (nsslPlaceholder != null) {
+            view.findViewById<View>(R.id.nssl_placeholder)?.let { notificationListPlaceholder ->
                 // After layout, ensure the notifications are positioned correctly
-                viewModel.onSharedNotificationContainerPositionChanged(
-                    nsslPlaceholder.top.toFloat(),
-                    nsslPlaceholder.bottom.toFloat(),
+                viewModel.onNotificationContainerBoundsChanged(
+                    notificationListPlaceholder.top.toFloat(),
+                    notificationListPlaceholder.bottom.toFloat(),
                 )
             }
 
-            val ksv = v.findViewById(R.id.keyguard_status_view) as View?
-            if (ksv != null) {
-                viewModel.statusViewTop = ksv.top
+            view.findViewById<View>(R.id.keyguard_status_view)?.let { statusView ->
+                viewModel.statusViewTop = statusView.top
             }
         }
     }

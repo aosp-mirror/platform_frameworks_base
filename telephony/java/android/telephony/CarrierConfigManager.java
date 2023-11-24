@@ -8853,6 +8853,24 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "epdg_static_address_roaming_string";
 
         /**
+         * Controls if the multiple SA proposals allowed for IKE session to include
+         * all the 3GPP TS 33.210 and RFC 8221 supported cipher suites in multiple
+         * IKE SA proposals as per RFC 7296.
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_MULTIPLE_SA_PROPOSALS)
+        public static final String KEY_SUPPORTS_IKE_SESSION_MULTIPLE_SA_PROPOSALS_BOOL =
+                KEY_PREFIX + "supports_ike_session_multiple_sa_proposals_bool";
+
+        /**
+         * Controls if the multiple SA proposals allowed for Child session to include
+         * all the 3GPP TS 33.210 and RFC 8221 supported cipher suites in multiple
+         * Child SA proposals as per RFC 7296.
+         */
+        @FlaggedApi(Flags.FLAG_ENABLE_MULTIPLE_SA_PROPOSALS)
+        public static final String KEY_SUPPORTS_CHILD_SESSION_MULTIPLE_SA_PROPOSALS_BOOL =
+                KEY_PREFIX + "supports_child_session_multiple_sa_proposals_bool";
+
+        /**
          * List of supported key sizes for AES Cipher Block Chaining (CBC) encryption mode of child
          * session. Possible values are:
          * {@link android.net.ipsec.ike.SaProposal#KEY_LEN_UNUSED},
@@ -9187,6 +9205,8 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_IKE_REKEY_HARD_TIMER_SEC_INT, 14400);
             defaults.putInt(KEY_CHILD_SA_REKEY_SOFT_TIMER_SEC_INT, 3600);
             defaults.putInt(KEY_CHILD_SA_REKEY_HARD_TIMER_SEC_INT, 7200);
+            defaults.putBoolean(KEY_SUPPORTS_IKE_SESSION_MULTIPLE_SA_PROPOSALS_BOOL, false);
+            defaults.putBoolean(KEY_SUPPORTS_CHILD_SESSION_MULTIPLE_SA_PROPOSALS_BOOL, false);
             defaults.putIntArray(
                     KEY_RETRANSMIT_TIMER_MSEC_INT_ARRAY, new int[] {500, 1000, 2000, 4000, 8000});
             defaults.putInt(KEY_DPD_TIMER_SEC_INT, 120);

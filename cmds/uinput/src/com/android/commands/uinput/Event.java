@@ -94,8 +94,9 @@ public class Event {
     private int mId;
     private Command mCommand;
     private String mName;
-    private int mVid;
-    private int mPid;
+    private int mVendorId;
+    private int mProductId;
+    private int mVersionId;
     private int mBusId;
     private int[] mInjections;
     private SparseArray<int[]> mConfiguration;
@@ -118,11 +119,15 @@ public class Event {
     }
 
     public int getVendorId() {
-        return mVid;
+        return mVendorId;
     }
 
     public int getProductId() {
-        return mPid;
+        return mProductId;
+    }
+
+    public int getVersionId() {
+        return mVersionId;
     }
 
     public int getBus() {
@@ -172,8 +177,8 @@ public class Event {
         return "Event{id=" + mId
             + ", command=" + mCommand
             + ", name=" + mName
-            + ", vid=" + mVid
-            + ", pid=" + mPid
+            + ", vid=" + mVendorId
+            + ", pid=" + mProductId
             + ", busId=" + mBusId
             + ", events=" + Arrays.toString(mInjections)
             + ", configuration=" + mConfiguration
@@ -216,12 +221,16 @@ public class Event {
             mEvent.mConfiguration = configuration;
         }
 
-        public void setVid(int vid) {
-            mEvent.mVid = vid;
+        public void setVendorId(int vendorId) {
+            mEvent.mVendorId = vendorId;
         }
 
-        public void setPid(int pid) {
-            mEvent.mPid = pid;
+        public void setProductId(int productId) {
+            mEvent.mProductId = productId;
+        }
+
+        public void setVersionId(int versionId) {
+            mEvent.mVersionId = versionId;
         }
 
         public void setBusId(int busId) {
