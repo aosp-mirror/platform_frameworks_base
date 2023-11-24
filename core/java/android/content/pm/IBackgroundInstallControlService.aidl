@@ -16,11 +16,20 @@
 
 package android.content.pm;
 
+
 import android.content.pm.ParceledListSlice;
+import android.os.IRemoteCallback;
 
 /**
  * {@hide}
  */
 interface IBackgroundInstallControlService {
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest.permission.QUERY_ALL_PACKAGES)")
     ParceledListSlice getBackgroundInstalledPackages(long flags, int userId);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(allOf = {android.Manifest.permission.QUERY_ALL_PACKAGES, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})")
+    void registerBackgroundInstallCallback(IRemoteCallback callback);
+
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(allOf = {android.Manifest.permission.QUERY_ALL_PACKAGES, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL})")
+    void unregisterBackgroundInstallCallback(IRemoteCallback callback);
 }
