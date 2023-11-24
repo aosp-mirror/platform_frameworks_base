@@ -29,6 +29,7 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.UserManager;
 import android.provider.Settings;
 import android.view.accessibility.AccessibilityManager;
 
@@ -40,6 +41,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
+import org.robolectric.Shadows;
 import org.robolectric.shadows.ShadowAccessibilityManager;
 
 import java.util.Arrays;
@@ -97,6 +99,20 @@ public class BatteryUtilsTest {
 
         assertThat(BatteryUtils.getA11yPackageNames(mContext))
                 .containsExactly(DEFAULT_TTS_PACKAGE, ACCESSIBILITY_PACKAGE);
+    }
+
+    @Test
+    public void isWorkProfile_defaultValue_returnFalse() {
+        assertThat(BatteryUtils.isWorkProfile(mContext)).isFalse();
+    }
+
+    @Test
+    public void isWorkProfile_workProfileMode_returnTrue() {
+        final UserManager userManager = mContext.getSystemService(UserManager.class);
+        Shadows.shadowOf(userManager).setManagedProfile(true);
+        Shadows.shadowOf(userManager).setIsSystemUser(false);
+
+        assertThat(BatteryUtils.isWorkProfile(mContext)).isTrue();
     }
 
     private void setTtsPackageName(String defaultTtsPackageName) {
