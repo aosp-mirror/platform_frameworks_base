@@ -60,6 +60,7 @@ import android.view.inputmethod.BaseInputConnection;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
+import com.android.modules.expresslog.Counter;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -68,6 +69,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Main session associated with a context.
@@ -80,6 +82,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class MainContentCaptureSession extends ContentCaptureSession {
 
     private static final String TAG = MainContentCaptureSession.class.getSimpleName();
+
+    private static final String CONTENT_CAPTURE_WRONG_THREAD_METRIC_ID =
+            "content_capture.value_content_capture_wrong_thread_count";
 
     // For readability purposes...
     private static final boolean FORCE_FLUSH = true;
@@ -164,6 +169,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
 
     @Nullable
     private final LocalLog mFlushHistory;
+
+    private final AtomicInteger mWrongThreadCount = new AtomicInteger(0);
 
     /**
      * Binder object used to update the session state.
@@ -701,6 +708,7 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                     + getDebugState());
         }
 
+        reportWrongThreadMetric();
         try {
             mSystemServerInterface.finishSession(mId);
         } catch (RemoteException e) {
@@ -1040,18 +1048,25 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     }
 
     /**
-     * Checks that the current work is running on the assigned thread from {@code mHandler}.
+     * Checks that the current work is running on the assigned thread from {@code mHandler} and
+     * count the number of times running on the wrong thread.
      *
      * <p>It is not guaranteed that the callers always invoke function from a single thread.
      * Therefore, accessing internal properties in {@link MainContentCaptureSession} should
      * always delegate to the assigned thread from {@code mHandler} for synchronization.</p>
      */
     private void checkOnContentCaptureThread() {
-        // TODO(b/309411951): Add metrics to track the issue instead.
         final boolean onContentCaptureThread = mHandler.getLooper().isCurrentThread();
         if (!onContentCaptureThread) {
+            mWrongThreadCount.incrementAndGet();
             Log.e(TAG, "MainContentCaptureSession running on " + Thread.currentThread());
         }
+    }
+
+    /** Reports number of times running on the wrong thread. */
+    private void reportWrongThreadMetric() {
+        Counter.logIncrement(
+                CONTENT_CAPTURE_WRONG_THREAD_METRIC_ID, mWrongThreadCount.getAndSet(0));
     }
 
     /**
