@@ -285,7 +285,7 @@ public final class KeyboardShortcutListSearch {
         mSpecialCharacterNames.put(
                 KeyEvent.KEYCODE_NUM_LOCK, context.getString(R.string.keyboard_key_num_lock));
         mSpecialCharacterNames.put(KeyEvent.KEYCODE_MINUS, "-");
-        mSpecialCharacterNames.put(KeyEvent.KEYCODE_GRAVE, "~");
+        mSpecialCharacterNames.put(KeyEvent.KEYCODE_GRAVE, "`");
         mSpecialCharacterNames.put(KeyEvent.KEYCODE_EQUALS, "=");
 
         mSpecialCharacterNames.put(KeyEvent.KEYCODE_NUMPAD_0,
@@ -493,7 +493,7 @@ public final class KeyboardShortcutListSearch {
                         Arrays.asList(
                                 Pair.create(KeyEvent.KEYCODE_SLASH, KeyEvent.META_META_ON))),
                 /* Back: go back to previous state (back button) */
-                /* Meta + ~, Meta + backspace, Meta + left arrow */
+                /* Meta + Grave, Meta + backspace, Meta + left arrow */
                 new ShortcutKeyGroupMultiMappingInfo(
                         context.getString(R.string.group_system_go_back),
                         Arrays.asList(
