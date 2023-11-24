@@ -17,7 +17,6 @@
 package com.android.server.display.mode
 
 import androidx.test.filters.SmallTest
-import com.android.server.display.mode.DisplayModeDirector.VoteSummary
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -32,7 +31,7 @@ class DisableRefreshRateSwitchingVoteTest {
     fun `disabled refresh rate switching is not changed`(
             @TestParameter voteDisableSwitching: Boolean
     ) {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.disableRefreshRateSwitching = true
         val vote = DisableRefreshRateSwitchingVote(voteDisableSwitching)
 
@@ -43,7 +42,7 @@ class DisableRefreshRateSwitchingVoteTest {
 
     @Test
     fun `disables refresh rate switching if requested`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         val vote = DisableRefreshRateSwitchingVote(true)
 
         vote.updateSummary(summary)
@@ -53,7 +52,7 @@ class DisableRefreshRateSwitchingVoteTest {
 
     @Test
     fun `does not disable refresh rate switching if not requested`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         val vote = DisableRefreshRateSwitchingVote(false)
 
         vote.updateSummary(summary)

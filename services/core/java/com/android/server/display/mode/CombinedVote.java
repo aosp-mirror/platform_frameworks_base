@@ -28,7 +28,7 @@ class CombinedVote implements Vote {
     }
 
     @Override
-    public void updateSummary(DisplayModeDirector.VoteSummary summary) {
+    public void updateSummary(VoteSummary summary) {
         mVotes.forEach(vote -> vote.updateSummary(summary));
     }
 

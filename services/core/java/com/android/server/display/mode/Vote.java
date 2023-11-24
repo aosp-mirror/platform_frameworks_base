@@ -128,7 +128,7 @@ interface Vote {
      */
     int INVALID_SIZE = -1;
 
-    void updateSummary(DisplayModeDirector.VoteSummary summary);
+    void updateSummary(VoteSummary summary);
 
     static Vote forPhysicalRefreshRates(float minRefreshRate, float maxRefreshRate) {
         return new CombinedVote(
