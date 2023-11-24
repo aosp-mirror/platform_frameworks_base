@@ -1571,15 +1571,6 @@ public final class SystemServiceRegistry {
                     }
                 });
 
-        registerService(Context.BACKGROUND_INSTALL_CONTROL_SERVICE,
-                BackgroundInstallControlManager.class,
-                new CachedServiceFetcher<BackgroundInstallControlManager>() {
-                    @Override
-                    public BackgroundInstallControlManager createService(ContextImpl ctx) {
-                        return new BackgroundInstallControlManager(ctx);
-                    }
-                });
-
         sInitializing = true;
         try {
             // Note: the following functions need to be @SystemApis, once they become mainline
