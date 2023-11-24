@@ -58,13 +58,14 @@ public class BrightnessClamperController {
     private final Executor mExecutor;
     private final List<BrightnessClamper<? super DisplayDeviceData>> mClampers;
 
-    private final List<BrightnessModifier> mModifiers;
+    private final List<BrightnessStateModifier> mModifiers;
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener;
     private float mBrightnessCap = PowerManager.BRIGHTNESS_MAX;
 
     private float mCustomAnimationRate = DisplayBrightnessState.CUSTOM_ANIMATION_RATE_NOT_SET;
     @Nullable
     private Type mClamperType = null;
+
     private boolean mClamperApplied = false;
 
     public BrightnessClamperController(Handler handler,
@@ -92,7 +93,7 @@ public class BrightnessClamperController {
 
         mClampers = injector.getClampers(handler, clamperChangeListenerInternal, data, flags,
                 context);
-        mModifiers = injector.getModifiers(context);
+        mModifiers = injector.getModifiers(flags, context, handler, clamperChangeListener);
         mOnPropertiesChangedListener =
                 properties -> mClampers.forEach(BrightnessClamper::onDeviceConfigChanged);
         start();
@@ -165,9 +166,10 @@ public class BrightnessClamperController {
      * Used to dump ClampersController state.
      */
     public void dump(PrintWriter writer) {
-        writer.println("BrightnessClampersController:");
+        writer.println("BrightnessClamperController:");
         writer.println("  mBrightnessCap: " + mBrightnessCap);
         writer.println("  mClamperType: " + mClamperType);
+        writer.println("  mClamperApplied: " + mClamperApplied);
         IndentingPrintWriter ipw = new IndentingPrintWriter(writer, "    ");
         mClampers.forEach(clamper -> clamper.dump(ipw));
         mModifiers.forEach(modifier -> modifier.dump(ipw));
@@ -181,6 +183,7 @@ public class BrightnessClamperController {
         mDeviceConfigParameterProvider.removeOnPropertiesChangedListener(
                 mOnPropertiesChangedListener);
         mClampers.forEach(BrightnessClamper::stop);
+        mModifiers.forEach(BrightnessStateModifier::stop);
     }
 
 
@@ -201,14 +204,14 @@ public class BrightnessClamperController {
             customAnimationRate = minClamper.getCustomAnimationRate();
         }
 
-        if (mBrightnessCap != brightnessCap || mClamperType != clamperType
+        if (mBrightnessCap != brightnessCap
+                || mClamperType != clamperType
                 || mCustomAnimationRate != customAnimationRate) {
             mBrightnessCap = brightnessCap;
             mClamperType = clamperType;
             mCustomAnimationRate = customAnimationRate;
             mClamperChangeListenerExternal.onChanged();
         }
-
     }
 
     private void start() {
@@ -248,16 +251,17 @@ public class BrightnessClamperController {
                 clampers.add(new BrightnessWearBedtimeModeClamper(handler, context,
                         clamperChangeListener, data));
             }
-            if (flags.isEvenDimmerEnabled()) {
-                clampers.add(new BrightnessMinClamper(handler, clamperChangeListener, context));
-            }
             return clampers;
         }
 
-        List<BrightnessModifier> getModifiers(Context context) {
-            List<BrightnessModifier> modifiers = new ArrayList<>();
+        List<BrightnessStateModifier> getModifiers(DisplayManagerFlags flags, Context context,
+                Handler handler, ClamperChangeListener listener) {
+            List<BrightnessStateModifier> modifiers = new ArrayList<>();
             modifiers.add(new DisplayDimModifier(context));
             modifiers.add(new BrightnessLowPowerModeModifier());
+            if (flags.isEvenDimmerEnabled()) {
+                modifiers.add(new BrightnessLowLuxModifier(handler, listener, context));
+            }
             return modifiers;
         }
     }
