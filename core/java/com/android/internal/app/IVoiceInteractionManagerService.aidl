@@ -388,4 +388,14 @@ interface IVoiceInteractionManagerService {
     oneway void notifyActivityEventChanged(
             in IBinder activityToken,
             int type);
+
+    /**
+      * Sets the sandboxed detection training data egress op to provided op-mode.
+      * Caller must be the active assistant and a preinstalled assistant.
+      *
+      * @param opMode app-op mode to set training data egress op to.
+      *
+      * @return whether was able to successfully set training data egress op.
+      */
+      boolean setSandboxedDetectionTrainingDataOp(int opMode);
 }

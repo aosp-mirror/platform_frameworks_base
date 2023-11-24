@@ -413,12 +413,8 @@ public abstract class InfoMediaManager extends MediaManager {
      */
     @NonNull
     List<MediaDevice> getSelectedMediaDevices() {
-        if (TextUtils.isEmpty(mPackageName)) {
-            Log.w(TAG, "getSelectedMediaDevices() package name is null or empty!");
-            return Collections.emptyList();
-        }
+        RoutingSessionInfo info = getRoutingSessionInfo();
 
-        final RoutingSessionInfo info = getRoutingSessionInfo();
         if (info == null) {
             Log.w(TAG, "getSelectedMediaDevices() cannot find selectable MediaDevice from : "
                     + mPackageName);

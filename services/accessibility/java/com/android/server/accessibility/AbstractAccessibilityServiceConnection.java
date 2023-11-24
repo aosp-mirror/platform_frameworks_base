@@ -34,7 +34,7 @@ import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLEAR_ACCE
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
-import static com.android.window.flags.Flags.removeCaptureDisplay;
+import static com.android.window.flags.Flags.deleteCaptureDisplay;
 
 import android.accessibilityservice.AccessibilityGestureEvent;
 import android.accessibilityservice.AccessibilityService;
@@ -1443,7 +1443,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
             return;
         }
         final long identity = Binder.clearCallingIdentity();
-        if (removeCaptureDisplay()) {
+        if (deleteCaptureDisplay()) {
             try {
                 ScreenCapture.ScreenCaptureListener screenCaptureListener = new
                         ScreenCapture.ScreenCaptureListener(
@@ -1485,7 +1485,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
 
     private void sendScreenshotSuccess(ScreenshotHardwareBuffer screenshotBuffer,
             RemoteCallback callback) {
-        if (removeCaptureDisplay()) {
+        if (deleteCaptureDisplay()) {
             mMainHandler.post(PooledLambda.obtainRunnable((nonArg) -> {
                 final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
                 final ParcelableColorSpace colorSpace =

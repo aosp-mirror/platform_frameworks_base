@@ -6350,4 +6350,20 @@ ul.</string>
     <string name="keyboard_layout_notification_multiple_selected_title">Physical keyboards configured</string>
     <!-- Notification message when multiple keyboards with selected layouts have been connected the first time simultaneously [CHAR LIMIT=NOTIF_BODY] -->
     <string name="keyboard_layout_notification_multiple_selected_message">Tap to view keyboards</string>
+
+    <!-- Private profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_private">Private</string>
+    <!-- Clone profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_clone">Clone</string>
+    <!-- Work profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work">Work</string>
+    <!-- 2nd Work profile label on a screen in case a device has more than one work profiles. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work_2">Work 2</string>
+    <!-- 3rd Work profile label on a screen in case a device has more than two work profiles. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_work_3">Work 3</string>
+    <!-- Test profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20]  -->
+    <string name="profile_label_test">Test</string>
+    <!-- Communal profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
+    <string name="profile_label_communal">Communal</string>
+
 </resources>

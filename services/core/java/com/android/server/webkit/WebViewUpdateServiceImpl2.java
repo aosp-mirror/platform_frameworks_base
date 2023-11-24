@@ -23,6 +23,7 @@ import android.content.pm.Signature;
 import android.os.AsyncTask;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
@@ -70,10 +71,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         WebViewPackageMissingException(String message) {
             super(message);
         }
-
-        WebViewPackageMissingException(Exception e) {
-            super(e);
-        }
     }
 
     private static final int WAIT_TIMEOUT_MS = 1000; // KEY_DISPATCHING_TIMEOUT is 5000.
@@ -84,9 +81,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
     private static final int VALIDITY_INCORRECT_VERSION_CODE = 2;
     private static final int VALIDITY_INCORRECT_SIGNATURE = 3;
     private static final int VALIDITY_NO_LIBRARY_FLAG = 4;
-
-    private static final int MULTIPROCESS_SETTING_ON_VALUE = Integer.MAX_VALUE;
-    private static final int MULTIPROCESS_SETTING_OFF_VALUE = Integer.MIN_VALUE;
 
     private final SystemInterface mSystemInterface;
     private final Context mContext;
@@ -166,7 +160,6 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
 
     @Override
     public void prepareWebViewInSystemServer() {
-        mSystemInterface.notifyZygote(isMultiProcessEnabled());
         try {
             synchronized (mLock) {
                 mCurrentWebViewPackage = findPreferredWebViewPackage();
@@ -366,14 +359,10 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
 
         // Once we've notified the system that the provider has changed and started RELRO creation,
         // try to restart the zygote so that it will be ready when apps use it.
-        if (isMultiProcessEnabled()) {
-            AsyncTask.THREAD_POOL_EXECUTOR.execute(this::startZygoteWhenReady);
-        }
+        AsyncTask.THREAD_POOL_EXECUTOR.execute(this::startZygoteWhenReady);
     }
 
-    /**
-     * Fetch only the currently valid WebView packages.
-     **/
+    /** Fetch only the currently valid WebView packages. */
     @Override
     public WebViewProviderInfo[] getValidWebViewPackages() {
         ProviderAndPackageInfo[] providersAndPackageInfos = getValidWebViewPackagesAndInfos();
@@ -632,62 +621,56 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
 
     @Override
     public boolean isMultiProcessEnabled() {
-        int settingValue = mSystemInterface.getMultiProcessSetting(mContext);
-        if (mSystemInterface.isMultiProcessDefaultEnabled()) {
-            // Multiprocess should be enabled unless the user has turned it off manually.
-            return settingValue > MULTIPROCESS_SETTING_OFF_VALUE;
-        } else {
-            // Multiprocess should not be enabled, unless the user has turned it on manually.
-            return settingValue >= MULTIPROCESS_SETTING_ON_VALUE;
-        }
+        throw new IllegalStateException(
+                "isMultiProcessEnabled shouldn't be called if update_service_v2 flag is set.");
     }
 
     @Override
     public void enableMultiProcess(boolean enable) {
-        PackageInfo current = getCurrentWebViewPackage();
-        mSystemInterface.setMultiProcessSetting(mContext,
-                enable ? MULTIPROCESS_SETTING_ON_VALUE : MULTIPROCESS_SETTING_OFF_VALUE);
-        mSystemInterface.notifyZygote(enable);
-        if (current != null) {
-            mSystemInterface.killPackageDependents(current.packageName);
-        }
+        throw new IllegalStateException(
+                "enableMultiProcess shouldn't be called if update_service_v2 flag is set.");
     }
 
-    /**
-     * Dump the state of this Service.
-     */
+    /** Dump the state of this Service. */
     @Override
     public void dumpState(PrintWriter pw) {
         pw.println("Current WebView Update Service state");
-        pw.println(String.format("  Multiprocess enabled: %b", isMultiProcessEnabled()));
         synchronized (mLock) {
             if (mCurrentWebViewPackage == null) {
                 pw.println("  Current WebView package is null");
             } else {
-                pw.println(String.format("  Current WebView package (name, version): (%s, %s)",
-                        mCurrentWebViewPackage.packageName,
-                        mCurrentWebViewPackage.versionName));
+                pw.println(
+                        TextUtils.formatSimple(
+                                "  Current WebView package (name, version): (%s, %s)",
+                                mCurrentWebViewPackage.packageName,
+                                mCurrentWebViewPackage.versionName));
             }
-            pw.println(String.format("  Minimum targetSdkVersion: %d",
-                    UserPackage.MINIMUM_SUPPORTED_SDK));
-            pw.println(String.format("  Minimum WebView version code: %d",
-                    mMinimumVersionCode));
-            pw.println(String.format("  Number of relros started: %d",
-                    mNumRelroCreationsStarted));
-            pw.println(String.format("  Number of relros finished: %d",
-                        mNumRelroCreationsFinished));
-            pw.println(String.format("  WebView package dirty: %b", mWebViewPackageDirty));
-            pw.println(String.format("  Any WebView package installed: %b",
-                    mAnyWebViewInstalled));
+            pw.println(
+                    TextUtils.formatSimple(
+                            "  Minimum targetSdkVersion: %d", UserPackage.MINIMUM_SUPPORTED_SDK));
+            pw.println(
+                    TextUtils.formatSimple(
+                            "  Minimum WebView version code: %d", mMinimumVersionCode));
+            pw.println(
+                    TextUtils.formatSimple(
+                            "  Number of relros started: %d", mNumRelroCreationsStarted));
+            pw.println(
+                    TextUtils.formatSimple(
+                            "  Number of relros finished: %d", mNumRelroCreationsFinished));
+            pw.println(TextUtils.formatSimple("  WebView package dirty: %b", mWebViewPackageDirty));
+            pw.println(
+                    TextUtils.formatSimple(
+                            "  Any WebView package installed: %b", mAnyWebViewInstalled));
 
             try {
                 PackageInfo preferredWebViewPackage = findPreferredWebViewPackage();
-                pw.println(String.format(
-                        "  Preferred WebView package (name, version): (%s, %s)",
-                        preferredWebViewPackage.packageName,
-                        preferredWebViewPackage.versionName));
+                pw.println(
+                        TextUtils.formatSimple(
+                                "  Preferred WebView package (name, version): (%s, %s)",
+                                preferredWebViewPackage.packageName,
+                                preferredWebViewPackage.versionName));
             } catch (WebViewPackageMissingException e) {
-                pw.println(String.format("  Preferred WebView package: none"));
+                pw.println("  Preferred WebView package: none");
             }
 
             dumpAllPackageInformationLocked(pw);
@@ -703,29 +686,36 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
             PackageInfo systemUserPackageInfo =
                     userPackages.get(UserHandle.USER_SYSTEM).getPackageInfo();
             if (systemUserPackageInfo == null) {
-                pw.println(String.format("    %s is NOT installed.", provider.packageName));
+                pw.println(
+                        TextUtils.formatSimple("    %s is NOT installed.", provider.packageName));
                 continue;
             }
 
             int validity = validityResult(provider, systemUserPackageInfo);
-            String packageDetails = String.format(
-                    "versionName: %s, versionCode: %d, targetSdkVersion: %d",
-                    systemUserPackageInfo.versionName,
-                    systemUserPackageInfo.getLongVersionCode(),
-                    systemUserPackageInfo.applicationInfo.targetSdkVersion);
+            String packageDetails =
+                    TextUtils.formatSimple(
+                            "versionName: %s, versionCode: %d, targetSdkVersion: %d",
+                            systemUserPackageInfo.versionName,
+                            systemUserPackageInfo.getLongVersionCode(),
+                            systemUserPackageInfo.applicationInfo.targetSdkVersion);
             if (validity == VALIDITY_OK) {
-                boolean installedForAllUsers = isInstalledAndEnabledForAllUsers(
-                        mSystemInterface.getPackageInfoForProviderAllUsers(mContext, provider));
-                pw.println(String.format(
-                        "    Valid package %s (%s) is %s installed/enabled for all users",
-                        systemUserPackageInfo.packageName,
-                        packageDetails,
-                        installedForAllUsers ? "" : "NOT"));
+                boolean installedForAllUsers =
+                        isInstalledAndEnabledForAllUsers(
+                                mSystemInterface.getPackageInfoForProviderAllUsers(
+                                        mContext, provider));
+                pw.println(
+                        TextUtils.formatSimple(
+                                "    Valid package %s (%s) is %s installed/enabled for all users",
+                                systemUserPackageInfo.packageName,
+                                packageDetails,
+                                installedForAllUsers ? "" : "NOT"));
             } else {
-                pw.println(String.format("    Invalid package %s (%s), reason: %s",
-                        systemUserPackageInfo.packageName,
-                        packageDetails,
-                        getInvalidityReason(validity)));
+                pw.println(
+                        TextUtils.formatSimple(
+                                "    Invalid package %s (%s), reason: %s",
+                                systemUserPackageInfo.packageName,
+                                packageDetails,
+                                getInvalidityReason(validity)));
             }
         }
     }

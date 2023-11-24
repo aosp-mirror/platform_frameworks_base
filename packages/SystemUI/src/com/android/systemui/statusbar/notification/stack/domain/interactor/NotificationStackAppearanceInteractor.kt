@@ -17,7 +17,7 @@
 
 package com.android.systemui.statusbar.notification.stack.domain.interactor
 
-import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
+import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.statusbar.notification.stack.data.repository.NotificationStackAppearanceRepository
 import javax.inject.Inject
@@ -31,13 +31,12 @@ class NotificationStackAppearanceInteractor
 constructor(
     private val repository: NotificationStackAppearanceRepository,
 ) {
-    /** The position of the notification stack in the current scene */
-    val stackPosition: StateFlow<SharedNotificationContainerPosition>
-        get() = repository.stackPosition.asStateFlow()
+    /** The bounds of the notification stack in the current scene. */
+    val stackBounds: StateFlow<NotificationContainerBounds> = repository.stackBounds.asStateFlow()
 
-    /** Sets the position of the notification stack in the current scene */
-    fun setStackPosition(position: SharedNotificationContainerPosition) {
-        check(position.top <= position.bottom) { "Invalid position: $position" }
-        repository.stackPosition.value = position
+    /** Sets the position of the notification stack in the current scene. */
+    fun setStackBounds(bounds: NotificationContainerBounds) {
+        check(bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
+        repository.stackBounds.value = bounds
     }
 }

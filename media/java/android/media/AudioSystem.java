@@ -2462,6 +2462,8 @@ public class AudioSystem
     public static final int PLATFORM_VOICE = 1;
     /** @hide The platform is a television or a set-top box */
     public static final int PLATFORM_TELEVISION = 2;
+    /** @hide The platform is automotive */
+    public static final int PLATFORM_AUTOMOTIVE = 3;
 
     /**
      * @hide
@@ -2478,6 +2480,9 @@ public class AudioSystem
             return PLATFORM_VOICE;
         } else if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK)) {
             return PLATFORM_TELEVISION;
+        } else if (context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE)) {
+            return PLATFORM_AUTOMOTIVE;
         } else {
             return PLATFORM_DEFAULT;
         }

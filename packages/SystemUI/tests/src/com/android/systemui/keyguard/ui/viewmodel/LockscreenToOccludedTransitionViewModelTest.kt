@@ -14,84 +14,56 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalCoroutinesApi::class)
+
 package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.collectLastValue
-import com.android.systemui.collectValues
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.flags.featureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.user.domain.UserDomainLayerModule
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                UserDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent : SysUITestComponent<LockscreenToOccludedTransitionViewModel> {
-        val repository: FakeKeyguardTransitionRepository
-        val keyguardRepository: FakeKeyguardRepository
-        val shadeRepository: FakeShadeRepository
 
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-                mocks: TestMocksModule,
-            ): TestComponent
+    private val kosmos =
+        testKosmos().apply {
+            featureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
-    }
-
-    private fun TestComponent.shadeExpanded(expanded: Boolean) {
-        if (expanded) {
-            shadeRepository.setQsExpansion(1f)
-        } else {
-            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
-            shadeRepository.setQsExpansion(0f)
-            shadeRepository.setLockscreenShadeExpansion(0f)
-        }
-    }
-
-    private val testComponent: TestComponent =
-        DaggerLockscreenToOccludedTransitionViewModelTest_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags =
-                    FakeFeatureFlagsClassicModule { set(Flags.FULL_SCREEN_USER_SWITCHER, true) },
-                mocks = TestMocksModule(),
-            )
+    private val testScope = kosmos.testScope
+    private val repository = kosmos.fakeKeyguardTransitionRepository
+    private val shadeRepository = kosmos.shadeRepository
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val underTest =
+        LockscreenToOccludedTransitionViewModel(
+            interactor = kosmos.keyguardTransitionInteractor,
+            shadeDependentFlows = kosmos.shadeDependentFlows,
+        )
 
     @Test
     fun lockscreenFadeOut() =
-        testComponent.runTest {
+        testScope.runTest {
             val values by collectValues(underTest.lockscreenAlpha)
             repository.sendTransitionSteps(
                 steps =
@@ -113,7 +85,7 @@ class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun lockscreenTranslationY() =
-        testComponent.runTest {
+        testScope.runTest {
             val pixels = 100
             val values by collectValues(underTest.lockscreenTranslationY(pixels))
             repository.sendTransitionSteps(
@@ -133,7 +105,7 @@ class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun lockscreenTranslationYIsCanceled() =
-        testComponent.runTest {
+        testScope.runTest {
             val pixels = 100
             val values by collectValues(underTest.lockscreenTranslationY(pixels))
             repository.sendTransitionSteps(
@@ -155,7 +127,7 @@ class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun deviceEntryParentViewAlpha_shadeExpanded() =
-        testComponent.runTest {
+        testScope.runTest {
             val values by collectValues(underTest.deviceEntryParentViewAlpha)
             shadeExpanded(true)
             runCurrent()
@@ -176,7 +148,7 @@ class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun deviceEntryParentViewAlpha_shadeNotExpanded() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.deviceEntryParentViewAlpha)
             shadeExpanded(false)
             runCurrent()
@@ -207,5 +179,15 @@ class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
             transitionState = state,
             ownerName = "LockscreenToOccludedTransitionViewModelTest"
         )
+    }
+
+    private fun shadeExpanded(expanded: Boolean) {
+        if (expanded) {
+            shadeRepository.setQsExpansion(1f)
+        } else {
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            shadeRepository.setQsExpansion(0f)
+            shadeRepository.setLockscreenShadeExpansion(0f)
+        }
     }
 }

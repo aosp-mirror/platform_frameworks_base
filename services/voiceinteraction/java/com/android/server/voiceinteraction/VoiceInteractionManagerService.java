@@ -24,6 +24,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
 import android.content.ComponentName;
@@ -1565,6 +1566,33 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @Override
+        public boolean setSandboxedDetectionTrainingDataOp(int opMode) {
+            synchronized (this) {
+                enforceIsCallerPreinstalledAssistant();
+
+                if (mImpl == null) {
+                    Slog.w(TAG, "setSandboxedDetectionTrainingDataop without running"
+                            + " voice interaction service");
+                    return false;
+                }
+
+                int callingUid = Binder.getCallingUid();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    AppOpsManager appOpsManager = (AppOpsManager)
+                            mContext.getSystemService(Context.APP_OPS_SERVICE);
+                    appOpsManager.setUidMode(
+                            AppOpsManager.OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
+                            callingUid, opMode);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
+
+                return true;
+            }
+        }
+
       //----------------- Model management APIs --------------------------------//
 
         @Override
@@ -2219,6 +2247,13 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        private void enforceIsCallerPreinstalledAssistant() {
+            if (!isCallerPreinstalledAssistant()) {
+                throw new
+                        SecurityException("Caller is not the pre-installed assistant.");
+            }
+        }
+
         private void enforceCallerAllowedToEnrollVoiceModel() {
             if (isCallerHoldingPermission(Manifest.permission.KEYPHRASE_ENROLLMENT_APPLICATION)) {
                 return;
@@ -2231,6 +2266,13 @@ public class VoiceInteractionManagerService extends SystemService {
         private boolean isCallerCurrentVoiceInteractionService() {
             return mImpl != null
                     && mImpl.mInfo.getServiceInfo().applicationInfo.uid == Binder.getCallingUid();
+        }
+
+        private boolean isCallerPreinstalledAssistant() {
+            return mImpl != null
+                    && mImpl.mInfo.getServiceInfo().applicationInfo.uid == Binder.getCallingUid()
+                    && (mImpl.mInfo.getServiceInfo().applicationInfo.isSystemApp()
+                    || mImpl.mInfo.getServiceInfo().applicationInfo.isUpdatedSystemApp());
         }
 
         private void setImplLocked(VoiceInteractionManagerServiceImpl impl) {

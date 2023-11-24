@@ -143,8 +143,17 @@ flag {
 }
 
 flag {
+   name: "theme_overlay_controller_wakefulness_deprecation"
+   namespace: "systemui"
+   description: "Replacing WakefulnessLifecycle by KeyguardTransitionInteractor in "
+        "ThemOverlayController to mitigate flickering when locking the device"
+   bug: "308676488"
+}
+
+flag {
    name: "media_in_scene_container"
    namespace: "systemui"
    description: "Enable media in the scene container framework"
    bug: "296122467"
 }
+

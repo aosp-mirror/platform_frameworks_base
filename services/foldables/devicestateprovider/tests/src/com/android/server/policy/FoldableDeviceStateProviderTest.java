@@ -17,18 +17,21 @@
 package com.android.server.policy;
 
 
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.STATE_OFF;
+import static android.view.Display.STATE_ON;
+import static android.view.Display.TYPE_EXTERNAL;
+import static android.view.Display.TYPE_INTERNAL;
+
+import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_ADDED;
+import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_REMOVED;
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED;
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED;
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED;
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL;
 import static com.android.server.devicestate.DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_NORMAL;
-import com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration;
-
-import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.STATE_OFF;
-import static android.view.Display.STATE_ON;
-
 import static com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration.createConfig;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -36,12 +39,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -51,20 +53,21 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.hardware.display.DisplayManager;
 import android.hardware.input.InputSensorInfo;
-import android.os.PowerManager;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
 import android.view.Display;
 
 import com.android.server.devicestate.DeviceState;
-import com.android.server.devicestate.DeviceStateProvider;
 import com.android.server.devicestate.DeviceStateProvider.Listener;
+import com.android.server.policy.FoldableDeviceStateProvider.DeviceStateConfiguration;
+import com.android.server.policy.feature.flags.FakeFeatureFlagsImpl;
+import com.android.server.policy.feature.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -95,10 +98,16 @@ public final class FoldableDeviceStateProviderTest {
     @Mock
     private DisplayManager mDisplayManager;
     private FoldableDeviceStateProvider mProvider;
+    @Mock
+    private Display mDefaultDisplay;
+    @Mock
+    private Display mExternalDisplay;
 
+    private final FakeFeatureFlagsImpl mFakeFeatureFlags = new FakeFeatureFlagsImpl();
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
+        mFakeFeatureFlags.setFlag(Flags.FLAG_ENABLE_DUAL_DISPLAY_BLOCKING, true);
 
         mHallSensor = new Sensor(mInputSensorInfo);
         mHingeAngleSensor = new Sensor(mInputSensorInfo);
@@ -473,6 +482,133 @@ public final class FoldableDeviceStateProviderTest {
         assertThat(mProvider.isScreenOn()).isFalse();
     }
 
+    @Test
+    public void test_dualScreenDisabledWhenExternalScreenIsConnected() throws Exception {
+        when(mDisplayManager.getDisplays()).thenReturn(new Display[]{mDefaultDisplay});
+        when(mDefaultDisplay.getType()).thenReturn(TYPE_INTERNAL);
+
+        createProvider(createConfig(/* identifier= */ 1, /* name= */ "CLOSED",
+                        (c) -> c.getHingeAngle() < 5f),
+                createConfig(/* identifier= */ 2, /* name= */ "HALF_OPENED",
+                        (c) -> c.getHingeAngle() < 90f),
+                createConfig(/* identifier= */ 3, /* name= */ "OPENED",
+                        (c) -> c.getHingeAngle() < 180f),
+                createConfig(/* identifier= */ 4, /* name= */ "DUAL_DISPLAY", /* flags */ 0,
+                        (c) -> false, FoldableDeviceStateProvider::hasNoConnectedExternalDisplay));
+
+        Listener listener = mock(Listener.class);
+        mProvider.setListener(listener);
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
+                eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
+        assertThat(mDeviceStateArrayCaptor.getValue()).asList().containsExactly(
+                new DeviceState[]{
+                        new DeviceState(1, "CLOSED", 0 /* flags */),
+                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
+                        new DeviceState(3, "OPENED", 0 /* flags */),
+                        new DeviceState(4, "DUAL_DISPLAY", 0 /* flags */)}).inOrder();
+
+        clearInvocations(listener);
+
+        when(mDisplayManager.getDisplays())
+                .thenReturn(new Display[]{mDefaultDisplay, mExternalDisplay});
+        when(mDisplayManager.getDisplay(1)).thenReturn(mExternalDisplay);
+        when(mExternalDisplay.getType()).thenReturn(TYPE_EXTERNAL);
+
+        // The DUAL_DISPLAY state should be disabled.
+        mProvider.onDisplayAdded(1);
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
+                eq(SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_ADDED));
+        assertThat(mDeviceStateArrayCaptor.getValue()).asList().containsExactly(
+                new DeviceState[]{
+                        new DeviceState(1, "CLOSED", 0 /* flags */),
+                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
+                        new DeviceState(3, "OPENED", 0 /* flags */)}).inOrder();
+        clearInvocations(listener);
+
+        // The DUAL_DISPLAY state should be re-enabled.
+        when(mDisplayManager.getDisplays()).thenReturn(new Display[]{mDefaultDisplay});
+        mProvider.onDisplayRemoved(1);
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
+                eq(SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_REMOVED));
+        assertThat(mDeviceStateArrayCaptor.getValue()).asList().containsExactly(
+                new DeviceState[]{
+                        new DeviceState(1, "CLOSED", 0 /* flags */),
+                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
+                        new DeviceState(3, "OPENED", 0 /* flags */),
+                        new DeviceState(4, "DUAL_DISPLAY", 0 /* flags */)}).inOrder();
+    }
+
+    @Test
+    public void test_notifySupportedStatesChangedCalledOnlyOnInitialExternalScreenAddition() {
+        when(mDisplayManager.getDisplays()).thenReturn(new Display[]{mDefaultDisplay});
+        when(mDefaultDisplay.getType()).thenReturn(TYPE_INTERNAL);
+
+        createProvider(createConfig(/* identifier= */ 1, /* name= */ "CLOSED",
+                        (c) -> c.getHingeAngle() < 5f),
+                createConfig(/* identifier= */ 2, /* name= */ "HALF_OPENED",
+                        (c) -> c.getHingeAngle() < 90f),
+                createConfig(/* identifier= */ 3, /* name= */ "OPENED",
+                        (c) -> c.getHingeAngle() < 180f),
+                createConfig(/* identifier= */ 4, /* name= */ "DUAL_DISPLAY", /* flags */ 0,
+                        (c) -> false, FoldableDeviceStateProvider::hasNoConnectedExternalDisplay));
+
+        Listener listener = mock(Listener.class);
+        mProvider.setListener(listener);
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
+                eq(SUPPORTED_DEVICE_STATES_CHANGED_INITIALIZED));
+        assertThat(mDeviceStateArrayCaptor.getValue()).asList().containsExactly(
+                new DeviceState[]{
+                        new DeviceState(1, "CLOSED", 0 /* flags */),
+                        new DeviceState(2, "HALF_OPENED", 0 /* flags */),
+                        new DeviceState(3, "OPENED", 0 /* flags */),
+                        new DeviceState(4, "DUAL_DISPLAY", 0 /* flags */)}).inOrder();
+
+        clearInvocations(listener);
+
+        addExternalDisplay(1);
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
+                eq(SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_ADDED));
+        addExternalDisplay(2);
+        addExternalDisplay(3);
+        addExternalDisplay(4);
+        verify(listener, times(1))
+                .onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture(),
+                eq(SUPPORTED_DEVICE_STATES_CHANGED_EXTERNAL_DISPLAY_ADDED));
+    }
+
+    @Test
+    public void hasNoConnectedDisplay_afterExternalDisplayAdded_returnsFalse() {
+        createProvider(
+                createConfig(
+                        /* identifier= */ 1, /* name= */ "ONE",
+                        /* flags= */0, (c) -> true,
+                        FoldableDeviceStateProvider::hasNoConnectedExternalDisplay)
+        );
+
+        addExternalDisplay(/* displayId */ 1);
+
+        assertThat(mProvider.hasNoConnectedExternalDisplay()).isFalse();
+    }
+
+    @Test
+    public void hasNoConnectedDisplay_afterExternalDisplayAddedAndRemoved_returnsTrue() {
+        createProvider(
+                createConfig(
+                        /* identifier= */ 1, /* name= */ "ONE",
+                        /* flags= */0, (c) -> true,
+                        FoldableDeviceStateProvider::hasNoConnectedExternalDisplay)
+        );
+
+        addExternalDisplay(/* displayId */ 1);
+        mProvider.onDisplayRemoved(1);
+
+        assertThat(mProvider.hasNoConnectedExternalDisplay()).isTrue();
+    }
+    private void addExternalDisplay(int displayId) {
+        when(mDisplayManager.getDisplay(displayId)).thenReturn(mExternalDisplay);
+        when(mExternalDisplay.getType()).thenReturn(TYPE_EXTERNAL);
+        mProvider.onDisplayAdded(displayId);
+    }
     private void setScreenOn(boolean isOn) {
         Display mockDisplay = mock(Display.class);
         int state = isOn ? STATE_ON : STATE_OFF;
@@ -508,12 +644,11 @@ public final class FoldableDeviceStateProviderTest {
     }
 
     private void createProvider(DeviceStateConfiguration... configurations) {
-        mProvider = new FoldableDeviceStateProvider(mContext, mSensorManager, mHingeAngleSensor,
-                mHallSensor, mDisplayManager, configurations);
+        mProvider = new FoldableDeviceStateProvider(mFakeFeatureFlags, mContext, mSensorManager,
+                mHingeAngleSensor, mHallSensor, mDisplayManager, configurations);
         verify(mDisplayManager)
                 .registerDisplayListener(
                         mDisplayListenerCaptor.capture(),
-                        nullable(Handler.class),
-                        anyLong());
+                        nullable(Handler.class));
     }
 }

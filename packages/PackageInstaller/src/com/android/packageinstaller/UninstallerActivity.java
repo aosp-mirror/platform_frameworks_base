@@ -56,6 +56,7 @@ import com.android.packageinstaller.television.ErrorFragment;
 import com.android.packageinstaller.television.UninstallAlertFragment;
 import com.android.packageinstaller.television.UninstallAppProgress;
 
+import com.android.packageinstaller.v2.ui.UninstallLaunch;
 import java.util.List;
 
 /*
@@ -80,6 +81,9 @@ public class UninstallerActivity extends Activity {
     private String mPackageName;
     private DialogInfo mDialogInfo;
 
+    // TODO (sumedhsen): Replace with an Android Feature Flag once implemented
+    private static final boolean USE_PIA_V2 = false;
+
     @Override
     public void onCreate(Bundle icicle) {
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
@@ -87,6 +91,20 @@ public class UninstallerActivity extends Activity {
         // Never restore any state, esp. never create any fragments. The data in the fragment might
         // be stale, if e.g. the app was uninstalled while the activity was destroyed.
         super.onCreate(null);
+
+        if (USE_PIA_V2 && !isTv()) {
+            boolean returnResult = getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
+            Intent piaV2 = new Intent(getIntent());
+            piaV2.putExtra(UninstallLaunch.EXTRA_CALLING_PKG_UID, getLaunchedFromUid());
+            piaV2.putExtra(UninstallLaunch.EXTRA_CALLING_ACTIVITY_NAME, getCallingActivity());
+            if (returnResult) {
+                piaV2.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
+            }
+            piaV2.setClass(this, UninstallLaunch.class);
+            startActivity(piaV2);
+            finish();
+            return;
+        }
 
         int callingUid = getLaunchedFromUid();
         if (callingUid == Process.INVALID_UID) {

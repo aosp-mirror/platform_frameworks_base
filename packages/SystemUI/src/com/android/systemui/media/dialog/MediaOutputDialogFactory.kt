@@ -61,6 +61,19 @@ open class MediaOutputDialogFactory @Inject constructor(
 
     /** Creates a [MediaOutputDialog] for the given package. */
     open fun create(packageName: String, aboveStatusBar: Boolean, view: View? = null) {
+        create(packageName, aboveStatusBar, view, includePlaybackAndAppMetadata = true)
+    }
+
+    open fun createDialogForSystemRouting() {
+        create(packageName = null, aboveStatusBar = false, includePlaybackAndAppMetadata = false)
+    }
+
+    private fun create(
+            packageName: String?,
+            aboveStatusBar: Boolean,
+            view: View? = null,
+            includePlaybackAndAppMetadata: Boolean = true
+    ) {
         // Dismiss the previous dialog, if any.
         mediaOutputDialog?.dismiss()
 
@@ -71,7 +84,7 @@ open class MediaOutputDialogFactory @Inject constructor(
             powerExemptionManager, keyGuardManager, featureFlags, userTracker)
         val dialog =
             MediaOutputDialog(context, aboveStatusBar, broadcastSender, controller,
-                    dialogLaunchAnimator, uiEventLogger)
+                    dialogLaunchAnimator, uiEventLogger, includePlaybackAndAppMetadata)
         mediaOutputDialog = dialog
 
         // Show the dialog.

@@ -22,7 +22,7 @@ import android.util.MathUtils
 import android.view.View.VISIBLE
 import com.android.app.animation.Interpolators
 import com.android.systemui.Flags.newAodTransition
-import com.android.systemui.common.shared.model.SharedNotificationContainerPosition
+import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
@@ -98,9 +98,9 @@ constructor(
 
     val goneToAodTransition = keyguardTransitionInteractor.goneToAodTransition
 
-    /** the shared notification container position *on the lockscreen* */
-    val notificationPositionOnLockscreen: StateFlow<SharedNotificationContainerPosition>
-        get() = keyguardInteractor.sharedNotificationContainerPosition
+    /** the shared notification container bounds *on the lockscreen* */
+    val notificationBounds: StateFlow<NotificationContainerBounds> =
+        keyguardInteractor.notificationContainerBounds
 
     /** An observable for the alpha level for the entire keyguard root view. */
     val alpha: Flow<Float> =
@@ -247,14 +247,13 @@ constructor(
         previewMode.value = PreviewMode(true)
     }
 
-    fun onSharedNotificationContainerPositionChanged(top: Float, bottom: Float) {
+    fun onNotificationContainerBoundsChanged(top: Float, bottom: Float) {
         // Notifications should not be visible in preview mode
         if (previewMode.value.isInPreviewMode) {
             return
         }
-        keyguardInteractor.setSharedNotificationContainerPosition(
-            SharedNotificationContainerPosition(top, bottom)
-        )
+
+        keyguardInteractor.setNotificationContainerBounds(NotificationContainerBounds(top, bottom))
     }
 
     /** Is there an expanded pulse, are we animating in response? */

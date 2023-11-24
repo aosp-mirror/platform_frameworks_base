@@ -96,6 +96,8 @@ public:
 
     bool hasText() const { return mDisplayList.hasText(); }
 
+    bool hasFill() const { return mDisplayList.hasFill(); }
+
     /**
      * Attempts to reset and reuse this DisplayList.
      *

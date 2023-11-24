@@ -343,6 +343,8 @@ public final class UserManagerTest {
         assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
         removeUser(userInfo.id);
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
+        assertThat(mUserManager.getProfileLabel()).isEqualTo(
+                Resources.getSystem().getString(userTypeDetails.getLabel(0)));
     }
 
     @MediumTest

@@ -60,8 +60,8 @@ public class JsonStyleParser implements EventParser {
                         case "command" -> eb.setCommand(
                                 Event.Command.valueOf(mReader.nextString().toUpperCase()));
                         case "name" -> eb.setName(mReader.nextString());
-                        case "vid" -> eb.setVid(readInt());
-                        case "pid" -> eb.setPid(readInt());
+                        case "vid" -> eb.setVendorId(readInt());
+                        case "pid" -> eb.setProductId(readInt());
                         case "bus" -> eb.setBusId(readBus());
                         case "events" -> {
                             int[] injections = readInjectedEvents().stream()

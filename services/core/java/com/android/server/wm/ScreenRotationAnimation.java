@@ -32,7 +32,7 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATI
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.utils.CoordinateTransforms.computeRotationMatrix;
-import static com.android.window.flags.Flags.removeCaptureDisplay;
+import static com.android.window.flags.Flags.deleteCaptureDisplay;
 
 import android.animation.ArgbEvaluator;
 import android.content.Context;
@@ -171,7 +171,7 @@ class ScreenRotationAnimation {
 
         try {
             final ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer;
-            if (isSizeChanged && !removeCaptureDisplay()) {
+            if (isSizeChanged && !deleteCaptureDisplay()) {
                 final DisplayAddress address = displayInfo.address;
                 if (!(address instanceof DisplayAddress.Physical)) {
                     Slog.e(TAG, "Display does not have a physical address: " + displayId);

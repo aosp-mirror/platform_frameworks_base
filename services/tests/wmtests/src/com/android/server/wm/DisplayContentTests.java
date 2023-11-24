@@ -51,8 +51,6 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
-import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -159,6 +157,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Tests for the {@link DisplayContent} class.
@@ -2287,7 +2289,7 @@ public class DisplayContentTests extends WindowTestsBase {
                 0 /* userId */);
         dc.mCurrentUniqueDisplayId = mDisplayInfo.uniqueId + "-test";
         // Trigger display changed.
-        dc.onDisplayChanged();
+        updateDisplay(dc);
         // Ensure overridden size and denisty match the most up-to-date values in settings for the
         // display.
         verifySizes(dc, forcedWidth, forcedHeight, forcedDensity);
@@ -2762,26 +2764,6 @@ public class DisplayContentTests extends WindowTestsBase {
                 mDisplayContent.getKeepClearAreas());
     }
 
-    @Test
-    public void testMayImeShowOnLaunchingActivity_negativeWhenSoftInputModeHidden() {
-        final ActivityRecord app = createActivityRecord(mDisplayContent);
-        final WindowState appWin = createWindow(null, TYPE_BASE_APPLICATION, app, "appWin");
-        createWindow(null, TYPE_APPLICATION_STARTING, app, "startingWin");
-        app.mStartingData = mock(SnapshotStartingData.class);
-        // Assume the app has shown IME before and warm launching with a snapshot window.
-        doReturn(true).when(app.mStartingData).hasImeSurface();
-
-        // Expect true when this IME focusable activity will show IME during launching.
-        assertTrue(WindowManager.LayoutParams.mayUseInputMethod(appWin.mAttrs.flags));
-        assertTrue(mDisplayContent.mayImeShowOnLaunchingActivity(app));
-
-        // Not expect IME will be shown during launching if the app's softInputMode is hidden.
-        appWin.mAttrs.softInputMode = SOFT_INPUT_STATE_ALWAYS_HIDDEN;
-        assertFalse(mDisplayContent.mayImeShowOnLaunchingActivity(app));
-        appWin.mAttrs.softInputMode = SOFT_INPUT_STATE_HIDDEN;
-        assertFalse(mDisplayContent.mayImeShowOnLaunchingActivity(app));
-    }
-
     private void removeRootTaskTests(Runnable runnable) {
         final TaskDisplayArea taskDisplayArea = mRootWindowContainer.getDefaultTaskDisplayArea();
         final Task rootTask1 = taskDisplayArea.createRootTask(WINDOWING_MODE_FULLSCREEN,
@@ -2852,7 +2834,7 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     private DisplayContent createDisplayNoUpdateDisplayInfo() {
         final DisplayContent displayContent = createNewDisplay();
-        doNothing().when(displayContent).updateDisplayInfo();
+        doNothing().when(displayContent).updateDisplayInfo(any());
         return displayContent;
     }
 
@@ -2880,6 +2862,16 @@ public class DisplayContentTests extends WindowTestsBase {
         final ArrayList<WindowState> result = new ArrayList<>(list);
         Collections.reverse(result);
         return result;
+    }
+
+    private void updateDisplay(DisplayContent displayContent) {
+        CompletableFuture<Object> future = new CompletableFuture<>();
+        displayContent.requestDisplayUpdate(() -> future.complete(new Object()));
+        try {
+            future.get(15, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void tapOnDisplay(final DisplayContent dc) {

@@ -140,6 +140,9 @@ filegroup {
         // For the generated R.java and Manifest.java
         ":framework-res{.aapt.srcjar}",
 
+        // Java/AIDL sources to be moved out to CrashRecovery module
+        ":framework-crashrecovery-sources",
+
         // etc.
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java

@@ -2337,6 +2337,7 @@ public class PackageInstaller {
      */
     @SystemApi
     @NonNull
+    @FlaggedApi(Flags.FLAG_READ_INSTALL_INFO)
     public InstallInfo readInstallInfo(@NonNull ParcelFileDescriptor pfd,
             @Nullable String debugPathName, int flags) throws PackageParsingException {
         final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
@@ -2516,6 +2517,7 @@ public class PackageInstaller {
          * and all relevant native code.
          * @throws IOException when size of native binaries cannot be calculated.
          */
+        @FlaggedApi(Flags.FLAG_READ_INSTALL_INFO)
         public long calculateInstalledSize(@NonNull SessionParams params,
                 @NonNull ParcelFileDescriptor pfd) throws IOException {
             return InstallLocationUtils.calculateInstalledSize(mPkg, params.abiOverride,

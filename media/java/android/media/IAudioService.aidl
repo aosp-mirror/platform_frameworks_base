@@ -52,7 +52,7 @@ import android.media.ISpatializerHeadToSoundStagePoseCallback;
 import android.media.ISpatializerOutputCallback;
 import android.media.IStreamAliasingDispatcher;
 import android.media.IVolumeController;
-import android.media.LoudnessCodecFormat;
+import android.media.LoudnessCodecInfo;
 import android.media.PlayerBase;
 import android.media.VolumeInfo;
 import android.media.VolumePolicy;
@@ -731,15 +731,13 @@ interface IAudioService {
 
     void unregisterLoudnessCodecUpdatesDispatcher(in ILoudnessCodecUpdatesDispatcher dispatcher);
 
-    oneway void startLoudnessCodecUpdates(in int piid);
+    oneway void startLoudnessCodecUpdates(int piid, in List<LoudnessCodecInfo> codecInfoSet);
 
-    oneway void stopLoudnessCodecUpdates(in int piid);
+    oneway void stopLoudnessCodecUpdates(int piid);
 
-    oneway void addLoudnesssCodecFormat(in int piid, in LoudnessCodecFormat format);
+    oneway void addLoudnessCodecInfo(int piid, in LoudnessCodecInfo codecInfo);
 
-    oneway void addLoudnesssCodecFormatList(in int piid, in List<LoudnessCodecFormat> format);
+    oneway void removeLoudnessCodecInfo(int piid, in LoudnessCodecInfo codecInfo);
 
-    oneway void removeLoudnessCodecFormat(in int piid, in LoudnessCodecFormat format);
-
-    PersistableBundle getLoudnessParams(in int piid, in LoudnessCodecFormat format);
+    PersistableBundle getLoudnessParams(int piid, in LoudnessCodecInfo codecInfo);
 }

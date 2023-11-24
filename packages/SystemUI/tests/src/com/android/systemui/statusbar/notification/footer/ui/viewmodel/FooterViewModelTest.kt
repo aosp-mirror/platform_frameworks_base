@@ -116,27 +116,27 @@ class FooterViewModelTest : SysuiTestCase() {
     @Test
     fun testMessageVisible_whenFilteredNotifications() =
         testComponent.runTest {
-            val message by collectLastValue(footerViewModel.message)
+            val visible by collectLastValue(footerViewModel.message.isVisible)
 
             activeNotificationListRepository.hasFilteredOutSeenNotifications.value = true
 
-            assertThat(message?.visible).isTrue()
+            assertThat(visible).isTrue()
         }
 
     @Test
     fun testMessageVisible_whenNoFilteredNotifications() =
         testComponent.runTest {
-            val message by collectLastValue(footerViewModel.message)
+            val visible by collectLastValue(footerViewModel.message.isVisible)
 
             activeNotificationListRepository.hasFilteredOutSeenNotifications.value = false
 
-            assertThat(message?.visible).isFalse()
+            assertThat(visible).isFalse()
         }
 
     @Test
     fun testClearAllButtonVisible_whenHasClearableNotifs() =
         testComponent.runTest {
-            val button by collectLastValue(footerViewModel.clearAllButton)
+            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
@@ -148,13 +148,13 @@ class FooterViewModelTest : SysuiTestCase() {
                 )
             runCurrent()
 
-            assertThat(button?.isVisible?.value).isTrue()
+            assertThat(visible?.value).isTrue()
         }
 
     @Test
     fun testClearAllButtonVisible_whenHasNoClearableNotifs() =
         testComponent.runTest {
-            val button by collectLastValue(footerViewModel.clearAllButton)
+            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
 
             activeNotificationListRepository.notifStats.value =
                 NotifStats(
@@ -166,13 +166,13 @@ class FooterViewModelTest : SysuiTestCase() {
                 )
             runCurrent()
 
-            assertThat(button?.isVisible?.value).isFalse()
+            assertThat(visible?.value).isFalse()
         }
 
     @Test
     fun testClearAllButtonAnimating_whenShadeExpandedAndTouchable() =
         testComponent.runTest {
-            val button by collectLastValue(footerViewModel.clearAllButton)
+            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
             runCurrent()
 
             // WHEN shade is expanded
@@ -200,13 +200,13 @@ class FooterViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN button visibility should animate
-            assertThat(button?.isVisible?.isAnimating).isTrue()
+            assertThat(visible?.isAnimating).isTrue()
         }
 
     @Test
     fun testClearAllButtonAnimating_whenShadeNotExpanded() =
         testComponent.runTest {
-            val button by collectLastValue(footerViewModel.clearAllButton)
+            val visible by collectLastValue(footerViewModel.clearAllButton.isVisible)
             runCurrent()
 
             // WHEN shade is collapsed
@@ -234,6 +234,6 @@ class FooterViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // THEN button visibility should not animate
-            assertThat(button?.isVisible?.isAnimating).isFalse()
+            assertThat(visible?.isAnimating).isFalse()
         }
 }
