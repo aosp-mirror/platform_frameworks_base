@@ -711,7 +711,7 @@
     <item msgid="7453955063378349599">"ಎಡ-ಬಾಗುವಿಕೆ"</item>
     <item msgid="5874146774389433072">"ಬಲ-ಬಾಗುವಿಕೆ"</item>
   </string-array>
-    <string name="save" msgid="3392754183673848006">"ಉಳಿಸಿ"</string>
+    <string name="save" msgid="3392754183673848006">"ಸೇವ್ ಮಾಡಿ"</string>
     <string name="reset" msgid="8715144064608810383">"ಮರುಹೊಂದಿಸಿ"</string>
     <string name="clipboard" msgid="8517342737534284617">"ಕ್ಲಿಪ್‌ಬೋರ್ಡ್"</string>
     <string name="accessibility_key" msgid="3471162841552818281">"ಕಸ್ಟಮ್ ನ್ಯಾವಿಗೇಷನ್ ಬಟನ್"</string>
@@ -991,7 +991,7 @@
     <string name="media_output_broadcasting_message" msgid="4150299923404886073">"ನಿಮ್ಮ ಪ್ರಸಾರವನ್ನು ಆಲಿಸಲು, ಹೊಂದಾಣಿಕೆಯಾಗುವ ಬ್ಲೂಟೂತ್ ಸಾಧನಗಳನ್ನು ಹೊಂದಿರುವ ಸಮೀಪದಲ್ಲಿರುವ ಜನರು ನಿಮ್ಮ QR ಕೋಡ್ ಅನ್ನು ಸ್ಕ್ಯಾನ್ ಮಾಡಬಹುದು ಅಥವಾ ನಿಮ್ಮ ಪ್ರಸಾರದ ಹೆಸರು ಹಾಗೂ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ಬಳಸಬಹುದು"</string>
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"ಪ್ರಸಾರದ ಹೆಸರು"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"ಪಾಸ್‌ವರ್ಡ್"</string>
-    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"ಉಳಿಸಿ"</string>
+    <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"ಸೇವ್ ಮಾಡಿ"</string>
     <string name="media_output_broadcast_starting" msgid="8130153654166235557">"ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"ಪ್ರಸಾರ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
