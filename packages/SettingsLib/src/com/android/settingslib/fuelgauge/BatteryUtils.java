@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.provider.Settings;
+import android.os.UserManager;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityManager;
 
@@ -67,5 +68,11 @@ public final class BatteryUtils {
             }
         }
         return packageNames;
+    }
+
+    /** Returns true if current user is a work profile user. */
+    public static boolean isWorkProfile(Context context) {
+        final UserManager userManager = context.getSystemService(UserManager.class);
+        return userManager.isManagedProfile() && !userManager.isSystemUser();
     }
 }

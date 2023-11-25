@@ -30,6 +30,7 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_90;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
@@ -130,13 +131,17 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 });
         mDisplayRotationCompatPolicy = new DisplayRotationCompatPolicy(
                 mDisplayContent, mMockHandler);
+
+        // Do not show the real toast.
+        spyOn(mDisplayRotationCompatPolicy);
+        doNothing().when(mDisplayRotationCompatPolicy).showToast(anyInt());
+        doNothing().when(mDisplayRotationCompatPolicy).showToast(anyInt(), anyString());
     }
 
     @Test
     public void testOpenedCameraInSplitScreen_showToast() throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         spyOn(mTask);
-        spyOn(mDisplayRotationCompatPolicy);
         doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivity).getWindowingMode();
         doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mTask).getWindowingMode();
 
@@ -160,7 +165,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOpenedCameraInSplitScreen_orientationNotFixed_doNotShowToast() {
         configureActivity(SCREEN_ORIENTATION_UNSPECIFIED);
         spyOn(mTask);
-        spyOn(mDisplayRotationCompatPolicy);
         doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mActivity).getWindowingMode();
         doReturn(WINDOWING_MODE_MULTI_WINDOW).when(mTask).getWindowingMode();
 
@@ -175,7 +179,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnScreenRotationAnimationFinished_treatmentNotEnabled_doNotShowToast() {
         when(mLetterboxConfiguration.isCameraCompatTreatmentEnabled())
                 .thenReturn(false);
-        spyOn(mDisplayRotationCompatPolicy);
 
         mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
 
@@ -185,8 +188,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     @Test
     public void testOnScreenRotationAnimationFinished_noOpenCamera_doNotShowToast() {
-        spyOn(mDisplayRotationCompatPolicy);
-
         mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
 
         verify(mDisplayRotationCompatPolicy, never()).showToast(
@@ -197,7 +198,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnScreenRotationAnimationFinished_notFullscreen_doNotShowToast() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         doReturn(true).when(mActivity).inMultiWindowMode();
-        spyOn(mDisplayRotationCompatPolicy);
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
 
@@ -211,7 +211,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnScreenRotationAnimationFinished_orientationNotFixed_doNotShowToast() {
         configureActivity(SCREEN_ORIENTATION_UNSPECIFIED);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        spyOn(mDisplayRotationCompatPolicy);
 
         mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
 
@@ -223,7 +222,6 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnScreenRotationAnimationFinished_showToast() {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
-        spyOn(mDisplayRotationCompatPolicy);
 
         mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
 

@@ -3038,7 +3038,7 @@ public class NotificationManagerService extends SystemService {
                 mPreferencesHelper.getNotificationChannel(pkg, uid, channel.getId(), true);
 
         mPreferencesHelper.updateNotificationChannel(pkg, uid, channel, true,
-                Binder.getCallingUid(), isCallerIsSystemOrSystemUi());
+                Binder.getCallingUid(), isCallerSystemOrSystemUi());
         if (mPreferencesHelper.onlyHasDefaultChannel(pkg, uid)) {
             mPermissionHelper.setNotificationPermission(pkg, UserHandle.getUserId(uid),
                     channel.getImportance() != IMPORTANCE_NONE, true);
@@ -3086,7 +3086,7 @@ public class NotificationManagerService extends SystemService {
         final NotificationChannelGroup preUpdate =
                 mPreferencesHelper.getNotificationChannelGroup(group.getId(), pkg, uid);
         mPreferencesHelper.createNotificationChannelGroup(pkg, uid, group,
-                fromApp, Binder.getCallingUid(), isCallerIsSystemOrSystemUi());
+                fromApp, Binder.getCallingUid(), isCallerSystemOrSystemUi());
         if (!fromApp) {
             maybeNotifyChannelGroupOwner(pkg, uid, preUpdate, group);
         }
@@ -3516,7 +3516,7 @@ public class NotificationManagerService extends SystemService {
             }
 
             checkCallerIsSameApp(pkg);
-            final boolean isSystemToast = isCallerIsSystemOrSystemUi()
+            final boolean isSystemToast = isCallerSystemOrSystemUi()
                     || PackageManagerService.PLATFORM_PACKAGE_NAME.equals(pkg);
             boolean isAppRenderedToast = (callback != null);
             if (!checkCanEnqueueToast(pkg, callingUid, displayId, isAppRenderedToast,
@@ -4083,7 +4083,7 @@ public class NotificationManagerService extends SystemService {
                         channel, true /* fromTargetApp */,
                         mConditionProviders.isPackageOrComponentAllowed(
                                 pkg, UserHandle.getUserId(uid)), Binder.getCallingUid(),
-                        isCallerIsSystemOrSystemUi());
+                        isCallerSystemOrSystemUi());
                 if (needsPolicyFileChange) {
                     mListeners.notifyNotificationChannelChanged(pkg,
                             UserHandle.getUserHandleForUid(uid),
@@ -4164,7 +4164,7 @@ public class NotificationManagerService extends SystemService {
                 String targetPkg, String channelId, boolean returnParentIfNoConversationChannel,
                 String conversationId) {
             if (canNotifyAsPackage(callingPkg, targetPkg, userId)
-                    || isCallerIsSystemOrSysemUiOrShell()) {
+                    || isCallerSystemOrSystemUiOrShell()) {
                 int targetUid = -1;
                 try {
                     targetUid = mPackageManagerClient.getPackageUidAsUser(targetPkg, userId);
@@ -4219,7 +4219,7 @@ public class NotificationManagerService extends SystemService {
         public void deleteNotificationChannel(String pkg, String channelId) {
             checkCallerIsSystemOrSameApp(pkg);
             final int callingUid = Binder.getCallingUid();
-            final boolean isSystemOrSystemUi = isCallerIsSystemOrSystemUi();
+            final boolean isSystemOrSystemUi = isCallerSystemOrSystemUi();
             final int callingUser = UserHandle.getUserId(callingUid);
             if (NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
                 throw new IllegalArgumentException("Cannot delete default channel");
@@ -4263,7 +4263,7 @@ public class NotificationManagerService extends SystemService {
             checkCallerIsSystemOrSameApp(pkg);
 
             final int callingUid = Binder.getCallingUid();
-            final boolean isSystemOrSystemUi = isCallerIsSystemOrSystemUi();
+            final boolean isSystemOrSystemUi = isCallerSystemOrSystemUi();
             NotificationChannelGroup groupToDelete =
                     mPreferencesHelper.getNotificationChannelGroupWithChannels(
                             pkg, callingUid, groupId, false);
@@ -5206,7 +5206,7 @@ public class NotificationManagerService extends SystemService {
         public void requestInterruptionFilterFromListener(INotificationListener token,
                 int interruptionFilter) throws RemoteException {
             final int callingUid = Binder.getCallingUid();
-            final boolean isSystemOrSystemUi = isCallerIsSystemOrSystemUi();
+            final boolean isSystemOrSystemUi = isCallerSystemOrSystemUi();
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mNotificationLock) {
@@ -5253,7 +5253,7 @@ public class NotificationManagerService extends SystemService {
         public void setZenMode(int mode, Uri conditionId, String reason) throws RemoteException {
             enforceSystemOrSystemUI("INotificationManager.setZenMode");
             final int callingUid = Binder.getCallingUid();
-            final boolean isSystemOrSystemUi = isCallerIsSystemOrSystemUi();
+            final boolean isSystemOrSystemUi = isCallerSystemOrSystemUi();
             final long identity = Binder.clearCallingIdentity();
             try {
                 mZenModeHelper.setManualZenMode(mode, conditionId, null, reason, callingUid,
@@ -5316,7 +5316,7 @@ public class NotificationManagerService extends SystemService {
             return mZenModeHelper.addAutomaticZenRule(rulePkg, automaticZenRule,
                     "addAutomaticZenRule", Binder.getCallingUid(),
                     // TODO: b/308670715: Distinguish FROM_APP from FROM_USER
-                    isCallerIsSystemOrSystemUi() ? ZenModeHelper.FROM_SYSTEM_OR_SYSTEMUI
+                    isCallerSystemOrSystemUi() ? ZenModeHelper.FROM_SYSTEM_OR_SYSTEMUI
                             : ZenModeHelper.FROM_APP);
         }
 
@@ -5336,7 +5336,7 @@ public class NotificationManagerService extends SystemService {
             return mZenModeHelper.updateAutomaticZenRule(id, automaticZenRule,
                     "updateAutomaticZenRule", Binder.getCallingUid(),
                     // TODO: b/308670715: Distinguish FROM_APP from FROM_USER
-                    isCallerIsSystemOrSystemUi() ? ZenModeHelper.FROM_SYSTEM_OR_SYSTEMUI
+                    isCallerSystemOrSystemUi() ? ZenModeHelper.FROM_SYSTEM_OR_SYSTEMUI
                             : ZenModeHelper.FROM_APP);
         }
 
@@ -5347,7 +5347,7 @@ public class NotificationManagerService extends SystemService {
             enforcePolicyAccess(Binder.getCallingUid(), "removeAutomaticZenRule");
 
             return mZenModeHelper.removeAutomaticZenRule(id, "removeAutomaticZenRule",
-                    Binder.getCallingUid(), isCallerIsSystemOrSystemUi());
+                    Binder.getCallingUid(), isCallerSystemOrSystemUi());
         }
 
         @Override
@@ -5357,7 +5357,7 @@ public class NotificationManagerService extends SystemService {
 
             return mZenModeHelper.removeAutomaticZenRules(packageName,
                     packageName + "|removeAutomaticZenRules", Binder.getCallingUid(),
-                    isCallerIsSystemOrSystemUi());
+                    isCallerSystemOrSystemUi());
         }
 
         @Override
@@ -5376,7 +5376,7 @@ public class NotificationManagerService extends SystemService {
             enforcePolicyAccess(Binder.getCallingUid(), "setAutomaticZenRuleState");
 
             mZenModeHelper.setAutomaticZenRuleState(id, condition, Binder.getCallingUid(),
-                    isCallerIsSystemOrSystemUi());
+                    isCallerSystemOrSystemUi());
         }
 
         @Override
@@ -5385,7 +5385,7 @@ public class NotificationManagerService extends SystemService {
             final int zen = NotificationManager.zenModeFromInterruptionFilter(filter, -1);
             if (zen == -1) throw new IllegalArgumentException("Invalid filter: " + filter);
             final int callingUid = Binder.getCallingUid();
-            final boolean isSystemOrSystemUi = isCallerIsSystemOrSystemUi();
+            final boolean isSystemOrSystemUi = isCallerSystemOrSystemUi();
 
             if (android.app.Flags.modesApi() && !canManageGlobalZenPolicy(pkg, callingUid)) {
                 mZenModeHelper.applyGlobalZenModeAsImplicitZenRule(pkg, callingUid, zen);
@@ -5480,7 +5480,7 @@ public class NotificationManagerService extends SystemService {
                     () -> CompatChanges.isChangeEnabled(MANAGE_GLOBAL_ZEN_VIA_IMPLICIT_RULES,
                             callingUid));
             return !isCompatChangeEnabled
-                    || isCallerIsSystemOrSystemUi()
+                    || isCallerSystemOrSystemUi()
                     || hasCompanionDevice(callingPkg, UserHandle.getUserId(callingUid),
                             AssociationRequest.DEVICE_PROFILE_WATCH);
         }
@@ -5711,7 +5711,7 @@ public class NotificationManagerService extends SystemService {
         public void setNotificationPolicy(String pkg, Policy policy) {
             enforcePolicyAccess(pkg, "setNotificationPolicy");
             int callingUid = Binder.getCallingUid();
-            boolean isSystemOrSystemUi = isCallerIsSystemOrSystemUi();
+            boolean isSystemOrSystemUi = isCallerSystemOrSystemUi();
 
             boolean shouldApplyAsImplicitRule = android.app.Flags.modesApi()
                     && !canManageGlobalZenPolicy(pkg, callingUid);
@@ -7113,7 +7113,7 @@ public class NotificationManagerService extends SystemService {
                 }
                 mPreferencesHelper.updateNotificationChannel(
                         pkg, notificationUid, channel, false, callingUid,
-                        isCallerIsSystemOrSystemUi());
+                        isCallerSystemOrSystemUi());
                 r.updateNotificationChannel(channel);
             } else if (!channel.isUserVisibleTaskShown() && !TextUtils.isEmpty(channelId)
                     && !NotificationChannel.DEFAULT_CHANNEL_ID.equals(channelId)) {
@@ -10433,7 +10433,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     @VisibleForTesting
-    protected boolean isCallerIsSystemOrSystemUi() {
+    protected boolean isCallerSystemOrSystemUi() {
         if (isCallerSystemOrPhone()) {
             return true;
         }
@@ -10441,12 +10441,12 @@ public class NotificationManagerService extends SystemService {
                 == PERMISSION_GRANTED;
     }
 
-    private boolean isCallerIsSystemOrSysemUiOrShell() {
+    private boolean isCallerSystemOrSystemUiOrShell() {
         int callingUid = Binder.getCallingUid();
         if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
             return true;
         }
-        return isCallerIsSystemOrSystemUi();
+        return isCallerSystemOrSystemUi();
     }
 
     private void checkCallerIsSystemOrShell() {

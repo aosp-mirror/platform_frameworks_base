@@ -298,14 +298,7 @@ public class InstallInstalling extends Activity {
                         broadcastIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_MUTABLE);
 
-                try {
-                    session.commit(pendingIntent.getIntentSender());
-                } catch (Exception e) {
-                    Log.e(LOG_TAG, "Cannot install package: ", e);
-                    launchFailure(PackageInstaller.STATUS_FAILURE,
-                        PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null);
-                    return;
-                }
+                session.commit(pendingIntent.getIntentSender());
                 mCancelButton.setEnabled(false);
                 setFinishOnTouchOutside(false);
             } else {

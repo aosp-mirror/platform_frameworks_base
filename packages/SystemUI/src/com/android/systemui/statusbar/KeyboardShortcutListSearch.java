@@ -29,8 +29,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.hardware.input.InputManagerGlobal;
@@ -119,7 +118,6 @@ public final class KeyboardShortcutListSearch {
 
     private final SparseArray<String> mSpecialCharacterNames = new SparseArray<>();
     private final SparseArray<String> mModifierNames = new SparseArray<>();
-    private final SparseArray<Drawable> mSpecialCharacterDrawables = new SparseArray<>();
     private final SparseArray<Drawable> mModifierDrawables = new SparseArray<>();
     // Ordered list of modifiers that are supported. All values in this array must exist in
     // mModifierNames.
@@ -146,7 +144,7 @@ public final class KeyboardShortcutListSearch {
         } else {
             this.mWindowManager = mContext.getSystemService(WindowManager.class);
         }
-        loadResources(context);
+        loadResources(this.mContext);
         createHardcodedShortcuts();
     }
 
@@ -349,19 +347,6 @@ public final class KeyboardShortcutListSearch {
         mModifierNames.put(KeyEvent.META_SHIFT_ON, "Shift");
         mModifierNames.put(KeyEvent.META_SYM_ON, "Sym");
         mModifierNames.put(KeyEvent.META_FUNCTION_ON, "Fn");
-
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DEL, context.getDrawable(R.drawable.ic_ksh_key_backspace));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_ENTER, context.getDrawable(R.drawable.ic_ksh_key_enter));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_UP, context.getDrawable(R.drawable.ic_ksh_key_up));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_RIGHT, context.getDrawable(R.drawable.ic_ksh_key_right));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_DOWN, context.getDrawable(R.drawable.ic_ksh_key_down));
-        mSpecialCharacterDrawables.put(
-                KeyEvent.KEYCODE_DPAD_LEFT, context.getDrawable(R.drawable.ic_ksh_key_left));
 
         mModifierDrawables.put(
                 KeyEvent.META_META_ON, context.getDrawable(R.drawable.ic_ksh_key_meta));
@@ -1034,16 +1019,32 @@ public final class KeyboardShortcutListSearch {
                             StringDrawableContainer shortcutRepresentation = shortcutKeys.get(k);
                             if (shortcutRepresentation.mDrawable != null) {
                                 ImageView shortcutKeyIconView = (ImageView) inflater.inflate(
-                                        R.layout.keyboard_shortcuts_key_new_icon_view,
+                                        R.layout.keyboard_shortcuts_key_icon_view,
                                         shortcutItemsContainer,
                                         false);
-                                Bitmap bitmap = Bitmap.createBitmap(shortcutKeyIconItemHeightWidth,
-                                        shortcutKeyIconItemHeightWidth, Bitmap.Config.ARGB_8888);
-                                Canvas canvas = new Canvas(bitmap);
-                                shortcutRepresentation.mDrawable.setBounds(0, 0, canvas.getWidth(),
-                                        canvas.getHeight());
-                                shortcutRepresentation.mDrawable.draw(canvas);
-                                shortcutKeyIconView.setImageBitmap(bitmap);
+                                shortcutKeyIconView.setImageDrawable(
+                                        shortcutRepresentation.mDrawable);
+                                // Once the view has been measured, scale and position the icon in
+                                // the center.
+                                shortcutKeyIconView.post(() -> {
+                                    Drawable d = shortcutKeyIconView.getDrawable();
+
+                                    float newSize = mContext.getResources().getDimensionPixelSize(
+                                            R.dimen.ksh_icon_scaled_size);
+                                    int viewWidth = shortcutKeyIconView.getWidth();
+                                    int viewHeight = shortcutKeyIconView.getHeight();
+                                    float scaleFactor = newSize / d.getIntrinsicWidth();
+                                    // Assumes that top/bottom and left/right padding are equal.
+                                    int paddingHorizontal =  shortcutKeyIconView.getPaddingLeft();
+                                    int paddingVertical =  shortcutKeyIconView.getPaddingTop();
+
+                                    Matrix m = new Matrix();
+                                    m.postScale(scaleFactor, scaleFactor);
+                                    m.postTranslate(
+                                            (viewWidth - newSize) / 2 - paddingHorizontal,
+                                            (viewHeight - newSize) / 2 - paddingVertical);
+                                    shortcutKeyIconView.setImageMatrix(m);
+                                });
                                 shortcutKeyIconView.setImportantForAccessibility(
                                         IMPORTANT_FOR_ACCESSIBILITY_YES);
                                 shortcutKeyIconView.setAccessibilityDelegate(
@@ -1052,7 +1053,7 @@ public final class KeyboardShortcutListSearch {
                                 shortcutItemsContainer.addView(shortcutKeyIconView);
                             } else if (shortcutRepresentation.mString != null) {
                                 TextView shortcutKeyTextView = (TextView) inflater.inflate(
-                                        R.layout.keyboard_shortcuts_key_new_view,
+                                        R.layout.keyboard_shortcuts_key_view,
                                         shortcutItemsContainer,
                                         false);
                                 shortcutKeyTextView.setMinimumWidth(shortcutKeyTextItemMinWidth);
@@ -1062,18 +1063,10 @@ public final class KeyboardShortcutListSearch {
                                                 shortcutRepresentation.mString));
                                 shortcutItemsContainer.addView(shortcutKeyTextView);
                             }
-
-                            if (k < shortcutKeysSize - 1) {
-                                TextView shortcutKeyTextView = (TextView) inflater.inflate(
-                                        R.layout.keyboard_shortcuts_key_plus_view,
-                                        shortcutItemsContainer,
-                                        false);
-                                shortcutItemsContainer.addView(shortcutKeyTextView);
-                            }
                         }
                     } else {
                         TextView shortcutKeyTextView = (TextView) inflater.inflate(
-                                R.layout.keyboard_shortcuts_key_new_view,
+                                R.layout.keyboard_shortcuts_key_view,
                                 shortcutItemsContainer,
                                 false);
                         shortcutKeyTextView.setMinimumWidth(shortcutKeyTextItemMinWidth);
@@ -1085,7 +1078,7 @@ public final class KeyboardShortcutListSearch {
 
                     if (p < keyGroupItemsSize - 1) {
                         TextView shortcutKeyTextView = (TextView) inflater.inflate(
-                                R.layout.keyboard_shortcuts_key_vertical_bar_view,
+                                R.layout.keyboard_shortcuts_key_separator_view,
                                 shortcutItemsContainer,
                                 false);
                         shortcutItemsContainer.addView(shortcutKeyTextView);
@@ -1124,9 +1117,6 @@ public final class KeyboardShortcutListSearch {
         Drawable shortcutKeyDrawable = null;
         if (info.getBaseCharacter() > Character.MIN_VALUE) {
             shortcutKeyString = String.valueOf(info.getBaseCharacter());
-        } else if (mSpecialCharacterDrawables.get(info.getKeycode()) != null) {
-            shortcutKeyDrawable = mSpecialCharacterDrawables.get(info.getKeycode());
-            shortcutKeyString = mSpecialCharacterNames.get(info.getKeycode());
         } else if (mSpecialCharacterNames.get(info.getKeycode()) != null) {
             shortcutKeyString = mSpecialCharacterNames.get(info.getKeycode());
         } else {
