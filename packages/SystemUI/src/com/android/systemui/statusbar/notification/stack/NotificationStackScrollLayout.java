@@ -1275,6 +1275,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * modifications to {@link #mOwnScrollY} are performed to reflect it in the view layout.
      */
     private void updateChildren() {
+        Trace.beginSection("NSSL#updateChildren");
         updateScrollStateForAddedChildren();
         mAmbientState.setCurrentScrollVelocity(mScroller.isFinished()
                 ? 0
@@ -1285,6 +1286,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         } else {
             startAnimationToState();
         }
+        Trace.endSection();
     }
 
     private void onPreDrawDuringAnimation() {

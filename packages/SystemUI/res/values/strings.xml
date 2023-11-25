@@ -1773,13 +1773,13 @@
     <!-- Name used to refer to the "Back" key on the keyboard. -->
     <string name="keyboard_key_back">Back</string>
     <!-- Name used to refer to the "Up" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_up">Up</string>
+    <string name="keyboard_key_dpad_up">Up arrow</string>
     <!-- Name used to refer to the "Down" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_down">Down</string>
+    <string name="keyboard_key_dpad_down">Down arrow</string>
     <!-- Name used to refer to the "Left" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_left">Left</string>
+    <string name="keyboard_key_dpad_left">Left arrow</string>
     <!-- Name used to refer to the "Right" arrow key on the keyboard. -->
-    <string name="keyboard_key_dpad_right">Right</string>
+    <string name="keyboard_key_dpad_right">Right arrow</string>
     <!-- Name used to refer to the "Center" arrow key on the keyboard. -->
     <string name="keyboard_key_dpad_center">Center</string>
     <!-- Name used to refer to the "Tab" key on the keyboard. -->
@@ -1834,6 +1834,8 @@
     <string name="keyboard_shortcut_group_system_shortcuts_helper">Keyboard Shortcuts</string>
     <!-- User visible title for the keyboard shortcut that switches to the next hardware keyboard layout. -->
     <string name="keyboard_shortcut_group_system_switch_input">Switch keyboard layout</string>
+    <!-- User visible string that joins different shortcuts in a list, e.g. shortcut1 "or" shortcut2 "or" ... -->
+    <string  name="keyboard_shortcut_join">or</string>
 
     <!-- Content description for the clear text button in shortcut search list. [CHAR LIMIT=NONE] -->
     <string name="keyboard_shortcut_clear_text">Clear text</string>
@@ -1908,11 +1910,11 @@
     <!-- User visible title for the keyboard shortcut that takes the user to the assistant app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_assist">Assistant</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the browser app. [CHAR LIMIT=70] -->
-    <string name="keyboard_shortcut_group_applications_browser">Browser (Chrome as default)</string>
+    <string name="keyboard_shortcut_group_applications_browser">Browser</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the contacts app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_contacts">Contacts</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the email app. [CHAR LIMIT=70] -->
-    <string name="keyboard_shortcut_group_applications_email">Email (Gmail as default)</string>
+    <string name="keyboard_shortcut_group_applications_email">Email</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the SMS messaging app. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_applications_sms">SMS</string>
     <!-- User visible title for the keyboard shortcut that takes the user to the music app. [CHAR LIMIT=70] -->

@@ -175,6 +175,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     private static final long NAV_BAR_COLOR_DEFAULT_TRANSPARENT = 232195501L;
 
+    /**
+     * Make app go edge-to-edge by default if the target SDK is
+     * {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    private static final long EDGE_TO_EDGE_BY_DEFAULT = 309578419;
+
     private static final int CUSTOM_TITLE_COMPATIBLE_FEATURES = DEFAULT_FEATURES |
             (1 << FEATURE_CUSTOM_TITLE) |
             (1 << FEATURE_CONTENT_TRANSITIONS) |
@@ -387,7 +395,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         mAllowFloatingWindowsFillScreen = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowFloatingWindowsFillScreen);
         mDefaultEdgeToEdge =
-                context.getApplicationInfo().targetSdkVersion >= DEFAULT_EDGE_TO_EDGE_SDK_VERSION;
+                context.getApplicationInfo().targetSdkVersion >= DEFAULT_EDGE_TO_EDGE_SDK_VERSION
+                        || (CompatChanges.isChangeEnabled(EDGE_TO_EDGE_BY_DEFAULT)
+                                && Flags.edgeToEdgeByDefault());
         if (mDefaultEdgeToEdge) {
             mDecorFitsSystemWindows = false;
         }
@@ -2558,11 +2568,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             mNavigationBarColor =
                     navBarColor == navBarDefaultColor
+                            && !mDefaultEdgeToEdge
                             && !(CompatChanges.isChangeEnabled(NAV_BAR_COLOR_DEFAULT_TRANSPARENT)
                                     && Flags.navBarTransparentByDefault())
                             && !context.getResources().getBoolean(
                                     R.bool.config_navBarDefaultTransparent)
-                            && !mDefaultEdgeToEdge
                     ? navBarCompatibleColor
                     : navBarColor;
 

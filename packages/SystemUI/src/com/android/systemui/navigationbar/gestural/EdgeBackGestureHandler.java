@@ -578,10 +578,15 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
      * @see NavigationModeController.ModeChangedListener#onNavigationModeChanged
      */
     public void onNavigationModeChanged(int mode) {
-        mUsingThreeButtonNav = QuickStepContract.isLegacyMode(mode);
-        mInGestureNavMode = QuickStepContract.isGesturalMode(mode);
-        updateIsEnabled();
-        updateCurrentUserResources();
+        Trace.beginSection("EdgeBackGestureHandler#onNavigationModeChanged");
+        try {
+            mUsingThreeButtonNav = QuickStepContract.isLegacyMode(mode);
+            mInGestureNavMode = QuickStepContract.isGesturalMode(mode);
+            updateIsEnabled();
+            updateCurrentUserResources();
+        } finally {
+            Trace.endSection();
+        }
     }
 
     public void onNavBarTransientStateChanged(boolean isTransient) {

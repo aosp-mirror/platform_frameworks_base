@@ -46,6 +46,7 @@ import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.Trace;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -229,28 +230,34 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     }
 
     public void init(int displayId) {
-        if (mInitialized) {
-            return;
+        Trace.beginSection("TaskbarDelegate#init");
+        try {
+            if (mInitialized) {
+                return;
+            }
+            mDisplayId = displayId;
+            parseCurrentSysuiState();
+            mCommandQueue.addCallback(this);
+            mOverviewProxyService.addCallback(this);
+            onNavigationModeChanged(mNavigationModeController.addListener(this));
+            mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
+            // Initialize component callback
+            Display display = mDisplayManager.getDisplay(displayId);
+            mWindowContext = mContext.createWindowContext(display, TYPE_APPLICATION, null);
+            mScreenPinningNotify = new ScreenPinningNotify(mWindowContext);
+            // Set initial state for any listeners
+            updateSysuiFlags();
+            mAutoHideController.setNavigationBar(mAutoHideUiElement);
+            mLightBarController.setNavigationBar(mLightBarTransitionsController);
+            mPipOptional.ifPresent(this::addPipExclusionBoundsChangeListener);
+            mEdgeBackGestureHandler.setBackAnimation(mBackAnimation);
+            mEdgeBackGestureHandler.onConfigurationChanged(
+                    mContext.getResources().getConfiguration());
+            mTaskStackChangeListeners.registerTaskStackListener(mTaskStackListener);
+            mInitialized = true;
+        } finally {
+            Trace.endSection();
         }
-        mDisplayId = displayId;
-        parseCurrentSysuiState();
-        mCommandQueue.addCallback(this);
-        mOverviewProxyService.addCallback(this);
-        onNavigationModeChanged(mNavigationModeController.addListener(this));
-        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
-        // Initialize component callback
-        Display display = mDisplayManager.getDisplay(displayId);
-        mWindowContext = mContext.createWindowContext(display, TYPE_APPLICATION, null);
-        mScreenPinningNotify = new ScreenPinningNotify(mWindowContext);
-        // Set initial state for any listeners
-        updateSysuiFlags();
-        mAutoHideController.setNavigationBar(mAutoHideUiElement);
-        mLightBarController.setNavigationBar(mLightBarTransitionsController);
-        mPipOptional.ifPresent(this::addPipExclusionBoundsChangeListener);
-        mEdgeBackGestureHandler.setBackAnimation(mBackAnimation);
-        mEdgeBackGestureHandler.onConfigurationChanged(mContext.getResources().getConfiguration());
-        mTaskStackChangeListeners.registerTaskStackListener(mTaskStackListener);
-        mInitialized = true;
     }
 
     public void destroy() {
