@@ -33,6 +33,7 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.media.AudioManager.STREAM_SYSTEM;
+import static android.media.audiopolicy.Flags.enableFadeManagerConfiguration;
 import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.INVALID_UID;
 import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
@@ -116,6 +117,7 @@ import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.AudioTrack;
 import android.media.BluetoothProfileConnectionInfo;
+import android.media.FadeManagerConfiguration;
 import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.IAudioFocusDispatcher;
 import android.media.IAudioModeDispatcher;
@@ -4513,6 +4515,8 @@ public class AudioService extends IAudioService.Stub
                 + bluetoothMacAddressAnonymization());
         pw.println("\tcom.android.media.audio.Flags.disablePrescaleAbsoluteVolume:"
                 + disablePrescaleAbsoluteVolume());
+        pw.println("\tandroid.media.audiopolicy.enableFadeManagerConfiguration:"
+                + enableFadeManagerConfiguration());
     }
 
     private void dumpAudioMode(PrintWriter pw) {
@@ -12614,6 +12618,47 @@ public class AudioService extends IAudioService.Stub
     }
 
     /**
+     * see {@link AudioPolicy#setFadeManagerConfigurationForFocusLoss(FadeManagerConfiguration)}
+     */
+    @android.annotation.EnforcePermission(
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public int setFadeManagerConfigurationForFocusLoss(
+            @NonNull FadeManagerConfiguration fmcForFocusLoss) {
+        super.setFadeManagerConfigurationForFocusLoss_enforcePermission();
+        ensureFadeManagerConfigIsEnabled();
+        Objects.requireNonNull(fmcForFocusLoss,
+                "Fade manager config for focus loss cannot be null");
+        validateFadeManagerConfiguration(fmcForFocusLoss);
+
+        return mPlaybackMonitor.setFadeManagerConfiguration(AudioManager.AUDIOFOCUS_LOSS,
+                fmcForFocusLoss);
+    }
+
+    /**
+     * see {@link AudioPolicy#clearFadeManagerConfigurationForFocusLoss()}
+     */
+    @android.annotation.EnforcePermission(
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public int clearFadeManagerConfigurationForFocusLoss() {
+        super.clearFadeManagerConfigurationForFocusLoss_enforcePermission();
+        ensureFadeManagerConfigIsEnabled();
+
+        return mPlaybackMonitor.clearFadeManagerConfiguration(AudioManager.AUDIOFOCUS_LOSS);
+    }
+
+    /**
+     * see {@link AudioPolicy#getFadeManagerConfigurationForFocusLoss()}
+     */
+    @android.annotation.EnforcePermission(
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public FadeManagerConfiguration getFadeManagerConfigurationForFocusLoss() {
+        super.getFadeManagerConfigurationForFocusLoss_enforcePermission();
+        ensureFadeManagerConfigIsEnabled();
+
+        return mPlaybackMonitor.getFadeManagerConfiguration(AudioManager.AUDIOFOCUS_LOSS);
+    }
+
+    /**
      * @see AudioManager#getHalVersion
      */
     public @Nullable AudioHalVersionInfo getHalVersion() {
@@ -12811,6 +12856,19 @@ public class AudioService extends IAudioService.Stub
             for (AudioPolicyProxy policy : mAudioPolicies.values()) {
                 pw.println(policy.toLogFriendlyString());
             }
+        }
+    }
+
+    private void ensureFadeManagerConfigIsEnabled() {
+        Preconditions.checkState(enableFadeManagerConfiguration(),
+                "Fade manager configuration not supported");
+    }
+
+    private void validateFadeManagerConfiguration(FadeManagerConfiguration fmc) {
+        // validate permission of audio attributes
+        List<AudioAttributes> attrs = fmc.getAudioAttributesWithVolumeShaperConfigs();
+        for (int index = 0; index < attrs.size(); index++) {
+            validateAudioAttributesUsage(attrs.get(index));
         }
     }
 
@@ -13114,6 +13172,7 @@ public class AudioService extends IAudioService.Stub
                             + "could not link to " + projection + " binder death", e);
                 }
             }
+
             int status = connectMixes();
             if (status != AudioSystem.SUCCESS) {
                 release();

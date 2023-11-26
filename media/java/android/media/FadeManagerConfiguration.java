@@ -22,6 +22,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
@@ -93,11 +94,9 @@ import java.util.Objects;
  *      Helps with recreating a new instance from another to simply change/add on top of the
  *      existing ones</li>
  * </ul>
- * TODO(b/304835727): Convert into system API so that it can be set through AudioPolicy
- *
  * @hide
  */
-
+@SystemApi
 @FlaggedApi(FLAG_ENABLE_FADE_MANAGER_CONFIGURATION)
 public final class FadeManagerConfiguration implements Parcelable {
 
@@ -523,6 +522,7 @@ public final class FadeManagerConfiguration implements Parcelable {
      *
      * @param fadeState one of the fade state in {@link FadeStateEnum}
      * @return human-readable string
+     * @hide
      */
     @NonNull
     public static String fadeStateToString(@FadeStateEnum int fadeState) {
@@ -712,7 +712,8 @@ public final class FadeManagerConfiguration implements Parcelable {
      *
      * <p><b>Notes:</b>
      * <ul>
-     *     <li>When fade state is set to enabled, the builder expects at least one valid usage to be
+     *     <li>When fade state is set to {@link #FADE_STATE_ENABLED_DEFAULT} or
+     *     {@link #FADE_STATE_ENABLED_AUTO}, the builder expects at least one valid usage to be
      *     set/added. Failure to do so will result in an exception during {@link #build()}</li>
      *     <li>Every usage added to the fadeable list should have corresponding volume shaper
      *     configs defined. This can be achieved by setting either the duration or volume shaper
@@ -720,8 +721,8 @@ public final class FadeManagerConfiguration implements Parcelable {
      *     {@link #setFadeOutVolumeShaperConfigForUsage(int, VolumeShaper.Configuration)}</li>
      *     <li> It is recommended to set volume shaper configurations individually for fade out and
      *     fade in</li>
-     *     <li>For any incomplete volume shaper configs a volume shaper configuration will be
-     *     created using either the default fade durations or the ones provided as part of the
+     *     <li>For any incomplete volume shaper configurations, a volume shaper configuration will
+     *     be created using either the default fade durations or the ones provided as part of the
      *     {@link #Builder(long, long)}</li>
      *     <li>Additional volume shaper configs can also configured for a given usage
      *     with additional attributes like content-type in order to achieve finer fade controls.

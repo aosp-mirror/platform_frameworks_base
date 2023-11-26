@@ -38,6 +38,7 @@ import android.media.AudioPlaybackConfiguration;
 import android.media.AudioPlaybackConfiguration.FormatInfo;
 import android.media.AudioPlaybackConfiguration.PlayerMuteEvent;
 import android.media.AudioSystem;
+import android.media.FadeManagerConfiguration;
 import android.media.IPlaybackConfigDispatcher;
 import android.media.PlayerBase;
 import android.media.VolumeShaper;
@@ -1006,6 +1007,18 @@ public final class PlaybackActivityMonitor
                             new ArrayList<AudioPlaybackConfiguration>(mPlayers.values()));
             }
         }
+    }
+
+    int setFadeManagerConfiguration(int focusType, FadeManagerConfiguration fadeMgrConfig) {
+        return mFadeOutManager.setFadeManagerConfiguration(fadeMgrConfig);
+    }
+
+    int clearFadeManagerConfiguration(int focusType) {
+        return mFadeOutManager.clearFadeManagerConfiguration();
+    }
+
+    FadeManagerConfiguration getFadeManagerConfiguration(int focusType) {
+        return mFadeOutManager.getFadeManagerConfiguration();
     }
 
     /**

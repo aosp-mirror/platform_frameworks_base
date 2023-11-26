@@ -58,13 +58,10 @@ public final class FadeOutManager {
      * Sets the custom fade manager configuration to be used for player fade out and in
      *
      * @param fadeManagerConfig custom fade manager configuration
-     * @return {@code true} if setting fade manager config succeeded, {@code false} otherwise
+     * @return {@link AudioManager#SUCCESS} if setting fade manager config succeeded,
+     *     {@link AudioManager#ERROR} otherwise
      */
-    boolean setFadeManagerConfiguration(FadeManagerConfiguration fadeManagerConfig) {
-        if (!enableFadeManagerConfiguration()) {
-            return false;
-        }
-
+    int setFadeManagerConfiguration(FadeManagerConfiguration fadeManagerConfig) {
         // locked to ensure the fade configs are not updated while faded app state is being updated
         synchronized (mLock) {
             return mFadeConfigurations.setFadeManagerConfiguration(fadeManagerConfig);
@@ -75,17 +72,23 @@ public final class FadeOutManager {
      * Clears the fade manager configuration that was previously set with
      * {@link #setFadeManagerConfiguration(FadeManagerConfiguration)}
      *
-     * @return {@code true} if clearing fade manager config succeeded, {@code false} otherwise
+     * @return {@link AudioManager#SUCCESS}  if clearing fade manager config succeeded,
+     *     {@link AudioManager#ERROR} otherwise
      */
-    boolean clearFadeManagerConfiguration() {
-        if (!enableFadeManagerConfiguration()) {
-            return false;
-        }
-
+    int clearFadeManagerConfiguration() {
         // locked to ensure the fade configs are not updated while faded app state is being updated
         synchronized (mLock) {
             return mFadeConfigurations.clearFadeManagerConfiguration();
         }
+    }
+
+    /**
+     * Returns the active fade manager configuration
+     *
+     * @return the {@link FadeManagerConfiguration}
+     */
+    FadeManagerConfiguration getFadeManagerConfiguration() {
+        return mFadeConfigurations.getFadeManagerConfiguration();
     }
 
     // TODO explore whether a shorter fade out would be a better UX instead of not fading out at all

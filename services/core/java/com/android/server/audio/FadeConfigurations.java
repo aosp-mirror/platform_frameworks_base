@@ -21,6 +21,7 @@ import static android.media.audiopolicy.Flags.enableFadeManagerConfiguration;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.AudioAttributes;
+import android.media.AudioManager;
 import android.media.AudioPlaybackConfiguration;
 import android.media.FadeManagerConfiguration;
 import android.media.VolumeShaper;
@@ -90,13 +91,14 @@ public final class FadeConfigurations {
      * Sets the custom fade manager configuration
      *
      * @param fadeManagerConfig custom fade manager configuration
-     * @return {@code true} if setting custom fade manager configuration succeeds or {@code false}
-     * otherwise (example - when fade manager configuration is disabled)
+     * @return {@link AudioManager#SUCCESS}  if setting custom fade manager configuration succeeds
+     *     or {@link AudioManager#ERROR} otherwise (example - when fade manager configuration
+     *     feature is disabled)
      */
-    public boolean setFadeManagerConfiguration(
+    public int setFadeManagerConfiguration(
             @NonNull FadeManagerConfiguration fadeManagerConfig) {
         if (!enableFadeManagerConfiguration()) {
-            return false;
+            return AudioManager.ERROR;
         }
 
         synchronized (mLock) {
@@ -104,25 +106,44 @@ public final class FadeConfigurations {
                     "Fade manager configuration cannot be null");
             mActiveFadeManagerConfig = getActiveFadeMgrConfigLocked();
         }
-        return true;
+        return AudioManager.SUCCESS;
     }
 
     /**
      * Clears the fade manager configuration that was previously set with
      * {@link #setFadeManagerConfiguration(FadeManagerConfiguration)}
      *
-     * @return {@code true} if previously set fade manager configuration is cleared or {@code false}
-     * otherwise (say, when fade manager configuration is disabled)
+     * @return {@link AudioManager#SUCCESS}  if previously set fade manager configuration is cleared
+     *     or {@link AudioManager#ERROR} otherwise (example, when fade manager configuration feature
+     *     is disabled)
      */
-    public boolean clearFadeManagerConfiguration() {
+    public int clearFadeManagerConfiguration() {
         if (!enableFadeManagerConfiguration()) {
-            return false;
+            return AudioManager.ERROR;
         }
+
         synchronized (mLock) {
             mUpdatedFadeManagerConfig = null;
             mActiveFadeManagerConfig = getActiveFadeMgrConfigLocked();
         }
-        return true;
+        return AudioManager.SUCCESS;
+    }
+
+    /**
+     * Returns the active fade manager configuration
+     *
+     * @return {@code null} if feature is disabled, or the custom fade manager configuration if set,
+     *     or default fade manager configuration if not set.
+     */
+    @Nullable
+    public FadeManagerConfiguration getFadeManagerConfiguration() {
+        if (!enableFadeManagerConfiguration()) {
+            return null;
+        }
+
+        synchronized (mLock) {
+            return mActiveFadeManagerConfig;
+        }
     }
 
     /**
