@@ -829,6 +829,10 @@
     <protected-broadcast android:name="android.app.admin.action.DEVICE_POLICY_SET_RESULT" />
     <protected-broadcast android:name="android.app.admin.action.DEVICE_POLICY_CHANGED" />
 
+    <!-- Added in V -->
+    <protected-broadcast android:name="android.intent.action.PROFILE_AVAILABLE" />
+    <protected-broadcast android:name="android.intent.action.PROFILE_UNAVAILABLE" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
