@@ -129,14 +129,6 @@ public class ActivityManagerUtils {
     }
 
     /**
-     * @param shortInstanceName {@link ServiceRecord#shortInstanceName}.
-     * @return hash of the ServiceRecord's shortInstanceName, combined with ANDROID_ID.
-     */
-    public static int hashComponentNameForAtom(String shortInstanceName) {
-        return getUnsignedHashUnCached(shortInstanceName) ^ getAndroidIdHash();
-    }
-
-    /**
      * Helper method to log an unsafe intent event.
      */
     public static void logUnsafeIntentEvent(int event, int callingUid,
