@@ -19,6 +19,7 @@ package android.window;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -87,6 +88,38 @@ public class WindowInfosListenerForTest {
         @NonNull
         public final Matrix transform;
 
+        /**
+         * True if the window is touchable.
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        public final boolean isTouchable;
+
+        /**
+         * True if the window is focusable.
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        public final boolean isFocusable;
+
+        /**
+         * True if the window is preventing splitting
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        public final boolean isPreventSplitting;
+
+        /**
+         * True if the window duplicates touches received to wallpaper.
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        public final boolean isDuplicateTouchToWallpaper;
+
+        /**
+         * True if the window is listening for when there is a touch DOWN event
+         * occurring outside its touchable bounds. When such an event occurs,
+         * this window will receive a MotionEvent with ACTION_OUTSIDE.
+         */
+        @SuppressLint("UnflaggedApi") // The API is only used for tests.
+        public final boolean isWatchOutsideTouch;
+
         WindowInfo(@NonNull IBinder windowToken, @NonNull String name, int displayId,
                 @NonNull Rect bounds, int inputConfig, @NonNull Matrix transform) {
             this.windowToken = windowToken;
@@ -96,6 +129,14 @@ public class WindowInfosListenerForTest {
             this.isTrustedOverlay = (inputConfig & InputConfig.TRUSTED_OVERLAY) != 0;
             this.isVisible = (inputConfig & InputConfig.NOT_VISIBLE) == 0;
             this.transform = transform;
+            this.isTouchable = (inputConfig & InputConfig.NOT_TOUCHABLE) == 0;
+            this.isFocusable = (inputConfig & InputConfig.NOT_FOCUSABLE) == 0;
+            this.isPreventSplitting = (inputConfig
+                            & InputConfig.PREVENT_SPLITTING) != 0;
+            this.isDuplicateTouchToWallpaper = (inputConfig
+                            & InputConfig.DUPLICATE_TOUCH_TO_WALLPAPER) != 0;
+            this.isWatchOutsideTouch = (inputConfig
+                            & InputConfig.WATCH_OUTSIDE_TOUCH) != 0;
         }
 
         @Override
