@@ -530,16 +530,12 @@ public class NotificationLockscreenUserManagerImpl implements
                 userHandle = mCurrentUserId;
             }
             if (mUsersUsersAllowingPrivateNotifications.indexOfKey(userHandle) < 0) {
-                // TODO(b/301955929): STOP_SHIP (stop flag flip): remove this read and use a safe
-                // default value before moving to 'released'
-                Log.wtf(TAG, "Asking for redact notifs setting too early", new Throwable());
-                updateUserShowPrivateSettings(userHandle);
+                Log.i(TAG, "Asking for redact notifs setting too early", new Throwable());
+                return false;
             }
             if (mUsersDpcAllowingPrivateNotifications.indexOfKey(userHandle) < 0) {
-                // TODO(b/301955929): STOP_SHIP (stop flag flip): remove this read and use a safe
-                // default value before moving to 'released'
-                Log.wtf(TAG, "Asking for redact notifs dpm override too early", new Throwable());
-                updateDpcSettings(userHandle);
+                Log.i(TAG, "Asking for redact notifs dpm override too early", new Throwable());
+                return false;
             }
             return mUsersUsersAllowingPrivateNotifications.get(userHandle)
                     && mUsersDpcAllowingPrivateNotifications.get(userHandle);
