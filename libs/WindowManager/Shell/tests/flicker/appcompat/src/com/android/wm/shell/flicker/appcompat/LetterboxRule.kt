@@ -57,25 +57,18 @@ class LetterboxRule(
         resetLetterboxStyle()
         _letterboxStyle = mapLetterboxStyle()
         val isLetterboxEducationEnabled = _letterboxStyle.getValue("Is education enabled")
-        var hasLetterboxEducationStateChanged = false
         if ("$withLetterboxEducationEnabled" != isLetterboxEducationEnabled) {
-            hasLetterboxEducationStateChanged = true
             execAdb("wm set-letterbox-style --isEducationEnabled " + withLetterboxEducationEnabled)
         }
-        return try {
-            object : Statement() {
-                @Throws(Throwable::class)
-                override fun evaluate() {
+        return object : Statement() {
+            @Throws(Throwable::class)
+            override fun evaluate() {
+                try {
                     base!!.evaluate()
+                } finally {
+                    resetLetterboxStyle()
                 }
             }
-        } finally {
-            if (hasLetterboxEducationStateChanged) {
-                execAdb(
-                    "wm set-letterbox-style --isEducationEnabled " + isLetterboxEducationEnabled
-                )
-            }
-            resetLetterboxStyle()
         }
     }
 
