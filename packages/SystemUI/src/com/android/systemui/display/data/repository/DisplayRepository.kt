@@ -94,6 +94,7 @@ constructor(
     private val displayManager: DisplayManager,
     @Background backgroundHandler: Handler,
     @Application applicationScope: CoroutineScope,
+    @Background bgApplicationScope: CoroutineScope,
     @Background backgroundCoroutineDispatcher: CoroutineDispatcher
 ) : DisplayRepository {
     private val allDisplayEvents: Flow<DisplayEvent> =
@@ -203,9 +204,8 @@ constructor(
             }
             .distinctUntilChanged()
             .debugLog("connectedDisplayIds")
-            .flowOn(backgroundCoroutineDispatcher)
             .stateIn(
-                applicationScope,
+                bgApplicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 // The initial value is set to empty, but connected displays are gathered as soon as
                 // the flow starts being collected. This is to ensure the call to get displays (an
