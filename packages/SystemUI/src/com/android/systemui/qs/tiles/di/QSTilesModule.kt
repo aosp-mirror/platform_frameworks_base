@@ -16,6 +16,8 @@
 
 package com.android.systemui.qs.tiles.di
 
+import com.android.systemui.qs.external.CustomTileStatePersister
+import com.android.systemui.qs.external.CustomTileStatePersisterImpl
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandlerImpl
 import com.android.systemui.qs.tiles.impl.custom.di.CustomTileComponent
@@ -52,4 +54,7 @@ interface QSTilesModule {
     fun bindQSTileIntentUserInputHandler(
         impl: QSTileIntentUserInputHandlerImpl
     ): QSTileIntentUserInputHandler
+
+    @Binds
+    fun bindCustomTileStatePersister(impl: CustomTileStatePersisterImpl): CustomTileStatePersister
 }
