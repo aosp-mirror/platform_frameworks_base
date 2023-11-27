@@ -1054,8 +1054,7 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     private class SetRemoteCollectionItemListAdapterAction extends Action {
-        @NonNull
-        private CompletableFuture<RemoteCollectionItems> mItemsFuture;
+        private @Nullable RemoteCollectionItems mItems;
         final Intent mServiceIntent;
         int mIntentId = -1;
         boolean mIsReplacedIntoAction = false;
@@ -1064,92 +1063,46 @@ public class RemoteViews implements Parcelable, Filter {
                 @NonNull RemoteCollectionItems items) {
             mViewId = id;
             items.setHierarchyRootData(getHierarchyRootData());
-            mItemsFuture = CompletableFuture.completedFuture(items);
+            mItems = items;
             mServiceIntent = null;
         }
 
         SetRemoteCollectionItemListAdapterAction(@IdRes int id, Intent intent) {
             mViewId = id;
-            mItemsFuture = getItemsFutureFromIntentWithTimeout(intent);
-            setHierarchyRootData(getHierarchyRootData());
+            mItems = null;
             mServiceIntent = intent;
-        }
-
-        private static CompletableFuture<RemoteCollectionItems> getItemsFutureFromIntentWithTimeout(
-                Intent intent) {
-            if (intent == null) {
-                Log.e(LOG_TAG, "Null intent received when generating adapter future");
-                return CompletableFuture.completedFuture(new RemoteCollectionItems
-                        .Builder().build());
-            }
-
-            final Context context = ActivityThread.currentApplication();
-            final CompletableFuture<RemoteCollectionItems> result = new CompletableFuture<>();
-
-            context.bindService(intent, Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE),
-                    result.defaultExecutor(), new ServiceConnection() {
-                        @Override
-                        public void onServiceConnected(ComponentName componentName,
-                                IBinder iBinder) {
-                            RemoteCollectionItems items;
-                            try {
-                                items = IRemoteViewsFactory.Stub.asInterface(iBinder)
-                                        .getRemoteCollectionItems();
-                            } catch (RemoteException re) {
-                                items = new RemoteCollectionItems.Builder().build();
-                                Log.e(LOG_TAG, "Error getting collection items from the factory",
-                                        re);
-                            } finally {
-                                context.unbindService(this);
-                            }
-
-                            result.complete(items);
-                        }
-
-                        @Override
-                        public void onServiceDisconnected(ComponentName componentName) { }
-                    });
-
-            result.completeOnTimeout(
-                    new RemoteCollectionItems.Builder().build(),
-                    MAX_ADAPTER_CONVERSION_WAITING_TIME_MS, TimeUnit.MILLISECONDS);
-
-            return result;
         }
 
         SetRemoteCollectionItemListAdapterAction(Parcel parcel) {
             mViewId = parcel.readInt();
             mIntentId = parcel.readInt();
-            mItemsFuture = CompletableFuture.completedFuture(mIntentId != -1
-                    ? null
-                    : new RemoteCollectionItems(parcel, getHierarchyRootData()));
             mServiceIntent = parcel.readTypedObject(Intent.CREATOR);
+            mItems = mServiceIntent != null
+                    ? null
+                    : new RemoteCollectionItems(parcel, getHierarchyRootData());
         }
 
         @Override
         public void setHierarchyRootData(HierarchyRootData rootData) {
-            if (mIntentId == -1) {
-                mItemsFuture = mItemsFuture
-                        .thenApply(rc -> {
-                            rc.setHierarchyRootData(rootData);
-                            return rc;
-                        });
+            if (mItems != null) {
+                mItems.setHierarchyRootData(rootData);
                 return;
             }
 
-            // Set the root data for items in the cache instead
-            mCollectionCache.setHierarchyDataForId(mIntentId, rootData);
+            if (mIntentId != -1) {
+                // Set the root data for items in the cache instead
+                mCollectionCache.setHierarchyDataForId(mIntentId, rootData);
+            }
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(mViewId);
             dest.writeInt(mIntentId);
-            if (mIntentId == -1) {
-                RemoteCollectionItems items = getCollectionItemsFromFuture(mItemsFuture);
-                items.writeToParcel(dest, flags, /* attached= */ true);
-            }
             dest.writeTypedObject(mServiceIntent, flags);
+            if (mItems != null) {
+                mItems.writeToParcel(dest, flags, /* attached= */ true);
+            }
         }
 
         @Override
@@ -1159,7 +1112,9 @@ public class RemoteViews implements Parcelable, Filter {
             if (target == null) return;
 
             RemoteCollectionItems items = mIntentId == -1
-                    ? getCollectionItemsFromFuture(mItemsFuture)
+                    ? mItems == null
+                            ? new RemoteCollectionItems.Builder().build()
+                            : mItems
                     : mCollectionCache.getItemsForId(mIntentId);
 
             // Ensure that we are applying to an AppWidget root
@@ -1216,51 +1171,32 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void visitUris(@NonNull Consumer<Uri> visitor) {
-            RemoteCollectionItems items = getCollectionItemsFromFuture(mItemsFuture);
-            items.visitUris(visitor);
-        }
-    }
+            if (mIntentId != -1 || mItems == null) {
+                return;
+            }
 
-    private static RemoteCollectionItems getCollectionItemsFromFuture(
-            CompletableFuture<RemoteCollectionItems> itemsFuture) {
-        RemoteCollectionItems items;
-        try {
-            items = itemsFuture.get();
-        } catch (Exception e) {
-            Log.e(LOG_TAG, "Error getting collection items from future", e);
-            items = new RemoteCollectionItems.Builder().build();
+            mItems.visitUris(visitor);
         }
-
-        return items;
     }
 
     /**
      * @hide
      */
-    public void collectAllIntents() {
-        mCollectionCache.collectAllIntentsNoComplete(this);
+    public CompletableFuture<Void> collectAllIntents() {
+        return mCollectionCache.collectAllIntentsNoComplete(this);
     }
 
     private class RemoteCollectionCache {
         private SparseArray<String> mIdToUriMapping = new SparseArray<>();
         private HashMap<String, RemoteCollectionItems> mUriToCollectionMapping = new HashMap<>();
 
-        // We don't put this into the parcel
-        private HashMap<String, CompletableFuture<RemoteCollectionItems>> mTempUriToFutureMapping =
-                new HashMap<>();
-
         RemoteCollectionCache() { }
 
         RemoteCollectionCache(RemoteCollectionCache src) {
-            boolean isWaitingCache = src.mTempUriToFutureMapping.size() != 0;
             for (int i = 0; i < src.mIdToUriMapping.size(); i++) {
                 String uri = src.mIdToUriMapping.valueAt(i);
                 mIdToUriMapping.put(src.mIdToUriMapping.keyAt(i), uri);
-                if (isWaitingCache) {
-                    mTempUriToFutureMapping.put(uri, src.mTempUriToFutureMapping.get(uri));
-                } else {
-                    mUriToCollectionMapping.put(uri, src.mUriToCollectionMapping.get(uri));
-                }
+                mUriToCollectionMapping.put(uri, src.mUriToCollectionMapping.get(uri));
             }
         }
 
@@ -1281,14 +1217,8 @@ public class RemoteViews implements Parcelable, Filter {
 
         void setHierarchyDataForId(int intentId, HierarchyRootData data) {
             String uri = mIdToUriMapping.get(intentId);
-            if (mTempUriToFutureMapping.get(uri) != null) {
-                CompletableFuture<RemoteCollectionItems> itemsFuture =
-                        mTempUriToFutureMapping.get(uri);
-                mTempUriToFutureMapping.put(uri, itemsFuture.thenApply(rc -> {
-                    rc.setHierarchyRootData(data);
-                    return rc;
-                }));
-
+            if (mUriToCollectionMapping.get(uri) == null) {
+                Log.e(LOG_TAG, "Error setting hierarchy data for id=" + intentId);
                 return;
             }
 
@@ -1301,14 +1231,17 @@ public class RemoteViews implements Parcelable, Filter {
             return mUriToCollectionMapping.get(uri);
         }
 
-        void collectAllIntentsNoComplete(@NonNull RemoteViews inViews) {
+        CompletableFuture<Void> collectAllIntentsNoComplete(@NonNull RemoteViews inViews) {
+            CompletableFuture<Void> collectionFuture = CompletableFuture.completedFuture(null);
             if (inViews.hasSizedRemoteViews()) {
                 for (RemoteViews remoteViews : inViews.mSizedRemoteViews) {
-                    remoteViews.collectAllIntents();
+                    collectionFuture = CompletableFuture.allOf(collectionFuture,
+                            collectAllIntentsNoComplete(remoteViews));
                 }
             } else if (inViews.hasLandscapeAndPortraitLayouts()) {
-                inViews.mLandscape.collectAllIntents();
-                inViews.mPortrait.collectAllIntents();
+                collectionFuture = CompletableFuture.allOf(
+                        collectAllIntentsNoComplete(inViews.mLandscape),
+                        collectAllIntentsNoComplete(inViews.mPortrait));
             } else if (inViews.mActions != null) {
                 for (Action action : inViews.mActions) {
                     if (action instanceof SetRemoteCollectionItemListAdapterAction rca) {
@@ -1318,40 +1251,95 @@ public class RemoteViews implements Parcelable, Filter {
                         }
 
                         if (rca.mIntentId != -1 && rca.mIsReplacedIntoAction) {
-                            String uri = mIdToUriMapping.get(rca.mIntentId);
-                            mTempUriToFutureMapping.put(uri, rca.mItemsFuture);
-                            rca.mItemsFuture = CompletableFuture.completedFuture(null);
+                            final String uri = mIdToUriMapping.get(rca.mIntentId);
+                            collectionFuture = CompletableFuture.allOf(collectionFuture,
+                                    getItemsFutureFromIntentWithTimeout(rca.mServiceIntent)
+                                            .thenAccept(rc -> {
+                                                rc.setHierarchyRootData(getHierarchyRootData());
+                                                mUriToCollectionMapping.put(uri, rc);
+                                            }));
+                            rca.mItems = null;
                             continue;
                         }
 
                         // Differentiate between the normal collection actions and the ones with
                         // intents.
                         if (rca.mServiceIntent != null) {
-                            String uri = rca.mServiceIntent.toUri(0);
+                            final String uri = rca.mServiceIntent.toUri(0);
                             int index = mIdToUriMapping.indexOfValue(uri);
                             if (index == -1) {
                                 int newIntentId = mIdToUriMapping.size();
                                 rca.mIntentId = newIntentId;
                                 mIdToUriMapping.put(newIntentId, uri);
-                                // mUriToIntentMapping.put(uri, mServiceIntent);
-                                mTempUriToFutureMapping.put(uri, rca.mItemsFuture);
                             } else {
                                 rca.mIntentId = mIdToUriMapping.keyAt(index);
+                                rca.mItems = null;
+                                continue;
                             }
-                            rca.mItemsFuture = CompletableFuture.completedFuture(null);
+                            collectionFuture = CompletableFuture.allOf(collectionFuture,
+                                    getItemsFutureFromIntentWithTimeout(rca.mServiceIntent)
+                                            .thenAccept(rc -> {
+                                                rc.setHierarchyRootData(getHierarchyRootData());
+                                                mUriToCollectionMapping.put(uri, rc);
+                                            }));
+                            rca.mItems = null;
                         } else {
-                            RemoteCollectionItems items = getCollectionItemsFromFuture(
-                                    rca.mItemsFuture);
-                            for (RemoteViews views : items.mViews) {
-                                views.collectAllIntents();
+                            for (RemoteViews views : rca.mItems.mViews) {
+                                collectionFuture = CompletableFuture.allOf(collectionFuture,
+                                        collectAllIntentsNoComplete(views));
                             }
                         }
                     } else if (action instanceof ViewGroupActionAdd vgaa
                             && vgaa.mNestedViews != null) {
-                        vgaa.mNestedViews.collectAllIntents();
+                        collectionFuture = CompletableFuture.allOf(collectionFuture,
+                                collectAllIntentsNoComplete(vgaa.mNestedViews));
                     }
                 }
             }
+
+            return collectionFuture;
+        }
+
+        private static CompletableFuture<RemoteCollectionItems> getItemsFutureFromIntentWithTimeout(
+                Intent intent) {
+            if (intent == null) {
+                Log.e(LOG_TAG, "Null intent received when generating adapter future");
+                return CompletableFuture.completedFuture(new RemoteCollectionItems
+                    .Builder().build());
+            }
+
+            final Context context = ActivityThread.currentApplication();
+            final CompletableFuture<RemoteCollectionItems> result = new CompletableFuture<>();
+
+            context.bindService(intent, Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE),
+                    result.defaultExecutor(), new ServiceConnection() {
+                        @Override
+                        public void onServiceConnected(ComponentName componentName,
+                                IBinder iBinder) {
+                            RemoteCollectionItems items;
+                            try {
+                                items = IRemoteViewsFactory.Stub.asInterface(iBinder)
+                                    .getRemoteCollectionItems();
+                            } catch (RemoteException re) {
+                                items = new RemoteCollectionItems.Builder().build();
+                                Log.e(LOG_TAG, "Error getting collection items from the factory",
+                                        re);
+                            } finally {
+                                context.unbindService(this);
+                            }
+
+                            result.complete(items);
+                        }
+
+                        @Override
+                        public void onServiceDisconnected(ComponentName componentName) { }
+                    });
+
+            result.completeOnTimeout(
+                    new RemoteCollectionItems.Builder().build(),
+                    MAX_ADAPTER_CONVERSION_WAITING_TIME_MS, TimeUnit.MILLISECONDS);
+
+            return result;
         }
 
         public void writeToParcel(Parcel out, int flags) {
@@ -1360,10 +1348,7 @@ public class RemoteViews implements Parcelable, Filter {
                 out.writeInt(mIdToUriMapping.keyAt(i));
                 String intentUri = mIdToUriMapping.valueAt(i);
                 out.writeString8(intentUri);
-                RemoteCollectionItems items = mTempUriToFutureMapping.get(intentUri) != null
-                        ? getCollectionItemsFromFuture(mTempUriToFutureMapping.get(intentUri))
-                        : mUriToCollectionMapping.get(intentUri);
-                items.writeToParcel(out, flags, true);
+                mUriToCollectionMapping.get(intentUri).writeToParcel(out, flags, true);
             }
         }
     }
