@@ -151,7 +151,14 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void setResizeBgColor(SurfaceControl.Transaction t, int bgColor) {
-        runOnViewThread(() -> setResizeBackgroundColor(t, bgColor));
+        if (mHandler.getLooper().isCurrentThread()) {
+            // We can only use the transaction if it can updated synchronously, otherwise the tx
+            // will be applied immediately after but also used/updated on the view thread which
+            // will lead to a race and/or crash
+            runOnViewThread(() -> setResizeBackgroundColor(t, bgColor));
+        } else {
+            runOnViewThread(() -> setResizeBackgroundColor(bgColor));
+        }
     }
 
     /**
