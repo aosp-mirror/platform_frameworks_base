@@ -55,6 +55,26 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_stashing", false);
 
     /**
+     * Flag to indicate whether to apply shadows to windows in desktop mode.
+     */
+    private static final boolean USE_WINDOW_SHADOWS = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_use_window_shadows", true);
+
+    /**
+     * Flag to indicate whether to apply shadows to the focused window in desktop mode.
+     *
+     * Note: this flag is only relevant if USE_WINDOW_SHADOWS is false.
+     */
+    private static final boolean USE_WINDOW_SHADOWS_FOCUSED_WINDOW = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_use_window_shadows_focused_window", false);
+
+    /**
+     * Flag to indicate whether to apply shadows to windows in desktop mode.
+     */
+    private static final boolean USE_ROUNDED_CORNERS = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_use_rounded_corners", true);
+
+    /**
      * Return {@code true} is desktop windowing proto 2 is enabled
      */
     public static boolean isEnabled() {
@@ -80,5 +100,22 @@ public class DesktopModeStatus {
      */
     public static boolean isStashingEnabled() {
         return IS_STASHING_ENABLED;
+    }
+
+    /**
+     * Return whether to use window shadows.
+     *
+     * @param isFocusedWindow whether the window to apply shadows to is focused
+     */
+    public static boolean useWindowShadow(boolean isFocusedWindow) {
+        return USE_WINDOW_SHADOWS
+            || (USE_WINDOW_SHADOWS_FOCUSED_WINDOW && isFocusedWindow);
+    }
+
+    /**
+     * Return whether to use rounded corners for windows.
+     */
+    public static boolean useRoundedCorners() {
+        return USE_ROUNDED_CORNERS;
     }
 }
