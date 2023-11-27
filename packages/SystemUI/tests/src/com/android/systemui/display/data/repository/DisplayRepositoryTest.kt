@@ -69,7 +69,6 @@ class DisplayRepositoryTest : SysuiTestCase() {
                 displayManager,
                 testHandler,
                 TestScope(UnconfinedTestDispatcher()),
-                TestScope(UnconfinedTestDispatcher()),
                 UnconfinedTestDispatcher()
             )
         verify(displayManager, never()).registerDisplayListener(any(), any())

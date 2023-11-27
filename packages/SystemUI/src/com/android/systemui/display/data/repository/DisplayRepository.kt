@@ -29,7 +29,6 @@ import com.android.app.tracing.FlowTracing.traceEach
 import com.android.app.tracing.traceSection
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.data.DisplayEvent
 import com.android.systemui.util.Compile
@@ -93,7 +92,6 @@ class DisplayRepositoryImpl
 constructor(
     private val displayManager: DisplayManager,
     @Background backgroundHandler: Handler,
-    @Application applicationScope: CoroutineScope,
     @Background bgApplicationScope: CoroutineScope,
     @Background backgroundCoroutineDispatcher: CoroutineDispatcher
 ) : DisplayRepository {
@@ -142,8 +140,7 @@ constructor(
     private val enabledDisplays =
         allDisplayEvents
             .map { getDisplays() }
-            .flowOn(backgroundCoroutineDispatcher)
-            .shareIn(applicationScope, started = SharingStarted.WhileSubscribed(), replay = 1)
+            .shareIn(bgApplicationScope, started = SharingStarted.WhileSubscribed(), replay = 1)
 
     override val displays: Flow<Set<Display>> = enabledDisplays
 
