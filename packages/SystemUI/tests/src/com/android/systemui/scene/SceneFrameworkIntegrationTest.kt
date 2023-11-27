@@ -61,7 +61,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -273,6 +272,9 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
     }
 
     @Test
+    fun startsInLockscreenScene() = testScope.runTest { assertCurrentScene(SceneKey.Lockscreen) }
+
+    @Test
     fun clickLockButtonAndEnterCorrectPin_unlocksDevice() =
         testScope.runTest {
             emulateUserDrivenTransition(SceneKey.Bouncer)
@@ -336,7 +338,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val upDestinationSceneKey by collectLastValue(shadeSceneViewModel.upDestinationSceneKey)
             setAuthMethod(AuthenticationMethodModel.None, enableLockscreen = true)
-            assertTrue(deviceEntryInteractor.canSwipeToEnter.value)
+            assertThat(deviceEntryInteractor.canSwipeToEnter.value).isTrue()
             assertCurrentScene(SceneKey.Lockscreen)
 
             // Emulate a user swipe to dismiss the lockscreen.

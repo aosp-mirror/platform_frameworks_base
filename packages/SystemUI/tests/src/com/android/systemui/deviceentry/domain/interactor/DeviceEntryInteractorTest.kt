@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeTrustRepository
@@ -54,6 +55,13 @@ class DeviceEntryInteractorTest : SysuiTestCase() {
             faceAuthRepository = faceAuthRepository,
             trustRepository = trustRepository,
         )
+
+    @Test
+    fun canSwipeToEnter_startsNull() =
+        testScope.runTest {
+            val values by collectValues(underTest.canSwipeToEnter)
+            assertThat(values[0]).isNull()
+        }
 
     @Test
     fun isUnlocked_whenAuthMethodIsNoneAndLockscreenDisabled_isTrue() =
