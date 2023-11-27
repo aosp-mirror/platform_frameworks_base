@@ -35,7 +35,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
 
 import android.metrics.LogMaker;
 import android.testing.AndroidTestingRunner;
@@ -170,8 +169,7 @@ public class NotificationStackScrollLayoutControllerTest extends SysuiTestCase {
             new ActiveNotificationListRepository();
 
     private final ActiveNotificationsInteractor mActiveNotificationsInteractor =
-            new ActiveNotificationsInteractor(mActiveNotificationsRepository,
-                    StandardTestDispatcher(/* scheduler = */ null, /* name = */ null));
+            new ActiveNotificationsInteractor(mActiveNotificationsRepository);
 
     private final SeenNotificationsInteractor mSeenNotificationsInteractor =
             new SeenNotificationsInteractor(mActiveNotificationsRepository);

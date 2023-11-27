@@ -22,8 +22,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import static kotlinx.coroutines.test.TestCoroutineDispatchersKt.StandardTestDispatcher;
-
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Looper;
@@ -296,10 +294,8 @@ public class QuickSettingsControllerBaseTest extends SysuiTestCase {
                 )
         );
 
-        mActiveNotificationsInteractor = new ActiveNotificationsInteractor(
-                        new ActiveNotificationListRepository(),
-                        StandardTestDispatcher(/* scheduler = */ null, /* name = */ null)
-                );
+        mActiveNotificationsInteractor =
+                new ActiveNotificationsInteractor(new ActiveNotificationListRepository());
 
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);
