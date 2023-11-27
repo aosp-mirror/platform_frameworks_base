@@ -44,6 +44,11 @@ import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICA
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_VISIBLE
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
+import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
+import com.android.systemui.util.asIndenting
+import com.android.systemui.util.printSection
+import com.android.systemui.util.println
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -93,6 +98,15 @@ constructor(
             )
         }
     }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) =
+        pw.asIndenting().run {
+            printSection("SceneContainerFlags") {
+                println("isEnabled", flags.isEnabled())
+                printSection("requirementDescription") { println(flags.requirementDescription()) }
+                println("flexiNotifsEnabled", flags.flexiNotifsEnabled())
+            }
+        }
 
     /** Updates the visibility of the scene container. */
     private fun hydrateVisibility() {
