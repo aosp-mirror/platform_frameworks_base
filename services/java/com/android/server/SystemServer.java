@@ -268,6 +268,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.backup.BackupManagerService$Lifecycle";
     private static final String APPWIDGET_SERVICE_CLASS =
             "com.android.server.appwidget.AppWidgetService";
+    private static final String ARC_PERSISTENT_DATA_BLOCK_SERVICE_CLASS =
+            "com.android.server.arc.persistent_data_block.ArcPersistentDataBlockService";
     private static final String ARC_SYSTEM_HEALTH_SERVICE =
             "com.android.server.arc.health.ArcSystemHealthService";
     private static final String VOICE_RECOGNITION_MANAGER_SERVICE_CLASS =
@@ -1889,6 +1891,12 @@ public final class SystemServer implements Dumpable {
             if (hasPdb) {
                 t.traceBegin("StartPersistentDataBlock");
                 mSystemServiceManager.startService(PersistentDataBlockService.class);
+                t.traceEnd();
+            }
+
+            if (Build.IS_ARC && SystemProperties.getInt("ro.boot.dev_mode", 0) == 1) {
+                t.traceBegin("StartArcPersistentDataBlock");
+                mSystemServiceManager.startService(ARC_PERSISTENT_DATA_BLOCK_SERVICE_CLASS);
                 t.traceEnd();
             }
 
