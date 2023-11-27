@@ -15,6 +15,7 @@
  */
 package com.android.systemui.screenrecord
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.PendingIntent
 import android.content.Intent
@@ -23,6 +24,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.ResultReceiver
 import android.os.UserHandle
+import android.view.MotionEvent.ACTION_MOVE
 import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -102,11 +104,19 @@ class ScreenRecordPermissionDialogDelegate(
 
     @LayoutRes override fun getOptionsViewLayoutId(): Int = R.layout.screen_record_options
 
+    @SuppressLint("ClickableViewAccessibility")
     private fun initRecordOptionsView() {
         audioSwitch = dialog.requireViewById(R.id.screenrecord_audio_switch)
         tapsSwitch = dialog.requireViewById(R.id.screenrecord_taps_switch)
+
+        // Add these listeners so that the switch only responds to movement
+        // within its target region, to meet accessibility requirements
+        audioSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
+        tapsSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
+
         tapsView = dialog.requireViewById(R.id.show_taps)
         updateTapsViewVisibility()
+
         options = dialog.requireViewById(R.id.screen_recording_options)
         val a: ArrayAdapter<*> =
             ScreenRecordingAdapter(
