@@ -241,6 +241,23 @@ public class StatusBarManager {
     public static final int CAMERA_LAUNCH_SOURCE_QUICK_AFFORDANCE = 3;
 
     /**
+     * Broadcast action: sent to apps that hold the status bar permission when
+     * KeyguardManager#setPrivateNotificationsAllowed() is changed.
+     *
+     * Extras: #EXTRA_KM_PRIVATE_NOTIFS_ALLOWED
+     * @hide
+     */
+    public static final String ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED
+            = "android.app.action.KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED";
+
+    /**
+     * Boolean, the latest value of KeyguardManager#getPrivateNotificationsAllowed()
+     * @hide
+     */
+    public static final String EXTRA_KM_PRIVATE_NOTIFS_ALLOWED
+            = "android.app.extra.KM_PRIVATE_NOTIFS_ALLOWED";
+
+    /**
      * Session flag for {@link #registerSessionListener} indicating the listener
      * is interested in sessions on the keygaurd.
      * Keyguard Session Boundaries:

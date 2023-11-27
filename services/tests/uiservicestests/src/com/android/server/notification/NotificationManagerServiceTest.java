@@ -16,11 +16,14 @@
 
 package com.android.server.notification;
 
+import static android.Manifest.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS;
+import static android.Manifest.permission.STATUS_BAR_SERVICE;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.NOT_FOREGROUND_SERVICE;
 import static android.app.ActivityManagerInternal.ServiceNotificationPolicy.SHOW_IMMEDIATELY;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.Flags.FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS;
 import static android.app.Notification.EXTRA_ALLOW_DURING_SETUP;
 import static android.app.Notification.EXTRA_PICTURE;
 import static android.app.Notification.EXTRA_PICTURE_ICON;
@@ -60,6 +63,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BA
 import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_MUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
+import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
+import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.PackageManager.FEATURE_TELECOM;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
@@ -551,6 +556,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mContext.addMockSystemService(Context.ALARM_SERVICE, mAlarmManager);
         mContext.addMockSystemService(NotificationManager.class, mMockNm);
 
+        doNothing().when(mContext).sendBroadcast(any(), anyString());
         doNothing().when(mContext).sendBroadcastAsUser(any(), any());
         doNothing().when(mContext).sendBroadcastAsUser(any(), any(), any());
 
@@ -913,7 +919,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
     private ApplicationInfo getApplicationInfo(String pkg, int uid) {
         final ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.packageName = pkg;
         applicationInfo.uid = uid;
+        applicationInfo.sourceDir = mContext.getApplicationInfo().sourceDir;
         switch (pkg) {
             case PKG_N_MR1:
                 applicationInfo.targetSdkVersion = Build.VERSION_CODES.N_MR1;
@@ -5539,15 +5547,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testBumpFGImportance_channelChangePreOApp() throws Exception {
-        String preOPkg = PKG_N_MR1;
-        final ApplicationInfo legacy = new ApplicationInfo();
-        legacy.targetSdkVersion = Build.VERSION_CODES.N_MR1;
-        when(mPackageManagerClient.getApplicationInfoAsUser(eq(preOPkg), anyInt(), anyInt()))
-                .thenReturn(legacy);
-        when(mPackageManagerClient.getPackageUidAsUser(eq(preOPkg), anyInt()))
-                .thenReturn(Binder.getCallingUid());
-        getContext().setMockPackageManager(mPackageManagerClient);
-
         Notification.Builder nb = new Notification.Builder(mContext,
                 NotificationChannel.DEFAULT_CHANNEL_ID)
                 .setContentTitle("foo")
@@ -5555,7 +5554,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setFlag(FLAG_FOREGROUND_SERVICE, true)
                 .setPriority(Notification.PRIORITY_MIN);
 
-        StatusBarNotification sbn = new StatusBarNotification(preOPkg, preOPkg, 9,
+        StatusBarNotification sbn = new StatusBarNotification(PKG_N_MR1, PKG_N_MR1, 9,
                 "testBumpFGImportance_channelChangePreOApp",
                 Binder.getCallingUid(), 0, nb.build(),
                 UserHandle.getUserHandleForUid(Binder.getCallingUid()), null, 0);
@@ -5575,11 +5574,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 .setFlag(FLAG_FOREGROUND_SERVICE, true)
                 .setPriority(Notification.PRIORITY_MIN);
 
-        sbn = new StatusBarNotification(preOPkg, preOPkg, 9,
+        sbn = new StatusBarNotification(PKG_N_MR1, PKG_N_MR1, 9,
                 "testBumpFGImportance_channelChangePreOApp", Binder.getCallingUid(),
                 0, nb.build(), UserHandle.getUserHandleForUid(Binder.getCallingUid()), null, 0);
 
-        mBinderService.enqueueNotificationWithTag(preOPkg, preOPkg,
+        mBinderService.enqueueNotificationWithTag(PKG_N_MR1, PKG_N_MR1,
                 "testBumpFGImportance_channelChangePreOApp",
                 sbn.getId(), sbn.getNotification(), sbn.getUserId());
         waitForIdle();
@@ -5587,7 +5586,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mService.getNotificationRecord(sbn.getKey()).getImportance());
 
         NotificationChannel defaultChannel = mBinderService.getNotificationChannel(
-                preOPkg, mContext.getUserId(), preOPkg, NotificationChannel.DEFAULT_CHANNEL_ID);
+                PKG_N_MR1, mContext.getUserId(), PKG_N_MR1, NotificationChannel.DEFAULT_CHANNEL_ID);
         assertEquals(IMPORTANCE_LOW, defaultChannel.getImportance());
     }
 
@@ -13910,6 +13909,22 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mAppOpsManager, never()).noteOpNoThrow(
                 eq(AppOpsManager.OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER), anyInt(), anyString(),
                 any(), any());
+    }
+
+    @Test
+    @EnableFlags(FLAG_KEYGUARD_PRIVATE_NOTIFICATIONS)
+    public void testSetPrivateNotificationsAllowed() throws Exception {
+        when(mContext.checkCallingPermission(CONTROL_KEYGUARD_SECURE_NOTIFICATIONS))
+                .thenReturn(PERMISSION_GRANTED);
+        mBinderService.setPrivateNotificationsAllowed(false);
+        Intent expected = new Intent(ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED)
+                .putExtra(EXTRA_KM_PRIVATE_NOTIFS_ALLOWED, false);
+        ArgumentCaptor<Intent> actual = ArgumentCaptor.forClass(Intent.class);
+        verify(mContext).sendBroadcast(actual.capture(), eq(STATUS_BAR_SERVICE));
+
+        assertEquals(ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED, actual.getValue().getAction());
+        assertFalse(actual.getValue().getBooleanExtra(EXTRA_KM_PRIVATE_NOTIFS_ALLOWED, true));
+        assertFalse(mBinderService.getPrivateNotificationsAllowed());
     }
 
     private NotificationRecord createAndPostNotification(Notification.Builder nb, String testName)

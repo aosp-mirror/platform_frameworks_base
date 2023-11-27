@@ -15,6 +15,8 @@
  */
 package com.android.systemui.statusbar;
 
+import static android.app.StatusBarManager.ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED;
+import static android.app.StatusBarManager.EXTRA_KM_PRIVATE_NOTIFS_ALLOWED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_SECURE_NOTIFICATIONS;
 import static android.app.admin.DevicePolicyManager.KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS;
@@ -22,6 +24,7 @@ import static android.os.UserHandle.USER_ALL;
 import static android.os.UserHandle.USER_NULL;
 import static android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS;
 import static android.provider.Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS;
+import static android.app.Flags.keyguardPrivateNotifications;
 import static android.os.Flags.allowPrivateProfile;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
@@ -47,7 +50,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
-import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
@@ -149,6 +151,25 @@ public class NotificationLockscreenUserManagerImpl implements
             new ListenerSet<>();
     private final Collection<Uri> mLockScreenUris = new ArrayList<>();
 
+    protected final BroadcastReceiver mKeyguardReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+
+            if (ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED.equals(action)) {
+                if (mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
+                    mKeyguardAllowingNotifications =
+                            intent.getBooleanExtra(EXTRA_KM_PRIVATE_NOTIFS_ALLOWED, false);
+                    if (mCurrentUserId == getSendingUserId()) {
+                        boolean changed = updateLockscreenNotificationSetting();
+                        if (changed) {
+                            notifyNotificationStateChanged();
+                        }
+                    }
+                }
+            }
+        }
+    };
 
     protected final BroadcastReceiver mAllUsersReceiver = new BroadcastReceiver() {
         @Override
@@ -321,11 +342,21 @@ public class NotificationLockscreenUserManagerImpl implements
         mLockScreenUris.add(SHOW_PRIVATE_LOCKSCREEN);
 
         dumpManager.registerDumpable(this);
+
+        if (keyguardPrivateNotifications()) {
+            init();
+        }
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {
         mPresenter = presenter;
 
+        if (!keyguardPrivateNotifications()) {
+            init();
+        }
+    }
+
+    private void init() {
         mLockscreenSettingsObserver = new ContentObserver(
                 mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)
                         ? mBackgroundHandler
@@ -408,6 +439,11 @@ public class NotificationLockscreenUserManagerImpl implements
                 new IntentFilter(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED),
                 mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)
                         ? mBackgroundExecutor : null, UserHandle.ALL);
+        if (keyguardPrivateNotifications()) {
+            mBroadcastDispatcher.registerReceiver(mKeyguardReceiver,
+                    new IntentFilter(ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED),
+                    mBackgroundExecutor, UserHandle.ALL);
+        }
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_ADDED);
@@ -449,6 +485,10 @@ public class NotificationLockscreenUserManagerImpl implements
         mLockscreenSettingsObserver.onChange(
                 false, mLockScreenUris, 0, UserHandle.of(userId));
         updateDpcSettings(userId);
+
+        if (keyguardPrivateNotifications()) {
+            updateGlobalKeyguardSettings();
+        }
     }
 
     public boolean shouldShowLockscreenNotifications() {
@@ -470,8 +510,12 @@ public class NotificationLockscreenUserManagerImpl implements
         boolean allowedByDpm;
 
         if (mFeatureFlags.isEnabled(Flags.NOTIF_LS_BACKGROUND_THREAD)) {
-            show = mUsersUsersAllowingNotifications.get(mCurrentUserId)
-                    && mKeyguardAllowingNotifications;
+            if (keyguardPrivateNotifications()) {
+                show = mUsersUsersAllowingNotifications.get(mCurrentUserId);
+            } else {
+                show = mUsersUsersAllowingNotifications.get(mCurrentUserId)
+                        && mKeyguardAllowingNotifications;
+            }
             // If DPC never notified us about a user, that means they have no policy for the user,
             // and they allow the behavior
             allowedByDpm = mUsersDpcAllowingNotifications.get(mCurrentUserId, true);
@@ -514,8 +558,13 @@ public class NotificationLockscreenUserManagerImpl implements
                 1,
                 userId) != 0;
         mUsersUsersAllowingNotifications.put(userId, newAllowLockscreen);
-        boolean keyguardChanged = updateGlobalKeyguardSettings();
-        return (newAllowLockscreen != originalAllowLockscreen) || keyguardChanged;
+
+        if (keyguardPrivateNotifications()) {
+            return (newAllowLockscreen != originalAllowLockscreen);
+        } else {
+            boolean keyguardChanged = updateGlobalKeyguardSettings();
+            return (newAllowLockscreen != originalAllowLockscreen) || keyguardChanged;
+        }
     }
 
     @WorkerThread
@@ -553,8 +602,14 @@ public class NotificationLockscreenUserManagerImpl implements
                 Log.i(TAG, "Asking for redact notifs dpm override too early", new Throwable());
                 return false;
             }
-            return mUsersUsersAllowingPrivateNotifications.get(userHandle)
-                    && mUsersDpcAllowingPrivateNotifications.get(userHandle);
+            if (keyguardPrivateNotifications()) {
+                return mUsersUsersAllowingPrivateNotifications.get(userHandle)
+                        && mUsersDpcAllowingPrivateNotifications.get(userHandle)
+                        && mKeyguardAllowingNotifications;
+            } else {
+                return mUsersUsersAllowingPrivateNotifications.get(userHandle)
+                        && mUsersDpcAllowingPrivateNotifications.get(userHandle);
+            }
         } else {
             if (userHandle == USER_ALL) {
                 return true;
@@ -641,9 +696,14 @@ public class NotificationLockscreenUserManagerImpl implements
                 Log.wtf(TAG, "Asking for show notifs dpm override too early", new Throwable());
                 updateDpcSettings(userHandle);
             }
-            return mUsersUsersAllowingNotifications.get(userHandle)
-                    && mUsersDpcAllowingNotifications.get(userHandle)
-                    && mKeyguardAllowingNotifications;
+            if (keyguardPrivateNotifications()) {
+                return mUsersUsersAllowingNotifications.get(userHandle)
+                        && mUsersDpcAllowingNotifications.get(userHandle);
+            } else {
+                return mUsersUsersAllowingNotifications.get(userHandle)
+                        && mUsersDpcAllowingNotifications.get(userHandle)
+                        && mKeyguardAllowingNotifications;
+            }
         } else {
             if (isCurrentProfile(userHandle) && userHandle != mCurrentUserId) {
                 return true;
@@ -682,7 +742,12 @@ public class NotificationLockscreenUserManagerImpl implements
                 ent.getSbn().getNotification().visibility == Notification.VISIBILITY_PRIVATE;
         boolean userForcesRedaction = packageHasVisibilityOverride(ent.getSbn().getKey());
 
-        return userForcesRedaction || notificationRequestsRedaction && isNotifRedacted;
+        if (keyguardPrivateNotifications()) {
+            return !mKeyguardAllowingNotifications
+                    || userForcesRedaction || notificationRequestsRedaction && isNotifRedacted;
+        } else {
+            return userForcesRedaction || notificationRequestsRedaction && isNotifRedacted;
+        }
     }
 
     private boolean packageHasVisibilityOverride(String key) {
