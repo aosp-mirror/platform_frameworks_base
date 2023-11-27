@@ -483,10 +483,15 @@ package android.app {
   }
 
   public class UiModeManager {
+    method @FlaggedApi("android.app.modes_api") @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE) public int getAttentionModeThemeOverlay();
     method public boolean isNightModeLocked();
     method public boolean isUiModeLocked();
     method @RequiresPermission(value=android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION, conditional=true) public boolean releaseProjection(int);
     method @RequiresPermission(value=android.Manifest.permission.TOGGLE_AUTOMOTIVE_PROJECTION, conditional=true) public boolean requestProjection(int);
+    field @FlaggedApi("android.app.modes_api") public static final int MODE_ATTENTION_THEME_OVERLAY_DAY = 1002; // 0x3ea
+    field @FlaggedApi("android.app.modes_api") public static final int MODE_ATTENTION_THEME_OVERLAY_NIGHT = 1001; // 0x3e9
+    field @FlaggedApi("android.app.modes_api") public static final int MODE_ATTENTION_THEME_OVERLAY_OFF = 1000; // 0x3e8
+    field @FlaggedApi("android.app.modes_api") public static final int MODE_ATTENTION_THEME_OVERLAY_UNKNOWN = -1; // 0xffffffff
     field public static final int PROJECTION_TYPE_ALL = -1; // 0xffffffff
     field public static final int PROJECTION_TYPE_AUTOMOTIVE = 1; // 0x1
     field public static final int PROJECTION_TYPE_NONE = 0; // 0x0

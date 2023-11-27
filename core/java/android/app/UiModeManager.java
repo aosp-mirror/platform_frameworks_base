@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -264,6 +265,60 @@ public class UiModeManager {
      * always run in night mode.
      */
     public static final int MODE_NIGHT_YES = 2;
+
+    /** @hide */
+    @IntDef(prefix = { "MODE_ATTENTION_THEME_OVERLAY_" }, value = {
+            MODE_ATTENTION_THEME_OVERLAY_OFF,
+            MODE_ATTENTION_THEME_OVERLAY_NIGHT,
+            MODE_ATTENTION_THEME_OVERLAY_DAY
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AttentionModeThemeOverlayType {}
+
+    /** @hide */
+    @IntDef(prefix = { "MODE_ATTENTION_THEME_OVERLAY_" }, value = {
+            MODE_ATTENTION_THEME_OVERLAY_OFF,
+            MODE_ATTENTION_THEME_OVERLAY_NIGHT,
+            MODE_ATTENTION_THEME_OVERLAY_DAY,
+            MODE_ATTENTION_THEME_OVERLAY_UNKNOWN
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AttentionModeThemeOverlayReturnType {}
+
+    /**
+     * Constant for {@link #setAttentionModeThemeOverlay(int)} (int)} and {@link
+     * #getAttentionModeThemeOverlay()}: Keeps night mode as set by {@link #setNightMode(int)}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @TestApi
+    public static final int MODE_ATTENTION_THEME_OVERLAY_OFF = 1000;
+
+    /**
+     * Constant for {@link #setAttentionModeThemeOverlay(int)} (int)} and {@link
+     * #getAttentionModeThemeOverlay()}: Maintains night mode always on.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @TestApi
+    public static final int MODE_ATTENTION_THEME_OVERLAY_NIGHT = 1001;
+
+    /**
+     * Constant for {@link #setAttentionModeThemeOverlay(int)} (int)} and {@link
+     * #getAttentionModeThemeOverlay()}: Maintains night mode always off (Light).
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @TestApi
+    public static final int MODE_ATTENTION_THEME_OVERLAY_DAY = 1002;
+
+    /**
+     * Constant for {@link #getAttentionModeThemeOverlay()}: Error communication with server.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @TestApi
+    public static final int MODE_ATTENTION_THEME_OVERLAY_UNKNOWN = -1;
 
     /**
      * Granular types for {@link #setNightModeCustomType(int)}
@@ -730,6 +785,55 @@ public class UiModeManager {
             }
         }
         return MODE_NIGHT_CUSTOM_TYPE_UNKNOWN;
+    }
+
+    /**
+     * Overlays current Attention mode Night Mode overlay.
+     * {@code attentionModeThemeOverlayType}.
+     *
+     * @throws IllegalArgumentException if passed an unsupported type to
+     *                                  {@code AttentionModeThemeOverlayType}.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
+    public void setAttentionModeThemeOverlay(
+            @AttentionModeThemeOverlayType int attentionModeThemeOverlayType) {
+        if (sGlobals != null) {
+            try {
+                sGlobals.mService.setAttentionModeThemeOverlay(attentionModeThemeOverlayType);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Returns the currently configured Attention Mode theme overlay.
+     * <p>
+     * May be one of:
+     *   <ul>
+     *     <li>{@link #MODE_ATTENTION_THEME_OVERLAY_OFF}</li>
+     *     <li>{@link #MODE_ATTENTION_THEME_OVERLAY_NIGHT}</li>
+     *     <li>{@link #MODE_ATTENTION_THEME_OVERLAY_DAY}</li>
+     *     <li>{@link #MODE_ATTENTION_THEME_OVERLAY_UNKNOWN}</li>
+     *   </ul>
+     * </p>
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
+    public @AttentionModeThemeOverlayReturnType int getAttentionModeThemeOverlay() {
+        if (sGlobals != null) {
+            try {
+                return sGlobals.mService.getAttentionModeThemeOverlay();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return MODE_ATTENTION_THEME_OVERLAY_UNKNOWN;
     }
 
     /**
