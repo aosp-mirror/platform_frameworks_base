@@ -16,6 +16,8 @@
 
 package android.service.notification;
 
+import android.service.notification.ZenModeConfig.ConfigChangeOrigin;
+
 /**
  * Responsible for making any service calls needed to apply the set of {@link ZenDeviceEffects} that
  * make sense for the current platform.
@@ -33,6 +35,13 @@ public interface DeviceEffectsApplier {
      *
      * <p>This will be called whenever the set of consolidated effects changes (normally through
      * the activation or deactivation of zen rules).
+     *
+     * @param effects The effects that should be active and inactive.
+     * @param source The origin of the change. Because the application of specific effects can be
+     *               disruptive (e.g. lead to Activity recreation), that operation can in some
+     *               cases be deferred (e.g. until screen off). However, if the effects are
+     *               changing as a result of an explicit user action, then it makes sense to
+     *               apply them immediately regardless.
      */
-    void apply(ZenDeviceEffects effects);
+    void apply(ZenDeviceEffects effects, @ConfigChangeOrigin int source);
 }
