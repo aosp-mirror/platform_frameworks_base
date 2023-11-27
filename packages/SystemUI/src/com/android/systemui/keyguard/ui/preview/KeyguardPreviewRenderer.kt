@@ -287,6 +287,10 @@ constructor(
             return
         }
 
+        if (smartSpaceView != null) {
+            parentView.removeView(smartSpaceView)
+        }
+
         smartSpaceView = lockscreenSmartspaceController.buildAndConnectDateView(parentView)
 
         val topPadding: Int =
@@ -362,12 +366,13 @@ constructor(
             ),
         )
 
+        setUpUdfps(previewContext, rootView)
+
         disposables.add(
             PreviewKeyguardBlueprintViewBinder.bind(keyguardRootView, keyguardBlueprintViewModel) {
                 if (keyguardBottomAreaRefactor()) {
                     setupShortcuts(keyguardRootView)
                 }
-                setUpUdfps(previewContext, rootView)
 
                 if (!shouldHideClock) {
                     setUpClock(previewContext, rootView)
