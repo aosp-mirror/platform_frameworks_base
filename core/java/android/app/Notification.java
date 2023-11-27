@@ -10373,16 +10373,6 @@ public class Notification implements Parcelable
         }
 
         /**
-         * @deprecated use {@link #getIntent()} instead.
-         * @removed Removed from the R SDK but was never publicly stable.
-         */
-        @Nullable
-        @Deprecated
-        public PendingIntent getBubbleIntent() {
-            return mPendingIntent;
-        }
-
-        /**
          * @return the pending intent to send when the bubble is dismissed by a user, if one exists.
          */
         @Nullable
@@ -10397,16 +10387,6 @@ public class Notification implements Parcelable
         @SuppressLint("InvalidNullConversion")
         @Nullable
         public Icon getIcon() {
-            return mIcon;
-        }
-
-        /**
-         * @deprecated use {@link #getIcon()} instead.
-         * @removed Removed from the R SDK but was never publicly stable.
-         */
-        @Nullable
-        @Deprecated
-        public Icon getBubbleIcon() {
             return mIcon;
         }
 
@@ -10664,48 +10644,6 @@ public class Notification implements Parcelable
                 }
                 mPendingIntent = intent;
                 mIcon = icon;
-            }
-
-            /**
-             * @deprecated use {@link Builder#Builder(String)} instead.
-             * @removed Removed from the R SDK but was never publicly stable.
-             */
-            @NonNull
-            @Deprecated
-            public BubbleMetadata.Builder createShortcutBubble(@NonNull String shortcutId) {
-                if (!TextUtils.isEmpty(shortcutId)) {
-                    // If shortcut id is set, we don't use these if they were previously set.
-                    mPendingIntent = null;
-                    mIcon = null;
-                }
-                mShortcutId = shortcutId;
-                return this;
-            }
-
-            /**
-             * @deprecated use {@link Builder#Builder(PendingIntent, Icon)} instead.
-             * @removed Removed from the R SDK but was never publicly stable.
-             */
-            @NonNull
-            @Deprecated
-            public BubbleMetadata.Builder createIntentBubble(@NonNull PendingIntent intent,
-                    @NonNull Icon icon) {
-                if (intent == null) {
-                    throw new IllegalArgumentException("Bubble requires non-null pending intent");
-                }
-                if (icon == null) {
-                    throw new IllegalArgumentException("Bubbles require non-null icon");
-                }
-                if (icon.getType() != TYPE_URI_ADAPTIVE_BITMAP
-                        && icon.getType() != TYPE_URI) {
-                    Log.w(TAG, "Bubbles work best with icons of TYPE_URI or "
-                            + "TYPE_URI_ADAPTIVE_BITMAP. "
-                            + "In the future, using an icon of this type will be required.");
-                }
-                mShortcutId = null;
-                mPendingIntent = intent;
-                mIcon = icon;
-                return this;
             }
 
             /**
