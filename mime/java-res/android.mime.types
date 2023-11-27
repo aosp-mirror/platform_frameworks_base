@@ -54,6 +54,8 @@
 ?application/ttml+xml ttml dfxp
 ?application/vnd.android.ota ota
 ?application/vnd.apple.mpegurl m3u8
+?application/vnd.apple.pkpass pkpass
+?application/vnd.apple.pkpasses pkpasses
 ?application/vnd.ms-pki.stl stl
 ?application/vnd.ms-powerpoint pot
 ?application/vnd.ms-wpl wpl
