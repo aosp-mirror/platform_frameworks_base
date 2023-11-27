@@ -64,7 +64,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
     private PowerStats.Descriptor mLastUsedDescriptor;
     // Cached results of parsing of current PowerStats.Descriptor. Only refreshed when
     // mLastUsedDescriptor changes
-    private CpuPowerStatsCollector.StatsArrayLayout mStatsLayout;
+    private CpuPowerStatsCollector.CpuStatsArrayLayout mStatsLayout;
     // Sequence of steps for power estimation and intermediate results.
     private PowerEstimationPlan mPlan;
 
@@ -106,7 +106,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
         }
 
         mLastUsedDescriptor = descriptor;
-        mStatsLayout = new CpuPowerStatsCollector.StatsArrayLayout();
+        mStatsLayout = new CpuPowerStatsCollector.CpuStatsArrayLayout();
         mStatsLayout.fromExtras(descriptor.extras);
 
         mTmpDeviceStatsArray = new long[descriptor.statsArrayLength];
@@ -149,7 +149,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
 
         if (mPlan == null) {
             mPlan = new PowerEstimationPlan(stats.getConfig());
-            if (mStatsLayout.getCpuClusterEnergyConsumerCount() != 0) {
+            if (mStatsLayout.getEnergyConsumerCount() != 0) {
                 initEnergyConsumerToPowerBracketMaps();
             }
         }
@@ -212,7 +212,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
      *          CL_2: [bracket3, bracket4]
      */
     private void initEnergyConsumerToPowerBracketMaps() {
-        int energyConsumerCount = mStatsLayout.getCpuClusterEnergyConsumerCount();
+        int energyConsumerCount = mStatsLayout.getEnergyConsumerCount();
         int powerBracketCount = mStatsLayout.getCpuPowerBracketCount();
 
         mEnergyConsumerToCombinedEnergyConsumerMap = new int[energyConsumerCount];
@@ -294,7 +294,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
                 continue;
             }
 
-            intermediates.uptime += mStatsLayout.getUptime(mTmpDeviceStatsArray);
+            intermediates.uptime += mStatsLayout.getUsageDuration(mTmpDeviceStatsArray);
 
             for (int cluster = 0; cluster < mCpuClusterCount; cluster++) {
                 intermediates.timeByCluster[cluster] +=
@@ -351,7 +351,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
         int cpuScalingStepCount = mStatsLayout.getCpuScalingStepCount();
         int powerBracketCount = mStatsLayout.getCpuPowerBracketCount();
         int[] scalingStepToBracketMap = mStatsLayout.getScalingStepToPowerBracketMap();
-        int energyConsumerCount = mStatsLayout.getCpuClusterEnergyConsumerCount();
+        int energyConsumerCount = mStatsLayout.getEnergyConsumerCount();
         List<DeviceStateEstimation> deviceStateEstimations = mPlan.deviceStateEstimations;
         for (int dse = deviceStateEstimations.size() - 1; dse >= 0; dse--) {
             DeviceStateEstimation deviceStateEstimation = deviceStateEstimations.get(dse);
@@ -392,7 +392,7 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
 
     private void adjustEstimatesUsingEnergyConsumers(
             Intermediates intermediates, DeviceStatsIntermediates deviceStatsIntermediates) {
-        int energyConsumerCount = mStatsLayout.getCpuClusterEnergyConsumerCount();
+        int energyConsumerCount = mStatsLayout.getEnergyConsumerCount();
         if (energyConsumerCount == 0) {
             return;
         }
@@ -509,8 +509,8 @@ public class CpuAggregatedPowerStatsProcessor extends AggregatedPowerStatsProces
             }
             sb.append(mStatsLayout.getTimeByCluster(stats, cluster));
         }
-        sb.append("] uptime: ").append(mStatsLayout.getUptime(stats));
-        int energyConsumerCount = mStatsLayout.getCpuClusterEnergyConsumerCount();
+        sb.append("] uptime: ").append(mStatsLayout.getUsageDuration(stats));
+        int energyConsumerCount = mStatsLayout.getEnergyConsumerCount();
         if (energyConsumerCount > 0) {
             sb.append(" energy: [");
             for (int i = 0; i < energyConsumerCount; i++) {

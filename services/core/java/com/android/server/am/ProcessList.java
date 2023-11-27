@@ -34,7 +34,7 @@ import static android.os.Process.getFreeMemory;
 import static android.os.Process.getTotalMemory;
 import static android.os.Process.killProcessQuiet;
 import static android.os.Process.startWebView;
-import static android.system.OsConstants.*;
+import static android.system.OsConstants.EAGAIN;
 
 import static com.android.sdksandbox.flags.Flags.selinuxSdkSandboxAudit;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
@@ -133,7 +133,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.server.AppStateTracker;
 import com.android.server.LocalServices;
@@ -3299,8 +3298,6 @@ public final class ProcessList {
             // about the process state of the isolated UID *before* it is registered with the
             // owning application.
             mService.mBatteryStatsService.addIsolatedUid(uid, info.uid);
-            FrameworkStatsLog.write(FrameworkStatsLog.ISOLATED_UID_CHANGED, info.uid, uid,
-                    FrameworkStatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
         final ProcessRecord r = new ProcessRecord(mService, info, proc, uid,
                 sdkSandboxClientAppPackage,
