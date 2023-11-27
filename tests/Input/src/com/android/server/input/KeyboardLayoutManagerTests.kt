@@ -63,6 +63,7 @@ private fun createKeyboard(
     deviceId: Int,
     vendorId: Int,
     productId: Int,
+    deviceBus: Int,
     languageTag: String,
     layoutType: String
 ): InputDevice =
@@ -75,6 +76,7 @@ private fun createKeyboard(
         .setExternal(true)
         .setVendorId(vendorId)
         .setProductId(productId)
+        .setDeviceBus(deviceBus)
         .setKeyboardLanguageTag(languageTag)
         .setKeyboardLayoutType(layoutType)
         .build()
@@ -94,6 +96,7 @@ class KeyboardLayoutManagerTests {
         const val ENGLISH_QWERTY_DEVICE_ID = 4
         const val DEFAULT_VENDOR_ID = 123
         const val DEFAULT_PRODUCT_ID = 456
+        const val DEFAULT_DEVICE_BUS = 789
         const val USER_ID = 4
         const val IME_ID = "ime_id"
         const val PACKAGE_NAME = "KeyboardLayoutManagerTests"
@@ -177,12 +180,14 @@ class KeyboardLayoutManagerTests {
         Mockito.`when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
             .thenReturn(inputManager)
 
-        keyboardDevice = createKeyboard(DEVICE_ID, DEFAULT_VENDOR_ID, DEFAULT_PRODUCT_ID, "", "")
-        vendorSpecificKeyboardDevice = createKeyboard(VENDOR_SPECIFIC_DEVICE_ID, 1, 1, "", "")
+        keyboardDevice = createKeyboard(DEVICE_ID, DEFAULT_VENDOR_ID, DEFAULT_PRODUCT_ID,
+                DEFAULT_DEVICE_BUS, "", "")
+        vendorSpecificKeyboardDevice = createKeyboard(VENDOR_SPECIFIC_DEVICE_ID, 1, 1,
+                1, "", "")
         englishDvorakKeyboardDevice = createKeyboard(ENGLISH_DVORAK_DEVICE_ID, DEFAULT_VENDOR_ID,
-                DEFAULT_PRODUCT_ID, "en", "dvorak")
+                DEFAULT_PRODUCT_ID, DEFAULT_DEVICE_BUS, "en", "dvorak")
         englishQwertyKeyboardDevice = createKeyboard(ENGLISH_QWERTY_DEVICE_ID, DEFAULT_VENDOR_ID,
-                DEFAULT_PRODUCT_ID, "en", "qwerty")
+                DEFAULT_PRODUCT_ID, DEFAULT_DEVICE_BUS, "en", "qwerty")
         Mockito.`when`(iInputManager.inputDeviceIds)
             .thenReturn(intArrayOf(
                 DEVICE_ID,
@@ -861,7 +866,9 @@ class KeyboardLayoutManagerTests {
                                 GERMAN_LAYOUT_NAME,
                                 KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_VIRTUAL_KEYBOARD,
                                 "de-Latn",
-                                LAYOUT_TYPE_QWERTZ))
+                                LAYOUT_TYPE_QWERTZ),
+                            ),
+                        ArgumentMatchers.eq(keyboardDevice.deviceBus),
                 )
             }
         }
@@ -887,7 +894,8 @@ class KeyboardLayoutManagerTests {
                                 ENGLISH_US_LAYOUT_NAME,
                                 KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEVICE,
                                 "de-Latn",
-                                LAYOUT_TYPE_QWERTZ))
+                                LAYOUT_TYPE_QWERTZ)),
+                        ArgumentMatchers.eq(keyboardDevice.deviceBus),
                 )
             }
         }
@@ -911,7 +919,9 @@ class KeyboardLayoutManagerTests {
                                 "Default",
                                 KeyboardMetricsCollector.LAYOUT_SELECTION_CRITERIA_DEFAULT,
                                 KeyboardMetricsCollector.DEFAULT_LANGUAGE_TAG,
-                                LAYOUT_TYPE_DEFAULT))
+                                LAYOUT_TYPE_DEFAULT),
+                            ),
+                        ArgumentMatchers.eq(keyboardDevice.deviceBus),
                 )
             }
         }
@@ -929,7 +939,8 @@ class KeyboardLayoutManagerTests {
                         ArgumentMatchers.anyBoolean(),
                         ArgumentMatchers.anyInt(),
                         ArgumentMatchers.anyInt(),
-                        ArgumentMatchers.any(ByteArray::class.java)
+                        ArgumentMatchers.any(ByteArray::class.java),
+                        ArgumentMatchers.anyInt(),
                 )
             }, Mockito.times(0))
         }
@@ -972,8 +983,13 @@ class KeyboardLayoutManagerTests {
     }
 
     private fun createByteArray(
-            expectedLanguageTag: String, expectedLayoutType: Int, expectedLayoutName: String,
-            expectedCriteria: Int, expectedImeLanguageTag: String, expectedImeLayoutType: Int): ByteArray {
+            expectedLanguageTag: String,
+            expectedLayoutType: Int,
+            expectedLayoutName: String,
+            expectedCriteria: Int,
+            expectedImeLanguageTag: String,
+            expectedImeLayoutType: Int
+    ): ByteArray {
         val proto = ProtoOutputStream()
         val keyboardLayoutConfigToken = proto.start(
                 KeyboardConfiguredProto.RepeatedKeyboardLayoutConfig.KEYBOARD_LAYOUT_CONFIG)
@@ -1001,7 +1017,7 @@ class KeyboardLayoutManagerTests {
                 KeyboardConfiguredProto.KeyboardLayoutConfig.IME_LAYOUT_TYPE,
                 expectedImeLayoutType
         )
-        proto.end(keyboardLayoutConfigToken);
+        proto.end(keyboardLayoutConfigToken)
         return proto.bytes
     }
 

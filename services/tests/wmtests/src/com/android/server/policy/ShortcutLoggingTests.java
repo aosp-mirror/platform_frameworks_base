@@ -30,12 +30,12 @@ import androidx.test.filters.MediumTest;
 import com.android.internal.annotations.Keep;
 import com.android.server.input.KeyboardMetricsCollector.KeyboardLogEvent;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
 @Presubmit
 @MediumTest
@@ -44,6 +44,7 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
 
     private static final int VENDOR_ID = 0x123;
     private static final int PRODUCT_ID = 0x456;
+    private static final int DEVICE_BUS = 0x789;
     private static final int META_KEY = KeyEvent.KEYCODE_META_LEFT;
     private static final int META_ON = MODIFIER.get(KeyEvent.KEYCODE_META_LEFT);
     private static final int ALT_KEY = KeyEvent.KEYCODE_ALT_LEFT;
@@ -298,7 +299,7 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
     @Before
     public void setUp() {
         setUpPhoneWindowManager(/*supportSettingsUpdate*/ true);
-        mPhoneWindowManager.overrideKeyEventSource(VENDOR_ID, PRODUCT_ID);
+        mPhoneWindowManager.overrideKeyEventSource(VENDOR_ID, PRODUCT_ID, DEVICE_BUS);
         mPhoneWindowManager.overrideLaunchHome();
         mPhoneWindowManager.overrideSearchKeyBehavior(
                 PhoneWindowManager.SEARCH_BEHAVIOR_TARGET_ACTIVITY);
@@ -318,7 +319,8 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
             int expectedKey, int expectedModifierState) {
         sendKeyCombination(testKeys, 0 /* duration */);
         mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
-                expectedKey, expectedModifierState, "Failed while executing " + testName);
+                expectedKey, expectedModifierState, DEVICE_BUS,
+                "Failed while executing " + testName);
     }
 
     @Test
@@ -328,7 +330,8 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.overrideLongPressOnHomeBehavior(longPressOnHomeBehavior);
         sendLongPressKeyCombination(testKeys);
         mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
-                expectedKey, expectedModifierState, "Failed while executing " + testName);
+                expectedKey, expectedModifierState, DEVICE_BUS,
+                "Failed while executing " + testName);
     }
 
     @Test
@@ -340,7 +343,8 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
         sendKeyCombination(testKeys, 0 /* duration */);
         sendKeyCombination(testKeys, 0 /* duration */);
         mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
-                expectedKey, expectedModifierState, "Failed while executing " + testName);
+                expectedKey, expectedModifierState, DEVICE_BUS,
+                "Failed while executing " + testName);
     }
 
     @Test
@@ -351,6 +355,7 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
         mPhoneWindowManager.overrideShortPressOnSettingsBehavior(shortPressOnSettingsBehavior);
         sendKeyCombination(testKeys, 0 /* duration */);
         mPhoneWindowManager.assertShortcutLogged(VENDOR_ID, PRODUCT_ID, expectedLogEvent,
-                expectedKey, expectedModifierState, "Failed while executing " + testName);
+                expectedKey, expectedModifierState, DEVICE_BUS,
+                "Failed while executing " + testName);
     }
 }
