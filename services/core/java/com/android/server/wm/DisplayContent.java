@@ -1153,12 +1153,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplay = display;
         mDisplayId = display.getDisplayId();
         mCurrentUniqueDisplayId = display.getUniqueId();
-        mDisplayUpdater = new ImmediateDisplayUpdater(this);
         mOffTokenAcquirer = mRootWindowContainer.mDisplayOffTokenAcquirer;
         mWallpaperController = new WallpaperController(mWmService, this);
         mWallpaperController.resetLargestDisplay(display);
         display.getDisplayInfo(mDisplayInfo);
         display.getMetrics(mDisplayMetrics);
+        mDisplayUpdater = new ImmediateDisplayUpdater(this);
         mSystemGestureExclusionLimit = mWmService.mConstants.mSystemGestureExclusionLimitDp
                 * mDisplayMetrics.densityDpi / DENSITY_DEFAULT;
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
