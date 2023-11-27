@@ -33018,7 +33018,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     private float getSizePercentage() {
-        if (mResources == null || getAlpha() == 0 || getVisibility() != VISIBLE) {
+        if (mResources == null || getVisibility() != VISIBLE) {
             return 0;
         }
 
