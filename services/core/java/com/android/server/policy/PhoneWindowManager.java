@@ -3638,15 +3638,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return true;
                 }
                 break;
-            case KeyEvent.KEYCODE_SPACE:
-                // Handle keyboard layout switching. (META + SPACE)
-                if (firstDown && event.isMetaPressed()) {
-                    int direction = (metaState & KeyEvent.META_SHIFT_MASK) != 0 ? -1 : 1;
-                    sendSwitchKeyboardLayout(event, direction);
-                    logKeyboardSystemsEvent(event, KeyboardLogEvent.LANGUAGE_SWITCH);
-                    return true;
-                }
-                break;
             case KeyEvent.KEYCODE_META_LEFT:
             case KeyEvent.KEYCODE_META_RIGHT:
                 if (down) {
