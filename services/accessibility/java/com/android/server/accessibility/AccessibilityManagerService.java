@@ -4413,23 +4413,48 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Override
     public boolean isAccessibilityServiceWarningRequired(AccessibilityServiceInfo info) {
         mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+        final ComponentName componentName = info.getComponentName();
 
         // Warning is not required if the service is already enabled.
         synchronized (mLock) {
             final AccessibilityUserState userState = getCurrentUserStateLocked();
-            if (userState.getEnabledServicesLocked().contains(info.getComponentName())) {
+            if (userState.getEnabledServicesLocked().contains(componentName)) {
                 return false;
             }
         }
         // Warning is not required if the service is already assigned to a shortcut.
         for (int shortcutType : AccessibilityManager.SHORTCUT_TYPES) {
             if (getAccessibilityShortcutTargets(shortcutType).contains(
-                    info.getComponentName().flattenToString())) {
+                    componentName.flattenToString())) {
                 return false;
             }
         }
+        // Warning is not required if the service is preinstalled and in the
+        // trustedAccessibilityServices allowlist.
+        if (android.view.accessibility.Flags.skipAccessibilityWarningDialogForTrustedServices()
+                && isAccessibilityServicePreinstalledAndTrusted(info)) {
+            return false;
+        }
+
         // Warning is required by default.
         return true;
+    }
+
+    private boolean isAccessibilityServicePreinstalledAndTrusted(AccessibilityServiceInfo info) {
+        final ComponentName componentName = info.getComponentName();
+        final boolean isPreinstalled =
+                info.getResolveInfo().serviceInfo.applicationInfo.isSystemApp();
+        if (isPreinstalled) {
+            final String[] trustedAccessibilityServices =
+                    mContext.getResources().getStringArray(
+                            R.array.config_trustedAccessibilityServices);
+            if (Arrays.stream(trustedAccessibilityServices)
+                    .map(ComponentName::unflattenFromString)
+                    .anyMatch(componentName::equals)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
