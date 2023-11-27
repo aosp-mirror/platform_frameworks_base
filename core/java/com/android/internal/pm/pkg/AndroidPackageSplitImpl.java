@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg;
+package com.android.internal.pm.pkg;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
+
+import com.android.server.pm.pkg.AndroidPackageSplit;
 
 import java.util.Collections;
 import java.util.List;
@@ -94,8 +96,8 @@ public class AndroidPackageSplitImpl implements AndroidPackageSplit {
         if (this == o) return true;
         if (!(o instanceof AndroidPackageSplitImpl)) return false;
         AndroidPackageSplitImpl that = (AndroidPackageSplitImpl) o;
-        var fieldsEqual = mRevisionCode == that.mRevisionCode && mFlags == that.mFlags && Objects.equals(
-                mName, that.mName) && Objects.equals(mPath, that.mPath)
+        var fieldsEqual = mRevisionCode == that.mRevisionCode && mFlags == that.mFlags
+                && Objects.equals(mName, that.mName) && Objects.equals(mPath, that.mPath)
                 && Objects.equals(mClassLoaderName, that.mClassLoaderName);
 
         if (!fieldsEqual) return false;

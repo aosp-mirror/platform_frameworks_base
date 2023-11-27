@@ -50,6 +50,7 @@ import android.util.SparseIntArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.pkg.AndroidPackageSplitImpl;
 import com.android.internal.pm.pkg.component.ParsedActivity;
 import com.android.internal.pm.pkg.component.ParsedApexSystemService;
 import com.android.internal.pm.pkg.component.ParsedAttribution;
@@ -71,7 +72,6 @@ import com.android.internal.util.Parcelling.BuiltIn.ForInternedString;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.AndroidPackageSplit;
-import com.android.server.pm.pkg.AndroidPackageSplitImpl;
 import com.android.server.pm.pkg.SELinuxUtil;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;
 import com.android.server.pm.pkg.component.ParsedActivityImpl;

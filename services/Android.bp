@@ -140,6 +140,7 @@ filegroup {
         ":services.voiceinteraction-sources",
         ":services.wallpapereffectsgeneration-sources",
         ":services.wifi-sources",
+        ":framework-pm-common-shared-srcs",
     ],
     visibility: ["//visibility:private"],
 }
