@@ -185,14 +185,29 @@ public final class AccessibilityManager {
 
     /**
      * Annotations for the shortcut type.
+     * <p>Note: Keep in sync with {@link #SHORTCUT_TYPES}.</p>
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {
+            // LINT.IfChange(shortcut_type_intdef)
             ACCESSIBILITY_BUTTON,
             ACCESSIBILITY_SHORTCUT_KEY
+            // LINT.ThenChange(:shortcut_type_array)
     })
     public @interface ShortcutType {}
+
+    /**
+     * Used for iterating through {@link ShortcutType}.
+     * <p>Note: Keep in sync with {@link ShortcutType}.</p>
+     * @hide
+     */
+    public static final int[] SHORTCUT_TYPES = {
+            // LINT.IfChange(shortcut_type_array)
+            ACCESSIBILITY_BUTTON,
+            ACCESSIBILITY_SHORTCUT_KEY,
+            // LINT.ThenChange(:shortcut_type_intdef)
+    };
 
     /**
      * Annotations for content flag of UI.
@@ -910,6 +925,28 @@ public final class AccessibilityManager {
             return Collections.unmodifiableList(services);
         } else {
             return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Returns whether the user must be shown the AccessibilityService warning dialog
+     * before the AccessibilityService (or any shortcut for the service) can be enabled.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    public boolean isAccessibilityServiceWarningRequired(@NonNull AccessibilityServiceInfo info) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return true;
+            }
+        }
+        try {
+            return service.isAccessibilityServiceWarningRequired(info);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while checking isAccessibilityServiceWarningRequired: ", re);
+            return true;
         }
     }
 

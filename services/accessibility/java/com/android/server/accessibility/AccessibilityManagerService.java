@@ -4406,6 +4406,28 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
+    public boolean isAccessibilityServiceWarningRequired(AccessibilityServiceInfo info) {
+        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
+
+        // Warning is not required if the service is already enabled.
+        synchronized (mLock) {
+            final AccessibilityUserState userState = getCurrentUserStateLocked();
+            if (userState.getEnabledServicesLocked().contains(info.getComponentName())) {
+                return false;
+            }
+        }
+        // Warning is not required if the service is already assigned to a shortcut.
+        for (int shortcutType : AccessibilityManager.SHORTCUT_TYPES) {
+            if (getAccessibilityShortcutTargets(shortcutType).contains(
+                    info.getComponentName().flattenToString())) {
+                return false;
+            }
+        }
+        // Warning is required by default.
+        return true;
+    }
+
+    @Override
     public void dump(FileDescriptor fd, final PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, LOG_TAG, pw)) return;
         synchronized (mLock) {
