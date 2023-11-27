@@ -215,7 +215,7 @@ class StorageManagerService extends IStorageManager.Stub
     public static final int FAILED_MOUNT_RESET_TIMEOUT_SECONDS = 10;
 
     /** Extended timeout for the system server watchdog. */
-    private static final int SLOW_OPERATION_WATCHDOG_TIMEOUT_MS = 60 * 1000;
+    private static final int SLOW_OPERATION_WATCHDOG_TIMEOUT_MS = 20 * 1000;
 
     /** Extended timeout for the system server watchdog for vold#partition operation. */
     private static final int PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS = 3 * 60 * 1000;
@@ -1235,11 +1235,16 @@ class StorageManagerService extends IStorageManager.Stub
         }
     }
 
+    private void extendWatchdogTimeout(String reason) {
+        Watchdog w = Watchdog.getInstance();
+        w.pauseWatchingMonitorsFor(SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, reason);
+        w.pauseWatchingCurrentThreadFor(SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, reason);
+    }
+
     private void onUserStopped(int userId) {
         Slog.d(TAG, "onUserStopped " + userId);
 
-        Watchdog.getInstance().pauseWatchingMonitorsFor(
-                SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#onUserStopped might be slow");
+        extendWatchdogTimeout("#onUserStopped might be slow");
         try {
             mVold.onUserStopped(userId);
             mStoraged.onUserStopped(userId);
@@ -1322,8 +1327,7 @@ class StorageManagerService extends IStorageManager.Stub
                 unlockedUsers.add(userId);
             }
         }
-        Watchdog.getInstance().pauseWatchingMonitorsFor(
-                SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#onUserStopped might be slow");
+        extendWatchdogTimeout("#onUserStopped might be slow");
         for (Integer userId : unlockedUsers) {
             try {
                 mVold.onUserStopped(userId);
@@ -2343,8 +2347,7 @@ class StorageManagerService extends IStorageManager.Stub
         try {
             // TODO(b/135341433): Remove cautious logging when FUSE is stable
             Slog.i(TAG, "Mounting volume " + vol);
-            Watchdog.getInstance().pauseWatchingMonitorsFor(
-                    SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#mount might be slow");
+            extendWatchdogTimeout("#mount might be slow");
             mVold.mount(vol.id, vol.mountFlags, vol.mountUserId, new IVoldMountCallback.Stub() {
                 @Override
                 public boolean onVolumeChecking(FileDescriptor fd, String path,
@@ -2474,8 +2477,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
 
-        Watchdog.getInstance().pauseWatchingMonitorsFor(
-                PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS, "#partition might be very slow");
+        extendWatchdogTimeout("#partition might be slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_PUBLIC, -1);
             waitForLatch(latch, "partitionPublic", 3 * DateUtils.MINUTE_IN_MILLIS);
@@ -2493,8 +2495,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
 
-        Watchdog.getInstance().pauseWatchingMonitorsFor(
-                PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS, "#partition might be very slow");
+        extendWatchdogTimeout("#partition might be slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_PRIVATE, -1);
             waitForLatch(latch, "partitionPrivate", 3 * DateUtils.MINUTE_IN_MILLIS);
@@ -2512,8 +2513,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         final CountDownLatch latch = findOrCreateDiskScanLatch(diskId);
 
-        Watchdog.getInstance().pauseWatchingMonitorsFor(
-                PARTITION_OPERATION_WATCHDOG_TIMEOUT_MS, "#partition might be very slow");
+        extendWatchdogTimeout("#partition might be slow");
         try {
             mVold.partition(diskId, IVold.PARTITION_TYPE_MIXED, ratio);
             waitForLatch(latch, "partitionMixed", 3 * DateUtils.MINUTE_IN_MILLIS);
@@ -3622,8 +3622,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public ParcelFileDescriptor open() throws AppFuseMountException {
-            Watchdog.getInstance().pauseWatchingMonitorsFor(
-                SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#open might be slow");
+            extendWatchdogTimeout("#open might be slow");
             try {
                 final FileDescriptor fd = mVold.mountAppFuse(uid, mountId);
                 mMounted = true;
@@ -3636,8 +3635,7 @@ class StorageManagerService extends IStorageManager.Stub
         @Override
         public ParcelFileDescriptor openFile(int mountId, int fileId, int flags)
                 throws AppFuseMountException {
-            Watchdog.getInstance().pauseWatchingMonitorsFor(
-                SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#openFile might be slow");
+            extendWatchdogTimeout("#openFile might be slow");
             try {
                 return new ParcelFileDescriptor(
                         mVold.openAppFuseFile(uid, mountId, fileId, flags));
@@ -3648,8 +3646,7 @@ class StorageManagerService extends IStorageManager.Stub
 
         @Override
         public void close() throws Exception {
-            Watchdog.getInstance().pauseWatchingMonitorsFor(
-                SLOW_OPERATION_WATCHDOG_TIMEOUT_MS, "#close might be slow");
+            extendWatchdogTimeout("#close might be slow");
             if (mMounted) {
                 BackgroundThread.getHandler().post(() -> {
                     try {
