@@ -22,7 +22,6 @@ import com.android.hoststubgen.filters.ConstantFilter
 import com.android.hoststubgen.filters.DefaultHookInjectingFilter
 import com.android.hoststubgen.filters.FilterPolicy
 import com.android.hoststubgen.filters.ImplicitOutputFilter
-import com.android.hoststubgen.filters.KeepAllClassesFilter
 import com.android.hoststubgen.filters.OutputFilter
 import com.android.hoststubgen.filters.StubIntersectingFilter
 import com.android.hoststubgen.filters.createFilterFromTextPolicyFile
@@ -52,15 +51,15 @@ class HostStubGen(val options: HostStubGenOptions) {
         val errors = HostStubGenErrors()
 
         // Load all classes.
-        val allClasses = loadClassStructures(options.inJar)
+        val allClasses = loadClassStructures(options.inJar.get)
 
         // Dump the classes, if specified.
-        options.inputJarDumpFile?.let {
+        options.inputJarDumpFile.ifSet {
             PrintWriter(it).use { pw -> allClasses.dump(pw) }
             log.i("Dump file created at $it")
         }
 
-        options.inputJarAsKeepAllFile?.let {
+        options.inputJarAsKeepAllFile.ifSet {
             PrintWriter(it).use {
                 pw -> allClasses.forEach {
                     classNode -> printAsTextPolicy(pw, classNode)
@@ -74,11 +73,11 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         // Transform the jar.
         convert(
-                options.inJar,
-                options.outStubJar,
-                options.outImplJar,
+                options.inJar.get,
+                options.outStubJar.get,
+                options.outImplJar.get,
                 filter,
-                options.enableClassChecker,
+                options.enableClassChecker.get,
                 allClasses,
                 errors,
         )
@@ -153,7 +152,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         // text-file based filter, which is handled by parseTextFilterPolicyFile.
 
         // The first filter is for the default policy from the command line options.
-        var filter: OutputFilter = ConstantFilter(options.defaultPolicy, "default-by-options")
+        var filter: OutputFilter = ConstantFilter(options.defaultPolicy.get, "default-by-options")
 
         // Next, we need a filter that resolves "class-wide" policies.
         // This is used when a member (methods, fields, nested classes) don't get any polices
@@ -163,16 +162,16 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         // Inject default hooks from options.
         filter = DefaultHookInjectingFilter(
-            options.defaultClassLoadHook,
-            options.defaultMethodCallHook,
+            options.defaultClassLoadHook.get,
+            options.defaultMethodCallHook.get,
             filter
         )
 
-        val annotationAllowedClassesFilter = options.annotationAllowedClassesFile.let { filename ->
-            if (filename == null) {
+        val annotationAllowedClassesFilter = options.annotationAllowedClassesFile.get.let { file ->
+            if (file == null) {
                 ClassFilter.newNullFilter(true) // Allow all classes
             } else {
-                ClassFilter.loadFromFile(filename, false)
+                ClassFilter.loadFromFile(file, false)
             }
         }
 
@@ -196,7 +195,7 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         // Next, "text based" filter, which allows to override polices without touching
         // the target code.
-        options.policyOverrideFile?.let {
+        options.policyOverrideFile.ifSet {
             filter = createFilterFromTextPolicyFile(it, allClasses, filter)
         }
 
@@ -211,11 +210,6 @@ class HostStubGen(val options: HostStubGenOptions) {
 
         // Apply the implicit filter.
         filter = ImplicitOutputFilter(errors, allClasses, filter)
-
-        // Optionally keep all classes.
-        if (options.keepAllClasses) {
-            filter = KeepAllClassesFilter(filter)
-        }
 
         return filter
     }
@@ -422,9 +416,9 @@ class HostStubGen(val options: HostStubGenOptions) {
             outVisitor = CheckClassAdapter(outVisitor)
         }
         val visitorOptions = BaseAdapter.Options(
-                enablePreTrace = options.enablePreTrace,
-                enablePostTrace = options.enablePostTrace,
-                enableNonStubMethodCallDetection = options.enableNonStubMethodCallDetection,
+                enablePreTrace = options.enablePreTrace.get,
+                enablePostTrace = options.enablePostTrace.get,
+                enableNonStubMethodCallDetection = options.enableNonStubMethodCallDetection.get,
                 errors = errors,
         )
         outVisitor = BaseAdapter.getVisitor(classInternalName, classes, outVisitor, filter,

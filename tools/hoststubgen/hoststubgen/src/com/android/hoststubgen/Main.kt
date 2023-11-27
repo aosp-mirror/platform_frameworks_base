@@ -28,9 +28,9 @@ fun main(args: Array<String>) {
     try {
         // Parse the command line arguments.
         val options = HostStubGenOptions.parseArgs(args)
-        clanupOnError = options.cleanUpOnError
+        clanupOnError = options.cleanUpOnError.get
 
-        log.level = options.logLevel
+        log.level = options.logLevel.get
 
         log.v("HostStubGen started")
         log.v("Options: $options")
