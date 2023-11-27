@@ -50,6 +50,9 @@ import android.util.SparseIntArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.AndroidPackageHidden;
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.AndroidPackageSplitImpl;
 import com.android.internal.pm.pkg.component.ParsedActivity;
 import com.android.internal.pm.pkg.component.ParsedApexSystemService;
@@ -64,6 +67,8 @@ import com.android.internal.pm.pkg.component.ParsedProcess;
 import com.android.internal.pm.pkg.component.ParsedProvider;
 import com.android.internal.pm.pkg.component.ParsedService;
 import com.android.internal.pm.pkg.component.ParsedUsesPermission;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackageHidden;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DataClass;
@@ -84,8 +89,6 @@ import com.android.server.pm.pkg.component.ParsedProcessImpl;
 import com.android.server.pm.pkg.component.ParsedProviderImpl;
 import com.android.server.pm.pkg.component.ParsedServiceImpl;
 import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageHidden;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.pkg.parsing.ParsingUtils;
 

@@ -29,7 +29,7 @@ import android.os.PatternMatcher
 import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
-import com.android.server.pm.parsing.pkg.AndroidPackageInternal
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
 import com.android.server.pm.pkg.component.ParsedActivityImpl

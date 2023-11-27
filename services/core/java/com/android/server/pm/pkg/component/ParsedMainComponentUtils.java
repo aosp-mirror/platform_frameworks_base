@@ -33,7 +33,7 @@ import android.util.Slog;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import org.xmlpull.v1.XmlPullParserException;

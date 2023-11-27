@@ -28,9 +28,9 @@ import android.util.ArraySet;
 
 import com.android.internal.R;
 import com.android.internal.pm.pkg.component.ParsedProcess;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.XmlUtils;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import org.xmlpull.v1.XmlPullParser;
