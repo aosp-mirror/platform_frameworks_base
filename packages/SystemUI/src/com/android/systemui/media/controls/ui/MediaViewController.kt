@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.res.Configuration
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT
 import com.android.app.tracing.traceSection
 import com.android.systemui.media.controls.models.GutsViewHolder
 import com.android.systemui.media.controls.models.player.MediaViewHolder
@@ -152,18 +153,11 @@ constructor(
                         lastOrientation = newOrientation
                         // Update the height of media controls for the expanded layout. it is needed
                         // for large screen devices.
-                        val backgroundIds =
-                            if (type == TYPE.PLAYER) {
-                                MediaViewHolder.backgroundIds
-                            } else {
-                                setOf(RecommendationViewHolder.backgroundId)
-                            }
-                        backgroundIds.forEach { id ->
-                            expandedLayout.getConstraint(id).layout.mHeight =
-                                context.resources.getDimensionPixelSize(
-                                    R.dimen.qs_media_session_height_expanded
-                                )
-                        }
+                        setBackgroundHeights(
+                            context.resources.getDimensionPixelSize(
+                                R.dimen.qs_media_session_height_expanded
+                            )
+                        )
                     }
                     if (this@MediaViewController::configurationChangeListener.isInitialized) {
                         configurationChangeListener.invoke()
@@ -275,6 +269,17 @@ constructor(
     /** Get the constraintSet for a given expansion */
     private fun constraintSetForExpansion(expansion: Float): ConstraintSet =
         if (expansion > 0) expandedLayout else collapsedLayout
+
+    /** Set the height of UMO background constraints. */
+    private fun setBackgroundHeights(height: Int) {
+        val backgroundIds =
+            if (type == TYPE.PLAYER) {
+                MediaViewHolder.backgroundIds
+            } else {
+                setOf(RecommendationViewHolder.backgroundId)
+            }
+        backgroundIds.forEach { id -> expandedLayout.getConstraint(id).layout.mHeight = height }
+    }
 
     /**
      * Set the views to be showing/hidden based on the [isGutsVisible] for a given
@@ -454,6 +459,18 @@ constructor(
         }
         // Let's create a new measurement
         if (state.expansion == 0.0f || state.expansion == 1.0f) {
+            if (state.expansion == 1.0f) {
+                val height =
+                    if (state.expandedMatchesParentHeight) {
+                        MATCH_CONSTRAINT
+                    } else {
+                        context.resources.getDimensionPixelSize(
+                            R.dimen.qs_media_session_height_expanded
+                        )
+                    }
+                setBackgroundHeights(height)
+            }
+
             result =
                 transitionLayout!!.calculateViewState(
                     state.measurementInput!!,
