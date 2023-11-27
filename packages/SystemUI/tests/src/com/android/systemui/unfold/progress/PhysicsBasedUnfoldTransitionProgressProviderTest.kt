@@ -15,9 +15,10 @@
  */
 package com.android.systemui.unfold.progress
 
+import android.os.Handler
+import android.os.HandlerThread
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import androidx.test.platform.app.InstrumentationRegistry
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_CLOSED
@@ -26,6 +27,8 @@ import com.android.systemui.unfold.updates.FOLD_UPDATE_FINISH_HALF_OPEN
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_CLOSING
 import com.android.systemui.unfold.updates.FOLD_UPDATE_START_OPENING
 import com.android.systemui.unfold.util.TestFoldStateProvider
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -37,16 +40,28 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
     private val foldStateProvider: TestFoldStateProvider = TestFoldStateProvider()
     private val listener = TestUnfoldProgressListener()
     private lateinit var progressProvider: UnfoldTransitionProgressProvider
+    private val schedulerFactory =
+        mock<UnfoldFrameCallbackScheduler.Factory>().apply {
+            whenever(create()).then { UnfoldFrameCallbackScheduler() }
+        }
+    private val mockBgHandler = mock<Handler>()
+    private val fakeHandler = Handler(HandlerThread("UnfoldBg").apply { start() }.looper)
 
     @Before
     fun setUp() {
-        progressProvider = PhysicsBasedUnfoldTransitionProgressProvider(context, foldStateProvider)
+        progressProvider =
+            PhysicsBasedUnfoldTransitionProgressProvider(
+                context,
+                schedulerFactory,
+                foldStateProvider = foldStateProvider,
+                progressHandler = fakeHandler
+            )
         progressProvider.addCallback(listener)
     }
 
     @Test
     fun testUnfold_emitsIncreasingTransitionEvents() {
-        runOnMainThreadWithInterval(
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
             { foldStateProvider.sendUnfoldedScreenAvailable() },
@@ -63,7 +78,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
     @Test
     fun testUnfold_emitsFinishingEvent() {
-        runOnMainThreadWithInterval(
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
             { foldStateProvider.sendUnfoldedScreenAvailable() },
@@ -77,7 +92,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
     @Test
     fun testUnfold_screenAvailableOnlyAfterFullUnfold_emitsIncreasingTransitionEvents() {
-        runOnMainThreadWithInterval(
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
@@ -94,7 +109,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
     @Test
     fun testFold_emitsDecreasingTransitionEvents() {
-        runOnMainThreadWithInterval(
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_CLOSING) },
             { foldStateProvider.sendHingeAngleUpdate(170f) },
             { foldStateProvider.sendHingeAngleUpdate(90f) },
@@ -110,7 +125,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
     @Test
     fun testUnfoldAndStopUnfolding_finishesTheUnfoldTransition() {
-        runOnMainThreadWithInterval(
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
             { foldStateProvider.sendUnfoldedScreenAvailable() },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
@@ -126,7 +141,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
     @Test
     fun testFoldImmediatelyAfterUnfold_runsFoldAnimation() {
-        runOnMainThreadWithInterval(
+        runOnProgressThreadWithInterval(
             { foldStateProvider.sendFoldUpdate(FOLD_UPDATE_START_OPENING) },
             { foldStateProvider.sendUnfoldedScreenAvailable() },
             { foldStateProvider.sendHingeAngleUpdate(10f) },
@@ -144,9 +159,12 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
         with(listener.ensureTransitionFinished()) { assertHasFoldAnimationAtTheEnd() }
     }
 
-    private fun runOnMainThreadWithInterval(vararg blocks: () -> Unit, intervalMillis: Long = 60) {
+    private fun runOnProgressThreadWithInterval(
+        vararg blocks: () -> Unit,
+        intervalMillis: Long = 60,
+    ) {
         blocks.forEach {
-            InstrumentationRegistry.getInstrumentation().runOnMainSync { it() }
+            fakeHandler.post(it)
             Thread.sleep(intervalMillis)
         }
     }
