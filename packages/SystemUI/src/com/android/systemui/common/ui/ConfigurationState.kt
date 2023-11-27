@@ -31,8 +31,10 @@ import com.android.systemui.statusbar.policy.onThemeChanged
 import com.android.systemui.util.kotlin.emitOnStart
 import com.android.systemui.util.view.bindLatest
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 
@@ -95,7 +97,8 @@ constructor(
  * call [onInflate] on the resulting view each time. Disposes of the [DisposableHandle] returned by
  * [onInflate] when done.
  *
- * This never completes unless cancelled, it just suspends and waits for updates.
+ * This never completes unless cancelled, it just suspends and waits for updates. It runs on a
+ * background thread using [backgroundDispatcher].
  *
  * For parameters [resource], [root] and [attachToRoot], see [LayoutInflater.inflate].
  *
@@ -105,7 +108,7 @@ constructor(
  * ```
  * parentView.repeatWhenAttached {
  *     configurationState
- *         .reinflateOnChange(
+ *         .reinflateAndBindLatest(
  *             R.layout.my_layout,
  *             parentView,
  *             attachToRoot = false,
@@ -124,7 +127,10 @@ suspend fun <T : View> ConfigurationState.reinflateAndBindLatest(
     @LayoutRes resource: Int,
     root: ViewGroup?,
     attachToRoot: Boolean,
+    backgroundDispatcher: CoroutineDispatcher,
     onInflate: (T) -> DisposableHandle?,
 ) {
-    inflateLayout<T>(resource, root, attachToRoot).bindLatest(onInflate)
+    inflateLayout<T>(resource, root, attachToRoot)
+        .flowOn(backgroundDispatcher)
+        .bindLatest(onInflate)
 }
