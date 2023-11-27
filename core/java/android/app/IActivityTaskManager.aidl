@@ -328,7 +328,7 @@ interface IActivityTaskManager {
      * A splash screen view has copied.
      */
     void onSplashScreenViewCopyFinished(int taskId,
-            in SplashScreenView.SplashScreenViewParcelable material);
+            in @nullable SplashScreenView.SplashScreenViewParcelable material);
 
     /**
      * When the Picture-in-picture state has changed.
