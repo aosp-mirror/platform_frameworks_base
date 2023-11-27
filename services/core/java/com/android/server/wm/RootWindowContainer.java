@@ -2171,12 +2171,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     // now, it will take focus briefly which confuses the RecentTasks tracker.
                     rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
                 }
-
+                // Temporarily disable focus when reparenting to avoid intermediate focus change
+                // (because the task is on top and the activity is resumed), which could cause the
+                // task to be added in recents task list unexpectedly.
+                rootTask.setFocusable(false);
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
                 // On the other hand, ActivityRecord#onParentChanged takes care of setting the
                 // up-to-dated root pinned task information on this newly created root task.
                 r.reparent(rootTask, MAX_VALUE, reason);
+                rootTask.setFocusable(true);
 
                 // Ensure the leash of new task is in sync with its current bounds after reparent.
                 rootTask.maybeApplyLastRecentsAnimationTransaction();
