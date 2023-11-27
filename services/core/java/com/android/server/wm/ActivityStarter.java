@@ -1567,6 +1567,7 @@ class ActivityStarter {
                 // An activity has changed order/visibility or the task is occluded by a transient
                 // activity, so this isn't just deliver-to-top
                 && mMovedToTopActivity == null
+                && !transitionController.hasOrderChanges()
                 && !transitionController.isTransientHide(startedActivityRootTask)) {
             // We just delivered to top, so there isn't an actual transition here.
             if (!forceTransientTransition) {

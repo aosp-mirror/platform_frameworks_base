@@ -792,6 +792,12 @@ class TransitionController {
         mCollectingTransition.recordTaskOrder(wc);
     }
 
+    /** @see Transition#hasOrderChanges */
+    boolean hasOrderChanges() {
+        if (mCollectingTransition == null) return false;
+        return mCollectingTransition.hasOrderChanges();
+    }
+
     /**
      * Collects the window containers which need to be synced with the changing display area into
      * the current collecting transition.
