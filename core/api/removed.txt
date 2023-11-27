@@ -30,20 +30,6 @@ package android.app {
 
 }
 
-package android.app.usage {
-
-  public class StorageStatsManager {
-    method @Deprecated public long getFreeBytes(String) throws java.io.IOException;
-    method @Deprecated public long getTotalBytes(String) throws java.io.IOException;
-    method @Deprecated public boolean isQuotaSupported(String);
-    method @Deprecated public android.app.usage.ExternalStorageStats queryExternalStatsForUser(String, android.os.UserHandle) throws java.io.IOException;
-    method @Deprecated public android.app.usage.StorageStats queryStatsForPackage(String, String, android.os.UserHandle) throws java.io.IOException, android.content.pm.PackageManager.NameNotFoundException;
-    method @Deprecated public android.app.usage.StorageStats queryStatsForUid(String, int) throws java.io.IOException;
-    method @Deprecated public android.app.usage.StorageStats queryStatsForUser(String, android.os.UserHandle) throws java.io.IOException;
-  }
-
-}
-
 package android.content {
 
   public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
