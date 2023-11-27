@@ -47,34 +47,37 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Adapter to convert AIDL-specific interface {@link ISession} methods to HIDL implementation.
+ * Adapter to convert HIDL methods into AIDL interface {@link ISession}.
  */
-public class AidlToHidlAdapter implements ISession {
+public class HidlToAidlSessionAdapter implements ISession {
 
-    private final String TAG = "AidlToHidlAdapter";
+    private static final String TAG = "HidlToAidlSessionAdapter";
+
     private static final int CHALLENGE_TIMEOUT_SEC = 600;
     @DurationMillisLong
     private static final int GENERATE_CHALLENGE_REUSE_INTERVAL_MILLIS = 60 * 1000;
     @DurationMillisLong
     private static final int GENERATE_CHALLENGE_COUNTER_TTL_MILLIS = CHALLENGE_TIMEOUT_SEC * 1000;
     private static final int INVALID_VALUE = -1;
+    @VisibleForTesting static final int ENROLL_TIMEOUT_SEC = 75;
+
     private final Clock mClock;
     private final List<Long> mGeneratedChallengeCount = new ArrayList<>();
-    @VisibleForTesting static final int ENROLL_TIMEOUT_SEC = 75;
+    private final int mUserId;
+    private final Context mContext;
+
     private long mGenerateChallengeCreatedAt = INVALID_VALUE;
     private long mGenerateChallengeResult = INVALID_VALUE;
     @NonNull private Supplier<IBiometricsFace> mSession;
-    private final int mUserId;
     private HidlToAidlCallbackConverter mHidlToAidlCallbackConverter;
-    private final Context mContext;
     private int mFeature = INVALID_VALUE;
 
-    public AidlToHidlAdapter(Context context, Supplier<IBiometricsFace> session,
+    public HidlToAidlSessionAdapter(Context context, Supplier<IBiometricsFace> session,
             int userId, AidlResponseHandler aidlResponseHandler) {
         this(context, session, userId, aidlResponseHandler, Clock.systemUTC());
     }
 
-    AidlToHidlAdapter(Context context, Supplier<IBiometricsFace> session, int userId,
+    HidlToAidlSessionAdapter(Context context, Supplier<IBiometricsFace> session, int userId,
             AidlResponseHandler aidlResponseHandler, Clock clock) {
         mSession = session;
         mUserId = userId;
@@ -83,40 +86,9 @@ public class AidlToHidlAdapter implements ISession {
         setCallback(aidlResponseHandler);
     }
 
-    private void setCallback(AidlResponseHandler aidlResponseHandler) {
-        mHidlToAidlCallbackConverter = new HidlToAidlCallbackConverter(aidlResponseHandler);
-        try {
-            mSession.get().setCallback(mHidlToAidlCallbackConverter);
-        } catch (RemoteException e) {
-            Slog.d(TAG, "Failed to set callback");
-        }
-    }
-
     @Override
     public IBinder asBinder() {
         return null;
-    }
-
-    private boolean isGeneratedChallengeCacheValid() {
-        return mGenerateChallengeCreatedAt != INVALID_VALUE
-                && mGenerateChallengeResult != INVALID_VALUE
-                && mClock.millis() - mGenerateChallengeCreatedAt
-                < GENERATE_CHALLENGE_REUSE_INTERVAL_MILLIS;
-    }
-
-    private void incrementChallengeCount() {
-        mGeneratedChallengeCount.add(0, mClock.millis());
-    }
-
-    private int decrementChallengeCount() {
-        final long now = mClock.millis();
-        // ignore values that are old in case generate/revoke calls are not matched
-        // this doesn't ensure revoke if calls are mismatched but it keeps the list from growing
-        mGeneratedChallengeCount.removeIf(x -> now - x > GENERATE_CHALLENGE_COUNTER_TTL_MILLIS);
-        if (!mGeneratedChallengeCount.isEmpty()) {
-            mGeneratedChallengeCount.remove(0);
-        }
-        return mGeneratedChallengeCount.size();
     }
 
     @Override
@@ -150,7 +122,7 @@ public class AidlToHidlAdapter implements ISession {
 
     @Override
     public EnrollmentStageConfig[] getEnrollmentConfig(byte enrollmentType) throws RemoteException {
-        //unsupported in HIDL
+        Slog.e(TAG, "getEnrollmentConfig unsupported in HIDL");
         return null;
     }
 
@@ -244,19 +216,6 @@ public class AidlToHidlAdapter implements ISession {
         }
     }
 
-    private int getFaceId() {
-        FaceManager faceManager = mContext.getSystemService(FaceManager.class);
-        List<Face> faces = faceManager.getEnrolledFaces(mUserId);
-        if (faces.isEmpty()) {
-            Slog.d(TAG, "No faces to get feature from.");
-            mHidlToAidlCallbackConverter.onError(0 /* deviceId */, mUserId,
-                    BiometricFaceConstants.FACE_ERROR_NOT_ENROLLED, 0 /* vendorCode */);
-            return INVALID_VALUE;
-        }
-
-        return faces.get(0).getBiometricId();
-    }
-
     @Override
     public void getAuthenticatorId() throws RemoteException {
         long authenticatorId = mSession.get().getAuthenticatorId().value;
@@ -265,7 +224,8 @@ public class AidlToHidlAdapter implements ISession {
 
     @Override
     public void invalidateAuthenticatorId() throws RemoteException {
-        //unsupported in HIDL
+        Slog.e(TAG, "invalidateAuthenticatorId unsupported in HIDL");
+        mHidlToAidlCallbackConverter.onUnsupportedClientScheduled();
     }
 
     @Override
@@ -279,45 +239,103 @@ public class AidlToHidlAdapter implements ISession {
 
     @Override
     public void close() throws RemoteException {
-        //Unsupported in HIDL
+        Slog.e(TAG, "close unsupported in HIDL");
     }
 
     @Override
     public ICancellationSignal authenticateWithContext(long operationId, OperationContext context)
             throws RemoteException {
-        //Unsupported in HIDL
-        return null;
+        Slog.e(TAG, "authenticateWithContext unsupported in HIDL");
+        return authenticate(operationId);
     }
 
     @Override
     public ICancellationSignal enrollWithContext(HardwareAuthToken hat, byte type, byte[] features,
             NativeHandle previewSurface, OperationContext context) throws RemoteException {
-        //Unsupported in HIDL
-        return null;
+        Slog.e(TAG, "enrollWithContext unsupported in HIDL");
+        return enroll(hat, type, features, previewSurface);
     }
 
     @Override
     public ICancellationSignal detectInteractionWithContext(OperationContext context)
             throws RemoteException {
-        //Unsupported in HIDL
-        return null;
+        Slog.e(TAG, "detectInteractionWithContext unsupported in HIDL");
+        return detectInteraction();
     }
 
     @Override
     public void onContextChanged(OperationContext context) throws RemoteException {
-        //Unsupported in HIDL
+        Slog.e(TAG, "onContextChanged unsupported in HIDL");
     }
 
     @Override
     public int getInterfaceVersion() throws RemoteException {
-        //Unsupported in HIDL
+        Slog.e(TAG, "getInterfaceVersion unsupported in HIDL");
         return 0;
     }
 
     @Override
     public String getInterfaceHash() throws RemoteException {
+        Slog.e(TAG, "getInterfaceHash unsupported in HIDL");
+        return null;
+    }
+
+    @Override
+    public ICancellationSignal enrollWithOptions(FaceEnrollOptions options) {
         //Unsupported in HIDL
         return null;
+    }
+
+    private boolean isGeneratedChallengeCacheValid() {
+        return mGenerateChallengeCreatedAt != INVALID_VALUE
+                && mGenerateChallengeResult != INVALID_VALUE
+                && mClock.millis() - mGenerateChallengeCreatedAt
+                < GENERATE_CHALLENGE_REUSE_INTERVAL_MILLIS;
+    }
+
+    private void incrementChallengeCount() {
+        mGeneratedChallengeCount.add(0, mClock.millis());
+    }
+
+    private int decrementChallengeCount() {
+        final long now = mClock.millis();
+        // ignore values that are old in case generate/revoke calls are not matched
+        // this doesn't ensure revoke if calls are mismatched but it keeps the list from growing
+        mGeneratedChallengeCount.removeIf(x -> now - x > GENERATE_CHALLENGE_COUNTER_TTL_MILLIS);
+        if (!mGeneratedChallengeCount.isEmpty()) {
+            mGeneratedChallengeCount.remove(0);
+        }
+        return mGeneratedChallengeCount.size();
+    }
+
+    private void setCallback(AidlResponseHandler aidlResponseHandler) {
+        mHidlToAidlCallbackConverter = new HidlToAidlCallbackConverter(aidlResponseHandler);
+        try {
+            if (mSession.get() != null) {
+                long halId = mSession.get().setCallback(mHidlToAidlCallbackConverter).value;
+                Slog.d(TAG, "Face HAL ready, HAL ID: " + halId);
+                if (halId == 0) {
+                    Slog.d(TAG, "Unable to set HIDL callback.");
+                }
+            } else {
+                Slog.e(TAG, "Unable to set HIDL callback. HIDL daemon is null.");
+            }
+        } catch (RemoteException e) {
+            Slog.d(TAG, "Failed to set callback");
+        }
+    }
+
+    private int getFaceId() {
+        FaceManager faceManager = mContext.getSystemService(FaceManager.class);
+        List<Face> faces = faceManager.getEnrolledFaces(mUserId);
+        if (faces.isEmpty()) {
+            Slog.d(TAG, "No faces to get feature from.");
+            mHidlToAidlCallbackConverter.onError(0 /* deviceId */, mUserId,
+                    BiometricFaceConstants.FACE_ERROR_NOT_ENROLLED, 0 /* vendorCode */);
+            return INVALID_VALUE;
+        }
+
+        return faces.get(0).getBiometricId();
     }
 
     /**
@@ -344,11 +362,5 @@ public class AidlToHidlAdapter implements ISession {
         public String getInterfaceHash() throws RemoteException {
             return null;
         }
-    }
-
-    @Override
-    public ICancellationSignal enrollWithOptions(FaceEnrollOptions options) {
-        //Unsupported in HIDL
-        return null;
     }
 }

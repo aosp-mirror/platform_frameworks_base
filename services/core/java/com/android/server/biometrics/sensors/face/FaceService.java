@@ -36,6 +36,7 @@ import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
 import android.hardware.face.Face;
 import android.hardware.face.FaceAuthenticateOptions;
+import android.hardware.face.FaceSensorConfigurations;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.face.FaceServiceReceiver;
 import android.hardware.face.IFaceAuthenticatorsRegisteredCallback;
@@ -55,6 +56,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 import android.view.Surface;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.SystemService;
@@ -76,6 +78,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * A service to manage multiple clients that want to access the face HAL API.
@@ -86,7 +89,7 @@ public class FaceService extends SystemService {
 
     protected static final String TAG = "FaceService";
 
-    private final FaceServiceWrapper mServiceWrapper;
+    @VisibleForTesting final FaceServiceWrapper mServiceWrapper;
     private final LockoutResetDispatcher mLockoutResetDispatcher;
     private final LockPatternUtils mLockPatternUtils;
     @NonNull
@@ -94,11 +97,18 @@ public class FaceService extends SystemService {
     @NonNull
     private final BiometricStateCallback<ServiceProvider, FaceSensorPropertiesInternal>
             mBiometricStateCallback;
+    @NonNull
+    private final FaceProviderFunction mFaceProviderFunction;
+
+    interface FaceProviderFunction {
+        FaceProvider getFaceProvider(Pair<String, SensorProps[]> filteredSensorProps,
+                boolean resetLockoutRequiresChallenge);
+    }
 
     /**
      * Receives the incoming binder calls from FaceManager.
      */
-    private final class FaceServiceWrapper extends IFaceService.Stub {
+    @VisibleForTesting final class FaceServiceWrapper extends IFaceService.Stub {
         @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
         @Override
         public ITestSession createTestSession(int sensorId, @NonNull ITestSessionCallback callback,
@@ -672,7 +682,8 @@ public class FaceService extends SystemService {
                     final SensorProps[] props = face.getSensorProps();
                     final FaceProvider provider = new FaceProvider(getContext(),
                             mBiometricStateCallback, props, instance, mLockoutResetDispatcher,
-                            BiometricContext.getInstance(getContext()));
+                            BiometricContext.getInstance(getContext()),
+                            false /* resetLockoutRequiresChallenge */);
                     providers.add(provider);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Remote exception in getSensorProps: " + fqName);
@@ -702,6 +713,55 @@ public class FaceService extends SystemService {
                 providers.addAll(getAidlProviders(filteredInstances.second));
                 return providers;
             });
+        }
+
+        @android.annotation.EnforcePermission(android.Manifest.permission.USE_BIOMETRIC_INTERNAL)
+        public void registerAuthenticatorsLegacy(
+                FaceSensorConfigurations faceSensorConfigurations) {
+            super.registerAuthenticatorsLegacy_enforcePermission();
+
+            if (!faceSensorConfigurations.hasSensorConfigurations()) {
+                Slog.d(TAG, "No face sensors to register.");
+                return;
+            }
+            mRegistry.registerAll(() -> getProviders(faceSensorConfigurations));
+        }
+
+        private List<ServiceProvider> getProviders(
+                FaceSensorConfigurations faceSensorConfigurations) {
+            final List<ServiceProvider> providers = new ArrayList<>();
+            final Pair<String, SensorProps[]> filteredSensorProps =
+                    filterAvailableHalInstances(faceSensorConfigurations);
+            providers.add(mFaceProviderFunction.getFaceProvider(filteredSensorProps,
+                    faceSensorConfigurations.getResetLockoutRequiresChallenge()));
+            return providers;
+        }
+
+        @NonNull
+        private Pair<String, SensorProps[]> filterAvailableHalInstances(
+                FaceSensorConfigurations faceSensorConfigurations) {
+            Pair<String, SensorProps[]> finalSensorPair = faceSensorConfigurations.getSensorPair();
+
+            if (faceSensorConfigurations.isSingleSensorConfigurationPresent()) {
+                return finalSensorPair;
+            }
+
+            final Pair<String, SensorProps[]> virtualSensorProps = faceSensorConfigurations
+                    .getSensorPairForInstance("virtual");
+
+            if (Utils.isVirtualEnabled(getContext())) {
+                if (virtualSensorProps != null) {
+                    return virtualSensorProps;
+                } else {
+                    Slog.e(TAG, "Could not find virtual interface while it is enabled");
+                    return finalSensorPair;
+                }
+            } else {
+                if (virtualSensorProps != null) {
+                    return faceSensorConfigurations.getSensorPairNotForInstance("virtual");
+                }
+            }
+            return finalSensorPair;
         }
 
         private Pair<List<FaceSensorPropertiesInternal>, List<String>>
@@ -752,20 +812,36 @@ public class FaceService extends SystemService {
     }
 
     public FaceService(Context context) {
+        this(context, null /* faceProviderFunction */, () -> IBiometricService.Stub.asInterface(
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE)));
+    }
+
+    @VisibleForTesting FaceService(Context context, FaceProviderFunction faceProviderFunction,
+            Supplier<IBiometricService> biometricServiceSupplier) {
         super(context);
         mServiceWrapper = new FaceServiceWrapper();
         mLockoutResetDispatcher = new LockoutResetDispatcher(context);
         mLockPatternUtils = new LockPatternUtils(context);
         mBiometricStateCallback = new BiometricStateCallback<>(UserManager.get(context));
-        mRegistry = new FaceServiceRegistry(mServiceWrapper,
-                () -> IBiometricService.Stub.asInterface(
-                        ServiceManager.getService(Context.BIOMETRIC_SERVICE)));
+        mRegistry = new FaceServiceRegistry(mServiceWrapper, biometricServiceSupplier);
         mRegistry.addAllRegisteredCallback(new IFaceAuthenticatorsRegisteredCallback.Stub() {
             @Override
             public void onAllAuthenticatorsRegistered(List<FaceSensorPropertiesInternal> sensors) {
                 mBiometricStateCallback.start(mRegistry.getProviders());
             }
         });
+
+        if (Flags.deHidl()) {
+            mFaceProviderFunction = faceProviderFunction != null ? faceProviderFunction :
+                    ((filteredSensorProps, resetLockoutRequiresChallenge) -> new FaceProvider(
+                            getContext(), mBiometricStateCallback,
+                            filteredSensorProps.second,
+                            filteredSensorProps.first, mLockoutResetDispatcher,
+                            BiometricContext.getInstance(getContext()),
+                            resetLockoutRequiresChallenge));
+        } else {
+            mFaceProviderFunction = ((filteredSensorProps, resetLockoutRequiresChallenge) -> null);
+        }
     }
 
     @Override

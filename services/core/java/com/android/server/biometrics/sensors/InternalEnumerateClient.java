@@ -54,8 +54,6 @@ public abstract class InternalEnumerateClient<T> extends HalClientMonitor<T>
         // is all done internally.
         super(context, lazyDaemon, token, null /* ClientMonitorCallbackConverter */, userId, owner,
                 0 /* cookie */, sensorId, logger, biometricContext);
-        //, BiometricsProtoEnums.ACTION_ENUMERATE,
-          //      BiometricsProtoEnums.CLIENT_UNKNOWN);
         mEnrolledList = enrolledList;
         mUtils = utils;
     }

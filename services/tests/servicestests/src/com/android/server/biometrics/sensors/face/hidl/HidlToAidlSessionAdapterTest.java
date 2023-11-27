@@ -16,7 +16,7 @@
 
 package com.android.server.biometrics.sensors.face.hidl;
 
-import static com.android.server.biometrics.sensors.face.hidl.AidlToHidlAdapter.ENROLL_TIMEOUT_SEC;
+import static com.android.server.biometrics.sensors.face.hidl.HidlToAidlSessionAdapter.ENROLL_TIMEOUT_SEC;
 import static com.android.server.biometrics.sensors.face.hidl.FaceGenerateChallengeClient.CHALLENGE_TIMEOUT_SEC;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -68,7 +68,7 @@ import java.util.List;
 
 @Presubmit
 @SmallTest
-public class AidlToHidlAdapterTest {
+public class HidlToAidlSessionAdapterTest {
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
 
@@ -84,25 +84,32 @@ public class AidlToHidlAdapterTest {
     private Clock mClock;
 
     private final long mChallenge = 100L;
-    private AidlToHidlAdapter mAidlToHidlAdapter;
+    private HidlToAidlSessionAdapter mHidlToAidlSessionAdapter;
     private final Face mFace = new Face("face" /* name */, 1 /* faceId */, 0 /* deviceId */);
     private final int mFeature = BiometricFaceConstants.FEATURE_REQUIRE_REQUIRE_DIVERSITY;
     private final byte[] mFeatures = new byte[]{Feature.REQUIRE_ATTENTION};
 
     @Before
     public void setUp() throws RemoteException {
+        final OptionalUint64 setCallbackResult = new OptionalUint64();
+        setCallbackResult.value = 1;
+
+        when(mSession.setCallback(any())).thenReturn(setCallbackResult);
+
         TestableContext testableContext = new TestableContext(
                 InstrumentationRegistry.getInstrumentation().getContext());
         testableContext.addMockSystemService(FaceManager.class, mFaceManager);
-        mAidlToHidlAdapter = new AidlToHidlAdapter(testableContext, () -> mSession, 0 /* userId */,
-                mAidlResponseHandler, mClock);
+
+        mHidlToAidlSessionAdapter = new HidlToAidlSessionAdapter(testableContext, () -> mSession,
+                0 /* userId */, mAidlResponseHandler, mClock);
         mHardwareAuthToken.timestamp = new Timestamp();
         mHardwareAuthToken.mac = new byte[10];
-        final OptionalUint64 result = new OptionalUint64();
-        result.status = Status.OK;
-        result.value = mChallenge;
 
-        when(mSession.generateChallenge(anyInt())).thenReturn(result);
+        final OptionalUint64 generateChallengeResult = new OptionalUint64();
+        generateChallengeResult.status = Status.OK;
+        generateChallengeResult.value = mChallenge;
+
+        when(mSession.generateChallenge(anyInt())).thenReturn(generateChallengeResult);
         when(mFaceManager.getEnrolledFaces(anyInt())).thenReturn(List.of(mFace));
     }
 
@@ -112,16 +119,16 @@ public class AidlToHidlAdapterTest {
 
         final ArgumentCaptor<Long> challengeCaptor = ArgumentCaptor.forClass(Long.class);
 
-        mAidlToHidlAdapter.generateChallenge();
+        mHidlToAidlSessionAdapter.generateChallenge();
 
         verify(mSession).generateChallenge(CHALLENGE_TIMEOUT_SEC);
         verify(mAidlResponseHandler).onChallengeGenerated(challengeCaptor.capture());
         assertThat(challengeCaptor.getValue()).isEqualTo(mChallenge);
 
         forwardTime(10 /* seconds */);
-        mAidlToHidlAdapter.generateChallenge();
+        mHidlToAidlSessionAdapter.generateChallenge();
         forwardTime(20 /* seconds */);
-        mAidlToHidlAdapter.generateChallenge();
+        mHidlToAidlSessionAdapter.generateChallenge();
 
         //Confirms that the challenge is cached and the hal method is not called again
         verifyNoMoreInteractions(mSession);
@@ -129,7 +136,7 @@ public class AidlToHidlAdapterTest {
                 .onChallengeGenerated(mChallenge);
 
         forwardTime(60 /* seconds */);
-        mAidlToHidlAdapter.generateChallenge();
+        mHidlToAidlSessionAdapter.generateChallenge();
 
         //HAL method called after challenge has timed out
         verify(mSession, times(2)).generateChallenge(CHALLENGE_TIMEOUT_SEC);
@@ -138,11 +145,11 @@ public class AidlToHidlAdapterTest {
     @Test
     public void testRevokeChallenge_waitsUntilEmpty() throws RemoteException {
         for (int i = 0; i < 3; i++) {
-            mAidlToHidlAdapter.generateChallenge();
+            mHidlToAidlSessionAdapter.generateChallenge();
             forwardTime(10 /* seconds */);
         }
         for (int i = 0; i < 3; i++) {
-            mAidlToHidlAdapter.revokeChallenge(0);
+            mHidlToAidlSessionAdapter.revokeChallenge(0);
             forwardTime((i + 1) * 10 /* seconds */);
         }
 
@@ -151,20 +158,19 @@ public class AidlToHidlAdapterTest {
 
     @Test
     public void testRevokeChallenge_timeout() throws RemoteException {
-        mAidlToHidlAdapter.generateChallenge();
-        mAidlToHidlAdapter.generateChallenge();
+        mHidlToAidlSessionAdapter.generateChallenge();
+        mHidlToAidlSessionAdapter.generateChallenge();
         forwardTime(700);
-        mAidlToHidlAdapter.generateChallenge();
-        mAidlToHidlAdapter.revokeChallenge(0);
+        mHidlToAidlSessionAdapter.generateChallenge();
+        mHidlToAidlSessionAdapter.revokeChallenge(0);
 
         verify(mSession).revokeChallenge();
     }
 
     @Test
     public void testEnroll() throws RemoteException {
-        ICancellationSignal cancellationSignal = mAidlToHidlAdapter.enroll(mHardwareAuthToken,
-                EnrollmentType.DEFAULT, mFeatures,
-                null /* previewSurface */);
+        ICancellationSignal cancellationSignal = mHidlToAidlSessionAdapter.enroll(
+                mHardwareAuthToken, EnrollmentType.DEFAULT, mFeatures, null /* previewSurface */);
         ArgumentCaptor<ArrayList<Integer>> featureCaptor = ArgumentCaptor.forClass(ArrayList.class);
 
         verify(mSession).enroll(any(), eq(ENROLL_TIMEOUT_SEC), featureCaptor.capture());
@@ -182,7 +188,8 @@ public class AidlToHidlAdapterTest {
     @Test
     public void testAuthenticate() throws RemoteException {
         final int operationId = 2;
-        ICancellationSignal cancellationSignal = mAidlToHidlAdapter.authenticate(operationId);
+        ICancellationSignal cancellationSignal = mHidlToAidlSessionAdapter.authenticate(
+                operationId);
 
         verify(mSession).authenticate(operationId);
 
@@ -193,7 +200,7 @@ public class AidlToHidlAdapterTest {
 
     @Test
     public void testDetectInteraction() throws RemoteException {
-        ICancellationSignal cancellationSignal = mAidlToHidlAdapter.detectInteraction();
+        ICancellationSignal cancellationSignal = mHidlToAidlSessionAdapter.detectInteraction();
 
         verify(mSession).authenticate(0);
 
@@ -204,7 +211,7 @@ public class AidlToHidlAdapterTest {
 
     @Test
     public void testEnumerateEnrollments() throws RemoteException {
-        mAidlToHidlAdapter.enumerateEnrollments();
+        mHidlToAidlSessionAdapter.enumerateEnrollments();
 
         verify(mSession).enumerate();
     }
@@ -212,7 +219,7 @@ public class AidlToHidlAdapterTest {
     @Test
     public void testRemoveEnrollment() throws RemoteException {
         final int[] enrollments = new int[]{1};
-        mAidlToHidlAdapter.removeEnrollments(enrollments);
+        mHidlToAidlSessionAdapter.removeEnrollments(enrollments);
 
         verify(mSession).remove(enrollments[0]);
     }
@@ -226,8 +233,8 @@ public class AidlToHidlAdapterTest {
 
         when(mSession.getFeature(eq(mFeature), anyInt())).thenReturn(result);
 
-        mAidlToHidlAdapter.setFeature(mFeature);
-        mAidlToHidlAdapter.getFeatures();
+        mHidlToAidlSessionAdapter.setFeature(mFeature);
+        mHidlToAidlSessionAdapter.getFeatures();
 
         verify(mSession).getFeature(eq(mFeature), anyInt());
         verify(mAidlResponseHandler).onFeaturesRetrieved(featureRetrieved.capture());
@@ -244,8 +251,8 @@ public class AidlToHidlAdapterTest {
 
         when(mSession.getFeature(eq(mFeature), anyInt())).thenReturn(result);
 
-        mAidlToHidlAdapter.setFeature(mFeature);
-        mAidlToHidlAdapter.getFeatures();
+        mHidlToAidlSessionAdapter.setFeature(mFeature);
+        mHidlToAidlSessionAdapter.getFeatures();
 
         verify(mSession).getFeature(eq(mFeature), anyInt());
         verify(mAidlResponseHandler).onFeaturesRetrieved(featureRetrieved.capture());
@@ -260,8 +267,8 @@ public class AidlToHidlAdapterTest {
 
         when(mSession.getFeature(eq(mFeature), anyInt())).thenReturn(result);
 
-        mAidlToHidlAdapter.setFeature(mFeature);
-        mAidlToHidlAdapter.getFeatures();
+        mHidlToAidlSessionAdapter.setFeature(mFeature);
+        mHidlToAidlSessionAdapter.getFeatures();
 
         verify(mSession).getFeature(eq(mFeature), anyInt());
         verify(mAidlResponseHandler, never()).onFeaturesRetrieved(any());
@@ -270,7 +277,7 @@ public class AidlToHidlAdapterTest {
 
     @Test
     public void testGetFeatures_featureNotSet() throws RemoteException {
-        mAidlToHidlAdapter.getFeatures();
+        mHidlToAidlSessionAdapter.getFeatures();
 
         verify(mSession, never()).getFeature(eq(mFeature), anyInt());
         verify(mAidlResponseHandler, never()).onFeaturesRetrieved(any());
@@ -283,7 +290,7 @@ public class AidlToHidlAdapterTest {
 
         when(mSession.setFeature(anyInt(), anyBoolean(), any(), anyInt())).thenReturn(Status.OK);
 
-        mAidlToHidlAdapter.setFeature(mHardwareAuthToken, feature, enabled);
+        mHidlToAidlSessionAdapter.setFeature(mHardwareAuthToken, feature, enabled);
 
         verify(mAidlResponseHandler).onFeatureSet(feature);
     }
@@ -296,7 +303,7 @@ public class AidlToHidlAdapterTest {
         when(mSession.setFeature(anyInt(), anyBoolean(), any(), anyInt()))
                 .thenReturn(Status.INTERNAL_ERROR);
 
-        mAidlToHidlAdapter.setFeature(mHardwareAuthToken, feature, enabled);
+        mHidlToAidlSessionAdapter.setFeature(mHardwareAuthToken, feature, enabled);
 
         verify(mAidlResponseHandler).onError(BiometricFaceConstants.FACE_ERROR_UNKNOWN,
                 0 /* vendorCode */);
@@ -311,7 +318,7 @@ public class AidlToHidlAdapterTest {
 
         when(mSession.getAuthenticatorId()).thenReturn(result);
 
-        mAidlToHidlAdapter.getAuthenticatorId();
+        mHidlToAidlSessionAdapter.getAuthenticatorId();
 
         verify(mSession).getAuthenticatorId();
         verify(mAidlResponseHandler).onAuthenticatorIdRetrieved(authenticatorId);
@@ -319,7 +326,7 @@ public class AidlToHidlAdapterTest {
 
     @Test
     public void testResetLockout() throws RemoteException {
-        mAidlToHidlAdapter.resetLockout(mHardwareAuthToken);
+        mHidlToAidlSessionAdapter.resetLockout(mHardwareAuthToken);
 
         ArgumentCaptor<ArrayList> hatCaptor = ArgumentCaptor.forClass(ArrayList.class);
 
