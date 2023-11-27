@@ -71,7 +71,7 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
         // Not implemented because upgrades are handled automatically.
     }
 
-    override fun getNonDefaultUidModes(uid: Int): SparseIntArray {
+    override fun getNonDefaultUidModes(uid: Int, persistentDeviceId: String): SparseIntArray {
         return opNameMapToOpSparseArray(getUidModes(uid))
     }
 
@@ -79,7 +79,7 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
         return opNameMapToOpSparseArray(getPackageModes(packageName, userId))
     }
 
-    override fun getUidMode(uid: Int, op: Int): Int {
+    override fun getUidMode(uid: Int, persistentDeviceId: String, op: Int): Int {
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
         val opName = AppOpsManager.opToPublicName(op)
@@ -92,7 +92,7 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
         return service.getState { with(appIdPolicy) { getAppOpModes(appId, userId) } }?.map
     }
 
-    override fun setUidMode(uid: Int, op: Int, mode: Int): Boolean {
+    override fun setUidMode(uid: Int, persistentDeviceId: String, op: Int, mode: Int): Boolean {
         val appId = UserHandle.getAppId(uid)
         val userId = UserHandle.getUserId(uid)
         val opName = AppOpsManager.opToPublicName(op)
@@ -150,7 +150,7 @@ class AppOpService(private val service: AccessCheckingService) : AppOpsCheckingS
         // and we have our own persistence.
     }
 
-    override fun getForegroundOps(uid: Int): SparseBooleanArray {
+    override fun getForegroundOps(uid: Int, persistentDeviceId: String): SparseBooleanArray {
         return SparseBooleanArray().apply {
             getUidModes(uid)?.forEachIndexed { _, op, mode ->
                 if (mode == AppOpsManager.MODE_FOREGROUND) {

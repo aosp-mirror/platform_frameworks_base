@@ -19,6 +19,7 @@ package com.android.server.appop;
 import static android.app.AppOpsManager.OP_SCHEDULE_EXACT_ALARM;
 import static android.app.AppOpsManager.OP_USE_FULL_SCREEN_INTENT;
 import static android.app.AppOpsManager._NUM_OP;
+import static android.companion.virtual.VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -208,8 +209,8 @@ public class AppOpsUpgradeTest {
     private void assertSameModes(AppOpsCheckingServiceImpl testService, int op1, int op2) {
         for (int uid : testService.getUidsWithNonDefaultModes()) {
             assertEquals(
-                    testService.getUidMode(uid, op1),
-                    testService.getUidMode(uid, op2)
+                    testService.getUidMode(uid, PERSISTENT_DEVICE_ID_DEFAULT, op1),
+                    testService.getUidMode(uid, PERSISTENT_DEVICE_ID_DEFAULT, op2)
             );
         }
         for (UserPackage pkg : testService.getPackagesWithNonDefaultModes()) {
@@ -275,7 +276,9 @@ public class AppOpsUpgradeTest {
                 } else {
                     expectedMode = previousMode;
                 }
-                int mode = testService.getUidMode(uid, OP_SCHEDULE_EXACT_ALARM);
+                int mode =
+                        testService.getUidMode(
+                                uid, PERSISTENT_DEVICE_ID_DEFAULT, OP_SCHEDULE_EXACT_ALARM);
                 assertEquals(expectedMode, mode);
             }
         }
@@ -284,7 +287,9 @@ public class AppOpsUpgradeTest {
         int[] unrelatedUidsInFile = {10225, 10178};
 
         for (int uid : unrelatedUidsInFile) {
-            int mode = testService.getUidMode(uid, OP_SCHEDULE_EXACT_ALARM);
+            int mode =
+                    testService.getUidMode(
+                            uid, PERSISTENT_DEVICE_ID_DEFAULT, OP_SCHEDULE_EXACT_ALARM);
             assertEquals(AppOpsManager.opToDefaultMode(OP_SCHEDULE_EXACT_ALARM), mode);
         }
     }
@@ -331,7 +336,9 @@ public class AppOpsUpgradeTest {
                 final int uid = UserHandle.getUid(userId, appId);
                 final int expectedMode = AppOpsManager.opToDefaultMode(OP_USE_FULL_SCREEN_INTENT);
                 synchronized (testService) {
-                    int mode = testService.getUidMode(uid, OP_USE_FULL_SCREEN_INTENT);
+                    int mode =
+                            testService.getUidMode(
+                                    uid, PERSISTENT_DEVICE_ID_DEFAULT, OP_USE_FULL_SCREEN_INTENT);
                     assertEquals(expectedMode, mode);
                 }
             }

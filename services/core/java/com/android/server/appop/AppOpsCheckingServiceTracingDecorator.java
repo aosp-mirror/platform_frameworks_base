@@ -81,11 +81,11 @@ public class AppOpsCheckingServiceTracingDecorator implements AppOpsCheckingServ
     }
 
     @Override
-    public SparseIntArray getNonDefaultUidModes(int uid) {
+    public SparseIntArray getNonDefaultUidModes(int uid, String persistentDeviceId) {
         Trace.traceBegin(TRACE_TAG,
                 "TaggedTracingAppOpsCheckingServiceInterfaceImpl#getNonDefaultUidModes");
         try {
-            return mService.getNonDefaultUidModes(uid);
+            return mService.getNonDefaultUidModes(uid, persistentDeviceId);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }
@@ -103,20 +103,21 @@ public class AppOpsCheckingServiceTracingDecorator implements AppOpsCheckingServ
     }
 
     @Override
-    public int getUidMode(int uid, int op) {
+    public int getUidMode(int uid, String persistentDeviceId, int op) {
         Trace.traceBegin(TRACE_TAG, "TaggedTracingAppOpsCheckingServiceInterfaceImpl#getUidMode");
         try {
-            return mService.getUidMode(uid, op);
+            return mService.getUidMode(uid, persistentDeviceId, op);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }
     }
 
     @Override
-    public boolean setUidMode(int uid, int op, @AppOpsManager.Mode int mode) {
+    public boolean setUidMode(
+            int uid, String persistentDeviceId, int op, @AppOpsManager.Mode int mode) {
         Trace.traceBegin(TRACE_TAG, "TaggedTracingAppOpsCheckingServiceInterfaceImpl#setUidMode");
         try {
-            return mService.setUidMode(uid, op, mode);
+            return mService.setUidMode(uid, persistentDeviceId, op, mode);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }
@@ -179,11 +180,11 @@ public class AppOpsCheckingServiceTracingDecorator implements AppOpsCheckingServ
     }
 
     @Override
-    public SparseBooleanArray getForegroundOps(int uid) {
+    public SparseBooleanArray getForegroundOps(int uid, String persistentDeviceId) {
         Trace.traceBegin(TRACE_TAG,
                 "TaggedTracingAppOpsCheckingServiceInterfaceImpl#getForegroundOps");
         try {
-            return mService.getForegroundOps(uid);
+            return mService.getForegroundOps(uid, persistentDeviceId);
         } finally {
             Trace.traceEnd(TRACE_TAG);
         }

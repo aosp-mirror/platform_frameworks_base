@@ -59,8 +59,9 @@ public interface AppOpsCheckingServiceInterface {
      * Returns a copy of non-default app-ops with op as keys and their modes as values for a uid.
      * Returns an empty SparseIntArray if nothing is set.
      * @param uid for which we need the app-ops and their modes.
+     * @param persistentDeviceId device for which we need the app-ops and their modes
      */
-    SparseIntArray getNonDefaultUidModes(int uid);
+    SparseIntArray getNonDefaultUidModes(int uid, String persistentDeviceId);
 
     /**
      * Returns a copy of non-default app-ops with op as keys and their modes as values for a package
@@ -75,20 +76,22 @@ public interface AppOpsCheckingServiceInterface {
      * Returns the app-op mode for a particular app-op of a uid.
      * Returns default op mode if the op mode for particular uid and op is not set.
      * @param uid user id for which we need the mode.
+     * @param persistentDeviceId device for which we need the mode
      * @param op app-op for which we need the mode.
      * @return mode of the app-op.
      */
-    int getUidMode(int uid, int op);
+    int getUidMode(int uid, String persistentDeviceId, int op);
 
     /**
      * Set the app-op mode for a particular uid and op.
      * The mode is not set if the mode is the same as the default mode for the op.
      * @param uid user id for which we want to set the mode.
+     * @param persistentDeviceId device for which we want to set the mode.
      * @param op app-op for which we want to set the mode.
      * @param mode mode for the app-op.
      * @return true if op mode is changed.
      */
-    boolean setUidMode(int uid, int op, @Mode int mode);
+    boolean setUidMode(int uid, String persistentDeviceId, int op, @Mode int mode);
 
     /**
      * Gets the app-op mode for a particular package.
@@ -130,10 +133,11 @@ public interface AppOpsCheckingServiceInterface {
 
     /**
      * @param uid UID to query foreground ops for.
+     * @param persistentDeviceId device to query foreground ops for
      * @return SparseBooleanArray where the keys are the op codes for which their modes are
      * MODE_FOREGROUND for the passed UID.
      */
-    SparseBooleanArray getForegroundOps(int uid);
+    SparseBooleanArray getForegroundOps(int uid, String persistentDeviceId);
 
     /**
      *

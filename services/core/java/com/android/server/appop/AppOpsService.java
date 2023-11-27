@@ -63,6 +63,7 @@ import static android.app.AppOpsManager.opAllowSystemBypassRestriction;
 import static android.app.AppOpsManager.opRestrictsRead;
 import static android.app.AppOpsManager.opToName;
 import static android.app.AppOpsManager.opToPublicName;
+import static android.companion.virtual.VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
@@ -1349,7 +1350,10 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 SparseBooleanArray foregroundOps = new SparseBooleanArray();
 
-                SparseBooleanArray uidForegroundOps = mAppOpsCheckingService.getForegroundOps(uid);
+                // TODO(b/299330771): Check uidForegroundOps for all devices.
+                SparseBooleanArray uidForegroundOps =
+                        mAppOpsCheckingService.getForegroundOps(
+                                uid, PERSISTENT_DEVICE_ID_DEFAULT);
                 for (int i = 0; i < uidForegroundOps.size(); i++) {
                     foregroundOps.put(uidForegroundOps.keyAt(i), true);
                 }
@@ -1369,10 +1373,16 @@ public class AppOpsService extends IAppOpsService.Stub {
                         continue;
                     }
                     final int code = foregroundOps.keyAt(fgi);
-
-                    if (mAppOpsCheckingService.getUidMode(uidState.uid, code)
+                    // TODO(b/299330771): Notify op changes for all relevant devices.
+                    if (mAppOpsCheckingService.getUidMode(
+                                            uidState.uid,
+                                            PERSISTENT_DEVICE_ID_DEFAULT,
+                                            code)
                                     != AppOpsManager.opToDefaultMode(code)
-                            && mAppOpsCheckingService.getUidMode(uidState.uid, code)
+                            && mAppOpsCheckingService.getUidMode(
+                                            uidState.uid,
+                                            PERSISTENT_DEVICE_ID_DEFAULT,
+                                            code)
                                     == AppOpsManager.MODE_FOREGROUND) {
                         mHandler.sendMessage(PooledLambda.obtainMessage(
                                 AppOpsService::notifyOpChangedForAllPkgsInUid,
@@ -1489,7 +1499,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Nullable
     private ArrayList<AppOpsManager.OpEntry> collectUidOps(@NonNull UidState uidState,
             @Nullable int[] ops) {
-        final SparseIntArray opModes = mAppOpsCheckingService.getNonDefaultUidModes(uidState.uid);
+        // TODO(b/299330771): Make this methods device-aware, currently it represents only the
+        // primary device.
+        final SparseIntArray opModes =
+                mAppOpsCheckingService.getNonDefaultUidModes(
+                        uidState.uid, PERSISTENT_DEVICE_ID_DEFAULT);
         if (opModes == null) {
             return null;
         }
@@ -1844,16 +1858,22 @@ public class AppOpsService extends IAppOpsService.Stub {
                 uidState = new UidState(uid);
                 mUidStates.put(uid, uidState);
             }
-            if (mAppOpsCheckingService.getUidMode(uidState.uid, code)
+            // TODO(b/266164193): Ensure this behavior is device-aware after uid op mode for runtime
+            //  permissions is deprecated.
+            if (mAppOpsCheckingService.getUidMode(
+                            uidState.uid, PERSISTENT_DEVICE_ID_DEFAULT, code)
                     != AppOpsManager.opToDefaultMode(code)) {
-                previousMode = mAppOpsCheckingService.getUidMode(uidState.uid, code);
+                previousMode =
+                        mAppOpsCheckingService.getUidMode(
+                                uidState.uid, PERSISTENT_DEVICE_ID_DEFAULT, code);
             } else {
                 // doesn't look right but is legacy behavior.
                 previousMode = MODE_DEFAULT;
             }
 
             mIgnoredCallback = permissionPolicyCallback;
-            if (!mAppOpsCheckingService.setUidMode(uidState.uid, code, mode)) {
+            if (!mAppOpsCheckingService.setUidMode(
+                    uidState.uid, PERSISTENT_DEVICE_ID_DEFAULT, code, mode)) {
                 return;
             }
             if (mode != MODE_ERRORED && mode != previousMode) {
@@ -2275,8 +2295,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             boolean changed = false;
             for (int i = mUidStates.size() - 1; i >= 0; i--) {
                 UidState uidState = mUidStates.valueAt(i);
-
-                SparseIntArray opModes = mAppOpsCheckingService.getNonDefaultUidModes(uidState.uid);
+                // TODO(b/299330771): Check non default modes for all devices.
+                SparseIntArray opModes =
+                        mAppOpsCheckingService.getNonDefaultUidModes(
+                                uidState.uid, PERSISTENT_DEVICE_ID_DEFAULT);
                 if (opModes != null && (uidState.uid == reqUid || reqUid == -1)) {
                     final int uidOpCount = opModes.size();
                     for (int j = uidOpCount - 1; j >= 0; j--) {
@@ -2285,7 +2307,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                             int previousMode = opModes.valueAt(j);
                             int newMode = isUidOpGrantedByRole(uidState.uid, code) ? MODE_ALLOWED :
                                     AppOpsManager.opToDefaultMode(code);
-                            mAppOpsCheckingService.setUidMode(uidState.uid, code, newMode);
+                            // TODO(b/299330771): Set mode for all necessary devices.
+                            mAppOpsCheckingService.setUidMode(
+                                    uidState.uid,
+                                    PERSISTENT_DEVICE_ID_DEFAULT,
+                                    code,
+                                    newMode);
                             for (String packageName : getPackagesForUid(uidState.uid)) {
                                 callbacks = addCallbacks(callbacks, code, uidState.uid, packageName,
                                         previousMode, mOpModeWatchers.get(code));
@@ -2601,10 +2628,14 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             code = AppOpsManager.opToSwitch(code);
             UidState uidState = getUidStateLocked(uid, false);
+            // TODO(b/299330771): Check mode for the relevant device.
             if (uidState != null
-                    && mAppOpsCheckingService.getUidMode(uidState.uid, code)
+                    && mAppOpsCheckingService.getUidMode(
+                                    uidState.uid, PERSISTENT_DEVICE_ID_DEFAULT, code)
                             != AppOpsManager.opToDefaultMode(code)) {
-                final int rawMode = mAppOpsCheckingService.getUidMode(uidState.uid, code);
+                final int rawMode =
+                        mAppOpsCheckingService.getUidMode(
+                                uidState.uid, PERSISTENT_DEVICE_ID_DEFAULT, code);
                 return raw ? rawMode : uidState.evalMode(code, rawMode);
             }
             Op op = getOpLocked(code, uid, packageName, null, false, pvr.bypass, /* edit */ false);
@@ -2851,13 +2882,19 @@ public class AppOpsService extends IAppOpsService.Stub {
                 return new SyncNotedAppOp(AppOpsManager.MODE_IGNORED, code, attributionTag,
                         packageName);
             }
+            // TODO(b/299330771): Check mode for the relevant device.
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
-            if (mAppOpsCheckingService.getUidMode(uidState.uid, switchCode)
+            if (mAppOpsCheckingService.getUidMode(
+                            uidState.uid, PERSISTENT_DEVICE_ID_DEFAULT, switchCode)
                     != AppOpsManager.opToDefaultMode(switchCode)) {
                 final int uidMode =
                         uidState.evalMode(
-                                code, mAppOpsCheckingService.getUidMode(uidState.uid, switchCode));
+                                code,
+                                mAppOpsCheckingService.getUidMode(
+                                        uidState.uid,
+                                        PERSISTENT_DEVICE_ID_DEFAULT,
+                                        switchCode));
                 if (uidMode != AppOpsManager.MODE_ALLOWED) {
                     if (DEBUG) Slog.d(TAG, "noteOperation: uid reject #" + uidMode + " for code "
                             + switchCode + " (" + code + ") uid " + uid + " package "
@@ -3396,13 +3433,19 @@ public class AppOpsService extends IAppOpsService.Stub {
             isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass,
                     false);
             final int switchCode = AppOpsManager.opToSwitch(code);
+            // TODO(b/299330771): Check mode for the relevant device.
             // If there is a non-default per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
-            if (mAppOpsCheckingService.getUidMode(uidState.uid, switchCode)
+            if (mAppOpsCheckingService.getUidMode(
+                            uidState.uid, PERSISTENT_DEVICE_ID_DEFAULT, switchCode)
                     != AppOpsManager.opToDefaultMode(switchCode)) {
                 final int uidMode =
                         uidState.evalMode(
-                                code, mAppOpsCheckingService.getUidMode(uidState.uid, switchCode));
+                                code,
+                                mAppOpsCheckingService.getUidMode(
+                                        uidState.uid,
+                                        PERSISTENT_DEVICE_ID_DEFAULT,
+                                        switchCode));
                 if (!shouldStartForMode(uidMode, startIfModeDefault)) {
                     if (DEBUG) {
                         Slog.d(TAG, "startOperation: uid reject #" + uidMode + " for code "
@@ -3511,13 +3554,19 @@ public class AppOpsService extends IAppOpsService.Stub {
             isRestricted = isOpRestrictedLocked(uid, code, packageName, attributionTag, pvr.bypass,
                     false);
             final int switchCode = AppOpsManager.opToSwitch(code);
+            // TODO(b/299330771): Check mode for the relevant device.
             // If there is a non-default mode per UID policy (we set UID op mode only if
             // non-default) it takes over, otherwise use the per package policy.
-            if (mAppOpsCheckingService.getUidMode(uidState.uid, switchCode)
+            if (mAppOpsCheckingService.getUidMode(
+                            uidState.uid, PERSISTENT_DEVICE_ID_DEFAULT, switchCode)
                     != AppOpsManager.opToDefaultMode(switchCode)) {
                 final int uidMode =
                         uidState.evalMode(
-                                code, mAppOpsCheckingService.getUidMode(uidState.uid, switchCode));
+                                code,
+                                mAppOpsCheckingService.getUidMode(
+                                        uidState.uid,
+                                        PERSISTENT_DEVICE_ID_DEFAULT,
+                                        switchCode));
                 if (!shouldStartForMode(uidMode, startIfModeDefault)) {
                     if (DEBUG) {
                         Slog.d(TAG, "startOperation: uid reject #" + uidMode + " for code "
@@ -5664,8 +5713,10 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
             for (int i=0; i<mUidStates.size(); i++) {
                 UidState uidState = mUidStates.valueAt(i);
+                // TODO(b/299330771): Get modes for all devices.
                 final SparseIntArray opModes =
-                        mAppOpsCheckingService.getNonDefaultUidModes(uidState.uid);
+                        mAppOpsCheckingService.getNonDefaultUidModes(
+                                uidState.uid, PERSISTENT_DEVICE_ID_DEFAULT);
                 final ArrayMap<String, Ops> pkgOps = uidState.pkgOps;
 
                 if (dumpWatchers || dumpHistory) {
