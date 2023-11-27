@@ -255,7 +255,7 @@ import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
@@ -620,6 +620,13 @@ public final class ViewRootImpl implements ViewParent,
     boolean mUpcomingWindowFocus;
     @GuardedBy("this")
     boolean mUpcomingInTouchMode;
+    // While set, allow this VRI to handle back key without drop it.
+    private boolean mProcessingBackKey;
+    /**
+     * Compatibility {@link OnBackInvokedCallback} for windowless window, to forward the back
+     * key event host app.
+     */
+    private Predicate<KeyEvent> mWindowlessBackKeyCallback;
 
     public boolean mTraversalScheduled;
     int mTraversalBarrier;
@@ -3194,7 +3201,11 @@ public final class ViewRootImpl implements ViewParent,
             host.dispatchAttachedToWindow(mAttachInfo, 0);
             mAttachInfo.mTreeObserver.dispatchOnWindowAttachedChange(true);
             dispatchApplyInsets(host);
-            if (!mOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled()) {
+            if (!mOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled()
+                    // Don't register compat OnBackInvokedCallback for windowless window.
+                    // The onBackInvoked event by default should forward to host app, so the
+                    // host app can decide the behavior.
+                    && mWindowlessBackKeyCallback == null) {
                 // For apps requesting legacy back behavior, we add a compat callback that
                 // dispatches {@link KeyEvent#KEYCODE_BACK} to their root views.
                 // This way from system point of view, these apps are providing custom
@@ -6660,7 +6671,8 @@ public final class ViewRootImpl implements ViewParent,
 
             // Find a reason for dropping or canceling the event.
             final String reason;
-            if (!mAttachInfo.mHasWindowFocus
+            // The embedded window is focused, allow this VRI to handle back key.
+            if (!mAttachInfo.mHasWindowFocus && !(mProcessingBackKey && isBack(q.mEvent))
                     && !q.mEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)
                     && !isAutofillUiShowing()) {
                 // This is a non-pointer event and the window doesn't currently have input focus
@@ -6883,10 +6895,20 @@ public final class ViewRootImpl implements ViewParent,
 
                 // If the new back dispatch is enabled, intercept KEYCODE_BACK before it reaches the
                 // view tree or IME, and invoke the appropriate {@link OnBackInvokedCallback}.
-                if (isBack(keyEvent)
-                        && mContext != null
-                        && mOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled()) {
-                    return doOnBackKeyEvent(keyEvent);
+                if (isBack(keyEvent)) {
+                    if (mWindowlessBackKeyCallback != null) {
+                        if (mWindowlessBackKeyCallback.test(keyEvent)) {
+                            return keyEvent.getAction() == KeyEvent.ACTION_UP
+                                    && !keyEvent.isCanceled()
+                                    ? FINISH_HANDLED : FINISH_NOT_HANDLED;
+                        } else {
+                            // Unable to forward the back key to host, forward to next stage.
+                            return FORWARD;
+                        }
+                    } else if (mContext != null
+                            && mOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled()) {
+                        return doOnBackKeyEvent(keyEvent);
+                    }
                 }
 
                 if (mInputQueue != null) {
@@ -10529,6 +10551,11 @@ public final class ViewRootImpl implements ViewParent,
         mHandler.obtainMessage(MSG_REQUEST_SCROLL_CAPTURE, listener).sendToTarget();
     }
 
+    // Make this VRI able to process back key without drop it.
+    void processingBackKey(boolean processing) {
+        mProcessingBackKey = processing;
+    }
+
     /**
      * Collect and include any ScrollCaptureCallback instances registered with the window.
      *
@@ -11753,13 +11780,18 @@ public final class ViewRootImpl implements ViewParent,
                 KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
                 KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
-        enqueueInputEvent(ev);
+        enqueueInputEvent(ev, null /* receiver */, 0 /* flags */, true /* processImmediately */);
     }
 
     private void registerCompatOnBackInvokedCallback() {
         mCompatOnBackInvokedCallback = () -> {
-            sendBackKeyEvent(KeyEvent.ACTION_DOWN);
-            sendBackKeyEvent(KeyEvent.ACTION_UP);
+            try {
+                processingBackKey(true);
+                sendBackKeyEvent(KeyEvent.ACTION_DOWN);
+                sendBackKeyEvent(KeyEvent.ACTION_UP);
+            } finally {
+                processingBackKey(false);
+            }
         };
         if (mOnBackInvokedDispatcher.hasImeOnBackInvokedDispatcher()) {
             Log.d(TAG, "Skip registering CompatOnBackInvokedCallback on IME dispatcher");
@@ -12195,5 +12227,14 @@ public final class ViewRootImpl implements ViewParent,
             e.rethrowAsRuntimeException();
         }
         return false;
+    }
+
+    /**
+     * Set the default back key callback for windowless window, to forward the back key event
+     * to host app.
+     * MUST NOT call this method for normal window.
+     */
+    void setBackKeyCallbackForWindowlessWindow(@NonNull Predicate<KeyEvent> callback) {
+        mWindowlessBackKeyCallback = callback;
     }
 }
