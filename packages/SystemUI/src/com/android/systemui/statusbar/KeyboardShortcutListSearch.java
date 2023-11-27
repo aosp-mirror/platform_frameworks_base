@@ -811,11 +811,12 @@ public final class KeyboardShortcutListSearch {
                 new BottomSheetDialog(mContext);
         final View keyboardShortcutsView = inflater.inflate(
                 R.layout.keyboard_shortcuts_search_view, null);
+        LinearLayout shortcutsContainer = keyboardShortcutsView.findViewById(
+                R.id.keyboard_shortcuts_container);
         mNoSearchResults = keyboardShortcutsView.findViewById(R.id.shortcut_search_no_result);
         mKeyboardShortcutsBottomSheetDialog.setContentView(keyboardShortcutsView);
         setButtonsDefaultStatus(keyboardShortcutsView);
-        populateKeyboardShortcutSearchList(
-                keyboardShortcutsView.findViewById(R.id.keyboard_shortcuts_container));
+        populateKeyboardShortcutSearchList(shortcutsContainer);
 
         // Workaround for solve issue about dialog not full expanded when landscape.
         FrameLayout bottomSheet = (FrameLayout)
@@ -865,9 +866,14 @@ public final class KeyboardShortcutListSearch {
                     @Override
                     public void afterTextChanged(Editable s) {
                         mQueryString = s.toString();
-                        populateKeyboardShortcutSearchList(
-                                keyboardShortcutsView.findViewById(
-                                        R.id.keyboard_shortcuts_container));
+                        populateKeyboardShortcutSearchList(shortcutsContainer);
+                        if (mNoSearchResults.getVisibility() == View.VISIBLE) {
+                            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                                    R.string.keyboard_shortcut_search_list_no_result));
+                        } else if (mSearchEditText.getText().length() > 0) {
+                            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                                    R.string.keyboard_shortcut_a11y_show_search_results));
+                        }
                     }
 
                     @Override
@@ -1222,28 +1228,35 @@ public final class KeyboardShortcutListSearch {
         mButtonOpenApps = keyboardShortcutsView.findViewById(R.id.shortcut_open_apps);
         mButtonSpecificApp = keyboardShortcutsView.findViewById(R.id.shortcut_specific_app);
 
+        LinearLayout shortcutsContainer = keyboardShortcutsView.findViewById(
+                R.id.keyboard_shortcuts_container);
+
         mButtonSystem.setOnClickListener(v -> {
             setCurrentCategoryIndex(SHORTCUT_SYSTEM_INDEX);
-            populateKeyboardShortcutSearchList(keyboardShortcutsView.findViewById(
-                    R.id.keyboard_shortcuts_container));
+            populateKeyboardShortcutSearchList(shortcutsContainer);
+            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                    R.string.keyboard_shortcut_a11y_filter_system));
         });
 
         mButtonInput.setOnClickListener(v -> {
             setCurrentCategoryIndex(SHORTCUT_INPUT_INDEX);
-            populateKeyboardShortcutSearchList(keyboardShortcutsView.findViewById(
-                    R.id.keyboard_shortcuts_container));
+            populateKeyboardShortcutSearchList(shortcutsContainer);
+            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                    R.string.keyboard_shortcut_a11y_filter_input));
         });
 
         mButtonOpenApps.setOnClickListener(v -> {
             setCurrentCategoryIndex(SHORTCUT_OPENAPPS_INDEX);
-            populateKeyboardShortcutSearchList(keyboardShortcutsView.findViewById(
-                    R.id.keyboard_shortcuts_container));
+            populateKeyboardShortcutSearchList(shortcutsContainer);
+            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                    R.string.keyboard_shortcut_a11y_filter_open_apps));
         });
 
         mButtonSpecificApp.setOnClickListener(v -> {
             setCurrentCategoryIndex(SHORTCUT_SPECIFICAPP_INDEX);
-            populateKeyboardShortcutSearchList(keyboardShortcutsView.findViewById(
-                    R.id.keyboard_shortcuts_container));
+            populateKeyboardShortcutSearchList(shortcutsContainer);
+            shortcutsContainer.setAccessibilityPaneTitle(mContext.getString(
+                    R.string.keyboard_shortcut_a11y_filter_current_app));
         });
 
         mFullButtonList.add(mButtonSystem);
