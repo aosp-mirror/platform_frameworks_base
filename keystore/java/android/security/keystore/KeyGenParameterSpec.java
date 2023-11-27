@@ -618,7 +618,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
      * @see #isMgf1DigestsSpecified()
      */
     @NonNull
-    @FlaggedApi("MGF1_DIGEST_SETTER")
+    @FlaggedApi(android.security.Flags.FLAG_MGF1_DIGEST_SETTER)
     public @KeyProperties.DigestEnum Set<String> getMgf1Digests() {
         if (mMgf1Digests.isEmpty()) {
             throw new IllegalStateException("Mask generation function (MGF) not specified");
@@ -633,7 +633,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
      * @see #getMgf1Digests()
      */
     @NonNull
-    @FlaggedApi("MGF1_DIGEST_SETTER")
+    @FlaggedApi(android.security.Flags.FLAG_MGF1_DIGEST_SETTER)
     public boolean isMgf1DigestsSpecified() {
         return !mMgf1Digests.isEmpty();
     }
@@ -1292,7 +1292,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          * <p>See {@link KeyProperties}.{@code DIGEST} constants.
          */
         @NonNull
-        @FlaggedApi("MGF1_DIGEST_SETTER")
+        @FlaggedApi(android.security.Flags.FLAG_MGF1_DIGEST_SETTER)
         public Builder setMgf1Digests(@NonNull @KeyProperties.DigestEnum String... mgf1Digests) {
             mMgf1Digests = Set.of(mgf1Digests);
             return this;
