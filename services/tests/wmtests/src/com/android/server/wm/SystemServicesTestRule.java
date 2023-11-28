@@ -444,7 +444,9 @@ public class SystemServicesTestRule implements TestRule {
         SurfaceAnimationThread.dispose();
         AnimationThread.dispose();
         UiThread.dispose();
-        mInputChannel.dispose();
+        if (mInputChannel != null) {
+            mInputChannel.dispose();
+        }
 
         tearDownLocalServices();
         // Reset priority booster because animation thread has been changed.
