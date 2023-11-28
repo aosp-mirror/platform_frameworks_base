@@ -837,6 +837,7 @@ public final class UsageEvents implements Parcelable {
         if (mEventCount != mEventsToWrite.size()) {
             Log.w(TAG, "Partial usage event list received: " + mEventCount + " != "
                     + mEventsToWrite.size());
+            mEventCount = mEventsToWrite.size();
         }
     }
 
