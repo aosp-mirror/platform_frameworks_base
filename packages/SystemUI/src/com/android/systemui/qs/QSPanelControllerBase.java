@@ -255,6 +255,10 @@ public abstract class QSPanelControllerBase<T extends QSPanel> extends ViewContr
             for (QSTile tile : tiles) {
                 addTile(tile, collapsedView);
             }
+        } else {
+            for (QSPanelControllerBase.TileRecord record : mRecords) {
+                record.tile.addCallback(record.callback);
+            }
         }
     }
 
