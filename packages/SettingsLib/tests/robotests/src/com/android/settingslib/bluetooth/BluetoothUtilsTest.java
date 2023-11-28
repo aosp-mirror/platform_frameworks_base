@@ -16,6 +16,7 @@
 package com.android.settingslib.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -84,6 +85,14 @@ public class BluetoothUtilsTest {
                 mContext, mCachedBluetoothDevice);
 
         verify(mContext).getDrawable(com.android.internal.R.drawable.ic_bt_laptop);
+    }
+
+    @Test
+    public void getBtClassDrawableWithDescription_typeHearingAid_returnHearingAidDrawable() {
+        when(mCachedBluetoothDevice.isHearingAidDevice()).thenReturn(true);
+        BluetoothUtils.getBtClassDrawableWithDescription(mContext, mCachedBluetoothDevice);
+
+        verify(mContext).getDrawable(com.android.internal.R.drawable.ic_bt_hearing_aid);
     }
 
     @Test

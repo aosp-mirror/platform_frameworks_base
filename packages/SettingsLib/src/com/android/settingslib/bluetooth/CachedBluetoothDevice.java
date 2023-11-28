@@ -412,6 +412,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     public void setHearingAidInfo(HearingAidInfo hearingAidInfo) {
         mHearingAidInfo = hearingAidInfo;
+        dispatchAttributesChanged();
     }
 
     public HearingAidInfo getHearingAidInfo() {
