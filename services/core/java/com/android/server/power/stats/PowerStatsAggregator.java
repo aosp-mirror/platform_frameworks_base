@@ -29,19 +29,28 @@ import java.util.function.Consumer;
  * {@link AggregatedPowerStats} that adds up power stats from the samples found in battery history.
  */
 public class PowerStatsAggregator {
+    private static final long UNINITIALIZED = -1;
     private final AggregatedPowerStats mStats;
+    private final AggregatedPowerStatsConfig mAggregatedPowerStatsConfig;
     private final BatteryStatsHistory mHistory;
     private final SparseArray<AggregatedPowerStatsProcessor> mProcessors = new SparseArray<>();
+    private int mCurrentBatteryState = AggregatedPowerStatsConfig.POWER_STATE_BATTERY;
+    private int mCurrentScreenState = AggregatedPowerStatsConfig.SCREEN_STATE_OTHER;
 
     public PowerStatsAggregator(AggregatedPowerStatsConfig aggregatedPowerStatsConfig,
             BatteryStatsHistory history) {
         mStats = new AggregatedPowerStats(aggregatedPowerStatsConfig);
+        mAggregatedPowerStatsConfig = aggregatedPowerStatsConfig;
         mHistory = history;
         for (AggregatedPowerStatsConfig.PowerComponent powerComponentsConfig :
                 aggregatedPowerStatsConfig.getPowerComponentsAggregatedStatsConfigs()) {
             AggregatedPowerStatsProcessor processor = powerComponentsConfig.getProcessor();
             mProcessors.put(powerComponentsConfig.getPowerComponentId(), processor);
         }
+    }
+
+    AggregatedPowerStatsConfig getConfig() {
+        return mAggregatedPowerStatsConfig;
     }
 
     /**
@@ -58,18 +67,20 @@ public class PowerStatsAggregator {
      */
     public void aggregatePowerStats(long startTimeMs, long endTimeMs,
             Consumer<AggregatedPowerStats> consumer) {
-        int currentBatteryState = AggregatedPowerStatsConfig.POWER_STATE_BATTERY;
-        int currentScreenState = AggregatedPowerStatsConfig.SCREEN_STATE_OTHER;
-        long baseTime = -1;
+        boolean clockUpdateAdded = false;
+        long baseTime = startTimeMs > 0 ? startTimeMs : UNINITIALIZED;
         long lastTime = 0;
         try (BatteryStatsHistoryIterator iterator =
                      mHistory.copy().iterate(startTimeMs, endTimeMs)) {
             while (iterator.hasNext()) {
                 BatteryStats.HistoryItem item = iterator.next();
 
-                if (baseTime < 0) {
+                if (!clockUpdateAdded) {
                     mStats.addClockUpdate(item.time, item.currentTime);
-                    baseTime = item.time;
+                    if (baseTime == UNINITIALIZED) {
+                        baseTime = item.time;
+                    }
+                    clockUpdateAdded = true;
                 } else if (item.cmd == BatteryStats.HistoryItem.CMD_CURRENT_TIME
                            || item.cmd == BatteryStats.HistoryItem.CMD_RESET) {
                     mStats.addClockUpdate(item.time, item.currentTime);
@@ -81,20 +92,20 @@ public class PowerStatsAggregator {
                         (item.states & BatteryStats.HistoryItem.STATE_BATTERY_PLUGGED_FLAG) != 0
                                 ? AggregatedPowerStatsConfig.POWER_STATE_OTHER
                                 : AggregatedPowerStatsConfig.POWER_STATE_BATTERY;
-                if (batteryState != currentBatteryState) {
+                if (batteryState != mCurrentBatteryState) {
                     mStats.setDeviceState(AggregatedPowerStatsConfig.STATE_POWER, batteryState,
                             item.time);
-                    currentBatteryState = batteryState;
+                    mCurrentBatteryState = batteryState;
                 }
 
                 int screenState =
                         (item.states & BatteryStats.HistoryItem.STATE_SCREEN_ON_FLAG) != 0
                                 ? AggregatedPowerStatsConfig.SCREEN_STATE_ON
                                 : AggregatedPowerStatsConfig.SCREEN_STATE_OTHER;
-                if (screenState != currentScreenState) {
+                if (screenState != mCurrentScreenState) {
                     mStats.setDeviceState(AggregatedPowerStatsConfig.STATE_SCREEN, screenState,
                             item.time);
-                    currentScreenState = screenState;
+                    mCurrentScreenState = screenState;
                 }
 
                 if (item.processStateChange != null) {

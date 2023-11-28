@@ -28,9 +28,8 @@ import android.util.ArraySet
 import android.util.IndentingPrintWriter
 import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal
 import com.android.server.pm.Computer
-import com.android.server.pm.parsing.pkg.AndroidPackageInternal
-import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
 import com.android.server.pm.pkg.component.ParsedActivityImpl

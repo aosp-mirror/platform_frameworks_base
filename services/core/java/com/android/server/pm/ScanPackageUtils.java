@@ -73,6 +73,7 @@ import android.util.jar.StrictJarFile;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.component.ParsedActivity;
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.internal.pm.pkg.component.ParsedProcess;
@@ -83,7 +84,6 @@ import com.android.server.SystemConfig;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.library.PackageBackwardCompatibility;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateUtils;
 import com.android.server.pm.pkg.component.ComponentMutateUtils;

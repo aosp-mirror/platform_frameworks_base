@@ -2327,8 +2327,8 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean wallpaperMayMove = win.mViewVisibility != viewVisibility
                     && win.hasWallpaper();
             wallpaperMayMove |= (flagChanges & FLAG_SHOW_WALLPAPER) != 0;
-            if ((flagChanges & FLAG_SECURE) != 0 && winAnimator.mSurfaceController != null) {
-                winAnimator.mSurfaceController.setSecure(win.isSecureLocked());
+            if ((flagChanges & FLAG_SECURE) != 0) {
+                win.setSecureLocked(win.isSecureLocked());
             }
 
             final boolean wasVisible = win.isVisible();

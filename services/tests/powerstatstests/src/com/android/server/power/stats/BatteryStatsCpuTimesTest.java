@@ -37,6 +37,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.os.BatteryStats;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.UserHandle;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
@@ -97,6 +99,7 @@ public class BatteryStatsCpuTimesTest {
     BatteryStatsImpl.UserInfoProvider mUserInfoProvider;
 
     private MockClock mClocks;
+    private PowerStatsUidResolver mPowerStatsUidResolver;
     private MockBatteryStatsImpl mBatteryStatsImpl;
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
 
@@ -105,7 +108,9 @@ public class BatteryStatsCpuTimesTest {
         MockitoAnnotations.initMocks(this);
 
         mClocks = new MockClock();
-        mBatteryStatsImpl = new MockBatteryStatsImpl(mClocks)
+        Handler handler = new Handler(Looper.getMainLooper());
+        mPowerStatsUidResolver = new PowerStatsUidResolver();
+        mBatteryStatsImpl = new MockBatteryStatsImpl(mClocks, null, handler, mPowerStatsUidResolver)
                 .setTestCpuScalingPolicies()
                 .setKernelCpuUidUserSysTimeReader(mCpuUidUserSysTimeReader)
                 .setKernelCpuUidFreqTimeReader(mCpuUidFreqTimeReader)
@@ -374,7 +379,7 @@ public class BatteryStatsCpuTimesTest {
 
         // PRECONDITIONS
         final int ownerUid = UserHandle.getUid(testUserId, FIRST_APPLICATION_UID + 42);
-        mBatteryStatsImpl.addIsolatedUidLocked(isolatedUid, ownerUid);
+        mPowerStatsUidResolver.noteIsolatedUidAdded(isolatedUid, ownerUid);
         final long[][] deltasUs = {
                 {9379, 3332409833484L}, {493247, 723234}, {3247819, 123348}
         };
@@ -965,7 +970,7 @@ public class BatteryStatsCpuTimesTest {
 
         // PRECONDITIONS
         final int ownerUid = UserHandle.getUid(testUserId, FIRST_APPLICATION_UID + 42);
-        mBatteryStatsImpl.addIsolatedUidLocked(isolatedUid, ownerUid);
+        mPowerStatsUidResolver.noteIsolatedUidAdded(isolatedUid, ownerUid);
         final long[][] deltasMs = {
                 {3, 12, 55, 100, 32},
                 {32483274, 232349349, 123, 2398, 0},

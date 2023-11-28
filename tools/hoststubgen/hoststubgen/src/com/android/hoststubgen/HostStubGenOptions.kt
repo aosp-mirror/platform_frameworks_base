@@ -21,21 +21,60 @@ import java.io.File
 import java.io.FileReader
 
 /**
+ * A single value that can only set once.
+ */
+class SetOnce<T>(
+        private var value: T,
+) {
+    class SetMoreThanOnceException : Exception()
+
+    private var set = false
+
+    fun set(v: T) {
+        if (set) {
+            throw SetMoreThanOnceException()
+        }
+        if (v == null) {
+            throw NullPointerException("This shouldn't happen")
+        }
+        set = true
+        value = v
+    }
+
+    val get: T
+        get() = this.value
+
+    val isSet: Boolean
+        get() = this.set
+
+    fun <R> ifSet(block: (T & Any) -> R): R? {
+        if (isSet) {
+            return block(value!!)
+        }
+        return null
+    }
+
+    override fun toString(): String {
+        return "$value"
+    }
+}
+
+/**
  * Options that can be set from command line arguments.
  */
 class HostStubGenOptions(
         /** Input jar file*/
-        var inJar: String = "",
+        var inJar: SetOnce<String> = SetOnce(""),
 
         /** Output stub jar file */
-        var outStubJar: String? = null,
+        var outStubJar: SetOnce<String?> = SetOnce(null),
 
         /** Output implementation jar file */
-        var outImplJar: String? = null,
+        var outImplJar: SetOnce<String?> = SetOnce(null),
 
-        var inputJarDumpFile: String? = null,
+        var inputJarDumpFile: SetOnce<String?> = SetOnce(null),
 
-        var inputJarAsKeepAllFile: String? = null,
+        var inputJarAsKeepAllFile: SetOnce<String?> = SetOnce(null),
 
         var stubAnnotations: MutableSet<String> = mutableSetOf(),
         var keepAnnotations: MutableSet<String> = mutableSetOf(),
@@ -51,27 +90,26 @@ class HostStubGenOptions(
 
         var packageRedirects: MutableList<Pair<String, String>> = mutableListOf(),
 
-        var annotationAllowedClassesFile: String? = null,
+        var annotationAllowedClassesFile: SetOnce<String?> = SetOnce(null),
 
-        var defaultClassLoadHook: String? = null,
-        var defaultMethodCallHook: String? = null,
+        var defaultClassLoadHook: SetOnce<String?> = SetOnce(null),
+        var defaultMethodCallHook: SetOnce<String?> = SetOnce(null),
 
         var intersectStubJars: MutableSet<String> = mutableSetOf(),
 
-        var policyOverrideFile: String? = null,
+        var policyOverrideFile: SetOnce<String?> = SetOnce(null),
 
-        var defaultPolicy: FilterPolicy = FilterPolicy.Remove,
-        var keepAllClasses: Boolean = false,
+        var defaultPolicy: SetOnce<FilterPolicy> = SetOnce(FilterPolicy.Remove),
 
-        var logLevel: LogLevel = LogLevel.Info,
+        var logLevel: SetOnce<LogLevel> = SetOnce(LogLevel.Info),
 
-        var cleanUpOnError: Boolean = false,
+        var cleanUpOnError: SetOnce<Boolean> = SetOnce(true),
 
-        var enableClassChecker: Boolean = false,
-        var enablePreTrace: Boolean = false,
-        var enablePostTrace: Boolean = false,
+        var enableClassChecker: SetOnce<Boolean> = SetOnce(false),
+        var enablePreTrace: SetOnce<Boolean> = SetOnce(false),
+        var enablePostTrace: SetOnce<Boolean> = SetOnce(false),
 
-        var enableNonStubMethodCallDetection: Boolean = false,
+        var enableNonStubMethodCallDetection: SetOnce<Boolean> = SetOnce(false),
 ) {
     companion object {
 
@@ -111,110 +149,120 @@ class HostStubGenOptions(
                     break
                 }
 
-                when (arg) {
-                    // TODO: Write help
-                    "-h", "--h" -> TODO("Help is not implemented yet")
+                // Define some shorthands...
+                fun nextArg(): String = ai.nextArgRequired(arg)
+                fun SetOnce<String>.setNextStringArg(): String = nextArg().also { this.set(it) }
+                fun SetOnce<String?>.setNextStringArg(): String = nextArg().also { this.set(it) }
+                fun MutableSet<String>.addUniqueAnnotationArg(): String =
+                        nextArg().also { this += ensureUniqueAnnotation(it) }
 
-                    "-v", "--verbose" -> ret.logLevel = LogLevel.Verbose
-                    "-d", "--debug" -> ret.logLevel = LogLevel.Debug
-                    "-q", "--quiet" -> ret.logLevel = LogLevel.None
+                try {
+                    when (arg) {
+                        // TODO: Write help
+                        "-h", "--help" -> TODO("Help is not implemented yet")
 
-                    "--in-jar" -> ret.inJar = ai.nextArgRequired(arg).ensureFileExists()
-                    "--out-stub-jar" -> ret.outStubJar = ai.nextArgRequired(arg)
-                    "--out-impl-jar" -> ret.outImplJar = ai.nextArgRequired(arg)
+                        "-v", "--verbose" -> ret.logLevel.set(LogLevel.Verbose)
+                        "-d", "--debug" -> ret.logLevel.set(LogLevel.Debug)
+                        "-q", "--quiet" -> ret.logLevel.set(LogLevel.None)
 
-                    "--policy-override-file" ->
-                        ret.policyOverrideFile = ai.nextArgRequired(arg).ensureFileExists()
+                        "--in-jar" -> ret.inJar.setNextStringArg().ensureFileExists()
+                        "--out-stub-jar" -> ret.outStubJar.setNextStringArg()
+                        "--out-impl-jar" -> ret.outImplJar.setNextStringArg()
 
-                    "--clean-up-on-error" -> ret.cleanUpOnError = true
-                    "--no-clean-up-on-error" -> ret.cleanUpOnError = false
+                        "--policy-override-file" ->
+                            ret.policyOverrideFile.setNextStringArg().ensureFileExists()
 
-                    "--default-remove" -> ret.defaultPolicy = FilterPolicy.Remove
-                    "--default-throw" -> ret.defaultPolicy = FilterPolicy.Throw
-                    "--default-keep" -> ret.defaultPolicy = FilterPolicy.Keep
-                    "--default-stub" -> ret.defaultPolicy = FilterPolicy.Stub
+                        "--clean-up-on-error" -> ret.cleanUpOnError.set(true)
+                        "--no-clean-up-on-error" -> ret.cleanUpOnError.set(false)
 
-                    "--keep-all-classes" -> ret.keepAllClasses = true
-                    "--no-keep-all-classes" -> ret.keepAllClasses = false
+                        "--default-remove" -> ret.defaultPolicy.set(FilterPolicy.Remove)
+                        "--default-throw" -> ret.defaultPolicy.set(FilterPolicy.Throw)
+                        "--default-keep" -> ret.defaultPolicy.set(FilterPolicy.Keep)
+                        "--default-stub" -> ret.defaultPolicy.set(FilterPolicy.Stub)
 
-                    "--stub-annotation" ->
-                        ret.stubAnnotations += ensureUniqueAnnotation(ai.nextArgRequired(arg))
+                        "--stub-annotation" ->
+                            ret.stubAnnotations.addUniqueAnnotationArg()
 
-                    "--keep-annotation" ->
-                        ret.keepAnnotations += ensureUniqueAnnotation(ai.nextArgRequired(arg))
+                        "--keep-annotation" ->
+                            ret.keepAnnotations.addUniqueAnnotationArg()
 
-                    "--stub-class-annotation" ->
-                        ret.stubClassAnnotations += ensureUniqueAnnotation(ai.nextArgRequired(arg))
+                        "--stub-class-annotation" ->
+                            ret.stubClassAnnotations.addUniqueAnnotationArg()
 
-                    "--keep-class-annotation" ->
-                        ret.keepClassAnnotations += ensureUniqueAnnotation(ai.nextArgRequired(arg))
+                        "--keep-class-annotation" ->
+                            ret.keepClassAnnotations.addUniqueAnnotationArg()
 
-                    "--throw-annotation" ->
-                        ret.throwAnnotations += ensureUniqueAnnotation(ai.nextArgRequired(arg))
+                        "--throw-annotation" ->
+                            ret.throwAnnotations.addUniqueAnnotationArg()
 
-                    "--remove-annotation" ->
-                        ret.removeAnnotations += ensureUniqueAnnotation(ai.nextArgRequired(arg))
+                        "--remove-annotation" ->
+                            ret.removeAnnotations.addUniqueAnnotationArg()
 
-                    "--substitute-annotation" ->
-                        ret.substituteAnnotations += ensureUniqueAnnotation(ai.nextArgRequired(arg))
+                        "--substitute-annotation" ->
+                            ret.substituteAnnotations.addUniqueAnnotationArg()
 
-                    "--native-substitute-annotation" ->
-                        ret.nativeSubstituteAnnotations +=
-                                ensureUniqueAnnotation(ai.nextArgRequired(arg))
+                        "--native-substitute-annotation" ->
+                            ret.nativeSubstituteAnnotations.addUniqueAnnotationArg()
 
-                    "--class-load-hook-annotation" ->
-                        ret.classLoadHookAnnotations +=
-                                ensureUniqueAnnotation(ai.nextArgRequired(arg))
+                        "--class-load-hook-annotation" ->
+                            ret.classLoadHookAnnotations.addUniqueAnnotationArg()
 
-                    "--keep-static-initializer-annotation" ->
-                        ret.keepStaticInitializerAnnotations +=
-                                ensureUniqueAnnotation(ai.nextArgRequired(arg))
+                        "--keep-static-initializer-annotation" ->
+                            ret.keepStaticInitializerAnnotations.addUniqueAnnotationArg()
 
-                    "--package-redirect" ->
-                        ret.packageRedirects += parsePackageRedirect(ai.nextArgRequired(arg))
+                        "--package-redirect" ->
+                            ret.packageRedirects += parsePackageRedirect(ai.nextArgRequired(arg))
 
-                    "--annotation-allowed-classes-file" ->
-                        ret.annotationAllowedClassesFile = ai.nextArgRequired(arg)
+                        "--annotation-allowed-classes-file" ->
+                            ret.annotationAllowedClassesFile.setNextStringArg()
 
-                    "--default-class-load-hook" ->
-                        ret.defaultClassLoadHook = ai.nextArgRequired(arg)
+                        "--default-class-load-hook" ->
+                            ret.defaultClassLoadHook.setNextStringArg()
 
-                    "--default-method-call-hook" ->
-                        ret.defaultMethodCallHook = ai.nextArgRequired(arg)
+                        "--default-method-call-hook" ->
+                            ret.defaultMethodCallHook.setNextStringArg()
 
-                    "--intersect-stub-jar" ->
-                        ret.intersectStubJars += ai.nextArgRequired(arg).ensureFileExists()
+                        "--intersect-stub-jar" ->
+                            ret.intersectStubJars += nextArg().ensureFileExists()
 
-                    "--gen-keep-all-file" ->
-                        ret.inputJarAsKeepAllFile = ai.nextArgRequired(arg)
+                        "--gen-keep-all-file" ->
+                            ret.inputJarAsKeepAllFile.setNextStringArg()
 
-                    // Following options are for debugging.
-                    "--enable-class-checker" -> ret.enableClassChecker = true
-                    "--no-class-checker" -> ret.enableClassChecker = false
+                        // Following options are for debugging.
+                        "--enable-class-checker" -> ret.enableClassChecker.set(true)
+                        "--no-class-checker" -> ret.enableClassChecker.set(false)
 
-                    "--enable-pre-trace" -> ret.enablePreTrace = true
-                    "--no-pre-trace" -> ret.enablePreTrace = false
+                        "--enable-pre-trace" -> ret.enablePreTrace.set(true)
+                        "--no-pre-trace" -> ret.enablePreTrace.set(false)
 
-                    "--enable-post-trace" -> ret.enablePostTrace = true
-                    "--no-post-trace" -> ret.enablePostTrace = false
+                        "--enable-post-trace" -> ret.enablePostTrace.set(true)
+                        "--no-post-trace" -> ret.enablePostTrace.set(false)
 
-                    "--enable-non-stub-method-check" -> ret.enableNonStubMethodCallDetection = true
-                    "--no-non-stub-method-check" -> ret.enableNonStubMethodCallDetection = false
+                        "--enable-non-stub-method-check" ->
+                            ret.enableNonStubMethodCallDetection.set(true)
 
-                    "--gen-input-dump-file" -> ret.inputJarDumpFile = ai.nextArgRequired(arg)
+                        "--no-non-stub-method-check" ->
+                            ret.enableNonStubMethodCallDetection.set(false)
 
-                    else -> throw ArgumentsException("Unknown option: $arg")
+                        "--gen-input-dump-file" -> ret.inputJarDumpFile.setNextStringArg()
+
+                        else -> throw ArgumentsException("Unknown option: $arg")
+                    }
+                } catch (e: SetOnce.SetMoreThanOnceException) {
+                    throw ArgumentsException("Duplicate or conflicting argument found: $arg")
                 }
             }
-            if (ret.inJar.isEmpty()) {
+            log.w(ret.toString())
+
+            if (!ret.inJar.isSet) {
                 throw ArgumentsException("Required option missing: --in-jar")
             }
-            if (ret.outStubJar == null && ret.outImplJar == null) {
+            if (!ret.outStubJar.isSet && !ret.outImplJar.isSet) {
                 log.w("Neither --out-stub-jar nor --out-impl-jar is set." +
                         " $COMMAND_NAME will not generate jar files.")
             }
 
-            if (ret.enableNonStubMethodCallDetection) {
+            if (ret.enableNonStubMethodCallDetection.get) {
                 log.w("--enable-non-stub-method-check is not fully implemented yet." +
                     " See the todo in doesMethodNeedNonStubCallCheck().")
             }
@@ -329,7 +377,6 @@ class HostStubGenOptions(
               intersectStubJars=$intersectStubJars,
               policyOverrideFile=$policyOverrideFile,
               defaultPolicy=$defaultPolicy,
-              keepAllClasses=$keepAllClasses,
               logLevel=$logLevel,
               cleanUpOnError=$cleanUpOnError,
               enableClassChecker=$enableClassChecker,

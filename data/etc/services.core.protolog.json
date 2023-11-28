@@ -991,12 +991,6 @@
       "group": "WM_DEBUG_WINDOW_INSETS",
       "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
     },
-    "-1176488860": {
-      "message": "SURFACE isSecure=%b: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
-    },
     "-1164930508": {
       "message": "Moving to RESUMED: %s (starting new instance) callers=%s",
       "level": "VERBOSE",
@@ -3276,6 +3270,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "810599500": {
+      "message": "SURFACE isSecure=%b: %s",
+      "level": "INFO",
+      "group": "WM_SHOW_TRANSACTIONS",
+      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "829434921": {
       "message": "Draw state now committed in %s",

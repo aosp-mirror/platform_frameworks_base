@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.pkg.parsing;
+package com.android.internal.pm.pkg.parsing;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;

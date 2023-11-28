@@ -30,6 +30,7 @@ public class ImmediateDisplayUpdater implements DisplayUpdater {
 
     public ImmediateDisplayUpdater(@NonNull DisplayContent displayContent) {
         mDisplayContent = displayContent;
+        mDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
     }
 
     @Override

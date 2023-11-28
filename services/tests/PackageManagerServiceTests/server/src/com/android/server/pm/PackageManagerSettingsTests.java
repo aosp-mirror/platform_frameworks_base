@@ -63,10 +63,10 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.PackageImpl;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.ArchiveState;

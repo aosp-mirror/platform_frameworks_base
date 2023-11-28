@@ -31,7 +31,7 @@ import android.text.TextUtils;
 import android.util.TypedValue;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.pkg.parsing.ParsingUtils;
 

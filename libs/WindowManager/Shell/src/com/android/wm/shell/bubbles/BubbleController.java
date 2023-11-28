@@ -788,7 +788,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 mLayerView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
                     if (!windowInsets.equals(mWindowInsets) && mLayerView != null) {
                         mWindowInsets = windowInsets;
-                        mBubblePositioner.update();
+                        mBubblePositioner.update(DeviceConfig.create(mContext, mWindowManager));
                         mLayerView.onDisplaySizeChanged();
                     }
                     return windowInsets;
@@ -798,7 +798,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 mStackView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
                     if (!windowInsets.equals(mWindowInsets) && mStackView != null) {
                         mWindowInsets = windowInsets;
-                        mBubblePositioner.update();
+                        mBubblePositioner.update(DeviceConfig.create(mContext, mWindowManager));
                         mStackView.onDisplaySizeChanged();
                     }
                     return windowInsets;
@@ -980,7 +980,7 @@ public class BubbleController implements ConfigurationChangeListener,
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         if (mBubblePositioner != null) {
-            mBubblePositioner.update();
+            mBubblePositioner.update(DeviceConfig.create(mContext, mWindowManager));
         }
         if (mStackView != null && newConfig != null) {
             if (newConfig.densityDpi != mDensityDpi

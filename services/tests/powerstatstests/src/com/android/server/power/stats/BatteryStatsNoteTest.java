@@ -35,6 +35,8 @@ import android.app.usage.NetworkStatsManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.HistoryItem;
 import android.os.BatteryStats.Uid.Sensor;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.WorkSource;
@@ -155,7 +157,9 @@ public class BatteryStatsNoteTest extends TestCase {
     @SmallTest
     public void testNoteStartWakeLocked_isolatedUid() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
-        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks, null,
+                new Handler(Looper.getMainLooper()), uidResolver);
 
         int pid = 10;
         String name = "name";
@@ -165,7 +169,7 @@ public class BatteryStatsNoteTest extends TestCase {
         isolatedWorkChain.addNode(ISOLATED_UID, name);
 
         // Map ISOLATED_UID to UID.
-        bi.addIsolatedUidLocked(ISOLATED_UID, UID);
+        uidResolver.noteIsolatedUidAdded(ISOLATED_UID, UID);
 
         bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
@@ -195,7 +199,9 @@ public class BatteryStatsNoteTest extends TestCase {
     @SmallTest
     public void testNoteStartWakeLocked_isolatedUidRace() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
-        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
+        PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks, null,
+                new Handler(Looper.getMainLooper()), uidResolver);
 
         int pid = 10;
         String name = "name";
@@ -205,7 +211,7 @@ public class BatteryStatsNoteTest extends TestCase {
         isolatedWorkChain.addNode(ISOLATED_UID, name);
 
         // Map ISOLATED_UID to UID.
-        bi.addIsolatedUidLocked(ISOLATED_UID, UID);
+        uidResolver.noteIsolatedUidAdded(ISOLATED_UID, UID);
 
         bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
@@ -216,7 +222,7 @@ public class BatteryStatsNoteTest extends TestCase {
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
 
         clocks.realtime = clocks.uptime = 150;
-        bi.maybeRemoveIsolatedUidLocked(ISOLATED_UID, clocks.realtime, clocks.uptime);
+        uidResolver.releaseIsolatedUid(ISOLATED_UID);
 
         clocks.realtime = clocks.uptime = 220;
         bi.noteStopWakeLocked(ISOLATED_UID, pid, isolatedWorkChain, name, historyName,
@@ -237,8 +243,9 @@ public class BatteryStatsNoteTest extends TestCase {
     @SmallTest
     public void testNoteLongPartialWakelockStart_isolatedUid() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
-        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
-
+        PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks, null,
+                new Handler(Looper.getMainLooper()), uidResolver);
 
         bi.setRecordAllHistoryLocked(true);
         bi.forceRecordAllHistory();
@@ -251,7 +258,7 @@ public class BatteryStatsNoteTest extends TestCase {
         isolatedWorkChain.addNode(ISOLATED_UID, name);
 
         // Map ISOLATED_UID to UID.
-        bi.addIsolatedUidLocked(ISOLATED_UID, UID);
+        uidResolver.noteIsolatedUidAdded(ISOLATED_UID, UID);
 
         bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
@@ -290,8 +297,9 @@ public class BatteryStatsNoteTest extends TestCase {
     @SmallTest
     public void testNoteLongPartialWakelockStart_isolatedUidRace() throws Exception {
         final MockClock clocks = new MockClock(); // holds realtime and uptime in ms
-        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks);
-
+        PowerStatsUidResolver uidResolver = new PowerStatsUidResolver();
+        MockBatteryStatsImpl bi = new MockBatteryStatsImpl(clocks, null,
+                new Handler(Looper.getMainLooper()), uidResolver);
 
         bi.setRecordAllHistoryLocked(true);
         bi.forceRecordAllHistory();
@@ -304,7 +312,7 @@ public class BatteryStatsNoteTest extends TestCase {
         isolatedWorkChain.addNode(ISOLATED_UID, name);
 
         // Map ISOLATED_UID to UID.
-        bi.addIsolatedUidLocked(ISOLATED_UID, UID);
+        uidResolver.noteIsolatedUidAdded(ISOLATED_UID, UID);
 
         bi.updateTimeBasesLocked(true, Display.STATE_OFF, 0, 0);
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_TOP);
@@ -314,7 +322,7 @@ public class BatteryStatsNoteTest extends TestCase {
         bi.noteUidProcessStateLocked(UID, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND);
 
         clocks.realtime = clocks.uptime = 150;
-        bi.maybeRemoveIsolatedUidLocked(ISOLATED_UID, clocks.realtime, clocks.uptime);
+        uidResolver.releaseIsolatedUid(ISOLATED_UID);
 
         clocks.realtime = clocks.uptime = 220;
         bi.noteLongPartialWakelockFinish(name, historyName, ISOLATED_UID);

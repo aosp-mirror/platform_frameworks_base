@@ -20,7 +20,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Surface.FRAME_RATE_CATEGORY_DEFAULT;
 import static android.view.Surface.FRAME_RATE_CATEGORY_HIGH;
 import static android.view.SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN;
-import static android.view.SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_SELF;
+import static android.view.SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_PROPAGATE;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -303,7 +303,7 @@ public class SystemPerformanceHinter {
             SurfaceControl displaySurfaceControl = mDisplayRootProvider.getRootForDisplay(
                     session.displayId);
             mTransaction.setFrameRateSelectionStrategy(displaySurfaceControl,
-                    FRAME_RATE_SELECTION_STRATEGY_SELF);
+                    FRAME_RATE_SELECTION_STRATEGY_PROPAGATE);
             // smoothSwitchOnly is false to request a higher framerate, even if it means switching
             // the display mode will cause would jank on non-VRR devices because keeping a lower
             // refresh rate would mean a poorer user experience.

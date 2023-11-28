@@ -248,7 +248,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private static final int SHOW = 1;
     private static final int HIDE = 2;
     private static final int RESET = 3;
-    private static final int VERIFY_UNLOCK = 4;
     private static final int NOTIFY_FINISHED_GOING_TO_SLEEP = 5;
     private static final int KEYGUARD_DONE = 7;
     private static final int KEYGUARD_DONE_DRAWING = 8;
@@ -2316,15 +2315,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mHandler.sendMessage(msg);
     }
 
-    /**
-     * Send message to keyguard telling it to verify unlock
-     * @see #handleVerifyUnlock()
-     */
-    private void verifyUnlockLocked() {
-        if (DEBUG) Log.d(TAG, "verifyUnlockLocked");
-        mHandler.sendEmptyMessage(VERIFY_UNLOCK);
-    }
-
     private void notifyStartedGoingToSleep() {
         if (DEBUG) Log.d(TAG, "notifyStartedGoingToSleep");
         mHandler.sendEmptyMessage(NOTIFY_STARTED_GOING_TO_SLEEP);
@@ -2497,12 +2487,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 case RESET:
                     message = "RESET";
                     handleReset(msg.arg1 != 0);
-                    break;
-                case VERIFY_UNLOCK:
-                    message = "VERIFY_UNLOCK";
-                    Trace.beginSection("KeyguardViewMediator#handleMessage VERIFY_UNLOCK");
-                    handleVerifyUnlock();
-                    Trace.endSection();
                     break;
                 case NOTIFY_STARTED_GOING_TO_SLEEP:
                     message = "NOTIFY_STARTED_GOING_TO_SLEEP";
@@ -3435,20 +3419,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         scheduleNonStrongBiometricIdleTimeout();
     }
 
-    /**
-     * Handle message sent by {@link #verifyUnlock}
-     * @see #VERIFY_UNLOCK
-     */
-    private void handleVerifyUnlock() {
-        Trace.beginSection("KeyguardViewMediator#handleVerifyUnlock");
-        synchronized (KeyguardViewMediator.this) {
-            if (DEBUG) Log.d(TAG, "handleVerifyUnlock");
-            setShowingLocked(true);
-            mKeyguardViewControllerLazy.get().dismissAndCollapse();
-        }
-        Trace.endSection();
-    }
-
     private void handleNotifyStartedGoingToSleep() {
         synchronized (KeyguardViewMediator.this) {
             if (DEBUG) Log.d(TAG, "handleNotifyStartedGoingToSleep");
@@ -3603,10 +3573,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     public void onShortPowerPressedGoHome() {
-        // do nothing
-    }
-
-    public void dismissKeyguardToLaunch(Intent intentToLaunch) {
         // do nothing
     }
 

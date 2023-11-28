@@ -26,8 +26,8 @@ import android.os.Build;
 import android.util.ArraySet;
 
 import com.android.internal.R;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.server.SystemConfig;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

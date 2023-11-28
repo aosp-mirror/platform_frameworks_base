@@ -76,9 +76,18 @@ public class PowerStatsAggregatorTest {
 
     @Test
     public void stateUpdates() {
+        PowerStats.Descriptor descriptor =
+                new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, 1,
+                        new PersistableBundle());
+        PowerStats powerStats = new PowerStats(descriptor);
+
         mClock.currentTime = 1222156800000L;    // An important date in world history
 
         mHistory.forceRecordAllHistory();
+        powerStats.stats = new long[]{0};
+        powerStats.uidStats.put(TEST_UID, new long[]{0});
+        mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
+
         mHistory.recordBatteryState(mClock.realtime, mClock.uptime, 10, /* plugged */ true);
         mHistory.recordStateStartEvent(mClock.realtime, mClock.uptime,
                 BatteryStats.HistoryItem.STATE_SCREEN_ON_FLAG);
@@ -87,10 +96,6 @@ public class PowerStatsAggregatorTest {
 
         advance(1000);
 
-        PowerStats.Descriptor descriptor =
-                new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, 1,
-                        new PersistableBundle());
-        PowerStats powerStats = new PowerStats(descriptor);
         powerStats.stats = new long[]{10000};
         powerStats.uidStats.put(TEST_UID, new long[]{1234});
         mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
@@ -181,17 +186,21 @@ public class PowerStatsAggregatorTest {
 
     @Test
     public void incompatiblePowerStats() {
+        PowerStats.Descriptor descriptor =
+                new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, 1,
+                        new PersistableBundle());
+        PowerStats powerStats = new PowerStats(descriptor);
+
         mHistory.forceRecordAllHistory();
+        powerStats.stats = new long[]{0};
+        powerStats.uidStats.put(TEST_UID, new long[]{0});
+        mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
         mHistory.recordBatteryState(mClock.realtime, mClock.uptime, 10, /* plugged */ true);
         mHistory.recordProcessStateChange(mClock.realtime, mClock.uptime, TEST_UID,
                 BatteryConsumer.PROCESS_STATE_FOREGROUND);
 
         advance(1000);
 
-        PowerStats.Descriptor descriptor =
-                new PowerStats.Descriptor(TEST_POWER_COMPONENT, "majorDrain", 1, 1,
-                        new PersistableBundle());
-        PowerStats powerStats = new PowerStats(descriptor);
         powerStats.stats = new long[]{10000};
         powerStats.uidStats.put(TEST_UID, new long[]{1234});
         mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);

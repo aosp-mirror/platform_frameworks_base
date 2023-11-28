@@ -59,10 +59,33 @@ class LoopedAnimatable2DrawableWrapperTest : SysuiTestCase() {
     }
 
     @Test
+    fun multipleStartAddsTheCallbackOnce() {
+        underTest.start()
+        underTest.start()
+        underTest.start()
+        underTest.start()
+
+        verify(drawable).registerAnimationCallback(any())
+    }
+
+    @Test
     fun stopRemovesTheCallback() {
+        underTest.start()
+
         underTest.stop()
 
         verify(drawable).unregisterAnimationCallback(any())
+    }
+
+    @Test
+    fun callbackSurvivesClearAnimationCallbacks() {
+        underTest.start()
+
+        underTest.clearAnimationCallbacks()
+
+        verify(drawable).clearAnimationCallbacks()
+        // start + re-add after #clearAnimationCallbacks
+        verify(drawable, times(2)).registerAnimationCallback(capture(callbackCaptor))
     }
 
     @Test

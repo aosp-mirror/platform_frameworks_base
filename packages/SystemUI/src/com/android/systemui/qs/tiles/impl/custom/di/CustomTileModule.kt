@@ -24,6 +24,8 @@ import com.android.systemui.qs.tiles.impl.custom.CustomTileMapper
 import com.android.systemui.qs.tiles.impl.custom.CustomTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepository
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepositoryImpl
+import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileRepository
+import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileRepositoryImpl
 import com.android.systemui.qs.tiles.impl.custom.di.bound.CustomTileBoundComponent
 import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
 import dagger.Binds
@@ -50,4 +52,6 @@ interface CustomTileModule {
     fun bindCustomTileDefaultsRepository(
         impl: CustomTileDefaultsRepositoryImpl
     ): CustomTileDefaultsRepository
+
+    @Binds fun bindCustomTileRepository(impl: CustomTileRepositoryImpl): CustomTileRepository
 }

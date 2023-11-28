@@ -30,6 +30,8 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -44,102 +46,112 @@ class ConfigurationStateTest : SysuiTestCase() {
 
     private val configurationController: ConfigurationController = mock()
     private val layoutInflater = TestLayoutInflater()
+    private val backgroundDispatcher = StandardTestDispatcher()
+    private val testScope = TestScope(backgroundDispatcher)
 
     val underTest = ConfigurationState(configurationController, context, layoutInflater)
 
     @Test
-    fun reinflateAndBindLatest_inflatesWithoutEmission() = runTest {
-        var callbackCount = 0
-        backgroundScope.launch {
-            underTest.reinflateAndBindLatest<View>(
-                resource = 0,
-                root = null,
-                attachToRoot = false,
-            ) {
-                callbackCount++
-                null
+    fun reinflateAndBindLatest_inflatesWithoutEmission() =
+        testScope.runTest {
+            var callbackCount = 0
+            backgroundScope.launch {
+                underTest.reinflateAndBindLatest<View>(
+                    resource = 0,
+                    root = null,
+                    attachToRoot = false,
+                    backgroundDispatcher,
+                ) {
+                    callbackCount++
+                    null
+                }
             }
-        }
 
-        // Inflates without an emission
-        runCurrent()
-        assertThat(layoutInflater.inflationCount).isEqualTo(1)
-        assertThat(callbackCount).isEqualTo(1)
-    }
-
-    @Test
-    fun reinflateAndBindLatest_reinflatesOnThemeChanged() = runTest {
-        var callbackCount = 0
-        backgroundScope.launch {
-            underTest.reinflateAndBindLatest<View>(
-                resource = 0,
-                root = null,
-                attachToRoot = false,
-            ) {
-                callbackCount++
-                null
-            }
-        }
-        runCurrent()
-
-        val configListeners: List<ConfigurationController.ConfigurationListener> = captureMany {
-            verify(configurationController, atLeastOnce()).addCallback(capture())
-        }
-
-        listOf(1, 2, 3).forEach { count ->
-            assertThat(layoutInflater.inflationCount).isEqualTo(count)
-            assertThat(callbackCount).isEqualTo(count)
-            configListeners.forEach { it.onThemeChanged() }
+            // Inflates without an emission
             runCurrent()
+            assertThat(layoutInflater.inflationCount).isEqualTo(1)
+            assertThat(callbackCount).isEqualTo(1)
         }
-    }
 
     @Test
-    fun reinflateAndBindLatest_reinflatesOnDensityOrFontScaleChanged() = runTest {
-        var callbackCount = 0
-        backgroundScope.launch {
-            underTest.reinflateAndBindLatest<View>(
-                resource = 0,
-                root = null,
-                attachToRoot = false,
-            ) {
-                callbackCount++
-                null
+    fun reinflateAndBindLatest_reinflatesOnThemeChanged() =
+        testScope.runTest {
+            var callbackCount = 0
+            backgroundScope.launch {
+                underTest.reinflateAndBindLatest<View>(
+                    resource = 0,
+                    root = null,
+                    attachToRoot = false,
+                    backgroundDispatcher,
+                ) {
+                    callbackCount++
+                    null
+                }
             }
-        }
-        runCurrent()
-
-        val configListeners: List<ConfigurationController.ConfigurationListener> = captureMany {
-            verify(configurationController, atLeastOnce()).addCallback(capture())
-        }
-
-        listOf(1, 2, 3).forEach { count ->
-            assertThat(layoutInflater.inflationCount).isEqualTo(count)
-            assertThat(callbackCount).isEqualTo(count)
-            configListeners.forEach { it.onDensityOrFontScaleChanged() }
             runCurrent()
-        }
-    }
 
-    @Test
-    fun testReinflateAndBindLatest_disposesOnCancel() = runTest {
-        var callbackCount = 0
-        var disposed = false
-        val job = launch {
-            underTest.reinflateAndBindLatest<View>(
-                resource = 0,
-                root = null,
-                attachToRoot = false,
-            ) {
-                callbackCount++
-                DisposableHandle { disposed = true }
+            val configListeners: List<ConfigurationController.ConfigurationListener> = captureMany {
+                verify(configurationController, atLeastOnce()).addCallback(capture())
+            }
+
+            listOf(1, 2, 3).forEach { count ->
+                assertThat(layoutInflater.inflationCount).isEqualTo(count)
+                assertThat(callbackCount).isEqualTo(count)
+                configListeners.forEach { it.onThemeChanged() }
+                runCurrent()
             }
         }
 
-        runCurrent()
-        job.cancelAndJoin()
-        assertThat(disposed).isTrue()
-    }
+    @Test
+    fun reinflateAndBindLatest_reinflatesOnDensityOrFontScaleChanged() =
+        testScope.runTest {
+            var callbackCount = 0
+            backgroundScope.launch {
+                underTest.reinflateAndBindLatest<View>(
+                    resource = 0,
+                    root = null,
+                    attachToRoot = false,
+                    backgroundDispatcher,
+                ) {
+                    callbackCount++
+                    null
+                }
+            }
+            runCurrent()
+
+            val configListeners: List<ConfigurationController.ConfigurationListener> = captureMany {
+                verify(configurationController, atLeastOnce()).addCallback(capture())
+            }
+
+            listOf(1, 2, 3).forEach { count ->
+                assertThat(layoutInflater.inflationCount).isEqualTo(count)
+                assertThat(callbackCount).isEqualTo(count)
+                configListeners.forEach { it.onDensityOrFontScaleChanged() }
+                runCurrent()
+            }
+        }
+
+    @Test
+    fun testReinflateAndBindLatest_disposesOnCancel() =
+        testScope.runTest {
+            var callbackCount = 0
+            var disposed = false
+            val job = launch {
+                underTest.reinflateAndBindLatest<View>(
+                    resource = 0,
+                    root = null,
+                    attachToRoot = false,
+                    backgroundDispatcher,
+                ) {
+                    callbackCount++
+                    DisposableHandle { disposed = true }
+                }
+            }
+
+            runCurrent()
+            job.cancelAndJoin()
+            assertThat(disposed).isTrue()
+        }
 
     inner class TestLayoutInflater : LayoutInflater(context) {
 
