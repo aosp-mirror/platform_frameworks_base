@@ -63,6 +63,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.UiThread;
 import com.android.server.am.PendingIntentRecord;
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.util.HashMap;
@@ -807,13 +808,29 @@ public class BackgroundActivityStartController {
                     "realCallingUid has BAL permission.");
         }
 
-        // don't abort if the realCallingUid has a visible window
-        // TODO(b/171459802): We should check appSwitchAllowed also
-        if (state.mRealCallingUidHasAnyVisibleWindow) {
-            return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
-                    /*background*/ false,
-                    "realCallingUid has visible (non-toast) window.");
+        // Normal apps with visible app window will be allowed to start activity if app switching
+        // is allowed, or apps like live wallpaper with non app visible window will be allowed.
+        final boolean appSwitchAllowedOrFg = state.mAppSwitchState == APP_SWITCH_ALLOW
+                || state.mAppSwitchState == APP_SWITCH_FG_ONLY;
+        if (Flags.balImproveRealCallerVisibilityCheck()) {
+            if (appSwitchAllowedOrFg && state.mRealCallingUidHasAnyVisibleWindow) {
+                return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
+                        /*background*/ false, "realCallingUid has visible window");
+            }
+            if (mService.mActiveUids.hasNonAppVisibleWindow(state.mRealCallingUid)) {
+                return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
+                        /*background*/ false, "realCallingUid has non-app visible window");
+            }
+        } else {
+            // don't abort if the realCallingUid has a visible window
+            // TODO(b/171459802): We should check appSwitchAllowed also
+            if (state.mRealCallingUidHasAnyVisibleWindow) {
+                return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
+                        /*background*/ false,
+                        "realCallingUid has visible (non-toast) window.");
+            }
         }
+
         // if the realCallingUid is a persistent system process, abort if the IntentSender
         // wasn't allowed to start an activity
         if (state.mForcedBalByPiSender.allowsBackgroundActivityStarts()
