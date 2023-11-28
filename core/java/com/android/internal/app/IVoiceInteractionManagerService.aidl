@@ -390,12 +390,12 @@ interface IVoiceInteractionManagerService {
             int type);
 
     /**
-      * Sets the sandboxed detection training data egress op to provided op-mode.
+      * Allows/disallows receiving training data from trusted process.
       * Caller must be the active assistant and a preinstalled assistant.
       *
-      * @param opMode app-op mode to set training data egress op to.
-      *
-      * @return whether was able to successfully set training data egress op.
+      * @param allowed whether to allow/disallow receiving training data produced during
+      * sandboxed detection (from trusted process).
       */
-      boolean setSandboxedDetectionTrainingDataOp(int opMode);
+      @EnforcePermission("MANAGE_HOTWORD_DETECTION")
+      void setIsReceiveSandboxedTrainingDataAllowed(boolean allowed);
 }

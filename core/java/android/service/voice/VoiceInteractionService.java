@@ -1024,21 +1024,31 @@ public class VoiceInteractionService extends Service {
         }
     }
 
-    /** Set sandboxed detection training data egress op.
+    /**
+     * Allow/disallow receiving training data from trusted process.
      *
-     * <p> This method can be called by a preinstalled assistant to allow/disallow training data
-     * egress from trusted process.
+     * <p> This method can be called by a preinstalled assistant to receive/stop receiving
+     * training data via {@link HotwordDetector.Callback#onTrainingData(HotwordTrainingData)}.
+     * These training data events are produced during sandboxed detection (in trusted process).
      *
-     * @return whether was able to update sandboxed detection op successfully.
-     * @throws SecurityException if assistant is not a preinstalled assistant.
+     * @param allowed whether to allow/disallow receiving training data produced during
+     *                sandboxed detection (from trusted process).
+     * @throws SecurityException if caller is not a preinstalled assistant or if caller is not the
+     * active assistant.
      *
      * @hide
      */
+    //TODO(b/315053245): Add mitigations to make API no-op once user has modified setting.
+    @SystemApi
     @FlaggedApi(Flags.FLAG_ALLOW_TRAINING_DATA_EGRESS_FROM_HDS)
-    public boolean setSandboxedDetectionTrainingDataOp(int opMode) {
-        Log.i(TAG, "Setting training data egress op-mode to " + opMode);
+    @RequiresPermission(Manifest.permission.MANAGE_HOTWORD_DETECTION)
+    public void setIsReceiveSandboxedTrainingDataAllowed(boolean allowed) {
+        Log.i(TAG, "setIsReceiveSandboxedTrainingDataAllowed to " + allowed);
+        if (mSystemService == null) {
+            throw new IllegalStateException("Not available until onReady() is called");
+        }
         try {
-            return mSystemService.setSandboxedDetectionTrainingDataOp(opMode);
+            mSystemService.setIsReceiveSandboxedTrainingDataAllowed(allowed);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
