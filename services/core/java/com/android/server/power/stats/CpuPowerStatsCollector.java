@@ -35,7 +35,6 @@ import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
 import com.android.server.LocalServices;
-import com.android.server.power.optimization.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -271,13 +270,6 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
         mVoltageSupplier = voltageSupplier;
         mDefaultCpuPowerBrackets = defaultCpuPowerBrackets;
         mDefaultCpuPowerBracketsPerEnergyConsumer = defaultCpuPowerBracketsPerEnergyConsumer;
-    }
-
-    /**
-     * Initializes the collector during the boot sequence.
-     */
-    public void onSystemReady() {
-        setEnabled(Flags.streamlinedBatteryStats());
     }
 
     private boolean ensureInitialized() {
