@@ -189,6 +189,14 @@ flag {
 }
 
 flag {
+   name: "migrate_clocks_to_blueprint"
+   namespace: "systemui"
+   description: "Move clock related views from KeyguardStatusView to KeyguardRootView, "
+        "and use modern architecture for lockscreen clocks"
+   bug: "301502635"
+}
+
+flag {
    name: "fast_unlock_transition"
    namespace: "systemui"
    description: "Faster wallpaper unlock transition"

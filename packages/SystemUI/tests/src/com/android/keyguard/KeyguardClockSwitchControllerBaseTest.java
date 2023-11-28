@@ -19,7 +19,6 @@ package com.android.keyguard;
 import static android.view.View.INVISIBLE;
 
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
-import static com.android.systemui.flags.Flags.MIGRATE_CLOCKS_TO_BLUEPRINT;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
@@ -179,7 +178,6 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
         mExecutor = new FakeExecutor(new FakeSystemClock());
         mFakeFeatureFlags = new FakeFeatureFlags();
         mFakeFeatureFlags.set(LOCKSCREEN_WALLPAPER_DREAM_ENABLED, false);
-        mFakeFeatureFlags.set(MIGRATE_CLOCKS_TO_BLUEPRINT, false);
         mController = new KeyguardClockSwitchController(
                 mView,
                 mStatusBarStateController,
