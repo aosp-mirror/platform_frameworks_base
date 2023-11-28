@@ -6,3 +6,10 @@ flag {
     description: "Flag for GNSS API for NavIC L1"
     bug: "302199306"
 }
+
+flag {
+    name: "gnss_call_stop_before_set_position_mode"
+    namespace: "location"
+    description: "Flag for calling stop() before setPositionMode()"
+    bug: "306874828"
+}
