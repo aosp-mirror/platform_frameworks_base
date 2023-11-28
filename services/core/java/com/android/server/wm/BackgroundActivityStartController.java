@@ -268,9 +268,14 @@ public class BackgroundActivityStartController {
             mIntent = intent;
             mRealCallingPackage = mService.getPackageNameIfUnique(realCallingUid, realCallingPid);
             if (originatingPendingIntent == null) {
-                // grant creator BAL privileges unless explicitly opted out
+                // grant BAL privileges unless explicitly opted out
                 mBalAllowedByPiCreator =
                         checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
+                                == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED
+                                ? BackgroundStartPrivileges.NONE
+                                : BackgroundStartPrivileges.ALLOW_BAL;
+                mBalAllowedByPiSender =
+                        checkedOptions.getPendingIntentBackgroundActivityStartMode()
                                 == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED
                                 ? BackgroundStartPrivileges.NONE
                                 : BackgroundStartPrivileges.ALLOW_BAL;
@@ -278,10 +283,10 @@ public class BackgroundActivityStartController {
                 // for PendingIntents we restrict BAL based on target_sdk
                 mBalAllowedByPiCreator = getBackgroundStartPrivilegesAllowedByCreator(
                         callingUid, callingPackage, checkedOptions);
+                mBalAllowedByPiSender =
+                        PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
+                                checkedOptions, realCallingUid, mRealCallingPackage);
             }
-            mBalAllowedByPiSender =
-                    PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
-                            checkedOptions, realCallingUid, mRealCallingPackage);
             mAppSwitchState = mService.getBalAppSwitchesState();
             mCallingUidProcState = mService.mActiveUids.getUidState(callingUid);
             mIsCallingUidPersistentSystemProcess =
@@ -580,11 +585,12 @@ public class BackgroundActivityStartController {
                     resultForCaller.allows() && resultForRealCaller.blocks());
         }
 
+        // Handle cases with explicit opt-in
         if (resultForCaller.allows()
                 && checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
                 == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED) {
             if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "Activity start explicitly allowed by PI creator. "
+                Slog.d(TAG, "Activity start explicitly allowed by caller. "
                         + state.dump(resultForCaller, resultForRealCaller));
             }
             return statsLog(resultForCaller, state);
@@ -593,11 +599,12 @@ public class BackgroundActivityStartController {
                 && checkedOptions.getPendingIntentBackgroundActivityStartMode()
                 == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED) {
             if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "Activity start explicitly allowed by PI sender. "
+                Slog.d(TAG, "Activity start explicitly allowed by real caller. "
                         + state.dump(resultForCaller, resultForRealCaller));
             }
             return statsLog(resultForRealCaller, state);
         }
+        // Handle PendingIntent cases with default behavior next
         boolean callerCanAllow = resultForCaller.allows()
                 && checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
                 == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
