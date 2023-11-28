@@ -26,10 +26,11 @@ import android.annotation.IntDef;
 
 /** Helper utility class of methods and constants that are available to be imported in Launcher. */
 public class SplitScreenConstants {
-    /**
-     * Duration used for every split fade-in or fade-out.
-     */
+    /** Duration used for every split fade-in or fade-out. */
     public static final int FADE_DURATION = 133;
+
+    /** Key for passing in widget intents when invoking split from launcher workspace. */
+    public static final String KEY_EXTRA_WIDGET_INTENT = "key_extra_widget_intent";
 
     ///////////////
     // IMPORTANT for the following SPLIT_POSITION and SNAP_TO constants:
