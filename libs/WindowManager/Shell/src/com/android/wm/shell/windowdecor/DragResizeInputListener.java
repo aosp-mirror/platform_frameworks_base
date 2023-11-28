@@ -49,7 +49,6 @@ import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerGlobal;
 
-import com.android.internal.view.BaseIWindow;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 
@@ -70,7 +69,9 @@ class DragResizeInputListener implements AutoCloseable {
     private final Supplier<SurfaceControl.Transaction> mSurfaceControlTransactionSupplier;
 
     private final int mDisplayId;
-    private final BaseIWindow mFakeWindow;
+
+    private final IBinder mClientToken;
+
     private final IBinder mFocusGrantToken;
     private final SurfaceControl mDecorationSurface;
     private final InputChannel mInputChannel;
@@ -78,7 +79,7 @@ class DragResizeInputListener implements AutoCloseable {
     private final DragPositioningCallback mCallback;
 
     private final SurfaceControl mInputSinkSurface;
-    private final BaseIWindow mFakeSinkWindow;
+    private final IBinder mSinkClientToken;
     private final InputChannel mSinkInputChannel;
     private final DisplayController mDisplayController;
 
@@ -116,17 +117,14 @@ class DragResizeInputListener implements AutoCloseable {
         mTaskCornerRadius = taskCornerRadius;
         mDecorationSurface = decorationSurface;
         mDisplayController = displayController;
-        // Use a fake window as the backing surface is a container layer, and we don't want to
-        // create a buffer layer for it, so we can't use ViewRootImpl.
-        mFakeWindow = new BaseIWindow();
-        mFakeWindow.setSession(mWindowSession);
+        mClientToken = new Binder();
         mFocusGrantToken = new Binder();
         mInputChannel = new InputChannel();
         try {
             mWindowSession.grantInputChannel(
                     mDisplayId,
                     mDecorationSurface,
-                    mFakeWindow.asBinder(),
+                    mClientToken,
                     null /* hostInputToken */,
                     FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
@@ -155,13 +153,13 @@ class DragResizeInputListener implements AutoCloseable {
                 .setLayer(mInputSinkSurface, WindowDecoration.INPUT_SINK_Z_ORDER)
                 .show(mInputSinkSurface)
                 .apply();
-        mFakeSinkWindow = new BaseIWindow();
+        mSinkClientToken = new Binder();
         mSinkInputChannel = new InputChannel();
         try {
             mWindowSession.grantInputChannel(
                     mDisplayId,
                     mInputSinkSurface,
-                    mFakeSinkWindow.asBinder(),
+                    mSinkClientToken,
                     null /* hostInputToken */,
                     FLAG_NOT_FOCUSABLE,
                     0 /* privateFlags */,
@@ -324,14 +322,14 @@ class DragResizeInputListener implements AutoCloseable {
         mInputEventReceiver.dispose();
         mInputChannel.dispose();
         try {
-            mWindowSession.remove(mFakeWindow.asBinder());
+            mWindowSession.remove(mClientToken);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
 
         mSinkInputChannel.dispose();
         try {
-            mWindowSession.remove(mFakeSinkWindow.asBinder());
+            mWindowSession.remove(mSinkClientToken);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
