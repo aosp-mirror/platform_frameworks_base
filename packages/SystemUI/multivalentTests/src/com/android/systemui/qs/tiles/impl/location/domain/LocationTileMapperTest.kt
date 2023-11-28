@@ -16,7 +16,6 @@
 
 package com.android.systemui.qs.tiles.impl.location.domain
 
-import android.graphics.drawable.Drawable
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -26,7 +25,6 @@ import com.android.systemui.qs.tiles.impl.location.domain.model.LocationTileMode
 import com.android.systemui.qs.tiles.impl.location.qsLocationTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
-import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth
 import junit.framework.Assert
 import org.junit.Test
@@ -37,7 +35,8 @@ import org.junit.runner.RunWith
 class LocationTileMapperTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val qsTileConfig = kosmos.qsLocationTileConfig
-    private val mapper by lazy { LocationTileMapper(context) }
+
+    private val mapper by lazy { LocationTileMapper(context.orCreateTestableResources.resources) }
 
     @Test
     fun mapsDisabledDataToInactiveState() {
@@ -57,9 +56,7 @@ class LocationTileMapperTest : SysuiTestCase() {
 
     @Test
     fun mapsEnabledDataToOnIconState() {
-        val fakeDrawable = mock<Drawable>()
-        context.orCreateTestableResources.addOverride(R.drawable.qs_location_icon_on, fakeDrawable)
-        val expectedIcon = Icon.Loaded(fakeDrawable, null)
+        val expectedIcon = Icon.Resource(R.drawable.qs_location_icon_on, null)
 
         val tileState: QSTileState = mapper.map(qsTileConfig, LocationTileModel(true))
 
@@ -69,9 +66,7 @@ class LocationTileMapperTest : SysuiTestCase() {
 
     @Test
     fun mapsDisabledDataToOffIconState() {
-        val fakeDrawable = mock<Drawable>()
-        context.orCreateTestableResources.addOverride(R.drawable.qs_location_icon_off, fakeDrawable)
-        val expectedIcon = Icon.Loaded(fakeDrawable, null)
+        val expectedIcon = Icon.Resource(R.drawable.qs_location_icon_off, null)
 
         val tileState: QSTileState = mapper.map(qsTileConfig, LocationTileModel(false))
 
