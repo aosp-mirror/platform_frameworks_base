@@ -27,9 +27,11 @@ import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.util.Log;
 
+import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -52,6 +54,9 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
         private final CallbackUtil.LazyListenerManager<OnLoudnessCodecUpdateListener>
                 mLoudnessListenerMgr = new CallbackUtil.LazyListenerManager<>();
 
+        private final Object mLock = new Object();
+
+        @GuardedBy("mLock")
         private final HashMap<OnLoudnessCodecUpdateListener, LoudnessCodecConfigurator>
                 mConfiguratorListener = new HashMap<>();
 
@@ -66,7 +71,8 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
 
         @Override
         public void dispatchLoudnessCodecParameterChange(int piid, PersistableBundle params) {
-            mLoudnessListenerMgr.callListeners(listener ->
+            mLoudnessListenerMgr.callListeners(listener -> {
+                synchronized (mLock) {
                     mConfiguratorListener.computeIfPresent(listener, (l, lcConfig) -> {
                         // send the appropriate bundle for the user to update
                         if (lcConfig.getAssignedTrackPiid() == piid) {
@@ -95,9 +101,10 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
                                 }
                             }
                         }
-
                         return lcConfig;
-                    }));
+                    });
+                }
+            });
         }
 
         private static Bundle filterLoudnessParams(Bundle bundle) {
@@ -130,20 +137,32 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
             mLoudnessListenerMgr.addListener(
                     executor, listener, "addLoudnessCodecListener",
                     () -> dispatcher);
-            mConfiguratorListener.put(listener, configurator);
+            synchronized (mLock) {
+                mConfiguratorListener.put(listener, configurator);
+            }
         }
 
         void removeLoudnessCodecListener(@NonNull LoudnessCodecConfigurator configurator) {
             Objects.requireNonNull(configurator);
 
-            for (Entry<OnLoudnessCodecUpdateListener, LoudnessCodecConfigurator> e :
-                    mConfiguratorListener.entrySet()) {
-                if (e.getValue() == configurator) {
-                    final OnLoudnessCodecUpdateListener listener = e.getKey();
-                    mConfiguratorListener.remove(listener);
-                    mLoudnessListenerMgr.removeListener(listener, "removeLoudnessCodecListener");
-                    break;
+            OnLoudnessCodecUpdateListener listenerToRemove = null;
+            synchronized (mLock) {
+                Iterator<Entry<OnLoudnessCodecUpdateListener, LoudnessCodecConfigurator>> iterator =
+                        mConfiguratorListener.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Entry<OnLoudnessCodecUpdateListener, LoudnessCodecConfigurator> e =
+                            iterator.next();
+                    if (e.getValue() == configurator) {
+                        final OnLoudnessCodecUpdateListener listener = e.getKey();
+                        iterator.remove();
+                        listenerToRemove = listener;
+                        break;
+                    }
                 }
+            }
+            if (listenerToRemove != null) {
+                mLoudnessListenerMgr.removeListener(listenerToRemove,
+                        "removeLoudnessCodecListener");
             }
         }
     }
