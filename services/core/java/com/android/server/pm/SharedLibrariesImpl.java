@@ -856,9 +856,9 @@ public final class SharedLibrariesImpl implements SharedLibrariesRead, Watchable
         // We may not yet have disabled the updated package yet, so be sure to grab the
         // current setting if that's the case.
         final PackageSetting updatedSystemPs = isUpdatedSystemApp
-                ? installRequest.getDisabledPackageSetting() == null
+                ? installRequest.getScanRequestDisabledPackageSetting() == null
                 ? installRequest.getScanRequestOldPackageSetting()
-                : installRequest.getDisabledPackageSetting()
+                : installRequest.getScanRequestDisabledPackageSetting()
                 : null;
         if (isUpdatedSystemApp && (updatedSystemPs.getPkg() == null
                 || updatedSystemPs.getPkg().getLibraryNames() == null)) {
