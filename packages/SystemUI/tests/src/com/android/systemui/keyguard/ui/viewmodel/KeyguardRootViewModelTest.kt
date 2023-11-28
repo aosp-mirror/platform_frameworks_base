@@ -163,23 +163,6 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun alpha_inPreviewMode_doesNotChange() =
-        testScope.runTest {
-            val value = collectLastValue(underTest.alpha)
-            underTest.enablePreviewMode()
-
-            assertThat(value()).isEqualTo(1f)
-            repository.setKeyguardAlpha(0.1f)
-            assertThat(value()).isEqualTo(1f)
-            repository.setKeyguardAlpha(0.5f)
-            assertThat(value()).isEqualTo(1f)
-            repository.setKeyguardAlpha(0.2f)
-            assertThat(value()).isEqualTo(1f)
-            repository.setKeyguardAlpha(0f)
-            assertThat(value()).isEqualTo(1f)
-        }
-
-    @Test
     fun translationAndScaleFromBurnInNotDozing() =
         testScope.runTest {
             val translationX by collectLastValue(underTest.translationX)

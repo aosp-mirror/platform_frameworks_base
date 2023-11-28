@@ -26,6 +26,7 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 /**
  * Breaks down LOCKSCREEN->PRIMARY BOUNCER transition into discrete steps for corresponding views to
@@ -45,6 +46,11 @@ constructor(
             transitionFlow =
                 interactor.transition(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER),
         )
+
+    val shortcutsAlpha: Flow<Float> =
+        interactor.transition(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER).map {
+            1 - it.value
+        }
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         shadeDependentFlows.transitionFlow(

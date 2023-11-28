@@ -96,6 +96,14 @@ constructor(
             onStep = { it },
         )
 
+    val shortcutsAlpha: Flow<Float> =
+        transitionAnimation.createFlow(
+            startTime = 233.milliseconds,
+            duration = 250.milliseconds,
+            onStep = { it },
+            onCancel = { 0f },
+        )
+
     val deviceEntryBackgroundViewAlpha =
         deviceEntryUdfpsInteractor.isUdfpsSupported.flatMapLatest { isUdfps ->
             if (isUdfps) {

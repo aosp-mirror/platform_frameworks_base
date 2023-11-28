@@ -17,38 +17,31 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.FromDozingTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor.Companion.TO_DOZING_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
-import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Breaks down DOZING->LOCKSCREEN transition into discrete steps for corresponding views to consume.
- */
-@ExperimentalCoroutinesApi
 @SysUISingleton
-class DozingToLockscreenTransitionViewModel
+class LockscreenToDozingTransitionViewModel
 @Inject
 constructor(
     interactor: KeyguardTransitionInteractor,
-) : DeviceEntryIconTransition {
-    private val transitionAnimation: KeyguardTransitionAnimationFlow =
+) {
+
+    private val transitionAnimation =
         KeyguardTransitionAnimationFlow(
-            transitionDuration = FromDozingTransitionInteractor.TO_LOCKSCREEN_DURATION,
-            transitionFlow = interactor.dozingToLockscreenTransition,
+            transitionDuration = TO_DOZING_DURATION,
+            transitionFlow = interactor.lockscreenToDozingTransition
         )
 
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.createFlow(
-            duration = 150.milliseconds,
-            onStep = { it },
-            onCancel = { 0f },
+            duration = 250.milliseconds,
+            onStep = { 1 - it },
+            onFinish = { 0f },
+            onCancel = { 1f },
         )
-
-    override val deviceEntryParentViewAlpha: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(1f)
 }
