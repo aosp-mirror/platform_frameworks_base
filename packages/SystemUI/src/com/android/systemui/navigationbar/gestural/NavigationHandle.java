@@ -105,8 +105,8 @@ public class NavigationHandle extends View implements ButtonInterface {
         float height = mRadius * 2 + additionalHeight;
         float additionalWidth = mAdditionalWidthForAnimation * mPulseAnimationProgress;
         float width = getWidth() + additionalWidth;
-        float x = -(additionalWidth / 2);
-        float y = navHeight - mBottom - height - (additionalHeight / 2);
+        float x = -additionalWidth;
+        float y = navHeight - mBottom - height + (additionalHeight / 2);
         float adjustedRadius = height / 2;
         canvas.drawRoundRect(x, y, width, y + height, adjustedRadius, adjustedRadius, mPaint);
     }
