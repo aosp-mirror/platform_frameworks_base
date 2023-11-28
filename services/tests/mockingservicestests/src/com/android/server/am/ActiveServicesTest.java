@@ -202,7 +202,7 @@ public class ActiveServicesTest {
         final ServiceInfo regularService = new ServiceInfo();
         regularService.processName = "com.foo";
         String processName = ActiveServices.getProcessNameForService(regularService, null, null,
-                null, false, false);
+                null, false, false, false);
         assertEquals("com.foo", processName);
 
         // Isolated service
@@ -211,8 +211,68 @@ public class ActiveServicesTest {
         isolatedService.flags = ServiceInfo.FLAG_ISOLATED_PROCESS;
         final ComponentName component = new ComponentName("com.foo", "barService");
         processName = ActiveServices.getProcessNameForService(isolatedService, component,
-                null, null, false, false);
+                null, null, false, false, false);
         assertEquals("com.foo:barService", processName);
+
+        // Isolated Service in package private process.
+        final ServiceInfo isolatedService1 = new ServiceInfo();
+        isolatedService1.processName = "com.foo:trusted_isolated";
+        isolatedService1.flags = ServiceInfo.FLAG_ISOLATED_PROCESS;
+        final ComponentName componentName = new ComponentName("com.foo", "barService");
+        processName = ActiveServices.getProcessNameForService(isolatedService1, componentName,
+                null, null, false, false, false);
+        assertEquals("com.foo:trusted_isolated:barService", processName);
+
+        // Isolated service in package-private shared process (main process)
+        final ServiceInfo isolatedPackageSharedService = new ServiceInfo();
+        final ComponentName componentName1 = new ComponentName("com.foo", "barService");
+        isolatedPackageSharedService.processName = "com.foo";
+        isolatedPackageSharedService.applicationInfo = new ApplicationInfo();
+        isolatedPackageSharedService.applicationInfo.processName = "com.foo";
+        isolatedPackageSharedService.flags = ServiceInfo.FLAG_ISOLATED_PROCESS;
+        String packageSharedIsolatedProcessName = ActiveServices.getProcessNameForService(
+                isolatedPackageSharedService, componentName1, null, null, false, false, true);
+        assertEquals("com.foo:barService", packageSharedIsolatedProcessName);
+
+        // Isolated service in package-private shared process
+        final ServiceInfo isolatedPackageSharedService1 = new ServiceInfo(
+                isolatedPackageSharedService);
+        isolatedPackageSharedService1.processName = "com.foo:trusted_isolated";
+        isolatedPackageSharedService1.applicationInfo = new ApplicationInfo();
+        isolatedPackageSharedService1.applicationInfo.processName = "com.foo";
+        isolatedPackageSharedService1.flags = ServiceInfo.FLAG_ISOLATED_PROCESS;
+        packageSharedIsolatedProcessName = ActiveServices.getProcessNameForService(
+                isolatedPackageSharedService1, componentName1, null, null, false, false, true);
+        assertEquals("com.foo:trusted_isolated", packageSharedIsolatedProcessName);
+
+
+        // Bind another one in the same isolated process
+        final ServiceInfo isolatedPackageSharedService2 = new ServiceInfo(
+                isolatedPackageSharedService1);
+        packageSharedIsolatedProcessName = ActiveServices.getProcessNameForService(
+                isolatedPackageSharedService2, componentName1, null, null, false, false, true);
+        assertEquals("com.foo:trusted_isolated", packageSharedIsolatedProcessName);
+
+        // Simulate another app trying to do the bind.
+        final ServiceInfo isolatedPackageSharedService3 = new ServiceInfo(
+                isolatedPackageSharedService1);
+        final String auxCallingPackage = "com.bar";
+        packageSharedIsolatedProcessName = ActiveServices.getProcessNameForService(
+                isolatedPackageSharedService3, componentName1, auxCallingPackage, null,
+                false, false, true);
+        assertEquals("com.foo:trusted_isolated", packageSharedIsolatedProcessName);
+
+        // Simulate another app owning the service
+        final ServiceInfo isolatedOtherPackageSharedService = new ServiceInfo(
+                isolatedPackageSharedService1);
+        final ComponentName componentName2 = new ComponentName("com.bar", "barService");
+        isolatedOtherPackageSharedService.processName = "com.bar:isolated";
+        isolatedPackageSharedService.applicationInfo.processName = "com.bar";
+        final String mainCallingPackage = "com.foo";
+        packageSharedIsolatedProcessName = ActiveServices.getProcessNameForService(
+                isolatedOtherPackageSharedService, componentName2, mainCallingPackage,
+                null, false, false, true);
+        assertEquals("com.bar:isolated", packageSharedIsolatedProcessName);
 
         // Isolated service in shared isolated process
         final ServiceInfo isolatedServiceShared1 = new ServiceInfo();
@@ -220,20 +280,21 @@ public class ActiveServicesTest {
         final String instanceName = "pool";
         final String callingPackage = "com.foo";
         final String sharedIsolatedProcessName1 = ActiveServices.getProcessNameForService(
-                isolatedServiceShared1, null, callingPackage, instanceName, false, true);
+                isolatedServiceShared1, null, callingPackage, instanceName, false, true, false);
         assertEquals("com.foo:ishared:pool", sharedIsolatedProcessName1);
 
         // Bind another one in the same isolated process
         final ServiceInfo isolatedServiceShared2 = new ServiceInfo(isolatedServiceShared1);
         final String sharedIsolatedProcessName2 = ActiveServices.getProcessNameForService(
-                isolatedServiceShared2, null, callingPackage, instanceName, false, true);
+                isolatedServiceShared2, null, callingPackage, instanceName, false, true, false);
         assertEquals(sharedIsolatedProcessName1, sharedIsolatedProcessName2);
 
         // Simulate another app trying to do the bind
         final ServiceInfo isolatedServiceShared3 = new ServiceInfo(isolatedServiceShared1);
         final String otherCallingPackage = "com.bar";
         final String sharedIsolatedProcessName3 = ActiveServices.getProcessNameForService(
-                isolatedServiceShared3, null, otherCallingPackage, instanceName, false, true);
+                isolatedServiceShared3, null, otherCallingPackage, instanceName, false, true,
+                false);
         Assert.assertNotEquals(sharedIsolatedProcessName2, sharedIsolatedProcessName3);
     }
 
