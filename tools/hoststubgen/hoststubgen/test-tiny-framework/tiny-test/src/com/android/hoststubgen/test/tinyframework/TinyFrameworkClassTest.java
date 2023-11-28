@@ -289,6 +289,6 @@ public class TinyFrameworkClassTest {
     @Test
     public void testAidlHeuristics() {
         assertThat(IPretendingAidl.Stub.addOne(1)).isEqualTo(2);
-        assertThat(IPretendingAidl.Proxy.addTwo(1)).isEqualTo(3);
+        assertThat(IPretendingAidl.Stub.Proxy.addTwo(1)).isEqualTo(3);
     }
 }

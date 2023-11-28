@@ -39,5 +39,5 @@ class AndroidHeuristicsFilter(
 private fun ClassNodes.isAidlClass(className: String): Boolean {
     return hasClass(className) &&
             hasClass("$className\$Stub") &&
-            hasClass("$className\$Proxy")
+            hasClass("$className\$Stub\$Proxy")
 }
