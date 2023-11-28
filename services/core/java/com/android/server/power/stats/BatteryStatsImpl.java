@@ -8203,18 +8203,18 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @GuardedBy("mBsi")
         private void ensureMultiStateCounters(long timestampMs) {
-            if (mProcStateTimeMs != null) {
-                return;
+            if (mProcStateTimeMs == null) {
+                mProcStateTimeMs =
+                        new TimeInFreqMultiStateCounter(mBsi.mOnBatteryTimeBase,
+                                PROC_STATE_TIME_COUNTER_STATE_COUNT, mBsi.getCpuFreqCount(),
+                                timestampMs);
             }
-
-            mProcStateTimeMs =
-                    new TimeInFreqMultiStateCounter(mBsi.mOnBatteryTimeBase,
-                            PROC_STATE_TIME_COUNTER_STATE_COUNT, mBsi.getCpuFreqCount(),
-                            timestampMs);
-            mProcStateScreenOffTimeMs =
-                    new TimeInFreqMultiStateCounter(mBsi.mOnBatteryScreenOffTimeBase,
-                            PROC_STATE_TIME_COUNTER_STATE_COUNT, mBsi.getCpuFreqCount(),
-                            timestampMs);
+            if (mProcStateScreenOffTimeMs == null) {
+                mProcStateScreenOffTimeMs =
+                        new TimeInFreqMultiStateCounter(mBsi.mOnBatteryScreenOffTimeBase,
+                                PROC_STATE_TIME_COUNTER_STATE_COUNT, mBsi.getCpuFreqCount(),
+                                timestampMs);
+            }
         }
 
         @GuardedBy("mBsi")
