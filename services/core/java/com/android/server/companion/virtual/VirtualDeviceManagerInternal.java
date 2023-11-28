@@ -149,6 +149,14 @@ public abstract class VirtualDeviceManagerInternal {
     public abstract @NonNull ArraySet<Integer> getDisplayIdsForDevice(int deviceId);
 
     /**
+     * Returns the ID of the device which owns the display with the given ID.
+     *
+     * <p>In case the virtual display ID is invalid or doesn't belong to a virtual device, then
+     * {@link android.content.Context#DEVICE_ID_DEFAULT} is returned.</p>
+     */
+    public abstract int getDeviceIdForDisplayId(int displayId);
+
+    /**
      * Gets the persistent ID for the VirtualDevice with the given device ID.
      *
      * @param deviceId which device we're asking about
