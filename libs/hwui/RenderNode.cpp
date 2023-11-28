@@ -260,6 +260,12 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
         pushStagingDisplayListChanges(observer, info);
     }
 
+    // always damageSelf when filtering backdrop content, or else the BackdropFilterDrawable will
+    // get a wrong snapshot of previous content.
+    if (mProperties.layerProperties().getBackdropImageFilter()) {
+        damageSelf(info);
+    }
+
     if (mDisplayList) {
         info.out.hasFunctors |= mDisplayList.hasFunctor();
         mHasHolePunches = mDisplayList.hasHolePunches();
