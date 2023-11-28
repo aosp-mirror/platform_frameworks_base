@@ -5580,6 +5580,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     @Override
     public void injectInputEventToInputFilter(InputEvent event) {
+        mSecurityPolicy.enforceCallingPermission(Manifest.permission.INJECT_EVENTS,
+                "injectInputEventToInputFilter");
         synchronized (mLock) {
             final long endMillis =
                     SystemClock.uptimeMillis() + WAIT_INPUT_FILTER_INSTALL_TIMEOUT_MS;
