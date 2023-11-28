@@ -2015,6 +2015,9 @@ public class TransitionTests extends WindowTestsBase {
         transition.collect(leafTaskA);
         rootTaskA.moveToFront("test", leafTaskA);
 
+        // Test has order changes, a shallow check of order changes
+        assertTrue(transition.hasOrderChanges());
+
         // All the tasks were already visible, so there shouldn't be any changes
         ArrayList<Transition.ChangeInfo> targets = Transition.calculateTargets(
                 participants, changes);
