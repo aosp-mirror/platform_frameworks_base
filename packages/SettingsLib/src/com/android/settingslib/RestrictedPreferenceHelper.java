@@ -23,7 +23,6 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -230,15 +229,13 @@ public class RestrictedPreferenceHelper {
     }
 
     private void updateDisabledState() {
-        boolean isEnabled = !(mDisabledByAdmin || mDisabledByAppOps);
         if (!(mPreference instanceof RestrictedTopLevelPreference)) {
-            mPreference.setEnabled(isEnabled);
+            mPreference.setEnabled(!(mDisabledByAdmin || mDisabledByAppOps));
         }
 
-        Drawable icon = mPreference.getIcon();
-        if (!isEnabled && icon != null) {
-            Utils.convertToGrayscale(icon);
-            mPreference.setIcon(icon);
+        if (mPreference instanceof PrimarySwitchPreference) {
+            ((PrimarySwitchPreference) mPreference)
+                    .setSwitchEnabled(!(mDisabledByAdmin || mDisabledByAppOps));
         }
     }
 }

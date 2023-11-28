@@ -133,12 +133,6 @@ public class PrimarySwitchPreference extends RestrictedPreference {
         }
     }
 
-    @Override
-    public void setEnabled(boolean enabled) {
-        super.setEnabled(enabled);
-        setSwitchEnabled(enabled);
-    }
-
     @VisibleForTesting(otherwise = VisibleForTesting.NONE)
     public boolean isSwitchEnabled() {
         return mEnableSwitch;
