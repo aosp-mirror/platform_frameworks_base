@@ -7,14 +7,14 @@ package com.android.server.display.config {
     method public final java.math.BigInteger getBrighteningLightDebounceMillis();
     method public final java.math.BigInteger getDarkeningLightDebounceIdleMillis();
     method public final java.math.BigInteger getDarkeningLightDebounceMillis();
-    method public final com.android.server.display.config.DisplayBrightnessMapping getDisplayBrightnessMapping();
     method public boolean getEnabled();
+    method public final com.android.server.display.config.LuxToBrightnessMapping getLuxToBrightnessMapping();
     method public final void setBrighteningLightDebounceIdleMillis(java.math.BigInteger);
     method public final void setBrighteningLightDebounceMillis(java.math.BigInteger);
     method public final void setDarkeningLightDebounceIdleMillis(java.math.BigInteger);
     method public final void setDarkeningLightDebounceMillis(java.math.BigInteger);
-    method public final void setDisplayBrightnessMapping(com.android.server.display.config.DisplayBrightnessMapping);
     method public void setEnabled(boolean);
+    method public final void setLuxToBrightnessMapping(com.android.server.display.config.LuxToBrightnessMapping);
   }
 
   public class BlockingZoneConfig {
@@ -76,11 +76,6 @@ package com.android.server.display.config {
   public class DensityMapping {
     ctor public DensityMapping();
     method public java.util.List<com.android.server.display.config.Density> getDensity();
-  }
-
-  public class DisplayBrightnessMapping {
-    ctor public DisplayBrightnessMapping();
-    method public final java.util.List<com.android.server.display.config.DisplayBrightnessPoint> getDisplayBrightnessPoint();
   }
 
   public class DisplayBrightnessPoint {
@@ -220,6 +215,12 @@ package com.android.server.display.config {
   public class LuxThrottling {
     ctor public LuxThrottling();
     method @NonNull public final java.util.List<com.android.server.display.config.BrightnessLimitMap> getBrightnessLimitMap();
+  }
+
+  public class LuxToBrightnessMapping {
+    ctor public LuxToBrightnessMapping();
+    method @NonNull public final com.android.server.display.config.NonNegativeFloatToFloatMap getMap();
+    method public final void setMap(@NonNull com.android.server.display.config.NonNegativeFloatToFloatMap);
   }
 
   public class NitsMap {

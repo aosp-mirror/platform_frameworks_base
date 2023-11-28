@@ -128,3 +128,11 @@ flag {
     bug: "293613040"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "auto_brightness_modes"
+    namespace: "display_manager"
+    description: "Feature flag for generic auto-brightness modes"
+    bug: "293613040"
+    is_fixed_read_only: true
+}
