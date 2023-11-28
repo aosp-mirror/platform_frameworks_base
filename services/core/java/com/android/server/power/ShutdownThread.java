@@ -19,6 +19,7 @@ package com.android.server.power;
 
 import android.app.ActivityManagerInternal;
 import android.app.AlertDialog;
+import android.app.BroadcastOptions;
 import android.app.Dialog;
 import android.app.IActivityManager;
 import android.app.ProgressDialog;
@@ -493,6 +494,9 @@ public final class ShutdownThread extends Thread {
         mActionDone = false;
         Intent intent = new Intent(Intent.ACTION_SHUTDOWN);
         intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND | Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+        final Bundle opts = BroadcastOptions.makeBasic()
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
+                .toBundle();
         final ActivityManagerInternal activityManagerInternal = LocalServices.getService(
                 ActivityManagerInternal.class);
         activityManagerInternal.broadcastIntentWithCallback(intent,
@@ -502,7 +506,7 @@ public final class ShutdownThread extends Thread {
                             Bundle extras, boolean ordered, boolean sticky, int sendingUser) {
                         mHandler.post(ShutdownThread.this::actionDone);
                     }
-                }, null, UserHandle.USER_ALL, null, null, null);
+                }, null, UserHandle.USER_ALL, null, null, opts);
 
         final long endTime = SystemClock.elapsedRealtime() + MAX_BROADCAST_TIME;
         synchronized (mActionDoneSync) {
