@@ -127,7 +127,6 @@ import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.provider.DeviceConfig;
 import android.util.IndentingPrintWriter;
-import android.util.KeyValueListParser;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -168,7 +167,6 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
     private long mMinSatiatedConsumptionLimit;
     private long mMaxSatiatedConsumptionLimit;
 
-    private final KeyValueListParser mParser = new KeyValueListParser(',');
     private final Injector mInjector;
 
     private final SparseArray<Action> mActions = new SparseArray<>();
@@ -274,176 +272,177 @@ public class JobSchedulerEconomicPolicy extends EconomicPolicy {
         mRewards.clear();
 
         try {
-            mParser.setString(policyValuesString);
+            mUserSettingDeviceConfigMediator.setSettingsString(policyValuesString);
+            mUserSettingDeviceConfigMediator.setDeviceConfigProperties(properties);
         } catch (IllegalArgumentException e) {
             Slog.e(TAG, "Global setting key incorrect: ", e);
         }
 
-        mMinSatiatedBalanceOther = getConstantAsCake(mParser, properties,
+        mMinSatiatedBalanceOther = getConstantAsCake(
             KEY_JS_MIN_SATIATED_BALANCE_OTHER_APP, DEFAULT_JS_MIN_SATIATED_BALANCE_OTHER_APP_CAKES);
-        mMinSatiatedBalanceHeadlessSystemApp = getConstantAsCake(mParser, properties,
+        mMinSatiatedBalanceHeadlessSystemApp = getConstantAsCake(
                 KEY_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP,
                 DEFAULT_JS_MIN_SATIATED_BALANCE_HEADLESS_SYSTEM_APP_CAKES,
                 mMinSatiatedBalanceOther);
-        mMinSatiatedBalanceExempted = getConstantAsCake(mParser, properties,
+        mMinSatiatedBalanceExempted = getConstantAsCake(
                 KEY_JS_MIN_SATIATED_BALANCE_EXEMPTED,
                 DEFAULT_JS_MIN_SATIATED_BALANCE_EXEMPTED_CAKES,
                 mMinSatiatedBalanceHeadlessSystemApp);
-        mMinSatiatedBalanceIncrementalAppUpdater = getConstantAsCake(mParser, properties,
+        mMinSatiatedBalanceIncrementalAppUpdater = getConstantAsCake(
                 KEY_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER,
                 DEFAULT_JS_MIN_SATIATED_BALANCE_INCREMENT_APP_UPDATER_CAKES);
-        mMaxSatiatedBalance = getConstantAsCake(mParser, properties,
+        mMaxSatiatedBalance = getConstantAsCake(
             KEY_JS_MAX_SATIATED_BALANCE, DEFAULT_JS_MAX_SATIATED_BALANCE_CAKES,
             Math.max(arcToCake(1), mMinSatiatedBalanceExempted));
-        mMinSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+        mMinSatiatedConsumptionLimit = getConstantAsCake(
                 KEY_JS_MIN_CONSUMPTION_LIMIT, DEFAULT_JS_MIN_CONSUMPTION_LIMIT_CAKES,
                 arcToCake(1));
-        mInitialSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+        mInitialSatiatedConsumptionLimit = getConstantAsCake(
                 KEY_JS_INITIAL_CONSUMPTION_LIMIT, DEFAULT_JS_INITIAL_CONSUMPTION_LIMIT_CAKES,
                 mMinSatiatedConsumptionLimit);
-        mMaxSatiatedConsumptionLimit = getConstantAsCake(mParser, properties,
+        mMaxSatiatedConsumptionLimit = getConstantAsCake(
                 KEY_JS_MAX_CONSUMPTION_LIMIT, DEFAULT_JS_MAX_CONSUMPTION_LIMIT_CAKES,
                 mInitialSatiatedConsumptionLimit);
 
         mActions.put(ACTION_JOB_MAX_START, new Action(ACTION_JOB_MAX_START,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_MAX_START_CTP,
                         DEFAULT_JS_ACTION_JOB_MAX_START_CTP_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_MAX_START_BASE_PRICE,
                         DEFAULT_JS_ACTION_JOB_MAX_START_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_MAX_RUNNING, new Action(ACTION_JOB_MAX_RUNNING,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_MAX_RUNNING_CTP,
                         DEFAULT_JS_ACTION_JOB_MAX_RUNNING_CTP_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE,
                         DEFAULT_JS_ACTION_JOB_MAX_RUNNING_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_HIGH_START, new Action(ACTION_JOB_HIGH_START,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_HIGH_START_CTP,
                         DEFAULT_JS_ACTION_JOB_HIGH_START_CTP_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_HIGH_START_BASE_PRICE,
                         DEFAULT_JS_ACTION_JOB_HIGH_START_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_HIGH_RUNNING, new Action(ACTION_JOB_HIGH_RUNNING,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_HIGH_RUNNING_CTP,
                         DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_CTP_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE,
                         DEFAULT_JS_ACTION_JOB_HIGH_RUNNING_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_DEFAULT_START, new Action(ACTION_JOB_DEFAULT_START,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_DEFAULT_START_CTP,
                         DEFAULT_JS_ACTION_JOB_DEFAULT_START_CTP_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE,
                         DEFAULT_JS_ACTION_JOB_DEFAULT_START_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_DEFAULT_RUNNING, new Action(ACTION_JOB_DEFAULT_RUNNING,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_DEFAULT_RUNNING_CTP,
                         DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_CTP_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE,
                         DEFAULT_JS_ACTION_JOB_DEFAULT_RUNNING_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_LOW_START, new Action(ACTION_JOB_LOW_START,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_LOW_START_CTP,
                         DEFAULT_JS_ACTION_JOB_LOW_START_CTP_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_LOW_START_BASE_PRICE,
                         DEFAULT_JS_ACTION_JOB_LOW_START_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_LOW_RUNNING, new Action(ACTION_JOB_LOW_RUNNING,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_LOW_RUNNING_CTP,
                         DEFAULT_JS_ACTION_JOB_LOW_RUNNING_CTP_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE,
                         DEFAULT_JS_ACTION_JOB_LOW_RUNNING_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_MIN_START, new Action(ACTION_JOB_MIN_START,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_MIN_START_CTP,
                         DEFAULT_JS_ACTION_JOB_MIN_START_CTP_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_MIN_START_BASE_PRICE,
                         DEFAULT_JS_ACTION_JOB_MIN_START_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_MIN_RUNNING, new Action(ACTION_JOB_MIN_RUNNING,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_MIN_RUNNING_CTP,
                         DEFAULT_JS_ACTION_JOB_MIN_RUNNING_CTP_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE,
                         DEFAULT_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE_CAKES)));
         mActions.put(ACTION_JOB_TIMEOUT, new Action(ACTION_JOB_TIMEOUT,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP,
                         DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_CTP_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE,
                         DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE_CAKES)));
 
         mRewards.put(REWARD_TOP_ACTIVITY, new Reward(REWARD_TOP_ACTIVITY,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_REWARD_TOP_ACTIVITY_INSTANT,
                         DEFAULT_JS_REWARD_TOP_ACTIVITY_INSTANT_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_REWARD_TOP_ACTIVITY_ONGOING,
                         DEFAULT_JS_REWARD_TOP_ACTIVITY_ONGOING_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_REWARD_TOP_ACTIVITY_MAX,
                         DEFAULT_JS_REWARD_TOP_ACTIVITY_MAX_CAKES)));
         mRewards.put(REWARD_NOTIFICATION_SEEN, new Reward(REWARD_NOTIFICATION_SEEN,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_REWARD_NOTIFICATION_SEEN_INSTANT,
                         DEFAULT_JS_REWARD_NOTIFICATION_SEEN_INSTANT_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_REWARD_NOTIFICATION_SEEN_ONGOING,
                         DEFAULT_JS_REWARD_NOTIFICATION_SEEN_ONGOING_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_REWARD_NOTIFICATION_SEEN_MAX,
                         DEFAULT_JS_REWARD_NOTIFICATION_SEEN_MAX_CAKES)));
         mRewards.put(REWARD_NOTIFICATION_INTERACTION,
                 new Reward(REWARD_NOTIFICATION_INTERACTION,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT,
                                 DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_INSTANT_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING,
                                 DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_ONGOING_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_JS_REWARD_NOTIFICATION_INTERACTION_MAX,
                                 DEFAULT_JS_REWARD_NOTIFICATION_INTERACTION_MAX_CAKES)));
         mRewards.put(REWARD_WIDGET_INTERACTION, new Reward(REWARD_WIDGET_INTERACTION,
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_REWARD_WIDGET_INTERACTION_INSTANT,
                         DEFAULT_JS_REWARD_WIDGET_INTERACTION_INSTANT_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_REWARD_WIDGET_INTERACTION_ONGOING,
                         DEFAULT_JS_REWARD_WIDGET_INTERACTION_ONGOING_CAKES),
-                getConstantAsCake(mParser, properties,
+                getConstantAsCake(
                         KEY_JS_REWARD_WIDGET_INTERACTION_MAX,
                         DEFAULT_JS_REWARD_WIDGET_INTERACTION_MAX_CAKES)));
         mRewards.put(REWARD_OTHER_USER_INTERACTION,
                 new Reward(REWARD_OTHER_USER_INTERACTION,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_JS_REWARD_OTHER_USER_INTERACTION_INSTANT,
                                 DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_INSTANT_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_JS_REWARD_OTHER_USER_INTERACTION_ONGOING,
                                 DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_ONGOING_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_JS_REWARD_OTHER_USER_INTERACTION_MAX,
                                 DEFAULT_JS_REWARD_OTHER_USER_INTERACTION_MAX_CAKES)));
         mRewards.put(REWARD_APP_INSTALL,
                 new Reward(REWARD_APP_INSTALL,
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_JS_REWARD_APP_INSTALL_INSTANT,
                                 DEFAULT_JS_REWARD_APP_INSTALL_INSTANT_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_JS_REWARD_APP_INSTALL_ONGOING,
                                 DEFAULT_JS_REWARD_APP_INSTALL_ONGOING_CAKES),
-                        getConstantAsCake(mParser, properties,
+                        getConstantAsCake(
                                 KEY_JS_REWARD_APP_INSTALL_MAX,
                                 DEFAULT_JS_REWARD_APP_INSTALL_MAX_CAKES)));
     }
