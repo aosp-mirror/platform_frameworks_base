@@ -14150,7 +14150,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 || action.startsWith("android.intent.action.PACKAGE_")
                                 || action.startsWith("android.intent.action.UID_")
                                 || action.startsWith("android.intent.action.EXTERNAL_")
-                                || action.startsWith("android.bluetooth.")) {
+                                || action.startsWith("android.bluetooth.")
+                                || action.equals(Intent.ACTION_SHUTDOWN)) {
                             if (DEBUG_BROADCAST) {
                                 Slog.wtf(TAG,
                                         "System internals registering for " + filter.toLongString()
