@@ -24,6 +24,8 @@ import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_DENIED;
 import static android.content.pm.ArchivedActivityInfo.bytesFromBitmap;
 import static android.content.pm.ArchivedActivityInfo.drawableToBitmap;
+import static android.content.pm.PackageInstaller.EXTRA_UNARCHIVE_STATUS;
+import static android.content.pm.PackageInstaller.UNARCHIVAL_OK;
 import static android.content.pm.PackageManager.DELETE_ARCHIVE;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
 import static android.content.pm.PackageManager.INSTALL_UNARCHIVE_DRAFT;
@@ -38,6 +40,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -118,6 +121,15 @@ public class PackageArchiver {
 
     private static final String ACTION_UNARCHIVE_DIALOG =
             "com.android.intent.action.UNARCHIVE_DIALOG";
+    private static final String ACTION_UNARCHIVE_ERROR_DIALOG =
+            "com.android.intent.action.UNARCHIVE_ERROR_DIALOG";
+
+    private static final String EXTRA_REQUIRED_BYTES =
+            "com.android.content.pm.extra.UNARCHIVE_EXTRA_REQUIRED_BYTES";
+    private static final String EXTRA_INSTALLER_PACKAGE_NAME =
+            "com.android.content.pm.extra.UNARCHIVE_INSTALLER_PACKAGE_NAME";
+    private static final String EXTRA_INSTALLER_TITLE =
+            "com.android.content.pm.extra.UNARCHIVE_INSTALLER_TITLE";
 
     private final Context mContext;
     private final PackageManagerService mPm;
@@ -305,11 +317,14 @@ public class PackageArchiver {
     /** Creates archived state for the package and user. */
     private CompletableFuture<ArchiveState> createArchiveState(String packageName, int userId)
             throws PackageManager.NameNotFoundException {
-        PackageStateInternal ps = getPackageState(packageName, mPm.snapshotComputer(),
+        Computer snapshot = mPm.snapshotComputer();
+        PackageStateInternal ps = getPackageState(packageName, snapshot,
                 Binder.getCallingUid(), userId);
         verifyNotSystemApp(ps.getFlags());
         String responsibleInstallerPackage = getResponsibleInstallerPackage(ps);
         verifyInstaller(responsibleInstallerPackage, userId);
+        ApplicationInfo installerInfo = snapshot.getApplicationInfo(
+                responsibleInstallerPackage, /* flags= */ 0, userId);
         verifyOptOutStatus(packageName,
                 UserHandle.getUid(userId, UserHandle.getUid(userId, ps.getAppId())));
 
@@ -320,7 +335,7 @@ public class PackageArchiver {
             try {
                 archiveState.complete(
                         createArchiveStateInternal(packageName, userId, mainActivities,
-                                responsibleInstallerPackage));
+                                installerInfo.loadLabel(mContext.getPackageManager()).toString()));
             } catch (IOException e) {
                 archiveState.completeExceptionally(e);
             }
@@ -328,8 +343,17 @@ public class PackageArchiver {
         return archiveState;
     }
 
-    static ArchiveState createArchiveState(@NonNull ArchivedPackageParcel archivedPackage,
+    @Nullable
+    ArchiveState createArchiveState(@NonNull ArchivedPackageParcel archivedPackage,
             int userId, String installerPackage) {
+        ApplicationInfo installerInfo = mPm.snapshotComputer().getApplicationInfo(
+                installerPackage, /* flags= */ 0, userId);
+        if (installerInfo == null) {
+            // Should never happen because we just fetched the installerInfo.
+            Slog.e(TAG, "Couldnt find installer " + installerPackage);
+            return null;
+        }
+
         try {
             var packageName = archivedPackage.packageName;
             var mainActivities = archivedPackage.archivedActivities;
@@ -346,7 +370,8 @@ public class PackageArchiver {
                 archiveActivityInfos.add(activityInfo);
             }
 
-            return new ArchiveState(archiveActivityInfos, installerPackage);
+            return new ArchiveState(archiveActivityInfos,
+                    installerInfo.loadLabel(mContext.getPackageManager()).toString());
         } catch (IOException e) {
             Slog.e(TAG, "Failed to create archive state", e);
             return null;
@@ -354,7 +379,7 @@ public class PackageArchiver {
     }
 
     ArchiveState createArchiveStateInternal(String packageName, int userId,
-            List<LauncherActivityInfo> mainActivities, String installerPackage)
+            List<LauncherActivityInfo> mainActivities, String installerTitle)
             throws IOException {
         final int iconSize = mContext.getSystemService(
                 ActivityManager.class).getLauncherLargeIconSize();
@@ -372,7 +397,7 @@ public class PackageArchiver {
             archiveActivityInfos.add(activityInfo);
         }
 
-        return new ArchiveState(archiveActivityInfos, installerPackage);
+        return new ArchiveState(archiveActivityInfos, installerTitle);
     }
 
     // TODO(b/298452477) Handle monochrome icons.
@@ -412,14 +437,14 @@ public class PackageArchiver {
         return iconFile.toPath();
     }
 
-    private void verifyInstaller(String installerPackage, int userId)
+    private void verifyInstaller(String installerPackageName, int userId)
             throws PackageManager.NameNotFoundException {
-        if (TextUtils.isEmpty(installerPackage)) {
+        if (TextUtils.isEmpty(installerPackageName)) {
             throw new PackageManager.NameNotFoundException("No installer found");
         }
         // Allow shell for easier development.
         if ((Binder.getCallingUid() != Process.SHELL_UID)
-                && !verifySupportsUnarchival(installerPackage, userId)) {
+                && !verifySupportsUnarchival(installerPackageName, userId)) {
             throw new PackageManager.NameNotFoundException("Installer does not support unarchival");
         }
     }
@@ -588,7 +613,7 @@ public class PackageArchiver {
 
         final Intent broadcastIntent = new Intent();
         broadcastIntent.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, packageName);
-        broadcastIntent.putExtra(PackageInstaller.EXTRA_UNARCHIVE_STATUS,
+        broadcastIntent.putExtra(EXTRA_UNARCHIVE_STATUS,
                 PackageInstaller.STATUS_PENDING_USER_ACTION);
         broadcastIntent.putExtra(Intent.EXTRA_INTENT, dialogIntent);
         sendIntent(statusReceiver, packageName, /* message= */ "", broadcastIntent);
@@ -780,6 +805,83 @@ public class PackageArchiver {
         return TextUtils.isEmpty(ps.getInstallSource().mUpdateOwnerPackageName)
                 ? ps.getInstallSource().mInstallerPackageName
                 : ps.getInstallSource().mUpdateOwnerPackageName;
+    }
+
+    void notifyUnarchivalListener(int status, String installerPackageName, String appPackageName,
+            long requiredStorageBytes, @Nullable PendingIntent userActionIntent,
+            IntentSender unarchiveIntentSender, int userId) {
+        final Intent broadcastIntent = new Intent();
+        broadcastIntent.putExtra(PackageInstaller.EXTRA_PACKAGE_NAME, appPackageName);
+        broadcastIntent.putExtra(EXTRA_UNARCHIVE_STATUS, status);
+
+        if (status != UNARCHIVAL_OK) {
+            final Intent dialogIntent = createErrorDialogIntent(status, installerPackageName,
+                    appPackageName,
+                    requiredStorageBytes, userActionIntent, userId);
+            if (dialogIntent == null) {
+                // Error already logged.
+                return;
+            }
+            broadcastIntent.putExtra(Intent.EXTRA_INTENT, dialogIntent);
+        }
+
+        final BroadcastOptions options = BroadcastOptions.makeBasic();
+        options.setPendingIntentBackgroundActivityStartMode(
+                MODE_BACKGROUND_ACTIVITY_START_DENIED);
+        try {
+            unarchiveIntentSender.sendIntent(mContext, 0, broadcastIntent, /* onFinished= */ null,
+                    /* handler= */ null, /* requiredPermission= */ null,
+                    options.toBundle());
+        } catch (IntentSender.SendIntentException e) {
+            Slog.e(TAG, TextUtils.formatSimple("Failed to send unarchive intent"), e);
+        }
+    }
+
+    @Nullable
+    private Intent createErrorDialogIntent(int status, String installerPackageName,
+            String appPackageName,
+            long requiredStorageBytes, PendingIntent userActionIntent, int userId) {
+        final Intent dialogIntent = new Intent(ACTION_UNARCHIVE_ERROR_DIALOG);
+        dialogIntent.putExtra(EXTRA_UNARCHIVE_STATUS, status);
+        if (requiredStorageBytes > 0) {
+            dialogIntent.putExtra(EXTRA_REQUIRED_BYTES, requiredStorageBytes);
+        }
+        // Note that the userActionIntent is provided by the installer and is used only by the
+        // system package installer as a follow-up action after the user confirms the dialog.
+        if (userActionIntent != null) {
+            dialogIntent.putExtra(Intent.EXTRA_INTENT, userActionIntent);
+        }
+        dialogIntent.putExtra(EXTRA_INSTALLER_PACKAGE_NAME, installerPackageName);
+        // We fetch this label from the archive state because the installer might not be installed
+        // anymore in an edge case.
+        String installerTitle = getInstallerTitle(appPackageName, userId);
+        if (installerTitle == null) {
+            // Error already logged.
+            return null;
+        }
+        dialogIntent.putExtra(EXTRA_INSTALLER_TITLE, installerTitle);
+        return dialogIntent;
+    }
+
+    private String getInstallerTitle(String appPackageName, int userId) {
+        PackageStateInternal packageState;
+        try {
+            packageState = getPackageState(appPackageName,
+                    mPm.snapshotComputer(),
+                    Process.SYSTEM_UID, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, TextUtils.formatSimple(
+                    "notifyUnarchivalListener: Couldn't fetch package state for %s.",
+                    appPackageName), e);
+            return null;
+        }
+        ArchiveState archiveState = packageState.getUserStateOrDefault(userId).getArchiveState();
+        if (archiveState == null) {
+            Slog.e(TAG, TextUtils.formatSimple("notifyUnarchivalListener: App not archived %s.",
+                    appPackageName));
+            return null;
+        }
+        return archiveState.getInstallerTitle();
     }
 
     @NonNull
