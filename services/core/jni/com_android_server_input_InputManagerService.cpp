@@ -26,6 +26,7 @@
 // Log debug messages about InputDispatcherPolicy
 #define DEBUG_INPUT_DISPATCHER_POLICY 0
 
+#include <android-base/logging.h>
 #include <android-base/parseint.h>
 #include <android-base/stringprintf.h>
 #include <android/os/IInputConstants.h>
@@ -309,7 +310,8 @@ public:
     void requestPointerCapture(const sp<IBinder>& windowToken, bool enabled);
     void setCustomPointerIcon(const SpriteIcon& icon);
     bool setPointerIcon(std::variant<std::unique_ptr<SpriteIcon>, PointerIconStyle> icon,
-                        int32_t displayId, DeviceId deviceId);
+                        int32_t displayId, DeviceId deviceId, int32_t pointerId,
+                        const sp<IBinder>& inputToken);
     void setMotionClassifierEnabled(bool enabled);
     std::optional<std::string> getBluetoothAddress(int32_t deviceId);
     void setStylusButtonMotionEventsEnabled(bool enabled);
@@ -1351,7 +1353,15 @@ void NativeInputManager::setCustomPointerIcon(const SpriteIcon& icon) {
 
 bool NativeInputManager::setPointerIcon(
         std::variant<std::unique_ptr<SpriteIcon>, PointerIconStyle> icon, int32_t displayId,
-        DeviceId deviceId) {
+        DeviceId deviceId, int32_t pointerId, const sp<IBinder>& inputToken) {
+    if (!mInputManager->getDispatcher().isPointerInWindow(inputToken, displayId, deviceId,
+                                                          pointerId)) {
+        LOG(WARNING) << "Attempted to change the pointer icon for deviceId " << deviceId
+                     << " on display " << displayId << " from input token " << inputToken.get()
+                     << ", but the pointer is not in the window.";
+        return false;
+    }
+
     return mInputManager->getChoreographer().setPointerIcon(std::move(icon), displayId, deviceId);
 }
 
@@ -2540,10 +2550,9 @@ static bool nativeSetPointerIcon(JNIEnv* env, jobject nativeImplObj, jobject ico
     } else {
         icon = pointerIcon.style;
     }
-    // TODO(b/293587049): Perform hit test to ensure the pointer is dispatched to the channel.
-    sp<IBinder> inputToken = ibinderForJavaObject(env, inputTokenObj);
 
-    return im->setPointerIcon(std::move(icon), displayId, deviceId);
+    return im->setPointerIcon(std::move(icon), displayId, deviceId, pointerId,
+                              ibinderForJavaObject(env, inputTokenObj));
 }
 
 static jboolean nativeCanDispatchToDisplay(JNIEnv* env, jobject nativeImplObj, jint deviceId,
