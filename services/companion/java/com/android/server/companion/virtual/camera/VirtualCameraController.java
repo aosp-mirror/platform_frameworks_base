@@ -27,14 +27,14 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.util.ArraySet;
+import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
-import java.util.Set;
+import java.util.Map;
 
 /**
  * Manages the registration and removal of virtual camera from the server side.
@@ -47,10 +47,13 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
     private static final String VIRTUAL_CAMERA_SERVICE_NAME = "virtual_camera";
     private static final String TAG = "VirtualCameraController";
 
+    private final Object mServiceLock = new Object();
+
+    @GuardedBy("mServiceLock")
     @Nullable private IVirtualCameraService mVirtualCameraService;
 
     @GuardedBy("mCameras")
-    private final Set<VirtualCameraConfig> mCameras = new ArraySet<>();
+    private final Map<IBinder, CameraDescriptor> mCameras = new ArrayMap<>();
 
     public VirtualCameraController() {
         connectVirtualCameraService();
@@ -71,8 +74,12 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
 
         try {
             if (registerCameraWithService(cameraConfig)) {
+                CameraDescriptor cameraDescriptor =
+                        new CameraDescriptor(cameraConfig);
+                IBinder binder = cameraConfig.getCallback().asBinder();
+                binder.linkToDeath(cameraDescriptor, 0 /* flags */);
                 synchronized (mCameras) {
-                    mCameras.add(cameraConfig);
+                    mCameras.put(binder, cameraDescriptor);
                 }
             } else {
                 // TODO(b/310857519): Revisit this to find a better way of indicating failure.
@@ -89,17 +96,22 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
      * @param cameraConfig The {@link VirtualCameraConfig} sent by the client.
      */
     public void unregisterCamera(@NonNull VirtualCameraConfig cameraConfig) {
-        try {
-            if (mVirtualCameraService == null) {
-                Slog.w(TAG, "Virtual camera service is not connected.");
+        synchronized (mCameras) {
+            IBinder binder = cameraConfig.getCallback().asBinder();
+            if (!mCameras.containsKey(binder)) {
+                Slog.w(TAG, "Virtual camera was not registered.");
             } else {
-                mVirtualCameraService.unregisterCamera(cameraConfig.getCallback().asBinder());
+                connectVirtualCameraServiceIfNeeded();
+
+                try {
+                    synchronized (mServiceLock) {
+                        mVirtualCameraService.unregisterCamera(binder);
+                    }
+                    mCameras.remove(binder);
+                } catch (RemoteException e) {
+                    e.rethrowFromSystemServer();
+                }
             }
-            synchronized (mCameras) {
-                mCameras.remove(cameraConfig);
-            }
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
         }
     }
 
@@ -108,7 +120,9 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
         connectVirtualCameraServiceIfNeeded();
 
         try {
-            return mVirtualCameraService.getCameraId(cameraConfig.getCallback().asBinder());
+            synchronized (mServiceLock) {
+                return mVirtualCameraService.getCameraId(cameraConfig.getCallback().asBinder());
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -117,7 +131,9 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
     @Override
     public void binderDied() {
         Slog.d(TAG, "Virtual camera service died.");
-        mVirtualCameraService = null;
+        synchronized (mServiceLock) {
+            mVirtualCameraService = null;
+        }
         synchronized (mCameras) {
             mCameras.clear();
         }
@@ -126,44 +142,49 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
     /** Release resources associated with this controller. */
     public void close() {
         synchronized (mCameras) {
-            if (mVirtualCameraService == null) {
-                Slog.w(TAG, "Virtual camera service is not connected.");
-            } else {
-                for (VirtualCameraConfig config : mCameras) {
-                    try {
-                        mVirtualCameraService.unregisterCamera(config.getCallback().asBinder());
-                    } catch (RemoteException e) {
-                        Slog.w(TAG, "close(): Camera failed to be removed on camera "
-                                + "service.", e);
+            if (!mCameras.isEmpty()) {
+                connectVirtualCameraServiceIfNeeded();
+
+                synchronized (mServiceLock) {
+                    for (IBinder binder : mCameras.keySet()) {
+                        try {
+                            mVirtualCameraService.unregisterCamera(binder);
+                        } catch (RemoteException e) {
+                            Slog.w(TAG, "close(): Camera failed to be removed on camera "
+                                    + "service.", e);
+                        }
                     }
                 }
+                mCameras.clear();
             }
-            mCameras.clear();
         }
-        mVirtualCameraService = null;
+        synchronized (mServiceLock) {
+            mVirtualCameraService = null;
+        }
     }
 
     /** Dumps information about this {@link VirtualCameraController} for debugging purposes. */
     public void dump(PrintWriter fout, String indent) {
         fout.println(indent + "VirtualCameraController:");
         indent += indent;
-        fout.printf("%sService:%s\n", indent, mVirtualCameraService);
         synchronized (mCameras) {
             fout.printf("%sRegistered cameras:%d%n\n", indent, mCameras.size());
-            for (VirtualCameraConfig config : mCameras) {
-                fout.printf("%s token: %s\n", indent, config);
+            for (CameraDescriptor descriptor : mCameras.values()) {
+                fout.printf("%s token: %s\n", indent, descriptor.mConfig);
             }
         }
     }
 
     private void connectVirtualCameraServiceIfNeeded() {
-        // Try to connect to service if not connected already.
-        if (mVirtualCameraService == null) {
-            connectVirtualCameraService();
-        }
-        // Throw exception if we are unable to connect to service.
-        if (mVirtualCameraService == null) {
-            throw new IllegalStateException("Virtual camera service is not connected.");
+        synchronized (mServiceLock) {
+            // Try to connect to service if not connected already.
+            if (mVirtualCameraService == null) {
+                connectVirtualCameraService();
+            }
+            // Throw exception if we are unable to connect to service.
+            if (mVirtualCameraService == null) {
+                throw new IllegalStateException("Virtual camera service is not connected.");
+            }
         }
     }
 
@@ -188,7 +209,24 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
 
     private boolean registerCameraWithService(VirtualCameraConfig config) throws RemoteException {
         VirtualCameraConfiguration serviceConfiguration = getServiceCameraConfiguration(config);
-        return mVirtualCameraService.registerCamera(config.getCallback().asBinder(),
-                serviceConfiguration);
+        synchronized (mServiceLock) {
+            return mVirtualCameraService.registerCamera(config.getCallback().asBinder(),
+                    serviceConfiguration);
+        }
+    }
+
+    private final class CameraDescriptor implements IBinder.DeathRecipient {
+
+        private final VirtualCameraConfig mConfig;
+
+        CameraDescriptor(VirtualCameraConfig config) {
+            mConfig = config;
+        }
+
+        @Override
+        public void binderDied() {
+            Slog.d(TAG, "Virtual camera binder died");
+            unregisterCamera(mConfig);
+        }
     }
 }
