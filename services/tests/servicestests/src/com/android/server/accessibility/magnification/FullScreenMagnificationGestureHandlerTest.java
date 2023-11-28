@@ -540,18 +540,23 @@ public class FullScreenMagnificationGestureHandlerTest {
         twoFingerTap();
 
         assertIn(STATE_ACTIVATED);
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+        verify(mMockMagnificationLogger).logMagnificationTwoFingerTripleTap(true);
     }
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
     public void testTwoFingerTripleTap_StateIsActivated_shouldInIdle() {
         goFromStateIdleTo(STATE_ACTIVATED);
+        reset(mMockMagnificationLogger);
 
         twoFingerTap();
         twoFingerTap();
         twoFingerTap();
 
         assertIn(STATE_IDLE);
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+        verify(mMockMagnificationLogger).logMagnificationTwoFingerTripleTap(false);
     }
 
     @Test
@@ -564,6 +569,8 @@ public class FullScreenMagnificationGestureHandlerTest {
         twoFingerTapAndHold();
 
         assertIn(STATE_NON_ACTIVATED_ZOOMED_TMP);
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+        verify(mMockMagnificationLogger).logMagnificationTwoFingerTripleTap(true);
     }
 
     @Test
@@ -576,6 +583,8 @@ public class FullScreenMagnificationGestureHandlerTest {
         twoFingerSwipeAndHold();
 
         assertIn(STATE_NON_ACTIVATED_ZOOMED_TMP);
+        verify(mMockMagnificationLogger, never()).logMagnificationTripleTap(anyBoolean());
+        verify(mMockMagnificationLogger).logMagnificationTwoFingerTripleTap(true);
     }
 
     @Test
