@@ -39,6 +39,13 @@ flag {
 }
 
 flag {
+  name: "vdm_custom_ime"
+  namespace: "virtual_devices"
+  description: "Enable custom IME API"
+  bug: "287269288"
+}
+
+flag {
   name: "vdm_custom_home"
   namespace: "virtual_devices"
   description: "Enable custom home API"

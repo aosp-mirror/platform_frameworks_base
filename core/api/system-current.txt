@@ -417,6 +417,7 @@ package android {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
     field public static final int gameSessionService = 16844373; // 0x1010655
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
+    field @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") public static final int isVirtualDeviceOnly;
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
     field public static final int playHomeTransitionSound = 16844358; // 0x1010646
@@ -17287,6 +17288,10 @@ package android.view.displayhash {
 }
 
 package android.view.inputmethod {
+
+  public final class InputMethodInfo implements android.os.Parcelable {
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") public boolean isVirtualDeviceOnly();
+  }
 
   public final class InputMethodManager {
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.view.inputmethod.InputMethodInfo getCurrentInputMethodInfoAsUser(@NonNull android.os.UserHandle);

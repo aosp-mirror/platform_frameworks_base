@@ -3854,6 +3854,10 @@
         <!-- Specifies if an IME can only be used while a device is in VR mode or on a dedicated
              device -->
         <attr name="isVrOnly" format="boolean"/>
+        <!-- Specifies if an IME can only be used on a display created by a virtual device.
+             @hide @SystemApi
+             @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") -->
+        <attr name="isVirtualDeviceOnly" format="boolean"/>
         <attr name="__removed2" format="boolean" />
         <!-- Specifies whether the IME supports showing inline suggestions. -->
         <attr name="supportsInlineSuggestions" format="boolean" />
