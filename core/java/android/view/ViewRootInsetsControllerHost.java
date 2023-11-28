@@ -279,6 +279,13 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
         return null;
     }
 
+    @Override
+    public void notifyAnimationRunningStateChanged(boolean running) {
+        if (mViewRoot != null) {
+            mViewRoot.notifyInsetsAnimationRunningStateChanged(running);
+        }
+    }
+
     private boolean isVisibleToUser() {
         return mViewRoot.getHostVisibility() == View.VISIBLE;
     }
