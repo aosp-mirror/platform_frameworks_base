@@ -180,6 +180,11 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
 
     @Override
     public void injectInputEventToInputFilter(InputEvent event) throws RemoteException {
+        synchronized (mLock) {
+            throwIfCalledByNotTrustedUidLocked();
+            throwIfShutdownLocked();
+            throwIfNotConnectedLocked();
+        }
         mAccessibilityManager.injectInputEventToInputFilter(event);
     }
 
