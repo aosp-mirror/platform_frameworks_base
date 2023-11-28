@@ -40,6 +40,8 @@ interface WebViewUpdateServiceInterface {
 
     WebViewProviderInfo[] getValidWebViewPackages();
 
+    WebViewProviderInfo getDefaultWebViewPackage();
+
     PackageInfo getCurrentWebViewPackage();
 
     boolean isMultiProcessEnabled();
