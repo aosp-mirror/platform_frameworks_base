@@ -998,6 +998,87 @@ public final class CardEmulation {
         }
     }
 
+     /**
+      * Setting NFC controller routing table, which includes Protocol Route and Technology Route,
+      * while this Activity is in the foreground.
+      *
+      * The parameter set to null can be used to keep current values for that entry.
+      * <p>
+      * Example usage in an Activity that requires to set proto route to "ESE" and keep tech route:
+      * <pre>
+      * protected void onResume() {
+      *     mNfcAdapter.overrideRoutingTable(this , "ESE" , null);
+      * }</pre>
+      * </p>
+      * Also activities must call this method when it goes to the background,
+      * with all parameters set to null.
+      * @param activity The Activity that requests NFC controller routing table to be changed.
+      * @param protocol ISO-DEP route destination, which can be "DH" or "UICC" or "ESE".
+      * @param technology Tech-A, Tech-B route destination, which can be "DH" or "UICC" or "ESE".
+      * @return true if operation is successful and false otherwise
+      *
+      * This is a high risk API and only included to support mainline effort
+      * @hide
+      */
+    public boolean overrideRoutingTable(Activity activity, String protocol, String technology) {
+        if (activity == null) {
+            throw new NullPointerException("activity or service or category is null");
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalArgumentException("Activity must be resumed.");
+        }
+        try {
+            return sService.overrideRoutingTable(UserHandle.myUserId(), protocol, technology);
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.overrideRoutingTable(UserHandle.myUserId(), protocol, technology);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
+    /**
+     * Restore the NFC controller routing table,
+     * which was changed by {@link #overrideRoutingTable(Activity, String, String)}
+     *
+     * @param activity The Activity that requested NFC controller routing table to be changed.
+     * @return true if operation is successful and false otherwise
+     *
+     * @hide
+     */
+    public boolean recoverRoutingTable(Activity activity) {
+        if (activity == null) {
+            throw new NullPointerException("activity is null");
+        }
+        if (!activity.isResumed()) {
+            throw new IllegalArgumentException("Activity must be resumed.");
+        }
+        try {
+            return sService.recoverRoutingTable(UserHandle.myUserId());
+        } catch (RemoteException e) {
+            // Try one more time
+            recoverService();
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover CardEmulationService.");
+                return false;
+            }
+            try {
+                return sService.recoverRoutingTable(UserHandle.myUserId());
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to reach CardEmulationService.");
+                return false;
+            }
+        }
+    }
+
     void recoverService() {
         NfcAdapter adapter = NfcAdapter.getDefaultAdapter(mContext);
         sService = adapter.getCardEmulationService();

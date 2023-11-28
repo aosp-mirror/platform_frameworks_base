@@ -112,6 +112,9 @@ public final class NfcActivityManager extends IAppCallback.Stub
         Bundle readerModeExtras = null;
         Binder token;
 
+        int mPollTech = NfcAdapter.FLAG_USE_ALL_TECH;
+        int mListenTech = NfcAdapter.FLAG_USE_ALL_TECH;
+
         public NfcActivityState(Activity activity) {
             if (activity.isDestroyed()) {
                 throw new IllegalStateException("activity is already destroyed");
@@ -132,6 +135,9 @@ public final class NfcActivityManager extends IAppCallback.Stub
             readerModeFlags = 0;
             readerModeExtras = null;
             token = null;
+
+            mPollTech = NfcAdapter.FLAG_USE_ALL_TECH;
+            mListenTech = NfcAdapter.FLAG_USE_ALL_TECH;
         }
         @Override
         public String toString() {
@@ -278,6 +284,9 @@ public final class NfcActivityManager extends IAppCallback.Stub
         int readerModeFlags = 0;
         Bundle readerModeExtras = null;
         Binder token;
+        int pollTech;
+        int listenTech;
+
         synchronized (NfcActivityManager.this) {
             NfcActivityState state = findActivityState(activity);
             if (DBG) Log.d(TAG, "onResume() for " + activity + " " + state);
@@ -286,9 +295,15 @@ public final class NfcActivityManager extends IAppCallback.Stub
             token = state.token;
             readerModeFlags = state.readerModeFlags;
             readerModeExtras = state.readerModeExtras;
+
+            pollTech = state.mPollTech;
+            listenTech = state.mListenTech;
         }
         if (readerModeFlags != 0) {
             setReaderMode(token, readerModeFlags, readerModeExtras);
+        } else if (listenTech != NfcAdapter.FLAG_USE_ALL_TECH
+                || pollTech != NfcAdapter.FLAG_USE_ALL_TECH) {
+            changeDiscoveryTech(token, pollTech, listenTech);
         }
         requestNfcServiceCallback();
     }
@@ -298,6 +313,9 @@ public final class NfcActivityManager extends IAppCallback.Stub
     public void onActivityPaused(Activity activity) {
         boolean readerModeFlagsSet;
         Binder token;
+        int pollTech;
+        int listenTech;
+
         synchronized (NfcActivityManager.this) {
             NfcActivityState state = findActivityState(activity);
             if (DBG) Log.d(TAG, "onPause() for " + activity + " " + state);
@@ -305,10 +323,17 @@ public final class NfcActivityManager extends IAppCallback.Stub
             state.resumed = false;
             token = state.token;
             readerModeFlagsSet = state.readerModeFlags != 0;
+
+            pollTech = state.mPollTech;
+            listenTech = state.mListenTech;
         }
         if (readerModeFlagsSet) {
             // Restore default p2p modes
             setReaderMode(token, 0, null);
+        } else if (listenTech != NfcAdapter.FLAG_USE_ALL_TECH
+                || pollTech != NfcAdapter.FLAG_USE_ALL_TECH) {
+            changeDiscoveryTech(token,
+                    NfcAdapter.FLAG_USE_ALL_TECH, NfcAdapter.FLAG_USE_ALL_TECH);
         }
     }
 
@@ -330,6 +355,55 @@ public final class NfcActivityManager extends IAppCallback.Stub
                 // release all associated references
                 destroyActivityState(activity);
             }
+        }
+    }
+
+    /** setDiscoveryTechnology() implementation */
+    public void setDiscoveryTech(Activity activity, int pollTech, int listenTech) {
+        boolean isResumed;
+        Binder token;
+        boolean readerModeFlagsSet;
+        synchronized (NfcActivityManager.this) {
+            NfcActivityState state = getActivityState(activity);
+            readerModeFlagsSet = state.readerModeFlags != 0;
+            state.mListenTech = listenTech;
+            state.mPollTech = pollTech;
+            token = state.token;
+            isResumed = state.resumed;
+        }
+        if (!readerModeFlagsSet && isResumed) {
+            changeDiscoveryTech(token, pollTech, listenTech);
+        } else if (readerModeFlagsSet) {
+            throw new IllegalStateException("Cannot be used when the Reader Mode is enabled");
+        }
+    }
+
+    /** resetDiscoveryTechnology() implementation */
+    public void resetDiscoveryTech(Activity activity) {
+        boolean isResumed;
+        Binder token;
+        boolean readerModeFlagsSet;
+        synchronized (NfcActivityManager.this) {
+            NfcActivityState state = getActivityState(activity);
+            readerModeFlagsSet = state.readerModeFlags != 0;
+            state.mListenTech = NfcAdapter.FLAG_USE_ALL_TECH;
+            state.mPollTech = NfcAdapter.FLAG_USE_ALL_TECH;
+            token = state.token;
+            isResumed = state.resumed;
+        }
+        if (readerModeFlagsSet) {
+            disableReaderMode(activity);
+        } else if (isResumed) {
+            changeDiscoveryTech(token, NfcAdapter.FLAG_USE_ALL_TECH, NfcAdapter.FLAG_USE_ALL_TECH);
+        }
+
+    }
+
+    private void changeDiscoveryTech(Binder token, int pollTech, int listenTech) {
+        try {
+            NfcAdapter.sService.updateDiscoveryTechnology(token, pollTech, listenTech);
+        } catch (RemoteException e) {
+            mAdapter.attemptDeadServiceRecovery(e);
         }
     }
 
