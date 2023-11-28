@@ -43,7 +43,10 @@ soong_config_module_type {
     name: "system_optimized_java_defaults",
     module_type: "java_defaults",
     config_namespace: "ANDROID",
-    bool_variables: ["SYSTEM_OPTIMIZE_JAVA"],
+    bool_variables: [
+        "SYSTEM_OPTIMIZE_JAVA",
+        "FULL_SYSTEM_OPTIMIZE_JAVA",
+    ],
     properties: ["optimize"],
 }
 
@@ -55,6 +58,7 @@ system_optimized_java_defaults {
                 enabled: true,
                 // TODO(b/210510433): Enable optimizations after improving
                 // retracing infra.
+                // See also FULL_SYSTEM_OPTIMIZE_JAVA.
                 optimize: false,
                 shrink: true,
                 ignore_warnings: false,
@@ -76,6 +80,12 @@ system_optimized_java_defaults {
                     // permission subpackage to prune unused jarjar'ed Kotlin dependencies.
                     proguard_flags_files: ["proguard_permission.flags"],
                 },
+            },
+        },
+        // Allow form factors to opt-in full system java optimization
+        FULL_SYSTEM_OPTIMIZE_JAVA: {
+            optimize: {
+                optimize: true,
             },
         },
     },
