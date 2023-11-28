@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Easings
 import com.android.compose.grid.VerticalGrid
 import com.android.compose.modifiers.thenIf
+import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout
 import com.android.systemui.bouncer.ui.viewmodel.ActionButtonAppearance
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.ContentDescription
@@ -65,9 +66,11 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/** Renders the PIN button pad. */
 @Composable
 fun PinPad(
     viewModel: PinBouncerViewModel,
+    layout: BouncerSceneLayout,
     modifier: Modifier = Modifier,
 ) {
     DisposableEffect(Unit) {
@@ -92,9 +95,9 @@ fun PinPad(
     }
 
     VerticalGrid(
-        columns = 3,
-        verticalSpacing = 12.dp,
-        horizontalSpacing = 20.dp,
+        columns = columns,
+        verticalSpacing = layout.verticalSpacing,
+        horizontalSpacing = calculateHorizontalSpacingBetweenColumns(layout.gridWidth),
         modifier = modifier,
     ) {
         repeat(9) { index ->
@@ -254,7 +257,7 @@ private fun PinPadButton(
 
     val cornerRadius: Dp by
         animateDpAsState(
-            if (isAnimationEnabled && isPressed) 24.dp else pinButtonSize / 2,
+            if (isAnimationEnabled && isPressed) 24.dp else pinButtonMaxSize / 2,
             label = "PinButton round corners",
             animationSpec = tween(animDurationMillis, easing = animEasing)
         )
@@ -284,7 +287,7 @@ private fun PinPadButton(
         contentAlignment = Alignment.Center,
         modifier =
             modifier
-                .sizeIn(maxWidth = pinButtonSize, maxHeight = pinButtonSize)
+                .sizeIn(maxWidth = pinButtonMaxSize, maxHeight = pinButtonMaxSize)
                 .aspectRatio(1f)
                 .drawBehind {
                     drawRoundRect(
@@ -345,10 +348,32 @@ private suspend fun showFailureAnimation(
     }
 }
 
-private val pinButtonSize = 84.dp
-private val pinButtonErrorShrinkFactor = 67.dp / pinButtonSize
+/** Returns the amount of horizontal spacing between columns, in dips. */
+private fun calculateHorizontalSpacingBetweenColumns(
+    gridWidth: Dp,
+): Dp {
+    return (gridWidth - (pinButtonMaxSize * columns)) / (columns - 1)
+}
+
+/** The width of the grid of PIN pad buttons, in dips. */
+private val BouncerSceneLayout.gridWidth: Dp
+    get() = if (isUseCompactSize) 292.dp else 300.dp
+
+/** The spacing between rows of PIN pad buttons, in dips. */
+private val BouncerSceneLayout.verticalSpacing: Dp
+    get() = if (isUseCompactSize) 8.dp else 12.dp
+
+/** Number of columns in the PIN pad grid. */
+private const val columns = 3
+/** Maximum size (width and height) of each PIN pad button. */
+private val pinButtonMaxSize = 84.dp
+/** Scale factor to apply to buttons when animating the "error" animation on them. */
+private val pinButtonErrorShrinkFactor = 67.dp / pinButtonMaxSize
+/** Animation duration of the "shrink" phase of the error animation, on each PIN pad button. */
 private const val pinButtonErrorShrinkMs = 50
+/** Amount of time to wait between application of the "error" animation to each row of buttons. */
 private const val pinButtonErrorStaggerDelayMs = 33
+/** Animation duration of the "revert" phase of the error animation, on each PIN pad button. */
 private const val pinButtonErrorRevertMs = 617
 
 // Pin button motion spec: http://shortn/_9TTIG6SoEa

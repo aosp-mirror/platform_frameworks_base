@@ -34,9 +34,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -66,6 +66,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -97,7 +98,7 @@ import kotlin.math.pow
 fun BouncerContent(
     viewModel: BouncerViewModel,
     dialogFactory: BouncerDialogFactory,
-    modifier: Modifier
+    modifier: Modifier = Modifier,
 ) {
     val isFullScreenUserSwitcherEnabled = viewModel.isUserSwitcherVisible
     val isSideBySideSupported by viewModel.isSideBySideSupported.collectAsState()
@@ -142,6 +143,7 @@ private fun StandardLayout(
     viewModel: BouncerViewModel,
     dialogFactory: BouncerDialogFactory,
     modifier: Modifier = Modifier,
+    layout: BouncerSceneLayout = BouncerSceneLayout.STANDARD,
     outputOnly: Boolean = false,
 ) {
     val foldPosture: FoldPosture by foldPosture()
@@ -161,6 +163,7 @@ private fun StandardLayout(
             FoldSplittable(
                 viewModel = viewModel,
                 dialogFactory = dialogFactory,
+                layout = layout,
                 outputOnly = outputOnly,
                 isSplit = false,
             )
@@ -170,6 +173,7 @@ private fun StandardLayout(
             FoldSplittable(
                 viewModel = viewModel,
                 dialogFactory = dialogFactory,
+                layout = layout,
                 outputOnly = outputOnly,
                 isSplit = true,
             )
@@ -193,6 +197,7 @@ private fun StandardLayout(
 private fun SceneScope.FoldSplittable(
     viewModel: BouncerViewModel,
     dialogFactory: BouncerDialogFactory,
+    layout: BouncerSceneLayout,
     outputOnly: Boolean,
     isSplit: Boolean,
     modifier: Modifier = Modifier,
@@ -210,13 +215,21 @@ private fun SceneScope.FoldSplittable(
         // Content above the fold, when split on a foldable device in a "table top" posture:
         Box(
             modifier =
-                Modifier.element(SceneElements.AboveFold).fillMaxWidth().thenIf(isSplit) {
-                    Modifier.weight(splitRatio)
-                },
+                Modifier.element(SceneElements.AboveFold)
+                    .fillMaxWidth()
+                    .then(
+                        if (isSplit) {
+                            Modifier.weight(splitRatio)
+                        } else if (outputOnly) {
+                            Modifier.fillMaxHeight()
+                        } else {
+                            Modifier
+                        }
+                    ),
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth().padding(top = 92.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = layout.topPadding),
             ) {
                 Crossfade(
                     targetState = message,
@@ -230,11 +243,23 @@ private fun SceneScope.FoldSplittable(
                     )
                 }
 
-                Spacer(Modifier.heightIn(min = 21.dp, max = 48.dp))
+                if (!outputOnly) {
+                    Spacer(Modifier.height(layout.spacingBetweenMessageAndEnteredInput))
 
+                    UserInputArea(
+                        viewModel = viewModel,
+                        visibility = UserInputAreaVisibility.OUTPUT_ONLY,
+                        layout = layout,
+                    )
+                }
+            }
+
+            if (outputOnly) {
                 UserInputArea(
                     viewModel = viewModel,
                     visibility = UserInputAreaVisibility.OUTPUT_ONLY,
+                    layout = layout,
+                    modifier = Modifier.align(Alignment.Center),
                 )
             }
         }
@@ -242,25 +267,32 @@ private fun SceneScope.FoldSplittable(
         // Content below the fold, when split on a foldable device in a "table top" posture:
         Box(
             modifier =
-                Modifier.element(SceneElements.BelowFold).fillMaxWidth().thenIf(isSplit) {
-                    Modifier.weight(1 - splitRatio)
-                },
+                Modifier.element(SceneElements.BelowFold)
+                    .fillMaxWidth()
+                    .weight(
+                        if (isSplit) {
+                            1 - splitRatio
+                        } else {
+                            1f
+                        }
+                    ),
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxSize()
             ) {
                 if (!outputOnly) {
                     Box(Modifier.weight(1f)) {
                         UserInputArea(
                             viewModel = viewModel,
                             visibility = UserInputAreaVisibility.INPUT_ONLY,
-                            modifier = Modifier.align(Alignment.Center),
+                            layout = layout,
+                            modifier = Modifier.align(Alignment.BottomCenter),
                         )
                     }
                 }
 
-                Spacer(Modifier.heightIn(min = 21.dp, max = 48.dp))
+                Spacer(Modifier.height(48.dp))
 
                 val actionButtonModifier = Modifier.height(56.dp)
 
@@ -275,7 +307,7 @@ private fun SceneScope.FoldSplittable(
                     }
                 }
 
-                Spacer(Modifier.height(48.dp))
+                Spacer(Modifier.height(layout.bottomPadding))
             }
         }
 
@@ -311,6 +343,7 @@ private fun SceneScope.FoldSplittable(
 private fun UserInputArea(
     viewModel: BouncerViewModel,
     visibility: UserInputAreaVisibility,
+    layout: BouncerSceneLayout,
     modifier: Modifier = Modifier,
 ) {
     val authMethodViewModel: AuthMethodBouncerViewModel? by
@@ -327,6 +360,7 @@ private fun UserInputArea(
                 UserInputAreaVisibility.INPUT_ONLY ->
                     PinPad(
                         viewModel = nonNullViewModel,
+                        layout = layout,
                         modifier = modifier,
                     )
             }
@@ -341,7 +375,8 @@ private fun UserInputArea(
             if (visibility == UserInputAreaVisibility.INPUT_ONLY) {
                 PatternBouncer(
                     viewModel = nonNullViewModel,
-                    modifier = modifier.aspectRatio(1f, matchHeightConstraintsFirst = false)
+                    layout = layout,
+                    modifier = modifier.aspectRatio(1f, matchHeightConstraintsFirst = false),
                 )
             }
         else -> Unit
@@ -449,7 +484,7 @@ private fun UserSwitcher(
 }
 
 /**
- * Renders the dropdown menu that displays the actual users and/or user actions that can be
+ * Renders the dropdowm menu that displays the actual users and/or user actions that can be
  * selected.
  */
 @Composable
@@ -519,6 +554,7 @@ private fun SplitLayout(
             StandardLayout(
                 viewModel = viewModel,
                 dialogFactory = dialogFactory,
+                layout = BouncerSceneLayout.SPLIT,
                 outputOnly = true,
                 modifier = startContentModifier,
             )
@@ -527,10 +563,12 @@ private fun SplitLayout(
             UserInputArea(
                 viewModel = viewModel,
                 visibility = UserInputAreaVisibility.INPUT_ONLY,
+                layout = BouncerSceneLayout.SPLIT,
                 modifier = endContentModifier,
             )
         },
-        modifier = modifier
+        layout = BouncerSceneLayout.SPLIT,
+        modifier = modifier,
     )
 }
 
@@ -542,6 +580,7 @@ private fun SplitLayout(
 private fun SwappableLayout(
     startContent: @Composable (Modifier) -> Unit,
     endContent: @Composable (Modifier) -> Unit,
+    layout: BouncerSceneLayout,
     modifier: Modifier = Modifier,
 ) {
     val layoutDirection = LocalLayoutDirection.current
@@ -597,7 +636,7 @@ private fun SwappableLayout(
                     alpha = animatedAlpha(animatedOffset)
                 }
         ) {
-            endContent(Modifier.widthIn(max = 400.dp).align(Alignment.BottomCenter))
+            endContent(Modifier.align(layout.swappableEndContentAlignment).widthIn(max = 400.dp))
         }
     }
 }
@@ -635,9 +674,11 @@ private fun SideBySideLayout(
             StandardLayout(
                 viewModel = viewModel,
                 dialogFactory = dialogFactory,
+                layout = BouncerSceneLayout.SIDE_BY_SIDE,
                 modifier = endContentModifier,
             )
         },
+        layout = BouncerSceneLayout.SIDE_BY_SIDE,
         modifier = modifier,
     )
 }
@@ -663,6 +704,7 @@ private fun StackedLayout(
         StandardLayout(
             viewModel = viewModel,
             dialogFactory = dialogFactory,
+            layout = BouncerSceneLayout.STACKED,
             modifier = Modifier.fillMaxWidth().weight(1f),
         )
     }
@@ -732,3 +774,48 @@ private object SceneElements {
 private val SceneTransitions = transitions {
     from(SceneKeys.ContiguousSceneKey, to = SceneKeys.SplitSceneKey) { spec = tween() }
 }
+
+/** Whether a more compact size should be used for various spacing dimensions. */
+internal val BouncerSceneLayout.isUseCompactSize: Boolean
+    get() =
+        when (this) {
+            BouncerSceneLayout.SIDE_BY_SIDE -> true
+            BouncerSceneLayout.SPLIT -> true
+            else -> false
+        }
+
+/** Amount of space to place between the message and the entered input UI elements, in dips. */
+private val BouncerSceneLayout.spacingBetweenMessageAndEnteredInput: Dp
+    get() =
+        when {
+            this == BouncerSceneLayout.STACKED -> 24.dp
+            isUseCompactSize -> 96.dp
+            else -> 128.dp
+        }
+
+/** Amount of space to place above the topmost UI element, in dips. */
+private val BouncerSceneLayout.topPadding: Dp
+    get() =
+        if (this == BouncerSceneLayout.SPLIT) {
+            40.dp
+        } else {
+            92.dp
+        }
+
+/** Amount of space to place below the bottommost UI element, in dips. */
+private val BouncerSceneLayout.bottomPadding: Dp
+    get() =
+        if (this == BouncerSceneLayout.SPLIT) {
+            40.dp
+        } else {
+            48.dp
+        }
+
+/** The in-a-box alignment for the content on the "end" side of a swappable layout. */
+private val BouncerSceneLayout.swappableEndContentAlignment: Alignment
+    get() =
+        if (this == BouncerSceneLayout.SPLIT) {
+            Alignment.Center
+        } else {
+            Alignment.BottomCenter
+        }

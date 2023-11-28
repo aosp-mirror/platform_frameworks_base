@@ -18,8 +18,6 @@ package com.android.systemui.bouncer.ui.composable
 
 import android.view.ViewTreeObserver
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalTextStyle
@@ -123,8 +121,6 @@ internal fun PasswordBouncer(
                         )
                     },
         )
-
-        Spacer(Modifier.height(100.dp))
     }
 }
 
