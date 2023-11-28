@@ -159,6 +159,12 @@
                 <xs:element type="usiVersion" name="usiVersion">
                     <xs:annotation name="final"/>
                 </xs:element>
+                <!-- Maximum screen brightness setting when screen brightness capped in
+                Wear Bedtime mode. This must be a non-negative decimal within the range defined by
+                the first and the last brightness value in screenBrightnessMap. -->
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessCapForWearBedtimeMode">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>

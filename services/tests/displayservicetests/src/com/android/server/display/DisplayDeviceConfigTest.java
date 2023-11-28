@@ -47,6 +47,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.internal.display.BrightnessSynchronizer;
 import com.android.server.display.config.HdrBrightnessData;
 import com.android.server.display.config.ThermalStatus;
 
@@ -671,6 +672,9 @@ public final class DisplayDeviceConfigTest {
 
         assertEquals("test_light_sensor", mDisplayDeviceConfig.getAmbientLightSensor().type);
         assertEquals("", mDisplayDeviceConfig.getAmbientLightSensor().name);
+
+        assertEquals(BrightnessSynchronizer.brightnessIntToFloat(35),
+                mDisplayDeviceConfig.getBrightnessCapForWearBedtimeMode(), ZERO_DELTA);
     }
 
     @Test
@@ -714,6 +718,13 @@ public final class DisplayDeviceConfigTest {
         assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowIncrease(), 0.04f, ZERO_DELTA);
         assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowDecreaseIdle(), 0.03f, ZERO_DELTA);
         assertEquals(mDisplayDeviceConfig.getBrightnessRampSlowIncreaseIdle(), 0.04f, ZERO_DELTA);
+    }
+
+    @Test
+    public void testBrightnessCapForWearBedtimeMode() throws IOException {
+        setupDisplayDeviceConfigFromDisplayConfigFile(getContent(getValidLuxThrottling(),
+                getValidProxSensor(), /* includeIdleMode= */ false));
+        assertEquals(0.1f, mDisplayDeviceConfig.getBrightnessCapForWearBedtimeMode(), ZERO_DELTA);
     }
 
     private String getValidLuxThrottling() {
@@ -1355,6 +1366,9 @@ public final class DisplayDeviceConfigTest {
                 +       "<majorVersion>2</majorVersion>\n"
                 +       "<minorVersion>0</minorVersion>\n"
                 +   "</usiVersion>\n"
+                +   "<screenBrightnessCapForWearBedtimeMode>"
+                +       "0.1"
+                +   "</screenBrightnessCapForWearBedtimeMode>"
                 + "</displayConfiguration>\n";
     }
 
@@ -1456,6 +1470,10 @@ public final class DisplayDeviceConfigTest {
         when(mResources.getInteger(
                 R.integer.config_autoBrightnessDarkeningLightDebounce))
                 .thenReturn(4000);
+
+        when(mResources.getInteger(
+                R.integer.config_screenBrightnessCapForWearBedtimeMode))
+                .thenReturn(35);
 
         mDisplayDeviceConfig = DisplayDeviceConfig.create(mContext, true);
     }
