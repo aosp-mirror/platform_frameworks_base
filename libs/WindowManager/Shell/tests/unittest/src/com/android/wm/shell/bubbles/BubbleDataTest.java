@@ -192,7 +192,7 @@ public class BubbleDataTest extends ShellTestCase {
                 mMainExecutor);
 
         mPositioner = new TestableBubblePositioner(mContext,
-                mock(WindowManager.class));
+                mContext.getSystemService(WindowManager.class));
         mBubbleData = new BubbleData(getContext(), mBubbleLogger, mPositioner, mEducationController,
                 mMainExecutor);
 

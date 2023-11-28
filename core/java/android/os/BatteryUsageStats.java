@@ -36,6 +36,7 @@ import java.io.Closeable;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -586,7 +587,8 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
                             + "(" + BatteryConsumer.processStateToString(key.processState) + ")";
                 }
                 printPowerComponent(pw, prefix, label, devicePowerMah, appsPowerMah,
-                        deviceConsumer.getPowerModel(key),
+                        mIncludesPowerModels ? deviceConsumer.getPowerModel(key)
+                                : BatteryConsumer.POWER_MODEL_UNDEFINED,
                         deviceConsumer.getUsageDurationMillis(key));
             }
         }
@@ -772,6 +774,15 @@ public final class BatteryUsageStats implements Parcelable, Closeable {
             mBatteryConsumersCursorWindow.close();
         }
         super.finalize();
+    }
+
+    @Override
+    public String toString() {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        dump(pw, "");
+        pw.flush();
+        return sw.toString();
     }
 
     /**

@@ -19,6 +19,7 @@ package com.android.systemui.dagger;
 import com.android.systemui.BootCompleteCacheImpl;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.Dependency;
+import com.android.systemui.Flags;
 import com.android.systemui.InitController;
 import com.android.systemui.SystemUIAppComponentFactoryBase;
 import com.android.systemui.dagger.qualifiers.PerUser;
@@ -35,6 +36,7 @@ import com.android.systemui.unfold.FoldStateLogger;
 import com.android.systemui.unfold.FoldStateLoggingProvider;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
+import com.android.systemui.unfold.dagger.UnfoldBg;
 import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
@@ -144,7 +146,15 @@ public interface SysUIComponent {
         getConnectingDisplayViewModel().init();
         getFoldStateLoggingProvider().ifPresent(FoldStateLoggingProvider::init);
         getFoldStateLogger().ifPresent(FoldStateLogger::init);
-        getUnfoldTransitionProgressProvider()
+
+        Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider;
+
+        if (Flags.unfoldAnimationBackgroundProgress()) {
+            unfoldTransitionProgressProvider = getBgUnfoldTransitionProgressProvider();
+        } else {
+            unfoldTransitionProgressProvider = getUnfoldTransitionProgressProvider();
+        }
+        unfoldTransitionProgressProvider
                 .ifPresent(
                         (progressProvider) ->
                                 getUnfoldTransitionProgressForwarder()
@@ -170,7 +180,14 @@ public interface SysUIComponent {
     ContextComponentHelper getContextComponentHelper();
 
     /**
-     * Creates a UnfoldTransitionProgressProvider.
+     * Creates a UnfoldTransitionProgressProvider that calculates progress in the background.
+     */
+    @SysUISingleton
+    @UnfoldBg
+    Optional<UnfoldTransitionProgressProvider> getBgUnfoldTransitionProgressProvider();
+
+    /**
+     * Creates a UnfoldTransitionProgressProvider that calculates progress in the main thread.
      */
     @SysUISingleton
     Optional<UnfoldTransitionProgressProvider> getUnfoldTransitionProgressProvider();

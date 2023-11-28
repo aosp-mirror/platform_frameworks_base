@@ -26,6 +26,7 @@ aconfig_srcjars = [
     ":android.os.flags-aconfig-java{.generated_srcjars}",
     ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
     ":android.security.flags-aconfig-java{.generated_srcjars}",
+    ":android.service.chooser.flags-aconfig-java{.generated_srcjars}",
     ":android.service.notification.flags-aconfig-java{.generated_srcjars}",
     ":android.view.flags-aconfig-java{.generated_srcjars}",
     ":android.view.accessibility.flags-aconfig-java{.generated_srcjars}",
@@ -54,6 +55,7 @@ aconfig_srcjars = [
     ":android.app.flags-aconfig-java{.generated_srcjars}",
     ":android.credentials.flags-aconfig-java{.generated_srcjars}",
     ":android.view.contentprotection.flags-aconfig-java{.generated_srcjars}",
+    ":com.android.server.flags.pinner-aconfig-java{.generated_srcjars}",
     ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
     ":android.media.tv.flags-aconfig-java{.generated_srcjars}",
     ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
@@ -583,6 +585,19 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+// Pinner Service
+aconfig_declarations {
+    name: "com.android.server.flags.pinner-aconfig",
+    package: "com.android.server.flags",
+    srcs: ["services/core/java/com/android/server/flags/pinner.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.server.flags.pinner-aconfig-java",
+    aconfig_declarations: "com.android.server.flags.pinner-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Voice
 aconfig_declarations {
     name: "android.service.voice.flags-aconfig",
@@ -681,6 +696,19 @@ java_aconfig_library {
 cc_aconfig_library {
     name: "device_policy_aconfig_flags_c_lib",
     aconfig_declarations: "device_policy_aconfig_flags",
+}
+
+// Chooser / "Sharesheet"
+aconfig_declarations {
+    name: "android.service.chooser.flags-aconfig",
+    package: "android.service.chooser",
+    srcs: ["core/java/android/service/chooser/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.service.chooser.flags-aconfig-java",
+    aconfig_declarations: "android.service.chooser.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
 // JobScheduler

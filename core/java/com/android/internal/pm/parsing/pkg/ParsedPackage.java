@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.parsing.pkg;
+package com.android.internal.pm.parsing.pkg;
 
 import android.content.pm.SigningDetails;
 

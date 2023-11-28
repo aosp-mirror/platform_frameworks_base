@@ -146,19 +146,21 @@ constructor(
                     isAnySimLocked -> {
                         switchToScene(
                             targetSceneKey = SceneKey.Bouncer,
-                            loggingReason = "Need to authenticate locked sim card."
+                            loggingReason = "Need to authenticate locked SIM card."
                         )
                     }
-                    isUnlocked && !canSwipeToEnter -> {
+                    isUnlocked && canSwipeToEnter == false -> {
                         switchToScene(
                             targetSceneKey = SceneKey.Gone,
-                            loggingReason = "Sim cards are unlocked."
+                            loggingReason = "All SIM cards unlocked and device already" +
+                                " unlocked and lockscreen doesn't require a swipe to dismiss."
                         )
                     }
                     else -> {
                         switchToScene(
                             targetSceneKey = SceneKey.Lockscreen,
-                            loggingReason = "Sim cards are unlocked."
+                            loggingReason = "All SIM cards unlocked and device still locked" +
+                                " or lockscreen still requires a swipe to dismiss."
                         )
                     }
                 }
@@ -205,11 +207,17 @@ constructor(
                             //    when the user is passively authenticated, the false value here
                             //    when the unlock state changes indicates this is an active
                             //    authentication attempt.
-                            if (isBypassEnabled || !canSwipeToEnter)
-                                SceneKey.Gone to
-                                    "device has been unlocked on lockscreen with either " +
-                                        "bypass enabled or using an active authentication mechanism"
-                            else null
+                            when {
+                                isBypassEnabled ->
+                                    SceneKey.Gone to
+                                        "device has been unlocked on lockscreen with bypass" +
+                                            " enabled"
+                                canSwipeToEnter == false ->
+                                    SceneKey.Gone to
+                                        "device has been unlocked on lockscreen using an active" +
+                                            " authentication mechanism"
+                                else -> null
+                            }
                         // Not on lockscreen or bouncer, so remain in the current scene.
                         else -> null
                     }
@@ -232,7 +240,7 @@ constructor(
                 } else {
                     val canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value
                     val isUnlocked = deviceEntryInteractor.isUnlocked.value
-                    if (isUnlocked && !canSwipeToEnter) {
+                    if (isUnlocked && canSwipeToEnter == false) {
                         switchToScene(
                             targetSceneKey = SceneKey.Gone,
                             loggingReason =

@@ -35,7 +35,7 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.pm.pkg.component.ParsedProvider;
-import com.android.server.pm.pkg.parsing.ParsingPackage;
+import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingUtils;
 
 import org.xmlpull.v1.XmlPullParser;

@@ -58,7 +58,6 @@ import com.android.internal.pm.pkg.component.ParsedProcess;
 import com.android.internal.pm.pkg.component.ParsedProvider;
 import com.android.internal.pm.pkg.component.ParsedService;
 import com.android.internal.pm.pkg.component.ParsedUsesPermission;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 
 import java.security.PublicKey;
 import java.util.List;
@@ -691,7 +690,7 @@ public interface AndroidPackage {
 
     /**
      * The names of packages to adopt ownership of permissions from, parsed under {@link
-     * ParsingPackageUtils#TAG_ADOPT_PERMISSIONS}.
+     * com.android.server.pm.pkg.parsing.ParsingPackageUtils#TAG_ADOPT_PERMISSIONS}.
      *
      * @see R.styleable#AndroidManifestOriginalPackage_name
      * @hide
@@ -796,7 +795,7 @@ public interface AndroidPackage {
 
     /**
      * For use with {@link com.android.server.pm.KeySetManagerService}. Parsed in {@link
-     * ParsingPackageUtils#TAG_KEY_SETS}.
+     * com.android.server.pm.pkg.parsing.ParsingPackageUtils#TAG_KEY_SETS}.
      *
      * @see R.styleable#AndroidManifestKeySet
      * @see R.styleable#AndroidManifestPublicKey
@@ -905,7 +904,7 @@ public interface AndroidPackage {
      * For system use to migrate from an old package name to a new one, moving over data if
      * available.
      *
-     * @see R.styleable#AndroidManifestOriginalPackage}
+     * @see R.styleable#AndroidManifestOriginalPackage
      * @hide
      */
     @NonNull
@@ -1267,7 +1266,7 @@ public interface AndroidPackage {
 
     /**
      * For use with {@link com.android.server.pm.KeySetManagerService}. Parsed in {@link
-     * ParsingPackageUtils#TAG_KEY_SETS}.
+     * com.android.server.pm.pkg.parsing.ParsingPackageUtils#TAG_KEY_SETS}.
      *
      * @see R.styleable#AndroidManifestUpgradeKeySet
      * @hide
@@ -1417,6 +1416,7 @@ public interface AndroidPackage {
      * @see ApplicationInfo#FLAG_IS_GAME
      * @see R.styleable#AndroidManifestApplication_isGame
      * @hide
+     * @deprecated
      */
     @Deprecated
     boolean isGame();

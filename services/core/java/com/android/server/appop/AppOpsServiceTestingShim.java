@@ -65,9 +65,9 @@ public class AppOpsServiceTestingShim implements AppOpsCheckingServiceInterface 
     }
 
     @Override
-    public SparseIntArray getNonDefaultUidModes(int uid) {
-        SparseIntArray oldVal = mOldImplementation.getNonDefaultUidModes(uid);
-        SparseIntArray newVal = mNewImplementation.getNonDefaultUidModes(uid);
+    public SparseIntArray getNonDefaultUidModes(int uid, String persistentDeviceId) {
+        SparseIntArray oldVal = mOldImplementation.getNonDefaultUidModes(uid, persistentDeviceId);
+        SparseIntArray newVal = mNewImplementation.getNonDefaultUidModes(uid, persistentDeviceId);
 
         if (!Objects.equals(oldVal, newVal)) {
             signalImplDifference("getNonDefaultUidModes");
@@ -89,9 +89,9 @@ public class AppOpsServiceTestingShim implements AppOpsCheckingServiceInterface 
     }
 
     @Override
-    public int getUidMode(int uid, int op) {
-        int oldVal = mOldImplementation.getUidMode(uid, op);
-        int newVal = mNewImplementation.getUidMode(uid, op);
+    public int getUidMode(int uid, String persistentDeviceId, int op) {
+        int oldVal = mOldImplementation.getUidMode(uid, persistentDeviceId, op);
+        int newVal = mNewImplementation.getUidMode(uid, persistentDeviceId, op);
 
         if (oldVal != newVal) {
             signalImplDifference("getUidMode");
@@ -101,9 +101,9 @@ public class AppOpsServiceTestingShim implements AppOpsCheckingServiceInterface 
     }
 
     @Override
-    public boolean setUidMode(int uid, int op, int mode) {
-        boolean oldVal = mOldImplementation.setUidMode(uid, op, mode);
-        boolean newVal = mNewImplementation.setUidMode(uid, op, mode);
+    public boolean setUidMode(int uid, String persistentDeviceId, int op, int mode) {
+        boolean oldVal = mOldImplementation.setUidMode(uid, persistentDeviceId, op, mode);
+        boolean newVal = mNewImplementation.setUidMode(uid, persistentDeviceId, op, mode);
 
         if (oldVal != newVal) {
             signalImplDifference("setUidMode");
@@ -155,9 +155,9 @@ public class AppOpsServiceTestingShim implements AppOpsCheckingServiceInterface 
     }
 
     @Override
-    public SparseBooleanArray getForegroundOps(int uid) {
-        SparseBooleanArray oldVal = mOldImplementation.getForegroundOps(uid);
-        SparseBooleanArray newVal = mNewImplementation.getForegroundOps(uid);
+    public SparseBooleanArray getForegroundOps(int uid, String persistentDeviceId) {
+        SparseBooleanArray oldVal = mOldImplementation.getForegroundOps(uid, persistentDeviceId);
+        SparseBooleanArray newVal = mNewImplementation.getForegroundOps(uid, persistentDeviceId);
 
         if (!Objects.equals(oldVal, newVal)) {
             signalImplDifference("getForegroundOps");

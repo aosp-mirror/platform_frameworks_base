@@ -55,6 +55,8 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.spy
 import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder
 import com.android.internal.R
+import com.android.internal.pm.parsing.pkg.ParsedPackage
+import com.android.internal.pm.pkg.parsing.ParsingPackage
 import com.android.server.LocalManagerRegistry
 import com.android.server.LocalServices
 import com.android.server.LockGuard
@@ -66,10 +68,8 @@ import com.android.server.pm.dex.DexManager
 import com.android.server.pm.dex.DynamicCodeLogger
 import com.android.server.pm.parsing.PackageParser2
 import com.android.server.pm.parsing.pkg.PackageImpl
-import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.pm.permission.PermissionManagerServiceInternal
 import com.android.server.pm.pkg.AndroidPackage
-import com.android.server.pm.pkg.parsing.ParsingPackage
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.pm.resolution.ComponentResolver
 import com.android.server.pm.snapshot.PackageDataSnapshot

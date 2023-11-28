@@ -72,7 +72,7 @@ import androidx.test.filters.Suppress;
 
 import com.android.compatibility.common.util.CddTest;
 import com.android.internal.content.InstallLocationUtils;
-import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.test.service.server.R;
 

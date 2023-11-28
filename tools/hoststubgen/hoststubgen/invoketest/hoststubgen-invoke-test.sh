@@ -51,6 +51,8 @@ ANNOTATION_FILTER=$TEMP/annotation-filter.txt
 
 HOSTSTUBGEN_OUT=$TEMP/output.txt
 
+EXTRA_ARGS=""
+
 # Because of `set -e`, we can't return non-zero from functions, so we store
 # HostStubGen result in it.
 HOSTSTUBGEN_RC=0
@@ -115,6 +117,7 @@ run_hoststubgen() {
       --keep-static-initializer-annotation \
           android.hosttest.annotation.HostSideTestStaticInitializerKeep \
       $filter_arg \
+      $EXTRA_ARGS \
       |& tee $HOSTSTUBGEN_OUT
   HOSTSTUBGEN_RC=${PIPESTATUS[0]}
   echo "HostStubGen exited with $HOSTSTUBGEN_RC"
@@ -209,7 +212,6 @@ com.supported.*
 com.unsupported.*
 "
 
-
 run_hoststubgen_for_failure "One specific class disallowed" \
     "TinyFrameworkClassAnnotations is not allowed to have Ravenwood annotations" \
     "
@@ -228,6 +230,14 @@ STUB="" run_hoststubgen_for_success "No stub generation" ""
 IMPL="" run_hoststubgen_for_success "No impl generation" ""
 
 STUB="" IMPL="" run_hoststubgen_for_success "No stub, no impl generation" ""
+
+EXTRA_ARGS="--in-jar abc" run_hoststubgen_for_failure "Duplicate arg" \
+    "Duplicate or conflicting argument found: --in-jar" \
+    ""
+
+EXTRA_ARGS="--quiet" run_hoststubgen_for_failure "Conflicting arg" \
+    "Duplicate or conflicting argument found: --quiet" \
+    ""
 
 
 echo "All tests passed"

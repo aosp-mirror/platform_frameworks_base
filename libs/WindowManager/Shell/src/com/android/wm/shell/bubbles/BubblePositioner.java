@@ -16,10 +16,7 @@
 
 package com.android.wm.shell.bubbles;
 
-import static android.view.View.LAYOUT_DIRECTION_RTL;
-
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Insets;
 import android.graphics.Point;
@@ -28,9 +25,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
 import android.view.Surface;
-import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.view.WindowMetrics;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -68,15 +63,12 @@ public class BubblePositioner {
     private static final float EXPANDED_VIEW_BUBBLE_BAR_LANDSCAPE_WIDTH_PERCENT = 0.4f;
 
     private Context mContext;
-    private WindowManager mWindowManager;
+    private DeviceConfig mDeviceConfig;
     private Rect mScreenRect;
     private @Surface.Rotation int mRotation = Surface.ROTATION_0;
     private Insets mInsets;
     private boolean mImeVisible;
     private int mImeHeight;
-    private boolean mIsLargeScreen;
-    private boolean mIsSmallTablet;
-
     private Rect mPositionRect;
     private int mDefaultMaxBubbles;
     private int mMaxBubbles;
@@ -110,44 +102,27 @@ public class BubblePositioner {
 
     public BubblePositioner(Context context, WindowManager windowManager) {
         mContext = context;
-        mWindowManager = windowManager;
-        update();
+        mDeviceConfig = DeviceConfig.create(context, windowManager);
+        update(mDeviceConfig);
     }
 
     /**
      * Available space and inset information. Call this when config changes
      * occur or when added to a window.
      */
-    public void update() {
-        WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
-        if (windowMetrics == null) {
-            return;
-        }
-        WindowInsets metricInsets = windowMetrics.getWindowInsets();
-        Insets insets = metricInsets.getInsetsIgnoringVisibility(WindowInsets.Type.navigationBars()
-                | WindowInsets.Type.statusBars()
-                | WindowInsets.Type.displayCutout());
-
-        final Rect bounds = windowMetrics.getBounds();
-        Configuration config = mContext.getResources().getConfiguration();
-        mIsLargeScreen = config.smallestScreenWidthDp >= 600;
-        if (mIsLargeScreen) {
-            float largestEdgeDp = Math.max(config.screenWidthDp, config.screenHeightDp);
-            mIsSmallTablet = largestEdgeDp < 960;
-        } else {
-            mIsSmallTablet = false;
-        }
+    public void update(DeviceConfig deviceConfig) {
+        mDeviceConfig = deviceConfig;
 
         if (BubbleDebugConfig.DEBUG_POSITIONER) {
             Log.w(TAG, "update positioner:"
                     + " rotation: " + mRotation
-                    + " insets: " + insets
-                    + " isLargeScreen: " + mIsLargeScreen
-                    + " isSmallTablet: " + mIsSmallTablet
+                    + " insets: " + deviceConfig.getInsets()
+                    + " isLargeScreen: " + deviceConfig.isLargeScreen()
+                    + " isSmallTablet: " + deviceConfig.isSmallTablet()
                     + " showingInBubbleBar: " + mShowingInBubbleBar
-                    + " bounds: " + bounds);
+                    + " bounds: " + deviceConfig.getWindowBounds());
         }
-        updateInternal(mRotation, insets, bounds);
+        updateInternal(mRotation, deviceConfig.getInsets(), deviceConfig.getWindowBounds());
     }
 
     @VisibleForTesting
@@ -175,15 +150,15 @@ public class BubblePositioner {
             mExpandedViewLargeScreenWidth = isLandscape()
                     ? (int) (bounds.width() * EXPANDED_VIEW_BUBBLE_BAR_LANDSCAPE_WIDTH_PERCENT)
                     : (int) (bounds.width() * EXPANDED_VIEW_BUBBLE_BAR_PORTRAIT_WIDTH_PERCENT);
-        } else if (mIsSmallTablet) {
+        } else if (mDeviceConfig.isSmallTablet()) {
             mExpandedViewLargeScreenWidth = (int) (bounds.width()
                     * EXPANDED_VIEW_SMALL_TABLET_WIDTH_PERCENT);
         } else {
             mExpandedViewLargeScreenWidth =
                     res.getDimensionPixelSize(R.dimen.bubble_expanded_view_largescreen_width);
         }
-        if (mIsLargeScreen) {
-            if (mIsSmallTablet) {
+        if (mDeviceConfig.isLargeScreen()) {
+            if (mDeviceConfig.isSmallTablet()) {
                 final int centeredInset = (bounds.width() - mExpandedViewLargeScreenWidth) / 2;
                 mExpandedViewLargeScreenInsetClosestEdge = centeredInset;
                 mExpandedViewLargeScreenInsetFurthestEdge = centeredInset;
@@ -264,13 +239,12 @@ public class BubblePositioner {
 
     /** @return whether the device is in landscape orientation. */
     public boolean isLandscape() {
-        return mContext.getResources().getConfiguration().orientation
-                == Configuration.ORIENTATION_LANDSCAPE;
+        return mDeviceConfig.isLandscape();
     }
 
     /** @return whether the screen is considered large. */
     public boolean isLargeScreen() {
-        return mIsLargeScreen;
+        return mDeviceConfig.isLargeScreen();
     }
 
     /**
@@ -281,7 +255,7 @@ public class BubblePositioner {
      * to the left or right side.
      */
     public boolean showBubblesVertically() {
-        return isLandscape() || mIsLargeScreen;
+        return isLandscape() || mDeviceConfig.isLargeScreen();
     }
 
     /** Size of the bubble. */
@@ -334,7 +308,7 @@ public class BubblePositioner {
     }
 
     private int getExpandedViewLargeScreenInsetFurthestEdge(boolean isOverflow) {
-        if (isOverflow && mIsLargeScreen) {
+        if (isOverflow && mDeviceConfig.isLargeScreen()) {
             return mScreenRect.width()
                     - mExpandedViewLargeScreenInsetClosestEdge
                     - mOverflowWidth;
@@ -358,7 +332,7 @@ public class BubblePositioner {
         final int pointerTotalHeight = getPointerSize();
         final int expandedViewLargeScreenInsetFurthestEdge =
                 getExpandedViewLargeScreenInsetFurthestEdge(isOverflow);
-        if (mIsLargeScreen) {
+        if (mDeviceConfig.isLargeScreen()) {
             // Note:
             // If we're in portrait OR if we're a small tablet, then the two insets values will
             // be equal. If we're landscape and a large tablet, the two values will be different.
@@ -439,12 +413,12 @@ public class BubblePositioner {
      */
     public float getExpandedViewHeight(BubbleViewProvider bubble) {
         boolean isOverflow = bubble == null || BubbleOverflow.KEY.equals(bubble.getKey());
-        if (isOverflow && showBubblesVertically() && !mIsLargeScreen) {
+        if (isOverflow && showBubblesVertically() && !mDeviceConfig.isLargeScreen()) {
             // overflow in landscape on phone is max
             return MAX_HEIGHT;
         }
 
-        if (mIsLargeScreen && !mIsSmallTablet && !isOverflow) {
+        if (mDeviceConfig.isLargeScreen() && !mDeviceConfig.isSmallTablet() && !isOverflow) {
             // the expanded view height on large tablets is calculated based on the shortest screen
             // size and is the same in both portrait and landscape
             int maxVerticalInset = Math.max(mInsets.top, mInsets.bottom);
@@ -529,11 +503,9 @@ public class BubblePositioner {
      */
     public PointF getExpandedBubbleXY(int index, BubbleStackView.StackViewState state) {
         boolean showBubblesVertically = showBubblesVertically();
-        boolean isRtl = mContext.getResources().getConfiguration().getLayoutDirection()
-                == LAYOUT_DIRECTION_RTL;
 
         int onScreenIndex;
-        if (showBubblesVertically || !isRtl) {
+        if (showBubblesVertically || !mDeviceConfig.isRtl()) {
             onScreenIndex = index;
         } else {
             // If bubbles are shown horizontally, check if RTL language is used.
@@ -554,10 +526,10 @@ public class BubblePositioner {
         if (showBubblesVertically) {
             int inset = mExpandedViewLargeScreenInsetClosestEdge;
             y = rowStart + positionInRow;
-            int left = mIsLargeScreen
+            int left = mDeviceConfig.isLargeScreen()
                     ? inset - mExpandedViewPadding - mBubbleSize
                     : mPositionRect.left;
-            int right = mIsLargeScreen
+            int right = mDeviceConfig.isLargeScreen()
                     ? mPositionRect.right - inset + mExpandedViewPadding
                     : mPositionRect.right - mBubbleSize;
             x = state.onLeft
@@ -693,13 +665,10 @@ public class BubblePositioner {
      * @param isAppBubble whether this start position is for an app bubble or not.
      */
     public PointF getDefaultStartPosition(boolean isAppBubble) {
-        final int layoutDirection = mContext.getResources().getConfiguration().getLayoutDirection();
         // Normal bubbles start on the left if we're in LTR, right otherwise.
         // TODO (b/294284894): update language around "app bubble" here
         // App bubbles start on the right in RTL, left otherwise.
-        final boolean startOnLeft = isAppBubble
-                ? layoutDirection == LAYOUT_DIRECTION_RTL
-                : layoutDirection != LAYOUT_DIRECTION_RTL;
+        final boolean startOnLeft = isAppBubble ? mDeviceConfig.isRtl() : !mDeviceConfig.isRtl();
         return getStartPosition(startOnLeft ? StackPinnedEdge.LEFT : StackPinnedEdge.RIGHT);
     }
 

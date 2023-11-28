@@ -101,7 +101,10 @@ constructor(
 
     override fun addCallback(callback: QSTile.Callback?) {
         callback ?: return
-        synchronized(callbacks) { callbacks.add(callback) }
+        synchronized(callbacks) {
+            callbacks.add(callback)
+            state?.let(callback::onStateChanged)
+        }
     }
 
     override fun removeCallback(callback: QSTile.Callback?) {

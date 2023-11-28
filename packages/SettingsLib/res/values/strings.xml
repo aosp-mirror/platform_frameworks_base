@@ -1373,11 +1373,11 @@
     <string name="tv_media_transfer_earc_subtitle">Connected via eARC</string>
 
     <!-- TV media output switcher. Title for the default audio output of the device [CHAR LIMIT=NONE] -->
-    <string name="tv_media_transfer_default">TV Default</string>
+    <string name="tv_media_transfer_default">TV default</string>
     <!-- TV media output switcher. Subtitle for default audio output which is HDMI, e.g. TV dongle [CHAR LIMIT=NONE] -->
-    <string name="tv_media_transfer_hdmi">HDMI Output</string>
+    <string name="tv_media_transfer_hdmi">HDMI output</string>
     <!-- TV media output switcher. Subtitle for default audio output which is internal speaker, i.e. panel VTs [CHAR LIMIT=NONE] -->
-    <string name="tv_media_transfer_internal_speakers">Internal Speakers</string>
+    <string name="tv_media_transfer_internal_speakers">Internal speakers</string>
 
     <!-- Warning message to tell user is have problem during profile connect, it need to turn off device and back on. [CHAR_LIMIT=NONE] -->
     <string name="profile_connect_timeout_subtext">Problem connecting. Turn device off &amp; back on</string>

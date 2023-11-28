@@ -36,9 +36,8 @@ import android.os.Process
 import android.util.ArraySet
 import android.util.SparseArray
 import android.util.Xml
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal
 import com.android.server.pm.Computer
-import com.android.server.pm.parsing.pkg.AndroidPackageInternal
-import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateInternal
 import com.android.server.pm.pkg.PackageUserStateInternal
 import com.android.server.pm.pkg.component.ParsedActivityImpl

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.pm.parsing.pkg;
+package com.android.internal.pm.parsing.pkg;
 
 import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
@@ -22,16 +22,18 @@ import android.content.pm.PackageInfo;
 
 /**
  * Methods that normal consumers should not have access to. This usually means the field is stateful
- * or deprecated and should be access through {@link AndroidPackageUtils} or a system manager
- * class.
+ * or deprecated and should be access through
+ * {@link com.android.server.pm.parsing.pkg.AndroidPackageUtils} or a system manager class.
  * <p>
  * This is a separate interface, not implemented by the base {@link AndroidPackage} because Java
  * doesn't support non-public interface methods. The class must be cast to this interface.
  * <p>
  * Because they exist in different packages, some methods are duplicated from
  * android.content.pm.parsing.ParsingPackageHidden.
+ * @hide
  */
-interface AndroidPackageHidden {
+// TODO: remove public after moved PackageImpl and AndroidPackageUtils
+public interface AndroidPackageHidden {
 
     /**
      * @see ApplicationInfo#primaryCpuAbi

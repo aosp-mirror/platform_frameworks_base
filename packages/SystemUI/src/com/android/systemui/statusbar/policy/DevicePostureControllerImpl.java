@@ -22,10 +22,13 @@ import android.util.SparseIntArray;
 
 import androidx.annotation.NonNull;
 
+import com.android.app.tracing.ListenersTracing;
 import com.android.internal.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.Assert;
+
+import kotlin.Unit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +78,11 @@ public class DevicePostureControllerImpl implements DevicePostureController {
             mCurrentDevicePosture =
                     mDeviceStateToPostureMap.get(state, DEVICE_POSTURE_UNKNOWN);
 
-            mListeners.forEach(l -> l.onPostureChanged(mCurrentDevicePosture));
+            ListenersTracing.INSTANCE.forEachTraced(mListeners, "DevicePostureControllerImpl",
+                    l -> {
+                        l.onPostureChanged(mCurrentDevicePosture);
+                        return Unit.INSTANCE;
+                    });
         });
     }
 

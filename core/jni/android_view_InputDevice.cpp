@@ -81,7 +81,8 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
                                           deviceInfo.getId(), deviceInfo.getGeneration(),
                                           deviceInfo.getControllerNumber(), nameObj.get(),
                                           static_cast<int32_t>(ident.vendor),
-                                          static_cast<int32_t>(ident.product), descriptorObj.get(),
+                                          static_cast<int32_t>(ident.product),
+                                          static_cast<int32_t>(ident.bus), descriptorObj.get(),
                                           deviceInfo.isExternal(), deviceInfo.getSources(),
                                           deviceInfo.getKeyboardType(), kcmObj.get(),
                                           keyboardLanguageTagObj.get(), keyboardLayoutTypeObj.get(),
@@ -111,7 +112,7 @@ int register_android_view_InputDevice(JNIEnv* env)
     gInputDeviceClassInfo.clazz = MakeGlobalRefOrDie(env, gInputDeviceClassInfo.clazz);
 
     gInputDeviceClassInfo.ctor = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "<init>",
-                                                  "(IIILjava/lang/String;IILjava/lang/"
+                                                  "(IIILjava/lang/String;IIILjava/lang/"
                                                   "String;ZIILandroid/view/KeyCharacterMap;Ljava/"
                                                   "lang/String;Ljava/lang/String;ZZZZZIII)V");
 

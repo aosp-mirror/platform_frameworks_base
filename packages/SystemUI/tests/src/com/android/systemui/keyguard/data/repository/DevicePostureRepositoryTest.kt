@@ -26,6 +26,7 @@ import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -49,7 +50,11 @@ class DevicePostureRepositoryTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
         testScope = TestScope()
-        underTest = DevicePostureRepositoryImpl(postureController = devicePostureController)
+        underTest =
+            DevicePostureRepositoryImpl(
+                postureController = devicePostureController,
+                UnconfinedTestDispatcher()
+            )
     }
 
     @Test

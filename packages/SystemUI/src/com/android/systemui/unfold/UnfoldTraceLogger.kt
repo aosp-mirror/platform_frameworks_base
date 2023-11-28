@@ -21,11 +21,14 @@ import com.android.app.tracing.TraceStateLogger
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.unfold.system.DeviceStateRepository
 import com.android.systemui.unfold.updates.FoldStateRepository
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 
 /**
  * Logs several unfold related details in a trace. Mainly used for debugging and investigate
@@ -37,7 +40,8 @@ class UnfoldTraceLogger
 constructor(
     private val context: Context,
     private val foldStateRepository: FoldStateRepository,
-    @Application private val applicationScope: CoroutineScope,
+    @Application applicationScope: CoroutineScope,
+    @Background private val coroutineContext: CoroutineContext,
     private val deviceStateRepository: DeviceStateRepository
 ) : CoreStartable {
     private val isFoldable: Boolean
@@ -46,20 +50,22 @@ constructor(
                 .getIntArray(com.android.internal.R.array.config_foldedDeviceStates)
                 .isNotEmpty()
 
+    private val bgScope = applicationScope.plus(coroutineContext)
+
     override fun start() {
         if (!isFoldable) return
 
-        applicationScope.launch {
+        bgScope.launch {
             val foldUpdateLogger = TraceStateLogger("FoldUpdate")
             foldStateRepository.foldUpdate.collect { foldUpdateLogger.log(it.name) }
         }
 
-        applicationScope.launch {
+        bgScope.launch {
             foldStateRepository.hingeAngle.collect {
                 Trace.traceCounter(Trace.TRACE_TAG_APP, "hingeAngle", it.toInt())
             }
         }
-        applicationScope.launch {
+        bgScope.launch {
             val foldedStateLogger = TraceStateLogger("FoldedState")
             deviceStateRepository.isFolded.collect { isFolded ->
                 foldedStateLogger.log(

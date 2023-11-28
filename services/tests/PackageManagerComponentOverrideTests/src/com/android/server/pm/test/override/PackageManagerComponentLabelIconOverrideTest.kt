@@ -24,6 +24,8 @@ import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.UserHandle
 import android.util.ArrayMap
+import com.android.internal.pm.parsing.pkg.AndroidPackageInternal
+import com.android.internal.pm.parsing.pkg.ParsedPackage
 import com.android.internal.pm.pkg.component.ParsedActivity
 import com.android.server.pm.AppsFilterImpl
 import com.android.server.pm.PackageManagerService
@@ -36,9 +38,7 @@ import com.android.server.pm.Settings
 import com.android.server.pm.SharedLibrariesImpl
 import com.android.server.pm.UserManagerInternal
 import com.android.server.pm.UserManagerService
-import com.android.server.pm.parsing.pkg.AndroidPackageInternal
 import com.android.server.pm.parsing.pkg.PackageImpl
-import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.resolution.ComponentResolver
 import com.android.server.pm.snapshot.PackageDataSnapshot

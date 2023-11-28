@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.plus
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -26,6 +27,14 @@ class CoroutinesModule {
     fun applicationScope(
             @Main dispatcherContext: CoroutineContext,
     ): CoroutineScope = CoroutineScope(dispatcherContext)
+
+    @Provides
+    @SysUISingleton
+    @Background
+    fun bgApplicationScope(
+            @Application applicationScope: CoroutineScope,
+            @Background coroutineContext: CoroutineContext,
+    ): CoroutineScope = applicationScope.plus(coroutineContext)
 
     @Provides
     @SysUISingleton
