@@ -289,13 +289,13 @@ RuntimeVisibleAnnotations:
     java.lang.annotation.Retention(
       value=Ljava/lang/annotation/RetentionPolicy;.CLASS
     )
-## Class: com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy.class
+## Class: com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy.class
   Compiled from "IPretendingAidl.java"
-public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Proxy
+public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub$Proxy
   minor version: 0
   major version: 61
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
-  this_class: #x                          // com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 3, attributes: 4
   private static {};
@@ -303,17 +303,17 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Proxy
     flags: (0x000a) ACC_PRIVATE, ACC_STATIC
     Code:
       stack=2, locals=0, args_size=0
-         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy
          x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logClassLoaded
          x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onClassLoaded:(Ljava/lang/Class;Ljava/lang/String;)V
          x: return
 
-  public com.android.hoststubgen.test.tinyframework.IPretendingAidl$Proxy();
+  public com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub$Proxy();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
     Code:
       stack=4, locals=1, args_size=1
-         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy
          x: ldc           #x                 // String <init>
          x: ldc           #x                 // String ()V
          x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
@@ -324,14 +324,14 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Proxy
       LineNumberTable:
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
-           11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy;
+           11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy;
 
   public static int addTwo(int);
     descriptor: (I)I
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
     Code:
       stack=4, locals=1, args_size=1
-         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy
+         x: ldc           #x                  // class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy
          x: ldc           #x                 // String addTwo
          x: ldc           #x                 // String (I)I
          x: ldc           #x                 // String com.android.hoststubgen.hosthelper.HostTestUtils.logMethodCall
@@ -346,7 +346,8 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Proxy
            11       4     0     a   I
 }
 InnerClasses:
-  public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;          // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
 SourceFile: "IPretendingAidl.java"
 RuntimeVisibleAnnotations:
   x: #x()
@@ -412,6 +413,7 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub
 }
 InnerClasses:
   public static #x= #x of #x;           // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
 SourceFile: "IPretendingAidl.java"
 RuntimeVisibleAnnotations:
   x: #x()
@@ -439,8 +441,8 @@ public interface com.android.hoststubgen.test.tinyframework.IPretendingAidl
          x: return
 }
 InnerClasses:
-  public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
   public static #x= #x of #x;           // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;          // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
 SourceFile: "IPretendingAidl.java"
 RuntimeVisibleAnnotations:
   x: #x()
@@ -448,8 +450,8 @@ RuntimeVisibleAnnotations:
   x: #x()
     com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
 NestMembers:
-  com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy
   com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
+  com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck$Impl.class
   Compiled from "TinyFrameworkCallerCheck.java"
 class com.android.hoststubgen.test.tinyframework.TinyFrameworkCallerCheck$Impl

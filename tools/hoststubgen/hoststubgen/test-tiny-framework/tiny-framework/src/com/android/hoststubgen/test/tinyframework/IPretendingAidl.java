@@ -25,11 +25,12 @@ public interface IPretendingAidl {
         public static int addOne(int a) {
             return a + 1;
         }
-    }
 
-    public static class Proxy {
-        public static int addTwo(int a) {
-            return a + 2;
+        public static class Proxy {
+            public static int addTwo(int a) {
+                return a + 2;
+            }
         }
     }
+
 }

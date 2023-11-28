@@ -223,16 +223,16 @@ RuntimeVisibleAnnotations:
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.TYPE,Ljava/lang/annotation/ElementType;.FIELD,Ljava/lang/annotation/ElementType;.METHOD]
     )
-## Class: com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy.class
+## Class: com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy.class
   Compiled from "IPretendingAidl.java"
-public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Proxy
+public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub$Proxy
   minor version: 0
   major version: 61
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
-  this_class: #x                          // com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy
+  this_class: #x                          // com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy
   super_class: #x                         // java/lang/Object
   interfaces: 0, fields: 0, methods: 2, attributes: 3
-  public com.android.hoststubgen.test.tinyframework.IPretendingAidl$Proxy();
+  public com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub$Proxy();
     descriptor: ()V
     flags: (0x0001) ACC_PUBLIC
     Code:
@@ -243,7 +243,7 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Proxy
       LineNumberTable:
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
-            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy;
+            0       5     0  this   Lcom/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy;
 
   public static int addTwo(int);
     descriptor: (I)I
@@ -262,7 +262,8 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Proxy
 SourceFile: "IPretendingAidl.java"
 NestHost: class com/android/hoststubgen/test/tinyframework/IPretendingAidl
 InnerClasses:
-  public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;          // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
 ## Class: com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub.class
   Compiled from "IPretendingAidl.java"
 public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub
@@ -303,6 +304,7 @@ SourceFile: "IPretendingAidl.java"
 NestHost: class com/android/hoststubgen/test/tinyframework/IPretendingAidl
 InnerClasses:
   public static #x= #x of #x;           // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
 ## Class: com/android/hoststubgen/test/tinyframework/IPretendingAidl.class
   Compiled from "IPretendingAidl.java"
 public interface com.android.hoststubgen.test.tinyframework.IPretendingAidl
@@ -315,11 +317,11 @@ public interface com.android.hoststubgen.test.tinyframework.IPretendingAidl
 }
 SourceFile: "IPretendingAidl.java"
 NestMembers:
-  com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy
   com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
+  com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy
 InnerClasses:
-  public static #x= #x of #x;            // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
-  public static #x= #x of #x;           // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;            // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
+  public static #x= #x of #x;           // Proxy=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy of class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck$Impl.class
   Compiled from "TinyFrameworkCallerCheck.java"
 class com.android.hoststubgen.test.tinyframework.TinyFrameworkCallerCheck$Impl
