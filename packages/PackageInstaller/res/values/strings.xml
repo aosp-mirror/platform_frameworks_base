@@ -267,4 +267,86 @@
     <!-- The action to restore (i.e. re-install, re-download) an app after parts of the app have been previously moved
          into the cloud for temporary storage. [CHAR LIMIT=15] -->
     <string name="restore">Restore</string>
+
+    <!-- Dialog title shown when the user is trying to restore an app but the associated download
+         cannot happen immediately because the device is offline (has no internet connection.
+         [CHAR LIMIT=50] -->
+    <string name="unarchive_error_offline_title">You\'re offline</string>
+
+    <!-- Dialog body test shown when the user is trying to restore an app but the associated download
+         cannot happen immediately because the device is offline (has no internet connection.
+         [CHAR LIMIT=none] -->
+    <string name="unarchive_error_offline_body">
+        This app will automatically restore when you\'re connected to the internet
+    </string>
+
+    <!-- Dialog title shown when the user is trying to restore an app but a generic error happened.
+         [CHAR LIMIT=50] -->
+    <string name="unarchive_error_generic_title">Something went wrong</string>
+
+    <!-- Dialog body shown when the user is trying to restore an app but a generic error happened.
+         [CHAR LIMIT=none] -->
+    <string name="unarchive_error_generic_body">
+        There was a problem trying to restore this app
+    </string>
+
+    <!-- Dialog title shown when the user is trying to restore an app but the device is out of
+         storage. [CHAR LIMIT=50] -->
+    <string name="unarchive_error_storage_title">Not enough storage</string>
+
+    <!-- Dialog body shown when the user is trying to restore an app but the device is out of
+         storage. [CHAR LIMIT=none] -->
+    <string name="unarchive_error_storage_body">
+        To restore this app, you can free up space on this device. Storage
+        required: <xliff:g id="bytes" example="100 MB">%1$s</xliff:g>
+    </string>
+
+    <!-- Dialog title shown when the user is trying to restore an app but the installer needs to
+         perform an additional action. [CHAR LIMIT=50] -->
+    <string name="unarchive_action_required_title">Action required</string>
+
+    <!-- Dialog body shown when the user is trying to restore an app but the installer needs to
+         perform an additional action. [CHAR LIMIT=none] -->
+    <string name="unarchive_action_required_body">
+        Follow the next steps to restore this app
+    </string>
+    <!-- Dialog title shown when the user is trying to restore an app but the installer responsible
+         for the action is in a disabled state. [CHAR LIMIT=50] -->
+    <string name="unarchive_error_installer_disabled_title">
+        <xliff:g id="installername" example="App Store">%1$s</xliff:g> is disabled
+    </string>
+
+    <!-- Dialog body shown when the user is trying to restore an app but the installer responsible
+         for the action is in a disabled state. [CHAR LIMIT=none] -->
+    <string name="unarchive_error_installer_disabled_body">
+        To restore this app, enable the
+        <xliff:g id="installername" example="App Store">%1$s</xliff:g> in Settings
+    </string>
+
+    <!-- Dialog title shown when the user is trying to restore an app but the installer responsible
+     for the action is uninstalled. [CHAR LIMIT=50] -->
+    <string name="unarchive_error_installer_uninstalled_title">
+        <xliff:g id="installername" example="App Store">%1$s</xliff:g> is uninstalled
+    </string>
+
+    <!-- Dialog body shown when the user is trying to restore an app but the installer responsible
+         for the action is uninstalled. [CHAR LIMIT=none] -->
+    <string name="unarchive_error_installer_uninstalled_body">
+        To restore this app, you\'ll need to install
+        <xliff:g id="installername" example="App Store">%1$s</xliff:g>
+    </string>
+
+    <!-- Dialog action to continue with the next action. [CHAR LIMIT=30] -->
+    <string name="unarchive_action_required_continue">Continue</string>
+
+    <!-- Dialog action to clear device storage, as in deleting some apps or photos to free up bytes
+         [CHAR LIMIT=30] -->
+    <string name="unarchive_clear_storage_button">Clear storage</string>
+
+    <!-- Dialog action to open the Settings app. [CHAR LIMIT=30] -->
+    <string name="unarchive_settings_button">Settings</string>
+
+    <!-- Dialog action to close a dialog. [CHAR LIMIT=30] -->
+    <string name="close">Close</string>
+
 </resources>

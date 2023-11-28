@@ -210,6 +210,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".UnarchiveErrorActivity"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:theme="@style/Theme.AlertDialogActivity.NoActionBar"
+                  android:excludeFromRecents="true"
+                  android:noHistory="true"
+                  android:exported="true">
+            <intent-filter android:priority="1">
+                <action android:name="com.android.intent.action.UNARCHIVE_ERROR_DIALOG" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
