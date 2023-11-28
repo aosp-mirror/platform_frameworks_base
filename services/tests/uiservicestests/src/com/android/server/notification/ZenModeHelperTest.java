@@ -1052,6 +1052,88 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testProtoWithAutoRuleCustomPolicy_classic() throws Exception {
+        setupZenConfig();
+        // clear any automatic rules just to make sure
+        mZenModeHelper.mConfig.automaticRules = new ArrayMap<>();
+
+        // Add an automatic rule with a custom policy
+        ZenRule rule = createCustomAutomaticRule(ZEN_MODE_IMPORTANT_INTERRUPTIONS, CUSTOM_RULE_ID);
+        rule.zenPolicy = new ZenPolicy.Builder()
+                .allowAlarms(true)
+                .allowRepeatCallers(false)
+                .allowCalls(PEOPLE_TYPE_STARRED)
+                .build();
+        mZenModeHelper.mConfig.automaticRules.put(rule.id, rule);
+        List<StatsEvent> events = new LinkedList<>();
+        mZenModeHelper.pullRules(events);
+
+        boolean foundCustomEvent = false;
+        for (StatsEvent ev : events) {
+            AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(ev);
+            assertTrue(atom.hasDndModeRule());
+            DNDModeProto cfg = atom.getDndModeRule();
+            if (cfg.getUid() == CUSTOM_PKG_UID) {
+                foundCustomEvent = true;
+                // Check that the pieces of the policy are applied.
+                assertThat(cfg.hasPolicy()).isTrue();
+                DNDPolicyProto policy = cfg.getPolicy();
+                assertThat(policy.getAlarms().getNumber()).isEqualTo(DNDProtoEnums.STATE_ALLOW);
+                assertThat(policy.getRepeatCallers().getNumber())
+                        .isEqualTo(DNDProtoEnums.STATE_DISALLOW);
+                assertThat(policy.getCalls().getNumber()).isEqualTo(DNDProtoEnums.STATE_ALLOW);
+                assertThat(policy.getAllowCallsFrom().getNumber())
+                        .isEqualTo(DNDProtoEnums.PEOPLE_STARRED);
+            }
+        }
+        assertTrue("couldn't find custom rule", foundCustomEvent);
+    }
+
+    @Test
+    public void testProtoWithAutoRuleCustomPolicy() throws Exception {
+        // allowChannels is only valid under modes_api.
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+
+        setupZenConfig();
+        // clear any automatic rules just to make sure
+        mZenModeHelper.mConfig.automaticRules = new ArrayMap<>();
+
+        // Add an automatic rule with a custom policy
+        ZenRule rule = createCustomAutomaticRule(ZEN_MODE_IMPORTANT_INTERRUPTIONS, CUSTOM_RULE_ID);
+        rule.zenPolicy = new ZenPolicy.Builder()
+                .allowAlarms(true)
+                .allowRepeatCallers(false)
+                .allowCalls(PEOPLE_TYPE_STARRED)
+                .allowChannels(ZenPolicy.CHANNEL_TYPE_NONE)
+                .build();
+        mZenModeHelper.mConfig.automaticRules.put(rule.id, rule);
+        List<StatsEvent> events = new LinkedList<>();
+        mZenModeHelper.pullRules(events);
+
+        boolean foundCustomEvent = false;
+        for (StatsEvent ev : events) {
+            AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(ev);
+            assertTrue(atom.hasDndModeRule());
+            DNDModeProto cfg = atom.getDndModeRule();
+            if (cfg.getUid() == CUSTOM_PKG_UID) {
+                foundCustomEvent = true;
+                // Check that the pieces of the policy are applied.
+                assertThat(cfg.hasPolicy()).isTrue();
+                DNDPolicyProto policy = cfg.getPolicy();
+                assertThat(policy.getAlarms().getNumber()).isEqualTo(DNDProtoEnums.STATE_ALLOW);
+                assertThat(policy.getRepeatCallers().getNumber())
+                        .isEqualTo(DNDProtoEnums.STATE_DISALLOW);
+                assertThat(policy.getCalls().getNumber()).isEqualTo(DNDProtoEnums.STATE_ALLOW);
+                assertThat(policy.getAllowCallsFrom().getNumber())
+                        .isEqualTo(DNDProtoEnums.PEOPLE_STARRED);
+                assertThat(policy.getAllowChannels().getNumber())
+                        .isEqualTo(DNDProtoEnums.CHANNEL_TYPE_NONE);
+            }
+        }
+        assertTrue("couldn't find custom rule", foundCustomEvent);
+    }
+
+    @Test
     public void ruleUidsCached() throws Exception {
         setupZenConfig();
         // one enabled automatic rule
@@ -2722,6 +2804,55 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testZenModeEventLog_policyAllowChannels() {
+        // when modes_api flag is on, ensure that any change in allow_channels gets logged,
+        // even when there are no other changes.
+        mTestFlagResolver.setFlagOverride(LOG_DND_STATE_EVENTS, true);
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+
+        // Default zen config has allow channels = priority (aka on)
+        setupZenConfig();
+
+        // First just turn zen mode on
+        mZenModeHelper.setManualZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, null, "",
+                Process.SYSTEM_UID, true);
+
+        // Now change only the channels part of the policy; want to confirm that this'll be
+        // reflected in the logs
+        ZenModeConfig newConfig = mZenModeHelper.mConfig.copy();
+        newConfig.allowPriorityChannels = false;
+        mZenModeHelper.setNotificationPolicy(newConfig.toNotificationPolicy(), Process.SYSTEM_UID,
+                true);
+
+        // Total events: one for turning on, one for changing policy
+        assertThat(mZenModeEventLogger.numLoggedChanges()).isEqualTo(2);
+
+        // The first event is just turning DND on; make sure the policy is what we expect there
+        // before it changes in the next stage
+        assertThat(mZenModeEventLogger.getEventId(0))
+                .isEqualTo(ZenModeEventLogger.ZenStateChangedEvent.DND_TURNED_ON.getId());
+        DNDPolicyProto origDndProto = mZenModeEventLogger.getPolicyProto(0);
+        checkDndProtoMatchesSetupZenConfig(origDndProto);
+        assertThat(origDndProto.getAllowChannels().getNumber())
+                .isEqualTo(DNDProtoEnums.CHANNEL_TYPE_PRIORITY);
+
+        // Second message where we change the policy:
+        //   - DND_POLICY_CHANGED (indicates only the policy changed and nothing else)
+        //   - rule type: unknown (it's a policy change, not a rule change)
+        //   - user action (because it comes from a "system" uid)
+        //   - change is in allow channels, and final policy
+        assertThat(mZenModeEventLogger.getEventId(1))
+                .isEqualTo(ZenModeEventLogger.ZenStateChangedEvent.DND_POLICY_CHANGED.getId());
+        assertThat(mZenModeEventLogger.getChangedRuleType(1))
+                .isEqualTo(DNDProtoEnums.UNKNOWN_RULE);
+        assertThat(mZenModeEventLogger.getIsUserAction(1)).isTrue();
+        assertThat(mZenModeEventLogger.getPackageUid(1)).isEqualTo(Process.SYSTEM_UID);
+        DNDPolicyProto dndProto = mZenModeEventLogger.getPolicyProto(1);
+        assertThat(dndProto.getAllowChannels().getNumber())
+                .isEqualTo(DNDProtoEnums.CHANNEL_TYPE_NONE);
+    }
+
+    @Test
     public void testUpdateConsolidatedPolicy_defaultRulesOnly() {
         setupZenConfig();
 
@@ -3416,6 +3547,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         return rule;
     }
 
+    // TODO: b/310620812 - Update setup methods to include allowChannels() when MODES_API is inlined
     private void setupZenConfig() {
         mZenModeHelper.mZenMode = ZEN_MODE_OFF;
         mZenModeHelper.mConfig.allowAlarms = false;

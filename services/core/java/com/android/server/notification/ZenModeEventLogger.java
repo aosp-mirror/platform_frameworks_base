@@ -23,6 +23,7 @@ import static android.service.notification.NotificationServiceProto.RULE_TYPE_MA
 import static android.service.notification.NotificationServiceProto.RULE_TYPE_UNKNOWN;
 
 import android.annotation.NonNull;
+import android.app.Flags;
 import android.app.NotificationManager;
 import android.content.pm.PackageManager;
 import android.os.Process;
@@ -502,6 +503,13 @@ class ZenModeEventLogger {
                         ZenModeConfig.getZenPolicySenders(mNewPolicy.allowMessagesFrom()));
                 proto.write(DNDPolicyProto.ALLOW_CONVERSATIONS_FROM,
                         mNewPolicy.allowConversationsFrom());
+
+                if (Flags.modesApi()) {
+                    proto.write(DNDPolicyProto.ALLOW_CHANNELS,
+                            mNewPolicy.allowPriorityChannels()
+                                    ? ZenPolicy.CHANNEL_TYPE_PRIORITY
+                                    : ZenPolicy.CHANNEL_TYPE_NONE);
+                }
             } else {
                 Log.wtf(TAG, "attempted to write zen mode log event with null policy");
             }
