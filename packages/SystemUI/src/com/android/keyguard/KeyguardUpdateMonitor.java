@@ -131,7 +131,7 @@ import com.android.systemui.keyguard.shared.model.FailedFaceAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpFaceAuthenticationStatus;
 import com.android.systemui.keyguard.shared.model.SuccessFaceAuthenticationStatus;
 import com.android.systemui.log.SessionTracker;
-import com.android.systemui.plugins.WeatherData;
+import com.android.systemui.plugins.clocks.WeatherData;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;

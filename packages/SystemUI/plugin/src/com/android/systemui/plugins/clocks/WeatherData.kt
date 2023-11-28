@@ -1,4 +1,4 @@
-package com.android.systemui.plugins
+package com.android.systemui.plugins.clocks
 
 import android.os.Bundle
 import android.util.Log
@@ -7,8 +7,7 @@ import androidx.annotation.VisibleForTesting
 
 typealias WeatherTouchAction = (View) -> Unit
 
-class WeatherData
-constructor(
+data class WeatherData(
     val description: String,
     val state: WeatherStateIcon,
     val useCelsius: Boolean,

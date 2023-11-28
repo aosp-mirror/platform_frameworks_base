@@ -68,8 +68,8 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.monet.ColorScheme
 import com.android.systemui.monet.Style
-import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.clocks.ClockRegistry

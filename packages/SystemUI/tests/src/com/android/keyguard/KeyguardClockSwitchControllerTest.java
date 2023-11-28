@@ -35,8 +35,8 @@ import android.view.View;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.plugins.ClockFaceConfig;
-import com.android.systemui.plugins.ClockTickRate;
+import com.android.systemui.plugins.clocks.ClockFaceConfig;
+import com.android.systemui.plugins.clocks.ClockTickRate;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.statusbar.StatusBarState;
 
