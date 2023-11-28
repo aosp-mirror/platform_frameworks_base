@@ -1112,12 +1112,17 @@ public class DownloadManager {
      * ready to execute it and connectivity is available.
      *
      * @param request the parameters specifying this download
-     * @return an ID for the download, unique across the system.  This ID is used to make future
-     * calls related to this download.
+     * @return an ID for the download, unique across the system.  This ID is used to make
+     * future calls related to this download. Returns -1 if the operation fails.
      */
     public long enqueue(Request request) {
         ContentValues values = request.toContentValues(mPackageName);
         Uri downloadUri = mResolver.insert(Downloads.Impl.CONTENT_URI, values);
+        if (downloadUri == null) {
+            // If insert fails due to RemoteException, it would return a null uri.
+            return -1;
+        }
+
         long id = Long.parseLong(downloadUri.getLastPathSegment());
         return id;
     }
