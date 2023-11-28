@@ -20,17 +20,17 @@ package com.android.server.companion;
 import static android.Manifest.permission.ASSOCIATE_COMPANION_DEVICES;
 import static android.Manifest.permission.DELIVER_COMPANION_MESSAGES;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
-import static android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE;
 import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION;
+import static android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE;
 import static android.Manifest.permission.USE_COMPANION_TRANSPORTS;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_BLE_APPEARED;
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_BLE_DISAPPEARED;
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_BT_CONNECTED;
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_BT_DISCONNECTED;
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_SELF_MANAGED_APPEARED;
-import static android.companion.CompanionDeviceService.DEVICE_EVENT_SELF_MANAGED_DISAPPEARED;
+import static android.companion.DevicePresenceEvent.EVENT_BLE_APPEARED;
+import static android.companion.DevicePresenceEvent.EVENT_BLE_DISAPPEARED;
+import static android.companion.DevicePresenceEvent.EVENT_BT_CONNECTED;
+import static android.companion.DevicePresenceEvent.EVENT_BT_DISCONNECTED;
+import static android.companion.DevicePresenceEvent.EVENT_SELF_MANAGED_APPEARED;
+import static android.companion.DevicePresenceEvent.EVENT_SELF_MANAGED_DISAPPEARED;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
@@ -45,6 +45,7 @@ import static com.android.server.companion.PackageUtils.enforceUsesCompanionDevi
 import static com.android.server.companion.PackageUtils.getPackageInfo;
 import static com.android.server.companion.PermissionsUtils.checkCallerCanManageCompanionDevice;
 import static com.android.server.companion.PermissionsUtils.enforceCallerCanManageAssociationsForPackage;
+import static com.android.server.companion.PermissionsUtils.enforceCallerCanObservingDevicePresenceByUuid;
 import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOr;
 import static com.android.server.companion.PermissionsUtils.enforceCallerIsSystemOrCanInteractWithUserId;
 import static com.android.server.companion.PermissionsUtils.sanitizeWithCallerChecks;
@@ -75,6 +76,7 @@ import android.companion.IOnAssociationsChangedListener;
 import android.companion.IOnMessageReceivedListener;
 import android.companion.IOnTransportsChangedListener;
 import android.companion.ISystemDataTransferCallback;
+import android.companion.ObservingDevicePresenceRequest;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.content.ComponentName;
 import android.content.Context;
@@ -92,6 +94,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelUuid;
 import android.os.PowerManagerInternal;
 import android.os.PowerWhitelistManager;
 import android.os.RemoteCallbackList;
@@ -132,6 +135,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -221,6 +225,8 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private CrossDeviceSyncController mCrossDeviceSyncController;
 
+    private ObservableUuidStore mObservableUuidStore;
+
     public CompanionDeviceManagerService(Context context) {
         super(context);
 
@@ -240,6 +246,7 @@ public class CompanionDeviceManagerService extends SystemService {
         mOnPackageVisibilityChangeListener =
                 new OnPackageVisibilityChangeListener(mActivityManager);
         mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+        mObservableUuidStore = new ObservableUuidStore();
     }
 
     @Override
@@ -249,15 +256,18 @@ public class CompanionDeviceManagerService extends SystemService {
         mPersistentStore = new PersistentDataStore();
 
         loadAssociationsFromDisk();
+
+        mObservableUuidStore.getObservableUuidsForUser(getContext().getUserId());
+
         mAssociationStore.registerListener(mAssociationStoreChangeListener);
 
         mDevicePresenceMonitor = new CompanionDevicePresenceMonitor(mUserManager,
-                mAssociationStore, mDevicePresenceCallback);
+                mAssociationStore, mObservableUuidStore, mDevicePresenceCallback);
 
         mAssociationRequestsProcessor = new AssociationRequestsProcessor(
                 /* cdmService */this, mAssociationStore);
         mCompanionAppController = new CompanionApplicationController(
-                context, mAssociationStore, mDevicePresenceMonitor);
+                context, mAssociationStore, mObservableUuidStore, mDevicePresenceMonitor);
         mTransportManager = new CompanionTransportManager(context, mAssociationStore);
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this,
                 mPackageManagerInternal, mAssociationStore,
@@ -352,12 +362,28 @@ public class CompanionDeviceManagerService extends SystemService {
         final int userId = user.getUserIdentifier();
         final Set<BluetoothDevice> blueToothDevices =
                 mDevicePresenceMonitor.getPendingConnectedDevices().get(userId);
+
+        final List<ObservableUuid> observableUuids =
+                mObservableUuidStore.getObservableUuidsForUser(userId);
+
         if (blueToothDevices != null) {
             for (BluetoothDevice bluetoothDevice : blueToothDevices) {
+                final List<ParcelUuid> deviceUuids = bluetoothDevice.getUuids() == null
+                        ? Collections.emptyList() : Arrays.asList(bluetoothDevice.getUuids());
+
                 for (AssociationInfo ai:
                         mAssociationStore.getAssociationsByAddress(bluetoothDevice.getAddress())) {
                     Slog.i(TAG, "onUserUnlocked, device id( " + ai.getId() + " ) is connected");
                     mDevicePresenceMonitor.onBluetoothCompanionDeviceConnected(ai.getId());
+                }
+
+                for (ObservableUuid observableUuid : observableUuids) {
+                    if (deviceUuids.contains(observableUuid.getUuid())) {
+                        Slog.i(TAG, "onUserUnlocked, UUID( "
+                                + observableUuid.getUuid() + " ) is connected");
+                        mDevicePresenceMonitor.onDevicePresenceEventByUuid(
+                                observableUuid, EVENT_BT_CONNECTED);
+                    }
                 }
             }
         }
@@ -423,36 +449,75 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    private void onDeviceEventInternal(int associationId, int event) {
-        Slog.i(TAG, "onDeviceEventInternal() id=" + associationId + " event= " + event);
+    private void onDevicePresenceEventInternal(int associationId, int event) {
+        Slog.i(TAG, "onDevicePresenceEventInternal() id=" + associationId + " event= " + event);
         final AssociationInfo association = mAssociationStore.getAssociationById(associationId);
         final String packageName = association.getPackageName();
         final int userId = association.getUserId();
         switch (event) {
-            case DEVICE_EVENT_BLE_APPEARED:
-            case DEVICE_EVENT_BT_CONNECTED:
-            case DEVICE_EVENT_SELF_MANAGED_APPEARED:
+            case EVENT_BLE_APPEARED:
+            case EVENT_BT_CONNECTED:
+            case EVENT_SELF_MANAGED_APPEARED:
                 if (!association.shouldBindWhenPresent()) return;
 
                 bindApplicationIfNeeded(association);
 
-                mCompanionAppController.notifyCompanionApplicationDeviceEvent(
+                mCompanionAppController.notifyCompanionApplicationDevicePresenceEvent(
                         association, event);
                 break;
-            case DEVICE_EVENT_BLE_DISAPPEARED:
-            case DEVICE_EVENT_BT_DISCONNECTED:
-            case DEVICE_EVENT_SELF_MANAGED_DISAPPEARED:
+            case EVENT_BLE_DISAPPEARED:
+            case EVENT_BT_DISCONNECTED:
+            case EVENT_SELF_MANAGED_DISAPPEARED:
                 if (!mCompanionAppController.isCompanionApplicationBound(userId, packageName)) {
                     if (DEBUG) Log.w(TAG, "u" + userId + "\\" + packageName + " is NOT bound");
                     return;
                 }
                 if (association.shouldBindWhenPresent()) {
-                    mCompanionAppController.notifyCompanionApplicationDeviceEvent(
+                    mCompanionAppController.notifyCompanionApplicationDevicePresenceEvent(
                             association, event);
                 }
                 // Check if there are other devices associated to the app that are present.
                 if (shouldBindPackage(userId, packageName)) return;
                 mCompanionAppController.unbindCompanionApplication(userId, packageName);
+                break;
+            default:
+                Slog.e(TAG, "Event: " + event + "is not supported");
+                break;
+        }
+    }
+
+    private void onDevicePresenceEventByUuidInternal(ObservableUuid uuid, int event) {
+        Slog.i(TAG, "onDevicePresenceEventByUuidInternal() id=" + uuid.getUuid()
+                + "for package=" + uuid.getPackageName() + " event=" + event);
+        final String packageName = uuid.getPackageName();
+        final int userId = uuid.getUserId();
+
+        switch(event) {
+            case EVENT_BT_CONNECTED:
+                if (!mCompanionAppController.isCompanionApplicationBound(userId, packageName)) {
+                    mCompanionAppController.bindCompanionApplication(
+                            userId, packageName, /*bindImportant*/ false);
+
+                } else if (DEBUG) {
+                    Log.i(TAG, "u" + userId + "\\" + packageName + " is already bound");
+                }
+
+                mCompanionAppController.notifyApplicationDevicePresenceEvent(uuid, event);
+
+                break;
+            case EVENT_BT_DISCONNECTED:
+                if (!mCompanionAppController.isCompanionApplicationBound(userId, packageName)) {
+                    if (DEBUG) Log.w(TAG, "u" + userId + "\\" + packageName + " is NOT bound");
+                    return;
+                }
+
+                mCompanionAppController.notifyApplicationDevicePresenceEvent(uuid, event);
+                // Check if there are other devices associated to the app or the UUID to be
+                // observed are present.
+                if (shouldBindPackage(userId, packageName)) return;
+
+                mCompanionAppController.unbindCompanionApplication(userId, packageName);
+
                 break;
             default:
                 Slog.e(TAG, "Event: " + event + "is not supported");
@@ -476,15 +541,26 @@ public class CompanionDeviceManagerService extends SystemService {
 
     /**
      * @return whether the package should be bound (i.e. at least one of the devices associated with
-     *         the package is currently present).
+     *         the package is currently present OR the UUID to be observed by this package is
+     *         currently present).
      */
     private boolean shouldBindPackage(@UserIdInt int userId, @NonNull String packageName) {
         final List<AssociationInfo> packageAssociations =
                 mAssociationStore.getAssociationsForPackage(userId, packageName);
+        final List<ObservableUuid> observableUuids =
+                mObservableUuidStore.getObservableUuidsForPackage(userId, packageName);
+
         for (AssociationInfo association : packageAssociations) {
             if (!association.shouldBindWhenPresent()) continue;
             if (mDevicePresenceMonitor.isDevicePresent(association.getId())) return true;
         }
+
+        for (ObservableUuid uuid : observableUuids) {
+            if (mDevicePresenceMonitor.isDeviceUuidPresent(uuid.getUuid())) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -568,12 +644,18 @@ public class CompanionDeviceManagerService extends SystemService {
         // Clear associations.
         final List<AssociationInfo> associationsForPackage =
                 mAssociationStore.getAssociationsForPackage(userId, packageName);
+        final List<ObservableUuid> uuidsTobeObserved =
+                mObservableUuidStore.getObservableUuidsForPackage(userId, packageName);
         for (AssociationInfo association : associationsForPackage) {
             mAssociationStore.removeAssociation(association.getId());
         }
         // Clear role holders
         for (AssociationInfo association : associationsForPackage) {
             maybeRemoveRoleHolderForAssociation(association);
+        }
+        // Clear the uuids to be observed.
+        for (ObservableUuid uuid : uuidsTobeObserved) {
+            mObservableUuidStore.removeObservableUuid(userId, uuid.getUuid(), packageName);
         }
 
         mCompanionAppController.onPackagesChanged(userId);
@@ -855,6 +937,95 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        @EnforcePermission(REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
+        public void startObservingDevicePresence(ObservingDevicePresenceRequest request,
+                String packageName, int userId) {
+            startObservingDevicePresence_enforcePermission();
+            registerDevicePresenceListener(request, packageName, userId, /* active */ true);
+        }
+
+        @Override
+        @EnforcePermission(REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
+        public void stopObservingDevicePresence(ObservingDevicePresenceRequest request,
+                String packageName, int userId) {
+            stopObservingDevicePresence_enforcePermission();
+            registerDevicePresenceListener(request, packageName, userId, /* active */ false);
+        }
+
+        private void registerDevicePresenceListener(ObservingDevicePresenceRequest request,
+                String packageName, int userId, boolean active) {
+            enforceUsesCompanionDeviceFeature(getContext(), userId, packageName);
+            enforceCallerIsSystemOr(userId, packageName);
+
+            final int associationId = request.getAssociationId();
+            final AssociationInfo associationInfo = mAssociationStore.getAssociationById(
+                    associationId);
+            final ParcelUuid uuid = request.getUuid();
+
+            if (uuid != null) {
+                enforceCallerCanObservingDevicePresenceByUuid(getContext());
+                if (active) {
+                    startObservingDevicePresenceByUuid(uuid, packageName, userId);
+                } else {
+                    stopObservingDevicePresenceByUuid(uuid, packageName, userId);
+                }
+            } else if (associationInfo == null) {
+                throw new IllegalArgumentException("App " + packageName
+                        + " is not associated with device " + request.getAssociationId()
+                        + " for user " + userId);
+            } else {
+                processDevicePresenceListener(
+                        associationInfo, userId, packageName, active);
+            }
+        }
+
+        private void startObservingDevicePresenceByUuid(ParcelUuid uuid, String packageName,
+                int userId) {
+            final List<ObservableUuid> observableUuids =
+                    mObservableUuidStore.getObservableUuidsForPackage(userId, packageName);
+
+            for (ObservableUuid observableUuid : observableUuids) {
+                if (observableUuid.getUuid().equals(uuid)) {
+                    Slog.i(TAG, "The uuid: " + uuid + " for package:" + packageName
+                            + "has been already scheduled for observing");
+                    return;
+                }
+            }
+
+            final ObservableUuid observableUuid = new ObservableUuid(userId, uuid,
+                    packageName, System.currentTimeMillis());
+
+            mObservableUuidStore.writeObservableUuid(userId, observableUuid);
+        }
+
+        private void stopObservingDevicePresenceByUuid(ParcelUuid uuid, String packageName,
+                int userId) {
+            final List<ObservableUuid> uuidsTobeObserved =
+                    mObservableUuidStore.getObservableUuidsForPackage(userId, packageName);
+            boolean isScheduledObserving = false;
+
+            for (ObservableUuid observableUuid : uuidsTobeObserved) {
+                if (observableUuid.getUuid().equals(uuid)) {
+                    isScheduledObserving = true;
+                    break;
+                }
+            }
+
+            if (!isScheduledObserving) {
+                Slog.i(TAG, "The uuid: " + uuid.toString() + " for package:" + packageName
+                        + "has NOT been scheduled for observing yet");
+                return;
+            }
+
+            mObservableUuidStore.removeObservableUuid(userId, uuid, packageName);
+            mDevicePresenceMonitor.removeCurrentConnectedUuidDevice(uuid);
+
+            if (!shouldBindPackage(userId, packageName)) {
+                mCompanionAppController.unbindCompanionApplication(userId, packageName);
+            }
+        }
+
+        @Override
         public PendingIntent buildPermissionTransferUserConsentIntent(String packageName,
                 int userId, int associationId) {
             return mSystemDataTransferProcessor.buildPermissionTransferUserConsentIntent(
@@ -1002,6 +1173,11 @@ public class CompanionDeviceManagerService extends SystemService {
                         + " for user " + userId));
             }
 
+            processDevicePresenceListener(association, userId, packageName, active);
+        }
+
+        private void processDevicePresenceListener(AssociationInfo association,
+                int userId, String packageName, boolean active) {
             // If already at specified state, then no-op.
             if (active == association.isNotifyOnDeviceNearby()) {
                 if (DEBUG) Log.d(TAG, "Device presence listener is already at desired state.");
@@ -1025,9 +1201,9 @@ public class CompanionDeviceManagerService extends SystemService {
                 if (mDevicePresenceMonitor.isBlePresent(associationId)
                         || mDevicePresenceMonitor.isSimulatePresent(associationId)) {
                     onDeviceAppearedInternal(associationId);
-                    onDeviceEventInternal(associationId, DEVICE_EVENT_BLE_APPEARED);
+                    onDevicePresenceEventInternal(associationId, EVENT_BLE_APPEARED);
                 } else if (mDevicePresenceMonitor.isBtConnected(associationId)) {
-                    onDeviceEventInternal(associationId, DEVICE_EVENT_BT_CONNECTED);
+                    onDevicePresenceEventInternal(associationId, EVENT_BT_CONNECTED);
                 }
             }
 
@@ -1518,20 +1694,25 @@ public class CompanionDeviceManagerService extends SystemService {
 
     private final CompanionDevicePresenceMonitor.Callback mDevicePresenceCallback =
             new CompanionDevicePresenceMonitor.Callback() {
-        @Override
-        public void onDeviceAppeared(int associationId) {
-            onDeviceAppearedInternal(associationId);
-        }
+                @Override
+                public void onDeviceAppeared(int associationId) {
+                    onDeviceAppearedInternal(associationId);
+                }
 
-        @Override
-        public void onDeviceDisappeared(int associationId) {
-            onDeviceDisappearedInternal(associationId);
-        }
+                @Override
+                public void onDeviceDisappeared(int associationId) {
+                    onDeviceDisappearedInternal(associationId);
+                }
 
-        @Override
-        public void onDeviceEvent(int associationId, int event) {
-            onDeviceEventInternal(associationId, event);
-        }
+                @Override
+                public void onDevicePresenceEvent(int associationId, int event) {
+                    onDevicePresenceEventInternal(associationId, event);
+                }
+
+                @Override
+                public void onDevicePresenceEventByUuid(ObservableUuid uuid, int event) {
+                    onDevicePresenceEventByUuidInternal(uuid, event);
+                }
     };
 
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {

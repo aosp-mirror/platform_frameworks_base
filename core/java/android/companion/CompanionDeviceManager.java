@@ -1061,6 +1061,7 @@ public final class CompanionDeviceManager {
         }
     }
 
+    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Register to receive callbacks whenever the associated device comes in and out of range.
      *
@@ -1117,7 +1118,7 @@ public final class CompanionDeviceManager {
                             callingUid, callingPid);
         }
     }
-
+    // TODO(b/315163162) Add @Deprecated keyword after 24Q2 cut.
     /**
      * Unregister for receiving callbacks whenever the associated device comes in and out of range.
      *
@@ -1156,6 +1157,64 @@ public final class CompanionDeviceManager {
             managerInternal
                     .logFgsApiEnd(ActivityManager.FOREGROUND_SERVICE_API_TYPE_CDM,
                             callingUid, callingPid);
+        }
+    }
+
+    /**
+     * Register to receive callbacks whenever the associated device comes in and out of range.
+     *
+     * <p>The app doesn't need to remain running in order to receive its callbacks.</p>
+     *
+     * <p>Calling app must check for feature presence of
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} before calling this API.</p>
+     *
+     * <p>For Bluetooth LE devices, this is based on scanning for device with the given address.
+     * The system will scan for the device when Bluetooth is ON or Bluetooth scanning is ON.</p>
+     *
+     * <p>For Bluetooth classic devices this is triggered when the device connects/disconnects.</p>
+     *
+     * <p>WiFi devices are not supported.</p>
+     *
+     * <p>If a Bluetooth LE device wants to use a rotating mac address, it is recommended to use
+     * Resolvable Private Address, and ensure the device is bonded to the phone so that android OS
+     * is able to resolve the address.</p>
+     *
+     * @param request A request for setting the types of device for observing device presence.
+     *
+     * @see ObservingDevicePresenceRequest.Builder
+     * @see CompanionDeviceService#onDevicePresenceEvent(DevicePresenceEvent)
+     */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
+    @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
+    public void startObservingDevicePresence(@NonNull ObservingDevicePresenceRequest request) {
+        Objects.requireNonNull(request, "request cannot be null");
+
+        try {
+            mService.startObservingDevicePresence(
+                    request, mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister for receiving callbacks whenever the associated device comes in and out of range.
+     *
+     * Calling app must check for feature presence of
+     * {@link PackageManager#FEATURE_COMPANION_DEVICE_SETUP} before calling this API.
+     *
+     * @param request A request for setting the types of device for observing device presence.
+     */
+    @FlaggedApi(Flags.FLAG_DEVICE_PRESENCE)
+    @RequiresPermission(android.Manifest.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE)
+    public void stopObservingDevicePresence(@NonNull ObservingDevicePresenceRequest request) {
+        Objects.requireNonNull(request, "request cannot be null");
+
+        try {
+            mService.stopObservingDevicePresence(
+                    request, mContext.getOpPackageName(), mContext.getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

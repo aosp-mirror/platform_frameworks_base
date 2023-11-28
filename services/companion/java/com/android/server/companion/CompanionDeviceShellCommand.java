@@ -27,6 +27,7 @@ import android.companion.Telecom;
 import android.companion.datatransfer.PermissionSyncRequest;
 import android.net.MacAddress;
 import android.os.Binder;
+import android.os.ParcelUuid;
 import android.os.ShellCommand;
 import android.util.Base64;
 import android.util.proto.ProtoOutputStream;
@@ -80,6 +81,19 @@ class CompanionDeviceShellCommand extends ShellCommand {
                 mDevicePresenceMonitor.simulateDeviceEvent(associationId, event);
                 return 0;
             }
+
+            if ("simulate-device-uuid-event".equals(cmd) && Flags.devicePresence()) {
+                String uuid = getNextArgRequired();
+                String packageName = getNextArgRequired();
+                int userId = getNextIntArgRequired();
+                int event = getNextIntArgRequired();
+                ObservableUuid observableUuid = new ObservableUuid(
+                        userId, ParcelUuid.fromString(uuid), packageName,
+                        System.currentTimeMillis());
+                mDevicePresenceMonitor.simulateDeviceEventByUuid(observableUuid, event);
+                return 0;
+            }
+
             switch (cmd) {
                 case "list": {
                     final int userId = getNextIntArgRequired();
@@ -446,6 +460,16 @@ class CompanionDeviceShellCommand extends ShellCommand {
             pw.println("      Make CDM act as if the given companion device is BT connected ");
             pw.println("    Case(3): ");
             pw.println("      Make CDM act as if the given companion device is BT disconnected ");
+            pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
+
+            pw.println("  simulate-device-uuid-event UUID PACKAGE USERID EVENT");
+            pw.println("  Simulate the companion device event changes:");
+            pw.println("    Case(2): ");
+            pw.println("      Make CDM act as if the given DEVICE is BT connected base"
+                    + "on the UUID");
+            pw.println("    Case(3): ");
+            pw.println("      Make CDM act as if the given DEVICE is BT disconnected base"
+                    + "on the UUID");
             pw.println("      USE FOR DEBUGGING AND/OR TESTING PURPOSES ONLY.");
         }
 

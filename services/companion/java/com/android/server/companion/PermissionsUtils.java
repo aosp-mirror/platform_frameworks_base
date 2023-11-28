@@ -19,6 +19,7 @@ package com.android.server.companion;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.Manifest.permission.REQUEST_COMPANION_SELF_MANAGED;
+import static android.Manifest.permission.REQUEST_OBSERVE_DEVICE_UUID_PRESENCE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_APP_STREAMING;
 import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
@@ -172,6 +173,14 @@ public final class PermissionsUtils {
                 + "permissions to "
                 + (actionDescription != null ? actionDescription : "manage associations")
                 + " for u" + userId + "/" + packageName);
+    }
+
+    static void enforceCallerCanObservingDevicePresenceByUuid(@NonNull Context context) {
+        if (context.checkCallingPermission(REQUEST_OBSERVE_DEVICE_UUID_PRESENCE)
+                != PERMISSION_GRANTED) {
+            throw new SecurityException("Caller (uid=" + getCallingUid() + ") does not have "
+                    + "permissions to request observing device presence base on the UUID");
+        }
     }
 
     /**
