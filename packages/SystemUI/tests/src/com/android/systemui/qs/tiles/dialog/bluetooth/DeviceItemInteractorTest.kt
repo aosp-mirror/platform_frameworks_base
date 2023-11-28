@@ -220,45 +220,57 @@ class DeviceItemInteractorTest : SysuiTestCase() {
 
     @Test
     fun testUpdateDeviceItemOnClick_connectedMedia_setActive() {
-        `when`(deviceItem1.type).thenReturn(DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE)
+        testScope.runTest {
+            `when`(deviceItem1.type).thenReturn(DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE)
 
-        interactor.updateDeviceItemOnClick(deviceItem1)
+            interactor.updateDeviceItemOnClick(deviceItem1)
 
-        verify(cachedDevice1).setActive()
-        verify(logger)
-            .logDeviceClick(cachedDevice1.address, DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE)
+            verify(cachedDevice1).setActive()
+            verify(logger)
+                .logDeviceClick(
+                    cachedDevice1.address,
+                    DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE
+                )
+        }
     }
 
     @Test
     fun testUpdateDeviceItemOnClick_activeMedia_disconnect() {
-        `when`(deviceItem1.type).thenReturn(DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE)
+        testScope.runTest {
+            `when`(deviceItem1.type).thenReturn(DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE)
 
-        interactor.updateDeviceItemOnClick(deviceItem1)
+            interactor.updateDeviceItemOnClick(deviceItem1)
 
-        verify(cachedDevice1).disconnect()
-        verify(logger)
-            .logDeviceClick(cachedDevice1.address, DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE)
+            verify(cachedDevice1).disconnect()
+            verify(logger)
+                .logDeviceClick(cachedDevice1.address, DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE)
+        }
     }
 
     @Test
     fun testUpdateDeviceItemOnClick_connectedOtherDevice_disconnect() {
-        `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
+        testScope.runTest {
+            `when`(deviceItem1.type).thenReturn(DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
 
-        interactor.updateDeviceItemOnClick(deviceItem1)
+            interactor.updateDeviceItemOnClick(deviceItem1)
 
-        verify(cachedDevice1).disconnect()
-        verify(logger)
-            .logDeviceClick(cachedDevice1.address, DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
+            verify(cachedDevice1).disconnect()
+            verify(logger)
+                .logDeviceClick(cachedDevice1.address, DeviceItemType.CONNECTED_BLUETOOTH_DEVICE)
+        }
     }
 
     @Test
     fun testUpdateDeviceItemOnClick_saved_connect() {
-        `when`(deviceItem1.type).thenReturn(DeviceItemType.SAVED_BLUETOOTH_DEVICE)
+        testScope.runTest {
+            `when`(deviceItem1.type).thenReturn(DeviceItemType.SAVED_BLUETOOTH_DEVICE)
 
-        interactor.updateDeviceItemOnClick(deviceItem1)
+            interactor.updateDeviceItemOnClick(deviceItem1)
 
-        verify(cachedDevice1).connect()
-        verify(logger).logDeviceClick(cachedDevice1.address, DeviceItemType.SAVED_BLUETOOTH_DEVICE)
+            verify(cachedDevice1).connect()
+            verify(logger)
+                .logDeviceClick(cachedDevice1.address, DeviceItemType.SAVED_BLUETOOTH_DEVICE)
+        }
     }
 
     private fun createFactory(

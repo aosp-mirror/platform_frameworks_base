@@ -20,7 +20,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import androidx.annotation.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.DialogCuj
@@ -40,6 +39,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -63,26 +64,25 @@ constructor(
 
     private var job: Job? = null
 
-    @VisibleForTesting internal var dialog: BluetoothTileDialog? = null
-
     /**
      * Shows the dialog.
      *
      * @param context The context in which the dialog is displayed.
      * @param view The view from which the dialog is shown.
      */
+    @kotlinx.coroutines.ExperimentalCoroutinesApi
     fun showDialog(context: Context, view: View?) {
-        dismissDialog()
-
-        var updateDeviceItemJob: Job? = null
-        var updateDialogUiJob: Job? = null
+        cancelJob()
 
         job =
             coroutineScope.launch(mainDispatcher) {
-                dialog = createBluetoothTileDialog(context)
+                var updateDeviceItemJob: Job?
+                var updateDialogUiJob: Job? = null
+                val dialog = createBluetoothTileDialog(context)
+
                 view?.let {
                     dialogLaunchAnimator.showFromView(
-                        dialog!!,
+                        dialog,
                         it,
                         animateBackgroundBoundsChange = true,
                         cuj =
@@ -92,9 +92,8 @@ constructor(
                             )
                     )
                 }
-                    ?: dialog!!.show()
+                    ?: dialog.show()
 
-                updateDeviceItemJob?.cancel()
                 updateDeviceItemJob = launch {
                     deviceItemInteractor.updateDeviceItems(context, DeviceFetchTrigger.FIRST_LOAD)
                 }
@@ -102,7 +101,7 @@ constructor(
                 bluetoothStateInteractor.bluetoothStateUpdate
                     .filterNotNull()
                     .onEach {
-                        dialog!!.onBluetoothStateUpdated(it, getSubtitleResId(it))
+                        dialog.onBluetoothStateUpdated(it, getSubtitleResId(it))
                         updateDeviceItemJob?.cancel()
                         updateDeviceItemJob = launch {
                             deviceItemInteractor.updateDeviceItems(
@@ -129,7 +128,7 @@ constructor(
                     .onEach {
                         updateDialogUiJob?.cancel()
                         updateDialogUiJob = launch {
-                            dialog?.onDeviceItemUpdated(
+                            dialog.onDeviceItemUpdated(
                                 it.take(MAX_DEVICE_ITEM_ENTRY),
                                 showSeeAll = it.size > MAX_DEVICE_ITEM_ENTRY,
                                 showPairNewDevice = bluetoothStateInteractor.isBluetoothEnabled
@@ -138,15 +137,15 @@ constructor(
                     }
                     .launchIn(this)
 
-                dialog!!
-                    .bluetoothStateToggle
+                dialog.bluetoothStateToggle
                     .onEach { bluetoothStateInteractor.isBluetoothEnabled = it }
                     .launchIn(this)
 
-                dialog!!
-                    .deviceItemClick
+                dialog.deviceItemClick
                     .onEach { deviceItemInteractor.updateDeviceItemOnClick(it) }
                     .launchIn(this)
+
+                produce<Unit> { awaitClose { dialog.cancel() } }
             }
     }
 
@@ -161,7 +160,7 @@ constructor(
                 logger,
                 context
             )
-            .apply { SystemUIDialog.registerDismissListener(this) { dismissDialog() } }
+            .apply { SystemUIDialog.registerDismissListener(this) { cancelJob() } }
     }
 
     override fun onDeviceItemGearClicked(deviceItem: DeviceItem, view: View) {
@@ -188,15 +187,13 @@ constructor(
         startSettingsActivity(Intent(ACTION_PAIR_NEW_DEVICE), view)
     }
 
-    private fun dismissDialog() {
+    private fun cancelJob() {
         job?.cancel()
         job = null
-        dialog?.dismiss()
-        dialog = null
     }
 
     private fun startSettingsActivity(intent: Intent, view: View) {
-        dialog?.run {
+        if (job?.isActive == true) {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             activityStarter.postStartActivityDismissingKeyguard(
                 intent,
