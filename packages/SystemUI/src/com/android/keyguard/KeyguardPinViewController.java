@@ -20,6 +20,8 @@ import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 
 import android.view.View;
 
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -44,6 +46,7 @@ public class KeyguardPinViewController
     private View mOkButton = mView.findViewById(R.id.key_enter);
 
     private long mPinLength;
+    private final UiEventLogger mUiEventLogger;
 
     private boolean mDisabledAutoConfirmation;
 
@@ -56,7 +59,8 @@ public class KeyguardPinViewController
             EmergencyButtonController emergencyButtonController,
             FalsingCollector falsingCollector,
             DevicePostureController postureController,
-            FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor) {
+            FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor,
+            UiEventLogger uiEventLogger) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, liftToActivateListener,
                 emergencyButtonController, falsingCollector, featureFlags, selectedUserInteractor);
@@ -67,6 +71,7 @@ public class KeyguardPinViewController
         view.setIsLockScreenLandscapeEnabled(mFeatureFlags.isEnabled(LOCKSCREEN_ENABLE_LANDSCAPE));
         mBackspaceKey = view.findViewById(R.id.delete_button);
         mPinLength = mLockPatternUtils.getPinLength(selectedUserInteractor.getSelectedUserId());
+        mUiEventLogger = uiEventLogger;
     }
 
     @Override
@@ -95,6 +100,7 @@ public class KeyguardPinViewController
             updateAutoConfirmationState();
             if (mPasswordEntry.getText().length() == mPinLength
                     && mOkButton.getVisibility() == View.INVISIBLE) {
+                mUiEventLogger.log(PinBouncerUiEvent.ATTEMPT_UNLOCK_WITH_AUTO_CONFIRM_FEATURE);
                 verifyPasswordAndUnlock();
             }
         }
@@ -183,5 +189,22 @@ public class KeyguardPinViewController
         return mLockPatternUtils.isAutoPinConfirmEnabled(
                 mSelectedUserInteractor.getSelectedUserId())
                 && mPinLength != LockPatternUtils.PIN_LENGTH_UNAVAILABLE;
+    }
+
+    /** UI Events for the auto confirmation feature in*/
+    enum PinBouncerUiEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "Attempting to unlock the device with the auto confirm feature.")
+        ATTEMPT_UNLOCK_WITH_AUTO_CONFIRM_FEATURE(1547);
+
+        private final int mId;
+
+        PinBouncerUiEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
     }
 }

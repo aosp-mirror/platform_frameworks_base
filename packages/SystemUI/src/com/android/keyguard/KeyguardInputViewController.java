@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
@@ -210,6 +211,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         private final KeyguardViewController mKeyguardViewController;
         private final FeatureFlags mFeatureFlags;
         private final SelectedUserInteractor mSelectedUserInteractor;
+        private final UiEventLogger mUiEventLogger;
 
         @Inject
         public Factory(KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -222,7 +224,8 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 EmergencyButtonController.Factory emergencyButtonControllerFactory,
                 DevicePostureController devicePostureController,
                 KeyguardViewController keyguardViewController,
-                FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor) {
+                FeatureFlags featureFlags, SelectedUserInteractor selectedUserInteractor,
+                UiEventLogger uiEventLogger) {
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
             mLatencyTracker = latencyTracker;
@@ -238,6 +241,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
             mKeyguardViewController = keyguardViewController;
             mFeatureFlags = featureFlags;
             mSelectedUserInteractor = selectedUserInteractor;
+            mUiEventLogger = uiEventLogger;
         }
 
         /** Create a new {@link KeyguardInputViewController}. */
@@ -265,7 +269,8 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
                         mLiftToActivateListener, emergencyButtonController, mFalsingCollector,
-                        mDevicePostureController, mFeatureFlags, mSelectedUserInteractor);
+                        mDevicePostureController, mFeatureFlags, mSelectedUserInteractor,
+                        mUiEventLogger);
             } else if (keyguardInputView instanceof KeyguardSimPinView) {
                 return new KeyguardSimPinViewController((KeyguardSimPinView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
