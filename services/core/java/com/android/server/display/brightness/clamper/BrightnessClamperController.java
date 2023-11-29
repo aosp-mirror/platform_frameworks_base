@@ -68,14 +68,14 @@ public class BrightnessClamperController {
     private boolean mClamperApplied = false;
 
     public BrightnessClamperController(Handler handler,
-            ClamperChangeListener clamperChangeListener, DisplayDeviceData data,  Context context,
+            ClamperChangeListener clamperChangeListener, DisplayDeviceData data, Context context,
             DisplayManagerFlags flags) {
         this(new Injector(), handler, clamperChangeListener, data, context, flags);
     }
 
     @VisibleForTesting
     BrightnessClamperController(Injector injector, Handler handler,
-            ClamperChangeListener clamperChangeListener, DisplayDeviceData data,  Context context,
+            ClamperChangeListener clamperChangeListener, DisplayDeviceData data, Context context,
             DisplayManagerFlags flags) {
         mDeviceConfigParameterProvider = injector.getDeviceConfigParameterProvider();
         mHandler = handler;
@@ -147,7 +147,8 @@ public class BrightnessClamperController {
      * Should be moved to DisplayBrightnessState OR derived from DisplayBrightnessState
      * TODO: b/263362199
      */
-    @BrightnessInfo.BrightnessMaxReason public int getBrightnessMaxReason() {
+    @BrightnessInfo.BrightnessMaxReason
+    public int getBrightnessMaxReason() {
         if (mClamperType == null) {
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
         } else if (mClamperType == Type.THERMAL) {
@@ -241,11 +242,14 @@ public class BrightnessClamperController {
                     new BrightnessThermalClamper(handler, clamperChangeListener, data));
             if (flags.isPowerThrottlingClamperEnabled()) {
                 clampers.add(new BrightnessPowerClamper(handler, clamperChangeListener,
-                            data));
+                        data));
             }
             if (flags.isBrightnessWearBedtimeModeClamperEnabled()) {
                 clampers.add(new BrightnessWearBedtimeModeClamper(handler, context,
                         clamperChangeListener, data));
+            }
+            if (flags.isEvenDimmerEnabled()) {
+                clampers.add(new BrightnessMinClamper(handler, clamperChangeListener, context));
             }
             return clampers;
         }

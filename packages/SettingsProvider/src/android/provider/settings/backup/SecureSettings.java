@@ -251,6 +251,8 @@ public class SecureSettings {
         Settings.Secure.STYLUS_HANDWRITING_ENABLED,
         Settings.Secure.DEFAULT_NOTE_TASK_PROFILE,
         Settings.Secure.CREDENTIAL_SERVICE,
-        Settings.Secure.CREDENTIAL_SERVICE_PRIMARY
+        Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+        Settings.Secure.EVEN_DIMMER_ACTIVATED,
+        Settings.Secure.EVEN_DIMMER_MIN_NITS
     };
 }

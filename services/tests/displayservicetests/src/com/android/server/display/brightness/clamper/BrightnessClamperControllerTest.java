@@ -262,8 +262,7 @@ public class BrightnessClamperControllerTest {
                 Handler handler,
                 BrightnessClamperController.ClamperChangeListener clamperChangeListener,
                 BrightnessClamperController.DisplayDeviceData data,
-                DisplayManagerFlags flags,
-                Context context) {
+                DisplayManagerFlags flags, Context context) {
             mCapturedChangeListener = clamperChangeListener;
             return mClampers;
         }
