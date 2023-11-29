@@ -246,7 +246,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     private static final String MIGRATED_SP_FULL = "migrated_all_users_to_sp_and_bound_keys";
 
     private static final boolean FIX_UNLOCKED_DEVICE_REQUIRED_KEYS =
-            android.security.Flags.fixUnlockedDeviceRequiredKeys();
+            android.security.Flags.fixUnlockedDeviceRequiredKeysV2();
 
     // Duration that LockSettingsService will store the gatekeeper password for. This allows
     // multiple biometric enrollments without prompting the user to enter their password via
