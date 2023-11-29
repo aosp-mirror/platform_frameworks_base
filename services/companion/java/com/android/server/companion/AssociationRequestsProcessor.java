@@ -285,30 +285,31 @@ class AssociationRequestsProcessor {
                 selfManaged, /* notifyOnDeviceNearby */ false, /* revoked */ false,
                 timestamp, Long.MAX_VALUE, /* systemDataSyncFlags */ 0);
 
-        if (deviceProfile != null) {
-            // If the "Device Profile" is specified, make the companion application a holder of the
-            // corresponding role.
-            addRoleHolderForAssociation(mService.getContext(), association, success -> {
-                if (success) {
-                    addAssociationToStore(association, deviceProfile);
-
-                    sendCallbackAndFinish(association, callback, resultReceiver);
-                } else {
-                    Slog.e(TAG, "Failed to add u" + userId + "\\" + packageName
-                            + " to the list of " + deviceProfile + " holders.");
-
-                    sendCallbackAndFinish(null, callback, resultReceiver);
-                }
-            });
-        } else {
-            addAssociationToStore(association, null);
-
-            sendCallbackAndFinish(association, callback, resultReceiver);
-        }
+        // Add role holder for association (if specified) and add new association to store.
+        maybeGrantRoleAndStoreAssociation(association, callback, resultReceiver);
 
         // Don't need to update the mRevokedAssociationsPendingRoleHolderRemoval since
         // maybeRemoveRoleHolderForAssociation in PackageInactivityListener will handle the case
         // that there are other devices with the same profile, so the role holder won't be removed.
+    }
+
+    public void maybeGrantRoleAndStoreAssociation(@NonNull AssociationInfo association,
+            @Nullable IAssociationRequestCallback callback,
+            @Nullable ResultReceiver resultReceiver) {
+        // If the "Device Profile" is specified, make the companion application a holder of the
+        // corresponding role.
+        // If it is null, then the operation will succeed without granting any role.
+        addRoleHolderForAssociation(mService.getContext(), association, success -> {
+            if (success) {
+                addAssociationToStore(association);
+                sendCallbackAndFinish(association, callback, resultReceiver);
+            } else {
+                Slog.e(TAG, "Failed to add u" + association.getUserId()
+                        + "\\" + association.getPackageName()
+                        + " to the list of " + association.getDeviceProfile() + " holders.");
+                sendCallbackAndFinish(null, callback, resultReceiver);
+            }
+        });
     }
 
     public void enableSystemDataSync(int associationId, int flags) {
@@ -325,15 +326,14 @@ class AssociationRequestsProcessor {
         mAssociationStore.updateAssociation(updated);
     }
 
-    private void addAssociationToStore(@NonNull AssociationInfo association,
-            @Nullable String deviceProfile) {
+    private void addAssociationToStore(@NonNull AssociationInfo association) {
         Slog.i(TAG, "New CDM association created=" + association);
 
         mAssociationStore.addAssociation(association);
 
         mService.updateSpecialAccessPermissionForAssociatedPackage(association);
 
-        logCreateAssociation(deviceProfile);
+        logCreateAssociation(association.getDeviceProfile());
     }
 
     private void sendCallbackAndFinish(@Nullable AssociationInfo association,
