@@ -36,7 +36,7 @@
             android:forceQueryable="true"
             android:directBootAware="true">
 
-        <receiver android:name=".TemporaryFileManager"
+        <receiver android:name=".common.TemporaryFileManager"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
@@ -101,7 +101,7 @@
                 android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
                 android:exported="false" />
 
-        <receiver android:name=".InstallEventReceiver"
+        <receiver android:name=".common.InstallEventReceiver"
                 android:permission="android.permission.INSTALL_PACKAGES"
                 android:exported="false">
             <intent-filter android:priority="1">
@@ -148,7 +148,7 @@
             android:exported="false">
         </activity>
 
-        <receiver android:name=".UninstallEventReceiver"
+        <receiver android:name=".common.UninstallEventReceiver"
             android:permission="android.permission.INSTALL_PACKAGES"
             android:exported="false">
             <intent-filter android:priority="1">
