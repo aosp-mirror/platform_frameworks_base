@@ -27,6 +27,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -47,10 +48,12 @@ import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
 import android.util.SparseArray;
+import android.util.Xml;
 
 import androidx.test.annotation.UiThreadTest;
 
 import com.android.internal.widget.LockSettingsInternal;
+import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
 import com.android.server.LocalServices;
 import com.android.server.am.UserState;
@@ -62,8 +65,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 /**
  * Run as {@code atest FrameworksMockingServicesTests:com.android.server.pm.UserManagerServiceTest}
@@ -95,6 +102,12 @@ public final class UserManagerServiceTest {
      * <p>You can use {@link #addDefaultProfileAndParent()} to add both of this user to the service.
      */
     private static final int PROFILE_USER_ID = 643;
+
+    private static final String USER_INFO_DIR = "system" + File.separator + "users";
+
+    private static final String XML_SUFFIX = ".xml";
+
+    private static final String TAG_RESTRICTIONS = "restrictions";
 
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
@@ -528,6 +541,48 @@ public final class UserManagerServiceTest {
         assertThat(user.name.length()).isEqualTo(500);
         UserInfo user1 = mUms.createUserWithThrow("Test", USER_TYPE_FULL_SECONDARY, 0);
         assertThat(user1.name.length()).isEqualTo(4);
+    }
+
+    @Test
+    public void testDefaultRestrictionsArePersistedAfterCreateUser()
+            throws IOException, XmlPullParserException {
+        UserInfo user = mUms.createUserWithThrow("Test", USER_TYPE_FULL_SECONDARY, 0);
+        assertTrue(hasRestrictionsInUserXMLFile(user.id));
+    }
+
+    /**
+     * Returns true if the user's XML file has Default restrictions
+     * @param userId Id of the user.
+     */
+    private boolean hasRestrictionsInUserXMLFile(int userId)
+            throws IOException, XmlPullParserException {
+        FileInputStream is = new FileInputStream(getUserXmlFile(userId));
+        final TypedXmlPullParser parser = Xml.resolvePullParser(is);
+
+        int type;
+        while ((type = parser.next()) != XmlPullParser.START_TAG
+                && type != XmlPullParser.END_DOCUMENT) {
+            // Skip
+        }
+
+        if (type != XmlPullParser.START_TAG) {
+            return false;
+        }
+
+        int outerDepth = parser.getDepth();
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (TAG_RESTRICTIONS.equals(parser.getName())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private File getUserXmlFile(int userId) {
+        File file = new File(mTestDir, USER_INFO_DIR);
+        return new File(file, userId + XML_SUFFIX);
     }
 
     private String generateLongString() {
