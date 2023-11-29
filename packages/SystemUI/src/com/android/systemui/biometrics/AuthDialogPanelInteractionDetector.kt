@@ -41,7 +41,9 @@ constructor(
             Log.e(TAG, "Already enabled")
             return
         }
+        //TODO(b/313957306) delete this check
         if (shadeInteractorLazy.get().isUserInteracting.value) {
+            // Workaround for b/311266890. This flow is in an error state that breaks this.
             Log.e(TAG, "isUserInteracting already true, skipping enable")
             return
         }
