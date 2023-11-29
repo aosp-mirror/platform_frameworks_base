@@ -590,7 +590,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 cancel("transit_sleep");
                 return;
             }
-            if (mKeyguardLocked) {
+            if (mKeyguardLocked || (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                         "[%d] RecentsController.merge: keyguard is locked", mInstanceId);
                 // We will not accept new changes if we are swiping over the keyguard.
