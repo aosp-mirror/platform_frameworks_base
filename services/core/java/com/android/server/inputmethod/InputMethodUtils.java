@@ -330,17 +330,11 @@ final class InputMethodUtils {
 
         @Nullable
         private String getString(@NonNull String key, @Nullable String defaultValue) {
-            return getStringForUser(key, defaultValue, mCurrentUserId);
-        }
-
-        @Nullable
-        private String getStringForUser(
-                @NonNull String key, @Nullable String defaultValue, @UserIdInt int userId) {
             final String result;
             if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
                 result = mCopyOnWriteDataStore.get(key);
             } else {
-                result = Settings.Secure.getStringForUser(mResolver, key, userId);
+                result = Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
             }
             return result != null ? result : defaultValue;
         }
