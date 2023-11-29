@@ -26,6 +26,7 @@ import static android.app.Notification.FLAG_BUBBLE;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 import static android.app.Notification.FLAG_INSISTENT;
+import static android.app.Notification.FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
 import static android.app.Notification.FLAG_NO_CLEAR;
 import static android.app.Notification.FLAG_NO_DISMISS;
 import static android.app.Notification.FLAG_ONGOING_EVENT;
@@ -58,6 +59,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_STATUS_BAR;
+import static android.app.Flags.lifetimeExtensionRefactor;
 import static android.content.Context.BIND_ALLOW_WHITELIST_MANAGEMENT;
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.BIND_FOREGROUND_SERVICE;
@@ -1224,7 +1226,7 @@ public class NotificationManagerService extends SystemService {
         public void onClearAll(int callingUid, int callingPid, int userId) {
             synchronized (mNotificationLock) {
                 cancelAllLocked(callingUid, callingPid, userId, REASON_CANCEL_ALL, null,
-                        /*includeCurrentProfiles*/ true);
+                        /*includeCurrentProfiles*/ true, FLAG_ONGOING_EVENT | FLAG_NO_CLEAR);
             }
         }
 
@@ -1498,6 +1500,7 @@ public class NotificationManagerService extends SystemService {
             synchronized (mNotificationLock) {
                 NotificationRecord r = mNotificationsByKey.get(key);
                 if (r != null) {
+                    r.recordSmartReplied();
                     LogMaker logMaker = r.getLogMaker()
                             .setCategory(MetricsEvent.SMART_REPLY_ACTION)
                             .setSubtype(replyIndex)
@@ -1804,11 +1807,22 @@ public class NotificationManagerService extends SystemService {
                     record = findNotificationByKeyLocked(intent.getStringExtra(EXTRA_KEY));
                 }
                 if (record != null) {
-                    cancelNotification(record.getSbn().getUid(), record.getSbn().getInitialPid(),
-                            record.getSbn().getPackageName(), record.getSbn().getTag(),
-                            record.getSbn().getId(), 0,
-                            FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB,
-                            true, record.getUserId(), REASON_TIMEOUT, null);
+                    if (lifetimeExtensionRefactor()) {
+                        cancelNotification(record.getSbn().getUid(),
+                                record.getSbn().getInitialPid(),
+                                record.getSbn().getPackageName(), record.getSbn().getTag(),
+                                record.getSbn().getId(), 0,
+                                FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB
+                                        | FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY,
+                                true, record.getUserId(), REASON_TIMEOUT, null);
+                    } else {
+                        cancelNotification(record.getSbn().getUid(),
+                                record.getSbn().getInitialPid(),
+                                record.getSbn().getPackageName(), record.getSbn().getTag(),
+                                record.getSbn().getId(), 0,
+                                FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB,
+                                true, record.getUserId(), REASON_TIMEOUT, null);
+                    }
                 }
             }
         }
@@ -3728,8 +3742,16 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void cancelNotificationWithTag(String pkg, String opPkg, String tag, int id,
                 int userId) {
+            // Don't allow client applications to cancel foreground service notifs, user-initiated
+            // job notifs, autobundled summaries, or notifs that have been replied to.
+            int mustNotHaveFlags = isCallingUidSystem() ? 0 :
+                    (FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB | FLAG_AUTOGROUP_SUMMARY);
+            if (lifetimeExtensionRefactor()) {
+                mustNotHaveFlags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+            }
+
             cancelNotificationInternal(pkg, opPkg, Binder.getCallingUid(), Binder.getCallingPid(),
-                    tag, id, userId);
+                    tag, id, userId, mustNotHaveFlags);
         }
 
         @Override
@@ -3740,9 +3762,16 @@ public class NotificationManagerService extends SystemService {
                     Binder.getCallingUid(), userId, true, false, "cancelAllNotifications", pkg);
 
             // Don't allow the app to cancel active FGS or UIJ notifications
-            cancelAllNotificationsInt(Binder.getCallingUid(), Binder.getCallingPid(),
-                    pkg, null, 0, FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB,
-                    userId, REASON_APP_CANCEL_ALL);
+            if (lifetimeExtensionRefactor()) {
+                cancelAllNotificationsInt(Binder.getCallingUid(), Binder.getCallingPid(),
+                        pkg, null, 0, FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB
+                                | FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY,
+                        userId, REASON_APP_CANCEL_ALL);
+            } else {
+                cancelAllNotificationsInt(Binder.getCallingUid(), Binder.getCallingPid(),
+                        pkg, null, 0, FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB,
+                        userId, REASON_APP_CANCEL_ALL);
+            }
         }
 
         @Override
@@ -4808,8 +4837,16 @@ public class NotificationManagerService extends SystemService {
                                     r.getSbn().getId(), userId, reason);
                         }
                     } else {
-                        cancelAllLocked(callingUid, callingPid, info.userid,
-                                REASON_LISTENER_CANCEL_ALL, info, info.supportsProfiles());
+                        if (lifetimeExtensionRefactor()) {
+                            cancelAllLocked(callingUid, callingPid, info.userid,
+                                    REASON_LISTENER_CANCEL_ALL, info, info.supportsProfiles(),
+                                    FLAG_ONGOING_EVENT | FLAG_NO_CLEAR
+                                            | FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY);
+                        } else {
+                            cancelAllLocked(callingUid, callingPid, info.userid,
+                                    REASON_LISTENER_CANCEL_ALL, info, info.supportsProfiles(),
+                                    FLAG_ONGOING_EVENT | FLAG_NO_CLEAR);
+                        }
                     }
                 }
             } finally {
@@ -4923,6 +4960,9 @@ public class NotificationManagerService extends SystemService {
                 int callingUid, int callingPid, String pkg, String tag, int id, int userId,
                 int reason) {
             int mustNotHaveFlags = FLAG_ONGOING_EVENT;
+            if (lifetimeExtensionRefactor()) {
+                mustNotHaveFlags |= FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+            }
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0 /* mustHaveFlags */,
                     mustNotHaveFlags,
                     true,
@@ -6712,7 +6752,12 @@ public class NotificationManagerService extends SystemService {
         @Override
         public void cancelNotification(String pkg, String opPkg, int callingUid, int callingPid,
                 String tag, int id, int userId) {
-            cancelNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, userId);
+            // Don't allow client applications to cancel foreground service notifs,
+            // user-initiated job notifs or autobundled summaries.
+            final int mustNotHaveFlags = isCallingUidSystem() ? 0 :
+                    (FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB | FLAG_AUTOGROUP_SUMMARY);
+            cancelNotificationInternal(pkg, opPkg, callingUid, callingPid, tag, id, userId,
+                    mustNotHaveFlags);
         }
 
         @Override
@@ -6907,7 +6952,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     void cancelNotificationInternal(String pkg, String opPkg, int callingUid, int callingPid,
-            String tag, int id, int userId) {
+            String tag, int id, int userId, int mustNotHaveFlags) {
         userId = ActivityManager.handleIncomingUser(callingPid,
                 callingUid, userId, true, false, "cancelNotificationWithTag", pkg);
 
@@ -6935,10 +6980,6 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        // Don't allow client applications to cancel foreground service notifs, user-initiated job
-        // notifs or autobundled summaries.
-        final int mustNotHaveFlags = isCallingUidSystem() ? 0 :
-                (FLAG_FOREGROUND_SERVICE | FLAG_USER_INITIATED_JOB | FLAG_AUTOGROUP_SUMMARY);
         cancelNotification(uid, callingPid, pkg, tag, id, 0,
                 mustNotHaveFlags, false, userId, REASON_APP_CANCEL, null);
     }
@@ -7293,6 +7334,11 @@ public class NotificationManagerService extends SystemService {
         }
 
         notification.flags &= ~FLAG_FSI_REQUESTED_BUT_DENIED;
+
+        // Apps should not create notifications that are lifetime extended.
+        if (lifetimeExtensionRefactor()) {
+            notification.flags &= ~FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY;
+        }
 
         if (notification.fullScreenIntent != null) {
             final AttributionSource attributionSource =
@@ -10088,7 +10134,7 @@ public class NotificationManagerService extends SystemService {
 
     @GuardedBy("mNotificationLock")
     void cancelAllLocked(int callingUid, int callingPid, int userId, int reason,
-            ManagedServiceInfo listener, boolean includeCurrentProfiles) {
+            ManagedServiceInfo listener, boolean includeCurrentProfiles, int mustNotHaveFlags) {
         final long cancellationElapsedTimeMs = SystemClock.elapsedRealtime();
         mHandler.post(new Runnable() {
             @Override
@@ -10100,7 +10146,7 @@ public class NotificationManagerService extends SystemService {
                             null, userId, 0, 0, reason, listenerName);
 
                     FlagChecker flagChecker = (int flags) -> {
-                        int flagsToCheck = FLAG_ONGOING_EVENT | FLAG_NO_CLEAR;
+                        int flagsToCheck = mustNotHaveFlags;
                         if (REASON_LISTENER_CANCEL_ALL == reason
                                 || REASON_CANCEL_ALL == reason) {
                             flagsToCheck |= FLAG_BUBBLE;
