@@ -831,6 +831,20 @@
     <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->
     <string name="qs_record_issue_stop">Stop</string>
 
+    <!-- QuickSettings: Issue Type Drop down options in Record Issue Start Dialog [CHAR LIMIT=50] -->
+    <string name="qs_record_issue_dropdown_header">What part of your device experience was affected?</string>
+    <!-- QuickSettings: Issue Type Drop down prompt in Record Issue Start Dialog [CHAR LIMIT=30] -->
+    <string name="qs_record_issue_dropdown_prompt">Select issue type</string>
+    <!-- QuickSettings: Screen record switch label in Record Issue Start Dialog [CHAR LIMIT=20] -->
+    <string name="qs_record_issue_dropdown_screenrecord">Screen record</string>
+
+    <!-- QuickSettings: Issue Type Drop down choices list in Record Issue Start Dialog [CHAR LIMIT=30] -->
+    <string-array name="qs_record_issue_types">
+        <item>Performance</item>
+        <item>User Interface</item>
+        <item>Battery</item>
+    </string-array>
+
     <!-- QuickSettings: Label for the toggle that controls whether One-handed mode is enabled. [CHAR LIMIT=NONE] -->
     <string name="quick_settings_onehanded_label">One-handed mode</string>
 
