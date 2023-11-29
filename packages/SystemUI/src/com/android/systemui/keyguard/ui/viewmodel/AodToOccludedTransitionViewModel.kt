@@ -30,11 +30,12 @@ class AodToOccludedTransitionViewModel
 @Inject
 constructor(
     interactor: KeyguardTransitionInteractor,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = FromAodTransitionInteractor.TO_OCCLUDED_DURATION,
-            transitionFlow = interactor.transition(KeyguardState.AOD, KeyguardState.OCCLUDED),
+        animationFlow.setup(
+            duration = FromAodTransitionInteractor.TO_OCCLUDED_DURATION,
+            stepFlow = interactor.transition(KeyguardState.AOD, KeyguardState.OCCLUDED),
         )
 
     override val deviceEntryParentViewAlpha = transitionAnimation.immediatelyTransitionTo(0f)

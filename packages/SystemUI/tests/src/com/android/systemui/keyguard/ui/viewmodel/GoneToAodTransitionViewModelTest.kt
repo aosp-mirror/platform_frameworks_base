@@ -19,23 +19,19 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
+import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
-import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -43,37 +39,12 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class GoneToAodTransitionViewModelTest : SysuiTestCase() {
-    private lateinit var underTest: GoneToAodTransitionViewModel
-    private lateinit var repository: FakeKeyguardTransitionRepository
-    private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
-    private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
-    private lateinit var testScope: TestScope
-
-    @Before
-    fun setUp() {
-        val testDispatcher = StandardTestDispatcher()
-        testScope = TestScope(testDispatcher)
-
-        repository = FakeKeyguardTransitionRepository()
-        fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
-        biometricSettingsRepository = FakeBiometricSettingsRepository()
-
-        underTest =
-            GoneToAodTransitionViewModel(
-                interactor =
-                    KeyguardTransitionInteractorFactory.create(
-                            scope = testScope.backgroundScope,
-                            repository = repository,
-                        )
-                        .keyguardTransitionInteractor,
-                deviceEntryUdfpsInteractor =
-                    DeviceEntryUdfpsInteractor(
-                        fingerprintPropertyRepository = fingerprintPropertyRepository,
-                        fingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository(),
-                        biometricSettingsRepository = biometricSettingsRepository,
-                    ),
-            )
-    }
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val repository = kosmos.fakeKeyguardTransitionRepository
+    private val underTest = kosmos.goneToAodTransitionViewModel
+    private val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
+    private val biometricSettingsRepository = kosmos.biometricSettingsRepository
 
     @Test
     fun enterFromTopTranslationY() =

@@ -28,16 +28,17 @@ class OffToLockscreenTransitionViewModel
 @Inject
 constructor(
     interactor: KeyguardTransitionInteractor,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) {
 
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = 250.milliseconds,
-            transitionFlow = interactor.offToLockscreenTransition
+        animationFlow.setup(
+            duration = 250.milliseconds,
+            stepFlow = interactor.offToLockscreenTransition
         )
 
     val shortcutsAlpha: Flow<Float> =
-        transitionAnimation.createFlow(
+        transitionAnimation.sharedFlow(
             duration = 250.milliseconds,
             onStep = { it },
             onCancel = { 0f },

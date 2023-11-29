@@ -25,6 +25,8 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -43,29 +45,36 @@ class DozingToLockscreenTransitionViewModelTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
+        testScope = TestScope()
         repository = FakeKeyguardTransitionRepository()
         underTest =
             DozingToLockscreenTransitionViewModel(
                 interactor =
                     KeyguardTransitionInteractorFactory.create(
-                            scope = TestScope().backgroundScope,
+                            scope = testScope.backgroundScope,
                             repository = repository,
                         )
                         .keyguardTransitionInteractor,
+                animationFlow =
+                    KeyguardTransitionAnimationFlow(
+                        scope = testScope.backgroundScope,
+                        logger = mock()
+                    ),
             )
     }
 
     @Test
-    fun deviceEntryParentViewShows() = runTest {
-        val deviceEntryParentViewAlpha by collectValues(underTest.deviceEntryParentViewAlpha)
-        repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-        repository.sendTransitionStep(step(0.1f))
-        repository.sendTransitionStep(step(0.3f))
-        repository.sendTransitionStep(step(0.5f))
-        repository.sendTransitionStep(step(0.6f))
-        repository.sendTransitionStep(step(1f))
-        deviceEntryParentViewAlpha.forEach { assertThat(it).isEqualTo(1f) }
-    }
+    fun deviceEntryParentViewShows() =
+        testScope.runTest {
+            val deviceEntryParentViewAlpha by collectValues(underTest.deviceEntryParentViewAlpha)
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(0.6f))
+            repository.sendTransitionStep(step(1f))
+            deviceEntryParentViewAlpha.forEach { assertThat(it).isEqualTo(1f) }
+        }
 
     private fun step(
         value: Float,
