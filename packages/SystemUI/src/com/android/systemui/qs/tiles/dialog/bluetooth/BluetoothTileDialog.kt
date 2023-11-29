@@ -24,6 +24,7 @@ import android.view.View.AccessibilityDelegate
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.ImageView
@@ -54,6 +55,7 @@ internal class BluetoothTileDialog
 constructor(
     private val bluetoothToggleInitialValue: Boolean,
     private val subtitleResIdInitialValue: Int,
+    private val cachedContentHeight: Int,
     private val bluetoothTileDialogCallback: BluetoothTileDialogCallback,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val systemClock: SystemClock,
@@ -72,6 +74,11 @@ constructor(
     internal val deviceItemClick
         get() = mutableDeviceItemClick.asSharedFlow()
 
+    private val mutableContentHeight: MutableSharedFlow<Int> =
+        MutableSharedFlow(extraBufferCapacity = 1)
+    internal val contentHeight
+        get() = mutableContentHeight.asSharedFlow()
+
     private val deviceItemAdapter: Adapter = Adapter(bluetoothTileDialogCallback)
 
     private var lastUiUpdateMs: Long = -1
@@ -84,6 +91,7 @@ constructor(
     private lateinit var seeAllButton: View
     private lateinit var pairNewDeviceButton: View
     private lateinit var deviceListView: RecyclerView
+    private lateinit var scrollViewContent: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,10 +118,21 @@ constructor(
         pairNewDeviceButton.setOnClickListener {
             bluetoothTileDialogCallback.onPairNewDeviceClicked(it)
         }
+        requireViewById<View>(R.id.scroll_view).apply {
+            scrollViewContent = this
+            layoutParams.height = cachedContentHeight
+        }
     }
 
     override fun start() {
         lastUiUpdateMs = systemClock.elapsedRealtime()
+    }
+
+    override fun dismiss() {
+        if (::scrollViewContent.isInitialized) {
+            mutableContentHeight.tryEmit(scrollViewContent.measuredHeight)
+        }
+        super.dismiss()
     }
 
     internal suspend fun onDeviceItemUpdated(
@@ -124,14 +143,16 @@ constructor(
         withContext(mainDispatcher) {
             val start = systemClock.elapsedRealtime()
             val itemRow = deviceItem.size + showSeeAll.toInt() + showPairNewDevice.toInt()
-            // Add a slight delay for smoother dialog height change
-            if (itemRow != lastItemRow) {
+            // If not the first load, add a slight delay for smoother dialog height change
+            if (itemRow != lastItemRow && lastItemRow != -1) {
                 delay(MIN_HEIGHT_CHANGE_INTERVAL_MS - (start - lastUiUpdateMs))
             }
             if (isActive) {
                 deviceItemAdapter.refreshDeviceItemList(deviceItem) {
                     seeAllButton.visibility = if (showSeeAll) VISIBLE else GONE
                     pairNewDeviceButton.visibility = if (showPairNewDevice) VISIBLE else GONE
+                    // Update the height after data is updated
+                    scrollViewContent.layoutParams.height = WRAP_CONTENT
                     lastUiUpdateMs = systemClock.elapsedRealtime()
                     lastItemRow = itemRow
                     logger.logDeviceUiUpdate(lastUiUpdateMs - start)
