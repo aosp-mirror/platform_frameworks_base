@@ -79,8 +79,6 @@
                 value="appops set com.android.shell android:mock_location deny"/>
     </target_preparer>
 
-    <target_preparer class="com.android.csuite.core.AppCrawlTesterHostPreparer"/>
-
     <!-- Use app crawler to log into Netflix -->
     <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
         <option name="run-command"
