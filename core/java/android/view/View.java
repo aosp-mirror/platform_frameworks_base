@@ -29901,12 +29901,20 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public void setPointerIcon(PointerIcon pointerIcon) {
         mMousePointerIcon = pointerIcon;
-        if (mAttachInfo == null || mAttachInfo.mHandlingPointerEvent) {
-            return;
-        }
-        try {
-            mAttachInfo.mSession.updatePointerIcon(mAttachInfo.mWindow);
-        } catch (RemoteException e) {
+        if (com.android.input.flags.Flags.enablePointerChoreographer()) {
+            final ViewRootImpl viewRootImpl = getViewRootImpl();
+            if (viewRootImpl == null) {
+                return;
+            }
+            viewRootImpl.refreshPointerIcon();
+        } else {
+            if (mAttachInfo == null || mAttachInfo.mHandlingPointerEvent) {
+                return;
+            }
+            try {
+                mAttachInfo.mSession.updatePointerIcon(mAttachInfo.mWindow);
+            } catch (RemoteException e) {
+            }
         }
     }
 
