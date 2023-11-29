@@ -43,14 +43,6 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name="v2.model.TemporaryFileManager"
-            android:exported="false"
-            android:enabled="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
         <activity android:name=".v2.ui.InstallLaunch"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:theme="@style/Theme.AlertDialogActivity"
@@ -109,15 +101,6 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".v2.model.InstallEventReceiver"
-            android:permission="android.permission.INSTALL_PACKAGES"
-            android:exported="false"
-            android:enabled="false">
-            <intent-filter android:priority="1">
-                <action android:name="com.android.packageinstaller.ACTION_INSTALL_COMMIT" />
-            </intent-filter>
-        </receiver>
-
         <activity android:name=".InstallSuccess"
                 android:theme="@style/Theme.AlertDialogActivity.NoAnimation"
                 android:exported="false" />
@@ -151,15 +134,6 @@
         <receiver android:name=".common.UninstallEventReceiver"
             android:permission="android.permission.INSTALL_PACKAGES"
             android:exported="false">
-            <intent-filter android:priority="1">
-                <action android:name="com.android.packageinstaller.ACTION_UNINSTALL_COMMIT" />
-            </intent-filter>
-        </receiver>
-
-        <receiver android:name=".v2.model.UninstallEventReceiver"
-            android:permission="android.permission.INSTALL_PACKAGES"
-            android:exported="false"
-            android:enabled="false">
             <intent-filter android:priority="1">
                 <action android:name="com.android.packageinstaller.ACTION_UNINSTALL_COMMIT" />
             </intent-filter>
