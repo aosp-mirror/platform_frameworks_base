@@ -627,7 +627,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         && mRecentsTask.equals(change.getContainer());
                 hasTaskChange = hasTaskChange || isRootTask;
                 final boolean isLeafTask = leafTaskFilter.test(change);
-                if (TransitionUtil.isOpeningType(change.getMode())) {
+                if (TransitionUtil.isOpeningType(change.getMode())
+                        || TransitionUtil.isOrderOnly(change)) {
                     if (isRecentsTask) {
                         recentsOpening = change;
                     } else if (isRootTask || isLeafTask) {
