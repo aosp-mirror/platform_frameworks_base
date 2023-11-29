@@ -164,6 +164,7 @@ public class CompanionDeviceManagerService extends SystemService {
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     private AssociationRequestsProcessor mAssociationRequestsProcessor;
     private SystemDataTransferProcessor mSystemDataTransferProcessor;
+    private BackupRestoreProcessor mBackupRestoreProcessor;
     private CompanionDevicePresenceMonitor mDevicePresenceMonitor;
     private CompanionApplicationController mCompanionAppController;
     private CompanionTransportManager mTransportManager;
@@ -256,6 +257,9 @@ public class CompanionDeviceManagerService extends SystemService {
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this,
                 mPackageManagerInternal, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
+        mBackupRestoreProcessor = new BackupRestoreProcessor(
+                /* cdmService */ this, mAssociationStore, mPersistentStore,
+                mSystemDataTransferRequestStore, mAssociationRequestsProcessor);
         // TODO(b/279663946): move context sync to a dedicated system service
         mCrossDeviceSyncController = new CrossDeviceSyncController(getContext(), mTransportManager);
 
@@ -501,7 +505,7 @@ public class CompanionDeviceManagerService extends SystemService {
         updateAtm(userId, updatedAssociations);
     }
 
-    private void persistStateForUser(@UserIdInt int userId) {
+    void persistStateForUser(@UserIdInt int userId) {
         // We want to store both active associations and the revoked (removed) association that we
         // are keeping around for the final clean-up (delayed role holder removal).
         final List<AssociationInfo> allAssociations;
@@ -575,6 +579,11 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         mCompanionAppController.onPackagesChanged(userId);
+    }
+
+    private void onPackageAddedInternal(@UserIdInt int userId, @NonNull String packageName) {
+        if (DEBUG) Log.i(TAG, "onPackageAddedInternal() u" + userId + "/" + packageName);
+        // TODO(b/314992577): Retroactively grant roles for restored associations
     }
 
     // Revoke associations if the selfManaged companion device does not connect for 3 months.
@@ -1052,13 +1061,14 @@ public class CompanionDeviceManagerService extends SystemService {
 
         @Override
         public byte[] getBackupPayload(int userId) {
-            // TODO(b/286124853): back up CDM data
-            return new byte[0];
+            Log.i(TAG, "getBackupPayload() userId=" + userId);
+            return mBackupRestoreProcessor.getBackupPayload(userId);
         }
 
         @Override
         public void applyRestoredPayload(byte[] payload, int userId) {
-            // TODO(b/286124853): restore CDM data
+            Log.i(TAG, "applyRestoredPayload() userId=" + userId);
+            mBackupRestoreProcessor.applyRestoredPayload(payload, userId);
         }
 
         @Override
@@ -1067,7 +1077,8 @@ public class CompanionDeviceManagerService extends SystemService {
                 @NonNull String[] args) {
             return new CompanionDeviceShellCommand(CompanionDeviceManagerService.this,
                     mAssociationStore, mDevicePresenceMonitor, mTransportManager,
-                    mSystemDataTransferProcessor, mAssociationRequestsProcessor)
+                    mSystemDataTransferProcessor, mAssociationRequestsProcessor,
+                    mBackupRestoreProcessor)
                     .exec(this, in.getFileDescriptor(), out.getFileDescriptor(),
                             err.getFileDescriptor(), args);
         }
@@ -1498,6 +1509,11 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public void onPackageModified(String packageName) {
             onPackageModifiedInternal(getChangingUserId(), packageName);
+        }
+
+        @Override
+        public void onPackageAdded(String packageName, int uid) {
+            onPackageAddedInternal(getChangingUserId(), packageName);
         }
     };
 
