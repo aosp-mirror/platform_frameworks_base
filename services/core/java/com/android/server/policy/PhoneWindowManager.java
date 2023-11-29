@@ -3971,7 +3971,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 return true;
             case KeyEvent.KEYCODE_ESCAPE:
-                if (down && repeatCount == 0) {
+                if (down
+                        && KeyEvent.metaStateHasNoModifiers(metaState)
+                        && repeatCount == 0) {
                     mContext.closeSystemDialogs();
                 }
                 return true;
