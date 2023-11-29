@@ -14,32 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.viewmodel;
+package com.android.packageinstaller.v2.viewmodel
 
-import android.app.Application;
-import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-import com.android.packageinstaller.v2.model.InstallRepository;
+import android.app.Application
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.android.packageinstaller.v2.model.InstallRepository
 
-public class InstallViewModelFactory extends ViewModelProvider.AndroidViewModelFactory {
+class InstallViewModelFactory(val application: Application, val repository: InstallRepository) :
+    ViewModelProvider.AndroidViewModelFactory(application) {
 
-    private final InstallRepository mRepository;
-    private final Application mApplication;
-
-    public InstallViewModelFactory(Application application, InstallRepository repository) {
-        // Calling super class' ctor ensures that create method is called correctly and the right
-        // ctor of InstallViewModel is used. If we fail to do that, the default ctor:
-        // InstallViewModel(application) is used, and repository isn't initialized in the viewmodel
-        super(application);
-        mApplication = application;
-        mRepository = repository;
-    }
-
-    @NonNull
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new InstallViewModel(mApplication, mRepository);
+    // Calling super class' ctor ensures that create method is called correctly and the right
+    // ctor of InstallViewModel is used. If we fail to do that, the default ctor:
+    // InstallViewModel(application) is used, and repository isn't initialized in the viewmodel
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return InstallViewModel(application, repository) as T
     }
 }

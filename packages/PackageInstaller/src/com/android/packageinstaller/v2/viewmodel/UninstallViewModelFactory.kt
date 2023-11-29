@@ -14,33 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.viewmodel;
+package com.android.packageinstaller.v2.viewmodel
 
-import android.app.Application;
-import androidx.annotation.NonNull;
-import androidx.lifecycle.ViewModel;
-import androidx.lifecycle.ViewModelProvider;
-import com.android.packageinstaller.v2.model.UninstallRepository;
+import android.app.Application
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.android.packageinstaller.v2.model.UninstallRepository
 
-public class UninstallViewModelFactory extends ViewModelProvider.AndroidViewModelFactory {
+class UninstallViewModelFactory(val application: Application, val repository: UninstallRepository) :
+    ViewModelProvider.AndroidViewModelFactory(application) {
 
-    private final UninstallRepository mRepository;
-    private final Application mApplication;
-
-    public UninstallViewModelFactory(Application application, UninstallRepository repository) {
-        // Calling super class' ctor ensures that create method is called correctly and the right
-        // ctor of UninstallViewModel is used. If we fail to do that, the default ctor:
-        // UninstallViewModel(application) is used, and repository isn't initialized in
-        // the viewmodel
-        super(application);
-        mApplication = application;
-        mRepository = repository;
-    }
-
-    @NonNull
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T extends ViewModel> T create(@NonNull Class<T> modelClass) {
-        return (T) new UninstallViewModel(mApplication, mRepository);
+    // Calling super class' ctor ensures that create method is called correctly and the right
+    // ctor of UninstallViewModel is used. If we fail to do that, the default ctor:
+    // UninstallViewModel(application) is used, and repository isn't initialized in
+    // the viewmodel
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        return UninstallViewModel(application, repository) as T
     }
 }

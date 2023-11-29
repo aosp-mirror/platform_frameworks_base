@@ -14,56 +14,49 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.viewmodel;
+package com.android.packageinstaller.v2.viewmodel
 
-import android.app.Application;
-import android.content.Intent;
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.MediatorLiveData;
-import androidx.lifecycle.MutableLiveData;
-import com.android.packageinstaller.v2.model.UninstallRepository;
-import com.android.packageinstaller.v2.model.UninstallRepository.CallerInfo;
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage;
+import android.app.Application
+import android.content.Intent
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import com.android.packageinstaller.v2.model.UninstallRepository
+import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage
 
-public class UninstallViewModel extends AndroidViewModel {
+class UninstallViewModel(application: Application, val repository: UninstallRepository) :
+    AndroidViewModel(application) {
 
-    private static final String TAG = UninstallViewModel.class.getSimpleName();
-    private final UninstallRepository mRepository;
-    private final MediatorLiveData<UninstallStage> mCurrentUninstallStage =
-        new MediatorLiveData<>();
-
-    public UninstallViewModel(@NonNull Application application, UninstallRepository repository) {
-        super(application);
-        mRepository = repository;
+    companion object {
+        private val LOG_TAG = UninstallViewModel::class.java.simpleName
     }
 
-    public MutableLiveData<UninstallStage> getCurrentUninstallStage() {
-        return mCurrentUninstallStage;
-    }
+    private val _currentUninstallStage = MediatorLiveData<UninstallStage>()
+    val currentUninstallStage: MutableLiveData<UninstallStage>
+        get() = _currentUninstallStage
 
-    public void preprocessIntent(Intent intent, CallerInfo callerInfo) {
-        UninstallStage stage = mRepository.performPreUninstallChecks(intent, callerInfo);
-        if (stage.getStageCode() != UninstallStage.STAGE_ABORTED) {
-            stage = mRepository.generateUninstallDetails();
+    fun preprocessIntent(intent: Intent, callerInfo: UninstallRepository.CallerInfo) {
+        var stage = repository.performPreUninstallChecks(intent, callerInfo)
+        if (stage.stageCode != UninstallStage.STAGE_ABORTED) {
+            stage = repository.generateUninstallDetails()
         }
-        mCurrentUninstallStage.setValue(stage);
+        _currentUninstallStage.value = stage
     }
 
-    public void initiateUninstall(boolean keepData) {
-        mRepository.initiateUninstall(keepData);
+    fun initiateUninstall(keepData: Boolean) {
+        repository.initiateUninstall(keepData)
         // Since uninstall is an async operation, we will get the uninstall result later in time.
         // Result of the uninstall will be set in UninstallRepository#mUninstallResult.
-        // As such, mCurrentUninstallStage will need to add another MutableLiveData
+        // As such, _currentUninstallStage will need to add another MutableLiveData
         // as a data source
-        mCurrentUninstallStage.addSource(mRepository.getUninstallResult(), uninstallStage -> {
+        _currentUninstallStage.addSource(repository.uninstallResult) { uninstallStage: UninstallStage? ->
             if (uninstallStage != null) {
-                mCurrentUninstallStage.setValue(uninstallStage);
+                _currentUninstallStage.value = uninstallStage
             }
-        });
+        }
     }
 
-    public void cancelInstall() {
-        mRepository.cancelInstall();
+    fun cancelInstall() {
+        repository.cancelInstall()
     }
 }

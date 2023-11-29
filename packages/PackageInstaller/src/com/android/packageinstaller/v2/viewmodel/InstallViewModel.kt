@@ -14,92 +14,82 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.viewmodel;
+package com.android.packageinstaller.v2.viewmodel
 
-import android.app.Application;
-import android.content.Intent;
-import androidx.annotation.NonNull;
-import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.MediatorLiveData;
-import androidx.lifecycle.MutableLiveData;
-import com.android.packageinstaller.v2.model.InstallRepository;
-import com.android.packageinstaller.v2.model.InstallRepository.CallerInfo;
-import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
-import com.android.packageinstaller.v2.model.installstagedata.InstallStaging;
+import android.app.Application
+import android.content.Intent
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import com.android.packageinstaller.v2.model.InstallRepository
+import com.android.packageinstaller.v2.model.installstagedata.InstallStage
+import com.android.packageinstaller.v2.model.installstagedata.InstallStaging
 
+class InstallViewModel(application: Application, val repository: InstallRepository) :
+    AndroidViewModel(application) {
 
-public class InstallViewModel extends AndroidViewModel {
-
-    private static final String TAG = InstallViewModel.class.getSimpleName();
-    private final InstallRepository mRepository;
-    private final MediatorLiveData<InstallStage> mCurrentInstallStage = new MediatorLiveData<>(
-            new InstallStaging());
-
-    public InstallViewModel(@NonNull Application application, InstallRepository repository) {
-        super(application);
-        mRepository = repository;
+    companion object {
+        private val LOG_TAG = InstallViewModel::class.java.simpleName
     }
 
-    public MutableLiveData<InstallStage> getCurrentInstallStage() {
-        return mCurrentInstallStage;
-    }
+    private val _currentInstallStage = MediatorLiveData<InstallStage>(InstallStaging())
+    val currentInstallStage: MutableLiveData<InstallStage>
+        get() = _currentInstallStage
 
-    public void preprocessIntent(Intent intent, CallerInfo callerInfo) {
-        InstallStage stage = mRepository.performPreInstallChecks(intent, callerInfo);
-        if (stage.getStageCode() == InstallStage.STAGE_ABORTED) {
-            mCurrentInstallStage.setValue(stage);
+    fun preprocessIntent(intent: Intent, callerInfo: InstallRepository.CallerInfo) {
+        val stage = repository.performPreInstallChecks(intent, callerInfo)
+        if (stage.stageCode == InstallStage.STAGE_ABORTED) {
+            _currentInstallStage.value = stage
         } else {
             // Since staging is an async operation, we will get the staging result later in time.
             // Result of the file staging will be set in InstallRepository#mStagingResult.
             // As such, mCurrentInstallStage will need to add another MutableLiveData
             // as a data source
-            mRepository.stageForInstall();
-            mCurrentInstallStage.addSource(mRepository.getStagingResult(), installStage -> {
-                if (installStage.getStageCode() != InstallStage.STAGE_READY) {
-                    mCurrentInstallStage.setValue(installStage);
+            repository.stageForInstall()
+            _currentInstallStage.addSource(repository.stagingResult) { installStage: InstallStage ->
+                if (installStage.stageCode != InstallStage.STAGE_READY) {
+                    _currentInstallStage.value = installStage
                 } else {
-                    checkIfAllowedAndInitiateInstall();
+                    checkIfAllowedAndInitiateInstall()
                 }
-            });
+            }
         }
     }
 
-    public MutableLiveData<Integer> getStagingProgress() {
-        return mRepository.getStagingProgress();
+    val stagingProgress: MutableLiveData<Int>
+        get() = repository.stagingProgress
+
+    private fun checkIfAllowedAndInitiateInstall() {
+        val stage = repository.requestUserConfirmation()
+        _currentInstallStage.value = stage
     }
 
-    private void checkIfAllowedAndInitiateInstall() {
-        InstallStage stage = mRepository.requestUserConfirmation();
-        mCurrentInstallStage.setValue(stage);
+    fun forcedSkipSourceCheck() {
+        val stage = repository.forcedSkipSourceCheck()
+        _currentInstallStage.value = stage
     }
 
-    public void forcedSkipSourceCheck() {
-        InstallStage stage = mRepository.forcedSkipSourceCheck();
-        mCurrentInstallStage.setValue(stage);
+    fun cleanupInstall() {
+        repository.cleanupInstall()
     }
 
-    public void cleanupInstall() {
-        mRepository.cleanupInstall();
+    fun reattemptInstall() {
+        val stage = repository.reattemptInstall()
+        _currentInstallStage.value = stage
     }
 
-    public void reattemptInstall() {
-        InstallStage stage = mRepository.reattemptInstall();
-        mCurrentInstallStage.setValue(stage);
-    }
-
-    public void initiateInstall() {
+    fun initiateInstall() {
         // Since installing is an async operation, we will get the install result later in time.
         // Result of the installation will be set in InstallRepository#mInstallResult.
         // As such, mCurrentInstallStage will need to add another MutableLiveData as a data source
-        mRepository.initiateInstall();
-        mCurrentInstallStage.addSource(mRepository.getInstallResult(), installStage -> {
+        repository.initiateInstall()
+        _currentInstallStage.addSource(repository.installResult) { installStage: InstallStage? ->
             if (installStage != null) {
-                mCurrentInstallStage.setValue(installStage);
+                _currentInstallStage.value = installStage
             }
-        });
+        }
     }
 
-    public int getStagedSessionId() {
-        return mRepository.getStagedSessionId();
-    }
+    val stagedSessionId: Int
+        get() = repository.stagedSessionId
 }
