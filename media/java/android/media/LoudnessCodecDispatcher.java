@@ -33,6 +33,7 @@ import androidx.annotation.NonNull;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
@@ -81,7 +82,7 @@ public class LoudnessCodecDispatcher implements CallbackUtil.DispatcherStub {
                     mConfiguratorListener.computeIfPresent(listener, (l, lcConfig) -> {
                         // send the appropriate bundle for the user to update
                         if (lcConfig.getAssignedTrackPiid() == piid) {
-                            final HashMap<LoudnessCodecInfo, Set<MediaCodec>> mediaCodecsMap =
+                            final Map<LoudnessCodecInfo, Set<MediaCodec>> mediaCodecsMap =
                                     lcConfig.getRegisteredMediaCodecs();
                             for (LoudnessCodecInfo codecInfo : mediaCodecsMap.keySet()) {
                                 final String infoKey = Integer.toString(codecInfo.hashCode());
