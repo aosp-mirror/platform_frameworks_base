@@ -45,7 +45,10 @@ interface QSTileViewModel {
      */
     fun onUserChanged(user: UserHandle)
 
-    /** Triggers the emission of the new [QSTileState] in a [state]. */
+    /**
+     * Triggers the emission of the new [QSTileState] in a [state]. The new value can still be
+     * skipped if there is no change.
+     */
     fun forceUpdate()
 
     /** Notifies underlying logic about user input. */

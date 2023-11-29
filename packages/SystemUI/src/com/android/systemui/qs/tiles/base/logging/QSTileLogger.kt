@@ -158,6 +158,33 @@ constructor(
             )
     }
 
+    fun logError(
+        tileSpec: TileSpec,
+        message: String,
+        error: Throwable,
+    ) {
+        tileSpec
+            .getLogBuffer()
+            .log(
+                tileSpec.getLogTag(),
+                LogLevel.ERROR,
+                {},
+                { message },
+                error,
+            )
+    }
+
+    fun logCustomTileUserActionDelivered(tileSpec: TileSpec) {
+        tileSpec
+            .getLogBuffer()
+            .log(
+                tileSpec.getLogTag(),
+                LogLevel.DEBUG,
+                {},
+                { "user action delivered to the service" },
+            )
+    }
+
     private fun TileSpec.getLogTag(): String = "${TAG_FORMAT_PREFIX}_${this.spec}"
 
     private fun TileSpec.getLogBuffer(): LogBuffer =

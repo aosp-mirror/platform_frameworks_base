@@ -20,14 +20,16 @@ import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileCoroutineScopeFactory
-import com.android.systemui.qs.tiles.impl.custom.CustomTileInteractor
-import com.android.systemui.qs.tiles.impl.custom.CustomTileMapper
-import com.android.systemui.qs.tiles.impl.custom.CustomTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepository
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileDefaultsRepositoryImpl
+import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTilePackageUpdatesRepository
+import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTilePackageUpdatesRepositoryImpl
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileRepository
 import com.android.systemui.qs.tiles.impl.custom.data.repository.CustomTileRepositoryImpl
+import com.android.systemui.qs.tiles.impl.custom.domain.CustomTileMapper
 import com.android.systemui.qs.tiles.impl.custom.domain.entity.CustomTileDataModel
+import com.android.systemui.qs.tiles.impl.custom.domain.interactor.CustomTileDataInteractor
+import com.android.systemui.qs.tiles.impl.custom.domain.interactor.CustomTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.di.QSTileScope
 import dagger.Binds
 import dagger.Module
@@ -40,7 +42,7 @@ interface CustomTileModule {
 
     @Binds
     fun bindDataInteractor(
-        dataInteractor: CustomTileInteractor
+        dataInteractor: CustomTileDataInteractor
     ): QSTileDataInteractor<CustomTileDataModel>
 
     @Binds
@@ -57,6 +59,11 @@ interface CustomTileModule {
     ): CustomTileDefaultsRepository
 
     @Binds fun bindCustomTileRepository(impl: CustomTileRepositoryImpl): CustomTileRepository
+
+    @Binds
+    abstract fun bindCustomTilePackageUpdatesRepository(
+        impl: CustomTilePackageUpdatesRepositoryImpl
+    ): CustomTilePackageUpdatesRepository
 
     companion object {
 

@@ -56,7 +56,7 @@ constructor(
     override fun createTile(tileSpec: String): QSTile? {
         val viewModel: QSTileViewModel =
             when (val spec = TileSpec.create(tileSpec)) {
-                is TileSpec.CustomTileSpec -> null
+                is TileSpec.CustomTileSpec -> createCustomTileViewModel(spec)
                 is TileSpec.PlatformTileSpec -> tileMap[tileSpec]?.get()
                 is TileSpec.Invalid -> null
             }

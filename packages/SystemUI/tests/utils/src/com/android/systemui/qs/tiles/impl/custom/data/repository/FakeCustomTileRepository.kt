@@ -19,11 +19,13 @@ package com.android.systemui.qs.tiles.impl.custom.data.repository
 import android.os.UserHandle
 import android.service.quicksettings.Tile
 import com.android.systemui.qs.external.FakeCustomTileStatePersister
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.impl.custom.data.entity.CustomTileDefaults
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.Flow
 
 class FakeCustomTileRepository(
+    tileSpec: TileSpec.CustomTileSpec,
     customTileStatePersister: FakeCustomTileStatePersister,
     private val packageManagerAdapterFacade: FakePackageManagerAdapterFacade,
     testBackgroundContext: CoroutineContext,
@@ -31,11 +33,15 @@ class FakeCustomTileRepository(
 
     private val realDelegate: CustomTileRepository =
         CustomTileRepositoryImpl(
-            packageManagerAdapterFacade.tileSpec,
+            tileSpec,
             customTileStatePersister,
             packageManagerAdapterFacade.packageManagerAdapter,
             testBackgroundContext,
         )
+
+    init {
+        require(tileSpec.componentName == packageManagerAdapterFacade.componentName)
+    }
 
     override suspend fun restoreForTheUserIfNeeded(user: UserHandle, isPersistable: Boolean) =
         realDelegate.restoreForTheUserIfNeeded(user, isPersistable)
