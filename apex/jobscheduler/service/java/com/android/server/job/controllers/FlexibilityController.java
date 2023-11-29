@@ -201,6 +201,10 @@ public final class FlexibilityController extends StateController {
         mPercentToDropConstraints =
                 mFcConfig.DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS;
         mPrefetchController = prefetchController;
+    }
+
+    @Override
+    public void startTrackingLocked() {
         if (mFlexibilityEnabled) {
             mPrefetchController.registerPrefetchChangedListener(mPrefetchChangedListener);
         }

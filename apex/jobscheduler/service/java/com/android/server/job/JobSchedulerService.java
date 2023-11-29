@@ -268,6 +268,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     /** Master list of jobs. */
     final JobStore mJobs;
     private final CountDownLatch mJobStoreLoadedLatch;
+    private final CountDownLatch mStartControllerTrackingLatch;
     /** Tracking the standby bucket state of each app */
     final StandbyTracker mStandbyTracker;
     /** Tracking amount of time each package runs for. */
@@ -2521,6 +2522,7 @@ public class JobSchedulerService extends com.android.server.SystemService
         mBatteryStateTracker.startTracking();
 
         // Create the controllers.
+        mStartControllerTrackingLatch = new CountDownLatch(1);
         mControllers = new ArrayList<StateController>();
         mPrefetchController = new PrefetchController(this);
         mControllers.add(mPrefetchController);
@@ -2551,6 +2553,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         mTareController =
                 new TareController(this, backgroundJobsController, mConnectivityController);
         mControllers.add(mTareController);
+
+        startControllerTrackingAsync();
 
         mRestrictiveControllers = new ArrayList<>();
         mRestrictiveControllers.add(batteryController);
@@ -2623,7 +2627,13 @@ public class JobSchedulerService extends com.android.server.SystemService
     public void onBootPhase(int phase) {
         if (PHASE_LOCK_SETTINGS_READY == phase) {
             // This is the last phase before PHASE_SYSTEM_SERVICES_READY. We need to ensure that
+            // controllers have started tracking and that
             // persisted jobs are loaded before we can proceed to PHASE_SYSTEM_SERVICES_READY.
+            try {
+                mStartControllerTrackingLatch.await();
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "Couldn't wait on controller tracking start latch");
+            }
             try {
                 mJobStoreLoadedLatch.await();
             } catch (InterruptedException e) {
@@ -2631,8 +2641,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
         } else if (PHASE_SYSTEM_SERVICES_READY == phase) {
             mConstantsObserver.start();
-            for (StateController controller : mControllers) {
-                controller.onSystemServicesReady();
+            for (int i = mControllers.size() - 1; i >= 0; --i) {
+                mControllers.get(i).onSystemServicesReady();
             }
 
             mAppStateTracker = (AppStateTrackerImpl) Objects.requireNonNull(
@@ -2693,6 +2703,17 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mHandler.obtainMessage(MSG_CHECK_JOB).sendToTarget();
             }
         }
+    }
+
+    private void startControllerTrackingAsync() {
+        mHandler.post(() -> {
+            synchronized (mLock) {
+                for (int i = mControllers.size() - 1; i >= 0; --i) {
+                    mControllers.get(i).startTrackingLocked();
+                }
+            }
+            mStartControllerTrackingLatch.countDown();
+        });
     }
 
     /**
@@ -5173,6 +5194,12 @@ public class JobSchedulerService extends com.android.server.SystemService
     @VisibleForTesting
     protected TareController getTareController() {
         return mTareController;
+    }
+
+    @VisibleForTesting
+    protected void waitOnAsyncLoadingForTesting() throws Exception {
+        mStartControllerTrackingLatch.await();
+        // Ignore the job store loading for testing.
     }
 
     // Shell command infrastructure

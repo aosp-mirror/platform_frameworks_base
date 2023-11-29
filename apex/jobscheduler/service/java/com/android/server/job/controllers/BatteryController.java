@@ -78,8 +78,12 @@ public final class BatteryController extends RestrictingController {
             FlexibilityController flexibilityController) {
         super(service);
         mPowerTracker = new PowerTracker();
-        mPowerTracker.startTracking();
         mFlexibilityController = flexibilityController;
+    }
+
+    @Override
+    public void startTrackingLocked() {
+        mPowerTracker.startTracking();
     }
 
     @Override

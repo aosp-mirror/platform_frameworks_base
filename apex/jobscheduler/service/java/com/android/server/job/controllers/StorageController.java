@@ -55,6 +55,10 @@ public final class StorageController extends StateController {
     public StorageController(JobSchedulerService service) {
         super(service);
         mStorageTracker = new StorageTracker();
+    }
+
+    @Override
+    public void startTrackingLocked() {
         mStorageTracker.startTracking();
     }
 
