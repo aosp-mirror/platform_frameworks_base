@@ -141,15 +141,6 @@ public class SliceManager {
     }
 
     /**
-     * @deprecated TO BE REMOVED
-     * @removed
-     */
-    @Deprecated
-    public void pinSlice(@NonNull Uri uri, @NonNull List<SliceSpec> specs) {
-        pinSlice(uri, new ArraySet<>(specs));
-    }
-
-    /**
      * Remove a pin for a slice.
      * <p>
      * If the slice has no other pins/callbacks then the slice will be unpinned.
@@ -270,15 +261,6 @@ public class SliceManager {
             // Manager will kill this process shortly anyway.
             return null;
         }
-    }
-
-    /**
-     * @deprecated TO BE REMOVED
-     * @removed
-     */
-    @Deprecated
-    public @Nullable Slice bindSlice(@NonNull Uri uri, @NonNull List<SliceSpec> supportedSpecs) {
-        return bindSlice(uri, new ArraySet<>(supportedSpecs));
     }
 
     /**
@@ -409,17 +391,6 @@ public class SliceManager {
             // Manager will kill this process shortly anyway.
             return null;
         }
-    }
-
-    /**
-     * @deprecated TO BE REMOVED.
-     * @removed
-     */
-    @Deprecated
-    @Nullable
-    public Slice bindSlice(@NonNull Intent intent,
-            @NonNull List<SliceSpec> supportedSpecs) {
-        return bindSlice(intent, new ArraySet<>(supportedSpecs));
     }
 
     /**
