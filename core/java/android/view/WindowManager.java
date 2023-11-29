@@ -656,26 +656,35 @@ public interface WindowManager extends ViewManager {
 
     /**
      * Display IME Policy: The IME should appear on the local display.
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_LOCAL = 0;
 
     /**
-     * Display IME Policy: The IME should appear on the fallback display.
+     * Display IME Policy: The IME should appear on a fallback display.
+     *
+     * <p>The fallback display is always {@link Display#DEFAULT_DISPLAY}.</p>
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1;
 
     /**
      * Display IME Policy: The IME should be hidden.
      *
-     * Setting this policy will prevent the IME from making a connection. This
-     * will prevent any IME from receiving metadata about input.
+     * <p>Setting this policy will prevent the IME from making a connection. This
+     * will prevent any IME from receiving metadata about input and this display will effectively
+     * have no IME.</p>
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_HIDE = 2;
 
     /**

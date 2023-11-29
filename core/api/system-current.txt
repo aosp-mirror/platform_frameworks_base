@@ -3232,6 +3232,7 @@ package android.companion.virtual {
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.content.ComponentName);
     method public void removeSoundEffectListener(@NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDevicePolicy(int, int);
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDisplayImePolicy(int, int);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void unregisterIntentInterceptor(@NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
   }
@@ -17173,6 +17174,9 @@ package android.view {
     method @NonNull public default java.util.List<android.content.ComponentName> notifyScreenshotListeners(int);
     method public default void registerTaskFpsCallback(@IntRange(from=0) int, @NonNull java.util.concurrent.Executor, @NonNull android.window.TaskFpsCallback);
     method public default void unregisterTaskFpsCallback(@NonNull android.window.TaskFpsCallback);
+    field public static final int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1; // 0x1
+    field public static final int DISPLAY_IME_POLICY_HIDE = 2; // 0x2
+    field public static final int DISPLAY_IME_POLICY_LOCAL = 0; // 0x0
   }
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {

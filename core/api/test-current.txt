@@ -3617,9 +3617,6 @@ package android.view {
     method public default void setShouldShowWithInsecureKeyguard(int, boolean);
     method public default boolean shouldShowSystemDecors(int);
     method @Nullable public default android.graphics.Bitmap snapshotTaskForRecents(@IntRange(from=0) int);
-    field public static final int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1; // 0x1
-    field public static final int DISPLAY_IME_POLICY_HIDE = 2; // 0x2
-    field public static final int DISPLAY_IME_POLICY_LOCAL = 0; // 0x0
     field public static final int LARGE_SCREEN_SMALLEST_SCREEN_WIDTH_DP = 600; // 0x258
   }
 
