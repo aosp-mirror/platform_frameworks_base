@@ -56,6 +56,7 @@ aconfig_srcjars = [
     ":android.credentials.flags-aconfig-java{.generated_srcjars}",
     ":android.view.contentprotection.flags-aconfig-java{.generated_srcjars}",
     ":com.android.server.flags.pinner-aconfig-java{.generated_srcjars}",
+    ":android.service.controls.flags-aconfig-java{.generated_srcjars}",
     ":android.service.voice.flags-aconfig-java{.generated_srcjars}",
     ":android.media.tv.flags-aconfig-java{.generated_srcjars}",
     ":android.service.autofill.flags-aconfig-java{.generated_srcjars}",
@@ -595,6 +596,19 @@ aconfig_declarations {
 java_aconfig_library {
     name: "com.android.server.flags.pinner-aconfig-java",
     aconfig_declarations: "com.android.server.flags.pinner-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Controls
+aconfig_declarations {
+    name: "android.service.controls.flags-aconfig",
+    package: "android.service.controls.flags",
+    srcs: ["core/java/android/service/controls/flags/*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.service.controls.flags-aconfig-java",
+    aconfig_declarations: "android.service.controls.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
