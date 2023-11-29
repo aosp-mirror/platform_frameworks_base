@@ -21,6 +21,11 @@ import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES;
 import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_HEARING_AID;
 import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_WATCH;
 import static android.media.AudioPlaybackConfiguration.PLAYER_DEVICEID_INVALID;
+import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_TYPE_MPEG_4;
+import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_TYPE_MPEG_D;
+import static android.media.MediaFormat.KEY_AAC_DRC_EFFECT_TYPE;
+import static android.media.MediaFormat.KEY_AAC_DRC_HEAVY_COMPRESSION;
+import static android.media.MediaFormat.KEY_AAC_DRC_TARGET_REFERENCE_LEVEL;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -41,6 +46,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -70,10 +76,14 @@ public class LoudnessCodecHelper {
     private static final String SYSTEM_PROPERTY_SPEAKER_SPL_RANGE_SIZE =
             "audio.loudness.builtin-speaker-spl-range-size";
 
-    private static final int SPL_RANGE_UNKNOWN = 0;
-    private static final int SPL_RANGE_SMALL = 1;
-    private static final int SPL_RANGE_MEDIUM = 2;
-    private static final int SPL_RANGE_LARGE = 3;
+    @VisibleForTesting
+    static final int SPL_RANGE_UNKNOWN = 0;
+    @VisibleForTesting
+    static final int SPL_RANGE_SMALL = 1;
+    @VisibleForTesting
+    static final int SPL_RANGE_MEDIUM = 2;
+    @VisibleForTesting
+    static final int SPL_RANGE_LARGE = 3;
 
     /** The possible transducer SPL ranges as defined in CTA2075 */
     @IntDef({
@@ -125,7 +135,8 @@ public class LoudnessCodecHelper {
     private final AudioService mAudioService;
 
     /** Contains the properties necessary to compute the codec loudness related parameters. */
-    private static final class LoudnessCodecInputProperties {
+    @VisibleForTesting
+    static final class LoudnessCodecInputProperties {
         private final int mMetadataType;
 
         private final boolean mIsDownmixing;
@@ -200,10 +211,53 @@ public class LoudnessCodecHelper {
         }
 
         PersistableBundle createLoudnessParameters() {
-            // TODO: create bundle with new parameters
-            return new PersistableBundle();
-        }
+            PersistableBundle loudnessParams = new PersistableBundle();
 
+            switch (mDeviceSplRange) {
+                case SPL_RANGE_LARGE:
+                    // corresponds to -31dB attenuation
+                    loudnessParams.putInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL, 124);
+                    if (mMetadataType == CODEC_METADATA_TYPE_MPEG_4) {
+                        loudnessParams.putInt(KEY_AAC_DRC_HEAVY_COMPRESSION, 0);
+                    } else if (mMetadataType == CODEC_METADATA_TYPE_MPEG_D) {
+                        // general compression
+                        loudnessParams.putInt(KEY_AAC_DRC_EFFECT_TYPE, 6);
+                    }
+                    break;
+                case SPL_RANGE_MEDIUM:
+                    // corresponds to -24dB attenuation
+                    loudnessParams.putInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL, 96);
+                    if (mMetadataType == CODEC_METADATA_TYPE_MPEG_4) {
+                        loudnessParams.putInt(KEY_AAC_DRC_HEAVY_COMPRESSION, mIsDownmixing ? 1 : 0);
+                    } else if (mMetadataType == CODEC_METADATA_TYPE_MPEG_D) {
+                        // general compression
+                        loudnessParams.putInt(KEY_AAC_DRC_EFFECT_TYPE, 6);
+                    }
+                    break;
+                case SPL_RANGE_SMALL:
+                    // corresponds to -16dB attenuation
+                    loudnessParams.putInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL, 64);
+                    if (mMetadataType == CODEC_METADATA_TYPE_MPEG_4) {
+                        loudnessParams.putInt(KEY_AAC_DRC_HEAVY_COMPRESSION, 1);
+                    } else if (mMetadataType == CODEC_METADATA_TYPE_MPEG_D) {
+                        // limited playback range compression
+                        loudnessParams.putInt(KEY_AAC_DRC_EFFECT_TYPE, 3);
+                    }
+                    break;
+                default:
+                    // corresponds to -24dB attenuation
+                    loudnessParams.putInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL, 96);
+                    if (mMetadataType == CODEC_METADATA_TYPE_MPEG_4) {
+                        loudnessParams.putInt(KEY_AAC_DRC_HEAVY_COMPRESSION, mIsDownmixing ? 1 : 0);
+                    } else if (mMetadataType == CODEC_METADATA_TYPE_MPEG_D) {
+                        // general compression
+                        loudnessParams.putInt(KEY_AAC_DRC_EFFECT_TYPE, 6);
+                    }
+                    break;
+            }
+
+            return loudnessParams;
+        }
     }
 
     @GuardedBy("mLock")
