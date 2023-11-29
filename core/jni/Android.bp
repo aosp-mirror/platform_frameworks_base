@@ -457,9 +457,4 @@ cc_library_shared_for_libandroid_runtime {
             ],
         },
     },
-
-    // Workaround Clang LTO crash.
-    lto: {
-        never: true,
-    },
 }

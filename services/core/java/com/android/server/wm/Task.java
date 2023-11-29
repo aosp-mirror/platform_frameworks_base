@@ -6135,6 +6135,7 @@ class Task extends TaskFragment {
                 // Avoid resuming activities on secondary displays since we don't want bubble
                 // activities to be resumed while bubble is still collapsed.
                 // TODO(b/113840485): Having keyguard going away state for secondary displays.
+                && display != null
                 && display.isDefaultDisplay) {
             return false;
         }
