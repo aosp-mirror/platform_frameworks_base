@@ -122,7 +122,9 @@ import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.window.ITrustedPresentationListener;
 import android.window.TaskFpsCallback;
+import android.window.TrustedPresentationThresholds;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -5882,6 +5884,37 @@ public interface WindowManager extends ViewManager {
     @TestApi
     @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
     default boolean replaceContentOnDisplayWithSc(int displayId, @NonNull SurfaceControl sc) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Add a trusted presentation listener associated with a window. If the listener has already
+     * been registered, an AndroidRuntimeException will be thrown.
+     *
+     * @param window  The Window to add the trusted presentation listener for
+     * @param thresholds The {@link TrustedPresentationThresholds} that will specify
+     *                   when the to invoke the callback.
+     * @param executor   The {@link Executor} where the callback will be invoked on.
+     * @param listener   The {@link ITrustedPresentationListener} that will receive the callbacks
+     *                  when entered or exited trusted presentation per the thresholds.
+     *
+     * @hide b/287076178 un-hide with API bump
+     */
+    default void registerTrustedPresentationListener(@NonNull IBinder window,
+            @NonNull TrustedPresentationThresholds thresholds,  @NonNull Executor executor,
+            @NonNull Consumer<Boolean> listener) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Removes a presentation listener associated with a window. If the listener was not previously
+     * registered, the call will be a noop.
+     *
+     * @hide
+     * @see #registerTrustedPresentationListener(IBinder,
+     * TrustedPresentationThresholds, Executor, Consumer)
+     */
+    default void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
         throw new UnsupportedOperationException();
     }
 }
