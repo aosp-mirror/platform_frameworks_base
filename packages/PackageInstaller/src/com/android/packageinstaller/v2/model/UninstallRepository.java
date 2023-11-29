@@ -60,6 +60,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import com.android.packageinstaller.R;
+import com.android.packageinstaller.common.EventResultPersister;
+import com.android.packageinstaller.common.UninstallEventReceiver;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallFailed;
 import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallReady;
