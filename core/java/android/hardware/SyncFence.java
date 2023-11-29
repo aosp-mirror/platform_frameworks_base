@@ -16,6 +16,7 @@
 
 package android.hardware;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.media.Image;
 import android.media.ImageWriter;
@@ -25,6 +26,8 @@ import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.SystemClock;
+
+import com.android.window.flags.Flags;
 
 import libcore.util.NativeAllocationRegistry;
 
@@ -118,6 +121,19 @@ public final class SyncFence implements AutoCloseable, Parcelable {
             mCloser = sRegistry.registerNativeAllocation(this, mNativePtr);
         } else {
             mCloser = () -> {};
+        }
+    }
+
+    /**
+     * Creates a copy of the SyncFence from an existing one.
+     * Both fences must be closed() independently.
+     */
+    @FlaggedApi(Flags.FLAG_SDK_DESIRED_PRESENT_TIME)
+    public SyncFence(@NonNull SyncFence other) {
+        this(other.mNativePtr);
+
+        if (mNativePtr != 0) {
+            nIncRef(mNativePtr);
         }
     }
 
@@ -312,4 +328,5 @@ public final class SyncFence implements AutoCloseable, Parcelable {
     private static native int nGetFd(long nPtr);
     private static native boolean nWait(long nPtr, long timeout);
     private static native long nGetSignalTime(long nPtr);
+    private static native void nIncRef(long nPtr);
 }

@@ -64,3 +64,11 @@ flag {
     is_fixed_read_only: true
     bug: "278027319"
 }
+
+flag {
+    namespace: "window_surfaces"
+    name: "sdk_desired_present_time"
+    description: "Feature flag for the new SDK API to set desired present time"
+    is_fixed_read_only: true
+    bug: "295038072"
+}
