@@ -134,7 +134,7 @@ public class Uinput {
         switch (Objects.requireNonNull(e.getCommand())) {
             case REGISTER ->
                     error("Device id=" + e.getId() + " is already registered. Ignoring event.");
-            case INJECT -> d.injectEvent(e.getInjections());
+            case INJECT -> d.injectEvent(e.getInjections(), e.getTimestampOffsetMicros());
             case DELAY -> d.addDelayNanos(e.getDurationNanos());
             case SYNC -> d.syncEvent(e.getSyncToken());
         }
