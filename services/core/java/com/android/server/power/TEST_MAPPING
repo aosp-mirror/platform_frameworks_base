@@ -20,6 +20,7 @@
       "name": "FrameworksServicesTests",
       "options": [
         {"include-filter": "com.android.server.power"},
+        {"exclude-filter": "com.android.server.power.BatteryStatsTests"},
         {"exclude-annotation": "android.platform.test.annotations.FlakyTest"},
         {"exclude-annotation": "androidx.test.filters.FlakyTest"}
       ]
@@ -38,7 +39,8 @@
     {
       "name": "FrameworksServicesTests",
       "options": [
-        {"include-filter": "com.android.server.power"}
+        {"include-filter": "com.android.server.power"},
+        {"exclude-filter": "com.android.server.power.BatteryStatsTests"}
       ]
     }
   ]
