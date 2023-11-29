@@ -110,24 +110,6 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
     }
 
     /**
-     * META + SPACE to switch keyboard layout.
-     */
-    @Test
-    public void testMetaSpace() {
-        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout(1);
-    }
-
-    /**
-     * META + SHIFT + SPACE to switch keyboard layout backwards.
-     */
-    @Test
-    public void testMetaShiftSpace() {
-        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_SPACE}, 0);
-        mPhoneWindowManager.assertSwitchKeyboardLayout(-1);
-    }
-
-    /**
      * CTRL + ALT + Z to enable accessibility service.
      */
     @Test

@@ -612,7 +612,7 @@ public final class KeyboardShortcutListSearch {
     private static KeyboardShortcutMultiMappingGroup getMultiMappingInputShortcuts(
             Context context) {
         List<ShortcutMultiMappingInfo> shortcutMultiMappingInfoList = Arrays.asList(
-                /* Switch input language (next language): Ctrl + Space or Meta + Space */
+                /* Switch input language (next language): Ctrl + Space */
                 new ShortcutMultiMappingInfo(
                         context.getString(R.string.input_switch_input_language_next),
                         null,
@@ -621,14 +621,9 @@ public final class KeyboardShortcutListSearch {
                                         context.getString(
                                                 R.string.input_switch_input_language_next),
                                         KeyEvent.KEYCODE_SPACE, KeyEvent.META_CTRL_ON),
-                                        null),
-                                new ShortcutKeyGroup(new KeyboardShortcutInfo(
-                                        context.getString(
-                                                R.string.input_switch_input_language_next),
-                                        KeyEvent.KEYCODE_SPACE, KeyEvent.META_META_ON),
                                         null))),
                 /* Switch input language (previous language): */
-                /* Ctrl + Shift + Space or Meta + Shift + Space */
+                /* Ctrl + Shift + Space */
                 new ShortcutMultiMappingInfo(
                         context.getString(R.string.input_switch_input_language_previous),
                         null,
@@ -638,12 +633,6 @@ public final class KeyboardShortcutListSearch {
                                                 R.string.input_switch_input_language_previous),
                                         KeyEvent.KEYCODE_SPACE,
                                         KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON),
-                                        null),
-                                new ShortcutKeyGroup(new KeyboardShortcutInfo(
-                                        context.getString(
-                                                R.string.input_switch_input_language_previous),
-                                        KeyEvent.KEYCODE_SPACE,
-                                        KeyEvent.META_META_ON | KeyEvent.META_SHIFT_ON),
                                         null)))
         );
         return new KeyboardShortcutMultiMappingGroup(
