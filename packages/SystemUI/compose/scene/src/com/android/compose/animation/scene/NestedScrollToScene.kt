@@ -17,11 +17,13 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
+import androidx.compose.ui.node.DelegatableNode
+import androidx.compose.ui.node.DelegatingNode
+import androidx.compose.ui.node.ModifierNodeElement
+import androidx.compose.ui.platform.InspectorInfo
+import com.android.compose.nestedscroll.PriorityNestedScrollConnection
 
 /**
  * Defines the behavior of the [SceneTransitionLayout] when a scrollable component is scrolled.
@@ -72,21 +74,101 @@ internal fun Modifier.nestedScrollToScene(
     orientation: Orientation,
     startBehavior: NestedScrollBehavior,
     endBehavior: NestedScrollBehavior,
-): Modifier = composed {
-    val connection =
-        remember(layoutImpl, orientation, startBehavior, endBehavior) {
+) =
+    this then
+        NestedScrollToSceneElement(
+            layoutImpl = layoutImpl,
+            orientation = orientation,
+            startBehavior = startBehavior,
+            endBehavior = endBehavior,
+        )
+
+private data class NestedScrollToSceneElement(
+    private val layoutImpl: SceneTransitionLayoutImpl,
+    private val orientation: Orientation,
+    private val startBehavior: NestedScrollBehavior,
+    private val endBehavior: NestedScrollBehavior,
+) : ModifierNodeElement<NestedScrollToSceneNode>() {
+    override fun create() =
+        NestedScrollToSceneNode(
+            layoutImpl = layoutImpl,
+            orientation = orientation,
+            startBehavior = startBehavior,
+            endBehavior = endBehavior,
+        )
+
+    override fun update(node: NestedScrollToSceneNode) {
+        node.update(
+            layoutImpl = layoutImpl,
+            orientation = orientation,
+            startBehavior = startBehavior,
+            endBehavior = endBehavior,
+        )
+    }
+
+    override fun InspectorInfo.inspectableProperties() {
+        name = "nestedScrollToScene"
+        properties["layoutImpl"] = layoutImpl
+        properties["orientation"] = orientation
+        properties["startBehavior"] = startBehavior
+        properties["endBehavior"] = endBehavior
+    }
+}
+
+private class NestedScrollToSceneNode(
+    layoutImpl: SceneTransitionLayoutImpl,
+    orientation: Orientation,
+    startBehavior: NestedScrollBehavior,
+    endBehavior: NestedScrollBehavior,
+) : DelegatingNode() {
+    private var priorityNestedScrollConnection: PriorityNestedScrollConnection =
+        scenePriorityNestedScrollConnection(
+            layoutImpl = layoutImpl,
+            orientation = orientation,
+            startBehavior = startBehavior,
+            endBehavior = endBehavior,
+        )
+
+    private var nestedScrollNode: DelegatableNode =
+        nestedScrollModifierNode(
+            connection = priorityNestedScrollConnection,
+            dispatcher = null,
+        )
+
+    override fun onAttach() {
+        delegate(nestedScrollNode)
+    }
+
+    override fun onDetach() {
+        // Make sure we reset the scroll connection when this modifier is removed from composition
+        priorityNestedScrollConnection.reset()
+    }
+
+    fun update(
+        layoutImpl: SceneTransitionLayoutImpl,
+        orientation: Orientation,
+        startBehavior: NestedScrollBehavior,
+        endBehavior: NestedScrollBehavior,
+    ) {
+        // Clean up the old nested scroll connection
+        priorityNestedScrollConnection.reset()
+        undelegate(nestedScrollNode)
+
+        // Create a new nested scroll connection
+        priorityNestedScrollConnection =
             scenePriorityNestedScrollConnection(
                 layoutImpl = layoutImpl,
                 orientation = orientation,
                 startBehavior = startBehavior,
-                endBehavior = endBehavior
+                endBehavior = endBehavior,
             )
-        }
-
-    // Make sure we reset the scroll connection when this modifier is removed from composition
-    DisposableEffect(connection) { onDispose { connection.reset() } }
-
-    nestedScroll(connection = connection)
+        nestedScrollNode =
+            nestedScrollModifierNode(
+                connection = priorityNestedScrollConnection,
+                dispatcher = null,
+            )
+        delegate(nestedScrollNode)
+    }
 }
 
 private fun scenePriorityNestedScrollConnection(
