@@ -15,6 +15,22 @@
  */
 package com.android.server.audio;
 
+import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_CARKIT;
+import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_DEFAULT;
+import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_HEADSET;
+import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_HEARING_AID;
+import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_SPEAKER;
+import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET;
+import static android.bluetooth.BluetoothDevice.DEVICE_TYPE_WATCH;
+import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_CARKIT;
+import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES;
+import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_HEARING_AID;
+import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_RECEIVER;
+import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_SPEAKER;
+import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_UNKNOWN;
+import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_WATCH;
+import static android.media.audio.Flags.automaticBtDeviceType;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothA2dp;
@@ -32,6 +48,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioManager;
+import android.media.AudioManager.AudioDeviceCategory;
 import android.media.AudioSystem;
 import android.media.BluetoothProfileConnectionInfo;
 import android.os.Binder;
@@ -1074,6 +1091,71 @@ public class BtHelper {
     /*package */ static Bundle getPreferredAudioProfiles(String address) {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         return adapter.getPreferredAudioProfiles(adapter.getRemoteDevice(address));
+    }
+
+    @Nullable
+    /*package */ static BluetoothDevice getBluetoothDevice(String address) {
+        BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+        if (adapter == null || !BluetoothAdapter.checkBluetoothAddress(address)) {
+            return null;
+        }
+
+        return adapter.getRemoteDevice(address);
+    }
+
+    @AudioDeviceCategory
+    /*package*/ static int getBtDeviceCategory(String address) {
+        if (!automaticBtDeviceType()) {
+            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
+        }
+
+        BluetoothDevice device = BtHelper.getBluetoothDevice(address);
+        if (device == null) {
+            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
+        }
+
+        byte[] deviceType = device.getMetadata(BluetoothDevice.METADATA_DEVICE_TYPE);
+        if (deviceType == null) {
+            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
+        }
+        String deviceCategory = new String(deviceType);
+        switch (deviceCategory) {
+            case DEVICE_TYPE_HEARING_AID:
+                return AUDIO_DEVICE_CATEGORY_HEARING_AID;
+            case DEVICE_TYPE_CARKIT:
+                return AUDIO_DEVICE_CATEGORY_CARKIT;
+            case DEVICE_TYPE_HEADSET:
+            case DEVICE_TYPE_UNTETHERED_HEADSET:
+                return AUDIO_DEVICE_CATEGORY_HEADPHONES;
+            case DEVICE_TYPE_SPEAKER:
+                return AUDIO_DEVICE_CATEGORY_SPEAKER;
+            case DEVICE_TYPE_WATCH:
+                return AUDIO_DEVICE_CATEGORY_WATCH;
+            case DEVICE_TYPE_DEFAULT:
+            default:
+                // fall through
+        }
+
+        BluetoothClass deviceClass = device.getBluetoothClass();
+        if (deviceClass == null) {
+            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
+        }
+
+        switch (deviceClass.getDeviceClass()) {
+            case BluetoothClass.Device.WEARABLE_WRIST_WATCH:
+                return AUDIO_DEVICE_CATEGORY_WATCH;
+            case BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER:
+            case BluetoothClass.Device.AUDIO_VIDEO_VIDEO_DISPLAY_AND_LOUDSPEAKER:
+            case BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO:
+                return AUDIO_DEVICE_CATEGORY_SPEAKER;
+            case BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET:
+            case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
+                return AUDIO_DEVICE_CATEGORY_HEADPHONES;
+            case BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO:
+                return AUDIO_DEVICE_CATEGORY_RECEIVER;
+            default:
+                return AUDIO_DEVICE_CATEGORY_UNKNOWN;
+        }
     }
 
     /**
