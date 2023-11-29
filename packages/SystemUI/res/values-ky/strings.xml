@@ -640,10 +640,14 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> баскычы"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Башкы бет"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Артка"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"Өйдө"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"Төмөн"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Солго"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Оңго"</string>
+    <!-- no translation found for keyboard_key_dpad_up (7199805608386368673) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_down (3354221123220737397) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_left (144176368026538621) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_right (8485763312139820037) -->
+    <skip />
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Ортолотуу"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Боштук"</string>
@@ -671,7 +675,10 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Билдирмелер"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Ыкчам баскычтар"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Баскычтоп калыбын которуштуруу"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Текстти тазалоо"</string>
+    <!-- no translation found for keyboard_shortcut_join (3578314570034512676) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_clear_text (6631051796030377857) -->
+    <skip />
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Ыкчам баскычтар"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Ыкчам баскычтарды издөө"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Ыкчам баскычтар жок"</string>
@@ -679,35 +686,45 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Киргизүү"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Ачык колдон-лор"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Учурдагы кол-мо"</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Билдирмелер тактасына кирүү"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Толук скриншот тартуу"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Системанын / колдонмолордун ыкчам баскычтарынын  тизмесине кирүү"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"Артка: мурунку абалга кайтуу (артка баскычы)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Башкы экранга кирүү"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Ачылып турган колдонмолордун тизмесин көрүү"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Соңку колдонмолорду көрүү (кадимки тартипте)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Соңку колдонмолорду көрүү (тескери тартипте)"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Бардык колдонмолордун тизмесин ачуу жана издөө (Издөө/Жүргүзгүч)"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Тапшырмалар тактасын жашыруу жана көрсөтүү"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Система параметрлерине кирүү"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Google Жардамчыны иштетүү"</string>
+    <!-- no translation found for keyboard_shortcut_a11y_show_search_results (2865241062981833705) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_system (7744143131119370483) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_input (4589316004510335529) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_open_apps (6175417687221004059) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_current_app (7944592357493737911) -->
+    <skip />
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Билдирмелерди көрүү"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Скриншот тартуу"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Ыкчам баскычтарды көрсөтүү"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"Артка кайтуу"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Башкы экранга өтүү"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Акыркы колдонмолорду көрүү"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Соңку колдонмолордо алдыга өтүү"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Соңку колдонмолордо артка кайтуу"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Колдонмолордун тизмесин ачуу"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Тапшырмалар панелин көрсөтүү"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Параметрлерди ачуу"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Жардамчыны ачуу"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Экранды кулпулоо"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"Ыкчам кыска жазууну түзүү"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"Кыска жазууларды ачуу"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Системанын бир нече тапшырма аткаруусу"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Оң жакта жайгашкан учурдагы колдонмо менен экранды бөлүүнү иштетүү"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Сол жакта жайгашкан учурдагы колдонмо менен экранды бөлүүнү иштетүү"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Экранды бөлүү режиминен толук экранга которулуу"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"Экранды бөлүү режиминде бир колдонмону экинчисине алмаштыруу"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Учурда оң жактагы колдонмо менен экранды бөлүүнү иштетүү"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Учурда сол жактагы колдонмо менен экранды бөлүүнү иштетүү"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Экранды бөлүү режиминен толук экранга которулуу"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"Экранды бөлүү режиминде бир колдонмону экинчисине алмаштыруу"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Киргизүү"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Кийинки киргизүү тилине которулуу"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Мурунку киргизүү тилине которулуу"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Кийинки тилге которулуу"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Мурунку тилге которулуу"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Быйтыкчаларды көрүү"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Айтып терүүнү иштетүү"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Колдонмолор"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Көмөкчү"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Серепчи (демейки шартта Chrome)"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Жардамчы"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Серепчи"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Байланыштар"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"Электрондук почта (демейки шартта Gmail)"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Электрондук почта"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Музыка"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Жылнаама"</string>

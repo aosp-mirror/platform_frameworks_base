@@ -401,11 +401,9 @@
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet ngadalë • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Po karikohet • Plot për <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="communal_tutorial_indicator_text" msgid="4503010353591430123">"Rrëshqit shpejt majtas për të filluar udhëzuesin e përbashkët"</string>
-    <!-- no translation found for button_to_open_widget_editor (5599945944349057600) -->
-    <skip />
+    <string name="button_to_open_widget_editor" msgid="5599945944349057600">"Hap modifikuesin e miniaplikacionit"</string>
     <string name="button_to_remove_widget" msgid="1511255853677835341">"Hiq një miniaplikacion"</string>
-    <!-- no translation found for hub_mode_add_widget_button_text (3956587989338301487) -->
-    <skip />
+    <string name="hub_mode_add_widget_button_text" msgid="3956587989338301487">"Shto miniaplikacionin"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Ndërro përdorues"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"menyja me tërheqje poshtë"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Të gjitha aplikacionet dhe të dhënat në këtë sesion do të fshihen."</string>
@@ -642,10 +640,14 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Butoni <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Kreu"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Prapa"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"Lart"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"Poshtë"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Majtas"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Djathtas"</string>
+    <!-- no translation found for keyboard_key_dpad_up (7199805608386368673) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_down (3354221123220737397) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_left (144176368026538621) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_right (8485763312139820037) -->
+    <skip />
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Qendror"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Hapësirë"</string>
@@ -673,7 +675,10 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Njoftimet"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Shkurtoret e tastierës"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Ndërro strukturën e tastierës"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Pastro tekstin"</string>
+    <!-- no translation found for keyboard_shortcut_join (3578314570034512676) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_clear_text (6631051796030377857) -->
+    <skip />
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Shkurtoret"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Kërko shkurtoret"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Nuk u gjet shkurtore"</string>
@@ -681,35 +686,45 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Hyrja"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Apl. e hapura"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Apl. aktual"</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Qasu te streha e njoftimeve"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Bëj një pamje të plotë ekrani"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Qasu te lista e sistemeve/shkurtoreve të aplikacioneve"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"Pas: kthehu pas te gjendja e mëparshme (butoni pas)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Qasu tek ekrani bazë"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Përmbledhje e aplikacioneve të hapura"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Lëviz mes aplikacioneve të fundit (përpara)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Lëviz mes aplikacioneve të fundit (pas)"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Qasu te lista e aplikacioneve dhe kërko (p.sh. Kërko/Launcher)"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Fshih dhe (ri)shfaq shiritin e detyrave"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Qasu te cilësimet e sistemit"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Qasu tek \"Asistenti i Google\""</string>
+    <!-- no translation found for keyboard_shortcut_a11y_show_search_results (2865241062981833705) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_system (7744143131119370483) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_input (4589316004510335529) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_open_apps (6175417687221004059) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_current_app (7944592357493737911) -->
+    <skip />
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Shiko njoftimet"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Nxirr një pamje ekrani"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Shfaq shkurtoret"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"Kthehu prapa"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Shko tek ekrani bazë"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Shiko aplikacionet e fundit"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Lëviz përpara përmes aplikacioneve të fundit"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Lëviz prapa përmes aplikacioneve të fundit"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Hap listën e aplikacioneve"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Shfaq shiritin e detyrave"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Hap cilësimet"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Hap \"Asistentin\""</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Ekrani i kyçjes"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"Hap aplikacionin \"Shënimet\" për një memorandum të shpejtë"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"Hap \"Shënimet\""</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Kryerja e shumë detyrave nga sistemi"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Fut ekranin e ndarë me aplikacionin aktual te RHS-ja"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Fut ekranin e ndarë me aplikacionin aktual te LHS-ja"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Kalo nga ekrani i ndarë në ekranin e plotë"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"Gjatë ekranit të ndarë: zëvendëso një aplikacion nga një te një tjetër"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Hyr në ekranin e ndarë me aplikacionin aktual në anën e djathtë"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Hyr në ekranin e ndarë me aplikacionin aktual në anën e majtë"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Kalo nga ekrani i ndarë në ekranin e plotë"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"Gjatë ekranit të ndarë: zëvendëso një aplikacion me një tjetër"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Hyrja"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Ndërro gjuhën e hyrjes (gjuha tjetër)"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Ndërro gjuhën e hyrjes (gjuha e mëparshme)"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Kalo te gjuha tjetër"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Kalo te gjuha e mëparshme"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Qasu te emoji-t"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Qasu te shkrimi me zë"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Aplikacionet"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Asistenti"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Shfletuesi (Chrome si i parazgjedhur)"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Asistenti"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Shfletuesi"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Kontaktet"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"Email (Gmail si i parazgjedhur)"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"Email-i"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Muzikë"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalendari"</string>
