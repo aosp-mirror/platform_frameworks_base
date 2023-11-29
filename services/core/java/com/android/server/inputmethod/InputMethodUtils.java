@@ -756,16 +756,6 @@ final class InputMethodUtils {
             return imi;
         }
 
-        @Nullable
-        String getSelectedInputMethodForUser(@UserIdInt int userId) {
-            final String imi =
-                    getStringForUser(Settings.Secure.DEFAULT_INPUT_METHOD, null, userId);
-            if (DEBUG) {
-                Slog.d(TAG, "getSelectedInputMethodForUserStr: " + imi);
-            }
-            return imi;
-        }
-
         void putDefaultVoiceInputMethod(String imeId) {
             if (DEBUG) {
                 Slog.d(TAG, "putDefaultVoiceInputMethodStr: " + imeId + ", " + mCurrentUserId);
