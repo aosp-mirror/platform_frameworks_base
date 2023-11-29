@@ -141,12 +141,28 @@ public class SnoozeHelper {
 
     protected boolean canSnooze(int numberToSnooze) {
         synchronized (mLock) {
-            if ((mPackages.size() + numberToSnooze) > CONCURRENT_SNOOZE_LIMIT) {
+            if ((mPackages.size() + numberToSnooze) > CONCURRENT_SNOOZE_LIMIT
+                || (countPersistedNotificationsLocked() + numberToSnooze)
+                > CONCURRENT_SNOOZE_LIMIT) {
                 return false;
             }
         }
         return true;
     }
+
+    private int countPersistedNotificationsLocked() {
+        int numNotifications = 0;
+        for (ArrayMap<String, String> persistedWithContext :
+                mPersistedSnoozedNotificationsWithContext.values()) {
+            numNotifications += persistedWithContext.size();
+        }
+        for (ArrayMap<String, Long> persistedWithDuration :
+                mPersistedSnoozedNotifications.values()) {
+            numNotifications += persistedWithDuration.size();
+        }
+        return numNotifications;
+    }
+
 
     @NonNull
     protected Long getSnoozeTimeForUnpostedNotification(int userId, String pkg, String key) {
@@ -449,6 +465,11 @@ public class SnoozeHelper {
                 NotificationRecord record = recordsByKey.remove(groupSummaryKey);
                 mPackages.remove(groupSummaryKey);
                 mUsers.remove(groupSummaryKey);
+
+                final String trimmedKey = getTrimmedString(groupSummaryKey);
+                removeRecordLocked(pkg, trimmedKey, userId, mPersistedSnoozedNotifications);
+                removeRecordLocked(pkg, trimmedKey, userId,
+                      mPersistedSnoozedNotificationsWithContext);
 
                 if (record != null && !record.isCanceled) {
                     Runnable runnable = () -> {
