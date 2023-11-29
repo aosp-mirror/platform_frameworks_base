@@ -1647,8 +1647,22 @@ public class TrustManagerService extends SystemService {
             fout.printf(" User \"%s\" (id=%d, flags=%#x)",
                     user.name, user.id, user.flags);
             if (!user.supportsSwitchToByUser()) {
-                fout.println("(managed profile)");
-                fout.println("   disabled because switching to this user is not possible.");
+                final boolean locked;
+                if (user.isProfile()) {
+                    if (mLockPatternUtils.isSeparateProfileChallengeEnabled(user.id)) {
+                        fout.print(" (profile with separate challenge)");
+                        locked = isDeviceLockedInner(user.id);
+                    } else {
+                        fout.print(" (profile with unified challenge)");
+                        locked = isDeviceLockedInner(resolveProfileParent(user.id));
+                    }
+                } else {
+                    fout.println(" (user that cannot be switched to)");
+                    locked = isDeviceLockedInner(user.id);
+                }
+                fout.println(": deviceLocked=" + dumpBool(locked));
+                fout.println(
+                        "   Trust agents disabled because switching to this user is not possible.");
                 return;
             }
             if (isCurrent) {
