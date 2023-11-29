@@ -50,6 +50,14 @@ constructor(
             onStep = { 1f - it },
         )
 
+    val shortcutsAlpha: Flow<Float> =
+        transitionAnimation.createFlow(
+            duration = 250.milliseconds,
+            onStep = { 1 - it },
+            onFinish = { 0f },
+            onCancel = { 1f },
+        )
+
     /** Lockscreen views y-translation */
     fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
         return transitionAnimation.createFlow(

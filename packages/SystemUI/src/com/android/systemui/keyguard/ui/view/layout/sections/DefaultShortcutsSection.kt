@@ -25,14 +25,12 @@ import androidx.constraintlayout.widget.ConstraintSet.LEFT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.RIGHT
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
-import com.android.systemui.res.R
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.binder.KeyguardQuickAffordanceViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
@@ -61,7 +59,7 @@ constructor(
                 KeyguardQuickAffordanceViewBinder.bind(
                     constraintLayout.requireViewById(R.id.start_button),
                     keyguardQuickAffordancesCombinedViewModel.startButton,
-                    keyguardRootViewModel.alpha,
+                    keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
                     falsingManager,
                     vibratorHelper,
                 ) {
@@ -71,7 +69,7 @@ constructor(
                 KeyguardQuickAffordanceViewBinder.bind(
                     constraintLayout.requireViewById(R.id.end_button),
                     keyguardQuickAffordancesCombinedViewModel.endButton,
-                    keyguardRootViewModel.alpha,
+                    keyguardQuickAffordancesCombinedViewModel.transitionAlpha,
                     falsingManager,
                     vibratorHelper,
                 ) {
