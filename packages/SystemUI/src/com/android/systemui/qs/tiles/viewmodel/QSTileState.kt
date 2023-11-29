@@ -16,7 +16,7 @@
 
 package com.android.systemui.qs.tiles.viewmodel
 
-import android.content.Context
+import android.content.res.Resources
 import android.service.quicksettings.Tile
 import android.view.View
 import android.widget.Switch
@@ -46,13 +46,13 @@ data class QSTileState(
     companion object {
 
         fun build(
-            context: Context,
+            resources: Resources,
             config: QSTileUIConfig,
             build: Builder.() -> Unit
         ): QSTileState =
             build(
                 { Icon.Resource(config.iconRes, null) },
-                context.getString(config.labelRes),
+                resources.getString(config.labelRes),
                 build,
             )
 

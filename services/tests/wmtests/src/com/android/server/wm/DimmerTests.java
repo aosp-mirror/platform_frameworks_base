@@ -25,8 +25,6 @@ import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_DIMMER;
 import static com.android.server.wm.utils.LastCallVerifier.lastCall;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -36,11 +34,14 @@ import static org.mockito.Mockito.when;
 
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
 import com.android.server.testutils.StubTransaction;
 import com.android.server.wm.utils.MockAnimationAdapter;
+import com.android.window.flags.Flags;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -122,7 +123,8 @@ public class DimmerTests extends WindowTestsBase {
         }
     }
 
-    static class MockAnimationAdapterFactory extends SmoothDimmer.AnimationAdapterFactory {
+    static class MockAnimationAdapterFactory extends DimmerAnimationHelper.AnimationAdapterFactory {
+        @Override
         public AnimationAdapter get(LocalAnimationAdapter.AnimationSpec alphaAnimationSpec,
                 SurfaceAnimationRunner runner) {
             return sTestAnimation;
@@ -175,8 +177,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INTRODUCE_SMOOTHER_DIMMER)
     public void testDimBelowWithChildSurfaceCreatesSurfaceBelowChild_Smooth() {
-        assumeTrue(Dimmer.DIMMER_REFACTOR);
         final float alpha = 0.7f;
         final int blur = 50;
         mHost.addChild(mChild, 0);
@@ -195,8 +197,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_INTRODUCE_SMOOTHER_DIMMER)
     public void testDimBelowWithChildSurfaceCreatesSurfaceBelowChild_Legacy() {
-        assumeFalse(Dimmer.DIMMER_REFACTOR);
         final float alpha = 0.7f;
         mHost.addChild(mChild, 0);
         mDimmer.adjustAppearance(mChild, alpha, 20);
@@ -210,8 +212,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INTRODUCE_SMOOTHER_DIMMER)
     public void testDimBelowWithChildSurfaceDestroyedWhenReset_Smooth() {
-        assumeTrue(Dimmer.DIMMER_REFACTOR);
         mHost.addChild(mChild, 0);
 
         final float alpha = 0.8f;
@@ -230,8 +232,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_INTRODUCE_SMOOTHER_DIMMER)
     public void testDimBelowWithChildSurfaceDestroyedWhenReset_Legacy() {
-        assumeFalse(Dimmer.DIMMER_REFACTOR);
         mHost.addChild(mChild, 0);
 
         final float alpha = 0.8f;
@@ -290,8 +292,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INTRODUCE_SMOOTHER_DIMMER)
     public void testRemoveDimImmediately_Smooth() {
-        assumeTrue(Dimmer.DIMMER_REFACTOR);
         mHost.addChild(mChild, 0);
         mDimmer.adjustAppearance(mChild, 1, 2);
         mDimmer.adjustRelativeLayer(mChild, -1);
@@ -310,8 +312,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_INTRODUCE_SMOOTHER_DIMMER)
     public void testRemoveDimImmediately_Legacy() {
-        assumeFalse(Dimmer.DIMMER_REFACTOR);
         mHost.addChild(mChild, 0);
         mDimmer.adjustAppearance(mChild, 1, 0);
         mDimmer.adjustRelativeLayer(mChild, -1);
@@ -330,8 +332,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(Flags.FLAG_INTRODUCE_SMOOTHER_DIMMER)
     public void testDimmerWithBlurUpdatesTransaction_Legacy() {
-        assumeFalse(Dimmer.DIMMER_REFACTOR);
         mHost.addChild(mChild, 0);
 
         final int blurRadius = 50;
@@ -343,5 +345,121 @@ public class DimmerTests extends WindowTestsBase {
 
         verify(mHost.getPendingTransaction()).setBackgroundBlurRadius(dimLayer, blurRadius);
         verify(mHost.getPendingTransaction()).setRelativeLayer(dimLayer, mChild.mControl, -1);
+    }
+
+    /**
+     * mChild is requesting the dim values to be set directly. In this case, dim won't play the
+     * standard animation, but directly apply mChild's requests to the dim surface
+     */
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INTRODUCE_SMOOTHER_DIMMER)
+    public void testContainerDimsOpeningAnimationByItself() {
+        mHost.addChild(mChild, 0);
+
+        mDimmer.resetDimStates();
+        mDimmer.adjustAppearance(mChild, 0.1f, 0);
+        mDimmer.adjustRelativeLayer(mChild, -1);
+        SurfaceControl dimLayer = mDimmer.getDimLayer();
+        mDimmer.updateDims(mTransaction);
+
+        mDimmer.resetDimStates();
+        mDimmer.adjustAppearance(mChild, 0.2f, 0);
+        mDimmer.adjustRelativeLayer(mChild, -1);
+        mDimmer.updateDims(mTransaction);
+
+        mDimmer.resetDimStates();
+        mDimmer.adjustAppearance(mChild, 0.3f, 0);
+        mDimmer.adjustRelativeLayer(mChild, -1);
+        mDimmer.updateDims(mTransaction);
+
+        verify(mTransaction).setAlpha(dimLayer, 0.2f);
+        verify(mTransaction).setAlpha(dimLayer, 0.3f);
+        verify(sTestAnimation, times(1)).startAnimation(
+                any(SurfaceControl.class), any(SurfaceControl.Transaction.class),
+                anyInt(), any(SurfaceAnimator.OnAnimationFinishedCallback.class));
+    }
+
+    /**
+     * Same as testContainerDimsOpeningAnimationByItself, but this is a more specific case in which
+     * alpha is animated to 0. This corner case is needed to verify that the layer is removed anyway
+     */
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INTRODUCE_SMOOTHER_DIMMER)
+    public void testContainerDimsClosingAnimationByItself() {
+        mHost.addChild(mChild, 0);
+
+        mDimmer.resetDimStates();
+        mDimmer.adjustAppearance(mChild, 0.2f, 0);
+        mDimmer.adjustRelativeLayer(mChild, -1);
+        SurfaceControl dimLayer = mDimmer.getDimLayer();
+        mDimmer.updateDims(mTransaction);
+
+        mDimmer.resetDimStates();
+        mDimmer.adjustAppearance(mChild, 0.1f, 0);
+        mDimmer.adjustRelativeLayer(mChild, -1);
+        mDimmer.updateDims(mTransaction);
+
+        mDimmer.resetDimStates();
+        mDimmer.adjustAppearance(mChild, 0f, 0);
+        mDimmer.adjustRelativeLayer(mChild, -1);
+        mDimmer.updateDims(mTransaction);
+
+        mDimmer.resetDimStates();
+        mDimmer.updateDims(mTransaction);
+        verify(mTransaction).remove(dimLayer);
+    }
+
+    /**
+     * Check the handover of the dim between two windows and the consequent dim animation in between
+     */
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INTRODUCE_SMOOTHER_DIMMER)
+    public void testMultipleContainersDimmingConsecutively() {
+        TestWindowContainer first = mChild;
+        TestWindowContainer second = new TestWindowContainer(mWm);
+        mHost.addChild(first, 0);
+        mHost.addChild(second, 1);
+
+        mDimmer.adjustAppearance(first, 0.5f, 0);
+        mDimmer.adjustRelativeLayer(first, -1);
+        SurfaceControl dimLayer = mDimmer.getDimLayer();
+        mDimmer.updateDims(mTransaction);
+
+        mDimmer.resetDimStates();
+        mDimmer.adjustAppearance(second, 0.9f, 0);
+        mDimmer.adjustRelativeLayer(second, -1);
+        mDimmer.updateDims(mTransaction);
+
+        verify(sTestAnimation, times(2)).startAnimation(
+                any(SurfaceControl.class), any(SurfaceControl.Transaction.class),
+                anyInt(), any(SurfaceAnimator.OnAnimationFinishedCallback.class));
+        verify(mTransaction).setAlpha(dimLayer, 0.5f);
+        verify(mTransaction).setAlpha(dimLayer, 0.9f);
+    }
+
+    /**
+     * Two windows are trying to modify the dim at the same time, but only the last request before
+     * updateDims will be satisfied
+     */
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_INTRODUCE_SMOOTHER_DIMMER)
+    public void testMultipleContainersDimmingAtTheSameTime() {
+        TestWindowContainer first = mChild;
+        TestWindowContainer second = new TestWindowContainer(mWm);
+        mHost.addChild(first, 0);
+        mHost.addChild(second, 1);
+
+        mDimmer.adjustAppearance(first, 0.5f, 0);
+        mDimmer.adjustRelativeLayer(first, -1);
+        SurfaceControl dimLayer = mDimmer.getDimLayer();
+        mDimmer.adjustAppearance(second, 0.9f, 0);
+        mDimmer.adjustRelativeLayer(second, -1);
+        mDimmer.updateDims(mTransaction);
+
+        verify(sTestAnimation, times(1)).startAnimation(
+                any(SurfaceControl.class), any(SurfaceControl.Transaction.class),
+                anyInt(), any(SurfaceAnimator.OnAnimationFinishedCallback.class));
+        verify(mTransaction, never()).setAlpha(dimLayer, 0.5f);
+        verify(mTransaction).setAlpha(dimLayer, 0.9f);
     }
 }

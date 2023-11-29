@@ -67,14 +67,7 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
      * @param cameraConfig The {@link VirtualCameraConfig} sent by the client.
      */
     public void registerCamera(@NonNull VirtualCameraConfig cameraConfig) {
-        // Try to connect to service if not connected already.
-        if (mVirtualCameraService == null) {
-            connectVirtualCameraService();
-        }
-        // Throw exception if we are unable to connect to service.
-        if (mVirtualCameraService == null) {
-            throw new IllegalStateException("Virtual camera service is not connected.");
-        }
+        connectVirtualCameraServiceIfNeeded();
 
         try {
             if (registerCameraWithService(cameraConfig)) {
@@ -107,6 +100,17 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
             }
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        }
+    }
+
+    /** Return the id of the virtual camera with the given config. */
+    public int getCameraId(@NonNull VirtualCameraConfig cameraConfig) {
+        connectVirtualCameraServiceIfNeeded();
+
+        try {
+            return mVirtualCameraService.getCameraId(cameraConfig.getCallback().asBinder());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -149,6 +153,17 @@ public final class VirtualCameraController implements IBinder.DeathRecipient {
             for (VirtualCameraConfig config : mCameras) {
                 fout.printf("%s token: %s\n", indent, config);
             }
+        }
+    }
+
+    private void connectVirtualCameraServiceIfNeeded() {
+        // Try to connect to service if not connected already.
+        if (mVirtualCameraService == null) {
+            connectVirtualCameraService();
+        }
+        // Throw exception if we are unable to connect to service.
+        if (mVirtualCameraService == null) {
+            throw new IllegalStateException("Virtual camera service is not connected.");
         }
     }
 

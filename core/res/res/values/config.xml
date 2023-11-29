@@ -1522,6 +1522,10 @@
     config_screenBrightnessSettingDefaultFloat instead -->
     <integer name="config_screenBrightnessSettingDefault">102</integer>
 
+    <!-- Maximum screen brightness setting when screen brightness capped in Wear Bedtime mode.
+    The value must be in the range [0, 255]. -->
+    <integer name="config_screenBrightnessCapForWearBedtimeMode">20</integer>
+
     <!-- Minimum screen brightness setting allowed by power manager.
          -2 is invalid so setting will resort to int value specified above.
          Set this to 0.0 to allow screen to go to minimal brightness.

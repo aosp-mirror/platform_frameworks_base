@@ -16,12 +16,14 @@
 
 package com.android.systemui.scene.shared.flag
 
+import android.content.Context
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.Flags.sceneContainer
 import com.android.systemui.compose.ComposeFacade
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flag
 import com.android.systemui.flags.Flags
@@ -29,6 +31,7 @@ import com.android.systemui.flags.ReleasedFlag
 import com.android.systemui.flags.ResourceBooleanFlag
 import com.android.systemui.flags.UnreleasedFlag
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
+import com.android.systemui.res.R
 import dagger.Module
 import dagger.Provides
 import dagger.assisted.Assisted
@@ -51,6 +54,7 @@ interface SceneContainerFlags {
 class SceneContainerFlagsImpl
 @AssistedInject
 constructor(
+    @Application private val context: Context,
     private val featureFlagsClassic: FeatureFlagsClassic,
     @Assisted private val isComposeAvailable: Boolean,
 ) : SceneContainerFlags {
@@ -80,7 +84,11 @@ constructor(
             ),
         ) +
             classicFlagTokens.map { flagToken -> FlagMustBeEnabled(flagToken) } +
-            listOf(ComposeMustBeAvailable(), CompileTimeFlagMustBeEnabled())
+            listOf(
+                ComposeMustBeAvailable(),
+                CompileTimeFlagMustBeEnabled(),
+                ResourceConfigMustBeEnabled()
+            )
 
     override fun isEnabled(): Boolean {
         // SCENE_CONTAINER_ENABLED is an explicit static flag check that helps with downstream
@@ -143,6 +151,14 @@ constructor(
 
         override fun isMet(): Boolean {
             return flagValue
+        }
+    }
+
+    private inner class ResourceConfigMustBeEnabled : Requirement {
+        override val name: String = "R.bool.config_sceneContainerFrameworkEnabled must be true"
+
+        override fun isMet(): Boolean {
+            return context.resources.getBoolean(R.bool.config_sceneContainerFrameworkEnabled)
         }
     }
 

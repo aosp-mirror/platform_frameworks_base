@@ -37,22 +37,11 @@ public class RefreshRateSettingsUtils {
      * @return The highest refresh rate
      */
     public static float findHighestRefreshRateForDefaultDisplay(Context context) {
-        return findHighestRefreshRate(context, Display.DEFAULT_DISPLAY);
-    }
-
-    /**
-     * Find the highest refresh rate among all the modes of the specified display.
-     *
-     * @param context The context
-     * @param displayId The display ID
-     * @return The highest refresh rate
-     */
-    public static float findHighestRefreshRate(Context context, int displayId) {
         final DisplayManager dm = context.getSystemService(DisplayManager.class);
-        final Display display = dm.getDisplay(displayId);
+        final Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
 
         if (display == null) {
-            Log.w(TAG, "No valid display device with ID = " + displayId);
+            Log.w(TAG, "No valid default display device");
             return DEFAULT_REFRESH_RATE;
         }
 

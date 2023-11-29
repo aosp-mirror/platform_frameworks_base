@@ -357,6 +357,12 @@ final class DeletePackageHelper {
         final DeletePackageAction action;
         synchronized (mPm.mLock) {
             final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
+            if (ps == null) {
+                if (DEBUG_REMOVE) {
+                    Slog.d(TAG, "Attempted to remove non-existent package " + packageName);
+                }
+                return false;
+            }
             final PackageSetting disabledPs = mPm.mSettings.getDisabledSystemPkgLPr(ps);
             if (PackageManagerServiceUtils.isSystemApp(ps)
                     && mPm.checkPermission(CONTROL_KEYGUARD, packageName, UserHandle.USER_SYSTEM)

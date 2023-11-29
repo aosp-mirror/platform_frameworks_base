@@ -63,6 +63,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.UiThread;
 import com.android.server.am.PendingIntentRecord;
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.util.HashMap;
@@ -716,17 +717,18 @@ public class BackgroundActivityStartController {
         // is allowed, or apps like live wallpaper with non app visible window will be allowed.
         final boolean appSwitchAllowedOrFg =
                 appSwitchState == APP_SWITCH_ALLOW || appSwitchState == APP_SWITCH_FG_ONLY;
-        final boolean allowCallingUidStartActivity =
-                ((appSwitchAllowedOrFg || mService.mActiveUids.hasNonAppVisibleWindow(callingUid))
-                        && callingUidHasAnyVisibleWindow)
-                        || isCallingUidPersistentSystemProcess;
-        if (allowCallingUidStartActivity) {
+        if (appSwitchAllowedOrFg && callingUidHasAnyVisibleWindow) {
             return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
-                    /*background*/ false,
-                    "callingUidHasAnyVisibleWindow = "
-                            + callingUid
-                            + ", isCallingUidPersistentSystemProcess = "
-                            + isCallingUidPersistentSystemProcess);
+                    /*background*/ false, "callingUid has visible window");
+        }
+        if (mService.mActiveUids.hasNonAppVisibleWindow(callingUid)) {
+            return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW,
+                    /*background*/ false, "callingUid has non-app visible window");
+        }
+
+        if (isCallingUidPersistentSystemProcess) {
+            return new BalVerdict(BAL_ALLOW_ALLOWLISTED_COMPONENT,
+                    /*background*/ false, "callingUid is persistent system process");
         }
 
         // don't abort if the callingUid has START_ACTIVITIES_FROM_BACKGROUND permission
@@ -806,13 +808,29 @@ public class BackgroundActivityStartController {
                     "realCallingUid has BAL permission.");
         }
 
-        // don't abort if the realCallingUid has a visible window
-        // TODO(b/171459802): We should check appSwitchAllowed also
-        if (state.mRealCallingUidHasAnyVisibleWindow) {
-            return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
-                    /*background*/ false,
-                    "realCallingUid has visible (non-toast) window.");
+        // Normal apps with visible app window will be allowed to start activity if app switching
+        // is allowed, or apps like live wallpaper with non app visible window will be allowed.
+        final boolean appSwitchAllowedOrFg = state.mAppSwitchState == APP_SWITCH_ALLOW
+                || state.mAppSwitchState == APP_SWITCH_FG_ONLY;
+        if (Flags.balImproveRealCallerVisibilityCheck()) {
+            if (appSwitchAllowedOrFg && state.mRealCallingUidHasAnyVisibleWindow) {
+                return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
+                        /*background*/ false, "realCallingUid has visible window");
+            }
+            if (mService.mActiveUids.hasNonAppVisibleWindow(state.mRealCallingUid)) {
+                return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
+                        /*background*/ false, "realCallingUid has non-app visible window");
+            }
+        } else {
+            // don't abort if the realCallingUid has a visible window
+            // TODO(b/171459802): We should check appSwitchAllowed also
+            if (state.mRealCallingUidHasAnyVisibleWindow) {
+                return new BalVerdict(BAL_ALLOW_PENDING_INTENT,
+                        /*background*/ false,
+                        "realCallingUid has visible (non-toast) window.");
+            }
         }
+
         // if the realCallingUid is a persistent system process, abort if the IntentSender
         // wasn't allowed to start an activity
         if (state.mForcedBalByPiSender.allowsBackgroundActivityStarts()

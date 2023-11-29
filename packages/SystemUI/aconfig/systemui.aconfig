@@ -164,3 +164,9 @@ flag {
    bug: "296122467"
 }
 
+flag {
+   name: "record_issue_qs_tile"
+   namespace: "systemui"
+   description: "Replace Record Trace QS Tile with expanded Record Issue QS Tile"
+   bug: "305049544"
+}

@@ -338,6 +338,13 @@ open class AuthContainerViewTest : SysuiTestCase() {
         waitForIdleSync()
 
         assertThat(container.hasCredentialView()).isTrue()
+        assertThat(container.hasBiometricPrompt()).isFalse()
+
+        // Check credential view persists after new attachment
+        container.onAttachedToWindow()
+
+        assertThat(container.hasCredentialView()).isTrue()
+        assertThat(container.hasBiometricPrompt()).isFalse()
     }
 
     @Test

@@ -30,6 +30,7 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.hardware.biometrics.BiometricAuthenticator.Modality;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -168,7 +169,7 @@ public class AuthContainerView extends LinearLayout
     // HAT received from LockSettingsService when credential is verified.
     @Nullable private byte[] mCredentialAttestation;
 
-    // TODO(b/287311775): remove when legacy prompt is replaced
+    // TODO(b/313469218): remove when legacy prompt is replaced
     @Deprecated
     static class Config {
         Context mContext;
@@ -220,6 +221,9 @@ public class AuthContainerView extends LinearLayout
             mHandler.postDelayed(() -> {
                 addCredentialView(false /* animatePanel */, true /* animateContents */);
             }, mConfig.mSkipAnimation ? 0 : ANIMATE_CREDENTIAL_START_DELAY_MS);
+
+            // TODO(b/313469218): Remove Config
+            mConfig.mPromptInfo.setAuthenticators(Authenticators.DEVICE_CREDENTIAL);
         }
 
         @Override

@@ -27,6 +27,7 @@ import com.android.systemui.flags.ReleasedFlag
 import com.android.systemui.flags.ResourceBooleanFlag
 import com.android.systemui.flags.UnreleasedFlag
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
+import com.android.systemui.res.R
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -74,10 +75,15 @@ internal class SceneContainerFlagsTest(
             .forEach { flagToken ->
                 setFlagsRule.enableFlags(flagToken)
                 aconfigFlags.setFlag(flagToken, testCase.areAllFlagsSet)
+                overrideResource(
+                    R.bool.config_sceneContainerFrameworkEnabled,
+                    testCase.isResourceConfigEnabled
+                )
             }
 
         underTest =
             SceneContainerFlagsImpl(
+                context = context,
                 featureFlagsClassic = featureFlags,
                 isComposeAvailable = testCase.isComposeAvailable,
             )
@@ -91,13 +97,12 @@ internal class SceneContainerFlagsTest(
     internal data class TestCase(
         val isComposeAvailable: Boolean,
         val areAllFlagsSet: Boolean,
+        val isResourceConfigEnabled: Boolean,
         val expectedEnabled: Boolean,
     ) {
         override fun toString(): String {
-            return """
-                (compose=$isComposeAvailable + flags=$areAllFlagsSet) -> expected=$expectedEnabled
-            """
-                .trimIndent()
+            return "(compose=$isComposeAvailable + flags=$areAllFlagsSet) + XML" +
+                " config=$isResourceConfigEnabled -> expected=$expectedEnabled"
         }
     }
 
@@ -105,17 +110,20 @@ internal class SceneContainerFlagsTest(
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun testCases() = buildList {
-            repeat(4) { combination ->
-                val isComposeAvailable = combination and 0b10 != 0
-                val areAllFlagsSet = combination and 0b01 != 0
+            repeat(8) { combination ->
+                val isComposeAvailable = combination and 0b100 != 0
+                val areAllFlagsSet = combination and 0b010 != 0
+                val isResourceConfigEnabled = combination and 0b001 != 0
 
-                val expectedEnabled = isComposeAvailable && areAllFlagsSet
+                val expectedEnabled =
+                    isComposeAvailable && areAllFlagsSet && isResourceConfigEnabled
 
                 add(
                     TestCase(
                         isComposeAvailable = isComposeAvailable,
                         areAllFlagsSet = areAllFlagsSet,
                         expectedEnabled = expectedEnabled,
+                        isResourceConfigEnabled = isResourceConfigEnabled,
                     )
                 )
             }

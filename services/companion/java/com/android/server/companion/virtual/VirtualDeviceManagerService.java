@@ -460,11 +460,11 @@ public class VirtualDeviceManagerService extends SystemService {
 
             synchronized (mVirtualDeviceManagerLock) {
                 if (!Flags.persistentDeviceIdApi() && mVirtualDevices.size() == 0) {
-                    final long callindId = Binder.clearCallingIdentity();
+                    final long callingId = Binder.clearCallingIdentity();
                     try {
                         registerCdmAssociationListener();
                     } finally {
-                        Binder.restoreCallingIdentity(callindId);
+                        Binder.restoreCallingIdentity(callingId);
                     }
                 }
                 mVirtualDevices.put(deviceId, virtualDevice);
@@ -498,13 +498,16 @@ public class VirtualDeviceManagerService extends SystemService {
             synchronized (mVirtualDeviceManagerLock) {
                 virtualDeviceImpl = mVirtualDevices.get(virtualDevice.getDeviceId());
                 if (virtualDeviceImpl == null) {
-                    throw new SecurityException("Invalid VirtualDevice");
+                    throw new SecurityException(
+                            "Invalid VirtualDevice (deviceId = " + virtualDevice.getDeviceId()
+                                    + ")");
                 }
             }
             if (virtualDeviceImpl.getOwnerUid() != callingUid) {
                 throw new SecurityException(
                         "uid " + callingUid
-                                + " is not the owner of the supplied VirtualDevice");
+                                + " is not the owner of the supplied VirtualDevice (deviceId = "
+                                + virtualDevice.getDeviceId() + ")");
             }
 
             return virtualDeviceImpl.createVirtualDisplay(
@@ -848,6 +851,11 @@ public class VirtualDeviceManagerService extends SystemService {
             return virtualDevice == null ? new ArraySet<>()
                     : Arrays.stream(virtualDevice.getDisplayIds()).boxed()
                             .collect(Collectors.toCollection(ArraySet::new));
+        }
+
+        @Override
+        public int getDeviceIdForDisplayId(int displayId) {
+            return mImpl.getDeviceIdForDisplayId(displayId);
         }
 
         @Override

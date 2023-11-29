@@ -90,7 +90,8 @@ public class BrightnessClamperController {
             }
         };
 
-        mClampers = injector.getClampers(handler, clamperChangeListenerInternal, data, flags);
+        mClampers = injector.getClampers(handler, clamperChangeListenerInternal, data, flags,
+                context);
         mModifiers = injector.getModifiers(context);
         mOnPropertiesChangedListener =
                 properties -> mClampers.forEach(BrightnessClamper::onDeviceConfigChanged);
@@ -234,13 +235,17 @@ public class BrightnessClamperController {
 
         List<BrightnessClamper<? super DisplayDeviceData>> getClampers(Handler handler,
                 ClamperChangeListener clamperChangeListener, DisplayDeviceData data,
-                DisplayManagerFlags flags) {
+                DisplayManagerFlags flags, Context context) {
             List<BrightnessClamper<? super DisplayDeviceData>> clampers = new ArrayList<>();
             clampers.add(
                     new BrightnessThermalClamper(handler, clamperChangeListener, data));
             if (flags.isPowerThrottlingClamperEnabled()) {
                 clampers.add(new BrightnessPowerClamper(handler, clamperChangeListener,
                             data));
+            }
+            if (flags.isBrightnessWearBedtimeModeClamperEnabled()) {
+                clampers.add(new BrightnessWearBedtimeModeClamper(handler, context,
+                        clamperChangeListener, data));
             }
             return clampers;
         }
@@ -257,7 +262,8 @@ public class BrightnessClamperController {
      * Config Data for clampers
      */
     public static class DisplayDeviceData implements BrightnessThermalClamper.ThermalData,
-                BrightnessPowerClamper.PowerData {
+                BrightnessPowerClamper.PowerData,
+            BrightnessWearBedtimeModeClamper.WearBedtimeModeData {
         @NonNull
         private final String mUniqueDisplayId;
         @NonNull
@@ -314,6 +320,11 @@ public class BrightnessClamperController {
         @Override
         public PowerThrottlingConfigData getPowerThrottlingConfigData() {
             return mDisplayDeviceConfig.getPowerThrottlingConfigData();
+        }
+
+        @Override
+        public float getBrightnessWearBedtimeModeCap() {
+            return mDisplayDeviceConfig.getBrightnessCapForWearBedtimeMode();
         }
     }
 }

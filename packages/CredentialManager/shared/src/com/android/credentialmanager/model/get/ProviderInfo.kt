@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.common
+package com.android.credentialmanager.model.get
 
-import android.app.PendingIntent
-import android.content.Intent
+import android.graphics.drawable.Drawable
 
-open class BaseEntry (
-    val providerId: String,
-    val entryKey: String,
-    val entrySubkey: String,
-    val pendingIntent: PendingIntent?,
-    val fillInIntent: Intent?,
-    val shouldTerminateUiUponSuccessfulProviderResult: Boolean,
+data class ProviderInfo(
+    /**
+     * Unique id (component name) of this provider.
+     * Not for display purpose - [displayName] should be used for ui rendering.
+     */
+    val id: String,
+    val icon: Drawable,
+    val displayName: String,
+    val credentialEntryList: List<CredentialEntryInfo>,
+    val authenticationEntryList: List<AuthenticationEntryInfo>,
+    val remoteEntry: RemoteEntryInfo?,
+    val actionEntryList: List<ActionEntryInfo>,
 )

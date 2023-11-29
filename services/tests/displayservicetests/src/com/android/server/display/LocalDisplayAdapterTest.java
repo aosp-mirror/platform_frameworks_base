@@ -1455,8 +1455,8 @@ public class LocalDisplayAdapterTest {
         // mMockContext and values will be loaded from mMockResources.
         @Override
         public DisplayDeviceConfig createDisplayDeviceConfig(Context context,
-                long physicalDisplayId, boolean isFirstDisplay) {
-            return DisplayDeviceConfig.create(context, isFirstDisplay);
+                long physicalDisplayId, boolean isFirstDisplay, DisplayManagerFlags flags) {
+            return DisplayDeviceConfig.create(context, isFirstDisplay, flags);
         }
     }
 

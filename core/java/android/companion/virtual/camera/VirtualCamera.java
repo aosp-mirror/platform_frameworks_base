@@ -66,21 +66,28 @@ public final class VirtualCamera implements Closeable {
     @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public VirtualCamera(
             @NonNull IVirtualDevice virtualDevice, @NonNull VirtualCameraConfig config) {
-        mVirtualDevice = virtualDevice;
+        mVirtualDevice = Objects.requireNonNull(virtualDevice);
         mConfig = Objects.requireNonNull(config);
-        Objects.requireNonNull(virtualDevice);
-        // TODO(b/310857519): Avoid registration inside constructor.
-        try {
-            mVirtualDevice.registerVirtualCamera(config);
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-        }
     }
 
     /** Returns the configuration of this virtual camera instance. */
     @NonNull
     public VirtualCameraConfig getConfig() {
         return mConfig;
+    }
+
+    /**
+     * Returns the id of this virtual camera instance.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    @NonNull
+    public String getId() {
+        try {
+            return Integer.toString(mVirtualDevice.getVirtualCameraId(mConfig));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     @Override

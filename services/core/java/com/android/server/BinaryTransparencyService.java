@@ -1466,8 +1466,11 @@ public class BinaryTransparencyService extends SystemService {
         if (android.security.Flags.binaryTransparencySepolicyHash()) {
             byte[] sepolicyHash = PackageUtils.computeSha256DigestForLargeFileAsBytes(
                     "/sys/fs/selinux/policy", PackageUtils.createLargeFileBuffer());
-            String sepolicyHashEncoded = HexEncoding.encodeToString(sepolicyHash, false);
-            Slog.d(TAG, "sepolicy hash: " + sepolicyHashEncoded);
+            String sepolicyHashEncoded = null;
+            if (sepolicyHash != null) {
+                sepolicyHashEncoded = HexEncoding.encodeToString(sepolicyHash, false);
+                Slog.d(TAG, "sepolicy hash: " + sepolicyHashEncoded);
+            }
             FrameworkStatsLog.write(FrameworkStatsLog.BOOT_INTEGRITY_INFO_REPORTED,
                     sepolicyHashEncoded, mVbmetaDigest);
         }

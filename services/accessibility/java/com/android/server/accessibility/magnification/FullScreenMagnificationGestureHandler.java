@@ -258,6 +258,11 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 public void logMagnificationTripleTap(boolean enabled) {
                     AccessibilityStatsLogUtils.logMagnificationTripleTap(enabled);
                 }
+
+                @Override
+                public void logMagnificationTwoFingerTripleTap(boolean enabled) {
+                    AccessibilityStatsLogUtils.logMagnificationTwoFingerTripleTap(enabled);
+                }
             };
         }
 
@@ -419,6 +424,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     /** An interface that allows testing magnification log events. */
     interface MagnificationLogger {
         void logMagnificationTripleTap(boolean enabled);
+        void logMagnificationTwoFingerTripleTap(boolean enabled);
     }
 
     interface State {
@@ -987,11 +993,13 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                             mDisplayId, event.getX(), event.getY())) {
                         transitionToDelegatingStateAndClear();
 
+                    } else if (isMultiFingerMultiTapTriggered(/* targetTapCount= */ 3, event)) {
+                        // Placing multiple fingers before a single finger, because achieving a
+                        // multi finger multi tap also means achieving a single finger triple tap
+                        onTripleTap(event);
+
                     } else if (isMultiTapTriggered(3 /* taps */)) {
                         onTripleTap(/* up */ event);
-
-                    } else if (isMultiFingerMultiTapTriggered(/* targetTapCount= */ 3, event)) {
-                        onTripleTap(event);
 
                     } else if (
                             // Possible to be false on: 3tap&drag -> scale -> PTR_UP -> UP
@@ -1026,6 +1034,11 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 mCompletedTapCount++;
                 mIsTwoFingerCountReached = false;
             }
+
+            if (mDetectTwoFingerTripleTap && mCompletedTapCount > 2) {
+                final boolean enabled = !isActivated();
+                mMagnificationLogger.logMagnificationTwoFingerTripleTap(enabled);
+            }
             return mDetectTwoFingerTripleTap && mCompletedTapCount == targetTapCount;
         }
 
@@ -1036,6 +1049,29 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             removePendingDelayedMessages();
             mFirstPointerDownLocation.set(Float.NaN, Float.NaN);
             mSecondPointerDownLocation.set(Float.NaN, Float.NaN);
+        }
+
+        void transitionToViewportDraggingStateAndClear(MotionEvent down) {
+
+            if (DEBUG_DETECTING) Slog.i(mLogTag, "onTripleTapAndHold()");
+            final boolean shortcutTriggered = mShortcutTriggered;
+
+            // Only log the 3tap and hold event
+            if (!shortcutTriggered) {
+                final boolean enabled = !isActivated();
+                if (mCompletedTapCount == 2) {
+                    // Two finger triple tap and hold
+                    mMagnificationLogger.logMagnificationTwoFingerTripleTap(enabled);
+                } else {
+                    // Triple tap and hold also belongs to triple tap event
+                    mMagnificationLogger.logMagnificationTripleTap(enabled);
+                }
+            }
+            clear();
+
+            mViewportDraggingState.prepareForZoomInTemporary(shortcutTriggered);
+            zoomInTemporary(down.getX(), down.getY(), shortcutTriggered);
+            transitionTo(mViewportDraggingState);
         }
     }
 
@@ -1416,8 +1452,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
             // Only log the 3tap and hold event
             if (!shortcutTriggered) {
-                // TODO:(b/309534286): Add metrics for two-finger triple-tap and fix
-                //  the log two-finger bug before enabling the flag
                 // Triple tap and hold also belongs to triple tap event
                 final boolean enabled = !isActivated();
                 mMagnificationLogger.logMagnificationTripleTap(enabled);

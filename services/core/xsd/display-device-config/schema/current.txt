@@ -7,14 +7,14 @@ package com.android.server.display.config {
     method public final java.math.BigInteger getBrighteningLightDebounceMillis();
     method public final java.math.BigInteger getDarkeningLightDebounceIdleMillis();
     method public final java.math.BigInteger getDarkeningLightDebounceMillis();
-    method public final com.android.server.display.config.DisplayBrightnessMapping getDisplayBrightnessMapping();
     method public boolean getEnabled();
+    method public final com.android.server.display.config.LuxToBrightnessMapping getLuxToBrightnessMapping();
     method public final void setBrighteningLightDebounceIdleMillis(java.math.BigInteger);
     method public final void setBrighteningLightDebounceMillis(java.math.BigInteger);
     method public final void setDarkeningLightDebounceIdleMillis(java.math.BigInteger);
     method public final void setDarkeningLightDebounceMillis(java.math.BigInteger);
-    method public final void setDisplayBrightnessMapping(com.android.server.display.config.DisplayBrightnessMapping);
     method public void setEnabled(boolean);
+    method public final void setLuxToBrightnessMapping(com.android.server.display.config.LuxToBrightnessMapping);
   }
 
   public class BlockingZoneConfig {
@@ -78,11 +78,6 @@ package com.android.server.display.config {
     method public java.util.List<com.android.server.display.config.Density> getDensity();
   }
 
-  public class DisplayBrightnessMapping {
-    ctor public DisplayBrightnessMapping();
-    method public final java.util.List<com.android.server.display.config.DisplayBrightnessPoint> getDisplayBrightnessPoint();
-  }
-
   public class DisplayBrightnessPoint {
     ctor public DisplayBrightnessPoint();
     method public final java.math.BigInteger getLux();
@@ -110,6 +105,7 @@ package com.android.server.display.config {
     method public final com.android.server.display.config.SensorDetails getProxSensor();
     method public com.android.server.display.config.DisplayQuirks getQuirks();
     method public com.android.server.display.config.RefreshRateConfigs getRefreshRate();
+    method public final java.math.BigDecimal getScreenBrightnessCapForWearBedtimeMode();
     method @NonNull public final java.math.BigDecimal getScreenBrightnessDefault();
     method @NonNull public final com.android.server.display.config.NitsMap getScreenBrightnessMap();
     method public final java.math.BigInteger getScreenBrightnessRampDecreaseMaxIdleMillis();
@@ -143,6 +139,7 @@ package com.android.server.display.config {
     method public final void setProxSensor(com.android.server.display.config.SensorDetails);
     method public void setQuirks(com.android.server.display.config.DisplayQuirks);
     method public void setRefreshRate(com.android.server.display.config.RefreshRateConfigs);
+    method public final void setScreenBrightnessCapForWearBedtimeMode(java.math.BigDecimal);
     method public final void setScreenBrightnessDefault(@NonNull java.math.BigDecimal);
     method public final void setScreenBrightnessMap(@NonNull com.android.server.display.config.NitsMap);
     method public final void setScreenBrightnessRampDecreaseMaxIdleMillis(java.math.BigInteger);
@@ -218,6 +215,12 @@ package com.android.server.display.config {
   public class LuxThrottling {
     ctor public LuxThrottling();
     method @NonNull public final java.util.List<com.android.server.display.config.BrightnessLimitMap> getBrightnessLimitMap();
+  }
+
+  public class LuxToBrightnessMapping {
+    ctor public LuxToBrightnessMapping();
+    method @NonNull public final com.android.server.display.config.NonNegativeFloatToFloatMap getMap();
+    method public final void setMap(@NonNull com.android.server.display.config.NonNegativeFloatToFloatMap);
   }
 
   public class NitsMap {

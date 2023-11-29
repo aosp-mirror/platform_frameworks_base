@@ -3013,7 +3013,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                         mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
                                         null, mStats.mHandler, null, null,
                                         mUserManagerUserInfoProvider, mPowerProfile,
-                                        mCpuScalingPolicies, null);
+                                        mCpuScalingPolicies, new PowerStatsUidResolver());
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
                                 checkinStats.dumpProtoLocked(mContext, fd, apps, flags,
@@ -3055,7 +3055,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                         mBatteryStatsConfig, Clock.SYSTEM_CLOCK, mMonotonicClock,
                                         null, mStats.mHandler, null, null,
                                         mUserManagerUserInfoProvider, mPowerProfile,
-                                        mCpuScalingPolicies, null);
+                                        mCpuScalingPolicies, new PowerStatsUidResolver());
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
                                 checkinStats.dumpCheckin(mContext, pw, apps, flags,

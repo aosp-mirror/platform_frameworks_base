@@ -1737,8 +1737,8 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Since we created root-leash but no longer reference it from core, release it now
         info.releaseAnimSurfaces();
 
-        mLogger.logOnSendAsync(mController.mLoggerHandler);
         if (mLogger.mInfo != null) {
+            mLogger.logOnSendAsync(mController.mLoggerHandler);
             mController.mTransitionTracer.logSentTransition(this, mTargets);
         }
     }
@@ -1753,6 +1753,27 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 asyncRotationController.onTransactionCommitTimeout(mCleanupTransaction);
             }
         }
+    }
+
+    /**
+     * Checks if the transition contains order changes.
+     *
+     * This is a shallow check that doesn't account for collection in parallel, unlike
+     * {@code collectOrderChanges}
+     */
+    boolean hasOrderChanges() {
+        ArrayList<Task> onTopTasks = new ArrayList<>();
+        // Iterate over target displays to get up to date on top tasks.
+        // Cannot use `mOnTopTasksAtReady` as it's not populated before the `applyReady` is called.
+        for (DisplayContent dc : mTargetDisplays) {
+            addOnTopTasks(dc, onTopTasks);
+        }
+        for (Task task : onTopTasks) {
+            if (!mOnTopTasksStart.contains(task)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -3305,7 +3326,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
          */
         void addGroup(WindowContainer wc) {
             if (mReadyGroups.containsKey(wc)) {
-                Slog.e(TAG, "Trying to add a ready-group twice: " + wc);
                 return;
             }
             mReadyGroups.put(wc, false);

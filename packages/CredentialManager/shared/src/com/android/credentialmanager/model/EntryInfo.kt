@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.credentialmanager.common
+package com.android.credentialmanager.model
 
-enum class CredentialType {
-    UNKNOWN, PASSKEY, PASSWORD,
-}
+import android.app.PendingIntent
+import android.content.Intent
+
+open class EntryInfo (
+    val providerId: String,
+    val entryKey: String,
+    val entrySubkey: String,
+    val pendingIntent: PendingIntent?,
+    val fillInIntent: Intent?,
+    val shouldTerminateUiUponSuccessfulProviderResult: Boolean,
+)

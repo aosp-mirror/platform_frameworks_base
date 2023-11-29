@@ -939,7 +939,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if (mVirtualCameraController == null) {
             throw new UnsupportedOperationException("Virtual camera controller is not available");
         }
-        mVirtualCameraController.registerCamera(Objects.requireNonNull(cameraConfig));
+        mVirtualCameraController.registerCamera(cameraConfig);
     }
 
     @Override // Binder call
@@ -951,7 +951,19 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         if (mVirtualCameraController == null) {
             throw new UnsupportedOperationException("Virtual camera controller is not available");
         }
-        mVirtualCameraController.unregisterCamera(Objects.requireNonNull(cameraConfig));
+        mVirtualCameraController.unregisterCamera(cameraConfig);
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public int getVirtualCameraId(@NonNull VirtualCameraConfig cameraConfig)
+            throws RemoteException {
+        super.getVirtualCameraId_enforcePermission();
+        Objects.requireNonNull(cameraConfig);
+        if (mVirtualCameraController == null) {
+            throw new UnsupportedOperationException("Virtual camera controller is not available");
+        }
+        return mVirtualCameraController.getCameraId(cameraConfig);
     }
 
     @Override

@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 
 import android.os.Handler;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.DexmakerShareClassLoaderRule;
 
@@ -38,6 +40,9 @@ class SystemServiceTestsBase {
     @Rule(order = 2)
     public final SystemServicesTestRule mSystemServicesTestRule = new SystemServicesTestRule(
             this::onBeforeSystemServicesCreated);
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @WindowTestRunner.MethodWrapperRule
     public final WindowManagerGlobalLockRule mLockRule =

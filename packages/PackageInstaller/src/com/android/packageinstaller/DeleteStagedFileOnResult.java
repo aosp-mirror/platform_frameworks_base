@@ -16,8 +16,6 @@
 
 package com.android.packageinstaller;
 
-import static android.content.Intent.CATEGORY_LAUNCHER;
-
 import static com.android.packageinstaller.PackageInstallerActivity.EXTRA_STAGED_SESSION_ID;
 
 import android.app.Activity;
@@ -47,9 +45,6 @@ public class DeleteStagedFileOnResult extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         setResult(resultCode, data);
         finish();
-        if (data != null && data.hasCategory(CATEGORY_LAUNCHER)) {
-            startActivity(data);
-        }
     }
 
     @Override
