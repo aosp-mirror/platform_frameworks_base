@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.ui;
+package com.android.packageinstaller.v2.ui
 
-import android.content.Intent;
+import android.content.Intent
 
-public interface InstallActionListener {
+interface InstallActionListener {
+    /**
+     * Method to handle a positive response from the user.
+     */
+    fun onPositiveResponse(reasonCode: Int)
 
     /**
-     * Method to handle a positive response from the user
+     * Method to dispatch intent for toggling "install from unknown sources" setting for a package.
      */
-    void onPositiveResponse(int stageCode);
+    fun sendUnknownAppsIntent(sourcePackageName: String)
 
     /**
-     * Method to dispatch intent for toggling "install from unknown sources" setting for a package
+     * Method to handle a negative response from the user.
      */
-    void sendUnknownAppsIntent(String packageName);
+    fun onNegativeResponse(stageCode: Int)
 
     /**
-     * Method to handle a negative response from the user
+     * Launch the intent to open the newly installed / updated app.
      */
-    void onNegativeResponse(int stageCode);
-    void openInstalledApp(Intent intent);
+    fun openInstalledApp(intent: Intent?)
 }

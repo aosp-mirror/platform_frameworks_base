@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.ui;
+package com.android.packageinstaller.v2.ui
 
-public interface UninstallActionListener {
-
-    void onPositiveResponse(boolean keepData);
-
-    void onNegativeResponse();
+interface UninstallActionListener {
+    fun onPositiveResponse(keepData: Boolean)
+    fun onNegativeResponse()
 }

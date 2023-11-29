@@ -14,190 +14,200 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.ui;
+package com.android.packageinstaller.v2.ui
 
-import static android.content.Intent.CATEGORY_LAUNCHER;
-import static android.content.Intent.FLAG_ACTIVITY_NO_HISTORY;
-import static android.os.Process.INVALID_UID;
-import static com.android.packageinstaller.v2.model.InstallRepository.EXTRA_STAGED_SESSION_ID;
+import android.app.Activity
+import android.app.AppOpsManager
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.Process
+import android.os.UserManager
+import android.provider.Settings
+import android.util.Log
+import android.view.Window
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.ViewModelProvider
+import com.android.packageinstaller.R
+import com.android.packageinstaller.v2.model.InstallRepository
+import com.android.packageinstaller.v2.model.installstagedata.InstallAborted
+import com.android.packageinstaller.v2.model.installstagedata.InstallFailed
+import com.android.packageinstaller.v2.model.installstagedata.InstallInstalling
+import com.android.packageinstaller.v2.model.installstagedata.InstallStage
+import com.android.packageinstaller.v2.model.installstagedata.InstallSuccess
+import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired
+import com.android.packageinstaller.v2.ui.fragments.AnonymousSourceFragment
+import com.android.packageinstaller.v2.ui.fragments.ExternalSourcesBlockedFragment
+import com.android.packageinstaller.v2.ui.fragments.InstallConfirmationFragment
+import com.android.packageinstaller.v2.ui.fragments.InstallFailedFragment
+import com.android.packageinstaller.v2.ui.fragments.InstallInstallingFragment
+import com.android.packageinstaller.v2.ui.fragments.InstallStagingFragment
+import com.android.packageinstaller.v2.ui.fragments.InstallSuccessFragment
+import com.android.packageinstaller.v2.ui.fragments.SimpleErrorFragment
+import com.android.packageinstaller.v2.viewmodel.InstallViewModel
+import com.android.packageinstaller.v2.viewmodel.InstallViewModelFactory
 
-import android.app.Activity;
-import android.app.AppOpsManager;
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.UserManager;
-import android.provider.Settings;
-import android.util.Log;
-import android.view.Window;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.ViewModelProvider;
-import com.android.packageinstaller.R;
-import com.android.packageinstaller.v2.model.InstallRepository;
-import com.android.packageinstaller.v2.model.InstallRepository.CallerInfo;
-import com.android.packageinstaller.v2.model.installstagedata.InstallAborted;
-import com.android.packageinstaller.v2.model.installstagedata.InstallFailed;
-import com.android.packageinstaller.v2.model.installstagedata.InstallInstalling;
-import com.android.packageinstaller.v2.model.installstagedata.InstallStage;
-import com.android.packageinstaller.v2.model.installstagedata.InstallSuccess;
-import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired;
-import com.android.packageinstaller.v2.ui.fragments.AnonymousSourceFragment;
-import com.android.packageinstaller.v2.ui.fragments.ExternalSourcesBlockedFragment;
-import com.android.packageinstaller.v2.ui.fragments.InstallConfirmationFragment;
-import com.android.packageinstaller.v2.ui.fragments.InstallFailedFragment;
-import com.android.packageinstaller.v2.ui.fragments.InstallInstallingFragment;
-import com.android.packageinstaller.v2.ui.fragments.InstallStagingFragment;
-import com.android.packageinstaller.v2.ui.fragments.InstallSuccessFragment;
-import com.android.packageinstaller.v2.ui.fragments.SimpleErrorFragment;
-import com.android.packageinstaller.v2.viewmodel.InstallViewModel;
-import com.android.packageinstaller.v2.viewmodel.InstallViewModelFactory;
-import java.util.ArrayList;
-import java.util.List;
+class InstallLaunch : FragmentActivity(), InstallActionListener {
 
-public class InstallLaunch extends FragmentActivity implements InstallActionListener {
+    companion object {
+        @JvmField val EXTRA_CALLING_PKG_UID =
+            InstallLaunch::class.java.packageName + ".callingPkgUid"
+        @JvmField val EXTRA_CALLING_PKG_NAME =
+            InstallLaunch::class.java.packageName + ".callingPkgName"
+        private val LOG_TAG = InstallLaunch::class.java.simpleName
+        private const val TAG_DIALOG = "dialog"
+    }
 
-    public static final String EXTRA_CALLING_PKG_UID =
-            InstallLaunch.class.getPackageName() + ".callingPkgUid";
-    public static final String EXTRA_CALLING_PKG_NAME =
-            InstallLaunch.class.getPackageName() + ".callingPkgName";
-    private static final String TAG = InstallLaunch.class.getSimpleName();
-    private static final String TAG_DIALOG = "dialog";
-    private final int REQUEST_TRUST_EXTERNAL_SOURCE = 1;
-    private final boolean mLocalLOGV = false;
+    private val localLOGV = false
+
     /**
      * A collection of unknown sources listeners that are actively listening for app ops mode
      * changes
      */
-    private final List<UnknownSourcesListener> mActiveUnknownSourcesListeners = new ArrayList<>(1);
-    private InstallViewModel mInstallViewModel;
-    private InstallRepository mInstallRepository;
-    private FragmentManager mFragmentManager;
-    private AppOpsManager mAppOpsManager;
+    private val activeUnknownSourcesListeners: MutableList<UnknownSourcesListener> = ArrayList(1)
+    private var installViewModel: InstallViewModel? = null
+    private var installRepository: InstallRepository? = null
+    private var fragmentManager: FragmentManager? = null
+    private var appOpsManager: AppOpsManager? = null
+    private lateinit var unknownAppsIntentLauncher: ActivityResultLauncher<Intent>
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
 
-        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        fragmentManager = supportFragmentManager
+        appOpsManager = getSystemService(AppOpsManager::class.java)
+        installRepository = InstallRepository(applicationContext)
+        installViewModel = ViewModelProvider(
+            this, InstallViewModelFactory(this.application, installRepository!!)
+        )[InstallViewModel::class.java]
 
-        mFragmentManager = getSupportFragmentManager();
-        mAppOpsManager = getSystemService(AppOpsManager.class);
+        val intent = intent
+        val info = InstallRepository.CallerInfo(
+            intent.getStringExtra(EXTRA_CALLING_PKG_NAME),
+            intent.getIntExtra(EXTRA_CALLING_PKG_UID, Process.INVALID_UID)
+        )
+        installViewModel!!.preprocessIntent(intent, info)
+        installViewModel!!.currentInstallStage.observe(this) { installStage: InstallStage ->
+            onInstallStageChange(installStage)
+        }
 
-        mInstallRepository = new InstallRepository(getApplicationContext());
-        mInstallViewModel = new ViewModelProvider(this,
-                new InstallViewModelFactory(this.getApplication(), mInstallRepository)).get(
-                InstallViewModel.class);
-
-        Intent intent = getIntent();
-        CallerInfo info = new CallerInfo(
-                intent.getStringExtra(EXTRA_CALLING_PKG_NAME),
-                intent.getIntExtra(EXTRA_CALLING_PKG_UID, INVALID_UID));
-        mInstallViewModel.preprocessIntent(intent, info);
-
-        mInstallViewModel.getCurrentInstallStage().observe(this, this::onInstallStageChange);
+        // Used to launch intent for Settings, to manage "install unknown apps" permission
+        unknownAppsIntentLauncher =
+            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                // Reattempt installation on coming back from Settings, after toggling
+                // "install unknown apps" permission
+                installViewModel!!.reattemptInstall()
+            }
     }
 
     /**
      * Main controller of the UI. This method shows relevant dialogs based on the install stage
      */
-    private void onInstallStageChange(InstallStage installStage) {
-        switch (installStage.getStageCode()) {
-            case InstallStage.STAGE_STAGING -> {
-                InstallStagingFragment stagingDialog = new InstallStagingFragment();
-                showDialogInner(stagingDialog);
-                mInstallViewModel.getStagingProgress().observe(this, stagingDialog::setProgress);
-            }
-            case InstallStage.STAGE_ABORTED -> {
-                InstallAborted aborted = (InstallAborted) installStage;
-                switch (aborted.getAbortReason()) {
-                    // TODO: check if any dialog is to be shown for ABORT_REASON_INTERNAL_ERROR
-                    case InstallAborted.ABORT_REASON_DONE,
-                        InstallAborted.ABORT_REASON_INTERNAL_ERROR ->
-                        setResult(aborted.getActivityResultCode(), aborted.getResultIntent(), true);
-                    case InstallAborted.ABORT_REASON_POLICY -> showPolicyRestrictionDialog(aborted);
-                    default -> setResult(RESULT_CANCELED, null, true);
+    private fun onInstallStageChange(installStage: InstallStage) {
+        when (installStage.stageCode) {
+            InstallStage.STAGE_STAGING -> {
+                val stagingDialog = InstallStagingFragment()
+                showDialogInner(stagingDialog)
+                installViewModel!!.stagingProgress.observe(this) { progress: Int ->
+                    stagingDialog.setProgress(progress)
                 }
             }
-            case InstallStage.STAGE_USER_ACTION_REQUIRED -> {
-                InstallUserActionRequired uar = (InstallUserActionRequired) installStage;
-                switch (uar.getActionReason()) {
-                    case InstallUserActionRequired.USER_ACTION_REASON_INSTALL_CONFIRMATION -> {
-                        InstallConfirmationFragment actionDialog =
-                            new InstallConfirmationFragment(uar);
-                        showDialogInner(actionDialog);
+
+            InstallStage.STAGE_ABORTED -> {
+                val aborted = installStage as InstallAborted
+                when (aborted.abortReason) {
+                    InstallAborted.ABORT_REASON_DONE, InstallAborted.ABORT_REASON_INTERNAL_ERROR ->
+                        setResult(aborted.activityResultCode, aborted.resultIntent, true)
+
+                    InstallAborted.ABORT_REASON_POLICY -> showPolicyRestrictionDialog(aborted)
+                    else -> setResult(Activity.RESULT_CANCELED, null, true)
+                }
+            }
+
+            InstallStage.STAGE_USER_ACTION_REQUIRED -> {
+                val uar = installStage as InstallUserActionRequired
+                when (uar.actionReason) {
+                    InstallUserActionRequired.USER_ACTION_REASON_INSTALL_CONFIRMATION -> {
+                        val actionDialog = InstallConfirmationFragment(uar)
+                        showDialogInner(actionDialog)
                     }
-                    case InstallUserActionRequired.USER_ACTION_REASON_UNKNOWN_SOURCE -> {
-                        ExternalSourcesBlockedFragment externalSourceDialog =
-                            new ExternalSourcesBlockedFragment(uar);
-                        showDialogInner(externalSourceDialog);
+
+                    InstallUserActionRequired.USER_ACTION_REASON_UNKNOWN_SOURCE -> {
+                        val externalSourceDialog = ExternalSourcesBlockedFragment(uar)
+                        showDialogInner(externalSourceDialog)
                     }
-                    case InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE -> {
-                        AnonymousSourceFragment anonymousSourceDialog =
-                            new AnonymousSourceFragment();
-                        showDialogInner(anonymousSourceDialog);
+
+                    InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE -> {
+                        val anonymousSourceDialog = AnonymousSourceFragment()
+                        showDialogInner(anonymousSourceDialog)
                     }
                 }
             }
-            case InstallStage.STAGE_INSTALLING -> {
-                InstallInstalling installing = (InstallInstalling) installStage;
-                InstallInstallingFragment installingDialog =
-                    new InstallInstallingFragment(installing);
-                showDialogInner(installingDialog);
+
+            InstallStage.STAGE_INSTALLING -> {
+                val installing = installStage as InstallInstalling
+                val installingDialog = InstallInstallingFragment(installing)
+                showDialogInner(installingDialog)
             }
-            case InstallStage.STAGE_SUCCESS -> {
-                InstallSuccess success = (InstallSuccess) installStage;
-                if (success.shouldReturnResult()) {
-                    Intent successIntent = success.getResultIntent();
-                    setResult(Activity.RESULT_OK, successIntent, true);
+
+            InstallStage.STAGE_SUCCESS -> {
+                val success = installStage as InstallSuccess
+                if (success.shouldReturnResult) {
+                    val successIntent = success.resultIntent
+                    setResult(Activity.RESULT_OK, successIntent, true)
                 } else {
-                    InstallSuccessFragment successFragment = new InstallSuccessFragment(success);
-                    showDialogInner(successFragment);
+                    val successFragment = InstallSuccessFragment(success)
+                    showDialogInner(successFragment)
                 }
             }
-            case InstallStage.STAGE_FAILED -> {
-                InstallFailed failed = (InstallFailed) installStage;
-                InstallFailedFragment failedDialog = new InstallFailedFragment(failed);
-                showDialogInner(failedDialog);
+
+            InstallStage.STAGE_FAILED -> {
+                val failed = installStage as InstallFailed
+                val failedDialog = InstallFailedFragment(failed)
+                showDialogInner(failedDialog)
             }
-            default -> {
-                Log.d(TAG, "Unimplemented stage: " + installStage.getStageCode());
-                showDialogInner(null);
+
+            else -> {
+                Log.d(LOG_TAG, "Unimplemented stage: " + installStage.stageCode)
+                showDialogInner(null)
             }
         }
     }
 
-    private void showPolicyRestrictionDialog(InstallAborted aborted) {
-        String restriction = aborted.getMessage();
-        Intent adminSupportIntent = aborted.getResultIntent();
-        boolean shouldFinish;
+    private fun showPolicyRestrictionDialog(aborted: InstallAborted) {
+        val restriction = aborted.message
+        val adminSupportIntent = aborted.resultIntent
+        val shouldFinish: Boolean
 
         // If the given restriction is set by an admin, display information about the
         // admin enforcing the restriction for the affected user. If not enforced by the admin,
         // show the system dialog.
         if (adminSupportIntent != null) {
-            if (mLocalLOGV) {
-                Log.i(TAG, "Restriction set by admin, starting " + adminSupportIntent);
+            if (localLOGV) {
+                Log.i(LOG_TAG, "Restriction set by admin, starting $adminSupportIntent")
             }
-            startActivity(adminSupportIntent);
+            startActivity(adminSupportIntent)
             // Finish the package installer app since the next dialog will not be shown by this app
-            shouldFinish = true;
+            shouldFinish = true
         } else {
-            if (mLocalLOGV) {
-                Log.i(TAG, "Restriction set by system: " + restriction);
+            if (localLOGV) {
+                Log.i(LOG_TAG, "Restriction set by system: $restriction")
             }
-            DialogFragment blockedByPolicyDialog = createDevicePolicyRestrictionDialog(restriction);
+            val blockedByPolicyDialog = createDevicePolicyRestrictionDialog(restriction)
             // Don't finish the package installer app since the next dialog
             // will be shown by this app
-            shouldFinish = false;
-            showDialogInner(blockedByPolicyDialog);
+            shouldFinish = false
+            showDialogInner(blockedByPolicyDialog)
         }
-        setResult(RESULT_CANCELED, null, shouldFinish);
+        setResult(Activity.RESULT_CANCELED, null, shouldFinish)
     }
 
     /**
@@ -206,18 +216,20 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
      * @param restriction The restriction to create the dialog for
      * @return The dialog
      */
-    private DialogFragment createDevicePolicyRestrictionDialog(String restriction) {
-        if (mLocalLOGV) {
-            Log.i(TAG, "createDialog(" + restriction + ")");
+    private fun createDevicePolicyRestrictionDialog(restriction: String): DialogFragment? {
+        if (localLOGV) {
+            Log.i(LOG_TAG, "createDialog($restriction)")
         }
-        return switch (restriction) {
-            case UserManager.DISALLOW_INSTALL_APPS ->
-                new SimpleErrorFragment(R.string.install_apps_user_restriction_dlg_text);
-            case UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
-                UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY ->
-                new SimpleErrorFragment(R.string.unknown_apps_user_restriction_dlg_text);
-            default -> null;
-        };
+        return when (restriction) {
+            UserManager.DISALLOW_INSTALL_APPS ->
+                SimpleErrorFragment(R.string.install_apps_user_restriction_dlg_text)
+
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY ->
+                SimpleErrorFragment(R.string.unknown_apps_user_restriction_dlg_text)
+
+            else -> null
+        }
     }
 
     /**
@@ -225,130 +237,112 @@ public class InstallLaunch extends FragmentActivity implements InstallActionList
      *
      * @param newDialog The new dialog to display
      */
-    private void showDialogInner(@Nullable DialogFragment newDialog) {
-        DialogFragment currentDialog = (DialogFragment) mFragmentManager.findFragmentByTag(
-            TAG_DIALOG);
-        if (currentDialog != null) {
-            currentDialog.dismissAllowingStateLoss();
-        }
-        if (newDialog != null) {
-            newDialog.show(mFragmentManager, TAG_DIALOG);
-        }
+    private fun showDialogInner(newDialog: DialogFragment?) {
+        val currentDialog = fragmentManager!!.findFragmentByTag(TAG_DIALOG) as DialogFragment?
+        currentDialog?.dismissAllowingStateLoss()
+        newDialog?.show(fragmentManager!!, TAG_DIALOG)
     }
 
-    public void setResult(int resultCode, Intent data, boolean shouldFinish) {
-        super.setResult(resultCode, data);
+    fun setResult(resultCode: Int, data: Intent?, shouldFinish: Boolean) {
+        super.setResult(resultCode, data)
         if (shouldFinish) {
-            finish();
+            finish()
         }
     }
 
-    @Override
-    public void onPositiveResponse(int reasonCode) {
-        switch (reasonCode) {
-            case InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE ->
-                mInstallViewModel.forcedSkipSourceCheck();
-            case InstallUserActionRequired.USER_ACTION_REASON_INSTALL_CONFIRMATION ->
-                mInstallViewModel.initiateInstall();
+    override fun onPositiveResponse(reasonCode: Int) {
+        when (reasonCode) {
+            InstallUserActionRequired.USER_ACTION_REASON_ANONYMOUS_SOURCE ->
+                installViewModel!!.forcedSkipSourceCheck()
+
+            InstallUserActionRequired.USER_ACTION_REASON_INSTALL_CONFIRMATION ->
+                installViewModel!!.initiateInstall()
         }
     }
 
-    @Override
-    public void onNegativeResponse(int stageCode) {
+    override fun onNegativeResponse(stageCode: Int) {
         if (stageCode == InstallStage.STAGE_USER_ACTION_REQUIRED) {
-            mInstallViewModel.cleanupInstall();
+            installViewModel!!.cleanupInstall()
         }
-        setResult(Activity.RESULT_CANCELED, null, true);
+        setResult(Activity.RESULT_CANCELED, null, true)
     }
 
-    @Override
-    public void sendUnknownAppsIntent(String sourcePackageName) {
-        Intent settingsIntent = new Intent();
-        settingsIntent.setAction(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
-        final Uri packageUri = Uri.parse("package:" + sourcePackageName);
-        settingsIntent.setData(packageUri);
-        settingsIntent.setFlags(FLAG_ACTIVITY_NO_HISTORY);
-
+    override fun sendUnknownAppsIntent(sourcePackageName: String) {
+        val settingsIntent = Intent()
+        settingsIntent.setAction(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+        val packageUri = Uri.parse("package:$sourcePackageName")
+        settingsIntent.setData(packageUri)
+        settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
         try {
-            registerAppOpChangeListener(new UnknownSourcesListener(sourcePackageName),
-                sourcePackageName);
-            startActivityForResult(settingsIntent, REQUEST_TRUST_EXTERNAL_SOURCE);
-        } catch (ActivityNotFoundException exc) {
-            Log.e(TAG, "Settings activity not found for action: "
-                + Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+            registerAppOpChangeListener(
+                UnknownSourcesListener(sourcePackageName), sourcePackageName
+            )
+            unknownAppsIntentLauncher.launch(settingsIntent)
+        } catch (exc: ActivityNotFoundException) {
+            Log.e(
+                LOG_TAG, "Settings activity not found for action: "
+                    + Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES
+            )
         }
     }
 
-    @Override
-    public void openInstalledApp(Intent intent) {
-        setResult(RESULT_OK, intent, true);
-        if (intent != null && intent.hasCategory(CATEGORY_LAUNCHER)) {
-            startActivity(intent);
+    override fun openInstalledApp(intent: Intent?) {
+        setResult(Activity.RESULT_OK, intent, true)
+        if (intent != null && intent.hasCategory(Intent.CATEGORY_LAUNCHER)) {
+            startActivity(intent)
         }
     }
 
-    private void registerAppOpChangeListener(UnknownSourcesListener listener, String packageName) {
-        mAppOpsManager.startWatchingMode(
-            AppOpsManager.OPSTR_REQUEST_INSTALL_PACKAGES, packageName,
-            listener);
-        mActiveUnknownSourcesListeners.add(listener);
+    private fun registerAppOpChangeListener(listener: UnknownSourcesListener, packageName: String) {
+        appOpsManager!!.startWatchingMode(
+            AppOpsManager.OPSTR_REQUEST_INSTALL_PACKAGES,
+            packageName,
+            listener
+        )
+        activeUnknownSourcesListeners.add(listener)
     }
 
-    private void unregisterAppOpChangeListener(UnknownSourcesListener listener) {
-        mActiveUnknownSourcesListeners.remove(listener);
-        mAppOpsManager.stopWatchingMode(listener);
+    private fun unregisterAppOpChangeListener(listener: UnknownSourcesListener) {
+        activeUnknownSourcesListeners.remove(listener)
+        appOpsManager!!.stopWatchingMode(listener)
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_TRUST_EXTERNAL_SOURCE) {
-            mInstallViewModel.reattemptInstall();
-        } else {
-            setResult(Activity.RESULT_CANCELED,  null, true);
+    override fun onDestroy() {
+        super.onDestroy()
+        while (activeUnknownSourcesListeners.isNotEmpty()) {
+            unregisterAppOpChangeListener(activeUnknownSourcesListeners[0])
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        while (!mActiveUnknownSourcesListeners.isEmpty()) {
-            unregisterAppOpChangeListener(mActiveUnknownSourcesListeners.get(0));
-        }
-    }
-
-    private class UnknownSourcesListener implements AppOpsManager.OnOpChangedListener {
-
-        private final String mOriginatingPackage;
-
-        public UnknownSourcesListener(String originatingPackage) {
-            mOriginatingPackage = originatingPackage;
-        }
-
-        @Override
-        public void onOpChanged(String op, String packageName) {
-            if (!mOriginatingPackage.equals(packageName)) {
-                return;
+    private inner class UnknownSourcesListener(private val mOriginatingPackage: String) :
+        AppOpsManager.OnOpChangedListener {
+        override fun onOpChanged(op: String, packageName: String) {
+            if (mOriginatingPackage != packageName) {
+                return
             }
-            unregisterAppOpChangeListener(this);
-            mActiveUnknownSourcesListeners.remove(this);
-            if (isDestroyed()) {
-                return;
+            unregisterAppOpChangeListener(this)
+            activeUnknownSourcesListeners.remove(this)
+            if (isDestroyed) {
+                return
             }
-            new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                if (!isDestroyed()) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                if (!isDestroyed) {
                     // Relaunch Pia to continue installation.
-                    startActivity(getIntent()
-                        .putExtra(EXTRA_STAGED_SESSION_ID, mInstallViewModel.getStagedSessionId()));
+                    startActivity(
+                        intent.putExtra(
+                            InstallRepository.EXTRA_STAGED_SESSION_ID,
+                            installViewModel!!.stagedSessionId
+                        )
+                    )
 
                     // If the userId of the root of activity stack is different from current userId,
                     // starting Pia again lead to duplicate instances of the app in the stack.
                     // As such, finish the old instance. Old Pia is finished even if the userId of
                     // the root is the same, since there is no way to determine the difference in
                     // userIds.
-                    finish();
+                    finish()
                 }
-            }, 500);
+            }, 500)
         }
     }
 }
