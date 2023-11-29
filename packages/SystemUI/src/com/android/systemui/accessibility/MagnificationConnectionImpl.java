@@ -32,7 +32,7 @@ import com.android.systemui.dagger.qualifiers.Main;
  *
  * @see IWindowMagnificationConnection
  */
-class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.Stub {
+class MagnificationConnectionImpl extends IWindowMagnificationConnection.Stub {
 
     private static final String TAG = "WindowMagnificationConnectionImpl";
 
@@ -40,7 +40,7 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
     private final Magnification mMagnification;
     private final Handler mHandler;
 
-    WindowMagnificationConnectionImpl(@NonNull Magnification magnification,
+    MagnificationConnectionImpl(@NonNull Magnification magnification,
             @Main Handler mainHandler) {
         mMagnification = magnification;
         mHandler = mainHandler;
@@ -57,8 +57,8 @@ class WindowMagnificationConnectionImpl extends IWindowMagnificationConnection.S
     }
 
     @Override
-    public void setScale(int displayId, float scale) {
-        mHandler.post(() -> mMagnification.setScale(displayId, scale));
+    public void setScaleForWindowMagnification(int displayId, float scale) {
+        mHandler.post(() -> mMagnification.setScaleForWindowMagnification(displayId, scale));
     }
 
     @Override

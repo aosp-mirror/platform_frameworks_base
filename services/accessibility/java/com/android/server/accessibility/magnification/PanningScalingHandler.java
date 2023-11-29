@@ -45,6 +45,7 @@ class PanningScalingHandler extends
     private static final String TAG = "PanningScalingHandler";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    // TODO(b/312372035): Revisit the scope of usage of the interface
     interface MagnificationDelegate {
         boolean processScroll(int displayId, float distanceX, float distanceY);
         void setScale(int displayId, float scale);
