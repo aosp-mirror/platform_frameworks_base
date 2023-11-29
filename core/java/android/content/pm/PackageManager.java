@@ -1263,18 +1263,14 @@ public abstract class PackageManager {
 
     /**
      * Flag parameter to also retrieve some information about archived packages.
-     * Packages can be archived through
-     * {@link PackageInstaller#requestArchive(String, IntentSender)} and do not have any APKs stored
-     * on the device, but do keep the data directory.
+     * Packages can be archived through {@link PackageInstaller#requestArchive} and do not have any
+     * APKs stored on the device, but do keep the data directory.
      * <p> Note: Archived apps are a subset of apps returned by {@link #MATCH_UNINSTALLED_PACKAGES}.
      * <p> Note: this flag may cause less information about currently installed
      * applications to be returned.
      * <p> Note: use of this flag requires the android.permission.QUERY_ALL_PACKAGES
      * permission to see uninstalled packages.
-     * @hide
      */
-    // TODO(b/278553670) Unhide and update @links before launch.
-    @SystemApi
     @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public static final long MATCH_ARCHIVED_PACKAGES = 1L << 32;
 
@@ -8969,10 +8965,7 @@ public abstract class PackageManager {
      *
      * @throws NameNotFoundException if the given package name is not available to the caller.
      * @see PackageInstaller#requestArchive(String, IntentSender)
-     *
-     * @hide
      */
-    @SystemApi
     @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public boolean isAppArchivable(@NonNull String packageName) throws NameNotFoundException {
         throw new UnsupportedOperationException("isAppArchivable not implemented");

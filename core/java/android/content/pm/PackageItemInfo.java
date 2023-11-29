@@ -177,12 +177,10 @@ public class PackageItemInfo {
     /**
      * Whether the package is currently in an archived state.
      *
-     * <p>Packages can be archived through {@link PackageArchiver} and do not have any APKs stored
-     * on the device, but do keep the data directory.
-     * @hide
+     * <p>Packages can be archived through {@link PackageInstaller#requestArchive} and do not have
+     * any APKs stored on the device, but do keep the data directory.
+     *
      */
-    // TODO(b/278553670) Unhide and update @links before launch.
-    @SystemApi
     @FlaggedApi(Flags.FLAG_ARCHIVING)
     public boolean isArchived;
 
