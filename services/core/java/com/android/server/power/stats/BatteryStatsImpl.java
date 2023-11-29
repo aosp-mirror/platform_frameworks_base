@@ -286,6 +286,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private final LongSparseArray<SamplingTimer> mKernelMemoryStats = new LongSparseArray<>();
     private int[] mCpuPowerBracketMap;
     private final CpuPowerStatsCollector mCpuPowerStatsCollector;
+    private boolean mPowerStatsCollectorEnabled;
 
     public LongSparseArray<SamplingTimer> getKernelMemoryStats() {
         return mKernelMemoryStats;
@@ -601,6 +602,10 @@ public class BatteryStatsImpl extends BatteryStats {
     @SuppressWarnings("GuardedBy")    // errorprone false positive on getProcStateTimeCounter
     @VisibleForTesting
     public void updateProcStateCpuTimesLocked(int uid, long elapsedRealtimeMs, long uptimeMs) {
+        if (mPowerStatsCollectorEnabled) {
+            return;
+        }
+
         ensureKernelSingleUidTimeReaderLocked();
 
         final Uid u = getUidStatsLocked(uid);
@@ -653,8 +658,9 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     @SuppressWarnings("GuardedBy")    // errorprone false positive on getProcStateTimeCounter
     public void updateCpuTimesForAllUids() {
-        if (mCpuPowerStatsCollector != null) {
+        if (mPowerStatsCollectorEnabled && mCpuPowerStatsCollector != null) {
             mCpuPowerStatsCollector.schedule();
+            return;
         }
 
         synchronized (BatteryStatsImpl.this) {
@@ -712,7 +718,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @GuardedBy("this")
     private void ensureKernelSingleUidTimeReaderLocked() {
-        if (mKernelSingleUidTimeReader != null) {
+        if (mPowerStatsCollectorEnabled || mKernelSingleUidTimeReader != null) {
             return;
         }
 
@@ -8213,6 +8219,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @GuardedBy("mBsi")
         private void ensureMultiStateCounters(long timestampMs) {
+            if (mBsi.mPowerStatsCollectorEnabled) {
+                throw new IllegalStateException("Multi-state counters used in streamlined mode");
+            }
+
             if (mProcStateTimeMs == null) {
                 mProcStateTimeMs =
                         new TimeInFreqMultiStateCounter(mBsi.mOnBatteryTimeBase,
@@ -10511,7 +10521,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     mProcessStateTimer[uidRunningState].startRunningLocked(elapsedRealtimeMs);
                 }
 
-                if (mBsi.trackPerProcStateCpuTimes()) {
+                if (!mBsi.mPowerStatsCollectorEnabled && mBsi.trackPerProcStateCpuTimes()) {
                     mBsi.updateProcStateCpuTimesLocked(mUid, elapsedRealtimeMs, uptimeMs);
 
                     LongArrayMultiStateCounter onBatteryCounter =
@@ -14211,7 +14221,7 @@ public class BatteryStatsImpl extends BatteryStats {
             mCpuUidFreqTimeReader.onSystemReady();
         }
         if (mCpuPowerStatsCollector != null) {
-            mCpuPowerStatsCollector.onSystemReady();
+            mCpuPowerStatsCollector.setEnabled(mPowerStatsCollectorEnabled);
         }
         mSystemReady = true;
     }
@@ -15230,6 +15240,15 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("this")
     private boolean trackPerProcStateCpuTimes() {
         return mCpuUidFreqTimeReader.isFastCpuTimesReader();
+    }
+
+    /**
+     * Enables or disables the PowerStatsCollector mode.
+     */
+    public void setPowerStatsCollectorEnabled(boolean enabled) {
+        synchronized (this) {
+            mPowerStatsCollectorEnabled = enabled;
+        }
     }
 
     @GuardedBy("this")
