@@ -239,7 +239,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             errors: HostStubGenErrors,
             ) {
         log.i("Converting %s into [stub: %s, impl: %s] ...", inJar, outStubJar, outImplJar)
-        log.i("Checker is %s", if (enableChecker) "enabled" else "disabled")
+        log.i("ASM CheckClassAdapter is %s", if (enableChecker) "enabled" else "disabled")
 
         val start = System.currentTimeMillis()
 
@@ -264,7 +264,7 @@ class HostStubGen(val options: HostStubGenOptions) {
             }
         }
         val end = System.currentTimeMillis()
-        log.v("Done transforming the jar in %.1f second(s).", (end - start) / 1000.0)
+        log.i("Done transforming the jar in %.1f second(s).", (end - start) / 1000.0)
     }
 
     private fun <T> maybeWithZipOutputStream(filename: String?, block: (ZipOutputStream?) -> T): T {
