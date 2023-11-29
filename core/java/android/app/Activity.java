@@ -972,6 +972,7 @@ public class Activity extends ContextThemeWrapper
 
     private final ActivityManager.TaskDescription mTaskDescription =
             new ActivityManager.TaskDescription();
+    private int mLastTaskDescriptionHashCode;
 
     protected static final int[] FOCUSED_STATE_SET = {com.android.internal.R.attr.state_focused};
 
@@ -7613,6 +7614,13 @@ public class Activity extends ContextThemeWrapper
                 mTaskDescription.setIcon(Icon.createWithBitmap(icon));
             }
         }
+        if (mLastTaskDescriptionHashCode == mTaskDescription.hashCode()) {
+            // Early return if the hashCode is the same.
+            // Note that we do not use #equals() to perform the check because there are several
+            // places in this class that directly sets the value to mTaskDescription.
+            return;
+        }
+        mLastTaskDescriptionHashCode = mTaskDescription.hashCode();
         ActivityClient.getInstance().setTaskDescription(mToken, mTaskDescription);
     }
 
