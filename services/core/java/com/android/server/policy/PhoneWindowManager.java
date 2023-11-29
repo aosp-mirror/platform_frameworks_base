@@ -3472,7 +3472,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_DEL:
-            case KeyEvent.KEYCODE_GRAVE:
+            case KeyEvent.KEYCODE_ESCAPE:
                 if (firstDown && event.isMetaPressed()) {
                     logKeyboardSystemsEvent(event, KeyboardLogEvent.BACK);
                     injectBackGesture(event.getDownTime());
