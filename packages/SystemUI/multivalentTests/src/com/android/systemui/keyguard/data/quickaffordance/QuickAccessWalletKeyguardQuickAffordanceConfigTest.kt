@@ -29,17 +29,16 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.wallet.controller.QuickAccessWalletController
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runBlockingTest
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -48,7 +47,6 @@ import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
@@ -56,26 +54,32 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     @Mock private lateinit var walletController: QuickAccessWalletController
     @Mock private lateinit var activityStarter: ActivityStarter
 
+    private lateinit var testDispatcher: TestDispatcher
+    private lateinit var testScope: TestScope
+
     private lateinit var underTest: QuickAccessWalletKeyguardQuickAffordanceConfig
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        testDispatcher = StandardTestDispatcher()
+        testScope = TestScope(testDispatcher)
+
         underTest =
             QuickAccessWalletKeyguardQuickAffordanceConfig(
                 context,
+                testDispatcher,
                 walletController,
                 activityStarter,
             )
     }
 
     @Test
-    fun affordance_keyguardShowing_hasWalletCard_visibleModel() = runBlockingTest {
+    fun affordance_keyguardShowing_hasWalletCard_visibleModel() = testScope.runTest {
         setUpState()
-        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
-        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+        val latest by collectLastValue(underTest.lockScreenState)
 
         val visibleModel = latest as KeyguardQuickAffordanceConfig.LockScreenState.Visible
         assertThat(visibleModel.icon)
@@ -88,77 +92,61 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
                         ),
                 )
             )
-        job.cancel()
     }
 
     @Test
-    fun affordance_keyguardShowing_hasNonPaymentCard_modelIsNone() =
-        runTest(UnconfinedTestDispatcher()) {
+    fun affordance_keyguardShowing_hasNonPaymentCard_modelIsNone() = testScope.runTest {
             setUpState(cardType = WalletCard.CARD_TYPE_NON_PAYMENT)
-            var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
-            val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+            val latest by collectLastValue(underTest.lockScreenState)
 
             assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
-            job.cancel()
         }
 
     @Test
-    fun affordance_keyguardShowing_hasPaymentCard_visibleModel() =
-        runTest(UnconfinedTestDispatcher()) {
-            setUpState(cardType = WalletCard.CARD_TYPE_PAYMENT)
-            var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
+    fun affordance_keyguardShowing_hasPaymentCard_visibleModel() = testScope.runTest {
+        setUpState(cardType = WalletCard.CARD_TYPE_PAYMENT)
 
-            val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+        val latest by collectLastValue(underTest.lockScreenState)
 
-            val visibleModel = latest as KeyguardQuickAffordanceConfig.LockScreenState.Visible
-            assertThat(visibleModel.icon)
-                .isEqualTo(
-                    Icon.Loaded(
-                        drawable = ICON,
-                        contentDescription =
-                            ContentDescription.Resource(
-                                res = R.string.accessibility_wallet_button,
-                            ),
-                    )
+        val visibleModel = latest as KeyguardQuickAffordanceConfig.LockScreenState.Visible
+        assertThat(visibleModel.icon)
+            .isEqualTo(
+                Icon.Loaded(
+                    drawable = ICON,
+                    contentDescription =
+                        ContentDescription.Resource(
+                            res = R.string.accessibility_wallet_button,
+                        ),
                 )
-            job.cancel()
-        }
+            )
+    }
 
     @Test
-    fun affordance_walletFeatureNotEnabled_modelIsNone() = runBlockingTest {
+    fun affordance_walletFeatureNotEnabled_modelIsNone() = testScope.runTest {
         setUpState(isWalletFeatureAvailable = false)
-        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
-        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+        val latest by collectLastValue(underTest.lockScreenState)
 
         assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
-
-        job.cancel()
     }
 
     @Test
-    fun affordance_queryNotSuccessful_modelIsNone() = runBlockingTest {
+    fun affordance_queryNotSuccessful_modelIsNone() = testScope.runTest {
         setUpState(isWalletQuerySuccessful = false)
-        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
-        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+        val latest by collectLastValue(underTest.lockScreenState)
 
         assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
-
-        job.cancel()
     }
 
     @Test
-    fun affordance_noSelectedCard_modelIsNone() = runBlockingTest {
+    fun affordance_noSelectedCard_modelIsNone() = testScope.runTest {
         setUpState(hasSelectedCard = false)
-        var latest: KeyguardQuickAffordanceConfig.LockScreenState? = null
 
-        val job = underTest.lockScreenState.onEach { latest = it }.launchIn(this)
+        val latest by collectLastValue(underTest.lockScreenState)
 
         assertThat(latest).isEqualTo(KeyguardQuickAffordanceConfig.LockScreenState.Hidden)
-
-        job.cancel()
     }
 
     @Test
@@ -179,7 +167,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun getPickerScreenState_default() = runTest {
+    fun getPickerScreenState_default() = testScope.runTest {
         setUpState()
 
         assertThat(underTest.getPickerScreenState())
@@ -187,7 +175,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun getPickerScreenState_unavailable() = runTest {
+    fun getPickerScreenState_unavailable() = testScope.runTest {
         setUpState(
             isWalletServiceAvailable = false,
         )
@@ -197,7 +185,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun getPickerScreenState_disabledWhenTheFeatureIsNotEnabled() = runTest {
+    fun getPickerScreenState_disabledWhenTheFeatureIsNotEnabled() = testScope.runTest {
         setUpState(
             isWalletFeatureAvailable = false,
         )
@@ -207,7 +195,7 @@ class QuickAccessWalletKeyguardQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun getPickerScreenState_disabledWhenThereIsNoCard() = runTest {
+    fun getPickerScreenState_disabledWhenThereIsNoCard() = testScope.runTest {
         setUpState(
             hasSelectedCard = false,
         )
