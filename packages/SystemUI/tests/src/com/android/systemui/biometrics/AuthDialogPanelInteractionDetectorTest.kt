@@ -95,6 +95,18 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
         }
 
     @Test
+    fun enableDetector_isUserInteractingTrue_shouldNotPostRunnable() =
+        testComponent.runTest {
+            // GIVEN isInteracting starts true
+            shadeRepository.setLegacyShadeTracking(true)
+            runCurrent()
+            detector.enable(action)
+
+            // THEN action was not run
+            verifyZeroInteractions(action)
+        }
+
+    @Test
     fun enableDetector_shadeExpandImmediate_shouldNotPostRunnable() =
         testComponent.runTest {
             // GIVEN shade is closed and detector is enabled
