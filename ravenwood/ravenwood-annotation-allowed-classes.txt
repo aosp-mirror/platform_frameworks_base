@@ -30,6 +30,7 @@ android.content.ClipDescription
 android.content.ComponentName
 android.content.ContentUris
 android.content.ContentValues
+android.content.ContextWrapper
 android.content.Intent
 android.content.IntentFilter
 android.content.UriMatcher
