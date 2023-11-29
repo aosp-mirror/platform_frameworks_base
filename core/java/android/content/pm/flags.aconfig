@@ -94,3 +94,10 @@ flag {
     description: "Feature flag to read install related information from an APK."
     bug: "275658500"
 }
+
+flag {
+    name: "use_pia_v2"
+    namespace: "package_manager_service"
+    description: "Feature flag to enable the refactored Package Installer app with updated UI."
+    bug: "182205982"
+}

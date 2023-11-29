@@ -17,8 +17,8 @@
 package com.android.packageinstaller;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.content.pm.Flags.usePiaV2;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
-
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
 
 import android.Manifest;
@@ -81,9 +81,6 @@ public class UninstallerActivity extends Activity {
     private String mPackageName;
     private DialogInfo mDialogInfo;
 
-    // TODO (sumedhsen): Replace with an Android Feature Flag once implemented
-    private static final boolean USE_PIA_V2 = false;
-
     @Override
     public void onCreate(Bundle icicle) {
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
@@ -92,7 +89,18 @@ public class UninstallerActivity extends Activity {
         // be stale, if e.g. the app was uninstalled while the activity was destroyed.
         super.onCreate(null);
 
-        if (USE_PIA_V2 && !isTv()) {
+        if (usePiaV2() && !isTv()) {
+            Log.i(TAG, "Using Pia V2");
+
+            PackageManager pm = getPackageManager();
+            pm.setComponentEnabledSetting(
+                new ComponentName(this, com.android.packageinstaller.UninstallEventReceiver.class),
+                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
+            pm.setComponentEnabledSetting(
+                new ComponentName(this,
+                    com.android.packageinstaller.v2.model.UninstallEventReceiver.class),
+                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
+
             boolean returnResult = getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
             Intent piaV2 = new Intent(getIntent());
             piaV2.putExtra(UninstallLaunch.EXTRA_CALLING_PKG_UID, getLaunchedFromUid());
