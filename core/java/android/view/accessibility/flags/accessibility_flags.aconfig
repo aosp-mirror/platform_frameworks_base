@@ -53,6 +53,13 @@ flag {
 
 flag {
     namespace: "accessibility"
+    name: "reduce_window_content_changed_event_throttle"
+    description: "Reduces the throttle of AccessibilityEvent of TYPE_WINDOW_CONTENT_CHANGED"
+    bug: "277305460"
+}
+
+flag {
+    namespace: "accessibility"
     name: "update_always_on_a11y_service"
     description: "Updates the Always-On A11yService state when the user changes the enablement of the shortcut."
     bug: "298869916"
