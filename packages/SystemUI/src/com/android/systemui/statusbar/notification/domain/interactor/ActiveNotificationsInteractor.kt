@@ -15,37 +15,48 @@
 
 package com.android.systemui.statusbar.notification.domain.interactor
 
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
 class ActiveNotificationsInteractor
 @Inject
 constructor(
     private val repository: ActiveNotificationListRepository,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) {
     /** Notifications actively presented to the user in the notification stack, in order. */
     val topLevelRepresentativeNotifications: Flow<List<ActiveNotificationModel>> =
-        repository.activeNotifications.map { store ->
-            store.renderList.map { key ->
-                val entry =
-                    store[key]
-                        ?: error("Could not find notification with key $key in active notif store.")
-                when (entry) {
-                    is ActiveNotificationGroupModel -> entry.summary
-                    is ActiveNotificationModel -> entry
+        repository.activeNotifications
+            .map { store ->
+                store.renderList.map { key ->
+                    val entry =
+                        store[key]
+                            ?: error(
+                                "Could not find notification with key $key in active notif store."
+                            )
+                    when (entry) {
+                        is ActiveNotificationGroupModel -> entry.summary
+                        is ActiveNotificationModel -> entry
+                    }
                 }
             }
-        }
+            .flowOn(backgroundDispatcher)
 
     /** Are any notifications being actively presented in the notification stack? */
     val areAnyNotificationsPresent: Flow<Boolean> =
-        repository.activeNotifications.map { it.renderList.isNotEmpty() }.distinctUntilChanged()
+        repository.activeNotifications
+            .map { it.renderList.isNotEmpty() }
+            .distinctUntilChanged()
+            .flowOn(backgroundDispatcher)
 
     /**
      * The same as [areAnyNotificationsPresent], but without flows, for easy access in synchronous
@@ -59,6 +70,7 @@ constructor(
         repository.notifStats
             .map { it.hasClearableAlertingNotifs || it.hasClearableSilentNotifs }
             .distinctUntilChanged()
+            .flowOn(backgroundDispatcher)
 
     fun setNotifStats(notifStats: NotifStats) {
         repository.notifStats.value = notifStats
