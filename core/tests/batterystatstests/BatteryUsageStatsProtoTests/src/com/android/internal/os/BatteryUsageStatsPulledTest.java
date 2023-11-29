@@ -48,6 +48,11 @@ public class BatteryUsageStatsPulledTest {
     private static final int UID_1 = 2000;
     private static final int UID_2 = 3000;
     private static final int UID_3 = 4000;
+    private static final int[] UID_USAGE_TIME_PROCESS_STATES = {
+            BatteryConsumer.PROCESS_STATE_FOREGROUND,
+            BatteryConsumer.PROCESS_STATE_BACKGROUND,
+            BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE
+    };
 
     @Test
     public void testGetStatsProto() {
@@ -195,6 +200,20 @@ public class BatteryUsageStatsPulledTest {
         assertEquals("For uid " + uid,
                 uidConsumer.getTimeInStateMs(android.os.UidBatteryConsumer.STATE_BACKGROUND),
                 uidConsumerProto.timeInBackgroundMillis);
+        for (int processState : UID_USAGE_TIME_PROCESS_STATES) {
+            final long timeInStateMillis = uidConsumer.getTimeInProcessStateMs(processState);
+            if (timeInStateMillis <= 0) {
+                continue;
+            }
+            assertEquals("For uid " + uid + ", process state " + processState,
+                    timeInStateMillis,
+                    Arrays.stream(uidConsumerProto.timeInState)
+                            .filter(timeInState -> timeInState.processState == processState)
+                            .findFirst()
+                            .orElseThrow()
+                            .timeInStateMillis);
+        }
+
         if (expectNullBatteryConsumerData) {
             assertNull("For uid " + uid, uidConsumerProto.batteryConsumerData);
         } else {
