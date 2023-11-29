@@ -109,7 +109,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     // Only read and modified in main thread (where click events come through).
     private int mClickEventId = 0;
 
-    private final ArrayList<Callback> mCallbacks = new ArrayList<>();
+    private final ArraySet<Callback> mCallbacks = new ArraySet<>();
     private final Object mStaleListener = new Object();
     protected TState mState;
     private TState mTmpState;
@@ -444,9 +444,9 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
     }
 
     private void handleStateChanged() {
-        if (mCallbacks.size() != 0) {
+        if (!mCallbacks.isEmpty()) {
             for (int i = 0; i < mCallbacks.size(); i++) {
-                mCallbacks.get(i).onStateChanged(mState);
+                mCallbacks.valueAt(i).onStateChanged(mState);
             }
         }
     }
