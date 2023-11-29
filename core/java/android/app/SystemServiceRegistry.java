@@ -137,6 +137,8 @@ import android.media.projection.MediaProjectionManager;
 import android.media.soundtrigger.SoundTriggerManager;
 import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
+import android.media.tv.ad.ITvAdManager;
+import android.media.tv.ad.TvAdManager;
 import android.media.tv.interactive.ITvInteractiveAppManager;
 import android.media.tv.interactive.TvInteractiveAppManager;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
@@ -959,6 +961,18 @@ public final class SystemServiceRegistry {
                         ITvInteractiveAppManager.Stub.asInterface(iBinder);
                 return new TvInteractiveAppManager(service, ctx.getUserId());
             }});
+
+        registerService(Context.TV_AD_SERVICE, TvAdManager.class,
+                new CachedServiceFetcher<TvAdManager>() {
+                    @Override
+                    public TvAdManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder iBinder =
+                                ServiceManager.getServiceOrThrow(Context.TV_AD_SERVICE);
+                        ITvAdManager service =
+                                ITvAdManager.Stub.asInterface(iBinder);
+                        return new TvAdManager(service, ctx.getUserId());
+                    }});
 
         registerService(Context.TV_INPUT_SERVICE, TvInputManager.class,
                 new CachedServiceFetcher<TvInputManager>() {
