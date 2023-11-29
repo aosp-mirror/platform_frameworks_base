@@ -63,6 +63,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
 import android.app.ActivityManager;
@@ -82,6 +83,7 @@ import android.util.DisplayMetrics;
 import android.util.Xml;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.SurfaceControl;
 import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.MediumTest;
@@ -1617,6 +1619,185 @@ public class TaskTests extends WindowTestsBase {
         assertFalse(task.isDragResizing());
         task.setDragResizing(false);
         assertFalse(task.isDragResizing());
+    }
+
+    @Test
+    public void testMoveOrCreateDecorSurface() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task =  new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = task.getTopMostActivity();
+        final TaskFragment fragment = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        doNothing().when(task).sendTaskFragmentParentInfoChangedIfNeeded();
+
+        // Decor surface should not be present initially.
+        assertNull(task.mDecorSurfaceContainer);
+        assertNull(task.getDecorSurface());
+        assertNull(task.getTaskFragmentParentInfo().getDecorSurface());
+
+        // Decor surface should be created.
+        clearInvocations(task);
+        task.moveOrCreateDecorSurfaceFor(fragment);
+
+        assertNotNull(task.mDecorSurfaceContainer);
+        assertNotNull(task.getDecorSurface());
+        verify(task).sendTaskFragmentParentInfoChangedIfNeeded();
+        assertNotNull(task.getTaskFragmentParentInfo().getDecorSurface());
+        assertEquals(fragment, task.mDecorSurfaceContainer.mOwnerTaskFragment);
+
+        // Decor surface should be removed.
+        clearInvocations(task);
+        task.removeDecorSurface();
+
+        assertNull(task.mDecorSurfaceContainer);
+        assertNull(task.getDecorSurface());
+        verify(task).sendTaskFragmentParentInfoChangedIfNeeded();
+        assertNull(task.getTaskFragmentParentInfo().getDecorSurface());
+    }
+
+    @Test
+    public void testMoveOrCreateDecorSurface_whenOwnerTaskFragmentRemoved() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task =  new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord activity = task.getTopMostActivity();
+        final TaskFragment fragment1 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment fragment2 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        doNothing().when(task).sendTaskFragmentParentInfoChangedIfNeeded();
+
+        task.moveOrCreateDecorSurfaceFor(fragment1);
+
+        assertNotNull(task.mDecorSurfaceContainer);
+        assertNotNull(task.getDecorSurface());
+        assertEquals(fragment1, task.mDecorSurfaceContainer.mOwnerTaskFragment);
+
+        // Transfer ownership
+        task.moveOrCreateDecorSurfaceFor(fragment2);
+
+        assertNotNull(task.mDecorSurfaceContainer);
+        assertNotNull(task.getDecorSurface());
+        assertEquals(fragment2, task.mDecorSurfaceContainer.mOwnerTaskFragment);
+
+        // Safe surface should be removed when the owner TaskFragment is removed.
+        task.removeChild(fragment2);
+
+        verify(task).removeDecorSurface();
+        assertNull(task.mDecorSurfaceContainer);
+        assertNull(task.getDecorSurface());
+    }
+
+    @Test
+    public void testAssignChildLayers_decorSurfacePlacement() {
+        final TaskFragmentOrganizer organizer = new TaskFragmentOrganizer(Runnable::run);
+        final Task task =  new TaskBuilder(mSupervisor).setCreateActivity(true).build();
+        final ActivityRecord unembeddedActivity = task.getTopMostActivity();
+
+        final TaskFragment fragment1 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final TaskFragment fragment2 = createTaskFragmentWithEmbeddedActivity(task, organizer);
+        final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
+
+        doNothing().when(task).sendTaskFragmentParentInfoChangedIfNeeded();
+        spyOn(unembeddedActivity);
+        spyOn(fragment1);
+        spyOn(fragment2);
+
+        // Initially, the decor surface should not be placed.
+        task.assignChildLayers(t);
+        verify(unembeddedActivity).assignLayer(t, 0);
+        verify(fragment1).assignLayer(t, 1);
+        verify(fragment2).assignLayer(t, 2);
+
+        clearInvocations(t);
+        clearInvocations(unembeddedActivity);
+        clearInvocations(fragment1);
+        clearInvocations(fragment2);
+
+        // The decor surface should be placed just above the owner TaskFragment.
+        doReturn(true).when(unembeddedActivity).isUid(task.effectiveUid);
+        doReturn(true).when(fragment1).isAllowedToBeEmbeddedInTrustedMode();
+        doReturn(true).when(fragment2).isAllowedToBeEmbeddedInTrustedMode();
+        doReturn(true).when(fragment1).isVisible();
+
+        task.moveOrCreateDecorSurfaceFor(fragment1);
+        task.assignChildLayers(t);
+
+        verify(unembeddedActivity).assignLayer(t, 0);
+        verify(fragment1).assignLayer(t, 1);
+        verify(t).setLayer(task.mDecorSurfaceContainer.mContainerSurface, 2);
+        verify(fragment2).assignLayer(t, 3);
+        verify(t).setVisibility(task.mDecorSurfaceContainer.mContainerSurface, true);
+        verify(t, never()).setLayer(eq(task.getDecorSurface()), anyInt());
+
+        clearInvocations(t);
+        clearInvocations(unembeddedActivity);
+        clearInvocations(fragment1);
+        clearInvocations(fragment2);
+
+        // The decor surface should be invisible if the owner TaskFragment is invisible.
+        doReturn(true).when(unembeddedActivity).isUid(task.effectiveUid);
+        doReturn(true).when(fragment1).isAllowedToBeEmbeddedInTrustedMode();
+        doReturn(true).when(fragment2).isAllowedToBeEmbeddedInTrustedMode();
+        doReturn(false).when(fragment1).isVisible();
+
+        task.assignChildLayers(t);
+
+        verify(unembeddedActivity).assignLayer(t, 0);
+        verify(fragment1).assignLayer(t, 1);
+        verify(t).setLayer(task.mDecorSurfaceContainer.mContainerSurface, 2);
+        verify(fragment2).assignLayer(t, 3);
+        verify(t).setVisibility(task.mDecorSurfaceContainer.mContainerSurface, false);
+        verify(t, never()).setLayer(eq(task.getDecorSurface()), anyInt());
+
+        clearInvocations(t);
+        clearInvocations(unembeddedActivity);
+        clearInvocations(fragment1);
+        clearInvocations(fragment2);
+
+        // The decor surface should be placed on below activity from a different UID.
+        doReturn(false).when(unembeddedActivity).isUid(task.effectiveUid);
+        doReturn(true).when(fragment1).isAllowedToBeEmbeddedInTrustedMode();
+        doReturn(true).when(fragment2).isAllowedToBeEmbeddedInTrustedMode();
+        doReturn(true).when(fragment1).isVisible();
+
+        task.assignChildLayers(t);
+
+        verify(t).setLayer(task.mDecorSurfaceContainer.mContainerSurface, 0);
+        verify(unembeddedActivity).assignLayer(t, 1);
+        verify(fragment1).assignLayer(t, 2);
+        verify(fragment2).assignLayer(t, 3);
+        verify(t).setVisibility(task.mDecorSurfaceContainer.mContainerSurface, true);
+        verify(t, never()).setLayer(eq(task.getDecorSurface()), anyInt());
+
+        clearInvocations(t);
+        clearInvocations(unembeddedActivity);
+        clearInvocations(fragment1);
+        clearInvocations(fragment2);
+
+        // The decor surface should be placed below untrusted embedded TaskFragment.
+        doReturn(true).when(unembeddedActivity).isUid(task.effectiveUid);
+        doReturn(true).when(fragment1).isAllowedToBeEmbeddedInTrustedMode();
+        doReturn(false).when(fragment2).isAllowedToBeEmbeddedInTrustedMode();
+        doReturn(true).when(fragment1).isVisible();
+
+        task.assignChildLayers(t);
+
+        verify(unembeddedActivity).assignLayer(t, 0);
+        verify(fragment1).assignLayer(t, 1);
+        verify(t).setLayer(task.mDecorSurfaceContainer.mContainerSurface, 2);
+        verify(fragment2).assignLayer(t, 3);
+        verify(t).setVisibility(task.mDecorSurfaceContainer.mContainerSurface, true);
+        verify(t, never()).setLayer(eq(task.getDecorSurface()), anyInt());
+
+        clearInvocations(t);
+        clearInvocations(unembeddedActivity);
+        clearInvocations(fragment1);
+        clearInvocations(fragment2);
+
+        // The decor surface should not be placed after removal.
+        task.removeDecorSurface();
+        task.assignChildLayers(t);
+
+        verify(unembeddedActivity).assignLayer(t, 0);
+        verify(fragment1).assignLayer(t, 1);
+        verify(fragment2).assignLayer(t, 2);
     }
 
     private Task getTestTask() {

@@ -108,6 +108,18 @@ public final class TaskFragmentOperation implements Parcelable {
      */
     public static final int OP_TYPE_REORDER_TO_TOP_OF_TASK = 13;
 
+    /**
+     * Creates a decor surface in the parent Task of the TaskFragment. The created decor surface
+     * will be provided in {@link TaskFragmentTransaction#TYPE_TASK_FRAGMENT_PARENT_INFO_CHANGED}
+     * event callback.
+     */
+    public static final int OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE = 14;
+
+    /**
+     * Removes the decor surface in the parent Task of the TaskFragment.
+     */
+    public static final int OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE = 15;
+
     @IntDef(prefix = { "OP_TYPE_" }, value = {
             OP_TYPE_UNKNOWN,
             OP_TYPE_CREATE_TASK_FRAGMENT,
@@ -124,6 +136,8 @@ public final class TaskFragmentOperation implements Parcelable {
             OP_TYPE_SET_ISOLATED_NAVIGATION,
             OP_TYPE_REORDER_TO_BOTTOM_OF_TASK,
             OP_TYPE_REORDER_TO_TOP_OF_TASK,
+            OP_TYPE_CREATE_TASK_FRAGMENT_DECOR_SURFACE,
+            OP_TYPE_REMOVE_TASK_FRAGMENT_DECOR_SURFACE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface OperationType {}
