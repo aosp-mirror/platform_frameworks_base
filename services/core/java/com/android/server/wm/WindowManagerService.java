@@ -8523,6 +8523,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 mImeTargetChangeListener = listener;
             }
         }
+
+        @Override
+        public void setOrientationRequestPolicy(boolean respected,
+                int[] fromOrientations, int[] toOrientations) {
+            synchronized (mGlobalLock) {
+                WindowManagerService.this.setOrientationRequestPolicy(respected,
+                        fromOrientations, toOrientations);
+            }
+        }
     }
 
     private final class ImeTargetVisibilityPolicyImpl extends ImeTargetVisibilityPolicy {

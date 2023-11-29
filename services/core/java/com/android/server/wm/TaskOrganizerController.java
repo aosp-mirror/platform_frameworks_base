@@ -1182,22 +1182,6 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
     }
 
-    @Override
-    public void setOrientationRequestPolicy(boolean isIgnoreOrientationRequestDisabled,
-            @Nullable int[] fromOrientations, @Nullable int[] toOrientations) {
-        enforceTaskPermission("setOrientationRequestPolicy()");
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                mService.mWindowManager
-                        .setOrientationRequestPolicy(isIgnoreOrientationRequestDisabled,
-                                fromOrientations, toOrientations);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
     public boolean handleInterceptBackPressedOnTaskRoot(Task task) {
         if (!shouldInterceptBackPressedOnRootTask(task)) {
             return false;
