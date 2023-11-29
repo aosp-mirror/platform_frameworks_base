@@ -38,6 +38,10 @@ import com.android.systemui.qs.tiles.impl.location.domain.LocationTileMapper
 import com.android.systemui.qs.tiles.impl.location.domain.interactor.LocationTileDataInteractor
 import com.android.systemui.qs.tiles.impl.location.domain.interactor.LocationTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.location.domain.model.LocationTileModel
+import com.android.systemui.qs.tiles.impl.uimodenight.domain.UiModeNightTileMapper
+import com.android.systemui.qs.tiles.impl.uimodenight.domain.interactor.UiModeNightTileDataInteractor
+import com.android.systemui.qs.tiles.impl.uimodenight.domain.interactor.UiModeNightTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.uimodenight.domain.model.UiModeNightTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
@@ -64,6 +68,7 @@ interface PolicyModule {
         const val FLASHLIGHT_TILE_SPEC = "flashlight"
         const val LOCATION_TILE_SPEC = "location"
         const val ALARM_TILE_SPEC = "alarm"
+        const val UIMODENIGHT_TILE_SPEC = "dark"
 
         /** Inject flashlight config */
         @Provides
@@ -156,6 +161,38 @@ interface PolicyModule {
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(ALARM_TILE_SPEC),
+                userActionInteractor,
+                stateInteractor,
+                mapper,
+            )
+
+        /** Inject uimodenight config */
+        @Provides
+        @IntoMap
+        @StringKey(UIMODENIGHT_TILE_SPEC)
+        fun provideUiModeNightTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(UIMODENIGHT_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_light_dark_theme_icon_off,
+                        labelRes = R.string.quick_settings_ui_mode_night_label,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        /** Inject uimodenight into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(UIMODENIGHT_TILE_SPEC)
+        fun provideUiModeNightTileViewModel(
+            factory: QSTileViewModelFactory.Static<UiModeNightTileModel>,
+            mapper: UiModeNightTileMapper,
+            stateInteractor: UiModeNightTileDataInteractor,
+            userActionInteractor: UiModeNightTileUserActionInteractor
+        ): QSTileViewModel =
+            factory.create(
+                TileSpec.create(UIMODENIGHT_TILE_SPEC),
                 userActionInteractor,
                 stateInteractor,
                 mapper,
