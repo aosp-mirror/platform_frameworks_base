@@ -284,6 +284,7 @@ java_library_host {
 
 java_host_for_device {
     name: "hoststubgen-helper-libcore-runtime.ravenwood",
+    defaults: ["hoststubgen-for-prototype-only-java"],
     libs: [
         "hoststubgen-helper-libcore-runtime",
     ],
