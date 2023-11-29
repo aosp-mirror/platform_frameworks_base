@@ -2115,6 +2115,20 @@ public class TelephonyManager {
     public static final String ACTION_REQUEST_OMADM_CONFIGURATION_UPDATE =
             "com.android.omadm.service.CONFIGURATION_UPDATE";
 
+    /**
+     * Activity action: Show setting to reset mobile networks.
+     *
+     * <p>On devices with a settings activity to reset mobile networks, the activity should be
+     * launched without additional permissions.
+     *
+     * <p>On some devices, this settings activity may not exist. Callers should ensure that this
+     * case is appropriately handled.
+     */
+    @FlaggedApi(Flags.FLAG_RESET_MOBILE_NETWORK_SETTINGS)
+    @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_RESET_MOBILE_NETWORK_SETTINGS =
+            "android.telephony.action.RESET_MOBILE_NETWORK_SETTINGS";
+
     //
     //
     // Device Info
