@@ -1566,6 +1566,7 @@ public class UserManagerService extends IUserManager.Stub {
                 : now - userData.info.creationTime);
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.REQUEST_QUIET_MODE_ENABLED)
+                .setInt(UserJourneyLogger.getUserTypeForStatsd(userData.info.userType))
                 .setStrings(callingPackage)
                 .setBoolean(enableQuietMode)
                 .setTimePeriod(period)
