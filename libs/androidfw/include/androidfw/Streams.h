@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_IO_IO_H
-#define AAPT_IO_IO_H
+#pragma once
 
 #include <string>
 
-namespace aapt {
-namespace io {
+namespace android {
 
 // InputStream interface that mimics protobuf's ZeroCopyInputStream,
 // with added error handling methods to better report issues.
@@ -41,21 +39,34 @@ class InputStream {
   virtual void BackUp(size_t count) = 0;
 
   // Returns true if this InputStream can rewind. If so, Rewind() can be called.
-  virtual bool CanRewind() const { return false; };
+  virtual bool CanRewind() const {
+    return false;
+  };
 
   // Rewinds the stream to the beginning so it can be read again.
   // Returns true if the rewind succeeded.
   // This does nothing if CanRewind() returns false.
-  virtual bool Rewind() { return false; }
+  virtual bool Rewind() {
+    return false;
+  }
 
   // Returns the number of bytes that have been read from the stream.
   virtual size_t ByteCount() const = 0;
 
   // Returns an error message if HadError() returned true.
-  virtual std::string GetError() const { return {}; }
+  virtual std::string GetError() const {
+    return {};
+  }
 
   // Returns true if an error occurred. Errors are permanent.
   virtual bool HadError() const = 0;
+
+  virtual bool ReadFullyAtOffset(void* data, size_t byte_count, off64_t offset) {
+    (void)data;
+    (void)byte_count;
+    (void)offset;
+    return false;
+  }
 };
 
 // A sub-InputStream interface that knows the total size of its stream.
@@ -87,13 +98,12 @@ class OutputStream {
   virtual size_t ByteCount() const = 0;
 
   // Returns an error message if HadError() returned true.
-  virtual std::string GetError() const { return {}; }
+  virtual std::string GetError() const {
+    return {};
+  }
 
   // Returns true if an error occurred. Errors are permanent.
   virtual bool HadError() const = 0;
 };
 
-}  // namespace io
-}  // namespace aapt
-
-#endif /* AAPT_IO_IO_H */
+}  // namespace android

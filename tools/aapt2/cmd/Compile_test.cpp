@@ -341,7 +341,7 @@ TEST_F(CompilerTest, RelativePathTest) {
   // Check resources.pb contains relative sources.
   io::IFile* proto_file =
       apk.get()->GetFileCollection()->FindFile("resources.pb");
-  std::unique_ptr<io::InputStream> proto_stream = proto_file->OpenInputStream();
+  std::unique_ptr<android::InputStream> proto_stream = proto_file->OpenInputStream();
   io::ProtoInputStreamReader proto_reader(proto_stream.get());
   pb::ResourceTable pb_table;
   proto_reader.ReadMessage(&pb_table);
