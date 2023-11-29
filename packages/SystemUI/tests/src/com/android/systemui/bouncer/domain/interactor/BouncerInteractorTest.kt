@@ -319,10 +319,10 @@ class BouncerInteractorTest : SysuiTestCase() {
     @Test
     fun imeHiddenEvent_isTriggered() =
         testScope.runTest {
-            val imeHiddenEvent by collectLastValue(underTest.onImeHidden)
+            val imeHiddenEvent by collectLastValue(underTest.onImeHiddenByUser)
             runCurrent()
 
-            underTest.onImeHidden()
+            underTest.onImeHiddenByUser()
             runCurrent()
 
             assertThat(imeHiddenEvent).isNotNull()

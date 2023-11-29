@@ -23,8 +23,6 @@ import com.android.systemui.authentication.data.repository.FakeAuthenticationRep
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
-import com.android.systemui.scene.shared.model.SceneKey
-import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -75,19 +73,5 @@ class AuthMethodBouncerViewModelTest : SysuiTestCase() {
             }
             underTest.onAuthenticateButtonClicked()
             assertThat(animateFailure).isFalse()
-        }
-
-    @Test
-    fun onImeVisibilityChanged() =
-        testScope.runTest {
-            sceneInteractor.changeScene(SceneModel(SceneKey.Bouncer), "")
-            sceneInteractor.onSceneChanged(SceneModel(SceneKey.Bouncer), "")
-            val onImeHidden by collectLastValue(bouncerInteractor.onImeHidden)
-
-            underTest.onImeVisibilityChanged(true)
-            assertThat(onImeHidden).isNull()
-
-            underTest.onImeVisibilityChanged(false)
-            assertThat(onImeHidden).isNotNull()
         }
 }

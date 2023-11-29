@@ -20,7 +20,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.res.R
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
@@ -43,7 +45,11 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
     private val testScope = utils.testScope
-    private val authenticationInteractor = utils.authenticationInteractor()
+    private val authenticationRepository = utils.authenticationRepository
+    private val authenticationInteractor =
+        utils.authenticationInteractor(
+            repository = authenticationRepository,
+        )
     private val sceneInteractor = utils.sceneInteractor()
     private val bouncerInteractor =
         utils.bouncerInteractor(
@@ -207,6 +213,101 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
         }
 
+    @Test
+    fun onImeVisibilityChanged_false_doesNothing() =
+        testScope.runTest {
+            val events by collectValues(bouncerInteractor.onImeHiddenByUser)
+            assertThat(events).isEmpty()
+
+            underTest.onImeVisibilityChanged(isVisible = false)
+            assertThat(events).isEmpty()
+        }
+
+    @Test
+    fun onImeVisibilityChanged_falseAfterTrue_emitsOnImeHiddenByUserEvent() =
+        testScope.runTest {
+            val events by collectValues(bouncerInteractor.onImeHiddenByUser)
+            assertThat(events).isEmpty()
+
+            underTest.onImeVisibilityChanged(isVisible = true)
+            assertThat(events).isEmpty()
+
+            underTest.onImeVisibilityChanged(isVisible = false)
+            assertThat(events).hasSize(1)
+
+            underTest.onImeVisibilityChanged(isVisible = true)
+            assertThat(events).hasSize(1)
+
+            underTest.onImeVisibilityChanged(isVisible = false)
+            assertThat(events).hasSize(2)
+        }
+
+    @Test
+    fun onImeVisibilityChanged_falseAfterTrue_whileThrottling_doesNothing() =
+        testScope.runTest {
+            val events by collectValues(bouncerInteractor.onImeHiddenByUser)
+            assertThat(events).isEmpty()
+            underTest.onImeVisibilityChanged(isVisible = true)
+            setThrottling(true)
+
+            underTest.onImeVisibilityChanged(isVisible = false)
+
+            assertThat(events).isEmpty()
+        }
+
+    @Test
+    fun isTextFieldFocusRequested_initiallyTrue() =
+        testScope.runTest {
+            val isTextFieldFocusRequested by collectLastValue(underTest.isTextFieldFocusRequested)
+            assertThat(isTextFieldFocusRequested).isTrue()
+        }
+
+    @Test
+    fun isTextFieldFocusRequested_focusGained_becomesFalse() =
+        testScope.runTest {
+            val isTextFieldFocusRequested by collectLastValue(underTest.isTextFieldFocusRequested)
+
+            underTest.onTextFieldFocusChanged(isFocused = true)
+
+            assertThat(isTextFieldFocusRequested).isFalse()
+        }
+
+    @Test
+    fun isTextFieldFocusRequested_focusLost_becomesTrue() =
+        testScope.runTest {
+            val isTextFieldFocusRequested by collectLastValue(underTest.isTextFieldFocusRequested)
+            underTest.onTextFieldFocusChanged(isFocused = true)
+
+            underTest.onTextFieldFocusChanged(isFocused = false)
+
+            assertThat(isTextFieldFocusRequested).isTrue()
+        }
+
+    @Test
+    fun isTextFieldFocusRequested_focusLostWhileThrottling_staysFalse() =
+        testScope.runTest {
+            val isTextFieldFocusRequested by collectLastValue(underTest.isTextFieldFocusRequested)
+            underTest.onTextFieldFocusChanged(isFocused = true)
+            setThrottling(true)
+
+            underTest.onTextFieldFocusChanged(isFocused = false)
+
+            assertThat(isTextFieldFocusRequested).isFalse()
+        }
+
+    @Test
+    fun isTextFieldFocusRequested_throttlingCountdownEnds_becomesTrue() =
+        testScope.runTest {
+            val isTextFieldFocusRequested by collectLastValue(underTest.isTextFieldFocusRequested)
+            underTest.onTextFieldFocusChanged(isFocused = true)
+            setThrottling(true)
+            underTest.onTextFieldFocusChanged(isFocused = false)
+
+            setThrottling(false)
+
+            assertThat(isTextFieldFocusRequested).isTrue()
+        }
+
     private fun TestScope.switchToScene(toScene: SceneKey) {
         val currentScene by collectLastValue(sceneInteractor.desiredScene)
         val bouncerShown = currentScene?.key != SceneKey.Bouncer && toScene == SceneKey.Bouncer
@@ -224,6 +325,35 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Password)
         utils.deviceEntryRepository.setUnlocked(false)
         switchToScene(SceneKey.Bouncer)
+    }
+
+    private suspend fun TestScope.setThrottling(
+        isThrottling: Boolean,
+        failedAttemptCount: Int = 5,
+    ) {
+        if (isThrottling) {
+            repeat(failedAttemptCount) {
+                authenticationRepository.reportAuthenticationAttempt(false)
+            }
+            val remainingTimeMs = 30_000
+            authenticationRepository.setThrottleDuration(remainingTimeMs)
+            authenticationRepository.setThrottling(
+                AuthenticationThrottlingModel(
+                    failedAttemptCount = failedAttemptCount,
+                    remainingMs = remainingTimeMs,
+                )
+            )
+        } else {
+            authenticationRepository.reportAuthenticationAttempt(true)
+            authenticationRepository.setThrottling(
+                AuthenticationThrottlingModel(
+                    failedAttemptCount = failedAttemptCount,
+                    remainingMs = 0,
+                )
+            )
+        }
+
+        runCurrent()
     }
 
     companion object {
