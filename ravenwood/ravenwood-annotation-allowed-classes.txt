@@ -7,6 +7,7 @@ android.util.DataUnit
 android.util.EventLog
 android.util.IntArray
 android.util.LongArray
+android.util.LruCache
 android.util.Slog
 android.util.TimeUtils
 android.util.Xml
