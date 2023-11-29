@@ -281,13 +281,13 @@ public class LoudnessCodecHelper {
         if (DEBUG) {
             Log.d(TAG, "startLoudnessCodecUpdates: piid " + piid + " codecInfos " + codecInfoList);
         }
-        Set<LoudnessCodecInfo> infoSet;
+
         synchronized (mLock) {
             if (mStartedPiids.contains(piid)) {
                 Log.w(TAG, "Already started loudness updates for piid " + piid);
                 return;
             }
-            infoSet = new HashSet<>(codecInfoList);
+            Set<LoudnessCodecInfo> infoSet = new HashSet<>(codecInfoList);
             mStartedPiids.put(piid, infoSet);
 
             mPiidToPidCache.put(piid, Binder.getCallingPid());
@@ -296,7 +296,7 @@ public class LoudnessCodecHelper {
         try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
             mAudioService.getActivePlaybackConfigurations().stream().filter(
                     conf -> conf.getPlayerInterfaceId() == piid).findFirst().ifPresent(
-                            apc -> updateCodecParametersForConfiguration(apc, infoSet));
+                    this::updateCodecParametersForConfiguration);
         }
     }
 
@@ -315,9 +315,10 @@ public class LoudnessCodecHelper {
         }
     }
 
-    void addLoudnessCodecInfo(int piid, LoudnessCodecInfo info) {
+    void addLoudnessCodecInfo(int piid, int mediaCodecHash, LoudnessCodecInfo info) {
         if (DEBUG) {
-            Log.d(TAG, "addLoudnessCodecInfo: piid " + piid + " info " + info);
+            Log.d(TAG, "addLoudnessCodecInfo: piid " + piid + " mcHash " + mediaCodecHash + " info "
+                    + info);
         }
 
         Set<LoudnessCodecInfo> infoSet;
@@ -334,7 +335,20 @@ public class LoudnessCodecHelper {
         try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
             mAudioService.getActivePlaybackConfigurations().stream().filter(
                     conf -> conf.getPlayerInterfaceId() == piid).findFirst().ifPresent(
-                            apc -> updateCodecParametersForConfiguration(apc, Set.of(info)));
+                            apc -> {
+                                final AudioDeviceInfo deviceInfo = apc.getAudioDeviceInfo();
+                                if (deviceInfo != null) {
+                                    PersistableBundle updateBundle = new PersistableBundle();
+                                    synchronized (mLock) {
+                                        updateBundle.putPersistableBundle(
+                                                Integer.toString(mediaCodecHash),
+                                                getCodecBundle_l(deviceInfo, info));
+                                    }
+                                    if (!updateBundle.isDefinitelyEmpty()) {
+                                        dispatchNewLoudnessParameters(piid, updateBundle);
+                                    }
+                                }
+                            });
         }
     }
 
@@ -435,48 +449,41 @@ public class LoudnessCodecHelper {
             }
         }
 
-        updateApcList.forEach(apc -> updateCodecParametersForConfiguration(apc, null));
+        updateApcList.forEach(apc -> updateCodecParametersForConfiguration(apc));
     }
 
-    /** Updates and dispatches the new loudness parameters for the {@code codecInfos} set.
+    /** Updates and dispatches the new loudness parameters for all its registered codecs.
      *
      * @param apc the player configuration for which the loudness parameters are updated.
-     * @param codecInfos the codec info for which the parameters are updated. If {@code null},
-     *                   send updates for all the started codecs assigned to {@code apc}
      */
-    private void updateCodecParametersForConfiguration(AudioPlaybackConfiguration apc,
-            Set<LoudnessCodecInfo> codecInfos) {
+    private void updateCodecParametersForConfiguration(AudioPlaybackConfiguration apc) {
         if (DEBUG) {
-            Log.d(TAG, "updateCodecParametersForConfiguration apc:" + apc + " codecInfos: "
-                    + codecInfos);
+            Log.d(TAG, "updateCodecParametersForConfiguration apc:" + apc);
         }
+
         final PersistableBundle allBundles = new PersistableBundle();
         final int piid = apc.getPlayerInterfaceId();
+
         synchronized (mLock) {
-            if (codecInfos == null) {
-                codecInfos = mStartedPiids.get(piid);
-            }
+            final Set<LoudnessCodecInfo> codecInfos = mStartedPiids.get(piid);
 
             final AudioDeviceInfo deviceInfo = apc.getAudioDeviceInfo();
             if (codecInfos != null && deviceInfo != null) {
                 for (LoudnessCodecInfo info : codecInfos) {
-                    allBundles.putPersistableBundle(Integer.toString(info.mediaCodecHashCode),
+                    allBundles.putPersistableBundle(Integer.toString(info.hashCode()),
                             getCodecBundle_l(deviceInfo, info));
                 }
             }
         }
 
         if (!allBundles.isDefinitelyEmpty()) {
-            if (DEBUG) {
-                Log.d(TAG, "Dispatching for piid: " + piid + " bundle: " + allBundles);
-            }
             dispatchNewLoudnessParameters(piid, allBundles);
         }
     }
 
     private void dispatchNewLoudnessParameters(int piid, PersistableBundle bundle) {
         if (DEBUG) {
-            Log.d(TAG, "dispatchNewLoudnessParameters: piid " + piid);
+            Log.d(TAG, "dispatchNewLoudnessParameters: piid " + piid + " bundle: " + bundle);
         }
         final int nbDispatchers = mLoudnessUpdateDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; ++i) {

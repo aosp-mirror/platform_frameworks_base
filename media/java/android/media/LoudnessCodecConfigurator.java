@@ -30,7 +30,6 @@ import androidx.annotation.GuardedBy;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -284,7 +283,7 @@ public class LoudnessCodecConfigurator {
             }
 
             if (piid != PLAYER_PIID_INVALID) {
-                mLcDispatcher.addLoudnessCodecInfo(piid, mcInfo);
+                mLcDispatcher.addLoudnessCodecInfo(piid, mediaCodec.hashCode(), mcInfo);
             }
         }
     }
@@ -305,7 +304,7 @@ public class LoudnessCodecConfigurator {
     public void removeMediaCodec(@NonNull MediaCodec mediaCodec) {
         int piid = PLAYER_PIID_INVALID;
         LoudnessCodecInfo mcInfo;
-        AtomicBoolean removed = new AtomicBoolean(false);
+        AtomicBoolean removeInfo = new AtomicBoolean(false);
 
         mcInfo = getCodecInfo(Objects.requireNonNull(mediaCodec,
                 "MediaCodec for removeMediaCodec cannot be null"));
@@ -316,16 +315,17 @@ public class LoudnessCodecConfigurator {
                     piid = mAudioTrack.getPlayerIId();
                 }
                 mMediaCodecs.computeIfPresent(mcInfo, (format, mcs) -> {
-                    removed.set(mcs.remove(mediaCodec));
+                    mcs.remove(mediaCodec);
                     if (mcs.isEmpty()) {
                         // remove the entry
+                        removeInfo.set(true);
                         return null;
                     }
                     return mcs;
                 });
             }
 
-            if (piid != PLAYER_PIID_INVALID && removed.get()) {
+            if (piid != PLAYER_PIID_INVALID && removeInfo.get()) {
                 mLcDispatcher.removeLoudnessCodecInfo(piid, mcInfo);
             }
         }
@@ -375,9 +375,9 @@ public class LoudnessCodecConfigurator {
     }
 
     /** @hide */
-    /*package*/ List<MediaCodec> getRegisteredMediaCodecList() {
+    /*package*/ HashMap<LoudnessCodecInfo, Set<MediaCodec>> getRegisteredMediaCodecs() {
         synchronized (mConfiguratorLock) {
-            return mMediaCodecs.values().stream().flatMap(Collection::stream).toList();
+            return mMediaCodecs;
         }
     }
 
@@ -428,8 +428,6 @@ public class LoudnessCodecConfigurator {
         final MediaFormat outputFormat = mediaCodec.getOutputFormat();
         lci.isDownmixing = outputFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT)
                 < inputFormat.getInteger(MediaFormat.KEY_CHANNEL_COUNT);
-
-        lci.mediaCodecHashCode = mediaCodec.hashCode();
 
         return lci;
     }

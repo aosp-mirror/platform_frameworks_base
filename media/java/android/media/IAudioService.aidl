@@ -739,7 +739,7 @@ interface IAudioService {
 
     oneway void stopLoudnessCodecUpdates(int piid);
 
-    oneway void addLoudnessCodecInfo(int piid, in LoudnessCodecInfo codecInfo);
+    oneway void addLoudnessCodecInfo(int piid, int mediaCodecHash, in LoudnessCodecInfo codecInfo);
 
     oneway void removeLoudnessCodecInfo(int piid, in LoudnessCodecInfo codecInfo);
 
