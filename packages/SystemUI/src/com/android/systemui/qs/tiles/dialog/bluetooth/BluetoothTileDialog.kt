@@ -81,10 +81,8 @@ constructor(
     private lateinit var toggleView: Switch
     private lateinit var subtitleTextView: TextView
     private lateinit var doneButton: View
-    private lateinit var seeAllViewGroup: View
-    private lateinit var pairNewDeviceViewGroup: View
-    private lateinit var seeAllRow: View
-    private lateinit var pairNewDeviceRow: View
+    private lateinit var seeAllButton: View
+    private lateinit var pairNewDeviceButton: View
     private lateinit var deviceListView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,10 +97,8 @@ constructor(
         toggleView = requireViewById(R.id.bluetooth_toggle)
         subtitleTextView = requireViewById(R.id.bluetooth_tile_dialog_subtitle) as TextView
         doneButton = requireViewById(R.id.done_button)
-        seeAllViewGroup = requireViewById(R.id.see_all_layout_group)
-        pairNewDeviceViewGroup = requireViewById(R.id.pair_new_device_layout_group)
-        seeAllRow = requireViewById(R.id.see_all_clickable_row)
-        pairNewDeviceRow = requireViewById(R.id.pair_new_device_clickable_row)
+        seeAllButton = requireViewById(R.id.see_all_button)
+        pairNewDeviceButton = requireViewById(R.id.pair_new_device_button)
         deviceListView = requireViewById<RecyclerView>(R.id.device_list)
 
         setupToggle()
@@ -110,8 +106,8 @@ constructor(
 
         subtitleTextView.text = context.getString(subtitleResIdInitialValue)
         doneButton.setOnClickListener { dismiss() }
-        seeAllRow.setOnClickListener { bluetoothTileDialogCallback.onSeeAllClicked(it) }
-        pairNewDeviceRow.setOnClickListener {
+        seeAllButton.setOnClickListener { bluetoothTileDialogCallback.onSeeAllClicked(it) }
+        pairNewDeviceButton.setOnClickListener {
             bluetoothTileDialogCallback.onPairNewDeviceClicked(it)
         }
     }
@@ -134,8 +130,8 @@ constructor(
             }
             if (isActive) {
                 deviceItemAdapter.refreshDeviceItemList(deviceItem) {
-                    seeAllViewGroup.visibility = if (showSeeAll) VISIBLE else GONE
-                    pairNewDeviceViewGroup.visibility = if (showPairNewDevice) VISIBLE else GONE
+                    seeAllButton.visibility = if (showSeeAll) VISIBLE else GONE
+                    pairNewDeviceButton.visibility = if (showPairNewDevice) VISIBLE else GONE
                     lastUiUpdateMs = systemClock.elapsedRealtime()
                     lastItemRow = itemRow
                     logger.logDeviceUiUpdate(lastUiUpdateMs - start)

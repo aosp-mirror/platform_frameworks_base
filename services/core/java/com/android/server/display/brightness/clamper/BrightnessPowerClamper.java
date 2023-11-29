@@ -49,10 +49,6 @@ class BrightnessPowerClamper extends
     private final Injector mInjector;
     @NonNull
     private final DeviceConfigParameterProvider mConfigParameterProvider;
-    @NonNull
-    private final Handler mHandler;
-    @NonNull
-    private final ClamperChangeListener mChangeListener;
     @Nullable
     private PmicMonitor mPmicMonitor;
     // data from DeviceConfig, for all displays, for all dataSets
@@ -99,10 +95,9 @@ class BrightnessPowerClamper extends
     @VisibleForTesting
     BrightnessPowerClamper(Injector injector, Handler handler, ClamperChangeListener listener,
             PowerData powerData) {
+        super(handler, listener);
         mInjector = injector;
         mConfigParameterProvider = injector.getDeviceConfigParameterProvider();
-        mHandler = handler;
-        mChangeListener = listener;
 
         mHandler.post(() -> {
             setDisplayData(powerData);

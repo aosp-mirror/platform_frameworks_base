@@ -168,26 +168,30 @@ constructor(
         )
     }
 
-    internal fun updateDeviceItemOnClick(deviceItem: DeviceItem) {
-        logger.logDeviceClick(deviceItem.cachedBluetoothDevice.address, deviceItem.type)
+    internal suspend fun updateDeviceItemOnClick(deviceItem: DeviceItem) {
+        withContext(backgroundDispatcher) {
+            logger.logDeviceClick(deviceItem.cachedBluetoothDevice.address, deviceItem.type)
 
-        deviceItem.cachedBluetoothDevice.apply {
-            when (deviceItem.type) {
-                DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE -> {
-                    disconnect()
-                    uiEventLogger.log(BluetoothTileDialogUiEvent.ACTIVE_DEVICE_DISCONNECT)
-                }
-                DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
-                    setActive()
-                    uiEventLogger.log(BluetoothTileDialogUiEvent.CONNECTED_DEVICE_SET_ACTIVE)
-                }
-                DeviceItemType.CONNECTED_BLUETOOTH_DEVICE -> {
-                    disconnect()
-                    uiEventLogger.log(BluetoothTileDialogUiEvent.CONNECTED_OTHER_DEVICE_DISCONNECT)
-                }
-                DeviceItemType.SAVED_BLUETOOTH_DEVICE -> {
-                    connect()
-                    uiEventLogger.log(BluetoothTileDialogUiEvent.SAVED_DEVICE_CONNECT)
+            deviceItem.cachedBluetoothDevice.apply {
+                when (deviceItem.type) {
+                    DeviceItemType.ACTIVE_MEDIA_BLUETOOTH_DEVICE -> {
+                        disconnect()
+                        uiEventLogger.log(BluetoothTileDialogUiEvent.ACTIVE_DEVICE_DISCONNECT)
+                    }
+                    DeviceItemType.AVAILABLE_MEDIA_BLUETOOTH_DEVICE -> {
+                        setActive()
+                        uiEventLogger.log(BluetoothTileDialogUiEvent.CONNECTED_DEVICE_SET_ACTIVE)
+                    }
+                    DeviceItemType.CONNECTED_BLUETOOTH_DEVICE -> {
+                        disconnect()
+                        uiEventLogger.log(
+                            BluetoothTileDialogUiEvent.CONNECTED_OTHER_DEVICE_DISCONNECT
+                        )
+                    }
+                    DeviceItemType.SAVED_BLUETOOTH_DEVICE -> {
+                        connect()
+                        uiEventLogger.log(BluetoothTileDialogUiEvent.SAVED_DEVICE_CONNECT)
+                    }
                 }
             }
         }

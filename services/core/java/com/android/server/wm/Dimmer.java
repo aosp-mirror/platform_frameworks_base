@@ -83,6 +83,7 @@ public abstract class Dimmer {
     /**
      * Mark all dims as pending completion on the next call to {@link #updateDims}
      *
+     * Called before iterating on mHost's children, first step of dimming.
      * This is intended for us by the host container, to be called at the beginning of
      * {@link WindowContainer#prepareSurfaces}. After calling this, the container should
      * chain {@link WindowContainer#prepareSurfaces} down to it's children to give them
@@ -100,8 +101,7 @@ public abstract class Dimmer {
 
     /**
      * Call after invoking {@link WindowContainer#prepareSurfaces} on children as
-     * described in {@link #resetDimStates}. The dim bounds returned by {@link #resetDimStates}
-     * should be set before calling this method.
+     * described in {@link #resetDimStates}.
      *
      * @param t      A transaction in which to update the dims.
      * @return true if any Dims were updated.

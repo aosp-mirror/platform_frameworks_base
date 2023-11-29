@@ -30,7 +30,6 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.time.FakeSystemClock
-import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -113,9 +112,7 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             bluetoothTileDialogViewModel.showDialog(context, null)
 
-            assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
             verify(dialogLaunchAnimator, never()).showFromView(any(), any(), any(), any())
-            assertThat(bluetoothTileDialogViewModel.dialog?.isShowing).isTrue()
             verify(uiEventLogger).log(BluetoothTileDialogUiEvent.BLUETOOTH_TILE_DIALOG_SHOWN)
         }
     }
@@ -125,7 +122,6 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             bluetoothTileDialogViewModel.showDialog(mContext, LinearLayout(mContext))
 
-            assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
             verify(dialogLaunchAnimator).showFromView(any(), any(), nullable(), anyBoolean())
         }
     }
@@ -136,7 +132,6 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
             backgroundExecutor.execute {
                 bluetoothTileDialogViewModel.showDialog(mContext, LinearLayout(mContext))
 
-                assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
                 verify(dialogLaunchAnimator).showFromView(any(), any(), nullable(), anyBoolean())
             }
         }
@@ -147,7 +142,6 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             bluetoothTileDialogViewModel.showDialog(context, null)
 
-            assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
             verify(deviceItemInteractor).deviceItemUpdate
         }
     }
@@ -157,7 +151,6 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             bluetoothTileDialogViewModel.showDialog(context, null)
 
-            assertThat(bluetoothTileDialogViewModel.dialog).isNotNull()
             verify(bluetoothStateInteractor).bluetoothStateUpdate
         }
     }

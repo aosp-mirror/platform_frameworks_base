@@ -4600,7 +4600,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void setStreamVolume(int streamType, int index, int flags,
-            @NonNull AudioDeviceAttributes ada,
+            @Nullable AudioDeviceAttributes ada,
             String callingPackage, String caller, String attributionTag, int uid,
             boolean hasModifyAudioSettings,
             boolean canChangeMuteAndUpdateController) {
@@ -4618,7 +4618,9 @@ public class AudioService extends IAudioService.Stub
         int streamTypeAlias = mStreamVolumeAlias[streamType];
         VolumeStreamState streamState = mStreamStates[streamTypeAlias];
 
-        final int device = ada.getInternalType();
+        final int device = (ada == null)
+                ? getDeviceForStream(streamType)
+                : ada.getInternalType();
         int oldIndex;
 
         // skip a2dp absolute volume control request when the device

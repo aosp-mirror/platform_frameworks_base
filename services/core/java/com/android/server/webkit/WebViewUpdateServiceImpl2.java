@@ -24,6 +24,7 @@ import android.os.AsyncTask;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.text.TextUtils;
+import android.util.AndroidRuntimeException;
 import android.util.Slog;
 import android.webkit.UserPackage;
 import android.webkit.WebViewFactory;
@@ -372,6 +373,23 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
             providers[n] = providersAndPackageInfos[n].provider;
         }
         return providers;
+    }
+
+    /**
+     * Returns the default WebView provider which should be first availableByDefault option in the
+     * system config.
+     */
+    @Override
+    public WebViewProviderInfo getDefaultWebViewPackage() {
+        WebViewProviderInfo[] webviewProviders = getWebViewPackages();
+        for (WebViewProviderInfo provider : webviewProviders) {
+            if (provider.availableByDefault) {
+                return provider;
+            }
+        }
+        // This should be unreachable because the config parser enforces that there is at least one
+        // availableByDefault provider.
+        throw new AndroidRuntimeException("No available by default WebView Provider.");
     }
 
     private static class ProviderAndPackageInfo {

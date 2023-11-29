@@ -46,6 +46,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -61,6 +62,7 @@ import static org.mockito.Mockito.verify;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.hardware.Sensor;
@@ -127,6 +129,8 @@ public class DeviceIdleControllerTest {
     private AlarmManager mAlarmManager;
     @Mock
     private ConnectivityManager mConnectivityManager;
+    @Mock
+    private ContentResolver mContentResolver;
     @Mock
     private IActivityManager mIActivityManager;
     @Mock
@@ -332,7 +336,7 @@ public class DeviceIdleControllerTest {
                         anyString(), any(Executor.class),
                         any(DeviceConfig.OnPropertiesChangedListener.class)));
         doAnswer((Answer<DeviceConfig.Properties>) invocationOnMock
-                -> mock(DeviceConfig.Properties.class))
+                -> new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_DEVICE_IDLE).build())
                 .when(() -> DeviceConfig.getProperties(
                         anyString(), ArgumentMatchers.<String>any()));
         when(mPowerManager.newWakeLock(anyInt(), anyString())).thenReturn(mWakeLock);
@@ -347,6 +351,7 @@ public class DeviceIdleControllerTest {
         mAppStateTracker = new AppStateTrackerForTest(getContext(), Looper.getMainLooper());
         mAnyMotionDetector = new AnyMotionDetectorForTest();
         mInjector = new InjectorForTest(getContext());
+        doNothing().when(mContentResolver).registerContentObserver(any(), anyBoolean(), any());
 
         doReturn(mWearModeManagerInternal)
                 .when(() -> LocalServices.getService(WearModeManagerInternal.class));
@@ -366,7 +371,8 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.setLightEnabledForTest(true);
 
         // Get the same Constants object that mDeviceIdleController got.
-        mConstants = mInjector.getConstants(mDeviceIdleController);
+        mConstants = mInjector.getConstants(mDeviceIdleController,
+                mInjector.getHandler(mDeviceIdleController), mContentResolver);
 
         final ArgumentCaptor<TelephonyCallback> telephonyCallbackCaptor =
                 ArgumentCaptor.forClass(TelephonyCallback.class);

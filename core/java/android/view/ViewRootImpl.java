@@ -991,7 +991,7 @@ public final class ViewRootImpl implements ViewParent,
     // for idleness handling.
     private boolean mHasIdledMessage = false;
     // time for touch boost period.
-    private static final int FRAME_RATE_TOUCH_BOOST_TIME = 1500;
+    private static final int FRAME_RATE_TOUCH_BOOST_TIME = 3000;
     // time for checking idle status periodically.
     private static final int FRAME_RATE_IDLENESS_CHECK_TIME_MILLIS = 500;
     // time for revaluating the idle status before lowering the frame rate.

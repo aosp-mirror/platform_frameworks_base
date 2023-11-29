@@ -19,6 +19,7 @@ package android.companion.virtual;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.PendingIntent;
 import android.companion.virtual.audio.VirtualAudioDevice;
@@ -340,12 +341,17 @@ public class VirtualDeviceInternal {
         return mVirtualAudioDevice;
     }
 
+    @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @NonNull
     VirtualCamera createVirtualCamera(@NonNull VirtualCameraConfig config) {
-        return new VirtualCamera(mVirtualDevice, config);
+        try {
+            mVirtualDevice.registerVirtualCamera(config);
+            return new VirtualCamera(mVirtualDevice, config);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
-    @NonNull
     void setShowPointerIcon(boolean showPointerIcon) {
         try {
             mVirtualDevice.setShowPointerIcon(showPointerIcon);

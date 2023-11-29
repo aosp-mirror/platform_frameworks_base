@@ -545,28 +545,12 @@ object Flags {
             unreleasedFlag("clipboard_shared_transitions", teamfood = true)
 
     /**
-     * Whether the scene container (Flexiglass) is enabled. Note that [SCENE_CONTAINER] should be
-     * checked and toggled together with [SCENE_CONTAINER_ENABLED] so that ProGuard can remove
-     * unused code from our APK at compile time.
+     * Whether the scene container (Flexiglass) is enabled. Note that SceneContainerFlags#isEnabled
+     * should be checked and toggled together with [SCENE_CONTAINER_ENABLED] so that ProGuard can
+     * remove unused code from our APK at compile time.
      */
     // TODO(b/283300105): Tracking Bug
     @JvmField val SCENE_CONTAINER_ENABLED = false
-    @Deprecated(
-        message = """
-            Do not use this flag directly. Please use
-            [com.android.systemui.scene.shared.flag.SceneContainerFlags#isEnabled].
-
-            (Not really deprecated but using this as a simple way to bring attention to the above).
-        """,
-        replaceWith = ReplaceWith(
-            "com.android.systemui.scene.shared.flag.SceneContainerFlags#isEnabled",
-        ),
-        level = DeprecationLevel.WARNING,
-    )
-    @JvmField val SCENE_CONTAINER = resourceBooleanFlag(
-        R.bool.config_sceneContainerFrameworkEnabled,
-        "scene_container",
-    )
 
     // 1900
     @JvmField val NOTE_TASKS = releasedFlag("keycode_flag")

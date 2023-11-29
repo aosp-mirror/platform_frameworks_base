@@ -485,8 +485,7 @@ constructor(
     ): Int =
         if (isPendingConfirmation) {
             when (sensorType) {
-                FingerprintSensorType.POWER_BUTTON ->
-                    R.string.security_settings_sfps_enroll_find_sensor_message
+                FingerprintSensorType.POWER_BUTTON -> -1
                 else -> R.string.fingerprint_dialog_authenticated_confirmation
             }
         } else if (isAuthenticating || isAuthenticated) {

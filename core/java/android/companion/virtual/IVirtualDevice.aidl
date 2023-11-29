@@ -246,4 +246,10 @@ interface IVirtualDevice {
      */
     @EnforcePermission("CREATE_VIRTUAL_DEVICE")
     void unregisterVirtualCamera(in VirtualCameraConfig camera);
+
+    /**
+     * Returns the id of the virtual camera with given config.
+     */
+    @EnforcePermission("CREATE_VIRTUAL_DEVICE")
+    int getVirtualCameraId(in VirtualCameraConfig camera);
 }
