@@ -62,6 +62,8 @@ import java.util.Set;
 public class SnoozeHelper {
     public static final int XML_SNOOZED_NOTIFICATION_VERSION = 1;
 
+    static final int CONCURRENT_SNOOZE_LIMIT = 500;
+
     // A safe size for strings to be put in persistent storage, to avoid breaking the XML write.
     static final int MAX_STRING_LENGTH = 1000;
 
@@ -136,6 +138,30 @@ public class SnoozeHelper {
             String pkg = mPackages.get(key);
             removeRecordLocked(pkg, key, userId, mPersistedSnoozedNotificationsWithContext);
         }
+    }
+
+    protected boolean canSnooze(int numberToSnooze) {
+        synchronized (mLock) {
+            if ((mPackages.size() + numberToSnooze) > CONCURRENT_SNOOZE_LIMIT
+                || (countPersistedNotificationsLocked() + numberToSnooze)
+                > CONCURRENT_SNOOZE_LIMIT) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int countPersistedNotificationsLocked() {
+        int numNotifications = 0;
+        for (ArrayMap<String, String> persistedWithContext :
+                mPersistedSnoozedNotificationsWithContext.values()) {
+            numNotifications += persistedWithContext.size();
+        }
+        for (ArrayMap<String, Long> persistedWithDuration :
+                mPersistedSnoozedNotifications.values()) {
+            numNotifications += persistedWithDuration.size();
+        }
+        return numNotifications;
     }
 
     @NonNull
@@ -439,6 +465,11 @@ public class SnoozeHelper {
                 NotificationRecord record = recordsByKey.remove(groupSummaryKey);
                 mPackages.remove(groupSummaryKey);
                 mUsers.remove(groupSummaryKey);
+
+                final String trimmedKey = getTrimmedString(groupSummaryKey);
+                removeRecordLocked(pkg, trimmedKey, userId, mPersistedSnoozedNotifications);
+                removeRecordLocked(pkg, trimmedKey, userId,
+                      mPersistedSnoozedNotificationsWithContext);
 
                 if (record != null && !record.isCanceled) {
                     Runnable runnable = () -> {
