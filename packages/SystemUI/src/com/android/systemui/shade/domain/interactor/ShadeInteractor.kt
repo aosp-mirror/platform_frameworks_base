@@ -39,7 +39,7 @@ interface ShadeInteractor : BaseShadeInteractor {
      * input (i.e. dragging a pointer). This will be true even if the user's input gesture had ended
      * but a transition they initiated is still animating.
      */
-    val isUserInteracting: Flow<Boolean>
+    val isUserInteracting: StateFlow<Boolean>
 
     /** Are touches allowed on the notification panel? */
     val isShadeTouchable: Flow<Boolean>
