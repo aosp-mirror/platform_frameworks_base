@@ -51,13 +51,14 @@
         android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/scroll_view"
         app:layout_constraintTop_toBottomOf="@id/bluetooth_tile_dialog_title" />
 
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="21dp"
+        android:fillViewport="true"
         app:layout_constrainedHeight="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -84,13 +85,13 @@
                 android:textSize="16sp"
                 app:layout_constraintEnd_toStartOf="@+id/bluetooth_toggle"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintBottom_toTopOf="@+id/device_list"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Switch
                 android:id="@+id/bluetooth_toggle"
                 android:layout_width="wrap_content"
                 android:layout_height="48dp"
+                android:paddingTop="10dp"
                 android:gravity="start|center_vertical"
                 android:paddingEnd="40dp"
                 android:contentDescription="@string/turn_on_bluetooth"
@@ -100,14 +101,13 @@
                 android:track="@drawable/settingslib_track_selector"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/bluetooth_toggle_title"
-                app:layout_constraintBottom_toTopOf="@+id/device_list"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/device_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="20dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/bluetooth_toggle"
@@ -146,6 +146,7 @@
                 android:background="@drawable/bluetooth_tile_dialog_bg_off"
                 android:layout_width="0dp"
                 android:layout_height="64dp"
+                android:layout_marginBottom="9dp"
                 android:contentDescription="@string/accessibility_bluetooth_device_settings_pair_new_device"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -177,7 +178,6 @@
                 android:maxLines="1"
                 android:text="@string/inline_done_button"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/pair_new_device_button"
                 app:layout_constraintBottom_toBottomOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
