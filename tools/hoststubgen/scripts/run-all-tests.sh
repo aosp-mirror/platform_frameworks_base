@@ -53,4 +53,4 @@ run ./scripts/build-framework-hostside-jars-and-extract.sh
 # These tests should all pass.
 run atest ${READY_TEST_MODULES[*]}
 
-echo ""${0##*/}" finished, with no unexpected failures. Ready to submit!"
+echo ""${0##*/}" finished, with no failures. Ready to submit!"
