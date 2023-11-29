@@ -2542,6 +2542,7 @@ public final class Settings {
      * ComponentName)} and only use this action to start an activity if they return {@code false}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @FlaggedApi(android.credentials.flags.Flags.FLAG_NEW_SETTINGS_INTENTS)
     public static final String ACTION_CREDENTIAL_PROVIDER =
             "android.settings.CREDENTIAL_PROVIDER";
 
