@@ -916,18 +916,27 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                             && event.getPointerCount() == 2;
                     mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
 
-                    if (isActivated() && event.getPointerCount() == 2) {
-                        storePointerDownLocation(mSecondPointerDownLocation, event);
-                        mHandler.sendEmptyMessageDelayed(MESSAGE_TRANSITION_TO_PANNINGSCALING_STATE,
-                                ViewConfiguration.getTapTimeout());
-                    } else if (mIsTwoFingerCountReached) {
-                        // Placing two-finger triple-taps behind isActivated to avoid
-                        // blocking panning scaling state
+                    if (event.getPointerCount() == 2) {
                         if (isMultiFingerMultiTapTriggered(/* targetTapCount= */ 2, event)) {
                             // 3tap and hold
                             afterLongTapTimeoutTransitionToDraggingState(event);
                         } else {
-                            afterMultiTapTimeoutTransitionToDelegatingState();
+                            if (mDetectTwoFingerTripleTap) {
+                                // If mDetectTwoFingerTripleTap, delay transition to the delegating
+                                // state for mMultiTapMaxDelay to ensure reachability of
+                                // multi finger multi tap
+                                afterMultiTapTimeoutTransitionToDelegatingState();
+                            }
+
+                            if (isActivated()) {
+                                // If activated, delay transition to the panning scaling
+                                // state for tap timeout to ensure reachability of
+                                // multi finger multi tap
+                                storePointerDownLocation(mSecondPointerDownLocation, event);
+                                mHandler.sendEmptyMessageDelayed(
+                                        MESSAGE_TRANSITION_TO_PANNINGSCALING_STATE,
+                                        ViewConfiguration.getTapTimeout());
+                            }
                         }
                     } else {
                         transitionToDelegatingStateAndClear();
@@ -953,6 +962,9 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                         // (which is a rare combo to be used aside from magnification)
                         if (isMultiTapTriggered(2 /* taps */) && event.getPointerCount() == 1) {
                             transitionToViewportDraggingStateAndClear(event);
+                        } else if (isMultiFingerMultiTapTriggered(/* targetTapCount= */ 2, event)
+                                && event.getPointerCount() == 2) {
+                            transitionToViewportDraggingStateAndClear(event);
                         } else if (isActivated() && event.getPointerCount() == 2) {
                             if (mIsSinglePanningEnabled
                                     && overscrollState(event, mFirstPointerDownLocation)
@@ -961,11 +973,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                             }
                             //Primary pointer is swiping, so transit to PanningScalingState
                             transitToPanningScalingStateAndClear();
-                        } else if (isMultiFingerMultiTapTriggered(/* targetTapCount= */ 2, event)
-                                && event.getPointerCount() == 2) {
-                            // Placing two-finger triple-taps behind isActivated to avoid
-                            // blocking panning scaling state
-                            transitionToViewportDraggingStateAndClear(event);
                         } else if (mIsSinglePanningEnabled
                                 && isActivated()
                                 && event.getPointerCount() == 1) {
@@ -979,8 +986,11 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                         }
                     } else if (isActivated() && pointerDownValid(mSecondPointerDownLocation)
                             && distanceClosestPointerToPoint(
-                            mSecondPointerDownLocation, /* move */ event) > mSwipeMinDistance) {
-                        //Second pointer is swiping, so transit to PanningScalingState
+                            mSecondPointerDownLocation, /* move */ event) > mSwipeMinDistance
+                            // If mCompleteTapCount is not zero, it means that it is a multi tap
+                            // gesture. So, we should not transit to the PanningScalingState.
+                            && mCompletedTapCount == 0) {
+                        // Second pointer is swiping, so transit to PanningScalingState
                         transitToPanningScalingStateAndClear();
                     }
                 }
@@ -988,6 +998,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 case ACTION_UP: {
 
                     mHandler.removeMessages(MESSAGE_ON_TRIPLE_TAP_AND_HOLD);
+                    mHandler.removeMessages(MESSAGE_TRANSITION_TO_PANNINGSCALING_STATE);
 
                     if (!mFullScreenMagnificationController.magnificationRegionContains(
                             mDisplayId, event.getX(), event.getY())) {
