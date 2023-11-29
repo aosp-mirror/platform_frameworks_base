@@ -16,8 +16,8 @@
 
 package android.app;
 
-import static android.view.contentprotection.flags.Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED;
 import static android.permission.flags.Flags.FLAG_OP_ENABLE_MOBILE_DATA_BY_USER;
+import static android.view.contentprotection.flags.Flags.FLAG_CREATE_ACCESSIBILITY_OVERLAY_APP_OP_ENABLED;
 
 import static java.lang.Long.max;
 
@@ -1521,9 +1521,17 @@ public class AppOpsManager {
      */
     public static final int OP_MEDIA_ROUTING_CONTROL = AppProtoEnums.APP_OP_MEDIA_ROUTING_CONTROL;
 
+    /**
+     * Op code for use by tests to avoid interfering history logs that the wider system might
+     * trigger.
+     *
+     * @hide
+     */
+    public static final int OP_RESERVED_FOR_TESTING = AppProtoEnums.APP_OP_RESERVED_FOR_TESTING;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 141;
+    public static final int _NUM_OP = 142;
 
     /**
      * All app ops represented as strings.
@@ -1671,6 +1679,7 @@ public class AppOpsManager {
             OPSTR_CREATE_ACCESSIBILITY_OVERLAY,
             OPSTR_MEDIA_ROUTING_CONTROL,
             OPSTR_ENABLE_MOBILE_DATA_BY_USER,
+            OPSTR_RESERVED_FOR_TESTING,
     })
     public @interface AppOpString {}
 
@@ -2330,6 +2339,17 @@ public class AppOpsManager {
     public static final String OPSTR_ENABLE_MOBILE_DATA_BY_USER =
             "android:enable_mobile_data_by_user";
 
+    /**
+     * Reserved for use by appop tests so that operations done legitimately by the platform don't
+     * interfere with expected results. Platform code should never use this.
+     *
+     * @hide
+     */
+    @TestApi
+    @SuppressLint("UnflaggedApi")
+    public static final String OPSTR_RESERVED_FOR_TESTING =
+            "android:reserved_for_testing";
+
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
     /** Should not collect noting of this app-op in {@link #sAppOpsToNote} */
@@ -2887,6 +2907,8 @@ public class AppOpsManager {
                 .setPermission(Manifest.permission.MEDIA_ROUTING_CONTROL).build(),
         new AppOpInfo.Builder(OP_ENABLE_MOBILE_DATA_BY_USER, OPSTR_ENABLE_MOBILE_DATA_BY_USER,
                 "ENABLE_MOBILE_DATA_BY_USER").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RESERVED_FOR_TESTING, OPSTR_RESERVED_FOR_TESTING,
+                "OP_RESERVED_FOR_TESTING").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
     };
 
     // The number of longs needed to form a full bitmask of app ops
