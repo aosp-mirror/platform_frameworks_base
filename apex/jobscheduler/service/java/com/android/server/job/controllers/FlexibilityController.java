@@ -369,8 +369,23 @@ public final class FlexibilityController extends StateController {
     @VisibleForTesting
     @GuardedBy("mLock")
     long getLifeCycleBeginningElapsedLocked(JobStatus js) {
+        long earliestRuntime = js.getEarliestRunTime() == JobStatus.NO_EARLIEST_RUNTIME
+                ? js.enqueueTime : js.getEarliestRunTime();
+        if (js.getJob().isPeriodic() && js.getNumPreviousAttempts() == 0) {
+            // Rescheduling periodic jobs (after a successful execution) may result in the job's
+            // start time being a little after the "true" periodic start time (to avoid jobs
+            // running back to back). See JobSchedulerService#getRescheduleJobForPeriodic for more
+            // details. Since rescheduled periodic jobs may already be delayed slightly by this
+            // policy, don't penalize them further by then enforcing the full set of applied
+            // flex constraints at the beginning of the newly determined start time. Let the flex
+            // constraint requirement start closer to the true periodic start time.
+            final long truePeriodicStartTimeElapsed =
+                    js.getLatestRunTimeElapsed() - js.getJob().getFlexMillis();
+            // For now, treat the lifecycle beginning as the midpoint between the true periodic
+            // start time and the adjusted start time.
+            earliestRuntime = (earliestRuntime + truePeriodicStartTimeElapsed) / 2;
+        }
         if (js.getJob().isPrefetch()) {
-            final long earliestRuntime = Math.max(js.enqueueTime, js.getEarliestRunTime());
             final long estimatedLaunchTime =
                     mPrefetchController.getNextEstimatedLaunchTimeLocked(js);
             long prefetchWindowStart = mPrefetchLifeCycleStart.getOrDefault(
@@ -381,8 +396,7 @@ public final class FlexibilityController extends StateController {
             }
             return Math.max(prefetchWindowStart, earliestRuntime);
         }
-        return js.getEarliestRunTime() == JobStatus.NO_EARLIEST_RUNTIME
-                ? js.enqueueTime : js.getEarliestRunTime();
+        return earliestRuntime;
     }
 
     @VisibleForTesting

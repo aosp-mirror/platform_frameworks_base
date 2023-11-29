@@ -23,6 +23,7 @@ import static android.app.job.JobInfo.NETWORK_TYPE_CELLULAR;
 import static android.app.job.JobInfo.NETWORK_TYPE_NONE;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
+import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -419,6 +420,66 @@ public class FlexibilityControllerTest {
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
         assertEquals(95, mFlexibilityController.getCurPercentOfLifecycleLocked(js, nowElapsed));
+    }
+
+    @Test
+    public void testGetLifeCycleBeginningElapsedLocked_Periodic() {
+        // Periodic with lifecycle
+        JobInfo.Builder jbBasic = createJob(0).setPeriodic(HOUR_IN_MILLIS);
+        JobInfo.Builder jbFlex = createJob(0)
+                .setPeriodic(HOUR_IN_MILLIS, 20 * MINUTE_IN_MILLIS);
+        JobStatus jsBasic =
+                createJobStatus("testGetLifeCycleBeginningElapsedLocked_Periodic", jbBasic);
+        JobStatus jsFlex =
+                createJobStatus("testGetLifeCycleBeginningElapsedLocked_Periodic", jbFlex);
+
+        final long nowElapsed = JobSchedulerService.sElapsedRealtimeClock.millis();
+        // Base case, no start adjustment
+        assertEquals(nowElapsed,
+                mFlexibilityController.getLifeCycleBeginningElapsedLocked(jsBasic));
+        assertEquals(nowElapsed + 40 * MINUTE_IN_MILLIS,
+                mFlexibilityController.getLifeCycleBeginningElapsedLocked(jsFlex));
+
+        // Rescheduled with start adjustment
+        final long adjustmentMs = 4 * MINUTE_IN_MILLIS;
+        jsBasic = new JobStatus(jsBasic,
+                // "True" start is nowElapsed + HOUR_IN_MILLIS
+                nowElapsed + HOUR_IN_MILLIS + adjustmentMs,
+                nowElapsed + 2 * HOUR_IN_MILLIS,
+                0 /* numFailures */, 0 /* numSystemStops */,
+                JobSchedulerService.sSystemClock.millis() /* lastSuccessfulRunTime */,
+                0, 0);
+        jsFlex = new JobStatus(jsFlex,
+                // "True" start is nowElapsed + 2 * HOUR_IN_MILLIS - 20 * MINUTE_IN_MILLIS
+                nowElapsed + 2 * HOUR_IN_MILLIS - 20 * MINUTE_IN_MILLIS + adjustmentMs,
+                nowElapsed + 2 * HOUR_IN_MILLIS,
+                0 /* numFailures */, 0 /* numSystemStops */,
+                JobSchedulerService.sSystemClock.millis() /* lastSuccessfulRunTime */,
+                0, 0);
+
+        assertEquals(nowElapsed + HOUR_IN_MILLIS + adjustmentMs / 2,
+                mFlexibilityController.getLifeCycleBeginningElapsedLocked(jsBasic));
+        assertEquals(nowElapsed + 2 * HOUR_IN_MILLIS - 20 * MINUTE_IN_MILLIS + adjustmentMs / 2,
+                mFlexibilityController.getLifeCycleBeginningElapsedLocked(jsFlex));
+
+        // Rescheduled for failure
+        jsBasic = new JobStatus(jsBasic,
+                nowElapsed + 30 * MINUTE_IN_MILLIS,
+                NO_LATEST_RUNTIME,
+                1 /* numFailures */, 1 /* numSystemStops */,
+                JobSchedulerService.sSystemClock.millis() /* lastSuccessfulRunTime */,
+                0, 0);
+        jsFlex = new JobStatus(jsFlex,
+                nowElapsed + 30 * MINUTE_IN_MILLIS,
+                NO_LATEST_RUNTIME,
+                1 /* numFailures */, 1 /* numSystemStops */,
+                JobSchedulerService.sSystemClock.millis() /* lastSuccessfulRunTime */,
+                0, 0);
+
+        assertEquals(nowElapsed + 30 * MINUTE_IN_MILLIS,
+                mFlexibilityController.getLifeCycleBeginningElapsedLocked(jsBasic));
+        assertEquals(nowElapsed + 30 * MINUTE_IN_MILLIS,
+                mFlexibilityController.getLifeCycleBeginningElapsedLocked(jsFlex));
     }
 
     @Test
