@@ -120,7 +120,8 @@ public class SystemDataTransferProcessor {
      * Resolve the requested association, throwing if the caller doesn't have
      * adequate permissions.
      */
-    private @NonNull AssociationInfo resolveAssociation(String packageName, int userId,
+    @NonNull
+    private AssociationInfo resolveAssociation(String packageName, int userId,
             int associationId) {
         AssociationInfo association = mAssociationStore.getAssociationById(associationId);
         association = PermissionsUtils.sanitizeWithCallerChecks(mContext, association);
@@ -130,6 +131,20 @@ public class SystemDataTransferProcessor {
                     + " for user " + userId);
         }
         return association;
+    }
+
+    /**
+     * Return whether the user has consented to the permission transfer for the association.
+     */
+    public boolean isPermissionTransferUserConsented(String packageName, @UserIdInt int userId,
+            int associationId) {
+        resolveAssociation(packageName, userId, associationId);
+
+        PermissionSyncRequest request = getPermissionSyncRequest(associationId);
+        if (request == null) {
+            return false;
+        }
+        return request.isUserConsented();
     }
 
     /**
