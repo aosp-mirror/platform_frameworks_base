@@ -23,6 +23,8 @@ import android.telephony.TelephonyManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
@@ -65,6 +67,8 @@ import org.mockito.Mockito.verify
 @SmallTest
 class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: FullMobileConnectionRepository
+
+    private val flags = FakeFeatureFlags().also { it.set(ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
 
     private val systemClock = FakeSystemClock()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -685,6 +689,7 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
                 testDispatcher,
                 logger = mock(),
                 tableLogBuffer,
+                flags,
                 testScope.backgroundScope,
             )
         whenever(
