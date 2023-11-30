@@ -48,7 +48,6 @@ import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.dagger.MediaModule.QUICK_QS_PANEL
 import com.android.systemui.notifications.ui.composable.NotificationStack
-import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.composable.QuickSettings
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Direction
@@ -179,7 +178,6 @@ private fun SceneScope.ShadeScene(
             QuickSettings(
                 modifier = Modifier.wrapContentHeight(),
                 viewModel.qsSceneAdapter,
-                QSSceneAdapter.State.QQS
             )
 
             if (viewModel.isMediaVisible()) {

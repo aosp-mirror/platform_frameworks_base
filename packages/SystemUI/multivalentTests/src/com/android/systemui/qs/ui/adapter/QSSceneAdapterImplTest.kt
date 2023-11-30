@@ -216,6 +216,37 @@ class QSSceneAdapterImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun state_expanding() =
+        testScope.runTest {
+            val qsImpl by collectLastValue(underTest.qsImpl)
+            val progress = 0.34f
+
+            underTest.inflate(context)
+            runCurrent()
+            clearInvocations(qsImpl!!)
+
+            underTest.setState(QSSceneAdapter.State.Expanding(progress))
+            with(qsImpl!!) {
+                verify(this).setQsVisible(true)
+                verify(this)
+                    .setQsExpansion(
+                        /* expansion= */ progress,
+                        /* panelExpansionFraction= */ 1f,
+                        /* proposedTranslation= */ 0f,
+                        /* squishinessFraction= */ 1f,
+                    )
+                verify(this).setListening(true)
+                verify(this).setExpanded(true)
+                verify(this)
+                    .setTransitionToFullShadeProgress(
+                        /* isTransitioningToFullShade= */ false,
+                        /* qsTransitionFraction= */ 1f,
+                        /* qsSquishinessFraction = */ 1f,
+                    )
+            }
+        }
+
+    @Test
     fun customizing_QS() =
         testScope.runTest {
             val customizing by collectLastValue(underTest.isCustomizing)

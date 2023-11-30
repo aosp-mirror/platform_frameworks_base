@@ -20,7 +20,6 @@ package com.android.systemui.scene
 
 import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
-import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
@@ -188,7 +187,7 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private var bouncerSceneJob: Job? = null
 
-    private val qsFlexiglassAdapter = FakeQSSceneAdapter(inflateDelegate = { _, _ -> mock<View>() })
+    private val qsFlexiglassAdapter = FakeQSSceneAdapter(inflateDelegate = { mock() })
 
     @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var mediaHost: MediaHost

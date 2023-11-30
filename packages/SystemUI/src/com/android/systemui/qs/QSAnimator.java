@@ -171,6 +171,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
 
     public void onRtlChanged() {
         updateAnimators();
+        setCurrentPosition();
     }
 
     /**
@@ -210,6 +211,7 @@ public class QSAnimator implements QSHost.Callback, PagedTileLayout.PageListener
     @Override
     public void onViewAttachedToWindow(@NonNull View view) {
         updateAnimators();
+        setCurrentPosition();
     }
 
     @Override
