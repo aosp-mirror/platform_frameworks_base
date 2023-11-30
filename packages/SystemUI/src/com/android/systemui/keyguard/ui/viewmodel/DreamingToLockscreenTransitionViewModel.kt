@@ -45,14 +45,13 @@ constructor(
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val fromDreamingTransitionInteractor: FromDreamingTransitionInteractor,
     private val deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
-    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     fun startTransition() = fromDreamingTransitionInteractor.startToLockscreenTransition()
 
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_LOCKSCREEN_DURATION,
-            stepFlow = keyguardTransitionInteractor.dreamingToLockscreenTransition,
+        KeyguardTransitionAnimationFlow(
+            transitionDuration = TO_LOCKSCREEN_DURATION,
+            transitionFlow = keyguardTransitionInteractor.dreamingToLockscreenTransition,
         )
 
     val transitionEnded =
@@ -63,7 +62,7 @@ constructor(
 
     /** Dream overlay y-translation on exit */
     fun dreamOverlayTranslationY(translatePx: Int): Flow<Float> {
-        return transitionAnimation.sharedFlow(
+        return transitionAnimation.createFlow(
             duration = TO_LOCKSCREEN_DURATION,
             onStep = { it * translatePx },
             interpolator = EMPHASIZED,
@@ -72,14 +71,14 @@ constructor(
 
     /** Dream overlay views alpha - fade out */
     val dreamOverlayAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+        transitionAnimation.createFlow(
             duration = 250.milliseconds,
             onStep = { 1f - it },
         )
 
     /** Lockscreen views y-translation */
     fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
-        return transitionAnimation.sharedFlow(
+        return transitionAnimation.createFlow(
             duration = TO_LOCKSCREEN_DURATION,
             onStep = { value -> -translatePx + value * translatePx },
             // Reset on cancel or finish
@@ -91,14 +90,14 @@ constructor(
 
     /** Lockscreen views alpha */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+        transitionAnimation.createFlow(
             startTime = 233.milliseconds,
             duration = 250.milliseconds,
             onStep = { it },
         )
 
     val shortcutsAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+        transitionAnimation.createFlow(
             startTime = 233.milliseconds,
             duration = 250.milliseconds,
             onStep = { it },

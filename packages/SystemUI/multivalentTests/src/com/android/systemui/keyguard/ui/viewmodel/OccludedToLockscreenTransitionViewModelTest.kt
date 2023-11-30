@@ -19,161 +19,197 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
-import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
-import com.android.systemui.coroutines.collectValues
-import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
+import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
+import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.kosmos.testScope
-import com.android.systemui.res.R
-import com.android.systemui.testKosmos
+import com.android.systemui.util.mockito.whenever
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito.anyInt
+import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
-    val kosmos = testKosmos()
-    val testScope = kosmos.testScope
+    private lateinit var underTest: OccludedToLockscreenTransitionViewModel
+    private lateinit var repository: FakeKeyguardTransitionRepository
+    private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
+    private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
+    @Mock private lateinit var configurationInteractor: ConfigurationInteractor
+    private val dimenFlow = MutableStateFlow(0)
 
-    val biometricSettingsRepository = kosmos.biometricSettingsRepository
-    val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
-    val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
-    val configurationRepository = kosmos.fakeConfigurationRepository
-    val underTest = kosmos.occludedToLockscreenTransitionViewModel
+    @Before
+    fun setUp() {
+        MockitoAnnotations.initMocks(this)
+        repository = FakeKeyguardTransitionRepository()
+        fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
+        biometricSettingsRepository = FakeBiometricSettingsRepository()
+        whenever(configurationInteractor.dimensionPixelSize(anyInt())).thenReturn(dimenFlow)
+        underTest =
+            OccludedToLockscreenTransitionViewModel(
+                interactor =
+                    KeyguardTransitionInteractorFactory.create(
+                            scope = TestScope().backgroundScope,
+                            repository = repository,
+                        )
+                        .keyguardTransitionInteractor,
+                deviceEntryUdfpsInteractor =
+                    DeviceEntryUdfpsInteractor(
+                        fingerprintPropertyRepository = fingerprintPropertyRepository,
+                        fingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository(),
+                        biometricSettingsRepository = biometricSettingsRepository,
+                    ),
+                configurationInteractor,
+            )
+    }
 
     @Test
     fun lockscreenFadeIn() =
-        testScope.runTest {
-            val values by collectValues(underTest.lockscreenAlpha)
+        runTest(UnconfinedTestDispatcher()) {
+            val values = mutableListOf<Float>()
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                listOf(
-                    step(0f, TransitionState.STARTED),
-                    step(0.1f),
-                    // Should start running here...
-                    step(0.3f),
-                    step(0.4f),
-                    step(0.5f),
-                    step(0.6f),
-                    // ...up to here
-                    step(0.8f),
-                    step(1f),
-                ),
-                testScope,
-            )
+            val job = underTest.lockscreenAlpha.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            // Should start running here...
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.4f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(0.6f))
+            // ...up to here
+            repository.sendTransitionStep(step(0.8f))
+            repository.sendTransitionStep(step(1f))
 
             assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
+
+            job.cancel()
         }
 
     @Test
     fun lockscreenTranslationY() =
-        testScope.runTest {
-            configurationRepository.setDimensionPixelSize(
-                R.dimen.occluded_to_lockscreen_transition_lockscreen_translation_y,
-                100
-            )
-            val values by collectValues(underTest.lockscreenTranslationY)
+        runTest(UnconfinedTestDispatcher()) {
+            dimenFlow.value = 100
+            val values = mutableListOf<Float>()
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                listOf(
-                    step(0f, TransitionState.STARTED),
-                    step(0f),
-                    step(0.3f),
-                    step(0.5f),
-                    step(1f),
-                ),
-                testScope,
-            )
+            val job = underTest.lockscreenTranslationY.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(1f))
 
             assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(-100f, 0f)) }
+
+            job.cancel()
         }
 
     @Test
     fun lockscreenTranslationYResettedAfterJobCancelled() =
-        testScope.runTest {
-            configurationRepository.setDimensionPixelSize(
-                R.dimen.occluded_to_lockscreen_transition_lockscreen_translation_y,
-                100
-            )
-            val values by collectValues(underTest.lockscreenTranslationY)
+        runTest(UnconfinedTestDispatcher()) {
+            dimenFlow.value = 100
+            val values = mutableListOf<Float>()
 
-            keyguardTransitionRepository.sendTransitionStep(step(0.5f, TransitionState.CANCELED))
+            val job = underTest.lockscreenTranslationY.onEach { values.add(it) }.launchIn(this)
+            repository.sendTransitionStep(step(0.5f, TransitionState.CANCELED))
 
             assertThat(values.last()).isEqualTo(0f)
+
+            job.cancel()
         }
 
     @Test
     fun deviceEntryParentViewFadeIn() =
-        testScope.runTest {
-            val values by collectValues(underTest.deviceEntryParentViewAlpha)
+        runTest(UnconfinedTestDispatcher()) {
+            val values = mutableListOf<Float>()
 
-            keyguardTransitionRepository.sendTransitionSteps(
-                listOf(
-                    step(0f, TransitionState.STARTED),
-                    step(0.1f),
-                    // Should start running here...
-                    step(0.3f),
-                    step(0.4f),
-                    step(0.5f),
-                    step(0.6f),
-                    // ...up to here
-                    step(0.8f),
-                    step(1f),
-                ),
-                testScope,
-            )
+            val job = underTest.deviceEntryParentViewAlpha.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            // Should start running here...
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.4f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(0.6f))
+            // ...up to here
+            repository.sendTransitionStep(step(0.8f))
+            repository.sendTransitionStep(step(1f))
 
             assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
+
+            job.cancel()
         }
 
     @Test
     fun deviceEntryBackgroundViewShows() =
-        testScope.runTest {
+        runTest(UnconfinedTestDispatcher()) {
             fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
-            val values by collectValues(underTest.deviceEntryBackgroundViewAlpha)
+            val values = mutableListOf<Float>()
 
-            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            keyguardTransitionRepository.sendTransitionStep(step(0.1f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.3f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.4f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.5f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.6f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.8f))
-            keyguardTransitionRepository.sendTransitionStep(step(1f))
+            val job =
+                underTest.deviceEntryBackgroundViewAlpha.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.4f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(0.6f))
+            repository.sendTransitionStep(step(0.8f))
+            repository.sendTransitionStep(step(1f))
 
             values.forEach { assertThat(it).isEqualTo(1f) }
+
+            job.cancel()
         }
 
     @Test
     fun deviceEntryBackgroundView_noUdfpsEnrolled_noUpdates() =
-        testScope.runTest {
+        runTest(UnconfinedTestDispatcher()) {
             fingerprintPropertyRepository.supportsRearFps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
-            val values by collectValues(underTest.deviceEntryBackgroundViewAlpha)
+            val values = mutableListOf<Float>()
 
-            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            keyguardTransitionRepository.sendTransitionStep(step(0.1f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.3f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.4f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.5f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.6f))
-            keyguardTransitionRepository.sendTransitionStep(step(0.8f))
-            keyguardTransitionRepository.sendTransitionStep(step(1f))
+            val job =
+                underTest.deviceEntryBackgroundViewAlpha.onEach { values.add(it) }.launchIn(this)
+
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.4f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(0.6f))
+            repository.sendTransitionStep(step(0.8f))
+            repository.sendTransitionStep(step(1f))
 
             assertThat(values).isEmpty() // no updates
+
+            job.cancel()
         }
 
     private fun step(

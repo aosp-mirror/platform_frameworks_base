@@ -40,25 +40,23 @@ constructor(
     interactor: KeyguardTransitionInteractor,
     shadeDependentFlows: ShadeDependentFlows,
     configurationInteractor: ConfigurationInteractor,
-    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_OCCLUDED_DURATION,
-            stepFlow = interactor.lockscreenToOccludedTransition,
+        KeyguardTransitionAnimationFlow(
+            transitionDuration = TO_OCCLUDED_DURATION,
+            transitionFlow = interactor.lockscreenToOccludedTransition,
         )
 
     /** Lockscreen views alpha */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+        transitionAnimation.createFlow(
             duration = 250.milliseconds,
             onStep = { 1f - it },
-            name = "LOCKSCREEN->OCCLUDED: lockscreenAlpha",
         )
 
     val shortcutsAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+        transitionAnimation.createFlow(
             duration = 250.milliseconds,
             onStep = { 1 - it },
             onFinish = { 0f },
@@ -70,7 +68,7 @@ constructor(
         configurationInteractor
             .dimensionPixelSize(R.dimen.lockscreen_to_occluded_transition_lockscreen_translation_y)
             .flatMapLatest { translatePx ->
-                transitionAnimation.sharedFlow(
+                transitionAnimation.createFlow(
                     duration = TO_OCCLUDED_DURATION,
                     onStep = { value -> value * translatePx },
                     // Reset on cancel or finish
