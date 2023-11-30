@@ -388,6 +388,10 @@ object Flags {
     // TODO(b/280426085): Tracking Bug
     @JvmField val NEW_BLUETOOTH_REPOSITORY = releasedFlag("new_bluetooth_repository")
 
+    // TODO(b/311222557): Tracking bug
+    val ROAMING_INDICATOR_VIA_DISPLAY_INFO =
+        releasedFlag("roaming_indicator_via_display_info")
+
     // TODO(b/292533677): Tracking Bug
     val WIFI_TRACKER_LIB_FOR_WIFI_ICON =
         unreleasedFlag("wifi_tracker_lib_for_wifi_icon", teamfood = true)

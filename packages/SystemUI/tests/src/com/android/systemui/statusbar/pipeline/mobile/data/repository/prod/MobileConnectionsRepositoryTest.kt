@@ -41,6 +41,8 @@ import com.android.settingslib.R
 import com.android.settingslib.mobile.MobileMappings
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
@@ -90,6 +92,9 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper
 class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private lateinit var underTest: MobileConnectionsRepositoryImpl
+
+    private val flags =
+        FakeFeatureFlags().also { it.set(Flags.ROAMING_INDICATOR_VIA_DISPLAY_INFO, true) }
 
     private lateinit var connectionFactory: MobileConnectionRepositoryImpl.Factory
     private lateinit var carrierMergedFactory: CarrierMergedConnectionRepository.Factory
@@ -182,6 +187,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 logger = logger,
                 mobileMappingsProxy = mobileMappings,
                 scope = testScope.backgroundScope,
+                flags = flags,
                 carrierConfigRepository = carrierConfigRepository,
             )
         carrierMergedFactory =
