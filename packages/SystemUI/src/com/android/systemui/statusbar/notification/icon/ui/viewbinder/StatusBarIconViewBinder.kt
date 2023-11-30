@@ -21,6 +21,7 @@ import android.view.View
 import com.android.internal.util.ContrastColorUtil
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.StatusBarIconView.NO_COLOR
 import com.android.systemui.statusbar.notification.NotificationUtils
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconColors
 import kotlinx.coroutines.flow.Flow
@@ -54,7 +55,8 @@ object StatusBarIconViewBinder {
         iconColors.collect { colors ->
             val isPreL = java.lang.Boolean.TRUE == view.getTag(R.id.icon_is_pre_L)
             val isColorized = !isPreL || NotificationUtils.isGrayscale(view, contrastColorUtil)
-            view.staticDrawableColor = colors.staticDrawableColor(view.viewBounds, isColorized)
+            view.staticDrawableColor =
+                if (isColorized) colors.staticDrawableColor(view.viewBounds) else NO_COLOR
             view.setDecorColor(colors.tint)
         }
     }

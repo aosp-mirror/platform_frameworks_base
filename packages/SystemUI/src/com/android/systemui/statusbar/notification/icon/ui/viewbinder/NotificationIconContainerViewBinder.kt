@@ -305,8 +305,6 @@ object NotificationIconContainerViewBinder {
                     }
                 }
             }
-            // Recalculate all icon positions, to reflect our updates.
-            view.calculateIconXTranslations()
         }
     }
 
