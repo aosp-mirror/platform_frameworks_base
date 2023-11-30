@@ -190,7 +190,7 @@ public class DisplayManagerFlags {
         return mBrightnessIntRangeUserPerceptionFlagState.isEnabled();
     }
 
-    public boolean isExternalVsyncProximityVoteEnabled() {
+    public boolean isVsyncProximityVoteEnabled() {
         return mVsyncProximityVote.isEnabled();
     }
 
