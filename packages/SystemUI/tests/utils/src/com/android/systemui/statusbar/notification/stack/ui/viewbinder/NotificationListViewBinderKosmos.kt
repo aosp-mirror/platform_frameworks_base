@@ -26,18 +26,18 @@ import com.android.systemui.statusbar.notification.icon.ui.viewbinder.shelfNotif
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.statusBarIconViewBindingFailureTracker
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.notificationListViewModel
 import com.android.systemui.statusbar.phone.notificationIconAreaController
-import com.android.systemui.statusbar.policy.configurationController
+import com.android.systemui.statusbar.ui.systemBarUtilsState
 
 val Kosmos.notificationListViewBinder by Fixture {
     NotificationListViewBinder(
         viewModel = notificationListViewModel,
         backgroundDispatcher = testDispatcher,
         configuration = configurationState,
-        configurationController = configurationController,
         falsingManager = falsingManager,
         iconAreaController = notificationIconAreaController,
         iconViewBindingFailureTracker = statusBarIconViewBindingFailureTracker,
         metricsLogger = metricsLogger,
         shelfIconViewStore = shelfNotificationIconViewStore,
+        systemBarUtilsState = systemBarUtilsState,
     )
 }

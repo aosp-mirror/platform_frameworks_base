@@ -63,7 +63,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.ui.SystemBarUtilsState;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.settings.SecureSettings;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -185,7 +185,7 @@ public class KeyguardClockSwitchControllerBaseTest extends SysuiTestCase {
                 mKeyguardSliceViewController,
                 mNotificationIconAreaController,
                 mSmartspaceController,
-                mock(ConfigurationController.class),
+                mock(SystemBarUtilsState.class),
                 mock(ScreenOffAnimationController.class),
                 mock(StatusBarIconViewBindingFailureTracker.class),
                 mKeyguardUnlockAnimationController,

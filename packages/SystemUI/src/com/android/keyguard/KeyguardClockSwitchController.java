@@ -72,7 +72,7 @@ import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
+import com.android.systemui.statusbar.ui.SystemBarUtilsState;
 import com.android.systemui.util.ViewController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.SecureSettings;
@@ -105,7 +105,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     private final NotificationIconContainerAlwaysOnDisplayViewModel mAodIconsViewModel;
     private final KeyguardRootViewModel mKeyguardRootViewModel;
     private final ConfigurationState mConfigurationState;
-    private final ConfigurationController mConfigurationController;
+    private final SystemBarUtilsState mSystemBarUtilsState;
     private final DozeParameters mDozeParameters;
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private final AlwaysOnDisplayNotificationIconViewStore mAodIconViewStore;
@@ -183,7 +183,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             KeyguardSliceViewController keyguardSliceViewController,
             NotificationIconAreaController notificationIconAreaController,
             LockscreenSmartspaceController smartspaceController,
-            ConfigurationController configurationController,
+            SystemBarUtilsState systemBarUtilsState,
             ScreenOffAnimationController screenOffAnimationController,
             StatusBarIconViewBindingFailureTracker iconViewBindingFailureTracker,
             KeyguardUnlockAnimationController keyguardUnlockAnimationController,
@@ -208,7 +208,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mKeyguardSliceViewController = keyguardSliceViewController;
         mNotificationIconAreaController = notificationIconAreaController;
         mSmartspaceController = smartspaceController;
-        mConfigurationController = configurationController;
+        mSystemBarUtilsState = systemBarUtilsState;
         mScreenOffAnimationController = screenOffAnimationController;
         mIconViewBindingFailureTracker = iconViewBindingFailureTracker;
         mSecureSettings = secureSettings;
@@ -619,13 +619,14 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                     mAodIconsBindHandle.dispose();
                 }
                 if (nic != null) {
-                    final DisposableHandle viewHandle = NotificationIconContainerViewBinder.bind(
-                            nic,
-                            mAodIconsViewModel,
-                            mConfigurationState,
-                            mConfigurationController,
-                            mIconViewBindingFailureTracker,
-                            mAodIconViewStore);
+                    final DisposableHandle viewHandle =
+                            NotificationIconContainerViewBinder.bindWhileAttached(
+                                    nic,
+                                    mAodIconsViewModel,
+                                    mConfigurationState,
+                                    mSystemBarUtilsState,
+                                    mIconViewBindingFailureTracker,
+                                    mAodIconViewStore);
                     final DisposableHandle visHandle = KeyguardRootViewBinder.bindAodIconVisibility(
                             nic,
                             mKeyguardRootViewModel.isNotifIconContainerVisible(),

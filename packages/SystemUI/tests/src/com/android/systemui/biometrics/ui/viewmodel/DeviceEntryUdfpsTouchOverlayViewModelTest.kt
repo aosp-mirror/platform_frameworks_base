@@ -20,7 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
-import com.android.systemui.flags.featureFlagsClassic
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.viewmodel.deviceEntryIconViewModelTransitionsMock
 import com.android.systemui.kosmos.testScope
@@ -49,7 +49,7 @@ import org.mockito.MockitoAnnotations
 class DeviceEntryUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
     val kosmos =
         testKosmos().apply {
-            featureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, true) }
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, true) }
         }
     val testScope = kosmos.testScope
 
