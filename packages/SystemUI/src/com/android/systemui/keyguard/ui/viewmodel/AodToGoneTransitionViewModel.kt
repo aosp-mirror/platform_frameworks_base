@@ -32,13 +32,12 @@ class AodToGoneTransitionViewModel
 @Inject
 constructor(
     interactor: KeyguardTransitionInteractor,
-    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = FromAodTransitionInteractor.TO_GONE_DURATION,
-            stepFlow = interactor.transition(KeyguardState.AOD, KeyguardState.GONE),
+        KeyguardTransitionAnimationFlow(
+            transitionDuration = FromAodTransitionInteractor.TO_GONE_DURATION,
+            transitionFlow = interactor.transition(KeyguardState.AOD, KeyguardState.GONE),
         )
 
     override val deviceEntryParentViewAlpha = transitionAnimation.immediatelyTransitionTo(0f)

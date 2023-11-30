@@ -18,7 +18,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.common.ui.domain.interactor.configurationInteractor
+import android.content.applicationContext
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.burnInInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
@@ -32,7 +32,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.keyguardRootViewModel by Fixture {
     KeyguardRootViewModel(
-        configurationInteractor = configurationInteractor,
+        context = applicationContext,
         deviceEntryInteractor = deviceEntryInteractor,
         dozeParameters = dozeParameters,
         keyguardInteractor = keyguardInteractor,
@@ -41,7 +41,6 @@ val Kosmos.keyguardRootViewModel by Fixture {
         burnInInteractor = burnInInteractor,
         goneToAodTransitionViewModel = goneToAodTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
-        occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
         screenOffAnimationController = screenOffAnimationController,
     )
 }

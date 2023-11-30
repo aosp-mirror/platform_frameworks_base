@@ -47,7 +47,6 @@ import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.communal.data.repository.FakeCommunalRepository
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.interactor.CommunalInteractorFactory
@@ -133,9 +132,6 @@ class SceneTestUtils(
     }
     val configurationRepository: FakeConfigurationRepository by lazy {
         FakeConfigurationRepository()
-    }
-    val configurationInteractor: ConfigurationInteractor by lazy {
-        ConfigurationInteractor(configurationRepository)
     }
     private val emergencyServicesRepository: EmergencyServicesRepository by lazy {
         EmergencyServicesRepository(
@@ -250,7 +246,7 @@ class SceneTestUtils(
             commandQueue = FakeCommandQueue(),
             sceneContainerFlags = sceneContainerFlags,
             bouncerRepository = FakeKeyguardBouncerRepository(),
-            configurationInteractor = configurationInteractor,
+            configurationRepository = configurationRepository,
             shadeRepository = FakeShadeRepository(),
             sceneInteractorProvider = { sceneInteractor() },
             powerInteractor = PowerInteractorFactory.create().powerInteractor,

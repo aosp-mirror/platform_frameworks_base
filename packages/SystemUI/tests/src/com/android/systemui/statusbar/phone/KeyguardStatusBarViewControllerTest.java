@@ -55,7 +55,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository;
@@ -168,7 +167,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 PowerInteractorFactory.create().getPowerInteractor(),
                 mSceneTestUtils.getSceneContainerFlags(),
                 new FakeKeyguardBouncerRepository(),
-                new ConfigurationInteractor(new FakeConfigurationRepository()),
+                new FakeConfigurationRepository(),
                 new FakeShadeRepository(),
                 () -> mSceneTestUtils.sceneInteractor());
         mViewModel =

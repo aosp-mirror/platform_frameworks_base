@@ -88,7 +88,7 @@ object KeyguardRootViewBinder {
         vibratorHelper: VibratorHelper?,
     ): DisposableHandle {
         var onLayoutChangeListener: OnLayoutChange? = null
-        val childViews = mutableMapOf<Int, View>()
+        val childViews = mutableMapOf<Int, View?>()
         val statusViewId = R.id.keyguard_status_view
         val burnInLayerId = R.id.burn_in_layer
         val aodNotificationIconContainerId = R.id.aod_notification_icon_container
@@ -113,12 +113,7 @@ object KeyguardRootViewBinder {
                     }
 
                     if (keyguardBottomAreaRefactor()) {
-                        launch {
-                            viewModel.alpha.collect { alpha ->
-                                view.alpha = alpha
-                                childViews[statusViewId]?.alpha = alpha
-                            }
-                        }
+                        launch { viewModel.alpha.collect { alpha -> view.alpha = alpha } }
                     }
 
                     if (KeyguardShadeMigrationNssl.isEnabled) {

@@ -17,14 +17,12 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.FromOccludedTransitionInteractor.Companion.TO_LOCKSCREEN_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
-import com.android.systemui.res.R
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,32 +40,26 @@ class OccludedToLockscreenTransitionViewModel
 @Inject
 constructor(
     interactor: KeyguardTransitionInteractor,
-    deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
-    configurationInteractor: ConfigurationInteractor,
-    animationFlow: KeyguardTransitionAnimationFlow,
+    deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor
 ) : DeviceEntryIconTransition {
-
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_LOCKSCREEN_DURATION,
-            stepFlow = interactor.occludedToLockscreenTransition,
+        KeyguardTransitionAnimationFlow(
+            transitionDuration = TO_LOCKSCREEN_DURATION,
+            transitionFlow = interactor.occludedToLockscreenTransition,
         )
 
     /** Lockscreen views y-translation */
-    val lockscreenTranslationY: Flow<Float> =
-        configurationInteractor
-            .dimensionPixelSize(R.dimen.occluded_to_lockscreen_transition_lockscreen_translation_y)
-            .flatMapLatest { translatePx ->
-                transitionAnimation.sharedFlow(
-                    duration = TO_LOCKSCREEN_DURATION,
-                    onStep = { value -> -translatePx + value * translatePx },
-                    interpolator = EMPHASIZED_DECELERATE,
-                    onCancel = { 0f },
-                )
-            }
+    fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
+        return transitionAnimation.createFlow(
+            duration = TO_LOCKSCREEN_DURATION,
+            onStep = { value -> -translatePx + value * translatePx },
+            interpolator = EMPHASIZED_DECELERATE,
+            onCancel = { 0f },
+        )
+    }
 
     val shortcutsAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+        transitionAnimation.createFlow(
             duration = 250.milliseconds,
             onStep = { it },
             onCancel = { 0f },
@@ -75,12 +67,10 @@ constructor(
 
     /** Lockscreen views alpha */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+        transitionAnimation.createFlow(
             startTime = 233.milliseconds,
             duration = 250.milliseconds,
             onStep = { it },
-            onStart = { 0f },
-            name = "OCCLUDED->LOCKSCREEN: lockscreenAlpha",
         )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =

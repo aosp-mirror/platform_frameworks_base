@@ -525,16 +525,6 @@ public class LogModule {
     }
 
     /**
-     * Provides a {@link LogBuffer} for keyguard transition animation logs.
-     */
-    @Provides
-    @SysUISingleton
-    @KeyguardTransitionAnimationLog
-    public static LogBuffer provideKeyguardTransitionAnimationLogBuffer(LogBufferFactory factory) {
-        return factory.create("KeyguardTransitionAnimationLog", 250);
-    }
-
-    /**
      * Provides a {@link LogBuffer} for Scrims like LightRevealScrim.
      */
     @Provides

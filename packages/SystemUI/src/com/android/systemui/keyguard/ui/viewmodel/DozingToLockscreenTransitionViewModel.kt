@@ -35,16 +35,15 @@ class DozingToLockscreenTransitionViewModel
 @Inject
 constructor(
     interactor: KeyguardTransitionInteractor,
-    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
-    private val transitionAnimation =
-        animationFlow.setup(
-            duration = FromDozingTransitionInteractor.TO_LOCKSCREEN_DURATION,
-            stepFlow = interactor.dozingToLockscreenTransition,
+    private val transitionAnimation: KeyguardTransitionAnimationFlow =
+        KeyguardTransitionAnimationFlow(
+            transitionDuration = FromDozingTransitionInteractor.TO_LOCKSCREEN_DURATION,
+            transitionFlow = interactor.dozingToLockscreenTransition,
         )
 
     val shortcutsAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+        transitionAnimation.createFlow(
             duration = 150.milliseconds,
             onStep = { it },
             onCancel = { 0f },

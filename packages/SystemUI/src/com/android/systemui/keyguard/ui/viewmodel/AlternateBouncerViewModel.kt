@@ -38,17 +38,15 @@ class AlternateBouncerViewModel
 constructor(
     private val statusBarKeyguardViewManager: StatusBarKeyguardViewManager,
     transitionInteractor: KeyguardTransitionInteractor,
-    animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     // When we're fully transitioned to the AlternateBouncer, the alpha of the scrim should be:
     private val alternateBouncerScrimAlpha = .66f
     private val toAlternateBouncerTransition =
-        animationFlow
-            .setup(
-                duration = TRANSITION_DURATION_MS,
-                stepFlow = transitionInteractor.anyStateToAlternateBouncerTransition,
+        KeyguardTransitionAnimationFlow(
+                transitionDuration = TRANSITION_DURATION_MS,
+                transitionFlow = transitionInteractor.anyStateToAlternateBouncerTransition,
             )
-            .sharedFlow(
+            .createFlow(
                 duration = TRANSITION_DURATION_MS,
                 onStep = { it },
                 onFinish = { 1f },
@@ -57,12 +55,11 @@ constructor(
                 interpolator = Interpolators.FAST_OUT_SLOW_IN,
             )
     private val fromAlternateBouncerTransition =
-        animationFlow
-            .setup(
-                TRANSITION_DURATION_MS,
-                transitionInteractor.transitionStepsFromState(ALTERNATE_BOUNCER),
+        KeyguardTransitionAnimationFlow(
+                transitionDuration = TRANSITION_DURATION_MS,
+                transitionFlow = transitionInteractor.transitionStepsFromState(ALTERNATE_BOUNCER),
             )
-            .sharedFlow(
+            .createFlow(
                 duration = TRANSITION_DURATION_MS,
                 onStep = { 1f - it },
                 // Reset on cancel

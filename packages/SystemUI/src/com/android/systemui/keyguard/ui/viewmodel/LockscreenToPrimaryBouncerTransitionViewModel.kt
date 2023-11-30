@@ -39,12 +39,11 @@ class LockscreenToPrimaryBouncerTransitionViewModel
 constructor(
     interactor: KeyguardTransitionInteractor,
     shadeDependentFlows: ShadeDependentFlows,
-    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
-            stepFlow =
+        KeyguardTransitionAnimationFlow(
+            transitionDuration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
+            transitionFlow =
                 interactor.transition(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER),
         )
 
@@ -56,7 +55,7 @@ constructor(
     override val deviceEntryParentViewAlpha: Flow<Float> =
         shadeDependentFlows.transitionFlow(
             flowWhenShadeIsNotExpanded =
-                transitionAnimation.sharedFlow(
+                transitionAnimation.createFlow(
                     duration = 250.milliseconds,
                     onStep = { 1f - it },
                     onFinish = { 0f }

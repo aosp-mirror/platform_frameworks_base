@@ -38,18 +38,17 @@ class GoneToAodTransitionViewModel
 constructor(
     interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
-    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_AOD_DURATION,
-            stepFlow = interactor.goneToAodTransition,
+        KeyguardTransitionAnimationFlow(
+            transitionDuration = TO_AOD_DURATION,
+            transitionFlow = interactor.goneToAodTransition,
         )
 
     /** y-translation from the top of the screen for AOD */
     fun enterFromTopTranslationY(translatePx: Int): Flow<Float> {
-        return transitionAnimation.sharedFlow(
+        return transitionAnimation.createFlow(
             startTime = 600.milliseconds,
             duration = 500.milliseconds,
             onStart = { translatePx },
@@ -62,7 +61,7 @@ constructor(
 
     /** alpha animation upon entering AOD */
     val enterFromTopAnimationAlpha: Flow<Float> =
-        transitionAnimation.sharedFlow(
+        transitionAnimation.createFlow(
             startTime = 600.milliseconds,
             duration = 500.milliseconds,
             onStart = { 0f },
@@ -75,7 +74,7 @@ constructor(
             if (udfpsEnrolled) {
                 // fade in at the end of the transition to give time for FP to start running
                 // and avoid a flicker of the unlocked icon
-                transitionAnimation.sharedFlow(
+                transitionAnimation.createFlow(
                     startTime = 1100.milliseconds,
                     duration = 200.milliseconds,
                     onStep = { it },

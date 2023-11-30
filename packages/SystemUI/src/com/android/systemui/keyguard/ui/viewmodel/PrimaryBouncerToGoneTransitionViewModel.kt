@@ -50,12 +50,11 @@ constructor(
     keyguardDismissActionInteractor: Lazy<KeyguardDismissActionInteractor>,
     featureFlags: FeatureFlagsClassic,
     bouncerToGoneFlows: BouncerToGoneFlows,
-    animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     private val transitionAnimation =
-        animationFlow.setup(
-            duration = TO_GONE_DURATION,
-            stepFlow = interactor.transition(PRIMARY_BOUNCER, GONE)
+        KeyguardTransitionAnimationFlow(
+            transitionDuration = TO_GONE_DURATION,
+            transitionFlow = interactor.transition(PRIMARY_BOUNCER, GONE)
         )
 
     private var leaveShadeOpen: Boolean = false
@@ -72,7 +71,7 @@ constructor(
             createBouncerAlphaFlow(primaryBouncerInteractor::willRunDismissFromKeyguard)
         }
     private fun createBouncerAlphaFlow(willRunAnimationOnKeyguard: () -> Boolean): Flow<Float> {
-        return transitionAnimation.sharedFlow(
+        return transitionAnimation.createFlow(
             duration = 200.milliseconds,
             onStart = { willRunDismissFromKeyguard = willRunAnimationOnKeyguard() },
             onStep = {
@@ -96,7 +95,7 @@ constructor(
             createLockscreenAlpha(primaryBouncerInteractor::willRunDismissFromKeyguard)
         }
     private fun createLockscreenAlpha(willRunAnimationOnKeyguard: () -> Boolean): Flow<Float> {
-        return transitionAnimation.sharedFlow(
+        return transitionAnimation.createFlow(
             duration = 50.milliseconds,
             onStart = {
                 leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
