@@ -552,7 +552,7 @@ public class InputDeviceSensorManager {
         }
     }
 
-    private boolean flush(SensorEventListener listener) {
+    private boolean flushInternal(SensorEventListener listener) {
         synchronized (mInputSensorLock) {
             int idx = findSensorEventListenerLocked(listener);
             if (idx < 0) {
@@ -608,7 +608,7 @@ public class InputDeviceSensorManager {
 
         @Override
         protected boolean flushImpl(SensorEventListener listener) {
-            return flush(listener);
+            return flushInternal(listener);
         }
 
         @Override
