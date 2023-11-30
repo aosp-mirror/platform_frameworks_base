@@ -137,7 +137,7 @@ public class SurfaceControlViewHostTests {
 
         wasVisible = waitForWindowVisible(mView2);
         if (!wasVisible) {
-            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows");
+            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-not visible");
         }
         assertTrue("Failed to wait for view2", wasVisible);
 
@@ -145,11 +145,21 @@ public class SurfaceControlViewHostTests {
 
         WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
                 mScvh1.getInputTransferToken(), true);
-        assertTrue("Failed to gain focus for view1", waitForWindowFocus(mView1, true));
+
+        boolean gainedFocus = waitForWindowFocus(mView1, true);
+        if (!gainedFocus) {
+            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-view1 not focus");
+        }
+        assertTrue("Failed to gain focus for view1", gainedFocus);
 
         WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
                 mScvh2.getInputTransferToken(), true);
-        assertTrue("Failed to gain focus for view2", waitForWindowFocus(mView2, true));
+
+        gainedFocus = waitForWindowFocus(mView2, true);
+        if (!gainedFocus) {
+            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-view2 not focus");
+        }
+        assertTrue("Failed to gain focus for view2", gainedFocus);
     }
 
     private static class TestWindowlessWindowManager extends WindowlessWindowManager {
