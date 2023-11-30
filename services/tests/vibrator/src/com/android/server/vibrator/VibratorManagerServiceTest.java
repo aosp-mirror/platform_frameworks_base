@@ -1399,6 +1399,17 @@ public class VibratorManagerServiceTest {
     }
 
     @Test
+    public void performHapticFeedback_usesServiceAsToken() throws Exception {
+        VibratorManagerService service = createSystemReadyService();
+
+        HalVibration vibration =
+                performHapticFeedbackAndWaitUntilFinished(
+                        service, HapticFeedbackConstants.SCROLL_TICK, /* always= */ true);
+
+        assertTrue(vibration.callerToken == service);
+    }
+
+    @Test
     public void vibrate_withIntensitySettings_appliesSettingsToScaleVibrations() throws Exception {
         int defaultNotificationIntensity =
                 mVibrator.getDefaultVibrationIntensity(VibrationAttributes.USAGE_NOTIFICATION);

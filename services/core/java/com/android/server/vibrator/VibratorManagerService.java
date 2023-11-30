@@ -411,9 +411,13 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
     @Override // Binder call
     public void performHapticFeedback(
-            int uid, int deviceId, String opPkg, int constant, boolean always, String reason,
-            IBinder token) {
-        performHapticFeedbackInternal(uid, deviceId, opPkg, constant, always, reason, token);
+            int uid, int deviceId, String opPkg, int constant, boolean always, String reason) {
+        // Note that the `performHapticFeedback` method does not take a token argument from the
+        // caller, and instead, uses this service as the token. This is to mitigate performance
+        // impact that would otherwise be caused due to marshal latency. Haptic feedback effects are
+        // short-lived, so we don't need to cancel when the process dies.
+        performHapticFeedbackInternal(
+                uid, deviceId, opPkg, constant, always, reason, /* token= */ this);
     }
 
     /**
