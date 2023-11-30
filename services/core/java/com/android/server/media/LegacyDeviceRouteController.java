@@ -35,13 +35,11 @@ import android.media.IAudioRoutesObserver;
 import android.media.IAudioService;
 import android.media.MediaRoute2Info;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -75,6 +73,7 @@ import java.util.Objects;
     private int mDeviceVolume;
     private MediaRoute2Info mDeviceRoute;
 
+    @VisibleForTesting
     /* package */ LegacyDeviceRouteController(@NonNull Context context,
             @NonNull AudioManager audioManager,
             @NonNull IAudioService audioService,
@@ -101,30 +100,15 @@ import java.util.Objects;
     }
 
     @Override
-    public void start(UserHandle mUser) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void stop() {
-        // Nothing to do.
+    public boolean selectRoute(@Nullable Integer type) {
+        // No-op as the controller does not support selection from the outside of the class.
+        return false;
     }
 
     @Override
     @NonNull
     public synchronized MediaRoute2Info getSelectedRoute() {
         return mDeviceRoute;
-    }
-
-    @Override
-    public synchronized List<MediaRoute2Info> getAvailableRoutes() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public synchronized void transferTo(@Nullable String routeId) {
-        // Unsupported. This implementation doesn't support transferable routes (always exposes a
-        // single non-bluetooth route).
     }
 
     @Override
