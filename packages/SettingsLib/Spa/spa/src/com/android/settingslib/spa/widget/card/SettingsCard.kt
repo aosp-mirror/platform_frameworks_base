@@ -36,10 +36,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.debug.UiModePreviews
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraLarge
+import com.android.settingslib.spa.framework.theme.SettingsShape.CornerExtraSmall
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.widget.ui.SettingsBody
 import com.android.settingslib.spa.widget.ui.SettingsTitle
@@ -49,7 +52,7 @@ fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
     Card(
         shape = CornerExtraLarge,
         colors = CardDefaults.cardColors(
-            containerColor = SettingsTheme.colorScheme.surface,
+            containerColor = Color.Transparent,
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -57,6 +60,20 @@ fun SettingsCard(content: @Composable ColumnScope.() -> Unit) {
                 horizontal = SettingsDimension.itemPaddingEnd,
                 vertical = SettingsDimension.itemPaddingAround,
             ),
+        content = content,
+    )
+}
+
+@Composable
+fun SettingsCardContent(content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        shape = CornerExtraSmall,
+        colors = CardDefaults.cardColors(
+            containerColor = SettingsTheme.colorScheme.surface,
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 1.dp),
         content = content,
     )
 }
@@ -70,14 +87,16 @@ fun SettingsCard(model: CardModel) {
 
 @Composable
 internal fun SettingsCardImpl(model: CardModel) {
-    Column(
-        modifier = Modifier.padding(SettingsDimension.itemPaddingStart),
-        verticalArrangement = Arrangement.spacedBy(SettingsDimension.itemPaddingAround)
-    ) {
-        CardIcon(model.imageVector)
-        SettingsTitle(model.title)
-        SettingsBody(model.text)
-        Buttons(model.buttons)
+    SettingsCardContent {
+        Column(
+            modifier = Modifier.padding(SettingsDimension.itemPaddingStart),
+            verticalArrangement = Arrangement.spacedBy(SettingsDimension.itemPaddingAround)
+        ) {
+            CardIcon(model.imageVector)
+            SettingsTitle(model.title)
+            SettingsBody(model.text)
+            Buttons(model.buttons)
+        }
     }
 }
 
