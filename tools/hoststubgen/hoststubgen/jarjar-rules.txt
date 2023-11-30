@@ -1,2 +1,2 @@
 # Rename guava
-rule com.google.common.** com.android.hoststubgen.x.@0
+rule com.google.** com.android.hoststubgen.x.google.@0
