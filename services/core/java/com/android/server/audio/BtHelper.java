@@ -26,6 +26,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothLeAudio;
+import android.bluetooth.BluetoothLeAudioCodecConfig;
 import android.bluetooth.BluetoothLeAudioCodecStatus;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -250,35 +251,73 @@ public class BtHelper {
         }
     }
 
-    /*package*/ synchronized @AudioSystem.AudioFormatNativeEnumForBtCodec int getA2dpCodec(
-            @NonNull BluetoothDevice device) {
-        if (mA2dp == null) {
-            return AudioSystem.AUDIO_FORMAT_DEFAULT;
+    /*package*/ synchronized @AudioSystem.AudioFormatNativeEnumForBtCodec int getCodec(
+            @NonNull BluetoothDevice device, @AudioService.BtProfile int profile) {
+        switch (profile) {
+            case BluetoothProfile.A2DP: {
+                if (mA2dp == null) {
+                    return AudioSystem.AUDIO_FORMAT_DEFAULT;
+                }
+                BluetoothCodecStatus btCodecStatus = null;
+                try {
+                    btCodecStatus = mA2dp.getCodecStatus(device);
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception while getting status of " + device, e);
+                }
+                if (btCodecStatus == null) {
+                    return AudioSystem.AUDIO_FORMAT_DEFAULT;
+                }
+                final BluetoothCodecConfig btCodecConfig = btCodecStatus.getCodecConfig();
+                if (btCodecConfig == null) {
+                    return AudioSystem.AUDIO_FORMAT_DEFAULT;
+                }
+                return AudioSystem.bluetoothA2dpCodecToAudioFormat(btCodecConfig.getCodecType());
+            }
+            case BluetoothProfile.LE_AUDIO: {
+                if (mLeAudio == null) {
+                    return AudioSystem.AUDIO_FORMAT_DEFAULT;
+                }
+                BluetoothLeAudioCodecStatus btLeCodecStatus = null;
+                int groupId = mLeAudio.getGroupId(device);
+                try {
+                    btLeCodecStatus = mLeAudio.getCodecStatus(groupId);
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception while getting status of " + device, e);
+                }
+                if (btLeCodecStatus == null) {
+                    return AudioSystem.AUDIO_FORMAT_DEFAULT;
+                }
+                BluetoothLeAudioCodecConfig btLeCodecConfig =
+                        btLeCodecStatus.getOutputCodecConfig();
+                if (btLeCodecConfig == null) {
+                    return AudioSystem.AUDIO_FORMAT_DEFAULT;
+                }
+                return AudioSystem.bluetoothLeCodecToAudioFormat(btLeCodecConfig.getCodecType());
+            }
+            default:
+                return AudioSystem.AUDIO_FORMAT_DEFAULT;
         }
-        BluetoothCodecStatus btCodecStatus = null;
-        try {
-            btCodecStatus = mA2dp.getCodecStatus(device);
-        } catch (Exception e) {
-            Log.e(TAG, "Exception while getting status of " + device, e);
-        }
-        if (btCodecStatus == null) {
-            return AudioSystem.AUDIO_FORMAT_DEFAULT;
-        }
-        final BluetoothCodecConfig btCodecConfig = btCodecStatus.getCodecConfig();
-        if (btCodecConfig == null) {
-            return AudioSystem.AUDIO_FORMAT_DEFAULT;
-        }
-        return AudioSystem.bluetoothCodecToAudioFormat(btCodecConfig.getCodecType());
     }
 
     /*package*/ synchronized @AudioSystem.AudioFormatNativeEnumForBtCodec
-            int getA2dpCodecWithFallbackToSBC(
-                    @NonNull BluetoothDevice device, @NonNull String source) {
-        @AudioSystem.AudioFormatNativeEnumForBtCodec int codec = getA2dpCodec(device);
+            int getCodecWithFallback(
+                    @NonNull BluetoothDevice device, @AudioService.BtProfile int profile,
+                    boolean isLeOutput, @NonNull String source) {
+        // For profiles other than A2DP and LE Audio output, the audio codec format must be
+        // AUDIO_FORMAT_DEFAULT as native audio policy manager expects a specific audio format
+        // only if audio HW module selection based on format is supported for the device type.
+        if (!(profile == BluetoothProfile.A2DP
+                || (profile == BluetoothProfile.LE_AUDIO && isLeOutput))) {
+            return AudioSystem.AUDIO_FORMAT_DEFAULT;
+        }
+        @AudioSystem.AudioFormatNativeEnumForBtCodec int codec =
+                getCodec(device, profile);
         if (codec == AudioSystem.AUDIO_FORMAT_DEFAULT) {
             AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
-                    "getA2dpCodec DEFAULT from " + source + " fallback to SBC"));
-            return AudioSystem.AUDIO_FORMAT_SBC;
+                    "getCodec DEFAULT from " + source + " fallback to "
+                            + (profile == BluetoothProfile.A2DP ? "SBC" : "LC3")));
+            return profile == BluetoothProfile.A2DP
+                    ? AudioSystem.AUDIO_FORMAT_SBC : AudioSystem.AUDIO_FORMAT_LC3;
         }
         return codec;
     }

@@ -1595,8 +1595,8 @@ public class AudioDeviceBroker {
         sendILMsg(MSG_IL_BTA2DP_TIMEOUT, SENDMSG_QUEUE, a2dpCodec, address, delayMs);
     }
 
-    /*package*/ void setLeAudioTimeout(String address, int device, int delayMs) {
-        sendILMsg(MSG_IL_BTLEAUDIO_TIMEOUT, SENDMSG_QUEUE, device, address, delayMs);
+    /*package*/ void setLeAudioTimeout(String address, int device, int codec, int delayMs) {
+        sendIILMsg(MSG_IIL_BTLEAUDIO_TIMEOUT, SENDMSG_QUEUE, device, codec, address, delayMs);
     }
 
     /*package*/ void setAvrcpAbsoluteVolumeSupported(boolean supported) {
@@ -1794,8 +1794,9 @@ public class AudioDeviceBroker {
                                 return;
                             }
                             @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
-                                    mBtHelper.getA2dpCodecWithFallbackToSBC(
-                                            btInfo.mDevice, "MSG_L_SET_BT_ACTIVE_DEVICE");
+                                    mBtHelper.getCodecWithFallback(btInfo.mDevice,
+                                            btInfo.mProfile, btInfo.mIsLeOutput,
+                                            "MSG_L_SET_BT_ACTIVE_DEVICE");
                             mDeviceInventory.onSetBtActiveDevice(btInfo, codec,
                                     (btInfo.mProfile
                                             != BluetoothProfile.LE_AUDIO || btInfo.mIsLeOutput)
@@ -1819,22 +1820,24 @@ public class AudioDeviceBroker {
                 case MSG_IL_BTA2DP_TIMEOUT:
                     // msg.obj  == address of BTA2DP device
                     synchronized (mDeviceStateLock) {
-                        mDeviceInventory.onMakeA2dpDeviceUnavailableNow((String) msg.obj, msg.arg1);
+                        mDeviceInventory.onMakeA2dpDeviceUnavailableNow(
+                                (String) msg.obj, msg.arg1);
                     }
                     break;
-                case MSG_IL_BTLEAUDIO_TIMEOUT:
+                case MSG_IIL_BTLEAUDIO_TIMEOUT:
                     // msg.obj  == address of LE Audio device
                     synchronized (mDeviceStateLock) {
                         mDeviceInventory.onMakeLeAudioDeviceUnavailableNow(
-                                (String) msg.obj, msg.arg1);
+                                (String) msg.obj, msg.arg1, msg.arg2);
                     }
                     break;
                 case MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE: {
                     final BtDeviceInfo btInfo = (BtDeviceInfo) msg.obj;
                     synchronized (mDeviceStateLock) {
                         @AudioSystem.AudioFormatNativeEnumForBtCodec final int codec =
-                                mBtHelper.getA2dpCodecWithFallbackToSBC(
-                                        btInfo.mDevice, "MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE");
+                                mBtHelper.getCodecWithFallback(btInfo.mDevice,
+                                        btInfo.mProfile, btInfo.mIsLeOutput,
+                                        "MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE");
                         mDeviceInventory.onBluetoothDeviceConfigChange(
                                 btInfo, codec, BtHelper.EVENT_DEVICE_CONFIG_CHANGE);
                     }
@@ -2084,7 +2087,7 @@ public class AudioDeviceBroker {
 
     private static final int MSG_IL_SAVE_NDEF_DEVICE_FOR_STRATEGY = 47;
     private static final int MSG_IL_SAVE_REMOVE_NDEF_DEVICE_FOR_STRATEGY = 48;
-    private static final int MSG_IL_BTLEAUDIO_TIMEOUT = 49;
+    private static final int MSG_IIL_BTLEAUDIO_TIMEOUT = 49;
 
     private static final int MSG_L_NOTIFY_PREFERRED_AUDIOPROFILE_APPLIED = 52;
     private static final int MSG_L_CHECK_COMMUNICATION_DEVICE_REMOVAL = 53;
@@ -2104,7 +2107,7 @@ public class AudioDeviceBroker {
             case MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE:
             case MSG_L_SET_BT_ACTIVE_DEVICE:
             case MSG_IL_BTA2DP_TIMEOUT:
-            case MSG_IL_BTLEAUDIO_TIMEOUT:
+            case MSG_IIL_BTLEAUDIO_TIMEOUT:
             case MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE:
             case MSG_TOGGLE_HDMI:
             case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT:
@@ -2196,7 +2199,7 @@ public class AudioDeviceBroker {
                 case MSG_L_SET_BT_ACTIVE_DEVICE:
                 case MSG_L_SET_WIRED_DEVICE_CONNECTION_STATE:
                 case MSG_IL_BTA2DP_TIMEOUT:
-                case MSG_IL_BTLEAUDIO_TIMEOUT:
+                case MSG_IIL_BTLEAUDIO_TIMEOUT:
                 case MSG_L_BLUETOOTH_DEVICE_CONFIG_CHANGE:
                     if (sLastDeviceConnectMsgTime >= time) {
                         // add a little delay to make sure messages are ordered as expected
