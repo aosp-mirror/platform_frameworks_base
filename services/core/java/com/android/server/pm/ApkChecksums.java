@@ -397,6 +397,9 @@ public class ApkChecksums {
             @Nullable Certificate[] trustedInstallers,
             Map<Integer, ApkChecksum> checksums,
             @NonNull Injector injector) {
+        if (!file.exists()) {
+            return;
+        }
         final String filePath = file.getAbsolutePath();
 
         // Always available: FSI or IncFs.
