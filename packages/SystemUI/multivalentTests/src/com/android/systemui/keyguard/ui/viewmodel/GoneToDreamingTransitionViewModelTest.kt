@@ -19,85 +19,73 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.coroutines.collectValues
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class GoneToDreamingTransitionViewModelTest : SysuiTestCase() {
-    private lateinit var underTest: GoneToDreamingTransitionViewModel
-    private lateinit var repository: FakeKeyguardTransitionRepository
-
-    @Before
-    fun setUp() {
-        repository = FakeKeyguardTransitionRepository()
-        val interactor =
-            KeyguardTransitionInteractorFactory.create(
-                    scope = TestScope().backgroundScope,
-                    repository = repository,
-                )
-                .keyguardTransitionInteractor
-        underTest = GoneToDreamingTransitionViewModel(interactor)
-    }
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val repository = kosmos.fakeKeyguardTransitionRepository
+    private val underTest = kosmos.goneToDreamingTransitionViewModel
 
     @Test
-    fun lockscreenFadeOut() =
-        runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<Float>()
+    fun runTest() =
+        testScope.runTest {
+            val values by collectValues(underTest.lockscreenAlpha)
 
-            val job = underTest.lockscreenAlpha.onEach { values.add(it) }.launchIn(this)
-
-            // Should start running here...
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            repository.sendTransitionStep(step(0f))
-            repository.sendTransitionStep(step(0.1f))
-            repository.sendTransitionStep(step(0.2f))
-            repository.sendTransitionStep(step(0.3f))
-            // ...up to here
-            repository.sendTransitionStep(step(1f))
+            repository.sendTransitionSteps(
+                listOf(
+                    // Should start running here...
+                    step(0f, TransitionState.STARTED),
+                    step(0f),
+                    step(0.1f),
+                    step(0.2f),
+                    step(0.3f),
+                    // ...up to here
+                    step(1f),
+                ),
+                testScope,
+            )
 
             // Only three values should be present, since the dream overlay runs for a small
             // fraction of the overall animation time
             assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
-
-            job.cancel()
         }
 
     @Test
     fun lockscreenTranslationY() =
-        runTest(UnconfinedTestDispatcher()) {
-            val values = mutableListOf<Float>()
-
+        testScope.runTest {
             val pixels = 100
-            val job =
-                underTest.lockscreenTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
+            val values by collectValues(underTest.lockscreenTranslationY(pixels))
 
-            // Should start running here...
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            repository.sendTransitionStep(step(0f))
-            repository.sendTransitionStep(step(0.3f))
-            repository.sendTransitionStep(step(0.5f))
-            // And a final reset event on CANCEL
-            repository.sendTransitionStep(step(0.8f, TransitionState.CANCELED))
+            repository.sendTransitionSteps(
+                listOf(
+                    // Should start running here...
+                    step(0f, TransitionState.STARTED),
+                    step(0f),
+                    step(0.3f),
+                    step(0.5f),
+                    // And a final reset event on CANCEL
+                    step(0.8f, TransitionState.CANCELED)
+                ),
+                testScope,
+            )
 
             assertThat(values.size).isEqualTo(5)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 100f)) }
-
-            job.cancel()
         }
 
     private fun step(

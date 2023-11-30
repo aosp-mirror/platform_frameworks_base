@@ -20,16 +20,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -37,34 +36,25 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class AodToOccludedTransitionViewModelTest : SysuiTestCase() {
-    private lateinit var underTest: AodToOccludedTransitionViewModel
-    private lateinit var repository: FakeKeyguardTransitionRepository
-
-    @Before
-    fun setUp() {
-        repository = FakeKeyguardTransitionRepository()
-        val interactor =
-            KeyguardTransitionInteractorFactory.create(
-                    scope = TestScope().backgroundScope,
-                    repository = repository,
-                )
-                .keyguardTransitionInteractor
-        underTest = AodToOccludedTransitionViewModel(interactor)
-    }
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val repository = kosmos.fakeKeyguardTransitionRepository
+    private val underTest = kosmos.aodToOccludedTransitionViewModel
 
     @Test
-    fun deviceEntryParentViewHides() = runTest {
-        val deviceEntryParentViewAlpha by collectValues(underTest.deviceEntryParentViewAlpha)
-        repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-        repository.sendTransitionStep(step(0.1f))
-        repository.sendTransitionStep(step(0.3f))
-        repository.sendTransitionStep(step(0.4f))
-        repository.sendTransitionStep(step(0.5f))
-        repository.sendTransitionStep(step(0.6f))
-        repository.sendTransitionStep(step(0.8f))
-        repository.sendTransitionStep(step(1f))
-        deviceEntryParentViewAlpha.forEach { Truth.assertThat(it).isEqualTo(0f) }
-    }
+    fun deviceEntryParentViewHides() =
+        testScope.runTest {
+            val deviceEntryParentViewAlpha by collectValues(underTest.deviceEntryParentViewAlpha)
+            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            repository.sendTransitionStep(step(0.1f))
+            repository.sendTransitionStep(step(0.3f))
+            repository.sendTransitionStep(step(0.4f))
+            repository.sendTransitionStep(step(0.5f))
+            repository.sendTransitionStep(step(0.6f))
+            repository.sendTransitionStep(step(0.8f))
+            repository.sendTransitionStep(step(1f))
+            deviceEntryParentViewAlpha.forEach { Truth.assertThat(it).isEqualTo(0f) }
+        }
 
     private fun step(
         value: Float,

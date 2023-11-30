@@ -41,11 +41,12 @@ class PrimaryBouncerToLockscreenTransitionViewModel
 constructor(
     interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
-            transitionFlow =
+        animationFlow.setup(
+            duration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
+            stepFlow =
                 interactor.transition(KeyguardState.PRIMARY_BOUNCER, KeyguardState.LOCKSCREEN),
         )
 

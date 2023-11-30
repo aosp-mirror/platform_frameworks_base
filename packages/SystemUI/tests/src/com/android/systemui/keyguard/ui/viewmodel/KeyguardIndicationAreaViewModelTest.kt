@@ -17,7 +17,10 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -65,6 +68,9 @@ class KeyguardIndicationAreaViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
+
         whenever(burnInHelperWrapper.burnInOffset(anyInt(), any()))
             .thenReturn(RETURNED_BURN_IN_OFFSET)
 
@@ -83,6 +89,7 @@ class KeyguardIndicationAreaViewModelTest : SysuiTestCase() {
                 keyguardBottomAreaViewModel = bottomAreaViewModel,
                 burnInHelperWrapper = burnInHelperWrapper,
                 shortcutsCombinedViewModel = shortcutsCombinedViewModel,
+                configurationInteractor = ConfigurationInteractor(FakeConfigurationRepository()),
             )
     }
 

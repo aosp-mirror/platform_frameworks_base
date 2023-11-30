@@ -19,21 +19,18 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
+import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
-import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -41,91 +38,77 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
-    private lateinit var underTest: PrimaryBouncerToLockscreenTransitionViewModel
-    private lateinit var repository: FakeKeyguardTransitionRepository
-    private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
-    private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
+    val kosmos = testKosmos()
+    val testScope = kosmos.testScope
 
-    @Before
-    fun setUp() {
-        repository = FakeKeyguardTransitionRepository()
-        fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
-        biometricSettingsRepository = FakeBiometricSettingsRepository()
+    val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
+    val biometricSettingsRepository = kosmos.biometricSettingsRepository
 
-        underTest =
-            PrimaryBouncerToLockscreenTransitionViewModel(
-                KeyguardTransitionInteractorFactory.create(
-                        scope = TestScope().backgroundScope,
-                        repository = repository,
-                    )
-                    .keyguardTransitionInteractor,
-                DeviceEntryUdfpsInteractor(
-                    fingerprintPropertyRepository = fingerprintPropertyRepository,
-                    fingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository(),
-                    biometricSettingsRepository = biometricSettingsRepository,
-                ),
-            )
-    }
+    val underTest = kosmos.primaryBouncerToLockscreenTransitionViewModel
 
     @Test
-    fun deviceEntryParentViewAlpha() = runTest {
-        val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
+    fun deviceEntryParentViewAlpha() =
+        testScope.runTest {
+            val deviceEntryParentViewAlpha by collectLastValue(underTest.deviceEntryParentViewAlpha)
 
-        // immediately 1f
-        repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-        assertThat(deviceEntryParentViewAlpha).isEqualTo(1f)
+            // immediately 1f
+            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(deviceEntryParentViewAlpha).isEqualTo(1f)
 
-        repository.sendTransitionStep(step(0.4f))
-        assertThat(deviceEntryParentViewAlpha).isEqualTo(1f)
+            keyguardTransitionRepository.sendTransitionStep(step(0.4f))
+            assertThat(deviceEntryParentViewAlpha).isEqualTo(1f)
 
-        repository.sendTransitionStep(step(.85f))
-        assertThat(deviceEntryParentViewAlpha).isEqualTo(1f)
+            keyguardTransitionRepository.sendTransitionStep(step(.85f))
+            assertThat(deviceEntryParentViewAlpha).isEqualTo(1f)
 
-        repository.sendTransitionStep(step(1f))
-        assertThat(deviceEntryParentViewAlpha).isEqualTo(1f)
-    }
-
-    @Test
-    fun deviceEntryBackgroundViewAlpha_udfpsEnrolled_show() = runTest {
-        fingerprintPropertyRepository.supportsUdfps()
-        val bgViewAlpha by collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
-
-        // immediately 1f
-        repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-        assertThat(bgViewAlpha).isEqualTo(1f)
-
-        repository.sendTransitionStep(step(0.1f))
-        assertThat(bgViewAlpha).isEqualTo(1f)
-
-        repository.sendTransitionStep(step(.3f))
-        assertThat(bgViewAlpha).isEqualTo(1f)
-
-        repository.sendTransitionStep(step(.5f))
-        assertThat(bgViewAlpha).isEqualTo(1f)
-
-        repository.sendTransitionStep(step(1f, TransitionState.FINISHED))
-        assertThat(bgViewAlpha).isEqualTo(1f)
-    }
+            keyguardTransitionRepository.sendTransitionStep(step(1f))
+            assertThat(deviceEntryParentViewAlpha).isEqualTo(1f)
+        }
 
     @Test
-    fun deviceEntryBackgroundViewAlpha_rearFpEnrolled_noUpdates() = runTest {
-        fingerprintPropertyRepository.supportsRearFps()
-        val bgViewAlpha by collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
-        repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-        assertThat(bgViewAlpha).isNull()
+    fun deviceEntryBackgroundViewAlpha_udfpsEnrolled_show() =
+        testScope.runTest {
+            fingerprintPropertyRepository.supportsUdfps()
+            val bgViewAlpha by collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
 
-        repository.sendTransitionStep(step(0.5f))
-        assertThat(bgViewAlpha).isNull()
+            // immediately 1f
+            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(bgViewAlpha).isEqualTo(1f)
 
-        repository.sendTransitionStep(step(.75f))
-        assertThat(bgViewAlpha).isNull()
+            keyguardTransitionRepository.sendTransitionStep(step(0.1f))
+            assertThat(bgViewAlpha).isEqualTo(1f)
 
-        repository.sendTransitionStep(step(1f))
-        assertThat(bgViewAlpha).isNull()
+            keyguardTransitionRepository.sendTransitionStep(step(.3f))
+            assertThat(bgViewAlpha).isEqualTo(1f)
 
-        repository.sendTransitionStep(step(1f, TransitionState.FINISHED))
-        assertThat(bgViewAlpha).isNull()
-    }
+            keyguardTransitionRepository.sendTransitionStep(step(.5f))
+            assertThat(bgViewAlpha).isEqualTo(1f)
+
+            keyguardTransitionRepository.sendTransitionStep(step(1f, TransitionState.FINISHED))
+            assertThat(bgViewAlpha).isEqualTo(1f)
+        }
+
+    @Test
+    fun deviceEntryBackgroundViewAlpha_rearFpEnrolled_noUpdates() =
+        testScope.runTest {
+            fingerprintPropertyRepository.supportsRearFps()
+            val bgViewAlpha by collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
+            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            assertThat(bgViewAlpha).isNull()
+
+            keyguardTransitionRepository.sendTransitionStep(step(0.5f))
+            assertThat(bgViewAlpha).isNull()
+
+            keyguardTransitionRepository.sendTransitionStep(step(.75f))
+            assertThat(bgViewAlpha).isNull()
+
+            keyguardTransitionRepository.sendTransitionStep(step(1f))
+            assertThat(bgViewAlpha).isNull()
+
+            keyguardTransitionRepository.sendTransitionStep(step(1f, TransitionState.FINISHED))
+            assertThat(bgViewAlpha).isNull()
+        }
 
     private fun step(
         value: Float,

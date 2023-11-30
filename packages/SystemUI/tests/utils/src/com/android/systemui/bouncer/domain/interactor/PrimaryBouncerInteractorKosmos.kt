@@ -12,20 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.keyguard.shared.model
+package com.android.systemui.bouncer.domain.interactor
 
-/**
- * Provides a stateful representation of the visibility of the KeyguardRootView
- *
- * @param statusBarState State of the status bar represented by [StatusBarState]
- * @param goingToFullShade Whether status bar is going to full shade
- * @param occlusionTransitionRunning Whether the occlusion transition is running in this instant
- */
-data class KeyguardRootViewVisibilityState(
-    val statusBarState: Int,
-    val goingToFullShade: Boolean,
-    val occlusionTransitionRunning: Boolean,
-)
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.mock
+
+var Kosmos.primaryBouncerInteractor by Kosmos.Fixture { mock<PrimaryBouncerInteractor>() }

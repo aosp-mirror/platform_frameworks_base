@@ -19,80 +19,61 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
+import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardDismissActionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.flags.featureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.statusbar.SysuiStatusBarStateController
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.statusbar.sysuiStatusBarStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
-import dagger.Lazy
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
-    private lateinit var underTest: PrimaryBouncerToGoneTransitionViewModel
-    private lateinit var repository: FakeKeyguardTransitionRepository
-    private lateinit var featureFlags: FakeFeatureFlags
-    @Mock private lateinit var statusBarStateController: SysuiStatusBarStateController
-    @Mock private lateinit var primaryBouncerInteractor: PrimaryBouncerInteractor
-    @Mock private lateinit var bouncerToGoneFlows: BouncerToGoneFlows
-    @Mock
-    private lateinit var keyguardDismissActionInteractor: Lazy<KeyguardDismissActionInteractor>
+    val kosmos =
+        testKosmos().apply {
+            featureFlagsClassic.apply {
+                set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
+                set(Flags.FULL_SCREEN_USER_SWITCHER, false)
+            }
+        }
+    val testScope = kosmos.testScope
 
-    private val shadeExpansionStateFlow = MutableStateFlow(0.1f)
+    val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    val primaryBouncerInteractor = kosmos.primaryBouncerInteractor
+    val sysuiStatusBarStateController = kosmos.sysuiStatusBarStateController
+    val underTest = kosmos.primaryBouncerToGoneTransitionViewModel
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
-        repository = FakeKeyguardTransitionRepository()
-        val featureFlags =
-            FakeFeatureFlags().apply { set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false) }
-        val interactor =
-            KeyguardTransitionInteractorFactory.create(
-                    scope = TestScope().backgroundScope,
-                    repository = repository,
-                )
-                .keyguardTransitionInteractor
-        underTest =
-            PrimaryBouncerToGoneTransitionViewModel(
-                interactor,
-                statusBarStateController,
-                primaryBouncerInteractor,
-                keyguardDismissActionInteractor,
-                featureFlags,
-                bouncerToGoneFlows,
-            )
-
         whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(false)
-        whenever(statusBarStateController.leaveOpenOnKeyguardHide()).thenReturn(false)
+        sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(false)
     }
 
     @Test
     fun bouncerAlpha() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val values by collectValues(underTest.bouncerAlpha)
 
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            repository.sendTransitionStep(step(0.3f))
-            repository.sendTransitionStep(step(0.6f))
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    step(0f, TransitionState.STARTED),
+                    step(0.3f),
+                    step(0.6f),
+                ),
+                testScope,
+            )
 
             assertThat(values.size).isEqualTo(3)
             values.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
@@ -100,14 +81,19 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun bouncerAlpha_runDimissFromKeyguard() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val values by collectValues(underTest.bouncerAlpha)
 
             whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(true)
 
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            repository.sendTransitionStep(step(0.3f))
-            repository.sendTransitionStep(step(0.6f))
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    step(0f, TransitionState.STARTED),
+                    step(0.3f),
+                    step(0.6f),
+                ),
+                testScope,
+            )
 
             assertThat(values.size).isEqualTo(3)
             values.forEach { assertThat(it).isEqualTo(0f) }
@@ -115,11 +101,11 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun lockscreenAlpha() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val values by collectValues(underTest.lockscreenAlpha)
 
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            repository.sendTransitionStep(step(1f))
+            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            keyguardTransitionRepository.sendTransitionStep(step(1f))
 
             assertThat(values.size).isEqualTo(2)
             values.forEach { assertThat(it).isEqualTo(0f) }
@@ -127,13 +113,13 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun lockscreenAlpha_runDimissFromKeyguard() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val values by collectValues(underTest.lockscreenAlpha)
 
-            whenever(primaryBouncerInteractor.willRunDismissFromKeyguard()).thenReturn(true)
+            sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
 
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            repository.sendTransitionStep(step(1f))
+            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            keyguardTransitionRepository.sendTransitionStep(step(1f))
 
             assertThat(values.size).isEqualTo(2)
             values.forEach { assertThat(it).isEqualTo(1f) }
@@ -141,13 +127,13 @@ class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun lockscreenAlpha_leaveShadeOpen() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val values by collectValues(underTest.lockscreenAlpha)
 
-            whenever(statusBarStateController.leaveOpenOnKeyguardHide()).thenReturn(true)
+            sysuiStatusBarStateController.setLeaveOpenOnKeyguardHide(true)
 
-            repository.sendTransitionStep(step(0f, TransitionState.STARTED))
-            repository.sendTransitionStep(step(1f))
+            keyguardTransitionRepository.sendTransitionStep(step(0f, TransitionState.STARTED))
+            keyguardTransitionRepository.sendTransitionStep(step(1f))
 
             assertThat(values.size).isEqualTo(2)
             values.forEach { assertThat(it).isEqualTo(1f) }

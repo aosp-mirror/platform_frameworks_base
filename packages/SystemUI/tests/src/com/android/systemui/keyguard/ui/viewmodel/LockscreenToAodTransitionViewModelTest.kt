@@ -18,88 +18,47 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
-import com.android.systemui.collectLastValue
-import com.android.systemui.collectValues
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.Flags.FULL_SCREEN_USER_SWITCHER
-import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.flags.featureFlagsClassic
+import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.user.domain.UserDomainLayerModule
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.shade.data.repository.shadeRepository
+import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 
 @ExperimentalCoroutinesApi
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class LockscreenToAodTransitionViewModelTest : SysuiTestCase() {
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                UserDomainLayerModule::class,
-            ]
-    )
-    interface TestComponent : SysUITestComponent<LockscreenToAodTransitionViewModel> {
-        val repository: FakeKeyguardTransitionRepository
-        val deviceEntryRepository: FakeDeviceEntryRepository
-        val keyguardRepository: FakeKeyguardRepository
-        val shadeRepository: FakeShadeRepository
-        val fingerprintPropertyRepository: FakeFingerprintPropertyRepository
-        val biometricSettingsRepository: FakeBiometricSettingsRepository
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-                mocks: TestMocksModule,
-            ): TestComponent
-        }
-    }
-
-    private fun TestComponent.shadeExpanded(expanded: Boolean) {
-        if (expanded) {
-            shadeRepository.setQsExpansion(1f)
-        } else {
-            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
-            shadeRepository.setQsExpansion(0f)
-            shadeRepository.setLockscreenShadeExpansion(0f)
-        }
-    }
-
-    private val testComponent: TestComponent =
-        DaggerLockscreenToAodTransitionViewModelTest_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags =
-                    FakeFeatureFlagsClassicModule { set(FULL_SCREEN_USER_SWITCHER, true) },
-                mocks = TestMocksModule(),
-            )
+    private val kosmos =
+        testKosmos().apply { featureFlagsClassic.apply { set(FULL_SCREEN_USER_SWITCHER, false) } }
+    private val testScope = kosmos.testScope
+    private val repository = kosmos.fakeKeyguardTransitionRepository
+    private val shadeRepository = kosmos.shadeRepository
+    private val keyguardRepository = kosmos.fakeKeyguardRepository
+    private val fingerprintPropertyRepository = kosmos.fingerprintPropertyRepository
+    private val biometricSettingsRepository = kosmos.biometricSettingsRepository
+    private val underTest = kosmos.lockscreenToAodTransitionViewModel
 
     @Test
     fun backgroundViewAlpha_shadeNotExpanded() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
             shadeExpanded(false)
             runCurrent()
@@ -121,7 +80,7 @@ class LockscreenToAodTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun backgroundViewAlpha_shadeExpanded() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.deviceEntryBackgroundViewAlpha)
             shadeExpanded(true)
             runCurrent()
@@ -142,7 +101,7 @@ class LockscreenToAodTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun deviceEntryParentViewAlpha_udfpsEnrolled_shadeNotExpanded() =
-        testComponent.runTest {
+        testScope.runTest {
             val values by collectValues(underTest.deviceEntryParentViewAlpha)
             fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
@@ -165,7 +124,7 @@ class LockscreenToAodTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun deviceEntryParentViewAlpha_udfpsEnrolled_shadeExpanded() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.deviceEntryParentViewAlpha)
             fingerprintPropertyRepository.supportsUdfps()
             biometricSettingsRepository.setIsFingerprintAuthEnrolledAndEnabled(true)
@@ -189,7 +148,7 @@ class LockscreenToAodTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun deviceEntryParentViewAlpha_rearFp_shadeNotExpanded() =
-        testComponent.runTest {
+        testScope.runTest {
             val actual by collectLastValue(underTest.deviceEntryParentViewAlpha)
             fingerprintPropertyRepository.supportsRearFps()
             shadeExpanded(false)
@@ -212,7 +171,7 @@ class LockscreenToAodTransitionViewModelTest : SysuiTestCase() {
 
     @Test
     fun deviceEntryParentViewAlpha_rearFp_shadeExpanded() =
-        testComponent.runTest {
+        testScope.runTest {
             val values by collectValues(underTest.deviceEntryParentViewAlpha)
             fingerprintPropertyRepository.supportsRearFps()
             shadeExpanded(true)
@@ -231,6 +190,16 @@ class LockscreenToAodTransitionViewModelTest : SysuiTestCase() {
             // immediately 0f
             values.forEach { assertThat(it).isEqualTo(0f) }
         }
+
+    private fun shadeExpanded(expanded: Boolean) {
+        if (expanded) {
+            shadeRepository.setQsExpansion(1f)
+        } else {
+            keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
+            shadeRepository.setQsExpansion(0f)
+            shadeRepository.setLockscreenShadeExpansion(0f)
+        }
+    }
 
     private fun step(
         value: Float,

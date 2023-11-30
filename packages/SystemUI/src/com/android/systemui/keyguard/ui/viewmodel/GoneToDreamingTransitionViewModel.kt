@@ -31,17 +31,18 @@ class GoneToDreamingTransitionViewModel
 @Inject
 constructor(
     private val interactor: KeyguardTransitionInteractor,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) {
 
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = TO_DREAMING_DURATION,
-            transitionFlow = interactor.goneToDreamingTransition,
+        animationFlow.setup(
+            duration = TO_DREAMING_DURATION,
+            stepFlow = interactor.goneToDreamingTransition,
         )
 
     /** Lockscreen views y-translation */
     fun lockscreenTranslationY(translatePx: Int): Flow<Float> {
-        return transitionAnimation.createFlow(
+        return transitionAnimation.sharedFlow(
             duration = 500.milliseconds,
             onStep = { it * translatePx },
             // Reset on cancel or finish
@@ -53,7 +54,7 @@ constructor(
 
     /** Lockscreen views alpha */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.createFlow(
+        transitionAnimation.sharedFlow(
             duration = 250.milliseconds,
             onStep = { 1f - it },
         )

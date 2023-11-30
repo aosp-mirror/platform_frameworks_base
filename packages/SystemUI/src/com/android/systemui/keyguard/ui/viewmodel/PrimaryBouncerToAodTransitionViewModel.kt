@@ -41,12 +41,12 @@ class PrimaryBouncerToAodTransitionViewModel
 constructor(
     interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = FromPrimaryBouncerTransitionInteractor.TO_AOD_DURATION,
-            transitionFlow =
-                interactor.transition(KeyguardState.PRIMARY_BOUNCER, KeyguardState.AOD),
+        animationFlow.setup(
+            duration = FromPrimaryBouncerTransitionInteractor.TO_AOD_DURATION,
+            stepFlow = interactor.transition(KeyguardState.PRIMARY_BOUNCER, KeyguardState.AOD),
         )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
@@ -62,7 +62,7 @@ constructor(
         deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest {
             isUdfpsEnrolledAndEnabled ->
             if (isUdfpsEnrolledAndEnabled) {
-                transitionAnimation.createFlow(
+                transitionAnimation.sharedFlow(
                     duration = 300.milliseconds,
                     onStep = { it },
                     onFinish = { 1f },
