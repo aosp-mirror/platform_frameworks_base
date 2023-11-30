@@ -22,9 +22,9 @@
 #include <sys/stat.h>
 
 #include "android-base/errors.h"
+#include "androidfw/FileStream.h"
 #include "androidfw/Source.h"
 #include "androidfw/StringPiece.h"
-#include "io/FileStream.h"
 #include "util/Files.h"
 #include "util/Util.h"
 #include "utils/FileMap.h"
@@ -49,8 +49,8 @@ std::unique_ptr<IData> RegularFile::OpenAsData() {
   return {};
 }
 
-std::unique_ptr<io::InputStream> RegularFile::OpenInputStream() {
-  return util::make_unique<FileInputStream>(source_.path);
+std::unique_ptr<android::InputStream> RegularFile::OpenInputStream() {
+  return util::make_unique<android::FileInputStream>(source_.path);
 }
 
 const android::Source& RegularFile::GetSource() const {

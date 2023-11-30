@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_PNG_H
-#define AAPT_PNG_H
+#pragma once
 
-#include <iostream>
 #include <string>
 
+#include "BigBuffer.h"
+#include "IDiagnostics.h"
+#include "Image.h"
+#include "Source.h"
+#include "Streams.h"
 #include "android-base/macros.h"
-#include "androidfw/BigBuffer.h"
-#include "androidfw/IDiagnostics.h"
-#include "androidfw/Source.h"
-#include "compile/Image.h"
-#include "io/Io.h"
-#include "process/IResourceTableConsumer.h"
 
-namespace aapt {
-
+namespace android {
 // Size in bytes of the PNG signature.
 constexpr size_t kPngSignatureSize = 8u;
 
@@ -42,32 +38,36 @@ struct PngOptions {
  */
 class Png {
  public:
-  explicit Png(android::IDiagnostics* diag) : mDiag(diag) {
+  explicit Png(IDiagnostics* diag) : mDiag(diag) {
   }
 
-  bool process(const android::Source& source, std::istream* input, android::BigBuffer* outBuffer,
+  bool process(const Source& source, std::istream* input, BigBuffer* outBuffer,
                const PngOptions& options);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Png);
 
-  android::IDiagnostics* mDiag;
+  IDiagnostics* mDiag;
 };
 
 /**
  * An InputStream that filters out unimportant PNG chunks.
  */
-class PngChunkFilter : public io::InputStream {
+class PngChunkFilter : public InputStream {
  public:
-  explicit PngChunkFilter(android::StringPiece data);
+  explicit PngChunkFilter(StringPiece data);
   virtual ~PngChunkFilter() = default;
 
   bool Next(const void** buffer, size_t* len) override;
   void BackUp(size_t count) override;
 
-  bool CanRewind() const override { return true; }
+  bool CanRewind() const override {
+    return true;
+  }
   bool Rewind() override;
-  size_t ByteCount() const override { return window_start_; }
+  size_t ByteCount() const override {
+    return window_start_;
+  }
 
   bool HadError() const override {
     return !error_msg_.empty();
@@ -81,26 +81,20 @@ class PngChunkFilter : public io::InputStream {
 
   bool ConsumeWindow(const void** buffer, size_t* len);
 
-  android::StringPiece data_;
+  StringPiece data_;
   size_t window_start_ = 0;
   size_t window_end_ = 0;
   std::string error_msg_;
 };
-
 /**
  * Reads a PNG from the InputStream into memory as an RGBA Image.
  */
-std::unique_ptr<Image> ReadPng(IAaptContext* context, const android::Source& source,
-                               io::InputStream* in);
+std::unique_ptr<Image> ReadPng(InputStream* in, IDiagnostics* diag);
 
 /**
  * Writes the RGBA Image, with optional 9-patch meta-data, into the OutputStream
  * as a PNG.
  */
-bool WritePng(IAaptContext* context, const Image* image,
-              const NinePatch* nine_patch, io::OutputStream* out,
-              const PngOptions& options);
-
-}  // namespace aapt
-
-#endif  // AAPT_PNG_H
+bool WritePng(const Image* image, const NinePatch* nine_patch, OutputStream* out,
+              const PngOptions& options, IDiagnostics* diag, bool verbose);
+}  // namespace android

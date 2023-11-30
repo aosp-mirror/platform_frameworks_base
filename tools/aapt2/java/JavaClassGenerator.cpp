@@ -37,8 +37,8 @@
 #include "java/ClassDefinition.h"
 #include "process/SymbolTable.h"
 
-using ::aapt::io::OutputStream;
 using ::aapt::text::Printer;
+using ::android::OutputStream;
 using ::android::StringPiece;
 using ::android::base::StringPrintf;
 

@@ -14,25 +14,22 @@
  * limitations under the License.
  */
 
-#include "compile/Png.h"
-
 #include "android-base/stringprintf.h"
+#include "android-base/strings.h"
+#include "androidfw/Png.h"
+#include "androidfw/Streams.h"
 #include "androidfw/StringPiece.h"
 
-#include "io/Io.h"
-
-using ::android::StringPiece;
 using ::android::base::StringPrintf;
 
-namespace aapt {
+namespace android {
 
 static constexpr const char* kPngSignature = "\x89\x50\x4e\x47\x0d\x0a\x1a\x0a";
 
 // Useful helper function that encodes individual bytes into a uint32
 // at compile time.
 constexpr uint32_t u32(uint8_t a, uint8_t b, uint8_t c, uint8_t d) {
-  return (((uint32_t)a) << 24) | (((uint32_t)b) << 16) | (((uint32_t)c) << 8) |
-         ((uint32_t)d);
+  return (((uint32_t)a) << 24) | (((uint32_t)b) << 16) | (((uint32_t)c) << 8) | ((uint32_t)d);
 }
 
 // Allow list of PNG chunk types that we want to keep in the resulting PNG.
@@ -71,7 +68,7 @@ static bool IsPngChunkAllowed(uint32_t type) {
 }
 
 PngChunkFilter::PngChunkFilter(StringPiece data) : data_(data) {
-  if (util::StartsWith(data_, kPngSignature)) {
+  if (android::base::StartsWith(data_, kPngSignature)) {
     window_start_ = 0;
     window_end_ = kPngSignatureSize;
   } else {
@@ -176,5 +173,4 @@ bool PngChunkFilter::Rewind() {
   window_end_ = kPngSignatureSize;
   return true;
 }
-
-}  // namespace aapt
+}  // namespace android
