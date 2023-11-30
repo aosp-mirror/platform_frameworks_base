@@ -4450,7 +4450,8 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    int getDisplayUserRotation(int displayId) {
+    @Override
+    public int getDisplayUserRotation(int displayId) {
         synchronized (mGlobalLock) {
             final DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display == null) {

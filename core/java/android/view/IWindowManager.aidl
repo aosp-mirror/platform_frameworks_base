@@ -291,6 +291,15 @@ interface IWindowManager
     int getDefaultDisplayRotation();
 
     /**
+     * Retrieve the display user rotation.
+     * @param displayId Id of the display
+     * @return Rotation one of {@link android.view.Surface#ROTATION_0},
+     *        {@link android.view.Surface#ROTATION_90}, {@link android.view.Surface#ROTATION_180},
+     *        {@link android.view.Surface#ROTATION_270} or -1 if display is not found.
+     */
+    int getDisplayUserRotation(int displayId);
+
+    /**
      * Watch the rotation of the specified screen.  Returns the current rotation,
      * calls back when it changes.
      */
