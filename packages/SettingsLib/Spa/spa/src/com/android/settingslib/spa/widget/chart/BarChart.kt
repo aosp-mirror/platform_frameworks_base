@@ -86,6 +86,10 @@ interface BarChartModel {
      */
     val yAxisLabelCount: Int
         get() = 3
+
+    /** If set to true, touch gestures are enabled on the [BarChart]. */
+    val enableBarchartTouch: Boolean
+        get() = true
 }
 
 data class BarChartData(
@@ -127,6 +131,7 @@ fun BarChart(barChartModel: BarChartModel) {
                             legend.isEnabled = false
                             extraBottomOffset = 4f
                             setScaleEnabled(false)
+                            setTouchEnabled(barChartModel.enableBarchartTouch)
 
                             xAxis.apply {
                                 position = XAxis.XAxisPosition.BOTTOM
