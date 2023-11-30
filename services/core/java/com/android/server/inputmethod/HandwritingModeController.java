@@ -22,6 +22,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UiThread;
+import android.content.ComponentName;
+import android.content.pm.PackageManagerInternal;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Handler;
 import android.os.IBinder;
@@ -66,6 +68,7 @@ final class HandwritingModeController {
     private final Looper mLooper;
     private final InputManagerInternal mInputManagerInternal;
     private final WindowManagerInternal mWindowManagerInternal;
+    private final PackageManagerInternal mPackageManagerInternal;
 
     private ArrayList<MotionEvent> mHandwritingBuffer;
     private InputEventReceiver mHandwritingEventReceiver;
@@ -75,6 +78,7 @@ final class HandwritingModeController {
     // when set, package names are used for handwriting delegation.
     private @Nullable String mDelegatePackageName;
     private @Nullable String mDelegatorPackageName;
+    private boolean mDelegatorFromDefaultHomePackage;
     private Runnable mDelegationIdleTimeoutRunnable;
     private Handler mDelegationIdleTimeoutHandler;
 
@@ -88,6 +92,7 @@ final class HandwritingModeController {
         mCurrentDisplayId = Display.INVALID_DISPLAY;
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
+        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mCurrentRequestId = 0;
         mInkWindowInitRunnable = inkWindowInitRunnable;
     }
@@ -151,9 +156,20 @@ final class HandwritingModeController {
      * @see InputMethodManager#prepareStylusHandwritingDelegation(View, String)
      */
     void prepareStylusHandwritingDelegation(
-            @NonNull String delegatePackageName, @NonNull String delegatorPackageName) {
+            int userId, @NonNull String delegatePackageName, @NonNull String delegatorPackageName) {
         mDelegatePackageName = delegatePackageName;
         mDelegatorPackageName = delegatorPackageName;
+        mDelegatorFromDefaultHomePackage = false;
+        // mDelegatorFromDefaultHomeActivity is only used in the cross-package delegation case.
+        // For same-package delegation, it doesn't need to be checked.
+        if (!delegatorPackageName.equals(delegatePackageName)) {
+            ComponentName defaultHomeActivity =
+                    mPackageManagerInternal.getDefaultHomeActivity(userId);
+            if (defaultHomeActivity != null) {
+                mDelegatorFromDefaultHomePackage =
+                        delegatorPackageName.equals(defaultHomeActivity.getPackageName());
+            }
+        }
         if (mHandwritingBuffer == null) {
             mHandwritingBuffer = new ArrayList<>(getHandwritingBufferSize());
         } else {
@@ -168,6 +184,10 @@ final class HandwritingModeController {
 
     @Nullable String getDelegatorPackageName() {
         return mDelegatorPackageName;
+    }
+
+    boolean isDelegatorFromDefaultHomePackage() {
+        return mDelegatorFromDefaultHomePackage;
     }
 
     private void scheduleHandwritingDelegationTimeout() {
@@ -210,6 +230,7 @@ final class HandwritingModeController {
         mDelegationIdleTimeoutRunnable = null;
         mDelegatorPackageName = null;
         mDelegatePackageName = null;
+        mDelegatorFromDefaultHomePackage = false;
     }
 
     /**
