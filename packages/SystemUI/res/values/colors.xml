@@ -119,7 +119,7 @@
 
     <!-- Keyboard shortcuts colors -->
     <color name="ksh_application_group_color">#fff44336</color>
-    <color name="ksh_key_item_color">?androidprv:attr/materialColorOnSurfaceVariant</color>
+    <color name="ksh_key_item_color">@*android:color/system_on_surface_variant_light</color>
     <color name="ksh_key_item_background">?androidprv:attr/materialColorSurfaceContainerHighest</color>
 
     <color name="instant_apps_color">#ff4d5a64</color>

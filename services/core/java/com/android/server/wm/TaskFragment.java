@@ -316,7 +316,8 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     /** Organizer that organizing this TaskFragment. */
     @Nullable
     private ITaskFragmentOrganizer mTaskFragmentOrganizer;
-    private int mTaskFragmentOrganizerUid = INVALID_UID;
+    @VisibleForTesting
+    int mTaskFragmentOrganizerUid = INVALID_UID;
     private @Nullable String mTaskFragmentOrganizerProcessName;
 
     /** Client assigned unique token for this TaskFragment if this is created by an organizer. */

@@ -58,6 +58,13 @@ constructor(
         )
     }
 
+    val shortcutsAlpha: Flow<Float> =
+        transitionAnimation.createFlow(
+            duration = 250.milliseconds,
+            onStep = { it },
+            onCancel = { 0f },
+        )
+
     /** Lockscreen views alpha */
     val lockscreenAlpha: Flow<Float> =
         transitionAnimation.createFlow(

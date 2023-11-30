@@ -82,16 +82,16 @@ class MagnificationConnectionWrapper {
         return true;
     }
 
-    boolean setScale(int displayId, float scale) {
+    boolean setScaleForWindowMagnification(int displayId, float scale) {
         if (mTrace.isA11yTracingEnabledForTypes(FLAGS_WINDOW_MAGNIFICATION_CONNECTION)) {
             mTrace.logTrace(TAG + ".setScale", FLAGS_WINDOW_MAGNIFICATION_CONNECTION,
                     "displayId=" + displayId + ";scale=" + scale);
         }
         try {
-            mConnection.setScale(displayId, scale);
+            mConnection.setScaleForWindowMagnification(displayId, scale);
         } catch (RemoteException e) {
             if (DBG) {
-                Slog.e(TAG, "Error calling setScale()", e);
+                Slog.e(TAG, "Error calling setScaleForWindowMagnification()", e);
             }
             return false;
         }

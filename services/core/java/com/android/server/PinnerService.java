@@ -1044,7 +1044,6 @@ public final class PinnerService extends SystemService {
         if (DEBUG) {
             Slog.d(TAG, "pin file: " + fileToPin + " use-pinlist: " + attemptPinIntrospection);
         }
-        Trace.beginSection("pinFile:" + fileToPin);
         ZipFile fileAsZip = null;
         InputStream pinRangeStream = null;
         try {
@@ -1067,7 +1066,6 @@ public final class PinnerService extends SystemService {
         } finally {
             safeClose(pinRangeStream);
             safeClose(fileAsZip);  // Also closes any streams we've opened
-            Trace.endSection();
         }
     }
 

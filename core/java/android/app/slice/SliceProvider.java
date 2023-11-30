@@ -209,15 +209,6 @@ public abstract class SliceProvider extends ContentProvider {
      * @see Slice#HINT_PARTIAL
      */
     public Slice onBindSlice(Uri sliceUri, Set<SliceSpec> supportedSpecs) {
-        return onBindSlice(sliceUri, new ArrayList<>(supportedSpecs));
-    }
-
-    /**
-     * @deprecated TO BE REMOVED
-     * @removed
-     */
-    @Deprecated
-    public Slice onBindSlice(Uri sliceUri, List<SliceSpec> supportedSpecs) {
         return null;
     }
 
@@ -479,7 +470,7 @@ public abstract class SliceProvider extends ContentProvider {
         } finally {
             Handler.getMain().removeCallbacks(mAnr);
         }
-        Slice.Builder parent = new Slice.Builder(sliceUri);
+        Slice.Builder parent = new Slice.Builder(sliceUri, null);
         Slice.Builder childAction = new Slice.Builder(parent)
                 .addIcon(Icon.createWithResource(context,
                         com.android.internal.R.drawable.ic_permission), null,
@@ -492,7 +483,8 @@ public abstract class SliceProvider extends ContentProvider {
                 .getTheme().resolveAttribute(android.R.attr.colorAccent, tv, true);
         int deviceDefaultAccent = tv.data;
 
-        parent.addSubSlice(new Slice.Builder(sliceUri.buildUpon().appendPath("permission").build())
+        Uri subSliceUri = sliceUri.buildUpon().appendPath("permission").build();
+        Slice.Builder subSlice = new Slice.Builder(subSliceUri, null)
                 .addIcon(Icon.createWithResource(context,
                         com.android.internal.R.drawable.ic_arrow_forward), null,
                         Collections.emptyList())
@@ -500,8 +492,8 @@ public abstract class SliceProvider extends ContentProvider {
                         Collections.emptyList())
                 .addInt(deviceDefaultAccent, SUBTYPE_COLOR,
                         Collections.emptyList())
-                .addSubSlice(childAction.build(), null)
-                .build(), null);
+                .addSubSlice(childAction.build(), null);
+        parent.addSubSlice(subSlice.build(), null);
         return parent.addHints(Arrays.asList(Slice.HINT_PERMISSION_REQUEST)).build();
     }
 

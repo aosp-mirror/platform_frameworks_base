@@ -84,6 +84,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 
 /** Renders the preview of the lock screen. */
@@ -158,7 +159,6 @@ constructor(
 
     init {
         if (keyguardBottomAreaRefactor()) {
-            keyguardRootViewModel.enablePreviewMode()
             quickAffordancesCombinedViewModel.enablePreviewMode(
                 initiallySelectedSlotId =
                     bundle.getString(
@@ -338,26 +338,27 @@ constructor(
             ),
         )
     }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun setupKeyguardRootView(previewContext: Context, rootView: FrameLayout) {
         val keyguardRootView = KeyguardRootView(previewContext, null)
-        disposables.add(
-            KeyguardRootViewBinder.bind(
-                keyguardRootView,
-                keyguardRootViewModel,
-                configuration,
-                featureFlags,
-                occludingAppDeviceEntryMessageViewModel,
-                chipbarCoordinator,
-                screenOffAnimationController,
-                shadeInteractor,
-                null, // clock provider only needed for burn in
-                null, // jank monitor not required for preview mode
-                null, // device entry haptics not required for preview mode
-                null, // device entry haptics not required for preview mode
+        if (!keyguardBottomAreaRefactor()) {
+            disposables.add(
+                KeyguardRootViewBinder.bind(
+                    keyguardRootView,
+                    keyguardRootViewModel,
+                    configuration,
+                    featureFlags,
+                    occludingAppDeviceEntryMessageViewModel,
+                    chipbarCoordinator,
+                    screenOffAnimationController,
+                    shadeInteractor,
+                    null, // clock provider only needed for burn in
+                    null, // jank monitor not required for preview mode
+                    null, // device entry haptics not required preview mode
+                    null, // device entry haptics not required for preview mode
+                )
             )
-        )
+        }
         rootView.addView(
             keyguardRootView,
             FrameLayout.LayoutParams(
@@ -392,30 +393,30 @@ constructor(
     }
 
     private fun setupShortcuts(keyguardRootView: ConstraintLayout) {
-        keyguardRootView.findViewById<LaunchableImageView?>(R.id.start_button)?.let {
+        keyguardRootView.findViewById<LaunchableImageView?>(R.id.start_button)?.let { imageView ->
             shortcutsBindings.add(
                 KeyguardQuickAffordanceViewBinder.bind(
-                    it,
-                    quickAffordancesCombinedViewModel.startButton,
-                    keyguardRootViewModel.alpha,
-                    falsingManager,
-                    vibratorHelper,
-                ) {
-                    indicationController.showTransientIndication(it)
+                    view = imageView,
+                    viewModel = quickAffordancesCombinedViewModel.startButton,
+                    alpha = flowOf(1f),
+                    falsingManager = falsingManager,
+                    vibratorHelper = vibratorHelper,
+                ) { message ->
+                    indicationController.showTransientIndication(message)
                 }
             )
         }
 
-        keyguardRootView.findViewById<LaunchableImageView?>(R.id.end_button)?.let {
+        keyguardRootView.findViewById<LaunchableImageView?>(R.id.end_button)?.let { imageView ->
             shortcutsBindings.add(
                 KeyguardQuickAffordanceViewBinder.bind(
-                    it,
-                    quickAffordancesCombinedViewModel.endButton,
-                    keyguardRootViewModel.alpha,
-                    falsingManager,
-                    vibratorHelper,
-                ) {
-                    indicationController.showTransientIndication(it)
+                    view = imageView,
+                    viewModel = quickAffordancesCombinedViewModel.endButton,
+                    alpha = flowOf(1f),
+                    falsingManager = falsingManager,
+                    vibratorHelper = vibratorHelper,
+                ) { message ->
+                    indicationController.showTransientIndication(message)
                 }
             )
         }

@@ -208,7 +208,7 @@ public class LoudnessCodecConfiguratorTest {
         verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()), anyList());
 
         mLcc.addMediaCodec(createAndConfigureMediaCodec());
-        verify(mAudioService).addLoudnessCodecInfo(eq(track.getPlayerIId()), any());
+        verify(mAudioService).addLoudnessCodecInfo(eq(track.getPlayerIId()), anyInt(), any());
     }
 
     @Test

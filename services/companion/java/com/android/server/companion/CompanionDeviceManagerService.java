@@ -833,6 +833,13 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
+        public boolean isPermissionTransferUserConsented(String packageName, int userId,
+                int associationId) {
+            return mSystemDataTransferProcessor.isPermissionTransferUserConsented(packageName,
+                    userId, associationId);
+        }
+
+        @Override
         public void startSystemDataTransfer(String packageName, int userId, int associationId,
                 ISystemDataTransferCallback callback) {
             mSystemDataTransferProcessor.startSystemDataTransfer(packageName, userId,

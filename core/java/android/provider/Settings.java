@@ -2542,6 +2542,7 @@ public final class Settings {
      * ComponentName)} and only use this action to start an activity if they return {@code false}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @FlaggedApi(android.credentials.flags.Flags.FLAG_NEW_SETTINGS_INTENTS)
     public static final String ACTION_CREDENTIAL_PROVIDER =
             "android.settings.CREDENTIAL_PROVIDER";
 
@@ -8843,6 +8844,24 @@ public final class Settings {
          */
         public static final String REDUCE_BRIGHT_COLORS_PERSIST_ACROSS_REBOOTS =
                 "reduce_bright_colors_persist_across_reboots";
+
+        /**
+         * Setting that specifies whether Even Dimmer - a feature that allows the brightness
+         * slider to go below what the display can conventionally do, should be enabled.
+         *
+         * @hide
+         */
+        public static final String EVEN_DIMMER_ACTIVATED =
+                "even_dimmer_activated";
+
+        /**
+         * Setting that specifies which nits level Even Dimmer should allow the screen brightness
+         * to go down to.
+         *
+         * @hide
+         */
+        public static final String EVEN_DIMMER_MIN_NITS =
+                "even_dimmer_min_nits";
 
         /**
          * List of the enabled print services.

@@ -95,7 +95,7 @@ void VerifyDirectory(const std::string& path, const std::string& file, const uin
 
 void VerifyZipFile(const std::string& output_path, const std::string& file, const uint8_t array[]) {
   std::unique_ptr<io::ZipFileCollection> zip = io::ZipFileCollection::Create(output_path, nullptr);
-  std::unique_ptr<io::InputStream> stream = zip->FindFile(file)->OpenInputStream();
+  std::unique_ptr<android::InputStream> stream = zip->FindFile(file)->OpenInputStream();
 
   std::vector<uint8_t> buffer;
   const void* data;

@@ -480,6 +480,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     public void systemServicesReady() {
+        mStats.setPowerStatsCollectorEnabled(Flags.streamlinedBatteryStats());
         mBatteryUsageStatsProvider.setPowerStatsExporterEnabled(Flags.streamlinedBatteryStats());
         mWorker.systemServicesReady();
         mStats.systemServicesReady(mContext);
@@ -2648,7 +2649,9 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         pw.println("     --proto: output as a binary protobuffer");
         pw.println("     --model power-profile: use the power profile model"
                 + " even if measured energy is available");
-        pw.println("  --sample: collect and dump a sample of stats for debugging purpose");
+        if (Flags.streamlinedBatteryStats()) {
+            pw.println("  --sample: collect and dump a sample of stats for debugging purpose");
+        }
         pw.println("  <package.name>: optional name of package to filter output by.");
         pw.println("  -h: print this help text.");
         pw.println("Battery stats (batterystats) commands:");
@@ -2938,10 +2941,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     mCpuWakeupStats.dump(new IndentingPrintWriter(pw, "  "),
                             SystemClock.elapsedRealtime());
                     return;
-                } else if ("--sample".equals(arg)) {
+                } else if (Flags.streamlinedBatteryStats() && "--sample".equals(arg)) {
                     dumpStatsSample(pw);
                     return;
-                } else if ("--aggregated".equals(arg)) {
+                } else if (Flags.streamlinedBatteryStats() && "--aggregated".equals(arg)) {
                     dumpAggregatedStats(pw);
                     return;
                 } else if ("--store".equals(arg)) {

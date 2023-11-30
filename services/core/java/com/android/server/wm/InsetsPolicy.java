@@ -740,6 +740,8 @@ class InsetsPolicy {
         private final Handler mHandler;
         private final String mName;
 
+        private boolean mInsetsAnimationRunning;
+
         Host(Handler handler, String name) {
             mHandler = handler;
             mName = name;
@@ -840,6 +842,11 @@ class InsetsPolicy {
         @Override
         public IBinder getWindowToken() {
             return null;
+        }
+
+        @Override
+        public void notifyAnimationRunningStateChanged(boolean running) {
+            mInsetsAnimationRunning = running;
         }
     }
 }

@@ -39,8 +39,11 @@ import javax.inject.Inject;
 /** Implementation of {@link DevicePostureController} using the DeviceStateManager. */
 @SysUISingleton
 public class DevicePostureControllerImpl implements DevicePostureController {
+    /** From androidx.window.common.COMMON_STATE_USE_BASE_STATE */
+    private static final int COMMON_STATE_USE_BASE_STATE = 1000;
     private final List<Callback> mListeners = new ArrayList<>();
     private int mCurrentDevicePosture = DEVICE_POSTURE_UNKNOWN;
+    private int mCurrentBasePosture = DEVICE_POSTURE_UNKNOWN;
 
     private final SparseIntArray mDeviceStateToPostureMap = new SparseIntArray();
 
@@ -73,16 +76,32 @@ public class DevicePostureControllerImpl implements DevicePostureController {
             mDeviceStateToPostureMap.put(deviceState, posture);
         }
 
-        deviceStateManager.registerCallback(executor, state -> {
-            Assert.isMainThread();
-            mCurrentDevicePosture =
-                    mDeviceStateToPostureMap.get(state, DEVICE_POSTURE_UNKNOWN);
+        deviceStateManager.registerCallback(executor, new DeviceStateManager.DeviceStateCallback() {
+            @Override
+            public void onStateChanged(int state) {
+                Assert.isMainThread();
+                mCurrentDevicePosture =
+                        mDeviceStateToPostureMap.get(state, DEVICE_POSTURE_UNKNOWN);
+                sendUpdatePosture();
+            }
 
-            ListenersTracing.INSTANCE.forEachTraced(mListeners, "DevicePostureControllerImpl",
+            @Override
+            public void onBaseStateChanged(int state) {
+                Assert.isMainThread();
+                mCurrentBasePosture = mDeviceStateToPostureMap.get(state, DEVICE_POSTURE_UNKNOWN);
+
+                if (useBaseState()) {
+                    sendUpdatePosture();
+                }
+            }
+
+            private void sendUpdatePosture() {
+                ListenersTracing.INSTANCE.forEachTraced(mListeners, "DevicePostureControllerImpl",
                     l -> {
-                        l.onPostureChanged(mCurrentDevicePosture);
+                        l.onPostureChanged(getDevicePosture());
                         return Unit.INSTANCE;
                     });
+            }
         });
     }
 
@@ -100,6 +119,14 @@ public class DevicePostureControllerImpl implements DevicePostureController {
 
     @Override
     public int getDevicePosture() {
-        return mCurrentDevicePosture;
+        if (useBaseState()) {
+            return mCurrentBasePosture;
+        } else {
+            return mCurrentDevicePosture;
+        }
+    }
+
+    private boolean useBaseState() {
+        return mCurrentDevicePosture == COMMON_STATE_USE_BASE_STATE;
     }
 }

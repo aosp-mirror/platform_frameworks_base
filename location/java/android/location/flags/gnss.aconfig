@@ -13,3 +13,10 @@ flag {
     description: "Flag for calling stop() before setPositionMode()"
     bug: "306874828"
 }
+
+flag {
+    name: "gnss_api_measurement_request_work_source"
+    namespace: "location"
+    description: "Flag for GnssMeasurementRequest WorkSource API"
+    bug: "295235160"
+}

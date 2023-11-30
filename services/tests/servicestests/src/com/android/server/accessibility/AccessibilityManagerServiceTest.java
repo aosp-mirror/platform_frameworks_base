@@ -85,9 +85,9 @@ import com.android.internal.compat.IPlatformCompat;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService.AccessibilityDisplayListener;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController;
+import com.android.server.accessibility.magnification.MagnificationConnectionManager;
 import com.android.server.accessibility.magnification.MagnificationController;
 import com.android.server.accessibility.magnification.MagnificationProcessor;
-import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -156,7 +156,7 @@ public class AccessibilityManagerServiceTest {
     @Mock private UserManagerInternal mMockUserManagerInternal;
     @Mock private IBinder mMockBinder;
     @Mock private IAccessibilityServiceClient mMockServiceClient;
-    @Mock private WindowMagnificationManager mMockWindowMagnificationMgr;
+    @Mock private MagnificationConnectionManager mMockMagnificationConnectionManager;
     @Mock private MagnificationController mMockMagnificationController;
     @Mock private FullScreenMagnificationController mMockFullScreenMagnificationController;
     @Mock private ProxyManager mProxyManager;
@@ -180,8 +180,8 @@ public class AccessibilityManagerServiceTest {
                 UserManagerInternal.class, mMockUserManagerInternal);
         mInputFilter = Mockito.mock(FakeInputFilter.class);
 
-        when(mMockMagnificationController.getWindowMagnificationMgr()).thenReturn(
-                mMockWindowMagnificationMgr);
+        when(mMockMagnificationController.getMagnificationConnectionManager()).thenReturn(
+                mMockMagnificationConnectionManager);
         when(mMockMagnificationController.getFullScreenMagnificationController()).thenReturn(
                 mMockFullScreenMagnificationController);
         when(mMockMagnificationController.supportWindowMagnification()).thenReturn(true);
@@ -530,7 +530,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(true);
+        verify(mMockMagnificationConnectionManager).requestConnection(true);
     }
 
     @SmallTest
@@ -547,7 +547,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(true);
+        verify(mMockMagnificationConnectionManager).requestConnection(true);
     }
 
     @SmallTest
@@ -565,7 +565,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(false);
+        verify(mMockMagnificationConnectionManager).requestConnection(false);
     }
 
     @SmallTest
@@ -583,7 +583,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(true);
+        verify(mMockMagnificationConnectionManager).requestConnection(true);
     }
 
     @SmallTest
@@ -602,7 +602,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(false);
+        verify(mMockMagnificationConnectionManager).requestConnection(false);
     }
 
     @SmallTest
@@ -616,7 +616,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr).requestConnection(true);
+        verify(mMockMagnificationConnectionManager).requestConnection(true);
     }
 
     @SmallTest
@@ -630,7 +630,8 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr, atLeastOnce()).removeMagnificationButton(anyInt());
+        verify(mMockMagnificationConnectionManager, atLeastOnce())
+                .removeMagnificationButton(anyInt());
     }
 
     @SmallTest
@@ -644,7 +645,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr, never()).removeMagnificationButton(anyInt());
+        verify(mMockMagnificationConnectionManager, never()).removeMagnificationButton(anyInt());
     }
 
     @SmallTest
@@ -659,7 +660,8 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr, atLeastOnce()).removeMagnificationButton(anyInt());
+        verify(mMockMagnificationConnectionManager, atLeastOnce())
+                .removeMagnificationButton(anyInt());
     }
 
     @SmallTest
@@ -674,7 +676,7 @@ public class AccessibilityManagerServiceTest {
         // Invokes client change to trigger onUserStateChanged.
         mA11yms.onClientChangeLocked(/* serviceInfoChanged= */false);
 
-        verify(mMockWindowMagnificationMgr, never()).removeMagnificationButton(anyInt());
+        verify(mMockMagnificationConnectionManager, never()).removeMagnificationButton(anyInt());
     }
 
     @Test

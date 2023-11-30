@@ -106,6 +106,14 @@ flag {
 }
 
 flag {
+    name: "even_dimmer"
+    namespace: "display_manager"
+    description: "Feature flag for extending the brightness below traditional range"
+    bug: "179428400"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "brightness_int_range_user_perception"
     namespace: "display_manager"
     description: "Feature flag for converting the brightness integer range to the user perception scale"

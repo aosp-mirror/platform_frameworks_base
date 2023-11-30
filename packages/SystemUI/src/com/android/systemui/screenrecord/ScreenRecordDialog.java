@@ -32,13 +32,16 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.view.Gravity;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.mediaprojection.MediaProjectionCaptureTarget;
@@ -115,6 +118,17 @@ public class ScreenRecordDialog extends SystemUIDialog {
         mOptions.setOnItemClickListenerInt((parent, view, position, id) -> {
             mAudioSwitch.setChecked(true);
         });
+
+        // disable redundant Touch & Hold accessibility action for Switch Access
+        mOptions.setAccessibilityDelegate(new View.AccessibilityDelegate() {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(@NonNull View host,
+                    @NonNull AccessibilityNodeInfo info) {
+                info.removeAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK);
+                super.onInitializeAccessibilityNodeInfo(host, info);
+            }
+        });
+        mOptions.setLongClickable(false);
     }
 
     /**

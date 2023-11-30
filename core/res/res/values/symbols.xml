@@ -287,6 +287,7 @@
   <java-symbol type="integer" name="config_audio_notif_vol_steps" />
   <java-symbol type="integer" name="config_audio_ring_vol_default" />
   <java-symbol type="integer" name="config_audio_ring_vol_steps" />
+  <java-symbol type="integer" name="config_audio_alarm_min_vol" />
   <java-symbol type="bool" name="config_spatial_audio_head_tracking_enabled_default" />
   <java-symbol type="bool" name="config_avoidGfxAccel" />
   <java-symbol type="bool" name="config_bluetooth_address_validation" />
@@ -1274,6 +1275,7 @@
   <java-symbol type="array" name="policy_exempt_apps" />
   <java-symbol type="array" name="vendor_policy_exempt_apps" />
   <java-symbol type="array" name="cloneable_apps" />
+  <java-symbol type="array" name="config_securityStatePackages" />
 
   <java-symbol type="drawable" name="default_wallpaper" />
   <java-symbol type="drawable" name="default_lock_wallpaper" />

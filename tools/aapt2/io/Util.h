@@ -19,18 +19,19 @@
 
 #include <string_view>
 
+#include "androidfw/Streams.h"
 #include "format/Archive.h"
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/message.h"
 #include "io/File.h"
-#include "io/Io.h"
 #include "process/IResourceTableConsumer.h"
 
 namespace aapt {
 namespace io {
 
-bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, std::string_view out_path,
-                              uint32_t compression_flags, IArchiveWriter* writer);
+bool CopyInputStreamToArchive(IAaptContext* context, android::InputStream* in,
+                              std::string_view out_path, uint32_t compression_flags,
+                              IArchiveWriter* writer);
 
 bool CopyFileToArchive(IAaptContext* context, IFile* file, std::string_view out_path,
                        uint32_t compression_flags, IArchiveWriter* writer);
@@ -44,11 +45,11 @@ bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::Message* prot
 
 // Copies the data from in to out. Returns false if there was an error.
 // If there was an error, check the individual streams' HadError/GetError methods.
-bool Copy(OutputStream* out, InputStream* in);
-bool Copy(OutputStream* out, android::StringPiece in);
-bool Copy(::google::protobuf::io::ZeroCopyOutputStream* out, InputStream* in);
+bool Copy(android::OutputStream* out, android::InputStream* in);
+bool Copy(android::OutputStream* out, android::StringPiece in);
+bool Copy(::google::protobuf::io::ZeroCopyOutputStream* out, android::InputStream* in);
 
-class OutputStreamAdaptor : public io::OutputStream {
+class OutputStreamAdaptor : public android::OutputStream {
  public:
   explicit OutputStreamAdaptor(::google::protobuf::io::ZeroCopyOutputStream* out) : out_(out) {
   }
@@ -84,7 +85,7 @@ class OutputStreamAdaptor : public io::OutputStream {
 
 class ZeroCopyInputAdaptor : public ::google::protobuf::io::ZeroCopyInputStream {
  public:
-  explicit ZeroCopyInputAdaptor(io::InputStream* in) : in_(in) {
+  explicit ZeroCopyInputAdaptor(android::InputStream* in) : in_(in) {
   }
 
   bool Next(const void** data, int* size) override {
@@ -119,12 +120,13 @@ class ZeroCopyInputAdaptor : public ::google::protobuf::io::ZeroCopyInputStream 
  private:
   DISALLOW_COPY_AND_ASSIGN(ZeroCopyInputAdaptor);
 
-  io::InputStream* in_;
+  android::InputStream* in_;
 };
 
 class ProtoInputStreamReader {
  public:
-  explicit ProtoInputStreamReader(io::InputStream* in) : in_(in) { }
+  explicit ProtoInputStreamReader(android::InputStream* in) : in_(in) {
+  }
 
   /** Deserializes a Message proto from the current position in the input stream.*/
   template <typename T> bool ReadMessage(T *message) {
@@ -135,7 +137,7 @@ class ProtoInputStreamReader {
   }
 
  private:
-  io::InputStream* in_;
+  android::InputStream* in_;
 };
 
 }  // namespace io

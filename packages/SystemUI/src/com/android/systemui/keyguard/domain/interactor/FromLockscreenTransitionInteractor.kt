@@ -380,6 +380,8 @@ constructor(
                     KeyguardState.DREAMING -> TO_DREAMING_DURATION
                     KeyguardState.OCCLUDED -> TO_OCCLUDED_DURATION
                     KeyguardState.AOD -> TO_AOD_DURATION
+                    KeyguardState.DOZING -> TO_DOZING_DURATION
+                    KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> TO_DREAMING_HOSTED_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
@@ -388,7 +390,9 @@ constructor(
     companion object {
         const val TAG = "FromLockscreenTransitionInteractor"
         private val DEFAULT_DURATION = 400.milliseconds
+        val TO_DOZING_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
+        val TO_DREAMING_HOSTED_DURATION = 933.milliseconds
         val TO_OCCLUDED_DURATION = 450.milliseconds
         val TO_AOD_DURATION = 500.milliseconds
         val TO_PRIMARY_BOUNCER_DURATION = DEFAULT_DURATION

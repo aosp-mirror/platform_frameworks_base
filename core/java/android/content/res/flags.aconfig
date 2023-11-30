@@ -15,3 +15,12 @@ flag {
     description: "Feature flag for passing in an AssetFileDescriptor to create an frro"
     bug: "304478666"
 }
+
+flag {
+    name: "manifest_flagging"
+    namespace: "resource_manager"
+    description: "Feature flag for flagging manifest entries"
+    bug: "297373084"
+    # This flag is read in PackageParser at boot time, and in aapt2 which is a build tool.
+    is_fixed_read_only: true
+}

@@ -2112,6 +2112,15 @@ public final class SystemServer implements Dumpable {
             networkPolicy.bindConnectivityManager();
             t.traceEnd();
 
+            t.traceBegin("StartSecurityStateManagerService");
+            try {
+                ServiceManager.addService(Context.SECURITY_STATE_SERVICE,
+                        new SecurityStateManagerService(context));
+            } catch (Throwable e) {
+                reportWtf("starting SecurityStateManagerService", e);
+            }
+            t.traceEnd();
+
             t.traceBegin("StartVpnManagerService");
             try {
                 vpnManager = VpnManagerService.create(context);

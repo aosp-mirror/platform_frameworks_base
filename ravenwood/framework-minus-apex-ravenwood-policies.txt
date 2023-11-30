@@ -1,5 +1,8 @@
 # Ravenwood "policy" file for framework-minus-apex.
 
+# Keep all AIDL interfaces
+class :aidl stubclass
+
 # Collections
 class android.util.ArrayMap stubclass
 class android.util.ArraySet stubclass

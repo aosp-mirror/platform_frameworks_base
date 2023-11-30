@@ -111,7 +111,7 @@ constexpr static const char* sWarningHeader =
     " */\n\n";
 
 void ClassDefinition::WriteJavaFile(const ClassDefinition* def, StringPiece package, bool final,
-                                    bool strip_api_annotations, io::OutputStream* out) {
+                                    bool strip_api_annotations, android::OutputStream* out) {
   Printer printer(out);
   printer.Print(sWarningHeader).Print("package ").Print(package).Println(";");
   printer.Println();

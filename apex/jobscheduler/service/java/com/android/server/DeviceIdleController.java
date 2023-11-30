@@ -1107,7 +1107,7 @@ public class DeviceIdleController extends SystemService
         private long mDefaultInactiveTimeout =
                 (30 * 60 * 1000L) / (!COMPRESS_TIME ? 1 : 10);
         private static final long DEFAULT_INACTIVE_TIMEOUT_SMALL_BATTERY =
-                (15 * 60 * 1000L) / (!COMPRESS_TIME ? 1 : 10);
+                (60 * 1000L) / (!COMPRESS_TIME ? 1 : 10);
         private long mDefaultSensingTimeout =
                 !COMPRESS_TIME ? 4 * 60 * 1000L : 60 * 1000L;
         private long mDefaultLocatingTimeout =
@@ -1120,7 +1120,7 @@ public class DeviceIdleController extends SystemService
         private long mDefaultIdleAfterInactiveTimeout =
                 (30 * 60 * 1000L) / (!COMPRESS_TIME ? 1 : 10);
         private static final long DEFAULT_IDLE_AFTER_INACTIVE_TIMEOUT_SMALL_BATTERY =
-                (15 * 60 * 1000L) / (!COMPRESS_TIME ? 1 : 10);
+                (60 * 1000L) / (!COMPRESS_TIME ? 1 : 10);
         private long mDefaultIdlePendingTimeout =
                 !COMPRESS_TIME ? 5 * 60 * 1000L : 30 * 1000L;
         private long mDefaultMaxIdlePendingTimeout =

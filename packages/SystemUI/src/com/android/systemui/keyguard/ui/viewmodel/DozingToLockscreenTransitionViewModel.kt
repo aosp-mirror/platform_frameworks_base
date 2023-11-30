@@ -22,6 +22,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 
@@ -39,6 +40,13 @@ constructor(
         KeyguardTransitionAnimationFlow(
             transitionDuration = FromDozingTransitionInteractor.TO_LOCKSCREEN_DURATION,
             transitionFlow = interactor.dozingToLockscreenTransition,
+        )
+
+    val shortcutsAlpha: Flow<Float> =
+        transitionAnimation.createFlow(
+            duration = 150.milliseconds,
+            onStep = { it },
+            onCancel = { 0f },
         )
 
     override val deviceEntryParentViewAlpha: Flow<Float> =

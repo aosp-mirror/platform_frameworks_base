@@ -66,6 +66,13 @@ public final class SensorPrivacyManager {
             + ".extra.sensor";
 
     /**
+     * An extra containing the notification id that triggered the intent
+     * @hide
+     */
+    public static final String EXTRA_NOTIFICATION_ID = SensorPrivacyManager.class.getName()
+            + ".extra.notification_id";
+
+    /**
      * An extra indicating if all sensors are affected
      * @hide
      */

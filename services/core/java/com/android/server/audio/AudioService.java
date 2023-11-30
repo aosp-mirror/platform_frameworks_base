@@ -38,6 +38,7 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 
+import static com.android.media.audio.Flags.alarmMinVolumeZero;
 import static com.android.media.audio.Flags.bluetoothMacAddressAnonymization;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
 import static com.android.server.audio.SoundDoseHelper.ACTION_CHECK_MUSIC_ACTIVE;
@@ -1191,6 +1192,19 @@ public class AudioService extends IAudioService.Stub
             MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM] = maxAlarmVolume;
         }
 
+        if (alarmMinVolumeZero()) {
+            try {
+                int minAlarmVolume = mContext.getResources().getInteger(
+                        com.android.internal.R.integer.config_audio_alarm_min_vol);
+                if (minAlarmVolume <= MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM]) {
+                    MIN_STREAM_VOLUME[AudioSystem.STREAM_ALARM] = minAlarmVolume;
+                } else {
+                    Log.e(TAG, "Error min alarm volume greater than max alarm volume");
+                }
+            } catch (Resources.NotFoundException e) {
+                Log.e(TAG, "Error querying for alarm min volume ", e);
+            }
+        }
         int defaultAlarmVolume = SystemProperties.getInt("ro.config.alarm_vol_default", -1);
         if (defaultAlarmVolume != -1 &&
                 defaultAlarmVolume <= MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM]) {
@@ -10667,8 +10681,8 @@ public class AudioService extends IAudioService.Stub
 
     /** @see LoudnessCodecConfigurator#addMediaCodec(MediaCodec) */
     @Override
-    public void addLoudnessCodecInfo(int piid, LoudnessCodecInfo codecInfo) {
-        mLoudnessCodecHelper.addLoudnessCodecInfo(piid, codecInfo);
+    public void addLoudnessCodecInfo(int piid, int mediaCodecHash, LoudnessCodecInfo codecInfo) {
+        mLoudnessCodecHelper.addLoudnessCodecInfo(piid, mediaCodecHash, codecInfo);
     }
 
     /** @see LoudnessCodecConfigurator#removeMediaCodec(MediaCodec) */
@@ -11372,6 +11386,8 @@ public class AudioService extends IAudioService.Stub
     static final int LOG_NB_EVENTS_SPATIAL = 30;
     static final int LOG_NB_EVENTS_SOUND_DOSE = 30;
 
+    static final int LOG_NB_EVENTS_LOUDNESS_CODEC = 30;
+
     static final EventLogger
             sLifecycleLogger = new EventLogger(LOG_NB_EVENTS_LIFECYCLE,
             "audio services lifecycle");
@@ -11570,6 +11586,10 @@ public class AudioService extends IAudioService.Stub
         pw.println("isSpatializerEnabled:" + isSpatializerEnabled() + " (routing dependent)");
         mSpatializerHelper.dump(pw);
         sSpatialLogger.dump(pw);
+
+        pw.println("\n");
+        pw.println("\nLoudness alignment:");
+        mLoudnessCodecHelper.dump(pw);
 
         mAudioSystem.dump(pw);
     }

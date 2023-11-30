@@ -728,14 +728,4 @@ public class Utils {
         return false;
     }
 
-    /**
-     *  Convert a drawable to grayscale drawable
-     */
-    public static void convertToGrayscale(@NonNull Drawable drawable) {
-        ColorMatrix matrix = new ColorMatrix();
-        matrix.setSaturation(0.0f);
-
-        ColorMatrixColorFilter filter = new ColorMatrixColorFilter(matrix);
-        drawable.setColorFilter(filter);
-    }
 }

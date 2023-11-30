@@ -65,9 +65,10 @@ constructor(
     override val isShadeFullyExpanded: Flow<Boolean> =
         baseShadeInteractor.shadeExpansion.map { it >= 1f }.distinctUntilChanged()
 
-    override val isUserInteracting: Flow<Boolean> =
+    override val isUserInteracting: StateFlow<Boolean> =
         combine(isUserInteractingWithShade, isUserInteractingWithQs) { shade, qs -> shade || qs }
             .distinctUntilChanged()
+            .stateIn(scope, SharingStarted.Eagerly, false)
 
     override val isShadeTouchable: Flow<Boolean> =
         combine(

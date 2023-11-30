@@ -35,6 +35,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NO_USER_ACTION;
 import static android.content.pm.PackageManager.MATCH_SYSTEM_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.SensorPrivacyManager.EXTRA_ALL_SENSORS;
+import static android.hardware.SensorPrivacyManager.EXTRA_NOTIFICATION_ID;
 import static android.hardware.SensorPrivacyManager.EXTRA_SENSOR;
 import static android.hardware.SensorPrivacyManager.EXTRA_TOGGLE_TYPE;
 import static android.hardware.SensorPrivacyManager.Sensors.CAMERA;
@@ -164,6 +165,7 @@ public final class SensorPrivacyService extends SystemService {
     private final AppOpsManagerInternal mAppOpsManagerInternal;
     private final TelephonyManager mTelephonyManager;
     private final PackageManagerInternal mPackageManagerInternal;
+    private final NotificationManager mNotificationManager;
 
     private CameraPrivacyLightController mCameraPrivacyLightController;
 
@@ -188,6 +190,7 @@ public final class SensorPrivacyService extends SystemService {
         mActivityTaskManager = context.getSystemService(ActivityTaskManager.class);
         mTelephonyManager = context.getSystemService(TelephonyManager.class);
         mPackageManagerInternal = getLocalService(PackageManagerInternal.class);
+        mNotificationManager = mContext.getSystemService(NotificationManager.class);
         mSensorPrivacyServiceImpl = new SensorPrivacyServiceImpl();
     }
 
@@ -288,9 +291,18 @@ public final class SensorPrivacyService extends SystemService {
                 @Override
                 public void onReceive(Context context, Intent intent) {
                     setToggleSensorPrivacy(
-                            ((UserHandle) intent.getParcelableExtra(
-                                    Intent.EXTRA_USER, android.os.UserHandle.class)).getIdentifier(), OTHER,
-                            intent.getIntExtra(EXTRA_SENSOR, UNKNOWN), false);
+                            intent.getParcelableExtra(Intent.EXTRA_USER, UserHandle.class)
+                                    .getIdentifier(),
+                            OTHER,
+                            intent.getIntExtra(EXTRA_SENSOR, UNKNOWN),
+                            false
+                    );
+
+                    int notificationId =
+                            intent.getIntExtra(EXTRA_NOTIFICATION_ID, SystemMessage.NOTE_UNKNOWN);
+                    if (notificationId != SystemMessage.NOTE_UNKNOWN) {
+                        mNotificationManager.cancel(notificationId);
+                    }
                 }
             }, new IntentFilter(ACTION_DISABLE_TOGGLE_SENSOR_PRIVACY),
                     MANAGE_SENSOR_PRIVACY, null, Context.RECEIVER_EXPORTED);
@@ -635,8 +647,6 @@ public final class SensorPrivacyService extends SystemService {
                 notificationId = SystemMessage.NOTE_UNBLOCK_CAM_TOGGLE;
             }
 
-            NotificationManager notificationManager =
-                    mContext.getSystemService(NotificationManager.class);
             NotificationChannel channel = new NotificationChannel(
                     SENSOR_PRIVACY_CHANNEL_ID,
                     getUiContext().getString(R.string.sensor_privacy_notification_channel_label),
@@ -646,7 +656,7 @@ public final class SensorPrivacyService extends SystemService {
             channel.enableVibration(false);
             channel.setBlockable(false);
 
-            notificationManager.createNotificationChannel(channel);
+            mNotificationManager.createNotificationChannel(channel);
 
             Icon icon = Icon.createWithResource(getUiContext().getResources(), iconRes);
 
@@ -669,10 +679,11 @@ public final class SensorPrivacyService extends SystemService {
                     new Intent(ACTION_DISABLE_TOGGLE_SENSOR_PRIVACY)
                             .setPackage(mContext.getPackageName())
                             .putExtra(EXTRA_SENSOR, sensor)
+                            .putExtra(EXTRA_NOTIFICATION_ID, notificationId)
                             .putExtra(Intent.EXTRA_USER, user),
                     PendingIntent.FLAG_IMMUTABLE
                             | PendingIntent.FLAG_UPDATE_CURRENT);
-            notificationManager.notify(notificationId,
+            mNotificationManager.notify(notificationId,
                     new Notification.Builder(mContext, SENSOR_PRIVACY_CHANNEL_ID)
                             .setContentTitle(contentTitle)
                             .setContentText(contentText)

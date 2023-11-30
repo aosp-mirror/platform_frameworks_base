@@ -23,7 +23,7 @@ package android.media;
  *
  * {@hide}
  */
-@JavaDerive(equals = true)
+@JavaDerive(equals = true, toString = true)
 parcelable LoudnessCodecInfo {
     /** Supported codec metadata types for loudness updates. */
     @Backing(type="int")
@@ -37,7 +37,6 @@ parcelable LoudnessCodecInfo {
         CODEC_METADATA_TYPE_DTS_UHD = 6
     }
 
-    int mediaCodecHashCode;
     CodecMetadataType metadataType;
     boolean isDownmixing;
 }

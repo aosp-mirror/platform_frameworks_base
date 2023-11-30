@@ -21,6 +21,11 @@ import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES;
 import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_HEARING_AID;
 import static android.media.AudioManager.AUDIO_DEVICE_CATEGORY_WATCH;
 import static android.media.AudioPlaybackConfiguration.PLAYER_DEVICEID_INVALID;
+import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_TYPE_MPEG_4;
+import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_TYPE_MPEG_D;
+import static android.media.MediaFormat.KEY_AAC_DRC_EFFECT_TYPE;
+import static android.media.MediaFormat.KEY_AAC_DRC_HEAVY_COMPRESSION;
+import static android.media.MediaFormat.KEY_AAC_DRC_TARGET_REFERENCE_LEVEL;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -41,7 +46,11 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.audio.AudioServiceEvents.LoudnessEvent;
+import com.android.server.utils.EventLogger;
 
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -50,6 +59,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Class to handle the updates in loudness parameters and responsible to generate parameters that
@@ -70,10 +80,14 @@ public class LoudnessCodecHelper {
     private static final String SYSTEM_PROPERTY_SPEAKER_SPL_RANGE_SIZE =
             "audio.loudness.builtin-speaker-spl-range-size";
 
-    private static final int SPL_RANGE_UNKNOWN = 0;
-    private static final int SPL_RANGE_SMALL = 1;
-    private static final int SPL_RANGE_MEDIUM = 2;
-    private static final int SPL_RANGE_LARGE = 3;
+    @VisibleForTesting
+    static final int SPL_RANGE_UNKNOWN = 0;
+    @VisibleForTesting
+    static final int SPL_RANGE_SMALL = 1;
+    @VisibleForTesting
+    static final int SPL_RANGE_MEDIUM = 2;
+    @VisibleForTesting
+    static final int SPL_RANGE_LARGE = 3;
 
     /** The possible transducer SPL ranges as defined in CTA2075 */
     @IntDef({
@@ -99,11 +113,18 @@ public class LoudnessCodecHelper {
                 pid = (Integer) cookie;
             }
             if (pid != null) {
-                mLoudnessCodecHelper.removePid(pid);
+                if (DEBUG) {
+                    Log.d(TAG, "Client with pid " + pid + " died, removing from receiving updates");
+                }
+                sLogger.enqueue(LoudnessEvent.getClientDied(pid));
+                mLoudnessCodecHelper.onClientPidDied(pid);
             }
             super.onCallbackDied(callback, cookie);
         }
     }
+
+    private static final EventLogger sLogger = new EventLogger(
+            AudioService.LOG_NB_EVENTS_LOUDNESS_CODEC, "Loudness updates");
 
     private final LoudnessRemoteCallbackList mLoudnessUpdateDispatchers =
             new LoudnessRemoteCallbackList(this);
@@ -125,7 +146,8 @@ public class LoudnessCodecHelper {
     private final AudioService mAudioService;
 
     /** Contains the properties necessary to compute the codec loudness related parameters. */
-    private static final class LoudnessCodecInputProperties {
+    @VisibleForTesting
+    static final class LoudnessCodecInputProperties {
         private final int mMetadataType;
 
         private final boolean mIsDownmixing;
@@ -200,10 +222,53 @@ public class LoudnessCodecHelper {
         }
 
         PersistableBundle createLoudnessParameters() {
-            // TODO: create bundle with new parameters
-            return new PersistableBundle();
-        }
+            PersistableBundle loudnessParams = new PersistableBundle();
 
+            switch (mDeviceSplRange) {
+                case SPL_RANGE_LARGE:
+                    // corresponds to -31dB attenuation
+                    loudnessParams.putInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL, 124);
+                    if (mMetadataType == CODEC_METADATA_TYPE_MPEG_4) {
+                        loudnessParams.putInt(KEY_AAC_DRC_HEAVY_COMPRESSION, 0);
+                    } else if (mMetadataType == CODEC_METADATA_TYPE_MPEG_D) {
+                        // general compression
+                        loudnessParams.putInt(KEY_AAC_DRC_EFFECT_TYPE, 6);
+                    }
+                    break;
+                case SPL_RANGE_MEDIUM:
+                    // corresponds to -24dB attenuation
+                    loudnessParams.putInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL, 96);
+                    if (mMetadataType == CODEC_METADATA_TYPE_MPEG_4) {
+                        loudnessParams.putInt(KEY_AAC_DRC_HEAVY_COMPRESSION, mIsDownmixing ? 1 : 0);
+                    } else if (mMetadataType == CODEC_METADATA_TYPE_MPEG_D) {
+                        // general compression
+                        loudnessParams.putInt(KEY_AAC_DRC_EFFECT_TYPE, 6);
+                    }
+                    break;
+                case SPL_RANGE_SMALL:
+                    // corresponds to -16dB attenuation
+                    loudnessParams.putInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL, 64);
+                    if (mMetadataType == CODEC_METADATA_TYPE_MPEG_4) {
+                        loudnessParams.putInt(KEY_AAC_DRC_HEAVY_COMPRESSION, 1);
+                    } else if (mMetadataType == CODEC_METADATA_TYPE_MPEG_D) {
+                        // limited playback range compression
+                        loudnessParams.putInt(KEY_AAC_DRC_EFFECT_TYPE, 3);
+                    }
+                    break;
+                default:
+                    // corresponds to -24dB attenuation
+                    loudnessParams.putInt(KEY_AAC_DRC_TARGET_REFERENCE_LEVEL, 96);
+                    if (mMetadataType == CODEC_METADATA_TYPE_MPEG_4) {
+                        loudnessParams.putInt(KEY_AAC_DRC_HEAVY_COMPRESSION, mIsDownmixing ? 1 : 0);
+                    } else if (mMetadataType == CODEC_METADATA_TYPE_MPEG_D) {
+                        // general compression
+                        loudnessParams.putInt(KEY_AAC_DRC_EFFECT_TYPE, 6);
+                    }
+                    break;
+            }
+
+            return loudnessParams;
+        }
     }
 
     @GuardedBy("mLock")
@@ -227,22 +292,25 @@ public class LoudnessCodecHelper {
         if (DEBUG) {
             Log.d(TAG, "startLoudnessCodecUpdates: piid " + piid + " codecInfos " + codecInfoList);
         }
-        Set<LoudnessCodecInfo> infoSet;
+
         synchronized (mLock) {
             if (mStartedPiids.contains(piid)) {
                 Log.w(TAG, "Already started loudness updates for piid " + piid);
                 return;
             }
-            infoSet = new HashSet<>(codecInfoList);
+            Set<LoudnessCodecInfo> infoSet = new HashSet<>(codecInfoList);
             mStartedPiids.put(piid, infoSet);
 
-            mPiidToPidCache.put(piid, Binder.getCallingPid());
+            int pid = Binder.getCallingPid();
+            mPiidToPidCache.put(piid, pid);
+
+            sLogger.enqueue(LoudnessEvent.getStartPiid(piid, pid));
         }
 
         try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
             mAudioService.getActivePlaybackConfigurations().stream().filter(
                     conf -> conf.getPlayerInterfaceId() == piid).findFirst().ifPresent(
-                            apc -> updateCodecParametersForConfiguration(apc, infoSet));
+                    this::updateCodecParametersForConfiguration);
         }
     }
 
@@ -250,20 +318,24 @@ public class LoudnessCodecHelper {
         if (DEBUG) {
             Log.d(TAG, "stopLoudnessCodecUpdates: piid " + piid);
         }
+
         synchronized (mLock) {
             if (!mStartedPiids.contains(piid)) {
                 Log.w(TAG, "Loudness updates are already stopped for piid " + piid);
                 return;
             }
             mStartedPiids.remove(piid);
+
+            sLogger.enqueue(LoudnessEvent.getStopPiid(piid, mPiidToPidCache.get(piid, -1)));
             mPiidToDeviceIdCache.delete(piid);
             mPiidToPidCache.delete(piid);
         }
     }
 
-    void addLoudnessCodecInfo(int piid, LoudnessCodecInfo info) {
+    void addLoudnessCodecInfo(int piid, int mediaCodecHash, LoudnessCodecInfo info) {
         if (DEBUG) {
-            Log.d(TAG, "addLoudnessCodecInfo: piid " + piid + " info " + info);
+            Log.d(TAG, "addLoudnessCodecInfo: piid " + piid + " mcHash " + mediaCodecHash + " info "
+                    + info);
         }
 
         Set<LoudnessCodecInfo> infoSet;
@@ -280,7 +352,20 @@ public class LoudnessCodecHelper {
         try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
             mAudioService.getActivePlaybackConfigurations().stream().filter(
                     conf -> conf.getPlayerInterfaceId() == piid).findFirst().ifPresent(
-                            apc -> updateCodecParametersForConfiguration(apc, Set.of(info)));
+                            apc -> {
+                                final AudioDeviceInfo deviceInfo = apc.getAudioDeviceInfo();
+                                if (deviceInfo != null) {
+                                    PersistableBundle updateBundle = new PersistableBundle();
+                                    synchronized (mLock) {
+                                        updateBundle.putPersistableBundle(
+                                                Integer.toString(mediaCodecHash),
+                                                getCodecBundle_l(deviceInfo, info));
+                                    }
+                                    if (!updateBundle.isDefinitelyEmpty()) {
+                                        dispatchNewLoudnessParameters(piid, updateBundle);
+                                    }
+                                }
+                            });
         }
     }
 
@@ -295,24 +380,6 @@ public class LoudnessCodecHelper {
             }
             final Set<LoudnessCodecInfo> infoSet = mStartedPiids.get(piid);
             infoSet.remove(codecInfo);
-        }
-    }
-
-    void removePid(int pid) {
-        if (DEBUG) {
-            Log.d(TAG, "Removing pid " + pid + " from receiving updates");
-        }
-        synchronized (mLock) {
-            for (int i = 0; i < mPiidToPidCache.size(); ++i) {
-                int piid = mPiidToPidCache.keyAt(i);
-                if (mPiidToPidCache.get(piid) == pid) {
-                    if (DEBUG) {
-                        Log.d(TAG, "Removing piid  " + piid);
-                    }
-                    mStartedPiids.delete(piid);
-                    mPiidToDeviceIdCache.delete(piid);
-                }
-            }
         }
     }
 
@@ -381,48 +448,77 @@ public class LoudnessCodecHelper {
             }
         }
 
-        updateApcList.forEach(apc -> updateCodecParametersForConfiguration(apc, null));
+        updateApcList.forEach(apc -> updateCodecParametersForConfiguration(apc));
     }
 
-    /** Updates and dispatches the new loudness parameters for the {@code codecInfos} set.
+    /** Updates and dispatches the new loudness parameters for all its registered codecs. */
+    void dump(PrintWriter pw) {
+        // Registered clients
+        pw.println("\nRegistered clients:\n");
+        synchronized (mLock) {
+            for (int i = 0; i < mStartedPiids.size(); ++i) {
+                int piid = mStartedPiids.keyAt(i);
+                int pid = mPiidToPidCache.get(piid, -1);
+                final Set<LoudnessCodecInfo> codecInfos = mStartedPiids.get(piid);
+                pw.println(String.format("Player piid %d pid %d active codec types %s\n", piid,
+                        pid, codecInfos.stream().map(Object::toString).collect(
+                                Collectors.joining(", "))));
+            }
+            pw.println();
+        }
+
+        sLogger.dump(pw);
+        pw.println();
+    }
+
+    private void onClientPidDied(int pid) {
+        synchronized (mLock) {
+            for (int i = 0; i < mPiidToPidCache.size(); ++i) {
+                int piid = mPiidToPidCache.keyAt(i);
+                if (mPiidToPidCache.get(piid) == pid) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Removing piid  " + piid);
+                    }
+                    mStartedPiids.delete(piid);
+                    mPiidToDeviceIdCache.delete(piid);
+                }
+            }
+        }
+    }
+
+    /**
+     * Updates and dispatches the new loudness parameters for the {@code codecInfos} set.
      *
      * @param apc the player configuration for which the loudness parameters are updated.
-     * @param codecInfos the codec info for which the parameters are updated. If {@code null},
-     *                   send updates for all the started codecs assigned to {@code apc}
      */
-    private void updateCodecParametersForConfiguration(AudioPlaybackConfiguration apc,
-            Set<LoudnessCodecInfo> codecInfos) {
+    private void updateCodecParametersForConfiguration(AudioPlaybackConfiguration apc) {
         if (DEBUG) {
-            Log.d(TAG, "updateCodecParametersForConfiguration apc:" + apc + " codecInfos: "
-                    + codecInfos);
+            Log.d(TAG, "updateCodecParametersForConfiguration apc:" + apc);
         }
+
         final PersistableBundle allBundles = new PersistableBundle();
         final int piid = apc.getPlayerInterfaceId();
+
         synchronized (mLock) {
-            if (codecInfos == null) {
-                codecInfos = mStartedPiids.get(piid);
-            }
+            final Set<LoudnessCodecInfo> codecInfos = mStartedPiids.get(piid);
 
             final AudioDeviceInfo deviceInfo = apc.getAudioDeviceInfo();
             if (codecInfos != null && deviceInfo != null) {
                 for (LoudnessCodecInfo info : codecInfos) {
-                    allBundles.putPersistableBundle(Integer.toString(info.mediaCodecHashCode),
+                    allBundles.putPersistableBundle(Integer.toString(info.hashCode()),
                             getCodecBundle_l(deviceInfo, info));
                 }
             }
         }
 
         if (!allBundles.isDefinitelyEmpty()) {
-            if (DEBUG) {
-                Log.d(TAG, "Dispatching for piid: " + piid + " bundle: " + allBundles);
-            }
             dispatchNewLoudnessParameters(piid, allBundles);
         }
     }
 
     private void dispatchNewLoudnessParameters(int piid, PersistableBundle bundle) {
         if (DEBUG) {
-            Log.d(TAG, "dispatchNewLoudnessParameters: piid " + piid);
+            Log.d(TAG, "dispatchNewLoudnessParameters: piid " + piid + " bundle: " + bundle);
         }
         final int nbDispatchers = mLoudnessUpdateDispatchers.beginBroadcast();
         for (int i = 0; i < nbDispatchers; ++i) {

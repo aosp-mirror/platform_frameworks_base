@@ -102,12 +102,6 @@ public final class SliceItem implements Parcelable {
      */
     public static final String FORMAT_LONG = "long";
     /**
-     * @deprecated TO BE REMOVED
-     * @removed
-     */
-    @Deprecated
-    public static final String FORMAT_TIMESTAMP = FORMAT_LONG;
-    /**
      * A {@link SliceItem} that contains a {@link RemoteInput}.
      */
     public static final String FORMAT_REMOTE_INPUT = "input";
@@ -257,15 +251,6 @@ public final class SliceItem implements Parcelable {
     }
 
     /**
-     * @deprecated replaced by {@link #getLong()}
-     * @removed
-     */
-    @Deprecated
-    public long getTimestamp() {
-        return (Long) mObj;
-    }
-
-    /**
      * @param hint The hint to check for
      * @return true if this item contains the given hint
      */
@@ -348,7 +333,7 @@ public final class SliceItem implements Parcelable {
             case FORMAT_INT:
                 dest.writeInt((Integer) obj);
                 break;
-            case FORMAT_TIMESTAMP:
+            case FORMAT_LONG:
                 dest.writeLong((Long) obj);
                 break;
         }
@@ -368,7 +353,7 @@ public final class SliceItem implements Parcelable {
                         Slice.CREATOR.createFromParcel(in));
             case FORMAT_INT:
                 return in.readInt();
-            case FORMAT_TIMESTAMP:
+            case FORMAT_LONG:
                 return in.readLong();
             case FORMAT_REMOTE_INPUT:
                 return RemoteInput.CREATOR.createFromParcel(in);
