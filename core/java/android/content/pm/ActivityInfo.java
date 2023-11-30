@@ -55,6 +55,7 @@ import java.util.Set;
  * from the AndroidManifest.xml's &lt;activity&gt; and
  * &lt;receiver&gt; tags.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ActivityInfo extends ComponentInfo implements Parcelable {
 
     private static final Parcelling.BuiltIn.ForStringSet sForStringSet =

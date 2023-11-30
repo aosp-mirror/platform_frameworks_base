@@ -39,6 +39,17 @@ android.content.Intent
 android.content.IntentFilter
 android.content.UriMatcher
 
+android.content.pm.PackageInfo
+android.content.pm.ApplicationInfo
+android.content.pm.PackageItemInfo
+android.content.pm.ComponentInfo
+android.content.pm.ActivityInfo
+android.content.pm.ServiceInfo
+android.content.pm.PathPermission
+android.content.pm.ProviderInfo
+android.content.pm.ResolveInfo
+android.content.pm.Signature
+
 android.database.AbstractCursor
 android.database.CharArrayBuffer
 android.database.ContentObservable
