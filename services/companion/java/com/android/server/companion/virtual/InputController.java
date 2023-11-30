@@ -30,6 +30,8 @@ import android.hardware.input.VirtualKeyEvent;
 import android.hardware.input.VirtualMouseButtonEvent;
 import android.hardware.input.VirtualMouseRelativeEvent;
 import android.hardware.input.VirtualMouseScrollEvent;
+import android.hardware.input.VirtualStylusButtonEvent;
+import android.hardware.input.VirtualStylusMotionEvent;
 import android.hardware.input.VirtualTouchEvent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -71,12 +73,14 @@ class InputController {
     static final String PHYS_TYPE_MOUSE = "Mouse";
     static final String PHYS_TYPE_TOUCHSCREEN = "Touchscreen";
     static final String PHYS_TYPE_NAVIGATION_TOUCHPAD = "NavigationTouchpad";
+    static final String PHYS_TYPE_STYLUS = "Stylus";
     @StringDef(prefix = { "PHYS_TYPE_" }, value = {
             PHYS_TYPE_DPAD,
             PHYS_TYPE_KEYBOARD,
             PHYS_TYPE_MOUSE,
             PHYS_TYPE_TOUCHSCREEN,
             PHYS_TYPE_NAVIGATION_TOUCHPAD,
+            PHYS_TYPE_STYLUS,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface PhysType {
@@ -186,6 +190,16 @@ class InputController {
             mInputManagerInternal.unsetTypeAssociation(phys);
             throw e;
         }
+    }
+
+    void createStylus(@NonNull String deviceName, int vendorId, int productId,
+            @NonNull IBinder deviceToken, int displayId, int height, int width)
+            throws DeviceCreationException {
+        final String phys = createPhys(PHYS_TYPE_STYLUS);
+        createDeviceInternal(InputDeviceDescriptor.TYPE_STYLUS, deviceName, vendorId,
+                productId, deviceToken, displayId, phys,
+                () -> mNativeWrapper.openUinputStylus(deviceName, vendorId, productId, phys,
+                        height, width));
     }
 
     void unregisterInputDevice(@NonNull IBinder token) {
@@ -410,6 +424,32 @@ class InputController {
         }
     }
 
+    boolean sendStylusMotionEvent(@NonNull IBinder token, @NonNull VirtualStylusMotionEvent event) {
+        synchronized (mLock) {
+            final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
+                    token);
+            if (inputDeviceDescriptor == null) {
+                return false;
+            }
+            return mNativeWrapper.writeStylusMotionEvent(inputDeviceDescriptor.getNativePointer(),
+                    event.getToolType(), event.getAction(), event.getX(), event.getY(),
+                    event.getPressure(), event.getTiltX(), event.getTiltY(),
+                    event.getEventTimeNanos());
+        }
+    }
+
+    boolean sendStylusButtonEvent(@NonNull IBinder token, @NonNull VirtualStylusButtonEvent event) {
+        synchronized (mLock) {
+            final InputDeviceDescriptor inputDeviceDescriptor = mInputDeviceDescriptors.get(
+                    token);
+            if (inputDeviceDescriptor == null) {
+                return false;
+            }
+            return mNativeWrapper.writeStylusButtonEvent(inputDeviceDescriptor.getNativePointer(),
+                    event.getButtonCode(), event.getAction(), event.getEventTimeNanos());
+        }
+    }
+
     public void dump(@NonNull PrintWriter fout) {
         fout.println("    InputController: ");
         synchronized (mLock) {
@@ -454,6 +494,8 @@ class InputController {
             String phys);
     private static native long nativeOpenUinputTouchscreen(String deviceName, int vendorId,
             int productId, String phys, int height, int width);
+    private static native long nativeOpenUinputStylus(String deviceName, int vendorId,
+            int productId, String phys, int height, int width);
     private static native void nativeCloseUinput(long ptr);
     private static native boolean nativeWriteDpadKeyEvent(long ptr, int androidKeyCode, int action,
             long eventTimeNanos);
@@ -468,6 +510,10 @@ class InputController {
             float relativeY, long eventTimeNanos);
     private static native boolean nativeWriteScrollEvent(long ptr, float xAxisMovement,
             float yAxisMovement, long eventTimeNanos);
+    private static native boolean nativeWriteStylusMotionEvent(long ptr, int toolType, int action,
+            int locationX, int locationY, int pressure, int tiltX, int tiltY, long eventTimeNanos);
+    private static native boolean nativeWriteStylusButtonEvent(long ptr, int buttonCode, int action,
+            long eventTimeNanos);
 
     /** Wrapper around the static native methods for tests. */
     @VisibleForTesting
@@ -489,6 +535,11 @@ class InputController {
                 int productId, String phys, int height, int width) {
             return nativeOpenUinputTouchscreen(deviceName, vendorId, productId, phys, height,
                     width);
+        }
+
+        public long openUinputStylus(String deviceName, int vendorId, int productId, String phys,
+                int height, int width) {
+            return nativeOpenUinputStylus(deviceName, vendorId, productId, phys, height, width);
         }
 
         public void closeUinput(long ptr) {
@@ -527,6 +578,17 @@ class InputController {
                 long eventTimeNanos) {
             return nativeWriteScrollEvent(ptr, xAxisMovement, yAxisMovement, eventTimeNanos);
         }
+
+        public boolean writeStylusMotionEvent(long ptr, int toolType, int action, int locationX,
+                int locationY, int pressure, int tiltX, int tiltY, long eventTimeNanos) {
+            return nativeWriteStylusMotionEvent(ptr, toolType, action, locationX, locationY,
+                    pressure, tiltX, tiltY, eventTimeNanos);
+        }
+
+        public boolean writeStylusButtonEvent(long ptr, int buttonCode, int action,
+                long eventTimeNanos) {
+            return nativeWriteStylusButtonEvent(ptr, buttonCode, action, eventTimeNanos);
+        }
     }
 
     @VisibleForTesting static final class InputDeviceDescriptor {
@@ -536,12 +598,14 @@ class InputController {
         static final int TYPE_TOUCHSCREEN = 3;
         static final int TYPE_DPAD = 4;
         static final int TYPE_NAVIGATION_TOUCHPAD = 5;
+        static final int TYPE_STYLUS = 6;
         @IntDef(prefix = { "TYPE_" }, value = {
                 TYPE_KEYBOARD,
                 TYPE_MOUSE,
                 TYPE_TOUCHSCREEN,
                 TYPE_DPAD,
                 TYPE_NAVIGATION_TOUCHPAD,
+                TYPE_STYLUS,
         })
         @Retention(RetentionPolicy.SOURCE)
         @interface Type {

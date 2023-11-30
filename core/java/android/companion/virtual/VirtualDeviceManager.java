@@ -55,6 +55,8 @@ import android.hardware.input.VirtualMouse;
 import android.hardware.input.VirtualMouseConfig;
 import android.hardware.input.VirtualNavigationTouchpad;
 import android.hardware.input.VirtualNavigationTouchpadConfig;
+import android.hardware.input.VirtualStylus;
+import android.hardware.input.VirtualStylusConfig;
 import android.hardware.input.VirtualTouchscreen;
 import android.hardware.input.VirtualTouchscreenConfig;
 import android.media.AudioManager;
@@ -856,6 +858,19 @@ public final class VirtualDeviceManager {
         public VirtualNavigationTouchpad createVirtualNavigationTouchpad(
                 @NonNull VirtualNavigationTouchpadConfig config) {
             return mVirtualDeviceInternal.createVirtualNavigationTouchpad(config);
+        }
+
+        /**
+         * Creates a virtual stylus.
+         *
+         * @param config the touchscreen configurations for the virtual stylus.
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @NonNull
+        @FlaggedApi(Flags.FLAG_VIRTUAL_STYLUS)
+        public VirtualStylus createVirtualStylus(
+                @NonNull VirtualStylusConfig config) {
+            return mVirtualDeviceInternal.createVirtualStylus(config);
         }
 
         /**
