@@ -126,6 +126,10 @@ public class BatteryUsageStatsProvider {
      */
     public List<BatteryUsageStats> getBatteryUsageStats(BatteryStatsImpl stats,
             List<BatteryUsageStatsQuery> queries) {
+        if (mPowerStatsExporterEnabled) {
+            stats.collectPowerStatsSamples();
+        }
+
         ArrayList<BatteryUsageStats> results = new ArrayList<>(queries.size());
         synchronized (stats) {
             stats.prepareForDumpLocked();
@@ -168,15 +172,16 @@ public class BatteryUsageStatsProvider {
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_VIRTUAL_UIDS) != 0);
         final double minConsumedPowerThreshold = query.getMinConsumedPowerThreshold();
 
-        final BatteryUsageStats.Builder batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
-                stats.getCustomEnergyConsumerNames(), includePowerModels,
-                includeProcessStateData, minConsumedPowerThreshold);
-        // TODO(b/188068523): use a monotonic clock to ensure resilience of order and duration
-        // of batteryUsageStats sessions to wall-clock adjustments
-        batteryUsageStatsBuilder.setStatsStartTimestamp(stats.getStartClockTime());
-        batteryUsageStatsBuilder.setStatsEndTimestamp(currentTimeMs);
-
+        final BatteryUsageStats.Builder batteryUsageStatsBuilder;
         synchronized (stats) {
+            batteryUsageStatsBuilder = new BatteryUsageStats.Builder(
+                    stats.getCustomEnergyConsumerNames(), includePowerModels,
+                    includeProcessStateData, minConsumedPowerThreshold);
+
+            // TODO(b/188068523): use a monotonic clock to ensure resilience of order and duration
+            // of batteryUsageStats sessions to wall-clock adjustments
+            batteryUsageStatsBuilder.setStatsStartTimestamp(stats.getStartClockTime());
+            batteryUsageStatsBuilder.setStatsEndTimestamp(currentTimeMs);
             SparseArray<? extends BatteryStats.Uid> uidStats = stats.getUidStats();
             for (int i = uidStats.size() - 1; i >= 0; i--) {
                 final BatteryStats.Uid uid = uidStats.valueAt(i);
