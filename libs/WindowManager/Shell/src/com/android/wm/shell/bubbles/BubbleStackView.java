@@ -1510,6 +1510,11 @@ public class BubbleStackView extends FrameLayout
             updateExpandedView();
         }
         setUpManageMenu();
+        if (mShowingManage) {
+            // the manage menu location depends on the manage button location which may need a
+            // layout pass, so post this to the looper
+            post(() -> showManageMenu(true));
+        }
     }
 
     @Override
