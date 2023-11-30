@@ -128,7 +128,7 @@ constructor(
     private fun automaticallySwitchScenes() {
         applicationScope.launch {
             // TODO (b/308001302): Move this to a bouncer specific interactor.
-            bouncerInteractor.onImeHidden.collectLatest {
+            bouncerInteractor.onImeHiddenByUser.collectLatest {
                 if (sceneInteractor.desiredScene.value.key == SceneKey.Bouncer) {
                     sceneInteractor.changeScene(
                         scene = SceneModel(SceneKey.Lockscreen),

@@ -2170,9 +2170,8 @@ public class DeviceIdleControllerTest {
     public void testStationaryDetection_QuickDozeOff() {
         setQuickDozeEnabled(false);
         enterDeepState(STATE_IDLE);
-        // Regular progression through states, so time should have increased appropriately.
-        mInjector.nowElapsed += mConstants.IDLE_AFTER_INACTIVE_TIMEOUT + mConstants.SENSING_TIMEOUT
-                + mConstants.LOCATING_TIMEOUT;
+        // Indicate that enough time has passed for the device to be considered stationary.
+        mInjector.nowElapsed += mConstants.MOTION_INACTIVE_TIMEOUT;
 
         StationaryListenerForTest stationaryListener = new StationaryListenerForTest();
 

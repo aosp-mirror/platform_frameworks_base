@@ -25,7 +25,7 @@ import com.android.server.display.DisplayBrightnessState;
 import java.io.PrintWriter;
 
 /**
- * Provides max allowed brightness
+ * Provides brightness range constraints
  */
 abstract class BrightnessClamper<T> {
 
@@ -74,6 +74,7 @@ abstract class BrightnessClamper<T> {
     protected enum Type {
         THERMAL,
         POWER,
-        BEDTIME_MODE
+        BEDTIME_MODE,
+        LUX,
     }
 }

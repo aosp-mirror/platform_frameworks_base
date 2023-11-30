@@ -51,6 +51,23 @@ size_t StringInputStream::TotalSize() const {
   return str_.size();
 }
 
+bool StringInputStream::ReadFullyAtOffset(void* data, size_t byte_count, off64_t offset) {
+  if (byte_count == 0) {
+    return true;
+  }
+  if (offset < 0) {
+    return false;
+  }
+  if (offset > std::numeric_limits<off64_t>::max() - byte_count) {
+    return false;
+  }
+  if (offset + byte_count > str_.size()) {
+    return false;
+  }
+  memcpy(data, str_.data() + offset, byte_count);
+  return true;
+}
+
 StringOutputStream::StringOutputStream(std::string* str, size_t buffer_capacity)
     : str_(str),
       buffer_capacity_(buffer_capacity),

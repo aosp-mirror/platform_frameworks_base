@@ -142,6 +142,7 @@ public class SettingsToPropertiesMapper {
         "core_experiments_team_internal",
         "core_graphics",
         "dck_framework",
+        "devoptions_settings",
         "game",
         "haptics",
         "hardware_backed_security_mainline",

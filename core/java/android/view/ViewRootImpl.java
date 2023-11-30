@@ -816,6 +816,8 @@ public final class ViewRootImpl implements ViewParent,
     private long mFpsPrevTime = -1;
     private int mFpsNumFrames;
 
+    private boolean mInsetsAnimationRunning;
+
     /**
      * The resolved pointer icon type requested by this window.
      * A null value indicates the resolved pointer icon has not yet been calculated.
@@ -2177,6 +2179,10 @@ public final class ViewRootImpl implements ViewParent,
         if (!mIsInTraversal) {
             scheduleTraversals();
         }
+    }
+
+    void notifyInsetsAnimationRunningStateChanged(boolean running) {
+        mInsetsAnimationRunning = running;
     }
 
     @Override

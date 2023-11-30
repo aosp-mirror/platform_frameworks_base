@@ -149,7 +149,7 @@ class ImplicitOutputFilter(
         val fallback = super.getPolicyForField(className, fieldName)
 
         val cn = classes.getClass(className)
-        val classPolicy = super.getPolicyForClass(className)
+        val classPolicy = outermostFilter.getPolicyForClass(className)
 
         log.d("Class ${cn.name} Class policy: $classPolicy")
         if (classPolicy.policy.needsInImpl) {

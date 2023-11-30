@@ -62,6 +62,14 @@ constructor(
             onStep = { 1f - it },
         )
 
+    val shortcutsAlpha: Flow<Float> =
+        transitionAnimation.createFlow(
+            duration = 250.milliseconds,
+            onStep = { 1 - it },
+            onFinish = { 0f },
+            onCancel = { 1f },
+        )
+
     override val deviceEntryParentViewAlpha: Flow<Float> =
         shadeDependentFlows.transitionFlow(
             flowWhenShadeIsNotExpanded = lockscreenAlpha,

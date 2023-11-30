@@ -67,6 +67,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
     private final UnlockedScreenOffAnimationController mUnlockedScreenOffAnimationController;
 
     private boolean mIsStatusBarExpanded = false;
+    private boolean mIsSceneContainerVisible = false;
     private boolean mShouldAdjustInsets = false;
     private View mNotificationShadeWindowView;
     private View mNotificationPanelView;
@@ -128,11 +129,14 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         });
 
         mUnlockedScreenOffAnimationController = unlockedScreenOffAnimationController;
-        javaAdapter.alwaysCollectFlow(shadeInteractor.isAnyExpanded(), this::onShadeOrQsExpanded);
 
         if (sceneContainerFlags.isEnabled()) {
             javaAdapter.alwaysCollectFlow(
                     sceneInteractor.get().isVisible(),
+                    this::onSceneContainerVisibilityChanged);
+        } else {
+            javaAdapter.alwaysCollectFlow(
+                    shadeInteractor.isAnyExpanded(),
                     this::onShadeOrQsExpanded);
         }
 
@@ -157,6 +161,17 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         if (isExpanded != mIsStatusBarExpanded) {
             mIsStatusBarExpanded = isExpanded;
             if (isExpanded) {
+                // make sure our state is sensible
+                mForceCollapsedUntilLayout = false;
+            }
+            updateTouchableRegion();
+        }
+    }
+
+    private void onSceneContainerVisibilityChanged(Boolean isVisible) {
+        if (isVisible != mIsSceneContainerVisible) {
+            mIsSceneContainerVisible = isVisible;
+            if (isVisible) {
                 // make sure our state is sensible
                 mForceCollapsedUntilLayout = false;
             }
@@ -267,6 +282,7 @@ public final class StatusBarTouchableRegionManager implements Dumpable {
         // since we don't want stray touches to go through the light reveal scrim to whatever is
         // underneath.
         return mIsStatusBarExpanded
+                || mIsSceneContainerVisible
                 || mPrimaryBouncerInteractor.isShowing().getValue()
                 || mAlternateBouncerInteractor.isVisibleState()
                 || mUnlockedScreenOffAnimationController.isAnimationPlaying();

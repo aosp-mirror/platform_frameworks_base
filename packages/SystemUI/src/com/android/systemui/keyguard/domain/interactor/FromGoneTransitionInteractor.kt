@@ -131,13 +131,16 @@ constructor(
                 when (toState) {
                     KeyguardState.DREAMING -> TO_DREAMING_DURATION
                     KeyguardState.AOD -> TO_AOD_DURATION
+                    KeyguardState.LOCKSCREEN -> TO_LOCKSCREEN_DURATION
                     else -> DEFAULT_DURATION
                 }.inWholeMilliseconds
         }
     }
+
     companion object {
         private val DEFAULT_DURATION = 500.milliseconds
         val TO_DREAMING_DURATION = 933.milliseconds
         val TO_AOD_DURATION = 1300.milliseconds
+        val TO_LOCKSCREEN_DURATION = DEFAULT_DURATION
     }
 }

@@ -20,7 +20,6 @@ import android.annotation.CurrentTimeMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -522,9 +521,7 @@ public class PackageInfo implements Parcelable {
     /**
      * Returns the time at which the app was archived for the user.  Units are as
      * per {@link System#currentTimeMillis()}.
-     * @hide
      */
-    @SystemApi
     @FlaggedApi(Flags.FLAG_ARCHIVING)
     public @CurrentTimeMillisLong long getArchiveTimeMillis() {
         return mArchiveTimeMillis;

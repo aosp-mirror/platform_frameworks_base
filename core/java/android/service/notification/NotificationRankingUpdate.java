@@ -15,7 +15,6 @@
  */
 package android.service.notification;
 
-import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.os.Bundle;
@@ -26,6 +25,7 @@ import android.system.ErrnoException;
 import android.system.OsConstants;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import java.nio.ByteBuffer;
@@ -75,10 +75,6 @@ public class NotificationRankingUpdate implements Parcelable {
                 }
                 // We only need read-only access to the shared memory region.
                 buffer = mRankingMapFd.mapReadOnly();
-                if (buffer == null) {
-                    mRankingMap = null;
-                    return;
-                }
                 byte[] payload = new byte[buffer.remaining()];
                 buffer.get(payload);
                 mapParcel.unmarshall(payload, 0, payload.length);
@@ -98,7 +94,7 @@ public class NotificationRankingUpdate implements Parcelable {
             } finally {
                 mapParcel.recycle();
                 if (buffer != null && mRankingMapFd != null) {
-                    mRankingMapFd.unmap(buffer);
+                    SharedMemory.unmap(buffer);
                     mRankingMapFd.close();
                 }
             }
@@ -210,6 +206,7 @@ public class NotificationRankingUpdate implements Parcelable {
                                     new NotificationListenerService.Ranking[0]
                             )
                     );
+            ByteBuffer buffer = null;
 
             try {
                 // Parcels the ranking map and measures its size.
@@ -217,13 +214,10 @@ public class NotificationRankingUpdate implements Parcelable {
                 int mapSize = mapParcel.dataSize();
 
                 // Creates a new SharedMemory object with enough space to hold the ranking map.
-                SharedMemory mRankingMapFd = SharedMemory.create(mSharedMemoryName, mapSize);
-                if (mRankingMapFd == null) {
-                    return;
-                }
+                mRankingMapFd = SharedMemory.create(mSharedMemoryName, mapSize);
 
                 // Gets a read/write buffer mapping the entire shared memory region.
-                final ByteBuffer buffer = mRankingMapFd.mapReadWrite();
+                buffer = mRankingMapFd.mapReadWrite();
                 // Puts the ranking map into the shared memory region buffer.
                 buffer.put(mapParcel.marshall(), 0, mapSize);
                 // Protects the region from being written to, by setting it to be read-only.
@@ -238,6 +232,12 @@ public class NotificationRankingUpdate implements Parcelable {
                 throw new RuntimeException(e);
             } finally {
                 mapParcel.recycle();
+                // To prevent memory leaks, we can close the ranking map fd here.
+                // Because a reference to this still exists
+                if (buffer != null && mRankingMapFd != null) {
+                    SharedMemory.unmap(buffer);
+                    mRankingMapFd.close();
+                }
             }
         } else {
             out.writeParcelable(mRankingMap, flags);
@@ -247,7 +247,7 @@ public class NotificationRankingUpdate implements Parcelable {
     /**
      * @hide
      */
-    public static final @android.annotation.NonNull Parcelable.Creator<NotificationRankingUpdate> CREATOR
+    public static final @NonNull Parcelable.Creator<NotificationRankingUpdate> CREATOR
             = new Parcelable.Creator<NotificationRankingUpdate>() {
         public NotificationRankingUpdate createFromParcel(Parcel parcel) {
             return new NotificationRankingUpdate(parcel);

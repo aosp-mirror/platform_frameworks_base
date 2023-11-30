@@ -54,7 +54,7 @@ oneway interface IWindowMagnificationConnection {
      * @param displayId the logical display id.
      * @param scale magnification scale.
      */
-    void setScale(int displayId, float scale);
+    void setScaleForWindowMagnification(int displayId, float scale);
 
      /**
      * Disables window magnification on specified display with animation.

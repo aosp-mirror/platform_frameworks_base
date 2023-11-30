@@ -1358,6 +1358,36 @@ public final class CompanionDeviceManager {
     }
 
     /**
+     * Return the current state of consent for permission transfer for the association.
+     * True if the user has allowed permission transfer for the association, false otherwise.
+     *
+     * <p>
+     * Note: The initial user consent is collected via
+     * {@link #buildPermissionTransferUserConsentIntent(int) a permission transfer user consent dialog}.
+     * After the user has made their initial selection, they can toggle the permission transfer
+     * feature in the settings.
+     * This method always returns the state of the toggle setting.
+     * </p>
+     *
+     * @param associationId The unique {@link AssociationInfo#getId ID} assigned to the association
+     *                      of the companion device recorded by CompanionDeviceManager
+     * @return True if the user has consented to the permission transfer, or false otherwise.
+     * @throws DeviceNotAssociatedException Exception if the companion device is not associated with
+     *                                      the user or the calling app.
+     */
+    @UserHandleAware
+    @FlaggedApi(Flags.FLAG_PERM_SYNC_USER_CONSENT)
+    public boolean isPermissionTransferUserConsented(int associationId) {
+        try {
+            return mService.isPermissionTransferUserConsented(mContext.getOpPackageName(),
+                    mContext.getUserId(), associationId);
+        } catch (RemoteException e) {
+            ExceptionUtils.propagateIfInstanceOf(e.getCause(), DeviceNotAssociatedException.class);
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Start system data transfer which has been previously approved by the user.
      *
      * <p>Before calling this method, the app needs to make sure there's a communication channel

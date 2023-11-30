@@ -17,11 +17,13 @@
 package android.location;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.location.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.WorkSource;
@@ -121,6 +123,7 @@ public final class GnssMeasurementRequest implements Parcelable {
      *
      * @hide
      */
+    @FlaggedApi(Flags.FLAG_GNSS_API_MEASUREMENT_REQUEST_WORK_SOURCE)
     @SystemApi
     public @NonNull WorkSource getWorkSource() {
         return mWorkSource;
@@ -298,6 +301,7 @@ public final class GnssMeasurementRequest implements Parcelable {
          *
          * @hide
          */
+        @FlaggedApi(Flags.FLAG_GNSS_API_MEASUREMENT_REQUEST_WORK_SOURCE)
         @SystemApi
         @RequiresPermission(Manifest.permission.UPDATE_DEVICE_STATS)
         public @NonNull Builder setWorkSource(@Nullable WorkSource workSource) {

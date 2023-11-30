@@ -412,6 +412,23 @@ public class BubbleExpandedView extends LinearLayout {
         setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
     }
 
+
+    /** Updates the width of the task view if it changed. */
+    void updateTaskViewContentWidth() {
+        if (mTaskView != null) {
+            int width = getContentWidth();
+            if (mTaskView.getWidth() != width) {
+                FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(width, MATCH_PARENT);
+                mTaskView.setLayoutParams(lp);
+            }
+        }
+    }
+
+    private int getContentWidth() {
+        boolean isStackOnLeft = mPositioner.isStackOnLeft(mStackView.getStackPosition());
+        return mPositioner.getTaskViewContentWidth(isStackOnLeft);
+    }
+
     /**
      * Initialize {@link BubbleController} and {@link BubbleStackView} here, this method must need
      * to be called after view inflate.
@@ -438,7 +455,12 @@ public class BubbleExpandedView extends LinearLayout {
                     mController.getTaskViewTransitions(), mController.getSyncTransactionQueue());
             mTaskView = new TaskView(mContext, mTaskViewTaskController);
             mTaskView.setListener(mController.getMainExecutor(), mTaskViewListener);
-            mExpandedViewContainer.addView(mTaskView);
+
+            // set a fixed width so it is not recalculated as part of a rotation. the width will be
+            // updated manually after the rotation.
+            FrameLayout.LayoutParams lp =
+                    new FrameLayout.LayoutParams(getContentWidth(), MATCH_PARENT);
+            mExpandedViewContainer.addView(mTaskView, lp);
             bringChildToFront(mTaskView);
         }
     }

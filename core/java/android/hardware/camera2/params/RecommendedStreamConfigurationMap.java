@@ -16,8 +16,6 @@
 
 package android.hardware.camera2.params;
 
-import static com.android.internal.R.string.hardware;
-
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;

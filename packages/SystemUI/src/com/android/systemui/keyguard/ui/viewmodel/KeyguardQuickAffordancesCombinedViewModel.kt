@@ -23,6 +23,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceIn
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancePosition
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,6 +33,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class KeyguardQuickAffordancesCombinedViewModel
@@ -39,6 +41,22 @@ class KeyguardQuickAffordancesCombinedViewModel
 constructor(
     private val quickAffordanceInteractor: KeyguardQuickAffordanceInteractor,
     private val keyguardInteractor: KeyguardInteractor,
+    shadeInteractor: ShadeInteractor,
+    aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
+    dozingToLockscreenTransitionViewModel: DozingToLockscreenTransitionViewModel,
+    dreamingHostedToLockscreenTransitionViewModel: DreamingHostedToLockscreenTransitionViewModel,
+    dreamingToLockscreenTransitionViewModel: DreamingToLockscreenTransitionViewModel,
+    goneToLockscreenTransitionViewModel: GoneToLockscreenTransitionViewModel,
+    occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
+    offToLockscreenTransitionViewModel: OffToLockscreenTransitionViewModel,
+    primaryBouncerToLockscreenTransitionViewModel: PrimaryBouncerToLockscreenTransitionViewModel,
+    lockscreenToAodTransitionViewModel: LockscreenToAodTransitionViewModel,
+    lockscreenToDozingTransitionViewModel: LockscreenToDozingTransitionViewModel,
+    lockscreenToDreamingHostedTransitionViewModel: LockscreenToDreamingHostedTransitionViewModel,
+    lockscreenToDreamingTransitionViewModel: LockscreenToDreamingTransitionViewModel,
+    lockscreenToGoneTransitionViewModel: LockscreenToGoneTransitionViewModel,
+    lockscreenToOccludedTransitionViewModel: LockscreenToOccludedTransitionViewModel,
+    lockscreenToPrimaryBouncerTransitionViewModel: LockscreenToPrimaryBouncerTransitionViewModel,
 ) {
 
     data class PreviewMode(
@@ -60,6 +78,39 @@ constructor(
     private val selectedPreviewSlotId =
         MutableStateFlow(KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START)
 
+    /** alpha while fading the quick affordances out */
+    private val fadeInAlpha: Flow<Float> =
+        merge(
+            aodToLockscreenTransitionViewModel.shortcutsAlpha,
+            dozingToLockscreenTransitionViewModel.shortcutsAlpha,
+            dreamingHostedToLockscreenTransitionViewModel.shortcutsAlpha,
+            dreamingToLockscreenTransitionViewModel.shortcutsAlpha,
+            goneToLockscreenTransitionViewModel.shortcutsAlpha,
+            occludedToLockscreenTransitionViewModel.shortcutsAlpha,
+            offToLockscreenTransitionViewModel.shortcutsAlpha,
+            primaryBouncerToLockscreenTransitionViewModel.shortcutsAlpha,
+        )
+
+    /** alpha while fading the quick affordances in */
+    private val fadeOutAlpha: Flow<Float> =
+        merge(
+            lockscreenToAodTransitionViewModel.shortcutsAlpha,
+            lockscreenToDozingTransitionViewModel.shortcutsAlpha,
+            lockscreenToDreamingHostedTransitionViewModel.shortcutsAlpha,
+            lockscreenToDreamingTransitionViewModel.shortcutsAlpha,
+            lockscreenToGoneTransitionViewModel.shortcutsAlpha,
+            lockscreenToOccludedTransitionViewModel.shortcutsAlpha,
+            lockscreenToPrimaryBouncerTransitionViewModel.shortcutsAlpha,
+            shadeInteractor.qsExpansion.map { 1 - it },
+        )
+
+    /** The source of truth of alpha for all of the quick affordances on lockscreen */
+    val transitionAlpha: Flow<Float> =
+        merge(
+            fadeInAlpha,
+            fadeOutAlpha,
+        )
+
     /**
      * Whether quick affordances are "opaque enough" to be considered visible to and interactive by
      * the user. If they are not interactive, user input should not be allowed on them.
@@ -73,7 +124,7 @@ constructor(
      * interactive/clickable unless "fully opaque" to avoid issues like in b/241830987.
      */
     private val areQuickAffordancesFullyOpaque: Flow<Boolean> =
-        keyguardInteractor.keyguardAlpha
+        transitionAlpha
             .map { alpha -> alpha >= AFFORDANCE_FULLY_OPAQUE_ALPHA_THRESHOLD }
             .distinctUntilChanged()
 
@@ -89,7 +140,7 @@ constructor(
      * Notifies that a slot with the given ID has been selected in the preview experience that is
      * rendering in the wallpaper picker. This is ignored for the real lock screen experience.
      *
-     * @see [KeyguardRootViewModel.enablePreviewMode]
+     * @see [enablePreviewMode]
      */
     fun onPreviewSlotSelected(slotId: String) {
         selectedPreviewSlotId.value = slotId

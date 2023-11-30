@@ -590,7 +590,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                 cancel("transit_sleep");
                 return;
             }
-            if (mKeyguardLocked) {
+            if (mKeyguardLocked || (info.getFlags() & TRANSIT_FLAG_KEYGUARD_LOCKED) != 0) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                         "[%d] RecentsController.merge: keyguard is locked", mInstanceId);
                 // We will not accept new changes if we are swiping over the keyguard.
@@ -627,7 +627,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                         && mRecentsTask.equals(change.getContainer());
                 hasTaskChange = hasTaskChange || isRootTask;
                 final boolean isLeafTask = leafTaskFilter.test(change);
-                if (TransitionUtil.isOpeningType(change.getMode())) {
+                if (TransitionUtil.isOpeningType(change.getMode())
+                        || TransitionUtil.isOrderOnly(change)) {
                     if (isRecentsTask) {
                         recentsOpening = change;
                     } else if (isRootTask || isLeafTask) {

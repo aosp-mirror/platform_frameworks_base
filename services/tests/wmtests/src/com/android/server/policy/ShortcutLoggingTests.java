@@ -30,12 +30,12 @@ import androidx.test.filters.MediumTest;
 import com.android.internal.annotations.Keep;
 import com.android.server.input.KeyboardMetricsCollector.KeyboardLogEvent;
 
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 
 @Presubmit
 @MediumTest
@@ -71,8 +71,8 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                         KeyboardLogEvent.RECENT_APPS, KeyEvent.KEYCODE_TAB, ALT_ON},
                 {"BACK key -> Go back", new int[]{KeyEvent.KEYCODE_BACK}, KeyboardLogEvent.BACK,
                         KeyEvent.KEYCODE_BACK, 0},
-                {"Meta + `(grave) -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_GRAVE},
-                        KeyboardLogEvent.BACK, KeyEvent.KEYCODE_GRAVE, META_ON},
+                {"Meta + Escape -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_ESCAPE},
+                        KeyboardLogEvent.BACK, KeyEvent.KEYCODE_ESCAPE, META_ON},
                 {"Meta + Left arrow -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_DPAD_LEFT},
                         KeyboardLogEvent.BACK, KeyEvent.KEYCODE_DPAD_LEFT, META_ON},
                 {"Meta + Del -> Go back", new int[]{META_KEY, KeyEvent.KEYCODE_DEL},
@@ -132,13 +132,6 @@ public class ShortcutLoggingTests extends ShortcutKeyTestBase {
                 {"LANGUAGE_SWITCH key -> Switch Keyboard Language",
                         new int[]{KeyEvent.KEYCODE_LANGUAGE_SWITCH},
                         KeyboardLogEvent.LANGUAGE_SWITCH, KeyEvent.KEYCODE_LANGUAGE_SWITCH, 0},
-                {"Meta + Space -> Switch Keyboard Language",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_SPACE},
-                        KeyboardLogEvent.LANGUAGE_SWITCH, KeyEvent.KEYCODE_SPACE, META_ON},
-                {"Meta + Shift + Space -> Switch Keyboard Language",
-                        new int[]{META_KEY, SHIFT_KEY, KeyEvent.KEYCODE_SPACE},
-                        KeyboardLogEvent.LANGUAGE_SWITCH, KeyEvent.KEYCODE_SPACE,
-                        META_ON | SHIFT_ON},
                 {"META key -> Open App Drawer in Accessibility mode", new int[]{META_KEY},
                         KeyboardLogEvent.ACCESSIBILITY_ALL_APPS, META_KEY, META_ON},
                 {"Meta + Alt -> Toggle CapsLock", new int[]{META_KEY, ALT_KEY},
