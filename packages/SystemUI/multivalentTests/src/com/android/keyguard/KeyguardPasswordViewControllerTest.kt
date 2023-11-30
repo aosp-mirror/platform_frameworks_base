@@ -24,6 +24,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.util.LatencyTracker
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.Flags as AconfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.flags.FakeFeatureFlags
@@ -90,8 +91,8 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
             .thenReturn(mock(ImageView::class.java))
         `when`(keyguardPasswordView.resources).thenReturn(context.resources)
         val fakeFeatureFlags = FakeFeatureFlags()
-        fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
         fakeFeatureFlags.set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false)
+        mSetFlagsRule.enableFlags(AconfigFlags.FLAG_REVAMPED_BOUNCER_MESSAGES)
         keyguardPasswordViewController =
             KeyguardPasswordViewController(
                 keyguardPasswordView,

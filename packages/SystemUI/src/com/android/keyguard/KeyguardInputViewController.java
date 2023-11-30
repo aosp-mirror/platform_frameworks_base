@@ -30,13 +30,13 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.Flags;
 import com.android.systemui.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.bouncer.ui.BouncerMessageView;
 import com.android.systemui.bouncer.ui.binder.BouncerMessageViewBinder;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.log.BouncerLogger;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.policy.DevicePostureController;
@@ -108,7 +108,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
 
     private void updateMessageAreaVisibility() {
         if (mMessageAreaController == null) return;
-        if (mFeatureFlags.isEnabled(Flags.REVAMPED_BOUNCER_MESSAGES)) {
+        if (Flags.revampedBouncerMessages()) {
             mMessageAreaController.disable();
         } else {
             mMessageAreaController.setIsVisible(true);
@@ -182,15 +182,13 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
     public void bindMessageView(
             @NonNull BouncerMessageInteractor bouncerMessageInteractor,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
-            BouncerLogger bouncerLogger,
-            FeatureFlags featureFlags) {
+            BouncerLogger bouncerLogger) {
         BouncerMessageView bouncerMessageView = (BouncerMessageView) mView.getBouncerMessageView();
         if (bouncerMessageView != null) {
             BouncerMessageViewBinder.bind(bouncerMessageView,
                     bouncerMessageInteractor,
                     messageAreaControllerFactory,
-                    bouncerLogger,
-                    featureFlags);
+                    bouncerLogger);
         }
     }
 
