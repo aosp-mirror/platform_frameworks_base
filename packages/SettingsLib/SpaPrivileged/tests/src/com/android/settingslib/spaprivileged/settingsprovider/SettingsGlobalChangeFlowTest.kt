@@ -29,7 +29,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class SettingsGlobalChangeRepositoryTest {
+class SettingsGlobalChangeFlowTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
@@ -52,7 +52,7 @@ class SettingsGlobalChangeRepositoryTest {
         var value by context.settingsGlobalBoolean(TEST_NAME)
         value = false
 
-        val flow = context.settingsGlobalBooleanFlow(TEST_NAME)
+        val flow = context.settingsGlobalChangeFlow(TEST_NAME)
         value = true
 
         assertThat(flow.toListWithTimeout()).hasSize(1)

@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.settingslib.spaprivileged.settingsprovider
+package com.android.settingslib.spaprivileged.database
 
 import android.content.Context
 import android.database.ContentObserver
-import android.os.Handler
-import android.provider.Settings
+import android.net.Uri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -27,20 +26,19 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
 
-internal fun <T> Context.settingsGlobalFlow(
-    name: String,
-    sendInitialValue: Boolean = true,
-    value: () -> T,
-): Flow<T> = callbackFlow {
-    val contentObserver = object : ContentObserver(Handler.getMain()) {
+/** Content change flow for the given [uri]. */
+internal fun Context.contentChangeFlow(
+    uri: Uri,
+    sendInitial: Boolean = true,
+): Flow<Unit> = callbackFlow {
+    val contentObserver = object : ContentObserver(null) {
         override fun onChange(selfChange: Boolean) {
-            trySend(value())
+            trySend(Unit)
         }
     }
-    val uri = Settings.Global.getUriFor(name)
     contentResolver.registerContentObserver(uri, false, contentObserver)
-    if (sendInitialValue) {
-        trySend(value())
+    if (sendInitial) {
+        trySend(Unit)
     }
 
     awaitClose { contentResolver.unregisterContentObserver(contentObserver) }

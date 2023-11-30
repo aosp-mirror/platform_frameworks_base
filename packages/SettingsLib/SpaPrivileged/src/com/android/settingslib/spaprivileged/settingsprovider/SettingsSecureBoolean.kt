@@ -19,19 +19,22 @@ package com.android.settingslib.spaprivileged.settingsprovider
 import android.content.ContentResolver
 import android.content.Context
 import android.provider.Settings
+import com.android.settingslib.spaprivileged.database.contentChangeFlow
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
-fun Context.settingsGlobalBoolean(name: String, defaultValue: Boolean = false):
-    ReadWriteProperty<Any?, Boolean> = SettingsGlobalBooleanDelegate(this, name, defaultValue)
+fun Context.settingsSecureBoolean(name: String, defaultValue: Boolean = false):
+    ReadWriteProperty<Any?, Boolean> = SettingsSecureBooleanDelegate(this, name, defaultValue)
 
-fun Context.settingsGlobalBooleanFlow(name: String, defaultValue: Boolean = false): Flow<Boolean> {
-    val value by settingsGlobalBoolean(name, defaultValue)
-    return settingsGlobalFlow(name) { value }
+fun Context.settingsSecureBooleanFlow(name: String, defaultValue: Boolean = false): Flow<Boolean> {
+    val value by settingsSecureBoolean(name, defaultValue)
+    return contentChangeFlow(Settings.Secure.getUriFor(name)).map { value }.distinctUntilChanged()
 }
 
-private class SettingsGlobalBooleanDelegate(
+private class SettingsSecureBooleanDelegate(
     context: Context,
     private val name: String,
     private val defaultValue: Boolean = false,
@@ -40,9 +43,9 @@ private class SettingsGlobalBooleanDelegate(
     private val contentResolver: ContentResolver = context.contentResolver
 
     override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean =
-        Settings.Global.getInt(contentResolver, name, if (defaultValue) 1 else 0) != 0
+        Settings.Secure.getInt(contentResolver, name, if (defaultValue) 1 else 0) != 0
 
     override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
-        Settings.Global.putInt(contentResolver, name, if (value) 1 else 0)
+        Settings.Secure.putInt(contentResolver, name, if (value) 1 else 0)
     }
 }
