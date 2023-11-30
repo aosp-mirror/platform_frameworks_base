@@ -79,11 +79,9 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.util.FrameworkStatsLog;
-import com.android.modules.utils.testing.ExtendedMockitoRule;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mock;
 
@@ -111,11 +109,6 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
     BroadcastQueueModernImpl mImpl;
 
     BroadcastProcessQueue mHead;
-
-    @Rule
-    public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
-            .spyStatic(FrameworkStatsLog.class)
-            .build();
 
     @Before
     public void setUp() throws Exception {
