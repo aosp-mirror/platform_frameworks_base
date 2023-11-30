@@ -33,6 +33,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
@@ -146,6 +147,7 @@ public class LowPowerStandbyController {
             this::onStandbyTimeoutExpired;
     private final LowPowerStandbyControllerInternal mLocalService = new LocalService();
     private final SparseIntArray mUidAllowedReasons = new SparseIntArray();
+    private final List<String> mLowPowerStandbyManagingPackages = new ArrayList<>();
     private final List<StandbyPortsLock> mStandbyPortLocks = new ArrayList<>();
 
     @GuardedBy("mLock")
@@ -368,6 +370,14 @@ public class LowPowerStandbyController {
 
             if (!mSupportedConfig) {
                 return;
+            }
+
+            List<PackageInfo> manageLowPowerStandbyPackages = mContext.getPackageManager()
+                    .getPackagesHoldingPermissions(new String[]{
+                            Manifest.permission.MANAGE_LOW_POWER_STANDBY
+                    }, PackageManager.MATCH_SYSTEM_ONLY);
+            for (PackageInfo packageInfo : manageLowPowerStandbyPackages) {
+                mLowPowerStandbyManagingPackages.add(packageInfo.packageName);
             }
 
             mAlarmManager = mContext.getSystemService(AlarmManager.class);
@@ -756,9 +766,7 @@ public class LowPowerStandbyController {
             Slog.d(TAG, "notifyEnabledChangedLocked, mIsEnabled=" + mIsEnabled);
         }
 
-        final Intent intent = new Intent(PowerManager.ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        sendExplicitBroadcast(PowerManager.ACTION_LOW_POWER_STANDBY_ENABLED_CHANGED);
     }
 
     @GuardedBy("mLock")
@@ -772,10 +780,7 @@ public class LowPowerStandbyController {
             Slog.d(TAG, "notifyPolicyChanged, policy=" + policy);
         }
 
-        final Intent intent = new Intent(
-                PowerManager.ACTION_LOW_POWER_STANDBY_POLICY_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
-        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+        sendExplicitBroadcast(PowerManager.ACTION_LOW_POWER_STANDBY_POLICY_CHANGED);
     }
 
     private void onStandbyTimeoutExpired() {
@@ -784,6 +789,22 @@ public class LowPowerStandbyController {
         }
         synchronized (mLock) {
             updateActiveLocked();
+        }
+    }
+
+    private void sendExplicitBroadcast(String intentType) {
+        final Intent intent = new Intent(intentType);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        mContext.sendBroadcastAsUser(intent, UserHandle.ALL);
+
+        // Send explicit broadcast to holders of MANAGE_LOW_POWER_STANDBY
+        final Intent privilegedIntent = new Intent(intentType);
+        privilegedIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        for (String packageName : mLowPowerStandbyManagingPackages) {
+            final Intent explicitIntent = new Intent(privilegedIntent);
+            explicitIntent.setPackage(packageName);
+            mContext.sendBroadcastAsUser(explicitIntent, UserHandle.ALL,
+                    Manifest.permission.MANAGE_LOW_POWER_STANDBY);
         }
     }
 
@@ -1360,7 +1381,7 @@ public class LowPowerStandbyController {
         }
 
         final Intent intent = new Intent(PowerManager.ACTION_LOW_POWER_STANDBY_PORTS_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
         mContext.sendBroadcastAsUser(intent, UserHandle.ALL,
                 Manifest.permission.MANAGE_LOW_POWER_STANDBY);
     }
