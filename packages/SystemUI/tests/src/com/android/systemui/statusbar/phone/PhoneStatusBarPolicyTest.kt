@@ -321,5 +321,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             get() = TODO("Not yet implemented")
         override val pendingDisplay: Flow<PendingDisplay?>
             get() = TODO("Not yet implemented")
+        override val concurrentDisplaysInProgress: Flow<Boolean>
+            get() = TODO("Not yet implemented")
     }
 }

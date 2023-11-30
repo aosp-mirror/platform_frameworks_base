@@ -16,6 +16,8 @@
 
 package com.android.systemui.display
 
+import com.android.systemui.display.data.repository.DeviceStateRepository
+import com.android.systemui.display.data.repository.DeviceStateRepositoryImpl
 import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.display.data.repository.DisplayRepositoryImpl
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
@@ -32,4 +34,9 @@ interface DisplayModule {
     ): ConnectedDisplayInteractor
 
     @Binds fun bindsDisplayRepository(displayRepository: DisplayRepositoryImpl): DisplayRepository
+
+    @Binds
+    fun bindsDeviceStateRepository(
+        deviceStateRepository: DeviceStateRepositoryImpl
+    ): DeviceStateRepository
 }

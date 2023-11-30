@@ -21,7 +21,6 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
-import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State.CONNECTED
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.util.mockito.any
@@ -107,5 +106,7 @@ class SystemEventCoordinatorTest : SysuiTestCase() {
             get() = flow
         override val pendingDisplay: Flow<PendingDisplay?>
             get() = MutableSharedFlow<PendingDisplay>()
+        override val concurrentDisplaysInProgress: Flow<Boolean>
+            get() = TODO("Not yet implemented")
     }
 }

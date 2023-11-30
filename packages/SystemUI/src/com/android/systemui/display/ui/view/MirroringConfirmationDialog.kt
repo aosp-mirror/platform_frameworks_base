@@ -37,11 +37,13 @@ class MirroringConfirmationDialog(
     private val onCancelMirroring: View.OnClickListener,
     private val navbarBottomInsetsProvider: () -> Int,
     configurationController: ConfigurationController? = null,
+    private val showConcurrentDisplayInfo: Boolean = false,
     theme: Int = R.style.Theme_SystemUI_Dialog,
 ) : SystemUIBottomSheetDialog(context, configurationController, theme) {
 
     private lateinit var mirrorButton: TextView
     private lateinit var dismissButton: TextView
+    private lateinit var dualDisplayWarning: TextView
     private var enabledPressed = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,6 +57,11 @@ class MirroringConfirmationDialog(
             }
         dismissButton =
             requireViewById<TextView>(R.id.cancel).apply { setOnClickListener(onCancelMirroring) }
+
+        dualDisplayWarning =
+            requireViewById<TextView>(R.id.dual_display_warning).apply {
+                visibility = if (showConcurrentDisplayInfo) View.VISIBLE else View.GONE
+            }
 
         setOnDismissListener {
             if (!enabledPressed) {
