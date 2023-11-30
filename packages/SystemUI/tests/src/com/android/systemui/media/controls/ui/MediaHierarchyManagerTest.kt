@@ -32,6 +32,7 @@ import com.android.systemui.controls.controller.ControlsControllerImplTest.Compa
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
@@ -94,6 +95,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock private lateinit var dreamOverlayStateController: DreamOverlayStateController
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock lateinit var logger: MediaViewLogger
+    @Mock private lateinit var mediaFlags: MediaFlags
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -126,6 +128,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         whenever(mediaCarouselController.mediaFrame).thenReturn(mediaFrame)
         isQsBypassingShade = MutableStateFlow(false)
         whenever(shadeInteractor.isQsBypassingShade).thenReturn(isQsBypassingShade)
+        whenever(mediaFlags.isSceneContainerEnabled()).thenReturn(false)
         mediaHierarchyManager =
             MediaHierarchyManager(
                 context,
@@ -145,6 +148,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 ResourcesSplitShadeStateController(),
                 logger,
+                mediaFlags,
             )
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
