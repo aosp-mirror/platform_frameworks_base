@@ -5280,6 +5280,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /** Applies latest configuration and/or visibility updates if needed. */
     boolean ensureConfigAndVisibilityAfterUpdate(ActivityRecord starting, int changes) {
+        if (starting == null && mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
+            return true;
+        }
         boolean kept = true;
         final Task mainRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
         // mainRootTask is null during startup.
