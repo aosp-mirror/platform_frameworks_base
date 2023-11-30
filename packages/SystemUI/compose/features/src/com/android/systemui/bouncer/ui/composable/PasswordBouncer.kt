@@ -29,7 +29,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -61,10 +60,6 @@ internal fun PasswordBouncer(
         if (isTextFieldFocusRequested) {
             focusRequester.requestFocus()
         }
-    }
-    val (isTextFieldFocused, onTextFieldFocusChanged) = remember { mutableStateOf(false) }
-    LaunchedEffect(isTextFieldFocused) {
-        viewModel.onTextFieldFocusChanged(isFocused = isTextFieldFocused)
     }
 
     val password: String by viewModel.password.collectAsState()
@@ -111,7 +106,7 @@ internal fun PasswordBouncer(
                 ),
             modifier =
                 Modifier.focusRequester(focusRequester)
-                    .onFocusChanged { onTextFieldFocusChanged(it.isFocused) }
+                    .onFocusChanged { viewModel.onTextFieldFocusChanged(it.isFocused) }
                     .drawBehind {
                         drawLine(
                             color = color,
