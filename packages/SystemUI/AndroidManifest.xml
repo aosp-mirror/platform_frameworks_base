@@ -512,15 +512,6 @@
             </intent-filter>
         </activity-alias>
 
-        <activity
-            android:name="com.android.wm.shell.legacysplitscreen.ForcedResizableInfoActivity"
-            android:theme="@style/ForcedResizableTheme"
-            android:excludeFromRecents="true"
-            android:stateNotNeeded="true"
-            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
-            android:exported="false">
-        </activity>
-
         <!-- Springboard for launching the share and edit activity. This needs to be in the main
              system ui process since we need to notify the status bar to dismiss the keyguard -->
         <receiver android:name=".screenshot.ActionProxyReceiver"
