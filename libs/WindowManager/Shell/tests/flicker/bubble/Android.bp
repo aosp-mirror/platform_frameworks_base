@@ -29,6 +29,8 @@ android_test {
     manifest: "AndroidManifest.xml",
     package_name: "com.android.wm.shell.flicker.bubbles",
     instrumentation_target_package: "com.android.wm.shell.flicker.bubbles",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: ["src/**/*.kt"],
     static_libs: ["WMShellFlickerTestsBase"],
+    data: ["trace_config/*"],
 }
