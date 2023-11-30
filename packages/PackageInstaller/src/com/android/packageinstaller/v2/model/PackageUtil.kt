@@ -14,56 +14,46 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model;
+package com.android.packageinstaller.v2.model
 
-import android.Manifest;
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageInstaller;
-import android.content.pm.PackageInstaller.SessionInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.ProviderInfo;
-import android.content.res.Resources;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Process;
-import android.os.UserHandle;
-import android.os.UserManager;
-import android.util.Log;
-import androidx.annotation.NonNull;
-import java.io.File;
-import java.util.Arrays;
-import java.util.Objects;
+import android.Manifest
+import android.content.Context
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
+import android.content.pm.PackageInstaller
+import android.content.pm.PackageManager
+import android.content.res.Resources
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.net.Uri
+import android.os.Build
+import android.os.Process
+import android.os.UserHandle
+import android.os.UserManager
+import android.util.Log
+import java.io.File
 
-public class PackageUtil {
-
-    private static final String TAG = InstallRepository.class.getSimpleName();
-    private static final String DOWNLOADS_AUTHORITY = "downloads";
-    private static final String SPLIT_BASE_APK_END_WITH = "base.apk";
+object PackageUtil {
+    private val LOG_TAG = InstallRepository::class.java.simpleName
+    private const val DOWNLOADS_AUTHORITY = "downloads"
+    private const val SPLIT_BASE_APK_END_WITH = "base.apk"
 
     /**
      * Determines if the UID belongs to the system downloads provider and returns the
-     * {@link ApplicationInfo} of the provider
+     * [ApplicationInfo] of the provider
      *
      * @param uid UID of the caller
-     * @return {@link ApplicationInfo} of the provider if a downloads provider exists, it is a
-     *     system app, and its UID matches with the passed UID, null otherwise.
+     * @return [ApplicationInfo] of the provider if a downloads provider exists, it is a
+     * system app, and its UID matches with the passed UID, null otherwise.
      */
-    public static ApplicationInfo getSystemDownloadsProviderInfo(PackageManager pm, int uid) {
-        final ProviderInfo providerInfo = pm.resolveContentProvider(
-            DOWNLOADS_AUTHORITY, 0);
-        if (providerInfo == null) {
-            // There seems to be no currently enabled downloads provider on the system.
-            return null;
-        }
-        ApplicationInfo appInfo = providerInfo.applicationInfo;
-        if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0 && uid == appInfo.uid) {
-            return appInfo;
-        }
-        return null;
+    private fun getSystemDownloadsProviderInfo(pm: PackageManager, uid: Int): ApplicationInfo? {
+        // Check if there are currently enabled downloads provider on the system.
+        val providerInfo = pm.resolveContentProvider(DOWNLOADS_AUTHORITY, 0)
+            ?: return null
+        val appInfo = providerInfo.applicationInfo
+        return if ((appInfo.flags and ApplicationInfo.FLAG_SYSTEM != 0) && uid == appInfo.uid) {
+            appInfo
+        } else null
     }
 
     /**
@@ -73,204 +63,220 @@ public class PackageUtil {
      * @param uid The UID requesting the install/uninstall
      * @return The maximum target SDK or -1 if the uid does not match any packages.
      */
-    public static int getMaxTargetSdkVersionForUid(@NonNull Context context, int uid) {
-        PackageManager pm = context.getPackageManager();
-        final String[] packages = pm.getPackagesForUid(uid);
-        int targetSdkVersion = -1;
+    @JvmStatic
+    fun getMaxTargetSdkVersionForUid(context: Context, uid: Int): Int {
+        val pm = context.packageManager
+        val packages = pm.getPackagesForUid(uid)
+        var targetSdkVersion = -1
         if (packages != null) {
-            for (String packageName : packages) {
+            for (packageName in packages) {
                 try {
-                    ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
-                    targetSdkVersion = Math.max(targetSdkVersion, info.targetSdkVersion);
-                } catch (PackageManager.NameNotFoundException e) {
+                    val info = pm.getApplicationInfo(packageName!!, 0)
+                    targetSdkVersion = maxOf(targetSdkVersion, info.targetSdkVersion)
+                } catch (e: PackageManager.NameNotFoundException) {
                     // Ignore and try the next package
                 }
             }
         }
-        return targetSdkVersion;
+        return targetSdkVersion
     }
 
-    public static boolean canPackageQuery(Context context, int callingUid, Uri packageUri) {
-        PackageManager pm = context.getPackageManager();
-        ProviderInfo info = pm.resolveContentProvider(packageUri.getAuthority(),
-            PackageManager.ComponentInfoFlags.of(0));
-        if (info == null) {
-            return false;
-        }
-        String targetPackage = info.packageName;
-
-        String[] callingPackages = pm.getPackagesForUid(callingUid);
-        if (callingPackages == null) {
-            return false;
-        }
-        for (String callingPackage : callingPackages) {
+    @JvmStatic
+    fun canPackageQuery(context: Context, callingUid: Int, packageUri: Uri): Boolean {
+        val pm = context.packageManager
+        val info = pm.resolveContentProvider(
+            packageUri.authority!!,
+            PackageManager.ComponentInfoFlags.of(0)
+        ) ?: return false
+        val targetPackage = info.packageName
+        val callingPackages = pm.getPackagesForUid(callingUid) ?: return false
+        for (callingPackage in callingPackages) {
             try {
-                if (pm.canPackageQuery(callingPackage, targetPackage)) {
-                    return true;
+                if (pm.canPackageQuery(callingPackage!!, targetPackage)) {
+                    return true
                 }
-            } catch (PackageManager.NameNotFoundException e) {
+            } catch (e: PackageManager.NameNotFoundException) {
                 // no-op
             }
         }
-        return false;
+        return false
     }
 
     /**
-     * @param context the {@link Context} object
+     * @param context the [Context] object
      * @param permission the permission name to check
      * @param callingUid the UID of the caller who's permission is being checked
-     * @return {@code true} if the callingUid is granted the said permission
+     * @return `true` if the callingUid is granted the said permission
      */
-    public static boolean isPermissionGranted(Context context, String permission, int callingUid) {
-        return context.checkPermission(permission, -1, callingUid)
-            == PackageManager.PERMISSION_GRANTED;
+    @JvmStatic
+    fun isPermissionGranted(context: Context, permission: String, callingUid: Int): Boolean {
+        return (context.checkPermission(permission, -1, callingUid)
+            == PackageManager.PERMISSION_GRANTED)
     }
 
     /**
-     * @param pm the {@link PackageManager} object
+     * @param pm the [PackageManager] object
      * @param permission the permission name to check
      * @param packageName the name of the package who's permission is being checked
-     * @return {@code true} if the package is granted the said permission
+     * @return `true` if the package is granted the said permission
      */
-    public static boolean isPermissionGranted(PackageManager pm, String permission,
-        String packageName) {
-        return pm.checkPermission(permission, packageName) == PackageManager.PERMISSION_GRANTED;
+    @JvmStatic
+    fun isPermissionGranted(pm: PackageManager, permission: String, packageName: String): Boolean {
+        return pm.checkPermission(permission, packageName) == PackageManager.PERMISSION_GRANTED
     }
 
     /**
-     * @param context the {@link Context} object
+     * @param context the [Context] object
      * @param callingUid the UID of the caller who's permission is being checked
      * @param originatingUid the UID from where install is being originated. This could be same as
      * callingUid or it will be the UID of the package performing a session based install
      * @param isTrustedSource whether install request is coming from a privileged app or an app that
-     * has {@link Manifest.permission.INSTALL_PACKAGES} permission granted
-     * @return {@code true} if the package is granted the said permission
+     * has [Manifest.permission.INSTALL_PACKAGES] permission granted
+     * @return `true` if the package is granted the said permission
      */
-    public static boolean isInstallPermissionGrantedOrRequested(Context context, int callingUid,
-        int originatingUid, boolean isTrustedSource) {
-        boolean isDocumentsManager =
-            isPermissionGranted(context, Manifest.permission.MANAGE_DOCUMENTS, callingUid);
-        boolean isSystemDownloadsProvider =
-            getSystemDownloadsProviderInfo(context.getPackageManager(), callingUid) != null;
+    @JvmStatic
+    fun isInstallPermissionGrantedOrRequested(
+        context: Context,
+        callingUid: Int,
+        originatingUid: Int,
+        isTrustedSource: Boolean,
+    ): Boolean {
+        val isDocumentsManager =
+            isPermissionGranted(context, Manifest.permission.MANAGE_DOCUMENTS, callingUid)
+        val isSystemDownloadsProvider =
+            getSystemDownloadsProviderInfo(context.packageManager, callingUid) != null
 
         if (!isTrustedSource && !isSystemDownloadsProvider && !isDocumentsManager) {
-
-            final int targetSdkVersion = getMaxTargetSdkVersionForUid(context, originatingUid);
+            val targetSdkVersion = getMaxTargetSdkVersionForUid(context, originatingUid)
             if (targetSdkVersion < 0) {
                 // Invalid originating uid supplied. Abort install.
-                Log.w(TAG, "Cannot get target sdk version for uid " + originatingUid);
-                return false;
+                Log.w(LOG_TAG, "Cannot get target sdk version for uid $originatingUid")
+                return false
             } else if (targetSdkVersion >= Build.VERSION_CODES.O
-                && !isUidRequestingPermission(context.getPackageManager(), originatingUid,
-                Manifest.permission.REQUEST_INSTALL_PACKAGES)) {
-                Log.e(TAG, "Requesting uid " + originatingUid + " needs to declare permission "
-                    + Manifest.permission.REQUEST_INSTALL_PACKAGES);
-                return false;
+                && !isUidRequestingPermission(
+                    context.packageManager, originatingUid,
+                    Manifest.permission.REQUEST_INSTALL_PACKAGES
+                )
+            ) {
+                Log.e(
+                    LOG_TAG, "Requesting uid " + originatingUid + " needs to declare permission "
+                        + Manifest.permission.REQUEST_INSTALL_PACKAGES
+                )
+                return false
             }
         }
-        return true;
+        return true
     }
 
     /**
-     * @param pm the {@link PackageManager} object
+     * @param pm the [PackageManager] object
      * @param uid the UID of the caller who's permission is being checked
      * @param permission the permission name to check
-     * @return {@code true} if the caller is requesting the said permission in its Manifest
+     * @return `true` if the caller is requesting the said permission in its Manifest
      */
-    public static boolean isUidRequestingPermission(PackageManager pm, int uid, String permission) {
-        final String[] packageNames = pm.getPackagesForUid(uid);
-        if (packageNames == null) {
-            return false;
-        }
-        for (final String packageName : packageNames) {
-            final PackageInfo packageInfo;
-            try {
-                packageInfo = pm.getPackageInfo(packageName,
-                    PackageManager.GET_PERMISSIONS);
-            } catch (PackageManager.NameNotFoundException e) {
+    private fun isUidRequestingPermission(
+        pm: PackageManager,
+        uid: Int,
+        permission: String,
+    ): Boolean {
+        val packageNames = pm.getPackagesForUid(uid) ?: return false
+        for (packageName in packageNames) {
+            val packageInfo: PackageInfo = try {
+                pm.getPackageInfo(packageName!!, PackageManager.GET_PERMISSIONS)
+            } catch (e: PackageManager.NameNotFoundException) {
                 // Ignore and try the next package
-                continue;
+                continue
             }
             if (packageInfo.requestedPermissions != null
-                && Arrays.asList(packageInfo.requestedPermissions).contains(permission)) {
-                return true;
+                && listOf(*packageInfo.requestedPermissions!!).contains(permission)
+            ) {
+                return true
             }
         }
-        return false;
+        return false
     }
 
     /**
-     * @param pi the {@link PackageInstaller} object to use
+     * @param pi the [PackageInstaller] object to use
      * @param originatingUid the UID of the package performing a session based install
      * @param sessionId ID of the install session
-     * @return {@code true} if the caller is the session owner
+     * @return `true` if the caller is the session owner
      */
-    public static boolean isCallerSessionOwner(PackageInstaller pi, int originatingUid,
-        int sessionId) {
+    @JvmStatic
+    fun isCallerSessionOwner(pi: PackageInstaller, originatingUid: Int, sessionId: Int): Boolean {
         if (originatingUid == Process.ROOT_UID) {
-            return true;
+            return true
         }
-        PackageInstaller.SessionInfo sessionInfo = pi.getSessionInfo(sessionId);
-        if (sessionInfo == null) {
-            return false;
+        val sessionInfo = pi.getSessionInfo(sessionId) ?: return false
+        val installerUid = sessionInfo.getInstallerUid()
+        return originatingUid == installerUid
+    }
+
+    /**
+     * Generates a stub [PackageInfo] object for the given packageName
+     */
+    @JvmStatic
+    fun generateStubPackageInfo(packageName: String?): PackageInfo {
+        val info = PackageInfo()
+        val aInfo = ApplicationInfo()
+        info.applicationInfo = aInfo
+        info.applicationInfo!!.packageName = packageName
+        info.packageName = info.applicationInfo!!.packageName
+        return info
+    }
+
+    /**
+     * Generates an [AppSnippet] containing an appIcon and appLabel from the
+     * [PackageInstaller.SessionInfo] object
+     */
+    @JvmStatic
+    fun getAppSnippet(context: Context, info: PackageInstaller.SessionInfo): AppSnippet {
+        val pm = context.packageManager
+        val label = info.getAppLabel()
+        val icon = if (info.getAppIcon() != null) BitmapDrawable(
+            context.resources,
+            info.getAppIcon()
+        ) else pm.defaultActivityIcon
+        return AppSnippet(label, icon)
+    }
+
+    /**
+     * Generates an [AppSnippet] containing an appIcon and appLabel from the
+     * [PackageInfo] object
+     */
+    @JvmStatic
+    fun getAppSnippet(context: Context, pkgInfo: PackageInfo): AppSnippet {
+        return pkgInfo.applicationInfo?.let { getAppSnippet(context, it) } ?: run {
+            AppSnippet(pkgInfo.packageName, context.packageManager.defaultActivityIcon)
         }
-        int installerUid = sessionInfo.getInstallerUid();
-        return originatingUid == installerUid;
     }
 
     /**
-     * Generates a stub {@link PackageInfo} object for the given packageName
+     * Generates an [AppSnippet] containing an appIcon and appLabel from the
+     * [ApplicationInfo] object
      */
-    public static PackageInfo generateStubPackageInfo(String packageName) {
-        final PackageInfo info = new PackageInfo();
-        final ApplicationInfo aInfo = new ApplicationInfo();
-        info.applicationInfo = aInfo;
-        info.packageName = info.applicationInfo.packageName = packageName;
-        return info;
+    @JvmStatic
+    fun getAppSnippet(context: Context, appInfo: ApplicationInfo): AppSnippet {
+        val pm = context.packageManager
+        val label = pm.getApplicationLabel(appInfo)
+        val icon = pm.getApplicationIcon(appInfo)
+        return AppSnippet(label, icon)
     }
 
     /**
-     * Generates an {@link AppSnippet} containing an appIcon and appLabel from the
-     * {@link SessionInfo} object
-     */
-    public static AppSnippet getAppSnippet(Context context, SessionInfo info) {
-        PackageManager pm = context.getPackageManager();
-        CharSequence label = info.getAppLabel();
-        Drawable icon = info.getAppIcon() != null ?
-            new BitmapDrawable(context.getResources(), info.getAppIcon())
-            : pm.getDefaultActivityIcon();
-        return new AppSnippet(label, icon);
-    }
-
-    /**
-     * Generates an {@link AppSnippet} containing an appIcon and appLabel from the
-     * {@link PackageInfo} object
-     */
-    public static AppSnippet getAppSnippet(Context context, PackageInfo pkgInfo) {
-        return getAppSnippet(context, pkgInfo.applicationInfo);
-    }
-
-    /**
-     * Generates an {@link AppSnippet} containing an appIcon and appLabel from the
-     * {@link ApplicationInfo} object
-     */
-    public static AppSnippet getAppSnippet(Context context, ApplicationInfo appInfo) {
-        PackageManager pm = context.getPackageManager();
-        CharSequence label = pm.getApplicationLabel(appInfo);
-        Drawable icon = pm.getApplicationIcon(appInfo);
-        return new AppSnippet(label, icon);
-    }
-
-    /**
-     * Generates an {@link AppSnippet} containing an appIcon and appLabel from the
+     * Generates an [AppSnippet] containing an appIcon and appLabel from the
      * supplied APK file
      */
-    public static AppSnippet getAppSnippet(Context context, ApplicationInfo appInfo,
-        File sourceFile) {
-        ApplicationInfo appInfoFromFile = processAppInfoForFile(appInfo, sourceFile);
-        CharSequence label = getAppLabelFromFile(context, appInfoFromFile);
-        Drawable icon = getAppIconFromFile(context, appInfoFromFile);
-        return new AppSnippet(label, icon);
+    @JvmStatic
+    fun getAppSnippet(context: Context, pkgInfo: PackageInfo, sourceFile: File): AppSnippet {
+        pkgInfo.applicationInfo?.let {
+            val appInfoFromFile = processAppInfoForFile(it, sourceFile)
+            val label = getAppLabelFromFile(context, appInfoFromFile)
+            val icon = getAppIconFromFile(context, appInfoFromFile)
+            return AppSnippet(label, icon)
+        } ?: run {
+            return AppSnippet(pkgInfo.packageName, context.packageManager.defaultActivityIcon)
+        }
     }
 
     /**
@@ -279,22 +285,22 @@ public class PackageUtil {
      * @param context context of package that can load the resources
      * @param appInfo ApplicationInfo object of package whose resources are to be loaded
      */
-    public static CharSequence getAppLabelFromFile(Context context, ApplicationInfo appInfo) {
-        PackageManager pm = context.getPackageManager();
-        CharSequence label = null;
+    private fun getAppLabelFromFile(context: Context, appInfo: ApplicationInfo): CharSequence? {
+        val pm = context.packageManager
+        var label: CharSequence? = null
         // Try to load the label from the package's resources. If an app has not explicitly
         // specified any label, just use the package name.
         if (appInfo.labelRes != 0) {
             try {
-                label = appInfo.loadLabel(pm);
-            } catch (Resources.NotFoundException e) {
+                label = appInfo.loadLabel(pm)
+            } catch (e: Resources.NotFoundException) {
             }
         }
         if (label == null) {
-            label = (appInfo.nonLocalizedLabel != null) ?
-                appInfo.nonLocalizedLabel : appInfo.packageName;
+            label = if (appInfo.nonLocalizedLabel != null) appInfo.nonLocalizedLabel
+            else appInfo.packageName
         }
-        return label;
+        return label
     }
 
     /**
@@ -303,105 +309,102 @@ public class PackageUtil {
      * @param context context of package that can load the resources
      * @param appInfo ApplicationInfo object of package whose resources are to be loaded
      */
-    public static Drawable getAppIconFromFile(Context context, ApplicationInfo appInfo) {
-        PackageManager pm = context.getPackageManager();
-        Drawable icon = null;
+    private fun getAppIconFromFile(context: Context, appInfo: ApplicationInfo): Drawable? {
+        val pm = context.packageManager
+        var icon: Drawable? = null
         // Try to load the icon from the package's resources. If an app has not explicitly
         // specified any resource, just use the default icon for now.
         try {
             if (appInfo.icon != 0) {
                 try {
-                    icon = appInfo.loadIcon(pm);
-                } catch (Resources.NotFoundException e) {
+                    icon = appInfo.loadIcon(pm)
+                } catch (e: Resources.NotFoundException) {
                 }
             }
             if (icon == null) {
-                icon = context.getPackageManager().getDefaultActivityIcon();
+                icon = context.packageManager.defaultActivityIcon
             }
-        } catch (OutOfMemoryError e) {
-            Log.i(TAG, "Could not load app icon", e);
+        } catch (e: OutOfMemoryError) {
+            Log.i(LOG_TAG, "Could not load app icon", e)
         }
-        return icon;
+        return icon
     }
 
-    private static ApplicationInfo processAppInfoForFile(ApplicationInfo appInfo, File sourceFile) {
-        final String archiveFilePath = sourceFile.getAbsolutePath();
-        appInfo.publicSourceDir = archiveFilePath;
-
+    private fun processAppInfoForFile(appInfo: ApplicationInfo, sourceFile: File): ApplicationInfo {
+        val archiveFilePath = sourceFile.absolutePath
+        appInfo.publicSourceDir = archiveFilePath
         if (appInfo.splitNames != null && appInfo.splitSourceDirs == null) {
-            final File[] files = sourceFile.getParentFile().listFiles();
-            final String[] splits = Arrays.stream(appInfo.splitNames)
-                .map(i -> findFilePath(files, i + ".apk"))
-                .filter(Objects::nonNull)
-                .toArray(String[]::new);
+            val files = sourceFile.parentFile?.listFiles()
+            val splits = appInfo.splitNames!!
+                .mapNotNull { findFilePath(files, "$it.apk") }
+                .toTypedArray()
 
-            appInfo.splitSourceDirs = splits;
-            appInfo.splitPublicSourceDirs = splits;
+            appInfo.splitSourceDirs = splits
+            appInfo.splitPublicSourceDirs = splits
         }
-        return appInfo;
+        return appInfo
     }
 
-    private static String findFilePath(File[] files, String postfix) {
-        for (File file : files) {
-            final String path = file.getAbsolutePath();
-            if (path.endsWith(postfix)) {
-                return path;
+    private fun findFilePath(files: Array<File>?, postfix: String): String? {
+        files?.let {
+            for (file in it) {
+                val path = file.absolutePath
+                if (path.endsWith(postfix)) {
+                    return path
+                }
             }
         }
-        return null;
+        return null
     }
 
     /**
      * @return the packageName corresponding to a UID.
      */
-    public static String getPackageNameForUid(Context context, int sourceUid,
-        String callingPackage) {
+    @JvmStatic
+    fun getPackageNameForUid(context: Context, sourceUid: Int, callingPackage: String?): String? {
         if (sourceUid == Process.INVALID_UID) {
-            return null;
+            return null
         }
         // If the sourceUid belongs to the system downloads provider, we explicitly return the
         // name of the Download Manager package. This is because its UID is shared with multiple
         // packages, resulting in uncertainty about which package will end up first in the list
         // of packages associated with this UID
-        PackageManager pm = context.getPackageManager();
-        ApplicationInfo systemDownloadProviderInfo = getSystemDownloadsProviderInfo(
-            pm, sourceUid);
+        val pm = context.packageManager
+        val systemDownloadProviderInfo = getSystemDownloadsProviderInfo(pm, sourceUid)
         if (systemDownloadProviderInfo != null) {
-            return systemDownloadProviderInfo.packageName;
+            return systemDownloadProviderInfo.packageName
         }
-        String[] packagesForUid = pm.getPackagesForUid(sourceUid);
-        if (packagesForUid == null) {
-            return null;
-        }
-        if (packagesForUid.length > 1) {
+        val packagesForUid = pm.getPackagesForUid(sourceUid) ?: return null
+        if (packagesForUid.size > 1) {
             if (callingPackage != null) {
-                for (String packageName : packagesForUid) {
-                    if (packageName.equals(callingPackage)) {
-                        return packageName;
+                for (packageName in packagesForUid) {
+                    if (packageName == callingPackage) {
+                        return packageName
                     }
                 }
             }
-            Log.i(TAG, "Multiple packages found for source uid " + sourceUid);
+            Log.i(LOG_TAG, "Multiple packages found for source uid $sourceUid")
         }
-        return packagesForUid[0];
+        return packagesForUid[0]
     }
 
     /**
-     * Utility method to get package information for a given {@link File}
+     * Utility method to get package information for a given [File]
      */
-    public static PackageInfo getPackageInfo(Context context, File sourceFile, int flags) {
-        String filePath = sourceFile.getAbsolutePath();
+    @JvmStatic
+    fun getPackageInfo(context: Context, sourceFile: File, flags: Int): PackageInfo? {
+        var filePath = sourceFile.absolutePath
         if (filePath.endsWith(SPLIT_BASE_APK_END_WITH)) {
-            File dir = sourceFile.getParentFile();
-            if (dir.listFiles().length > 1) {
+            val dir = sourceFile.parentFile
+            if ((dir?.listFiles()?.size ?: 0) > 1) {
                 // split apks, use file directory to get archive info
-                filePath = dir.getPath();
+                filePath = dir.path
             }
         }
-        try {
-            return context.getPackageManager().getPackageArchiveInfo(filePath, flags);
-        } catch (Exception ignored) {
-            return null;
+        return try {
+            context.packageManager.getPackageArchiveInfo(filePath, flags)
+        } catch (ignored: Exception) {
+            null
         }
     }
 
@@ -414,49 +417,24 @@ public class PackageUtil {
      *
      * @return If the profile is part of the user or the profile parent of the user
      */
-    public static boolean isProfileOfOrSame(UserManager userManager, UserHandle userHandle,
-        UserHandle profileHandle) {
-        if (userHandle.equals(profileHandle)) {
-            return true;
+    @JvmStatic
+    fun isProfileOfOrSame(
+        userManager: UserManager,
+        userHandle: UserHandle,
+        profileHandle: UserHandle?,
+    ): Boolean {
+        if (profileHandle == null) {
+            return false
         }
-        return userManager.getProfileParent(profileHandle) != null
-            && userManager.getProfileParent(profileHandle).equals(userHandle);
+        return if (userHandle == profileHandle) {
+            true
+        } else userManager.getProfileParent(profileHandle) != null
+            && userManager.getProfileParent(profileHandle) == userHandle
     }
 
     /**
      * The class to hold an incoming package's icon and label.
-     * See {@link #getAppSnippet(Context, SessionInfo)},
-     * {@link #getAppSnippet(Context, PackageInfo)},
-     * {@link #getAppSnippet(Context, ApplicationInfo)},
-     * {@link #getAppSnippet(Context, ApplicationInfo, File)}
+     * See [getAppSnippet]
      */
-    public static class AppSnippet {
-
-        private CharSequence mLabel;
-        private Drawable mIcon;
-
-        public AppSnippet(CharSequence label, Drawable icon) {
-            mLabel = label;
-            mIcon = icon;
-        }
-
-        public AppSnippet() {
-        }
-
-        public CharSequence getLabel() {
-            return mLabel;
-        }
-
-        public void setLabel(CharSequence mLabel) {
-            this.mLabel = mLabel;
-        }
-
-        public Drawable getIcon() {
-            return mIcon;
-        }
-
-        public void setIcon(Drawable mIcon) {
-            this.mIcon = mIcon;
-        }
-    }
+    data class AppSnippet(var label: CharSequence?, var icon: Drawable?)
 }
