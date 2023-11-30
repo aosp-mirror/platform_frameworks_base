@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-#include "io/FileStream.h"
+#include "androidfw/FileStream.h"
+#include "androidfw/StringPiece.h"
 
 #include "android-base/file.h"
 #include "android-base/macros.h"
 
-#include "test/Test.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 using ::android::StringPiece;
 using ::testing::Eq;
 using ::testing::NotNull;
 using ::testing::StrEq;
 
-namespace aapt {
-namespace io {
+namespace android {
 
 TEST(FileInputStreamTest, NextAndBackup) {
   std::string input = "this is a cool string";
@@ -123,5 +124,4 @@ TEST(FileOutputStreamTest, NextAndBackup) {
   EXPECT_THAT(actual, StrEq(input));
 }
 
-}  // namespace io
-}  // namespace aapt
+}  // namespace android

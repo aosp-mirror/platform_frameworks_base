@@ -18,9 +18,8 @@
 #define AAPT_TEXT_PRINTER_H
 
 #include "android-base/macros.h"
+#include "androidfw/Streams.h"
 #include "androidfw/StringPiece.h"
-
-#include "io/Io.h"
 
 namespace aapt {
 namespace text {
@@ -28,7 +27,7 @@ namespace text {
 // An indenting Printer that helps write formatted text to the OutputStream.
 class Printer {
  public:
-  explicit Printer(::aapt::io::OutputStream* out) : out_(out) {
+  explicit Printer(android::OutputStream* out) : out_(out) {
   }
 
   Printer& Print(android::StringPiece str);
@@ -41,7 +40,7 @@ class Printer {
  private:
   DISALLOW_COPY_AND_ASSIGN(Printer);
 
-  ::aapt::io::OutputStream* out_;
+  android::OutputStream* out_;
   int indent_level_ = 0;
   bool needs_indent_ = false;
   bool error_ = false;

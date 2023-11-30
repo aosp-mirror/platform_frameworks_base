@@ -29,8 +29,8 @@
 #include "util/Util.h"
 #include "xml/XmlDom.h"
 
-using ::aapt::io::OutputStream;
 using ::aapt::text::Printer;
+using ::android::OutputStream;
 
 namespace aapt {
 namespace proguard {

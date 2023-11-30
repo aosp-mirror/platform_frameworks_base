@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-#include "compile/Image.h"
+#include "androidfw/Image.h"
+#include "androidfw/ResourceTypes.h"
+#include "gtest/gtest.h"
 
-#include "test/Test.h"
-
-namespace aapt {
+namespace android {
 
 // Pixels are in RGBA_8888 packing.
 
@@ -33,16 +33,19 @@ namespace aapt {
 #define TRANS "\x00\x00\x00\x00"
 
 static uint8_t* k2x2[] = {
-    (uint8_t*)WHITE WHITE, (uint8_t*)WHITE WHITE,
+    (uint8_t*)WHITE WHITE,
+    (uint8_t*)WHITE WHITE,
 };
 
 static uint8_t* kMixedNeutralColor3x3[] = {
-    (uint8_t*)WHITE BLACK TRANS, (uint8_t*)TRANS RED TRANS,
+    (uint8_t*)WHITE BLACK TRANS,
+    (uint8_t*)TRANS RED TRANS,
     (uint8_t*)WHITE WHITE WHITE,
 };
 
 static uint8_t* kTransparentNeutralColor3x3[] = {
-    (uint8_t*)TRANS BLACK TRANS, (uint8_t*)BLACK RED BLACK,
+    (uint8_t*)TRANS BLACK TRANS,
+    (uint8_t*)BLACK RED BLACK,
     (uint8_t*)TRANS BLACK TRANS,
 };
 
@@ -66,55 +69,44 @@ static uint8_t* kMultipleStretch10x7[] = {
 };
 
 static uint8_t* kPadding6x5[] = {
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE WHITE,
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE WHITE,
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE BLACK,
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE WHITE,
+    (uint8_t*)WHITE WHITE WHITE WHITE WHITE WHITE, (uint8_t*)WHITE WHITE WHITE WHITE WHITE WHITE,
+    (uint8_t*)WHITE WHITE WHITE WHITE WHITE BLACK, (uint8_t*)WHITE WHITE WHITE WHITE WHITE WHITE,
     (uint8_t*)WHITE WHITE BLACK BLACK WHITE WHITE,
 };
 
 static uint8_t* kLayoutBoundsWrongEdge3x3[] = {
-    (uint8_t*)WHITE RED WHITE, (uint8_t*)RED WHITE WHITE,
+    (uint8_t*)WHITE RED WHITE,
+    (uint8_t*)RED WHITE WHITE,
     (uint8_t*)WHITE WHITE WHITE,
 };
 
 static uint8_t* kLayoutBoundsNotEdgeAligned5x5[] = {
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
-    (uint8_t*)WHITE WHITE WHITE WHITE RED,
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
+    (uint8_t*)WHITE WHITE WHITE WHITE WHITE, (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
+    (uint8_t*)WHITE WHITE WHITE WHITE RED,   (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
     (uint8_t*)WHITE WHITE RED WHITE WHITE,
 };
 
 static uint8_t* kLayoutBounds5x5[] = {
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
-    (uint8_t*)WHITE WHITE WHITE WHITE RED,
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
-    (uint8_t*)WHITE WHITE WHITE WHITE RED,
+    (uint8_t*)WHITE WHITE WHITE WHITE WHITE, (uint8_t*)WHITE WHITE WHITE WHITE RED,
+    (uint8_t*)WHITE WHITE WHITE WHITE WHITE, (uint8_t*)WHITE WHITE WHITE WHITE RED,
     (uint8_t*)WHITE RED WHITE RED WHITE,
 };
 
 static uint8_t* kAsymmetricLayoutBounds5x5[] = {
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
-    (uint8_t*)WHITE WHITE WHITE WHITE RED,
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
+    (uint8_t*)WHITE WHITE WHITE WHITE WHITE, (uint8_t*)WHITE WHITE WHITE WHITE RED,
+    (uint8_t*)WHITE WHITE WHITE WHITE WHITE, (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
     (uint8_t*)WHITE RED WHITE WHITE WHITE,
 };
 
 static uint8_t* kPaddingAndLayoutBounds5x5[] = {
-    (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
-    (uint8_t*)WHITE WHITE WHITE WHITE RED,
-    (uint8_t*)WHITE WHITE WHITE WHITE BLACK,
-    (uint8_t*)WHITE WHITE WHITE WHITE RED,
+    (uint8_t*)WHITE WHITE WHITE WHITE WHITE, (uint8_t*)WHITE WHITE WHITE WHITE RED,
+    (uint8_t*)WHITE WHITE WHITE WHITE BLACK, (uint8_t*)WHITE WHITE WHITE WHITE RED,
     (uint8_t*)WHITE RED BLACK RED WHITE,
 };
 
 static uint8_t* kColorfulImage5x5[] = {
-    (uint8_t*)WHITE BLACK WHITE BLACK WHITE,
-    (uint8_t*)BLACK RED BLUE GREEN WHITE,
-    (uint8_t*)BLACK RED GREEN GREEN WHITE,
-    (uint8_t*)WHITE TRANS BLUE GREEN WHITE,
+    (uint8_t*)WHITE BLACK WHITE BLACK WHITE, (uint8_t*)BLACK RED BLUE GREEN WHITE,
+    (uint8_t*)BLACK RED GREEN GREEN WHITE,   (uint8_t*)WHITE TRANS BLUE GREEN WHITE,
     (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
 };
 
@@ -145,33 +137,21 @@ static uint8_t* kOutlineTranslucent10x10[] = {
 };
 
 static uint8_t* kOutlineOffsetTranslucent12x10[] = {
-    (uint8_t*)
-        WHITE WHITE WHITE BLACK BLACK BLACK BLACK BLACK BLACK BLACK BLACK WHITE,
-    (uint8_t*)
-        WHITE TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS WHITE,
-    (uint8_t*)
-        WHITE TRANS TRANS TRANS TRANS GR_20 GR_20 GR_20 GR_20 TRANS TRANS WHITE,
-    (uint8_t*)
-        WHITE TRANS TRANS TRANS TRANS GR_50 GR_50 GR_50 GR_50 TRANS TRANS WHITE,
-    (uint8_t*)
-        WHITE TRANS TRANS TRANS GR_20 GR_50 GR_70 GR_70 GR_50 GR_20 TRANS WHITE,
-    (uint8_t*)
-        WHITE TRANS TRANS TRANS GR_20 GR_50 GR_70 GR_70 GR_50 GR_20 TRANS WHITE,
-    (uint8_t*)
-        WHITE TRANS TRANS TRANS TRANS GR_50 GR_50 GR_50 GR_50 TRANS TRANS WHITE,
-    (uint8_t*)
-        WHITE TRANS TRANS TRANS TRANS GR_20 GR_20 GR_20 GR_20 TRANS TRANS WHITE,
-    (uint8_t*)
-        WHITE TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS WHITE,
-    (uint8_t*)
-        WHITE WHITE WHITE WHITE WHITE WHITE WHITE WHITE WHITE WHITE WHITE WHITE,
+    (uint8_t*)WHITE WHITE WHITE BLACK BLACK BLACK BLACK BLACK BLACK BLACK BLACK WHITE,
+    (uint8_t*)WHITE TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS WHITE,
+    (uint8_t*)WHITE TRANS TRANS TRANS TRANS GR_20 GR_20 GR_20 GR_20 TRANS TRANS WHITE,
+    (uint8_t*)WHITE TRANS TRANS TRANS TRANS GR_50 GR_50 GR_50 GR_50 TRANS TRANS WHITE,
+    (uint8_t*)WHITE TRANS TRANS TRANS GR_20 GR_50 GR_70 GR_70 GR_50 GR_20 TRANS WHITE,
+    (uint8_t*)WHITE TRANS TRANS TRANS GR_20 GR_50 GR_70 GR_70 GR_50 GR_20 TRANS WHITE,
+    (uint8_t*)WHITE TRANS TRANS TRANS TRANS GR_50 GR_50 GR_50 GR_50 TRANS TRANS WHITE,
+    (uint8_t*)WHITE TRANS TRANS TRANS TRANS GR_20 GR_20 GR_20 GR_20 TRANS TRANS WHITE,
+    (uint8_t*)WHITE TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS TRANS WHITE,
+    (uint8_t*)WHITE WHITE WHITE WHITE WHITE WHITE WHITE WHITE WHITE WHITE WHITE WHITE,
 };
 
 static uint8_t* kOutlineRadius5x5[] = {
-    (uint8_t*)WHITE BLACK BLACK BLACK WHITE,
-    (uint8_t*)BLACK TRANS GREEN TRANS WHITE,
-    (uint8_t*)BLACK GREEN GREEN GREEN WHITE,
-    (uint8_t*)BLACK TRANS GREEN TRANS WHITE,
+    (uint8_t*)WHITE BLACK BLACK BLACK WHITE, (uint8_t*)BLACK TRANS GREEN TRANS WHITE,
+    (uint8_t*)BLACK GREEN GREEN GREEN WHITE, (uint8_t*)BLACK TRANS GREEN TRANS WHITE,
     (uint8_t*)WHITE WHITE WHITE WHITE WHITE,
 };
 
@@ -195,14 +175,12 @@ TEST(NinePatchTest, MixedNeutralColors) {
 
 TEST(NinePatchTest, TransparentNeutralColor) {
   std::string err;
-  EXPECT_NE(nullptr,
-            NinePatch::Create(kTransparentNeutralColor3x3, 3, 3, &err));
+  EXPECT_NE(nullptr, NinePatch::Create(kTransparentNeutralColor3x3, 3, 3, &err));
 }
 
 TEST(NinePatchTest, SingleStretchRegion) {
   std::string err;
-  std::unique_ptr<NinePatch> nine_patch =
-      NinePatch::Create(kSingleStretch7x6, 7, 6, &err);
+  std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(kSingleStretch7x6, 7, 6, &err);
   ASSERT_NE(nullptr, nine_patch);
 
   ASSERT_EQ(1u, nine_patch->horizontal_stretch_regions.size());
@@ -214,8 +192,7 @@ TEST(NinePatchTest, SingleStretchRegion) {
 
 TEST(NinePatchTest, MultipleStretchRegions) {
   std::string err;
-  std::unique_ptr<NinePatch> nine_patch =
-      NinePatch::Create(kMultipleStretch10x7, 10, 7, &err);
+  std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(kMultipleStretch10x7, 10, 7, &err);
   ASSERT_NE(nullptr, nine_patch);
 
   ASSERT_EQ(3u, nine_patch->horizontal_stretch_regions.size());
@@ -231,16 +208,14 @@ TEST(NinePatchTest, MultipleStretchRegions) {
 
 TEST(NinePatchTest, InferPaddingFromStretchRegions) {
   std::string err;
-  std::unique_ptr<NinePatch> nine_patch =
-      NinePatch::Create(kMultipleStretch10x7, 10, 7, &err);
+  std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(kMultipleStretch10x7, 10, 7, &err);
   ASSERT_NE(nullptr, nine_patch);
   EXPECT_EQ(Bounds(1, 0, 1, 0), nine_patch->padding);
 }
 
 TEST(NinePatchTest, Padding) {
   std::string err;
-  std::unique_ptr<NinePatch> nine_patch =
-      NinePatch::Create(kPadding6x5, 6, 5, &err);
+  std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(kPadding6x5, 6, 5, &err);
   ASSERT_NE(nullptr, nine_patch);
   EXPECT_EQ(Bounds(1, 1, 1, 1), nine_patch->padding);
 }
@@ -253,15 +228,13 @@ TEST(NinePatchTest, LayoutBoundsAreOnWrongEdge) {
 
 TEST(NinePatchTest, LayoutBoundsMustTouchEdges) {
   std::string err;
-  EXPECT_EQ(nullptr,
-            NinePatch::Create(kLayoutBoundsNotEdgeAligned5x5, 5, 5, &err));
+  EXPECT_EQ(nullptr, NinePatch::Create(kLayoutBoundsNotEdgeAligned5x5, 5, 5, &err));
   EXPECT_FALSE(err.empty());
 }
 
 TEST(NinePatchTest, LayoutBounds) {
   std::string err;
-  std::unique_ptr<NinePatch> nine_patch =
-      NinePatch::Create(kLayoutBounds5x5, 5, 5, &err);
+  std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(kLayoutBounds5x5, 5, 5, &err);
   ASSERT_NE(nullptr, nine_patch);
   EXPECT_EQ(Bounds(1, 1, 1, 1), nine_patch->layout_bounds);
 
@@ -272,8 +245,7 @@ TEST(NinePatchTest, LayoutBounds) {
 
 TEST(NinePatchTest, PaddingAndLayoutBounds) {
   std::string err;
-  std::unique_ptr<NinePatch> nine_patch =
-      NinePatch::Create(kPaddingAndLayoutBounds5x5, 5, 5, &err);
+  std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(kPaddingAndLayoutBounds5x5, 5, 5, &err);
   ASSERT_NE(nullptr, nine_patch);
   EXPECT_EQ(Bounds(1, 1, 1, 1), nine_patch->padding);
   EXPECT_EQ(Bounds(1, 1, 1, 1), nine_patch->layout_bounds);
@@ -281,25 +253,20 @@ TEST(NinePatchTest, PaddingAndLayoutBounds) {
 
 TEST(NinePatchTest, RegionColorsAreCorrect) {
   std::string err;
-  std::unique_ptr<NinePatch> nine_patch =
-      NinePatch::Create(kColorfulImage5x5, 5, 5, &err);
+  std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(kColorfulImage5x5, 5, 5, &err);
   ASSERT_NE(nullptr, nine_patch);
 
   std::vector<uint32_t> expected_colors = {
-      NinePatch::PackRGBA((uint8_t*)RED),
-      (uint32_t)android::Res_png_9patch::NO_COLOR,
-      NinePatch::PackRGBA((uint8_t*)GREEN),
-      (uint32_t)android::Res_png_9patch::TRANSPARENT_COLOR,
-      NinePatch::PackRGBA((uint8_t*)BLUE),
-      NinePatch::PackRGBA((uint8_t*)GREEN),
+      NinePatch::PackRGBA((uint8_t*)RED),   (uint32_t)android::Res_png_9patch::NO_COLOR,
+      NinePatch::PackRGBA((uint8_t*)GREEN), (uint32_t)android::Res_png_9patch::TRANSPARENT_COLOR,
+      NinePatch::PackRGBA((uint8_t*)BLUE),  NinePatch::PackRGBA((uint8_t*)GREEN),
   };
   EXPECT_EQ(expected_colors, nine_patch->region_colors);
 }
 
 TEST(NinePatchTest, OutlineFromOpaqueImage) {
   std::string err;
-  std::unique_ptr<NinePatch> nine_patch =
-      NinePatch::Create(kOutlineOpaque10x10, 10, 10, &err);
+  std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(kOutlineOpaque10x10, 10, 10, &err);
   ASSERT_NE(nullptr, nine_patch);
   EXPECT_EQ(Bounds(2, 2, 2, 2), nine_patch->outline);
   EXPECT_EQ(0x000000ffu, nine_patch->outline_alpha);
@@ -308,8 +275,7 @@ TEST(NinePatchTest, OutlineFromOpaqueImage) {
 
 TEST(NinePatchTest, OutlineFromTranslucentImage) {
   std::string err;
-  std::unique_ptr<NinePatch> nine_patch =
-      NinePatch::Create(kOutlineTranslucent10x10, 10, 10, &err);
+  std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(kOutlineTranslucent10x10, 10, 10, &err);
   ASSERT_NE(nullptr, nine_patch);
   EXPECT_EQ(Bounds(3, 3, 3, 3), nine_patch->outline);
   EXPECT_EQ(0x000000b3u, nine_patch->outline_alpha);
@@ -337,8 +303,7 @@ TEST(NinePatchTest, OutlineFromOffCenterImage) {
 
 TEST(NinePatchTest, OutlineRadius) {
   std::string err;
-  std::unique_ptr<NinePatch> nine_patch =
-      NinePatch::Create(kOutlineRadius5x5, 5, 5, &err);
+  std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(kOutlineRadius5x5, 5, 5, &err);
   ASSERT_NE(nullptr, nine_patch);
   EXPECT_EQ(Bounds(0, 0, 0, 0), nine_patch->outline);
   EXPECT_EQ(3.4142f, nine_patch->outline_radius);
@@ -353,8 +318,7 @@ TEST(NinePatchTest, OutlineRadius) {
 
 TEST(NinePatchTest, SerializePngEndianness) {
   std::string err;
-  std::unique_ptr<NinePatch> nine_patch =
-      NinePatch::Create(kStretchAndPadding5x5, 5, 5, &err);
+  std::unique_ptr<NinePatch> nine_patch = NinePatch::Create(kStretchAndPadding5x5, 5, 5, &err);
   ASSERT_NE(nullptr, nine_patch);
 
   size_t len;
@@ -374,4 +338,4 @@ TEST(NinePatchTest, SerializePngEndianness) {
   EXPECT_TRUE(BigEndianOne(cursor + 12));
 }
 
-}  // namespace aapt
+}  // namespace android

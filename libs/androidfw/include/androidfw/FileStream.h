@@ -14,19 +14,16 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_IO_FILESTREAM_H
-#define AAPT_IO_FILESTREAM_H
-
-#include "io/Io.h"
+#pragma once
 
 #include <memory>
 #include <string>
 
+#include "Streams.h"
 #include "android-base/macros.h"
 #include "android-base/unique_fd.h"
 
-namespace aapt {
-namespace io {
+namespace android {
 
 constexpr size_t kDefaultBufferCapacity = 4096u;
 
@@ -47,6 +44,8 @@ class FileInputStream : public InputStream {
   bool HadError() const override;
 
   std::string GetError() const override;
+
+  bool ReadFullyAtOffset(void* data, size_t byte_count, off64_t offset) override;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(FileInputStream);
@@ -101,7 +100,4 @@ class FileOutputStream : public OutputStream {
   size_t total_byte_count_ = 0u;
 };
 
-}  // namespace io
-}  // namespace aapt
-
-#endif  // AAPT_IO_FILESTREAM_H
+}  // namespace android

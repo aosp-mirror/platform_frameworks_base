@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include "compile/Png.h"
-
 #include <png.h>
 #include <zlib.h>
 
@@ -26,16 +24,16 @@
 #include "android-base/errors.h"
 #include "android-base/logging.h"
 #include "android-base/macros.h"
+#include "androidfw/Png.h"
 
-#include "trace/TraceBuffer.h"
-
-namespace aapt {
+namespace android {
 
 // Custom deleter that destroys libpng read and info structs.
 class PngReadStructDeleter {
  public:
   PngReadStructDeleter(png_structp read_ptr, png_infop info_ptr)
-      : read_ptr_(read_ptr), info_ptr_(info_ptr) {}
+      : read_ptr_(read_ptr), info_ptr_(info_ptr) {
+  }
 
   ~PngReadStructDeleter() {
     png_destroy_read_struct(&read_ptr_, &info_ptr_, nullptr);
@@ -52,7 +50,8 @@ class PngReadStructDeleter {
 class PngWriteStructDeleter {
  public:
   PngWriteStructDeleter(png_structp write_ptr, png_infop info_ptr)
-      : write_ptr_(write_ptr), info_ptr_(info_ptr) {}
+      : write_ptr_(write_ptr), info_ptr_(info_ptr) {
+  }
 
   ~PngWriteStructDeleter() {
     png_destroy_write_struct(&write_ptr_, &info_ptr_);
@@ -83,7 +82,7 @@ static void LogError(png_structp png_ptr, png_const_charp error_msg) {
 }
 
 static void ReadDataFromStream(png_structp png_ptr, png_bytep buffer, png_size_t len) {
-  io::InputStream* in = (io::InputStream*)png_get_io_ptr(png_ptr);
+  InputStream* in = (InputStream*)png_get_io_ptr(png_ptr);
 
   const void* in_buffer;
   size_t in_len;
@@ -108,7 +107,7 @@ static void ReadDataFromStream(png_structp png_ptr, png_bytep buffer, png_size_t
 }
 
 static void WriteDataToStream(png_structp png_ptr, png_bytep buffer, png_size_t len) {
-  io::OutputStream* out = (io::OutputStream*)png_get_io_ptr(png_ptr);
+  OutputStream* out = (OutputStream*)png_get_io_ptr(png_ptr);
 
   void* out_buffer;
   size_t out_len;
@@ -143,28 +142,22 @@ static void WriteDataToStream(png_structp png_ptr, png_bytep buffer, png_size_t 
   }
 }
 
-std::unique_ptr<Image> ReadPng(IAaptContext* context, const android::Source& source,
-                               io::InputStream* in) {
-  TRACE_CALL();
-  // Create a diagnostics that has the source information encoded.
-  android::SourcePathDiagnostics source_diag(source, context->GetDiagnostics());
-
+std::unique_ptr<Image> ReadPng(InputStream* in, IDiagnostics* diag) {
   // Read the first 8 bytes of the file looking for the PNG signature.
   // Bail early if it does not match.
   const png_byte* signature;
   size_t buffer_size;
   if (!in->Next((const void**)&signature, &buffer_size)) {
     if (in->HadError()) {
-      source_diag.Error(android::DiagMessage()
-                        << "failed to read PNG signature: " << in->GetError());
+      diag->Error(android::DiagMessage() << "failed to read PNG signature: " << in->GetError());
     } else {
-      source_diag.Error(android::DiagMessage() << "not enough data for PNG signature");
+      diag->Error(android::DiagMessage() << "not enough data for PNG signature");
     }
     return {};
   }
 
   if (buffer_size < kPngSignatureSize || png_sig_cmp(signature, 0, kPngSignatureSize) != 0) {
-    source_diag.Error(android::DiagMessage() << "file signature does not match PNG signature");
+    diag->Error(android::DiagMessage() << "file signature does not match PNG signature");
     return {};
   }
 
@@ -176,14 +169,14 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, const android::Source& sou
   // version of libpng.
   png_structp read_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if (read_ptr == nullptr) {
-    source_diag.Error(android::DiagMessage() << "failed to create libpng read png_struct");
+    diag->Error(android::DiagMessage() << "failed to create libpng read png_struct");
     return {};
   }
 
   // Create and initialize the memory for image header and data.
   png_infop info_ptr = png_create_info_struct(read_ptr);
   if (info_ptr == nullptr) {
-    source_diag.Error(android::DiagMessage() << "failed to create libpng read png_info");
+    diag->Error(android::DiagMessage() << "failed to create libpng read png_info");
     png_destroy_read_struct(&read_ptr, nullptr, nullptr);
     return {};
   }
@@ -199,7 +192,7 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, const android::Source& sou
   }
 
   // Handle warnings ourselves via IDiagnostics.
-  png_set_error_fn(read_ptr, (png_voidp)&source_diag, LogError, LogWarning);
+  png_set_error_fn(read_ptr, (png_voidp)&diag, LogError, LogWarning);
 
   // Set up the read functions which read from our custom data sources.
   png_set_read_fn(read_ptr, (png_voidp)in, ReadDataFromStream);
@@ -213,8 +206,8 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, const android::Source& sou
   // Extract image meta-data from the various chunk headers.
   uint32_t width, height;
   int bit_depth, color_type, interlace_method, compression_method, filter_method;
-  png_get_IHDR(read_ptr, info_ptr, &width, &height, &bit_depth, &color_type,
-               &interlace_method, &compression_method, &filter_method);
+  png_get_IHDR(read_ptr, info_ptr, &width, &height, &bit_depth, &color_type, &interlace_method,
+               &compression_method, &filter_method);
 
   // When the image is read, expand it so that it is in RGBA 8888 format
   // so that image handling is uniform.
@@ -239,8 +232,7 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, const android::Source& sou
     png_set_add_alpha(read_ptr, 0xFF, PNG_FILLER_AFTER);
   }
 
-  if (color_type == PNG_COLOR_TYPE_GRAY ||
-      color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
+  if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
     png_set_gray_to_rgb(read_ptr);
   }
 
@@ -256,12 +248,12 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, const android::Source& sou
   // something
   // that can always be represented by 9-patch.
   if (width > std::numeric_limits<int32_t>::max() || height > std::numeric_limits<int32_t>::max()) {
-    source_diag.Error(android::DiagMessage()
-                      << "PNG image dimensions are too large: " << width << "x" << height);
+    diag->Error(android::DiagMessage()
+                << "PNG image dimensions are too large: " << width << "x" << height);
     return {};
   }
 
-  std::unique_ptr<Image> output_image = util::make_unique<Image>();
+  std::unique_ptr<Image> output_image = std::make_unique<Image>();
   output_image->width = static_cast<int32_t>(width);
   output_image->height = static_cast<int32_t>(height);
 
@@ -272,7 +264,7 @@ std::unique_ptr<Image> ReadPng(IAaptContext* context, const android::Source& sou
   output_image->data = std::unique_ptr<uint8_t[]>(new uint8_t[height * row_bytes]);
 
   // Create an array of rows that index into the data block.
-  output_image->rows = std::unique_ptr<uint8_t* []>(new uint8_t*[height]);
+  output_image->rows = std::unique_ptr<uint8_t*[]>(new uint8_t*[height]);
   for (uint32_t h = 0; h < height; h++) {
     output_image->rows[h] = output_image->data.get() + (h * row_bytes);
   }
@@ -332,8 +324,7 @@ static int PickColorType(int32_t width, int32_t height, bool grayscale,
       // This grayscale has alpha and can fit within a palette.
       // See if it is worth fitting into a palette.
       const size_t palette_threshold = palette_chunk_size + alpha_chunk_size +
-                                       palette_data_chunk_size +
-                                       kPaletteOverheadConstant;
+                                       palette_data_chunk_size + kPaletteOverheadConstant;
       if (grayscale_alpha_data_chunk_size > palette_threshold) {
         return PNG_COLOR_TYPE_PALETTE;
       }
@@ -343,16 +334,14 @@ static int PickColorType(int32_t width, int32_t height, bool grayscale,
 
   if (color_palette_size <= 256 && !has_nine_patch) {
     // This image can fit inside a palette. Let's see if it is worth it.
-    size_t total_size_with_palette =
-        palette_data_chunk_size + palette_chunk_size;
+    size_t total_size_with_palette = palette_data_chunk_size + palette_chunk_size;
     size_t total_size_without_palette = color_data_chunk_size;
     if (alpha_palette_size > 0) {
       total_size_with_palette += alpha_palette_size;
       total_size_without_palette = color_alpha_data_chunk_size;
     }
 
-    if (total_size_without_palette >
-        total_size_with_palette + kPaletteOverheadConstant) {
+    if (total_size_without_palette > total_size_with_palette + kPaletteOverheadConstant) {
       return PNG_COLOR_TYPE_PALETTE;
     }
   }
@@ -482,26 +471,22 @@ static void WriteNinePatch(png_structp write_ptr, png_infop write_info_ptr,
   png_set_unknown_chunks(write_ptr, write_info_ptr, unknown_chunks, index);
 }
 
-bool WritePng(IAaptContext* context, const Image* image,
-              const NinePatch* nine_patch, io::OutputStream* out,
-              const PngOptions& options) {
-  TRACE_CALL();
+bool WritePng(const Image* image, const NinePatch* nine_patch, OutputStream* out,
+              const PngOptions& options, IDiagnostics* diag, bool verbose) {
   // Create and initialize the write png_struct with the default error and
   // warning handlers.
   // The header version is also passed in to ensure that this was built against the same
   // version of libpng.
   png_structp write_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
   if (write_ptr == nullptr) {
-    context->GetDiagnostics()->Error(android::DiagMessage()
-                                     << "failed to create libpng write png_struct");
+    diag->Error(android::DiagMessage() << "failed to create libpng write png_struct");
     return false;
   }
 
   // Allocate memory to store image header data.
   png_infop write_info_ptr = png_create_info_struct(write_ptr);
   if (write_info_ptr == nullptr) {
-    context->GetDiagnostics()->Error(android::DiagMessage()
-                                     << "failed to create libpng write png_info");
+    diag->Error(android::DiagMessage() << "failed to create libpng write png_info");
     png_destroy_write_struct(&write_ptr, nullptr);
     return false;
   }
@@ -516,7 +501,7 @@ bool WritePng(IAaptContext* context, const Image* image,
   }
 
   // Handle warnings with our IDiagnostics.
-  png_set_error_fn(write_ptr, (png_voidp)context->GetDiagnostics(), LogError, LogWarning);
+  png_set_error_fn(write_ptr, (png_voidp)&diag, LogError, LogWarning);
 
   // Set up the write functions which write to our custom data sources.
   png_set_write_fn(write_ptr, (png_voidp)out, WriteDataToStream, nullptr);
@@ -578,22 +563,21 @@ bool WritePng(IAaptContext* context, const Image* image,
     }
   }
 
-  if (context->IsVerbose()) {
+  if (verbose) {
     android::DiagMessage msg;
-    msg << " paletteSize=" << color_palette.size()
-        << " alphaPaletteSize=" << alpha_palette.size()
+    msg << " paletteSize=" << color_palette.size() << " alphaPaletteSize=" << alpha_palette.size()
         << " maxGrayDeviation=" << max_gray_deviation
         << " grayScale=" << (grayscale ? "true" : "false");
-    context->GetDiagnostics()->Note(msg);
+    diag->Note(msg);
   }
 
   const bool convertible_to_grayscale = max_gray_deviation <= options.grayscale_tolerance;
 
-  const int new_color_type = PickColorType(
-      image->width, image->height, grayscale, convertible_to_grayscale,
-      nine_patch != nullptr, color_palette.size(), alpha_palette.size());
+  const int new_color_type =
+      PickColorType(image->width, image->height, grayscale, convertible_to_grayscale,
+                    nine_patch != nullptr, color_palette.size(), alpha_palette.size());
 
-  if (context->IsVerbose()) {
+  if (verbose) {
     android::DiagMessage msg;
     msg << "encoding PNG ";
     if (nine_patch) {
@@ -619,12 +603,11 @@ bool WritePng(IAaptContext* context, const Image* image,
         msg << "unknown type " << new_color_type;
         break;
     }
-    context->GetDiagnostics()->Note(msg);
+    diag->Note(msg);
   }
 
-  png_set_IHDR(write_ptr, write_info_ptr, image->width, image->height, 8,
-               new_color_type, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
-               PNG_FILTER_TYPE_DEFAULT);
+  png_set_IHDR(write_ptr, write_info_ptr, image->width, image->height, 8, new_color_type,
+               PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
   if (new_color_type & PNG_COLOR_MASK_PALETTE) {
     // Assigns indices to the palette, and writes the encoded palette to the
@@ -666,11 +649,9 @@ bool WritePng(IAaptContext* context, const Image* image,
       }
       png_write_row(write_ptr, out_row.get());
     }
-  } else if (new_color_type == PNG_COLOR_TYPE_GRAY ||
-             new_color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
+  } else if (new_color_type == PNG_COLOR_TYPE_GRAY || new_color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
     const size_t bpp = new_color_type == PNG_COLOR_TYPE_GRAY ? 1 : 2;
-    auto out_row =
-        std::unique_ptr<png_byte[]>(new png_byte[image->width * bpp]);
+    auto out_row = std::unique_ptr<png_byte[]>(new png_byte[image->width * bpp]);
 
     for (int32_t y = 0; y < image->height; y++) {
       png_const_bytep in_row = image->rows[y];
@@ -691,8 +672,7 @@ bool WritePng(IAaptContext* context, const Image* image,
           // The image is convertible to grayscale, use linear-luminance of
           // sRGB colorspace:
           // https://en.wikipedia.org/wiki/Grayscale#Colorimetric_.28luminance-preserving.29_conversion_to_grayscale
-          out_row[x * bpp] =
-              (png_byte)(rr * 0.2126f + gg * 0.7152f + bb * 0.0722f);
+          out_row[x * bpp] = (png_byte)(rr * 0.2126f + gg * 0.7152f + bb * 0.0722f);
         }
 
         if (bpp == 2) {
@@ -747,4 +727,4 @@ bool WritePng(IAaptContext* context, const Image* image,
   return true;
 }
 
-}  // namespace aapt
+}  // namespace android
