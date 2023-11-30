@@ -483,10 +483,15 @@ class TestPhoneWindowManager {
         doReturn(mPackageManager).when(mContext).getPackageManager();
     }
 
-    void overrideKeyEventSource(int vendorId, int productId) {
-        InputDevice device = new InputDevice.Builder().setId(1).setVendorId(vendorId).setProductId(
-                productId).setSources(InputDevice.SOURCE_KEYBOARD).setKeyboardType(
-                InputDevice.KEYBOARD_TYPE_ALPHABETIC).build();
+    void overrideKeyEventSource(int vendorId, int productId, int deviceBus) {
+        InputDevice device = new InputDevice.Builder()
+                .setId(1)
+                .setVendorId(vendorId)
+                .setProductId(productId)
+                .setDeviceBus(deviceBus)
+                .setSources(InputDevice.SOURCE_KEYBOARD)
+                .setKeyboardType(InputDevice.KEYBOARD_TYPE_ALPHABETIC)
+                .build();
         doReturn(mInputManager).when(mContext).getSystemService(eq(InputManager.class));
         doReturn(device).when(mInputManager).getInputDevice(anyInt());
     }
@@ -682,11 +687,11 @@ class TestPhoneWindowManager {
     }
 
     void assertShortcutLogged(int vendorId, int productId, KeyboardLogEvent logEvent,
-            int expectedKey, int expectedModifierState, String errorMsg) {
+            int expectedKey, int expectedModifierState, int deviceBus, String errorMsg) {
         mTestLooper.dispatchAll();
         verify(() -> FrameworkStatsLog.write(FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED,
                         vendorId, productId, logEvent.getIntValue(), new int[]{expectedKey},
-                        expectedModifierState), description(errorMsg));
+                        expectedModifierState, deviceBus), description(errorMsg));
     }
 
     void assertSwitchToRecent(int persistentId) throws RemoteException {
