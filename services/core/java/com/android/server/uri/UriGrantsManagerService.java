@@ -146,17 +146,31 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
             mGrantedUriPermissions = new SparseArray<>();
 
     private UriGrantsManagerService() {
-        this(SystemServiceManager.ensureSystemDir());
+        this(SystemServiceManager.ensureSystemDir(), "uri-grants");
     }
 
-    private UriGrantsManagerService(File systemDir) {
+    private UriGrantsManagerService(File systemDir, String commitTag) {
         mH = new H(IoThread.get().getLooper());
-        mGrantFile = new AtomicFile(new File(systemDir, "urigrants.xml"), "uri-grants");
+        final File file = new File(systemDir, "urigrants.xml");
+        mGrantFile = (commitTag != null) ? new AtomicFile(file, commitTag) : new AtomicFile(file);
     }
 
     @VisibleForTesting
     static UriGrantsManagerService createForTest(File systemDir) {
-        final UriGrantsManagerService service = new UriGrantsManagerService(systemDir);
+        final UriGrantsManagerService service = new UriGrantsManagerService(systemDir, null) {
+            @VisibleForTesting
+            protected int checkUidPermission(String permission, int uid) {
+                // Tests have no permission granted
+                return PackageManager.PERMISSION_DENIED;
+            }
+
+            @VisibleForTesting
+            protected int checkComponentPermission(String permission, int uid, int owningUid,
+                    boolean exported) {
+                // Tests have no permission granted
+                return PackageManager.PERMISSION_DENIED;
+            }
+        };
         service.mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
         service.mPmInternal = LocalServices.getService(PackageManagerInternal.class);
         return service;
@@ -202,12 +216,19 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
         }
     }
 
-    private int checkUidPermission(String permission, int uid) {
+    @VisibleForTesting
+    protected int checkUidPermission(String permission, int uid) {
         try {
             return AppGlobals.getPackageManager().checkUidPermission(permission, uid);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @VisibleForTesting
+    protected int checkComponentPermission(String permission, int uid, int owningUid,
+            boolean exported) {
+        return ActivityManager.checkComponentPermission(permission, uid, owningUid, exported);
     }
 
     /**
@@ -916,7 +937,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
             ProviderInfo pi, GrantUri grantUri, int uid, final int modeFlags) {
         if (DEBUG) Slog.v(TAG, "checkHoldingPermissions: uri=" + grantUri + " uid=" + uid);
         if (UserHandle.getUserId(uid) != grantUri.sourceUserId) {
-            if (ActivityManager.checkComponentPermission(INTERACT_ACROSS_USERS, uid, -1, true)
+            if (checkComponentPermission(INTERACT_ACROSS_USERS, uid, -1, true)
                     != PERMISSION_GRANTED) {
                 return false;
             }
@@ -1340,7 +1361,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub implements
         if (uid == Process.SYSTEM_UID || uid == Process.ROOT_UID) {
             return true;
         }
-        return ActivityManager.checkComponentPermission(
+        return checkComponentPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
                     uid, /* owningUid = */-1, /* exported = */ true)
                     == PackageManager.PERMISSION_GRANTED;

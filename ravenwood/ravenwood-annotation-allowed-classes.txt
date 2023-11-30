@@ -88,6 +88,8 @@ android.graphics.PointF
 android.graphics.Rect
 android.graphics.RectF
 
+android.content.ContentProvider
+
 com.android.server.LocalServices
 
 com.android.internal.os.SomeArgs

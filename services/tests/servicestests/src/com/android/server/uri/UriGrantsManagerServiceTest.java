@@ -57,17 +57,22 @@ import android.content.pm.ProviderInfo;
 import android.net.Uri;
 import android.os.Process;
 import android.os.UserHandle;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArraySet;
 
 import androidx.test.InstrumentationRegistry;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Set;
 
 public class UriGrantsManagerServiceTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private UriGrantsMockContext mContext;
     private UriGrantsManagerInternal mService;
 
@@ -79,7 +84,7 @@ public class UriGrantsManagerServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        mContext = new UriGrantsMockContext(InstrumentationRegistry.getContext());
+        mContext = new UriGrantsMockContext();
         mService = UriGrantsManagerService.createForTest(mContext.getFilesDir()).getLocalService();
     }
 
