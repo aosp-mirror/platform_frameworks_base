@@ -1713,7 +1713,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
         mNonPreemptibleInputMethods = mRes.getStringArray(
                 com.android.internal.R.array.config_nonPreemptibleInputMethods);
-        mHwController = new HandwritingModeController(thread.getLooper(),
+        mHwController = new HandwritingModeController(mContext, thread.getLooper(),
                 new InkWindowInitializer());
         registerDeviceListenerAndCheckStylusSupport();
     }
