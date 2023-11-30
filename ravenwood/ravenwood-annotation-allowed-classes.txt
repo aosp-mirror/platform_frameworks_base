@@ -2,16 +2,20 @@
 
 com.android.internal.util.ArrayUtils
 
+android.util.AtomicFile
 android.util.DataUnit
 android.util.EventLog
 android.util.IntArray
 android.util.LongArray
+android.util.LruCache
 android.util.Slog
 android.util.TimeUtils
 android.util.Xml
 
 android.os.Binder
 android.os.Binder$IdentitySupplier
+android.os.FileUtils
+android.os.FileUtils$MemoryPipe
 android.os.Handler
 android.os.HandlerExecutor
 android.os.HandlerThread

@@ -57,8 +57,10 @@ android_ravenwood_test {
     static_libs: [
         "androidx.annotation_annotation",
         "androidx.test.rules",
+        "mockito_ravenwood",
     ],
     srcs: [
+        "src/android/util/AtomicFileTest.java",
         "src/android/util/DataUnitTest.java",
         "src/android/util/EventLogTest.java",
         "src/android/util/IndentingPrintWriterTest.java",
