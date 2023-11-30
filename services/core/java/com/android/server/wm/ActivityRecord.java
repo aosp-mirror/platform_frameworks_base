@@ -5262,7 +5262,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean canAffectSystemUiFlags() {
         return task != null && task.canAffectSystemUiFlags() && isVisible()
-                && !inPinnedWindowingMode();
+                && !mWaitForEnteringPinnedMode && !inPinnedWindowingMode();
     }
 
     @Override
