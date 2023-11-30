@@ -42,4 +42,6 @@ data class SliderHapticFeedbackConfig(
     @FloatRange(from = 0.0, to = 1.0) val upperBookendScale: Float = 1f,
     /** Vibration scale at the lower bookend of the slider */
     @FloatRange(from = 0.0, to = 1.0) val lowerBookendScale: Float = 0.05f,
+    /** Exponent for power function compensation */
+    @FloatRange(from = 0.0, fromInclusive = false) val exponent: Float = 1f / 0.89f,
 )
