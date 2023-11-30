@@ -1602,8 +1602,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                     || sdrAnimateValue != currentSdrBrightness)) {
                 boolean skipAnimation = initialRampSkip || hasBrightnessBuckets
                         || !isDisplayContentVisible || brightnessIsTemporary;
-                if (!skipAnimation && BrightnessSynchronizer.floatEquals(
-                        sdrAnimateValue, currentSdrBrightness)) {
+                final boolean isHdrOnlyChange = BrightnessSynchronizer.floatEquals(
+                        sdrAnimateValue, currentSdrBrightness);
+                if (mFlags.isFastHdrTransitionsEnabled() && !skipAnimation && isHdrOnlyChange) {
                     // SDR brightness is unchanged, so animate quickly as this is only impacting
                     // a likely minority amount of display content
                     // ie, the highlights of an HDR video or UltraHDR image

@@ -144,3 +144,12 @@ flag {
     bug: "293613040"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "fast_hdr_transitions"
+    namespace: "display_manager"
+    description: "Feature flag for fast transitions into/out of HDR"
+    bug: "292124102"
+    is_fixed_read_only: true
+}
+
