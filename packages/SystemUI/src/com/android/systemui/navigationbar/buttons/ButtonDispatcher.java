@@ -247,10 +247,10 @@ public class ButtonDispatcher {
         }
     }
 
-    public void animateLongPress(boolean isTouchDown, long durationMs) {
+    public void animateLongPress(boolean isTouchDown, boolean shrink, long durationMs) {
         for (int i = 0; i < mViews.size(); i++) {
             if (mViews.get(i) instanceof ButtonInterface) {
-                ((ButtonInterface) mViews.get(i)).animateLongPress(isTouchDown, durationMs);
+                ((ButtonInterface) mViews.get(i)).animateLongPress(isTouchDown, shrink, durationMs);
             }
         }
     }
