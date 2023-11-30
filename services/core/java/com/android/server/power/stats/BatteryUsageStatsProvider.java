@@ -71,7 +71,7 @@ public class BatteryUsageStatsProvider {
 
                 // Power calculators are applied in the order of registration
                 mPowerCalculators.add(new BatteryChargeCalculator());
-                if (mPowerStatsExporterEnabled) {
+                if (!mPowerStatsExporterEnabled) {
                     mPowerCalculators.add(
                             new CpuPowerCalculator(mCpuScalingPolicies, mPowerProfile));
                 }
@@ -385,7 +385,6 @@ public class BatteryUsageStatsProvider {
     }
 
     public void setPowerStatsExporterEnabled(boolean enabled) {
-
         mPowerStatsExporterEnabled = enabled;
     }
 }
