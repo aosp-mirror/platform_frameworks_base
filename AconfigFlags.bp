@@ -333,6 +333,11 @@ java_aconfig_library {
     aconfig_declarations: "android.os.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
     mode: "exported",
+    min_sdk_version: "30",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.mediaprovider",
+    ],
 }
 
 cc_aconfig_library {
