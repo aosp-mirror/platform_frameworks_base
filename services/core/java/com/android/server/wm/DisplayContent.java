@@ -1194,7 +1194,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // 2. VirtualDisplays on VR, AA (and everything else).
         mTapDetector = new TaskTapPointerEventListener(mWmService, this);
         registerPointerEventListener(mTapDetector);
-        registerPointerEventListener(mWmService.mMousePositionTracker);
+        if (mWmService.mMousePositionTracker != null) {
+            registerPointerEventListener(mWmService.mMousePositionTracker);
+        }
         if (mWmService.mAtmService.getRecentTasks() != null) {
             registerPointerEventListener(
                     mWmService.mAtmService.getRecentTasks().getInputListener());
