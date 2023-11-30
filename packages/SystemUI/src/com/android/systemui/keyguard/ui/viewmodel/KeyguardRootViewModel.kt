@@ -17,13 +17,13 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.content.Context
 import android.util.MathUtils
 import android.view.View.VISIBLE
 import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.NotificationContainerBounds
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -34,6 +34,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
+import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.res.R
@@ -64,7 +65,7 @@ import kotlinx.coroutines.flow.onStart
 class KeyguardRootViewModel
 @Inject
 constructor(
-    private val context: Context,
+    configurationInteractor: ConfigurationInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val dozeParameters: DozeParameters,
     private val keyguardInteractor: KeyguardInteractor,
@@ -74,6 +75,7 @@ constructor(
     private val keyguardClockViewModel: KeyguardClockViewModel,
     private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
+    private val occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
     screenOffAnimationController: ScreenOffAnimationController,
     // TODO(b/310989341): remove after changing migrate_clocks_to_blueprint to aconfig
     private val featureFlags: FeatureFlagsClassic,
@@ -97,14 +99,18 @@ constructor(
             .filter { it == AOD || it == LOCKSCREEN }
             .map { VISIBLE }
 
-    val goneToAodTransition = keyguardTransitionInteractor.goneToAodTransition
+    val goneToAodTransition = keyguardTransitionInteractor.transition(from = GONE, to = AOD)
 
     /** the shared notification container bounds *on the lockscreen* */
     val notificationBounds: StateFlow<NotificationContainerBounds> =
         keyguardInteractor.notificationContainerBounds
 
     /** An observable for the alpha level for the entire keyguard root view. */
-    val alpha: Flow<Float> = keyguardInteractor.keyguardAlpha.distinctUntilChanged()
+    val alpha: Flow<Float> =
+        merge(
+            keyguardInteractor.keyguardAlpha.distinctUntilChanged(),
+            occludedToLockscreenTransitionViewModel.lockscreenAlpha,
+        )
 
     private fun burnIn(): Flow<BurnInModel> {
         val dozingAmount: Flow<Float> =
@@ -150,20 +156,26 @@ constructor(
     val burnInLayerAlpha: Flow<Float> = goneToAodTransitionViewModel.enterFromTopAnimationAlpha
 
     val translationY: Flow<Float> =
-        keyguardInteractor.configurationChange.flatMapLatest { _ ->
-            val enterFromTopAmount =
-                context.resources.getDimensionPixelSize(
-                    R.dimen.keyguard_enter_from_top_translation_y
-                )
+        configurationInteractor
+        .dimensionPixelSize(R.dimen.keyguard_enter_from_top_translation_y)
+        .flatMapLatest { enterFromTopAmount ->
             combine(
                 keyguardInteractor.keyguardTranslationY.onStart { emit(0f) },
                 burnIn().map { it.translationY.toFloat() }.onStart { emit(0f) },
-                goneToAodTransitionViewModel.enterFromTopTranslationY(enterFromTopAmount).onStart {
-                    emit(0f)
-                },
-            ) { keyguardTransitionY, burnInTranslationY, goneToAodTransitionTranslationY ->
-                // All 3 values need to be combined for a smooth translation
-                keyguardTransitionY + burnInTranslationY + goneToAodTransitionTranslationY
+                goneToAodTransitionViewModel
+                    .enterFromTopTranslationY(enterFromTopAmount)
+                    .onStart { emit(0f) },
+                occludedToLockscreenTransitionViewModel.lockscreenTranslationY,
+            ) {
+                keyguardTransitionY,
+                burnInTranslationY,
+                goneToAodTransitionTranslationY,
+                occludedToLockscreenTransitionTranslationY ->
+                // All values need to be combined for a smooth translation
+                keyguardTransitionY +
+                    burnInTranslationY +
+                    goneToAodTransitionTranslationY +
+                    occludedToLockscreenTransitionTranslationY
             }
         }
 

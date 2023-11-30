@@ -23,6 +23,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -46,7 +47,6 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
-
     private val kosmos =
         testKosmos().apply {
             featureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }

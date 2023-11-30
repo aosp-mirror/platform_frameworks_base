@@ -30,6 +30,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.TestMocksModule
 import com.android.systemui.collectLastValue
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
@@ -93,11 +94,16 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     @Mock private lateinit var goneToAodTransitionViewModel: GoneToAodTransitionViewModel
     @Mock
     private lateinit var aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel
+    @Mock
+    private lateinit var occludedToLockscreenTransitionViewModel:
+        OccludedToLockscreenTransitionViewModel
     @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var clockController: ClockController
 
     private val burnInFlow = MutableStateFlow(BurnInModel())
     private val goneToAodTransitionViewModelVisibility = MutableStateFlow(0)
     private val enterFromTopAnimationAlpha = MutableStateFlow(0f)
+    private val occludedToLockscreenTranslationY = MutableStateFlow(0f)
+    private val occludedToLockscreenAlpha = MutableStateFlow(0f)
     private val goneToAodTransitionStep = MutableSharedFlow<TransitionStep>(replay = 1)
     private val dozeAmountTransitionStep = MutableSharedFlow<TransitionStep>(replay = 1)
     private val clockSize = MutableStateFlow(LARGE)
@@ -133,9 +139,14 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         whenever(keyguardTransitionInteractor.startedKeyguardState).thenReturn(startedKeyguardState)
         whenever(keyguardClockViewModel.clockSize).thenReturn(clockSize)
 
+        whenever(occludedToLockscreenTransitionViewModel.lockscreenTranslationY)
+            .thenReturn(occludedToLockscreenTranslationY)
+        whenever(occludedToLockscreenTransitionViewModel.lockscreenAlpha)
+            .thenReturn(occludedToLockscreenAlpha)
+
         underTest =
             KeyguardRootViewModel(
-                context,
+                ConfigurationInteractor(configurationRepository),
                 deviceEntryInteractor =
                     mock { whenever(isBypassEnabled).thenReturn(MutableStateFlow(false)) },
                 dozeParameters = mock(),
@@ -150,6 +161,7 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
                 keyguardClockViewModel,
                 goneToAodTransitionViewModel,
                 aodToLockscreenTransitionViewModel,
+                occludedToLockscreenTransitionViewModel,
                 screenOffAnimationController = mock(),
                 // TODO(b/310989341): remove after change to aconfig
                 featureFlags
@@ -161,8 +173,8 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     fun alpha() =
         testScope.runTest {
             val value = collectLastValue(underTest.alpha)
+            assertThat(value()).isEqualTo(0f)
 
-            assertThat(value()).isEqualTo(1f)
             repository.setKeyguardAlpha(0.1f)
             assertThat(value()).isEqualTo(0.1f)
             repository.setKeyguardAlpha(0.5f)
@@ -171,6 +183,8 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             assertThat(value()).isEqualTo(0.2f)
             repository.setKeyguardAlpha(0f)
             assertThat(value()).isEqualTo(0f)
+            occludedToLockscreenAlpha.value = 0.8f
+            assertThat(value()).isEqualTo(0.8f)
         }
 
     @Test

@@ -529,7 +529,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 .thenReturn(emptyFlow());
         when(mOccludedToLockscreenTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
-        when(mOccludedToLockscreenTransitionViewModel.lockscreenTranslationY(anyInt()))
+        when(mOccludedToLockscreenTransitionViewModel.getLockscreenTranslationY())
                 .thenReturn(emptyFlow());
 
         // Lockscreen->Dreaming
@@ -567,7 +567,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 .thenReturn(emptyFlow());
         when(mLockscreenToOccludedTransitionViewModel.getLockscreenAlpha())
                 .thenReturn(emptyFlow());
-        when(mLockscreenToOccludedTransitionViewModel.lockscreenTranslationY(anyInt()))
+        when(mLockscreenToOccludedTransitionViewModel.getLockscreenTranslationY())
                 .thenReturn(emptyFlow());
 
         // Primary Bouncer->Gone
