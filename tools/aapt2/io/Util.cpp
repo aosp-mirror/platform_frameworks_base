@@ -26,9 +26,8 @@ using ::google::protobuf::io::ZeroCopyOutputStream;
 namespace aapt {
 namespace io {
 
-bool CopyInputStreamToArchive(IAaptContext* context, android::InputStream* in,
-                              std::string_view out_path, uint32_t compression_flags,
-                              IArchiveWriter* writer) {
+bool CopyInputStreamToArchive(IAaptContext* context, InputStream* in, std::string_view out_path,
+                              uint32_t compression_flags, IArchiveWriter* writer) {
   TRACE_CALL();
   if (context->IsVerbose()) {
     context->GetDiagnostics()->Note(android::DiagMessage()
@@ -92,7 +91,7 @@ bool CopyProtoToArchive(IAaptContext* context, ::google::protobuf::Message* prot
   return false;
 }
 
-bool Copy(android::OutputStream* out, android::InputStream* in) {
+bool Copy(OutputStream* out, InputStream* in) {
   TRACE_CALL();
   const void* in_buffer;
   size_t in_len;
@@ -111,7 +110,7 @@ bool Copy(android::OutputStream* out, android::InputStream* in) {
   return !in->HadError();
 }
 
-bool Copy(android::OutputStream* out, StringPiece in) {
+bool Copy(OutputStream* out, StringPiece in) {
   const char* in_buffer = in.data();
   size_t in_len = in.size();
   while (in_len != 0) {
@@ -130,7 +129,7 @@ bool Copy(android::OutputStream* out, StringPiece in) {
   return true;
 }
 
-bool Copy(ZeroCopyOutputStream* out, android::InputStream* in) {
+bool Copy(ZeroCopyOutputStream* out, InputStream* in) {
   OutputStreamAdaptor adaptor(out);
   return Copy(&adaptor, in);
 }

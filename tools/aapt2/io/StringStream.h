@@ -17,16 +17,17 @@
 #ifndef AAPT_IO_STRINGSTREAM_H
 #define AAPT_IO_STRINGSTREAM_H
 
+#include "io/Io.h"
+
 #include <memory>
 
 #include "android-base/macros.h"
-#include "androidfw/Streams.h"
 #include "androidfw/StringPiece.h"
 
 namespace aapt {
 namespace io {
 
-class StringInputStream : public android::KnownSizeInputStream {
+class StringInputStream : public KnownSizeInputStream {
  public:
   explicit StringInputStream(android::StringPiece str);
 
@@ -46,8 +47,6 @@ class StringInputStream : public android::KnownSizeInputStream {
 
   size_t TotalSize() const override;
 
-  bool ReadFullyAtOffset(void* data, size_t byte_count, off64_t offset) override;
-
  private:
   DISALLOW_COPY_AND_ASSIGN(StringInputStream);
 
@@ -55,7 +54,7 @@ class StringInputStream : public android::KnownSizeInputStream {
   size_t offset_;
 };
 
-class StringOutputStream : public android::OutputStream {
+class StringOutputStream : public OutputStream {
  public:
   explicit StringOutputStream(std::string* str, size_t buffer_capacity = 4096u);
 

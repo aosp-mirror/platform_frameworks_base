@@ -27,10 +27,11 @@
 #include <string>
 #include <vector>
 
-#include "Resource.h"
 #include "android-base/macros.h"
-#include "androidfw/Streams.h"
 #include "androidfw/StringPiece.h"
+
+#include "Resource.h"
+#include "io/Io.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlUtil.h"
 
@@ -65,7 +66,7 @@ class XmlPullParser : public IPackageDeclStack {
   static bool SkipCurrentElement(XmlPullParser* parser);
   static bool IsGoodEvent(Event event);
 
-  explicit XmlPullParser(android::InputStream* in);
+  explicit XmlPullParser(io::InputStream* in);
   ~XmlPullParser();
 
   /**
@@ -178,7 +179,7 @@ class XmlPullParser : public IPackageDeclStack {
     std::vector<Attribute> attributes;
   };
 
-  android::InputStream* in_;
+  io::InputStream* in_;
   XML_Parser parser_;
   std::queue<EventData> event_queue_;
   std::string error_;

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-#include "androidfw/BigBufferStream.h"
+#include "io/BigBufferStream.h"
 
-#include <algorithm>
-
-namespace android {
+namespace aapt {
+namespace io {
 
 //
 // BigBufferInputStream
@@ -77,34 +76,6 @@ size_t BigBufferInputStream::TotalSize() const {
   return buffer_->size();
 }
 
-bool BigBufferInputStream::ReadFullyAtOffset(void* data, size_t byte_count, off64_t offset) {
-  if (byte_count == 0) {
-    return true;
-  }
-  if (offset < 0) {
-    return false;
-  }
-  if (offset > std::numeric_limits<off64_t>::max() - byte_count) {
-    return false;
-  }
-  if (offset + byte_count > buffer_->size()) {
-    return false;
-  }
-  auto p = reinterpret_cast<uint8_t*>(data);
-  for (auto iter = buffer_->begin(); iter != buffer_->end() && byte_count > 0; ++iter) {
-    if (offset < iter->size) {
-      size_t to_read = std::min(byte_count, (size_t)(iter->size - offset));
-      memcpy(p, iter->buffer.get() + offset, to_read);
-      byte_count -= to_read;
-      p += to_read;
-      offset = 0;
-    } else {
-      offset -= iter->size;
-    }
-  }
-  return byte_count == 0;
-}
-
 //
 // BigBufferOutputStream
 //
@@ -126,4 +97,5 @@ bool BigBufferOutputStream::HadError() const {
   return false;
 }
 
-}  // namespace android
+}  // namespace io
+}  // namespace aapt
