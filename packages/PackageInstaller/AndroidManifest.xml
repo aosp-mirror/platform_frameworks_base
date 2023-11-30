@@ -206,7 +206,7 @@
                   android:noHistory="true"
                   android:exported="true">
             <intent-filter android:priority="1">
-                <action android:name="android.intent.action.UNARCHIVE_DIALOG" />
+                <action android:name="com.android.intent.action.UNARCHIVE_DIALOG" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
