@@ -68,6 +68,16 @@ flag {
 }
 
 flag {
+    name: "notification_background_tint_optimization"
+    namespace: "systemui"
+    description: "Re-enable the codepath that removed tinting of notifications when the"
+        " standard background color is desired.  This was the behavior before we discovered"
+        " a resources threading issue, which we worked around by tinting the notification"
+        " backgrounds and footer buttons."
+    bug: "294347738"
+}
+
+flag {
     name: "scene_container"
     namespace: "systemui"
     description: "Enables the scene container framework go/flexiglass."
