@@ -324,13 +324,16 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static SystemPerformanceHinter provideSystemPerformanceHinter(Context context,
+    static Optional<SystemPerformanceHinter> provideSystemPerformanceHinter(Context context,
             ShellInit shellInit,
             ShellCommandHandler shellCommandHandler,
             RootTaskDisplayAreaOrganizer rootTdaOrganizer) {
+        if (!com.android.window.flags.Flags.explicitRefreshRateHints()) {
+            return Optional.empty();
+        }
         final PerfHintController perfHintController =
                 new PerfHintController(context, shellInit, shellCommandHandler, rootTdaOrganizer);
-        return perfHintController.getHinter();
+        return Optional.of(perfHintController.getHinter());
     }
 
     //
