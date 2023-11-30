@@ -452,11 +452,6 @@ object Flags {
     // 1200 - predictive back
     @Keep
     @JvmField
-    val WM_ENABLE_PREDICTIVE_BACK =
-        sysPropBooleanFlag("persist.wm.debug.predictive_back", default = true)
-
-    @Keep
-    @JvmField
     val WM_ENABLE_PREDICTIVE_BACK_ANIM =
         sysPropBooleanFlag("persist.wm.debug.predictive_back_anim", default = true)
 
