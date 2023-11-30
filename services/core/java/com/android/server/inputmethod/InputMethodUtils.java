@@ -1029,6 +1029,44 @@ final class InputMethodUtils {
     }
 
     /**
+     * Returns a list of enabled IME IDs to address Bug 261723412.
+     *
+     * <p>This is a temporary workaround until we come up with a better solution. Do not use this
+     * for anything other than Bug 261723412.</p>
+     *
+     * @param context {@link Context} object to query secure settings.
+     * @param userId User ID to query about.
+     * @return A list of enabled IME IDs.
+     */
+    @NonNull
+    static List<String> getEnabledInputMethodIdsForFiltering(@NonNull Context context,
+            @UserIdInt int userId) {
+        final String enabledInputMethodsStr = TextUtils.nullIfEmpty(
+                Settings.Secure.getStringForUser(
+                        context.getContentResolver(),
+                        Settings.Secure.ENABLED_INPUT_METHODS,
+                        userId));
+        if (enabledInputMethodsStr == null) {
+            return List.of();
+        }
+        final TextUtils.SimpleStringSplitter inputMethodSplitter =
+                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
+        final TextUtils.SimpleStringSplitter subtypeSplitter =
+                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
+        inputMethodSplitter.setString(enabledInputMethodsStr);
+        final ArrayList<String> result = new ArrayList<>();
+        while (inputMethodSplitter.hasNext()) {
+            String nextImsStr = inputMethodSplitter.next();
+            subtypeSplitter.setString(nextImsStr);
+            if (subtypeSplitter.hasNext()) {
+                // The first element is ime id.
+                result.add(subtypeSplitter.next());
+            }
+        }
+        return result;
+    }
+
+    /**
      * Convert the input method ID to a component name
      *
      * @param id A unique ID for this input method.
