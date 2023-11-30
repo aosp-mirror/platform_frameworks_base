@@ -82,8 +82,6 @@ object SharedNotificationContainerBinder {
                     }
 
                     launch { viewModel.translationY.collect { controller.setTranslationY(it) } }
-
-                    launch { viewModel.alpha.collect { controller.setMaxAlphaForExpansion(it) } }
                 }
             }
 

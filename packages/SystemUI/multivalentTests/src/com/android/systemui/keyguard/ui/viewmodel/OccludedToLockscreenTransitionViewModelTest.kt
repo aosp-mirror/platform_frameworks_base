@@ -20,7 +20,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakeFingerprintPropertyRepository
-import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
@@ -29,11 +28,9 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.util.mockito.whenever
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.TestScope
@@ -42,9 +39,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.anyInt
-import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
 @SmallTest
@@ -54,16 +48,12 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
     private lateinit var repository: FakeKeyguardTransitionRepository
     private lateinit var fingerprintPropertyRepository: FakeFingerprintPropertyRepository
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
-    @Mock private lateinit var configurationInteractor: ConfigurationInteractor
-    private val dimenFlow = MutableStateFlow(0)
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
         repository = FakeKeyguardTransitionRepository()
         fingerprintPropertyRepository = FakeFingerprintPropertyRepository()
         biometricSettingsRepository = FakeBiometricSettingsRepository()
-        whenever(configurationInteractor.dimensionPixelSize(anyInt())).thenReturn(dimenFlow)
         underTest =
             OccludedToLockscreenTransitionViewModel(
                 interactor =
@@ -78,7 +68,6 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
                         fingerprintAuthRepository = FakeDeviceEntryFingerprintAuthRepository(),
                         biometricSettingsRepository = biometricSettingsRepository,
                     ),
-                configurationInteractor,
             )
     }
 
@@ -109,10 +98,11 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
     @Test
     fun lockscreenTranslationY() =
         runTest(UnconfinedTestDispatcher()) {
-            dimenFlow.value = 100
             val values = mutableListOf<Float>()
 
-            val job = underTest.lockscreenTranslationY.onEach { values.add(it) }.launchIn(this)
+            val pixels = 100
+            val job =
+                underTest.lockscreenTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
 
             repository.sendTransitionStep(step(0f, TransitionState.STARTED))
             repository.sendTransitionStep(step(0f))
@@ -129,10 +119,11 @@ class OccludedToLockscreenTransitionViewModelTest : SysuiTestCase() {
     @Test
     fun lockscreenTranslationYResettedAfterJobCancelled() =
         runTest(UnconfinedTestDispatcher()) {
-            dimenFlow.value = 100
             val values = mutableListOf<Float>()
 
-            val job = underTest.lockscreenTranslationY.onEach { values.add(it) }.launchIn(this)
+            val pixels = 100
+            val job =
+                underTest.lockscreenTranslationY(pixels).onEach { values.add(it) }.launchIn(this)
             repository.sendTransitionStep(step(0.5f, TransitionState.CANCELED))
 
             assertThat(values.last()).isEqualTo(0f)
