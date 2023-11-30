@@ -15,7 +15,7 @@
   ~
   -->
 
-<FrameLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:sysui="http://schemas.android.com/apk/res-auto"
     android:id="@+id/alternate_bouncer"
@@ -32,4 +32,4 @@
         android:importantForAccessibility="no"
         sysui:ignoreRightInset="true"
     />
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -17,40 +17,51 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor.Companion.TO_GONE_DURATION
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor
+import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
-import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
-import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flatMapLatest
 
 /**
- * Breaks down ALTERNATE_BOUNCER->GONE transition into discrete steps for corresponding views to
+ * Breaks down ALTERNATE BOUNCER->AOD transition into discrete steps for corresponding views to
  * consume.
  */
-@OptIn(ExperimentalCoroutinesApi::class)
+@ExperimentalCoroutinesApi
 @SysUISingleton
-class AlternateBouncerToGoneTransitionViewModel
+class AlternateBouncerToAodTransitionViewModel
 @Inject
 constructor(
     interactor: KeyguardTransitionInteractor,
-    bouncerToGoneFlows: BouncerToGoneFlows,
+    deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
         animationFlow.setup(
-            duration = TO_GONE_DURATION,
-            stepFlow = interactor.transition(ALTERNATE_BOUNCER, KeyguardState.GONE),
+            duration = FromAlternateBouncerTransitionInteractor.TO_AOD_DURATION,
+            stepFlow = interactor.transition(KeyguardState.ALTERNATE_BOUNCER, KeyguardState.AOD),
         )
 
-    /** Scrim alpha values */
-    val scrimAlpha: Flow<ScrimAlpha> =
-        bouncerToGoneFlows.scrimAlpha(TO_GONE_DURATION, ALTERNATE_BOUNCER)
+    val deviceEntryBackgroundViewAlpha: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = FromAlternateBouncerTransitionInteractor.TO_AOD_DURATION,
+            onStep = { 1 - it },
+            onFinish = { 0f },
+        )
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(0f)
+        deviceEntryUdfpsInteractor.isUdfpsEnrolledAndEnabled.flatMapLatest { udfpsEnrolledAndEnabled
+            ->
+            if (udfpsEnrolledAndEnabled) {
+                transitionAnimation.immediatelyTransitionTo(1f)
+            } else {
+                emptyFlow()
+            }
+        }
 }
