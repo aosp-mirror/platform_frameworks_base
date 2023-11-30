@@ -25,16 +25,13 @@
 #include "android-base/errors.h"
 #include "android-base/file.h"
 #include "android-base/utf8.h"
-#include "androidfw/BigBufferStream.h"
 #include "androidfw/ConfigDescription.h"
-#include "androidfw/FileStream.h"
 #include "androidfw/IDiagnostics.h"
-#include "androidfw/Image.h"
-#include "androidfw/Png.h"
 #include "androidfw/StringPiece.h"
 #include "cmd/Util.h"
 #include "compile/IdAssigner.h"
 #include "compile/InlineXmlFormatParser.h"
+#include "compile/Png.h"
 #include "compile/PseudolocaleGenerator.h"
 #include "compile/XmlIdCollector.h"
 #include "format/Archive.h"
@@ -42,6 +39,8 @@
 #include "format/proto/ProtoSerialize.h"
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
+#include "io/BigBufferStream.h"
+#include "io/FileStream.h"
 #include "io/FileSystem.h"
 #include "io/StringStream.h"
 #include "io/Util.h"
@@ -53,9 +52,9 @@
 #include "xml/XmlDom.h"
 #include "xml/XmlPullParser.h"
 
+using ::aapt::io::FileInputStream;
 using ::aapt::text::Printer;
 using ::android::ConfigDescription;
-using ::android::FileInputStream;
 using ::android::StringPiece;
 using ::android::base::SystemErrorCodeToString;
 using ::google::protobuf::io::CopyingOutputStreamAdaptor;
@@ -242,7 +241,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
   }
 
   if (options.generate_text_symbols_path) {
-    android::FileOutputStream fout_text(options.generate_text_symbols_path.value());
+    io::FileOutputStream fout_text(options.generate_text_symbols_path.value());
 
     if (fout_text.HadError()) {
       context->GetDiagnostics()->Error(android::DiagMessage()
@@ -308,7 +307,7 @@ static bool CompileTable(IAaptContext* context, const CompileOptions& options,
 }
 
 static bool WriteHeaderAndDataToWriter(StringPiece output_path, const ResourceFile& file,
-                                       android::KnownSizeInputStream* in, IArchiveWriter* writer,
+                                       io::KnownSizeInputStream* in, IArchiveWriter* writer,
                                        android::IDiagnostics* diag) {
   TRACE_CALL();
   // Start the entry so we can write the header.
@@ -449,7 +448,7 @@ static bool CompileXml(IAaptContext* context, const CompileOptions& options,
   }
 
   if (options.generate_text_symbols_path) {
-    android::FileOutputStream fout_text(options.generate_text_symbols_path.value());
+    io::FileOutputStream fout_text(options.generate_text_symbols_path.value());
 
     if (fout_text.HadError()) {
       context->GetDiagnostics()->Error(android::DiagMessage()
@@ -499,22 +498,21 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
     }
 
     android::BigBuffer crunched_png_buffer(4096);
-    android::BigBufferOutputStream crunched_png_buffer_out(&crunched_png_buffer);
+    io::BigBufferOutputStream crunched_png_buffer_out(&crunched_png_buffer);
 
     // Ensure that we only keep the chunks we care about if we end up
     // using the original PNG instead of the crunched one.
     const StringPiece content(reinterpret_cast<const char*>(data->data()), data->size());
-    android::PngChunkFilter png_chunk_filter(content);
-    android::SourcePathDiagnostics source_diag(path_data.source, context->GetDiagnostics());
-    auto image = android::ReadPng(&png_chunk_filter, &source_diag);
+    PngChunkFilter png_chunk_filter(content);
+    std::unique_ptr<Image> image = ReadPng(context, path_data.source, &png_chunk_filter);
     if (!image) {
       return false;
     }
 
-    std::unique_ptr<android::NinePatch> nine_patch;
+    std::unique_ptr<NinePatch> nine_patch;
     if (path_data.extension == "9.png") {
       std::string err;
-      nine_patch = android::NinePatch::Create(image->rows.get(), image->width, image->height, &err);
+      nine_patch = NinePatch::Create(image->rows.get(), image->width, image->height, &err);
       if (!nine_patch) {
         context->GetDiagnostics()->Error(android::DiagMessage() << err);
         return false;
@@ -539,8 +537,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
     }
 
     // Write the crunched PNG.
-    if (!android::WritePng(image.get(), nine_patch.get(), &crunched_png_buffer_out, {},
-                           &source_diag, context->IsVerbose())) {
+    if (!WritePng(context, image.get(), nine_patch.get(), &crunched_png_buffer_out, {})) {
       return false;
     }
 
@@ -560,7 +557,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
 
       png_chunk_filter.Rewind();
       android::BigBuffer filtered_png_buffer(4096);
-      android::BigBufferOutputStream filtered_png_buffer_out(&filtered_png_buffer);
+      io::BigBufferOutputStream filtered_png_buffer_out(&filtered_png_buffer);
       io::Copy(&filtered_png_buffer_out, &png_chunk_filter);
       buffer.AppendBuffer(std::move(filtered_png_buffer));
     }
@@ -570,7 +567,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
       // This will help catch exotic cases where the new code may generate larger PNGs.
       std::stringstream legacy_stream{std::string(content)};
       android::BigBuffer legacy_buffer(4096);
-      android::Png png(context->GetDiagnostics());
+      Png png(context->GetDiagnostics());
       if (!png.process(path_data.source, &legacy_stream, &legacy_buffer, {})) {
         return false;
       }
@@ -581,7 +578,7 @@ static bool CompilePng(IAaptContext* context, const CompileOptions& options,
     }
   }
 
-  android::BigBufferInputStream buffer_in(&buffer);
+  io::BigBufferInputStream buffer_in(&buffer);
   return WriteHeaderAndDataToWriter(output_path, res_file, &buffer_in, writer,
       context->GetDiagnostics());
 }

@@ -22,9 +22,9 @@
 #include "Resources.pb.h"
 #include "ResourcesInternal.pb.h"
 #include "androidfw/BigBuffer.h"
-#include "androidfw/Streams.h"
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/io/zero_copy_stream.h"
+#include "io/Io.h"
 #include "io/Util.h"
 
 namespace aapt {
@@ -39,7 +39,7 @@ class ContainerWriter {
   explicit ContainerWriter(::google::protobuf::io::ZeroCopyOutputStream* out, size_t entry_count);
 
   bool AddResTableEntry(const pb::ResourceTable& table);
-  bool AddResFileEntry(const pb::internal::CompiledFile& file, android::KnownSizeInputStream* in);
+  bool AddResFileEntry(const pb::internal::CompiledFile& file, io::KnownSizeInputStream* in);
   bool HadError() const;
   std::string GetError() const;
 
@@ -79,7 +79,7 @@ class ContainerReaderEntry {
 
 class ContainerReader {
  public:
-  explicit ContainerReader(android::InputStream* in);
+  explicit ContainerReader(io::InputStream* in);
 
   ContainerReaderEntry* Next();
 
@@ -91,7 +91,7 @@ class ContainerReader {
 
   friend class ContainerReaderEntry;
 
-  android::InputStream* in_;
+  io::InputStream* in_;
   io::ZeroCopyInputAdaptor adaptor_;
   ::google::protobuf::io::CodedInputStream coded_in_;
   size_t total_entry_count_;
