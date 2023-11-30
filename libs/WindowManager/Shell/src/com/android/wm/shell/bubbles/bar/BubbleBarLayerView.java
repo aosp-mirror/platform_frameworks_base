@@ -31,16 +31,20 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
+import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.bubbles.DeviceConfig;
+import com.android.wm.shell.bubbles.DismissViewUtils;
+import com.android.wm.shell.common.bubbles.DismissView;
+
+import kotlin.Unit;
 
 import java.util.Objects;
 import java.util.function.Consumer;
-
-import kotlin.Unit;
 
 /**
  * Similar to {@link com.android.wm.shell.bubbles.BubbleStackView}, this view is added to window
@@ -63,7 +67,11 @@ public class BubbleBarLayerView extends FrameLayout
 
     @Nullable
     private BubbleViewProvider mExpandedBubble;
+    @Nullable
     private BubbleBarExpandedView mExpandedView;
+    @Nullable
+    private BubbleBarExpandedViewDragController mDragController;
+    private DismissView mDismissView;
     private @Nullable Consumer<String> mUnBubbleConversationCallback;
 
     // TODO(b/273310265) - currently the view is always on the right, need to update for RTL.
@@ -100,6 +108,8 @@ public class BubbleBarLayerView extends FrameLayout
         mScrimView.setAlpha(0f);
         mScrimView.setBackgroundDrawable(new ColorDrawable(
                 getResources().getColor(android.R.color.system_neutral1_1000)));
+
+        setUpDismissView();
 
         setOnClickListener(view -> hideMenuOrCollapse());
     }
@@ -196,6 +206,13 @@ public class BubbleBarLayerView extends FrameLayout
                 }
             });
 
+            mDragController = new BubbleBarExpandedViewDragController(mExpandedView, mDismissView,
+                    () -> {
+                        mBubbleController.dismissBubble(mExpandedBubble.getKey(),
+                                Bubbles.DISMISS_USER_GESTURE);
+                        return Unit.INSTANCE;
+                    });
+
             addView(mExpandedView, new FrameLayout.LayoutParams(width, height));
         }
 
@@ -227,6 +244,7 @@ public class BubbleBarLayerView extends FrameLayout
         mAnimationHelper.animateCollapse(() -> removeView(viewToRemove));
         mBubbleController.getSysuiProxy().onStackExpandChanged(false);
         mExpandedView = null;
+        mDragController = null;
         setTouchDelegate(null);
         showScrim(false);
     }
@@ -250,6 +268,18 @@ public class BubbleBarLayerView extends FrameLayout
     public void setUnBubbleConversationCallback(
             @Nullable Consumer<String> unBubbleConversationCallback) {
         mUnBubbleConversationCallback = unBubbleConversationCallback;
+    }
+
+    private void setUpDismissView() {
+        if (mDismissView != null) {
+            removeView(mDismissView);
+        }
+        mDismissView = new DismissView(getContext());
+        DismissViewUtils.setup(mDismissView);
+        int elevation = getResources().getDimensionPixelSize(R.dimen.bubble_elevation);
+
+        addView(mDismissView);
+        mDismissView.setElevation(elevation);
     }
 
     /** Hides the current modal education/menu view, expanded view or collapses the bubble stack */

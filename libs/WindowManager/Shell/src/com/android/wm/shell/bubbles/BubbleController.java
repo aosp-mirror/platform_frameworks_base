@@ -1280,7 +1280,14 @@ public class BubbleController implements ConfigurationChangeListener,
      * Dismiss bubble if it exists and remove it from the stack
      */
     public void dismissBubble(Bubble bubble, @Bubbles.DismissReason int reason) {
-        mBubbleData.dismissBubbleWithKey(bubble.getKey(), reason);
+        dismissBubble(bubble.getKey(), reason);
+    }
+
+    /**
+     * Dismiss bubble with given key if it exists and remove it from the stack
+     */
+    public void dismissBubble(String key, @Bubbles.DismissReason int reason) {
+        mBubbleData.dismissBubbleWithKey(key, reason);
     }
 
     /**
