@@ -157,27 +157,27 @@ constructor(
 
     val translationY: Flow<Float> =
         configurationInteractor
-        .dimensionPixelSize(R.dimen.keyguard_enter_from_top_translation_y)
-        .flatMapLatest { enterFromTopAmount ->
-            combine(
-                keyguardInteractor.keyguardTranslationY.onStart { emit(0f) },
-                burnIn().map { it.translationY.toFloat() }.onStart { emit(0f) },
-                goneToAodTransitionViewModel
-                    .enterFromTopTranslationY(enterFromTopAmount)
-                    .onStart { emit(0f) },
-                occludedToLockscreenTransitionViewModel.lockscreenTranslationY,
-            ) {
-                keyguardTransitionY,
-                burnInTranslationY,
-                goneToAodTransitionTranslationY,
-                occludedToLockscreenTransitionTranslationY ->
-                // All values need to be combined for a smooth translation
-                keyguardTransitionY +
-                    burnInTranslationY +
-                    goneToAodTransitionTranslationY +
-                    occludedToLockscreenTransitionTranslationY
+            .dimensionPixelSize(R.dimen.keyguard_enter_from_top_translation_y)
+            .flatMapLatest { enterFromTopAmount ->
+                combine(
+                    keyguardInteractor.keyguardTranslationY.onStart { emit(0f) },
+                    burnIn().map { it.translationY.toFloat() }.onStart { emit(0f) },
+                    goneToAodTransitionViewModel
+                        .enterFromTopTranslationY(enterFromTopAmount)
+                        .onStart { emit(0f) },
+                    occludedToLockscreenTransitionViewModel.lockscreenTranslationY,
+                ) {
+                    keyguardTransitionY,
+                    burnInTranslationY,
+                    goneToAodTransitionTranslationY,
+                    occludedToLockscreenTransitionTranslationY ->
+                    // All values need to be combined for a smooth translation
+                    keyguardTransitionY +
+                        burnInTranslationY +
+                        goneToAodTransitionTranslationY +
+                        occludedToLockscreenTransitionTranslationY
+                }
             }
-        }
 
     val translationX: Flow<Float> = burnIn().map { it.translationX.toFloat() }
 

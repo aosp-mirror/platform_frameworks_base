@@ -103,7 +103,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
     private val _transitions =
         MutableSharedFlow<TransitionStep>(
             replay = 2,
-            extraBufferCapacity = 10,
+            extraBufferCapacity = 20,
             onBufferOverflow = BufferOverflow.DROP_OLDEST,
         )
     override val transitions = _transitions.asSharedFlow().distinctUntilChanged()
@@ -227,10 +227,7 @@ class KeyguardTransitionRepositoryImpl @Inject constructor() : KeyguardTransitio
 
     private fun emitTransition(nextStep: TransitionStep, isManual: Boolean = false) {
         logAndTrace(nextStep, isManual)
-        val emitted = _transitions.tryEmit(nextStep)
-        if (!emitted) {
-            Log.w(TAG, "Failed to emit next value without suspending")
-        }
+        _transitions.tryEmit(nextStep)
         lastStep = nextStep
     }
 
