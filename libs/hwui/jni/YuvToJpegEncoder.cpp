@@ -5,6 +5,7 @@
 #include "SkStream.h"
 #include "YuvToJpegEncoder.h"
 #include <ui/PixelFormat.h>
+#include <utils/Errors.h>
 #include <hardware/hardware.h>
 
 #include "graphics_jni_helpers.h"
@@ -298,7 +299,7 @@ void Yuv422IToJpegEncoder::configSamplingFactors(jpeg_compress_struct* cinfo) {
 }
 ///////////////////////////////////////////////////////////////////////////////
 
-using namespace android::ultrahdr;
+using namespace ultrahdr;
 
 ultrahdr_color_gamut P010Yuv420ToJpegREncoder::findColorGamut(JNIEnv* env, int aDataSpace) {
     switch (aDataSpace & ADataSpace::STANDARD_MASK) {
