@@ -29,13 +29,14 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioDeviceAttributes;
+import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.BluetoothProfileConnectionInfo;
 import android.util.Log;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
@@ -54,7 +55,6 @@ public class AudioDeviceBrokerTest {
     private static final String TAG = "AudioDeviceBrokerTest";
     private static final int MAX_MESSAGE_HANDLING_DELAY_MS = 100;
 
-    private Context mContext;
     // the actual class under test
     private AudioDeviceBroker mAudioDeviceBroker;
 
@@ -67,13 +67,13 @@ public class AudioDeviceBrokerTest {
 
     @Before
     public void setUp() throws Exception {
-        mContext = InstrumentationRegistry.getTargetContext();
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
 
         mMockAudioService = mock(AudioService.class);
         mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
         mSpyDevInventory = spy(new AudioDeviceInventory(mSpyAudioSystem));
         mSpySystemServer = spy(new NoOpSystemServerAdapter());
-        mAudioDeviceBroker = new AudioDeviceBroker(mContext, mMockAudioService, mSpyDevInventory,
+        mAudioDeviceBroker = new AudioDeviceBroker(context, mMockAudioService, mSpyDevInventory,
                 mSpySystemServer, mSpyAudioSystem);
         mSpyDevInventory.setDeviceBroker(mAudioDeviceBroker);
 
@@ -195,6 +195,37 @@ public class AudioDeviceBrokerTest {
         // Verify that the sticky intent is broadcasted
         verify(mSpySystemServer, times(1)).broadcastStickyIntentToCurrentProfileGroup(
                 any(Intent.class));
+    }
+
+    /**
+     * Test that constructing an AdiDeviceState instance requires a non-null address for a
+     * wireless type, but can take null for a non-wireless type;
+     * @throws Exception
+     */
+    @Test
+    public void testAdiDeviceStateNullAddressCtor() throws Exception {
+        try {
+            new AdiDeviceState(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER,
+                    AudioManager.DEVICE_OUT_SPEAKER, null);
+            new AdiDeviceState(AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+                    AudioManager.DEVICE_OUT_BLUETOOTH_A2DP, null);
+            Assert.fail();
+        } catch (NullPointerException e) { }
+    }
+
+    @Test
+    public void testAdiDeviceStateStringSerialization() throws Exception {
+        Log.i(TAG, "starting testAdiDeviceStateStringSerialization");
+        final AdiDeviceState devState = new AdiDeviceState(
+                AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, AudioManager.DEVICE_OUT_SPEAKER, "bla");
+        devState.setHasHeadTracker(false);
+        devState.setHeadTrackerEnabled(false);
+        devState.setSAEnabled(true);
+        final String persistString = devState.toPersistableString();
+        final AdiDeviceState result = AdiDeviceState.fromPersistedString(persistString);
+        Log.i(TAG, "original:" + devState);
+        Log.i(TAG, "result  :" + result);
+        Assert.assertEquals(devState, result);
     }
 
     private void doTestConnectionDisconnectionReconnection(int delayAfterDisconnection,
