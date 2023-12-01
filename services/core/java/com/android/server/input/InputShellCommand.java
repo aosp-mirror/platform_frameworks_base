@@ -448,6 +448,7 @@ public class InputShellCommand extends ShellCommand {
                     event, nextEventTime, 1 /* repeatCount */, KeyEvent.FLAG_LONG_PRESS);
             injectKeyEvent(longPressEvent, async);
         }
+        event = KeyEvent.changeTimeRepeat(event, SystemClock.uptimeMillis(), 0);
         injectKeyEvent(KeyEvent.changeAction(event, KeyEvent.ACTION_UP), async);
     }
 
