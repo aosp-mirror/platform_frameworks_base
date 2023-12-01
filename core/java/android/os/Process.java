@@ -853,6 +853,7 @@ public class Process {
             args.argi2 = pid;
             args.argi3 = Long.hashCode(Thread.currentThread().getId());
             args.argi4 = THREAD_PRIORITY_DEFAULT;
+            args.arg1 = Boolean.TRUE; // backgroundOk
             return args;
         });
     }
@@ -1105,6 +1106,11 @@ public class Process {
         final SomeArgs args =
                 Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get();
         if (args.argi3 == tid) {
+            boolean backgroundOk = (args.arg1 == Boolean.TRUE);
+            if (priority >= THREAD_PRIORITY_BACKGROUND && !backgroundOk) {
+                throw new IllegalArgumentException(
+                        "Priority " + priority + " blocked by setCanSelfBackground()");
+            }
             args.argi4 = priority;
         } else {
             throw new UnsupportedOperationException(
@@ -1119,7 +1125,15 @@ public class Process {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static final native void setCanSelfBackground(boolean backgroundOk);
+
+    /** @hide */
+    public static final void setCanSelfBackground$ravenwood(boolean backgroundOk) {
+        final SomeArgs args =
+                Preconditions.requireNonNullViaRavenwoodRule(sIdentity$ravenwood).get();
+        args.arg1 = Boolean.valueOf(backgroundOk);
+    }
 
     /**
      * Sets the scheduling group for a thread.

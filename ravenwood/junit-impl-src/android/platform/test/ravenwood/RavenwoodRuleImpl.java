@@ -32,6 +32,8 @@ public class RavenwoodRuleImpl {
         android.os.Process.init$ravenwood(rule.mUid, rule.mPid);
         android.os.Binder.init$ravenwood();
 
+        com.android.server.LocalServices.removeAllServicesForTest();
+
         if (rule.mProvideMainThread) {
             final HandlerThread main = new HandlerThread(MAIN_THREAD_NAME);
             main.start();
@@ -44,6 +46,8 @@ public class RavenwoodRuleImpl {
             Looper.getMainLooper().quit();
             Looper.clearMainLooperForTest();
         }
+
+        com.android.server.LocalServices.removeAllServicesForTest();
 
         android.os.Process.reset$ravenwood();
         android.os.Binder.reset$ravenwood();
