@@ -311,6 +311,9 @@ public class NotificationShadeWindowViewController implements Dumpable {
                     mTouchActive = true;
                     mTouchCancelled = false;
                     mDownEvent = ev;
+                    if (KeyguardShadeMigrationNssl.isEnabled()) {
+                        mService.userActivity();
+                    }
                 } else if (ev.getActionMasked() == MotionEvent.ACTION_UP
                         || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
                     mTouchActive = false;

@@ -98,7 +98,6 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import java.util.Optional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.TestScope
@@ -113,8 +112,9 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import java.util.Optional
+import org.mockito.Mockito.`when` as whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -444,6 +444,26 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
             assertThat(interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)).isTrue()
             verify(notificationShadeWindowController).setLaunchingActivity(false)
         }
+
+    @Test
+    fun handleDispatchTouchEvent_nsslMigrationOff_userActivity_not_called() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
+
+        interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
+
+        verify(centralSurfaces, times(0)).userActivity()
+    }
+
+    @Test
+    fun handleDispatchTouchEvent_nsslMigrationOn_userActivity() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL)
+        underTest.setStatusBarViewController(phoneStatusBarViewController)
+
+        interactionEventHandler.handleDispatchTouchEvent(DOWN_EVENT)
+
+        verify(centralSurfaces).userActivity()
+    }
 
     @Test
     fun shouldInterceptTouchEvent_statusBarKeyguardViewManagerShouldIntercept() {
