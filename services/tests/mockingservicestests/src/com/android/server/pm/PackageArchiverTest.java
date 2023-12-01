@@ -366,9 +366,17 @@ public class PackageArchiverTest {
                 eq(new VersionedPackage(PACKAGE, PackageManager.VERSION_CODE_HIGHEST)),
                 eq(CALLER_PACKAGE), eq(DELETE_ARCHIVE | DELETE_KEEP_DATA), eq(mIntentSender),
                 eq(UserHandle.CURRENT.getIdentifier()), anyInt());
-        assertThat(mPackageSetting.readUserState(
-                UserHandle.CURRENT.getIdentifier()).getArchiveState()).isEqualTo(
-                createArchiveState());
+
+        ArchiveState expectedArchiveState = createArchiveState();
+        ArchiveState actualArchiveState = mPackageSetting.readUserState(
+                UserHandle.CURRENT.getIdentifier()).getArchiveState();
+        assertThat(actualArchiveState.getActivityInfos())
+                .isEqualTo(expectedArchiveState.getActivityInfos());
+        assertThat(actualArchiveState.getInstallerTitle())
+                .isEqualTo(expectedArchiveState.getInstallerTitle());
+        // The timestamps are expected to be different
+        assertThat(actualArchiveState.getArchiveTimeMillis())
+                .isNotEqualTo(expectedArchiveState.getArchiveTimeMillis());
     }
 
     @Test
@@ -383,9 +391,17 @@ public class PackageArchiverTest {
                 eq(DELETE_ARCHIVE | DELETE_KEEP_DATA | PackageManager.DELETE_SHOW_DIALOG),
                 eq(mIntentSender),
                 eq(UserHandle.CURRENT.getIdentifier()), anyInt());
-        assertThat(mPackageSetting.readUserState(
-                UserHandle.CURRENT.getIdentifier()).getArchiveState()).isEqualTo(
-                createArchiveState());
+
+        ArchiveState expectedArchiveState = createArchiveState();
+        ArchiveState actualArchiveState = mPackageSetting.readUserState(
+                UserHandle.CURRENT.getIdentifier()).getArchiveState();
+        assertThat(actualArchiveState.getActivityInfos())
+                .isEqualTo(expectedArchiveState.getActivityInfos());
+        assertThat(actualArchiveState.getInstallerTitle())
+                .isEqualTo(expectedArchiveState.getInstallerTitle());
+        // The timestamps are expected to be different
+        assertThat(actualArchiveState.getArchiveTimeMillis())
+                .isNotEqualTo(expectedArchiveState.getArchiveTimeMillis());
     }
 
     @Test

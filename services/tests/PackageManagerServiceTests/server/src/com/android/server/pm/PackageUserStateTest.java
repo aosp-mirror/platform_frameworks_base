@@ -404,6 +404,7 @@ public class PackageUserStateTest {
 
     @Test
     public void archiveState() {
+        final long currentTimeMillis = System.currentTimeMillis();
         PackageUserStateImpl packageUserState = new PackageUserStateImpl();
         ArchiveState.ArchiveActivityInfo archiveActivityInfo =
                 new ArchiveState.ArchiveActivityInfo(
@@ -415,5 +416,23 @@ public class PackageUserStateTest {
                 "installerTitle");
         packageUserState.setArchiveState(archiveState);
         assertEquals(archiveState, packageUserState.getArchiveState());
+        assertTrue(archiveState.getArchiveTimeMillis() > currentTimeMillis);
+    }
+
+    @Test
+    public void archiveStateWithTimestamp() {
+        final long currentTimeMillis = System.currentTimeMillis();
+        PackageUserStateImpl packageUserState = new PackageUserStateImpl();
+        ArchiveState.ArchiveActivityInfo archiveActivityInfo =
+                new ArchiveState.ArchiveActivityInfo(
+                        "appTitle",
+                        new ComponentName("pkg", "class"),
+                        Path.of("/path1"),
+                        Path.of("/path2"));
+        ArchiveState archiveState = new ArchiveState(List.of(archiveActivityInfo),
+                "installerTitle", currentTimeMillis);
+        packageUserState.setArchiveState(archiveState);
+        assertEquals(archiveState, packageUserState.getArchiveState());
+        assertEquals(archiveState.getArchiveTimeMillis(), currentTimeMillis);
     }
 }
