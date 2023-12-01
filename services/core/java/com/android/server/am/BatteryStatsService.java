@@ -886,9 +886,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             syncStats("get-stats", BatteryExternalStatsWorker.UPDATE_ALL);
         }
 
-        synchronized (mStats) {
-            return mBatteryUsageStatsProvider.getBatteryUsageStats(mStats, queries);
-        }
+        return mBatteryUsageStatsProvider.getBatteryUsageStats(mStats, queries);
     }
 
     /** Register callbacks for statsd pulled atoms. */
@@ -2730,13 +2728,13 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         BatteryUsageStatsQuery query = builder.build();
         synchronized (mStats) {
             mStats.prepareForDumpLocked();
-            BatteryUsageStats batteryUsageStats =
-                    mBatteryUsageStatsProvider.getBatteryUsageStats(mStats, query);
-            if (proto) {
-                batteryUsageStats.dumpToProto(fd);
-            } else {
-                batteryUsageStats.dump(pw, "");
-            }
+        }
+        BatteryUsageStats batteryUsageStats =
+                mBatteryUsageStatsProvider.getBatteryUsageStats(mStats, query);
+        if (proto) {
+            batteryUsageStats.dumpToProto(fd);
+        } else {
+            batteryUsageStats.dump(pw, "");
         }
     }
 
