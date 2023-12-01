@@ -396,7 +396,7 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 .onDozeAmountChanged(
                     eq(.3f),
                     eq(.3f),
-                    eq(UdfpsKeyguardViewLegacy.ANIMATION_UNLOCKED_SCREEN_OFF)
+                    eq(UdfpsKeyguardViewLegacy.ANIMATE_APPEAR_ON_SCREEN_OFF)
                 )
 
             transitionRepository.sendTransitionStep(
@@ -413,9 +413,130 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
                 .onDozeAmountChanged(
                     eq(1f),
                     eq(1f),
-                    eq(UdfpsKeyguardViewLegacy.ANIMATION_UNLOCKED_SCREEN_OFF)
+                    eq(UdfpsKeyguardViewLegacy.ANIMATE_APPEAR_ON_SCREEN_OFF)
                 )
 
+            job.cancel()
+        }
+
+    @Test
+    fun aodToOccluded_dozeAmountChanged() =
+        testScope.runTest {
+            // GIVEN view is attached
+            mController.onViewAttached()
+            Mockito.reset(mView)
+
+            val job = mController.listenForAodToOccludedTransitions(this)
+
+            // WHEN transitioning from aod to occluded
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.OCCLUDED,
+                    value = .3f,
+                    transitionState = TransitionState.RUNNING
+                )
+            )
+            runCurrent()
+            // THEN doze amount is updated
+            verify(mView)
+                .onDozeAmountChanged(eq(.7f), eq(.7f), eq(UdfpsKeyguardViewLegacy.ANIMATION_NONE))
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.OCCLUDED,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                )
+            )
+            runCurrent()
+            // THEN doze amount is updated
+            verify(mView)
+                .onDozeAmountChanged(eq(0f), eq(0f), eq(UdfpsKeyguardViewLegacy.ANIMATION_NONE))
+
+            job.cancel()
+        }
+
+    @Test
+    fun occludedToAod_dozeAmountChanged() =
+        testScope.runTest {
+            // GIVEN view is attached
+            mController.onViewAttached()
+            Mockito.reset(mView)
+
+            val job = mController.listenForOccludedToAodTransition(this)
+
+            // WHEN transitioning from occluded to aod
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.OCCLUDED,
+                    to = KeyguardState.AOD,
+                    value = .3f,
+                    transitionState = TransitionState.RUNNING
+                )
+            )
+            runCurrent()
+            // THEN doze amount is updated
+            verify(mView)
+                .onDozeAmountChanged(
+                    eq(.3f),
+                    eq(.3f),
+                    eq(UdfpsKeyguardViewLegacy.ANIMATE_APPEAR_ON_SCREEN_OFF)
+                )
+
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.OCCLUDED,
+                    to = KeyguardState.AOD,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                )
+            )
+            runCurrent()
+            // THEN doze amount is updated
+            verify(mView)
+                .onDozeAmountChanged(
+                    eq(1f),
+                    eq(1f),
+                    eq(UdfpsKeyguardViewLegacy.ANIMATE_APPEAR_ON_SCREEN_OFF)
+                )
+
+            job.cancel()
+        }
+
+    @Test
+    fun cancelledAodToLockscreen_dozeAmountChangedToZero() =
+        testScope.runTest {
+            // GIVEN view is attached
+            mController.onViewAttached()
+            Mockito.reset(mView)
+
+            val job = mController.listenForLockscreenAodTransitions(this)
+            // WHEN aod to lockscreen transition is cancelled
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                    value = 1f,
+                    transitionState = TransitionState.CANCELED
+                )
+            )
+            runCurrent()
+            // ... and WHEN the next transition is from lockscreen => occluded
+            transitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.OCCLUDED,
+                    value = .4f,
+                    transitionState = TransitionState.STARTED
+                )
+            )
+            runCurrent()
+
+            // THEN doze amount is updated to zero
+            verify(mView)
+                .onDozeAmountChanged(eq(0f), eq(0f), eq(UdfpsKeyguardViewLegacy.ANIMATION_NONE))
             job.cancel()
         }
 }
