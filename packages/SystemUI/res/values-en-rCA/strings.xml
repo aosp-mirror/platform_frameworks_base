@@ -1172,7 +1172,7 @@
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant attention on"</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Set default notes app in Settings"</string>
     <string name="install_app" msgid="5066668100199613936">"Install app"</string>
-    <string name="privacy_dialog_title" msgid="7839968133469098311">"Microphone &amp; Camera"</string>
+    <string name="privacy_dialog_title" msgid="7839968133469098311">"Microphone and camera"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Recent app use"</string>
     <string name="privacy_dialog_more_button" msgid="7610604080293562345">"See recent access"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Done"</string>
