@@ -16,8 +16,12 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewbinder
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -25,6 +29,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCa
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.launch
 
@@ -38,6 +43,7 @@ object SharedNotificationContainerBinder {
         sceneContainerFlags: SceneContainerFlags,
         controller: NotificationStackScrollLayoutController,
         notificationStackSizeCalculator: NotificationStackSizeCalculator,
+        @Main mainImmediateDispatcher: CoroutineDispatcher,
     ): DisposableHandle {
         val disposableHandle =
             view.repeatWhenAttached {
@@ -55,6 +61,41 @@ object SharedNotificationContainerBinder {
                             controller.setOverExpansion(0f)
                             controller.setOverScrollAmount(0)
                             controller.updateFooter()
+                        }
+                    }
+                }
+            }
+
+        /*
+         * For animation sensitive coroutines, immediately run just like applicationScope does
+         * instead of doing a post() to the main thread. This extra delay can cause visible jitter.
+         */
+        val disposableHandleMainImmediate =
+            view.repeatWhenAttached(mainImmediateDispatcher) {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    if (!sceneContainerFlags.flexiNotifsEnabled()) {
+                        launch {
+                            // Only temporarily needed, until flexi notifs go live
+                            viewModel.shadeCollpaseFadeIn.collect { fadeIn ->
+                                if (fadeIn) {
+                                    android.animation.ValueAnimator.ofFloat(0f, 1f).apply {
+                                        duration = 350
+                                        addUpdateListener { animation ->
+                                            controller.setMaxAlphaForExpansion(
+                                                animation.getAnimatedFraction()
+                                            )
+                                        }
+                                        addListener(
+                                            object : AnimatorListenerAdapter() {
+                                                override fun onAnimationEnd(animation: Animator) {
+                                                    viewModel.setShadeCollapseFadeInComplete(true)
+                                                }
+                                            }
+                                        )
+                                        start()
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -92,6 +133,7 @@ object SharedNotificationContainerBinder {
         return object : DisposableHandle {
             override fun dispose() {
                 disposableHandle.dispose()
+                disposableHandleMainImmediate.dispose()
                 controller.setOnHeightChangedRunnable(null)
             }
         }
