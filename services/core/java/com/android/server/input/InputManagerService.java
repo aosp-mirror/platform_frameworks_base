@@ -411,6 +411,40 @@ public class InputManagerService extends IInputManager.Stub
     private boolean mShowKeyPresses = false;
     private boolean mShowRotaryInput = false;
 
+    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
+    final SparseArray<SparseArray<PointerIcon>> mLoadedPointerIconsByDisplayAndType =
+            new SparseArray<>();
+    @GuardedBy("mLoadedPointerIconsByDisplayAndType")
+    boolean mUseLargePointerIcons = false;
+
+    final DisplayManager.DisplayListener mDisplayListener = new DisplayManager.DisplayListener() {
+        @Override
+        public void onDisplayAdded(int displayId) {
+
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            synchronized (mLoadedPointerIconsByDisplayAndType) {
+                mLoadedPointerIconsByDisplayAndType.remove(displayId);
+            }
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+            synchronized (mLoadedPointerIconsByDisplayAndType) {
+                // The display density could have changed, so force all cached pointer icons to be
+                // reloaded for the display.
+                var iconsByType = mLoadedPointerIconsByDisplayAndType.get(displayId);
+                if (iconsByType == null) {
+                    return;
+                }
+                iconsByType.clear();
+            }
+            mNative.reloadPointerIcons();
+        }
+    };
+
     /** Point of injection for test dependencies. */
     @VisibleForTesting
     static class Injector {
@@ -577,6 +611,10 @@ public class InputManagerService extends IInputManager.Stub
         if (mWiredAccessoryCallbacks != null) {
             mWiredAccessoryCallbacks.systemReady();
         }
+
+        Objects.requireNonNull(
+                mContext.getSystemService(DisplayManager.class)).registerDisplayListener(
+                mDisplayListener, mHandler);
 
         mKeyboardLayoutManager.systemRunning();
         mBatteryController.systemRunning();
@@ -1290,8 +1328,11 @@ public class InputManagerService extends IInputManager.Stub
             mPointerIconDisplayContext = null;
         }
 
-        updateAdditionalDisplayInputProperties(displayId, AdditionalDisplayInputProperties::reset);
+        updateAdditionalDisplayInputProperties(displayId,
+                AdditionalDisplayInputProperties::reset);
 
+        // TODO(b/320763728): Rely on WindowInfosListener to determine when a display has been
+        //  removed in InputDispatcher instead of this callback.
         mNative.displayRemoved(displayId);
     }
 
@@ -2721,8 +2762,22 @@ public class InputManagerService extends IInputManager.Stub
 
     // Native callback.
     @SuppressWarnings("unused")
-    private PointerIcon getPointerIcon(int displayId) {
-        return PointerIcon.getDefaultIcon(getContextForPointerIcon(displayId));
+    private @NonNull PointerIcon getLoadedPointerIcon(int displayId, int type) {
+        synchronized (mLoadedPointerIconsByDisplayAndType) {
+            SparseArray<PointerIcon> iconsByType = mLoadedPointerIconsByDisplayAndType.get(
+                    displayId);
+            if (iconsByType == null) {
+                iconsByType = new SparseArray<>();
+                mLoadedPointerIconsByDisplayAndType.put(displayId, iconsByType);
+            }
+            PointerIcon icon = iconsByType.get(type);
+            if (icon == null) {
+                icon = PointerIcon.getLoadedSystemIcon(getContextForPointerIcon(displayId), type,
+                        mUseLargePointerIcons);
+                iconsByType.put(type, icon);
+            }
+            return Objects.requireNonNull(icon);
+        }
     }
 
     // Native callback.
@@ -3554,6 +3609,18 @@ public class InputManagerService extends IInputManager.Stub
      */
     public void setAccessibilityStickyKeysEnabled(boolean enabled) {
         mNative.setAccessibilityStickyKeysEnabled(enabled);
+    }
+
+    void setUseLargePointerIcons(boolean useLargeIcons) {
+        synchronized (mLoadedPointerIconsByDisplayAndType) {
+            if (mUseLargePointerIcons == useLargeIcons) {
+                return;
+            }
+            mUseLargePointerIcons = useLargeIcons;
+            // Clear all cached icons on all displays.
+            mLoadedPointerIconsByDisplayAndType.clear();
+        }
+        mNative.reloadPointerIcons();
     }
 
     interface KeyboardBacklightControllerInterface {
