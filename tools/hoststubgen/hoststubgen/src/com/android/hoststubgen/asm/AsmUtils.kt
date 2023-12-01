@@ -108,7 +108,7 @@ fun isAnonymousInnerClass(cn: ClassNode): Boolean {
  * Otherwise, return null.
  */
 fun getDirectOuterClassName(className: String): String? {
-    val pos = className.indexOf('$')
+    val pos = className.lastIndexOf('$')
     if (pos < 0) {
         return null
     }
