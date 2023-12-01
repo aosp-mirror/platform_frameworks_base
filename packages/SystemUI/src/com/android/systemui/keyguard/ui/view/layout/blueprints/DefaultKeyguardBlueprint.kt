@@ -21,9 +21,9 @@ import com.android.systemui.communal.ui.view.layout.sections.CommunalTutorialInd
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
-import com.android.systemui.keyguard.ui.view.layout.items.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
+import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntrySection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultNotificationStackScrollLayoutSection
@@ -75,10 +75,10 @@ constructor(
             defaultStatusBarSection,
             defaultNotificationStackScrollLayoutSection,
             aodNotificationIconsSection,
+            smartspaceSection,
             aodBurnInSection,
             communalTutorialIndicatorSection,
             clockSection,
-            smartspaceSection,
             defaultDeviceEntrySection, // Add LAST: Intentionally has z-order above other views.
         )
 

@@ -41,6 +41,7 @@ import com.android.systemui.common.shared.model.TintedIcon
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryHapticsInteractor
 import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
@@ -140,25 +141,35 @@ object KeyguardRootViewBinder {
                         }
 
                         launch {
+                            // When translation happens in burnInLayer, it won't be weather clock
+                            // large clock isn't added to burnInLayer due to its scale transition
+                            // so we also need to add translation to it here
+                            // same as translationX
                             viewModel.translationY.collect { y ->
                                 childViews[burnInLayerId]?.translationY = y
+                                childViews[largeClockId]?.translationY = y
                             }
                         }
 
                         launch {
                             viewModel.translationX.collect { x ->
                                 childViews[burnInLayerId]?.translationX = x
+                                childViews[largeClockId]?.translationX = x
                             }
                         }
 
                         launch {
                             viewModel.scale.collect { (scale, scaleClockOnly) ->
                                 if (scaleClockOnly) {
+                                    // For clocks except weather clock, we have scale transition
+                                    // besides translate
                                     childViews[largeClockId]?.let {
                                         it.scaleX = scale
                                         it.scaleY = scale
                                     }
                                 } else {
+                                    // For weather clock, large clock should have only scale
+                                    // transition with other parts in burnInLayer
                                     childViews[burnInLayerId]?.scaleX = scale
                                     childViews[burnInLayerId]?.scaleY = scale
                                 }
@@ -247,7 +258,10 @@ object KeyguardRootViewBinder {
                     }
                 }
             }
-        viewModel.clockControllerProvider = clockControllerProvider
+
+        if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            viewModel.clockControllerProvider = clockControllerProvider
+        }
 
         onLayoutChangeListener = OnLayoutChange(viewModel)
         view.addOnLayoutChangeListener(onLayoutChangeListener)

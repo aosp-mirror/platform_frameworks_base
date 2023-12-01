@@ -21,10 +21,13 @@ import android.content.Context
 import android.util.MathUtils
 import android.view.View.VISIBLE
 import com.android.app.animation.Interpolators
+import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -68,11 +71,21 @@ constructor(
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val notificationsKeyguardInteractor: NotificationsKeyguardInteractor,
     private val burnInInteractor: BurnInInteractor,
+    private val keyguardClockViewModel: KeyguardClockViewModel,
     private val goneToAodTransitionViewModel: GoneToAodTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     screenOffAnimationController: ScreenOffAnimationController,
+    // TODO(b/310989341): remove after changing migrate_clocks_to_blueprint to aconfig
+    private val featureFlags: FeatureFlagsClassic,
 ) {
     var clockControllerProvider: Provider<ClockController>? = null
+        get() {
+            if (featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+                return Provider { keyguardClockViewModel.clock }
+            } else {
+                return field
+            }
+        }
 
     /** System insets that keyguard needs to stay out of */
     var topInset: Int = 0
@@ -103,7 +116,8 @@ constructor(
         return combine(dozingAmount, burnInInteractor.keyguardBurnIn) { dozeAmount, burnIn ->
             val interpolation = Interpolators.FAST_OUT_SLOW_IN.getInterpolation(dozeAmount)
             val useScaleOnly =
-                clockControllerProvider?.get()?.config?.useAlternateSmartspaceAODTransition ?: false
+                (clockControllerProvider?.get()?.config?.useAlternateSmartspaceAODTransition
+                    ?: false) && keyguardClockViewModel.clockSize.value == LARGE
             if (useScaleOnly) {
                 BurnInModel(
                     translationX = 0,
@@ -113,7 +127,12 @@ constructor(
             } else {
                 // Ensure the desired translation doesn't encroach on the top inset
                 val burnInY = MathUtils.lerp(0, burnIn.translationY, interpolation).toInt()
-                val translationY = -(statusViewTop - Math.max(topInset, statusViewTop + burnInY))
+                val translationY =
+                    if (featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+                        burnInY
+                    } else {
+                        -(statusViewTop - Math.max(topInset, statusViewTop + burnInY))
+                    }
                 BurnInModel(
                     translationX = MathUtils.lerp(0, burnIn.translationX, interpolation).toInt(),
                     translationY = translationY,
@@ -194,7 +213,6 @@ constructor(
             .distinctUntilChanged()
 
     fun onNotificationContainerBoundsChanged(top: Float, bottom: Float) {
-
         keyguardInteractor.setNotificationContainerBounds(NotificationContainerBounds(top, bottom))
     }
 

@@ -32,7 +32,8 @@ class DefaultClockProvider(
     val ctx: Context,
     val layoutInflater: LayoutInflater,
     val resources: Resources,
-    val hasStepClockAnimation: Boolean = false
+    val hasStepClockAnimation: Boolean = false,
+    val migratedClocks: Boolean = false
 ) : ClockProvider {
     override fun getClocks(): List<ClockMetadata> = listOf(ClockMetadata(DEFAULT_CLOCK_ID))
 
@@ -47,6 +48,7 @@ class DefaultClockProvider(
             resources,
             settings,
             hasStepClockAnimation,
+            migratedClocks,
         )
     }
 
