@@ -1518,8 +1518,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         return archPkg;
     }
 
-    void createArchiveStateIfNeeded(PackageSetting pkgSetting, ArchivedPackageParcel archivePackage,
-            int[] userIds) {
+    void markPackageAsArchivedIfNeeded(PackageSetting pkgSetting,
+                                       ArchivedPackageParcel archivePackage, int[] userIds) {
         if (pkgSetting == null || archivePackage == null
                 || archivePackage.archivedActivities == null || userIds == null
                 || userIds.length == 0) {
@@ -1541,6 +1541,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             }
             pkgSetting
                     .modifyUserState(userId)
+                    .setInstalled(false)
                     .setArchiveState(archiveState);
         }
     }
