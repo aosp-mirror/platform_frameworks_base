@@ -45,6 +45,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageInstaller;
@@ -92,6 +93,7 @@ public class PackageArchiverTest {
     private static final String PACKAGE = "com.example";
     private static final String CALLER_PACKAGE = "com.caller";
     private static final String INSTALLER_PACKAGE = "com.installer";
+    private static final String INSTALLER_LABEL = "Installer";
     private static final Path ICON_PATH = Path.of("icon.png");
 
     @Rule
@@ -198,6 +200,10 @@ public class PackageArchiverTest {
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getResourcesForApplication(eq(PACKAGE))).thenReturn(
                 mock(Resources.class));
+        ApplicationInfo installerAi = mock(ApplicationInfo.class);
+        when(mComputer.getApplicationInfo(eq(INSTALLER_PACKAGE), anyLong(), anyInt())).thenReturn(
+                installerAi);
+        when(installerAi.loadLabel(any())).thenReturn(INSTALLER_LABEL);
         when(mInstallerService.createSessionInternal(any(), any(), any(), anyInt(),
                 anyInt())).thenReturn(1);
         when(mInstallerService.getExistingDraftSessionId(anyInt(), any(), anyInt())).thenReturn(
@@ -545,7 +551,7 @@ public class PackageArchiverTest {
                     ICON_PATH, null);
             activityInfos.add(activityInfo);
         }
-        return new ArchiveState(activityInfos, INSTALLER_PACKAGE);
+        return new ArchiveState(activityInfos, INSTALLER_LABEL);
     }
 
     private static List<LauncherActivityInfo> createLauncherActivities() {
