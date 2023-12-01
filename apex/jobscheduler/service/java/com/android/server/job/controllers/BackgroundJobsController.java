@@ -73,6 +73,10 @@ public final class BackgroundJobsController extends StateController {
                 LocalServices.getService(ActivityManagerInternal.class));
         mAppStateTracker = (AppStateTrackerImpl) Objects.requireNonNull(
                 LocalServices.getService(AppStateTracker.class));
+    }
+
+    @Override
+    public void startTrackingLocked() {
         mAppStateTracker.addListener(mForceAppStandbyListener);
     }
 

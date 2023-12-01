@@ -106,7 +106,10 @@ public class ComponentController extends StateController {
 
     public ComponentController(JobSchedulerService service) {
         super(service);
+    }
 
+    @Override
+    public void startTrackingLocked() {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_CHANGED);

@@ -134,7 +134,10 @@ public class PrefetchController extends StateController {
         mThresholdAlarmListener = new ThresholdAlarmListener(
                 mContext, AppSchedulingModuleThread.get().getLooper());
         mUsageStatsManagerInternal = LocalServices.getService(UsageStatsManagerInternal.class);
+    }
 
+    @Override
+    public void startTrackingLocked() {
         mUsageStatsManagerInternal
                 .registerLaunchTimeChangedListener(mEstimatedLaunchTimeChangedListener);
     }
