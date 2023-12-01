@@ -221,20 +221,24 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
         synchronized (mLock) {
             SparseIntArray opModes = mUidModes.get(uid, null);
             if (opModes == null) {
-                if (mode != defaultMode) {
-                    opModes = new SparseIntArray();
-                    mUidModes.put(uid, opModes);
-                    opModes.put(op, mode);
-                    scheduleWriteLocked();
+                if (mode == defaultMode) {
+                    return false;
                 }
+                opModes = new SparseIntArray();
+                mUidModes.put(uid, opModes);
+                opModes.put(op, mode);
+                scheduleWriteLocked();
             } else {
-                if (opModes.indexOfKey(op) >= 0 && opModes.get(op) == mode) {
+                if (opModes.indexOfKey(op) >= 0) {
+                    if (opModes.get(op) == mode) {
+                        return false;
+                    }
+                } else if (mode == defaultMode) {
                     return false;
                 }
                 if (mode == defaultMode) {
                     opModes.delete(op);
                     if (opModes.size() <= 0) {
-                        opModes = null;
                         mUidModes.delete(uid);
                     }
                 } else {
