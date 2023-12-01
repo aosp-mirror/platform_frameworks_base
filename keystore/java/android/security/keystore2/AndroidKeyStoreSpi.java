@@ -25,7 +25,6 @@ import android.hardware.security.keymint.HardwareAuthenticatorType;
 import android.hardware.security.keymint.KeyParameter;
 import android.hardware.security.keymint.SecurityLevel;
 import android.os.StrictMode;
-import android.security.Flags;
 import android.security.GateKeeper;
 import android.security.KeyStore2;
 import android.security.KeyStoreParameter;
@@ -538,31 +537,11 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                         /* Because of default MGF1 digest is SHA-1. It has to be added in Key
                          * characteristics. Otherwise, crypto operations will fail with Incompatible
                          * MGF1 digest.
-                         * If the MGF1 Digest setter flag isn't set, then the condition in the
-                         * if clause above must be false (cannot have MGF1 digests specified if the
-                         * flag was off). In that case, in addition to adding the default MGF1
-                         * digest, we have to add all the other digests as MGF1 Digests.
-                         *
                          */
                         importArgs.add(KeyStore2ParameterUtils.makeEnum(
                                 KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
                                 KeyProperties.Digest.toKeymaster(DEFAULT_MGF1_DIGEST)
                         ));
-                        if (!Flags.mgf1DigestSetter()) {
-                            final int defaultMgf1Digest = KeyProperties.Digest.toKeymaster(
-                                    DEFAULT_MGF1_DIGEST);
-                            for (String digest : spec.getDigests()) {
-                                int digestToAddAsMgf1Digest = KeyProperties.Digest.toKeymaster(
-                                        digest);
-                                // Do not add the default MGF1 digest as it has been added above.
-                                if (digestToAddAsMgf1Digest != defaultMgf1Digest) {
-                                    importArgs.add(KeyStore2ParameterUtils.makeEnum(
-                                            KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST,
-                                            digestToAddAsMgf1Digest
-                                    ));
-                                }
-                            }
-                        }
                     }
                 }
             }
