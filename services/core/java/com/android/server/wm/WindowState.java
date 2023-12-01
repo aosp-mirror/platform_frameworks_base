@@ -666,6 +666,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mSeamlesslyRotated = false;
 
     /**
+     * Whether the IME insets have been consumed. If {@code true}, this window won't be able to
+     * receive visible IME insets; {@code false}, otherwise.
+     */
+    boolean mImeInsetsConsumed = false;
+
+    /**
      * The insets state of sources provided by windows above the current window.
      */
     final InsetsState mAboveInsetsState = new InsetsState();
@@ -1482,7 +1488,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             if (insetsChanged) {
                 mWindowFrames.setInsetsChanged(false);
-                mWmService.mWindowsInsetsChanged--;
+                if (mWmService.mWindowsInsetsChanged > 0) {
+                    mWmService.mWindowsInsetsChanged--;
+                }
                 if (mWmService.mWindowsInsetsChanged == 0) {
                     mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
                 }
@@ -3791,13 +3799,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void notifyInsetsChanged() {
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "notifyInsetsChanged for %s ", this);
-        mWindowFrames.setInsetsChanged(true);
+        if (!mWindowFrames.hasInsetsChanged()) {
+            mWindowFrames.setInsetsChanged(true);
 
-        // If the new InsetsState won't be dispatched before releasing WM lock, the following
-        // message will be executed.
-        mWmService.mWindowsInsetsChanged++;
-        mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
-        mWmService.mH.sendEmptyMessage(WindowManagerService.H.INSETS_CHANGED);
+            // If the new InsetsState won't be dispatched before releasing WM lock, the following
+            // message will be executed.
+            mWmService.mWindowsInsetsChanged++;
+            mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
+            mWmService.mH.sendEmptyMessage(WindowManagerService.H.INSETS_CHANGED);
+        }
 
         final WindowContainer p = getParent();
         if (p != null) {
@@ -4187,6 +4197,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             pw.print("null");
         }
+        pw.println();
 
         if (mXOffset != 0 || mYOffset != 0) {
             pw.println(prefix + "mXOffset=" + mXOffset + " mYOffset=" + mYOffset);
@@ -4219,6 +4230,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (computeDragResizing()) {
             pw.println(prefix + "computeDragResizing=" + computeDragResizing());
+        }
+        if (mImeInsetsConsumed) {
+            pw.println(prefix + "mImeInsetsConsumed=true");
         }
         pw.println(prefix + "isOnScreen=" + isOnScreen());
         pw.println(prefix + "isVisible=" + isVisible());

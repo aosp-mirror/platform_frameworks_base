@@ -3251,6 +3251,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC = 1 << 24;
 
         /**
+         * Flag to indicate that the window consumes the insets of {@link Type#ime()}. This makes
+         * windows below this window unable to receive visible IME insets.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_CONSUME_IME_INSETS = 1 << 25;
+
+        /**
          * Flag to indicate that the window is controlling the appearance of system bars. So we
          * don't need to adjust it by reading its system UI flags for compatibility.
          * @hide
@@ -3334,6 +3341,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
+                PRIVATE_FLAG_CONSUME_IME_INSETS,
                 PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                 PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
                 PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
@@ -3432,6 +3440,10 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         name = "COLOR_SPACE_AGNOSTIC"),
                 @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_CONSUME_IME_INSETS,
+                        equals = PRIVATE_FLAG_CONSUME_IME_INSETS,
+                        name = "CONSUME_IME_INSETS"),
+                @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                         equals = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                         name = "APPEARANCE_CONTROLLED"),
@@ -3458,7 +3470,7 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
                         equals = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
-                        name = "PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY")
+                        name = "SYSTEM_APPLICATION_OVERLAY")
         })
         @PrivateFlags
         @TestApi
