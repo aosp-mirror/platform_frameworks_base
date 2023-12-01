@@ -90,8 +90,10 @@ public class AudioDeviceInventory {
     private static final String mMetricsId = "audio.device.";
 
     private final Object mDeviceInventoryLock = new Object();
-    @GuardedBy("mDeviceCatalogLock")
+    @GuardedBy("mDeviceInventoryLock")
     private final ArrayList<AdiDeviceState> mDeviceInventory = new ArrayList<>(0);
+
+
     List<AdiDeviceState> getImmutableDeviceInventory() {
         synchronized (mDeviceInventoryLock) {
             return List.copyOf(mDeviceInventory);
@@ -107,6 +109,7 @@ public class AudioDeviceInventory {
     AdiDeviceState findDeviceStateForAudioDeviceAttributes(AudioDeviceAttributes ada,
             int canonicalDeviceType) {
         final boolean isWireless = isBluetoothDevice(ada.getInternalType());
+
         synchronized (mDeviceInventoryLock) {
             for (AdiDeviceState deviceSetting : mDeviceInventory) {
                 if (deviceSetting.getDeviceType() == canonicalDeviceType
