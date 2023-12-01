@@ -1013,6 +1013,11 @@ public class SpatializerHelper {
         if (mSpat == null) {
             mSpatCallback = new SpatializerCallback();
             mSpat = AudioSystem.getSpatializer(mSpatCallback);
+            if (mSpat == null) {
+                Log.e(TAG, "createSpat(): No Spatializer found");
+                postReset();
+                return;
+            }
             try {
                 //TODO: register heatracking callback only when sensors are registered
                 if (mIsHeadTrackingSupported) {
