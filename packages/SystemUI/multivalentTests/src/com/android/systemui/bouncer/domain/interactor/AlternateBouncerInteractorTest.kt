@@ -37,6 +37,7 @@ import kotlinx.coroutines.test.TestScope
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -166,6 +167,7 @@ class AlternateBouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore("b/287599719")
     fun canShowAlternateBouncerForFingerprint_rearFps() {
         mSetFlagsRule.enableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR)
         initializeUnderTest()

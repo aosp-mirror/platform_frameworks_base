@@ -1691,7 +1691,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Quitar"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"¿Quieres subir el volumen por encima del nivel recomendado?\n\nEscuchar sonidos fuertes durante mucho tiempo puede dañar los oídos."</string>
     <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"¿Seguir escuchando a un volumen alto?\n\nEl volumen de los auriculares ha estado alto durante más tiempo del recomendado, lo que puede dañar tu audición."</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Sonido alto detectado\n\nEl volumen de los auriculares está más alto de lo recomendado, lo que puede dañar tu audición."</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Volumen alto detectado\n\nEl volumen de los auriculares está más alto de lo recomendado, lo que puede dañar tu audición."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"¿Utilizar acceso directo de accesibilidad?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Si el acceso directo está activado, pulsa los dos botones de volumen durante 3 segundos para iniciar una función de accesibilidad."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"¿Quieres activar el acceso directo a las funciones de accesibilidad?"</string>
@@ -2360,4 +2360,18 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Diseño del teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Toca para cambiarlo."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Teclados físicos configurados"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Toca para ver los teclados"</string>
+    <!-- no translation found for profile_label_private (6463418670715290696) -->
+    <skip />
+    <!-- no translation found for profile_label_clone (769106052210954285) -->
+    <skip />
+    <!-- no translation found for profile_label_work (3495359133038584618) -->
+    <skip />
+    <!-- no translation found for profile_label_work_2 (4691533661598632135) -->
+    <skip />
+    <!-- no translation found for profile_label_work_3 (4834572253956798917) -->
+    <skip />
+    <!-- no translation found for profile_label_test (9168641926186071947) -->
+    <skip />
+    <!-- no translation found for profile_label_communal (8743921499944800427) -->
+    <skip />
 </resources>

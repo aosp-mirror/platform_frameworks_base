@@ -120,7 +120,6 @@ public class SettingsToPropertiesMapper {
     static final String[] sDeviceConfigAconfigScopes = new String[] {
         "accessibility",
         "android_core_networking",
-        "angle",
         "app_widgets",
         "arc_next",
         "avic",
@@ -144,6 +143,7 @@ public class SettingsToPropertiesMapper {
         "dck_framework",
         "devoptions_settings",
         "game",
+        "gpu",
         "haptics",
         "hardware_backed_security_mainline",
         "input",

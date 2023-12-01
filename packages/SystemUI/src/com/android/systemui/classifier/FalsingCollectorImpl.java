@@ -380,7 +380,7 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     static void logDebug(String msg) {
         if (DEBUG) {
-            logDebug(msg);
+            Log.d(TAG, msg);
         }
     }
 

@@ -43,6 +43,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dreams.DreamOverlayStateController
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.dream.MediaDreamComplication
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
@@ -108,6 +109,7 @@ constructor(
     @Application private val coroutineScope: CoroutineScope,
     private val splitShadeStateController: SplitShadeStateController,
     private val logger: MediaViewLogger,
+    private val mediaFlags: MediaFlags,
 ) {
 
     /** Track the media player setting status on lock screen. */
@@ -215,6 +217,7 @@ constructor(
     }
 
     private val mediaHosts = arrayOfNulls<MediaHost>(LOCATION_COMMUNAL_HUB + 1)
+
     /**
      * The last location where this view was at before going to the desired location. This is useful
      * for guided transitions.
@@ -1041,6 +1044,17 @@ constructor(
 
     private fun updateHostAttachment() =
         traceSection("MediaHierarchyManager#updateHostAttachment") {
+            if (mediaFlags.isSceneContainerEnabled()) {
+                // No need to manage transition states - just update the desired location directly
+                logger.logMediaHostAttachment(desiredLocation)
+                mediaCarouselController.onDesiredLocationChanged(
+                    desiredLocation = desiredLocation,
+                    desiredHostState = getHost(desiredLocation),
+                    animate = false,
+                )
+                return
+            }
+
             var newLocation = resolveLocationForFading()
             // Don't use the overlay when fading or when we don't have active media
             var canUseOverlay = !isCurrentlyFading() && hasActiveMediaOrRecommendation
@@ -1124,6 +1138,7 @@ constructor(
             (!bypassController.bypassEnabled && (statusbarState == StatusBarState.KEYGUARD))
         val location =
             when {
+                mediaFlags.isSceneContainerEnabled() -> desiredLocation
                 dreamOverlayActive && dreamMediaComplicationActive -> LOCATION_DREAM_OVERLAY
                 (qsExpansion > 0.0f || inSplitShade) && !onLockscreen -> LOCATION_QS
                 qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
@@ -1282,7 +1297,7 @@ private annotation class TransformationType
             MediaHierarchyManager.LOCATION_QQS,
             MediaHierarchyManager.LOCATION_LOCKSCREEN,
             MediaHierarchyManager.LOCATION_DREAM_OVERLAY,
-            MediaHierarchyManager.LOCATION_COMMUNAL_HUB
+            MediaHierarchyManager.LOCATION_COMMUNAL_HUB,
         ]
 )
 @Retention(AnnotationRetention.SOURCE)

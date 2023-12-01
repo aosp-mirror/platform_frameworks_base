@@ -2085,7 +2085,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     new ArrayMap<>();
             AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
             queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
-                    methodList, directBootAwareness, mSettings.getEnabledInputMethodNames());
+                    methodList, directBootAwareness);
             settings = new InputMethodSettings(mContext, methodMap, userId, true /* copyOnWrite */);
         }
         // filter caller's access to input methods
@@ -2713,10 +2713,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @AnyThread
-    void schedulePrepareStylusHandwritingDelegation(
+    void schedulePrepareStylusHandwritingDelegation(@UserIdInt int userId,
             @NonNull String delegatePackageName, @NonNull String delegatorPackageName) {
         mHandler.obtainMessage(
-                MSG_PREPARE_HANDWRITING_DELEGATION,
+                MSG_PREPARE_HANDWRITING_DELEGATION, userId, 0 /* unused */,
                 new Pair<>(delegatePackageName, delegatorPackageName)).sendToTarget();
     }
 
@@ -3433,7 +3433,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             Slog.w(TAG, "prepareStylusHandwritingDelegation() fail");
             throw new IllegalArgumentException("Delegator doesn't match Uid");
         }
-        schedulePrepareStylusHandwritingDelegation(delegatePackageName, delegatorPackageName);
+        schedulePrepareStylusHandwritingDelegation(
+                userId, delegatePackageName, delegatorPackageName);
     }
 
     @Override
@@ -3441,13 +3442,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @NonNull IInputMethodClient client,
             @UserIdInt int userId,
             @NonNull String delegatePackageName,
-            @NonNull String delegatorPackageName) {
+            @NonNull String delegatorPackageName,
+            @InputMethodManager.HandwritingDelegateFlags int flags) {
         if (!isStylusHandwritingEnabled(mContext, userId)) {
             Slog.w(TAG, "Can not accept stylus handwriting delegation. Stylus handwriting"
                     + " pref is disabled for user: " + userId);
             return false;
         }
-        if (!verifyDelegator(client, delegatePackageName, delegatorPackageName)) {
+        if (!verifyDelegator(client, delegatePackageName, delegatorPackageName, flags)) {
             return false;
         }
 
@@ -3471,14 +3473,20 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     private boolean verifyDelegator(
             @NonNull IInputMethodClient client,
             @NonNull String delegatePackageName,
-            @NonNull String delegatorPackageName) {
+            @NonNull String delegatorPackageName,
+            @InputMethodManager.HandwritingDelegateFlags int flags) {
         if (!verifyClientAndPackageMatch(client, delegatePackageName)) {
             Slog.w(TAG, "Delegate package does not belong to the same user. Ignoring"
                     + " startStylusHandwriting");
             return false;
         }
         synchronized (ImfLock.class) {
-            if (!delegatorPackageName.equals(mHwController.getDelegatorPackageName())) {
+            boolean homeDelegatorAllowed =
+                    (flags & InputMethodManager.HANDWRITING_DELEGATE_FLAG_HOME_DELEGATOR_ALLOWED)
+                            != 0;
+            if (!delegatorPackageName.equals(mHwController.getDelegatorPackageName())
+                    && !(homeDelegatorAllowed
+                            && mHwController.isDelegatorFromDefaultHomePackage())) {
                 Slog.w(TAG,
                         "Delegator package does not match. Ignoring startStylusHandwriting");
                 return false;
@@ -4200,7 +4208,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     new ArrayMap<>();
             AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
             queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
-                    methodList, DirectBootAwareness.AUTO, mSettings.getEnabledInputMethodNames());
+                    methodList, DirectBootAwareness.AUTO);
             final InputMethodSettings settings = new InputMethodSettings(mContext, methodMap,
                     userId, false);
             settings.setAdditionalInputMethodSubtypes(imiId, toBeAdded, additionalSubtypeMap,
@@ -4924,9 +4932,10 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             case MSG_PREPARE_HANDWRITING_DELEGATION:
                 synchronized (ImfLock.class) {
+                    int userId = msg.arg1;
                     String delegate = (String) ((Pair) msg.obj).first;
                     String delegator = (String) ((Pair) msg.obj).second;
-                    mHwController.prepareStylusHandwritingDelegation(delegate, delegator);
+                    mHwController.prepareStylusHandwritingDelegation(userId, delegate, delegator);
                 }
                 return true;
             case MSG_START_HANDWRITING:
@@ -5025,7 +5034,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     static void queryInputMethodServicesInternal(Context context,
             @UserIdInt int userId, ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap,
             ArrayMap<String, InputMethodInfo> methodMap, ArrayList<InputMethodInfo> methodList,
-            @DirectBootAwareness int directBootAwareness, List<String> enabledInputMethodList) {
+            @DirectBootAwareness int directBootAwareness) {
         final Context userAwareContext = context.getUserId() == userId
                 ? context
                 : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
@@ -5057,6 +5066,11 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
         methodList.ensureCapacity(services.size());
         methodMap.ensureCapacity(services.size());
+
+        // Note: This is a temporary solution for Bug 261723412.  If there is any better solution,
+        // we should remove this data dependency.
+        final List<String> enabledInputMethodList =
+                InputMethodUtils.getEnabledInputMethodIdsForFiltering(context, userId);
 
         filterInputMethodServices(additionalSubtypeMap, methodMap, methodList,
                 enabledInputMethodList, userAwareContext, services);
@@ -5124,8 +5138,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         mMyPackageMonitor.clearKnownImePackageNamesLocked();
 
         queryInputMethodServicesInternal(mContext, mSettings.getCurrentUserId(),
-                mAdditionalSubtypeMap, mMethodMap, mMethodList, DirectBootAwareness.AUTO,
-                mSettings.getEnabledInputMethodNames());
+                mAdditionalSubtypeMap, mMethodMap, mMethodList, DirectBootAwareness.AUTO);
 
         // Construct the set of possible IME packages for onPackageChanged() to avoid false
         // negatives when the package state remains to be the same but only the component state is
@@ -5438,47 +5451,21 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @GuardedBy("ImfLock.class")
     private InputMethodInfo queryDefaultInputMethodForUserIdLocked(@UserIdInt int userId) {
-        final String imeId = mSettings.getSelectedInputMethodForUser(userId);
-        if (TextUtils.isEmpty(imeId)) {
-            Slog.e(TAG, "No default input method found for userId " + userId);
-            return null;
+        if (userId == mSettings.getCurrentUserId()) {
+            return mMethodMap.get(mSettings.getSelectedInputMethod());
         }
 
-        InputMethodInfo curInputMethodInfo;
-        if (userId == mSettings.getCurrentUserId()
-                && (curInputMethodInfo = mMethodMap.get(imeId)) != null) {
-            // clone the InputMethodInfo before returning.
-            return new InputMethodInfo(curInputMethodInfo);
-        }
-
+        final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
+        final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
         final ArrayMap<String, List<InputMethodSubtype>> additionalSubtypeMap = new ArrayMap<>();
         AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
-        Context userAwareContext =
-                mContext.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
-
-        final int flags = PackageManager.GET_META_DATA
-                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
-                | PackageManager.MATCH_DIRECT_BOOT_AUTO;
-        final List<ResolveInfo> services =
-                userAwareContext.getPackageManager().queryIntentServicesAsUser(
-                        new Intent(InputMethod.SERVICE_INTERFACE),
-                        PackageManager.ResolveInfoFlags.of(flags),
-                        userId);
-        for (ResolveInfo ri : services) {
-            final String imeIdResolved = InputMethodInfo.computeId(ri);
-            if (imeId.equals(imeIdResolved)) {
-                try {
-                    return new InputMethodInfo(
-                            userAwareContext, ri, additionalSubtypeMap.get(imeId));
-                } catch (Exception e) {
-                    Slog.wtf(TAG, "Unable to load input method " + imeId, e);
-                }
-            }
-        }
-        // we didn't find the InputMethodInfo for imeId. This shouldn't happen.
-        Slog.e(TAG, "Error while locating input method info for imeId: " + imeId);
-        return null;
+        queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap, methodMap,
+                methodList, DirectBootAwareness.AUTO);
+        InputMethodSettings settings = new InputMethodSettings(mContext, methodMap, userId,
+                true /* copyOnWrite */);
+        return methodMap.get(settings.getSelectedInputMethod());
     }
+
     private ArrayMap<String, InputMethodInfo> queryMethodMapForUser(@UserIdInt int userId) {
         final ArrayMap<String, InputMethodInfo> methodMap = new ArrayMap<>();
         final ArrayList<InputMethodInfo> methodList = new ArrayList<>();
@@ -5486,8 +5473,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 new ArrayMap<>();
         AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
         queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                methodMap, methodList, DirectBootAwareness.AUTO,
-                mSettings.getEnabledInputMethodNames());
+                methodMap, methodList, DirectBootAwareness.AUTO);
         return methodMap;
     }
 
@@ -6511,8 +6497,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 new ArrayMap<>();
                         AdditionalSubtypeUtils.load(additionalSubtypeMap, userId);
                         queryInputMethodServicesInternal(mContext, userId, additionalSubtypeMap,
-                                methodMap, methodList, DirectBootAwareness.AUTO,
-                                mSettings.getEnabledInputMethodNames());
+                                methodMap, methodList, DirectBootAwareness.AUTO);
                         final InputMethodSettings settings = new InputMethodSettings(mContext,
                                 methodMap, userId, false);
 

@@ -123,7 +123,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     private static final int EXTRA_CONTENT_OVERLAY_FADE_OUT_DELAY_MS =
             SystemProperties.getInt(
-                    "persist.wm.debug.extra_content_overlay_fade_out_delay_ms", 0);
+                    "persist.wm.debug.extra_content_overlay_fade_out_delay_ms", 450);
 
     private final Context mContext;
     private final SyncTransactionQueue mSyncTransactionQueue;

@@ -2861,10 +2861,11 @@ final class InstallPackageHelper {
                     ? request.getRemovedInfo().mArgs : null;
             if (args != null) {
                 if (!killApp) {
-                    // If we didn't kill the app, defer the deletion of code/resource files, since
-                    // they may still be in use by the running application. This mitigates problems
-                    // in cases where resources or code is loaded by a new Activity before
-                    // ApplicationInfo changes have propagated to all application threads.
+                    // If we didn't kill the app, defer the deletion of code/resource files,
+                    // since the old code/resource files may still be in use by the running
+                    // application. This mitigates problems and cases where resources or
+                    // code is loaded by a new Activity before ApplicationInfo changes have
+                    // propagated to all application threads.
                     mPm.scheduleDeferredNoKillPostDelete(args);
                 } else {
                     mRemovePackageHelper.cleanUpResources(args.mCodeFile, args.mInstructionSets);

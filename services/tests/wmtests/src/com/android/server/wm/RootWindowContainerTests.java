@@ -362,6 +362,8 @@ public class RootWindowContainerTests extends WindowTestsBase {
         // Ensure a task has moved over.
         ensureTaskPlacement(task, activity);
         assertTrue(task.inPinnedWindowingMode());
+        assertFalse("Entering PiP activity must not affect SysUiFlags",
+                activity.canAffectSystemUiFlags());
 
         // The activity with fixed orientation should not apply letterbox when entering PiP.
         final int requestedOrientation = task.getConfiguration().orientation

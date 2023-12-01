@@ -1745,6 +1745,10 @@ SamShouldBeLast: android.media.session.MediaSessionManager#setOnMediaKeyListener
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.session.MediaSessionManager.setOnMediaKeyListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.session.MediaSessionManager#setOnVolumeKeyLongPressListener(android.media.session.MediaSessionManager.OnVolumeKeyLongPressListener, android.os.Handler):
     SAM-compatible parameters (such as parameter 1, "listener", in android.media.session.MediaSessionManager.setOnVolumeKeyLongPressListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.accessibility.AccessibilityManager#addAccessibilityStateChangeListener(android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addAccessibilityStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.view.accessibility.AccessibilityManager#addTouchExplorationStateChangeListener(android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.view.accessibility.AccessibilityManager.addTouchExplorationStateChangeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 
 
 SdkConstant: android.content.Intent#ACTION_BATTERY_LEVEL_CHANGED:

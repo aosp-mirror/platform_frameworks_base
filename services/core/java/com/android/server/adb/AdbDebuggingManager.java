@@ -1797,8 +1797,13 @@ public class AdbDebuggingManager {
                 mFingerprints);
 
         try {
-            dump.write("user_keys", AdbDebuggingManagerProto.USER_KEYS,
-                    FileUtils.readTextFile(new File("/data/misc/adb/adb_keys"), 0, null));
+            File userKeys = new File("/data/misc/adb/adb_keys");
+            if (userKeys.exists()) {
+                dump.write("user_keys", AdbDebuggingManagerProto.USER_KEYS,
+                           FileUtils.readTextFile(userKeys, 0, null));
+            } else {
+                Slog.i(TAG, "No user keys on this device");
+            }
         } catch (IOException e) {
             Slog.i(TAG, "Cannot read user keys", e);
         }

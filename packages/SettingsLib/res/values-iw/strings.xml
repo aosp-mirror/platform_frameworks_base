@@ -567,9 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"‏חיבור דרך ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"‏חיבור דרך eARC"</string>
-    <string name="tv_media_transfer_default" msgid="38102257053315304">"ברירת המחדל של הטלוויזיה"</string>
-    <string name="tv_media_transfer_hdmi" msgid="2229000864416329818">"‏פלט HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="2433193551482972117">"רמקולים פנימיים"</string>
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ברירת המחדל של הטלוויזיה"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"‏פלט HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"רמקולים פנימיים"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"יש בעיה בחיבור. עליך לכבות את המכשיר ולהפעיל אותו מחדש"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"התקן אודיו חוטי"</string>
     <string name="help_label" msgid="3528360748637781274">"עזרה ומשוב"</string>

@@ -16,6 +16,7 @@
 package com.android.hoststubgen.visitors
 
 import com.android.hoststubgen.HostStubGenErrors
+import com.android.hoststubgen.LogLevel
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.getPackageNameFromClassName
 import com.android.hoststubgen.asm.resolveClassName
@@ -229,7 +230,7 @@ abstract class BaseAdapter (
         ): ClassVisitor {
             var next = nextVisitor
 
-            val verbosePrinter = PrintWriter(log.getVerbosePrintStream())
+            val verbosePrinter = PrintWriter(log.getWriter(LogLevel.Verbose))
 
             // Inject TraceClassVisitor for debugging.
             if (options.enablePostTrace) {

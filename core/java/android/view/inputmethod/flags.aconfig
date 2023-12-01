@@ -31,3 +31,10 @@ flag {
     bug: "284527000"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "home_screen_handwriting_delegator"
+    namespace: "input_method"
+    description: "Feature flag for supporting stylus handwriting delegation from RemoteViews on the home screen"
+    bug: "279959705"
+}

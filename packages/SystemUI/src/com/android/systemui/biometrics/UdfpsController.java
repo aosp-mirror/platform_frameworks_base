@@ -74,6 +74,8 @@ import com.android.systemui.biometrics.udfps.NormalizedTouchData;
 import com.android.systemui.biometrics.udfps.SinglePointerTouchProcessor;
 import com.android.systemui.biometrics.udfps.TouchProcessor;
 import com.android.systemui.biometrics.udfps.TouchProcessorResult;
+import com.android.systemui.biometrics.ui.viewmodel.DefaultUdfpsTouchOverlayViewModel;
+import com.android.systemui.biometrics.ui.viewmodel.DeviceEntryUdfpsTouchOverlayViewModel;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
@@ -101,6 +103,8 @@ import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 import com.android.systemui.util.time.SystemClock;
+
+import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -164,6 +168,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
     @NonNull private final PrimaryBouncerInteractor mPrimaryBouncerInteractor;
     @Nullable private final TouchProcessor mTouchProcessor;
     @NonNull private final SessionTracker mSessionTracker;
+    @NonNull private final Lazy<DeviceEntryUdfpsTouchOverlayViewModel>
+            mDeviceEntryUdfpsTouchOverlayViewModel;
+    @NonNull private final Lazy<DefaultUdfpsTouchOverlayViewModel>
+            mDefaultUdfpsTouchOverlayViewModel;
     @NonNull private final AlternateBouncerInteractor mAlternateBouncerInteractor;
     @NonNull private final InputManager mInputManager;
     @NonNull private final UdfpsKeyguardAccessibilityDelegate mUdfpsKeyguardAccessibilityDelegate;
@@ -284,7 +292,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                         mAlternateBouncerInteractor,
                         mUdfpsKeyguardAccessibilityDelegate,
                         mKeyguardTransitionInteractor,
-                        mSelectedUserInteractor
+                        mSelectedUserInteractor,
+                        mDeviceEntryUdfpsTouchOverlayViewModel,
+                        mDefaultUdfpsTouchOverlayViewModel
                     )));
         }
 
@@ -501,11 +511,13 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     + mOverlay.getRequestId());
             return false;
         }
-        if ((mLockscreenShadeTransitionController.getQSDragProgress() != 0f
-                && !mAlternateBouncerInteractor.isVisibleState())
-                || mPrimaryBouncerInteractor.isInTransit()) {
-            Log.w(TAG, "ignoring touch due to qsDragProcess or primaryBouncerInteractor");
-            return false;
+        if (!DeviceEntryUdfpsRefactor.isEnabled()) {
+            if ((mLockscreenShadeTransitionController.getQSDragProgress() != 0f
+                    && !mAlternateBouncerInteractor.isVisibleState())
+                    || mPrimaryBouncerInteractor.isInTransit()) {
+                Log.w(TAG, "ignoring touch due to qsDragProcess or primaryBouncerInteractor");
+                return false;
+            }
         }
         if (event.getAction() == MotionEvent.ACTION_DOWN
                 || event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
@@ -657,7 +669,9 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             @NonNull Provider<UdfpsKeyguardViewModels> udfpsKeyguardViewModelsProvider,
             @NonNull SelectedUserInteractor selectedUserInteractor,
             @NonNull FpsUnlockTracker fpsUnlockTracker,
-            @NonNull KeyguardTransitionInteractor keyguardTransitionInteractor) {
+            @NonNull KeyguardTransitionInteractor keyguardTransitionInteractor,
+            Lazy<DeviceEntryUdfpsTouchOverlayViewModel> deviceEntryUdfpsTouchOverlayViewModel,
+            Lazy<DefaultUdfpsTouchOverlayViewModel> defaultUdfpsTouchOverlayViewModel) {
         mContext = context;
         mExecution = execution;
         mVibrator = vibrator;
@@ -706,6 +720,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
 
         mTouchProcessor = singlePointerTouchProcessor;
         mSessionTracker = sessionTracker;
+        mDeviceEntryUdfpsTouchOverlayViewModel = deviceEntryUdfpsTouchOverlayViewModel;
+        mDefaultUdfpsTouchOverlayViewModel = defaultUdfpsTouchOverlayViewModel;
 
         mDumpManager.registerDumpable(TAG, this);
 

@@ -30,7 +30,7 @@
 #include "XmlPullParser.h"
 #include "util/Util.h"
 
-using ::android::InputStream;
+using ::aapt::io::InputStream;
 using ::android::StringPiece;
 using ::android::StringPiece16;
 

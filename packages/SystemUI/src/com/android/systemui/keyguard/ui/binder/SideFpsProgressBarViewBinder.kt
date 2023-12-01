@@ -19,11 +19,10 @@ package com.android.systemui.keyguard.ui.binder
 import android.animation.ValueAnimator
 import android.graphics.Point
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags
 import com.android.systemui.biometrics.SideFpsController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.view.SideFpsProgressBar
 import com.android.systemui.keyguard.ui.viewmodel.SideFpsProgressBarViewModel
 import com.android.systemui.log.SideFpsLogger
@@ -50,11 +49,10 @@ constructor(
     private val sfpsController: dagger.Lazy<SideFpsController>,
     private val logger: SideFpsLogger,
     private val commandRegistry: CommandRegistry,
-    private val featureFlagsClassic: FeatureFlagsClassic,
 ) : CoreStartable {
 
     override fun start() {
-        if (!featureFlagsClassic.isEnabled(Flags.REST_TO_UNLOCK)) {
+        if (!Flags.restToUnlock()) {
             return
         }
         // When the rest to unlock feature is disabled by the user, stop any coroutines that are

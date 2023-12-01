@@ -17,7 +17,7 @@
 #ifndef AAPT2_DUMP_H
 #define AAPT2_DUMP_H
 
-#include <androidfw/FileStream.h>
+#include <io/FileStream.h>
 #include <io/ZipArchive.h>
 
 #include "Command.h"

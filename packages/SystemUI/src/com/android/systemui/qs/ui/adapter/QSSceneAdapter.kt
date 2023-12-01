@@ -19,7 +19,6 @@ package com.android.systemui.qs.ui.adapter
 import android.content.Context
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import androidx.asynclayoutinflater.view.AsyncLayoutInflater
 import com.android.systemui.dagger.SysUISingleton
@@ -30,6 +29,10 @@ import com.android.systemui.qs.QSImpl
 import com.android.systemui.qs.dagger.QSSceneComponent
 import com.android.systemui.res.R
 import com.android.systemui.util.kotlin.sample
+import javax.inject.Inject
+import javax.inject.Provider
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -40,10 +43,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import javax.inject.Provider
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 // TODO(307945185) Split View concerns into a ViewBinder
 /** Adapter to use between Scene system and [QSImpl] */
@@ -61,9 +60,9 @@ interface QSSceneAdapter {
      * Inflate an instance of [QSImpl] for this context. Once inflated, it will be available in
      * [qsView]
      */
-    suspend fun inflate(context: Context, parent: ViewGroup? = null)
+    suspend fun inflate(context: Context)
 
-    /** Set the current state for QS. [state] must not be [State.INITIAL]. */
+    /** Set the current state for QS. [state]. */
     fun setState(state: State)
 
     sealed class State(
@@ -71,8 +70,15 @@ interface QSSceneAdapter {
         val expansion: Float,
     ) {
         data object CLOSED : State(false, 0f)
-        data object QQS : State(true, 0f)
-        data object QS : State(true, 1f)
+        data class Expanding(val progress: Float) : State(true, progress)
+
+        companion object {
+            // These are special cases of the expansion.
+            val QQS = Expanding(0f)
+            val QS = Expanding(1f)
+
+            fun Collapsing(progress: Float) = Expanding(1f - progress)
+        }
     }
 }
 
@@ -128,11 +134,11 @@ constructor(
 
     override fun setDetailShowing(showing: Boolean) {}
 
-    override suspend fun inflate(context: Context, parent: ViewGroup?) {
+    override suspend fun inflate(context: Context) {
         withContext(mainDispatcher) {
             val inflater = asyncLayoutInflaterFactory(context)
             val view = suspendCoroutine { continuation ->
-                inflater.inflate(R.layout.qs_panel, parent) { view, _, _ ->
+                inflater.inflate(R.layout.qs_panel, null) { view, _, _ ->
                     continuation.resume(view)
                 }
             }

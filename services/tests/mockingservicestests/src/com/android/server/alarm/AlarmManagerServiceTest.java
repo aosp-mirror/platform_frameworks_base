@@ -3397,6 +3397,8 @@ public final class AlarmManagerServiceTest {
                 bOptions.getTemporaryAppAllowlistType());
         assertEquals(PowerExemptionManager.REASON_TIMEZONE_CHANGED,
                 bOptions.getTemporaryAppAllowlistReasonCode());
+        assertEquals(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT,
+                bOptions.getDeliveryGroupPolicy());
     }
 
     @Test

@@ -20,14 +20,13 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Point
 import androidx.core.animation.doOnEnd
+import com.android.systemui.Flags
 import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.biometrics.domain.interactor.SideFpsSensorInteractor
 import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.isDefaultOrientation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
@@ -58,7 +57,6 @@ constructor(
     private val sfpsSensorInteractor: SideFpsSensorInteractor,
     displayStateInteractor: DisplayStateInteractor,
     @Application private val applicationScope: CoroutineScope,
-    private val featureFlagsClassic: FeatureFlagsClassic,
 ) {
     private val _progress = MutableStateFlow(0.0f)
     private val _visible = MutableStateFlow(false)
@@ -155,7 +153,7 @@ constructor(
         sfpsSensorInteractor.isProlongedTouchRequiredForAuthentication
 
     init {
-        if (featureFlagsClassic.isEnabled(Flags.REST_TO_UNLOCK)) {
+        if (Flags.restToUnlock()) {
             launchAnimator()
         }
     }

@@ -361,7 +361,8 @@ class BroadcastProcessQueue {
                     && (record.userId == testRecord.userId)
                     && record.intent.filterEquals(testRecord.intent)
                     && isReceiverEquals(receiver, testReceiver)
-                    && testRecord.allReceiversPending()) {
+                    && testRecord.allReceiversPending()
+                    && record.isMatchingRecord(testRecord)) {
                 // Exact match found; perform in-place swap
                 args.arg1 = record;
                 args.argi1 = recordIndex;

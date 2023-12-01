@@ -52,7 +52,7 @@ class QuickSettingsSceneViewModelTest : SysuiTestCase() {
     private val sceneInteractor = utils.sceneInteractor()
     private val mobileIconsInteractor = FakeMobileIconsInteractor(FakeMobileMappingsProxy(), mock())
     private val flags = FakeFeatureFlagsClassic().also { it.set(Flags.NEW_NETWORK_SLICE_UI, false) }
-    private val qsFlexiglassAdapter = FakeQSSceneAdapter { _, _ -> mock() }
+    private val qsFlexiglassAdapter = FakeQSSceneAdapter { mock() }
 
     private var mobileIconsViewModel: MobileIconsViewModel =
         MobileIconsViewModel(
