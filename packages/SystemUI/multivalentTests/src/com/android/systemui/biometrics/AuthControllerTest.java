@@ -1041,8 +1041,9 @@ public class AuthControllerTest extends SysuiTestCase {
                     mExecution, mCommandQueue, mActivityTaskManager, mWindowManager,
                     mFingerprintManager, mFaceManager, () -> mUdfpsController,
                     () -> mSideFpsController, mDisplayManager, mWakefulnessLifecycle,
-                    mPanelInteractionDetector, mUserManager, mLockPatternUtils, mUdfpsLogger,
-                    mLogContextInteractor, () -> mBiometricPromptCredentialInteractor,
+                    mPanelInteractionDetector, mUserManager, mLockPatternUtils, () -> mUdfpsLogger,
+                    () -> mLogContextInteractor,
+                    () -> mBiometricPromptCredentialInteractor,
                     () -> mPromptSelectionInteractor, () -> mCredentialViewModel,
                     () -> mPromptViewModel, mInteractionJankMonitor, mHandler, mBackgroundExecutor,
                     mUdfpsUtils, mVibratorHelper);

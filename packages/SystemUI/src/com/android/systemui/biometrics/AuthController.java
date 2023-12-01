@@ -86,6 +86,8 @@ import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.concurrency.Execution;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -133,7 +135,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     @NonNull private final Provider<PromptSelectorInteractor> mPromptSelectorInteractor;
     @NonNull private final Provider<CredentialViewModel> mCredentialViewModelProvider;
     @NonNull private final Provider<PromptViewModel> mPromptViewModelProvider;
-    @NonNull private final LogContextInteractor mLogContextInteractor;
+    @NonNull private final Lazy<LogContextInteractor> mLogContextInteractor;
 
     private final Display mDisplay;
     private float mScaleFactor = 1f;
@@ -156,7 +158,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
     @Nullable private UdfpsOverlayParams mUdfpsOverlayParams;
     @Nullable private IUdfpsRefreshRateRequestCallback mUdfpsRefreshRateRequestCallback;
     @Nullable private SideFpsController mSideFpsController;
-    @NonNull private UdfpsLogger mUdfpsLogger;
+    @NonNull private Lazy<UdfpsLogger> mUdfpsLogger;
     @VisibleForTesting IBiometricSysuiReceiver mReceiver;
     @VisibleForTesting @NonNull final BiometricDisplayListener mOrientationListener;
     @Nullable private final List<FaceSensorPropertiesInternal> mFaceProps;
@@ -309,7 +311,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             });
             mUdfpsController.setAuthControllerUpdateUdfpsLocation(this::updateUdfpsLocation);
             mUdfpsController.setUdfpsDisplayMode(new UdfpsDisplayMode(mContext, mExecution,
-                    this, mUdfpsLogger));
+                    this, mUdfpsLogger.get()));
             mUdfpsBounds = mUdfpsProps.get(0).getLocation().getRect();
         }
 
@@ -755,8 +757,8 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
             @NonNull AuthDialogPanelInteractionDetector panelInteractionDetector,
             @NonNull UserManager userManager,
             @NonNull LockPatternUtils lockPatternUtils,
-            @NonNull UdfpsLogger udfpsLogger,
-            @NonNull LogContextInteractor logContextInteractor,
+            @NonNull Lazy<UdfpsLogger> udfpsLogger,
+            @NonNull Lazy<LogContextInteractor> logContextInteractor,
             @NonNull Provider<PromptCredentialInteractor> promptCredentialInteractorProvider,
             @NonNull Provider<PromptSelectorInteractor> promptSelectorInteractorProvider,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
@@ -903,7 +905,7 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
 
     @Override
     public void setBiometricContextListener(IBiometricContextListener listener) {
-        mLogContextInteractor.addBiometricContextListener(listener);
+        mLogContextInteractor.get().addBiometricContextListener(listener);
     }
 
     /**
@@ -932,14 +934,14 @@ public class AuthController implements CoreStartable, CommandQueue.Callbacks,
      */
     public void requestMaxRefreshRate(boolean request) throws RemoteException {
         if (mUdfpsRefreshRateRequestCallback == null) {
-            mUdfpsLogger.log(
+            mUdfpsLogger.get().log(
                     "PreAuthRefreshRate",
                     "skip request - refreshRateCallback is null",
                     LogLevel.DEBUG
             );
             return;
         }
-        mUdfpsLogger.requestMaxRefreshRate(request);
+        mUdfpsLogger.get().requestMaxRefreshRate(request);
         mUdfpsRefreshRateRequestCallback.onAuthenticationPossible(mContext.getDisplayId(), request);
     }
 
