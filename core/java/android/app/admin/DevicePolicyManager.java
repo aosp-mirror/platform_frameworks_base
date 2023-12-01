@@ -9146,7 +9146,7 @@ public class DevicePolicyManager {
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.VANILLA_ICE_CREAM)
     public boolean isDeviceOwnerApp(String packageName) {
         throwIfParentInstance("isDeviceOwnerApp");
-        if (android.permission.flags.Flags.roleControllerInSystemServer()
+        if (android.permission.flags.Flags.systemServerRoleControllerEnabled()
                 && CompatChanges.isChangeEnabled(IS_DEVICE_OWNER_USER_AWARE)) {
             return isDeviceOwnerAppOnContextUser(packageName);
         }

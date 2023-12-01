@@ -16,7 +16,7 @@ flag {
 }
 
 flag {
-    name: "role_controller_in_system_server"
+    name: "system_server_role_controller_enabled"
     is_fixed_read_only: true
     namespace: "permissions"
     description: "enable role controller in system server"
