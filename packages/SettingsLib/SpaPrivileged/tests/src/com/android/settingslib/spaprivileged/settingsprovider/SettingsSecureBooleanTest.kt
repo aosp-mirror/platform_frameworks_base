@@ -30,74 +30,74 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-class SettingsGlobalBooleanRepositoryTest {
+class SettingsSecureBooleanTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 
     @Test
     fun getValue_setTrue_returnTrue() {
-        Settings.Global.putInt(context.contentResolver, TEST_NAME, 1)
+        Settings.Secure.putInt(context.contentResolver, TEST_NAME, 1)
 
-        val value by context.settingsGlobalBoolean(TEST_NAME)
+        val value by context.settingsSecureBoolean(TEST_NAME)
 
         assertThat(value).isTrue()
     }
 
     @Test
     fun getValue_setFalse_returnFalse() {
-        Settings.Global.putInt(context.contentResolver, TEST_NAME, 0)
+        Settings.Secure.putInt(context.contentResolver, TEST_NAME, 0)
 
-        val value by context.settingsGlobalBoolean(TEST_NAME)
+        val value by context.settingsSecureBoolean(TEST_NAME)
 
         assertThat(value).isFalse()
     }
 
     @Test
     fun setValue_setTrue_returnTrue() {
-        var value by context.settingsGlobalBoolean(TEST_NAME)
+        var value by context.settingsSecureBoolean(TEST_NAME)
 
         value = true
 
-        assertThat(Settings.Global.getInt(context.contentResolver, TEST_NAME, 0)).isEqualTo(1)
+        assertThat(Settings.Secure.getInt(context.contentResolver, TEST_NAME, 0)).isEqualTo(1)
     }
 
     @Test
     fun setValue_setFalse_returnFalse() {
-        var value by context.settingsGlobalBoolean(TEST_NAME)
+        var value by context.settingsSecureBoolean(TEST_NAME)
 
         value = false
 
-        assertThat(Settings.Global.getInt(context.contentResolver, TEST_NAME, 1)).isEqualTo(0)
+        assertThat(Settings.Secure.getInt(context.contentResolver, TEST_NAME, 1)).isEqualTo(0)
     }
 
     @Test
-    fun settingsGlobalBooleanFlow_valueNotChanged() = runBlocking {
-        var value by context.settingsGlobalBoolean(TEST_NAME)
+    fun settingsSecureBooleanFlow_valueNotChanged() = runBlocking {
+        var value by context.settingsSecureBoolean(TEST_NAME)
         value = false
 
-        val flow = context.settingsGlobalBooleanFlow(TEST_NAME)
+        val flow = context.settingsSecureBooleanFlow(TEST_NAME)
 
         assertThat(flow.firstWithTimeoutOrNull()).isFalse()
     }
 
     @Test
-    fun settingsGlobalBooleanFlow_collectAfterValueChanged_onlyKeepLatest() = runBlocking {
-        var value by context.settingsGlobalBoolean(TEST_NAME)
+    fun settingsSecureBooleanFlow_collectAfterValueChanged_onlyKeepLatest() = runBlocking {
+        var value by context.settingsSecureBoolean(TEST_NAME)
         value = false
 
-        val flow = context.settingsGlobalBooleanFlow(TEST_NAME)
+        val flow = context.settingsSecureBooleanFlow(TEST_NAME)
         value = true
 
         assertThat(flow.firstWithTimeoutOrNull()).isTrue()
     }
 
     @Test
-    fun settingsGlobalBooleanFlow_collectBeforeValueChanged_getBoth() = runBlocking {
-        var value by context.settingsGlobalBoolean(TEST_NAME)
+    fun settingsSecureBooleanFlow_collectBeforeValueChanged_getBoth() = runBlocking {
+        var value by context.settingsSecureBoolean(TEST_NAME)
         value = false
 
         val listDeferred = async {
-            context.settingsGlobalBooleanFlow(TEST_NAME).toListWithTimeout()
+            context.settingsSecureBooleanFlow(TEST_NAME).toListWithTimeout()
         }
         delay(100)
         value = true

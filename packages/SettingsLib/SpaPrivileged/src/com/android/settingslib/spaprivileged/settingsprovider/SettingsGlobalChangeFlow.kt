@@ -17,7 +17,9 @@
 package com.android.settingslib.spaprivileged.settingsprovider
 
 import android.content.Context
+import android.provider.Settings
+import com.android.settingslib.spaprivileged.database.contentChangeFlow
 import kotlinx.coroutines.flow.Flow
 
 fun Context.settingsGlobalChangeFlow(name: String, sendInitialValue: Boolean = true): Flow<Unit> =
-    settingsGlobalFlow(name, sendInitialValue) { }
+    contentChangeFlow(Settings.Global.getUriFor(name), sendInitialValue)
