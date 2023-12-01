@@ -397,6 +397,9 @@ public class BubblePositioner {
      * the screen and the size of the elements around it (e.g. padding, pointer, manage button).
      */
     public int getMaxExpandedViewHeight(boolean isOverflow) {
+        if (mDeviceConfig.isLargeScreen() && !mDeviceConfig.isSmallTablet() && !isOverflow) {
+            return getExpandedViewHeightForLargeScreen();
+        }
         // Subtract top insets because availableRect.height would account for that
         int expandedContainerY = (int) getExpandedViewYTopAligned() - getInsets().top;
         int paddingTop = showBubblesVertically()
@@ -414,6 +417,16 @@ public class BubblePositioner {
                 - bottomPadding;
     }
 
+    private int getExpandedViewHeightForLargeScreen() {
+        // the expanded view height on large tablets is calculated based on the shortest screen
+        // size and is the same in both portrait and landscape
+        int maxVerticalInset = Math.max(mInsets.top, mInsets.bottom);
+        int shortestScreenSide = Math.min(getScreenRect().height(), getScreenRect().width());
+        // Subtract pointer size because it's laid out in LinearLayout with the expanded view.
+        return shortestScreenSide - maxVerticalInset * 2
+                - mManageButtonHeight - mPointerWidth - mExpandedViewPadding * 2;
+    }
+
     /**
      * Determines the height for the bubble, ensuring a minimum height. If the height should be as
      * big as available, returns {@link #MAX_HEIGHT}.
@@ -424,15 +437,6 @@ public class BubblePositioner {
             // overflow in landscape on phone is max
             return MAX_HEIGHT;
         }
-
-        if (mDeviceConfig.isLargeScreen() && !mDeviceConfig.isSmallTablet() && !isOverflow) {
-            // the expanded view height on large tablets is calculated based on the shortest screen
-            // size and is the same in both portrait and landscape
-            int maxVerticalInset = Math.max(mInsets.top, mInsets.bottom);
-            int shortestScreenSide = Math.min(mScreenRect.height(), mScreenRect.width());
-            return shortestScreenSide - 2 * maxVerticalInset - mManageButtonHeight;
-        }
-
         float desiredHeight = isOverflow
                 ? mOverflowHeight
                 : ((Bubble) bubble).getDesiredHeight(mContext);
