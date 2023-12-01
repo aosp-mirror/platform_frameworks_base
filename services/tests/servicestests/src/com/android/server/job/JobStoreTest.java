@@ -3,6 +3,7 @@ package com.android.server.job;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_IMS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_OEM_PAID;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 
 import static com.android.server.job.JobStore.JOB_FILE_SPLIT_PREFIX;
 
@@ -141,7 +142,7 @@ public class JobStoreTest {
         final JobInfo task2 = new Builder(12, mComponent)
                 .setMinimumLatency(5000L)
                 .setBackoffCriteria(15000L, JobInfo.BACKOFF_POLICY_LINEAR)
-                .setOverrideDeadline(30000L)
+                .setOverrideDeadline(4 * HOUR_IN_MILLIS)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                 .setPersisted(true)
                 .build();
@@ -194,7 +195,7 @@ public class JobStoreTest {
         final JobInfo task2 = new Builder(12, mComponent)
                 .setMinimumLatency(5000L)
                 .setBackoffCriteria(15000L, JobInfo.BACKOFF_POLICY_LINEAR)
-                .setOverrideDeadline(30000L)
+                .setOverrideDeadline(3 * HOUR_IN_MILLIS)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                 .setPersisted(true)
                 .build();
@@ -224,7 +225,7 @@ public class JobStoreTest {
         final JobInfo task2 = new Builder(12, mComponent)
                 .setMinimumLatency(5000L)
                 .setBackoffCriteria(15000L, JobInfo.BACKOFF_POLICY_LINEAR)
-                .setOverrideDeadline(30000L)
+                .setOverrideDeadline(5 * HOUR_IN_MILLIS)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                 .setPersisted(true)
                 .build();
@@ -330,7 +331,6 @@ public class JobStoreTest {
     @Test
     public void testMaybeWriteStatusToDisk() throws Exception {
         int taskId = 5;
-        long runByMillis = 20000L; // 20s
         long runFromMillis = 2000L; // 2s
         long initialBackoff = 10000L; // 10s
 
@@ -338,7 +338,7 @@ public class JobStoreTest {
                 .setRequiresCharging(true)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY)
                 .setBackoffCriteria(initialBackoff, JobInfo.BACKOFF_POLICY_EXPONENTIAL)
-                .setOverrideDeadline(runByMillis)
+                .setOverrideDeadline(6 * HOUR_IN_MILLIS)
                 .setMinimumLatency(runFromMillis)
                 .setPersisted(true)
                 .build();
@@ -379,7 +379,7 @@ public class JobStoreTest {
         final JobInfo task2 = new Builder(12, mComponent)
                 .setMinimumLatency(5000L)
                 .setBackoffCriteria(15000L, JobInfo.BACKOFF_POLICY_LINEAR)
-                .setOverrideDeadline(30000L)
+                .setOverrideDeadline(7 * HOUR_IN_MILLIS)
                 .setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED)
                 .setPersisted(true)
                 .build();
@@ -542,7 +542,7 @@ public class JobStoreTest {
     @Test
     public void testBiasPersisted() throws Exception {
         JobInfo.Builder b = new Builder(92, mComponent)
-                .setOverrideDeadline(5000)
+                .setOverrideDeadline(8 * HOUR_IN_MILLIS)
                 .setBias(42)
                 .setPersisted(true);
         final JobStatus js = JobStatus.createFromJobInfo(b.build(), SOME_UID, null, -1, null, null);
@@ -613,7 +613,7 @@ public class JobStoreTest {
     @Test
     public void testPriorityPersisted() throws Exception {
         final JobInfo job = new Builder(92, mComponent)
-                .setOverrideDeadline(5000)
+                .setOverrideDeadline(9 * HOUR_IN_MILLIS)
                 .setPriority(JobInfo.PRIORITY_MIN)
                 .setPersisted(true)
                 .build();
@@ -634,13 +634,13 @@ public class JobStoreTest {
     @Test
     public void testNonPersistedTaskIsNotPersisted() throws Exception {
         JobInfo.Builder b = new Builder(42, mComponent)
-                .setOverrideDeadline(10000)
+                .setOverrideDeadline(10 * HOUR_IN_MILLIS)
                 .setPersisted(false);
         JobStatus jsNonPersisted = JobStatus.createFromJobInfo(b.build(),
                 SOME_UID, null, -1, null, null);
         mTaskStoreUnderTest.add(jsNonPersisted);
         b = new Builder(43, mComponent)
-                .setOverrideDeadline(10000)
+                .setOverrideDeadline(11 * HOUR_IN_MILLIS)
                 .setPersisted(true);
         JobStatus jsPersisted = JobStatus.createFromJobInfo(b.build(),
                 SOME_UID, null, -1, null, null);

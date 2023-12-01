@@ -4388,7 +4388,7 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.w(TAG, "Uid " + uid + " set bias on its job");
                     return new JobInfo.Builder(job)
                             .setBias(JobInfo.BIAS_DEFAULT)
-                            .build(false, false);
+                            .build(false, false, false);
                 }
             }
 
@@ -4410,7 +4410,9 @@ public class JobSchedulerService extends com.android.server.SystemService
             job.enforceValidity(
                     CompatChanges.isChangeEnabled(
                             JobInfo.DISALLOW_DEADLINES_FOR_PREFETCH_JOBS, callingUid),
-                    rejectNegativeNetworkEstimates);
+                    rejectNegativeNetworkEstimates,
+                    CompatChanges.isChangeEnabled(
+                            JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS, callingUid));
             if ((job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0) {
                 getContext().enforceCallingOrSelfPermission(
                         android.Manifest.permission.CONNECTIVITY_INTERNAL, TAG);

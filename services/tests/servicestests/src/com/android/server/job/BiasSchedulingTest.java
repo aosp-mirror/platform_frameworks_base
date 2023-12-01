@@ -29,6 +29,8 @@ import androidx.test.filters.FlakyTest;
 import com.android.server.job.MockBiasJobService.TestEnvironment;
 import com.android.server.job.MockBiasJobService.TestEnvironment.Event;
 
+import libcore.junit.util.compat.CoreCompatChangeRule;
+
 import java.util.ArrayList;
 
 @TargetApi(24)
@@ -61,6 +63,7 @@ public class BiasSchedulingTest extends AndroidTestCase {
     }
 
     @FlakyTest(bugId = 293589359)
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     public void testLowerBiasJobPreempted() throws Exception {
         for (int i = 0; i < JobConcurrencyManager.MAX_CONCURRENCY_LIMIT; ++i) {
             JobInfo job = new JobInfo.Builder(100 + i, sJobServiceComponent)
@@ -92,6 +95,7 @@ public class BiasSchedulingTest extends AndroidTestCase {
         assertTrue("Lower bias jobs were not preempted.", wasJobHigherExecuted);
     }
 
+    @CoreCompatChangeRule.DisableCompatChanges({JobInfo.ENFORCE_MINIMUM_TIME_WINDOWS})
     public void testHigherBiasJobNotPreempted() throws Exception {
         for (int i = 0; i < JobConcurrencyManager.DEFAULT_CONCURRENCY_LIMIT; ++i) {
             JobInfo job = new JobInfo.Builder(100 + i, sJobServiceComponent)
