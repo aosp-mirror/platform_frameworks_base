@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.WindowInsets.Type.statusBars;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
@@ -221,7 +222,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         mRecentsTransitionHandler.addTransitionStateListener(new RecentsTransitionStateListener() {
             @Override
             public void onTransitionStarted(IBinder transition) {
-                onRecentsTransitionStarted(transition);
+                blockRelayoutOnTransitionStarted(transition);
             }
         });
         mShellCommandHandler.addDumpCallback(this::dump, this);
@@ -281,6 +282,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             if (decor != null) {
                 decor.addTransitionPausingRelayout(transition);
             }
+        } else if (change.getMode() == WindowManager.TRANSIT_TO_FRONT
+                && ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0)
+                && change.getTaskInfo() != null) {
+            blockRelayoutOnTransitionStarted(transition);
         }
     }
 
@@ -358,7 +363,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         }
     }
 
-    private void onRecentsTransitionStarted(IBinder transition) {
+    private void blockRelayoutOnTransitionStarted(IBinder transition) {
         // Block relayout on window decorations originating from #onTaskInfoChanges until the
         // animation completes to avoid interfering with the transition animation.
         for (int i = 0; i < mWindowDecorByTaskId.size(); i++) {
