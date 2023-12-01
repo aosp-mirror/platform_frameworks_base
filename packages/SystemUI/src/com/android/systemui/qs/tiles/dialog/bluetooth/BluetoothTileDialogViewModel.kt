@@ -105,6 +105,41 @@ constructor(
                     deviceItemInteractor.updateDeviceItems(context, DeviceFetchTrigger.FIRST_LOAD)
                 }
 
+                // deviceItemUpdate is emitted when device item list is done fetching, update UI and
+                // stop the progress bar.
+                deviceItemInteractor.deviceItemUpdate
+                    .onEach {
+                        updateDialogUiJob?.cancel()
+                        updateDialogUiJob = launch {
+                            dialog.apply {
+                                onDeviceItemUpdated(
+                                    it.take(MAX_DEVICE_ITEM_ENTRY),
+                                    showSeeAll = it.size > MAX_DEVICE_ITEM_ENTRY,
+                                    showPairNewDevice = bluetoothStateInteractor.isBluetoothEnabled
+                                )
+                                animateProgressBar(false)
+                            }
+                        }
+                    }
+                    .launchIn(this)
+
+                // deviceItemUpdateRequest is emitted when a bluetooth callback is called, re-fetch
+                // the device item list and animiate the progress bar.
+                deviceItemInteractor.deviceItemUpdateRequest
+                    .onEach {
+                        dialog.animateProgressBar(true)
+                        updateDeviceItemJob?.cancel()
+                        updateDeviceItemJob = launch {
+                            deviceItemInteractor.updateDeviceItems(
+                                context,
+                                DeviceFetchTrigger.BLUETOOTH_CALLBACK_RECEIVED
+                            )
+                        }
+                    }
+                    .launchIn(this)
+
+                // bluetoothStateUpdate is emitted when bluetooth on/off state is changed, re-fetch
+                // the device item list.
                 bluetoothStateInteractor.bluetoothStateUpdate
                     .filterNotNull()
                     .onEach {
@@ -119,39 +154,21 @@ constructor(
                     }
                     .launchIn(this)
 
-                deviceItemInteractor.deviceItemUpdateRequest
-                    .onEach {
-                        updateDeviceItemJob?.cancel()
-                        updateDeviceItemJob = launch {
-                            deviceItemInteractor.updateDeviceItems(
-                                context,
-                                DeviceFetchTrigger.BLUETOOTH_CALLBACK_RECEIVED
-                            )
-                        }
-                    }
-                    .launchIn(this)
-
-                deviceItemInteractor.deviceItemUpdate
-                    .onEach {
-                        updateDialogUiJob?.cancel()
-                        updateDialogUiJob = launch {
-                            dialog.onDeviceItemUpdated(
-                                it.take(MAX_DEVICE_ITEM_ENTRY),
-                                showSeeAll = it.size > MAX_DEVICE_ITEM_ENTRY,
-                                showPairNewDevice = bluetoothStateInteractor.isBluetoothEnabled
-                            )
-                        }
-                    }
-                    .launchIn(this)
-
+                // bluetoothStateToggle is emitted when user toggles the bluetooth state switch,
+                // send the new value to the bluetoothStateInteractor and animate the progress bar.
                 dialog.bluetoothStateToggle
-                    .onEach { bluetoothStateInteractor.isBluetoothEnabled = it }
+                    .onEach {
+                        dialog.animateProgressBar(true)
+                        bluetoothStateInteractor.isBluetoothEnabled = it
+                    }
                     .launchIn(this)
 
+                // deviceItemClick is emitted when user clicked on a device item.
                 dialog.deviceItemClick
                     .onEach { deviceItemInteractor.updateDeviceItemOnClick(it) }
                     .launchIn(this)
 
+                // contentHeight is emitted when the dialog is dismissed.
                 dialog.contentHeight
                     .onEach {
                         withContext(backgroundDispatcher) {

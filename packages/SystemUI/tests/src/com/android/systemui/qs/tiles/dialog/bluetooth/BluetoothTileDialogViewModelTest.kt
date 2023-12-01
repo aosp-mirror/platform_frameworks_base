@@ -162,13 +162,15 @@ class BluetoothTileDialogViewModelTest : SysuiTestCase() {
 
     @Test
     fun testStartSettingsActivity_activityLaunched_dialogDismissed() {
-        `when`(deviceItem.cachedBluetoothDevice).thenReturn(cachedBluetoothDevice)
-        bluetoothTileDialogViewModel.showDialog(context, null)
+        testScope.runTest {
+            `when`(deviceItem.cachedBluetoothDevice).thenReturn(cachedBluetoothDevice)
+            bluetoothTileDialogViewModel.showDialog(context, null)
 
-        val clickedView = View(context)
-        bluetoothTileDialogViewModel.onPairNewDeviceClicked(clickedView)
+            val clickedView = View(context)
+            bluetoothTileDialogViewModel.onPairNewDeviceClicked(clickedView)
 
-        verify(uiEventLogger).log(BluetoothTileDialogUiEvent.PAIR_NEW_DEVICE_CLICKED)
-        verify(activityStarter).postStartActivityDismissingKeyguard(any(), anyInt(), nullable())
+            verify(uiEventLogger).log(BluetoothTileDialogUiEvent.PAIR_NEW_DEVICE_CLICKED)
+            verify(activityStarter).postStartActivityDismissingKeyguard(any(), anyInt(), nullable())
+        }
     }
 }

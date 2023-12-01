@@ -17,6 +17,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:id="@+id/root"
     style="@style/Widget.SliceView.Panel"
     android:layout_width="wrap_content"
@@ -53,17 +54,40 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bluetooth_tile_dialog_title" />
 
+    <View
+        android:id="@+id/bluetooth_tile_dialog_progress_background"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintEnd_toEndOf="@id/bluetooth_tile_dialog_progress_animation"
+        app:layout_constraintStart_toStartOf="@id/bluetooth_tile_dialog_progress_animation"
+        app:layout_constraintTop_toTopOf="@id/bluetooth_tile_dialog_progress_animation"
+        app:layout_constraintBottom_toBottomOf="@id/bluetooth_tile_dialog_progress_animation"
+        android:background="?androidprv:attr/colorSurfaceVariant" />
+
+    <ProgressBar
+        android:id="@+id/bluetooth_tile_dialog_progress_animation"
+        android:layout_width="152dp"
+        android:layout_height="4dp"
+        android:layout_marginTop="16dp"
+        style="@style/TrimmedHorizontalProgressBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bluetooth_tile_dialog_subtitle"
+        android:visibility="invisible"
+        android:indeterminate="true" />
+
     <androidx.core.widget.NestedScrollView
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="21dp"
+        android:minHeight="145dp"
         android:fillViewport="true"
         app:layout_constrainedHeight="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/bluetooth_tile_dialog_subtitle">
+        app:layout_constraintTop_toBottomOf="@id/bluetooth_tile_dialog_progress_animation">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/scroll_layout"
@@ -81,7 +105,7 @@
                 android:paddingStart="36dp"
                 android:text="@string/turn_on_bluetooth"
                 android:clickable="false"
-                android:textAppearance="@style/TextAppearance.Dialog.Body.Message"
+                android:textAppearance="@style/TextAppearance.Dialog.Title"
                 android:textSize="16sp"
                 app:layout_constraintEnd_toStartOf="@+id/bluetooth_toggle"
                 app:layout_constraintStart_toStartOf="parent"
@@ -90,8 +114,7 @@
             <Switch
                 android:id="@+id/bluetooth_toggle"
                 android:layout_width="wrap_content"
-                android:layout_height="48dp"
-                android:paddingTop="10dp"
+                android:layout_height="64dp"
                 android:gravity="start|center_vertical"
                 android:paddingEnd="40dp"
                 android:contentDescription="@string/turn_on_bluetooth"
@@ -107,7 +130,6 @@
                 android:id="@+id/device_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/bluetooth_toggle"
