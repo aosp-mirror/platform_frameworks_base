@@ -70,6 +70,7 @@
 
     <style name="SettingsSwitchPreferenceCompat.SettingsLib" parent="@style/Preference.SwitchPreferenceCompat.Material">
         <item name="layout">@layout/settingslib_preference</item>
+        <item name="singleLineTitle">false</item>
         <item name="iconSpaceReserved">@bool/settingslib_config_icon_space_reserved</item>
     </style>
 
