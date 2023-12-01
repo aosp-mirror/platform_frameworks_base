@@ -867,21 +867,19 @@ public class TrustManagerService extends SystemService {
             mDeviceLockedForUser.put(userId, locked);
         }
         if (changed) {
-            dispatchDeviceLocked(userId, locked);
-            Authorization.onLockScreenEvent(locked, userId, null,
-                    getBiometricSids(userId));
+            notifyTrustAgentsOfDeviceLockState(userId, locked);
+            notifyKeystoreOfDeviceLockState(userId, locked);
             // Also update the user's profiles who have unified challenge, since they
             // share the same unlocked state (see {@link #isDeviceLocked(int)})
             for (int profileHandle : mUserManager.getEnabledProfileIds(userId)) {
                 if (mLockPatternUtils.isManagedProfileWithUnifiedChallenge(profileHandle)) {
-                    Authorization.onLockScreenEvent(locked, profileHandle, null,
-                            getBiometricSids(profileHandle));
+                    notifyKeystoreOfDeviceLockState(profileHandle, locked);
                 }
             }
         }
     }
 
-    private void dispatchDeviceLocked(int userId, boolean isLocked) {
+    private void notifyTrustAgentsOfDeviceLockState(int userId, boolean isLocked) {
         for (int i = 0; i < mActiveAgents.size(); i++) {
             AgentInfo agent = mActiveAgents.valueAt(i);
             if (agent.userId == userId) {
@@ -891,6 +889,17 @@ public class TrustManagerService extends SystemService {
                     agent.agent.onDeviceUnlocked();
                 }
             }
+        }
+    }
+
+    private void notifyKeystoreOfDeviceLockState(int userId, boolean isLocked) {
+        if (isLocked) {
+            Authorization.onDeviceLocked(userId, getBiometricSids(userId));
+        } else {
+            // Notify Keystore that the device is now unlocked for the user.  Note that for unlocks
+            // with LSKF, this is redundant with the call from LockSettingsService which provides
+            // the password.  However, for unlocks with biometric or trust agent, this is required.
+            Authorization.onDeviceUnlocked(userId, /* password= */ null);
         }
     }
 
@@ -1427,10 +1436,10 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    private long[] getBiometricSids(int userId) {
+    private @NonNull long[] getBiometricSids(int userId) {
         BiometricManager biometricManager = mContext.getSystemService(BiometricManager.class);
         if (biometricManager == null) {
-            return null;
+            return new long[0];
         }
         return biometricManager.getAuthenticatorIds(userId);
     }
@@ -1729,8 +1738,7 @@ public class TrustManagerService extends SystemService {
                         mDeviceLockedForUser.put(userId, locked);
                     }
 
-                    Authorization.onLockScreenEvent(locked, userId, null,
-                            getBiometricSids(userId));
+                    notifyKeystoreOfDeviceLockState(userId, locked);
 
                     if (locked) {
                         try {
