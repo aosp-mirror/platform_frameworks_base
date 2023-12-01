@@ -6,6 +6,10 @@
   ],
   "ravenwood-presubmit": [
     {
+      "name": "RavenwoodMinimumTest",
+      "host": true
+    },
+    {
       "name": "RavenwoodMockitoTest",
       "host": true
     },
