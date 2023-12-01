@@ -36,8 +36,10 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
-import dagger.Lazy
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -59,7 +61,6 @@ class BrightnessDialogTest : SysuiTestCase() {
     @Mock private lateinit var brightnessControllerFactory: BrightnessController.Factory
     @Mock private lateinit var brightnessController: BrightnessController
     @Mock private lateinit var accessibilityMgr: AccessibilityManagerWrapper
-    @Mock private lateinit var shadeInteractorLazy: Lazy<ShadeInteractor>
     @Mock private lateinit var shadeInteractor: ShadeInteractor
 
     private val clock = FakeSystemClock()
@@ -89,7 +90,6 @@ class BrightnessDialogTest : SysuiTestCase() {
             .thenReturn(brightnessSliderController)
         `when`(brightnessSliderController.rootView).thenReturn(View(context))
         `when`(brightnessControllerFactory.create(any())).thenReturn(brightnessController)
-        whenever(shadeInteractorLazy.get()).thenReturn(shadeInteractor)
         whenever(shadeInteractor.isQsExpanded).thenReturn(MutableStateFlow(false))
     }
 
@@ -178,6 +178,20 @@ class BrightnessDialogTest : SysuiTestCase() {
 
         clock.advanceTime(BrightnessDialog.DIALOG_TIMEOUT_MILLIS.toLong())
         assertThat(activityRule.activity.isFinishing()).isFalse()
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun testFinishOnQSExpanded() = runTest {
+        val isQSExpanded = MutableStateFlow(false)
+        `when`(shadeInteractor.isQsExpanded).thenReturn(isQSExpanded)
+        activityRule.launchActivity(Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG))
+
+        assertThat(activityRule.activity.isFinishing()).isFalse()
+
+        isQSExpanded.value = true
+        advanceUntilIdle()
+        assertThat(activityRule.activity.isFinishing()).isTrue()
     }
 
     class TestDialog(
