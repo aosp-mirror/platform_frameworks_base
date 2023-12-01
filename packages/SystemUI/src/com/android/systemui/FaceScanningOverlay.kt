@@ -36,8 +36,6 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.asIndenting
@@ -56,7 +54,6 @@ class FaceScanningOverlay(
     val mainExecutor: Executor,
     val logger: ScreenDecorationsLogger,
     val authController: AuthController,
-    val featureFlags: FeatureFlags,
 ) : ScreenDecorations.DisplayCutoutView(context, pos) {
     private var showScanningAnim = false
     private val rimPaint = Paint()
@@ -297,20 +294,10 @@ class FaceScanningOverlay(
     }
 
     private fun createFaceScanningRimAnimator(): AnimatorSet {
-        val dontPulse = featureFlags.isEnabled(Flags.STOP_PULSING_FACE_SCANNING_ANIMATION)
-        if (dontPulse) {
-            return AnimatorSet().apply {
-                playSequentially(
-                        cameraProtectionAnimator,
-                        createRimAppearAnimator(),
-                )
-            }
-        }
         return AnimatorSet().apply {
             playSequentially(
-                cameraProtectionAnimator,
-                createRimAppearAnimator(),
-                createPulseAnimator()
+                    cameraProtectionAnimator,
+                    createRimAppearAnimator(),
             )
         }
     }
@@ -346,17 +333,6 @@ class FaceScanningOverlay(
     private fun updateRimAlpha(animator: ValueAnimator) {
         rimPaint.alpha = animator.animatedValue as Int
         invalidate()
-    }
-
-    private fun createPulseAnimator(): ValueAnimator {
-        return ValueAnimator.ofFloat(
-                PULSE_RADIUS_OUT, PULSE_RADIUS_IN).apply {
-            duration = HALF_PULSE_DURATION
-            interpolator = Interpolators.STANDARD
-            repeatCount = 11 // Pulse inwards and outwards, reversing direction, 6 times
-            repeatMode = ValueAnimator.REVERSE
-            addUpdateListener(this@FaceScanningOverlay::updateRimProgress)
-        }
     }
 
     private val keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
