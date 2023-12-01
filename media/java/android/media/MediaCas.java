@@ -272,7 +272,7 @@ public final class MediaCas implements AutoCloseable {
                         Log.d(TAG, "Trying to get AIDL service");
                         IMediaCasService serviceAidl =
                                 IMediaCasService.Stub.asInterface(
-                                        ServiceManager.getService(
+                                        ServiceManager.waitForDeclaredService(
                                                 IMediaCasService.DESCRIPTOR + "/default"));
                         if (serviceAidl != null) {
                             return serviceAidl;
