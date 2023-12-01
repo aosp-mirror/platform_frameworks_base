@@ -847,14 +847,15 @@ final class InputMethodUtils {
             if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
                 return explicitlyOrImplicitlyEnabledSubtypes.get(0);
             }
+            final String locale = mRes.getConfiguration().locale.toString();
             final InputMethodSubtype subtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
-                    mRes, explicitlyOrImplicitlyEnabledSubtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD,
-                    null, true);
+                    explicitlyOrImplicitlyEnabledSubtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD,
+                    locale, true);
             if (subtype != null) {
                 return subtype;
             }
-            return SubtypeUtils.findLastResortApplicableSubtypeLocked(mRes,
-                    explicitlyOrImplicitlyEnabledSubtypes, null, null, true);
+            return SubtypeUtils.findLastResortApplicableSubtypeLocked(
+                    explicitlyOrImplicitlyEnabledSubtypes, null, locale, true);
         }
 
         boolean setAdditionalInputMethodSubtypes(@NonNull String imeId,
