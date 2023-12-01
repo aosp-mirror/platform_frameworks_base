@@ -162,6 +162,8 @@ interface IWindowSession {
      * @param flags See {@code View#startDragAndDrop}
      * @param surface Surface containing drag shadow image
      * @param touchSource See {@code InputDevice#getSource()}
+     * @param touchDeviceId device ID of last touch event
+     * @param pointerId pointer ID of last touch event
      * @param touchX X coordinate of last touch point
      * @param touchY Y coordinate of last touch point
      * @param thumbCenterX X coordinate for the position within the shadow image that should be
@@ -171,9 +173,9 @@ interface IWindowSession {
      * @param data Data transferred by drag and drop
      * @return Token of drag operation which will be passed to cancelDragAndDrop.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     IBinder performDrag(IWindow window, int flags, in SurfaceControl surface, int touchSource,
-            float touchX, float touchY, float thumbCenterX, float thumbCenterY, in ClipData data);
+            int touchDeviceId, int touchPointerId, float touchX, float touchY, float thumbCenterX,
+            float thumbCenterY, in ClipData data);
 
     /**
      * Drops the content of the current drag operation for accessibility

@@ -340,7 +340,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public IBinder performDrag(IWindow window, int flags, SurfaceControl surface, int touchSource,
-            float touchX, float touchY, float thumbCenterX, float thumbCenterY, ClipData data) {
+            int touchDeviceId, int touchPointerId, float touchX, float touchY, float thumbCenterX,
+            float thumbCenterY, ClipData data) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         // Validate and resolve ClipDescription data before clearing the calling identity
@@ -349,7 +350,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         final long ident = Binder.clearCallingIdentity();
         try {
             return mDragDropController.performDrag(mPid, mUid, window, flags, surface, touchSource,
-                    touchX, touchY, thumbCenterX, thumbCenterY, data);
+                    touchDeviceId, touchPointerId, touchX, touchY, thumbCenterX, thumbCenterY,
+                    data);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

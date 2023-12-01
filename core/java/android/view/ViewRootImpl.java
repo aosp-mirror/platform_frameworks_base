@@ -808,6 +808,8 @@ public final class ViewRootImpl implements ViewParent,
     final PointF mDragPoint = new PointF();
     final PointF mLastTouchPoint = new PointF();
     int mLastTouchSource;
+    int mLastTouchDeviceId = KeyCharacterMap.VIRTUAL_KEYBOARD;
+    int mLastTouchPointerId;
     /** Tracks last {@link MotionEvent#getToolType(int)} with {@link MotionEvent#ACTION_UP}. **/
     private int mLastClickToolType;
 
@@ -7098,6 +7100,8 @@ public final class ViewRootImpl implements ViewParent,
                 mLastTouchPoint.x = event.getRawX();
                 mLastTouchPoint.y = event.getRawY();
                 mLastTouchSource = event.getSource();
+                mLastTouchDeviceId = event.getDeviceId();
+                mLastTouchPointerId = event.getPointerId(0);
 
                 // Register last ACTION_UP. This will be propagated to IME.
                 if (event.getActionMasked() == MotionEvent.ACTION_UP) {
@@ -8507,6 +8511,14 @@ public final class ViewRootImpl implements ViewParent,
 
     public int getLastTouchSource() {
         return mLastTouchSource;
+    }
+
+    public int getLastTouchDeviceId() {
+        return mLastTouchDeviceId;
+    }
+
+    public int getLastTouchPointerId() {
+        return mLastTouchPointerId;
     }
 
     /**

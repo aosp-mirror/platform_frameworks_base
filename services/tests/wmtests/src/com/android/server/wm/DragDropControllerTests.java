@@ -553,7 +553,7 @@ public class DragDropControllerTests extends WindowTestsBase {
             assertTrue(mWm.mInputManager.transferTouchFocus(new InputChannel(),
                     new InputChannel(), true /* isDragDrop */));
             mToken = mTarget.performDrag(TEST_PID, 0, mWindow.mClient,
-                    flag, surface, 0, 0, 0, 0, 0, data);
+                    flag, surface, 0, 0, 0, 0, 0, 0, 0, data);
             assertNotNull(mToken);
 
             r.run();
@@ -575,7 +575,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     private void startA11yDrag(int flags, ClipData data, Runnable r) {
         mToken = mTarget.performDrag(0, 0, mWindow.mClient,
-                flags | View.DRAG_FLAG_ACCESSIBILITY_ACTION, null, 0, 0, 0, 0, 0, data);
+                flags | View.DRAG_FLAG_ACCESSIBILITY_ACTION, null, 0, 0, 0, 0, 0, 0, 0, data);
         assertNotNull(mToken);
         r.run();
     }
