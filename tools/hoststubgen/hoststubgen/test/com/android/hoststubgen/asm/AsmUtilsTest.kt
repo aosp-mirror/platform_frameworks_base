@@ -13,11 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.hoststubgen.utils
+package com.android.hoststubgen.asm
 
-import com.android.hoststubgen.asm.getDirectOuterClassName
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
+import org.objectweb.asm.Opcodes.ACC_PRIVATE
+import org.objectweb.asm.Opcodes.ACC_PROTECTED
+import org.objectweb.asm.Opcodes.ACC_PUBLIC
+import org.objectweb.asm.Opcodes.ACC_STATIC
 
 class AsmUtilsTest {
     private fun checkGetDirectOuterClassName(input: String, expected: String?) {
@@ -30,5 +33,17 @@ class AsmUtilsTest {
         checkGetDirectOuterClassName("a\$x", "a")
         checkGetDirectOuterClassName("a.b.c\$x", "a.b.c")
         checkGetDirectOuterClassName("a.b.c\$x\$y", "a.b.c\$x")
+    }
+
+    @Test
+    fun testVisibility() {
+        fun test(access: Int, expected: Visibility) {
+            assertThat(Visibility.fromAccess(access)).isEqualTo(expected)
+        }
+
+        test(ACC_PUBLIC or ACC_STATIC, Visibility.PUBLIC)
+        test(ACC_PRIVATE or ACC_STATIC, Visibility.PRIVATE)
+        test(ACC_PROTECTED or ACC_STATIC, Visibility.PROTECTED)
+        test(ACC_STATIC, Visibility.PACKAGE_PRIVATE)
     }
 }

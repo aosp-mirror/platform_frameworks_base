@@ -128,7 +128,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         }
 
         val end = System.currentTimeMillis()
-        log.v("Done reading class structure in %.1f second(s).", (end - start) / 1000.0)
+        log.i("Done reading class structure in %.1f second(s).", (end - start) / 1000.0)
         return allClasses
     }
 

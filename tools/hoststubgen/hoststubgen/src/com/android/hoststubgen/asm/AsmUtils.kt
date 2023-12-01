@@ -196,6 +196,29 @@ fun isVisibilityPrivateOrPackagePrivate(access: Int): Boolean {
     }
 }
 
+enum class Visibility {
+    PRIVATE,
+    PACKAGE_PRIVATE,
+    PROTECTED,
+    PUBLIC;
+
+    companion object {
+        fun fromAccess(access: Int): Visibility {
+            if ((access and Opcodes.ACC_PUBLIC) != 0) {
+                return PUBLIC
+            }
+            if ((access and Opcodes.ACC_PROTECTED) != 0) {
+                return PROTECTED
+            }
+            if ((access and Opcodes.ACC_PRIVATE) != 0) {
+                return PRIVATE
+            }
+
+            return PACKAGE_PRIVATE
+        }
+    }
+}
+
 fun ClassNode.isEnum(): Boolean {
     return (this.access and Opcodes.ACC_ENUM) != 0
 }
@@ -212,6 +235,10 @@ fun MethodNode.isSynthetic(): Boolean {
     return (this.access and Opcodes.ACC_SYNTHETIC) != 0
 }
 
+fun MethodNode.isStatic(): Boolean {
+    return (this.access and Opcodes.ACC_STATIC) != 0
+}
+
 fun FieldNode.isEnum(): Boolean {
     return (this.access and Opcodes.ACC_ENUM) != 0
 }
@@ -219,6 +246,19 @@ fun FieldNode.isEnum(): Boolean {
 fun FieldNode.isSynthetic(): Boolean {
     return (this.access and Opcodes.ACC_SYNTHETIC) != 0
 }
+
+fun ClassNode.getVisibility(): Visibility {
+    return Visibility.fromAccess(this.access)
+}
+
+fun MethodNode.getVisibility(): Visibility {
+    return Visibility.fromAccess(this.access)
+}
+
+fun FieldNode.getVisibility(): Visibility {
+    return Visibility.fromAccess(this.access)
+}
+
 
 /*
 
