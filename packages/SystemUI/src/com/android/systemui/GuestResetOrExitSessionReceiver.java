@@ -36,7 +36,6 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 
-import dagger.Lazy;
 import dagger.assisted.Assisted;
 import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
@@ -141,23 +140,23 @@ public final class GuestResetOrExitSessionReceiver extends BroadcastReceiver {
      * reset and restart of guest user.
      */
     public static final class ResetSessionDialogFactory {
-        private final Lazy<SystemUIDialog> mDialogLazy;
+        private final SystemUIDialog.Factory mDialogFactory;
         private final Resources mResources;
         private final ResetSessionDialogClickListener.Factory mClickListenerFactory;
 
         @Inject
         public ResetSessionDialogFactory(
-                Lazy<SystemUIDialog> dialogLazy,
+                SystemUIDialog.Factory dialogFactory,
                 @Main Resources resources,
                 ResetSessionDialogClickListener.Factory clickListenerFactory) {
-            mDialogLazy = dialogLazy;
+            mDialogFactory = dialogFactory;
             mResources = resources;
             mClickListenerFactory = clickListenerFactory;
         }
 
         /** Create a guest reset dialog instance */
         public AlertDialog create(int userId) {
-            SystemUIDialog dialog = mDialogLazy.get();
+            SystemUIDialog dialog = mDialogFactory.create();
             ResetSessionDialogClickListener listener = mClickListenerFactory.create(
                     userId, dialog);
             dialog.setTitle(com.android.settingslib.R.string.guest_reset_and_restart_dialog_title);
@@ -216,22 +215,22 @@ public final class GuestResetOrExitSessionReceiver extends BroadcastReceiver {
      * exit of guest user.
      */
     public static final class ExitSessionDialogFactory {
-        private final Lazy<SystemUIDialog> mDialogLazy;
+        private final SystemUIDialog.Factory mDialogFactory;
         private final ExitSessionDialogClickListener.Factory mClickListenerFactory;
         private final Resources mResources;
 
         @Inject
         public ExitSessionDialogFactory(
-                Lazy<SystemUIDialog> dialogLazy,
+                SystemUIDialog.Factory dialogFactory,
                 ExitSessionDialogClickListener.Factory clickListenerFactory,
                 @Main Resources resources) {
-            mDialogLazy = dialogLazy;
+            mDialogFactory = dialogFactory;
             mClickListenerFactory = clickListenerFactory;
             mResources = resources;
         }
 
         public AlertDialog create(boolean isEphemeral, int userId) {
-            SystemUIDialog dialog = mDialogLazy.get();
+            SystemUIDialog dialog = mDialogFactory.create();
             ExitSessionDialogClickListener clickListener = mClickListenerFactory.create(
                     isEphemeral, userId, dialog);
             if (isEphemeral) {
