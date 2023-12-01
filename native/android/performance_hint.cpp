@@ -18,12 +18,14 @@
 
 #include <aidl/android/hardware/power/SessionHint.h>
 #include <aidl/android/hardware/power/SessionMode.h>
+#include <android/WorkDuration.h>
 #include <android/os/IHintManager.h>
 #include <android/os/IHintSession.h>
 #include <android/performance_hint.h>
 #include <binder/Binder.h>
 #include <binder/IBinder.h>
 #include <binder/IServiceManager.h>
+#include <inttypes.h>
 #include <performance_hint_private.h>
 #include <utils/SystemClock.h>
 
@@ -75,9 +77,12 @@ public:
     int setThreads(const int32_t* threadIds, size_t size);
     int getThreadIds(int32_t* const threadIds, size_t* size);
     int setPreferPowerEfficiency(bool enabled);
+    int reportActualWorkDuration(AWorkDuration* workDuration);
 
 private:
     friend struct APerformanceHintManager;
+
+    int reportActualWorkDurationInternal(WorkDuration* workDuration);
 
     sp<IHintManager> mHintManager;
     sp<IHintSession> mHintSession;
@@ -92,8 +97,7 @@ private:
     // Last hint reported from sendHint indexed by hint value
     std::vector<int64_t> mLastHintSentTimestamp;
     // Cached samples
-    std::vector<int64_t> mActualDurationsNanos;
-    std::vector<int64_t> mTimestampsNanos;
+    std::vector<WorkDuration> mActualWorkDurations;
 };
 
 static IHintManager* gIHintManagerForTesting = nullptr;
@@ -195,8 +199,7 @@ int APerformanceHintSession::updateTargetWorkDuration(int64_t targetDurationNano
      * Most of the workload is target_duration dependent, so now clear the cached samples
      * as they are most likely obsolete.
      */
-    mActualDurationsNanos.clear();
-    mTimestampsNanos.clear();
+    mActualWorkDurations.clear();
     mFirstTargetMetTimestamp = 0;
     mLastTargetMetTimestamp = 0;
     return 0;
@@ -207,43 +210,10 @@ int APerformanceHintSession::reportActualWorkDuration(int64_t actualDurationNano
         ALOGE("%s: actualDurationNanos must be positive", __FUNCTION__);
         return EINVAL;
     }
-    int64_t now = elapsedRealtimeNano();
-    mActualDurationsNanos.push_back(actualDurationNanos);
-    mTimestampsNanos.push_back(now);
 
-    if (actualDurationNanos >= mTargetDurationNanos) {
-        // Reset timestamps if we are equal or over the target.
-        mFirstTargetMetTimestamp = 0;
-    } else {
-        // Set mFirstTargetMetTimestamp for first time meeting target.
-        if (!mFirstTargetMetTimestamp || !mLastTargetMetTimestamp ||
-            (now - mLastTargetMetTimestamp > 2 * mPreferredRateNanos)) {
-            mFirstTargetMetTimestamp = now;
-        }
-        /**
-         * Rate limit the change if the update is over mPreferredRateNanos since first
-         * meeting target and less than mPreferredRateNanos since last meeting target.
-         */
-        if (now - mFirstTargetMetTimestamp > mPreferredRateNanos &&
-            now - mLastTargetMetTimestamp <= mPreferredRateNanos) {
-            return 0;
-        }
-        mLastTargetMetTimestamp = now;
-    }
+    WorkDuration workDuration(0, actualDurationNanos, actualDurationNanos, 0);
 
-    binder::Status ret =
-            mHintSession->reportActualWorkDuration(mActualDurationsNanos, mTimestampsNanos);
-    if (!ret.isOk()) {
-        ALOGE("%s: HintSession reportActualWorkDuration failed: %s", __FUNCTION__,
-              ret.exceptionMessage().c_str());
-        mFirstTargetMetTimestamp = 0;
-        mLastTargetMetTimestamp = 0;
-        return EPIPE;
-    }
-    mActualDurationsNanos.clear();
-    mTimestampsNanos.clear();
-
-    return 0;
+    return reportActualWorkDurationInternal(&workDuration);
 }
 
 int APerformanceHintSession::sendHint(SessionHint hint) {
@@ -322,6 +292,67 @@ int APerformanceHintSession::setPreferPowerEfficiency(bool enabled) {
     return OK;
 }
 
+int APerformanceHintSession::reportActualWorkDuration(AWorkDuration* aWorkDuration) {
+    WorkDuration* workDuration = static_cast<WorkDuration*>(aWorkDuration);
+    if (workDuration->workPeriodStartTimestampNanos <= 0) {
+        ALOGE("%s: workPeriodStartTimestampNanos must be positive", __FUNCTION__);
+        return EINVAL;
+    }
+    if (workDuration->actualTotalDurationNanos <= 0) {
+        ALOGE("%s: actualDurationNanos must be positive", __FUNCTION__);
+        return EINVAL;
+    }
+    if (workDuration->actualCpuDurationNanos <= 0) {
+        ALOGE("%s: cpuDurationNanos must be positive", __FUNCTION__);
+        return EINVAL;
+    }
+    if (workDuration->actualGpuDurationNanos < 0) {
+        ALOGE("%s: gpuDurationNanos must be non negative", __FUNCTION__);
+        return EINVAL;
+    }
+
+    return reportActualWorkDurationInternal(workDuration);
+}
+
+int APerformanceHintSession::reportActualWorkDurationInternal(WorkDuration* workDuration) {
+    int64_t actualTotalDurationNanos = workDuration->actualTotalDurationNanos;
+    int64_t now = uptimeNanos();
+    workDuration->timestampNanos = now;
+    mActualWorkDurations.push_back(std::move(*workDuration));
+
+    if (actualTotalDurationNanos >= mTargetDurationNanos) {
+        // Reset timestamps if we are equal or over the target.
+        mFirstTargetMetTimestamp = 0;
+    } else {
+        // Set mFirstTargetMetTimestamp for first time meeting target.
+        if (!mFirstTargetMetTimestamp || !mLastTargetMetTimestamp ||
+            (now - mLastTargetMetTimestamp > 2 * mPreferredRateNanos)) {
+            mFirstTargetMetTimestamp = now;
+        }
+        /**
+         * Rate limit the change if the update is over mPreferredRateNanos since first
+         * meeting target and less than mPreferredRateNanos since last meeting target.
+         */
+        if (now - mFirstTargetMetTimestamp > mPreferredRateNanos &&
+            now - mLastTargetMetTimestamp <= mPreferredRateNanos) {
+            return 0;
+        }
+        mLastTargetMetTimestamp = now;
+    }
+
+    binder::Status ret = mHintSession->reportActualWorkDuration2(mActualWorkDurations);
+    if (!ret.isOk()) {
+        ALOGE("%s: HintSession reportActualWorkDuration failed: %s", __FUNCTION__,
+              ret.exceptionMessage().c_str());
+        mFirstTargetMetTimestamp = 0;
+        mLastTargetMetTimestamp = 0;
+        return ret.exceptionCode() == binder::Status::EX_ILLEGAL_ARGUMENT ? EINVAL : EPIPE;
+    }
+    mActualWorkDurations.clear();
+
+    return 0;
+}
+
 // ===================================== C API
 APerformanceHintManager* APerformanceHint_getManager() {
     return APerformanceHintManager::getInstance();
@@ -374,6 +405,64 @@ int APerformanceHint_getThreadIds(void* aPerformanceHintSession, int32_t* const 
 
 int APerformanceHint_setPreferPowerEfficiency(APerformanceHintSession* session, bool enabled) {
     return session->setPreferPowerEfficiency(enabled);
+}
+
+int APerformanceHint_reportActualWorkDuration2(APerformanceHintSession* session,
+                                               AWorkDuration* workDuration) {
+    if (session == nullptr || workDuration == nullptr) {
+        ALOGE("Invalid value: (session %p, workDuration %p)", session, workDuration);
+        return EINVAL;
+    }
+    return session->reportActualWorkDuration(workDuration);
+}
+
+AWorkDuration* AWorkDuration_create() {
+    WorkDuration* workDuration = new WorkDuration();
+    return static_cast<AWorkDuration*>(workDuration);
+}
+
+void AWorkDuration_release(AWorkDuration* aWorkDuration) {
+    if (aWorkDuration == nullptr) {
+        ALOGE("%s: aWorkDuration is nullptr", __FUNCTION__);
+    }
+    delete aWorkDuration;
+}
+
+void AWorkDuration_setWorkPeriodStartTimestampNanos(AWorkDuration* aWorkDuration,
+                                                    int64_t workPeriodStartTimestampNanos) {
+    if (aWorkDuration == nullptr || workPeriodStartTimestampNanos <= 0) {
+        ALOGE("%s: Invalid value. (AWorkDuration: %p, workPeriodStartTimestampNanos: %" PRIi64 ")",
+              __FUNCTION__, aWorkDuration, workPeriodStartTimestampNanos);
+    }
+    static_cast<WorkDuration*>(aWorkDuration)->workPeriodStartTimestampNanos =
+            workPeriodStartTimestampNanos;
+}
+
+void AWorkDuration_setActualTotalDurationNanos(AWorkDuration* aWorkDuration,
+                                               int64_t actualTotalDurationNanos) {
+    if (aWorkDuration == nullptr || actualTotalDurationNanos <= 0) {
+        ALOGE("%s: Invalid value. (AWorkDuration: %p, actualTotalDurationNanos: %" PRIi64 ")",
+              __FUNCTION__, aWorkDuration, actualTotalDurationNanos);
+    }
+    static_cast<WorkDuration*>(aWorkDuration)->actualTotalDurationNanos = actualTotalDurationNanos;
+}
+
+void AWorkDuration_setActualCpuDurationNanos(AWorkDuration* aWorkDuration,
+                                             int64_t actualCpuDurationNanos) {
+    if (aWorkDuration == nullptr || actualCpuDurationNanos <= 0) {
+        ALOGE("%s: Invalid value. (AWorkDuration: %p, actualCpuDurationNanos: %" PRIi64 ")",
+              __FUNCTION__, aWorkDuration, actualCpuDurationNanos);
+    }
+    static_cast<WorkDuration*>(aWorkDuration)->actualCpuDurationNanos = actualCpuDurationNanos;
+}
+
+void AWorkDuration_setActualGpuDurationNanos(AWorkDuration* aWorkDuration,
+                                             int64_t actualGpuDurationNanos) {
+    if (aWorkDuration == nullptr || actualGpuDurationNanos < 0) {
+        ALOGE("%s: Invalid value. (AWorkDuration: %p, actualGpuDurationNanos: %" PRIi64 ")",
+              __FUNCTION__, aWorkDuration, actualGpuDurationNanos);
+    }
+    static_cast<WorkDuration*>(aWorkDuration)->actualGpuDurationNanos = actualGpuDurationNanos;
 }
 
 void APerformanceHint_setIHintManagerForTesting(void* iManager) {
