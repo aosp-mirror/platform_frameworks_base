@@ -1492,13 +1492,15 @@ public class ThermalManagerService extends SystemService {
                             threshold.hotThrottlingThresholds[ThrottlingSeverity.SEVERE];
                     if (!Float.isNaN(severeThreshold)) {
                         mSevereThresholds.put(threshold.name, severeThreshold);
-                        for (int severity = ThrottlingSeverity.LIGHT;
-                                severity <= ThrottlingSeverity.SHUTDOWN; severity++) {
-                            if (Flags.allowThermalHeadroomThresholds()
-                                    && threshold.hotThrottlingThresholds.length > severity) {
-                                updateHeadroomThreshold(severity,
-                                        threshold.hotThrottlingThresholds[severity],
-                                        severeThreshold);
+                        if (Flags.allowThermalHeadroomThresholds()) {
+                            for (int severity = ThrottlingSeverity.LIGHT;
+                                    severity <= ThrottlingSeverity.SHUTDOWN; severity++) {
+                                if (severity != ThrottlingSeverity.SEVERE
+                                        && threshold.hotThrottlingThresholds.length > severity) {
+                                    updateHeadroomThreshold(severity,
+                                            threshold.hotThrottlingThresholds[severity],
+                                            severeThreshold);
+                                }
                             }
                         }
                     }
@@ -1506,11 +1508,15 @@ public class ThermalManagerService extends SystemService {
             }
         }
 
-        // For a older device with multiple SKIN sensors, we will set a severity's headroom
+        // For an older device with multiple SKIN sensors, we will set a severity's headroom
         // threshold based on the minimum value of all as a workaround.
         void updateHeadroomThreshold(int severity, float threshold, float severeThreshold) {
             if (!Float.isNaN(threshold)) {
                 synchronized (mSamples) {
+                    if (severity == ThrottlingSeverity.SEVERE) {
+                        mHeadroomThresholds[severity] = 1.0f;
+                        return;
+                    }
                     float headroom = normalizeTemperature(threshold, severeThreshold);
                     if (Float.isNaN(mHeadroomThresholds[severity])) {
                         mHeadroomThresholds[severity] = headroom;
