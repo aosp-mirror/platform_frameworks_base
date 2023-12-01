@@ -15,3 +15,9 @@ flag {
     bug: "299448097"
 }
 
+flag {
+  name: "redact_sensitive_notifications_from_untrusted_listeners"
+  namespace: "systemui"
+  description: "This flag controls the redacting of sensitive notifications from untrusted NotificationListenerServices"
+  bug: "306271190"
+}

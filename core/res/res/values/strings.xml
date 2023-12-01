@@ -6363,4 +6363,10 @@ ul.</string>
     <!-- Communal profile label on a screen. This can be used as a tab label for this profile in tabbed views and can be used to represent the profile in sharing surfaces, etc. [CHAR LIMIT=20] -->
     <string name="profile_label_communal">Communal</string>
 
+    <!-- Notification message used when a notification's normal message contains sensitive information. -->
+    <!-- TODO b/301960090: replace with redacted message string and action title, when/if UX provides one -->
+    <!-- DO NOT TRANSLATE -->
+    <string name="redacted_notification_message"></string>
+    <!-- Notification action title used instead of a notification's normal title sensitive [CHAR_LIMIT=NOTIF_BODY] -->
+    <string name="redacted_notification_action_title"></string>
 </resources>
