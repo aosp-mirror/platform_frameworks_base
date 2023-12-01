@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
 
 import android.annotation.UserIdInt;
@@ -30,6 +31,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.content.pm.UserProperties;
 import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -207,6 +209,9 @@ public final class UserManagerTest {
                 .isEqualTo(cloneUserProperties.isCredentialShareableWithParent());
         assertThrows(SecurityException.class, cloneUserProperties::getDeleteAppWithParent);
 
+        compareDrawables(mUserManager.getUserBadge(),
+                Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
+
         // Verify clone user parent
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
         UserInfo parentProfileInfo = mUserManager.getProfileParent(userInfo.id);
@@ -214,6 +219,45 @@ public final class UserManagerTest {
         assertThat(mainUserId).isEqualTo(parentProfileInfo.id);
         removeUser(userInfo.id);
         assertThat(mUserManager.getProfileParent(mainUserId)).isNull();
+    }
+
+    @Test
+    public void testCommunalProfile() throws Exception {
+        assumeTrue("Device doesn't support communal profiles ",
+                mUserManager.isUserTypeEnabled(UserManager.USER_TYPE_PROFILE_COMMUNAL));
+
+        // Create communal profile if needed
+        if (mUserManager.getCommunalProfile() == null) {
+            Slog.i(TAG, "Attempting to create a communal profile for a test");
+            createUser("Communal", UserManager.USER_TYPE_PROFILE_COMMUNAL, /*flags*/ 0);
+        }
+        final UserHandle communal = mUserManager.getCommunalProfile();
+        assertWithMessage("Couldn't create communal profile").that(communal).isNotNull();
+
+        final UserTypeDetails userTypeDetails =
+                UserTypeFactory.getUserTypes().get(UserManager.USER_TYPE_PROFILE_COMMUNAL);
+        assertWithMessage("No communal user type on device").that(userTypeDetails).isNotNull();
+
+        // Test that only one communal profile can be created
+        final UserInfo secondCommunalProfile =
+                createUser("Communal", UserManager.USER_TYPE_PROFILE_COMMUNAL, /*flags*/ 0);
+        assertThat(secondCommunalProfile).isNull();
+
+        // Verify that communal profile doesn't have a parent
+        assertThat(mUserManager.getProfileParent(communal.getIdentifier())).isNull();
+
+        // Make sure that, when switching users, the communal profile remains visible.
+        final boolean isStarted = mActivityManager.startProfile(communal);
+        assertWithMessage("Unable to start communal profile").that(isStarted).isTrue();
+        final UserManager umCommunal = (UserManager) mContext.createPackageContextAsUser(
+                        "android", 0, communal).getSystemService(Context.USER_SERVICE);
+        final int originalCurrent = ActivityManager.getCurrentUser();
+        final UserInfo testUser = createUser("TestUser", /* flags= */ 0);
+        assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
+        switchUser(testUser.id);
+        assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
+        switchUser(originalCurrent);
+        assertWithMessage("Communal profile not visible").that(umCommunal.isUserVisible()).isTrue();
     }
 
     @MediumTest
@@ -803,6 +847,9 @@ public final class UserManagerTest {
                 .isEqualTo(userTypeDetails.getBadgePlain());
         assertThat(mUserManager.getUserBadgeNoBackgroundResId(userId))
                 .isEqualTo(userTypeDetails.getBadgeNoBackground());
+
+        compareDrawables(mUserManager.getUserBadge(),
+                Resources.getSystem().getDrawable(userTypeDetails.getBadgePlain()));
 
         final int badgeIndex = userInfo.profileBadge;
         assertThat(mUserManager.getUserBadgeColor(userId)).isEqualTo(
@@ -1552,6 +1599,12 @@ public final class UserManagerTest {
     private boolean isMainUserPermanentAdmin() {
         return Resources.getSystem()
                 .getBoolean(com.android.internal.R.bool.config_isMainUserPermanentAdmin);
+    }
+
+    private void compareDrawables(Drawable actual, Drawable expected) {
+        assertEquals(actual.getIntrinsicWidth(), expected.getIntrinsicWidth());
+        assertEquals(actual.getIntrinsicHeight(), expected.getIntrinsicHeight());
+        assertEquals(actual.getLevel(), expected.getLevel());
     }
 
 }

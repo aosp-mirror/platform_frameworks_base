@@ -4116,10 +4116,18 @@ package android.content.pm {
 
   public final class UserProperties implements android.os.Parcelable {
     method public int describeContents();
+    method public int getShowInQuietMode();
+    method public int getShowInSharingSurfaces();
     method public boolean isCredentialShareableWithParent();
     method public boolean isMediaSharedWithParent();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.UserProperties> CREATOR;
+    field public static final int SHOW_IN_QUIET_MODE_DEFAULT = 2; // 0x2
+    field public static final int SHOW_IN_QUIET_MODE_HIDDEN = 1; // 0x1
+    field public static final int SHOW_IN_QUIET_MODE_PAUSED = 0; // 0x0
+    field public static final int SHOW_IN_SHARING_SURFACES_NO = 2; // 0x2
+    field public static final int SHOW_IN_SHARING_SURFACES_SEPARATE = 1; // 0x1
+    field public static final int SHOW_IN_SHARING_SURFACES_WITH_PARENT = 0; // 0x0
   }
 
 }
@@ -10968,6 +10976,7 @@ package android.os {
     method @NonNull public java.util.List<android.os.UserHandle> getEnabledProfiles();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public android.os.UserHandle getMainUser();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public android.os.UserHandle getPreviousForegroundUser();
+    method @NonNull public String getProfileLabel();
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public android.os.UserHandle getProfileParent(@NonNull android.os.UserHandle);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public int getRemainingCreatableProfileCount(@NonNull String);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS, android.Manifest.permission.QUERY_USERS}) public int getRemainingCreatableUserCount(@NonNull String);
@@ -10976,6 +10985,7 @@ package android.os {
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public android.os.PersistableBundle getSeedAccountOptions();
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public String getSeedAccountType();
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public long[] getSerialNumbersOfUsers(boolean);
+    method @NonNull public android.graphics.drawable.Drawable getUserBadge();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.os.UserHandle> getUserHandles(boolean);
     method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.GET_ACCOUNTS_PRIVILEGED}) public android.graphics.Bitmap getUserIcon();
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.QUERY_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional=true) public android.content.pm.UserProperties getUserProperties(@NonNull android.os.UserHandle);

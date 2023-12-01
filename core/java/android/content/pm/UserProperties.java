@@ -19,6 +19,7 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -49,6 +50,8 @@ public final class UserProperties implements Parcelable {
     private static final String ATTR_SHOW_IN_LAUNCHER = "showInLauncher";
     private static final String ATTR_START_WITH_PARENT = "startWithParent";
     private static final String ATTR_SHOW_IN_SETTINGS = "showInSettings";
+    private static final String ATTR_SHOW_IN_QUIET_MODE = "showInQuietMode";
+    private static final String ATTR_SHOW_IN_SHARING_SURFACES = "showInSharingSurfaces";
     private static final String ATTR_INHERIT_DEVICE_POLICY = "inheritDevicePolicy";
     private static final String ATTR_USE_PARENTS_CONTACTS = "useParentsContacts";
     private static final String ATTR_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA =
@@ -76,6 +79,10 @@ public final class UserProperties implements Parcelable {
             INDEX_MEDIA_SHARED_WITH_PARENT,
             INDEX_CREDENTIAL_SHAREABLE_WITH_PARENT,
             INDEX_DELETE_APP_WITH_PARENT,
+            INDEX_ALWAYS_VISIBLE,
+            INDEX_SHOW_IN_QUIET_MODE,
+            INDEX_SHOW_IN_SHARING_SURFACES,
+            INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE,
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -91,6 +98,10 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_MEDIA_SHARED_WITH_PARENT = 8;
     private static final int INDEX_CREDENTIAL_SHAREABLE_WITH_PARENT = 9;
     private static final int INDEX_DELETE_APP_WITH_PARENT = 10;
+    private static final int INDEX_ALWAYS_VISIBLE = 11;
+    private static final int INDEX_SHOW_IN_QUIET_MODE = 12;
+    private static final int INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE = 13;
+    private static final int INDEX_SHOW_IN_SHARING_SURFACES = 14;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -276,6 +287,81 @@ public final class UserProperties implements Parcelable {
      */
     public static final int CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING = 1;
 
+    /**
+     * Possible values for the profile visibility when in quiet mode. This affects the profile data
+     * and apps surfacing in Settings, sharing surfaces, and file picker surfaces. It signifies
+     * whether the profile data and apps will be shown or not.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "SHOW_IN_QUIET_MODE_",
+            value = {
+                    SHOW_IN_QUIET_MODE_PAUSED,
+                    SHOW_IN_QUIET_MODE_HIDDEN,
+                    SHOW_IN_QUIET_MODE_DEFAULT,
+            }
+    )
+    public @interface ShowInQuietMode {
+    }
+
+    /**
+     * Indicates that the profile should still be visible in quiet mode but should be shown as
+     * paused (e.g. by greying out its icons).
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_QUIET_MODE_PAUSED = 0;
+    /**
+     * Indicates that the profile should not be visible when the profile is in quiet mode.
+     * For example, the profile should not be shown in tabbed views in Settings, files sharing
+     * surfaces etc when in quiet mode.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_QUIET_MODE_HIDDEN = 1;
+    /**
+     * Indicates that quiet mode should not have any effect on the profile visibility. If the
+     * profile is meant to be visible, it will remain visible and vice versa.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_QUIET_MODE_DEFAULT = 2;
+
+    /**
+     * Possible values for the profile apps visibility in sharing surfaces. This indicates the
+     * profile data and apps should be shown in separate tabs or mixed with its parent user's data
+     * and apps in sharing surfaces and file picker surfaces.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "SHOW_IN_SHARING_SURFACES_",
+            value = {
+                    SHOW_IN_SHARING_SURFACES_SEPARATE,
+                    SHOW_IN_SHARING_SURFACES_WITH_PARENT,
+                    SHOW_IN_SHARING_SURFACES_NO,
+            }
+    )
+    public @interface ShowInSharingSurfaces {
+    }
+
+    /**
+     * Indicates that the profile data and apps should be shown in sharing surfaces intermixed with
+     * parent user's data and apps.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_SHARING_SURFACES_WITH_PARENT = SHOW_IN_LAUNCHER_WITH_PARENT;
+
+    /**
+     * Indicates that the profile data and apps should be shown in sharing surfaces separate from
+     * parent user's data and apps.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_SHARING_SURFACES_SEPARATE = SHOW_IN_LAUNCHER_SEPARATE;
+
+    /**
+     * Indicates that the profile data and apps should not be shown in sharing surfaces at all.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public static final int SHOW_IN_SHARING_SURFACES_NO = SHOW_IN_LAUNCHER_NO;
 
     /**
      * Creates a UserProperties (intended for the SystemServer) that stores a reference to the given
@@ -329,6 +415,8 @@ public final class UserProperties implements Parcelable {
         setShowInLauncher(orig.getShowInLauncher());
         setMediaSharedWithParent(orig.isMediaSharedWithParent());
         setCredentialShareableWithParent(orig.isCredentialShareableWithParent());
+        setShowInQuietMode(orig.getShowInQuietMode());
+        setShowInSharingSurfaces(orig.getShowInSharingSurfaces());
     }
 
     /**
@@ -403,6 +491,61 @@ public final class UserProperties implements Parcelable {
         setPresent(INDEX_SHOW_IN_SETTINGS);
     }
     private @ShowInSettings int mShowInSettings;
+
+    /**
+     * Returns whether a user should be shown in the Settings and sharing surfaces depending on the
+     * {@link android.os.UserManager#requestQuietModeEnabled(boolean, android.os.UserHandle)
+     * quiet mode}. This is only applicable to profile users since the quiet mode concept is only
+     * applicable to profile users.
+     *
+     * <p> Please note that, in Settings, this property takes effect only if
+     * {@link #getShowInSettings()} does not return {@link #SHOW_IN_SETTINGS_NO}.
+     * Also note that in Sharing surfaces this property takes effect only if
+     * {@link #getShowInSharingSurfaces()} does not return {@link #SHOW_IN_SHARING_SURFACES_NO}.
+     *
+     * @return One of {@link #SHOW_IN_QUIET_MODE_HIDDEN},
+     *         {@link #SHOW_IN_QUIET_MODE_PAUSED}, or
+     *         {@link #SHOW_IN_QUIET_MODE_DEFAULT} depending on whether the profile should be
+     *         shown in quiet mode or not.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public @ShowInQuietMode int getShowInQuietMode() {
+        // NOTE: Launcher currently does not make use of this property.
+        if (isPresent(INDEX_SHOW_IN_QUIET_MODE)) return mShowInQuietMode;
+        if (mDefaultProperties != null) return mDefaultProperties.mShowInQuietMode;
+        throw new SecurityException(
+                "You don't have permission to query ShowInQuietMode");
+    }
+    /** @hide */
+    public void setShowInQuietMode(@ShowInQuietMode int showInQuietMode) {
+        this.mShowInQuietMode = showInQuietMode;
+        setPresent(INDEX_SHOW_IN_QUIET_MODE);
+    }
+    private int mShowInQuietMode;
+
+    /**
+     * Returns whether a user's data and apps should be shown in sharing surfaces in a separate tab
+     * or mixed with the parent user's data/apps. This is only applicable to profile users.
+     *
+     * @return One of {@link #SHOW_IN_SHARING_SURFACES_NO},
+     *         {@link #SHOW_IN_SHARING_SURFACES_SEPARATE}, or
+     *         {@link #SHOW_IN_SHARING_SURFACES_WITH_PARENT} depending on whether the profile
+     *         should be shown separate from its parent's data, mixed with the parent's data, or
+     *         not shown at all.
+     */
+    @SuppressLint("UnflaggedApi") // b/306636213
+    public @ShowInSharingSurfaces int getShowInSharingSurfaces() {
+        if (isPresent(INDEX_SHOW_IN_SHARING_SURFACES)) return mShowInSharingSurfaces;
+        if (mDefaultProperties != null) return mDefaultProperties.mShowInSharingSurfaces;
+        throw new SecurityException(
+                "You don't have permission to query ShowInSharingSurfaces");
+    }
+    /** @hide */
+    public void setShowInSharingSurfaces(@ShowInSharingSurfaces int showInSharingSurfaces) {
+        this.mShowInSharingSurfaces = showInSharingSurfaces;
+        setPresent(INDEX_SHOW_IN_SHARING_SURFACES);
+    }
+    private int mShowInSharingSurfaces;
 
     /**
      * Returns whether a profile should be started when its parent starts (unless in quiet mode).
@@ -700,6 +843,12 @@ public final class UserProperties implements Parcelable {
                 case ATTR_SHOW_IN_SETTINGS:
                     setShowInSettings(parser.getAttributeInt(i));
                     break;
+                case ATTR_SHOW_IN_QUIET_MODE:
+                    setShowInQuietMode(parser.getAttributeInt(i));
+                    break;
+                case ATTR_SHOW_IN_SHARING_SURFACES:
+                    setShowInSharingSurfaces(parser.getAttributeInt(i));
+                    break;
                 case ATTR_INHERIT_DEVICE_POLICY:
                     setInheritDevicePolicy(parser.getAttributeInt(i));
                     break;
@@ -750,6 +899,13 @@ public final class UserProperties implements Parcelable {
         if (isPresent(INDEX_SHOW_IN_SETTINGS)) {
             serializer.attributeInt(null, ATTR_SHOW_IN_SETTINGS, mShowInSettings);
         }
+        if (isPresent(INDEX_SHOW_IN_QUIET_MODE)) {
+            serializer.attributeInt(null, ATTR_SHOW_IN_QUIET_MODE,
+                    mShowInQuietMode);
+        }
+        if (isPresent(INDEX_SHOW_IN_SHARING_SURFACES)) {
+            serializer.attributeInt(null, ATTR_SHOW_IN_SHARING_SURFACES, mShowInSharingSurfaces);
+        }
         if (isPresent(INDEX_INHERIT_DEVICE_POLICY)) {
             serializer.attributeInt(null, ATTR_INHERIT_DEVICE_POLICY,
                     mInheritDevicePolicy);
@@ -792,6 +948,8 @@ public final class UserProperties implements Parcelable {
         dest.writeInt(mShowInLauncher);
         dest.writeBoolean(mStartWithParent);
         dest.writeInt(mShowInSettings);
+        dest.writeInt(mShowInQuietMode);
+        dest.writeInt(mShowInSharingSurfaces);
         dest.writeInt(mInheritDevicePolicy);
         dest.writeBoolean(mUseParentsContacts);
         dest.writeBoolean(mUpdateCrossProfileIntentFiltersOnOTA);
@@ -813,6 +971,8 @@ public final class UserProperties implements Parcelable {
         mShowInLauncher = source.readInt();
         mStartWithParent = source.readBoolean();
         mShowInSettings = source.readInt();
+        mShowInQuietMode = source.readInt();
+        mShowInSharingSurfaces = source.readInt();
         mInheritDevicePolicy = source.readInt();
         mUseParentsContacts = source.readBoolean();
         mUpdateCrossProfileIntentFiltersOnOTA = source.readBoolean();
@@ -848,6 +1008,10 @@ public final class UserProperties implements Parcelable {
         private @ShowInLauncher int mShowInLauncher = SHOW_IN_LAUNCHER_WITH_PARENT;
         private boolean mStartWithParent = false;
         private @ShowInSettings int mShowInSettings = SHOW_IN_SETTINGS_WITH_PARENT;
+        private @ShowInQuietMode int mShowInQuietMode =
+                SHOW_IN_QUIET_MODE_PAUSED;
+        private @ShowInSharingSurfaces int mShowInSharingSurfaces =
+                SHOW_IN_SHARING_SURFACES_SEPARATE;
         private @InheritDevicePolicy int mInheritDevicePolicy = INHERIT_DEVICE_POLICY_NO;
         private boolean mUseParentsContacts = false;
         private boolean mUpdateCrossProfileIntentFiltersOnOTA = false;
@@ -875,6 +1039,19 @@ public final class UserProperties implements Parcelable {
             mShowInSettings = showInSettings;
             return this;
         }
+
+        /** Sets the value for {@link #mShowInQuietMode} */
+        public Builder setShowInQuietMode(@ShowInQuietMode int showInQuietMode) {
+            mShowInQuietMode = showInQuietMode;
+            return this;
+        }
+
+        /** Sets the value for {@link #mShowInSharingSurfaces}. */
+        public Builder setShowInSharingSurfaces(@ShowInSharingSurfaces int showInSharingSurfaces) {
+            mShowInSharingSurfaces = showInSharingSurfaces;
+            return this;
+        }
+
 
         /** Sets the value for {@link #mInheritDevicePolicy}*/
         public Builder setInheritDevicePolicy(
@@ -932,6 +1109,8 @@ public final class UserProperties implements Parcelable {
                     mShowInLauncher,
                     mStartWithParent,
                     mShowInSettings,
+                    mShowInQuietMode,
+                    mShowInSharingSurfaces,
                     mInheritDevicePolicy,
                     mUseParentsContacts,
                     mUpdateCrossProfileIntentFiltersOnOTA,
@@ -948,6 +1127,8 @@ public final class UserProperties implements Parcelable {
             @ShowInLauncher int showInLauncher,
             boolean startWithParent,
             @ShowInSettings int showInSettings,
+            @ShowInQuietMode int showInQuietMode,
+            @ShowInSharingSurfaces int showInSharingSurfaces,
             @InheritDevicePolicy int inheritDevicePolicy,
             boolean useParentsContacts, boolean updateCrossProfileIntentFiltersOnOTA,
             @CrossProfileIntentFilterAccessControlLevel int crossProfileIntentFilterAccessControl,
@@ -959,6 +1140,8 @@ public final class UserProperties implements Parcelable {
         setShowInLauncher(showInLauncher);
         setStartWithParent(startWithParent);
         setShowInSettings(showInSettings);
+        setShowInQuietMode(showInQuietMode);
+        setShowInSharingSurfaces(showInSharingSurfaces);
         setInheritDevicePolicy(inheritDevicePolicy);
         setUseParentsContacts(useParentsContacts);
         setUpdateCrossProfileIntentFiltersOnOTA(updateCrossProfileIntentFiltersOnOTA);

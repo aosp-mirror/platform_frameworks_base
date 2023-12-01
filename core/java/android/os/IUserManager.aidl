@@ -129,6 +129,7 @@ interface IUserManager {
     int getUserBadgeColorResId(int userId);
     int getUserBadgeDarkColorResId(int userId);
     boolean hasBadge(int userId);
+    int getProfileLabelResId(int userId);
     boolean isUserUnlocked(int userId);
     boolean isUserRunning(int userId);
     boolean isUserForeground(int userId);

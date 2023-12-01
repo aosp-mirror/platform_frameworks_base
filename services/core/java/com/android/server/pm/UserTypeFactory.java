@@ -49,6 +49,7 @@ import android.os.UserManager;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
 
@@ -123,7 +124,7 @@ public final class UserTypeFactory {
                 .setName(USER_TYPE_PROFILE_CLONE)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(1)
-                .setLabel(0)
+                .setLabels(R.string.profile_label_clone)
                 .setIconBadge(com.android.internal.R.drawable.ic_clone_icon_badge)
                 .setBadgePlain(com.android.internal.R.drawable.ic_clone_badge)
                 // Clone doesn't use BadgeNoBackground, so just set to BadgePlain as a placeholder.
@@ -148,6 +149,10 @@ public final class UserTypeFactory {
                                 UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
                         .setCrossProfileIntentResolutionStrategy(UserProperties
                                 .CROSS_PROFILE_INTENT_RESOLUTION_STRATEGY_NO_FILTERING)
+                        .setShowInQuietMode(
+                                UserProperties.SHOW_IN_QUIET_MODE_DEFAULT)
+                        .setShowInSharingSurfaces(
+                                UserProperties.SHOW_IN_SHARING_SURFACES_WITH_PARENT)
                         .setMediaSharedWithParent(true)
                         .setCredentialShareableWithParent(true)
                         .setDeleteAppWithParent(true));
@@ -163,7 +168,10 @@ public final class UserTypeFactory {
                 .setBaseType(FLAG_PROFILE)
                 .setDefaultUserInfoPropertyFlags(FLAG_MANAGED_PROFILE)
                 .setMaxAllowedPerParent(1)
-                .setLabel(0)
+                .setLabels(
+                        R.string.profile_label_work,
+                        R.string.profile_label_work_2,
+                        R.string.profile_label_work_3)
                 .setIconBadge(com.android.internal.R.drawable.ic_corp_icon_badge_case)
                 .setBadgePlain(com.android.internal.R.drawable.ic_corp_badge_case)
                 .setBadgeNoBackground(com.android.internal.R.drawable.ic_corp_badge_no_background)
@@ -186,6 +194,10 @@ public final class UserTypeFactory {
                         .setStartWithParent(true)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
                         .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
+                        .setShowInQuietMode(
+                                UserProperties.SHOW_IN_QUIET_MODE_PAUSED)
+                        .setShowInSharingSurfaces(
+                                UserProperties.SHOW_IN_SHARING_SURFACES_SEPARATE)
                         .setCredentialShareableWithParent(true));
     }
 
@@ -201,7 +213,10 @@ public final class UserTypeFactory {
                 .setName(USER_TYPE_PROFILE_TEST)
                 .setBaseType(FLAG_PROFILE)
                 .setMaxAllowedPerParent(2)
-                .setLabel(0)
+                .setLabels(
+                        R.string.profile_label_test,
+                        R.string.profile_label_test,
+                        R.string.profile_label_test)
                 .setIconBadge(com.android.internal.R.drawable.ic_test_icon_badge_experiment)
                 .setBadgePlain(com.android.internal.R.drawable.ic_test_badge_experiment)
                 .setBadgeNoBackground(com.android.internal.R.drawable.ic_test_badge_no_background)

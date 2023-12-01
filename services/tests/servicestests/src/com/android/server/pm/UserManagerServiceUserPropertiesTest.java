@@ -60,6 +60,8 @@ public class UserManagerServiceUserPropertiesTest {
                 .setShowInLauncher(21)
                 .setStartWithParent(false)
                 .setShowInSettings(45)
+                .setShowInSharingSurfaces(78)
+                .setShowInQuietMode(12)
                 .setInheritDevicePolicy(67)
                 .setUseParentsContacts(false)
                 .setCrossProfileIntentFilterAccessControl(10)
@@ -71,6 +73,8 @@ public class UserManagerServiceUserPropertiesTest {
         final UserProperties actualProps = new UserProperties(defaultProps);
         actualProps.setShowInLauncher(14);
         actualProps.setShowInSettings(32);
+        actualProps.setShowInSharingSurfaces(46);
+        actualProps.setShowInQuietMode(27);
         actualProps.setInheritDevicePolicy(51);
         actualProps.setUseParentsContacts(true);
         actualProps.setCrossProfileIntentFilterAccessControl(20);
@@ -223,6 +227,10 @@ public class UserManagerServiceUserPropertiesTest {
         assertThat(expected.getShowInLauncher()).isEqualTo(actual.getShowInLauncher());
         assertThat(expected.getStartWithParent()).isEqualTo(actual.getStartWithParent());
         assertThat(expected.getShowInSettings()).isEqualTo(actual.getShowInSettings());
+        assertThat(expected.getShowInSharingSurfaces()).isEqualTo(
+                actual.getShowInSharingSurfaces());
+        assertThat(expected.getShowInQuietMode())
+                .isEqualTo(actual.getShowInQuietMode());
         assertThat(expected.getInheritDevicePolicy()).isEqualTo(actual.getInheritDevicePolicy());
         assertThat(expected.getUseParentsContacts()).isEqualTo(actual.getUseParentsContacts());
         assertThat(expected.getCrossProfileIntentFilterAccessControl())
