@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
 import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
 import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
+import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION_TO_USER;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
@@ -170,6 +171,8 @@ final class LetterboxUiController {
 
     // Corresponds to OVERRIDE_ANY_ORIENTATION
     private final boolean mIsOverrideAnyOrientationEnabled;
+    // Corresponds to OVERRIDE_ANY_ORIENTATION_TO_USER
+    private final boolean mIsOverrideToUserOrientationEnabled;
     // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT
     private final boolean mIsOverrideToPortraitOrientationEnabled;
     // Corresponds to OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR
@@ -254,9 +257,8 @@ final class LetterboxUiController {
     // Counter for ActivityRecord#setRequestedOrientation
     private int mSetOrientationRequestCounter = 0;
 
-    // The min aspect ratio override set by user. Stores the last selected aspect ratio after
-    // {@link #shouldApplyUserFullscreenOverride} or {@link #shouldApplyUserMinAspectRatioOverride}
-    // have been invoked.
+    // TODO(b/315140179): Make mUserAspectRatio final
+    // The min aspect ratio override set by user
     @PackageManager.UserMinAspectRatio
     private int mUserAspectRatio = USER_MIN_ASPECT_RATIO_UNSET;
 
@@ -355,6 +357,8 @@ final class LetterboxUiController {
                         PROPERTY_COMPAT_ALLOW_USER_ASPECT_RATIO_FULLSCREEN_OVERRIDE);
 
         mIsOverrideAnyOrientationEnabled = isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION);
+        mIsOverrideToUserOrientationEnabled =
+                isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION_TO_USER);
         mIsOverrideToPortraitOrientationEnabled =
                 isCompatChangeEnabled(OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT);
         mIsOverrideToReverseLandscapeOrientationEnabled =
@@ -663,9 +667,11 @@ final class LetterboxUiController {
 
     @ScreenOrientation
     int overrideOrientationIfNeeded(@ScreenOrientation int candidate) {
+        final DisplayContent displayContent = mActivityRecord.mDisplayContent;
+        final boolean isIgnoreOrientationRequestEnabled = displayContent != null
+                && displayContent.getIgnoreOrientationRequest();
         if (shouldApplyUserFullscreenOverride()
-                && mActivityRecord.mDisplayContent != null
-                && mActivityRecord.mDisplayContent.getIgnoreOrientationRequest()) {
+                && isIgnoreOrientationRequestEnabled) {
             Slog.v(TAG, "Requested orientation " + screenOrientationToString(candidate) + " for "
                     + mActivityRecord + " is overridden to "
                     + screenOrientationToString(SCREEN_ORIENTATION_USER)
@@ -690,12 +696,22 @@ final class LetterboxUiController {
             return candidate;
         }
 
-        DisplayContent displayContent = mActivityRecord.mDisplayContent;
         if (mIsOverrideOrientationOnlyForCameraEnabled && displayContent != null
                 && (displayContent.mDisplayRotationCompatPolicy == null
                         || !displayContent.mDisplayRotationCompatPolicy
                                 .isActivityEligibleForOrientationOverride(mActivityRecord))) {
             return candidate;
+        }
+
+        // mUserAspectRatio is always initialized first in shouldApplyUserFullscreenOverride(),
+        // which will always come first before this check as user override > device
+        // manufacturer override.
+        if (mUserAspectRatio == PackageManager.USER_MIN_ASPECT_RATIO_UNSET
+                && mIsOverrideToUserOrientationEnabled && isIgnoreOrientationRequestEnabled) {
+            Slog.v(TAG, "Requested orientation  " + screenOrientationToString(candidate) + " for "
+                    + mActivityRecord + " is overridden to "
+                    + screenOrientationToString(SCREEN_ORIENTATION_USER));
+            return SCREEN_ORIENTATION_USER;
         }
 
         if (mIsOverrideToReverseLandscapeOrientationEnabled
