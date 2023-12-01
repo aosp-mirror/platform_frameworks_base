@@ -135,6 +135,9 @@
     <color name="biometric_dialog_gray">#ff757575</color>
     <color name="biometric_dialog_accent">@color/material_dynamic_primary40</color>
     <color name="biometric_dialog_error">#ffd93025</color>                  <!-- red 600 -->
+    <!-- Color for biometric prompt content view -->
+    <color name="biometric_prompt_content_background_color">#8AB4F8</color>
+    <color name="biometric_prompt_content_list_item_bullet_color">#1d873b</color>
 
     <!-- SFPS colors -->
     <color name="sfps_chevron_fill">@color/material_dynamic_primary90</color>

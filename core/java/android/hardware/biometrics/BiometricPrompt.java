@@ -22,6 +22,7 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 import static android.hardware.biometrics.Flags.FLAG_ADD_KEY_AGREEMENT_CRYPTO_OBJECT;
 import static android.hardware.biometrics.Flags.FLAG_GET_OP_ID_CRYPTO_OBJECT;
+import static android.hardware.biometrics.Flags.FLAG_CUSTOM_BIOMETRIC_PROMPT;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
@@ -208,12 +209,36 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
 
         /**
          * Optional: Sets a description that will be shown on the prompt.
+         *
+         * <p> Note that the description set by {@link Builder#setDescription(CharSequence)} will be
+         * overridden by {@link Builder#setContentView(PromptContentView)}. The view provided to
+         * {@link Builder#setContentView(PromptContentView)} will be used if both methods are
+         * called.
+         *
          * @param description The description to display.
          * @return This builder.
          */
         @NonNull
         public Builder setDescription(@NonNull CharSequence description) {
             mPromptInfo.setDescription(description);
+            return this;
+        }
+
+        /**
+         * Optional: Sets application customized content view that will be shown on the prompt.
+         *
+         * <p> Note that the description set by {@link Builder#setDescription(CharSequence)} will be
+         * overridden by {@link Builder#setContentView(PromptContentView)}. The view provided to
+         * {@link Builder#setContentView(PromptContentView)} will be used if both methods are
+         * called.
+         *
+         * @param view The customized view information.
+         * @return This builder.re
+         */
+        @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+        @NonNull
+        public BiometricPrompt.Builder setContentView(@NonNull PromptContentView view) {
+            mPromptInfo.setContentView(view);
             return this;
         }
 
@@ -695,6 +720,18 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     @Nullable
     public CharSequence getDescription() {
         return mPromptInfo.getDescription();
+    }
+
+    /**
+     * Gets the content view for the prompt, as set by
+     * {@link Builder#setContentView(PromptContentView)}.
+     *
+     * @return The content view for the prompt, or null if the prompt has no content view.
+     */
+    @FlaggedApi(FLAG_CUSTOM_BIOMETRIC_PROMPT)
+    @Nullable
+    public PromptContentView getContentView() {
+        return mPromptInfo.getContentView();
     }
 
     /**

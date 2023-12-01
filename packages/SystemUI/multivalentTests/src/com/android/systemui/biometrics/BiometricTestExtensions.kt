@@ -18,6 +18,7 @@ package com.android.systemui.biometrics
 
 import android.hardware.biometrics.BiometricManager.Authenticators
 import android.hardware.biometrics.ComponentInfoInternal
+import android.hardware.biometrics.PromptContentView
 import android.hardware.biometrics.PromptInfo
 import android.hardware.biometrics.SensorProperties
 import android.hardware.biometrics.SensorPropertiesInternal
@@ -119,6 +120,7 @@ internal fun promptInfo(
     title: String = "title",
     subtitle: String = "sub",
     description: String = "desc",
+    contentView: PromptContentView? = null,
     credentialTitle: String? = "cred title",
     credentialSubtitle: String? = "cred sub",
     credentialDescription: String? = "cred desc",
@@ -128,6 +130,7 @@ internal fun promptInfo(
     info.title = title
     info.subtitle = subtitle
     info.description = description
+    info.contentView = contentView
     credentialTitle?.let { info.deviceCredentialTitle = it }
     credentialSubtitle?.let { info.deviceCredentialSubtitle = it }
     credentialDescription?.let { info.deviceCredentialDescription = it }
