@@ -23,8 +23,6 @@ import java.util.HashMap;
 
 import javax.annotation.concurrent.GuardedBy;
 
-import org.junit.AssumptionViolatedException;
-
 /**
  * Utilities used in the host side test environment.
  */
@@ -128,7 +126,7 @@ public class HostTestUtils {
             }
         }
         // All processed classes have this annotation.
-        var allowed = clazz.getAnnotation(HostStubGenProcessedKeepClass.class) != null;
+        var allowed = clazz.getAnnotation(HostStubGenKeptInImpl.class) != null;
 
         // Java classes should be able to access any methods. (via callbacks, etc.)
         if (!allowed) {
