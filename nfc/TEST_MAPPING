@@ -1,0 +1,10 @@
+{
+  "presubmit": [
+    {
+      "name": "NfcManagerTests"
+    },
+    {
+      "name": "CtsNfcTestCases"
+    }
+  ]
+}
