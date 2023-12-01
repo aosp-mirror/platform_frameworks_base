@@ -2210,7 +2210,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
      * create a top-bottom split.
      */
     boolean isLeftRightSplit() {
-        return mSplitLayout.isLeftRightSplit();
+        return mSplitLayout != null && mSplitLayout.isLeftRightSplit();
     }
 
     /**
