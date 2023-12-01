@@ -635,6 +635,7 @@ java_defaults {
     api_contributions: [
         "framework-virtualization.stubs.source.test.api.contribution",
         "framework-location.stubs.source.test.api.contribution",
+        "framework-nfc.stubs.source.test.api.contribution",
     ],
 }
 
