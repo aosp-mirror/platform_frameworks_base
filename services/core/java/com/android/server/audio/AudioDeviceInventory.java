@@ -1335,6 +1335,27 @@ public class AudioDeviceInventory {
         }
     }
 
+    private static boolean devicesListEqual(@NonNull List<AudioDeviceAttributes> list1,
+                                            @NonNull List<AudioDeviceAttributes> list2) {
+        if (list1.size() != list2.size()) {
+            return false;
+        }
+        // This assumes a given device is only present once in a list
+        for (AudioDeviceAttributes d1 : list1) {
+            boolean found = false;
+            for (AudioDeviceAttributes d2 : list2) {
+                if (d1.equalTypeAddress(d2)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private int setDevicesRole(
             ArrayMap<Pair<Integer, Integer>, List<AudioDeviceAttributes>> rolesMap,
             AudioSystemInterface addOp,
@@ -1342,31 +1363,26 @@ public class AudioDeviceInventory {
             int useCase, int role, @NonNull List<AudioDeviceAttributes> devices) {
         synchronized (rolesMap) {
             Pair<Integer, Integer> key = new Pair<>(useCase, role);
-            List<AudioDeviceAttributes> roleDevices = new ArrayList<>();
-            List<AudioDeviceAttributes> appliedDevices = new ArrayList<>();
-
             if (rolesMap.containsKey(key)) {
-                roleDevices = rolesMap.get(key);
-                boolean equal = false;
-                if (roleDevices.size() == devices.size()) {
-                    roleDevices.retainAll(devices);
-                    equal = roleDevices.size() == devices.size();
+                if (devicesListEqual(devices, rolesMap.get(key))) {
+                    // NO OP: no change in preference
+                    return AudioSystem.SUCCESS;
                 }
-                if (!equal) {
-                    clearOp.deviceRoleAction(useCase, role, null);
-                    roleDevices.clear();
-                    appliedDevices.addAll(devices);
-                }
-            } else {
-                appliedDevices.addAll(devices);
-            }
-            if (appliedDevices.isEmpty()) {
+            } else if (devices.isEmpty()) {
+                // NO OP: no preference to no preference
                 return AudioSystem.SUCCESS;
             }
-            final int status = addOp.deviceRoleAction(useCase, role, appliedDevices);
-            if (status == AudioSystem.SUCCESS) {
-                roleDevices.addAll(appliedDevices);
-                rolesMap.put(key, roleDevices);
+            int status;
+            if (devices.isEmpty()) {
+                status = clearOp.deviceRoleAction(useCase, role, null);
+                if (status == AudioSystem.SUCCESS) {
+                    rolesMap.remove(key);
+                }
+            } else {
+                status = addOp.deviceRoleAction(useCase, role, devices);
+                if (status == AudioSystem.SUCCESS) {
+                    rolesMap.put(key, devices);
+                }
             }
             return status;
         }
