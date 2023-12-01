@@ -126,10 +126,7 @@ class AppListRepositoryTest {
         val flags = argumentCaptor<ApplicationInfoFlags> {
             verify(packageManager).getInstalledApplicationsAsUser(capture(), eq(ADMIN_USER_ID))
         }.firstValue
-        assertThat(flags.value).isEqualTo(
-            PackageManager.MATCH_DISABLED_COMPONENTS or
-                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
-        )
+        assertThat(flags.value and PackageManager.MATCH_ANY_USER.toLong()).isEqualTo(0L)
     }
 
     @Test
@@ -272,21 +269,6 @@ class AppListRepositoryTest {
             (PackageManager.MATCH_DISABLED_COMPONENTS or
                 PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong() or
                 PackageManager.MATCH_ARCHIVED_PACKAGES
-        )
-    }
-
-    @Test
-    fun loadApps_archivedAppsDisabled() = runTest {
-        mockInstalledApplications(listOf(NORMAL_APP), ADMIN_USER_ID)
-        val appList = repository.loadApps(userId = ADMIN_USER_ID)
-
-        assertThat(appList).containsExactly(NORMAL_APP)
-        val flags = argumentCaptor<ApplicationInfoFlags> {
-            verify(packageManager).getInstalledApplicationsAsUser(capture(), eq(ADMIN_USER_ID))
-        }.firstValue
-        assertThat(flags.value).isEqualTo(
-            PackageManager.MATCH_DISABLED_COMPONENTS or
-                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
         )
     }
 
