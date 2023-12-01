@@ -57,11 +57,12 @@ abstract class MediaRoute2Provider {
 
     public abstract void requestCreateSession(
             long requestId,
-            UserHandle userHandle,
             String packageName,
             String routeId,
             @Nullable Bundle sessionHints,
-            @RoutingSessionInfo.TransferReason int transferReason);
+            @RoutingSessionInfo.TransferReason int transferReason,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName);
 
     public abstract void releaseSession(long requestId, String sessionId);
 

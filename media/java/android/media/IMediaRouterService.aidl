@@ -64,7 +64,8 @@ interface IMediaRouterService {
 
     void requestCreateSessionWithRouter2(IMediaRouter2 router, int requestId, long managerRequestId,
             in RoutingSessionInfo oldSession, in MediaRoute2Info route,
-            in @nullable Bundle sessionHints);
+            in @nullable Bundle sessionHints, in UserHandle transferInitiatorUserHandle,
+            in String transferInitiatorPackageName);
     void selectRouteWithRouter2(IMediaRouter2 router, String sessionId, in MediaRoute2Info route);
     void deselectRouteWithRouter2(IMediaRouter2 router, String sessionId, in MediaRoute2Info route);
     void transferToRouteWithRouter2(IMediaRouter2 router, String sessionId,
@@ -84,7 +85,8 @@ interface IMediaRouterService {
     void stopScan(IMediaRouter2Manager manager);
 
     void requestCreateSessionWithManager(IMediaRouter2Manager manager, int requestId,
-            in RoutingSessionInfo oldSession, in @nullable MediaRoute2Info route);
+            in RoutingSessionInfo oldSession, in @nullable MediaRoute2Info route,
+            in UserHandle transferInitiatorUserHandle, in String transferInitiatorPackageName);
     void selectRouteWithManager(IMediaRouter2Manager manager, int requestId,
             String sessionId, in MediaRoute2Info route);
     void deselectRouteWithManager(IMediaRouter2Manager manager, int requestId,

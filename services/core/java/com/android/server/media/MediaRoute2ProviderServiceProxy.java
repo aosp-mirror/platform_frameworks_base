@@ -100,11 +100,12 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     @Override
     public void requestCreateSession(
             long requestId,
-            UserHandle userHandle,
             String packageName,
             String routeId,
             Bundle sessionHints,
-            @RoutingSessionInfo.TransferReason int transferReason) {
+            @RoutingSessionInfo.TransferReason int transferReason,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiatorPackageName) {
         if (mConnectionReady) {
             mActiveConnection.requestCreateSession(requestId, packageName, routeId, sessionHints);
             updateBinding();

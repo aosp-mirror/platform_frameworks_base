@@ -521,8 +521,8 @@ public final class MediaRouter2Manager {
             transferToRoute(
                     sessionInfo, route, transferInitiatorUserHandle, transferInitiatorPackageName);
         } else {
-            // TODO: b/279555229 - propagate transferInitiationUid to remote routes as well.
-            requestCreateSession(sessionInfo, route);
+            requestCreateSession(sessionInfo, route, transferInitiatorUserHandle,
+                    transferInitiatorPackageName);
         }
     }
 
@@ -911,7 +911,9 @@ public final class MediaRouter2Manager {
         }
     }
 
-    private void requestCreateSession(RoutingSessionInfo oldSession, MediaRoute2Info route) {
+    private void requestCreateSession(RoutingSessionInfo oldSession, MediaRoute2Info route,
+            @NonNull UserHandle transferInitiatorUserHandle,
+            @NonNull String transferInitiationPackageName) {
         if (TextUtils.isEmpty(oldSession.getClientPackageName())) {
             Log.w(TAG, "requestCreateSession: Can't create a session without package name.");
             notifyTransferFailed(oldSession, route);
@@ -922,7 +924,8 @@ public final class MediaRouter2Manager {
 
         try {
             mMediaRouterService.requestCreateSessionWithManager(
-                    mClient, requestId, oldSession, route);
+                    mClient, requestId, oldSession, route, transferInitiatorUserHandle,
+                    transferInitiationPackageName);
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
