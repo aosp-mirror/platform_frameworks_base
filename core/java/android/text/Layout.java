@@ -3913,7 +3913,6 @@ public abstract class Layout {
      * @see Layout.Builder
      */
     @NonNull
-    @FlaggedApi(FLAG_USE_BOUNDS_FOR_WIDTH)
     public final CharSequence getText() {
         return mText;
     }
