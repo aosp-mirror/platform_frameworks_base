@@ -345,7 +345,7 @@ class FaceScanningOverlay(
                 post {
                     faceAuthSucceeded = true
                     logger.biometricEvent("biometricAuthenticated")
-                    enableShowProtection(true)
+                    enableShowProtection(false)
                 }
             }
         }
