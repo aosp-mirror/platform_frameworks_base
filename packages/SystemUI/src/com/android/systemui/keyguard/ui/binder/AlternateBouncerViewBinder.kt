@@ -49,7 +49,7 @@ object AlternateBouncerViewBinder {
         swipeUpAnywhereGestureHandler: SwipeUpAnywhereGestureHandler,
         tapGestureDetector: TapGestureDetector,
     ) {
-        DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()
+        if (DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()) return
         scope.launch {
             // forcePluginOpen is necessary to show over occluded apps.
             // This cannot be tied to the view's lifecycle because setting this allows the view

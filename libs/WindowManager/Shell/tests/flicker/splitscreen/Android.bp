@@ -54,11 +54,13 @@ android_test {
     manifest: "AndroidManifest.xml",
     package_name: "com.android.wm.shell.flicker.splitscreen",
     instrumentation_target_package: "com.android.wm.shell.flicker.splitscreen",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: [
         ":WMShellFlickerTestsSplitScreenBase-src",
         ":WMShellFlickerTestsSplitScreenGroup1-src",
     ],
     static_libs: ["WMShellFlickerTestsBase"],
+    data: ["trace_config/*"],
 }
 
 android_test {
@@ -74,4 +76,5 @@ android_test {
         ":WMShellFlickerTestsSplitScreenGroup1-src",
     ],
     static_libs: ["WMShellFlickerTestsBase"],
+    data: ["trace_config/*"],
 }

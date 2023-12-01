@@ -18,6 +18,8 @@ package com.android.systemui.statusbar.notification.footer.ui.view;
 
 import static android.graphics.PorterDuff.Mode.SRC_ATOP;
 
+import static com.android.systemui.Flags.notificationBackgroundTintOptimization;
+
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
 import android.annotation.StringRes;
@@ -313,15 +315,16 @@ public class FooterView extends StackScrollerDecorView {
         Resources.Theme theme = mContext.getTheme();
         final @ColorInt int onSurface = Utils.getColorAttrDefaultColor(mContext,
                 com.android.internal.R.attr.materialColorOnSurface);
-        final @ColorInt int scHigh = Utils.getColorAttrDefaultColor(mContext,
-                com.android.internal.R.attr.materialColorSurfaceContainerHigh);
         final Drawable clearAllBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
         final Drawable manageBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
-        // TODO(b/282173943): Remove redundant tinting once Resources are thread-safe
-        final ColorFilter bgColorFilter = new PorterDuffColorFilter(scHigh, SRC_ATOP);
-        if (scHigh != 0) {
-            clearAllBg.setColorFilter(bgColorFilter);
-            manageBg.setColorFilter(bgColorFilter);
+        if (!notificationBackgroundTintOptimization()) {
+            final @ColorInt int scHigh = Utils.getColorAttrDefaultColor(mContext,
+                    com.android.internal.R.attr.materialColorSurfaceContainerHigh);
+            if (scHigh != 0) {
+                final ColorFilter bgColorFilter = new PorterDuffColorFilter(scHigh, SRC_ATOP);
+                clearAllBg.setColorFilter(bgColorFilter);
+                manageBg.setColorFilter(bgColorFilter);
+            }
         }
         mClearAllButton.setBackground(clearAllBg);
         mClearAllButton.setTextColor(onSurface);

@@ -105,7 +105,7 @@ IRenderPipeline::DrawResult SkiaVulkanPipeline::draw(
                     ProfileType::None != Properties::getProfileType())) {
         SkCanvas* profileCanvas = backBuffer->getCanvas();
         SkAutoCanvasRestore saver(profileCanvas, true);
-        profileCanvas->concat(mVkSurface->getCurrentPreTransform());
+        profileCanvas->concat(preTransform);
         SkiaProfileRenderer profileRenderer(profileCanvas, frame.width(), frame.height());
         profiler->draw(profileRenderer);
     }

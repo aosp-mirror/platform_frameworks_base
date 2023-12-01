@@ -640,10 +640,14 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"Mygtukas <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Pagrindinis"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Atgal"</string>
-    <string name="keyboard_key_dpad_up" msgid="2164184320424941416">"Aukštyn"</string>
-    <string name="keyboard_key_dpad_down" msgid="2110172278574325796">"Žemyn"</string>
-    <string name="keyboard_key_dpad_left" msgid="8329738048908755640">"Kairėn"</string>
-    <string name="keyboard_key_dpad_right" msgid="6282105433822321767">"Dešinėn"</string>
+    <!-- no translation found for keyboard_key_dpad_up (7199805608386368673) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_down (3354221123220737397) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_left (144176368026538621) -->
+    <skip />
+    <!-- no translation found for keyboard_key_dpad_right (8485763312139820037) -->
+    <skip />
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Centras"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Tarpas"</string>
@@ -671,7 +675,10 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Pranešimai"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Spartieji klavišai"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Perjungti klaviat. išdėstymą"</string>
-    <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"Išvalyti tekstą"</string>
+    <!-- no translation found for keyboard_shortcut_join (3578314570034512676) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_clear_text (6631051796030377857) -->
+    <skip />
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"Spartieji klavišai"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Ieškoti sparčiųjų klavišų"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Sparčiųjų klavišų nerasta"</string>
@@ -679,35 +686,45 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"Įvestis"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"Atidar. progr."</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"Esama programa"</string>
-    <string name="group_system_access_notification_shade" msgid="7116898151485382275">"Pasiekti pranešimų skydelį"</string>
-    <string name="group_system_full_screenshot" msgid="7389040853798023211">"Padaryti viso ekrano kopiją"</string>
-    <string name="group_system_access_system_app_shortcuts" msgid="4421497579210445641">"Pasiekti sistemos sąrašą / programų šaukinius"</string>
-    <string name="group_system_go_back" msgid="8838454003680364227">"Atgal: grįžti prie ankstesnės būsenos (mygtukas „Atgal“)"</string>
-    <string name="group_system_access_home_screen" msgid="1857344316928441909">"Pasiekti pagrindinį ekraną"</string>
-    <string name="group_system_overview_open_apps" msgid="6897128761003265350">"Peržiūrėti atidarytas programas"</string>
-    <string name="group_system_cycle_forward" msgid="9202444850838205990">"Pereiti prie naujausių programų (į priekį)"</string>
-    <string name="group_system_cycle_back" msgid="5163464503638229131">"Pereiti prie naujausių programų (atgal)"</string>
-    <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Visų progr. ir paiešk. prieig. sąrašas (t. y. Paieška, paleid. priem.)"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Slėpti ir (iš naujo) parodyti užduočių juostą"</string>
-    <string name="group_system_access_system_settings" msgid="7961639365383008053">"Pasiekti sistemos nustatymus"</string>
-    <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Pasiekti „Google“ padėjėją"</string>
+    <!-- no translation found for keyboard_shortcut_a11y_show_search_results (2865241062981833705) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_system (7744143131119370483) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_input (4589316004510335529) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_open_apps (6175417687221004059) -->
+    <skip />
+    <!-- no translation found for keyboard_shortcut_a11y_filter_current_app (7944592357493737911) -->
+    <skip />
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Peržiūrėti pranešimus"</string>
+    <string name="group_system_full_screenshot" msgid="5742204844232667785">"Padaryti ekrano kopiją"</string>
+    <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Rodyti sparčiuosius klavišus"</string>
+    <string name="group_system_go_back" msgid="2730322046244918816">"Grįžti"</string>
+    <string name="group_system_access_home_screen" msgid="4130366993484706483">"Grįžti į pagrindinį ekraną"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Peržiūrėti naujausias programas"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Pereiti į priekį per naujausias programas"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Pereiti atgal per naujausias programas"</string>
+    <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Atidaryti programų sąrašą"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="6108733797075862081">"Rodyti užduočių juostą"</string>
+    <string name="group_system_access_system_settings" msgid="8731721963449070017">"Atidaryti nustatymus"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Atidaryti Padėjėją"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Užrakinti ekraną"</string>
-    <string name="group_system_quick_memo" msgid="2914234890158583919">"Gauti pastabų programą trumpiems užrašams"</string>
+    <string name="group_system_quick_memo" msgid="6257072703041301265">"Atidaryti pastabas"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"Kelių užduočių atlikimas sistemoje"</string>
-    <string name="system_multitasking_rhs" msgid="6593269428880305699">"Eiti į išskaidyto ekrano režimą su dabartine programa dešinėje"</string>
-    <string name="system_multitasking_lhs" msgid="8839380725557952846">"Eiti į išskaidyto ekrano režimą su dabartine programa kairėje"</string>
-    <string name="system_multitasking_full_screen" msgid="1962084334200006297">"Perjungti iš išskaidyto ekrano režimo į viso ekrano režimą"</string>
-    <string name="system_multitasking_replace" msgid="844285282472557186">"Išskaidyto ekrano režimu: pakeisti iš vienos programos į kitą"</string>
+    <string name="system_multitasking_rhs" msgid="2454557648974553729">"Eiti į išskaidyto ekrano režimą su dabartine programa dešinėje"</string>
+    <string name="system_multitasking_lhs" msgid="3516599774920979402">"Eiti į išskaidyto ekrano režimą su dabartine programa kairėje"</string>
+    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Perjungti iš išskaidyto ekrano režimo į viso ekrano režimą"</string>
+    <string name="system_multitasking_replace" msgid="7410071959803642125">"Išskaidyto ekrano režimu: pakeisti iš vienos programos į kitą"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Įvestis"</string>
-    <string name="input_switch_input_language_next" msgid="3394291576873633793">"Perjungti įvesties kalbą (kita kalba)"</string>
-    <string name="input_switch_input_language_previous" msgid="8823659252918609216">"Perjungti įvesties kalbą (ankstesnė kalba)"</string>
+    <string name="input_switch_input_language_next" msgid="3782155659868227855">"Perjungti į kitą kalbą"</string>
+    <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Perjungti ankstesnę kalbą"</string>
     <string name="input_access_emoji" msgid="8105642858900406351">"Pasiekti jaustuką"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"Pasiekti rašymą balsu"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"Programos"</string>
-    <string name="keyboard_shortcut_group_applications_assist" msgid="771606231466098742">"Pagalbinė programa"</string>
-    <string name="keyboard_shortcut_group_applications_browser" msgid="7328131901589876868">"Naršyti („Chrome“ kaip numatytoji naršyklė)"</string>
+    <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"Padėjėjas"</string>
+    <string name="keyboard_shortcut_group_applications_browser" msgid="2776211137869809251">"Naršyklė"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2807268086386201060">"Kontaktai"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="7480359963463803511">"El. paštas („Gmail“ kaip numatytasis el. paštas)"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="7852376788894975192">"El. paštas"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="6912633831752843566">"SMS"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"Muzika"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"Kalendorius"</string>

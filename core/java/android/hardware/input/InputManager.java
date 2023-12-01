@@ -1095,62 +1095,6 @@ public final class InputManager {
     }
 
     /**
-     * Get sensors information as list.
-     *
-     * @hide
-     */
-    public InputSensorInfo[] getSensorList(int deviceId) {
-        return mGlobal.getSensorList(deviceId);
-    }
-
-    /**
-     * Enable input device sensor
-     *
-     * @hide
-     */
-    public boolean enableSensor(int deviceId, int sensorType, int samplingPeriodUs,
-            int maxBatchReportLatencyUs) {
-        return mGlobal.enableSensor(deviceId, sensorType, samplingPeriodUs,
-                maxBatchReportLatencyUs);
-    }
-
-    /**
-     * Enable input device sensor
-     *
-     * @hide
-     */
-    public void disableSensor(int deviceId, int sensorType) {
-        mGlobal.disableSensor(deviceId, sensorType);
-    }
-
-    /**
-     * Flush input device sensor
-     *
-     * @hide
-     */
-    public boolean flushSensor(int deviceId, int sensorType) {
-        return mGlobal.flushSensor(deviceId, sensorType);
-    }
-
-    /**
-     * Register input device sensor listener
-     *
-     * @hide
-     */
-    public boolean registerSensorListener(IInputSensorEventListener listener) {
-        return mGlobal.registerSensorListener(listener);
-    }
-
-    /**
-     * Unregister input device sensor listener
-     *
-     * @hide
-     */
-    public void unregisterSensorListener(IInputSensorEventListener listener) {
-        mGlobal.unregisterSensorListener(listener);
-    }
-
-    /**
      * Add a runtime association between the input port and the display port. This overrides any
      * static associations.
      * @param inputPort The port of the input device.

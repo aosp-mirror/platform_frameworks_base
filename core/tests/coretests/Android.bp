@@ -66,6 +66,7 @@ android_test {
         "testables",
         "com.android.text.flags-aconfig-java",
         "flag-junit",
+        "ravenwood-junit",
     ],
 
     libs: [
@@ -162,4 +163,16 @@ android_library {
         "framework",
         "framework-res",
     ],
+}
+
+android_ravenwood_test {
+    name: "FrameworksCoreTestsRavenwood",
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+    ],
+    srcs: [
+        "src/android/os/FileUtilsTest.java",
+    ],
+    auto_gen_config: true,
 }

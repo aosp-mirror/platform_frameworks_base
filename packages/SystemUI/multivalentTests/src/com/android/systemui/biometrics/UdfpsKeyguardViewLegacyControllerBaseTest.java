@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
@@ -94,6 +95,7 @@ public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        mSetFlagsRule.disableFlags(Flags.FLAG_DEVICE_ENTRY_UDFPS_REFACTOR);
         when(mView.getContext()).thenReturn(mResourceContext);
         when(mResourceContext.getString(anyInt())).thenReturn("test string");
         when(mKeyguardViewMediator.isAnimatingScreenOff()).thenReturn(false);

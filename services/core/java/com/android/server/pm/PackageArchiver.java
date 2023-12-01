@@ -116,7 +116,8 @@ public class PackageArchiver {
 
     private static final String ARCHIVE_ICONS_DIR = "package_archiver";
 
-    private static final String ACTION_UNARCHIVE_DIALOG = "android.intent.action.UNARCHIVE_DIALOG";
+    private static final String ACTION_UNARCHIVE_DIALOG =
+            "com.android.intent.action.UNARCHIVE_DIALOG";
 
     private final Context mContext;
     private final PackageManagerService mPm;

@@ -2,7 +2,7 @@
 
 This directory contains a small classes that "simulates" framework.jar, and tests against it.
 
-This test doesn't use the actual android framework code.
+This test is agnostic to Android, and it doesn't use any android framework code or knowledge.
 
 ## How to run
 

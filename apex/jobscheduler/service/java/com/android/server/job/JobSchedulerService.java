@@ -4358,7 +4358,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         private JobInfo enforceBuilderApiPermissions(int uid, int pid, JobInfo job) {
             if (job.getBias() != JobInfo.BIAS_DEFAULT
                         && !hasPermission(uid, pid, Manifest.permission.UPDATE_DEVICE_STATS)) {
-                if (CompatChanges.isChangeEnabled(THROW_ON_UNSUPPORTED_BIAS_USAGE, uid)) {
+                if (CompatChanges.isChangeEnabled(THROW_ON_UNSUPPORTED_BIAS_USAGE, uid)
+                        && Flags.throwOnUnsupportedBiasUsage()) {
                     throw new SecurityException("Apps may not call setBias()");
                 } else {
                     // We can't throw the exception. Log the issue and modify the job to remove

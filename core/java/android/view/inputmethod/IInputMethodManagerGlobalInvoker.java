@@ -514,14 +514,15 @@ final class IInputMethodManagerGlobalInvoker {
             @NonNull IInputMethodClient client,
             @UserIdInt int userId,
             @NonNull String delegatePackageName,
-            @NonNull String delegatorPackageName) {
+            @NonNull String delegatorPackageName,
+            @InputMethodManager.HandwritingDelegateFlags int flags) {
         final IInputMethodManager service = getService();
         if (service == null) {
             return false;
         }
         try {
             return service.acceptStylusHandwritingDelegation(
-                    client, userId, delegatePackageName, delegatorPackageName);
+                    client, userId, delegatePackageName, delegatorPackageName, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

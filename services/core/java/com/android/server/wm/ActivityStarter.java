@@ -1861,7 +1861,10 @@ class ActivityStarter {
                     + "PendingIntent. However, only the creator of the PendingIntent allows BAL, "
                     + "while the sender does not allow BAL. realCallingPackage: "
                     + realCallingPackage + "; callingPackage: " + mRequest.callingPackage
-                    + "; mTargetRootTask:" + mTargetRootTask);
+                    + "; mTargetRootTask:" + mTargetRootTask + "; mIntent: " + mIntent
+                    + "; mTargetRootTask.getTopNonFinishingActivity: "
+                    + mTargetRootTask.getTopNonFinishingActivity()
+                    + "; mTargetRootTask.getRootActivity: " + mTargetRootTask.getRootActivity());
         }
     }
 

@@ -233,7 +233,7 @@ public class NotificationRankingUpdate implements Parcelable {
             } finally {
                 mapParcel.recycle();
                 // To prevent memory leaks, we can close the ranking map fd here.
-                // Because a reference to this still exists
+                // This is safe to do because a reference to this still exists.
                 if (buffer != null && mRankingMapFd != null) {
                     SharedMemory.unmap(buffer);
                     mRankingMapFd.close();

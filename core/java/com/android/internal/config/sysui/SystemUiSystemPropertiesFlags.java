@@ -87,10 +87,6 @@ public class SystemUiSystemPropertiesFlags {
         public static final Flag NOTIF_COOLDOWN_RULE = devFlag(
                 "persist.debug.sysui.notification.notif_cooldown_rule", "rule1");
 
-        /** b/301242692: Visit extra URIs used in notifications to prevent security issues. */
-        public static final Flag VISIT_RISKY_URIS = devFlag(
-                "persist.sysui.notification.visit_risky_uris");
-
         /** b/303716154: For debugging only: use short bitmap duration. */
         public static final Flag DEBUG_SHORT_BITMAP_DURATION = devFlag(
                 "persist.sysui.notification.debug_short_bitmap_duration");

@@ -235,10 +235,6 @@ EXTRA_ARGS="--in-jar abc" run_hoststubgen_for_failure "Duplicate arg" \
     "Duplicate or conflicting argument found: --in-jar" \
     ""
 
-EXTRA_ARGS="--quiet" run_hoststubgen_for_failure "Conflicting arg" \
-    "Duplicate or conflicting argument found: --quiet" \
-    ""
-
 
 echo "All tests passed"
 exit 0

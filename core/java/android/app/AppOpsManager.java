@@ -2391,12 +2391,9 @@ public class AppOpsManager {
             OP_ACTIVITY_RECOGNITION,
             // Aural
             OP_READ_MEDIA_AUDIO,
-            OP_WRITE_MEDIA_AUDIO,
             // Visual
             OP_READ_MEDIA_VIDEO,
-            OP_WRITE_MEDIA_VIDEO,
             OP_READ_MEDIA_IMAGES,
-            OP_WRITE_MEDIA_IMAGES,
             OP_READ_MEDIA_VISUAL_USER_SELECTED,
             // Nearby devices
             OP_BLUETOOTH_SCAN,

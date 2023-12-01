@@ -46,7 +46,6 @@ import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.notifications.ui.composable.HeadsUpNotificationSpace
-import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsSceneViewModel
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.ui.composable.ComposableScene
@@ -156,7 +155,6 @@ private fun SceneScope.QuickSettingsScene(
                 QuickSettings(
                     modifier = Modifier.fillMaxHeight(),
                     viewModel.qsSceneAdapter,
-                    QSSceneAdapter.State.QS
                 )
             }
         }

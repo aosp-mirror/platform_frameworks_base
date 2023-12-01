@@ -16,15 +16,23 @@
 
 package com.android.systemui.keyevent.data.repository
 
+import dagger.Binds
+import dagger.Module
+import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class FakeKeyEventRepository() : KeyEventRepository {
+class FakeKeyEventRepository @Inject constructor() : KeyEventRepository {
     private val _isPowerButtonDown = MutableStateFlow(false)
     override val isPowerButtonDown: Flow<Boolean> = _isPowerButtonDown.asStateFlow()
 
     fun setPowerButtonDown(isDown: Boolean) {
         _isPowerButtonDown.value = isDown
     }
+}
+
+@Module
+interface FakeKeyEventRepositoryModule {
+    @Binds fun bindFake(fake: FakeKeyEventRepository): KeyEventRepository
 }

@@ -101,9 +101,7 @@ class HostStubGenOptions(
 
         var defaultPolicy: SetOnce<FilterPolicy> = SetOnce(FilterPolicy.Remove),
 
-        var logLevel: SetOnce<LogLevel> = SetOnce(LogLevel.Info),
-
-        var cleanUpOnError: SetOnce<Boolean> = SetOnce(true),
+        var cleanUpOnError: SetOnce<Boolean> = SetOnce(false),
 
         var enableClassChecker: SetOnce<Boolean> = SetOnce(false),
         var enablePreTrace: SetOnce<Boolean> = SetOnce(false),
@@ -143,6 +141,11 @@ class HostStubGenOptions(
                 return name
             }
 
+            fun setLogFile(level: LogLevel, filename: String) {
+                log.addFilePrinter(level, filename)
+                log.i("$level log file: $filename")
+            }
+
             while (true) {
                 val arg = ai.nextArgOptional()
                 if (arg == null) {
@@ -161,9 +164,9 @@ class HostStubGenOptions(
                         // TODO: Write help
                         "-h", "--help" -> TODO("Help is not implemented yet")
 
-                        "-v", "--verbose" -> ret.logLevel.set(LogLevel.Verbose)
-                        "-d", "--debug" -> ret.logLevel.set(LogLevel.Debug)
-                        "-q", "--quiet" -> ret.logLevel.set(LogLevel.None)
+                        "-v", "--verbose" -> log.setConsoleLogLevel(LogLevel.Verbose)
+                        "-d", "--debug" -> log.setConsoleLogLevel(LogLevel.Debug)
+                        "-q", "--quiet" -> log.setConsoleLogLevel(LogLevel.None)
 
                         "--in-jar" -> ret.inJar.setNextStringArg().ensureFileExists()
                         "--out-stub-jar" -> ret.outStubJar.setNextStringArg()
@@ -211,7 +214,7 @@ class HostStubGenOptions(
                             ret.keepStaticInitializerAnnotations.addUniqueAnnotationArg()
 
                         "--package-redirect" ->
-                            ret.packageRedirects += parsePackageRedirect(ai.nextArgRequired(arg))
+                            ret.packageRedirects += parsePackageRedirect(nextArg())
 
                         "--annotation-allowed-classes-file" ->
                             ret.annotationAllowedClassesFile.setNextStringArg()
@@ -246,13 +249,15 @@ class HostStubGenOptions(
 
                         "--gen-input-dump-file" -> ret.inputJarDumpFile.setNextStringArg()
 
+                        "--verbose-log" -> setLogFile(LogLevel.Verbose, nextArg())
+                        "--debug-log" -> setLogFile(LogLevel.Debug, nextArg())
+
                         else -> throw ArgumentsException("Unknown option: $arg")
                     }
                 } catch (e: SetOnce.SetMoreThanOnceException) {
                     throw ArgumentsException("Duplicate or conflicting argument found: $arg")
                 }
             }
-            log.w(ret.toString())
 
             if (!ret.inJar.isSet) {
                 throw ArgumentsException("Required option missing: --in-jar")
@@ -377,7 +382,6 @@ class HostStubGenOptions(
               intersectStubJars=$intersectStubJars,
               policyOverrideFile=$policyOverrideFile,
               defaultPolicy=$defaultPolicy,
-              logLevel=$logLevel,
               cleanUpOnError=$cleanUpOnError,
               enableClassChecker=$enableClassChecker,
               enablePreTrace=$enablePreTrace,

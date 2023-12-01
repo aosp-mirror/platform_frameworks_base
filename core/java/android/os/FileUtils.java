@@ -52,9 +52,11 @@ import android.provider.DocumentsContract.Document;
 import android.provider.MediaStore;
 import android.system.ErrnoException;
 import android.system.Os;
+import android.system.OsConstants;
 import android.system.StructStat;
 import android.text.TextUtils;
 import android.util.DataUnit;
+import android.util.EmptyArray;
 import android.util.Log;
 import android.util.Slog;
 import android.webkit.MimeTypeMap;
@@ -64,7 +66,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.SizedInputStream;
 
 import libcore.io.IoUtils;
-import libcore.util.EmptyArray;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -94,6 +95,7 @@ import java.util.zip.CheckedInputStream;
 /**
  * Utility methods useful for working with files.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class FileUtils {
     private static final String TAG = "FileUtils";
 
@@ -116,9 +118,6 @@ public final class FileUtils {
     private FileUtils() {
     }
 
-    private static final String CAMERA_DIR_LOWER_CASE = "/storage/emulated/" + UserHandle.myUserId()
-            + "/dcim/camera";
-
     /** Regular expression for safe filenames: no spaces or metacharacters.
       *
       * Use a preload holder so that FileUtils can be compile-time initialized.
@@ -132,6 +131,21 @@ public final class FileUtils {
     private static volatile int sMediaProviderAppId = -1;
 
     private static final long COPY_CHECKPOINT_BYTES = 524288;
+
+    static {
+        sEnableCopyOptimizations = shouldEnableCopyOptimizations();
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static boolean shouldEnableCopyOptimizations() {
+        // Advanced copy operations enabled by default
+        return true;
+    }
+
+    private static boolean shouldEnableCopyOptimizations$ravenwood() {
+        // Disabled under Ravenwood due to missing kernel support
+        return false;
+    }
 
     /**
      * Listener that is called periodically as progress is made.
@@ -150,6 +164,7 @@ public final class FileUtils {
      * @hide
      */
     @UnsupportedAppUsage
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static int setPermissions(File path, int mode, int uid, int gid) {
         return setPermissions(path.getAbsolutePath(), mode, uid, gid);
     }
@@ -164,6 +179,7 @@ public final class FileUtils {
      * @hide
      */
     @UnsupportedAppUsage
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static int setPermissions(String path, int mode, int uid, int gid) {
         try {
             Os.chmod(path, mode);
@@ -194,6 +210,7 @@ public final class FileUtils {
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static int setPermissions(FileDescriptor fd, int mode, int uid, int gid) {
         try {
             Os.fchmod(fd, mode);
@@ -221,6 +238,7 @@ public final class FileUtils {
      * @param to File where attributes should be copied to.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static void copyPermissions(@NonNull File from, @NonNull File to) throws IOException {
         try {
             final StructStat stat = Os.stat(from.getAbsolutePath());
@@ -236,6 +254,7 @@ public final class FileUtils {
      * @hide
      */
     @Deprecated
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static int getUid(String path) {
         try {
             return Os.stat(path).st_uid;
@@ -314,11 +333,7 @@ public final class FileUtils {
         }
         try (FileOutputStream out = new FileOutputStream(destFile)) {
             copy(in, out);
-            try {
-                Os.fsync(out.getFD());
-            } catch (ErrnoException e) {
-                throw e.rethrowAsIOException();
-            }
+            sync(out);
         }
     }
 
@@ -475,6 +490,7 @@ public final class FileUtils {
      * @hide
      */
     @VisibleForTesting
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static long copyInternalSplice(FileDescriptor in, FileDescriptor out, long count,
             CancellationSignal signal, Executor executor, ProgressListener listener)
             throws ErrnoException {
@@ -516,6 +532,7 @@ public final class FileUtils {
      * @hide
      */
     @VisibleForTesting
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static long copyInternalSendfile(FileDescriptor in, FileDescriptor out, long count,
             CancellationSignal signal, Executor executor, ProgressListener listener)
             throws ErrnoException {
@@ -699,6 +716,7 @@ public final class FileUtils {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodReplace
     public static void bytesToFile(String filename, byte[] content) throws IOException {
         if (filename.startsWith("/proc/")) {
             final int oldMask = StrictMode.allowThreadDiskWritesMask();
@@ -711,6 +729,14 @@ public final class FileUtils {
             try (FileOutputStream fos = new FileOutputStream(filename)) {
                 fos.write(content);
             }
+        }
+    }
+
+    /** @hide */
+    public static void bytesToFile$ravenwood(String filename, byte[] content) throws IOException {
+        // No StrictMode support, so we can just directly write
+        try (FileOutputStream fos = new FileOutputStream(filename)) {
+            fos.write(content);
         }
     }
 
@@ -1176,6 +1202,7 @@ public final class FileUtils {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = MimeTypeMap.class)
     public static String[] splitFileName(String mimeType, String displayName) {
         String name;
         String ext;
@@ -1423,11 +1450,13 @@ public final class FileUtils {
      *   indicate a failure to flush bytes to the underlying resource.
      */
     @Deprecated
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires ART support")
     public static void closeQuietly(@Nullable FileDescriptor fd) {
         IoUtils.closeQuietly(fd);
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModeStringToPosix(String mode) {
         // Quick check for invalid chars
         for (int i = 0; i < mode.length(); i++) {
@@ -1462,6 +1491,7 @@ public final class FileUtils {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static String translateModePosixToString(int mode) {
         String res = "";
         if ((mode & O_ACCMODE) == O_RDWR) {
@@ -1483,6 +1513,7 @@ public final class FileUtils {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModePosixToPfd(int mode) {
         int res = 0;
         if ((mode & O_ACCMODE) == O_RDWR) {
@@ -1507,6 +1538,7 @@ public final class FileUtils {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModePfdToPosix(int mode) {
         int res = 0;
         if ((mode & MODE_READ_WRITE) == MODE_READ_WRITE) {
@@ -1531,6 +1563,7 @@ public final class FileUtils {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = OsConstants.class)
     public static int translateModeAccessToPosix(int mode) {
         if (mode == F_OK) {
             // There's not an exact mapping, so we attempt a read-only open to
@@ -1549,6 +1582,7 @@ public final class FileUtils {
 
     /** {@hide} */
     @VisibleForTesting
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     public static ParcelFileDescriptor convertToModernFd(FileDescriptor fd) {
         Context context = AppGlobals.getInitialApplication();
         if (UserHandle.getAppId(Process.myUid()) == getMediaProviderAppId(context)) {
@@ -1565,6 +1599,7 @@ public final class FileUtils {
         }
     }
 
+    @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
     private static int getMediaProviderAppId(Context context) {
         if (sMediaProviderAppId != -1) {
             return sMediaProviderAppId;
@@ -1605,10 +1640,12 @@ public final class FileUtils {
             return this;
         }
 
+        @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
         public static MemoryPipe createSource(byte[] data) throws IOException {
             return new MemoryPipe(data, false).startInternal();
         }
 
+        @android.ravenwood.annotation.RavenwoodThrow(reason = "Requires kernel support")
         public static MemoryPipe createSink(byte[] data) throws IOException {
             return new MemoryPipe(data, true).startInternal();
         }

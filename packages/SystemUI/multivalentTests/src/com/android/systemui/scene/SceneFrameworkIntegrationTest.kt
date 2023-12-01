@@ -20,7 +20,6 @@ package com.android.systemui.scene
 
 import android.telecom.TelecomManager
 import android.telephony.TelephonyManager
-import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.R
@@ -37,6 +36,8 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
 import com.android.systemui.keyguard.ui.viewmodel.LockscreenSceneViewModel
 import com.android.systemui.log.table.TableLogBuffer
+import com.android.systemui.media.controls.pipeline.MediaDataManager
+import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.model.SysUiState
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
@@ -186,7 +187,10 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
 
     private var bouncerSceneJob: Job? = null
 
-    private val qsFlexiglassAdapter = FakeQSSceneAdapter(inflateDelegate = { _, _ -> mock<View>() })
+    private val qsFlexiglassAdapter = FakeQSSceneAdapter(inflateDelegate = { mock() })
+
+    @Mock private lateinit var mediaDataManager: MediaDataManager
+    @Mock private lateinit var mediaHost: MediaHost
 
     @Before
     fun setUp() {
@@ -240,6 +244,8 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
                 shadeHeaderViewModel = shadeHeaderViewModel,
                 qsSceneAdapter = qsFlexiglassAdapter,
                 notifications = utils.notificationsPlaceholderViewModel(),
+                mediaDataManager = mediaDataManager,
+                mediaHost = mediaHost,
             )
 
         utils.deviceEntryRepository.setUnlocked(false)

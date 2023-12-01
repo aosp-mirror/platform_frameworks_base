@@ -95,6 +95,7 @@ import android.hardware.usb.UsbManager;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.media.AudioAttributes;
 import android.media.AudioAttributes.AttributeSystemUsage;
+import android.media.AudioDescriptor;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioDeviceVolumeManager;
@@ -107,6 +108,7 @@ import android.media.AudioManager.AudioDeviceCategory;
 import android.media.AudioManagerInternal;
 import android.media.AudioMixerAttributes;
 import android.media.AudioPlaybackConfiguration;
+import android.media.AudioProfile;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
@@ -234,6 +236,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7687,6 +7690,13 @@ public class AudioService extends IAudioService.Stub
     @Retention(RetentionPolicy.SOURCE)
     public @interface ConnectionState {}
 
+    /**
+     * Default SAD for a TV using ARC, used when the Amplifier didn't report any SADs.
+     * Represents 2-channel LPCM including all defined sample rates and bit depths.
+     * For the format definition, see Table 34 in the CEA standard CEA-861-D.
+     */
+    private static final byte[] DEFAULT_ARC_AUDIO_DESCRIPTOR = new byte[]{0x09, 0x7f, 0x07};
+
     @android.annotation.EnforcePermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING)
     /**
      * see AudioManager.setWiredDeviceConnectionState()
@@ -7697,6 +7707,27 @@ public class AudioService extends IAudioService.Stub
         Objects.requireNonNull(attributes);
 
         attributes = retrieveBluetoothAddress(attributes);
+
+        // When using ARC, a TV should use default 2 channel LPCM if the Amplifier didn't
+        // report any SADs. See section 13.15.3 of the HDMI-CEC spec version 1.4b.
+        if (attributes.getType() == AudioDeviceInfo.TYPE_HDMI_ARC
+                && attributes.getRole() == AudioDeviceAttributes.ROLE_OUTPUT
+                && attributes.getAudioDescriptors().isEmpty()) {
+            attributes = new AudioDeviceAttributes(
+                    attributes.getRole(),
+                    attributes.getType(),
+                    attributes.getAddress(),
+                    attributes.getName(),
+                    attributes.getAudioProfiles(),
+                    new ArrayList<AudioDescriptor>(Collections.singletonList(
+                            new AudioDescriptor(
+                                    AudioDescriptor.STANDARD_EDID,
+                                    AudioProfile.AUDIO_ENCAPSULATION_TYPE_NONE,
+                                    DEFAULT_ARC_AUDIO_DESCRIPTOR
+                            )
+                    ))
+            );
+        }
 
         if (state != CONNECTION_STATE_CONNECTED
                 && state != CONNECTION_STATE_DISCONNECTED) {

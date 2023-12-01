@@ -134,6 +134,8 @@ class com.android.modules.utils.TypedXmlSerializer stubclass
 class android.net.Uri stubclass
 class android.net.UriCodec stubclass
 
-# Context: just enough to support wrapper, no further functionality
+# Just enough to support mocking, no further functionality
 class android.content.Context stub
+    method <init> ()V stub
+class android.content.pm.PackageManager stub
     method <init> ()V stub

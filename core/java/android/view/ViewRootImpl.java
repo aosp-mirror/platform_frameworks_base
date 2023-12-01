@@ -92,6 +92,7 @@ import static android.view.WindowManagerGlobal.RELAYOUT_RES_CANCEL_AND_REDRAW;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_CONSUME_ALWAYS_SYSTEM_BARS;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.accessibility.Flags.forceInvertColor;
+import static android.view.accessibility.Flags.reduceWindowContentChangedEventThrottle;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.IME_FOCUS_CONTROLLER;
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
@@ -11361,6 +11362,10 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         private boolean canContinueThrottle(View source, int changeType) {
+            if (!reduceWindowContentChangedEventThrottle()) {
+                // Old behavior. Always throttle.
+                return true;
+            }
             if (mSource == null) {
                 // We don't have a pending event.
                 return true;

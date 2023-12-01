@@ -101,3 +101,10 @@ flag {
     description: "Feature flag to enable the refactored Package Installer app with updated UI."
     bug: "182205982"
 }
+
+flag {
+    name: "improve_install_dont_kill"
+    namespace: "package_manager_service"
+    description: "Feature flag to reduce app crashes caused by split installs with INSTALL_DONT_KILL"
+    bug: "291212866"
+}

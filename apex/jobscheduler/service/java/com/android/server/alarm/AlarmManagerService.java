@@ -2163,6 +2163,8 @@ public class AlarmManagerService extends SystemService {
                     mActivityManagerInternal.getBootTimeTempAllowListDuration(),
                     TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                     PowerExemptionManager.REASON_TIMEZONE_CHANGED, "");
+            mOptsTimeBroadcast.setDeliveryGroupPolicy(
+                    BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
             getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
                     null /* receiverPermission */, mOptsTimeBroadcast.toBundle());
         }
@@ -4608,6 +4610,8 @@ public class AlarmManagerService extends SystemService {
                                 mActivityManagerInternal.getBootTimeTempAllowListDuration(),
                                 TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
                                 PowerExemptionManager.REASON_TIME_CHANGED, "");
+                        mOptsTimeBroadcast.setDeliveryGroupPolicy(
+                                BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT);
                         getContext().sendBroadcastAsUser(intent, UserHandle.ALL,
                                 null /* receiverPermission */, mOptsTimeBroadcast.toBundle());
                         // The world has changed on us, so we need to re-evaluate alarms
