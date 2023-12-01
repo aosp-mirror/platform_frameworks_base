@@ -20,11 +20,14 @@ public interface android.hosttest.annotation.HostSideTestClassLoadHook extends j
   public abstract java.lang.String value();
     descriptor: ()Ljava/lang/String;
     flags: (0x0401) ACC_PUBLIC, ACC_ABSTRACT
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "HostSideTestClassLoadHook.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
   x: #x(#x=[e#x.#x])
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.TYPE]
@@ -55,7 +58,7 @@ public interface android.hosttest.annotation.HostSideTestKeep extends java.lang.
 SourceFile: "HostSideTestKeep.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
   x: #x(#x=[e#x.#x,e#x.#x,e#x.#x,e#x.#x])
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.TYPE,Ljava/lang/annotation/ElementType;.FIELD,Ljava/lang/annotation/ElementType;.METHOD,Ljava/lang/annotation/ElementType;.CONSTRUCTOR]
@@ -86,11 +89,14 @@ public interface android.hosttest.annotation.HostSideTestNativeSubstitutionClass
   public abstract java.lang.String value();
     descriptor: ()Ljava/lang/String;
     flags: (0x0401) ACC_PUBLIC, ACC_ABSTRACT
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "HostSideTestNativeSubstitutionClass.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
   x: #x(#x=[e#x.#x])
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.TYPE]
@@ -121,7 +127,7 @@ public interface android.hosttest.annotation.HostSideTestRemove extends java.lan
 SourceFile: "HostSideTestRemove.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
   x: #x(#x=[e#x.#x,e#x.#x,e#x.#x,e#x.#x])
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.TYPE,Ljava/lang/annotation/ElementType;.FIELD,Ljava/lang/annotation/ElementType;.METHOD,Ljava/lang/annotation/ElementType;.CONSTRUCTOR]
@@ -152,7 +158,7 @@ public interface android.hosttest.annotation.HostSideTestStub extends java.lang.
 SourceFile: "HostSideTestStub.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
   x: #x(#x=[e#x.#x,e#x.#x,e#x.#x,e#x.#x])
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.TYPE,Ljava/lang/annotation/ElementType;.FIELD,Ljava/lang/annotation/ElementType;.METHOD,Ljava/lang/annotation/ElementType;.CONSTRUCTOR]
@@ -183,11 +189,14 @@ public interface android.hosttest.annotation.HostSideTestSubstitute extends java
   public abstract java.lang.String suffix();
     descriptor: ()Ljava/lang/String;
     flags: (0x0401) ACC_PUBLIC, ACC_ABSTRACT
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "HostSideTestSubstitute.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
   x: #x(#x=[e#x.#x])
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.METHOD]
@@ -218,7 +227,7 @@ public interface android.hosttest.annotation.HostSideTestThrow extends java.lang
 SourceFile: "HostSideTestThrow.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
   x: #x(#x=[e#x.#x,e#x.#x])
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.METHOD,Ljava/lang/annotation/ElementType;.CONSTRUCTOR]
@@ -249,7 +258,7 @@ public interface android.hosttest.annotation.HostSideTestWholeClassKeep extends 
 SourceFile: "HostSideTestWholeClassKeep.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
   x: #x(#x=[e#x.#x])
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.TYPE]
@@ -280,7 +289,7 @@ public interface android.hosttest.annotation.HostSideTestWholeClassStub extends 
 SourceFile: "HostSideTestWholeClassStub.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
   x: #x(#x=[e#x.#x])
     java.lang.annotation.Target(
       value=[Ljava/lang/annotation/ElementType;.TYPE]
@@ -325,6 +334,11 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub$Pro
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int addTwo(int);
     descriptor: (I)I
@@ -344,6 +358,11 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub$Pro
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       4     0     a   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   public static #x= #x of #x;          // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
@@ -351,9 +370,9 @@ InnerClasses:
 SourceFile: "IPretendingAidl.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestHost: class com/android/hoststubgen/test/tinyframework/IPretendingAidl
 ## Class: com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub.class
   Compiled from "IPretendingAidl.java"
@@ -391,6 +410,11 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int addOne(int);
     descriptor: (I)I
@@ -410,6 +434,11 @@ public class com.android.hoststubgen.test.tinyframework.IPretendingAidl$Stub
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       4     0     a   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   public static #x= #x of #x;           // Stub=class com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub of class com/android/hoststubgen/test/tinyframework/IPretendingAidl
@@ -417,9 +446,9 @@ InnerClasses:
 SourceFile: "IPretendingAidl.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestHost: class com/android/hoststubgen/test/tinyframework/IPretendingAidl
 ## Class: com/android/hoststubgen/test/tinyframework/IPretendingAidl.class
   Compiled from "IPretendingAidl.java"
@@ -446,9 +475,9 @@ InnerClasses:
 SourceFile: "IPretendingAidl.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestMembers:
   com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub
   com/android/hoststubgen/test/tinyframework/IPretendingAidl$Stub$Proxy
@@ -488,6 +517,11 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkCallerCheck$Impl
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck$Impl;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int getOneKeep();
     descriptor: ()I
@@ -508,6 +542,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkCallerCheck$Impl
         x: iconst_1
         x: ireturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestKeep
@@ -525,6 +562,11 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkCallerCheck$Impl
         x: iconst_1
         x: ireturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -534,9 +576,9 @@ InnerClasses:
 SourceFile: "TinyFrameworkCallerCheck.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck.class
   Compiled from "TinyFrameworkCallerCheck.java"
@@ -574,6 +616,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkCallerCheck
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int getOne_withCheck();
     descriptor: ()I
@@ -588,6 +635,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkCallerCheck
         x: invokestatic  #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck$Impl.getOneKeep:()I
         x: ireturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int getOne_noCheck();
     descriptor: ()I
@@ -602,15 +654,20 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkCallerCheck
         x: invokestatic  #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck$Impl.getOneStub:()I
         x: ireturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   private static #x= #x of #x;          // Impl=class com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck$Impl of class com/android/hoststubgen/test/tinyframework/TinyFrameworkCallerCheck
 SourceFile: "TinyFrameworkCallerCheck.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
@@ -628,6 +685,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
   public int stub;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -635,6 +697,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
   public int keep;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestKeep
@@ -675,6 +740,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      15     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassAnnotations;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -698,6 +768,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
         Start  Length  Slot  Name   Signature
            11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassAnnotations;
            11       6     1 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -727,6 +802,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
         Start  Length  Slot  Name   Signature
            26       4     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassAnnotations;
            26       4     1 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestKeep
@@ -750,6 +828,13 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
         Start  Length  Slot  Name   Signature
            11       4     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassAnnotations;
            11       4     1 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int nativeAddThree(int);
     descriptor: (I)I
@@ -769,6 +854,13 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       4     0 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.String unsupportedMethod();
     descriptor: ()Ljava/lang/String;
@@ -792,6 +884,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
         x: ldc           #x                 // String Unreachable
         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsThrow
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestThrow
@@ -813,6 +910,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassAnnotations;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -820,9 +922,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassAnnota
 SourceFile: "TinyFrameworkClassAnnotations.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestStub
@@ -842,14 +944,29 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassClassW
   public int stub;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int keep;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int remove;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static {};
     descriptor: ()V
@@ -884,6 +1001,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassClassW
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      15     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassClassWideAnnotations;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int addOne(int);
     descriptor: (I)I
@@ -904,6 +1026,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassClassW
         Start  Length  Slot  Name   Signature
            11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassClassWideAnnotations;
            11       6     1 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int addOneInner(int);
     descriptor: (I)I
@@ -924,6 +1051,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassClassW
         Start  Length  Slot  Name   Signature
            11       4     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassClassWideAnnotations;
            11       4     1 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public void toBeRemoved(java.lang.String);
     descriptor: (Ljava/lang/String;)V
@@ -944,6 +1076,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassClassW
         Start  Length  Slot  Name   Signature
            11       8     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassClassWideAnnotations;
            11       8     1   foo   Ljava/lang/String;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int addTwo(int);
     descriptor: (I)I
@@ -964,6 +1101,13 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassClassW
         Start  Length  Slot  Name   Signature
            11       4     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassClassWideAnnotations;
            11       4     1 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int nativeAddThree(int);
     descriptor: (I)I
@@ -983,6 +1127,13 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassClassW
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       4     0 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.String unsupportedMethod();
     descriptor: ()Ljava/lang/String;
@@ -1000,6 +1151,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassClassW
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       3     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassClassWideAnnotations;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.String visibleButUsesUnsupportedMethod();
     descriptor: ()Ljava/lang/String;
@@ -1018,13 +1174,18 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassClassW
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassClassWideAnnotations;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "TinyFrameworkClassClassWideAnnotations.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
@@ -1041,6 +1202,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHo
     descriptor: Ljava/util/Set;
     flags: (0x0019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL
     Signature: #x                          // Ljava/util/Set<Ljava/lang/Class<*>;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHook();
     descriptor: ()V
@@ -1059,6 +1225,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHo
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkClassLoadHook;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static void onClassLoaded(java.lang.Class<?>);
     descriptor: (Ljava/lang/Class;)V
@@ -1083,6 +1254,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHo
         Start  Length  Slot  Name   Signature
            11      11     0 clazz   Ljava/lang/Class<*>;
     Signature: #x                          // (Ljava/lang/Class<*>;)V
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   static {};
     descriptor: ()V
@@ -1103,13 +1279,18 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassLoadHo
         x: putstatic     #x                 // Field sLoadedClasses:Ljava/util/Set;
         x: return
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "TinyFrameworkClassLoadHook.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
@@ -1125,6 +1306,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
   public static boolean sInitialized;
     descriptor: Z
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1132,6 +1318,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
   public static java.lang.Object sObject;
     descriptor: Ljava/lang/Object;
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1140,9 +1331,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
 SourceFile: "TinyFrameworkClassWithInitializerDefault.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestStub
@@ -1158,6 +1349,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
   public static boolean sInitialized;
     descriptor: Z
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1165,6 +1361,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
   public static java.lang.Object sObject;
     descriptor: Ljava/lang/Object;
     flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1193,13 +1394,16 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkClassWithIn
         x: putstatic     #x                 // Field sObject:Ljava/lang/Object;
         x: return
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "TinyFrameworkClassWithInitializerStub.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x(#x=s#x)
     android.hosttest.annotation.HostSideTestClassLoadHook(
@@ -1221,6 +1425,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
   public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex RED;
     descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
     flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1228,6 +1437,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
   public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex GREEN;
     descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
     flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1235,6 +1449,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
   public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex BLUE;
     descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
     flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1242,6 +1461,9 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
   private final java.lang.String mLongName;
     descriptor: Ljava/lang/String;
     flags: (0x0012) ACC_PRIVATE, ACC_FINAL
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestKeep
@@ -1249,6 +1471,9 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
   private final java.lang.String mShortName;
     descriptor: Ljava/lang/String;
     flags: (0x0012) ACC_PRIVATE, ACC_FINAL
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestKeep
@@ -1256,6 +1481,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
   private static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex[] $VALUES;
     descriptor: [Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
     flags: (0x101a) ACC_PRIVATE, ACC_STATIC, ACC_FINAL, ACC_SYNTHETIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex[] values();
     descriptor: ()[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
@@ -1272,6 +1502,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
         x: checkcast     #x                 // class "[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;"
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex valueOf(java.lang.String);
     descriptor: (Ljava/lang/String;)Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
@@ -1292,6 +1527,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      10     0  name   Ljava/lang/String;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumComplex(java.lang.String, java.lang.String);
     descriptor: (Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V
@@ -1321,6 +1561,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
            11      18     3 longName   Ljava/lang/String;
            11      18     4 shortName   Ljava/lang/String;
     Signature: #x                          // (Ljava/lang/String;Ljava/lang/String;)V
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1342,6 +1587,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1363,6 +1613,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1393,6 +1648,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
         x: aastore
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   static {};
     descriptor: ()V
@@ -1435,14 +1695,19 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumC
         x: putstatic     #x                 // Field $VALUES:[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;
         x: return
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 Signature: #x                           // Ljava/lang/Enum<Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumComplex;>;
 SourceFile: "TinyFrameworkEnumComplex.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestStub
@@ -1458,6 +1723,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
   public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple CAT;
     descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
     flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1465,6 +1735,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
   public static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple DOG;
     descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
     flags: (0x4019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL, ACC_ENUM
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1472,6 +1747,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
   private static final com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple[] $VALUES;
     descriptor: [Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
     flags: (0x101a) ACC_PRIVATE, ACC_STATIC, ACC_FINAL, ACC_SYNTHETIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple[] values();
     descriptor: ()[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
@@ -1488,6 +1768,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
         x: checkcast     #x                 // class "[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;"
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple valueOf(java.lang.String);
     descriptor: (Ljava/lang/String;)Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
@@ -1508,6 +1793,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      10     0  name   Ljava/lang/String;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple();
     descriptor: (Ljava/lang/String;I)V
@@ -1529,6 +1819,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
         Start  Length  Slot  Name   Signature
            11       7     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
     Signature: #x                          // ()V
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumSimple[] $values();
     descriptor: ()[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
@@ -1552,6 +1847,11 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
         x: aastore
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   static {};
     descriptor: ()V
@@ -1582,14 +1882,19 @@ public final class com.android.hoststubgen.test.tinyframework.TinyFrameworkEnumS
         x: putstatic     #x                 // Field $VALUES:[Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;
         x: return
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 Signature: #x                           // Ljava/lang/Enum<Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkEnumSimple;>;
 SourceFile: "TinyFrameworkEnumSimple.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestStub
@@ -1629,6 +1934,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkExceptionTe
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkExceptionTester;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int testException();
     descriptor: ()I
@@ -1662,13 +1972,18 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkExceptionTe
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            22      11     0     e   Ljava/lang/Exception;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "TinyFrameworkExceptionTester.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
@@ -1684,10 +1999,18 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
   public int stub;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int keep;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static {};
     descriptor: ()V
@@ -1725,6 +2048,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      15     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int addOne(int);
     descriptor: (I)I
@@ -1745,6 +2073,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
         Start  Length  Slot  Name   Signature
            11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy;
            11       6     1 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int addOneInner(int);
     descriptor: (I)I
@@ -1771,6 +2104,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
         Start  Length  Slot  Name   Signature
            26       4     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy;
            26       4     1 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int addTwo(int);
     descriptor: (I)I
@@ -1791,6 +2127,13 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
         Start  Length  Slot  Name   Signature
            11       4     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy;
            11       4     1 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int nativeAddThree(int);
     descriptor: (I)I
@@ -1810,6 +2153,13 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       4     0 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.String unsupportedMethod();
     descriptor: ()Ljava/lang/String;
@@ -1833,6 +2183,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
         x: ldc           #x                 // String Unreachable
         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
         x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsThrow
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.String visibleButUsesUnsupportedMethod();
     descriptor: ()Ljava/lang/String;
@@ -1851,13 +2206,18 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkForTextPoli
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkForTextPolicy;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "TinyFrameworkForTextPolicy.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested.class
   Compiled from "TinyFrameworkLambdas.java"
 public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nested
@@ -1871,6 +2231,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nes
     descriptor: Ljava/util/function/Supplier;
     flags: (0x0011) ACC_PUBLIC, ACC_FINAL
     Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1879,6 +2244,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nes
     descriptor: Ljava/util/function/Supplier;
     flags: (0x0019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL
     Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1903,6 +2273,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nes
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      14     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1924,6 +2299,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nes
         Start  Length  Slot  Name   Signature
            11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested;
     Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1942,6 +2322,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nes
         x: areturn
       LineNumberTable:
     Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -1960,6 +2345,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nes
         x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static java.lang.Integer lambda$getSupplier$2();
     descriptor: ()Ljava/lang/Integer;
@@ -1975,6 +2365,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nes
         x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static java.lang.Integer lambda$static$1();
     descriptor: ()Ljava/lang/Integer;
@@ -1990,6 +2385,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nes
         x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static java.lang.Integer lambda$new$0();
     descriptor: ()Ljava/lang/Integer;
@@ -2005,6 +2405,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nes
         x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   static {};
     descriptor: ()V
@@ -2023,6 +2428,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas$Nes
         x: putstatic     #x                // Field sSupplier:Ljava/util/function/Supplier;
         x: return
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   public static #x= #x of #x;            // Nested=class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested of class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
@@ -2030,9 +2438,9 @@ InnerClasses:
 SourceFile: "TinyFrameworkLambdas.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestStub
@@ -2073,6 +2481,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
     descriptor: Ljava/util/function/Supplier;
     flags: (0x0011) ACC_PUBLIC, ACC_FINAL
     Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -2081,6 +2494,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
     descriptor: Ljava/util/function/Supplier;
     flags: (0x0019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL
     Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -2105,6 +2523,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      14     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -2126,6 +2549,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
         Start  Length  Slot  Name   Signature
            11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas;
     Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -2144,6 +2572,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
         x: areturn
       LineNumberTable:
     Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
     RuntimeInvisibleAnnotations:
       x: #x()
         android.hosttest.annotation.HostSideTestStub
@@ -2162,6 +2595,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
         x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static java.lang.Integer lambda$getSupplier$2();
     descriptor: ()Ljava/lang/Integer;
@@ -2177,6 +2615,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
         x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static java.lang.Integer lambda$static$1();
     descriptor: ()Ljava/lang/Integer;
@@ -2192,6 +2635,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
         x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static java.lang.Integer lambda$new$0();
     descriptor: ()Ljava/lang/Integer;
@@ -2207,6 +2655,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
         x: invokestatic  #x                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
         x: areturn
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   static {};
     descriptor: ()V
@@ -2225,6 +2678,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkLambdas
         x: putstatic     #x                // Field sSupplier:Ljava/util/function/Supplier;
         x: return
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   public static #x= #x of #x;           // Nested=class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas$Nested of class com/android/hoststubgen/test/tinyframework/TinyFrameworkLambdas
@@ -2232,9 +2688,9 @@ InnerClasses:
 SourceFile: "TinyFrameworkLambdas.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestStub
@@ -2275,6 +2731,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
   int value;
     descriptor: I
     flags: (0x0000)
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static {};
     descriptor: ()V
@@ -2303,6 +2764,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int nativeAddTwo(int);
     descriptor: (I)I
@@ -2312,6 +2778,13 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
          x: iload_0
          x: invokestatic  #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host.nativeAddTwo:(I)I
          x: ireturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int nativeAddTwo_should_be_like_this(int);
     descriptor: (I)I
@@ -2330,6 +2803,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0   arg   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static long nativeLongPlus(long, long);
     descriptor: (JJ)J
@@ -2340,6 +2818,13 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
          x: lload_2
          x: invokestatic  #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host.nativeLongPlus:(JJ)J
          x: lreturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static long nativeLongPlus_should_be_like_this(long, long);
     descriptor: (JJ)J
@@ -2360,6 +2845,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
         Start  Length  Slot  Name   Signature
            11       6     0  arg1   J
            11       6     2  arg2   J
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public void setValue(int);
     descriptor: (I)V
@@ -2380,6 +2870,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
         Start  Length  Slot  Name   Signature
            11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
            11       6     1     v   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int nativeNonStaticAddToValue(int);
     descriptor: (I)I
@@ -2390,6 +2885,13 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
          x: iload_1
          x: invokestatic  #x                 // Method com/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host.nativeNonStaticAddToValue:(Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;I)I
          x: ireturn
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int nativeNonStaticAddToValue_should_be_like_this(int);
     descriptor: (I)I
@@ -2410,13 +2912,18 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
         Start  Length  Slot  Name   Signature
            11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
            11       6     1   arg   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "TinyFrameworkNative.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
@@ -2466,6 +2973,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative_host;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int nativeAddTwo(int);
     descriptor: (I)I
@@ -2491,6 +3001,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       4     0   arg   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static long nativeLongPlus(long, long);
     descriptor: (JJ)J
@@ -2517,6 +3030,9 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
         Start  Length  Slot  Name   Signature
            26       4     0  arg1   J
            26       4     2  arg2   J
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int nativeNonStaticAddToValue(com.android.hoststubgen.test.tinyframework.TinyFrameworkNative, int);
     descriptor: (Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;I)I
@@ -2544,11 +3060,14 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative_host
         Start  Length  Slot  Name   Signature
            26       7     0 source   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
            26       7     1   arg   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "TinyFrameworkNative_host.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassKeep
@@ -2564,6 +3083,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$1 ex
   final com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses this$0;
     descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;
     flags: (0x1010) ACC_FINAL, ACC_SYNTHETIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static {};
     descriptor: ()V
@@ -2596,6 +3118,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$1 ex
         Start  Length  Slot  Name   Signature
            11      10     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$1;
            11      10     1 this$0   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.Integer get();
     descriptor: ()Ljava/lang/Integer;
@@ -2620,6 +3145,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$1 ex
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$1;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.Object get();
     descriptor: ()Ljava/lang/Object;
@@ -2644,6 +3172,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$1 ex
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$1;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   #x;                                     // class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$1
@@ -2652,7 +3183,7 @@ Signature: #x                           // Ljava/lang/Object;Ljava/util/function
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$2.class
   Compiled from "TinyFrameworkNestedClasses.java"
@@ -2690,6 +3221,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$2 ex
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$2;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.Integer get();
     descriptor: ()Ljava/lang/Integer;
@@ -2714,6 +3248,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$2 ex
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$2;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.Object get();
     descriptor: ()Ljava/lang/Object;
@@ -2738,6 +3275,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$2 ex
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$2;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   #x;                                     // class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$2
@@ -2746,7 +3286,7 @@ Signature: #x                           // Ljava/lang/Object;Ljava/util/function
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$3.class
   Compiled from "TinyFrameworkNestedClasses.java"
@@ -2760,6 +3300,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$3 ex
   final com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses this$0;
     descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;
     flags: (0x1010) ACC_FINAL, ACC_SYNTHETIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static {};
     descriptor: ()V
@@ -2792,6 +3335,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$3 ex
         Start  Length  Slot  Name   Signature
            11      10     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$3;
            11      10     1 this$0   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.Integer get();
     descriptor: ()Ljava/lang/Integer;
@@ -2816,6 +3362,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$3 ex
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$3;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.Object get();
     descriptor: ()Ljava/lang/Object;
@@ -2840,6 +3389,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$3 ex
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$3;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   #x;                                     // class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$3
@@ -2848,7 +3400,7 @@ Signature: #x                           // Ljava/lang/Object;Ljava/util/function
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$4.class
   Compiled from "TinyFrameworkNestedClasses.java"
@@ -2886,6 +3438,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$4 ex
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$4;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.Integer get();
     descriptor: ()Ljava/lang/Integer;
@@ -2910,6 +3465,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$4 ex
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$4;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.Object get();
     descriptor: ()Ljava/lang/Object;
@@ -2934,6 +3492,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$4 ex
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$4;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   #x;                                     // class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$4
@@ -2942,7 +3503,7 @@ Signature: #x                           // Ljava/lang/Object;Ljava/util/function
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$BaseClass.class
   Compiled from "TinyFrameworkNestedClasses.java"
@@ -2956,6 +3517,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
   public int value;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static {};
     descriptor: ()V
@@ -2988,15 +3554,20 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
         Start  Length  Slot  Name   Signature
            11      10     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$BaseClass;
            11      10     1     x   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   public static #x= #x of #x;           // BaseClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$BaseClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$InnerClass.class
   Compiled from "TinyFrameworkNestedClasses.java"
@@ -3010,10 +3581,20 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
   public int value;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   final com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses this$0;
     descriptor: Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;
     flags: (0x1010) ACC_FINAL, ACC_SYNTHETIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static {};
     descriptor: ()V
@@ -3049,15 +3630,20 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
         Start  Length  Slot  Name   Signature
            11      15     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$InnerClass;
            11      15     1 this$0   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   public #x= #x of #x;                  // InnerClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$InnerClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
@@ -3098,6 +3684,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$Stat
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$1;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.Integer get();
     descriptor: ()Ljava/lang/Integer;
@@ -3122,6 +3711,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$Stat
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$1;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.lang.Object get();
     descriptor: ()Ljava/lang/Object;
@@ -3146,6 +3738,9 @@ class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses$Stat
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass$1;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   public static #x= #x of #x;          // StaticNestedClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
@@ -3155,7 +3750,7 @@ Signature: #x                           // Ljava/lang/Object;Ljava/util/function
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass.class
   Compiled from "TinyFrameworkNestedClasses.java"
@@ -3169,6 +3764,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
   public int value;
     descriptor: I
     flags: (0x0001) ACC_PUBLIC
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static {};
     descriptor: ()V
@@ -3200,6 +3800,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      11     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static java.util.function.Supplier<java.lang.Integer> getSupplier_static();
     descriptor: ()Ljava/util/function/Supplier;
@@ -3217,6 +3822,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
         x: areturn
       LineNumberTable:
     Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   public static #x= #x of #x;           // StaticNestedClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$StaticNestedClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
@@ -3224,9 +3834,9 @@ InnerClasses:
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
@@ -3269,6 +3879,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
         Start  Length  Slot  Name   Signature
            11       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$SubClass;
            11       6     1     x   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   public static #x= #x of #x;           // BaseClass=class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$BaseClass of class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
@@ -3276,9 +3891,9 @@ InnerClasses:
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 NestHost: class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses
 ## Class: com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses.class
   Compiled from "TinyFrameworkNestedClasses.java"
@@ -3293,11 +3908,21 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
     descriptor: Ljava/util/function/Supplier;
     flags: (0x0011) ACC_PUBLIC, ACC_FINAL
     Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static final java.util.function.Supplier<java.lang.Integer> sSupplier;
     descriptor: Ljava/util/function/Supplier;
     flags: (0x0019) ACC_PUBLIC, ACC_STATIC, ACC_FINAL
     Signature: #x                          // Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses();
     descriptor: ()V
@@ -3322,6 +3947,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      17     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public java.util.function.Supplier<java.lang.Integer> getSupplier();
     descriptor: ()Ljava/util/function/Supplier;
@@ -3343,6 +3973,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
         Start  Length  Slot  Name   Signature
            11       9     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses;
     Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static java.util.function.Supplier<java.lang.Integer> getSupplier_static();
     descriptor: ()Ljava/util/function/Supplier;
@@ -3360,6 +3995,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
         x: areturn
       LineNumberTable:
     Signature: #x                          // ()Ljava/util/function/Supplier<Ljava/lang/Integer;>;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   static {};
     descriptor: ()V
@@ -3380,6 +4020,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClass
         x: putstatic     #x                 // Field sSupplier:Ljava/util/function/Supplier;
         x: return
       LineNumberTable:
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 InnerClasses:
   #x;                                    // class com/android/hoststubgen/test/tinyframework/TinyFrameworkNestedClasses$1
@@ -3394,9 +4039,9 @@ InnerClasses:
 SourceFile: "TinyFrameworkNestedClasses.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
@@ -3446,6 +4091,11 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkPackageRedi
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11       5     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkPackageRedirect;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public static int foo(int);
     descriptor: (I)I
@@ -3467,13 +4117,18 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkPackageRedi
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      12     0 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "TinyFrameworkPackageRedirect.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
@@ -3489,6 +4144,9 @@ public class com.supported.UnsupportedClass
   private final int mValue;
     descriptor: I
     flags: (0x0012) ACC_PRIVATE, ACC_FINAL
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   private static {};
     descriptor: ()V
@@ -3527,6 +4185,9 @@ public class com.supported.UnsupportedClass
         Start  Length  Slot  Name   Signature
            26      10     0  this   Lcom/supported/UnsupportedClass;
            26      10     1 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int getValue();
     descriptor: ()I
@@ -3551,11 +4212,14 @@ public class com.supported.UnsupportedClass
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            26       5     0  this   Lcom/supported/UnsupportedClass;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "UnsupportedClass.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassKeep
@@ -3600,6 +4264,11 @@ public class com.unsupported.UnsupportedClass
         Start  Length  Slot  Name   Signature
            11      14     0  this   Lcom/unsupported/UnsupportedClass;
            11      14     1 value   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 
   public int getValue();
     descriptor: ()I
@@ -3620,13 +4289,18 @@ public class com.unsupported.UnsupportedClass
       LocalVariableTable:
         Start  Length  Slot  Name   Signature
            11      10     0  this   Lcom/unsupported/UnsupportedClass;
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 }
 SourceFile: "UnsupportedClass.java"
 RuntimeVisibleAnnotations:
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
   x: #x()
-    com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
+    com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
 RuntimeInvisibleAnnotations:
   x: #x()
     android.hosttest.annotation.HostSideTestWholeClassStub
