@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.deviceentry.data.repository
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
+package com.android.systemui.deviceentry.domain.interactor
+
+import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.kosmos.Kosmos
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-var Kosmos.deviceEntryHapticsRepository: DeviceEntryHapticsRepository by
-    Kosmos.Fixture { fakeDeviceEntryHapticsRepository }
-val Kosmos.fakeDeviceEntryHapticsRepository by Kosmos.Fixture { FakeDeviceEntryHapticsRepository() }
+val Kosmos.deviceEntryBiometricAuthInteractor by
+    Kosmos.Fixture {
+        DeviceEntryBiometricAuthInteractor(
+            biometricSettingsRepository = biometricSettingsRepository,
+            deviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor,
+        )
+    }

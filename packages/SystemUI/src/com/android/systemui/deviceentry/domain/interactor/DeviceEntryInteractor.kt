@@ -23,6 +23,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
+import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.scene.shared.model.SceneKey
@@ -30,6 +31,7 @@ import com.android.systemui.scene.shared.model.SceneModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -60,6 +62,9 @@ constructor(
     trustRepository: TrustRepository,
     flags: SceneContainerFlags,
 ) {
+    val enteringDeviceFromBiometricUnlock: Flow<BiometricUnlockSource> =
+        repository.enteringDeviceFromBiometricUnlock
+
     /**
      * Whether the device is unlocked.
      *
