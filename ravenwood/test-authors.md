@@ -31,6 +31,14 @@ android_ravenwood_test {
 * Write your unit test just like you would for an Android device:
 
 ```
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 @RunWith(AndroidJUnit4.class)
 public class MyCodeTest {
     @Test
@@ -43,6 +51,14 @@ public class MyCodeTest {
 * APIs available under Ravenwood are stateless by default.  If your test requires explicit states (such as defining the UID you’re running under, or requiring a main `Looper` thread), add a `RavenwoodRule` to declare that:
 
 ```
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 @RunWith(AndroidJUnit4.class)
 public class MyCodeTest {
     @Rule
