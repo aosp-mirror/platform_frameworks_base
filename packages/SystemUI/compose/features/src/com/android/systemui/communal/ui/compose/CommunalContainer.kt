@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -19,8 +20,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
@@ -28,6 +31,7 @@ import com.android.compose.animation.scene.FixedSizeEdgeDetector
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.transitions
@@ -56,6 +60,7 @@ val sceneTransitions = transitions {
  * This is a temporary container to allow the communal UI to use [SceneTransitionLayout] for gesture
  * handling and transitions before the full Flexiglass layout is ready.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CommunalContainer(
     modifier: Modifier = Modifier,
@@ -65,6 +70,7 @@ fun CommunalContainer(
         viewModel.currentScene
             .transform<CommunalSceneKey, SceneKey> { value -> value.toTransitionSceneKey() }
             .collectAsState(TransitionSceneKey.Blank)
+    val sceneTransitionLayoutState = remember { SceneTransitionLayoutState(currentScene) }
     // Don't show hub mode UI if keyguard is present. This is important since we're in the shade,
     // which can be opened from many locations.
     val isKeyguardShowing by viewModel.isKeyguardVisible.collectAsState(initial = false)
@@ -75,32 +81,59 @@ fun CommunalContainer(
         return
     }
 
-    SceneTransitionLayout(
-        modifier = modifier.fillMaxSize(),
-        currentScene = currentScene,
-        onChangeScene = { sceneKey -> viewModel.onSceneChanged(sceneKey.toCommunalSceneKey()) },
-        transitions = sceneTransitions,
-        edgeDetector = FixedSizeEdgeDetector(ContainerDimensions.EdgeSwipeSize)
-    ) {
-        scene(
-            TransitionSceneKey.Blank,
-            userActions =
-                mapOf(
-                    Swipe(SwipeDirection.Left, fromEdge = Edge.Right) to TransitionSceneKey.Communal
-                )
+    Box(modifier = modifier.fillMaxSize()) {
+        SceneTransitionLayout(
+            modifier = Modifier.fillMaxSize(),
+            currentScene = currentScene,
+            onChangeScene = { sceneKey -> viewModel.onSceneChanged(sceneKey.toCommunalSceneKey()) },
+            transitions = sceneTransitions,
+            state = sceneTransitionLayoutState,
+            edgeDetector = FixedSizeEdgeDetector(ContainerDimensions.EdgeSwipeSize)
         ) {
-            BlankScene { showSceneTransitionLayout = false }
+            scene(
+                TransitionSceneKey.Blank,
+                userActions =
+                    mapOf(
+                        Swipe(SwipeDirection.Left, fromEdge = Edge.Right) to
+                            TransitionSceneKey.Communal
+                    )
+            ) {
+                BlankScene { showSceneTransitionLayout = false }
+            }
+
+            scene(
+                TransitionSceneKey.Communal,
+                userActions =
+                    mapOf(
+                        Swipe(SwipeDirection.Right, fromEdge = Edge.Left) to
+                            TransitionSceneKey.Blank
+                    ),
+            ) {
+                CommunalScene(viewModel, modifier = modifier)
+            }
         }
 
-        scene(
-            TransitionSceneKey.Communal,
-            userActions =
-                mapOf(
-                    Swipe(SwipeDirection.Right, fromEdge = Edge.Left) to TransitionSceneKey.Blank
-                ),
-        ) {
-            CommunalScene(viewModel, modifier = modifier)
-        }
+        // TODO(b/308813166): remove once CommunalContainer is moved lower in z-order and doesn't
+        //  block touches anymore.
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    // Offsetting to the left so that edge swipe to open the hub still works. This
+                    // does mean that the very right edge of the hub won't refresh the screen
+                    // timeout, but should be good enough for a temporary solution.
+                    .offset(x = -ContainerDimensions.EdgeSwipeSize)
+                    .pointerInteropFilter {
+                        viewModel.onUserActivity()
+                        if (
+                            sceneTransitionLayoutState.transitionState.currentScene ==
+                                TransitionSceneKey.Blank
+                        ) {
+                            viewModel.onOuterTouch(it)
+                            return@pointerInteropFilter true
+                        }
+                        false
+                    }
+        )
     }
 }
 
