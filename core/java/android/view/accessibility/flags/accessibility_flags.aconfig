@@ -34,7 +34,7 @@ flag {
     namespace: "accessibility"
     name: "flash_notification_system_api"
     description: "Makes flash notification APIs as system APIs for calling from mainline module"
-    bug: "282821643"
+    bug: "303131332"
 }
 
 flag {
