@@ -188,3 +188,9 @@ flag {
    bug: "305049544"
 }
 
+flag {
+   name: "fast_unlock_transition"
+   namespace: "systemui"
+   description: "Faster wallpaper unlock transition"
+   bug: "298186160"
+}
