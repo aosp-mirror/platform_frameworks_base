@@ -620,7 +620,7 @@
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ಅತಿಥಿ ಚಟುವಟಿಕೆಯನ್ನು ಉಳಿಸಬೇಕೆ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ನೀವು ಪ್ರಸ್ತುತ ಸೆಶನ್‌ನ ಚಟುವಟಿಕೆಯನ್ನು ಉಳಿಸಬಹುದು ಅಥವಾ ಎಲ್ಲಾ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಡೇಟಾವನ್ನು ಅಳಿಸಬಹುದು"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"ಅಳಿಸಿ"</string>
-    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ಉಳಿಸಿ"</string>
+    <string name="guest_exit_save_data_button" msgid="3690974510644963547">"ಸೇವ್ ಮಾಡಿ"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"ಅತಿಥಿ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"ಅತಿಥಿ ಸೆಷನ್ ಅನ್ನು ರೀಸೆಟ್ ಮಾಡಿ"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"ಅತಿಥಿ ಮೋಡ್‌ನಿಂದ ನಿರ್ಗಮಿಸಿ"</string>
