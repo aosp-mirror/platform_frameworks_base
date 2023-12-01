@@ -29,6 +29,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.Build;
+import android.os.LocaleList;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
@@ -397,7 +398,8 @@ final class InputMethodUtils {
             List<InputMethodSubtype> enabledSubtypes =
                     getEnabledInputMethodSubtypeListLocked(imi);
             if (allowsImplicitlyEnabledSubtypes && enabledSubtypes.isEmpty()) {
-                enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(mRes, imi);
+                enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
+                        mRes.getConfiguration().getLocales(), imi);
             }
             return InputMethodSubtype.sort(imi, enabledSubtypes);
         }
@@ -646,6 +648,7 @@ final class InputMethodUtils {
 
         private String getEnabledSubtypeHashCodeForInputMethodAndSubtypeLocked(List<Pair<String,
                 ArrayList<String>>> enabledImes, String imeId, String subtypeHashCode) {
+            final LocaleList localeList = mRes.getConfiguration().getLocales();
             for (Pair<String, ArrayList<String>> enabledIme: enabledImes) {
                 if (enabledIme.first.equals(imeId)) {
                     final ArrayList<String> explicitlyEnabledSubtypes = enabledIme.second;
@@ -657,7 +660,8 @@ final class InputMethodUtils {
                         // are enabled implicitly, so needs to treat them to be enabled.
                         if (imi != null && imi.getSubtypeCount() > 0) {
                             List<InputMethodSubtype> implicitlyEnabledSubtypes =
-                                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(mRes, imi);
+                                    SubtypeUtils.getImplicitlyApplicableSubtypesLocked(localeList,
+                                            imi);
                             final int numSubtypes = implicitlyEnabledSubtypes.size();
                             for (int i = 0; i < numSubtypes; ++i) {
                                 final InputMethodSubtype st = implicitlyEnabledSubtypes.get(i);

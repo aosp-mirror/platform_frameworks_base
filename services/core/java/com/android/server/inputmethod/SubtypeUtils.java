@@ -18,7 +18,6 @@ package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.res.Resources;
 import android.os.LocaleList;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -125,9 +124,7 @@ final class SubtypeUtils {
     @VisibleForTesting
     @NonNull
     static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLocked(
-            Resources res, InputMethodInfo imi) {
-        final LocaleList systemLocales = res.getConfiguration().getLocales();
-
+            @NonNull LocaleList systemLocales, InputMethodInfo imi) {
         synchronized (sCacheLock) {
             // We intentionally do not use InputMethodInfo#equals(InputMethodInfo) here because
             // it does not check if subtypes are also identical.
@@ -140,7 +137,7 @@ final class SubtypeUtils {
         // TODO: Refactor getImplicitlyApplicableSubtypesLockedImpl() so that it can receive
         // LocaleList rather than Resource.
         final ArrayList<InputMethodSubtype> result =
-                getImplicitlyApplicableSubtypesLockedImpl(res, imi);
+                getImplicitlyApplicableSubtypesLockedImpl(systemLocales, imi);
         synchronized (sCacheLock) {
             // Both LocaleList and InputMethodInfo are immutable. No need to copy them here.
             sCachedSystemLocales = systemLocales;
@@ -151,9 +148,8 @@ final class SubtypeUtils {
     }
 
     private static ArrayList<InputMethodSubtype> getImplicitlyApplicableSubtypesLockedImpl(
-            Resources res, InputMethodInfo imi) {
+            @NonNull LocaleList systemLocales, InputMethodInfo imi) {
         final List<InputMethodSubtype> subtypes = getSubtypes(imi);
-        final LocaleList systemLocales = res.getConfiguration().getLocales();
         final String systemLocale = systemLocales.get(0).toString();
         if (TextUtils.isEmpty(systemLocale)) return new ArrayList<>();
         final int numSubtypes = subtypes.size();
