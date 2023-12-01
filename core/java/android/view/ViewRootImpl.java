@@ -2182,8 +2182,14 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    void notifyInsetsAnimationRunningStateChanged(boolean running) {
-        mInsetsAnimationRunning = running;
+    /**
+     * Notify the when the running state of a insets animation changed.
+     */
+    @VisibleForTesting
+    public void notifyInsetsAnimationRunningStateChanged(boolean running) {
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            mInsetsAnimationRunning = running;
+        }
     }
 
     @Override
@@ -11949,7 +11955,7 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        int frameRateCategory = mIsFrameRateBoosting
+        int frameRateCategory = mIsFrameRateBoosting || mInsetsAnimationRunning
                 ? FRAME_RATE_CATEGORY_HIGH : preferredFrameRateCategory;
 
         try {
@@ -12060,6 +12066,14 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public int getPreferredFrameRateCategory() {
         return mPreferredFrameRateCategory;
+    }
+
+    /**
+     * Get the value of mLastPreferredFrameRateCategory
+     */
+    @VisibleForTesting
+    public int getLastPreferredFrameRateCategory() {
+        return mLastPreferredFrameRateCategory;
     }
 
     /**
