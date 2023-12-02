@@ -39,4 +39,7 @@ constructor(
         check(bounds.top <= bounds.bottom) { "Invalid bounds: $bounds" }
         repository.stackBounds.value = bounds
     }
+
+    /** The corner radius of the notification stack, in dp. */
+    val cornerRadiusDp: StateFlow<Float> = repository.cornerRadiusDp.asStateFlow()
 }

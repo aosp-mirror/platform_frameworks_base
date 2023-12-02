@@ -85,9 +85,9 @@ constructor(
             )
         if (sceneContainerFlags.flexiNotifsEnabled()) {
             NotificationStackAppearanceViewBinder.bind(
+                context,
                 sharedNotificationContainer,
                 notificationStackAppearanceViewModel,
-                sceneContainerFlags,
                 ambientState,
                 controller,
             )

@@ -67,9 +67,24 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             val bounds by collectLastValue(appearanceViewModel.stackBounds)
 
             val top = 200f
+            val left = 0f
             val bottom = 550f
-            placeholderViewModel.onBoundsChanged(top, bottom)
-            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = top, bottom = bottom))
+            val right = 100f
+            placeholderViewModel.onBoundsChanged(
+                left = left,
+                top = top,
+                right = right,
+                bottom = bottom
+            )
+            assertThat(bounds)
+                .isEqualTo(
+                    NotificationContainerBounds(
+                        left = left,
+                        top = top,
+                        right = right,
+                        bottom = bottom
+                    )
+                )
         }
 
     @Test

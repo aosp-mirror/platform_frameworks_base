@@ -225,7 +225,9 @@ constructor(
             .distinctUntilChanged()
 
     fun onNotificationContainerBoundsChanged(top: Float, bottom: Float) {
-        keyguardInteractor.setNotificationContainerBounds(NotificationContainerBounds(top, bottom))
+        keyguardInteractor.setNotificationContainerBounds(
+            NotificationContainerBounds(top = top, bottom = bottom)
+        )
     }
 
     /** Is there an expanded pulse, are we animating in response? */

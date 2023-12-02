@@ -24,6 +24,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import javax.inject.Inject
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * ViewModel used by the Notification placeholders inside the scene container to update the
@@ -55,9 +56,14 @@ constructor(
      *   pixels.
      */
     fun onBoundsChanged(
+        left: Float,
         top: Float,
+        right: Float,
         bottom: Float,
     ) {
-        interactor.setStackBounds(NotificationContainerBounds(top, bottom))
+        interactor.setStackBounds(NotificationContainerBounds(left, top, right, bottom))
     }
+
+    /** The corner radius of the placeholder, in dp. */
+    val cornerRadiusDp: StateFlow<Float> = interactor.cornerRadiusDp
 }

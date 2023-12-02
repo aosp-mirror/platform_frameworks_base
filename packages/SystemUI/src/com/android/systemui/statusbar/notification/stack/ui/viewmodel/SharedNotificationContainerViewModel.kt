@@ -174,7 +174,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = NotificationContainerBounds(0f, 0f),
+                initialValue = NotificationContainerBounds(),
             )
 
     val alpha: Flow<Float> =
