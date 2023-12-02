@@ -95,7 +95,6 @@ public class BubblePositioner {
     private int mMinimumFlyoutWidthLargeScreen;
 
     private PointF mRestingStackPosition;
-    private int[] mPaddings = new int[4];
 
     private boolean mShowingInBubbleBar;
     private final Point mBubbleBarPosition = new Point();
@@ -344,46 +343,44 @@ public class BubblePositioner {
         final int pointerTotalHeight = getPointerSize();
         final int expandedViewLargeScreenInsetFurthestEdge =
                 getExpandedViewLargeScreenInsetFurthestEdge(isOverflow);
+        int[] paddings = new int[4];
         if (mDeviceConfig.isLargeScreen()) {
             // Note:
             // If we're in portrait OR if we're a small tablet, then the two insets values will
             // be equal. If we're landscape and a large tablet, the two values will be different.
             // [left, top, right, bottom]
-            mPaddings[0] = onLeft
+            paddings[0] = onLeft
                     ? mExpandedViewLargeScreenInsetClosestEdge - pointerTotalHeight
                     : expandedViewLargeScreenInsetFurthestEdge;
-            mPaddings[1] = 0;
-            mPaddings[2] = onLeft
+            paddings[1] = 0;
+            paddings[2] = onLeft
                     ? expandedViewLargeScreenInsetFurthestEdge
                     : mExpandedViewLargeScreenInsetClosestEdge - pointerTotalHeight;
             // Overflow doesn't show manage button / get padding from it so add padding here
-            mPaddings[3] = isOverflow ? mExpandedViewPadding : 0;
-            return mPaddings;
+            paddings[3] = isOverflow ? mExpandedViewPadding : 0;
+            return paddings;
         } else {
             int leftPadding = mInsets.left + mExpandedViewPadding;
             int rightPadding = mInsets.right + mExpandedViewPadding;
-            final float expandedViewWidth = isOverflow
-                    ? mOverflowWidth
-                    : mExpandedViewLargeScreenWidth;
             if (showBubblesVertically()) {
                 if (!onLeft) {
                     rightPadding += mBubbleSize - pointerTotalHeight;
                     leftPadding += isOverflow
-                            ? (mPositionRect.width() - rightPadding - expandedViewWidth)
+                            ? (mPositionRect.width() - rightPadding - mOverflowWidth)
                             : 0;
                 } else {
                     leftPadding += mBubbleSize - pointerTotalHeight;
                     rightPadding += isOverflow
-                            ? (mPositionRect.width() - leftPadding - expandedViewWidth)
+                            ? (mPositionRect.width() - leftPadding - mOverflowWidth)
                             : 0;
                 }
             }
             // [left, top, right, bottom]
-            mPaddings[0] = leftPadding;
-            mPaddings[1] = showBubblesVertically() ? 0 : mPointerMargin;
-            mPaddings[2] = rightPadding;
-            mPaddings[3] = 0;
-            return mPaddings;
+            paddings[0] = leftPadding;
+            paddings[1] = showBubblesVertically() ? 0 : mPointerMargin;
+            paddings[2] = rightPadding;
+            paddings[3] = 0;
+            return paddings;
         }
     }
 
@@ -395,7 +392,7 @@ public class BubblePositioner {
     }
 
     /** Gets the y position of the expanded view if it was top-aligned. */
-    public float getExpandedViewYTopAligned() {
+    public int getExpandedViewYTopAligned() {
         final int top = getAvailableRect().top;
         if (showBubblesVertically()) {
             return top - mPointerWidth + mExpandedViewPadding;
@@ -413,7 +410,7 @@ public class BubblePositioner {
             return getExpandedViewHeightForLargeScreen();
         }
         // Subtract top insets because availableRect.height would account for that
-        int expandedContainerY = (int) getExpandedViewYTopAligned() - getInsets().top;
+        int expandedContainerY = getExpandedViewYTopAligned() - getInsets().top;
         int paddingTop = showBubblesVertically()
                 ? 0
                 : mPointerHeight;
@@ -474,11 +471,11 @@ public class BubblePositioner {
     public float getExpandedViewY(BubbleViewProvider bubble, float bubblePosition) {
         boolean isOverflow = bubble == null || BubbleOverflow.KEY.equals(bubble.getKey());
         float expandedViewHeight = getExpandedViewHeight(bubble);
-        float topAlignment = getExpandedViewYTopAligned();
+        int topAlignment = getExpandedViewYTopAligned();
         int manageButtonHeight =
                 isOverflow ? mExpandedViewPadding : mManageButtonHeightIncludingMargins;
 
-        // On largescreen portrait bubbles are bottom aligned.
+        // On large screen portrait bubbles are bottom aligned.
         if (areBubblesBottomAligned() && expandedViewHeight == MAX_HEIGHT) {
             return mPositionRect.bottom - manageButtonHeight
                     - getExpandedViewHeightForLargeScreen() - mPointerWidth;
