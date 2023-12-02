@@ -90,7 +90,7 @@ class TestFile : public io::IFile {
     return {};
   }
 
-  std::unique_ptr<io::InputStream> OpenInputStream() override {
+  std::unique_ptr<android::InputStream> OpenInputStream() override {
     return OpenAsData();
   }
 

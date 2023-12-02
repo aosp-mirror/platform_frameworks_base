@@ -17,6 +17,7 @@ package com.android.hoststubgen.visitors
 
 import com.android.hoststubgen.HostStubGenErrors
 import com.android.hoststubgen.LogLevel
+import com.android.hoststubgen.asm.UnifiedVisitor
 import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.getPackageNameFromClassName
 import com.android.hoststubgen.asm.resolveClassName
@@ -24,8 +25,8 @@ import com.android.hoststubgen.asm.toJvmClassName
 import com.android.hoststubgen.filters.FilterPolicy
 import com.android.hoststubgen.filters.FilterPolicyWithReason
 import com.android.hoststubgen.filters.OutputFilter
-import com.android.hoststubgen.hosthelper.HostStubGenProcessedKeepClass
-import com.android.hoststubgen.hosthelper.HostStubGenProcessedStubClass
+import com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+import com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
 import com.android.hoststubgen.log
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.FieldVisitor
@@ -64,6 +65,18 @@ abstract class BaseAdapter (
      */
     protected abstract fun shouldEmit(policy: FilterPolicy): Boolean
 
+    /**
+     * Inject [HostStubGenKeptInStub] and [HostStubGenKeptInImpl] as needed to an item.
+     */
+    protected fun injectInStubAndKeepAnnotations(policy: FilterPolicy, v: UnifiedVisitor) {
+        if (policy.needsInStub) {
+            v.visitAnnotation(HostStubGenKeptInStub.CLASS_DESCRIPTOR, true)
+        }
+        if (policy.needsInImpl) {
+            v.visitAnnotation(HostStubGenKeptInImpl.CLASS_DESCRIPTOR, true)
+        }
+    }
+
     override fun visit(
             version: Int,
             access: Int,
@@ -100,12 +113,7 @@ abstract class BaseAdapter (
             nativeSubstitutionClass = fullClassName
         }
         // Inject annotations to generated classes.
-        if (classPolicy.policy.needsInStub) {
-            visitAnnotation(HostStubGenProcessedStubClass.CLASS_DESCRIPTOR, true)
-        }
-        if (classPolicy.policy.needsInImpl) {
-            visitAnnotation(HostStubGenProcessedKeepClass.CLASS_DESCRIPTOR, true)
-        }
+        injectInStubAndKeepAnnotations(classPolicy.policy, UnifiedVisitor.on(this))
     }
 
     override fun visitEnd() {
@@ -148,7 +156,11 @@ abstract class BaseAdapter (
             }
 
             log.v("Emitting field: %s %s %s", name, descriptor, policy)
-            return super.visitField(access, name, descriptor, signature, value)
+            val ret = super.visitField(access, name, descriptor, signature, value)
+
+            injectInStubAndKeepAnnotations(policy.policy, UnifiedVisitor.on(ret))
+
+            return ret
         }
     }
 
@@ -195,8 +207,15 @@ abstract class BaseAdapter (
             // it can do so inside visitMethodInner().
             val newAccess = updateAccessFlags(access, name, descriptor)
 
-            return visitMethodInner(access, newName, descriptor, signature, exceptions, policy,
-                    super.visitMethod(newAccess, newName, descriptor, signature, exceptions))
+            val ret = visitMethodInner(access, newName, descriptor, signature, exceptions, policy,
+                substituteTo != null,
+                super.visitMethod(newAccess, newName, descriptor, signature, exceptions))
+
+            ret?.let {
+                injectInStubAndKeepAnnotations(policy.policy, UnifiedVisitor.on(ret))
+            }
+
+            return ret
         }
     }
 
@@ -215,6 +234,7 @@ abstract class BaseAdapter (
         signature: String?,
         exceptions: Array<String>?,
         policy: FilterPolicyWithReason,
+        substituted: Boolean,
         superVisitor: MethodVisitor?,
         ): MethodVisitor?
 

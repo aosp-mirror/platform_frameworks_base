@@ -253,12 +253,6 @@ object Flags {
     val KEYGUARD_WM_STATE_REFACTOR: UnreleasedFlag =
             unreleasedFlag("keyguard_wm_state_refactor")
 
-    /** Flag to disable the face scanning animation pulsing. */
-    // TODO(b/295245791): Tracking bug.
-    @JvmField val STOP_PULSING_FACE_SCANNING_ANIMATION = resourceBooleanFlag(
-            R.bool.flag_stop_pulsing_face_scanning_animation,
-            "stop_pulsing_face_scanning_animation")
-
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag("power_menu_lite")

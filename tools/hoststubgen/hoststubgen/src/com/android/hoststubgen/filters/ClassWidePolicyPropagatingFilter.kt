@@ -15,6 +15,7 @@
  */
 package com.android.hoststubgen.filters
 
+import com.android.hoststubgen.asm.ClassNodes
 import com.android.hoststubgen.asm.getDirectOuterClassName
 
 /**
@@ -22,22 +23,38 @@ import com.android.hoststubgen.asm.getDirectOuterClassName
  * (obtained from [outermostFilter]) to the fields and methods.
  */
 class ClassWidePolicyPropagatingFilter(
-        fallback: OutputFilter,
+    private val classes: ClassNodes,
+    fallback: OutputFilter,
     ) : DelegatingFilter(fallback) {
 
     private fun getClassWidePolicy(className: String, resolve: Boolean): FilterPolicyWithReason? {
         var currentClass = className
 
-        while (true) {
-            outermostFilter.getPolicyForClass(className).let { policy ->
-                if (policy.policy.isClassWidePolicy) {
-                    val p = if (resolve) policy.policy.resolveClassWidePolicy() else policy.policy
 
-                    return p.withReason(policy.reason).wrapReason("class-wide in $currentClass")
-                }
-                // If the class's policy is remove, then remove it.
-                if (policy.policy == FilterPolicy.Remove) {
-                    return FilterPolicy.Remove.withReason("class-wide in $currentClass")
+        // If the class name is `a.b.c.A$B$C`, then we try to get the class wide policy
+        // from a.b.c.A$B$C, then a.b.c.A$B, and then a.b.c.A.
+        while (true) {
+            // Sometimes a class name has a `$` in it but not as a nest class name separator --
+            // e.g. class name like "MyClass$$". In this case, `MyClass$` may not actually be
+            // a class name.
+            // So before getting the class policy on a nonexistent class, which may cause an
+            // incorrect result, we make sure if className actually exists.
+            if (classes.hasClass(className)) {
+                outermostFilter.getPolicyForClass(className).let { policy ->
+                    if (policy.policy.isClassWidePolicy) {
+                        val p = if (resolve) {
+                            policy.policy.resolveClassWidePolicy()
+                        } else {
+                            policy.policy
+                        }
+
+                        return p.withReason(policy.reason)
+                            .wrapReason("class-wide in $currentClass")
+                    }
+                    // If the class's policy is remove, then remove it.
+                    if (policy.policy == FilterPolicy.Remove) {
+                        return FilterPolicy.Remove.withReason("class-wide in $currentClass")
+                    }
                 }
             }
 

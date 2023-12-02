@@ -28,16 +28,12 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
-import android.hardware.biometrics.BiometricSourceType
 import android.view.View
 import androidx.core.graphics.ColorUtils
 import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardUpdateMonitor
-import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.settingslib.Utils
 import com.android.systemui.biometrics.AuthController
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.log.ScreenDecorationsLogger
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.asIndenting
@@ -56,7 +52,6 @@ class FaceScanningOverlay(
     val mainExecutor: Executor,
     val logger: ScreenDecorationsLogger,
     val authController: AuthController,
-    val featureFlags: FeatureFlags,
 ) : ScreenDecorations.DisplayCutoutView(context, pos) {
     private var showScanningAnim = false
     private val rimPaint = Paint()
@@ -69,24 +64,9 @@ class FaceScanningOverlay(
         com.android.internal.R.attr.materialColorPrimaryFixed)
     private var cameraProtectionAnimator: ValueAnimator? = null
     var hideOverlayRunnable: Runnable? = null
-    var faceAuthSucceeded = false
 
     init {
         visibility = View.INVISIBLE // only show this view when face scanning is happening
-    }
-
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        mainExecutor.execute {
-            keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
-        }
-    }
-
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        mainExecutor.execute {
-            keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
-        }
     }
 
     override fun setColor(color: Int) {
@@ -106,18 +86,22 @@ class FaceScanningOverlay(
         }
     }
 
-    override fun enableShowProtection(show: Boolean) {
-        val animationRequired =
+    override fun enableShowProtection(isCameraActive: Boolean) {
+        val scanningAnimationRequiredWhenCameraActive =
                 keyguardUpdateMonitor.isFaceDetectionRunning || authController.isShowing
-        val showScanningAnimNow = animationRequired && show
-        if (showScanningAnimNow == showScanningAnim) {
+        val faceAuthSucceeded = keyguardUpdateMonitor.isFaceAuthenticated
+        val showScanningAnimationNow = scanningAnimationRequiredWhenCameraActive && isCameraActive
+        if (showScanningAnimationNow == showScanningAnim) {
             return
         }
-        logger.cameraProtectionShownOrHidden(keyguardUpdateMonitor.isFaceDetectionRunning,
+        logger.cameraProtectionShownOrHidden(
+                showScanningAnimationNow,
+                keyguardUpdateMonitor.isFaceDetectionRunning,
                 authController.isShowing,
-                show,
+                faceAuthSucceeded,
+                isCameraActive,
                 showScanningAnim)
-        showScanningAnim = showScanningAnimNow
+        showScanningAnim = showScanningAnimationNow
         updateProtectionBoundingPath()
         // Delay the relayout until the end of the animation when hiding,
         // otherwise we'd clip it.
@@ -128,7 +112,7 @@ class FaceScanningOverlay(
 
         cameraProtectionAnimator?.cancel()
         cameraProtectionAnimator = ValueAnimator.ofFloat(cameraProtectionProgress,
-                if (showScanningAnimNow) SHOW_CAMERA_PROTECTION_SCALE
+                if (showScanningAnimationNow) SHOW_CAMERA_PROTECTION_SCALE
                 else HIDDEN_CAMERA_PROTECTION_SCALE).apply {
             startDelay =
                     if (showScanningAnim) 0
@@ -297,20 +281,10 @@ class FaceScanningOverlay(
     }
 
     private fun createFaceScanningRimAnimator(): AnimatorSet {
-        val dontPulse = featureFlags.isEnabled(Flags.STOP_PULSING_FACE_SCANNING_ANIMATION)
-        if (dontPulse) {
-            return AnimatorSet().apply {
-                playSequentially(
-                        cameraProtectionAnimator,
-                        createRimAppearAnimator(),
-                )
-            }
-        }
         return AnimatorSet().apply {
             playSequentially(
-                cameraProtectionAnimator,
-                createRimAppearAnimator(),
-                createPulseAnimator()
+                    cameraProtectionAnimator,
+                    createRimAppearAnimator(),
             )
         }
     }
@@ -348,80 +322,15 @@ class FaceScanningOverlay(
         invalidate()
     }
 
-    private fun createPulseAnimator(): ValueAnimator {
-        return ValueAnimator.ofFloat(
-                PULSE_RADIUS_OUT, PULSE_RADIUS_IN).apply {
-            duration = HALF_PULSE_DURATION
-            interpolator = Interpolators.STANDARD
-            repeatCount = 11 // Pulse inwards and outwards, reversing direction, 6 times
-            repeatMode = ValueAnimator.REVERSE
-            addUpdateListener(this@FaceScanningOverlay::updateRimProgress)
-        }
-    }
-
-    private val keyguardUpdateMonitorCallback = object : KeyguardUpdateMonitorCallback() {
-        override fun onBiometricAuthenticated(
-            userId: Int,
-            biometricSourceType: BiometricSourceType?,
-            isStrongBiometric: Boolean
-        ) {
-            if (biometricSourceType == BiometricSourceType.FACE) {
-                post {
-                    faceAuthSucceeded = true
-                    logger.biometricEvent("biometricAuthenticated")
-                    enableShowProtection(true)
-                }
-            }
-        }
-
-        override fun onBiometricAcquired(
-            biometricSourceType: BiometricSourceType?,
-            acquireInfo: Int
-        ) {
-            if (biometricSourceType == BiometricSourceType.FACE) {
-                post {
-                    faceAuthSucceeded = false // reset
-                }
-            }
-        }
-
-        override fun onBiometricAuthFailed(biometricSourceType: BiometricSourceType?) {
-            if (biometricSourceType == BiometricSourceType.FACE) {
-                post {
-                    faceAuthSucceeded = false
-                    logger.biometricEvent("biometricFailed")
-                    enableShowProtection(false)
-                }
-            }
-        }
-
-        override fun onBiometricError(
-            msgId: Int,
-            errString: String?,
-            biometricSourceType: BiometricSourceType?
-        ) {
-            if (biometricSourceType == BiometricSourceType.FACE) {
-                post {
-                    faceAuthSucceeded = false
-                    logger.biometricEvent("biometricError")
-                    enableShowProtection(false)
-                }
-            }
-        }
-    }
-
     companion object {
         private const val HIDDEN_RIM_SCALE = HIDDEN_CAMERA_PROTECTION_SCALE
         private const val SHOW_CAMERA_PROTECTION_SCALE = 1f
 
-        private const val PULSE_RADIUS_IN = 1.1f
         private const val PULSE_RADIUS_OUT = 1.125f
         private const val PULSE_RADIUS_SUCCESS = 1.25f
 
         private const val CAMERA_PROTECTION_APPEAR_DURATION = 250L
         private const val PULSE_APPEAR_DURATION = 250L // without start delay
-
-        private const val HALF_PULSE_DURATION = 500L
 
         private const val PULSE_SUCCESS_DISAPPEAR_DURATION = 400L
         private const val CAMERA_PROTECTION_SUCCESS_DISAPPEAR_DURATION = 500L // without start delay

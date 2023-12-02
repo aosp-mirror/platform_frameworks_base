@@ -120,6 +120,7 @@ public class SettingsToPropertiesMapper {
     static final String[] sDeviceConfigAconfigScopes = new String[] {
         "accessibility",
         "android_core_networking",
+        "aoc",
         "app_widgets",
         "arc_next",
         "avic",

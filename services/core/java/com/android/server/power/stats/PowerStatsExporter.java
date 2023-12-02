@@ -60,6 +60,7 @@ public class PowerStatsExporter {
      */
     public void exportAggregatedPowerStats(BatteryUsageStats.Builder batteryUsageStatsBuilder,
             long monotonicStartTime, long monotonicEndTime) {
+        boolean hasStoredSpans = false;
         long maxEndTime = monotonicStartTime;
         List<PowerStatsSpan.Metadata> spans = mPowerStatsStore.getTableOfContents();
         for (int i = spans.size() - 1; i >= 0; i--) {
@@ -99,13 +100,14 @@ public class PowerStatsExporter {
             }
             List<PowerStatsSpan.Section> sections = span.getSections();
             for (int k = 0; k < sections.size(); k++) {
+                hasStoredSpans = true;
                 PowerStatsSpan.Section section = sections.get(k);
                 populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder,
                         ((AggregatedPowerStatsSection) section).getAggregatedPowerStats());
             }
         }
 
-        if (maxEndTime < monotonicEndTime - mBatterySessionTimeSpanSlackMillis) {
+        if (!hasStoredSpans || maxEndTime < monotonicEndTime - mBatterySessionTimeSpanSlackMillis) {
             mPowerStatsAggregator.aggregatePowerStats(maxEndTime, monotonicEndTime,
                     stats -> populateBatteryUsageStatsBuilder(batteryUsageStatsBuilder, stats));
         }

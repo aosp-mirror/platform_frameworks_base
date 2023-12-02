@@ -158,7 +158,7 @@ class HostStubGen(val options: HostStubGenOptions) {
         // This is used when a member (methods, fields, nested classes) don't get any polices
         // from upper filters. e.g. when a method has no annotations, then this filter will apply
         // the class-wide policy, if any. (if not, we'll fall back to the above filter.)
-        filter = ClassWidePolicyPropagatingFilter(filter)
+        filter = ClassWidePolicyPropagatingFilter(allClasses, filter)
 
         // Inject default hooks from options.
         filter = DefaultHookInjectingFilter(

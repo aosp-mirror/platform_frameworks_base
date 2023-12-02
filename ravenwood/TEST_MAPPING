@@ -1,7 +1,21 @@
 {
-    "presubmit": [
-        // Let's only run this one as a smoke test.
-        // TODO: Enable it once the infra knows how to run it.
-        // { "name": "CtsUtilTestCasesRavenwood" }
-    ]
+  "presubmit": [
+    {
+      "name": "RavenwoodMockitoTest_device"
+    }
+  ],
+  "ravenwood-presubmit": [
+    {
+      "name": "RavenwoodMinimumTest",
+      "host": true
+    },
+    {
+      "name": "RavenwoodMockitoTest",
+      "host": true
+    },
+    {
+      "name": "CtsUtilTestCasesRavenwood",
+      "host": true
+    }
+  ]
 }

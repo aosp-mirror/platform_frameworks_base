@@ -51,31 +51,31 @@ public class ShutdownThreadTest {
 
     private static final String WAVEFORM_VIB_10MS_SERIALIZATION =
             """
-            <vibration>
+            <vibration-effect>
                 <waveform-effect>
                     <waveform-entry durationMs="10" amplitude="100"/>
                 </waveform-effect>
-            </vibration>
+            </vibration-effect>
             """;
 
     private static final VibrationEffect WAVEFORM_VIB_10MS = VibrationEffect.createOneShot(10, 100);
 
     private static final String REPEATING_VIB_SERIALIZATION =
             """
-            <vibration>
+            <vibration-effect>
                 <waveform-effect>
                     <repeating>
                         <waveform-entry durationMs="10" amplitude="100"/>
                     </repeating>
                 </waveform-effect>
-            </vibration>
+            </vibration-effect>
             """;
 
     private static final String CLICK_VIB_SERIALIZATION =
             """
-            <vibration>
+            <vibration-effect>
                 <predefined-effect name="click"/>
-            </vibration>
+            </vibration-effect>
             """;
 
     private static final VibrationEffect CLILCK_VIB =

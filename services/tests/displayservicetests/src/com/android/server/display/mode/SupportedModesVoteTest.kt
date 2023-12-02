@@ -18,7 +18,6 @@ package com.android.server.display.mode
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.server.display.mode.DisplayModeDirector.VoteSummary
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -44,7 +43,7 @@ class SupportedModesVoteTest {
 
     @Test
     fun `adds supported modes if supportedModes in summary is null`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
 
         supportedModesVote.updateSummary(summary)
 
@@ -53,7 +52,7 @@ class SupportedModesVoteTest {
 
     @Test
     fun `does not add supported modes if summary has empty list of modes`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.supportedModes = ArrayList()
 
         supportedModesVote.updateSummary(summary)
@@ -63,7 +62,7 @@ class SupportedModesVoteTest {
 
     @Test
     fun `filters out modes that does not match vote`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.supportedModes = ArrayList(listOf(otherMode, supportedModes[0]))
 
         supportedModesVote.updateSummary(summary)

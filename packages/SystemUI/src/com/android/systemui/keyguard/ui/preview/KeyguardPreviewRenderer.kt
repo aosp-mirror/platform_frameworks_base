@@ -119,7 +119,6 @@ constructor(
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val shadeInteractor: ShadeInteractor,
 ) {
-
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
     private val height: Int = bundle.getInt(KEY_VIEW_HEIGHT)

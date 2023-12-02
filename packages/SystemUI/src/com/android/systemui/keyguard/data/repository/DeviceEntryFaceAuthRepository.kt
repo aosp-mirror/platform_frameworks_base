@@ -187,8 +187,7 @@ constructor(
         faceManager?.sensorPropertiesInternal?.firstOrNull()?.supportsFaceDetection ?: false
 
     private val _isAuthRunning = MutableStateFlow(false)
-    override val isAuthRunning: StateFlow<Boolean>
-        get() = _isAuthRunning
+    override val isAuthRunning: StateFlow<Boolean> = _isAuthRunning
 
     private val keyguardSessionId: InstanceId?
         get() = sessionTracker.getSessionId(StatusBarManager.SESSION_KEYGUARD)
@@ -254,6 +253,13 @@ constructor(
                 )
                 .andAllFlows("canFaceAuthRun", faceAuthLog)
                 .flowOn(backgroundDispatcher)
+                .onEach {
+                    faceAuthLogger.canFaceAuthRunChanged(it)
+                    if (!it) {
+                        // Cancel currently running auth if any of the gating checks are false.
+                        cancel()
+                    }
+                }
                 .stateIn(applicationScope, SharingStarted.Eagerly, false)
 
         // Face detection can run only when lockscreen bypass is enabled
@@ -281,9 +287,12 @@ constructor(
                 )
                 .andAllFlows("canFaceDetectRun", faceDetectLog)
                 .flowOn(backgroundDispatcher)
+                .onEach {
+                    if (!it) {
+                        cancelDetection()
+                    }
+                }
                 .stateIn(applicationScope, SharingStarted.Eagerly, false)
-        observeFaceAuthGatingChecks()
-        observeFaceDetectGatingChecks()
         observeFaceAuthResettingConditions()
         listenForSchedulingWatchdog()
         processPendingAuthRequests()
@@ -317,6 +326,7 @@ constructor(
                     it.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
                 },
             )
+            .flowOn(backgroundDispatcher)
             .onEach { anyOfThemIsTrue ->
                 if (anyOfThemIsTrue) {
                     clearPendingAuthRequest("Resetting auth status")
@@ -335,17 +345,6 @@ constructor(
             pendingAuthenticateRequest.value?.fallbackToDetection
         )
         pendingAuthenticateRequest.value = null
-    }
-
-    private fun observeFaceDetectGatingChecks() {
-        canRunDetection
-            .onEach {
-                if (!it) {
-                    cancelDetection()
-                }
-            }
-            .flowOn(mainDispatcher)
-            .launchIn(applicationScope)
     }
 
     private fun isUdfps() =
@@ -404,20 +403,6 @@ constructor(
                 "userSwitchingInProgress"
             )
         )
-    }
-
-    private fun observeFaceAuthGatingChecks() {
-        canRunFaceAuth
-            .onEach {
-                faceAuthLogger.canFaceAuthRunChanged(it)
-                if (!it) {
-                    // Cancel currently running auth if any of the gating checks are false.
-                    faceAuthLogger.cancellingFaceAuth()
-                    cancel()
-                }
-            }
-            .flowOn(mainDispatcher)
-            .launchIn(applicationScope)
     }
 
     private val faceAuthCallback =
@@ -554,7 +539,7 @@ constructor(
                     authenticate(it.uiEvent, it.fallbackToDetection)
                 }
             }
-            .flowOn(mainDispatcher)
+            .flowOn(backgroundDispatcher)
             .launchIn(applicationScope)
     }
 
@@ -650,6 +635,7 @@ constructor(
     override fun cancel() {
         if (authCancellationSignal == null) return
 
+        faceAuthLogger.cancellingFaceAuth()
         authCancellationSignal?.cancel()
         cancelNotReceivedHandlerJob?.cancel()
         cancelNotReceivedHandlerJob =

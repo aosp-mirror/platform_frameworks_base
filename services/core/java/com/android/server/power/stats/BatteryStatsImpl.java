@@ -49,6 +49,7 @@ import android.os.BatteryUsageStatsQuery;
 import android.os.Binder;
 import android.os.BluetoothBatteryStats;
 import android.os.Build;
+import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.IBatteryPropertiesRegistrar;
 import android.os.Looper;
@@ -137,7 +138,6 @@ import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.net.module.util.NetworkCapabilitiesUtils;
-import com.android.server.power.optimization.Flags;
 import com.android.server.power.stats.SystemServerCpuThreadReader.SystemServiceCpuThreadTimes;
 
 import libcore.util.EmptyArray;
@@ -10543,7 +10543,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
                 final int batteryConsumerProcessState =
                         mapUidProcessStateToBatteryConsumerProcessState(uidRunningState);
-                if (mBsi.mSystemReady && Flags.streamlinedBatteryStats()) {
+                if (mBsi.mSystemReady && mBsi.mPowerStatsCollectorEnabled) {
                     mBsi.mHistory.recordProcessStateChange(elapsedRealtimeMs, uptimeMs, mUid,
                             batteryConsumerProcessState);
                 }
@@ -11711,6 +11711,10 @@ public class BatteryStatsImpl extends BatteryStats {
 
         // Store the empty state to disk to ensure consistency
         writeSyncLocked();
+
+        if (mPowerStatsCollectorEnabled) {
+            schedulePowerStatsSampleCollection();
+        }
 
         // Flush external data, gathering snapshots, but don't process it since it is pre-reset data
         mIgnoreNextExternalStats = true;
@@ -15759,6 +15763,16 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
         mCpuPowerStatsCollector.forceSchedule();
+    }
+
+    /**
+     * Schedules an immediate collection of PowerStats samples and awaits the result.
+     */
+    public void collectPowerStatsSamples() {
+        schedulePowerStatsSampleCollection();
+        ConditionVariable done = new ConditionVariable();
+        mHandler.post(done::open);
+        done.block();
     }
 
     /**

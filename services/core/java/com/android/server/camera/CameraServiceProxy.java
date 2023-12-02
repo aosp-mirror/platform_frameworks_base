@@ -52,7 +52,6 @@ import android.hardware.display.DisplayManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
-import android.nfc.INfcAdapter;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcManager;
 import android.os.Binder;
@@ -1281,45 +1280,19 @@ public class CameraServiceProxy extends SystemService
         }
     }
 
-    // TODO(b/303286040): Remove the raw INfcAdapter usage once |ENABLE_NFC_MAINLINE_FLAG| is
-    // rolled out.
-    private static final String NFC_SERVICE_BINDER_NAME = "nfc";
-    // Flags arguments to NFC adapter to enable/disable NFC
-    public static final int DISABLE_POLLING_FLAGS = 0x1000;
-    public static final int ENABLE_POLLING_FLAGS = 0x0000;
-    private void setNfcReaderModeUsingINfcAdapter(boolean enablePolling) {
-        IBinder nfcServiceBinder = getBinderService(NFC_SERVICE_BINDER_NAME);
-        if (nfcServiceBinder == null) {
+    private void notifyNfcService(boolean enablePolling) {
+        NfcManager nfcManager = mContext.getSystemService(NfcManager.class);
+        if (nfcManager == null) {
             Slog.w(TAG, "Could not connect to NFC service to notify it of camera state");
             return;
         }
-        INfcAdapter nfcAdapterRaw = INfcAdapter.Stub.asInterface(nfcServiceBinder);
-        int flags = enablePolling ? ENABLE_POLLING_FLAGS : DISABLE_POLLING_FLAGS;
-        if (DEBUG) Slog.v(TAG, "Setting NFC reader mode to flags " + flags);
-        try {
-            nfcAdapterRaw.setReaderMode(nfcInterfaceToken, null, flags, null);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Could not notify NFC service, remote exception: " + e);
+        NfcAdapter nfcAdapter = nfcManager.getDefaultAdapter();
+        if (nfcAdapter == null) {
+            Slog.w(TAG, "Could not connect to NFC service to notify it of camera state");
+            return;
         }
-    }
-
-    private void notifyNfcService(boolean enablePolling) {
-        if (android.nfc.Flags.enableNfcMainline()) {
-            NfcManager nfcManager = mContext.getSystemService(NfcManager.class);
-            if (nfcManager == null) {
-                Slog.w(TAG, "Could not connect to NFC service to notify it of camera state");
-                return;
-            }
-            NfcAdapter nfcAdapter = nfcManager.getDefaultAdapter();
-            if (nfcAdapter == null) {
-                Slog.w(TAG, "Could not connect to NFC service to notify it of camera state");
-                return;
-            }
-            if (DEBUG) Slog.v(TAG, "Setting NFC reader mode. enablePolling: " + enablePolling);
-            nfcAdapter.setReaderMode(enablePolling);
-        } else {
-            setNfcReaderModeUsingINfcAdapter(enablePolling);
-        }
+        if (DEBUG) Slog.v(TAG, "Setting NFC reader mode. enablePolling: " + enablePolling);
+        nfcAdapter.setReaderMode(enablePolling);
     }
 
     private static int[] toArray(Collection<Integer> c) {

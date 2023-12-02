@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.base.viewmodel
 
 import android.os.UserHandle
+import com.android.systemui.Dumpable
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.tiles.base.analytics.QSTileAnalytics
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
@@ -34,6 +35,7 @@ import com.android.systemui.qs.tiles.viewmodel.QSTileViewModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.kotlin.throttle
 import com.android.systemui.util.time.SystemClock
+import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -81,7 +83,7 @@ class QSTileViewModelImpl<DATA_TYPE>(
     private val systemClock: SystemClock,
     private val backgroundDispatcher: CoroutineDispatcher,
     private val tileScope: CoroutineScope = CoroutineScope(SupervisorJob()),
-) : QSTileViewModel {
+) : QSTileViewModel, Dumpable {
 
     private val users: MutableStateFlow<UserHandle> =
         MutableStateFlow(userRepository.getSelectedUserInfo().userHandle)
@@ -136,6 +138,13 @@ class QSTileViewModelImpl<DATA_TYPE>(
     override fun destroy() {
         tileScope.cancel()
     }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) =
+        with(pw) {
+            println("${config.tileSpec.spec}:")
+            print("    ")
+            println(state.replayCache.lastOrNull().toString())
+        }
 
     private fun createTileDataFlow(): SharedFlow<DATA_TYPE> =
         users

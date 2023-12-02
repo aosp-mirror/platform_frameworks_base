@@ -65,9 +65,9 @@ final class SerializedVibrationEffect implements XmlSerializedVibration<Vibratio
     @Override
     public void write(@NonNull TypedXmlSerializer serializer)
             throws IOException {
-        serializer.startTag(XmlConstants.NAMESPACE, XmlConstants.TAG_VIBRATION);
+        serializer.startTag(XmlConstants.NAMESPACE, XmlConstants.TAG_VIBRATION_EFFECT);
         writeContent(serializer);
-        serializer.endTag(XmlConstants.NAMESPACE, XmlConstants.TAG_VIBRATION);
+        serializer.endTag(XmlConstants.NAMESPACE, XmlConstants.TAG_VIBRATION_EFFECT);
     }
 
     @Override

@@ -31,7 +31,7 @@ class BaseModeRefreshRateVote implements Vote {
     }
 
     @Override
-    public void updateSummary(DisplayModeDirector.VoteSummary summary) {
+    public void updateSummary(VoteSummary summary) {
         if (summary.appRequestBaseModeRefreshRate == 0f
                 && mAppRequestBaseModeRefreshRate > 0f) {
             summary.appRequestBaseModeRefreshRate = mAppRequestBaseModeRefreshRate;

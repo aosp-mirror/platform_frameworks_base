@@ -18,7 +18,6 @@ package com.android.server.display.mode
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.server.display.mode.DisplayModeDirector.VoteSummary
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -41,7 +40,7 @@ class BaseModeRefreshRateVoteTest {
 
     @Test
     fun `updates summary with base mode refresh rate if not set`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
 
         baseModeVote.updateSummary(summary)
 
@@ -50,7 +49,7 @@ class BaseModeRefreshRateVoteTest {
 
     @Test
     fun `keeps summary base mode refresh rate if set`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.appRequestBaseModeRefreshRate = OTHER_BASE_REFRESH_RATE
 
         baseModeVote.updateSummary(summary)
@@ -61,7 +60,7 @@ class BaseModeRefreshRateVoteTest {
     @Test
     fun `keeps summary with base mode refresh rate if vote refresh rate is negative`() {
         val invalidBaseModeVote = BaseModeRefreshRateVote(-10f)
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
 
         invalidBaseModeVote.updateSummary(summary)
 

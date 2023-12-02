@@ -18,7 +18,6 @@ package com.android.server.display.mode
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.server.display.mode.DisplayModeDirector.VoteSummary
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -41,7 +40,7 @@ class SizeVoteTest {
 
     @Test
     fun `updates size if width and height not set and display resolution voting disabled`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ false)
+        val summary = createVotesSummary(isDisplayResolutionRangeVotingEnabled = false)
         summary.width = Vote.INVALID_SIZE
         summary.height = Vote.INVALID_SIZE
         summary.minWidth = 100
@@ -57,7 +56,7 @@ class SizeVoteTest {
 
     @Test
     fun `does not update size if width set and display resolution voting disabled`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ false)
+        val summary = createVotesSummary(isDisplayResolutionRangeVotingEnabled = false)
         summary.width = 150
         summary.height = Vote.INVALID_SIZE
         summary.minWidth = 100
@@ -73,7 +72,7 @@ class SizeVoteTest {
 
     @Test
     fun `does not update size if height set and display resolution voting disabled`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ false)
+        val summary = createVotesSummary(isDisplayResolutionRangeVotingEnabled = false)
         summary.width = Vote.INVALID_SIZE
         summary.height = 250
         summary.minWidth = 100
@@ -89,7 +88,7 @@ class SizeVoteTest {
 
     @Test
     fun `updates width if summary has more and display resolution voting enabled`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.width = 850
 
         sizeVote.updateSummary(summary)
@@ -99,7 +98,7 @@ class SizeVoteTest {
 
     @Test
     fun `does not update width if summary has less and display resolution voting enabled`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.width = 750
 
         sizeVote.updateSummary(summary)
@@ -109,7 +108,7 @@ class SizeVoteTest {
 
     @Test
     fun `updates height if summary has more and display resolution voting enabled`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.height = 1650
 
         sizeVote.updateSummary(summary)
@@ -119,7 +118,7 @@ class SizeVoteTest {
 
     @Test
     fun `does not update height if summary has less and display resolution voting enabled`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.height = 1550
 
         sizeVote.updateSummary(summary)
@@ -129,7 +128,7 @@ class SizeVoteTest {
 
     @Test
     fun `updates minWidth if summary has less and display resolution voting enabled`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.width = 150
         summary.minWidth = 350
 
@@ -140,7 +139,7 @@ class SizeVoteTest {
 
     @Test
     fun `does not update minWidth if summary has more and display resolution voting enabled`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.width = 150
         summary.minWidth = 450
 
@@ -151,7 +150,7 @@ class SizeVoteTest {
 
     @Test
     fun `updates minHeight if summary has less and display resolution voting enabled`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.width = 150
         summary.minHeight = 1150
 
@@ -162,7 +161,7 @@ class SizeVoteTest {
 
     @Test
     fun `does not update minHeight if summary has more and display resolution voting enabled`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.width = 150
         summary.minHeight = 1250
 

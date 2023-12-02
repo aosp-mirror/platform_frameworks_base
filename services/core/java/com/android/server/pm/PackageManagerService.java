@@ -1534,8 +1534,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             return;
         }
         for (int userId : userIds) {
-            var archiveState = PackageArchiver.createArchiveState(archivePackage, userId,
-                    responsibleInstallerPackage);
+            var archiveState = mInstallerService.mPackageArchiver.createArchiveState(
+                    archivePackage, userId, responsibleInstallerPackage);
             if (archiveState == null) {
                 continue;
             }

@@ -64,3 +64,5 @@ android.graphics.Point
 android.graphics.PointF
 android.graphics.Rect
 android.graphics.RectF
+
+com.android.server.LocalServices

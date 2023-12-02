@@ -73,6 +73,8 @@ import android.window.ISurfaceSyncGroupCompletedListener;
 import android.window.ITaskFpsCallback;
 import android.window.ScreenCapture;
 import android.window.WindowContextInfo;
+import android.window.ITrustedPresentationListener;
+import android.window.TrustedPresentationThresholds;
 
 /**
  * System private interface to the window manager.
@@ -1075,4 +1077,10 @@ interface IWindowManager
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MONITOR_INPUT)")
     void unregisterDecorViewGestureListener(IDecorViewGestureListener listener, int displayId);
+
+    void registerTrustedPresentationListener(in IBinder window, in ITrustedPresentationListener listener,
+            in TrustedPresentationThresholds thresholds, int id);
+
+
+    void unregisterTrustedPresentationListener(in ITrustedPresentationListener listener, int id);
 }

@@ -38,6 +38,7 @@ import android.speech.IRecognitionServiceManagerCallback;
 import android.speech.IRecognitionSupportCallback;
 import android.speech.RecognitionService;
 import android.speech.SpeechRecognizer;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
@@ -253,6 +254,7 @@ final class SpeechRecognitionManagerServiceImpl extends
     @GuardedBy("mLock")
     private void incrementSessionCountForUidLocked(int uid) {
         mSessionCountByUid.put(uid, mSessionCountByUid.get(uid, 0) + 1);
+        Log.i(TAG, "Client " + uid + " has opened " + mSessionCountByUid.get(uid, 0) + " sessions");
     }
 
     @GuardedBy("mLock")

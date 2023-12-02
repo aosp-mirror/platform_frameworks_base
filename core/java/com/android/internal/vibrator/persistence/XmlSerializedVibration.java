@@ -54,7 +54,8 @@ public interface XmlSerializedVibration<T> {
      *
      * <p>This allows the same serialized representation of a vibration to be used in different
      * contexts (e.g. a {@link android.os.VibrationEffect} can be written into any of the tags
-     * {@code <vibration>}, {@code <parallel-vibration>} or {@code <vibration vibratorId="0">}).
+     * {@code <vibration-effect>}, {@code <parallel-vibration-effect>}
+     * or {@code <vibration-effect vibratorId="0">}).
      *
      * @param serializer The output XML serializer where the vibration will be written
      */
