@@ -636,7 +636,7 @@ public final class JobStatus {
                     .build());
             // Don't perform validation checks at this point since we've already passed the
             // initial validation check.
-            job = builder.build(false, false);
+            job = builder.build(false, false, false);
         }
 
         this.job = job;

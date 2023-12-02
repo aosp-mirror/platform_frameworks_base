@@ -171,7 +171,7 @@ public class PowerStatsStore {
             try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file))) {
                 return PowerStatsSpan.read(inputStream, parser, mSectionReader, sectionTypes);
             } catch (IOException | XmlPullParserException e) {
-                Slog.wtf(TAG, "Cannot read PowerStatsSpan file: " + file);
+                Slog.wtf(TAG, "Cannot read PowerStatsSpan file: " + file, e);
             }
         } finally {
             unlockStoreDirectory();
