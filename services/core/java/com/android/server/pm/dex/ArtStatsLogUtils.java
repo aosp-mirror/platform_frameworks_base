@@ -337,7 +337,8 @@ public class ArtStatsLogUtils {
                     0, // deprecated, used to be durationIncludingSleepMs
                     0, // optimizedPackagesCount
                     0, // packagesDependingOnBootClasspathCount
-                    0); // totalPackagesCount
+                    0, // totalPackagesCount
+                    ArtStatsLog.BACKGROUND_DEXOPT_JOB_ENDED__PASS__PASS_UNKNOWN);
         }
     }
 }
