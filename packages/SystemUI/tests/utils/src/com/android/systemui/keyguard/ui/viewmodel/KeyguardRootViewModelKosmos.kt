@@ -20,6 +20,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.applicationContext
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
+import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.keyguard.domain.interactor.burnInInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
@@ -42,5 +43,7 @@ val Kosmos.keyguardRootViewModel by Fixture {
         goneToAodTransitionViewModel = goneToAodTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
         screenOffAnimationController = screenOffAnimationController,
+        keyguardClockViewModel = keyguardClockViewModel,
+        featureFlags = FakeFeatureFlagsClassic(),
     )
 }

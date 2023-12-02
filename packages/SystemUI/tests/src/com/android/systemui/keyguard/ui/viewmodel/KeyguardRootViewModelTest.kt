@@ -21,6 +21,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.view.View
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysUITestComponent
@@ -32,7 +33,9 @@ import com.android.systemui.common.ui.data.repository.FakeConfigurationRepositor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
+import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
@@ -79,13 +82,13 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardRootViewModelTest : SysuiTestCase() {
-
     private lateinit var underTest: KeyguardRootViewModel
     private lateinit var testScope: TestScope
     private lateinit var repository: FakeKeyguardRepository
     private lateinit var keyguardInteractor: KeyguardInteractor
     private lateinit var configurationRepository: FakeConfigurationRepository
     @Mock private lateinit var burnInInteractor: BurnInInteractor
+    @Mock private lateinit var keyguardClockViewModel: KeyguardClockViewModel
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock private lateinit var goneToAodTransitionViewModel: GoneToAodTransitionViewModel
     @Mock
@@ -97,7 +100,9 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     private val enterFromTopAnimationAlpha = MutableStateFlow(0f)
     private val goneToAodTransitionStep = MutableSharedFlow<TransitionStep>(replay = 1)
     private val dozeAmountTransitionStep = MutableSharedFlow<TransitionStep>(replay = 1)
+    private val clockSize = MutableStateFlow(LARGE)
     private val startedKeyguardState = MutableStateFlow(KeyguardState.GONE)
+    private val featureFlags: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic()
 
     @Before
     fun setUp() {
@@ -107,7 +112,9 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
 
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
 
-        val withDeps = KeyguardInteractorFactory.create()
+        featureFlags.set(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT, false)
+
+        val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
         keyguardInteractor = withDeps.keyguardInteractor
         repository = withDeps.repository
         configurationRepository = withDeps.configurationRepository
@@ -124,6 +131,7 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         whenever(keyguardTransitionInteractor.dozeAmountTransition)
             .thenReturn(dozeAmountTransitionStep)
         whenever(keyguardTransitionInteractor.startedKeyguardState).thenReturn(startedKeyguardState)
+        whenever(keyguardClockViewModel.clockSize).thenReturn(clockSize)
 
         underTest =
             KeyguardRootViewModel(
@@ -139,9 +147,12 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
                         whenever(isPulseExpanding).thenReturn(emptyFlow())
                     },
                 burnInInteractor,
+                keyguardClockViewModel,
                 goneToAodTransitionViewModel,
                 aodToLockscreenTransitionViewModel,
                 screenOffAnimationController = mock(),
+                // TODO(b/310989341): remove after change to aconfig
+                featureFlags
             )
         underTest.clockControllerProvider = Provider { clockController }
     }

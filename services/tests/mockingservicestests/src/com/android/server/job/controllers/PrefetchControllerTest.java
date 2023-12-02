@@ -158,6 +158,7 @@ public class PrefetchControllerTest {
         ArgumentCaptor<EstimatedLaunchTimeChangedListener> eltListenerCaptor =
                 ArgumentCaptor.forClass(EstimatedLaunchTimeChangedListener.class);
         mPrefetchController = new PrefetchController(mJobSchedulerService);
+        mPrefetchController.startTrackingLocked();
         mPcConstants = mPrefetchController.getPcConstants();
 
         setDeviceConfigLong(PcConstants.KEY_LAUNCH_TIME_THRESHOLD_MS, 7 * HOUR_IN_MILLIS);

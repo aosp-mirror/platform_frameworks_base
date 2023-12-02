@@ -17,15 +17,16 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.transition.TransitionManager
+import androidx.annotation.VisibleForTesting
+import androidx.constraintlayout.helper.widget.Layer
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.domain.interactor.KeyguardBlueprintInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
-import com.android.systemui.keyguard.ui.view.layout.items.ClockSection
+import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.ClockController
@@ -40,13 +41,12 @@ object KeyguardClockViewBinder {
         clockSection: ClockSection,
         keyguardRootView: ConstraintLayout,
         viewModel: KeyguardClockViewModel,
-        keyguardBlueprintInteractor: KeyguardBlueprintInteractor,
         keyguardClockInteractor: KeyguardClockInteractor,
         featureFlags: FeatureFlagsClassic,
     ) {
         keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                keyguardClockInteractor.eventController.registerListeners(keyguardRootView)
+                keyguardClockInteractor.clockEventController.registerListeners(keyguardRootView)
             }
         }
         keyguardRootView.repeatWhenAttached {
@@ -54,10 +54,11 @@ object KeyguardClockViewBinder {
                 launch {
                     if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) return@launch
                     viewModel.currentClock.collect { currentClock ->
-                        viewModel.clock?.let { clock -> cleanupClockViews(clock, keyguardRootView) }
+                        cleanupClockViews(viewModel.clock, keyguardRootView, viewModel.burnInLayer)
                         viewModel.clock = currentClock
-                        addClockViews(currentClock, keyguardRootView)
-                        keyguardBlueprintInteractor.refreshBlueprint()
+                        addClockViews(currentClock, keyguardRootView, viewModel.burnInLayer)
+                        viewModel.burnInLayer?.updatePostLayout(keyguardRootView)
+                        applyConstraints(clockSection, keyguardRootView, true)
                     }
                 }
                 // TODO: Weather clock dozing animation
@@ -71,13 +72,61 @@ object KeyguardClockViewBinder {
                 }
                 launch {
                     if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) return@launch
-                    viewModel.clockShouldBeCentered.collect { shouldBeCentered ->
-                        clockSection.setClockShouldBeCentered(
-                            viewModel.useLargeClock && shouldBeCentered
-                        )
+                    viewModel.clockShouldBeCentered.collect {
                         applyConstraints(clockSection, keyguardRootView, true)
                     }
                 }
+                launch {
+                    if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) return@launch
+                    viewModel.hasCustomWeatherDataDisplay.collect {
+                        applyConstraints(clockSection, keyguardRootView, true)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun cleanupClockViews(
+        clockController: ClockController?,
+        rootView: ConstraintLayout,
+        burnInLayer: Layer?
+    ) {
+        clockController?.let { clock ->
+            clock.smallClock.layout.views.forEach {
+                burnInLayer?.removeView(it)
+                rootView.removeView(it)
+            }
+            // add large clock to burn in layer only when it will have same transition with other
+            // components in AOD
+            // otherwise, it will have a separate scale transition while other components only have
+            // translate transition
+            if (clock.config.useAlternateSmartspaceAODTransition) {
+                clock.largeClock.layout.views.forEach { burnInLayer?.removeView(it) }
+            }
+            clock.largeClock.layout.views.forEach { rootView.removeView(it) }
+        }
+    }
+
+    @VisibleForTesting
+    fun addClockViews(
+        clockController: ClockController?,
+        rootView: ConstraintLayout,
+        burnInLayer: Layer?
+    ) {
+        clockController?.let { clock ->
+            clock.smallClock.layout.views[0].id = R.id.lockscreen_clock_view
+            if (clock.largeClock.layout.views.size == 1) {
+                clock.largeClock.layout.views[0].id = R.id.lockscreen_clock_view_large
+            }
+            // small clock should either be a single view or container with id
+            // `lockscreen_clock_view`
+            clock.smallClock.layout.views.forEach {
+                rootView.addView(it)
+                burnInLayer?.addView(it)
+            }
+            clock.largeClock.layout.views.forEach { rootView.addView(it) }
+            if (clock.config.useAlternateSmartspaceAODTransition) {
+                clock.largeClock.layout.views.forEach { burnInLayer?.addView(it) }
             }
         }
     }
@@ -92,22 +141,6 @@ object KeyguardClockViewBinder {
         if (animated) {
             TransitionManager.beginDelayedTransition(rootView)
         }
-
         constraintSet.applyTo(rootView)
-    }
-
-    private fun cleanupClockViews(clock: ClockController, rootView: ConstraintLayout) {
-        clock.smallClock.layout.views.forEach { rootView.removeView(it) }
-        clock.largeClock.layout.views.forEach { rootView.removeView(it) }
-    }
-
-    private fun addClockViews(clock: ClockController, rootView: ConstraintLayout) {
-        clock.smallClock.layout.views[0].id = R.id.lockscreen_clock_view
-        if (clock.largeClock.layout.views.size == 1) {
-            clock.largeClock.layout.views[0].id = R.id.lockscreen_clock_view_large
-        }
-        // small clock should either be a single view or container with id `lockscreen_clock_view`
-        clock.smallClock.layout.views.forEach { rootView.addView(it) }
-        clock.largeClock.layout.views.forEach { rootView.addView(it) }
     }
 }

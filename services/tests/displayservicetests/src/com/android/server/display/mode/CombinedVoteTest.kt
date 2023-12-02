@@ -18,7 +18,6 @@ package com.android.server.display.mode
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.server.display.mode.DisplayModeDirector.VoteSummary
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -47,7 +46,7 @@ class CombinedVoteTest {
 
     @Test
     fun `delegates update to children`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
 
         combinedVote.updateSummary(summary)
 

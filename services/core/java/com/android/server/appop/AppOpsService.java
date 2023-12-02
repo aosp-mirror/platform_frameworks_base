@@ -1180,6 +1180,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                                     uidState.pkgOps.put(packageName,
                                             new Ops(packageName, uidState));
                                 }
+
+                                createSandboxUidStateIfNotExistsForAppLocked(uid);
                             }
                         }
                     }
@@ -1261,6 +1263,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 ops.put(code, new Op(uidState, packageName, code, uid));
             }
         }
+
+        createSandboxUidStateIfNotExistsForAppLocked(uid);
     }
 
     /**
@@ -4009,6 +4013,11 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         return uidState;
+    }
+
+    private void createSandboxUidStateIfNotExistsForAppLocked(int uid) {
+        final int sandboxUid = Process.toSdkSandboxUid(uid);
+        getUidStateLocked(sandboxUid, true);
     }
 
     private void updateAppWidgetVisibility(SparseArray<String> uidPackageNames, boolean visible) {

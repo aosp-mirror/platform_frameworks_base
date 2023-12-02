@@ -45,7 +45,6 @@ import android.util.SparseArray;
 
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.KnownPackages;
 import com.android.server.pm.PackageArchiver;
@@ -1104,7 +1103,9 @@ public abstract class PackageManagerInternal {
      * Read legacy permission states for permissions migration to new permission subsystem.
      * Note that this api is supposed to be used for permissions state migration only.
      */
-    public abstract RuntimePermissionsState getLegacyPermissionsState(@UserIdInt int userId);
+    // TODO: restore to com.android.permission.persistence.RuntimePermissionsState
+    // once Ravenwood includes Mainline stubs
+    public abstract Object getLegacyPermissionsState(@UserIdInt int userId);
 
     /**
      * @return permissions file version for the given user.

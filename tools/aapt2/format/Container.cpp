@@ -94,7 +94,7 @@ bool ContainerWriter::AddResTableEntry(const pb::ResourceTable& table) {
 }
 
 bool ContainerWriter::AddResFileEntry(const pb::internal::CompiledFile& file,
-                                      io::KnownSizeInputStream* in) {
+                                      android::KnownSizeInputStream* in) {
   if (current_entry_count_ >= total_entry_count_) {
     error_ = "too many entries being serialized";
     return false;
@@ -264,7 +264,7 @@ std::string ContainerReaderEntry::GetError() const {
   return reader_->GetError();
 }
 
-ContainerReader::ContainerReader(io::InputStream* in)
+ContainerReader::ContainerReader(android::InputStream* in)
     : in_(in),
       adaptor_(in),
       coded_in_(&adaptor_),

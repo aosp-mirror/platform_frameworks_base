@@ -54,6 +54,7 @@ class ScreenRecordPermissionDialogDelegate(
     private val userContextProvider: UserContextProvider,
     private val onStartRecordingClicked: Runnable?,
     mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
+    private val systemUIDialogFactory: SystemUIDialog.Factory
 ) :
     BaseMediaProjectionPermissionDialogDelegate<SystemUIDialog>(
         createOptionList(),
@@ -62,14 +63,18 @@ class ScreenRecordPermissionDialogDelegate(
         mediaProjectionMetricsLogger,
         R.drawable.ic_screenrecord,
         R.color.screenrecord_icon_color
-    ) {
+    ), SystemUIDialog.Delegate {
     private lateinit var tapsSwitch: Switch
     private lateinit var tapsView: View
     private lateinit var audioSwitch: Switch
     private lateinit var options: Spinner
 
+    override fun createDialog(): SystemUIDialog {
+        return systemUIDialogFactory.create(this)
+    }
+
     override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
-        super.onCreate(dialog, savedInstanceState)
+        super<BaseMediaProjectionPermissionDialogDelegate>.onCreate(dialog, savedInstanceState)
         setDialogTitle(R.string.screenrecord_permission_dialog_title)
         dialog.setTitle(R.string.screenrecord_title)
         setStartButtonText(R.string.screenrecord_permission_dialog_continue)

@@ -31,7 +31,7 @@ class DisableRefreshRateSwitchingVote implements Vote {
     }
 
     @Override
-    public void updateSummary(DisplayModeDirector.VoteSummary summary) {
+    public void updateSummary(VoteSummary summary) {
         summary.disableRefreshRateSwitching =
                 summary.disableRefreshRateSwitching || mDisableRefreshRateSwitching;
     }

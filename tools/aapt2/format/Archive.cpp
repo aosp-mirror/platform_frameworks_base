@@ -91,7 +91,7 @@ class DirectoryWriter : public IArchiveWriter {
     return true;
   }
 
-  bool WriteFile(StringPiece path, uint32_t flags, io::InputStream* in) override {
+  bool WriteFile(StringPiece path, uint32_t flags, android::InputStream* in) override {
     if (!StartEntry(path, flags)) {
       return false;
     }
@@ -182,7 +182,7 @@ class ZipFileWriter : public IArchiveWriter {
     return true;
   }
 
-  bool WriteFile(StringPiece path, uint32_t flags, io::InputStream* in) override {
+  bool WriteFile(StringPiece path, uint32_t flags, android::InputStream* in) override {
     while (true) {
       if (!StartEntry(path, flags)) {
         return false;

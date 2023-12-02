@@ -35,7 +35,7 @@ class SupportedModesVote implements Vote {
      * If summary.supportedModes==null then there is no restriction on supportedModes
      */
     @Override
-    public void updateSummary(DisplayModeDirector.VoteSummary summary) {
+    public void updateSummary(VoteSummary summary) {
         if (summary.supportedModes == null) {
             summary.supportedModes = new ArrayList<>(mSupportedModes);
         } else {

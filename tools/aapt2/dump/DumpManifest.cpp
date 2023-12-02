@@ -29,8 +29,8 @@
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
 #include "androidfw/ConfigDescription.h"
+#include "androidfw/FileStream.h"
 #include "io/File.h"
-#include "io/FileStream.h"
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlDom.h"
 

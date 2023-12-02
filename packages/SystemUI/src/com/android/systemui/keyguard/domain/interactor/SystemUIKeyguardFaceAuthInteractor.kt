@@ -29,6 +29,7 @@ import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFaceAuthRepository
@@ -69,6 +70,7 @@ constructor(
     private val context: Context,
     @Application private val applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val repository: DeviceEntryFaceAuthRepository,
     private val primaryBouncerInteractor: Lazy<PrimaryBouncerInteractor>,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
@@ -104,6 +106,7 @@ constructor(
                     fallbackToDetect = false
                 )
             }
+            .flowOn(backgroundDispatcher)
             .launchIn(applicationScope)
 
         alternateBouncerInteractor.isVisible
@@ -115,6 +118,7 @@ constructor(
                     fallbackToDetect = false
                 )
             }
+            .flowOn(backgroundDispatcher)
             .launchIn(applicationScope)
 
         merge(
@@ -143,6 +147,7 @@ constructor(
                     fallbackToDetect = true
                 )
             }
+            .flowOn(backgroundDispatcher)
             .launchIn(applicationScope)
 
         deviceEntryFingerprintAuthRepository.isLockedOut
@@ -155,6 +160,7 @@ constructor(
                     }
                 }
             }
+            .flowOn(backgroundDispatcher)
             .launchIn(applicationScope)
 
         // User switching should stop face auth and then when it is complete we should trigger face
@@ -178,6 +184,7 @@ constructor(
                     )
                 }
             }
+            .flowOn(backgroundDispatcher)
             .launchIn(applicationScope)
     }
 

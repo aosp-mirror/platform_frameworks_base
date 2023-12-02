@@ -67,6 +67,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
     private boolean mIsOverflow;
     private BubbleTaskViewHelper mBubbleTaskViewHelper;
     private BubbleBarMenuViewController mMenuViewController;
+    private BubbleBarExpandedViewDragController mDragController;
     private @Nullable Supplier<Rect> mLayerBoundsSupplier;
     private @Nullable Listener mListener;
 
@@ -180,6 +181,8 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         mHandleView.setOnClickListener(view -> {
             mMenuViewController.showMenu(true /* animated */);
         });
+
+        mDragController = new BubbleBarExpandedViewDragController(this);
     }
 
     public BubbleBarHandleView getHandleView() {
@@ -385,5 +388,12 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         if (!animating) {
             setContentVisibility(mIsContentVisible);
         }
+    }
+
+    /**
+     * Check whether the view is animating
+     */
+    public boolean isAnimating() {
+        return mIsAnimating;
     }
 }

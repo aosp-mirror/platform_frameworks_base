@@ -1,11 +1,13 @@
 {
-    "presubmit": [
-        { "name": "tiny-framework-dump-test" },
-        { "name": "hoststubgentest" },
-        { "name": "hoststubgen-invoke-test" }
-
-        // As a smoke test.
-        // TODO: Enable it once the infra knows how to run it.
-        // { "name": "CtsUtilTestCasesRavenwood" }
-    ]
+  "presubmit": [
+    { "name": "tiny-framework-dump-test" },
+    { "name": "hoststubgentest" },
+    { "name": "hoststubgen-invoke-test" }
+  ],
+  "ravenwood-presubmit": [
+    {
+      "name": "CtsUtilTestCasesRavenwood",
+      "host": true
+    }
+  ]
 }

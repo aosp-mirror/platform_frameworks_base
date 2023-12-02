@@ -113,7 +113,7 @@ public class JobSchedulerServiceTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         mMockingSession = mockitoSession()
                 .initMocks(this)
                 .strictness(Strictness.LENIENT)
@@ -178,6 +178,7 @@ public class JobSchedulerServiceTest {
         when(mContext.getSystemService(UiModeManager.class)).thenReturn(mock(UiModeManager.class));
 
         mService = new TestJobSchedulerService(mContext);
+        mService.waitOnAsyncLoadingForTesting();
     }
 
     @After

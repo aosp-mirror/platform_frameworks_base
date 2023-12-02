@@ -45,6 +45,7 @@ class StubGeneratingAdapter(
             signature: String?,
             exceptions: Array<String>?,
             policy: FilterPolicyWithReason,
+            substituted: Boolean,
             superVisitor: MethodVisitor?,
     ): MethodVisitor? {
         return StubMethodVisitor(access, name, descriptor, signature, exceptions, superVisitor)

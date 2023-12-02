@@ -78,8 +78,15 @@ abstract class RelativeTouchListener : View.OnTouchListener {
         velY: Float
     )
 
+    open fun onCancel(
+        v: View,
+        ev: MotionEvent,
+        viewInitialX: Float,
+        viewInitialY: Float
+    ) {}
+
     /** The raw coordinates of the last ACTION_DOWN event. */
-    private val touchDown = PointF()
+    private var touchDown: PointF? = null
 
     /** The coordinates of the view, at the time of the last ACTION_DOWN event. */
     private val viewPositionOnTouchDown = PointF()
@@ -91,12 +98,11 @@ abstract class RelativeTouchListener : View.OnTouchListener {
 
     private var performedLongClick = false
 
-    @Suppress("UNCHECKED_CAST")
     override fun onTouch(v: View, ev: MotionEvent): Boolean {
         addMovement(ev)
 
-        val dx = ev.rawX - touchDown.x
-        val dy = ev.rawY - touchDown.y
+        val dx = touchDown?.let { ev.rawX - it.x } ?: 0f
+        val dy = touchDown?.let { ev.rawY - it.y } ?: 0f
 
         when (ev.action) {
             MotionEvent.ACTION_DOWN -> {
@@ -108,7 +114,7 @@ abstract class RelativeTouchListener : View.OnTouchListener {
                 // last gesture.
                 touchSlop = ViewConfiguration.get(v.context).scaledTouchSlop
 
-                touchDown.set(ev.rawX, ev.rawY)
+                touchDown = PointF(ev.rawX, ev.rawY)
                 viewPositionOnTouchDown.set(v.translationX, v.translationY)
 
                 performedLongClick = false
@@ -120,6 +126,7 @@ abstract class RelativeTouchListener : View.OnTouchListener {
             }
 
             MotionEvent.ACTION_MOVE -> {
+                if (touchDown == null) return false
                 if (!movedEnough && hypot(dx, dy) > touchSlop && !performedLongClick) {
                     movedEnough = true
                     v.handler?.removeCallbacksAndMessages(null)
@@ -131,6 +138,7 @@ abstract class RelativeTouchListener : View.OnTouchListener {
             }
 
             MotionEvent.ACTION_UP -> {
+                if (touchDown == null) return false
                 if (movedEnough) {
                     velocityTracker.computeCurrentVelocity(1000 /* units */)
                     onUp(v, ev, viewPositionOnTouchDown.x, viewPositionOnTouchDown.y, dx, dy,
@@ -143,12 +151,16 @@ abstract class RelativeTouchListener : View.OnTouchListener {
 
                 velocityTracker.clear()
                 movedEnough = false
+                touchDown = null
             }
 
             MotionEvent.ACTION_CANCEL -> {
+                if (touchDown == null) return false
                 v.handler?.removeCallbacksAndMessages(null)
                 velocityTracker.clear()
                 movedEnough = false
+                touchDown = null
+                onCancel(v, ev, viewPositionOnTouchDown.x, viewPositionOnTouchDown.y)
             }
         }
 

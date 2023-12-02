@@ -74,4 +74,6 @@ interface KeyguardRepositoryModule {
     fun bind(impl: BouncerMessageAuditLogger): CoreStartable
 
     @Binds fun trustRepository(impl: TrustRepositoryImpl): TrustRepository
+
+    @Binds fun keyguardClockRepository(impl: KeyguardClockRepositoryImpl): KeyguardClockRepository
 }

@@ -17,7 +17,6 @@
 package com.android.server.display.mode
 
 import androidx.test.filters.SmallTest
-import com.android.server.display.mode.DisplayModeDirector.VoteSummary
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import org.junit.Before
@@ -40,7 +39,7 @@ class RenderVoteTest {
 
     @Test
     fun `updates minRenderFrameRate if summary has less`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.minRenderFrameRate = 45f
 
         renderVote.updateSummary(summary)
@@ -50,7 +49,7 @@ class RenderVoteTest {
 
     @Test
     fun `does not update minRenderFrameRate if summary has more`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.minRenderFrameRate = 75f
 
         renderVote.updateSummary(summary)
@@ -60,7 +59,7 @@ class RenderVoteTest {
 
     @Test
     fun `updates maxRenderFrameRate if summary has more`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.maxRenderFrameRate = 120f
 
         renderVote.updateSummary(summary)
@@ -70,7 +69,7 @@ class RenderVoteTest {
 
     @Test
     fun `does not update maxRenderFrameRate if summary has less`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.maxRenderFrameRate = 75f
 
         renderVote.updateSummary(summary)
@@ -80,7 +79,7 @@ class RenderVoteTest {
 
     @Test
     fun `updates minPhysicalRefreshRate if summary has less`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.minPhysicalRefreshRate = 45f
 
         renderVote.updateSummary(summary)
@@ -90,7 +89,7 @@ class RenderVoteTest {
 
     @Test
     fun `does not update minPhysicalRefreshRate if summary has more`() {
-        val summary = VoteSummary(/* isDisplayResolutionRangeVotingEnabled= */ true)
+        val summary = createVotesSummary()
         summary.minPhysicalRefreshRate = 75f
 
         renderVote.updateSummary(summary)

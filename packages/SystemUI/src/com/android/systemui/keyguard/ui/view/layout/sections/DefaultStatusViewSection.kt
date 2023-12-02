@@ -53,7 +53,7 @@ constructor(
     private val keyguardViewConfigurator: Lazy<KeyguardViewConfigurator>,
     private val notificationPanelViewController: Lazy<NotificationPanelViewController>,
     private val keyguardMediaController: KeyguardMediaController,
-    private val splitShadeStateController: SplitShadeStateController
+    private val splitShadeStateController: SplitShadeStateController,
 ) : KeyguardSection() {
     private val statusViewId = R.id.keyguard_status_view
 
@@ -76,6 +76,9 @@ constructor(
         keyguardStatusView.findViewById<View>(R.id.left_aligned_notification_icon_container)?.let {
             it.setVisibility(View.GONE)
         }
+        // Should keep this even if flag, migrating clocks to blueprint, is on
+        // cause some events in clockEventController rely on keyguardStatusViewController
+        // TODO(b/313499340): clean up
         constraintLayout.addView(keyguardStatusView)
     }
 

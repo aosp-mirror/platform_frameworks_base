@@ -346,7 +346,8 @@ public class VirtualDeviceInternal {
     VirtualCamera createVirtualCamera(@NonNull VirtualCameraConfig config) {
         try {
             mVirtualDevice.registerVirtualCamera(config);
-            return new VirtualCamera(mVirtualDevice, config);
+            return new VirtualCamera(mVirtualDevice,
+                            Integer.toString(mVirtualDevice.getVirtualCameraId(config)), config);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

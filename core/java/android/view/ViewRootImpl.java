@@ -2182,8 +2182,14 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    void notifyInsetsAnimationRunningStateChanged(boolean running) {
-        mInsetsAnimationRunning = running;
+    /**
+     * Notify the when the running state of a insets animation changed.
+     */
+    @VisibleForTesting
+    public void notifyInsetsAnimationRunningStateChanged(boolean running) {
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            mInsetsAnimationRunning = running;
+        }
     }
 
     @Override
@@ -2442,6 +2448,19 @@ public final class ViewRootImpl implements ViewParent,
 
         if (updateBoundsLayer(t)) {
             applyTransactionOnDraw(t);
+        }
+
+        // Set the frame rate selection strategy to FRAME_RATE_SELECTION_STRATEGY_SELF
+        // This strategy ensures that the frame rate specifications do not cascade down to
+        // the descendant layers. This is particularly important for applications like Chrome,
+        // where child surfaces should adhere to default behavior instead of no preference
+        if (sToolkitSetFrameRateReadOnlyFlagValue) {
+            try {
+                mFrameRateTransaction.setFrameRateSelectionStrategy(sc,
+                        sc.FRAME_RATE_SELECTION_STRATEGY_SELF).applyAsyncUnsafe();
+            } catch (Exception e) {
+                Log.e(mTag, "Unable to set frame rate selection strategy ", e);
+            }
         }
     }
 
@@ -11949,7 +11968,7 @@ public final class ViewRootImpl implements ViewParent,
             return;
         }
 
-        int frameRateCategory = mIsFrameRateBoosting
+        int frameRateCategory = mIsFrameRateBoosting || mInsetsAnimationRunning
                 ? FRAME_RATE_CATEGORY_HIGH : preferredFrameRateCategory;
 
         try {
@@ -12060,6 +12079,14 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public int getPreferredFrameRateCategory() {
         return mPreferredFrameRateCategory;
+    }
+
+    /**
+     * Get the value of mLastPreferredFrameRateCategory
+     */
+    @VisibleForTesting
+    public int getLastPreferredFrameRateCategory() {
+        return mLastPreferredFrameRateCategory;
     }
 
     /**

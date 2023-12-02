@@ -24,6 +24,7 @@ import dagger.Module
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /** Fake implementation of [ShadeRepository] */
 @SysUISingleton

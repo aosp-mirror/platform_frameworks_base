@@ -37,8 +37,8 @@ package com.android.internal.vibrator.persistence {
     enum_constant public static final com.android.internal.vibrator.persistence.PrimitiveEffectName tick;
   }
 
-  public class Vibration {
-    ctor public Vibration();
+  public class VibrationEffect {
+    ctor public VibrationEffect();
     method public com.android.internal.vibrator.persistence.PredefinedEffect getPredefinedEffect_optional();
     method public com.android.internal.vibrator.persistence.PrimitiveEffect getPrimitiveEffect_optional();
     method public com.android.internal.vibrator.persistence.WaveformEffect getWaveformEffect_optional();
@@ -49,7 +49,7 @@ package com.android.internal.vibrator.persistence {
 
   public class VibrationSelect {
     ctor public VibrationSelect();
-    method public java.util.List<com.android.internal.vibrator.persistence.Vibration> getVibration();
+    method public java.util.List<com.android.internal.vibrator.persistence.VibrationEffect> getVibrationEffect();
   }
 
   public enum WaveformAmplitudeDefault {
@@ -80,7 +80,7 @@ package com.android.internal.vibrator.persistence {
   public class XmlParser {
     ctor public XmlParser();
     method public static String readText(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
-    method public static com.android.internal.vibrator.persistence.Vibration readVibration(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
+    method public static com.android.internal.vibrator.persistence.VibrationEffect readVibrationEffect(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static com.android.internal.vibrator.persistence.VibrationSelect readVibrationSelect(java.io.InputStream) throws javax.xml.datatype.DatatypeConfigurationException, java.io.IOException, org.xmlpull.v1.XmlPullParserException;
     method public static void skip(org.xmlpull.v1.XmlPullParser) throws java.io.IOException, org.xmlpull.v1.XmlPullParserException;
   }

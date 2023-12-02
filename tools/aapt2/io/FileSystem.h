@@ -30,7 +30,7 @@ class RegularFile : public IFile {
   explicit RegularFile(const android::Source& source);
 
   std::unique_ptr<IData> OpenAsData() override;
-  std::unique_ptr<io::InputStream> OpenInputStream() override;
+  std::unique_ptr<android::InputStream> OpenInputStream() override;
   const android::Source& GetSource() const override;
   bool GetModificationTime(struct tm* buf) const override;
 
