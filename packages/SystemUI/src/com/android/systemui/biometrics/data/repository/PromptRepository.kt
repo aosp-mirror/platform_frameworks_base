@@ -55,6 +55,9 @@ interface PromptRepository {
     /** The kind of credential to use (biometric, pin, pattern, etc.). */
     val kind: StateFlow<PromptKind>
 
+    /** The package name that the prompt is called from. */
+    val opPackageName: StateFlow<String?>
+
     /**
      * If explicit confirmation is required.
      *
@@ -68,6 +71,7 @@ interface PromptRepository {
         userId: Int,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
+        opPackageName: String,
     )
 
     /** Unset the prompt info. */
@@ -108,6 +112,9 @@ constructor(
     private val _kind: MutableStateFlow<PromptKind> = MutableStateFlow(PromptKind.Biometric())
     override val kind = _kind.asStateFlow()
 
+    private val _opPackageName: MutableStateFlow<String?> = MutableStateFlow(null)
+    override val opPackageName = _opPackageName.asStateFlow()
+
     private val _faceSettings =
         _userId.map { id -> faceSettings.forUser(id) }.distinctUntilChanged()
     private val _faceSettingAlwaysRequireConfirmation =
@@ -127,11 +134,13 @@ constructor(
         userId: Int,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
+        opPackageName: String,
     ) {
         _kind.value = kind
         _userId.value = userId
         _challenge.value = gatekeeperChallenge
         _promptInfo.value = promptInfo
+        _opPackageName.value = opPackageName
     }
 
     override fun unsetPrompt() {
@@ -139,6 +148,7 @@ constructor(
         _userId.value = null
         _challenge.value = null
         _kind.value = PromptKind.Biometric()
+        _opPackageName.value = null
     }
 
     companion object {

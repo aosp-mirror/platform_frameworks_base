@@ -76,6 +76,7 @@ interface PromptSelectorInteractor {
         userId: Int,
         challenge: Long,
         modalities: BiometricModalities,
+        opPackageName: String,
     )
 
     /** Use credential-based authentication instead of biometrics. */
@@ -84,6 +85,7 @@ interface PromptSelectorInteractor {
         @Utils.CredentialType kind: Int,
         userId: Int,
         challenge: Long,
+        opPackageName: String,
     )
 
     /** Unset the current authentication request. */
@@ -104,9 +106,12 @@ constructor(
             promptRepository.promptInfo,
             promptRepository.challenge,
             promptRepository.userId,
-            promptRepository.kind
-        ) { promptInfo, challenge, userId, kind ->
-            if (promptInfo == null || userId == null || challenge == null) {
+            promptRepository.kind,
+            promptRepository.opPackageName,
+        ) { promptInfo, challenge, userId, kind, opPackageName ->
+            if (
+                promptInfo == null || userId == null || challenge == null || opPackageName == null
+            ) {
                 return@combine null
             }
 
@@ -117,6 +122,7 @@ constructor(
                         userInfo = BiometricUserInfo(userId = userId),
                         operationInfo = BiometricOperationInfo(gatekeeperChallenge = challenge),
                         modalities = kind.activeModalities,
+                        opPackageName = opPackageName,
                     )
                 else -> null
             }
@@ -152,13 +158,15 @@ constructor(
         promptInfo: PromptInfo,
         userId: Int,
         challenge: Long,
-        modalities: BiometricModalities
+        modalities: BiometricModalities,
+        opPackageName: String,
     ) {
         promptRepository.setPrompt(
             promptInfo = promptInfo,
             userId = userId,
             gatekeeperChallenge = challenge,
             kind = PromptKind.Biometric(modalities),
+            opPackageName = opPackageName,
         )
     }
 
@@ -167,12 +175,14 @@ constructor(
         @Utils.CredentialType kind: Int,
         userId: Int,
         challenge: Long,
+        opPackageName: String,
     ) {
         promptRepository.setPrompt(
             promptInfo = promptInfo,
             userId = userId,
             gatekeeperChallenge = challenge,
             kind = kind.asBiometricPromptCredential(),
+            opPackageName = opPackageName,
         )
     }
 

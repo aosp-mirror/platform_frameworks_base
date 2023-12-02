@@ -31,6 +31,7 @@ import android.view.View
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
 import android.view.accessibility.AccessibilityManager
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -92,6 +93,7 @@ object BiometricViewBinder {
         val textColorHint =
             view.resources.getColor(R.color.biometric_dialog_gray, view.context.theme)
 
+        val logoView = view.requireViewById<ImageView>(R.id.logo)
         val titleView = view.requireViewById<TextView>(R.id.title)
         val subtitleView = view.requireViewById<TextView>(R.id.subtitle)
         val descriptionView = view.requireViewById<TextView>(R.id.description)
@@ -99,6 +101,8 @@ object BiometricViewBinder {
             view.requireViewById<ScrollView>(R.id.customized_view_container)
 
         // set selected to enable marquee unless a screen reader is enabled
+        logoView.isSelected =
+            !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         titleView.isSelected =
             !accessibilityManager.isEnabled || !accessibilityManager.isTouchExplorationEnabled
         subtitleView.isSelected =
@@ -152,6 +156,7 @@ object BiometricViewBinder {
                 }
             }
 
+            logoView.setImageDrawable(viewModel.logo.first())
             titleView.text = viewModel.title.first()
             subtitleView.text = viewModel.subtitle.first()
             descriptionView.text = viewModel.description.first()
@@ -183,6 +188,7 @@ object BiometricViewBinder {
                     viewModel = viewModel,
                     viewsToHideWhenSmall =
                         listOf(
+                            logoView,
                             titleView,
                             subtitleView,
                             descriptionView,
@@ -190,6 +196,7 @@ object BiometricViewBinder {
                         ),
                     viewsToFadeInOnSizeChange =
                         listOf(
+                            logoView,
                             titleView,
                             subtitleView,
                             descriptionView,

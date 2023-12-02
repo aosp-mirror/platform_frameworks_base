@@ -16,6 +16,7 @@
 package com.android.systemui.biometrics
 
 import android.app.admin.DevicePolicyManager
+import android.content.pm.PackageManager
 import android.hardware.biometrics.BiometricAuthenticator
 import android.hardware.biometrics.BiometricConstants
 import android.hardware.biometrics.BiometricManager
@@ -79,6 +80,8 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.Mockito.`when` as whenever
 
+private const val OP_PACKAGE_NAME = "biometric.testapp"
+
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
@@ -109,6 +112,8 @@ open class AuthContainerViewTest : SysuiTestCase() {
     lateinit var authController: AuthController
     @Mock
     lateinit var selectedUserInteractor: SelectedUserInteractor
+    @Mock
+    private lateinit var packageManager: PackageManager
 
     private val testScope = TestScope(StandardTestDispatcher())
     private val fakeExecutor = FakeExecutor(FakeSystemClock())
@@ -134,6 +139,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
     private lateinit var udfpsOverlayInteractor: UdfpsOverlayInteractor
 
     private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
+    private val defaultLogoIcon = context.getDrawable(R.drawable.ic_android)
 
     private var authContainer: TestAuthContainerView? = null
 
@@ -156,6 +162,9 @@ open class AuthContainerViewTest : SysuiTestCase() {
                         selectedUserInteractor,
                         testScope.backgroundScope,
                 )
+        // Set up default logo icon
+        whenever(packageManager.getApplicationIcon(OP_PACKAGE_NAME)).thenReturn(defaultLogoIcon)
+        context.setMockPackageManager(packageManager)
     }
 
     @After
@@ -533,6 +542,7 @@ open class AuthContainerViewTest : SysuiTestCase() {
             mPromptInfo = PromptInfo().apply {
                 this.authenticators = authenticators
             }
+            mOpPackageName = OP_PACKAGE_NAME
         },
         testScope.backgroundScope,
         fingerprintProps,

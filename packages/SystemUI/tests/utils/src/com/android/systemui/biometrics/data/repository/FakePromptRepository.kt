@@ -26,12 +26,24 @@ class FakePromptRepository : PromptRepository {
     private val _isConfirmationRequired = MutableStateFlow(false)
     override val isConfirmationRequired = _isConfirmationRequired.asStateFlow()
 
+    private val _opPackageName: MutableStateFlow<String?> = MutableStateFlow(null)
+    override val opPackageName = _opPackageName.asStateFlow()
+
     override fun setPrompt(
         promptInfo: PromptInfo,
         userId: Int,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
-    ) = setPrompt(promptInfo, userId, gatekeeperChallenge, kind, forceConfirmation = false)
+        opPackageName: String,
+    ) =
+        setPrompt(
+            promptInfo,
+            userId,
+            gatekeeperChallenge,
+            kind,
+            forceConfirmation = false,
+            opPackageName = opPackageName
+        )
 
     fun setPrompt(
         promptInfo: PromptInfo,
@@ -39,12 +51,14 @@ class FakePromptRepository : PromptRepository {
         gatekeeperChallenge: Long?,
         kind: PromptKind,
         forceConfirmation: Boolean = false,
+        opPackageName: String? = null,
     ) {
         _promptInfo.value = promptInfo
         _userId.value = userId
         _challenge.value = gatekeeperChallenge
         _kind.value = kind
         _isConfirmationRequired.value = promptInfo.isConfirmationRequested || forceConfirmation
+        _opPackageName.value = opPackageName
     }
 
     override fun unsetPrompt() {
