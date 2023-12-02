@@ -3877,7 +3877,22 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
             if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS
                     && mode != UPDATE_FOCUS_WILL_PLACE_SURFACES) {
-                assignWindowLayers(false /* setLayoutNeeded */);
+                boolean isPrevTargetTranslucent = prevTarget != null
+                        && prevTarget.mActivityRecord != null
+                        && !prevTarget.mActivityRecord.occludesParent();
+                // This is a workaround for the case where the device is transitioning away from a
+                // translucent target.
+                // Assigning layers before the animation starts, causes a flicker when the new
+                // target was previously visible. Because of the newTarget's layer being already
+                // visible, assignWindowLayers() would cause this new target layer to come at the
+                // top of prevTarget's layer even before the animation starts.
+                // These layers will now be reassigned when the animation starts inside
+                // AppTransitionController.
+                if (isPrevTargetTranslucent && !mTransitionController.isShellTransitionsEnabled()) {
+                    mAppTransitionController.deferAssignChildLayers();
+                } else {
+                    assignWindowLayers(false /* setLayoutNeeded */);
+                }
             }
 
             if (imWindowChanged) {
@@ -4321,7 +4336,24 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         // 2. Assign window layers based on the IME surface parent to make sure it is on top of the
         // app.
-        assignWindowLayers(true /* setLayoutNeeded */);
+        boolean lastImeTargetTranslucent = mLastImeInputTarget != null
+                && mLastImeInputTarget.getWindowState() != null
+                && mLastImeInputTarget.getWindowState().mActivityRecord != null
+                && !mLastImeInputTarget.getWindowState().mActivityRecord.occludesParent();
+        // This is a workaround for the case where the device is transitioning away from a
+        // translucent target.
+        // Assigning layers before the animation starts, causes a flicker when the new
+        // target was previously visible. Because of the newTarget's layer being already
+        // visible, assignWindowLayers() would cause this new target layer to come at the
+        // top of last target's layer even before the animation starts.
+        // These layers will now be reassigned when the animation starts inside
+        // AppTransitionController.
+        if (lastImeTargetTranslucent && !mTransitionController.isShellTransitionsEnabled()) {
+            mAppTransitionController.deferAssignChildLayers();
+        } else {
+            assignWindowLayers(true /* setLayoutNeeded */);
+        }
+
         // 3. The z-order of IME might have been changed. Update the above insets state.
         mInsetsStateController.updateAboveInsetsState(
                 mInsetsStateController.getRawInsetsState().isSourceOrDefaultVisible(
