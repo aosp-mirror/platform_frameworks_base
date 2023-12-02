@@ -91,6 +91,44 @@ public final class FadeOutManager {
         return mFadeConfigurations.getFadeManagerConfiguration();
     }
 
+    /**
+     * Sets the transient fade manager configuration to be used for player fade out and in
+     *
+     * @param fadeManagerConfig fade manager config that has higher priority than the existing
+     *     fade manager configuration. This is expected to be transient.
+     * @return {@link AudioManager#SUCCESS}  if setting fade manager config succeeded,
+     *     {@link AudioManager#ERROR} otherwise
+     */
+    int setTransientFadeManagerConfiguration(FadeManagerConfiguration fadeManagerConfig) {
+        // locked to ensure the fade configs are not updated while faded app state is being updated
+        synchronized (mLock) {
+            return mFadeConfigurations.setTransientFadeManagerConfiguration(fadeManagerConfig);
+        }
+    }
+
+    /**
+     * Clears the transient fade manager configuration that was previously set with
+     * {@link #setTransientFadeManagerConfiguration(FadeManagerConfiguration)}
+     *
+     * @return {@link AudioManager#SUCCESS}  if clearing fade manager config succeeded,
+     *      {@link AudioManager#ERROR} otherwise
+     */
+    int clearTransientFadeManagerConfiguration() {
+        // locked to ensure the fade configs are not updated while faded app state is being updated
+        synchronized (mLock) {
+            return mFadeConfigurations.clearTransientFadeManagerConfiguration();
+        }
+    }
+
+    /**
+     * Query if fade is enblead and can be enforced on players
+     *
+     * @return {@code true} if fade is enabled, {@code false} otherwise.
+     */
+    boolean isFadeEnabled() {
+        return mFadeConfigurations.isFadeEnabled();
+    }
+
     // TODO explore whether a shorter fade out would be a better UX instead of not fading out at all
     //      (legacy behavior)
     /**

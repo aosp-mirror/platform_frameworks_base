@@ -399,6 +399,14 @@ interface IAudioService {
     int dispatchFocusChange(in AudioFocusInfo afi, in int focusChange,
             in IAudioPolicyCallback pcb);
 
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)")
+    int dispatchFocusChangeWithFade(in AudioFocusInfo afi,
+            in int focusChange,
+            in IAudioPolicyCallback pcb,
+            in List<AudioFocusInfo> otherActiveAfis,
+            in FadeManagerConfiguration transientFadeMgrConfig);
+
     oneway void playerHasOpPlayAudio(in int piid, in boolean hasOpPlayAudio);
 
     @EnforcePermission("BLUETOOTH_STACK")

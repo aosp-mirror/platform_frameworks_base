@@ -970,6 +970,12 @@ public final class PlaybackActivityMonitor
         return mFadeOutManager.getFadeInDelayForOffendersMillis(aa);
     }
 
+    @Override
+    public boolean shouldEnforceFade() {
+        return mFadeOutManager.isFadeEnabled();
+    }
+
+
     //=================================================================
     // Track playback activity listeners
 
@@ -1019,6 +1025,15 @@ public final class PlaybackActivityMonitor
 
     FadeManagerConfiguration getFadeManagerConfiguration(int focusType) {
         return mFadeOutManager.getFadeManagerConfiguration();
+    }
+
+    int setTransientFadeManagerConfiguration(int focusType,
+            FadeManagerConfiguration fadeMgrConfig) {
+        return mFadeOutManager.setTransientFadeManagerConfiguration(fadeMgrConfig);
+    }
+
+    int clearTransientFadeManagerConfiguration(int focusType) {
+        return mFadeOutManager.clearTransientFadeManagerConfiguration();
     }
 
     /**

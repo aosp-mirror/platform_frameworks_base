@@ -13530,6 +13530,43 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /**
+     * see {@link AudioManager#dispatchAudioFocusChangeWithFade(AudioFocusInfo, int, AudioPolicy,
+     * List, FadeManagerConfiguration)}
+     */
+    @android.annotation.EnforcePermission(
+            android.Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public int dispatchFocusChangeWithFade(AudioFocusInfo afi, int focusChange,
+            IAudioPolicyCallback pcb, List<AudioFocusInfo> otherActiveAfis,
+            FadeManagerConfiguration transientFadeMgrConfig) {
+        super.dispatchFocusChangeWithFade_enforcePermission();
+        ensureFadeManagerConfigIsEnabled();
+        Objects.requireNonNull(afi, "AudioFocusInfo cannot be null");
+        Objects.requireNonNull(pcb, "AudioPolicy callback cannot be null");
+        Objects.requireNonNull(otherActiveAfis,
+                "Other active AudioFocusInfo list cannot be null");
+        if (transientFadeMgrConfig != null) {
+            validateFadeManagerConfiguration(transientFadeMgrConfig);
+        }
+
+        synchronized (mAudioPolicies) {
+            Preconditions.checkState(mAudioPolicies.containsKey(pcb.asBinder()),
+                    "Unregistered AudioPolicy for focus dispatch with fade");
+
+            // set the transient fade manager config to be used for handling this focus change
+            if (transientFadeMgrConfig != null) {
+                mPlaybackMonitor.setTransientFadeManagerConfiguration(focusChange,
+                        transientFadeMgrConfig);
+            }
+            int status = mMediaFocusControl.dispatchFocusChangeWithFade(afi, focusChange,
+                    otherActiveAfis);
+
+            if (transientFadeMgrConfig != null) {
+                mPlaybackMonitor.clearTransientFadeManagerConfiguration(focusChange);
+            }
+            return status;
+        }
+    }
 
     //======================
     // Audioserver state dispatch

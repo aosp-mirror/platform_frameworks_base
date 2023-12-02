@@ -83,7 +83,9 @@ public final class FadeConfigurations {
     private FadeManagerConfiguration mDefaultFadeManagerConfig;
     @GuardedBy("mLock")
     private FadeManagerConfiguration mUpdatedFadeManagerConfig;
-    /** active fade manager is one of updated > default */
+    @GuardedBy("mLock")
+    private FadeManagerConfiguration mTransientFadeManagerConfig;
+    /** active fade manager is one of: transient > updated > default */
     @GuardedBy("mLock")
     private FadeManagerConfiguration mActiveFadeManagerConfig;
 
@@ -143,6 +145,63 @@ public final class FadeConfigurations {
 
         synchronized (mLock) {
             return mActiveFadeManagerConfig;
+        }
+    }
+
+    /**
+     * Sets the transient fade manager configuration
+     *
+     * @param fadeManagerConfig custom fade manager configuration
+     * @return {@link AudioManager#SUCCESS} if setting custom fade manager configuration succeeds
+     *     or {@link AudioManager#ERROR} otherwise (example - when fade manager configuration is
+     *     disabled)
+     */
+    public int setTransientFadeManagerConfiguration(
+            @NonNull FadeManagerConfiguration fadeManagerConfig) {
+        if (!enableFadeManagerConfiguration()) {
+            return AudioManager.ERROR;
+        }
+
+        synchronized (mLock) {
+            mTransientFadeManagerConfig = Objects.requireNonNull(fadeManagerConfig,
+                    "Transient FadeManagerConfiguration cannot be null");
+            mActiveFadeManagerConfig = getActiveFadeMgrConfigLocked();
+        }
+        return AudioManager.SUCCESS;
+    }
+
+    /**
+     * Clears the transient fade manager configuration that was previously set with
+     * {@link #setTransientFadeManagerConfiguration(FadeManagerConfiguration)}
+     *
+     * @return {@link AudioManager#SUCCESS} if previously set transient fade manager configuration
+     *     is cleared or {@link AudioManager#ERROR} otherwise (example - when fade manager
+     *     configuration is disabled)
+     */
+    public int clearTransientFadeManagerConfiguration() {
+        if (!enableFadeManagerConfiguration()) {
+            return AudioManager.ERROR;
+        }
+        synchronized (mLock) {
+            mTransientFadeManagerConfig = null;
+            mActiveFadeManagerConfig = getActiveFadeMgrConfigLocked();
+        }
+        return AudioManager.SUCCESS;
+    }
+
+    /**
+     * Query if fade should be enforecd on players
+     *
+     * @return {@code true} if fade is enabled or using default configurations, {@code false}
+     * otherwise.
+     */
+    public boolean isFadeEnabled() {
+        if (!enableFadeManagerConfiguration()) {
+            return true;
+        }
+
+        synchronized (mLock) {
+            return getUpdatedFadeManagerConfigLocked().isFadeEnabled();
         }
     }
 
@@ -469,11 +528,15 @@ public final class FadeConfigurations {
         return mActiveFadeManagerConfig;
     }
 
-    /** Priority between fade manager configs: Updated > Default */
+    /** Priority between fade manager configs: Transient > Updated > Default */
     @GuardedBy("mLock")
     private FadeManagerConfiguration getActiveFadeMgrConfigLocked() {
         // below configs are arranged in the order of priority
         // configs placed higher have higher priority
+        if (mTransientFadeManagerConfig != null) {
+            return mTransientFadeManagerConfig;
+        }
+
         if (mUpdatedFadeManagerConfig != null) {
             return mUpdatedFadeManagerConfig;
         }
