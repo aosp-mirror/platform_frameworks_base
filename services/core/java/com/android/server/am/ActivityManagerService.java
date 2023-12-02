@@ -2486,7 +2486,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUseFifoUiScheduling = false;
         mEnableOffloadQueue = false;
         mEnableModernQueue = false;
-        mBroadcastQueues = new BroadcastQueue[0];
+        mBroadcastQueues = injector.getBroadcastQueues(this);
         mComponentAliasResolver = new ComponentAliasResolver(this);
     }
 
@@ -2527,40 +2527,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ? new OomAdjusterModernImpl(this, mProcessList, activeUids)
                 : new OomAdjuster(this, mProcessList, activeUids);
 
-        // Broadcast policy parameters
-        final BroadcastConstants foreConstants = new BroadcastConstants(
-                Settings.Global.BROADCAST_FG_CONSTANTS);
-        foreConstants.TIMEOUT = BROADCAST_FG_TIMEOUT;
-
-        final BroadcastConstants backConstants = new BroadcastConstants(
-                Settings.Global.BROADCAST_BG_CONSTANTS);
-        backConstants.TIMEOUT = BROADCAST_BG_TIMEOUT;
-
-        final BroadcastConstants offloadConstants = new BroadcastConstants(
-                Settings.Global.BROADCAST_OFFLOAD_CONSTANTS);
-        offloadConstants.TIMEOUT = BROADCAST_BG_TIMEOUT;
-        // by default, no "slow" policy in this queue
-        offloadConstants.SLOW_TIME = Integer.MAX_VALUE;
-
         mEnableOffloadQueue = SystemProperties.getBoolean(
                 "persist.device_config.activity_manager_native_boot.offload_queue_enabled", true);
-        mEnableModernQueue = foreConstants.MODERN_QUEUE_ENABLED;
+        mEnableModernQueue = new BroadcastConstants(
+                Settings.Global.BROADCAST_FG_CONSTANTS).MODERN_QUEUE_ENABLED;
 
-        if (mEnableModernQueue) {
-            mBroadcastQueues = new BroadcastQueue[1];
-            mBroadcastQueues[0] = new BroadcastQueueModernImpl(this, mHandler,
-                    foreConstants, backConstants);
-        } else {
-            mBroadcastQueues = new BroadcastQueue[4];
-            mBroadcastQueues[BROADCAST_QUEUE_FG] = new BroadcastQueueImpl(this, mHandler,
-                    "foreground", foreConstants, false, ProcessList.SCHED_GROUP_DEFAULT);
-            mBroadcastQueues[BROADCAST_QUEUE_BG] = new BroadcastQueueImpl(this, mHandler,
-                    "background", backConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
-            mBroadcastQueues[BROADCAST_QUEUE_BG_OFFLOAD] = new BroadcastQueueImpl(this, mHandler,
-                    "offload_bg", offloadConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
-            mBroadcastQueues[BROADCAST_QUEUE_FG_OFFLOAD] = new BroadcastQueueImpl(this, mHandler,
-                    "offload_fg", foreConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
-        }
+        mBroadcastQueues = mInjector.getBroadcastQueues(this);
 
         mServices = new ActiveServices(this);
         mCpHelper = new ContentProviderHelper(this, true);
@@ -20059,6 +20031,44 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mNmi = LocalServices.getService(NetworkManagementInternal.class);
             }
             return mNmi != null;
+        }
+
+        public BroadcastQueue[] getBroadcastQueues(ActivityManagerService service) {
+            // Broadcast policy parameters
+            final BroadcastConstants foreConstants = new BroadcastConstants(
+                    Settings.Global.BROADCAST_FG_CONSTANTS);
+            foreConstants.TIMEOUT = BROADCAST_FG_TIMEOUT;
+
+            final BroadcastConstants backConstants = new BroadcastConstants(
+                    Settings.Global.BROADCAST_BG_CONSTANTS);
+            backConstants.TIMEOUT = BROADCAST_BG_TIMEOUT;
+
+            final BroadcastConstants offloadConstants = new BroadcastConstants(
+                    Settings.Global.BROADCAST_OFFLOAD_CONSTANTS);
+            offloadConstants.TIMEOUT = BROADCAST_BG_TIMEOUT;
+            // by default, no "slow" policy in this queue
+            offloadConstants.SLOW_TIME = Integer.MAX_VALUE;
+
+            final BroadcastQueue[] broadcastQueues;
+            final Handler handler = service.mHandler;
+            if (service.mEnableModernQueue) {
+                broadcastQueues = new BroadcastQueue[1];
+                broadcastQueues[0] = new BroadcastQueueModernImpl(service, handler,
+                        foreConstants, backConstants);
+            } else {
+                broadcastQueues = new BroadcastQueue[4];
+                broadcastQueues[BROADCAST_QUEUE_FG] = new BroadcastQueueImpl(service, handler,
+                        "foreground", foreConstants, false, ProcessList.SCHED_GROUP_DEFAULT);
+                broadcastQueues[BROADCAST_QUEUE_BG] = new BroadcastQueueImpl(service, handler,
+                        "background", backConstants, true, ProcessList.SCHED_GROUP_BACKGROUND);
+                broadcastQueues[BROADCAST_QUEUE_BG_OFFLOAD] = new BroadcastQueueImpl(service,
+                        handler, "offload_bg", offloadConstants, true,
+                        ProcessList.SCHED_GROUP_BACKGROUND);
+                broadcastQueues[BROADCAST_QUEUE_FG_OFFLOAD] = new BroadcastQueueImpl(service,
+                        handler, "offload_fg", foreConstants, true,
+                        ProcessList.SCHED_GROUP_BACKGROUND);
+            }
+            return broadcastQueues;
         }
     }
 

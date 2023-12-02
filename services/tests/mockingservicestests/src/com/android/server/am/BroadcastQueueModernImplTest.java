@@ -126,6 +126,7 @@ public final class BroadcastQueueModernImplTest extends BaseBroadcastQueueTest {
 
         mImpl = new BroadcastQueueModernImpl(mAms, mHandlerThread.getThreadHandler(),
             mConstants, mConstants, mSkipPolicy, emptyHistory);
+        mBroadcastQueues[0] = mImpl;
 
         doReturn(1L).when(mQueue1).getRunnableAt();
         doReturn(2L).when(mQueue2).getRunnableAt();
