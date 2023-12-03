@@ -482,6 +482,35 @@ public class ThermalManagerServiceTest {
     }
 
     @Test
+    public void testGetThermalHeadroomThresholdsOnDefaultHalResult() throws Exception  {
+        TemperatureWatcher watcher = mService.mTemperatureWatcher;
+        ArrayList<TemperatureThreshold> thresholds = new ArrayList<>();
+        mFakeHal.mTemperatureThresholdList = thresholds;
+        watcher.updateThresholds();
+        synchronized (watcher.mSamples) {
+            assertArrayEquals(
+                    new float[]{Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN,
+                            Float.NaN},
+                    watcher.mHeadroomThresholds, 0.01f);
+        }
+        TemperatureThreshold nanThresholds = new TemperatureThreshold();
+        nanThresholds.name = "nan";
+        nanThresholds.type = Temperature.TYPE_SKIN;
+        nanThresholds.hotThrottlingThresholds = new float[ThrottlingSeverity.SHUTDOWN  + 1];
+        nanThresholds.coldThrottlingThresholds = new float[ThrottlingSeverity.SHUTDOWN  + 1];
+        Arrays.fill(nanThresholds.hotThrottlingThresholds, Float.NaN);
+        Arrays.fill(nanThresholds.coldThrottlingThresholds, Float.NaN);
+        thresholds.add(nanThresholds);
+        watcher.updateThresholds();
+        synchronized (watcher.mSamples) {
+            assertArrayEquals(
+                    new float[]{Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN, Float.NaN,
+                            Float.NaN},
+                    watcher.mHeadroomThresholds, 0.01f);
+        }
+    }
+
+    @Test
     public void testTemperatureWatcherGetSlopeOf() throws RemoteException {
         TemperatureWatcher watcher = mService.mTemperatureWatcher;
         List<TemperatureWatcher.Sample> samples = new ArrayList<>();
