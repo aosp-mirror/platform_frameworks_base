@@ -89,7 +89,7 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
     @Composable
     fun FooterAppVersion(showPackageName: Boolean = rememberIsDevelopmentSettingsEnabled()) {
         val context = LocalContext.current
-        val footer = remember(showPackageName) {
+        val footer = remember(packageInfo, showPackageName) {
             val list = mutableListOf<String>()
             packageInfo.versionNameBidiWrapped?.let {
                 list += context.getString(R.string.version_text, it)
