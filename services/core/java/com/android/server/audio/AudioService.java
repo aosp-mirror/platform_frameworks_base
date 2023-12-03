@@ -341,7 +341,6 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_DISPATCH_AUDIO_MODE = 40;
     private static final int MSG_ROUTING_UPDATED = 41;
     private static final int MSG_INIT_HEADTRACKING_SENSORS = 42;
-    private static final int MSG_PERSIST_SPATIAL_AUDIO_DEVICE_SETTINGS = 43;
     private static final int MSG_ADD_ASSISTANT_SERVICE_UID = 44;
     private static final int MSG_REMOVE_ASSISTANT_SERVICE_UID = 45;
     private static final int MSG_UPDATE_ACTIVE_ASSISTANT_SERVICE_UID = 46;
@@ -953,6 +952,8 @@ public class AudioService extends IAudioService.Stub
 
         mPlatformType = AudioSystem.getPlatformType(context);
 
+        mDeviceBroker = new AudioDeviceBroker(mContext, this);
+
         mIsSingleVolume = AudioSystem.isSingleVolume(context);
 
         mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
@@ -965,7 +966,7 @@ public class AudioService extends IAudioService.Stub
 
         mSfxHelper = new SoundEffectsHelper(mContext);
 
-        mSpatializerHelper = new SpatializerHelper(this, mAudioSystem);
+        mSpatializerHelper = new SpatializerHelper(this, mAudioSystem, mDeviceBroker);
 
         mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
         mHasVibrator = mVibrator == null ? false : mVibrator.hasVibrator();
@@ -1100,8 +1101,6 @@ public class AudioService extends IAudioService.Stub
 
         mUseFixedVolume = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_useFixedVolume);
-
-        mDeviceBroker = new AudioDeviceBroker(mContext, this);
 
         mRecordMonitor = new RecordingActivityMonitor(mContext);
         mRecordMonitor.registerRecordingCallback(mVoiceRecordingActivityMonitor, true);
@@ -5925,6 +5924,10 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    /*package*/ SettingsAdapter getSettings() {
+        return mSettings;
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Internal methods
     ///////////////////////////////////////////////////////////////////////////
@@ -8129,10 +8132,6 @@ public class AudioService extends IAudioService.Stub
                     mSpatializerHelper.onInitSensors();
                     break;
 
-                case MSG_PERSIST_SPATIAL_AUDIO_DEVICE_SETTINGS:
-                    onPersistSpatialAudioDeviceSettings();
-                    break;
-
                 case MSG_CHECK_MUSIC_ACTIVE:
                     onCheckMusicActive((String) msg.obj);
                     break;
@@ -8142,6 +8141,7 @@ public class AudioService extends IAudioService.Stub
                     onConfigureSafeVolume((msg.what == MSG_CONFIGURE_SAFE_MEDIA_VOLUME_FORCED),
                             (String) msg.obj);
                     break;
+
                 case MSG_PERSIST_SAFE_VOLUME_STATE:
                     onPersistSafeVolumeState(msg.arg1);
                     break;
@@ -9102,42 +9102,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     void onInitSpatializer() {
-        final String settings = mSettings.getSecureStringForUser(mContentResolver,
-                Settings.Secure.SPATIAL_AUDIO_ENABLED, UserHandle.USER_CURRENT);
-        if (settings == null) {
-            Log.e(TAG, "error reading spatial audio device settings");
-        } else {
-            Log.v(TAG, "restoring spatial audio device settings: " + settings);
-            mSpatializerHelper.setSADeviceSettings(settings);
-        }
+        mDeviceBroker.onReadAudioDeviceSettings();
         mSpatializerHelper.init(/*effectExpected*/ mHasSpatializerEffect);
         mSpatializerHelper.setFeatureEnabled(mHasSpatializerEffect);
-    }
-
-    /**
-     * post a message to persist the spatial audio device settings.
-     * Message is delayed by 1s on purpose in case of successive changes in quick succession (at
-     * init time for instance)
-     * Note this method is made public to work around a Mockito bug where it needs to be public
-     * in order to be mocked by a test a the same package
-     * (see https://code.google.com/archive/p/mockito/issues/127)
-     */
-    public void persistSpatialAudioDeviceSettings() {
-        sendMsg(mAudioHandler,
-                MSG_PERSIST_SPATIAL_AUDIO_DEVICE_SETTINGS,
-                SENDMSG_REPLACE, /*arg1*/ 0, /*arg2*/ 0, TAG,
-                /*delay*/ 1000);
-    }
-
-    void onPersistSpatialAudioDeviceSettings() {
-        final String settings = mSpatializerHelper.getSADeviceSettings();
-        Log.v(TAG, "saving spatial audio device settings: " + settings);
-        boolean res = mSettings.putSecureStringForUser(mContentResolver,
-                Settings.Secure.SPATIAL_AUDIO_ENABLED,
-                settings, UserHandle.USER_CURRENT);
-        if (!res) {
-            Log.e(TAG, "error saving spatial audio device settings: " + settings);
-        }
     }
 
     //==========================================================================================
