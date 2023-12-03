@@ -26,6 +26,10 @@ import com.android.systemui.qs.tiles.MicrophoneToggleTile
 import com.android.systemui.qs.tiles.UiModeNightTile
 import com.android.systemui.qs.tiles.WorkModeTile
 import com.android.systemui.qs.tiles.base.viewmodel.QSTileViewModelFactory
+import com.android.systemui.qs.tiles.impl.alarm.domain.AlarmTileMapper
+import com.android.systemui.qs.tiles.impl.alarm.domain.interactor.AlarmTileDataInteractor
+import com.android.systemui.qs.tiles.impl.alarm.domain.interactor.AlarmTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.alarm.domain.model.AlarmTileModel
 import com.android.systemui.qs.tiles.impl.flashlight.domain.FlashlightMapper
 import com.android.systemui.qs.tiles.impl.flashlight.domain.interactor.FlashlightTileDataInteractor
 import com.android.systemui.qs.tiles.impl.flashlight.domain.interactor.FlashlightTileUserActionInteractor
@@ -59,6 +63,7 @@ interface PolicyModule {
     companion object {
         const val FLASHLIGHT_TILE_SPEC = "flashlight"
         const val LOCATION_TILE_SPEC = "location"
+        const val ALARM_TILE_SPEC = "alarm"
 
         /** Inject flashlight config */
         @Provides
@@ -119,6 +124,38 @@ interface PolicyModule {
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(LOCATION_TILE_SPEC),
+                userActionInteractor,
+                stateInteractor,
+                mapper,
+            )
+
+        /** Inject alarm config */
+        @Provides
+        @IntoMap
+        @StringKey(ALARM_TILE_SPEC)
+        fun provideAlarmTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(ALARM_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.ic_alarm,
+                        labelRes = R.string.status_bar_alarm,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        /** Inject AlarmTile into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(ALARM_TILE_SPEC)
+        fun provideAlarmTileViewModel(
+            factory: QSTileViewModelFactory.Static<AlarmTileModel>,
+            mapper: AlarmTileMapper,
+            stateInteractor: AlarmTileDataInteractor,
+            userActionInteractor: AlarmTileUserActionInteractor
+        ): QSTileViewModel =
+            factory.create(
+                TileSpec.create(ALARM_TILE_SPEC),
                 userActionInteractor,
                 stateInteractor,
                 mapper,
