@@ -9000,6 +9000,13 @@ public final class Settings {
         public static final String UNSAFE_VOLUME_MUSIC_ACTIVE_MS = "unsafe_volume_music_active_ms";
 
         /**
+         * Internal collection of audio device inventory items
+         * The device item stored are {@link com.android.server.audio.AdiDeviceState}
+         * @hide
+         */
+        public static final String AUDIO_DEVICE_INVENTORY = "audio_device_inventory";
+
+        /**
          * Indicates whether notification display on the lock screen is enabled.
          * <p>
          * Type: int (0 for false, 1 for true)
