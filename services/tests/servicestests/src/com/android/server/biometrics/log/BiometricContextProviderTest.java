@@ -179,6 +179,29 @@ public class BiometricContextProviderTest {
     }
 
     @Test
+    public void testSubscribesToFoldState() throws RemoteException {
+        final List<Integer> actual = new ArrayList<>();
+        final List<Integer> expected = List.of(FoldState.FULLY_CLOSED, FoldState.FULLY_OPENED,
+                FoldState.UNKNOWN, FoldState.HALF_OPENED);
+        mProvider.subscribe(mOpContext, ctx -> {
+            assertThat(ctx).isSameInstanceAs(mOpContext.toAidlContext());
+            assertThat(mProvider.getFoldState()).isEqualTo(ctx.foldState);
+            actual.add(ctx.foldState);
+        });
+
+        for (int v : expected) {
+            mListener.onFoldChanged(v);
+        }
+
+        assertThat(actual).containsExactly(
+                FoldState.FULLY_CLOSED,
+                FoldState.FULLY_OPENED,
+                FoldState.UNKNOWN,
+                FoldState.HALF_OPENED
+        ).inOrder();
+    }
+
+    @Test
     public void testSubscribesToDisplayState() throws RemoteException {
         final List<Integer> actual = new ArrayList<>();
         final List<Integer> expected = List.of(AuthenticateOptions.DISPLAY_STATE_AOD,
