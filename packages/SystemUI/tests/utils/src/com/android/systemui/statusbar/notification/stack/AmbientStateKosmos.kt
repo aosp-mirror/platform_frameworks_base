@@ -14,11 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.statusbar.notification.stack
 
+import android.content.testableContext
+import com.android.systemui.dump.dumpManager
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.shade.transition.largeScreenShadeInterpolator
+import com.android.systemui.statusbar.phone.statusBarKeyguardViewManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @OptIn(ExperimentalCoroutinesApi::class)
-var Kosmos.statusBarKeyguardViewManager by Kosmos.Fixture { mock<StatusBarKeyguardViewManager>() }
+val Kosmos.ambientState by Fixture {
+    AmbientState(
+        /*context=*/ testableContext,
+        /*dumpManager=*/ dumpManager,
+        /*sectionProvider=*/ stackScrollAlgorithmSectionProvider,
+        /*bypassController=*/ stackScrollAlgorithmBypassController,
+        /*statusBarKeyguardViewManager=*/ statusBarKeyguardViewManager,
+        /*largeScreenShadeInterpolator=*/ largeScreenShadeInterpolator,
+    )
+}

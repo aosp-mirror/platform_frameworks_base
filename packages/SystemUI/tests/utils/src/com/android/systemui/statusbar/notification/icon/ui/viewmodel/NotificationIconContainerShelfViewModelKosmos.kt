@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.statusbar.notification.icon.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.android.systemui.statusbar.notification.icon.domain.interactor.notificationIconsInteractor
 
-@OptIn(ExperimentalCoroutinesApi::class)
-var Kosmos.statusBarKeyguardViewManager by Kosmos.Fixture { mock<StatusBarKeyguardViewManager>() }
+val Kosmos.notificationIconContainerShelfViewModel by
+    Kosmos.Fixture {
+        NotificationIconContainerShelfViewModel(
+            interactor = notificationIconsInteractor,
+        )
+    }

@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.scene.data.repository
 
+import com.android.internal.statusbar.statusBarService
+import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.android.systemui.kosmos.Kosmos.Fixture
 
-@OptIn(ExperimentalCoroutinesApi::class)
-var Kosmos.statusBarKeyguardViewManager by Kosmos.Fixture { mock<StatusBarKeyguardViewManager>() }
+val Kosmos.windowRootViewVisibilityRepository by Fixture {
+    WindowRootViewVisibilityRepository(
+        statusBarService = statusBarService,
+        uiBgExecutor = fakeExecutor,
+    )
+}
