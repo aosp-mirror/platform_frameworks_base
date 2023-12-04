@@ -149,6 +149,9 @@
     <!-- Nearby devices' permission will be granted of corresponding profile [CHAR LIMIT=30] -->
     <string name="permission_nearby_devices">Nearby devices</string>
 
+    <!-- Change media output permission will be granted to the corresponding profile [CHAR LIMIT=30] -->
+    <string name="permission_media_routing_control">Change media output</string>
+
     <!-- Storage permission will be granted of corresponding profile [CHAR LIMIT=30] -->
     <string name="permission_storage">Photos and media</string>
 
@@ -193,6 +196,9 @@
 
     <!-- Description of nearby_device_streaming permission of corresponding profile [CHAR LIMIT=NONE] -->
     <string name="permission_nearby_device_streaming_summary">Stream apps and other system features from your phone</string>
+
+    <!-- Description of change media output permission to be granted to the corresponding profile [CHAR LIMIT=NONE] -->
+    <string name="permission_media_routing_control_summary">Access a list of available devices and control which one streams or casts audio or video from other apps</string>
 
     <!-- The type of the device for phone [CHAR LIMIT=30] -->
     <string name="device_type" product="default">phone</string>
