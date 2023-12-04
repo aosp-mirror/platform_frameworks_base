@@ -85,6 +85,7 @@ class com.android.internal.util.FastMath stubclass
 class com.android.internal.util.FastPrintWriter stubclass
 class com.android.internal.util.GrowingArrayUtils stubclass
 class com.android.internal.util.LineBreakBufferedWriter stubclass
+class com.android.internal.util.Parcelling stubclass
 class com.android.internal.util.Preconditions stubclass
 class com.android.internal.util.StringPool stubclass
 
