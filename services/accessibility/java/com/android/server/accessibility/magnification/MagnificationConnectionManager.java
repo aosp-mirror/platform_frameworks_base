@@ -922,6 +922,7 @@ public class MagnificationConnectionManager implements
         disableWindowMagnification(displayId, true);
     }
 
+    @SuppressWarnings("MissingPermissionAnnotation")
     private class ConnectionCallback extends IMagnificationConnectionCallback.Stub implements
             IBinder.DeathRecipient {
         private boolean mExpiredDeathRecipient = false;

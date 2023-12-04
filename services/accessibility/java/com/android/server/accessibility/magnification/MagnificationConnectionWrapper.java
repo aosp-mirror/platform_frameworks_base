@@ -246,6 +246,7 @@ class MagnificationConnectionWrapper {
         return new RemoteAnimationCallback(callback, trace);
     }
 
+    @SuppressWarnings("MissingPermissionAnnotation")
     private static class RemoteAnimationCallback extends
             IRemoteMagnificationAnimationCallback.Stub {
         private final MagnificationAnimationCallback mCallback;

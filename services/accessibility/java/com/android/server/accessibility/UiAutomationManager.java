@@ -245,6 +245,7 @@ class UiAutomationManager {
         }
     }
 
+    @SuppressWarnings("MissingPermissionAnnotation")
     private class UiAutomationService extends AbstractAccessibilityServiceConnection {
         private final Handler mMainHandler;
 

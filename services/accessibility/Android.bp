@@ -19,6 +19,9 @@ java_library_static {
     defaults: [
         "platform_service_defaults",
     ],
+    lint: {
+        error_checks: ["MissingPermissionAnnotation"],
+    },
     srcs: [
         ":services.accessibility-sources",
         "//frameworks/base/packages/SettingsLib/RestrictedLockUtils:SettingsLibRestrictedLockUtilsSrc",
