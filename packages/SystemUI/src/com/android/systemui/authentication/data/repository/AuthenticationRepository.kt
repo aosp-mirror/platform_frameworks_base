@@ -60,14 +60,6 @@ import kotlinx.coroutines.withContext
 /** Defines interface for classes that can access authentication-related application state. */
 interface AuthenticationRepository {
     /**
-     * Whether the auto confirm feature is enabled for the currently-selected user.
-     *
-     * Note that the length of the PIN is also important to take into consideration, please see
-     * [hintedPinLength].
-     */
-    val isAutoConfirmFeatureEnabled: StateFlow<Boolean>
-
-    /**
      * Emits the result whenever a PIN/Pattern/Password security challenge is attempted by the user
      * in order to unlock the device.
      */
@@ -92,6 +84,17 @@ interface AuthenticationRepository {
      * to try another authentication attempt. `null` indicates throttling isn't active.
      */
     val throttling: MutableStateFlow<AuthenticationThrottlingModel?>
+
+    /** Whether throttling has occurred at least once since the last successful authentication. */
+    val hasThrottlingOccurred: MutableStateFlow<Boolean>
+
+    /**
+     * Whether the auto confirm feature is enabled for the currently-selected user.
+     *
+     * Note that the length of the PIN is also important to take into consideration, please see
+     * [hintedPinLength].
+     */
+    val isAutoConfirmFeatureEnabled: StateFlow<Boolean>
 
     /**
      * The currently-configured authentication method. This determines how the authentication
@@ -172,11 +175,6 @@ constructor(
     mobileConnectionsRepository: MobileConnectionsRepository,
 ) : AuthenticationRepository {
 
-    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
-        refreshingFlow(
-            initialValue = false,
-            getFreshValue = lockPatternUtils::isAutoPinConfirmEnabled,
-        )
     override val authenticationChallengeResult = MutableSharedFlow<Boolean>()
 
     override val hintedPinLength: Int = 6
@@ -190,8 +188,13 @@ constructor(
     override val throttling: MutableStateFlow<AuthenticationThrottlingModel?> =
         MutableStateFlow(null)
 
-    private val selectedUserId: Int
-        get() = userRepository.getSelectedUserInfo().id
+    override val hasThrottlingOccurred: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
+        refreshingFlow(
+            initialValue = false,
+            getFreshValue = lockPatternUtils::isAutoPinConfirmEnabled,
+        )
 
     override val authenticationMethod: Flow<AuthenticationMethodModel> =
         combine(userRepository.selectedUserInfo, mobileConnectionsRepository.isAnySimSecure) {
@@ -279,6 +282,9 @@ constructor(
             }
         }
     }
+
+    private val selectedUserId: Int
+        get() = userRepository.getSelectedUserInfo().id
 
     /**
      * Returns a [StateFlow] that's automatically kept fresh. The passed-in [getFreshValue] is
