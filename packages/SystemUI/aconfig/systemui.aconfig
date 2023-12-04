@@ -194,3 +194,10 @@ flag {
    description: "Faster wallpaper unlock transition"
    bug: "298186160"
 }
+
+flag {
+   name: "quick_settings_visual_haptics_longpress"
+   namespace: "systemui"
+   description: "Enable special visual and haptic effects for quick settings tiles with long-press actions"
+   bug: "229856884"
+}
