@@ -479,7 +479,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktiver"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Lyd og vibration"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Indstillinger"</string>
-    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Lydstyrken blev sænket til et mere sikkert niveau"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Lydstyrken blev reduceret til et mere sikkert niveau"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Høretelefonernes lydstyrke har været høj i længere tid end anbefalet"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Høretelefonernes lydstyrke har overskredet sikkerhedsgrænsen for denne uge"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Fortsæt med at lytte"</string>

@@ -1682,8 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ମାତ୍ରା ବଢ଼ାଇ ସୁପାରିଶ ସ୍ତର ବଢ଼ାଉଛନ୍ତି? \n\n ଲମ୍ବା ସମୟ ପର୍ଯ୍ୟନ୍ତ ଉଚ୍ଚ ଶବ୍ଦରେ ଶୁଣିଲେ ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତି ଖରାପ ହୋଇପାରେ।"</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ଅଧିକ ଭଲ୍ୟୁମରେ ଶୁଣିବା ଜାରି ରଖିବେ?\n\nସୁପାରିଶ କରାଯାଇଥିବା ଅପେକ୍ଷା ଅଧିକ ସମୟ ପାଇଁ ହେଡଫୋନର ଭଲ୍ୟୁମ ଅଧିକ ଅଛି, ଯାହା ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତିକୁ ନଷ୍ଟ କରିପାରିବ"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ଉଚ୍ଚ ସାଉଣ୍ଡ ଚିହ୍ନଟ କରାଯାଇଛି\n\nହେଡଫୋନର ଭଲ୍ୟୁମ ସୁପାରିଶ କରାଯାଇଥିବା ଅପେକ୍ଷା ଅଧିକ ଅଛି, ଯାହା ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତିକୁ ନଷ୍ଟ କରିପାରିବ"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ଅଧିକ ଭଲ୍ୟୁମରେ ଶୁଣିବା ଜାରି ରଖିବେ?\n\nସୁପାରିଶ କରାଯାଇଥିବା ଭଲ୍ୟୁମ ଠାରୁ ହେଡଫୋନର ଭଲ୍ୟୁମ ଅଧିକ ଅଛି, ଯାହା ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତିକୁ ନଷ୍ଟ କରିପାରେ"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ଲାଉଡ ସାଉଣ୍ଡ ଚିହ୍ନଟ ହୋଇଛି\n\nସୁପାରିଶ ଭଲ୍ୟୁମ ଠାରୁ ହେଡଫୋନର ଭଲ୍ୟୁମ ଅଧିକ ଅଛି, ଯାହା ଆପଣଙ୍କ ଶ୍ରବଣ ଶକ୍ତିକୁ ନଷ୍ଟ କରିପାରେ"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ଆକ୍ସେସବିଲିଟି ଶର୍ଟକଟ୍‍ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ସର୍ଟକଟ୍ ଚାଲୁ ଥିବା ବେଳେ, ଉଭୟ ଭଲ୍ୟୁମ୍ ବଟନ୍ 3 ସେକେଣ୍ଡ ପାଇଁ ଦବାଇବା ଦ୍ୱାରା ଏକ ଆକ୍ସେସବିଲିଟି ଫିଚର୍ ଆରମ୍ଭ ହେବ।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"ଆକ୍ସେସିବିଲିଟୀ ଫିଚରଗୁଡ଼ିକ ପାଇଁ ସର୍ଟକଟ୍ ଚାଲୁ କରିବେ?"</string>
@@ -1935,7 +1935,7 @@
     <string name="notification_history_title_placeholder" msgid="7748630986182249599">"କଷ୍ଟମ୍ ଆପ୍ ବିଜ୍ଞପ୍ତି"</string>
     <string name="user_creation_account_exists" msgid="2239146360099708035">"<xliff:g id="APP">%1$s</xliff:g>ରେ ଏକ ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବା ପାଇଁ <xliff:g id="ACCOUNT">%2$s</xliff:g>କୁ (ପୂର୍ବରୁ ଏହି ଆକାଉଣ୍ଟ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ନାମରେ ଅଛି) ଅନୁମତି ଦେବେ?"</string>
     <string name="user_creation_adding" msgid="7305185499667958364">"<xliff:g id="APP">%1$s</xliff:g>ରେ ଏକ ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବା ପାଇଁ <xliff:g id="ACCOUNT">%2$s</xliff:g>କୁ ଅନୁମତି ଦେବେ?"</string>
-    <string name="supervised_user_creation_label" msgid="6884904353827427515">"ନିରୀକ୍ଷିତ ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="supervised_user_creation_label" msgid="6884904353827427515">"ନିରୀକ୍ଷିତ ୟୁଜର ଯୋଗ କରନ୍ତୁ"</string>
     <string name="language_selection_title" msgid="52674936078683285">"ଏକ ଭାଷା ଯୋଗ କରନ୍ତୁ"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"ପସନ୍ଦର ଅଞ୍ଚଳ"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"ଭାଷାର ନାମ ଟାଇପ୍‍ କରନ୍ତୁ"</string>

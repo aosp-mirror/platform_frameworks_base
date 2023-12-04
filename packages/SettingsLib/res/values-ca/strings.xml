@@ -292,7 +292,7 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Activa el còdec d\'àudio per Bluetooth\nSelecció: mode de canal"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Còdec LDAC d\'àudio de Bluetooth: qualitat de reproducció"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Activa l\'LDAC d\'àudio de Bluetooth\nSelecció de còdec: qualitat de reproducció"</string>
-    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Reproducció en continu: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Reproducció en línia: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS privat"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Selecciona el mode de DNS privat"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Desactivat"</string>
