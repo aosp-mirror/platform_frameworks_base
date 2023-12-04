@@ -1817,7 +1817,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                         // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 8, attributes: 2
+  interfaces: 0, fields: 1, methods: 10, attributes: 2
   int value;
     descriptor: I
     flags: (0x0000)
@@ -1904,6 +1904,24 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
         Start  Length  Slot  Name   Signature
             0       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
             0       6     1   arg   I
+
+  public static native void nativeStillNotSupported();
+    descriptor: ()V
+    flags: (0x0109) ACC_PUBLIC, ACC_STATIC, ACC_NATIVE
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestThrow
+
+  public static void nativeStillNotSupported_should_be_like_this();
+    descriptor: ()V
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":()V
+         x: athrow
+      LineNumberTable:
 }
 SourceFile: "TinyFrameworkNative.java"
 RuntimeInvisibleAnnotations:

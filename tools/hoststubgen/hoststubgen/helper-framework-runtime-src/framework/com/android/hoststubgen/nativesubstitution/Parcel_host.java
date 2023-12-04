@@ -15,9 +15,6 @@
  */
 package com.android.hoststubgen.nativesubstitution;
 
-import android.os.IBinder;
-
-import java.io.FileDescriptor;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -143,12 +140,6 @@ public class Parcel_host {
     public static void nativeMarkSensitive(long nativePtr) {
         getInstance(nativePtr).mSensitive = true;
     }
-    public static void nativeMarkForBinder(long nativePtr, IBinder binder) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static boolean nativeIsForRpc(long nativePtr) {
-        throw new RuntimeException("Not implemented yet");
-    }
     public static int nativeDataSize(long nativePtr) {
         return getInstance(nativePtr).mSize;
     }
@@ -236,9 +227,6 @@ public class Parcel_host {
     public static int nativeWriteDouble(long nativePtr, double val) {
         return nativeWriteLong(nativePtr, Double.doubleToLongBits(val));
     }
-    public static void nativeSignalExceptionForError(int error) {
-        throw new RuntimeException("Not implemented yet");
-    }
 
     private static int align4(int val) {
         return ((val + 3) / 4) * 4;
@@ -255,12 +243,6 @@ public class Parcel_host {
     public static void nativeWriteString16(long nativePtr, String val) {
         // Just reuse String8
         nativeWriteString8(nativePtr, val);
-    }
-    public static void nativeWriteStrongBinder(long nativePtr, IBinder val) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static void nativeWriteFileDescriptor(long nativePtr, FileDescriptor val) {
-        throw new RuntimeException("Not implemented yet");
     }
 
     public static byte[] nativeCreateByteArray(long nativePtr) {
@@ -348,12 +330,6 @@ public class Parcel_host {
     public static String nativeReadString16(long nativePtr) {
         return nativeReadString8(nativePtr);
     }
-    public static IBinder nativeReadStrongBinder(long nativePtr) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static FileDescriptor nativeReadFileDescriptor(long nativePtr) {
-        throw new RuntimeException("Not implemented yet");
-    }
 
     public static byte[] nativeMarshall(long nativePtr) {
         var p = getInstance(nativePtr);
@@ -366,13 +342,6 @@ public class Parcel_host {
         System.arraycopy(data, offset, p.mBuffer, p.mPos, length);
         p.mPos += length;
         p.updateSize();
-    }
-    public static int nativeCompareData(long thisNativePtr, long otherNativePtr) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static boolean nativeCompareDataInRange(
-            long ptrA, int offsetA, long ptrB, int offsetB, int length) {
-        throw new RuntimeException("Not implemented yet");
     }
     public static void nativeAppendFrom(
             long thisNativePtr, long otherNativePtr, int srcOffset, int length) {
@@ -396,29 +365,5 @@ public class Parcel_host {
             long nativePtr, int offset, int length) {
         // Assume false for now, because we don't support writing FDs yet.
         return false;
-    }
-    public static void nativeWriteInterfaceToken(long nativePtr, String interfaceName) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static void nativeEnforceInterface(long nativePtr, String interfaceName) {
-        throw new RuntimeException("Not implemented yet");
-    }
-
-    public static boolean nativeReplaceCallingWorkSourceUid(
-            long nativePtr, int workSourceUid) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static int nativeReadCallingWorkSourceUid(long nativePtr) {
-        throw new RuntimeException("Not implemented yet");
-    }
-
-    public static long nativeGetOpenAshmemSize(long nativePtr) {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static long getGlobalAllocSize() {
-        throw new RuntimeException("Not implemented yet");
-    }
-    public static long getGlobalAllocCount() {
-        throw new RuntimeException("Not implemented yet");
     }
 }
