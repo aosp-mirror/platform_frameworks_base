@@ -727,6 +727,7 @@ public final class DisplayPowerController2Test {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FAST_HDR_TRANSITIONS)
     public void testDisplayBrightnessHdr_SkipAnimationOnHdrAppearance() {
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,
@@ -762,6 +763,7 @@ public final class DisplayPowerController2Test {
     }
 
     @Test
+    @RequiresFlagsEnabled(Flags.FLAG_FAST_HDR_TRANSITIONS)
     public void testDisplayBrightnessHdr_SkipAnimationOnHdrRemoval() {
         Settings.System.putInt(mContext.getContentResolver(),
                 Settings.System.SCREEN_BRIGHTNESS_MODE,

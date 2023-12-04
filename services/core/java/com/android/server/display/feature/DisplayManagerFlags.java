@@ -101,6 +101,10 @@ public class DisplayManagerFlags {
             Flags.FLAG_AUTO_BRIGHTNESS_MODES,
             Flags::autoBrightnessModes);
 
+    private final FlagState mFastHdrTransitions = new FlagState(
+            Flags.FLAG_FAST_HDR_TRANSITIONS,
+            Flags::fastHdrTransitions);
+
     /** Returns whether connected display management is enabled or not. */
     public boolean isConnectedDisplayManagementEnabled() {
         return mConnectedDisplayManagementFlagState.isEnabled();
@@ -205,6 +209,10 @@ public class DisplayManagerFlags {
         return mAutoBrightnessModesFlagState.isEnabled();
     }
 
+    public boolean isFastHdrTransitionsEnabled() {
+        return mFastHdrTransitions.isEnabled();
+    }
+
     /**
      * dumps all flagstates
      * @param pw printWriter
@@ -226,6 +234,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mVsyncProximityVote);
         pw.println(" " + mBrightnessWearBedtimeModeClamperFlagState);
         pw.println(" " + mAutoBrightnessModesFlagState);
+        pw.println(" " + mFastHdrTransitions);
     }
 
     private static class FlagState {
