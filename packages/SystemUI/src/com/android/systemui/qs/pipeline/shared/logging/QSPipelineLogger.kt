@@ -209,6 +209,18 @@ constructor(
         )
     }
 
+    fun logTileUnmarked(userId: Int, spec: TileSpec) {
+        tileAutoAddLogBuffer.log(
+            AUTO_ADD_TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = userId
+                str1 = spec.toString()
+            },
+            { "Tile $str1 unmarked as auto-added for user $int1" }
+        )
+    }
+
     fun logSettingsRestored(restoreData: RestoreData) {
         restoreLogBuffer.log(
             RESTORE_TAG,
@@ -226,6 +238,21 @@ constructor(
         )
     }
 
+    fun logRestoreProcessorApplied(
+        restoreProcessorClassName: String?,
+        step: RestorePreprocessorStep,
+    ) {
+        restoreLogBuffer.log(
+            RESTORE_TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = restoreProcessorClassName
+                str2 = step.name
+            },
+            { "Restore $str2 processed by $str1" }
+        )
+    }
+
     /** Reasons for destroying an existing tile. */
     enum class TileDestroyedReason(val readable: String) {
         TILE_REMOVED("Tile removed from  current set"),
@@ -233,5 +260,10 @@ constructor(
         NEW_TILE_NOT_AVAILABLE("New tile not available"),
         EXISTING_TILE_NOT_AVAILABLE("Existing tile not available"),
         TILE_NOT_PRESENT_IN_NEW_USER("Tile not present in new user"),
+    }
+
+    enum class RestorePreprocessorStep {
+        PREPROCESSING,
+        POSTPROCESSING
     }
 }

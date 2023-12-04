@@ -5,10 +5,15 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.pipeline.data.model.RestoreData
+import com.android.systemui.qs.pipeline.data.model.RestoreProcessor
 import com.android.systemui.qs.pipeline.data.repository.FakeAutoAddRepository
 import com.android.systemui.qs.pipeline.data.repository.FakeQSSettingsRestoredRepository
 import com.android.systemui.qs.pipeline.data.repository.FakeTileSpecRepository
 import com.android.systemui.qs.pipeline.data.repository.TilesSettingConverter
+import com.android.systemui.qs.pipeline.domain.interactor.RestoreReconciliationInteractorTest.TestableRestoreProcessor.Companion.POSTPROCESS
+import com.android.systemui.qs.pipeline.domain.interactor.RestoreReconciliationInteractorTest.TestableRestoreProcessor.Companion.PREPROCESS
+import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import com.android.systemui.util.mockito.mock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -17,7 +22,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.inOrder
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -28,6 +33,9 @@ class RestoreReconciliationInteractorTest : SysuiTestCase() {
 
     private val qsSettingsRestoredRepository = FakeQSSettingsRestoredRepository()
 
+    private val restoreProcessor: TestableRestoreProcessor = TestableRestoreProcessor()
+    private val qsLogger: QSPipelineLogger = mock()
+
     private lateinit var underTest: RestoreReconciliationInteractor
 
     private val testDispatcher = StandardTestDispatcher()
@@ -35,13 +43,13 @@ class RestoreReconciliationInteractorTest : SysuiTestCase() {
 
     @Before
     fun setUp() {
-        MockitoAnnotations.initMocks(this)
-
         underTest =
             RestoreReconciliationInteractor(
                 tileSpecRepository,
                 autoAddRepository,
                 qsSettingsRestoredRepository,
+                setOf(restoreProcessor),
+                qsLogger,
                 testScope.backgroundScope,
                 testDispatcher
             )
@@ -84,6 +92,44 @@ class RestoreReconciliationInteractorTest : SysuiTestCase() {
             val expectedAutoAdd = "b,d,e"
             assertThat(autoAdd).isEqualTo(expectedAutoAdd.toTilesSet())
         }
+
+    @Test
+    fun restoreProcessorsCalled() =
+        testScope.runTest {
+            val user = 10
+
+            val restoredSpecs = "a,c,d,f"
+            val restoredAutoAdded = "d,e"
+
+            val restoreData =
+                RestoreData(
+                    restoredSpecs.toTilesList(),
+                    restoredAutoAdded.toTilesSet(),
+                    user,
+                )
+
+            qsSettingsRestoredRepository.onDataRestored(restoreData)
+            runCurrent()
+
+            assertThat(restoreProcessor.calls).containsExactly(PREPROCESS, POSTPROCESS).inOrder()
+        }
+
+    private class TestableRestoreProcessor : RestoreProcessor {
+        val calls = mutableListOf<Any>()
+
+        override suspend fun preProcessRestore(restoreData: RestoreData) {
+            calls.add(PREPROCESS)
+        }
+
+        override suspend fun postProcessRestore(restoreData: RestoreData) {
+            calls.add(POSTPROCESS)
+        }
+
+        companion object {
+            val PREPROCESS = Any()
+            val POSTPROCESS = Any()
+        }
+    }
 
     companion object {
         private fun String.toTilesList() = TilesSettingConverter.toTilesList(this)

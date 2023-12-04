@@ -20,9 +20,8 @@ import android.util.SparseArray
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.qs.pipeline.data.model.RestoreData
 import com.android.systemui.qs.pipeline.shared.TileSpec
-import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.Flow
 
 /** Repository to track what QS tiles have been auto-added */
 interface AutoAddRepository {
@@ -49,8 +48,9 @@ interface AutoAddRepository {
 @SysUISingleton
 class AutoAddSettingRepository
 @Inject
-constructor(private val userAutoAddRepositoryFactory: UserAutoAddRepository.Factory) :
-    AutoAddRepository {
+constructor(
+    private val userAutoAddRepositoryFactory: UserAutoAddRepository.Factory,
+) : AutoAddRepository {
 
     private val userAutoAddRepositories = SparseArray<UserAutoAddRepository>()
 
