@@ -17,7 +17,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
-          package="com.android.server.wm.flick">
+          package="com.android.server.wm.flicker">
 
     <uses-sdk android:minSdkVersion="29" android:targetSdkVersion="29"/>
     <!-- Read and write traces from external storage -->
