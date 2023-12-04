@@ -1179,10 +1179,12 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testFinishActivityIfPossible_nonVisibleNoAppTransition() {
         registerTestTransitionPlayer();
+        spyOn(mRootWindowContainer.mTransitionController);
+        final ActivityRecord bottomActivity = createActivityWithTask();
+        bottomActivity.setVisibility(false);
+        bottomActivity.setState(STOPPED, "test");
+        bottomActivity.mLastSurfaceShowing = false;
         final ActivityRecord activity = createActivityWithTask();
-        // Put an activity on top of test activity to make it invisible and prevent us from
-        // accidentally resuming the topmost one again.
-        new ActivityBuilder(mAtm).build();
         activity.setVisibleRequested(false);
         activity.setState(STOPPED, "test");
 
@@ -1190,6 +1192,14 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         verify(activity.mDisplayContent, never()).prepareAppTransition(eq(TRANSIT_CLOSE));
         assertFalse(activity.inTransition());
+
+        // finishIfPossible -> completeFinishing -> addToFinishingAndWaitForIdle
+        // -> resumeFocusedTasksTopActivities
+        assertTrue(bottomActivity.isState(RESUMED));
+        assertTrue(bottomActivity.isVisible());
+        verify(mRootWindowContainer.mTransitionController).onVisibleWithoutCollectingTransition(
+                eq(bottomActivity), any());
+        assertTrue(bottomActivity.mLastSurfaceShowing);
     }
 
     /**
