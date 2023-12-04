@@ -323,6 +323,14 @@ public class PackageInstaller {
      */
     @SystemApi
     public static final String EXTRA_CALLBACK = "android.content.pm.extra.CALLBACK";
+    /**
+     * Key for passing extra delete flags during archiving.
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    public static final String EXTRA_DELETE_FLAGS = "android.content.pm.extra.DELETE_FLAGS";
 
     /**
      * Type of DataLoader for this session. Will be one of
@@ -2330,6 +2338,7 @@ public class PackageInstaller {
      * communicated.
      *
      * @param statusReceiver Callback used to notify when the operation is completed.
+     * @param flags Flags for archiving. Can be 0 or {@link PackageManager#DELETE_SHOW_DIALOG}.
      * @throws PackageManager.NameNotFoundException If {@code packageName} isn't found or not
      *                                              available to the caller or isn't archived.
      */
@@ -2337,11 +2346,12 @@ public class PackageInstaller {
             Manifest.permission.DELETE_PACKAGES,
             Manifest.permission.REQUEST_DELETE_PACKAGES})
     @FlaggedApi(Flags.FLAG_ARCHIVING)
-    public void requestArchive(@NonNull String packageName, @NonNull IntentSender statusReceiver)
+    public void requestArchive(@NonNull String packageName, @NonNull IntentSender statusReceiver,
+            @DeleteFlags int flags)
             throws PackageManager.NameNotFoundException {
         try {
             mInstaller.requestArchive(packageName, mInstallerPackageName, statusReceiver,
-                    new UserHandle(mUserId));
+                    new UserHandle(mUserId), flags);
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
         } catch (RemoteException e) {
