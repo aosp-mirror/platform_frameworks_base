@@ -570,8 +570,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         mService.deferWindowLayout();
         mService.mTaskSupervisor.setDeferRootVisibilityUpdate(true /* deferUpdate */);
         try {
-            if (transition != null) {
-                transition.applyDisplayChangeIfNeeded();
+            final ArrayList<ActivityRecord> activitiesMayChange =
+                    transition != null ? transition.applyDisplayChangeIfNeeded() : null;
+            if (activitiesMayChange != null) {
+                effects |= TRANSACT_EFFECTS_CLIENT_CONFIG;
             }
             final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
             final int hopSize = hops.size();
@@ -695,7 +697,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 for (int i = haveConfigChanges.size() - 1; i >= 0; --i) {
                     haveConfigChanges.valueAt(i).forAllActivities(r -> {
                         r.ensureActivityConfiguration(0, PRESERVE_WINDOWS);
+                        if (activitiesMayChange != null) {
+                            activitiesMayChange.remove(r);
+                        }
                     });
+                }
+                // TODO(b/258618073): Combine with haveConfigChanges after confirming that there
+                //  is no problem to always preserve window. Currently this uses the parameters
+                //  as ATMS#ensureConfigAndVisibilityAfterUpdate.
+                if (activitiesMayChange != null) {
+                    for (int i = activitiesMayChange.size() - 1; i >= 0; --i) {
+                        final ActivityRecord ar = activitiesMayChange.get(i);
+                        if (!ar.isVisibleRequested()) continue;
+                        ar.ensureActivityConfiguration(0 /* globalChanges */,
+                                !PRESERVE_WINDOWS, true /* ignoreVisibility */,
+                                false /* isRequestedOrientationChanged */);
+                    }
                 }
             }
 

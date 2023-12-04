@@ -2857,12 +2857,18 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         return false;
     }
 
-    /** Applies the new configuration for the changed displays. */
-    void applyDisplayChangeIfNeeded() {
+    /**
+     * Applies the new configuration for the changed displays. Returns the activities that should
+     * check whether to deliver the new configuration to clients.
+     */
+    @Nullable
+    ArrayList<ActivityRecord> applyDisplayChangeIfNeeded() {
+        ArrayList<ActivityRecord> activitiesMayChange = null;
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
             final WindowContainer<?> wc = mParticipants.valueAt(i);
             final DisplayContent dc = wc.asDisplayContent();
             if (dc == null || !mChanges.get(dc).hasChanged()) continue;
+            final int originalSeq = dc.getConfiguration().seq;
             dc.sendNewConfiguration();
             // Set to ready if no other change controls the ready state. But if there is, such as
             // if an activity is pausing, it will call setReady(ar, false) and wait for the next
@@ -2871,7 +2877,22 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (!mReadyTrackerOld.mUsed) {
                 setReady(dc, true);
             }
+            if (originalSeq == dc.getConfiguration().seq) continue;
+            // If the update is deferred, sendNewConfiguration won't deliver new configuration to
+            // clients, then it is the caller's responsibility to deliver the changes.
+            if (mController.mAtm.mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
+                if (activitiesMayChange == null) {
+                    activitiesMayChange = new ArrayList<>();
+                }
+                final ArrayList<ActivityRecord> visibleActivities = activitiesMayChange;
+                dc.forAllActivities(r -> {
+                    if (r.isVisibleRequested()) {
+                        visibleActivities.add(r);
+                    }
+                });
+            }
         }
+        return activitiesMayChange;
     }
 
     boolean getLegacyIsReady() {
