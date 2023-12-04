@@ -3390,7 +3390,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (currentFocusedApp != null && currentFocusedApp.task == task
                 && topFocusedDisplayId == mDisplayContent.getDisplayId()) {
             final Task topFocusableTask = mDisplayContent.getTask(
-                    (t) -> t.isLeafTask() && t.isFocusable(), true /*  traverseTopToBottom */);
+                    (t) -> t.isLeafTask() && t.isFocusable() && !t.inPinnedWindowingMode(),
+                    true /*  traverseTopToBottom */);
             if (task == topFocusableTask) {
                 if (currentFocusedApp == this) {
                     ProtoLog.d(WM_DEBUG_FOCUS, "moveFocusableActivityToTop: already on top "
