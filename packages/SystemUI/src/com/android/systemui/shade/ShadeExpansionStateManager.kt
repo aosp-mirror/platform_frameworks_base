@@ -163,12 +163,6 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
         }
     }
 
-    fun notifyPanelCollapsingChanged(isCollapsing: Boolean) {
-        for (cb in shadeStateEventsListeners) {
-            cb.onPanelCollapsingChanged(isCollapsing)
-        }
-    }
-
     private fun debugLog(msg: String) {
         if (!DEBUG) return
         Log.v(TAG, msg)

@@ -71,14 +71,11 @@ constructor(
 
     override val isQsBypassingShade: Flow<Boolean> =
         sceneInteractor.transitionState
-            .flatMapLatest { state ->
+            .map { state ->
                 when (state) {
-                    is ObservableTransitionState.Idle -> flowOf(false)
+                    is ObservableTransitionState.Idle -> false
                     is ObservableTransitionState.Transition ->
-                        flowOf(
-                            state.toScene == SceneKey.QuickSettings &&
-                                state.fromScene != SceneKey.Shade
-                        )
+                        state.toScene == SceneKey.QuickSettings && state.fromScene != SceneKey.Shade
                 }
             }
             .distinctUntilChanged()

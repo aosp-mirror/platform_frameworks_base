@@ -34,12 +34,14 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.TestScopeProvider;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeStateEvents;
 import com.android.systemui.shade.ShadeStateEvents.ShadeStateEventsListener;
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
@@ -51,6 +53,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
@@ -61,6 +64,10 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
+
+import kotlinx.coroutines.flow.MutableStateFlow;
+import kotlinx.coroutines.flow.StateFlowKt;
+import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -78,6 +85,7 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Mock private ShadeStateEvents mShadeStateEvents;
     @Mock private VisibilityLocationProvider mVisibilityLocationProvider;
     @Mock private VisualStabilityProvider mVisualStabilityProvider;
+    @Mock private ShadeAnimationInteractor mShadeAnimationInteractor;
 
     @Captor private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefulnessObserverCaptor;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mSBStateListenerCaptor;
@@ -86,6 +94,9 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
     private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
+    private final TestScope mTestScope = TestScopeProvider.getTestScope();
+    private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
+    private final MutableStateFlow<Boolean> mShadeClosing = StateFlowKt.MutableStateFlow(false);
 
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
     private StatusBarStateController.StateListener mStatusBarStateListener;
@@ -103,11 +114,13 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
                 mDumpManager,
                 mHeadsUpManager,
                 mShadeStateEvents,
+                mShadeAnimationInteractor,
+                mJavaAdapter,
                 mStatusBarStateController,
                 mVisibilityLocationProvider,
                 mVisualStabilityProvider,
                 mWakefulnessLifecycle);
-
+        when(mShadeAnimationInteractor.isAnyCloseAnimationRunning()).thenReturn(mShadeClosing);
         mCoordinator.attach(mNotifPipeline);
 
         // capture arguments:
@@ -549,7 +562,8 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     }
 
     private void setPanelCollapsing(boolean collapsing) {
-        mNotifPanelEventsCallback.onPanelCollapsingChanged(collapsing);
+        mShadeClosing.setValue(collapsing);
+        mTestScope.getTestScheduler().runCurrent();
     }
 
     private void setPulsing(boolean pulsing) {

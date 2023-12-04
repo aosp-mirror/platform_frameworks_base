@@ -105,6 +105,12 @@ interface ShadeRepository {
     /** True when QS is taking up the entire screen, i.e. fully expanded on a non-unfolded phone. */
     @Deprecated("Use ShadeInteractor instead") val legacyQsFullscreen: StateFlow<Boolean>
 
+    /** NPVC.mClosing as a flow. */
+    @Deprecated("Use ShadeAnimationInteractor instead") val legacyIsClosing: StateFlow<Boolean>
+
+    /** Sets whether a closing animation is happening. */
+    @Deprecated("Use ShadeAnimationInteractor instead") fun setLegacyIsClosing(isClosing: Boolean)
+
     /**  */
     @Deprecated("Use ShadeInteractor instead")
     fun setLegacyQsFullscreen(legacyQsFullscreen: Boolean)
@@ -259,6 +265,15 @@ constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepos
     @Deprecated("Should only be called by NPVC and tests")
     override fun setLegacyShadeTracking(tracking: Boolean) {
         _legacyShadeTracking.value = tracking
+    }
+
+    private val _legacyIsClosing = MutableStateFlow(false)
+    @Deprecated("Use ShadeInteractor instead")
+    override val legacyIsClosing: StateFlow<Boolean> = _legacyIsClosing.asStateFlow()
+
+    @Deprecated("Use ShadeInteractor instead")
+    override fun setLegacyIsClosing(isClosing: Boolean) {
+        _legacyIsClosing.value = isClosing
     }
 
     @Deprecated("Should only be called by NPVC and tests")
