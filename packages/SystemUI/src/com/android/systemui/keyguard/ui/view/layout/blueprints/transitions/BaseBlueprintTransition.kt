@@ -24,6 +24,7 @@ import android.transition.TransitionValues
 import android.transition.Visibility
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.helper.widget.Layer
 
 class BaseBlueprintTransition : TransitionSet() {
     init {
@@ -31,6 +32,7 @@ class BaseBlueprintTransition : TransitionSet() {
         addTransition(AlphaOutVisibility())
             .addTransition(ChangeBounds())
             .addTransition(AlphaInVisibility())
+        excludeTarget(Layer::class.java, /* exclude= */ true)
     }
     class AlphaOutVisibility : Visibility() {
         override fun onDisappear(
