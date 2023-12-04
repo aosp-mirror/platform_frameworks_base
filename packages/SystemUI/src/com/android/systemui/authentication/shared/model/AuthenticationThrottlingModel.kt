@@ -23,10 +23,13 @@ data class AuthenticationThrottlingModel(
     val failedAttemptCount: Int = 0,
 
     /**
-     * Remaining amount of time, in milliseconds, before another authentication attempt can be done.
-     * If not throttling this will be `0`.
+     * Remaining amount of time, in seconds, before another authentication attempt can be done. If
+     * not throttling this will be `0`.
      *
      * This number is changed throughout the timeout.
+     *
+     * Note: this isn't precise (in milliseconds), but rounded up to ensure "at most" this amount of
+     * seconds remains.
      */
-    val remainingMs: Int = 0,
+    val remainingSeconds: Int = 0,
 )

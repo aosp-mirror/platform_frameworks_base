@@ -36,7 +36,6 @@ import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import com.android.systemui.user.ui.viewmodel.UserViewModel
 import dagger.Module
 import dagger.Provides
-import kotlin.math.ceil
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -205,7 +204,7 @@ class BouncerViewModel(
                             applicationContext.getString(
                                 authMethodViewModel.throttlingMessageId,
                                 throttling.failedAttemptCount,
-                                ceil(throttling.remainingMs / 1000f).toInt(),
+                                throttling.remainingSeconds,
                             )
                         } else {
                             null
