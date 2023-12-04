@@ -17,7 +17,9 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
-    <item android:state_pressed="true" android:color="?androidprv:attr/materialColorOnSurface" android:alpha="0.15" />
+    <!-- Pressed state's alpha is set to 0.00 temporarily until this bug is resolved permanently
+    b/313920497 Design intended alpha is 0.15-->
+    <item android:state_pressed="true" android:color="?androidprv:attr/materialColorOnSurface" android:alpha="0.00" />
     <item android:state_hovered="true" android:color="?androidprv:attr/materialColorOnSurface" android:alpha="0.11" />
     <item android:color="@color/transparent" />
 </selector>
