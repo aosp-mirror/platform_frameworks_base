@@ -617,10 +617,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private boolean mIsOcclusionTransitionRunning = false;
     private boolean mIsGoneToDreamingLockscreenHostedTransitionRunning;
     private int mDreamingToLockscreenTransitionTranslationY;
-    private int mOccludedToLockscreenTransitionTranslationY;
     private int mLockscreenToDreamingTransitionTranslationY;
     private int mGoneToDreamingTransitionTranslationY;
-    private int mLockscreenToOccludedTransitionTranslationY;
     private SplitShadeStateController mSplitShadeStateController;
     private final Runnable mFlingCollapseRunnable = () -> fling(0, false /* expand */,
             mNextCollapseSpeedUpFactor, false /* expandBecauseOfFalsing */);
@@ -1161,11 +1159,13 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         // Occluded->Lockscreen
         collectFlow(mView, mKeyguardTransitionInteractor.getOccludedToLockscreenTransition(),
                 mOccludedToLockscreenTransition, mMainDispatcher);
-        collectFlow(mView, mOccludedToLockscreenTransitionViewModel.getLockscreenAlpha(),
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
+            collectFlow(mView, mOccludedToLockscreenTransitionViewModel.getLockscreenAlpha(),
                 setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
-        collectFlow(mView, mOccludedToLockscreenTransitionViewModel.lockscreenTranslationY(
-                mOccludedToLockscreenTransitionTranslationY),
-                setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
+            collectFlow(mView,
+                    mOccludedToLockscreenTransitionViewModel.getLockscreenTranslationY(),
+                    setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
+        }
 
         // Lockscreen->Dreaming
         collectFlow(mView, mKeyguardTransitionInteractor.getLockscreenToDreamingTransition(),
@@ -1191,8 +1191,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 mLockscreenToOccludedTransition, mMainDispatcher);
         collectFlow(mView, mLockscreenToOccludedTransitionViewModel.getLockscreenAlpha(),
                 setTransitionAlpha(mNotificationStackScrollLayoutController), mMainDispatcher);
-        collectFlow(mView, mLockscreenToOccludedTransitionViewModel.lockscreenTranslationY(
-                mLockscreenToOccludedTransitionTranslationY),
+        collectFlow(mView, mLockscreenToOccludedTransitionViewModel.getLockscreenTranslationY(),
                 setTransitionY(mNotificationStackScrollLayoutController), mMainDispatcher);
 
         // Primary bouncer->Gone (ensures lockscreen content is not visible on successful auth)
@@ -1224,14 +1223,10 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                 R.dimen.split_shade_scrim_transition_distance);
         mDreamingToLockscreenTransitionTranslationY = mResources.getDimensionPixelSize(
                 R.dimen.dreaming_to_lockscreen_transition_lockscreen_translation_y);
-        mOccludedToLockscreenTransitionTranslationY = mResources.getDimensionPixelSize(
-                R.dimen.occluded_to_lockscreen_transition_lockscreen_translation_y);
         mLockscreenToDreamingTransitionTranslationY = mResources.getDimensionPixelSize(
                 R.dimen.lockscreen_to_dreaming_transition_lockscreen_translation_y);
         mGoneToDreamingTransitionTranslationY = mResources.getDimensionPixelSize(
                 R.dimen.gone_to_dreaming_transition_lockscreen_translation_y);
-        mLockscreenToOccludedTransitionTranslationY = mResources.getDimensionPixelSize(
-                R.dimen.lockscreen_to_occluded_transition_lockscreen_translation_y);
         // TODO (b/265193930): remove this and make QsController listen to NotificationPanelViews
         mQsController.loadDimens();
     }

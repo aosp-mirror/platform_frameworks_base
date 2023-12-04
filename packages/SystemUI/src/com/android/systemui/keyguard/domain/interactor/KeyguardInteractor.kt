@@ -28,7 +28,7 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.shared.model.Position
-import com.android.systemui.common.ui.data.repository.ConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
@@ -76,7 +76,7 @@ constructor(
     powerInteractor: PowerInteractor,
     sceneContainerFlags: SceneContainerFlags,
     bouncerRepository: KeyguardBouncerRepository,
-    configurationRepository: ConfigurationRepository,
+    configurationInteractor: ConfigurationInteractor,
     shadeRepository: ShadeRepository,
     sceneInteractorProvider: Provider<SceneInteractor>,
 ) {
@@ -212,35 +212,29 @@ constructor(
     /** The approximate location on the screen of the face unlock sensor, if one is available. */
     val faceSensorLocation: Flow<Point?> = repository.faceSensorLocation
 
-    /** Notifies when a new configuration is set */
-    val configurationChange: Flow<Unit> =
-        configurationRepository.onAnyConfigurationChange.onStart { emit(Unit) }
-
     /** The position of the keyguard clock. */
     val clockPosition: Flow<Position> = repository.clockPosition
 
     val keyguardAlpha: Flow<Float> = repository.keyguardAlpha
 
     val keyguardTranslationY: Flow<Float> =
-        configurationChange.flatMapLatest {
-            val translationDistance =
-                configurationRepository.getDimensionPixelSize(
-                    R.dimen.keyguard_translate_distance_on_swipe_up
-                )
-            shadeRepository.shadeModel.map {
-                if (it.expansionAmount == 0f) {
-                    // Reset the translation value
-                    0f
-                } else {
-                    // On swipe up, translate the keyguard to reveal the bouncer
-                    MathUtils.lerp(
-                        translationDistance,
-                        0,
-                        Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(it.expansionAmount)
-                    )
+        configurationInteractor
+            .dimensionPixelSize(R.dimen.keyguard_translate_distance_on_swipe_up)
+            .flatMapLatest { translationDistance ->
+                shadeRepository.shadeModel.map {
+                    if (it.expansionAmount == 0f) {
+                        // Reset the translation value
+                        0f
+                    } else {
+                        // On swipe up, translate the keyguard to reveal the bouncer
+                        MathUtils.lerp(
+                            translationDistance,
+                            0,
+                            Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(it.expansionAmount)
+                        )
+                    }
                 }
             }
-        }
 
     val clockShouldBeCentered: Flow<Boolean> = repository.clockShouldBeCentered
 
@@ -292,18 +286,6 @@ constructor(
     /** Sets whether quick settings or quick-quick settings is visible. */
     fun setQuickSettingsVisible(isVisible: Boolean) {
         repository.setQuickSettingsVisible(isVisible)
-    }
-
-    fun setKeyguardRootVisibility(
-        statusBarState: Int,
-        goingToFullShade: Boolean,
-        isOcclusionTransitionRunning: Boolean
-    ) {
-        repository.setKeyguardVisibility(
-            statusBarState,
-            goingToFullShade,
-            isOcclusionTransitionRunning
-        )
     }
 
     fun setClockPosition(x: Int, y: Int) {

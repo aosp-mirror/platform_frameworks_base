@@ -37,7 +37,6 @@ import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.KeyguardDone
-import com.android.systemui.keyguard.shared.model.KeyguardRootViewVisibilityState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -178,9 +177,6 @@ interface KeyguardRepository {
     /** Whether quick settings or quick-quick settings is visible. */
     val isQuickSettingsVisible: Flow<Boolean>
 
-    /** Represents the current state of the KeyguardRootView visibility */
-    val keyguardRootViewVisibility: Flow<KeyguardRootViewVisibilityState>
-
     /** Receive an event for doze time tick */
     val dozeTimeTick: Flow<Long>
 
@@ -210,12 +206,6 @@ interface KeyguardRepository {
 
     /** Sets the current amount of alpha that should be used for rendering the keyguard. */
     fun setKeyguardAlpha(alpha: Float)
-
-    fun setKeyguardVisibility(
-        statusBarState: Int,
-        goingToFullShade: Boolean,
-        occlusionTransitionRunning: Boolean
-    )
 
     /**
      * Sets the relative offset of the lock-screen clock from its natural position on the screen.
@@ -621,17 +611,6 @@ constructor(
     private val _isActiveDreamLockscreenHosted = MutableStateFlow(false)
     override val isActiveDreamLockscreenHosted = _isActiveDreamLockscreenHosted.asStateFlow()
 
-    private val _keyguardRootViewVisibility =
-        MutableStateFlow(
-            KeyguardRootViewVisibilityState(
-                com.android.systemui.statusbar.StatusBarState.SHADE,
-                goingToFullShade = false,
-                occlusionTransitionRunning = false,
-            )
-        )
-    override val keyguardRootViewVisibility: Flow<KeyguardRootViewVisibilityState> =
-        _keyguardRootViewVisibility.asStateFlow()
-
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.value = animate
     }
@@ -642,19 +621,6 @@ constructor(
 
     override fun setKeyguardAlpha(alpha: Float) {
         _keyguardAlpha.value = alpha
-    }
-
-    override fun setKeyguardVisibility(
-        statusBarState: Int,
-        goingToFullShade: Boolean,
-        occlusionTransitionRunning: Boolean
-    ) {
-        _keyguardRootViewVisibility.value =
-            KeyguardRootViewVisibilityState(
-                statusBarState,
-                goingToFullShade,
-                occlusionTransitionRunning
-            )
     }
 
     override fun setClockPosition(x: Int, y: Int) {

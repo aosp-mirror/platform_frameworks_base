@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -35,10 +36,11 @@ constructor(
     keyguardBottomAreaViewModel: KeyguardBottomAreaViewModel,
     private val burnInHelperWrapper: BurnInHelperWrapper,
     private val shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
+    configurationInteractor: ConfigurationInteractor,
 ) {
 
     /** Notifies when a new configuration is set */
-    val configurationChange: Flow<Unit> = keyguardInteractor.configurationChange
+    val configurationChange: Flow<Unit> = configurationInteractor.onAnyConfigurationChange
 
     /** An observable for the alpha level for the entire bottom area. */
     val alpha: Flow<Float> = keyguardBottomAreaViewModel.alpha
@@ -47,17 +49,18 @@ constructor(
     val isIndicationAreaPadded: Flow<Boolean> =
         if (keyguardBottomAreaRefactor()) {
             combine(shortcutsCombinedViewModel.startButton, shortcutsCombinedViewModel.endButton) {
-                startButtonModel,
-                endButtonModel ->
-                startButtonModel.isVisible || endButtonModel.isVisible
-            }
+                    startButtonModel,
+                    endButtonModel ->
+                    startButtonModel.isVisible || endButtonModel.isVisible
+                }
                 .distinctUntilChanged()
         } else {
-            combine(keyguardBottomAreaViewModel.startButton, keyguardBottomAreaViewModel.endButton) {
-                startButtonModel,
-                endButtonModel ->
-                startButtonModel.isVisible || endButtonModel.isVisible
-            }
+            combine(
+                    keyguardBottomAreaViewModel.startButton,
+                    keyguardBottomAreaViewModel.endButton
+                ) { startButtonModel, endButtonModel ->
+                    startButtonModel.isVisible || endButtonModel.isVisible
+                }
                 .distinctUntilChanged()
         }
     /** An observable for the x-offset by which the indication area should be translated. */
