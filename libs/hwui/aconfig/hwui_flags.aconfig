@@ -41,3 +41,10 @@ flag {
   description: "Enable r_8, r_16_uint, rg_1616_uint, and rgba_10101010 in the SDK"
   bug: "292545615"
 }
+
+flag {
+  name: "animate_hdr_transitions"
+  namespace: "core_graphics"
+  description: "Automatically animate all changes in HDR headroom"
+  bug: "314810174"
+}

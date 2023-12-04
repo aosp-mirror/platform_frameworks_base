@@ -729,10 +729,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private BLASTBufferQueue mBlastBufferQueue;
 
-    private boolean mUpdateHdrSdrRatioInfo = false;
-    private float mDesiredHdrSdrRatio = 1f;
-    private float mRenderHdrSdrRatio = 1f;
-    private Consumer<Display> mHdrSdrRatioChangedListener = null;
+    private final HdrRenderState mHdrRenderState = new HdrRenderState(this);
 
     /**
      * Child container layer of {@code mSurface} with the same bounds as its parent, and cropped to
@@ -1778,7 +1775,7 @@ public final class ViewRootImpl implements ViewParent,
                 mAttachInfo.mThreadedRenderer = renderer;
                 renderer.setSurfaceControl(mSurfaceControl, mBlastBufferQueue);
                 updateColorModeIfNeeded(attrs.getColorMode(), attrs.getDesiredHdrHeadroom());
-                updateRenderHdrSdrRatio();
+                mHdrRenderState.forceUpdateHdrSdrRatio();
                 updateForceDarkMode();
                 mAttachInfo.mHardwareAccelerated = true;
                 mAttachInfo.mHardwareAccelerationRequested = true;
@@ -2121,9 +2118,7 @@ public final class ViewRootImpl implements ViewParent,
     private void updateInternalDisplay(int displayId, Resources resources) {
         final Display preferredDisplay =
                 ResourcesManager.getInstance().getAdjustedDisplay(displayId, resources);
-        if (mHdrSdrRatioChangedListener != null && mDisplay != null) {
-            mDisplay.unregisterHdrSdrRatioChangedListener(mHdrSdrRatioChangedListener);
-        }
+        mHdrRenderState.stopListening();
         if (preferredDisplay == null) {
             // Fallback to use default display.
             Slog.w(TAG, "Cannot get desired display with Id: " + displayId);
@@ -2132,9 +2127,7 @@ public final class ViewRootImpl implements ViewParent,
         } else {
             mDisplay = preferredDisplay;
         }
-        if (mHdrSdrRatioChangedListener != null && mDisplay != null) {
-            mDisplay.registerHdrSdrRatioChangedListener(mExecutor, mHdrSdrRatioChangedListener);
-        }
+        mHdrRenderState.startListening();
         mContext.updateDisplay(mDisplay.getDisplayId());
     }
 
@@ -5100,11 +5093,12 @@ public final class ViewRootImpl implements ViewParent,
 
                 useAsyncReport = true;
 
-                if (mUpdateHdrSdrRatioInfo) {
-                    mUpdateHdrSdrRatioInfo = false;
+                if (mHdrRenderState.updateForFrame(mAttachInfo.mDrawingTime)) {
+                    final float renderRatio = mHdrRenderState.getRenderHdrSdrRatio();
                     applyTransactionOnDraw(mTransaction.setExtendedRangeBrightness(
-                            getSurfaceControl(), mRenderHdrSdrRatio, mDesiredHdrSdrRatio));
-                    mAttachInfo.mThreadedRenderer.setTargetHdrSdrRatio(mRenderHdrSdrRatio);
+                            getSurfaceControl(), renderRatio,
+                            mHdrRenderState.getDesiredHdrSdrRatio()));
+                    mAttachInfo.mThreadedRenderer.setTargetHdrSdrRatio(renderRatio);
                 }
 
                 if (activeSyncGroup != null) {
@@ -5715,11 +5709,6 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    private void updateRenderHdrSdrRatio() {
-        mRenderHdrSdrRatio = Math.min(mDesiredHdrSdrRatio, mDisplay.getHdrSdrRatio());
-        mUpdateHdrSdrRatioInfo = true;
-    }
-
     private void updateColorModeIfNeeded(@ActivityInfo.ColorMode int colorMode,
             float desiredRatio) {
         if (mAttachInfo.mThreadedRenderer == null) {
@@ -5739,22 +5728,8 @@ public final class ViewRootImpl implements ViewParent,
         if (desiredRatio == 0 || desiredRatio > automaticRatio) {
             desiredRatio = automaticRatio;
         }
-        if (desiredRatio != mDesiredHdrSdrRatio) {
-            mDesiredHdrSdrRatio = desiredRatio;
-            updateRenderHdrSdrRatio();
-            invalidate();
 
-            if (mDesiredHdrSdrRatio < 1.01f) {
-                mDisplay.unregisterHdrSdrRatioChangedListener(mHdrSdrRatioChangedListener);
-                mHdrSdrRatioChangedListener = null;
-            } else {
-                mHdrSdrRatioChangedListener = display -> {
-                    updateRenderHdrSdrRatio();
-                    invalidate();
-                };
-                mDisplay.registerHdrSdrRatioChangedListener(mExecutor, mHdrSdrRatioChangedListener);
-            }
-        }
+        mHdrRenderState.setDesiredHdrSdrRatio(desiredRatio);
     }
 
     @Override
@@ -6365,7 +6340,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     final ViewRootHandler mHandler = new ViewRootHandler();
-    private final Executor mExecutor = (Runnable r) -> {
+    final Executor mExecutor = (Runnable r) -> {
         mHandler.post(r);
     };
 
@@ -8656,7 +8631,7 @@ public final class ViewRootImpl implements ViewParent,
             if (mAttachInfo.mThreadedRenderer != null) {
                 mAttachInfo.mThreadedRenderer.setSurfaceControl(mSurfaceControl, mBlastBufferQueue);
             }
-            updateRenderHdrSdrRatio();
+            mHdrRenderState.forceUpdateHdrSdrRatio();
             if (mPreviousTransformHint != transformHint) {
                 mPreviousTransformHint = transformHint;
                 dispatchTransformHintChanged(transformHint);
@@ -9204,9 +9179,7 @@ public final class ViewRootImpl implements ViewParent,
     private void destroyHardwareRenderer() {
         ThreadedRenderer hardwareRenderer = mAttachInfo.mThreadedRenderer;
 
-        if (mHdrSdrRatioChangedListener != null) {
-            mDisplay.unregisterHdrSdrRatioChangedListener(mHdrSdrRatioChangedListener);
-        }
+        mHdrRenderState.stopListening();
 
         if (hardwareRenderer != null) {
             if (mHardwareRendererObserver != null) {
