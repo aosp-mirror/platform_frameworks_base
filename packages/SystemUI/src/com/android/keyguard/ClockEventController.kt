@@ -33,8 +33,8 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.customization.R
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.customization.R
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.DisplaySpecific
 import com.android.systemui.dagger.qualifiers.Main
@@ -49,14 +49,19 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel.DEBUG
 import com.android.systemui.log.dagger.KeyguardLargeClockLog
 import com.android.systemui.log.dagger.KeyguardSmallClockLog
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.ClockFaceController
-import com.android.systemui.plugins.ClockTickRate
-import com.android.systemui.plugins.WeatherData
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockFaceController
+import com.android.systemui.plugins.clocks.ClockTickRate
+import com.android.systemui.plugins.clocks.AlarmData
+import com.android.systemui.plugins.clocks.WeatherData
+import com.android.systemui.plugins.clocks.ZenData
+import com.android.systemui.plugins.clocks.ZenData.ZenMode
+import com.android.systemui.res.R as SysuiR
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
@@ -88,7 +93,8 @@ constructor(
     @Background private val bgExecutor: Executor,
     @KeyguardSmallClockLog private val smallLogBuffer: LogBuffer?,
     @KeyguardLargeClockLog private val largeLogBuffer: LogBuffer?,
-    private val featureFlags: FeatureFlags
+    private val featureFlags: FeatureFlags,
+    private val zenModeController: ZenModeController,
 ) {
     var clock: ClockController? = null
         set(value) {
@@ -137,11 +143,17 @@ constructor(
                 }
                 updateFontSizes()
                 updateTimeListeners()
-                cachedWeatherData?.let {
+                weatherData?.let {
                     if (WeatherData.DEBUG) {
                         Log.i(TAG, "Pushing cached weather data to new clock: $it")
                     }
                     value.events.onWeatherDataChanged(it)
+                }
+                zenData?.let {
+                    value.events.onZenDataChanged(it)
+                }
+                alarmData?.let {
+                    value.events.onAlarmDataChanged(it)
                 }
 
                 smallClockOnAttachStateChangeListener =
@@ -260,7 +272,10 @@ constructor(
     var largeTimeListener: TimeListener? = null
     val shouldTimeListenerRun: Boolean
         get() = isKeyguardVisible && dozeAmount < DOZE_TICKRATE_THRESHOLD
-    private var cachedWeatherData: WeatherData? = null
+
+    private var weatherData: WeatherData? = null
+    private var zenData: ZenData? = null
+    private var alarmData: AlarmData? = null
 
     private val configListener =
         object : ConfigurationController.ConfigurationListener {
@@ -321,13 +336,42 @@ constructor(
 
             override fun onUserSwitchComplete(userId: Int) {
                 clock?.run { events.onTimeFormatChanged(DateFormat.is24HourFormat(context)) }
+                zenModeCallback.onNextAlarmChanged()
             }
 
             override fun onWeatherDataChanged(data: WeatherData) {
-                cachedWeatherData = data
+                weatherData = data
                 clock?.run { events.onWeatherDataChanged(data) }
             }
         }
+
+    private val zenModeCallback = object : ZenModeController.Callback {
+        override fun onZenChanged(zen: Int) {
+            var mode = ZenMode.fromInt(zen)
+            if (mode == null) {
+                Log.e(TAG, "Failed to get zen mode from int: $zen")
+                return
+            }
+
+            zenData = ZenData(
+                mode,
+                if (mode == ZenMode.OFF) SysuiR.string::dnd_is_off.name
+                    else SysuiR.string::dnd_is_on.name
+            ).also { data ->
+                clock?.run { events.onZenDataChanged(data) }
+            }
+        }
+
+        override fun onNextAlarmChanged() {
+            val nextAlarmMillis = zenModeController.getNextAlarm()
+            alarmData = AlarmData(
+                if (nextAlarmMillis > 0) nextAlarmMillis else null,
+                SysuiR.string::status_bar_alarm.name
+            ).also { data ->
+                clock?.run { events.onAlarmDataChanged(data) }
+            }
+        }
+    }
 
     fun registerListeners(parent: View) {
         if (isRegistered) {
@@ -341,6 +385,7 @@ constructor(
         configurationController.addCallback(configListener)
         batteryController.addCallback(batteryCallback)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        zenModeController.addCallback(zenModeCallback)
         disposableHandle =
             parent.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -355,6 +400,10 @@ constructor(
             }
         smallTimeListener?.update(shouldTimeListenerRun)
         largeTimeListener?.update(shouldTimeListenerRun)
+
+        // Query ZenMode data
+        zenModeCallback.onZenChanged(zenModeController.zen)
+        zenModeCallback.onNextAlarmChanged()
     }
 
     fun unregisterListeners() {
@@ -368,6 +417,7 @@ constructor(
         configurationController.removeCallback(configListener)
         batteryController.removeCallback(batteryCallback)
         keyguardUpdateMonitor.removeCallback(keyguardUpdateMonitorCallback)
+        zenModeController.removeCallback(zenModeCallback)
         smallRegionSampler?.stopRegionSampler()
         largeRegionSampler?.stopRegionSampler()
         smallTimeListener?.stop()

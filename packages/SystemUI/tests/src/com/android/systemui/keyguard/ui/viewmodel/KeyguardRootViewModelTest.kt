@@ -21,7 +21,6 @@ package com.android.systemui.keyguard.ui.viewmodel
 
 import android.view.View
 import androidx.test.filters.SmallTest
-import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
 import com.android.systemui.SysuiTestCase
@@ -43,7 +42,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.plugins.ClockController
+import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.statusbar.notification.data.repository.fakeNotificationsKeyguardViewStateRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
 import com.android.systemui.statusbar.phone.dozeParameters
@@ -73,9 +72,10 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardRootViewModelTest : SysuiTestCase() {
-    private val kosmos = testKosmos().apply {
-        featureFlagsClassic.apply { set(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT, false) }
-    }
+    private val kosmos =
+        testKosmos().apply {
+            featureFlagsClassic.apply { set(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT, false) }
+        }
     private val testScope = kosmos.testScope
     private val repository = kosmos.fakeKeyguardRepository
     private val configurationRepository = kosmos.fakeConfigurationRepository

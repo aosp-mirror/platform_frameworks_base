@@ -26,8 +26,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.ClockId
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow

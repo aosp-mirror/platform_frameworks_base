@@ -20,7 +20,7 @@ import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch.ClockSize
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.keyguard.shared.model.SettingsClockSize
-import com.android.systemui.plugins.ClockId
+import com.android.systemui.plugins.clocks.ClockId
 import com.android.systemui.shared.clocks.DEFAULT_CLOCK_ID
 import com.android.systemui.util.mockito.mock
 import dagger.Binds
