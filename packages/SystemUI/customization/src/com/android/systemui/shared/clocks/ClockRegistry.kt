@@ -173,8 +173,10 @@ open class ClockRegistry(
                     { "Skipping initial load of known clock package package: $str1" }
                 )
 
+                var isCurrentClock = false
                 var isClockListChanged = false
                 for (metadata in knownClocks) {
+                    isCurrentClock = isCurrentClock || currentClockId == metadata.clockId
                     val id = metadata.clockId
                     val info =
                         availableClocks.concurrentGetOrPut(id, ClockInfo(metadata, null, manager)) {
@@ -207,8 +209,9 @@ open class ClockRegistry(
                 }
                 verifyLoadedProviders()
 
-                // Load executed via verifyLoadedProviders
-                return false
+                // Load immediately if it's the current clock, otherwise let verifyLoadedProviders
+                // load and unload clocks as necessary on the background thread.
+                return isCurrentClock
             }
 
             override fun onPluginLoaded(
