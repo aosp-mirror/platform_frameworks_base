@@ -50,8 +50,8 @@ class FakeAuthenticationRepository(
     private val _isPatternVisible = MutableStateFlow(true)
     override val isPatternVisible: StateFlow<Boolean> = _isPatternVisible.asStateFlow()
 
-    private val _throttling = MutableStateFlow(AuthenticationThrottlingModel())
-    override val throttling: StateFlow<AuthenticationThrottlingModel> = _throttling.asStateFlow()
+    override val throttling: MutableStateFlow<AuthenticationThrottlingModel?> =
+        MutableStateFlow(null)
 
     private val _authenticationMethod =
         MutableStateFlow<AuthenticationMethodModel>(DEFAULT_AUTHENTICATION_METHOD)
@@ -99,10 +99,6 @@ class FakeAuthenticationRepository(
 
     override suspend fun getThrottlingEndTimestamp(): Long {
         return throttlingEndTimestamp
-    }
-
-    override fun setThrottling(throttlingModel: AuthenticationThrottlingModel) {
-        _throttling.value = throttlingModel
     }
 
     fun setAutoConfirmFeatureEnabled(isEnabled: Boolean) {

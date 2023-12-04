@@ -106,12 +106,12 @@ class BouncerViewModel(
         get() = bouncerInteractor.isUserSwitcherVisible
 
     private val isInputEnabled: StateFlow<Boolean> =
-        bouncerInteractor.isThrottled
-            .map { !it }
+        bouncerInteractor.throttling
+            .map { it == null }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = !bouncerInteractor.isThrottled.value,
+                initialValue = bouncerInteractor.throttling.value == null,
             )
 
     // Handle to the scope of the child ViewModel (stored in [authMethod]).
@@ -141,8 +141,8 @@ class BouncerViewModel(
 
     /** The user-facing message to show in the bouncer. */
     val message: StateFlow<MessageViewModel> =
-        combine(bouncerInteractor.message, bouncerInteractor.isThrottled) { message, isThrottled ->
-                toMessageViewModel(message, isThrottled)
+        combine(bouncerInteractor.message, bouncerInteractor.throttling) { message, throttling ->
+                toMessageViewModel(message, isThrottled = throttling != null)
             }
             .stateIn(
                 scope = applicationScope,
@@ -150,7 +150,7 @@ class BouncerViewModel(
                 initialValue =
                     toMessageViewModel(
                         message = bouncerInteractor.message.value,
-                        isThrottled = bouncerInteractor.isThrottled.value,
+                        isThrottled = bouncerInteractor.throttling.value != null,
                     ),
             )
 
@@ -198,15 +198,14 @@ class BouncerViewModel(
     init {
         if (flags.isEnabled()) {
             applicationScope.launch {
-                combine(bouncerInteractor.isThrottled, authMethodViewModel) {
-                        isThrottled,
+                combine(bouncerInteractor.throttling, authMethodViewModel) {
+                        throttling,
                         authMethodViewModel ->
-                        if (isThrottled && authMethodViewModel != null) {
+                        if (throttling != null && authMethodViewModel != null) {
                             applicationContext.getString(
                                 authMethodViewModel.throttlingMessageId,
-                                bouncerInteractor.throttling.value.failedAttemptCount,
-                                ceil(bouncerInteractor.throttling.value.remainingMs / 1000f)
-                                    .toInt(),
+                                throttling.failedAttemptCount,
+                                ceil(throttling.remainingMs / 1000f).toInt(),
                             )
                         } else {
                             null
