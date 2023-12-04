@@ -193,7 +193,6 @@ java_library_static {
         "overlayable_policy_aidl-java",
         "SurfaceFlingerProperties",
         "com.android.sysprop.watchdog",
-        "ImmutabilityAnnotation",
         "securebox",
         "apache-commons-math",
         "backstage_power_flags_lib",
