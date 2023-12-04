@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.impl.ExtensionKey;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
 import android.util.Log;
@@ -276,8 +277,11 @@ public abstract class CameraMetadata<TKey> {
             throw new IllegalArgumentException("key type must be that of a metadata key");
         }
 
-        if (field.getAnnotation(PublicKey.class) == null) {
-            // Never expose @hide keys up to the API user
+        if (field.getAnnotation(PublicKey.class) == null
+                && field.getAnnotation(ExtensionKey.class) == null) {
+            // Never expose @hide keys to the API user unless they are
+            // marked as @ExtensionKey, as these keys are publicly accessible via
+            // the extension key classes.
             return false;
         }
 
@@ -3891,6 +3895,36 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureRequest#DISTORTION_CORRECTION_MODE
      */
     public static final int DISTORTION_CORRECTION_MODE_HIGH_QUALITY = 2;
+
+    //
+    // Enumeration values for CaptureRequest#EFV_STABILIZATION_MODE
+    //
+
+    /**
+     * <p>No stabilization.</p>
+     * @see CaptureRequest#EFV_STABILIZATION_MODE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final int EFV_STABILIZATION_MODE_OFF = 0;
+
+    /**
+     * <p>Gimbal stabilization mode.</p>
+     * @see CaptureRequest#EFV_STABILIZATION_MODE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final int EFV_STABILIZATION_MODE_GIMBAL = 1;
+
+    /**
+     * <p>Locked stabilization mode which uses the
+     * {@link android.hardware.camera2.CameraExtensionCharacteristics#EXTENSION_EYES_FREE_VIDEOGRAPHY }
+     * stabilization to directionally steady the target region.</p>
+     * @see CaptureRequest#EFV_STABILIZATION_MODE
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final int EFV_STABILIZATION_MODE_LOCKED = 2;
 
     //
     // Enumeration values for CaptureResult#CONTROL_AE_STATE
