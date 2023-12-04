@@ -351,6 +351,7 @@ package android {
     field public static final String SET_VOLUME_KEY_LONG_PRESS_LISTENER = "android.permission.SET_VOLUME_KEY_LONG_PRESS_LISTENER";
     field public static final String SET_WALLPAPER_COMPONENT = "android.permission.SET_WALLPAPER_COMPONENT";
     field public static final String SET_WALLPAPER_DIM_AMOUNT = "android.permission.SET_WALLPAPER_DIM_AMOUNT";
+    field @FlaggedApi("android.service.chooser.support_nfc_resolver") public static final String SHOW_CUSTOMIZED_RESOLVER = "android.permission.SHOW_CUSTOMIZED_RESOLVER";
     field public static final String SHOW_KEYGUARD_MESSAGE = "android.permission.SHOW_KEYGUARD_MESSAGE";
     field public static final String SHUTDOWN = "android.permission.SHUTDOWN";
     field public static final String SIGNAL_REBOOT_READINESS = "android.permission.SIGNAL_REBOOT_READINESS";
@@ -11779,6 +11780,14 @@ package android.service.carrier {
     method public default void onSendMmsComplete(int, @Nullable byte[]);
     method public default void onSendMultipartSmsComplete(int, @Nullable int[]);
     method public default void onSendSmsComplete(int, int);
+  }
+
+}
+
+package android.service.chooser {
+
+  @FlaggedApi("android.service.chooser.support_nfc_resolver") public class CustomChoosers {
+    method @FlaggedApi("android.service.chooser.support_nfc_resolver") @NonNull public static android.content.Intent createNfcResolverIntent(@NonNull android.content.Intent, @Nullable CharSequence, @NonNull java.util.List<android.content.pm.ResolveInfo>);
   }
 
 }

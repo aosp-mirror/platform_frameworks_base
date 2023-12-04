@@ -7469,6 +7469,13 @@
     <permission android:name="android.permission.SIGNAL_REBOOT_READINESS"
                 android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows the holder to launch an Intent Resolver flow with custom presentation
+         and/or targets.
+         @FlaggedApi("android.service.chooser.support_nfc_resolver")
+         @hide -->
+    <permission android:name="android.permission.SHOW_CUSTOMIZED_RESOLVER"
+                android:protectionLevel="signature|privileged" />
+
     <!-- @hide Allows an application to get a People Tile preview for a given shortcut. -->
     <permission android:name="android.permission.GET_PEOPLE_TILE_PREVIEW"
         android:protectionLevel="signature|recents" />
@@ -7888,6 +7895,18 @@
                   android:visibleToInstantApps="true">
             <intent-filter>
                 <action android:name="com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity android:name="com.android.internal.app.NfcResolverActivity"
+                android:theme="@style/Theme.Dialog.Alert"
+                android:finishOnCloseSystemDialogs="true"
+                android:excludeFromRecents="true"
+                android:multiprocess="true"
+                android:permission="android.permission.SHOW_CUSTOMIZED_RESOLVER"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.chooser.action.SHOW_CUSTOMIZED_RESOLVER" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
