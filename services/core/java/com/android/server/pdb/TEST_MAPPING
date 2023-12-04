@@ -1,7 +1,0 @@
-{
-    "postsubmit": [
-        {
-            "name": " PersistentDataBlockServiceTest"
-        }
-    ]
-}
