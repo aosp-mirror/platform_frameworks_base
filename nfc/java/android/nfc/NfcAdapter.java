@@ -19,6 +19,7 @@ package android.nfc;
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -77,6 +78,7 @@ public final class NfcAdapter {
 
     private final NfcControllerAlwaysOnListener mControllerAlwaysOnListener;
     private final NfcWlcStateListener mNfcWlcStateListener;
+    private final NfcVendorNciCallbackListener mNfcVendorNciCallbackListener;
 
     /**
      * Intent to start an activity when a tag with NDEF payload is discovered.
@@ -866,6 +868,7 @@ public final class NfcAdapter {
         mLock = new Object();
         mControllerAlwaysOnListener = new NfcControllerAlwaysOnListener(getService());
         mNfcWlcStateListener = new NfcWlcStateListener(getService());
+        mNfcVendorNciCallbackListener = new NfcVendorNciCallbackListener(getService());
     }
 
     /**
@@ -2966,5 +2969,164 @@ public final class NfcAdapter {
             }
             return null;
         }
+    }
+
+    /**
+     * Vendor NCI command success.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
+    public static final int SEND_VENDOR_NCI_STATUS_SUCCESS = 0;
+    /**
+     * Vendor NCI command rejected.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
+    public static final int SEND_VENDOR_NCI_STATUS_REJECTED = 1;
+    /**
+     * Vendor NCI command corrupted.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
+    public static final int SEND_VENDOR_NCI_STATUS_MESSAGE_CORRUPTED  = 2;
+    /**
+     * Vendor NCI command failed with unknown reason.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
+    public static final int SEND_VENDOR_NCI_STATUS_FAILED = 3;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            SEND_VENDOR_NCI_STATUS_SUCCESS,
+            SEND_VENDOR_NCI_STATUS_REJECTED,
+            SEND_VENDOR_NCI_STATUS_MESSAGE_CORRUPTED,
+            SEND_VENDOR_NCI_STATUS_FAILED,
+    })
+    @interface SendVendorNciStatus {}
+
+    /**
+     * Message Type for NCI Command.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
+    public static final int MESSAGE_TYPE_COMMAND = 1;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(value = {
+            MESSAGE_TYPE_COMMAND,
+    })
+    @interface MessageType {}
+
+    /**
+     * Send Vendor specific Nci Messages with custom message type.
+     *
+     * The format of the NCI messages are defined in the NCI specification. The platform is
+     * responsible for fragmenting the payload if necessary.
+     *
+     * Note that mt (message type) is added at the beginning of method parameters as it is more
+     * distinctive than other parameters and was requested from vendor.
+     *
+     * @param mt message Type of the command
+     * @param gid group ID of the command. This needs to be one of the vendor reserved GIDs from
+     *            the NCI specification
+     * @param oid opcode ID of the command. This is left to the OEM / vendor to decide
+     * @param payload containing vendor Nci message payload
+     * @return message send status
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public @SendVendorNciStatus int sendVendorNciMessage(@MessageType int mt,
+            @IntRange(from = 0, to = 15) int gid, @IntRange(from = 0) int oid,
+            @NonNull byte[] payload) {
+        Objects.requireNonNull(payload, "Payload must not be null");
+        try {
+            return sService.sendVendorNciMessage(mt, gid, oid, payload);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register an {@link NfcVendorNciCallback} to listen for Nfc vendor responses and notifications
+     * <p>The provided callback will be invoked by the given {@link Executor}.
+     *
+     * <p>When first registering a callback, the callbacks's
+     * {@link NfcVendorNciCallback#onVendorNciCallBack(byte[])} is immediately invoked to
+     * notify the vendor notification.
+     *
+     * @param executor an {@link Executor} to execute given callback
+     * @param callback user implementation of the {@link NfcVendorNciCallback}
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void registerNfcVendorNciCallback(@NonNull @CallbackExecutor Executor executor,
+            @NonNull NfcVendorNciCallback callback) {
+        mNfcVendorNciCallbackListener.register(executor, callback);
+    }
+
+    /**
+     * Unregister the specified {@link NfcVendorNciCallback}
+     *
+     * <p>The same {@link NfcVendorNciCallback} object used when calling
+     * {@link #registerNfcVendorNciCallback(Executor, NfcVendorNciCallback)} must be used.
+     *
+     * <p>Callbacks are automatically unregistered when application process goes away
+     *
+     * @param callback user implementation of the {@link NfcVendorNciCallback}
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_ENABLE_NFC_MAINLINE)
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public void unregisterNfcVendorNciCallback(@NonNull NfcVendorNciCallback callback) {
+        mNfcVendorNciCallbackListener.unregister(callback);
+    }
+
+    /**
+     * Interface for receiving vendor NCI responses and notifications.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
+    public interface NfcVendorNciCallback {
+        /**
+         * Invoked when a vendor specific NCI response is received.
+         *
+         * @param gid group ID of the command. This needs to be one of the vendor reserved GIDs from
+         *            the NCI specification.
+         * @param oid opcode ID of the command. This is left to the OEM / vendor to decide.
+         * @param payload containing vendor Nci message payload.
+         */
+        @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
+        void onVendorNciResponse(
+                @IntRange(from = 0, to = 15) int gid, int oid, @NonNull byte[] payload);
+
+        /**
+         * Invoked when a vendor specific NCI notification is received.
+         *
+         * @param gid group ID of the command. This needs to be one of the vendor reserved GIDs from
+         *            the NCI specification.
+         * @param oid opcode ID of the command. This is left to the OEM / vendor to decide.
+         * @param payload containing vendor Nci message payload.
+         */
+        @FlaggedApi(Flags.FLAG_NFC_VENDOR_CMD)
+        void onVendorNciNotification(
+                @IntRange(from = 9, to = 15) int gid, int oid, @NonNull byte[] payload);
     }
 }
