@@ -17,6 +17,8 @@ package com.android.hoststubgen.test.tinyframework;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.fail;
+
 import com.android.hoststubgen.test.tinyframework.TinyFrameworkNestedClasses.SubClass;
 
 import org.junit.Rule;
@@ -156,6 +158,32 @@ public class TinyFrameworkClassTest {
         TinyFrameworkNative instance = new TinyFrameworkNative();
         instance.setValue(5);
         assertThat(instance.nativeNonStaticAddToValue(3)).isEqualTo(8);
+    }
+
+
+    @Test
+    public void testSubstituteNativeWithThrow() throws Exception {
+        // We can't use TinyFrameworkNative.nativeStillNotSupported() directly in this class,
+        // because @Throw implies @Keep (not @Stub), and we currently compile this test
+        // against the stub jar (so it won't contain @Throw methods).
+        //
+        // But the method exists at runtime, so we can use reflections to call it.
+        //
+        // In the real Ravenwood environment, we don't use HostStubGen's stub jar at all,
+        // so it's not a problem.
+
+        final var clazz = TinyFrameworkNative.class;
+        final var method = clazz.getMethod("nativeStillNotSupported");
+
+        try {
+            method.invoke(null);
+
+            fail("java.lang.reflect.InvocationTargetException expected");
+
+        } catch (java.lang.reflect.InvocationTargetException e) {
+            var inner = e.getCause();
+            assertThat(inner.getMessage()).contains("not supported on the host side");
+        }
     }
 
     @Test

@@ -2220,7 +2220,7 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
   flags: (0x0021) ACC_PUBLIC, ACC_SUPER
   this_class: #x                          // com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
   super_class: #x                         // java/lang/Object
-  interfaces: 0, fields: 1, methods: 8, attributes: 3
+  interfaces: 0, fields: 1, methods: 10, attributes: 3
   int value;
     descriptor: I
     flags: (0x0000)
@@ -2370,6 +2370,50 @@ public class com.android.hoststubgen.test.tinyframework.TinyFrameworkNative
         Start  Length  Slot  Name   Signature
             0       6     0  this   Lcom/android/hoststubgen/test/tinyframework/TinyFrameworkNative;
             0       6     1   arg   I
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+
+  public static void nativeStillNotSupported();
+    descriptor: ()V
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=4, locals=0, args_size=0
+         x: ldc           #x                 // String com/android/hoststubgen/test/tinyframework/TinyFrameworkNative
+         x: ldc           #x                 // String nativeStillNotSupported
+         x: ldc           #x                 // String ()V
+         x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.getStackWalker:()Ljava/lang/StackWalker;
+         x: invokevirtual #x                 // Method java/lang/StackWalker.getCallerClass:()Ljava/lang/Class;
+        x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onNonStubMethodCalled:(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Class;)V
+        x: invokestatic  #x                 // Method com/android/hoststubgen/hosthelper/HostTestUtils.onThrowMethodCalled:()V
+        x: new           #x                 // class java/lang/RuntimeException
+        x: dup
+        x: ldc           #x                 // String Unreachable
+        x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":(Ljava/lang/String;)V
+        x: athrow
+    RuntimeVisibleAnnotations:
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsThrow
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenProcessedAsSubstitute
+      x: #x()
+        com.android.hoststubgen.hosthelper.HostStubGenKeptInImpl
+    RuntimeInvisibleAnnotations:
+      x: #x()
+        android.hosttest.annotation.HostSideTestThrow
+
+  public static void nativeStillNotSupported_should_be_like_this();
+    descriptor: ()V
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=0, args_size=0
+         x: new           #x                 // class java/lang/RuntimeException
+         x: dup
+         x: invokespecial #x                 // Method java/lang/RuntimeException."<init>":()V
+         x: athrow
+      LineNumberTable:
     RuntimeVisibleAnnotations:
       x: #x()
         com.android.hoststubgen.hosthelper.HostStubGenKeptInStub
