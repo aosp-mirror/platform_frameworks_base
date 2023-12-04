@@ -19,6 +19,7 @@ package android.telephony.ims;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresFeature;
@@ -45,6 +46,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IIntegerConsumer;
 import com.android.internal.telephony.ITelephony;
+import com.android.internal.telephony.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -441,6 +443,114 @@ public class ImsMmTelManager implements RegistrationManager {
 
         try {
             iTelephony.unregisterImsRegistrationCallback(mSubId, c.getBinder());
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Registers a {@link RegistrationCallback} with the system, which will provide IMS emergency
+     * registration updates for the subscription specified in
+     * {@link ImsManager#getImsMmTelManager(int)}. Use
+     * {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to Subscription changed
+     * events and call {@link #unregisterImsRegistrationCallback(RegistrationCallback)} to clean up.
+     *
+     * When the callback is registered, it will initiate the callback c to be called with the
+     * current emergency registration state.
+     * Emergency registration callback is available when there is valid SIM card.
+     * <p>This API requires one of the following:
+     * <ul>
+     *     <li>The caller holds the READ_PRECISE_PHONE_STATE permission.</li>
+     *     <li>If the caller is the device or profile owner, the caller holds the
+     *     {@link Manifest.permission#READ_PRECISE_PHONE_STATE} permission.</li>
+     *     <li>The caller has carrier privileges (see
+     *     {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on any
+     *     active subscription.</li>
+     * </ul>
+     * <p>The profile owner is an app that owns a managed profile on the device; for more details
+     * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     * Access by profile owners is deprecated and will be removed in a future release.
+     *
+     * @param executor The executor the callback events should be run on.
+     * @param c The {@link RegistrationCallback} to be added.
+     * @see #unregisterImsEmergencyRegistrationCallback
+     * @throws ImsException if the subscription associated with this callback is valid, but
+     * the {@link ImsService} associated with the subscription is not available. This can happen if
+     * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
+     * reason.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_EMERGENCY_REGISTRATION_STATE)
+    public void registerImsEmergencyRegistrationCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull RegistrationManager.RegistrationCallback c) throws ImsException {
+        if (c == null) {
+            throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
+        }
+        if (executor == null) {
+            throw new IllegalArgumentException("Must include a non-null Executor.");
+        }
+        c.setExecutor(executor);
+
+        ITelephony iTelephony = getITelephony();
+        if (iTelephony == null) {
+            throw new ImsException("Could not find Telephony Service.",
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+
+        try {
+            iTelephony.registerImsEmergencyRegistrationCallback(mSubId, c.getBinder());
+        } catch (ServiceSpecificException e) {
+            throw new ImsException(e.getMessage(), e.errorCode);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }  catch (IllegalStateException e) {
+            throw new ImsException(e.getMessage(), ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+        }
+    }
+
+    /**
+     * Removes an existing {@link RegistrationCallback} for Emergency IMS registration.
+     *
+     * When the subscription associated with this callback is removed (SIM removed, ESIM swap,
+     * etc...), this callback will automatically be removed. If this method is called for an
+     * inactive subscription, it will result in a no-op.
+     * <p>This API requires one of the following:
+     * <ul>
+     *     <li>The caller holds the READ_PRECISE_PHONE_STATE permission.</li>
+     *     <li>If the caller is the device or profile owner, the caller holds the
+     *     {@link Manifest.permission#READ_PRECISE_PHONE_STATE} permission.</li>
+     *     <li>The caller has carrier privileges (see
+     *     {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on any
+     *     active subscription.</li>
+     * </ul>
+     * <p>The profile owner is an app that owns a managed profile on the device; for more details
+     * see <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>.
+     * Access by profile owners is deprecated and will be removed in a future release.
+     *
+     * @param c The {@link RegistrationCallback} to be removed.
+     * @see android.telephony.SubscriptionManager.OnSubscriptionsChangedListener
+     * @see #registerImsEmergencyRegistrationCallback(Executor,
+     *                                 RegistrationManager.RegistrationCallback)
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_EMERGENCY_REGISTRATION_STATE)
+    public void unregisterImsEmergencyRegistrationCallback(
+            @NonNull RegistrationManager.RegistrationCallback c) {
+        if (c == null) {
+            throw new IllegalArgumentException("Must include a non-null RegistrationCallback.");
+        }
+
+        ITelephony iTelephony = getITelephony();
+        if (iTelephony == null) {
+            Log.w("ImsMmTelManager", "Could not find Telephony Service.");
+            return;
+        }
+
+        try {
+            iTelephony.unregisterImsEmergencyRegistrationCallback(mSubId, c.getBinder());
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }

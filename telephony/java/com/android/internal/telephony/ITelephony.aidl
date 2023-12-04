@@ -1901,6 +1901,16 @@ interface ITelephony {
     void unregisterImsRegistrationCallback(int subId, IImsRegistrationCallback c);
 
     /**
+     * Adds an IMS emergency registration status callback for the subscription id specified.
+     */
+    void registerImsEmergencyRegistrationCallback(int subId, IImsRegistrationCallback c);
+    /**
+     * Removes an existing IMS emergency registration status callback for the subscription
+     * id specified.
+     */
+    void unregisterImsEmergencyRegistrationCallback(int subId, IImsRegistrationCallback c);
+
+    /**
      * Get the IMS service registration state for the MmTelFeature associated with this sub id.
      */
     void getImsMmTelRegistrationState(int subId, IIntegerConsumer consumer);
