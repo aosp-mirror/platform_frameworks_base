@@ -232,6 +232,19 @@ public class JobStatusTest {
     }
 
     @Test
+    public void testFlexibleConstraintCounts() {
+        JobStatus js = createJobStatus(new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                .setUserInitiated(false)
+                .build());
+
+        js.setNumAppliedFlexibleConstraints(3);
+        js.setNumDroppedFlexibleConstraints(2);
+        assertEquals(3, js.getNumAppliedFlexibleConstraints());
+        assertEquals(2, js.getNumDroppedFlexibleConstraints());
+        assertEquals(1, js.getNumRequiredFlexibleConstraints());
+    }
+
+    @Test
     public void testIsUserVisibleJob() {
         JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                 .setUserInitiated(false)

@@ -1769,7 +1769,8 @@ public final class ConnectivityController extends RestrictingController implemen
 
     @VisibleForTesting
     class CcConfig {
-        private boolean mFlexIsEnabled = FlexibilityController.FcConfig.DEFAULT_FLEXIBILITY_ENABLED;
+        private boolean mFlexIsEnabled =
+                FlexibilityController.FcConfig.DEFAULT_APPLIED_CONSTRAINTS != 0;
         private boolean mShouldReprocessNetworkCapabilities = false;
 
         /**
