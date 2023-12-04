@@ -185,6 +185,7 @@ android_ravenwood_test {
         "src/android/os/BuildTest.java",
         "src/android/os/FileUtilsTest.java",
         "src/android/util/**/*.java",
+        "src/com/android/internal/os/LongArrayMultiStateCounterTest.java",
         "src/com/android/internal/util/**/*.java",
         "testdoubles/src/com/android/internal/util/**/*.java",
     ],

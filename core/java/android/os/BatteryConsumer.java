@@ -33,6 +33,7 @@ import java.util.ArrayList;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class BatteryConsumer {
 
     private static final String TAG = "BatteryConsumer";

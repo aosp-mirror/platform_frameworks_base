@@ -1,6 +1,8 @@
 # Only classes listed here can use the Ravenwood annotations.
 
 com.android.internal.util.ArrayUtils
+com.android.internal.os.LongArrayMultiStateCounter
+com.android.internal.os.LongArrayMultiStateCounter$LongArrayContainer
 
 android.util.AtomicFile
 android.util.DataUnit
@@ -22,6 +24,7 @@ android.util.SparseSetArray
 android.util.TimeUtils
 android.util.Xml
 
+android.os.BatteryConsumer
 android.os.Binder
 android.os.Binder$IdentitySupplier
 android.os.FileUtils
