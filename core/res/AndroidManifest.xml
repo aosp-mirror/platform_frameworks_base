@@ -829,6 +829,10 @@
     <protected-broadcast android:name="android.app.admin.action.DEVICE_POLICY_SET_RESULT" />
     <protected-broadcast android:name="android.app.admin.action.DEVICE_POLICY_CHANGED" />
 
+    <!-- Added in V -->
+    <protected-broadcast android:name="android.intent.action.PROFILE_AVAILABLE" />
+    <protected-broadcast android:name="android.intent.action.PROFILE_UNAVAILABLE" />
+
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
     <!-- ====================================================================== -->
@@ -1467,10 +1471,9 @@
 
     <!-- Allows an application to initiate a phone call without going through
         the Dialer user interface for the user to confirm the call.
-        <p>
-        <em>Note: An app holding this permission can also call carrier MMI codes to change settings
-        such as call forwarding or call waiting preferences.
-        <p>Protection level: dangerous
+        <p class="note"><b>Note:</b> An app holding this permission can also call carrier MMI
+        codes to change settings such as call forwarding or call waiting preferences.</p>
+        <p>Protection level: dangerous</p>
     -->
     <permission android:name="android.permission.CALL_PHONE"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -7752,8 +7755,9 @@
                 android:process=":ui">
         </activity>
         <activity android:name="com.android.internal.app.PlatLogoActivity"
-                android:theme="@style/Theme.Wallpaper.NoTitleBar.Fullscreen"
+                android:theme="@style/Theme.NoTitleBar.Fullscreen"
                 android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
+                android:enableOnBackInvokedCallback="true"
                 android:icon="@drawable/platlogo"
                 android:process=":ui">
         </activity>
@@ -8231,6 +8235,10 @@
             android:enabled="true"
             android:exported="true">
         </provider>
+
+        <meta-data
+            android:name="com.android.server.patch.25239169"
+            android:value="true" />
 
     </application>
 

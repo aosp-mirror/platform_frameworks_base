@@ -178,7 +178,7 @@ public abstract class PrintService extends Service {
      * <pre> &lt;print-service
      *     android:vendor="SomeVendor"
      *     android:settingsActivity="foo.bar.MySettingsActivity"
-     *     andorid:addPrintersActivity="foo.bar.MyAddPrintersActivity."
+     *     android:addPrintersActivity="foo.bar.MyAddPrintersActivity."
      *     . . .
      * /&gt;</pre>
      * <p>

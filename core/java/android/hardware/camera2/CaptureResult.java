@@ -887,6 +887,12 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * <p>Only constrains auto-exposure (AE) algorithm, not
      * manual control of {@link CaptureRequest#SENSOR_EXPOSURE_TIME android.sensor.exposureTime} and
      * {@link CaptureRequest#SENSOR_FRAME_DURATION android.sensor.frameDuration}.</p>
+     * <p>Note that the actual achievable max framerate also depends on the minimum frame
+     * duration of the output streams. The max frame rate will be
+     * <code>min(aeTargetFpsRange.maxFps, 1 / max(individual stream min durations)</code>. For example,
+     * if the application sets this key to <code>{60, 60}</code>, but the maximum minFrameDuration among
+     * all configured streams is 33ms, the maximum framerate won't be 60fps, but will be
+     * 30fps.</p>
      * <p>To start a CaptureSession with a target FPS range different from the
      * capture request template's default value, the application
      * is strongly recommended to call

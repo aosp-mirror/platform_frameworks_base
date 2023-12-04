@@ -270,7 +270,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Fargeinvertering"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Fargekorrigering"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Skriftstørrelse"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Administrer brukere"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Brukervalg"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Ferdig"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Lukk"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Tilkoblet"</string>
@@ -479,7 +479,7 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktiver"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Lyd og vibrering"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Innstillinger"</string>
-    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Senk volumet til et tryggere nivå"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volumet er senket til et tryggere nivå"</string>
     <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Volumet på hodetelefonene har vært høyt lenger enn anbefalt"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Volumet på hodetelefonene har overskredet sikkerhetsgrensen for denne uken"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Fortsett å lytte"</string>
@@ -1090,7 +1090,7 @@
     <string name="clipboard_image_preview" msgid="2156475174343538128">"Forhåndsvisning av bilde"</string>
     <string name="clipboard_edit" msgid="4500155216174011640">"redigere"</string>
     <string name="add" msgid="81036585205287996">"Legg til"</string>
-    <string name="manage_users" msgid="1823875311934643849">"Administrer brukere"</string>
+    <string name="manage_users" msgid="1823875311934643849">"Brukervalg"</string>
     <string name="drag_split_not_supported" msgid="7173481676120546121">"Dette varselet støtter ikke at du drar det til en delt skjerm"</string>
     <string name="dream_overlay_status_bar_wifi_off" msgid="4497069245055003582">"Wi‑Fi er utilgjengelig"</string>
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Prioriteringsmodus"</string>
@@ -1127,7 +1127,7 @@
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Trykk på og hold inne snarveien"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Avbryt"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Bytt skjerm nå"</string>
-    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Brett ut telefonen"</string>
+    <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Åpne telefonen"</string>
     <string name="rear_display_unfolded_bottom_sheet_title" msgid="6291111173057304055">"Vil du bytte skjerm?"</string>
     <string name="rear_display_folded_bottom_sheet_description" msgid="6842767125783222695">"Bruk baksidekameraet for å få høyere oppløsning"</string>
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Brett ut telefonen for å få høyere oppløsning"</string>

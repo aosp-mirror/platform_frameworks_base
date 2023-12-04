@@ -166,7 +166,7 @@
     <string name="httpErrorTimeout" msgid="7446272815190334204">"زمان اتصال به سرور تمام شده است."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"این صفحه دارای تعداد بسیار زیادی تغییر مسیر سرور است."</string>
     <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"‏پروتکل پشتیبانی نمی‌‎شود."</string>
-    <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"اتصال امن ایجاد نشد."</string>
+    <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"اتصال ایمن ایجاد نشد."</string>
     <string name="httpErrorBadUrl" msgid="754447723314832538">"به‌دلیل نامعتبر بودن نشانی اینترنتی، صفحه باز نمی‌شود."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"دسترسی به فایل انجام نشد."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"فایل درخواستی پیدا نشد."</string>
@@ -2333,10 +2333,10 @@
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"رفتن به تنظیمات"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"خاموش کردن"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"‫<xliff:g id="DEVICE_NAME">%s</xliff:g> پیکربندی شد"</string>
-    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"طرح‌بندی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"طرح‌بندی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"طرح‌بندی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"صفحه‌کلید روی این طرح‌بندی‌ها تنظیم شد: <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g>… برای تغییر ضربه بزنید"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"جانمایی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"جانمایی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"جانمایی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"جانمایی صفحه‌کلید چنین تنظیم شد: <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g>… برای تغییر ضربه بزنید"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"صفحه‌کلیدهای فیزیکی پیکربندی شدند"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"برای مشاهده صفحه‌کلیدها ضربه بزنید"</string>
 </resources>
