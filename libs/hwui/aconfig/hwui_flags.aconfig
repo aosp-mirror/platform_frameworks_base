@@ -1,6 +1,13 @@
 package: "com.android.graphics.hwui.flags"
 
 flag {
+  name: "matrix_44"
+  namespace: "core_graphics"
+  description: "API for 4x4 matrix and related canvas functions"
+  bug: "280116960"
+}
+
+flag {
   name: "limited_hdr"
   namespace: "core_graphics"
   description: "API to enable apps to restrict the amount of HDR headroom that is used"
