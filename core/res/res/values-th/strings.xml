@@ -1683,7 +1683,7 @@
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ลบ"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"นี่เป็นการเพิ่มระดับเสียงเกินระดับที่แนะนำ\n\nการฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
     <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"ต้องการฟังเสียงดังต่อไปไหม\n\nเสียงของหูฟังอยู่ในระดับที่ดังเป็นระยะเวลานานกว่าที่แนะนำ ซึ่งอาจทำให้เกิดความเสียหายต่อระบบการได้ยินของคุณ"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"การตรวจจับเสียงดัง\n\nเสียงของหูฟังอยู่ในระดับที่ดังกว่าที่แนะนำ ซึ่งอาจทำให้เกิดความเสียหายต่อระบบการได้ยินของคุณ"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"ตรวจพบเสียงดัง\n\nเสียงของหูฟังอยู่ในระดับที่ดังกว่าที่แนะนำ ซึ่งอาจทำให้เกิดความเสียหายต่อระบบการได้ยินของคุณ"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ใช้ทางลัดการช่วยเหลือพิเศษไหม"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"เมื่อทางลัดเปิดอยู่ การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มนาน 3 วินาทีจะเริ่มฟีเจอร์การช่วยเหลือพิเศษ"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"เปิดใช้ทางลัดสำหรับฟีเจอร์การช่วยเหลือพิเศษใช่ไหม"</string>

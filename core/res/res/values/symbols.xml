@@ -1074,6 +1074,13 @@
   <java-symbol type="string" name="managed_profile_label_badge_2" />
   <java-symbol type="string" name="managed_profile_label_badge_3" />
   <java-symbol type="string" name="clone_profile_label_badge" />
+  <java-symbol type="string" name="profile_label_private" />
+  <java-symbol type="string" name="profile_label_clone" />
+  <java-symbol type="string" name="profile_label_work" />
+  <java-symbol type="string" name="profile_label_work_2" />
+  <java-symbol type="string" name="profile_label_work_3" />
+  <java-symbol type="string" name="profile_label_test" />
+  <java-symbol type="string" name="profile_label_communal" />
   <java-symbol type="string" name="mediasize_unknown_portrait" />
   <java-symbol type="string" name="mediasize_unknown_landscape" />
   <java-symbol type="string" name="mediasize_iso_a0" />

@@ -35,6 +35,18 @@
             "file_patterns": ["StorageManagerService\\.java"]
         },
         {
+            "name": "CtsScopedStorageBypassDatabaseOperationsTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageGeneralTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
+            "name": "CtsScopedStorageRedactUriTest",
+            "file_patterns": ["StorageManagerService\\.java"]
+        },
+        {
             "name": "FrameworksMockingServicesTests",
             "options": [
                 {
