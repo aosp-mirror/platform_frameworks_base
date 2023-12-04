@@ -25,6 +25,7 @@ import android.os.Binder
 import android.os.UserHandle
 import android.util.ArrayMap
 import com.android.internal.pm.parsing.pkg.AndroidPackageInternal
+import com.android.internal.pm.parsing.pkg.PackageImpl
 import com.android.internal.pm.parsing.pkg.ParsedPackage
 import com.android.internal.pm.pkg.component.ParsedActivity
 import com.android.server.pm.AppsFilterImpl
@@ -38,7 +39,6 @@ import com.android.server.pm.Settings
 import com.android.server.pm.SharedLibrariesImpl
 import com.android.server.pm.UserManagerInternal
 import com.android.server.pm.UserManagerService
-import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.resolution.ComponentResolver
 import com.android.server.pm.snapshot.PackageDataSnapshot
@@ -49,6 +49,8 @@ import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import com.android.server.wm.ActivityTaskManagerInternal
 import com.google.common.truth.Truth.assertThat
+import java.io.File
+import java.util.UUID
 import org.junit.After
 import org.junit.Before
 import org.junit.BeforeClass
@@ -61,8 +63,6 @@ import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.intThat
 import org.mockito.Mockito.same
 import org.testng.Assert.assertThrows
-import java.io.File
-import java.util.UUID
 
 @RunWith(Parameterized::class)
 class PackageManagerComponentLabelIconOverrideTest {

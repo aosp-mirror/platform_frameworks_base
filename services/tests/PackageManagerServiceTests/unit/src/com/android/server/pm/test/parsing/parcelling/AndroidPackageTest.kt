@@ -30,21 +30,21 @@ import android.util.ArraySet
 import android.util.SparseArray
 import android.util.SparseIntArray
 import com.android.internal.R
-import com.android.server.pm.parsing.pkg.AndroidPackageUtils
-import com.android.server.pm.parsing.pkg.PackageImpl
+import com.android.internal.pm.parsing.pkg.AndroidPackageLegacyUtils
+import com.android.internal.pm.parsing.pkg.PackageImpl
+import com.android.internal.pm.pkg.component.ParsedActivityImpl
+import com.android.internal.pm.pkg.component.ParsedApexSystemServiceImpl
+import com.android.internal.pm.pkg.component.ParsedAttributionImpl
+import com.android.internal.pm.pkg.component.ParsedComponentImpl
+import com.android.internal.pm.pkg.component.ParsedInstrumentationImpl
+import com.android.internal.pm.pkg.component.ParsedIntentInfoImpl
+import com.android.internal.pm.pkg.component.ParsedPermissionGroupImpl
+import com.android.internal.pm.pkg.component.ParsedPermissionImpl
+import com.android.internal.pm.pkg.component.ParsedProcessImpl
+import com.android.internal.pm.pkg.component.ParsedProviderImpl
+import com.android.internal.pm.pkg.component.ParsedServiceImpl
+import com.android.internal.pm.pkg.component.ParsedUsesPermissionImpl
 import com.android.server.pm.pkg.AndroidPackage
-import com.android.server.pm.pkg.component.ParsedActivityImpl
-import com.android.server.pm.pkg.component.ParsedApexSystemServiceImpl
-import com.android.server.pm.pkg.component.ParsedAttributionImpl
-import com.android.server.pm.pkg.component.ParsedComponentImpl
-import com.android.server.pm.pkg.component.ParsedInstrumentationImpl
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl
-import com.android.server.pm.pkg.component.ParsedPermissionGroupImpl
-import com.android.server.pm.pkg.component.ParsedPermissionImpl
-import com.android.server.pm.pkg.component.ParsedProcessImpl
-import com.android.server.pm.pkg.component.ParsedProviderImpl
-import com.android.server.pm.pkg.component.ParsedServiceImpl
-import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import java.security.KeyPairGenerator
@@ -534,34 +534,34 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
             }
         ),
         getter(AndroidPackage::getKnownActivityEmbeddingCerts, setOf("TESTEMBEDDINGCERT")),
-        getSetByValue({ AndroidPackageUtils.isOdm(it) }, "isOdm", PackageImpl::setOdm, true),
-        getSetByValue({ AndroidPackageUtils.isOem(it) }, "isOem", PackageImpl::setOem, true),
+        getSetByValue({ AndroidPackageLegacyUtils.isOdm(it) }, "isOdm", PackageImpl::setOdm, true),
+        getSetByValue({ AndroidPackageLegacyUtils.isOem(it) }, "isOem", PackageImpl::setOem, true),
         getSetByValue(
-            { AndroidPackageUtils.isPrivileged(it) },
+            { AndroidPackageLegacyUtils.isPrivileged(it) },
             "isPrivileged",
             PackageImpl::setPrivileged,
             true
         ),
         getSetByValue(
-            { AndroidPackageUtils.isProduct(it) },
+            { AndroidPackageLegacyUtils.isProduct(it) },
             "isProduct",
             PackageImpl::setProduct,
             true
         ),
         getSetByValue(
-            { AndroidPackageUtils.isVendor(it) },
+            { AndroidPackageLegacyUtils.isVendor(it) },
             "isVendor",
             PackageImpl::setVendor,
             true
         ),
         getSetByValue(
-            { AndroidPackageUtils.isSystem(it) },
+            { AndroidPackageLegacyUtils.isSystem(it) },
             "isSystem",
             PackageImpl::setSystem,
             true
         ),
         getSetByValue(
-            { AndroidPackageUtils.isSystemExt(it) },
+            { AndroidPackageLegacyUtils.isSystemExt(it) },
             "isSystemExt",
             PackageImpl::setSystemExt,
             true
@@ -593,7 +593,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
                 )
             ) { "" }
         },
-        true
+        true, null
     )
         .asSplit(
             arrayOf("testSplitNameZero", "testSplitNameOne"),

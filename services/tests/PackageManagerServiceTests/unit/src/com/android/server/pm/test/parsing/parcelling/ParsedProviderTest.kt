@@ -17,9 +17,9 @@
 package com.android.server.pm.test.parsing.parcelling
 
 import android.content.pm.PathPermission
-import com.android.internal.pm.pkg.component.ParsedProvider
-import com.android.server.pm.pkg.component.ParsedProviderImpl
 import android.os.PatternMatcher
+import com.android.internal.pm.pkg.component.ParsedProvider
+import com.android.internal.pm.pkg.component.ParsedProviderImpl
 import kotlin.contracts.ExperimentalContracts
 
 @ExperimentalContracts

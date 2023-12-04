@@ -73,7 +73,7 @@ import androidx.test.filters.Suppress;
 import com.android.compatibility.common.util.CddTest;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
+import com.android.server.pm.parsing.ParsingUtils;
 import com.android.server.pm.test.service.server.R;
 
 import dalvik.system.VMRuntime;
@@ -346,7 +346,7 @@ public class PackageManagerTests extends AndroidTestCase {
 
     private ParsedPackage parsePackage(Uri packageURI) {
         final String archiveFilePath = packageURI.getPath();
-        ParseResult<ParsedPackage> result = ParsingPackageUtils.parseDefaultOneTime(
+        ParseResult<ParsedPackage> result = ParsingUtils.parseDefaultOneTime(
                 new File(archiveFilePath), 0 /*flags*/, Collections.emptyList(),
                 false /*collectCertificates*/);
         if (result.isError()) {

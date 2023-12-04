@@ -24,6 +24,7 @@ import android.content.pm.SigningDetails
 import android.os.Build
 import android.util.Slog
 import com.android.internal.os.RoSystemProperties
+import com.android.internal.pm.permission.CompatibilityPermissionInfo
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
 import com.android.server.permission.access.AccessState
@@ -42,7 +43,6 @@ import com.android.server.permission.access.util.hasBits
 import com.android.server.permission.access.util.isInternal
 import com.android.server.pm.KnownPackages
 import com.android.server.pm.parsing.PackageInfoUtils
-import com.android.server.pm.permission.CompatibilityPermissionInfo
 import com.android.server.pm.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageState
 
