@@ -689,9 +689,11 @@ public class AudioDeviceInventory {
                 case BluetoothProfile.LE_AUDIO:
                 case BluetoothProfile.LE_AUDIO_BROADCAST:
                     if (switchToUnavailable) {
-                        makeLeAudioDeviceUnavailableNow(address, btInfo.mAudioSystemDevice);
+                        makeLeAudioDeviceUnavailableNow(address,
+                                btInfo.mAudioSystemDevice, di.mDeviceCodecFormat);
                     } else if (switchToAvailable) {
-                        makeLeAudioDeviceAvailable(btInfo, streamType, "onSetBtActiveDevice");
+                        makeLeAudioDeviceAvailable(
+                                btInfo, streamType, codec, "onSetBtActiveDevice");
                     }
                     break;
                 default: throw new IllegalArgumentException("Invalid profile "
@@ -752,12 +754,13 @@ public class AudioDeviceInventory {
 
 
             if (event == BtHelper.EVENT_DEVICE_CONFIG_CHANGE) {
-                boolean a2dpCodecChange = false;
-                if (btInfo.mProfile == BluetoothProfile.A2DP) {
+                boolean codecChange = false;
+                if (btInfo.mProfile == BluetoothProfile.A2DP
+                        || btInfo.mProfile == BluetoothProfile.LE_AUDIO) {
                     if (di.mDeviceCodecFormat != codec) {
                         di.mDeviceCodecFormat = codec;
                         mConnectedDevices.replace(key, di);
-                        a2dpCodecChange = true;
+                        codecChange = true;
                     }
                     final int res = mAudioSystem.handleDeviceConfigChange(
                             btInfo.mAudioSystemDevice, address, BtHelper.getName(btDevice), codec);
@@ -782,7 +785,7 @@ public class AudioDeviceInventory {
 
                     }
                 }
-                if (!a2dpCodecChange) {
+                if (!codecChange) {
                     updateBluetoothPreferredModes_l(btDevice /*connectedDevice*/);
                 }
             }
@@ -796,9 +799,9 @@ public class AudioDeviceInventory {
         }
     }
 
-    /*package*/ void onMakeLeAudioDeviceUnavailableNow(String address, int device) {
+    /*package*/ void onMakeLeAudioDeviceUnavailableNow(String address, int device, int codec) {
         synchronized (mDevicesLock) {
-            makeLeAudioDeviceUnavailableNow(address, device);
+            makeLeAudioDeviceUnavailableNow(address, device, codec);
         }
     }
 
@@ -1657,11 +1660,12 @@ public class AudioDeviceInventory {
         }
 
         synchronized (mDevicesLock) {
-            final ArraySet<String> toRemove = new ArraySet<>();
+            final ArraySet<Pair<String, Integer>> toRemove = new ArraySet<>();
             // Disconnect ALL DEVICE_OUT_BLE_HEADSET or DEVICE_OUT_BLE_BROADCAST devices
             mConnectedDevices.values().forEach(deviceInfo -> {
                 if (deviceInfo.mDeviceType == device) {
-                    toRemove.add(deviceInfo.mDeviceAddress);
+                    toRemove.add(
+                            new Pair<>(deviceInfo.mDeviceAddress, deviceInfo.mDeviceCodecFormat));
                 }
             });
             new MediaMetrics.Item(mMetricsId + "disconnectLeAudio")
@@ -1671,8 +1675,8 @@ public class AudioDeviceInventory {
                 final int delay = checkSendBecomingNoisyIntentInt(device,
                         AudioService.CONNECTION_STATE_DISCONNECTED,
                         AudioSystem.DEVICE_NONE);
-                toRemove.stream().forEach(deviceAddress ->
-                        makeLeAudioDeviceUnavailableLater(deviceAddress, device, delay)
+                toRemove.stream().forEach(entry ->
+                        makeLeAudioDeviceUnavailableLater(entry.first, device, entry.second, delay)
                 );
             }
         }
@@ -2216,7 +2220,8 @@ public class AudioDeviceInventory {
 
     @GuardedBy("mDevicesLock")
     private void makeLeAudioDeviceAvailable(
-            AudioDeviceBroker.BtDeviceInfo btInfo, int streamType, String eventSource) {
+            AudioDeviceBroker.BtDeviceInfo btInfo, int streamType,
+            @AudioSystem.AudioFormatNativeEnumForBtCodec int codec, String eventSource) {
         final int volumeIndex = btInfo.mVolume == -1 ? -1 : btInfo.mVolume * 10;
         final int device = btInfo.mAudioSystemDevice;
 
@@ -2250,7 +2255,7 @@ public class AudioDeviceInventory {
 
             AudioDeviceAttributes ada = new AudioDeviceAttributes(device, address, name);
             final int res = AudioSystem.setDeviceConnectionState(ada,
-                    AudioSystem.DEVICE_STATE_AVAILABLE,  AudioSystem.AUDIO_FORMAT_DEFAULT);
+                    AudioSystem.DEVICE_STATE_AVAILABLE, codec);
             if (res != AudioSystem.AUDIO_STATUS_OK) {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
                         "APM failed to make available LE Audio device addr=" + address
@@ -2265,7 +2270,7 @@ public class AudioDeviceInventory {
             // Reset LEA suspend state each time a new sink is connected
             mDeviceBroker.clearLeAudioSuspended(true /* internalOnly */);
             mConnectedDevices.put(DeviceInfo.makeDeviceListKey(device, address),
-                    new DeviceInfo(device, name, address, AudioSystem.AUDIO_FORMAT_DEFAULT,
+                    new DeviceInfo(device, name, address, codec,
                             peerAddress, groupId));
             mDeviceBroker.postAccessoryPlugMediaUnmute(device);
             setCurrentAudioRouteNameIfPossible(name, /*fromA2dp=*/false);
@@ -2288,13 +2293,14 @@ public class AudioDeviceInventory {
     }
 
     @GuardedBy("mDevicesLock")
-    private void makeLeAudioDeviceUnavailableNow(String address, int device) {
+    private void makeLeAudioDeviceUnavailableNow(String address, int device,
+            @AudioSystem.AudioFormatNativeEnumForBtCodec int codec) {
         AudioDeviceAttributes ada = null;
         if (device != AudioSystem.DEVICE_NONE) {
             ada = new AudioDeviceAttributes(device, address);
             final int res = AudioSystem.setDeviceConnectionState(ada,
                     AudioSystem.DEVICE_STATE_UNAVAILABLE,
-                    AudioSystem.AUDIO_FORMAT_DEFAULT);
+                    codec);
 
             if (res != AudioSystem.AUDIO_STATUS_OK) {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
@@ -2319,7 +2325,8 @@ public class AudioDeviceInventory {
     }
 
     @GuardedBy("mDevicesLock")
-    private void makeLeAudioDeviceUnavailableLater(String address, int device, int delayMs) {
+    private void makeLeAudioDeviceUnavailableLater(
+            String address, int device, int codec, int delayMs) {
         // prevent any activity on the LEA output to avoid unwanted
         // reconnection of the sink.
         mDeviceBroker.setLeAudioSuspended(
@@ -2327,7 +2334,7 @@ public class AudioDeviceInventory {
         // the device will be made unavailable later, so consider it disconnected right away
         mConnectedDevices.remove(DeviceInfo.makeDeviceListKey(device, address));
         // send the delayed message to make the device unavailable later
-        mDeviceBroker.setLeAudioTimeout(address, device, delayMs);
+        mDeviceBroker.setLeAudioTimeout(address, device, codec, delayMs);
     }
 
     @GuardedBy("mDevicesLock")

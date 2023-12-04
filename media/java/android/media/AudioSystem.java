@@ -318,11 +318,12 @@ public class AudioSystem
 
     /**
      * @hide
-     * Convert a Bluetooth codec to an audio format enum
+     * Convert an A2DP Bluetooth codec to an audio format enum
      * @param btCodec the codec to convert.
      * @return the audio format, or {@link #AUDIO_FORMAT_DEFAULT} if unknown
      */
-    public static @AudioFormatNativeEnumForBtCodec int bluetoothCodecToAudioFormat(int btCodec) {
+    public static @AudioFormatNativeEnumForBtCodec int bluetoothA2dpCodecToAudioFormat(
+            int btCodec) {
         switch (btCodec) {
             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_SBC:
                 return AudioSystem.AUDIO_FORMAT_SBC;
@@ -339,7 +340,25 @@ public class AudioSystem
             case BluetoothCodecConfig.SOURCE_CODEC_TYPE_OPUS:
                 return AudioSystem.AUDIO_FORMAT_OPUS;
             default:
-                Log.e(TAG, "Unknown BT codec 0x" + Integer.toHexString(btCodec)
+                Log.e(TAG, "Unknown A2DP BT codec 0x" + Integer.toHexString(btCodec)
+                        + " for conversion to audio format");
+                // TODO returning DEFAULT is the current behavior, should this return INVALID?
+                return AudioSystem.AUDIO_FORMAT_DEFAULT;
+        }
+    }
+
+    /**
+     * @hide
+     * Convert a LE Audio Bluetooth codec to an audio format enum
+     * @param btCodec the codec to convert.
+     * @return the audio format, or {@link #AUDIO_FORMAT_DEFAULT} if unknown
+     */
+    public static @AudioFormatNativeEnumForBtCodec int bluetoothLeCodecToAudioFormat(int btCodec) {
+        switch (btCodec) {
+            case BluetoothLeAudioCodecConfig.SOURCE_CODEC_TYPE_LC3:
+                return AudioSystem.AUDIO_FORMAT_LC3;
+            default:
+                Log.e(TAG, "Unknown LE Audio BT codec 0x" + Integer.toHexString(btCodec)
                         + " for conversion to audio format");
                 // TODO returning DEFAULT is the current behavior, should this return INVALID?
                 return AudioSystem.AUDIO_FORMAT_DEFAULT;
