@@ -4838,7 +4838,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
-                    mCentralSurfaces.userActivity();
+                    if (!KeyguardShadeMigrationNssl.isEnabled()) {
+                        mCentralSurfaces.userActivity();
+                    }
                     mAnimatingOnDown = mHeightAnimator != null && !mIsSpringBackAnimation;
                     mMinExpandHeight = 0.0f;
                     mDownTime = mSystemClock.uptimeMillis();
