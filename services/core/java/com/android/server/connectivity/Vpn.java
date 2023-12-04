@@ -56,7 +56,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.net.ConnectivityDiagnosticsManager;
 import android.net.ConnectivityManager;
-import android.net.DnsResolver;
 import android.net.INetd;
 import android.net.INetworkManagementEventObserver;
 import android.net.Ikev2VpnProfile;
@@ -67,8 +66,6 @@ import android.net.IpSecManager.IpSecTunnelInterface;
 import android.net.IpSecTransform;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.LocalSocket;
-import android.net.LocalSocketAddress;
 import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
@@ -109,7 +106,6 @@ import android.net.vcn.VcnTransportInfo;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -120,7 +116,6 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemService;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -160,11 +155,8 @@ import com.android.server.vcn.util.PersistableBundleUtils;
 
 import libcore.io.IoUtils;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
@@ -190,8 +182,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledFuture;
@@ -451,10 +441,6 @@ public class Vpn {
     // The user id of initiating VPN.
     private final int mUserId;
 
-    interface RetryScheduler {
-        void checkInterruptAndDelay(boolean sleepLonger) throws InterruptedException;
-    }
-
     private static class CarrierConfigInfo {
         public final String mccMnc;
         public final int keepaliveDelaySec;
@@ -483,130 +469,12 @@ public class Vpn {
             return Binder.getCallingUid() == Process.SYSTEM_UID;
         }
 
-        public void startService(final String serviceName) {
-            SystemService.start(serviceName);
-        }
-
-        public void stopService(final String serviceName) {
-            SystemService.stop(serviceName);
-        }
-
-        public boolean isServiceRunning(final String serviceName) {
-            return SystemService.isRunning(serviceName);
-        }
-
-        public boolean isServiceStopped(final String serviceName) {
-            return SystemService.isStopped(serviceName);
-        }
-
-        public File getStateFile() {
-            return new File("/data/misc/vpn/state");
-        }
-
         public DeviceIdleInternal getDeviceIdleInternal() {
             return LocalServices.getService(DeviceIdleInternal.class);
         }
 
         public PendingIntent getIntentForStatusPanel(Context context) {
             return VpnConfig.getIntentForStatusPanel(context);
-        }
-
-        public void sendArgumentsToDaemon(
-                final String daemon, final LocalSocket socket, final String[] arguments,
-                final RetryScheduler retryScheduler) throws IOException, InterruptedException {
-            final LocalSocketAddress address = new LocalSocketAddress(
-                    daemon, LocalSocketAddress.Namespace.RESERVED);
-
-            // Wait for the socket to connect.
-            while (true) {
-                try {
-                    socket.connect(address);
-                    break;
-                } catch (Exception e) {
-                    // ignore
-                }
-                retryScheduler.checkInterruptAndDelay(true /* sleepLonger */);
-            }
-            socket.setSoTimeout(500);
-
-            final OutputStream out = socket.getOutputStream();
-            for (String argument : arguments) {
-                byte[] bytes = argument.getBytes(StandardCharsets.UTF_8);
-                if (bytes.length >= 0xFFFF) {
-                    throw new IllegalArgumentException("Argument is too large");
-                }
-                out.write(bytes.length >> 8);
-                out.write(bytes.length);
-                out.write(bytes);
-                retryScheduler.checkInterruptAndDelay(false /* sleepLonger */);
-            }
-            out.write(0xFF);
-            out.write(0xFF);
-
-            // Wait for End-of-File.
-            final InputStream in = socket.getInputStream();
-            while (true) {
-                try {
-                    if (in.read() == -1) {
-                        break;
-                    }
-                } catch (Exception e) {
-                    // ignore
-                }
-                retryScheduler.checkInterruptAndDelay(true /* sleepLonger */);
-            }
-        }
-
-        @NonNull
-        public InetAddress resolve(final String endpoint)
-                throws ExecutionException, InterruptedException {
-            try {
-                return InetAddresses.parseNumericAddress(endpoint);
-            } catch (IllegalArgumentException e) {
-                // Endpoint is not numeric : fall through and resolve
-            }
-
-            final CancellationSignal cancellationSignal = new CancellationSignal();
-            try {
-                final DnsResolver resolver = DnsResolver.getInstance();
-                final CompletableFuture<InetAddress> result = new CompletableFuture();
-                final DnsResolver.Callback<List<InetAddress>> cb =
-                        new DnsResolver.Callback<List<InetAddress>>() {
-                            @Override
-                            public void onAnswer(@NonNull final List<InetAddress> answer,
-                                    final int rcode) {
-                                if (answer.size() > 0) {
-                                    result.complete(answer.get(0));
-                                } else {
-                                    result.completeExceptionally(
-                                            new UnknownHostException(endpoint));
-                                }
-                            }
-
-                            @Override
-                            public void onError(@Nullable final DnsResolver.DnsException error) {
-                                // Unfortunately UnknownHostException doesn't accept a cause, so
-                                // print a message here instead. Only show the summary, not the
-                                // full stack trace.
-                                Log.e(TAG, "Async dns resolver error : " + error);
-                                result.completeExceptionally(new UnknownHostException(endpoint));
-                            }
-                        };
-                resolver.query(null /* network, null for default */, endpoint,
-                        DnsResolver.FLAG_EMPTY, r -> r.run(), cancellationSignal, cb);
-                return result.get();
-            } catch (final ExecutionException e) {
-                Log.e(TAG, "Cannot resolve VPN endpoint : " + endpoint + ".", e);
-                throw e;
-            } catch (final InterruptedException e) {
-                Log.e(TAG, "Legacy VPN was interrupted while resolving the endpoint", e);
-                cancellationSignal.cancel();
-                throw e;
-            }
-        }
-
-        public boolean isInterfacePresent(final Vpn vpn, final String iface) {
-            return vpn.jniCheck(iface) != 0;
         }
 
         /**
