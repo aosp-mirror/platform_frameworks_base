@@ -524,7 +524,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
         mZenModeHelper.applyRestrictions();
 
-        for (int usage : AudioAttributes.SDK_USAGES) {
+        for (int usage : AudioAttributes.getSdkUsages()) {
             if (usage == AudioAttributes.USAGE_ASSISTANCE_SONIFICATION) {
                 // only mute audio, not vibrations
                 verify(mAppOps, atLeastOnce()).setRestriction(eq(AppOpsManager.OP_PLAY_AUDIO),
@@ -546,7 +546,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
         mZenModeHelper.applyRestrictions();
 
-        for (int usage : AudioAttributes.SDK_USAGES) {
+        for (int usage : AudioAttributes.getSdkUsages()) {
             verify(mAppOps).setRestriction(
                     eq(AppOpsManager.OP_PLAY_AUDIO), eq(usage), anyInt(), eq(new String[]{PKG_O}));
             verify(mAppOps).setRestriction(
@@ -561,7 +561,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
         mZenModeHelper.applyRestrictions();
 
-        for (int usage : AudioAttributes.SDK_USAGES) {
+        for (int usage : AudioAttributes.getSdkUsages()) {
             verify(mAppOps).setRestriction(
                     eq(AppOpsManager.OP_PLAY_AUDIO), eq(usage), anyInt(), eq(null));
             verify(mAppOps).setRestriction(
@@ -576,7 +576,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
         mZenModeHelper.applyRestrictions();
 
-        for (int usage : AudioAttributes.SDK_USAGES) {
+        for (int usage : AudioAttributes.getSdkUsages()) {
             verify(mAppOps).setRestriction(
                     eq(AppOpsManager.OP_PLAY_AUDIO), eq(usage), anyInt(), eq(null));
             verify(mAppOps).setRestriction(
