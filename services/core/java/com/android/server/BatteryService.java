@@ -17,6 +17,7 @@
 package com.android.server;
 
 import static android.os.Flags.stateOfHealthPublic;
+
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import static com.android.server.health.Utils.copyV1Battery;
 
@@ -166,6 +167,7 @@ public final class BatteryService extends SystemService {
     private int mLowBatteryCloseWarningLevel;
     private int mBatteryNearlyFullLevel;
     private int mShutdownBatteryTemperature;
+    private boolean mShutdownIfNoPower;
 
     private static String sSystemUiPackage;
 
@@ -230,6 +232,8 @@ public final class BatteryService extends SystemService {
                 com.android.internal.R.integer.config_lowBatteryCloseWarningBump);
         mShutdownBatteryTemperature = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_shutdownBatteryTemperature);
+        mShutdownIfNoPower = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_shutdownIfNoPower);
         sSystemUiPackage = mContext.getResources().getString(
                 com.android.internal.R.string.config_systemUi);
 
@@ -390,6 +394,9 @@ public final class BatteryService extends SystemService {
     private boolean shouldShutdownLocked() {
         if (mHealthInfo.batteryCapacityLevel != BatteryCapacityLevel.UNSUPPORTED) {
             return (mHealthInfo.batteryCapacityLevel == BatteryCapacityLevel.CRITICAL);
+        }
+        if (!mShutdownIfNoPower) {
+            return false;
         }
         if (mHealthInfo.batteryLevel > 0) {
             return false;
