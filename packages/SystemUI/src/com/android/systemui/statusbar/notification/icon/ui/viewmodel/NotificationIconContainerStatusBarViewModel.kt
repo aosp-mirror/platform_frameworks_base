@@ -117,8 +117,8 @@ constructor(
         override val tint: Int,
         private val areas: Collection<Rect>,
     ) : NotificationIconColors {
-        override fun staticDrawableColor(viewBounds: Rect, isColorized: Boolean): Int {
-            return if (isColorized && DarkIconDispatcher.isInAreas(areas, viewBounds)) {
+        override fun staticDrawableColor(viewBounds: Rect): Int {
+            return if (DarkIconDispatcher.isInAreas(areas, viewBounds)) {
                 tint
             } else {
                 DarkIconDispatcher.DEFAULT_ICON_TINT
