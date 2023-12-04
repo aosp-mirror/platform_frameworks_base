@@ -88,10 +88,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -1138,6 +1140,14 @@ public class SubscriptionManager {
      */
     public static final String IS_NTN = SimInfo.COLUMN_IS_NTN;
 
+    /**
+     * TelephonyProvider column name to identify service capabilities.
+     * Disabled by default.
+     * <P>Type: INTEGER (int)</P>
+     * @hide
+     */
+    public static final String SERVICE_CAPABILITIES = SimInfo.COLUMN_SERVICE_CAPABILITIES;
+
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"USAGE_SETTING_"},
@@ -1346,6 +1356,86 @@ public class SubscriptionManager {
                     PHONE_NUMBER_SOURCE_IMS,
             })
     public @interface PhoneNumberSource {}
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"SERVICE_CAPABILITY"},
+            value = {
+                    SERVICE_CAPABILITY_VOICE,
+                    SERVICE_CAPABILITY_SMS,
+                    SERVICE_CAPABILITY_DATA,
+            })
+    public @interface ServiceCapability {
+    }
+
+    /**
+     * Represents a value indicating the voice calling capabilities of a subscription.
+     *
+     * <p>This value identifies whether the subscription supports various voice calling services.
+     * These services can include circuit-switched (CS) calling, packet-switched (PS) IMS (IP
+     * Multimedia Subsystem) calling, and over-the-top (OTT) calling options.
+     *
+     * <p>Note: The availability of emergency calling services is not solely dependent on this
+     * voice capability. Emergency services may be accessible even if the subscription lacks
+     * standard voice capabilities. However, the device's ability to support emergency calls
+     * can be influenced by its inherent voice capabilities, as determined by
+     * {@link TelephonyManager#isDeviceVoiceCapable()}.
+     *
+     * @see TelephonyManager#isDeviceVoiceCapable()
+     */
+    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
+    public static final int SERVICE_CAPABILITY_VOICE = 1;
+
+    /**
+     * Represents a value indicating the SMS capabilities of a subscription.
+     *
+     * <p>This value identifies whether the subscription supports various sms services.
+     * These services can include circuit-switched (CS) SMS, packet-switched (PS) IMS (IP
+     * Multimedia Subsystem) SMS, and over-the-top (OTT) SMS options.
+     *
+     * <p>Note: The availability of emergency SMS services is not solely dependent on this
+     * sms capability. Emergency services may be accessible even if the subscription lacks
+     * standard sms capabilities. However, the device's ability to support emergency sms
+     * can be influenced by its inherent sms capabilities, as determined by
+     * {@link TelephonyManager#isDeviceSmsCapable()}.
+     *
+     * @see TelephonyManager#isDeviceSmsCapable()
+     */
+    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
+    public static final int SERVICE_CAPABILITY_SMS = 2;
+
+    /**
+     * Represents a value indicating the data calling capabilities of a subscription.
+     */
+    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
+    public static final int SERVICE_CAPABILITY_DATA = 3;
+
+    /**
+     * Maximum value of service capabilities supported so far.
+     * @hide
+     */
+    public static final int SERVICE_CAPABILITY_MAX = SERVICE_CAPABILITY_DATA;
+
+    /**
+     * Bitmask for {@code SERVICE_CAPABILITY_VOICE}.
+     * @hide
+     */
+    public static final int SERVICE_CAPABILITY_VOICE_BITMASK =
+            serviceCapabilityToBitmask(SERVICE_CAPABILITY_VOICE);
+
+    /**
+     * Bitmask for {@code SERVICE_CAPABILITY_SMS}.
+     * @hide
+     */
+    public static final int SERVICE_CAPABILITY_SMS_BITMASK =
+            serviceCapabilityToBitmask(SERVICE_CAPABILITY_SMS);
+
+    /**
+     * Bitmask for {@code SERVICE_CAPABILITY_DATA}.
+     * @hide
+     */
+    public static final int SERVICE_CAPABILITY_DATA_BITMASK =
+            serviceCapabilityToBitmask(SERVICE_CAPABILITY_DATA);
 
     private final Context mContext;
 
@@ -4483,5 +4573,39 @@ public class SubscriptionManager {
             ex.rethrowAsRuntimeException();
         }
         return new ArrayList<>();
+    }
+
+    /**
+     * @return the bitmasks combination of all service capabilities.
+     * @hide
+     */
+    public static int getAllServiceCapabilityBitmasks() {
+        return SERVICE_CAPABILITY_VOICE_BITMASK | SERVICE_CAPABILITY_SMS_BITMASK
+                | SERVICE_CAPABILITY_DATA_BITMASK;
+    }
+
+    /**
+     * @return The set of service capability from a bitmask combined one.
+     * @hide
+     */
+    @NonNull
+    @ServiceCapability
+    public static Set<Integer> getServiceCapabilitiesSet(int combinedServiceCapabilities) {
+        Set<Integer> capabilities = new HashSet<>();
+        for (int i = SERVICE_CAPABILITY_VOICE; i <= SERVICE_CAPABILITY_MAX; i++) {
+            final int capabilityBitmask = serviceCapabilityToBitmask(i);
+            if ((combinedServiceCapabilities & capabilityBitmask) == capabilityBitmask) {
+                capabilities.add(i);
+            }
+        }
+        return Collections.unmodifiableSet(capabilities);
+    }
+
+    /**
+     * @return The service capability bitmask from a {@link ServiceCapability} value.
+     * @hide
+     */
+    public static int serviceCapabilityToBitmask(@ServiceCapability int capability) {
+        return 1 << (capability - 1);
     }
 }

@@ -10044,6 +10044,49 @@ public class CarrierConfigManager {
     public static final String KEY_AUTO_DATA_SWITCH_RAT_SIGNAL_SCORE_BUNDLE =
             "auto_data_switch_rat_signal_score_string_bundle";
 
+    // TODO(b/316183370): replace @code with @link in javadoc after feature is released
+    /**
+     * An array of cellular services supported by a subscription.
+     *
+     * <p>Permissible values include:
+     * <ul>
+     *   <li>{@code SubscriptionManager#SERVICE_CAPABILITY_VOICE} for voice services</li>
+     *   <li>{@code SubscriptionManager#SERVICE_CAPABILITY_SMS} for SMS services</li>
+     *   <li>{@code SubscriptionManager#SERVICE_CAPABILITY_DATA} for data services</li>
+     * </ul>
+     *
+     * <p>Carrier-specific factors may influence how these services are supported. Therefore,
+     * modifying this carrier configuration might not always enable the specified services. These
+     * capability bitmasks should be considered as indicators of a carrier's preferred services
+     * to enhance user experience, rather than as absolute platform guarantees.
+     *
+     * <p>Device-level service capabilities, defined by
+     * {@code TelephonyManager#isDeviceVoiceCapable} and
+     * {@code TelephonyManager#isDeviceSmsCapable}, take precedence over these subscription-level
+     * settings. For instance, a device where {@code TelephonyManager#isDeviceVoiceCapable} returns
+     * false may not be able to make voice calls, even if subscribed to a service marked as
+     * voice-capable.
+     *
+     * <p>To determine a subscription's cellular service capabilities, use
+     * {@code SubscriptionInfo#getServiceCapabilities()}. To track changes in services, register
+     * a {@link SubscriptionManager.OnSubscriptionsChangedListener} and invoke the
+     * same method in its callback.
+     *
+     * <p>Emergency service availability may not depend on the cellular service capabilities.
+     * For example, emergency calls might be possible on a subscription even if it lacks
+     * {@code SubscriptionManager#SERVICE_CAPABILITY_VOICE}.
+     *
+     * <p>If unset, the default value is “[1, 2, 3]” (supports all cellular services).
+     *
+     * @see TelephonyManager#isDeviceVoiceCapable
+     * @see TelephonyManager#isDeviceSmsCapable
+     * @see SubscriptionInfo#getServiceCapabilities()
+     * @see SubscriptionManager.OnSubscriptionsChangedListener
+     */
+    @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
+    public static final String KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY =
+            "cellular_service_capabilities_int_array";
+
     /** The default value for every variable. */
     private static final PersistableBundle sDefaults;
 
@@ -10830,6 +10873,7 @@ public class CarrierConfigManager {
                 new boolean[] {false, false, true, false, false});
         sDefaults.putStringArray(KEY_CARRIER_SERVICE_NAME_STRING_ARRAY, new String[0]);
         sDefaults.putStringArray(KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY, new String[0]);
+        sDefaults.putIntArray(KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY, new int[]{1, 2, 3});
     }
 
     /**
