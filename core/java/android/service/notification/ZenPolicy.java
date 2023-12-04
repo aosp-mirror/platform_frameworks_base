@@ -1241,7 +1241,7 @@ public final class ZenPolicy implements Parcelable {
      * @hide
      */
     public byte[] toProto() {
-        // TODO: b/308672510 - log new ZenPolicy fields to DNDPolicyProto.
+        // TODO: b/308672510 - log user-customized ZenPolicy fields to DNDPolicyProto.
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         ProtoOutputStream proto = new ProtoOutputStream(bytes);
 
@@ -1266,6 +1266,10 @@ public final class ZenPolicy implements Parcelable {
         proto.write(DNDPolicyProto.ALLOW_CALLS_FROM, getPriorityCallSenders());
         proto.write(DNDPolicyProto.ALLOW_MESSAGES_FROM, getPriorityMessageSenders());
         proto.write(DNDPolicyProto.ALLOW_CONVERSATIONS_FROM, getPriorityConversationSenders());
+
+        if (Flags.modesApi()) {
+            proto.write(DNDPolicyProto.ALLOW_CHANNELS, getAllowedChannels());
+        }
 
         proto.flush();
         return bytes.toByteArray();
