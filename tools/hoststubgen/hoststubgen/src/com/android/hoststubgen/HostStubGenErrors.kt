@@ -15,10 +15,10 @@
  */
 package com.android.hoststubgen
 
-class HostStubGenErrors {
-    fun onErrorFound(message: String) {
-        // For now, we just throw as soon as any error is found, but eventually we should keep
+open class HostStubGenErrors {
+    open fun onErrorFound(message: String) {
+        // TODO: For now, we just throw as soon as any error is found, but eventually we should keep
         // all errors and print them at the end.
-        throw RuntimeException(message)
+        throw HostStubGenUserErrorException(message)
     }
 }
