@@ -158,6 +158,13 @@ static void concat(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jlong matrixHan
     get_canvas(canvasHandle)->concat(*matrix);
 }
 
+static void concat44(JNIEnv* env, jobject obj, jlong canvasHandle, jfloatArray arr) {
+    jfloat* matVals = env->GetFloatArrayElements(arr, 0);
+    const SkM44 matrix = SkM44::RowMajor(matVals);
+    get_canvas(canvasHandle)->concat(matrix);
+    env->ReleaseFloatArrayElements(arr, matVals, 0);
+}
+
 static void rotate(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, jfloat degrees) {
     get_canvas(canvasHandle)->rotate(degrees);
 }
@@ -755,6 +762,7 @@ static const JNINativeMethod gMethods[] = {
     {"nGetMatrix", "(JJ)V", (void*)CanvasJNI::getMatrix},
     {"nSetMatrix","(JJ)V", (void*) CanvasJNI::setMatrix},
     {"nConcat","(JJ)V", (void*) CanvasJNI::concat},
+    {"nConcat","(J[F)V", (void*) CanvasJNI::concat44},
     {"nRotate","(JF)V", (void*) CanvasJNI::rotate},
     {"nScale","(JFF)V", (void*) CanvasJNI::scale},
     {"nSkew","(JFF)V", (void*) CanvasJNI::skew},
