@@ -5502,6 +5502,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 configureDisplayPolicy();
             }
 
+            if (!isDefaultDisplay) {
+                mDisplayRotation.updateRotationUnchecked(true);
+            }
+
             reconfigureDisplayLocked();
             onRequestedOverrideConfigurationChanged(getRequestedOverrideConfiguration());
             mWmService.mDisplayNotificationController.dispatchDisplayAdded(this);
