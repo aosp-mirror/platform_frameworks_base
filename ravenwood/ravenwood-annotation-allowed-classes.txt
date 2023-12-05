@@ -4,12 +4,21 @@ com.android.internal.util.ArrayUtils
 
 android.util.AtomicFile
 android.util.DataUnit
+android.util.DayOfMonthCursor
 android.util.DumpableContainer
 android.util.EventLog
 android.util.IntArray
+android.util.KeyValueListParser
 android.util.LongArray
+android.util.LongArrayQueue
+android.util.LongSparseLongArray
 android.util.LruCache
+android.util.MonthDisplayHelper
+android.util.RecurrenceRule
+android.util.RotationUtils
 android.util.Slog
+android.util.SparseDoubleArray
+android.util.SparseSetArray
 android.util.TimeUtils
 android.util.Xml
 

@@ -50,13 +50,13 @@ public class MetadataReaderTest {
     private Bundle mData;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         mInputStream = getClass().getClassLoader().getResourceAsStream("res/drawable/image.jpg");
         mData = new Bundle();
     }
 
     @After
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         IoUtils.closeQuietly(mInputStream);
     }
 

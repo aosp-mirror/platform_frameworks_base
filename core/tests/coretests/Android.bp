@@ -167,13 +167,22 @@ android_library {
 
 android_ravenwood_test {
     name: "FrameworksCoreTestsRavenwood",
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
     static_libs: [
+        "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
         "androidx.core_core",
         "androidx.annotation_annotation",
         "androidx.test.rules",
+        "androidx.test.ext.junit",
+        "mockito_ravenwood",
+        "platform-test-annotations",
     ],
     srcs: [
         "src/android/os/FileUtilsTest.java",
+        "src/android/util/**/*.java",
         "src/com/android/internal/util/**/*.java",
         "testdoubles/src/com/android/internal/util/**/*.java",
     ],

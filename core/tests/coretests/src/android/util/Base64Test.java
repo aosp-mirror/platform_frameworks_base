@@ -16,9 +16,16 @@
 
 package android.util;
 
-import androidx.test.filters.LargeTest;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import junit.framework.TestCase;
+import androidx.test.filters.LargeTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -32,7 +39,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 @LargeTest
-public class Base64Test extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class Base64Test {
     private static final String TAG = "Base64Test";
 
     /** Decodes a string, returning a string. */
@@ -62,7 +70,7 @@ public class Base64Test extends TestCase {
     }
 
     /** Assert that actual equals the first len bytes of expected. */
-    private void assertEquals(byte[] expected, int len, byte[] actual) {
+    private void assertPartialEquals(byte[] expected, int len, byte[] actual) {
         assertEquals(len, actual.length);
         for (int i = 0; i < len; ++i) {
             assertEquals(expected[i], actual[i]);
@@ -70,21 +78,14 @@ public class Base64Test extends TestCase {
     }
 
     /** Assert that actual equals the first len bytes of expected. */
-    private void assertEquals(byte[] expected, int len, byte[] actual, int alen) {
+    private void assertPartialEquals(byte[] expected, int len, byte[] actual, int alen) {
         assertEquals(len, alen);
         for (int i = 0; i < len; ++i) {
             assertEquals(expected[i], actual[i]);
         }
     }
 
-    /** Assert that actual equals the first len bytes of expected. */
-    private void assertEquals(byte[] expected, byte[] actual) {
-        assertEquals(expected.length, actual.length);
-        for (int i = 0; i < expected.length; ++i) {
-            assertEquals(expected[i], actual[i]);
-        }
-    }
-
+    @Test
     public void testDecodeExtraChars() throws Exception {
         // padding 0
         assertEquals("hello, world", decodeString("aGVsbG8sIHdvcmxk"));
@@ -131,28 +132,30 @@ public class Base64Test extends TestCase {
                                           (byte) 0xcc, (byte) 0xbb, (byte) 0xaa,
                                           (byte) 0x99, (byte) 0x88, (byte) 0x77 };
 
+    @Test
     public void testBinaryDecode() throws Exception {
-        assertEquals(BYTES, 0, Base64.decode("", 0));
-        assertEquals(BYTES, 1, Base64.decode("/w==", 0));
-        assertEquals(BYTES, 2, Base64.decode("/+4=", 0));
-        assertEquals(BYTES, 3, Base64.decode("/+7d", 0));
-        assertEquals(BYTES, 4, Base64.decode("/+7dzA==", 0));
-        assertEquals(BYTES, 5, Base64.decode("/+7dzLs=", 0));
-        assertEquals(BYTES, 6, Base64.decode("/+7dzLuq", 0));
-        assertEquals(BYTES, 7, Base64.decode("/+7dzLuqmQ==", 0));
-        assertEquals(BYTES, 8, Base64.decode("/+7dzLuqmYg=", 0));
+        assertPartialEquals(BYTES, 0, Base64.decode("", 0));
+        assertPartialEquals(BYTES, 1, Base64.decode("/w==", 0));
+        assertPartialEquals(BYTES, 2, Base64.decode("/+4=", 0));
+        assertPartialEquals(BYTES, 3, Base64.decode("/+7d", 0));
+        assertPartialEquals(BYTES, 4, Base64.decode("/+7dzA==", 0));
+        assertPartialEquals(BYTES, 5, Base64.decode("/+7dzLs=", 0));
+        assertPartialEquals(BYTES, 6, Base64.decode("/+7dzLuq", 0));
+        assertPartialEquals(BYTES, 7, Base64.decode("/+7dzLuqmQ==", 0));
+        assertPartialEquals(BYTES, 8, Base64.decode("/+7dzLuqmYg=", 0));
     }
 
+    @Test
     public void testWebSafe() throws Exception {
-        assertEquals(BYTES, 0, Base64.decode("", Base64.URL_SAFE));
-        assertEquals(BYTES, 1, Base64.decode("_w==", Base64.URL_SAFE));
-        assertEquals(BYTES, 2, Base64.decode("_-4=", Base64.URL_SAFE));
-        assertEquals(BYTES, 3, Base64.decode("_-7d", Base64.URL_SAFE));
-        assertEquals(BYTES, 4, Base64.decode("_-7dzA==", Base64.URL_SAFE));
-        assertEquals(BYTES, 5, Base64.decode("_-7dzLs=", Base64.URL_SAFE));
-        assertEquals(BYTES, 6, Base64.decode("_-7dzLuq", Base64.URL_SAFE));
-        assertEquals(BYTES, 7, Base64.decode("_-7dzLuqmQ==", Base64.URL_SAFE));
-        assertEquals(BYTES, 8, Base64.decode("_-7dzLuqmYg=", Base64.URL_SAFE));
+        assertPartialEquals(BYTES, 0, Base64.decode("", Base64.URL_SAFE));
+        assertPartialEquals(BYTES, 1, Base64.decode("_w==", Base64.URL_SAFE));
+        assertPartialEquals(BYTES, 2, Base64.decode("_-4=", Base64.URL_SAFE));
+        assertPartialEquals(BYTES, 3, Base64.decode("_-7d", Base64.URL_SAFE));
+        assertPartialEquals(BYTES, 4, Base64.decode("_-7dzA==", Base64.URL_SAFE));
+        assertPartialEquals(BYTES, 5, Base64.decode("_-7dzLs=", Base64.URL_SAFE));
+        assertPartialEquals(BYTES, 6, Base64.decode("_-7dzLuq", Base64.URL_SAFE));
+        assertPartialEquals(BYTES, 7, Base64.decode("_-7dzLuqmQ==", Base64.URL_SAFE));
+        assertPartialEquals(BYTES, 8, Base64.decode("_-7dzLuqmYg=", Base64.URL_SAFE));
 
         assertEquals("", Base64.encodeToString(BYTES, 0, 0, Base64.URL_SAFE));
         assertEquals("_w==\n", Base64.encodeToString(BYTES, 0, 1, Base64.URL_SAFE));
@@ -165,6 +168,7 @@ public class Base64Test extends TestCase {
         assertEquals("_-7dzLuqmYg=\n", Base64.encodeToString(BYTES, 0, 8, Base64.URL_SAFE));
     }
 
+    @Test
     public void testFlags() throws Exception {
         assertEquals("YQ==\n",       encodeToString("a", 0));
         assertEquals("YQ==",         encodeToString("a", Base64.NO_WRAP));
@@ -195,6 +199,7 @@ public class Base64Test extends TestCase {
         assertEquals("YWJjZA\r\n",   encodeToString("abcd", Base64.CRLF | Base64.NO_PADDING));
     }
 
+    @Test
     public void testLineLength() throws Exception {
         String in_56 = "abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyzabcd";
         String in_57 = in_56 + "e";
@@ -245,7 +250,9 @@ public class Base64Test extends TestCase {
      * us to get at package-private members (Base64.Encoder in
      * this case).
      */
-    public void XXXtestEncodeInternal() throws Exception {
+    @Test
+    @Ignore
+    public void testEncodeInternal() throws Exception {
         byte[] input = { (byte) 0x61, (byte) 0x62, (byte) 0x63 };
         byte[] output = new byte[100];
 
@@ -253,11 +260,11 @@ public class Base64Test extends TestCase {
                                                     output);
 
         encoder.process(input, 0, 3, false);
-        assertEquals("YWJj".getBytes(), 4, encoder.output, encoder.op);
+        assertPartialEquals("YWJj".getBytes(), 4, encoder.output, encoder.op);
         assertEquals(0, encoder.tailLen);
 
         encoder.process(input, 0, 3, false);
-        assertEquals("YWJj".getBytes(), 4, encoder.output, encoder.op);
+        assertPartialEquals("YWJj".getBytes(), 4, encoder.output, encoder.op);
         assertEquals(0, encoder.tailLen);
 
         encoder.process(input, 0, 1, false);
@@ -269,7 +276,7 @@ public class Base64Test extends TestCase {
         assertEquals(2, encoder.tailLen);
 
         encoder.process(input, 0, 1, false);
-        assertEquals("YWFh".getBytes(), 4, encoder.output, encoder.op);
+        assertPartialEquals("YWFh".getBytes(), 4, encoder.output, encoder.op);
         assertEquals(0, encoder.tailLen);
 
         encoder.process(input, 0, 2, false);
@@ -277,15 +284,15 @@ public class Base64Test extends TestCase {
         assertEquals(2, encoder.tailLen);
 
         encoder.process(input, 0, 2, false);
-        assertEquals("YWJh".getBytes(), 4, encoder.output, encoder.op);
+        assertPartialEquals("YWJh".getBytes(), 4, encoder.output, encoder.op);
         assertEquals(1, encoder.tailLen);
 
         encoder.process(input, 0, 2, false);
-        assertEquals("YmFi".getBytes(), 4, encoder.output, encoder.op);
+        assertPartialEquals("YmFi".getBytes(), 4, encoder.output, encoder.op);
         assertEquals(0, encoder.tailLen);
 
         encoder.process(input, 0, 1, true);
-        assertEquals("YQ".getBytes(), 2, encoder.output, encoder.op);
+        assertPartialEquals("YQ".getBytes(), 2, encoder.output, encoder.op);
     }
 
     private static final String lipsum =
@@ -311,6 +318,7 @@ public class Base64Test extends TestCase {
             "molestie dapibus commodo. Ut vel tellus at massa gravida " +
             "semper non sed orci.";
 
+    @Test
     public void testInputStream() throws Exception {
         int[] flagses = { Base64.DEFAULT,
                           Base64.NO_PADDING,
@@ -343,7 +351,7 @@ public class Base64Test extends TestCase {
             while ((b = b64is.read(actual, ap, actual.length-ap)) != -1) {
                 ap += b;
             }
-            assertEquals(actual, ap, plain);
+            assertPartialEquals(actual, ap, plain);
 
             // read individual bytes
             bais = new ByteArrayInputStream(encoded);
@@ -352,7 +360,7 @@ public class Base64Test extends TestCase {
             while ((b = b64is.read()) != -1) {
                 actual[ap++] = (byte) b;
             }
-            assertEquals(actual, ap, plain);
+            assertPartialEquals(actual, ap, plain);
 
             // mix reads of variously-sized arrays with one-byte reads
             bais = new ByteArrayInputStream(encoded);
@@ -371,7 +379,7 @@ public class Base64Test extends TestCase {
                     }
                 }
             }
-            assertEquals(actual, ap, plain);
+            assertPartialEquals(actual, ap, plain);
 
             // ----- test encoding ("plain" -> "encoded") -----
 
@@ -382,7 +390,7 @@ public class Base64Test extends TestCase {
             while ((b = b64is.read(actual, ap, actual.length-ap)) != -1) {
                 ap += b;
             }
-            assertEquals(actual, ap, encoded);
+            assertPartialEquals(actual, ap, encoded);
 
             // read individual bytes
             bais = new ByteArrayInputStream(plain);
@@ -391,7 +399,7 @@ public class Base64Test extends TestCase {
             while ((b = b64is.read()) != -1) {
                 actual[ap++] = (byte) b;
             }
-            assertEquals(actual, ap, encoded);
+            assertPartialEquals(actual, ap, encoded);
 
             // mix reads of variously-sized arrays with one-byte reads
             bais = new ByteArrayInputStream(plain);
@@ -410,11 +418,12 @@ public class Base64Test extends TestCase {
                     }
                 }
             }
-            assertEquals(actual, ap, encoded);
+            assertPartialEquals(actual, ap, encoded);
         }
     }
 
     /** http://b/3026478 */
+    @Test
     public void testSingleByteReads() throws IOException {
         InputStream in = new Base64InputStream(
                 new ByteArrayInputStream("/v8=".getBytes()), Base64.DEFAULT);
@@ -426,6 +435,7 @@ public class Base64Test extends TestCase {
      * Tests that Base64OutputStream produces exactly the same results
      * as calling Base64.encode/.decode on an in-memory array.
      */
+    @Test
     public void testOutputStream() throws Exception {
         int[] flagses = { Base64.DEFAULT,
                           Base64.NO_PADDING,
@@ -456,7 +466,7 @@ public class Base64Test extends TestCase {
             b64os.write(plain);
             b64os.close();
             actual = baos.toByteArray();
-            assertEquals(encoded, actual);
+            assertArrayEquals(encoded, actual);
 
             // many calls to write(int)
             baos = new ByteArrayOutputStream();
@@ -466,7 +476,7 @@ public class Base64Test extends TestCase {
             }
             b64os.close();
             actual = baos.toByteArray();
-            assertEquals(encoded, actual);
+            assertArrayEquals(encoded, actual);
 
             // intermixed sequences of write(int) with
             // write(byte[],int,int) of various lengths.
@@ -489,7 +499,7 @@ public class Base64Test extends TestCase {
             }
             b64os.close();
             actual = baos.toByteArray();
-            assertEquals(encoded, actual);
+            assertArrayEquals(encoded, actual);
 
             // ----- test decoding ("encoded" -> "plain") -----
 
@@ -499,7 +509,7 @@ public class Base64Test extends TestCase {
             b64os.write(encoded);
             b64os.close();
             actual = baos.toByteArray();
-            assertEquals(plain, actual);
+            assertArrayEquals(plain, actual);
 
             // many calls to write(int)
             baos = new ByteArrayOutputStream();
@@ -509,7 +519,7 @@ public class Base64Test extends TestCase {
             }
             b64os.close();
             actual = baos.toByteArray();
-            assertEquals(plain, actual);
+            assertArrayEquals(plain, actual);
 
             // intermixed sequences of write(int) with
             // write(byte[],int,int) of various lengths.
@@ -532,10 +542,11 @@ public class Base64Test extends TestCase {
             }
             b64os.close();
             actual = baos.toByteArray();
-            assertEquals(plain, actual);
+            assertArrayEquals(plain, actual);
         }
     }
 
+    @Test
     public void testOutputStream_ioExceptionDuringClose() {
         OutputStream out = new OutputStream() {
             @Override public void write(int b) throws IOException { }
@@ -551,6 +562,7 @@ public class Base64Test extends TestCase {
         }
     }
 
+    @Test
     public void testOutputStream_ioExceptionDuringCloseAndWrite() {
         OutputStream out = new OutputStream() {
             @Override public void write(int b) throws IOException {
@@ -583,6 +595,7 @@ public class Base64Test extends TestCase {
         }
     }
 
+    @Test
     public void testOutputStream_ioExceptionDuringWrite() {
         OutputStream out = new OutputStream() {
             @Override public void write(int b) throws IOException {

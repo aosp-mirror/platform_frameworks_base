@@ -74,6 +74,7 @@ class android.util.proto.ProtoUtils stubclass
 class android.util.proto.WireTypeMismatchException stubclass
 
 # Misc
+class android.util.BackupUtils stubclass
 class android.util.Dumpable stubclass
 class android.util.DebugUtils stubclass
 class android.util.MathUtils stubclass
