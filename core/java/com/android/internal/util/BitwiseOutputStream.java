@@ -26,6 +26,7 @@ import android.compat.annotation.UnsupportedAppUsage;
  *
  * NOTE -- This class is not threadsafe.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class BitwiseOutputStream {
 
     // The byte array being written to, which will be grown as needed.

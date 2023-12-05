@@ -16,20 +16,23 @@
 
 package com.android.internal.util;
 
-import com.android.internal.util.BitwiseInputStream;
-import com.android.internal.util.BitwiseOutputStream;
-import com.android.internal.util.HexDump;
-
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import static org.junit.Assert.assertEquals;
 
 import android.util.Log;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.util.Random;
 
-public class BitwiseStreamsTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class BitwiseStreamsTest {
     private final static String LOG_TAG = "BitwiseStreamsTest";
 
+    @Test
     @SmallTest
     public void testOne() throws Exception {
         int offset = 3;
@@ -45,6 +48,7 @@ public class BitwiseStreamsTest extends AndroidTestCase {
         assertEquals(HexDump.toHexString(inBuf), HexDump.toHexString(inBufDup));
     }
 
+    @Test
     @SmallTest
     public void testTwo() throws Exception {
         int offset = 3;
@@ -59,6 +63,7 @@ public class BitwiseStreamsTest extends AndroidTestCase {
         assertEquals(HexDump.toHexString(inBuf), HexDump.toHexString(inBufDup));
     }
 
+    @Test
     @SmallTest
     public void testThree() throws Exception {
         int offset = 4;
@@ -73,6 +78,7 @@ public class BitwiseStreamsTest extends AndroidTestCase {
         assertEquals(HexDump.toHexString(inBuf), HexDump.toHexString(inBufDup));
     }
 
+    @Test
     @SmallTest
     public void testFour() throws Exception {
         int offset = 7;
@@ -90,6 +96,7 @@ public class BitwiseStreamsTest extends AndroidTestCase {
         assertEquals(HexDump.toHexString(inBuf), HexDump.toHexString(inBufDup));
     }
 
+    @Test
     @SmallTest
     public void testFive() throws Exception {
         Random random = new Random();
@@ -111,6 +118,7 @@ public class BitwiseStreamsTest extends AndroidTestCase {
         }
     }
 
+    @Test
     @SmallTest
     public void testSix() throws Exception {
         int num_runs = 10;
@@ -134,6 +142,7 @@ public class BitwiseStreamsTest extends AndroidTestCase {
         Log.d(LOG_TAG, "repeated encode-decode took " + (end - start) + " ms");
     }
 
+    @Test
     @SmallTest
     public void testExpandArray() throws Exception {
         Random random = new Random();

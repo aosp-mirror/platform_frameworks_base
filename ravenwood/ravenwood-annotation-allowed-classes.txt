@@ -4,6 +4,7 @@ com.android.internal.util.ArrayUtils
 
 android.util.AtomicFile
 android.util.DataUnit
+android.util.DumpableContainer
 android.util.EventLog
 android.util.IntArray
 android.util.LongArray
@@ -66,3 +67,30 @@ android.graphics.Rect
 android.graphics.RectF
 
 com.android.server.LocalServices
+
+com.android.internal.os.SomeArgs
+
+com.android.internal.util.BitUtils
+com.android.internal.util.BitwiseInputStream
+com.android.internal.util.BitwiseOutputStream
+com.android.internal.util.CallbackRegistry
+com.android.internal.util.DumpableContainer
+com.android.internal.util.dump.DumpableContainerImpl
+com.android.internal.util.DumpUtils
+com.android.internal.util.FastMath
+com.android.internal.util.FastPrintWriter
+com.android.internal.util.FileRotator
+com.android.internal.util.GrowingArrayUtils
+com.android.internal.util.HeavyHitterSketch
+com.android.internal.util.LineBreakBufferedWriter
+com.android.internal.util.ObjectUtils
+com.android.internal.util.Parcelling
+com.android.internal.util.ParseUtils
+com.android.internal.util.ProcFileReader
+com.android.internal.util.QuickSelect
+com.android.internal.util.RingBuffer
+com.android.internal.util.StringPool
+
+com.google.android.collect.Lists
+com.google.android.collect.Maps
+com.google.android.collect.Sets

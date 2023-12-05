@@ -31,6 +31,7 @@ import java.util.TreeSet;
  * other static methods for working with Sets.
  *
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Sets {
     
     /**

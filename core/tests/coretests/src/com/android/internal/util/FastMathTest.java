@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,19 @@
 
 package com.android.internal.util;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import static org.junit.Assert.assertEquals;
 
-/**
- * Fast and loose math routines.
- */
-@android.ravenwood.annotation.RavenwoodKeepWholeClass
-public class FastMath {
+import androidx.test.runner.AndroidJUnit4;
 
-    /**
-     * Fast round from float to int. This is faster than Math.round()
-     * thought it may return slightly different results. It does not try to
-     * handle (in any meaningful way) NaN or infinities.
-     */
-    @UnsupportedAppUsage
-    public static int round(float value) {
-        long lx = (long) (value * (65536 * 256f));
-        return (int) ((lx + 0x800000) >> 24);
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+@RunWith(AndroidJUnit4.class)
+public class FastMathTest {
+    @Test
+    public void testRound() {
+        assertEquals(-1, FastMath.round(-1.0f));
+        assertEquals(0, FastMath.round(0.0f));
+        assertEquals(1, FastMath.round(1.0f));
     }
 }

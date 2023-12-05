@@ -25,6 +25,7 @@ import java.util.Collections;
  * Provides static methods for creating {@code List} instances easily, and other
  * utility methods for working with lists. 
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Lists {
 
     /**

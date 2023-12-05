@@ -81,15 +81,11 @@ class android.util.Patterns stubclass
 class android.util.UtilConfig stubclass
 
 # Internals
-class com.android.internal.util.FastMath stubclass
-class com.android.internal.util.FastPrintWriter stubclass
-class com.android.internal.util.GrowingArrayUtils stubclass
-class com.android.internal.util.LineBreakBufferedWriter stubclass
-class com.android.internal.util.Parcelling stubclass
+class com.android.internal.util.FileRotator stubclass
+class com.android.internal.util.HexDump stubclass
+class com.android.internal.util.MessageUtils stubclass
 class com.android.internal.util.Preconditions stubclass
-class com.android.internal.util.StringPool stubclass
-
-class com.android.internal.os.SomeArgs stubclass
+class com.android.internal.util.TokenBucket stubclass
 
 # Parcel
 class android.os.Parcel stubclass

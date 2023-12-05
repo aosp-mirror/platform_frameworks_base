@@ -93,7 +93,7 @@ public class RavenwoodRule implements TestRule {
     /**
      * Return if the current process is running under a Ravenwood test environment.
      */
-    public boolean isUnderRavenwood() {
+    public static boolean isUnderRavenwood() {
         return IS_UNDER_RAVENWOOD;
     }
 
@@ -102,6 +102,9 @@ public class RavenwoodRule implements TestRule {
         return new Statement() {
             @Override
             public void evaluate() throws Throwable {
+                if (description.getTestClass().getAnnotation(IgnoreUnderRavenwood.class) != null) {
+                    Assume.assumeFalse(IS_UNDER_RAVENWOOD);
+                }
                 if (description.getAnnotation(IgnoreUnderRavenwood.class) != null) {
                     Assume.assumeFalse(IS_UNDER_RAVENWOOD);
                 }

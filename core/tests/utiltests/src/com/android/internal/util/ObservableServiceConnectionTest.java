@@ -29,14 +29,19 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.ObservableServiceConnection.ServiceTransformer;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -46,7 +51,12 @@ import java.util.Queue;
 import java.util.concurrent.Executor;
 
 @SmallTest
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = ObservableServiceConnection.class)
 public class ObservableServiceConnectionTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private static final ComponentName COMPONENT_NAME =
             new ComponentName("test.package", "component");
 

@@ -23,15 +23,22 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
 
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.Suppress;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+
 import android.util.Log;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.FileRotator.Reader;
 import com.android.internal.util.FileRotator.Writer;
-import com.android.internal.util.test.FsUtil;
 
 import com.google.android.collect.Lists;
+
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -40,6 +47,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -47,7 +55,8 @@ import java.util.Random;
 /**
  * Tests for {@link FileRotator}.
  */
-public class FileRotatorTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class FileRotatorTest {
     private static final String TAG = "FileRotatorTest";
 
     private File mBasePath;
@@ -59,14 +68,12 @@ public class FileRotatorTest extends AndroidTestCase {
 
     // TODO: test throwing rolls back correctly
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        mBasePath = getContext().getFilesDir();
-        FsUtil.deleteContents(mBasePath);
+    @Before
+    public void setUp() throws Exception {
+        mBasePath = Files.createTempDirectory(TAG).toFile();
     }
 
+    @Test
     public void testEmpty() throws Exception {
         final FileRotator rotate1 = new FileRotator(
                 mBasePath, PREFIX, DAY_IN_MILLIS, WEEK_IN_MILLIS);
@@ -85,6 +92,7 @@ public class FileRotatorTest extends AndroidTestCase {
         assertReadAll(rotate2);
     }
 
+    @Test
     public void testCombine() throws Exception {
         final FileRotator rotate = new FileRotator(
                 mBasePath, PREFIX, DAY_IN_MILLIS, WEEK_IN_MILLIS);
@@ -106,6 +114,7 @@ public class FileRotatorTest extends AndroidTestCase {
         assertReadAll(rotate, "bar");
     }
 
+    @Test
     public void testRotate() throws Exception {
         final FileRotator rotate = new FileRotator(
                 mBasePath, PREFIX, DAY_IN_MILLIS, WEEK_IN_MILLIS);
@@ -138,6 +147,7 @@ public class FileRotatorTest extends AndroidTestCase {
         assertReadAll(rotate, "bar", "baz");
     }
 
+    @Test
     public void testDelete() throws Exception {
         final FileRotator rotate = new FileRotator(
                 mBasePath, PREFIX, MINUTE_IN_MILLIS, DAY_IN_MILLIS);
@@ -168,6 +178,7 @@ public class FileRotatorTest extends AndroidTestCase {
         assertReadAll(rotate);
     }
 
+    @Test
     public void testThrowRestoresBackup() throws Exception {
         final FileRotator rotate = new FileRotator(
                 mBasePath, PREFIX, MINUTE_IN_MILLIS, DAY_IN_MILLIS);
@@ -201,6 +212,7 @@ public class FileRotatorTest extends AndroidTestCase {
         assertReadAll(rotate, "foo");
     }
 
+    @Test
     public void testOtherFilesAndMalformed() throws Exception {
         final FileRotator rotate = new FileRotator(
                 mBasePath, PREFIX, SECOND_IN_MILLIS, SECOND_IN_MILLIS);
@@ -229,6 +241,7 @@ public class FileRotatorTest extends AndroidTestCase {
     private static final String BLUE = "blue";
     private static final String YELLOW = "yellow";
 
+    @Test
     public void testQueryMatch() throws Exception {
         final FileRotator rotate = new FileRotator(
                 mBasePath, PREFIX, HOUR_IN_MILLIS, YEAR_IN_MILLIS);
@@ -277,6 +290,7 @@ public class FileRotatorTest extends AndroidTestCase {
         assertReadMatching(rotate, Long.MIN_VALUE, TEST_TIME - DAY_IN_MILLIS);
     }
 
+    @Test
     public void testClockRollingBackwards() throws Exception {
         final FileRotator rotate = new FileRotator(
                 mBasePath, PREFIX, DAY_IN_MILLIS, YEAR_IN_MILLIS);
@@ -325,7 +339,8 @@ public class FileRotatorTest extends AndroidTestCase {
         assertReadAll(rotate, "meow", "yay");
     }
 
-    @Suppress
+    @Test
+    @Ignore
     public void testFuzz() throws Exception {
         final FileRotator rotate = new FileRotator(
                 mBasePath, PREFIX, HOUR_IN_MILLIS, DAY_IN_MILLIS);
@@ -352,6 +367,7 @@ public class FileRotatorTest extends AndroidTestCase {
         Log.d(TAG, Arrays.toString(mBasePath.list()));
     }
 
+    @Test
     public void testRecoverAtomic() throws Exception {
         write("rotator.1024-2048", "foo");
         write("rotator.1024-2048.backup", "bar");
@@ -366,6 +382,7 @@ public class FileRotatorTest extends AndroidTestCase {
         assertReadAll(rotate, "bar");
     }
 
+    @Test
     public void testReadSorted() throws Exception {
         write("rotator.1024-2048", "2");
         write("rotator.2048-4096", "3");
@@ -376,11 +393,11 @@ public class FileRotatorTest extends AndroidTestCase {
         assertReadAll(rotate, "1", "2", "3");
     }
 
+    @Test
     public void testFileSystemInaccessible() throws Exception {
-        File inaccessibleDir = null;
-        String dirPath = getContext().getFilesDir() + File.separator + "inaccessible";
-        inaccessibleDir = new File(dirPath);
-        final FileRotator rotate = new FileRotator(inaccessibleDir, PREFIX, SECOND_IN_MILLIS, SECOND_IN_MILLIS);
+        File inaccessibleDir = mBasePath.toPath().resolve("does_not_exist").toFile();
+        final FileRotator rotate = new FileRotator(inaccessibleDir, PREFIX,
+                SECOND_IN_MILLIS, SECOND_IN_MILLIS);
 
         // rotate should not throw on dir not mkdir-ed (or otherwise inaccessible)
         rotate.maybeRotate(TEST_TIME);
