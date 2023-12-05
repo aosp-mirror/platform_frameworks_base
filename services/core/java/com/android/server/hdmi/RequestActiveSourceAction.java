@@ -29,6 +29,12 @@ public class RequestActiveSourceAction extends HdmiCecFeatureAction {
     // State to wait for the <Active Source> message.
     private static final int STATE_WAIT_FOR_ACTIVE_SOURCE = 1;
 
+    // Number of retries <Request Active Source> is sent if no device answers this message.
+    private static final int MAX_SEND_RETRY_COUNT = 1;
+
+    private int mSendRetryCount = 0;
+
+
     RequestActiveSourceAction(HdmiCecLocalDevice source, IHdmiControlCallback callback) {
         super(source, callback);
     }
@@ -60,7 +66,12 @@ public class RequestActiveSourceAction extends HdmiCecFeatureAction {
             return;
         }
         if (mState == STATE_WAIT_FOR_ACTIVE_SOURCE) {
-            finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
+            if (mSendRetryCount++ < MAX_SEND_RETRY_COUNT) {
+                sendCommand(HdmiCecMessageBuilder.buildRequestActiveSource(getSourceAddress()));
+                addTimer(mState, HdmiConfig.TIMEOUT_MS);
+            } else {
+                finishWithCallback(HdmiControlManager.RESULT_TIMEOUT);
+            }
         }
     }
 }
