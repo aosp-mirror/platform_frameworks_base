@@ -2158,7 +2158,11 @@ final class InstallPackageHelper {
                 }
             }
             if (installRequest.getReturnCode() == PackageManager.INSTALL_SUCCEEDED) {
-                mPm.createArchiveStateIfNeeded(ps,
+                // If this is an archival installation then we'll initialize the archive status,
+                // while also marking package as not installed.
+                // Doing this at the very end of the install as we are using ps.getInstalled
+                // to figure out which users were changed.
+                mPm.markPackageAsArchivedIfNeeded(ps,
                         installRequest.getArchivedPackage(),
                         installRequest.getNewUsers());
                 mPm.updateSequenceNumberLP(ps, installRequest.getNewUsers());
