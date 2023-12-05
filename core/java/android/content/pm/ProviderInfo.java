@@ -27,6 +27,7 @@ import android.util.Printer;
  * {@link android.content.pm.PackageManager#resolveContentProvider(java.lang.String, int)
  * PackageManager.resolveContentProvider()}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ProviderInfo extends ComponentInfo
         implements Parcelable {
     
