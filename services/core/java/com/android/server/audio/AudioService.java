@@ -13710,6 +13710,11 @@ public class AudioService extends IAudioService.Stub
         return mDeviceBroker.getDeviceAddresses(device);
     }
 
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
+    MusicFxHelper getMusicFxHelper() {
+        return mMusicFxHelper;
+    }
+
     //======================
     // misc
     //======================
