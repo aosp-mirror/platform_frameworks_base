@@ -43,6 +43,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCREEN_INTENT;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.provider.Settings.Global.ZEN_MODE_ALARMS;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
@@ -92,6 +93,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.AppGlobals;
@@ -104,6 +106,7 @@ import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
@@ -116,6 +119,7 @@ import android.media.VolumePolicy;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Process;
+import android.os.SimpleClock;
 import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -172,12 +176,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @SmallTest
 @SuppressLint("GuardedBy") // It's ok for this test to access guarded methods from the service.
@@ -232,6 +240,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Mock PackageManager mPackageManager;
     private Resources mResources;
     private TestableLooper mTestableLooper;
+    private final TestClock mTestClock = new TestClock();
     private ZenModeHelper mZenModeHelper;
     private ContentResolver mContentResolver;
     @Mock DeviceEffectsApplier mDeviceEffectsApplier;
@@ -269,7 +278,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mConditionProviders.addSystemProvider(new CountdownConditionProvider());
         mConditionProviders.addSystemProvider(new ScheduleConditionProvider());
         mZenModeEventLogger = new ZenModeEventLoggerFake(mPackageManager);
-        mZenModeHelper = new ZenModeHelper(mContext, mTestableLooper.getLooper(),
+        mZenModeHelper = new ZenModeHelper(mContext, mTestableLooper.getLooper(), mTestClock,
                 mConditionProviders, mTestFlagResolver, mZenModeEventLogger);
 
         ResolveInfo ri = new ResolveInfo();
@@ -1198,7 +1207,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void ruleUidAutomaticZenRuleRemovedUpdatesCache() throws Exception {
         when(mContext.checkCallingPermission(anyString()))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+                .thenReturn(PERMISSION_GRANTED);
 
         setupZenConfig();
         // one enabled automatic rule
@@ -1780,7 +1789,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testDoNotUpdateModifiedDefaultAutoRule() {
         // mDefaultConfig is set to default config in setup by getDefaultConfigParser
         when(mContext.checkCallingPermission(anyString()))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+                .thenReturn(PERMISSION_GRANTED);
 
         // shouldn't update rule that's been modified
         ZenModeConfig.ZenRule updatedDefaultRule = new ZenModeConfig.ZenRule();
@@ -1806,7 +1815,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testDoNotUpdateEnabledDefaultAutoRule() {
         // mDefaultConfig is set to default config in setup by getDefaultConfigParser
         when(mContext.checkCallingPermission(anyString()))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+                .thenReturn(PERMISSION_GRANTED);
 
         // shouldn't update the rule that's enabled
         ZenModeConfig.ZenRule updatedDefaultRule = new ZenModeConfig.ZenRule();
@@ -1833,7 +1842,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // mDefaultConfig is set to default config in setup by getDefaultConfigParser
         final String defaultRuleName = "rule name test";
         when(mContext.checkCallingPermission(anyString()))
-                .thenReturn(PackageManager.PERMISSION_GRANTED);
+                .thenReturn(PERMISSION_GRANTED);
 
         // will update rule that is not enabled and modified
         ZenModeConfig.ZenRule customDefaultRule = new ZenModeConfig.ZenRule();
@@ -4318,6 +4327,324 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void removeAndAddAutomaticZenRule_wasCustomized_isRestored() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+
+        // Start with a rule.
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mTestClock.setNowMillis(1000);
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Test", CONDITION_ID)
+                .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                .setZenPolicy(new ZenPolicy.Builder().allowRepeatCallers(false).build())
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "add it", CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getAutomaticZenRule(ruleId).getCreationTime()).isEqualTo(1000);
+        assertThat(mZenModeHelper.getAutomaticZenRule(ruleId).canUpdate()).isTrue();
+
+        // User customizes it.
+        AutomaticZenRule userUpdate = new AutomaticZenRule.Builder(rule)
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                .setZenPolicy(new ZenPolicy.Builder().allowRepeatCallers(true).build())
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, userUpdate, UPDATE_ORIGIN_USER, "userUpdate",
+                Process.SYSTEM_UID);
+
+        // App deletes it.
+        mTestClock.advanceByMillis(1000);
+        mZenModeHelper.removeAutomaticZenRule(ruleId, UPDATE_ORIGIN_APP, "delete it",
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(0);
+        assertThat(mZenModeHelper.mConfig.deletedRules).hasSize(1);
+
+        // App adds it again.
+        mTestClock.advanceByMillis(1000);
+        String newRuleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "add it again", CUSTOM_PKG_UID);
+
+        // Verify that the rule was restored:
+        // - id and creation time is the same as the original one.
+        // - ZenPolicy is the one that the user had set.
+        // - rule still has the user-modified fields.
+        AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(newRuleId);
+        assertThat(finalRule.getCreationTime()).isEqualTo(1000); // And not 3000.
+        assertThat(newRuleId).isEqualTo(ruleId);
+        assertThat(finalRule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_ALARMS);
+        assertThat(finalRule.getZenPolicy().getPriorityCategoryRepeatCallers()).isEqualTo(
+                ZenPolicy.STATE_ALLOW);
+        assertThat(finalRule.getUserModifiedFields()).isEqualTo(
+                AutomaticZenRule.FIELD_INTERRUPTION_FILTER);
+        assertThat(finalRule.getZenPolicy().getUserModifiedFields()).isEqualTo(
+                ZenPolicy.FIELD_PRIORITY_CATEGORY_REPEAT_CALLERS);
+
+        // Also, we discarded the "deleted rule" since we already used it for restoration.
+        assertThat(mZenModeHelper.mConfig.deletedRules).hasSize(0);
+    }
+
+    @Test
+    public void removeAndAddAutomaticZenRule_wasNotCustomized_isNotRestored() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+
+        // Start with a single rule.
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mTestClock.setNowMillis(1000);
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Test", CONDITION_ID)
+                .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                .setZenPolicy(new ZenPolicy.Builder().allowRepeatCallers(false).build())
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "add it", CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getAutomaticZenRule(ruleId).getCreationTime()).isEqualTo(1000);
+
+        // App deletes it.
+        mTestClock.advanceByMillis(1000);
+        mZenModeHelper.removeAutomaticZenRule(ruleId, UPDATE_ORIGIN_APP, "delete it",
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(0);
+        assertThat(mZenModeHelper.mConfig.deletedRules).hasSize(0);
+
+        // App adds it again.
+        mTestClock.advanceByMillis(1000);
+        String newRuleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "add it again", CUSTOM_PKG_UID);
+
+        // Verify that the rule was recreated. This means id and creation time are new.
+        AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(newRuleId);
+        assertThat(finalRule.getCreationTime()).isEqualTo(3000);
+        assertThat(newRuleId).isNotEqualTo(ruleId);
+    }
+
+    @Test
+    public void removeAndAddAutomaticZenRule_recreatedButNotByApp_isNotRestored() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+
+        // Start with a single rule.
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mTestClock.setNowMillis(1000);
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Test", CONDITION_ID)
+                .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                .setZenPolicy(new ZenPolicy.Builder().allowRepeatCallers(false).build())
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "add it", CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getAutomaticZenRule(ruleId).getCreationTime()).isEqualTo(1000);
+
+        // User customizes it.
+        mTestClock.advanceByMillis(1000);
+        AutomaticZenRule userUpdate = new AutomaticZenRule.Builder(rule)
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                .setZenPolicy(new ZenPolicy.Builder().allowRepeatCallers(true).build())
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, userUpdate, UPDATE_ORIGIN_USER, "userUpdate",
+                Process.SYSTEM_UID);
+
+        // App deletes it.
+        mTestClock.advanceByMillis(1000);
+        mZenModeHelper.removeAutomaticZenRule(ruleId, UPDATE_ORIGIN_APP, "delete it",
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(0);
+        assertThat(mZenModeHelper.mConfig.deletedRules).hasSize(1);
+
+        // User creates it again (unusual case, but ok).
+        mTestClock.advanceByMillis(1000);
+        String newRuleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_USER, "add it anew", CUSTOM_PKG_UID);
+
+        // Verify that the rule was recreated. This means id and creation time are new, and the rule
+        // matches the latest data supplied to addAZR.
+        AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(newRuleId);
+        assertThat(finalRule.getCreationTime()).isEqualTo(4000);
+        assertThat(newRuleId).isNotEqualTo(ruleId);
+        assertThat(finalRule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_PRIORITY);
+        assertThat(finalRule.getZenPolicy().getPriorityCategoryRepeatCallers()).isEqualTo(
+                ZenPolicy.STATE_DISALLOW);
+
+        // Also, we discarded the "deleted rule" since we're not interested in recreating it.
+        assertThat(mZenModeHelper.mConfig.deletedRules).hasSize(0);
+    }
+
+    @Test
+    public void removeAndAddAutomaticZenRule_removedByUser_isNotRestored() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+
+        // Start with a single rule.
+        mZenModeHelper.mConfig.automaticRules.clear();
+        mTestClock.setNowMillis(1000);
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Test", CONDITION_ID)
+                .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
+                .setZenPolicy(new ZenPolicy.Builder().allowRepeatCallers(false).build())
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "add it", CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.getAutomaticZenRule(ruleId).getCreationTime()).isEqualTo(1000);
+
+        // User customizes it.
+        mTestClock.advanceByMillis(1000);
+        AutomaticZenRule userUpdate = new AutomaticZenRule.Builder(rule)
+                .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
+                .setZenPolicy(new ZenPolicy.Builder().allowRepeatCallers(true).build())
+                .build();
+        mZenModeHelper.updateAutomaticZenRule(ruleId, userUpdate, UPDATE_ORIGIN_USER, "userUpdate",
+                Process.SYSTEM_UID);
+
+        // User deletes it.
+        mTestClock.advanceByMillis(1000);
+        mZenModeHelper.removeAutomaticZenRule(ruleId, UPDATE_ORIGIN_USER, "delete it",
+                CUSTOM_PKG_UID);
+        assertThat(mZenModeHelper.mConfig.automaticRules).hasSize(0);
+        assertThat(mZenModeHelper.mConfig.deletedRules).hasSize(0);
+
+        // App creates it again.
+        mTestClock.advanceByMillis(1000);
+        String newRuleId = mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "add it again", CUSTOM_PKG_UID);
+
+        // Verify that the rule was recreated. This means id and creation time are new.
+        AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(newRuleId);
+        assertThat(finalRule.getCreationTime()).isEqualTo(4000);
+        assertThat(newRuleId).isNotEqualTo(ruleId);
+    }
+
+    @Test
+    public void removeAutomaticZenRule_preservedForRestoringByPackageAndConditionId() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mContext.getTestablePermissions().setPermission(Manifest.permission.MANAGE_NOTIFICATIONS,
+                PERMISSION_GRANTED); // So that canManageAZR passes although packages don't match.
+        mZenModeHelper.mConfig.automaticRules.clear();
+
+        // Start with a bunch of customized rules where conditionUris are not unique.
+        String id1 = mZenModeHelper.addAutomaticZenRule("pkg1",
+                new AutomaticZenRule.Builder("Test1", Uri.parse("uri1")).build(), UPDATE_ORIGIN_APP,
+                "add it", CUSTOM_PKG_UID);
+        String id2 = mZenModeHelper.addAutomaticZenRule("pkg1",
+                new AutomaticZenRule.Builder("Test2", Uri.parse("uri2")).build(), UPDATE_ORIGIN_APP,
+                "add it", CUSTOM_PKG_UID);
+        String id3 = mZenModeHelper.addAutomaticZenRule("pkg1",
+                new AutomaticZenRule.Builder("Test3", Uri.parse("uri2")).build(), UPDATE_ORIGIN_APP,
+                "add it", CUSTOM_PKG_UID);
+        String id4 = mZenModeHelper.addAutomaticZenRule("pkg2",
+                new AutomaticZenRule.Builder("Test4", Uri.parse("uri1")).build(), UPDATE_ORIGIN_APP,
+                "add it", CUSTOM_PKG_UID);
+        String id5 = mZenModeHelper.addAutomaticZenRule("pkg2",
+                new AutomaticZenRule.Builder("Test5", Uri.parse("uri1")).build(), UPDATE_ORIGIN_APP,
+                "add it", CUSTOM_PKG_UID);
+        for (ZenRule zenRule : mZenModeHelper.mConfig.automaticRules.values()) {
+            zenRule.userModifiedFields = AutomaticZenRule.FIELD_INTERRUPTION_FILTER;
+        }
+
+        mZenModeHelper.removeAutomaticZenRule(id1, UPDATE_ORIGIN_APP, "begone", CUSTOM_PKG_UID);
+        mZenModeHelper.removeAutomaticZenRule(id2, UPDATE_ORIGIN_APP, "begone", CUSTOM_PKG_UID);
+        mZenModeHelper.removeAutomaticZenRule(id3, UPDATE_ORIGIN_APP, "begone", CUSTOM_PKG_UID);
+        mZenModeHelper.removeAutomaticZenRule(id4, UPDATE_ORIGIN_APP, "begone", CUSTOM_PKG_UID);
+        mZenModeHelper.removeAutomaticZenRule(id5, UPDATE_ORIGIN_APP, "begone", CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.mConfig.deletedRules.keySet())
+                .containsExactly("pkg1|uri1", "pkg1|uri2", "pkg2|uri1");
+        assertThat(mZenModeHelper.mConfig.deletedRules.values().stream().map(zr -> zr.name)
+                .collect(Collectors.toList()))
+                .containsExactly("Test1", "Test3", "Test5");
+    }
+
+    @Test
+    public void removeAllZenRules_preservedForRestoring() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mZenModeHelper.mConfig.automaticRules.clear();
+
+        mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
+                new AutomaticZenRule.Builder("Test1", Uri.parse("uri1")).build(), UPDATE_ORIGIN_APP,
+                "add it", CUSTOM_PKG_UID);
+        mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(),
+                new AutomaticZenRule.Builder("Test2", Uri.parse("uri2")).build(), UPDATE_ORIGIN_APP,
+                "add it", CUSTOM_PKG_UID);
+
+        for (ZenRule zenRule : mZenModeHelper.mConfig.automaticRules.values()) {
+            zenRule.userModifiedFields = AutomaticZenRule.FIELD_INTERRUPTION_FILTER;
+        }
+
+        mZenModeHelper.removeAutomaticZenRules(mContext.getPackageName(), UPDATE_ORIGIN_APP,
+                "begone", CUSTOM_PKG_UID);
+
+        assertThat(mZenModeHelper.mConfig.deletedRules).hasSize(2);
+    }
+
+    @Test
+    public void removeAllZenRules_fromSystem_deletesPreservedRulesToo() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mZenModeHelper.mConfig.automaticRules.clear();
+
+        // Start with deleted rules from 2 different packages.
+        Instant now = Instant.ofEpochMilli(1701796461000L);
+        ZenRule pkg1Rule = newZenRule("pkg1", now.minus(1, ChronoUnit.DAYS), now);
+        ZenRule pkg2Rule = newZenRule("pkg2", now.minus(2, ChronoUnit.DAYS), now);
+        mZenModeHelper.mConfig.deletedRules.put(ZenModeConfig.deletedRuleKey(pkg1Rule), pkg1Rule);
+        mZenModeHelper.mConfig.deletedRules.put(ZenModeConfig.deletedRuleKey(pkg2Rule), pkg2Rule);
+
+        mZenModeHelper.removeAutomaticZenRules("pkg1",
+                UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, "goodbye pkg1", Process.SYSTEM_UID);
+
+        // Preserved rules from pkg1 are gone; those from pkg2 are still there.
+        assertThat(mZenModeHelper.mConfig.deletedRules.values().stream().map(r -> r.pkg)
+                .collect(Collectors.toSet())).containsExactly("pkg2");
+    }
+
+    @Test
+    public void testRuleCleanup() throws Exception {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        Instant now = Instant.ofEpochMilli(1701796461000L);
+        Instant yesterday = now.minus(1, ChronoUnit.DAYS);
+        Instant aWeekAgo = now.minus(7, ChronoUnit.DAYS);
+        Instant twoMonthsAgo = now.minus(60, ChronoUnit.DAYS);
+        mTestClock.setNowMillis(now.toEpochMilli());
+
+        when(mPackageManager.getPackageInfo(eq("good_pkg"), anyInt()))
+                .thenReturn(new PackageInfo());
+        when(mPackageManager.getPackageInfo(eq("bad_pkg"), anyInt()))
+                .thenThrow(new PackageManager.NameNotFoundException("bad_pkg is not here"));
+
+        // Set up a config for another user containing:
+        ZenModeConfig config = new ZenModeConfig();
+        config.user = 42;
+        mZenModeHelper.mConfigs.put(42, config);
+        // okay rules (not deleted, package exists, with a range of creation dates).
+        config.automaticRules.put("ar1", newZenRule("good_pkg", now, null));
+        config.automaticRules.put("ar2", newZenRule("good_pkg", yesterday, null));
+        config.automaticRules.put("ar3", newZenRule("good_pkg", twoMonthsAgo, null));
+        // newish rules for a missing package
+        config.automaticRules.put("ar4", newZenRule("bad_pkg", yesterday, null));
+        // oldish rules belonging to a missing package
+        config.automaticRules.put("ar5", newZenRule("bad_pkg", aWeekAgo, null));
+        // rules deleted recently
+        config.deletedRules.put("del1", newZenRule("good_pkg", twoMonthsAgo, yesterday));
+        config.deletedRules.put("del2", newZenRule("good_pkg", twoMonthsAgo, aWeekAgo));
+        // rules deleted a long time ago
+        config.deletedRules.put("del3", newZenRule("good_pkg", twoMonthsAgo, twoMonthsAgo));
+        // rules for a missing package, created recently and deleted recently
+        config.deletedRules.put("del4", newZenRule("bad_pkg", yesterday, now));
+        // rules for a missing package, created a long time ago and deleted recently
+        config.deletedRules.put("del5", newZenRule("bad_pkg", twoMonthsAgo, now));
+        // rules for a missing package, created a long time ago and deleted a long time ago
+        config.deletedRules.put("del6", newZenRule("bad_pkg", twoMonthsAgo, twoMonthsAgo));
+
+        mZenModeHelper.onUserUnlocked(42); // copies config and cleans it up.
+
+        assertThat(mZenModeHelper.mConfig.automaticRules.keySet())
+                .containsExactly("ar1", "ar2", "ar3", "ar4");
+        assertThat(mZenModeHelper.mConfig.deletedRules.keySet())
+                .containsExactly("del1", "del2", "del4");
+    }
+
+    private static ZenRule newZenRule(String pkg, Instant createdAt, @Nullable Instant deletedAt) {
+        ZenRule rule = new ZenRule();
+        rule.pkg = pkg;
+        rule.creationTime = createdAt.toEpochMilli();
+        rule.deletionInstant = deletedAt;
+        // Plus stuff so that isValidAutomaticRule() passes
+        rule.name = "A rule from " + pkg + " created on " + createdAt;
+        rule.conditionId = Uri.parse(rule.name);
+        return rule;
+    }
+
+    @Test
     public void applyGlobalZenModeAsImplicitZenRule_createsImplicitRuleAndActivatesIt() {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
         mZenModeHelper.mConfig.automaticRules.clear();
@@ -4917,6 +5244,27 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         @Override
         public int nextTag() throws IOException, XmlPullParserException {
             return parser.nextTag();
+        }
+    }
+
+    private static class TestClock extends SimpleClock {
+        private long mNowMillis = 441644400000L;
+
+        private TestClock() {
+            super(ZoneOffset.UTC);
+        }
+
+        @Override
+        public long millis() {
+            return mNowMillis;
+        }
+
+        private void setNowMillis(long millis) {
+            mNowMillis = millis;
+        }
+
+        private void advanceByMillis(long millis) {
+            mNowMillis += millis;
         }
     }
 }
