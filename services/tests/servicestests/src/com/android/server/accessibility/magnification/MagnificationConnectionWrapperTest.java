@@ -24,8 +24,8 @@ import static org.mockito.Mockito.verify;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.view.Display;
+import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
@@ -45,7 +45,7 @@ public class MagnificationConnectionWrapperTest {
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
 
-    private IWindowMagnificationConnection mConnection;
+    private IMagnificationConnection mConnection;
     @Mock
     private AccessibilityTraceManager mTrace;
     @Mock
@@ -53,14 +53,14 @@ public class MagnificationConnectionWrapperTest {
     @Mock
     private MagnificationAnimationCallback mAnimationCallback;
 
-    private MockWindowMagnificationConnection mMockWindowMagnificationConnection;
+    private MockMagnificationConnection mMockMagnificationConnection;
     private MagnificationConnectionWrapper mConnectionWrapper;
 
     @Before
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
-        mMockWindowMagnificationConnection = new MockWindowMagnificationConnection();
-        mConnection = mMockWindowMagnificationConnection.getConnection();
+        mMockMagnificationConnection = new MockMagnificationConnection();
+        mConnection = mMockMagnificationConnection.getConnection();
         mConnectionWrapper = new MagnificationConnectionWrapper(mConnection, mTrace);
     }
 

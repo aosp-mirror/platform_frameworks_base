@@ -19,7 +19,7 @@ package com.android.server.accessibility.magnification;
 import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MODE_FULLSCREEN;
 
 import static com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationInfoChangedCallback;
-import static com.android.server.accessibility.magnification.MockWindowMagnificationConnection.TEST_DISPLAY;
+import static com.android.server.accessibility.magnification.MockMagnificationConnection.TEST_DISPLAY;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

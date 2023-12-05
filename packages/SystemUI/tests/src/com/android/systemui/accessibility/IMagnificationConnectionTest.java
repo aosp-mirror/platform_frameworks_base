@@ -33,8 +33,8 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.IMagnificationConnection;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
 import androidx.test.filters.SmallTest;
@@ -53,13 +53,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Tests for {@link android.view.accessibility.IWindowMagnificationConnection} retrieved from
+ * Tests for {@link android.view.accessibility.IMagnificationConnection} retrieved from
  * {@link Magnification}
  */
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class IWindowMagnificationConnectionTest extends SysuiTestCase {
+public class IMagnificationConnectionTest extends SysuiTestCase {
 
     private static final int TEST_DISPLAY = Display.DEFAULT_DISPLAY;
     @Mock
@@ -85,7 +85,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     @Mock
     private AccessibilityLogger mA11yLogger;
 
-    private IWindowMagnificationConnection mIWindowMagnificationConnection;
+    private IMagnificationConnection mIMagnificationConnection;
     private Magnification mMagnification;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
 
@@ -94,10 +94,10 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         getContext().addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
         doAnswer(invocation -> {
-            mIWindowMagnificationConnection = invocation.getArgument(0);
+            mIMagnificationConnection = invocation.getArgument(0);
             return null;
-        }).when(mAccessibilityManager).setWindowMagnificationConnection(
-                any(IWindowMagnificationConnection.class));
+        }).when(mAccessibilityManager).setMagnificationConnection(
+                any(IMagnificationConnection.class));
         mMagnification = new Magnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue,
                 mModeSwitchesController, mSysUiState, mOverviewProxyService, mSecureSettings,
@@ -107,14 +107,14 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         mMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
                 mContext.getSystemService(DisplayManager.class));
 
-        mMagnification.requestWindowMagnificationConnection(true);
-        assertNotNull(mIWindowMagnificationConnection);
-        mIWindowMagnificationConnection.setConnectionCallback(mConnectionCallback);
+        mMagnification.requestMagnificationConnection(true);
+        assertNotNull(mIMagnificationConnection);
+        mIMagnificationConnection.setConnectionCallback(mConnectionCallback);
     }
 
     @Test
     public void enableWindowMagnification_passThrough() throws RemoteException {
-        mIWindowMagnificationConnection.enableWindowMagnification(TEST_DISPLAY, 3.0f, Float.NaN,
+        mIMagnificationConnection.enableWindowMagnification(TEST_DISPLAY, 3.0f, Float.NaN,
                 Float.NaN, 0f, 0f, mAnimationCallback);
         waitForIdleSync();
 
@@ -124,7 +124,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
 
     @Test
     public void disableWindowMagnification_deleteWindowMagnification() throws RemoteException {
-        mIWindowMagnificationConnection.disableWindowMagnification(TEST_DISPLAY,
+        mIMagnificationConnection.disableWindowMagnification(TEST_DISPLAY,
                 mAnimationCallback);
         waitForIdleSync();
 
@@ -134,7 +134,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
 
     @Test
     public void setScaleForWindowMagnification() throws RemoteException {
-        mIWindowMagnificationConnection.setScaleForWindowMagnification(TEST_DISPLAY, 3.0f);
+        mIMagnificationConnection.setScaleForWindowMagnification(TEST_DISPLAY, 3.0f);
         waitForIdleSync();
 
         verify(mWindowMagnificationController).setScale(3.0f);
@@ -142,7 +142,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
 
     @Test
     public void moveWindowMagnifier() throws RemoteException {
-        mIWindowMagnificationConnection.moveWindowMagnifier(TEST_DISPLAY, 100f, 200f);
+        mIMagnificationConnection.moveWindowMagnifier(TEST_DISPLAY, 100f, 200f);
         waitForIdleSync();
 
         verify(mWindowMagnificationController).moveWindowMagnifier(100f, 200f);
@@ -150,7 +150,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
 
     @Test
     public void moveWindowMagnifierToPosition() throws RemoteException {
-        mIWindowMagnificationConnection.moveWindowMagnifierToPosition(TEST_DISPLAY,
+        mIMagnificationConnection.moveWindowMagnifierToPosition(TEST_DISPLAY,
                 100f, 200f, mAnimationCallback);
         waitForIdleSync();
 
@@ -163,7 +163,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         // magnification settings panel should not be showing
         assertFalse(mMagnification.isMagnificationSettingsPanelShowing(TEST_DISPLAY));
 
-        mIWindowMagnificationConnection.showMagnificationButton(TEST_DISPLAY,
+        mIMagnificationConnection.showMagnificationButton(TEST_DISPLAY,
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
         waitForIdleSync();
 
@@ -173,7 +173,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
 
     @Test
     public void removeMagnificationButton() throws RemoteException {
-        mIWindowMagnificationConnection.removeMagnificationButton(TEST_DISPLAY);
+        mIMagnificationConnection.removeMagnificationButton(TEST_DISPLAY);
         waitForIdleSync();
 
         verify(mModeSwitchesController).removeButton(TEST_DISPLAY);
@@ -181,7 +181,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
 
     @Test
     public void removeMagnificationSettingsPanel() throws RemoteException {
-        mIWindowMagnificationConnection.removeMagnificationSettingsPanel(TEST_DISPLAY);
+        mIMagnificationConnection.removeMagnificationSettingsPanel(TEST_DISPLAY);
         waitForIdleSync();
 
         verify(mMagnificationSettingsController).closeMagnificationSettings();
@@ -191,7 +191,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     public void onUserMagnificationScaleChanged() throws RemoteException {
         final int testUserId = 1;
         final float testScale = 3.0f;
-        mIWindowMagnificationConnection.onUserMagnificationScaleChanged(
+        mIMagnificationConnection.onUserMagnificationScaleChanged(
                 testUserId, TEST_DISPLAY, testScale);
         waitForIdleSync();
 

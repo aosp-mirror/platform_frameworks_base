@@ -760,11 +760,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
 
         @Override
-        public boolean requestWindowMagnificationConnection(boolean request) {
+        public boolean requestMagnificationConnection(boolean request) {
             IStatusBar bar = mBar;
             if (bar != null) {
                 try {
-                    bar.requestWindowMagnificationConnection(request);
+                    bar.requestMagnificationConnection(request);
                     return true;
                 } catch (RemoteException ex) { }
             }
