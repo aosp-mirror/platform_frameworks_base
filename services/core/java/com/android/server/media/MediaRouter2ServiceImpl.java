@@ -193,26 +193,6 @@ class MediaRouter2ServiceImpl {
 
     // Start of methods that implement MediaRouter2 operations.
 
-    @RequiresPermission(Manifest.permission.MEDIA_CONTENT_CONTROL)
-    @NonNull
-    public boolean verifyPackageExists(@NonNull String clientPackageName) {
-        final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
-        final long token = Binder.clearCallingIdentity();
-
-        try {
-            // TODO (b/305919655) - Handle revoking of MEDIA_ROUTING_CONTROL at runtime.
-            enforcePrivilegedRoutingPermissions(uid, pid, /* callerPackageName */ null);
-            PackageManager pm = mContext.getPackageManager();
-            pm.getPackageInfo(clientPackageName, PackageManager.PackageInfoFlags.of(0));
-            return true;
-        } catch (PackageManager.NameNotFoundException ex) {
-            return false;
-        } finally {
-            Binder.restoreCallingIdentity(token);
-        }
-    }
-
     @NonNull
     public List<MediaRoute2Info> getSystemRoutes() {
         final int uid = Binder.getCallingUid();
@@ -491,13 +471,65 @@ class MediaRouter2ServiceImpl {
 
         final int callerUid = Binder.getCallingUid();
         final int callerPid = Binder.getCallingPid();
-        final int callerUserId = UserHandle.getUserHandleForUid(callerUid).getIdentifier();
+        final UserHandle callerUser = Binder.getCallingUserHandle();
+
+        // TODO (b/305919655) - Handle revoking of MEDIA_ROUTING_CONTROL at runtime.
+        enforcePrivilegedRoutingPermissions(callerUid, callerPid, callerPackageName);
 
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
                 registerManagerLocked(
-                        manager, callerUid, callerPid, callerPackageName, callerUserId);
+                        manager,
+                        callerUid,
+                        callerPid,
+                        callerPackageName,
+                        /* targetPackageName */ null,
+                        callerUser);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @RequiresPermission(
+            anyOf = {
+                Manifest.permission.MEDIA_CONTENT_CONTROL,
+                Manifest.permission.MEDIA_ROUTING_CONTROL
+            })
+    public void registerProxyRouter(
+            @NonNull IMediaRouter2Manager manager,
+            @NonNull String callerPackageName,
+            @NonNull String targetPackageName,
+            @NonNull UserHandle targetUser) {
+        Objects.requireNonNull(manager, "manager must not be null");
+        Objects.requireNonNull(targetUser, "targetUser must not be null");
+
+        if (TextUtils.isEmpty(targetPackageName)) {
+            throw new IllegalArgumentException("targetPackageName must not be empty");
+        }
+
+        int callerUid = Binder.getCallingUid();
+        int callerPid = Binder.getCallingPid();
+        final long token = Binder.clearCallingIdentity();
+
+        try {
+            // TODO (b/305919655) - Handle revoking of MEDIA_ROUTING_CONTROL at runtime.
+            enforcePrivilegedRoutingPermissions(callerUid, callerPid, callerPackageName);
+            enforceCrossUserPermissions(callerUid, callerPid, targetUser);
+            if (!verifyPackageExistsForUser(targetPackageName, targetUser)) {
+                throw new IllegalArgumentException(
+                        "targetPackageName does not exist: " + targetPackageName);
+            }
+
+            synchronized (mLock) {
+                registerManagerLocked(
+                        manager,
+                        callerUid,
+                        callerPid,
+                        callerPackageName,
+                        targetPackageName,
+                        targetUser);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -758,6 +790,37 @@ class MediaRouter2ServiceImpl {
                 != PermissionChecker.PERMISSION_GRANTED) {
             throw new SecurityException(
                     "Must hold MEDIA_CONTENT_CONTROL or MEDIA_ROUTING_CONTROL permissions.");
+        }
+    }
+
+    @RequiresPermission(value = Manifest.permission.INTERACT_ACROSS_USERS)
+    private boolean verifyPackageExistsForUser(
+            @NonNull String clientPackageName, @NonNull UserHandle user) {
+        try {
+            PackageManager pm = mContext.getPackageManager();
+            pm.getPackageInfoAsUser(
+                    clientPackageName, PackageManager.PackageInfoFlags.of(0), user.getIdentifier());
+            return true;
+        } catch (PackageManager.NameNotFoundException ex) {
+            return false;
+        }
+    }
+
+    /**
+     * Enforces the caller has {@link Manifest.permission#INTERACT_ACROSS_USERS_FULL} if the
+     * caller's user is different from the target user.
+     */
+    private void enforceCrossUserPermissions(
+            int callerUid, int callerPid, @NonNull UserHandle targetUser) {
+        int callerUserId = UserHandle.getUserId(callerUid);
+
+        if (targetUser.getIdentifier() != callerUserId) {
+            mContext.enforcePermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL,
+                    callerPid,
+                    callerUid,
+                    "Must hold INTERACT_ACROSS_USERS_FULL to control an app in a different"
+                            + " userId.");
         }
     }
 
@@ -1203,7 +1266,8 @@ class MediaRouter2ServiceImpl {
             int callerUid,
             int callerPid,
             @NonNull String callerPackageName,
-            int callerUserId) {
+            @Nullable String targetPackageName,
+            @NonNull UserHandle targetUser) {
         final IBinder binder = manager.asBinder();
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
@@ -1217,15 +1281,18 @@ class MediaRouter2ServiceImpl {
                 TAG,
                 TextUtils.formatSimple(
                         "registerManager | callerUid: %d, callerPid: %d, callerPackage: %s,"
-                            + " callerUserId: %d",
-                        callerUid, callerPid, callerPackageName, callerUserId));
+                                + "targetPackageName: %s, targetUserId: %d",
+                        callerUid, callerPid, callerPackageName, targetPackageName, targetUser));
 
-        // TODO (b/305919655) - Handle revoking of MEDIA_ROUTING_CONTROL at runtime.
-        enforcePrivilegedRoutingPermissions(callerUid, callerPid, callerPackageName);
-
-        UserRecord userRecord = getOrCreateUserRecordLocked(callerUserId);
-        managerRecord = new ManagerRecord(
-                userRecord, manager, callerUid, callerPid, callerPackageName);
+        UserRecord userRecord = getOrCreateUserRecordLocked(targetUser.getIdentifier());
+        managerRecord =
+                new ManagerRecord(
+                        userRecord,
+                        manager,
+                        callerUid,
+                        callerPid,
+                        callerPackageName,
+                        targetPackageName);
         try {
             binder.linkToDeath(managerRecord, 0);
         } catch (RemoteException ex) {
@@ -1791,22 +1858,30 @@ class MediaRouter2ServiceImpl {
     }
 
     final class ManagerRecord implements IBinder.DeathRecipient {
-        public final UserRecord mUserRecord;
-        public final IMediaRouter2Manager mManager;
+        @NonNull public final UserRecord mUserRecord;
+        @NonNull public final IMediaRouter2Manager mManager;
         public final int mOwnerUid;
         public final int mOwnerPid;
-        public final String mOwnerPackageName;
+        @NonNull public final String mOwnerPackageName;
         public final int mManagerId;
-        public SessionCreationRequest mLastSessionCreationRequest;
+        // TODO (b/281072508): Document behaviour around nullability for mTargetPackageName.
+        @Nullable public final String mTargetPackageName;
+        @Nullable public SessionCreationRequest mLastSessionCreationRequest;
         public boolean mIsScanning;
 
-        ManagerRecord(UserRecord userRecord, IMediaRouter2Manager manager,
-                int ownerUid, int ownerPid, String ownerPackageName) {
+        ManagerRecord(
+                @NonNull UserRecord userRecord,
+                @NonNull IMediaRouter2Manager manager,
+                int ownerUid,
+                int ownerPid,
+                @NonNull String ownerPackageName,
+                @Nullable String targetPackageName) {
             mUserRecord = userRecord;
             mManager = manager;
             mOwnerUid = ownerUid;
             mOwnerPid = ownerPid;
             mOwnerPackageName = ownerPackageName;
+            mTargetPackageName = targetPackageName;
             mManagerId = mNextRouterOrManagerId.getAndIncrement();
         }
 
