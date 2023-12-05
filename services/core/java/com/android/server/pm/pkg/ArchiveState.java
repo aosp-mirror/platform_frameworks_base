@@ -16,9 +16,10 @@
 
 package com.android.server.pm.pkg;
 
-import android.content.ComponentName;
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 
 import com.android.internal.util.AnnotationValidations;
 import com.android.internal.util.DataClass;
@@ -51,14 +52,45 @@ public class ArchiveState {
     @NonNull
     private final String mInstallerTitle;
 
-    /** Information about a main activity of an archived app. */
+    /**
+     * The time at which the app was archived for the user.  Units are as per
+     * {@link System#currentTimeMillis()}.
+     */
+    private final @CurrentTimeMillisLong long mArchiveTimeMillis;
+
+    /**
+     * Creates a new ArchiveState.
+     *
+     * @param activityInfos
+     *   Information about main activities.
+     *
+     *   <p> This list has at least one entry. In the vast majority of cases, this list has only one
+     *   entry.
+     * @param installerTitle
+     *   Corresponds to android:label of the installer responsible for the unarchival of the app.
+     *   Stored in the installer's locale .*
+     */
+    public ArchiveState(
+            @NonNull List<ArchiveActivityInfo> activityInfos,
+            @NonNull String installerTitle) {
+        this(activityInfos, installerTitle, System.currentTimeMillis());
+    }
+
+
+    /**
+     * Information about a main activity of an archived app.
+     */
     @DataClass(genEqualsHashCode = true, genToString = true)
     public static class ArchiveActivityInfo {
-        /** Corresponds to the activity's android:label in the app's locale. */
+        /**
+         * Corresponds to the activity's android:label in the app's locale.
+         */
         @NonNull
         private final String mTitle;
 
-        /** The component name of the original activity (pre-archival). */
+        /**
+         * The component name of the original activity (pre-archival).
+         */
         @NonNull
         private final ComponentName mOriginalComponentName;
 
@@ -69,7 +101,9 @@ public class ArchiveState {
         @Nullable
         private final Path mIconBitmap;
 
-        /** See {@link #mIconBitmap}. Only set if the app defined a monochrome icon. */
+        /**
+         * See {@link #mIconBitmap}. Only set if the app defined a monochrome icon.
+         */
         @Nullable
         private final Path mMonochromeIconBitmap;
 
@@ -93,6 +127,8 @@ public class ArchiveState {
          *
          * @param title
          *   Corresponds to the activity's android:label in the app's locale.
+         * @param originalComponentName
+         *   The component name of the original activity (pre-archival).
          * @param iconBitmap
          *   The path to the stored icon of the activity in the app's locale. Null if the app does
          *   not define any icon (default icon would be shown on the launcher).
@@ -106,9 +142,11 @@ public class ArchiveState {
                 @Nullable Path iconBitmap,
                 @Nullable Path monochromeIconBitmap) {
             this.mTitle = title;
+            AnnotationValidations.validate(
+                    NonNull.class, null, mTitle);
             this.mOriginalComponentName = originalComponentName;
-            AnnotationValidations.validate(NonNull.class, null, mTitle);
-            AnnotationValidations.validate(NonNull.class, null, mOriginalComponentName);
+            AnnotationValidations.validate(
+                    NonNull.class, null, mOriginalComponentName);
             this.mIconBitmap = iconBitmap;
             this.mMonochromeIconBitmap = monochromeIconBitmap;
 
@@ -125,7 +163,7 @@ public class ArchiveState {
 
         /**
          * The component name of the original activity (pre-archival).
-            */
+         */
         @DataClass.Generated.Member
         public @NonNull ComponentName getOriginalComponentName() {
             return mOriginalComponentName;
@@ -189,18 +227,17 @@ public class ArchiveState {
 
             int _hash = 1;
             _hash = 31 * _hash + java.util.Objects.hashCode(mTitle);
-            _hash = 31* _hash + java.util.Objects.hashCode(mOriginalComponentName);
+            _hash = 31 * _hash + java.util.Objects.hashCode(mOriginalComponentName);
             _hash = 31 * _hash + java.util.Objects.hashCode(mIconBitmap);
             _hash = 31 * _hash + java.util.Objects.hashCode(mMonochromeIconBitmap);
             return _hash;
         }
 
         @DataClass.Generated(
-                time = 1693590309015L,
+                time = 1701471309832L,
                 codegenVersion = "1.0.23",
                 sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/ArchiveState.java",
-                inputSignatures =
-                        "private final @android.annotation.NonNull java.lang.String mTitle\nprivate final @android.annotation.NonNull android.content.ComponentName mOriginalComponentName\nprivate final @android.annotation.Nullable java.nio.file.Path mIconBitmap\nprivate final @android.annotation.Nullable java.nio.file.Path mMonochromeIconBitmap\nclass ArchiveActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true)")
+                inputSignatures = "private final @android.annotation.NonNull java.lang.String mTitle\nprivate final @android.annotation.NonNull android.content.ComponentName mOriginalComponentName\nprivate final @android.annotation.Nullable java.nio.file.Path mIconBitmap\nprivate final @android.annotation.Nullable java.nio.file.Path mMonochromeIconBitmap\nclass ArchiveActivityInfo extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true)")
         @Deprecated
         private void __metadata() {}
 
@@ -238,15 +275,24 @@ public class ArchiveState {
      * @param installerTitle
      *   Corresponds to android:label of the installer responsible for the unarchival of the app.
      *   Stored in the installer's locale .
+     * @param archiveTimeMillis
+     *   The time at which the app was archived for the user.  Units are as per
+     *   {@link System#currentTimeMillis()}.
      */
     @DataClass.Generated.Member
     public ArchiveState(
             @NonNull List<ArchiveActivityInfo> activityInfos,
-            @NonNull String installerTitle) {
+            @NonNull String installerTitle,
+            @CurrentTimeMillisLong long archiveTimeMillis) {
         this.mActivityInfos = activityInfos;
-        AnnotationValidations.validate(NonNull.class, null, mActivityInfos);
+        AnnotationValidations.validate(
+                NonNull.class, null, mActivityInfos);
         this.mInstallerTitle = installerTitle;
-        AnnotationValidations.validate(NonNull.class, null, mInstallerTitle);
+        AnnotationValidations.validate(
+                NonNull.class, null, mInstallerTitle);
+        this.mArchiveTimeMillis = archiveTimeMillis;
+        AnnotationValidations.validate(
+                CurrentTimeMillisLong.class, null, mArchiveTimeMillis);
 
         // onConstructed(); // You can define this method to get a callback
     }
@@ -271,6 +317,15 @@ public class ArchiveState {
         return mInstallerTitle;
     }
 
+    /**
+     * The time at which the app was archived for the user.  Units are as per
+     * {@link System#currentTimeMillis()}.
+     */
+    @DataClass.Generated.Member
+    public @CurrentTimeMillisLong long getArchiveTimeMillis() {
+        return mArchiveTimeMillis;
+    }
+
     @Override
     @DataClass.Generated.Member
     public String toString() {
@@ -279,7 +334,8 @@ public class ArchiveState {
 
         return "ArchiveState { " +
                 "activityInfos = " + mActivityInfos + ", " +
-                "installerTitle = " + mInstallerTitle +
+                "installerTitle = " + mInstallerTitle + ", " +
+                "archiveTimeMillis = " + mArchiveTimeMillis +
         " }";
     }
 
@@ -297,7 +353,8 @@ public class ArchiveState {
         //noinspection PointlessBooleanExpression
         return true
                 && java.util.Objects.equals(mActivityInfos, that.mActivityInfos)
-                && java.util.Objects.equals(mInstallerTitle, that.mInstallerTitle);
+                && java.util.Objects.equals(mInstallerTitle, that.mInstallerTitle)
+                && mArchiveTimeMillis == that.mArchiveTimeMillis;
     }
 
     @Override
@@ -309,14 +366,15 @@ public class ArchiveState {
         int _hash = 1;
         _hash = 31 * _hash + java.util.Objects.hashCode(mActivityInfos);
         _hash = 31 * _hash + java.util.Objects.hashCode(mInstallerTitle);
+        _hash = 31 * _hash + Long.hashCode(mArchiveTimeMillis);
         return _hash;
     }
 
     @DataClass.Generated(
-            time = 1693590309027L,
+            time = 1701471309853L,
             codegenVersion = "1.0.23",
             sourceFile = "frameworks/base/services/core/java/com/android/server/pm/pkg/ArchiveState.java",
-            inputSignatures = "private final @android.annotation.NonNull java.util.List<com.android.server.pm.pkg.ArchiveActivityInfo> mActivityInfos\nprivate final @android.annotation.NonNull java.lang.String mInstallerTitle\nclass ArchiveState extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true)")
+            inputSignatures = "private final @android.annotation.NonNull java.util.List<com.android.server.pm.pkg.ArchiveActivityInfo> mActivityInfos\nprivate final @android.annotation.NonNull java.lang.String mInstallerTitle\nprivate final @android.annotation.CurrentTimeMillisLong long mArchiveTimeMillis\nclass ArchiveState extends java.lang.Object implements []\n@com.android.internal.util.DataClass(genEqualsHashCode=true, genToString=true)")
     @Deprecated
     private void __metadata() {}
 

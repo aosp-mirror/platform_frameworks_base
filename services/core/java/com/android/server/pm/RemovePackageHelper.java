@@ -419,9 +419,6 @@ final class RemovePackageHelper {
                     Slog.d(TAG, "    user " + userId + ": " + wasInstalled + " => " + false);
                 }
                 deletedPs.setInstalled(/* installed= */ false, userId);
-                if (isArchive) {
-                    deletedPs.modifyUserState(userId).setArchiveTimeMillis(currentTimeMillis);
-                }
             }
         }
         // make sure to preserve per-user installed state if this removal was just
