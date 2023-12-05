@@ -16,6 +16,7 @@
 
 package com.android.server.appwidget;
 
+import static android.appwidget.flags.Flags.removeAppWidgetServiceIoFromCriticalPath;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -144,6 +145,7 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -277,7 +279,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mKeyguardManager = (KeyguardManager) mContext.getSystemService(KEYGUARD_SERVICE);
         mDevicePolicyManagerInternal = LocalServices.getService(DevicePolicyManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mSaveStateHandler = BackgroundThread.getHandler();
+        if (removeAppWidgetServiceIoFromCriticalPath()) {
+            mSaveStateHandler = new Handler(BackgroundThread.get().getLooper(),
+                    this::handleSaveMessage);
+        } else {
+            mSaveStateHandler = BackgroundThread.getHandler();
+        }
         final ServiceThread serviceThread = new ServiceThread(TAG,
                 android.os.Process.THREAD_PRIORITY_FOREGROUND, false /* allowIo */);
         serviceThread.start();
@@ -312,6 +319,40 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         // Cap memory usage at 1.5 times the size of the display
         // 1.5 * 4 bytes/pixel * w * h ==> 6 * w * h
         mMaxWidgetBitmapMemory = 6 * size.x * size.y;
+    }
+
+    private boolean handleSaveMessage(Message msg) {
+        final int userId = msg.what;
+        SparseArray<byte[]> userIdToBytesMapping;
+        synchronized (mLock) {
+            // No need to enforce unlocked state when there is no caller. User can be in the
+            // stopping state or removed by the time the message is processed
+            ensureGroupStateLoadedLocked(userId, false /* enforceUserUnlockingOrUnlocked */);
+            userIdToBytesMapping = saveStateToByteArrayLocked(userId);
+        }
+
+        for (int i = 0; i < userIdToBytesMapping.size(); i++) {
+            int currentProfileId = userIdToBytesMapping.keyAt(i);
+            byte[] currentStateByteArray = userIdToBytesMapping.valueAt(i);
+            AtomicFile currentFile = getSavedStateFile(currentProfileId);
+            FileOutputStream fileStream;
+            try {
+                fileStream = currentFile.startWrite();
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to start writing stream", e);
+                continue;
+            }
+
+            try {
+                fileStream.write(currentStateByteArray);
+                currentFile.finishWrite(fileStream);
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to write state byte stream to file", e);
+                currentFile.failWrite(fileStream);
+            }
+        }
+
+        return true;
     }
 
     private void registerBroadcastReceiver() {
@@ -1944,7 +1985,12 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void saveGroupStateAsync(int groupId) {
-        mSaveStateHandler.post(new SaveStateRunnable(groupId));
+        if (removeAppWidgetServiceIoFromCriticalPath()) {
+            mSaveStateHandler.removeMessages(groupId);
+            mSaveStateHandler.sendEmptyMessage(groupId);
+        } else {
+            mSaveStateHandler.post(new SaveStateRunnable(groupId));
+        }
     }
 
     private void updateAppWidgetInstanceLocked(Widget widget, RemoteViews views,
@@ -3104,6 +3150,23 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @GuardedBy("mLock")
+    private @NonNull SparseArray<byte[]> saveStateToByteArrayLocked(int userId) {
+        tagProvidersAndHosts();
+
+        final int[] profileIds = mSecurityPolicy.getEnabledGroupProfileIds(userId);
+        SparseArray<byte[]> userIdToBytesMapping = new SparseArray<>();
+
+        for (int profileId : profileIds) {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            if (writeProfileStateToStreamLocked(outputStream, profileId)) {
+                userIdToBytesMapping.put(profileId, outputStream.toByteArray());
+            }
+        }
+
+        return userIdToBytesMapping;
+    }
+
+    @GuardedBy("mLock")
     private void saveStateLocked(int userId) {
         tagProvidersAndHosts();
 
@@ -3117,7 +3180,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             FileOutputStream stream;
             try {
                 stream = file.startWrite();
-                if (writeProfileStateToFileLocked(stream, profileId)) {
+                if (writeProfileStateToStreamLocked(stream, profileId)) {
                     file.finishWrite(stream);
                 } else {
                     file.failWrite(stream);
@@ -3158,7 +3221,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     @GuardedBy("mLock")
-    private boolean writeProfileStateToFileLocked(FileOutputStream stream, int userId) {
+    private boolean writeProfileStateToStreamLocked(OutputStream stream, int userId) {
         int N;
 
         try {
