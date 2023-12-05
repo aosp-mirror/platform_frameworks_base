@@ -26,10 +26,12 @@ import static android.media.LoudnessCodecInfo.CodecMetadataType.CODEC_METADATA_T
 import static android.media.MediaFormat.KEY_AAC_DRC_EFFECT_TYPE;
 import static android.media.MediaFormat.KEY_AAC_DRC_HEAVY_COMPRESSION;
 import static android.media.MediaFormat.KEY_AAC_DRC_TARGET_REFERENCE_LEVEL;
+import static android.media.audio.Flags.automaticBtDeviceType;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.media.AudioDeviceInfo;
+import android.media.AudioManager.AudioDeviceCategory;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioSystem;
 import android.media.ILoudnessCodecUpdatesDispatcher;
@@ -552,6 +554,13 @@ public class LoudnessCodecHelper {
     @DeviceSplRange
     private int getDeviceSplRange(AudioDeviceInfo deviceInfo) {
         final int internalDeviceType = deviceInfo.getInternalType();
+        final @AudioDeviceCategory int deviceCategory;
+        if (automaticBtDeviceType()) {
+            deviceCategory = mAudioService.getBluetoothAudioDeviceCategory(deviceInfo.getAddress());
+        } else {
+            deviceCategory = mAudioService.getBluetoothAudioDeviceCategory_legacy(
+                    deviceInfo.getAddress(), AudioSystem.isBluetoothLeDevice(internalDeviceType));
+        }
         if (internalDeviceType == AudioSystem.DEVICE_OUT_SPEAKER) {
             final String splRange = SystemProperties.get(
                     SYSTEM_PROPERTY_SPEAKER_SPL_RANGE_SIZE, "unknown");
@@ -569,18 +578,14 @@ public class LoudnessCodecHelper {
                 || internalDeviceType == AudioSystem.DEVICE_OUT_WIRED_HEADPHONE
                 || internalDeviceType == AudioSystem.DEVICE_OUT_WIRED_HEADSET
                 || (AudioSystem.isBluetoothDevice(internalDeviceType)
-                && mAudioService.getBluetoothAudioDeviceCategory(deviceInfo.getAddress(),
-                AudioSystem.isBluetoothLeDevice(internalDeviceType))
-                == AUDIO_DEVICE_CATEGORY_HEADPHONES)) {
+                && deviceCategory == AUDIO_DEVICE_CATEGORY_HEADPHONES)) {
             return SPL_RANGE_LARGE;
         } else if (AudioSystem.isBluetoothDevice(internalDeviceType)) {
-            final int audioDeviceType = mAudioService.getBluetoothAudioDeviceCategory(
-                    deviceInfo.getAddress(), AudioSystem.isBluetoothLeDevice(internalDeviceType));
-            if (audioDeviceType == AUDIO_DEVICE_CATEGORY_CARKIT) {
+            if (deviceCategory == AUDIO_DEVICE_CATEGORY_CARKIT) {
                 return SPL_RANGE_MEDIUM;
-            } else if (audioDeviceType == AUDIO_DEVICE_CATEGORY_WATCH) {
+            } else if (deviceCategory == AUDIO_DEVICE_CATEGORY_WATCH) {
                 return SPL_RANGE_SMALL;
-            } else if (audioDeviceType == AUDIO_DEVICE_CATEGORY_HEARING_AID) {
+            } else if (deviceCategory == AUDIO_DEVICE_CATEGORY_HEARING_AID) {
                 return SPL_RANGE_SMALL;
             }
         }

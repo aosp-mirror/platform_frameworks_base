@@ -30,6 +30,7 @@ import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
+import android.media.AudioManager.AudioDeviceCategory;
 import android.media.AudioPlaybackConfiguration;
 import android.media.AudioRecordingConfiguration;
 import android.media.AudioRoutesInfo;
@@ -1483,8 +1484,12 @@ public class AudioDeviceBroker {
                 MSG_I_UPDATE_LE_AUDIO_GROUP_ADDRESSES, SENDMSG_QUEUE, groupId);
     }
 
-    /*package*/ void postSynchronizeLeDevicesInInventory(AdiDeviceState deviceState) {
-        sendLMsgNoDelay(MSG_L_SYNCHRONIZE_LE_DEVICES_IN_INVENTORY, SENDMSG_QUEUE, deviceState);
+    /*package*/ void postSynchronizeAdiDevicesInInventory(AdiDeviceState deviceState) {
+        sendLMsgNoDelay(MSG_L_SYNCHRONIZE_ADI_DEVICES_IN_INVENTORY, SENDMSG_QUEUE, deviceState);
+    }
+
+    /*package*/ void postUpdatedAdiDeviceState(AdiDeviceState deviceState) {
+        sendLMsgNoDelay(MSG_L_UPDATED_ADI_DEVICE_STATE, SENDMSG_QUEUE, deviceState);
     }
 
     /*package*/ static final class CommunicationDeviceInfo {
@@ -2007,12 +2012,17 @@ public class AudioDeviceBroker {
                         }
                     } break;
 
-                case MSG_L_SYNCHRONIZE_LE_DEVICES_IN_INVENTORY:
+                case MSG_L_SYNCHRONIZE_ADI_DEVICES_IN_INVENTORY:
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
-                            mDeviceInventory.onSynchronizeLeDevicesInInventory(
+                            mDeviceInventory.onSynchronizeAdiDevicesInInventory(
                                     (AdiDeviceState) msg.obj);
                         }
+                    } break;
+
+                case MSG_L_UPDATED_ADI_DEVICE_STATE:
+                    synchronized (mDeviceStateLock) {
+                        mAudioService.onUpdatedAdiDeviceState((AdiDeviceState) msg.obj);
                     } break;
 
                 default:
@@ -2098,7 +2108,8 @@ public class AudioDeviceBroker {
 
     private static final int MSG_CHECK_COMMUNICATION_ROUTE_CLIENT_STATE = 56;
     private static final int MSG_I_UPDATE_LE_AUDIO_GROUP_ADDRESSES = 57;
-    private static final int MSG_L_SYNCHRONIZE_LE_DEVICES_IN_INVENTORY = 58;
+    private static final int MSG_L_SYNCHRONIZE_ADI_DEVICES_IN_INVENTORY = 58;
+    private static final int MSG_L_UPDATED_ADI_DEVICE_STATE = 59;
 
 
 
@@ -2743,6 +2754,21 @@ public class AudioDeviceBroker {
     @Nullable
     AdiDeviceState findBtDeviceStateForAddress(String address, int deviceType) {
         return mDeviceInventory.findBtDeviceStateForAddress(address, deviceType);
+    }
+
+    void addAudioDeviceWithCategoryInInventoryIfNeeded(@NonNull String address,
+            @AudioDeviceCategory int btAudioDeviceCategory) {
+        mDeviceInventory.addAudioDeviceWithCategoryInInventoryIfNeeded(address,
+                btAudioDeviceCategory);
+    }
+
+    @AudioDeviceCategory
+    int getAndUpdateBtAdiDeviceStateCategoryForAddress(@NonNull String address) {
+        return mDeviceInventory.getAndUpdateBtAdiDeviceStateCategoryForAddress(address);
+    }
+
+    boolean isBluetoothAudioDeviceCategoryFixed(@NonNull String address) {
+        return mDeviceInventory.isBluetoothAudioDeviceCategoryFixed(address);
     }
 
     //------------------------------------------------

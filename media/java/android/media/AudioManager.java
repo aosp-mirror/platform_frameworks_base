@@ -20,6 +20,7 @@ import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAUL
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
+import static android.media.audio.Flags.automaticBtDeviceType;
 import static android.media.audio.Flags.FLAG_FOCUS_FREEZE_TEST_API;
 
 import android.Manifest;
@@ -7170,10 +7171,14 @@ public class AudioManager {
      * Sets the audio device type of a Bluetooth device given its MAC address
      */
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
-    public void setBluetoothAudioDeviceCategory(@NonNull String address, boolean isBle,
+    public void setBluetoothAudioDeviceCategory_legacy(@NonNull String address, boolean isBle,
             @AudioDeviceCategory int btAudioDeviceType) {
+        if (automaticBtDeviceType()) {
+            // do nothing
+            return;
+        }
         try {
-            getService().setBluetoothAudioDeviceCategory(address, isBle, btAudioDeviceType);
+            getService().setBluetoothAudioDeviceCategory_legacy(address, isBle, btAudioDeviceType);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -7185,9 +7190,67 @@ public class AudioManager {
      */
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     @AudioDeviceCategory
-    public int getBluetoothAudioDeviceCategory(@NonNull String address, boolean isBle) {
+    public int getBluetoothAudioDeviceCategory_legacy(@NonNull String address, boolean isBle) {
+        if (automaticBtDeviceType()) {
+            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
+        }
         try {
-            return getService().getBluetoothAudioDeviceCategory(address, isBle);
+            return getService().getBluetoothAudioDeviceCategory_legacy(address, isBle);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Sets the audio device type of a Bluetooth device given its MAC address
+     *
+     * @return {@code true} if the device type was set successfully. If the
+     *         audio device type was automatically identified this method will
+     *         return {@code false}.
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean setBluetoothAudioDeviceCategory(@NonNull String address,
+            @AudioDeviceCategory int btAudioDeviceCategory) {
+        if (!automaticBtDeviceType()) {
+            return false;
+        }
+        try {
+            return getService().setBluetoothAudioDeviceCategory(address, btAudioDeviceCategory);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Gets the audio device type of a Bluetooth device given its MAC address
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @AudioDeviceCategory
+    public int getBluetoothAudioDeviceCategory(@NonNull String address) {
+        if (!automaticBtDeviceType()) {
+            return AUDIO_DEVICE_CATEGORY_UNKNOWN;
+        }
+        try {
+            return getService().getBluetoothAudioDeviceCategory(address);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns {@code true} if the audio device type of a Bluetooth device can
+     * be automatically identified
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean isBluetoothAudioDeviceCategoryFixed(@NonNull String address) {
+        if (!automaticBtDeviceType()) {
+            return false;
+        }
+        try {
+            return getService().isBluetoothAudioDeviceCategoryFixed(address);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
