@@ -1102,6 +1102,12 @@ public final class JobStatus {
         return job.getService();
     }
 
+    /** Return the package name of the app that scheduled the job. */
+    public String getCallingPackageName() {
+        return job.getService().getPackageName();
+    }
+
+    /** Return the package name of the app on whose behalf the job was scheduled. */
     public String getSourcePackageName() {
         return sourcePackageName;
     }

@@ -1433,10 +1433,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                         Slog.d(TAG, "Removing jobs for pkg " + pkgName + " at uid " + pkgUid);
                     }
                     synchronized (mLock) {
-                        // Exclude jobs scheduled on behalf of this app for now because SyncManager
+                        // Exclude jobs scheduled on behalf of this app because SyncManager
                         // and other job proxy agents may not know to reschedule the job properly
                         // after force stop.
-                        // TODO(209852664): determine how to best handle syncs & other proxied jobs
+                        // Proxied jobs will not be allowed to run if the source app is stopped.
                         cancelJobsForPackageAndUidLocked(pkgName, pkgUid,
                                 /* includeSchedulingApp */ true, /* includeSourceApp */ false,
                                 JobParameters.STOP_REASON_USER,
@@ -1448,7 +1448,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         }
     };
 
-    private String getPackageName(Intent intent) {
+    /** Returns the package name stored in the intent's data. */
+    @Nullable
+    public static String getPackageName(Intent intent) {
         Uri uri = intent.getData();
         String pkg = uri != null ? uri.getSchemeSpecificPart() : null;
         return pkg;
