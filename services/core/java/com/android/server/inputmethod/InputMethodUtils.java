@@ -219,7 +219,6 @@ final class InputMethodUtils {
 
         @NonNull
         private Context mUserAwareContext;
-        private Resources mRes;
         private ContentResolver mResolver;
         private final ArrayMap<String, InputMethodInfo> mMethodMap;
 
@@ -282,7 +281,6 @@ final class InputMethodUtils {
             mUserAwareContext = context.getUserId() == userId
                     ? context
                     : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
-            mRes = mUserAwareContext.getResources();
             mResolver = mUserAwareContext.getContentResolver();
         }
 
@@ -399,7 +397,7 @@ final class InputMethodUtils {
                     getEnabledInputMethodSubtypeListLocked(imi);
             if (allowsImplicitlyEnabledSubtypes && enabledSubtypes.isEmpty()) {
                 enabledSubtypes = SubtypeUtils.getImplicitlyApplicableSubtypesLocked(
-                        mRes.getConfiguration().getLocales(), imi);
+                        SystemLocaleWrapper.get(mCurrentUserId), imi);
             }
             return InputMethodSubtype.sort(imi, enabledSubtypes);
         }
@@ -648,7 +646,7 @@ final class InputMethodUtils {
 
         private String getEnabledSubtypeHashCodeForInputMethodAndSubtypeLocked(List<Pair<String,
                 ArrayList<String>>> enabledImes, String imeId, String subtypeHashCode) {
-            final LocaleList localeList = mRes.getConfiguration().getLocales();
+            final LocaleList localeList = SystemLocaleWrapper.get(mCurrentUserId);
             for (Pair<String, ArrayList<String>> enabledIme: enabledImes) {
                 if (enabledIme.first.equals(imeId)) {
                     final ArrayList<String> explicitlyEnabledSubtypes = enabledIme.second;
@@ -851,7 +849,7 @@ final class InputMethodUtils {
             if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
                 return explicitlyOrImplicitlyEnabledSubtypes.get(0);
             }
-            final String locale = mRes.getConfiguration().locale.toString();
+            final String locale = SystemLocaleWrapper.get(mCurrentUserId).get(0).toString();
             final InputMethodSubtype subtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
                     explicitlyOrImplicitlyEnabledSubtypes, SubtypeUtils.SUBTYPE_MODE_KEYBOARD,
                     locale, true);

@@ -741,7 +741,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      */
     int mImeWindowVis;
 
-    private LocaleList mLastSystemLocales;
     private final MyPackageMonitor mMyPackageMonitor = new MyPackageMonitor();
     private final String mSlotIme;
 
@@ -1199,9 +1198,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             if (Intent.ACTION_USER_ADDED.equals(action)
                     || Intent.ACTION_USER_REMOVED.equals(action)) {
                 updateCurrentProfileIds();
-                return;
-            } else if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
-                onActionLocaleChanged();
             } else {
                 Slog.w(TAG, "Unexpected intent " + intent);
             }
@@ -1240,20 +1236,19 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
      *
      * <p>Note: For historical reasons, {@link Intent#ACTION_LOCALE_CHANGED} has been sent to all
      * the users. We should ignore this event if this is about any background user's locale.</p>
-     *
-     * <p>Caution: This method must not be called when system is not ready.</p>
      */
-    void onActionLocaleChanged() {
+    void onActionLocaleChanged(@NonNull LocaleList prevLocales, @NonNull LocaleList newLocales) {
+        if (DEBUG) {
+            Slog.d(TAG, "onActionLocaleChanged prev=" + prevLocales + " new=" + newLocales);
+        }
         synchronized (ImfLock.class) {
-            final LocaleList possibleNewLocale = mRes.getConfiguration().getLocales();
-            if (possibleNewLocale != null && possibleNewLocale.equals(mLastSystemLocales)) {
+            if (!mSystemReady) {
                 return;
             }
             buildInputMethodListLocked(true);
             // If the locale is changed, needs to reset the default ime
             resetDefaultImeLocked(mContext);
             updateFromSettingsLocked(true);
-            mLastSystemLocales = possibleNewLocale;
         }
     }
 
@@ -1681,6 +1676,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                                 true /* allowIo */);
         thread.start();
         mHandler = Handler.createAsync(thread.getLooper(), this);
+        SystemLocaleWrapper.onStart(context, this::onActionLocaleChanged, mHandler);
         mImeTrackerService = new ImeTrackerService(serviceThreadForTesting != null
                 ? serviceThreadForTesting.getLooper() : Looper.getMainLooper());
         // Note: SettingsObserver doesn't register observers in its constructor.
@@ -1838,7 +1834,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // Even in such cases, IMMS works fine because it will find the most applicable
         // IME for that user.
         final boolean initialUserSwitch = TextUtils.isEmpty(defaultImiId);
-        mLastSystemLocales = mRes.getConfiguration().getLocales();
 
         // The mSystemReady flag is set during boot phase,
         // and user switch would not happen at that time.
@@ -1890,7 +1885,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             }
             if (!mSystemReady) {
                 mSystemReady = true;
-                mLastSystemLocales = mRes.getConfiguration().getLocales();
                 final int currentUserId = mSettings.getCurrentUserId();
                 mSettings.switchCurrentUser(currentUserId,
                         !mUserManagerInternal.isUserUnlockingOrUnlocked(currentUserId));
@@ -1930,7 +1924,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 final IntentFilter broadcastFilterForSystemUser = new IntentFilter();
                 broadcastFilterForSystemUser.addAction(Intent.ACTION_USER_ADDED);
                 broadcastFilterForSystemUser.addAction(Intent.ACTION_USER_REMOVED);
-                broadcastFilterForSystemUser.addAction(Intent.ACTION_LOCALE_CHANGED);
                 mContext.registerReceiver(new ImmsBroadcastReceiverForSystemUser(),
                         broadcastFilterForSystemUser);
 
@@ -4078,7 +4071,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             && !TextUtils.isEmpty(mCurrentSubtype.getLocale())) {
                         locale = mCurrentSubtype.getLocale();
                     } else {
-                        locale = mRes.getConfiguration().locale.toString();
+                        locale = SystemLocaleWrapper.get(mSettings.getCurrentUserId()).get(0)
+                                .toString();
                     }
                     for (int i = 0; i < enabledCount; ++i) {
                         final InputMethodInfo imi = enabled.get(i);
@@ -5434,7 +5428,8 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
                     mCurrentSubtype = explicitlyOrImplicitlyEnabledSubtypes.get(0);
                 } else if (explicitlyOrImplicitlyEnabledSubtypes.size() > 1) {
-                    final String locale = mRes.getConfiguration().locale.toString();
+                    final String locale = SystemLocaleWrapper.get(mSettings.getCurrentUserId())
+                            .get(0).toString();
                     mCurrentSubtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
                             explicitlyOrImplicitlyEnabledSubtypes,
                             SubtypeUtils.SUBTYPE_MODE_KEYBOARD, locale, true);
