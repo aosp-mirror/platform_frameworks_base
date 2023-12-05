@@ -101,28 +101,6 @@ package android.graphics {
     field @Deprecated public static final int MATRIX_SAVE_FLAG = 1; // 0x1
   }
 
-  public final class ImageDecoder implements java.lang.AutoCloseable {
-    method @Deprecated public boolean getAsAlphaMask();
-    method @Deprecated public boolean getConserveMemory();
-    method @Deprecated public boolean getDecodeAsAlphaMask();
-    method @Deprecated public boolean getMutable();
-    method @Deprecated public boolean getRequireUnpremultiplied();
-    method @Deprecated public android.graphics.ImageDecoder setAsAlphaMask(boolean);
-    method @Deprecated public void setConserveMemory(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setDecodeAsAlphaMask(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setMutable(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setRequireUnpremultiplied(boolean);
-    method @Deprecated public android.graphics.ImageDecoder setResize(int, int);
-    method @Deprecated public android.graphics.ImageDecoder setResize(int);
-    field @Deprecated public static final int ERROR_SOURCE_ERROR = 3; // 0x3
-    field @Deprecated public static final int ERROR_SOURCE_EXCEPTION = 1; // 0x1
-    field @Deprecated public static final int ERROR_SOURCE_INCOMPLETE = 2; // 0x2
-  }
-
-  @Deprecated public static class ImageDecoder.IncompleteException extends java.io.IOException {
-    ctor public ImageDecoder.IncompleteException();
-  }
-
   @Deprecated public class LayerRasterizer extends android.graphics.Rasterizer {
     ctor public LayerRasterizer();
     method public void addLayer(android.graphics.Paint, float, float);
