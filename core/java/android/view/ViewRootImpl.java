@@ -97,6 +97,8 @@ import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodCl
 import static android.view.inputmethod.InputMethodEditorTraceProto.InputMethodClientsTraceProto.ClientSideProto.INSETS_CONTROLLER;
 import static android.view.flags.Flags.toolkitSetFrameRateReadOnly;
 
+import static com.android.input.flags.Flags.enablePointerChoreographer;
+
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.animation.AnimationHandler;
@@ -7485,18 +7487,34 @@ public final class ViewRootImpl implements ViewParent,
             mPointerIconType = pointerType;
             mCustomPointerIcon = null;
             if (mPointerIconType != PointerIcon.TYPE_CUSTOM) {
-                InputManagerGlobal
-                    .getInstance()
-                    .setPointerIconType(pointerType);
+                if (enablePointerChoreographer()) {
+                    InputManagerGlobal
+                            .getInstance()
+                            .setPointerIcon(PointerIcon.getSystemIcon(mContext, pointerType),
+                                    event.getDisplayId(), event.getDeviceId(),
+                                    event.getPointerId(pointerIndex), getInputToken());
+                } else {
+                    InputManagerGlobal
+                            .getInstance()
+                            .setPointerIconType(pointerType);
+                }
                 return true;
             }
         }
         if (mPointerIconType == PointerIcon.TYPE_CUSTOM &&
                 !pointerIcon.equals(mCustomPointerIcon)) {
             mCustomPointerIcon = pointerIcon;
-            InputManagerGlobal
-                    .getInstance()
-                    .setCustomPointerIcon(mCustomPointerIcon);
+            if (enablePointerChoreographer()) {
+                InputManagerGlobal
+                        .getInstance()
+                        .setPointerIcon(mCustomPointerIcon,
+                                event.getDisplayId(), event.getDeviceId(),
+                                event.getPointerId(pointerIndex), getInputToken());
+            } else {
+                InputManagerGlobal
+                        .getInstance()
+                        .setCustomPointerIcon(mCustomPointerIcon);
+            }
         }
         return true;
     }

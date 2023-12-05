@@ -1308,24 +1308,6 @@ public final class InputDevice implements Parcelable {
     }
 
     /**
-     * Sets the current pointer type.
-     * @param pointerType the type of the pointer icon.
-     * @hide
-     */
-    public void setPointerType(int pointerType) {
-        InputManagerGlobal.getInstance().setPointerIconType(pointerType);
-    }
-
-    /**
-     * Specifies the current custom pointer.
-     * @param icon the icon data.
-     * @hide
-     */
-    public void setCustomPointerIcon(PointerIcon icon) {
-        InputManagerGlobal.getInstance().setCustomPointerIcon(icon);
-    }
-
-    /**
      * Reports whether the device has a battery.
      * @return true if the device has a battery, false otherwise.
      * @hide
