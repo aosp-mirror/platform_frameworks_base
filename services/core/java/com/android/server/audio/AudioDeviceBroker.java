@@ -300,7 +300,7 @@ public class AudioDeviceBroker {
         }
         postSetCommunicationDeviceForClient(new CommunicationDeviceInfo(
                 cb, uid, new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_SPEAKER, ""),
-                on, BtHelper.SCO_MODE_UNDEFINED, eventSource, false, isPrivileged));
+                on, BtHelper.SCO_MODE_UNDEFINED, eventSource, isPrivileged));
     }
 
     /**
@@ -313,6 +313,11 @@ public class AudioDeviceBroker {
 
     private static final long SET_COMMUNICATION_DEVICE_TIMEOUT_MS = 3000;
 
+    /** synchronization for setCommunicationDevice() and getCommunicationDevice */
+    private Object mCommunicationDeviceLock = new Object();
+    @GuardedBy("mCommunicationDeviceLock")
+    private int mCommunicationDeviceUpdateCount = 0;
+
     /*package*/ boolean setCommunicationDevice(IBinder cb, int uid, AudioDeviceInfo device,
                                                boolean isPrivileged, String eventSource) {
 
@@ -320,29 +325,23 @@ public class AudioDeviceBroker {
             Log.v(TAG, "setCommunicationDevice, device: " + device + ", uid: " + uid);
         }
 
-        AudioDeviceAttributes deviceAttr =
-                (device != null) ? new AudioDeviceAttributes(device) : null;
-        CommunicationDeviceInfo deviceInfo = new CommunicationDeviceInfo(cb, uid, deviceAttr,
-                device != null, BtHelper.SCO_MODE_UNDEFINED, eventSource, true, isPrivileged);
-        postSetCommunicationDeviceForClient(deviceInfo);
-        boolean status;
-        synchronized (deviceInfo) {
-            final long start = System.currentTimeMillis();
-            long elapsed = 0;
-            while (deviceInfo.mWaitForStatus) {
-                try {
-                    deviceInfo.wait(SET_COMMUNICATION_DEVICE_TIMEOUT_MS - elapsed);
-                } catch (InterruptedException e) {
-                    elapsed = System.currentTimeMillis() - start;
-                    if (elapsed >= SET_COMMUNICATION_DEVICE_TIMEOUT_MS) {
-                        deviceInfo.mStatus = false;
-                        deviceInfo.mWaitForStatus = false;
-                    }
+        synchronized (mDeviceStateLock) {
+            if (device == null) {
+                CommunicationRouteClient client = getCommunicationRouteClientForUid(uid);
+                if (client == null) {
+                    return false;
                 }
             }
-            status = deviceInfo.mStatus;
         }
-        return status;
+        synchronized (mCommunicationDeviceLock) {
+            mCommunicationDeviceUpdateCount++;
+            AudioDeviceAttributes deviceAttr =
+                    (device != null) ? new AudioDeviceAttributes(device) : null;
+            CommunicationDeviceInfo deviceInfo = new CommunicationDeviceInfo(cb, uid, deviceAttr,
+                    device != null, BtHelper.SCO_MODE_UNDEFINED, eventSource, isPrivileged);
+            postSetCommunicationDeviceForClient(deviceInfo);
+        }
+        return true;
     }
 
     /**
@@ -352,7 +351,7 @@ public class AudioDeviceBroker {
      * @return true if the communication device is set or reset
      */
     @GuardedBy("mDeviceStateLock")
-    /*package*/ boolean onSetCommunicationDeviceForClient(CommunicationDeviceInfo deviceInfo) {
+    /*package*/ void onSetCommunicationDeviceForClient(CommunicationDeviceInfo deviceInfo) {
         if (AudioService.DEBUG_COMM_RTE) {
             Log.v(TAG, "onSetCommunicationDeviceForClient: " + deviceInfo);
         }
@@ -360,14 +359,13 @@ public class AudioDeviceBroker {
             CommunicationRouteClient client = getCommunicationRouteClientForUid(deviceInfo.mUid);
             if (client == null || (deviceInfo.mDevice != null
                     && !deviceInfo.mDevice.equals(client.getDevice()))) {
-                return false;
+                return;
             }
         }
 
         AudioDeviceAttributes device = deviceInfo.mOn ? deviceInfo.mDevice : null;
         setCommunicationRouteForClient(deviceInfo.mCb, deviceInfo.mUid, device,
                 deviceInfo.mScoAudioMode, deviceInfo.mIsPrivileged, deviceInfo.mEventSource);
-        return true;
     }
 
     @GuardedBy("mDeviceStateLock")
@@ -536,7 +534,7 @@ public class AudioDeviceBroker {
                 CommunicationDeviceInfo deviceInfo = new CommunicationDeviceInfo(
                         crc.getBinder(), crc.getUid(), device, false,
                         BtHelper.SCO_MODE_UNDEFINED, "onCheckCommunicationDeviceRemoval",
-                        false, crc.isPrivileged());
+                        crc.isPrivileged());
                 postSetCommunicationDeviceForClient(deviceInfo);
             }
         }
@@ -619,32 +617,54 @@ public class AudioDeviceBroker {
      * @return AudioDeviceInfo the requested device for communication.
      */
     /* package */ AudioDeviceInfo getCommunicationDevice() {
-        synchronized (mDeviceStateLock) {
-            updateActiveCommunicationDevice();
-            AudioDeviceInfo device = mActiveCommunicationDevice;
-            // make sure we return a valid communication device (i.e. a device that is allowed by
-            // setCommunicationDevice()) for consistency.
-            if (device != null) {
-                // a digital dock is used instead of the speaker in speakerphone mode and should
-                // be reflected as such
-                if (device.getType() == AudioDeviceInfo.TYPE_DOCK) {
-                    device = getCommunicationDeviceOfType(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
+        synchronized (mCommunicationDeviceLock) {
+            final long start = System.currentTimeMillis();
+            long elapsed = 0;
+            while (mCommunicationDeviceUpdateCount > 0) {
+                try {
+                    mCommunicationDeviceLock.wait(
+                            SET_COMMUNICATION_DEVICE_TIMEOUT_MS - elapsed);
+                } catch (InterruptedException e) {
+                    Log.w(TAG, "Interrupted while waiting for communication device update.");
+                }
+                elapsed = System.currentTimeMillis() - start;
+                if (elapsed >= SET_COMMUNICATION_DEVICE_TIMEOUT_MS) {
+                    Log.e(TAG, "Timeout waiting for communication device update.");
+                    break;
                 }
             }
-            // Try to default to earpiece when current communication device is not valid. This can
-            // happen for instance if no call is active. If no earpiece device is available take the
-            // first valid communication device
-            if (device == null || !AudioDeviceBroker.isValidCommunicationDevice(device)) {
-                device = getCommunicationDeviceOfType(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
-                if (device == null) {
-                    List<AudioDeviceInfo> commDevices = getAvailableCommunicationDevices();
-                    if (!commDevices.isEmpty()) {
-                        device = commDevices.get(0);
-                    }
-                }
-            }
-            return device;
         }
+        synchronized (mDeviceStateLock) {
+            return getCommunicationDeviceInt();
+        }
+    }
+
+    @GuardedBy("mDeviceStateLock")
+    private AudioDeviceInfo  getCommunicationDeviceInt() {
+        updateActiveCommunicationDevice();
+        AudioDeviceInfo device = mActiveCommunicationDevice;
+        // make sure we return a valid communication device (i.e. a device that is allowed by
+        // setCommunicationDevice()) for consistency.
+        if (device != null) {
+            // a digital dock is used instead of the speaker in speakerphone mode and should
+            // be reflected as such
+            if (device.getType() == AudioDeviceInfo.TYPE_DOCK) {
+                device = getCommunicationDeviceOfType(AudioDeviceInfo.TYPE_BUILTIN_SPEAKER);
+            }
+        }
+        // Try to default to earpiece when current communication device is not valid. This can
+        // happen for instance if no call is active. If no earpiece device is available take the
+        // first valid communication device
+        if (device == null || !AudioDeviceBroker.isValidCommunicationDevice(device)) {
+            device = getCommunicationDeviceOfType(AudioDeviceInfo.TYPE_BUILTIN_EARPIECE);
+            if (device == null) {
+                List<AudioDeviceInfo> commDevices = getAvailableCommunicationDevices();
+                if (!commDevices.isEmpty()) {
+                    device = commDevices.get(0);
+                }
+            }
+        }
+        return device;
     }
 
     /**
@@ -1218,7 +1238,7 @@ public class AudioDeviceBroker {
         }
         postSetCommunicationDeviceForClient(new CommunicationDeviceInfo(
                 cb, uid, new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO, ""),
-                true, scoAudioMode, eventSource, false, isPrivileged));
+                true, scoAudioMode, eventSource, isPrivileged));
     }
 
     /*package*/ void stopBluetoothScoForClient(
@@ -1229,7 +1249,7 @@ public class AudioDeviceBroker {
         }
         postSetCommunicationDeviceForClient(new CommunicationDeviceInfo(
                 cb, uid, new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_BLUETOOTH_SCO, ""),
-                false, BtHelper.SCO_MODE_UNDEFINED, eventSource, false, isPrivileged));
+                false, BtHelper.SCO_MODE_UNDEFINED, eventSource, isPrivileged));
     }
 
     /*package*/ int setPreferredDevicesForStrategySync(int strategy,
@@ -1316,7 +1336,7 @@ public class AudioDeviceBroker {
 
     @GuardedBy("mDeviceStateLock")
     private void dispatchCommunicationDevice() {
-        AudioDeviceInfo device = getCommunicationDevice();
+        AudioDeviceInfo device = getCommunicationDeviceInt();
         int portId = device != null ? device.getId() : 0;
         if (portId == mCurCommunicationPortId) {
             return;
@@ -1500,12 +1520,10 @@ public class AudioDeviceBroker {
         final int mScoAudioMode; // only used for SCO: requested audio mode
         final boolean mIsPrivileged; // true if the client app has MODIFY_PHONE_STATE permission
         final @NonNull String mEventSource; // caller identifier for logging
-        boolean mWaitForStatus; // true if the caller waits for a completion status (API dependent)
-        boolean mStatus = false; // completion status only used if mWaitForStatus is true
 
         CommunicationDeviceInfo(@NonNull IBinder cb, int uid,
                 @Nullable AudioDeviceAttributes device, boolean on, int scoAudioMode,
-                @NonNull String eventSource, boolean waitForStatus, boolean isPrivileged) {
+                @NonNull String eventSource, boolean isPrivileged) {
             mCb = cb;
             mUid = uid;
             mDevice = device;
@@ -1513,7 +1531,6 @@ public class AudioDeviceBroker {
             mScoAudioMode = scoAudioMode;
             mIsPrivileged = isPrivileged;
             mEventSource = eventSource;
-            mWaitForStatus = waitForStatus;
         }
 
         // redefine equality op so we can match messages intended for this client
@@ -1541,9 +1558,7 @@ public class AudioDeviceBroker {
                     + " mOn=" + mOn
                     + " mScoAudioMode=" + mScoAudioMode
                     + " mIsPrivileged=" + mIsPrivileged
-                    + " mEventSource=" + mEventSource
-                    + " mWaitForStatus=" + mWaitForStatus
-                    + " mStatus=" + mStatus;
+                    + " mEventSource=" + mEventSource;
         }
     }
 
@@ -1882,18 +1897,19 @@ public class AudioDeviceBroker {
 
                 case MSG_L_SET_COMMUNICATION_DEVICE_FOR_CLIENT:
                     CommunicationDeviceInfo deviceInfo = (CommunicationDeviceInfo) msg.obj;
-                    boolean status;
                     synchronized (mSetModeLock) {
                         synchronized (mDeviceStateLock) {
-                            status = onSetCommunicationDeviceForClient(deviceInfo);
+                            onSetCommunicationDeviceForClient(deviceInfo);
                         }
                     }
-                    synchronized (deviceInfo) {
-                        if (deviceInfo.mWaitForStatus) {
-                            deviceInfo.mStatus = status;
-                            deviceInfo.mWaitForStatus = false;
-                            deviceInfo.notify();
+                    synchronized (mCommunicationDeviceLock) {
+                        if (mCommunicationDeviceUpdateCount > 0) {
+                            mCommunicationDeviceUpdateCount--;
+                        } else {
+                            Log.e(TAG, "mCommunicationDeviceUpdateCount already 0 in"
+                                    + " MSG_L_SET_COMMUNICATION_DEVICE_FOR_CLIENT");
                         }
+                        mCommunicationDeviceLock.notify();
                     }
                     break;
 
