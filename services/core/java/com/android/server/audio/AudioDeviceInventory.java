@@ -1664,6 +1664,10 @@ public class AudioDeviceInventory {
                         addAudioDeviceInInventoryIfNeeded(device, address, "",
                                 BtHelper.getBtDeviceCategory(address));
                     }
+                    AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
+                            "SCO " + (AudioSystem.isInputDevice(device) ? "source" : "sink")
+                            + " device addr=" + address
+                            + (connect ? " now available" : " made unavailable")).printLog(TAG));
                 }
                 mmi.set(MediaMetrics.Property.STATE, MediaMetrics.Value.CONNECTED).record();
             } else {
@@ -1925,7 +1929,7 @@ public class AudioDeviceInventory {
             // TODO: return;
         } else {
             AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
-                    "A2DP device addr=" + Utils.anonymizeBluetoothAddress(address)
+                    "A2DP source device addr=" + Utils.anonymizeBluetoothAddress(address)
                             + " now available").printLog(TAG));
         }
 
@@ -2382,7 +2386,8 @@ public class AudioDeviceInventory {
                 // TODO: return;
             } else {
                 AudioService.sDeviceLogger.enqueue(new EventLogger.StringEvent(
-                        "LE Audio device addr=" + Utils.anonymizeBluetoothAddress(address)
+                        "LE Audio " + (AudioSystem.isInputDevice(device) ? "source" : "sink")
+                                + " device addr=" + Utils.anonymizeBluetoothAddress(address)
                                 + " now available").printLog(TAG));
             }
             // Reset LEA suspend state each time a new sink is connected
@@ -2522,7 +2527,7 @@ public class AudioDeviceInventory {
         int delay = 0;
         Set<Integer> devices = new HashSet<>();
         for (DeviceInfo di : mConnectedDevices.values()) {
-            if (((di.mDeviceType & AudioSystem.DEVICE_BIT_IN) == 0)
+            if (!AudioSystem.isInputDevice(di.mDeviceType)
                     && BECOMING_NOISY_INTENT_DEVICES_SET.contains(di.mDeviceType)) {
                 devices.add(di.mDeviceType);
                 Log.i(TAG, "NOISY: adding 0x" + Integer.toHexString(di.mDeviceType));
