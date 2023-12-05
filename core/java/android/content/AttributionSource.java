@@ -107,6 +107,13 @@ public final class AttributionSource implements Parcelable {
     }
 
     /** @hide */
+    public AttributionSource(int uid, @Nullable String packageName,
+            @Nullable String attributionTag, int virtualDeviceId) {
+        this(uid, Process.INVALID_PID, packageName, attributionTag, sDefaultToken, null,
+                virtualDeviceId, null);
+    }
+
+    /** @hide */
     public AttributionSource(int uid, int pid, @Nullable String packageName,
             @Nullable String attributionTag) {
         this(uid, pid, packageName, attributionTag, sDefaultToken);

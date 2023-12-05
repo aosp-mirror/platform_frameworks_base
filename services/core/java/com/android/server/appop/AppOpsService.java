@@ -2580,17 +2580,30 @@ public class AppOpsService extends IAppOpsService.Stub {
     public int checkOperationRaw(int code, int uid, String packageName,
             @Nullable String attributionTag) {
         return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, attributionTag,
-                true /*raw*/);
+                Context.DEVICE_ID_DEFAULT, true /*raw*/);
+    }
+
+    @Override
+    public int checkOperationRawForDevice(int code, int uid, @Nullable String packageName,
+            @Nullable String attributionTag, int virtualDeviceId) {
+        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, attributionTag,
+                virtualDeviceId, true /*raw*/);
     }
 
     @Override
     public int checkOperation(int code, int uid, String packageName) {
         return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, null,
-                false /*raw*/);
+                Context.DEVICE_ID_DEFAULT, false /*raw*/);
+    }
+
+    @Override
+    public int checkOperationForDevice(int code, int uid, String packageName, int virtualDeviceId) {
+        return mCheckOpsDelegateDispatcher.checkOperation(code, uid, packageName, null,
+                virtualDeviceId, false /*raw*/);
     }
 
     private int checkOperationImpl(int code, int uid, String packageName,
-            @Nullable String attributionTag, boolean raw) {
+             @Nullable String attributionTag, int virtualDeviceId, boolean raw) {
         verifyIncomingOp(code);
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
             return AppOpsManager.opToDefaultMode(code);
@@ -2816,12 +2829,23 @@ public class AppOpsService extends IAppOpsService.Stub {
             String attributionTag, boolean shouldCollectAsyncNotedOp, String message,
             boolean shouldCollectMessage) {
         return mCheckOpsDelegateDispatcher.noteOperation(code, uid, packageName,
-                attributionTag, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+                attributionTag, Context.DEVICE_ID_DEFAULT, shouldCollectAsyncNotedOp, message,
+                shouldCollectMessage);
+    }
+
+    @Override
+    public SyncNotedAppOp noteOperationForDevice(int code, int uid, @Nullable String packageName,
+            @Nullable String attributionTag, int virtualDeviceId, boolean shouldCollectAsyncNotedOp,
+            String message, boolean shouldCollectMessage) {
+        return mCheckOpsDelegateDispatcher.noteOperation(code, uid, packageName,
+                attributionTag, virtualDeviceId, shouldCollectAsyncNotedOp, message,
+                shouldCollectMessage);
     }
 
     private SyncNotedAppOp noteOperationImpl(int code, int uid, @Nullable String packageName,
-            @Nullable String attributionTag, boolean shouldCollectAsyncNotedOp,
-            @Nullable String message, boolean shouldCollectMessage) {
+             @Nullable String attributionTag, int virtualDeviceId,
+             boolean shouldCollectAsyncNotedOp, @Nullable String message,
+             boolean shouldCollectMessage) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
@@ -2840,10 +2864,10 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private SyncNotedAppOp noteOperationUnchecked(int code, int uid, @NonNull String packageName,
-            @Nullable String attributionTag, int proxyUid, String proxyPackageName,
-            @Nullable String proxyAttributionTag, @OpFlags int flags,
-            boolean shouldCollectAsyncNotedOp, @Nullable String message,
-            boolean shouldCollectMessage) {
+           @Nullable String attributionTag, int proxyUid, String proxyPackageName,
+           @Nullable String proxyAttributionTag, @OpFlags int flags,
+           boolean shouldCollectAsyncNotedOp, @Nullable String message,
+           boolean shouldCollectMessage) {
         PackageVerificationResult pvr;
         try {
             pvr = verifyAndGetBypass(uid, packageName, attributionTag, proxyPackageName);
@@ -3238,12 +3262,26 @@ public class AppOpsService extends IAppOpsService.Stub {
             String message, boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
             int attributionChainId) {
         return mCheckOpsDelegateDispatcher.startOperation(token, code, uid, packageName,
-                attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                shouldCollectMessage, attributionFlags, attributionChainId);
+                attributionTag, Context.DEVICE_ID_DEFAULT, startIfModeDefault,
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage, attributionFlags,
+                attributionChainId
+        );
+    }
+
+    @Override
+    public SyncNotedAppOp startOperationForDevice(IBinder token, int code, int uid,
+            @Nullable String packageName, @Nullable String attributionTag, int virtualDeviceId,
+            boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
+            boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
+            int attributionChainId) {
+        return mCheckOpsDelegateDispatcher.startOperation(token, code, uid, packageName,
+                attributionTag, virtualDeviceId, startIfModeDefault, shouldCollectAsyncNotedOp,
+                message, shouldCollectMessage, attributionFlags, attributionChainId
+        );
     }
 
     private SyncNotedAppOp startOperationImpl(@NonNull IBinder clientId, int code, int uid,
-            @Nullable String packageName, @Nullable String attributionTag,
+            @Nullable String packageName, @Nullable String attributionTag, int virtualDeviceId,
             boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, @NonNull String message,
             boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
             int attributionChainId) {
@@ -3614,11 +3652,18 @@ public class AppOpsService extends IAppOpsService.Stub {
     public void finishOperation(IBinder clientId, int code, int uid, String packageName,
             String attributionTag) {
         mCheckOpsDelegateDispatcher.finishOperation(clientId, code, uid, packageName,
-                attributionTag);
+                attributionTag, Context.DEVICE_ID_DEFAULT);
+    }
+
+    @Override
+    public void finishOperationForDevice(IBinder clientId, int code, int uid,
+            @Nullable String packageName, @Nullable String attributionTag, int virtualDeviceId) {
+        mCheckOpsDelegateDispatcher.finishOperation(clientId, code, uid, packageName,
+                attributionTag, virtualDeviceId);
     }
 
     private void finishOperationImpl(IBinder clientId, int code, int uid, String packageName,
-            String attributionTag) {
+            String attributionTag, int virtualDeviceId) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
@@ -6800,25 +6845,28 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         public int checkOperation(int code, int uid, String packageName,
-                @Nullable String attributionTag, boolean raw) {
+                @Nullable String attributionTag, int virtualDeviceId, boolean raw) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
-                    return mPolicy.checkOperation(code, uid, packageName, attributionTag, raw,
-                            this::checkDelegateOperationImpl);
+                    return mPolicy.checkOperation(code, uid, packageName, attributionTag,
+                            virtualDeviceId, raw, this::checkDelegateOperationImpl
+                    );
                 } else {
-                    return mPolicy.checkOperation(code, uid, packageName, attributionTag, raw,
-                            AppOpsService.this::checkOperationImpl);
+                    return mPolicy.checkOperation(code, uid, packageName, attributionTag,
+                            virtualDeviceId, raw, AppOpsService.this::checkOperationImpl
+                    );
                 }
             } else if (mCheckOpsDelegate != null) {
-                return checkDelegateOperationImpl(code, uid, packageName, attributionTag, raw);
+                return checkDelegateOperationImpl(code, uid, packageName, attributionTag,
+                        virtualDeviceId, raw);
             }
-            return checkOperationImpl(code, uid, packageName, attributionTag, raw);
+            return checkOperationImpl(code, uid, packageName, attributionTag, virtualDeviceId, raw);
         }
 
         private int checkDelegateOperationImpl(int code, int uid, String packageName,
-                @Nullable String attributionTag, boolean raw) {
-            return mCheckOpsDelegate.checkOperation(code, uid, packageName, attributionTag, raw,
-                    AppOpsService.this::checkOperationImpl);
+                 @Nullable String attributionTag, int virtualDeviceId, boolean raw) {
+            return mCheckOpsDelegate.checkOperation(code, uid, packageName, attributionTag,
+                    virtualDeviceId, raw, AppOpsService.this::checkOperationImpl);
         }
 
         public int checkAudioOperation(int code, int usage, int uid, String packageName) {
@@ -6843,33 +6891,36 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         public SyncNotedAppOp noteOperation(int code, int uid, String packageName,
-                String attributionTag, boolean shouldCollectAsyncNotedOp, String message,
-                boolean shouldCollectMessage) {
+                String attributionTag, int virtualDeviceId, boolean shouldCollectAsyncNotedOp,
+                String message, boolean shouldCollectMessage) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
                     return mPolicy.noteOperation(code, uid, packageName, attributionTag,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            this::noteDelegateOperationImpl);
+                            virtualDeviceId, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage, this::noteDelegateOperationImpl
+                    );
                 } else {
                     return mPolicy.noteOperation(code, uid, packageName, attributionTag,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                            AppOpsService.this::noteOperationImpl);
+                            virtualDeviceId, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage, AppOpsService.this::noteOperationImpl
+                    );
                 }
             } else if (mCheckOpsDelegate != null) {
-                return noteDelegateOperationImpl(code, uid, packageName,
-                        attributionTag, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+                return noteDelegateOperationImpl(code, uid, packageName, attributionTag,
+                        virtualDeviceId, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
             }
             return noteOperationImpl(code, uid, packageName, attributionTag,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+                    virtualDeviceId, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
         }
 
         private SyncNotedAppOp noteDelegateOperationImpl(int code, int uid,
-                @Nullable String packageName, @Nullable String featureId,
+                @Nullable String packageName, @Nullable String featureId, int virtualDeviceId,
                 boolean shouldCollectAsyncNotedOp, @Nullable String message,
                 boolean shouldCollectMessage) {
             return mCheckOpsDelegate.noteOperation(code, uid, packageName, featureId,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    AppOpsService.this::noteOperationImpl);
+                    virtualDeviceId, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                    AppOpsService.this::noteOperationImpl
+            );
         }
 
         public SyncNotedAppOp noteProxyOperation(int code, AttributionSource attributionSource,
@@ -6904,40 +6955,45 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
-                @Nullable String packageName, @NonNull String attributionTag,
+                @Nullable String packageName, @NonNull String attributionTag, int virtualDeviceId,
                 boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
                 @AttributionFlags int attributionFlags, int attributionChainId) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
-                    return mPolicy.startOperation(token, code, uid, packageName,
-                            attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                    return mPolicy.startOperation(token, code, uid, packageName, attributionTag,
+                            virtualDeviceId, startIfModeDefault, shouldCollectAsyncNotedOp, message,
                             shouldCollectMessage, attributionFlags, attributionChainId,
-                            this::startDelegateOperationImpl);
+                            this::startDelegateOperationImpl
+                    );
                 } else {
                     return mPolicy.startOperation(token, code, uid, packageName, attributionTag,
-                            startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                            virtualDeviceId, startIfModeDefault, shouldCollectAsyncNotedOp, message,
                             shouldCollectMessage, attributionFlags, attributionChainId,
-                            AppOpsService.this::startOperationImpl);
+                            AppOpsService.this::startOperationImpl
+                    );
                 }
             } else if (mCheckOpsDelegate != null) {
                 return startDelegateOperationImpl(token, code, uid, packageName, attributionTag,
-                        startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                        shouldCollectMessage, attributionFlags, attributionChainId);
+                        virtualDeviceId, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                        shouldCollectMessage, attributionFlags, attributionChainId
+                );
             }
             return startOperationImpl(token, code, uid, packageName, attributionTag,
-                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    attributionFlags, attributionChainId);
+                    virtualDeviceId, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                    shouldCollectMessage, attributionFlags, attributionChainId
+            );
         }
 
         private SyncNotedAppOp startDelegateOperationImpl(IBinder token, int code, int uid,
                 @Nullable String packageName, @Nullable String attributionTag,
-                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
-                boolean shouldCollectMessage, @AttributionFlags int attributionFlags,
-                int attributionChainId) {
+                int virtualDeviceId, boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
+                String message, boolean shouldCollectMessage,
+                @AttributionFlags int attributionFlags, int attributionChainId) {
             return mCheckOpsDelegate.startOperation(token, code, uid, packageName, attributionTag,
-                    startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
-                    attributionFlags, attributionChainId, AppOpsService.this::startOperationImpl);
+                    virtualDeviceId, startIfModeDefault, shouldCollectAsyncNotedOp, message,
+                    shouldCollectMessage, attributionFlags, attributionChainId,
+                    AppOpsService.this::startOperationImpl);
         }
 
         public SyncNotedAppOp startProxyOperation(@NonNull IBinder clientId, int code,
@@ -6982,26 +7038,28 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         public void finishOperation(IBinder clientId, int code, int uid, String packageName,
-                String attributionTag) {
+                String attributionTag, int virtualDeviceId) {
             if (mPolicy != null) {
                 if (mCheckOpsDelegate != null) {
                     mPolicy.finishOperation(clientId, code, uid, packageName, attributionTag,
-                            this::finishDelegateOperationImpl);
+                            virtualDeviceId, this::finishDelegateOperationImpl);
                 } else {
                     mPolicy.finishOperation(clientId, code, uid, packageName, attributionTag,
-                            AppOpsService.this::finishOperationImpl);
+                            virtualDeviceId, AppOpsService.this::finishOperationImpl);
                 }
             } else if (mCheckOpsDelegate != null) {
-                finishDelegateOperationImpl(clientId, code, uid, packageName, attributionTag);
+                finishDelegateOperationImpl(clientId, code, uid, packageName, attributionTag,
+                        virtualDeviceId);
             } else {
-                finishOperationImpl(clientId, code, uid, packageName, attributionTag);
+                finishOperationImpl(clientId, code, uid, packageName, attributionTag,
+                        virtualDeviceId);
             }
         }
 
         private void finishDelegateOperationImpl(IBinder clientId, int code, int uid,
-                String packageName, String attributionTag) {
+                String packageName, String attributionTag, int virtualDeviceId) {
             mCheckOpsDelegate.finishOperation(clientId, code, uid, packageName, attributionTag,
-                    AppOpsService.this::finishOperationImpl);
+                    virtualDeviceId, AppOpsService.this::finishOperationImpl);
         }
 
         public void finishProxyOperation(@NonNull IBinder clientId, int code,

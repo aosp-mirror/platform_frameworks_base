@@ -429,10 +429,10 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.HeptFunction;
+import com.android.internal.util.function.DodecFunction;
 import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.OctFunction;
 import com.android.internal.util.function.QuadFunction;
-import com.android.internal.util.function.QuintFunction;
 import com.android.internal.util.function.UndecFunction;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.BootReceiver;
@@ -20149,20 +20149,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public int checkOperation(int code, int uid, String packageName,
-                String attributionTag, boolean raw,
-                QuintFunction<Integer, Integer, String, String, Boolean, Integer> superImpl) {
+        public int checkOperation(int code, int uid, String packageName, String attributionTag,
+                int virtualDeviceId, boolean raw, HexFunction<Integer, Integer, String, String,
+                        Integer, Boolean, Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
                         Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return superImpl.apply(code, shellUid, "com.android.shell", null, raw);
+                    return superImpl.apply(code, shellUid, "com.android.shell", null,
+                            virtualDeviceId, raw);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(code, uid, packageName, attributionTag, raw);
+            return superImpl.apply(code, uid, packageName, attributionTag, virtualDeviceId, raw);
         }
 
         @Override
@@ -20183,23 +20184,24 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
-                @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
+                @Nullable String featureId, int virtualDeviceId, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
-                @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
-                        SyncNotedAppOp> superImpl) {
+                @NonNull OctFunction<Integer, Integer, String, String, Integer, Boolean, String,
+                        Boolean, SyncNotedAppOp> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
                         Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(code, shellUid, "com.android.shell", featureId,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+                            virtualDeviceId, shouldCollectAsyncNotedOp, message,
+                            shouldCollectMessage);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(code, uid, packageName, featureId, shouldCollectAsyncNotedOp,
-                    message, shouldCollectMessage);
+            return superImpl.apply(code, uid, packageName, featureId, virtualDeviceId,
+                    shouldCollectAsyncNotedOp, message, shouldCollectMessage);
         }
 
         @Override
@@ -20230,11 +20232,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public SyncNotedAppOp startOperation(IBinder token, int code, int uid,
-                @Nullable String packageName, @Nullable String attributionTag,
+                @Nullable String packageName, @Nullable String attributionTag, int virtualDeviceId,
                 boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
                 @Nullable String message, boolean shouldCollectMessage,
                 @AttributionFlags int attributionFlags, int attributionChainId,
-                @NonNull UndecFunction<IBinder, Integer, Integer, String, String, Boolean,
+                @NonNull DodecFunction<IBinder, Integer, Integer, String, String, Integer, Boolean,
                         Boolean, String, Boolean, Integer, Integer, SyncNotedAppOp> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
@@ -20242,13 +20244,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(token, code, shellUid, "com.android.shell",
-                            attributionTag, startIfModeDefault, shouldCollectAsyncNotedOp, message,
-                            shouldCollectMessage, attributionFlags, attributionChainId);
+                            attributionTag, virtualDeviceId, startIfModeDefault,
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                            attributionFlags, attributionChainId);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
-            return superImpl.apply(token, code, uid, packageName, attributionTag,
+            return superImpl.apply(token, code, uid, packageName, attributionTag, virtualDeviceId,
                     startIfModeDefault, shouldCollectAsyncNotedOp, message, shouldCollectMessage,
                     attributionFlags, attributionChainId);
         }
