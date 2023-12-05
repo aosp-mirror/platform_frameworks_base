@@ -479,8 +479,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"оневозможи"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Звук и вибрации"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Поставки"</string>
-    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Звукот е намален на побезбедна вредност"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Јачината на звукот е висока подолго од препорачаното"</string>
+    <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Јачината на звукот е намалена на побезбедно ниво"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Јачината на звукот на слушалките беше висока подолго од препорачаното"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Јачината на звукот на слушалките го надмина безбедното ограничување за седмицава"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Продолжете со слушање"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Намалете го звукот"</string>
