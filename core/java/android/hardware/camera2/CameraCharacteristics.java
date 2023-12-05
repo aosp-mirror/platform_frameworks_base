@@ -3469,7 +3469,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>When the key is present, only a PRIVATE/YUV output of the specified size is guaranteed
      * to be supported by the camera HAL in the secure camera mode. Any other format or
      * resolutions might not be supported. Use
-     * {@link CameraDevice#isSessionConfigurationSupported }
+     * {@link CameraManager#isSessionConfigurationWithParametersSupported }
      * API to query if a secure session configuration is supported if the device supports this
      * API.</p>
      * <p>If this key returns null on a device with SECURE_IMAGE_DATA capability, the application
@@ -4986,6 +4986,290 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      */
     public static final Key<long[]> INFO_DEVICE_STATE_ORIENTATIONS =
             new Key<long[]>("android.info.deviceStateOrientations", long[].class);
+
+    /**
+     * <p>The version of the session configuration query
+     * {@link android.hardware.camera2.CameraManager#isSessionConfigurationWithParametersSupported }
+     * API</p>
+     * <p>The possible values in this key correspond to the values defined in
+     * android.os.Build.VERSION_CODES. Each version defines a set of feature combinations the
+     * camera device must reliably report whether they are supported via
+     * {@link android.hardware.camera2.CameraManager#isSessionConfigurationWithParametersSupported }
+     * API. And the version is always less or equal to android.os.Build.VERSION.SDK_INT.</p>
+     * <p>If set to UPSIDE_DOWN_CAKE, this camera device doesn't support
+     * {@link android.hardware.camera2.CameraManager#isSessionConfigurationWithParametersSupported }.
+     * Calling the method for this camera ID throws an UnsupportedOperationException.</p>
+     * <p>If set to VANILLA_ICE_CREAM, the application can call
+     * {@link android.hardware.camera2.CameraManager#isSessionConfigurationWithParametersSupported }
+     * to check if the combinations of below features are supported.</p>
+     * <ul>
+     * <li>A subset of LIMITED-level device stream combinations.</li>
+     * </ul>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th style="text-align: center;">Target 1</th>
+     * <th style="text-align: center;">Size</th>
+     * <th style="text-align: center;">Target 2</th>
+     * <th style="text-align: center;">Size</th>
+     * <th style="text-align: center;">Sample use case(s)</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">MAXIMUM</td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;">Simple preview, GPU video processing, or no-preview video recording.</td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">PREVIEW</td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S720P</td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">MAXIMUM</td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;">In-application video/image processing.</td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">PREVIEW</td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S720P</td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">PREVIEW</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">MAXIMUM</td>
+     * <td style="text-align: center;">Standard still imaging.</td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">MAXIMUM</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">MAXIMUM</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S720P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">MAXIMUM</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S720P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">PREVIEW</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">MAXIMUM</td>
+     * <td style="text-align: center;">In-app processing plus still capture.</td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">MAXIMUM</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">MAXIMUM</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S720P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">MAXIMUM</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S720P</td>
+     * <td style="text-align: center;">JPEG</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">PREVIEW</td>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">PREVIEW</td>
+     * <td style="text-align: center;">Standard recording.</td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S720P</td>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S720P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">PREVIEW</td>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">PREVIEW</td>
+     * <td style="text-align: center;">Preview plus in-app processing.</td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S1440P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S1080P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * <tr>
+     * <td style="text-align: center;">PRIV</td>
+     * <td style="text-align: center;">S720P</td>
+     * <td style="text-align: center;">YUV</td>
+     * <td style="text-align: center;">S720P</td>
+     * <td style="text-align: center;"></td>
+     * </tr>
+     * </tbody>
+     * </table>
+     * <pre><code>- {@code MAXIMUM} size refers to the camera device's maximum output resolution for
+     *   that format from {@code StreamConfigurationMap#getOutputSizes}. {@code PREVIEW} size
+     *   refers to the best size match to the device's screen resolution, or to 1080p
+     *   (@code 1920x1080}, whichever is smaller. Both sizes are guaranteed to be supported.
+     *
+     * - {@code S1440P} refers to {@code 1920x1440 (4:3)} and {@code 2560x1440 (16:9)}.
+     *   {@code S1080P} refers to {@code 1440x1080 (4:3)} and {@code 1920x1080 (16:9)}.
+     *   And {@code S720P} refers to {@code 960x720 (4:3)} and {@code 1280x720 (16:9)}.
+     *
+     * - If a combination contains a S1440P, S1080P, or S720P stream,
+     *   both 4:3 and 16:9 aspect ratio sizes can be queried. For example, for the
+     *   stream combination of {PRIV, S1440P, JPEG, MAXIMUM}, and if MAXIMUM ==
+     *   4032 x 3024, the application will be able to query both
+     *   {PRIV, 1920 x 1440, JPEG, 4032 x 3024} and {PRIV, 2560 x 1440, JPEG, 4032 x 2268}
+     *   without an exception being thrown.
+     * </code></pre>
+     * <ul>
+     * <li>VIDEO_STABILIZATION_MODES: {OFF, PREVIEW}</li>
+     * <li>AE_TARGET_FPS_RANGE: {{<em>, 30}, {</em>, 60}}</li>
+     * <li>DYNAMIC_RANGE_PROFILE: {STANDARD, HLG10}</li>
+     * </ul>
+     * <p>This key is available on all devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
+    public static final Key<Integer> INFO_SESSION_CONFIGURATION_QUERY_VERSION =
+            new Key<Integer>("android.info.sessionConfigurationQueryVersion", int.class);
 
     /**
      * <p>The maximum number of frames that can occur after a request

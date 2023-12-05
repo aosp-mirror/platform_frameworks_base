@@ -29,13 +29,15 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CaptureRequest;
+import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.utils.HashCodeHelpers;
 import android.media.ImageReader;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -124,7 +126,7 @@ public final class SessionConfiguration implements Parcelable {
 
     /**
      * Create a SessionConfiguration from Parcel.
-     * No support for parcelable 'mStateCallback', 'mExecutor' and 'mSessionParameters' yet.
+     * No support for parcelable 'mStateCallback' and 'mExecutor' yet.
      */
     private SessionConfiguration(@NonNull Parcel source) {
         int sessionType = source.readInt();
@@ -134,6 +136,15 @@ public final class SessionConfiguration implements Parcelable {
         boolean isInputMultiResolution = source.readBoolean();
         ArrayList<OutputConfiguration> outConfigs = new ArrayList<OutputConfiguration>();
         source.readTypedList(outConfigs, OutputConfiguration.CREATOR);
+        // Ignore the values for hasSessionParameters and settings because we cannot reconstruct
+        // the CaptureRequest object.
+        if (Flags.featureCombinationQuery()) {
+            boolean hasSessionParameters = source.readBoolean();
+            if (hasSessionParameters) {
+                CameraMetadataNative settings = new CameraMetadataNative();
+                settings.readFromParcel(source);
+            }
+        }
 
         if ((inputWidth > 0) && (inputHeight > 0) && (inputFormat != -1)) {
             mInputConfig = new InputConfiguration(inputWidth, inputHeight,
@@ -174,6 +185,15 @@ public final class SessionConfiguration implements Parcelable {
             dest.writeBoolean(/*isMultiResolution*/ false);
         }
         dest.writeTypedList(mOutputConfigurations);
+        if (Flags.featureCombinationQuery()) {
+            if (mSessionParameters != null) {
+                dest.writeBoolean(/*hasSessionParameters*/true);
+                CameraMetadataNative metadata = mSessionParameters.getNativeCopy();
+                metadata.writeToParcel(dest, /*flags*/0);
+            } else {
+                dest.writeBoolean(/*hasSessionParameters*/false);
+            }
+        }
     }
 
     @Override
