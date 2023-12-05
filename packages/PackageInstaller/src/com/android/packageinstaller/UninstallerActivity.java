@@ -47,15 +47,15 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-
 import com.android.packageinstaller.handheld.ErrorDialogFragment;
 import com.android.packageinstaller.handheld.UninstallAlertDialogFragment;
 import com.android.packageinstaller.television.ErrorFragment;
 import com.android.packageinstaller.television.UninstallAlertFragment;
 import com.android.packageinstaller.television.UninstallAppProgress;
+import com.android.packageinstaller.common.EventResultPersister;
+import com.android.packageinstaller.common.UninstallEventReceiver;
 import com.android.packageinstaller.v2.ui.UninstallLaunch;
 
 import java.util.List;
@@ -93,15 +93,6 @@ public class UninstallerActivity extends Activity {
 
         if (usePiaV2() && !isTv()) {
             Log.i(TAG, "Using Pia V2");
-
-            PackageManager pm = getPackageManager();
-            pm.setComponentEnabledSetting(
-                new ComponentName(this, com.android.packageinstaller.UninstallEventReceiver.class),
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
-            pm.setComponentEnabledSetting(
-                new ComponentName(this,
-                    com.android.packageinstaller.v2.model.UninstallEventReceiver.class),
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
 
             boolean returnResult = getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false);
             Intent piaV2 = new Intent(getIntent());

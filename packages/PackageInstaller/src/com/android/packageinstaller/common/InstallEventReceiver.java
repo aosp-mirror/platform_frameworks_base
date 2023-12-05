@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model;
+package com.android.packageinstaller.common;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
 import androidx.annotation.NonNull;
 
 /**
- * Receives uninstall events and persists them using a {@link EventResultPersister}.
+ * Receives install events and perists them using a {@link EventResultPersister}.
  */
-public class UninstallEventReceiver extends BroadcastReceiver {
+public class InstallEventReceiver extends BroadcastReceiver {
     private static final Object sLock = new Object();
     private static EventResultPersister sReceiver;
 
@@ -37,7 +38,7 @@ public class UninstallEventReceiver extends BroadcastReceiver {
         synchronized (sLock) {
             if (sReceiver == null) {
                 sReceiver = new EventResultPersister(
-                        TemporaryFileManager.getUninstallStateFile(context));
+                        TemporaryFileManager.getInstallStateFile(context));
             }
         }
 
@@ -70,16 +71,7 @@ public class UninstallEventReceiver extends BroadcastReceiver {
      * @param context  A context of the current app
      * @param id The id the observer was added for
      */
-    static void removeObserver(@NonNull Context context, int id) {
+    public static void removeObserver(@NonNull Context context, int id) {
         getReceiver(context).removeObserver(id);
-    }
-
-    /**
-     * @param context A context of the current app
-     *
-     * @return A new uninstall id
-     */
-    static int getNewId(@NonNull Context context) throws EventResultPersister.OutOfIdsException {
-        return getReceiver(context).getNewId();
     }
 }

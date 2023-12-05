@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model;
+package com.android.packageinstaller.common;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.SystemClock;
 import android.util.Log;
+
 import androidx.annotation.NonNull;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -29,13 +31,13 @@ import java.io.IOException;
  * Manages files of the package installer and resets state during boot.
  */
 public class TemporaryFileManager extends BroadcastReceiver {
-
     private static final String LOG_TAG = TemporaryFileManager.class.getSimpleName();
 
     /**
      * Create a new file to hold a staged file.
      *
      * @param context The context of the caller
+     *
      * @return A new file
      */
     @NonNull
@@ -47,6 +49,7 @@ public class TemporaryFileManager extends BroadcastReceiver {
      * Get the file used to store the results of installs.
      *
      * @param context The context of the caller
+     *
      * @return the file used to store the results of installs
      */
     @NonNull
@@ -58,6 +61,7 @@ public class TemporaryFileManager extends BroadcastReceiver {
      * Get the file used to store the results of uninstalls.
      *
      * @param context The context of the caller
+     *
      * @return the file used to store the results of uninstalls
      */
     @NonNull
@@ -85,7 +89,7 @@ public class TemporaryFileManager extends BroadcastReceiver {
                 }
             } else {
                 Log.w(LOG_TAG, fileOnBoot.getName() + " was created before onBoot broadcast was "
-                    + "received");
+                        + "received");
             }
         }
     }

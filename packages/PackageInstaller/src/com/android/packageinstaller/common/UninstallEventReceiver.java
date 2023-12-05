@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *      https://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller;
+package com.android.packageinstaller.common;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -71,7 +71,7 @@ public class UninstallEventReceiver extends BroadcastReceiver {
      * @param context  A context of the current app
      * @param id The id the observer was added for
      */
-    static void removeObserver(@NonNull Context context, int id) {
+    public static void removeObserver(@NonNull Context context, int id) {
         getReceiver(context).removeObserver(id);
     }
 
@@ -80,7 +80,8 @@ public class UninstallEventReceiver extends BroadcastReceiver {
      *
      * @return A new uninstall id
      */
-    static int getNewId(@NonNull Context context) throws EventResultPersister.OutOfIdsException {
+    public static int getNewId(@NonNull Context context)
+        throws EventResultPersister.OutOfIdsException {
         return getReceiver(context).getNewId();
     }
 }

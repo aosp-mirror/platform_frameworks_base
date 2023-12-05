@@ -23,7 +23,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.admin.DevicePolicyManager;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -39,7 +38,6 @@ import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import com.android.packageinstaller.v2.ui.InstallLaunch;
@@ -63,16 +61,9 @@ public class InstallStart extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPackageManager = getPackageManager();
+
         if (usePiaV2()) {
             Log.i(TAG, "Using Pia V2");
-
-            mPackageManager.setComponentEnabledSetting(new ComponentName(this,
-                    com.android.packageinstaller.InstallEventReceiver.class),
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED, 0);
-            mPackageManager.setComponentEnabledSetting(new ComponentName(this,
-                    com.android.packageinstaller.v2.model.InstallEventReceiver.class),
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
 
             Intent piaV2 = new Intent(getIntent());
             piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_NAME, getCallingPackage());
@@ -83,6 +74,7 @@ public class InstallStart extends Activity {
             finish();
             return;
         }
+        mPackageManager = getPackageManager();
         mUserManager = getSystemService(UserManager.class);
 
         Intent intent = getIntent();
