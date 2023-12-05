@@ -47,6 +47,7 @@ constructor(
     private val keyguardDismissActionInteractor: Lazy<KeyguardDismissActionInteractor>,
     private val featureFlags: FeatureFlagsClassic,
     private val shadeInteractor: ShadeInteractor,
+    private val animationFlow: KeyguardTransitionAnimationFlow,
 ) {
     /** Common fade for scrim alpha values during *BOUNCER->GONE */
     fun scrimAlpha(duration: Duration, fromState: KeyguardState): Flow<ScrimAlpha> {
@@ -73,14 +74,14 @@ constructor(
         var leaveShadeOpen: Boolean = false
         var willRunDismissFromKeyguard: Boolean = false
         val transitionAnimation =
-            KeyguardTransitionAnimationFlow(
-                transitionDuration = duration,
-                transitionFlow = interactor.transition(fromState, GONE)
+            animationFlow.setup(
+                duration = duration,
+                stepFlow = interactor.transition(fromState, GONE)
             )
 
         return shadeInteractor.shadeExpansion.flatMapLatest { shadeExpansion ->
             transitionAnimation
-                .createFlow(
+                .sharedFlow(
                     duration = duration,
                     interpolator = EMPHASIZED_ACCELERATE,
                     onStart = {

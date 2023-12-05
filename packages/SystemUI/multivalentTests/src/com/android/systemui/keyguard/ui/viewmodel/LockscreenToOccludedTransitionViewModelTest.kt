@@ -21,18 +21,19 @@ package com.android.systemui.keyguard.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.res.R
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
@@ -46,7 +47,6 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
-
     private val kosmos =
         testKosmos().apply {
             featureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
@@ -55,11 +55,8 @@ class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
     private val repository = kosmos.fakeKeyguardTransitionRepository
     private val shadeRepository = kosmos.shadeRepository
     private val keyguardRepository = kosmos.fakeKeyguardRepository
-    private val underTest =
-        LockscreenToOccludedTransitionViewModel(
-            interactor = kosmos.keyguardTransitionInteractor,
-            shadeDependentFlows = kosmos.shadeDependentFlows,
-        )
+    private val configurationRepository = kosmos.fakeConfigurationRepository
+    private val underTest = kosmos.lockscreenToOccludedTransitionViewModel
 
     @Test
     fun lockscreenFadeOut() =
@@ -86,8 +83,11 @@ class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
     @Test
     fun lockscreenTranslationY() =
         testScope.runTest {
-            val pixels = 100
-            val values by collectValues(underTest.lockscreenTranslationY(pixels))
+            configurationRepository.setDimensionPixelSize(
+                R.dimen.lockscreen_to_occluded_transition_lockscreen_translation_y,
+                100
+            )
+            val values by collectValues(underTest.lockscreenTranslationY)
             repository.sendTransitionSteps(
                 steps =
                     listOf(
@@ -106,8 +106,11 @@ class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
     @Test
     fun lockscreenTranslationYIsCanceled() =
         testScope.runTest {
-            val pixels = 100
-            val values by collectValues(underTest.lockscreenTranslationY(pixels))
+            configurationRepository.setDimensionPixelSize(
+                R.dimen.lockscreen_to_occluded_transition_lockscreen_translation_y,
+                100
+            )
+            val values by collectValues(underTest.lockscreenTranslationY)
             repository.sendTransitionSteps(
                 steps =
                     listOf(

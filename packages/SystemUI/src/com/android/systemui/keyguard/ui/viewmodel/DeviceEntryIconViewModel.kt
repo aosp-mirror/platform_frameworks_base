@@ -57,7 +57,6 @@ constructor(
     private val sceneContainerFlags: SceneContainerFlags,
     private val keyguardViewController: Lazy<KeyguardViewController>,
     private val deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor,
-    udfpsInteractor: DeviceEntryUdfpsInteractor,
     private val deviceEntryInteractor: DeviceEntryInteractor,
 ) {
     private val intEvaluator = IntEvaluator()
@@ -149,7 +148,7 @@ constructor(
         }
     val iconType: Flow<DeviceEntryIconView.IconType> =
         combine(
-            udfpsInteractor.isListeningForUdfps,
+            deviceEntryUdfpsInteractor.isListeningForUdfps,
             deviceEntryInteractor.isUnlocked,
         ) { isListeningForUdfps, isUnlocked ->
             if (isUnlocked) {

@@ -20,6 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -56,7 +57,7 @@ class KeyguardStatusBarViewModelTest : SysuiTestCase() {
             PowerInteractorFactory.create().powerInteractor,
             sceneTestUtils.sceneContainerFlags,
             FakeKeyguardBouncerRepository(),
-            FakeConfigurationRepository(),
+            ConfigurationInteractor(FakeConfigurationRepository()),
             FakeShadeRepository(),
         ) {
             sceneTestUtils.sceneInteractor()

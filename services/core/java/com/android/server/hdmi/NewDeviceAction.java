@@ -182,7 +182,7 @@ final class NewDeviceAction extends HdmiCecFeatureAction {
                 .setVendorId(mVendorId)
                 .setDisplayName(mDisplayName)
                 .build();
-        localDevice().mService.getHdmiCecNetwork().addCecDevice(deviceInfo);
+        localDevice().mService.getHdmiCecNetwork().updateCecDevice(deviceInfo);
 
         // Consume CEC messages we already got for this newly found device.
         tv().processDelayedMessages(mDeviceLogicalAddress);

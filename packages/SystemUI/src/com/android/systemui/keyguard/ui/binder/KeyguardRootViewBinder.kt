@@ -47,7 +47,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.plugins.ClockController
+import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.CrossFadeHelper
@@ -89,7 +89,7 @@ object KeyguardRootViewBinder {
         vibratorHelper: VibratorHelper?,
     ): DisposableHandle {
         var onLayoutChangeListener: OnLayoutChange? = null
-        val childViews = mutableMapOf<Int, View?>()
+        val childViews = mutableMapOf<Int, View>()
         val statusViewId = R.id.keyguard_status_view
         val burnInLayerId = R.id.burn_in_layer
         val aodNotificationIconContainerId = R.id.aod_notification_icon_container
@@ -114,7 +114,12 @@ object KeyguardRootViewBinder {
                     }
 
                     if (keyguardBottomAreaRefactor()) {
-                        launch { viewModel.alpha.collect { alpha -> view.alpha = alpha } }
+                        launch {
+                            viewModel.alpha.collect { alpha ->
+                                view.alpha = alpha
+                                childViews[statusViewId]?.alpha = alpha
+                            }
+                        }
                     }
 
                     if (KeyguardShadeMigrationNssl.isEnabled) {

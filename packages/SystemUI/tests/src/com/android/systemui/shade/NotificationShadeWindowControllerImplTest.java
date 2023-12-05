@@ -53,6 +53,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
+import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -190,7 +191,7 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 powerInteractor,
                 sceneContainerFlags,
                 new FakeKeyguardBouncerRepository(),
-                configurationRepository,
+                new ConfigurationInteractor(configurationRepository),
                 shadeRepository,
                 () -> sceneInteractor);
 

@@ -127,22 +127,22 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             val actual by collectLastValue(underTest.qsExpansion)
 
             // WHEN split shade is enabled and QS is expanded
-            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
             overrideResource(R.bool.config_use_split_notification_shade, true)
             configurationRepository.onAnyConfigurationChange()
-            val progress = MutableStateFlow(.3f)
+            runCurrent()
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
                     ObservableTransitionState.Transition(
                         fromScene = SceneKey.QuickSettings,
                         toScene = SceneKey.Shade,
-                        progress = progress,
+                        progress = MutableStateFlow(.3f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
                     )
                 )
             sceneInteractor.setTransitionState(transitionState)
             runCurrent()
+            keyguardRepository.setStatusBarState(StatusBarState.SHADE)
 
             // THEN legacy shade expansion is passed through
             Truth.assertThat(actual).isEqualTo(.3f)
@@ -157,6 +157,8 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
             // WHEN split shade is not enabled and QS is expanded
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
             overrideResource(R.bool.config_use_split_notification_shade, false)
+            configurationRepository.onAnyConfigurationChange()
+            runCurrent()
             val progress = MutableStateFlow(.3f)
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
@@ -182,13 +184,12 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
             // WHEN scene transition active
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            val progress = MutableStateFlow(.3f)
             val transitionState =
                 MutableStateFlow<ObservableTransitionState>(
                     ObservableTransitionState.Transition(
                         fromScene = SceneKey.QuickSettings,
                         toScene = SceneKey.Shade,
-                        progress = progress,
+                        progress = MutableStateFlow(.3f),
                         isInitiatedByUserInput = false,
                         isUserInputOngoing = flowOf(false),
                     )
@@ -345,6 +346,52 @@ class ShadeInteractorSceneContainerImplTest : SysuiTestCase() {
 
             // THEN expansion is 0
             Truth.assertThat(expansionAmount).isEqualTo(0f)
+        }
+
+    fun isQsBypassingShade_goneToQs() =
+        testComponent.runTest() {
+            val actual by collectLastValue(underTest.isQsBypassingShade)
+
+            // WHEN transitioning from QS directly to Gone
+            configurationRepository.onAnyConfigurationChange()
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.Gone,
+                        toScene = SceneKey.QuickSettings,
+                        progress = MutableStateFlow(.1f),
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            runCurrent()
+
+            // THEN qs is bypassing shade
+            Truth.assertThat(actual).isTrue()
+        }
+
+    fun isQsBypassingShade_shadeToQs() =
+        testComponent.runTest() {
+            val actual by collectLastValue(underTest.isQsBypassingShade)
+
+            // WHEN transitioning from QS to Shade
+            configurationRepository.onAnyConfigurationChange()
+            val transitionState =
+                MutableStateFlow<ObservableTransitionState>(
+                    ObservableTransitionState.Transition(
+                        fromScene = SceneKey.Shade,
+                        toScene = SceneKey.QuickSettings,
+                        progress = MutableStateFlow(.1f),
+                        isInitiatedByUserInput = false,
+                        isUserInputOngoing = flowOf(false),
+                    )
+                )
+            sceneInteractor.setTransitionState(transitionState)
+            runCurrent()
+
+            // THEN qs is not bypassing shade
+            Truth.assertThat(actual).isFalse()
         }
 
     @Test

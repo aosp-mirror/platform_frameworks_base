@@ -180,6 +180,7 @@ public class SettingsToPropertiesMapper {
         "tv_system_ui",
         "vibrator",
         "virtual_devices",
+        "wallet_integration",
         "wear_calling_messaging",
         "wear_connectivity",
         "wear_esim_carriers",

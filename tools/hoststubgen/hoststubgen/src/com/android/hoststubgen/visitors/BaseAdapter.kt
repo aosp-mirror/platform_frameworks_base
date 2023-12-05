@@ -17,8 +17,8 @@ package com.android.hoststubgen.visitors
 
 import com.android.hoststubgen.HostStubGenErrors
 import com.android.hoststubgen.LogLevel
-import com.android.hoststubgen.asm.UnifiedVisitor
 import com.android.hoststubgen.asm.ClassNodes
+import com.android.hoststubgen.asm.UnifiedVisitor
 import com.android.hoststubgen.asm.getPackageNameFromClassName
 import com.android.hoststubgen.asm.resolveClassName
 import com.android.hoststubgen.asm.toJvmClassName
@@ -178,7 +178,9 @@ abstract class BaseAdapter (
         log.d("visitMethod: %s%s [%x] [%s] Policy: %s", name, descriptor, access, signature, p)
 
         log.withIndent {
-            // If it's a substitute-to method, then skip.
+            // If it's a substitute-from method, then skip (== remove).
+            // Instead of this method, we rename the substitute-to method with the original
+            // name, in the "Maybe rename the method" part below.
             val policy = filter.getPolicyForMethod(currentClassName, name, descriptor)
             if (policy.policy.isSubstitute) {
                 log.d("Skipping %s%s %s", name, descriptor, policy)
@@ -191,9 +193,19 @@ abstract class BaseAdapter (
 
             // Maybe rename the method.
             val newName: String
-            val substituteTo = filter.getRenameTo(currentClassName, name, descriptor)
-            if (substituteTo != null) {
-                newName = substituteTo
+            val renameTo = filter.getRenameTo(currentClassName, name, descriptor)
+            if (renameTo != null) {
+                newName = renameTo
+
+                // It's confusing, but here, `newName` is the original method name
+                // (the one with the @substitute/replace annotation).
+                // `name` is the name of the method we're currently visiting, so it's usually a
+                // "...$ravewnwood" name.
+                if (!checkSubstitutionMethodCompatibility(
+                        classes, currentClassName, newName, name, descriptor, options.errors)) {
+                    return null
+                }
+
                 log.v("Emitting %s.%s%s as %s %s", currentClassName, name, descriptor,
                         newName, policy)
             } else {
@@ -203,12 +215,12 @@ abstract class BaseAdapter (
 
             // Let subclass update the flag.
             // But note, we only use it when calling the super's method,
-            // but not for visitMethodInner(), beucase when subclass wants to change access,
+            // but not for visitMethodInner(), because when subclass wants to change access,
             // it can do so inside visitMethodInner().
             val newAccess = updateAccessFlags(access, name, descriptor)
 
             val ret = visitMethodInner(access, newName, descriptor, signature, exceptions, policy,
-                substituteTo != null,
+                renameTo != null,
                 super.visitMethod(newAccess, newName, descriptor, signature, exceptions))
 
             ret?.let {

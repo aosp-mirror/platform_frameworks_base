@@ -111,16 +111,15 @@ after the backend updates the `State` using `QSTileImpl#handleUpdateState`.
 * **[`QSTileView`](/packages/SystemUI/plugin/src/com/android/systemui/plugins/qs/QSTileView.java)**:
   Abstract class that provides basic Tile functionality. These allows
   external [Factories](#qsfactory) to create Tiles.
-* **[`QSTileViewImpl`](/packages/SystemUI/src/com/android/systemui/qs/tileimpl/QSTileViewImpl.java)
-  **: Implementation of `QSTileView`. It takes care of the following:
+* **[`QSTileViewImpl`](/packages/SystemUI/src/com/android/systemui/qs/tileimpl/QSTileViewImpl.java)**:
+  Implementation of `QSTileView`. It takes care of the following:
     * Holding the icon
     * Background color and shape
     * Ripple
     * Click listening
     * Labels
 * **[`QSIconView`](/packages/SystemUI/plugin/src/com/android/systemui/plugins/qs/QSIconView.java)**
-* **[`QSIconViewImpl`](/packages/SystemUI/src/com/android/systemui/qs/tileimpl/QSIconViewImpl.java)
-  **
+* **[`QSIconViewImpl`](/packages/SystemUI/src/com/android/systemui/qs/tileimpl/QSIconViewImpl.java)**
 
 #### QSIconView and QSIconViewImpl
 
@@ -333,18 +332,21 @@ This class handles management of the service, including:
 ## How are tiles created/instantiated?
 
 This section describes the classes that aid in the creation of each tile as well as the complete
-lifecycle of a tile. First we describe two important interfaces/classes.
+lifecycle of a tile. The current system makes use of flows to propagate information downstream.
 
-### QSTileHost
+First we describe three important interfaces/classes.
 
-This class keeps track of the tiles selected by the current user (backed in the Secure
-Setting `sysui_qs_tiles`) to be displayed in Quick Settings. Whenever the value of this setting
-changes (or on device start), the whole list of tiles is read. This is compared with the current
-tiles, destroying unnecessary ones and creating needed ones.
+### TileSpecRepository (and UserTileSpecRepository)
 
-It additionally provides a point of communication between the tiles and the StatusBar, for example
-to open it and collapse it. And a way for the StatusBar service to add tiles (only works
-for `CustomTile`).
+These classes keep track of the current tiles for each user, as a list of Tile specs. While the
+device is running, this is the source of truth of tiles for that user.
+
+The list is persisted to `Settings.Secure` every time it changes so it will be available upon
+restart or backup. In particular, any changes in the secure setting while this repository is
+tracking the list of tiles will be reverted.
+
+The class provides a `Flow<List<TileSpec>>` for each user that can be collected to keep track of the
+current list of tiles.
 
 #### Tile specs
 
@@ -356,36 +358,49 @@ SystemUI tile specs are usually a single simple word identifying the tile (like 
 or `battery`). Custom tile specs are always a string of the form `custom(...)` where the ellipsis is
 a flattened String representing the `ComponentName` for the corresponding `TileService`.
 
+We represent these internally using a `TileSpec` class that can distinguish between platform tiles
+and custom tiles.
+
+### CurrentTilesInteractor
+
+This class consumes the lists of specs provided by `TileSpecRepository` and produces a
+`Flow<List<Pair<TileSpec, QSTile>>>` with the current tiles for the current user.
+
+Internally, whenever the list of tiles changes, the following operation is performed:
+* Properly dispose of tiles that are no longer in the current list.
+* Properly dispose of tiles that are no longer available.
+* If the user has changed, relay the new user to the platform tiles and destroy any custom tiles.
+* Create new tiles as needed, disposing those that are not available or when the corresponding
+  service does not exist.
+* Reorder the tiles.
+
+Also, when this is completed, we pass the final list back to the repository so it matches the
+correct list of tiles.
+
 ### QSFactory
 
 This interface provides a way of creating tiles and views from a spec. It can be used in plugins to
 provide different definitions for tiles.
 
 In SystemUI there is only one implementation of this factory and that is the default
-factory (`QSFactoryImpl`) in `QSTileHost`.
+factory (`QSFactoryImpl`) in `CurrentTilesInteractorImpl`.
 
 #### QSFactoryImpl
 
-This class implements two methods as specified in the `QSFactory` interface:
+This class implements the following method as specified in the `QSFactory` interface:
 
 * ```java
   public QSTile createTile(String)
   ```
 
-  Creates a tile (backend) from a given spec. The factory has providers for all of the SystemUI
-  tiles, returning one when the correct spec is used.
+  Creates a tile (backend) from a given spec. The factory has a map with providers for all of the
+  SystemUI tiles, returning one when the correct spec is used.
 
   If the spec is not recognized but it has the `custom(` prefix, the factory tries to create
-  a `CustomTile` for the component in the spec. This could fail (the component is not a
-  valid `TileService` or is not enabled) and will be detected later when the tile is polled to
-  determine if it's available.
+  a `CustomTile` for the component in the spec.
 
-* ```java
-  public QSTileView createTileView(QSTile, boolean)
-  ```
-
-  Creates a view for the corresponding `QSTile`. The second parameter determines if the view that is
-  created should be a collapsed one (for using in QQS) or not (for using in QS).
+  As part of filtering not valid tiles, custom tiles that don't have a corresponding valid service
+  component are never instantiated.
 
 ### Lifecycle of a Tile
 
@@ -393,20 +408,20 @@ We describe first the parts of the lifecycle that are common to SystemUI tiles a
 tiles. Following that, there will be a section with the steps that are exclusive to third party
 tiles.
 
-1. The tile is added through the QS customizer by the user. This will immediately save the new list
-   of tile specs to the Secure Setting `sysui_qs_tiles`. This step could also happend if `StatusBar`
-   adds tiles (either through adb, or through its service interface as with the `DevelopmentTiles`).
-2. This triggers a "setting changed" that is caught by `QSTileHost`. This class processes the new
-   value of the setting and finds out that there is a new spec in the list. Alternatively, when the
-   device is booted, all tiles in the setting are considered as "new".
-3. `QSTileHost` calls all the available `QSFactory` classes that it has registered in order to find
-   the first one that will be able to create a tile with that spec. Assume that `QSFactoryImpl`
-   managed to create the tile, which is some implementation of `QSTile` (either a SystemUI subclass
-   of `QSTileImpl` or a `CustomTile`). If the tile is available, it's stored in a map and things
-   proceed forward.
-4. `QSTileHost` calls its callbacks indicating that the tiles have changed. In particular, `QSPanel`
-   and `QuickQSPanel` receive this call with the full list of tiles. We will focus on these two
-   classes.
+1. The tile is added through the QS customizer by the user. This will send the new list of tiles to
+   `TileSpecRepository` which will update its internal state and also store the new value in the
+   secure setting `sysui_qs_tiles`. This step could also happen if `StatusBar` adds tiles (either
+   through adb, or through its service interface as with the `DevelopmentTiles`).
+2. This updates the flow that `CurrentTilesInteractor` is collecting from, triggering the process
+   described above.
+3. `CurrentTilesInteractor` calls the available `QSFactory` classes in order to find one that will
+   be able to create a tile with that spec. Assuming that `QSFactoryImpl` managed to create the
+   tile, which is some implementation of `QSTile` (either a SystemUI subclass
+   of `QSTileImpl` or a `CustomTile`) it will be added to the current list.
+   If the tile is available, it's stored in a map and things proceed forward.
+4. `CurrentTilesInteractor` updates its flow and classes collecting from it will be notified of the
+   change. In particular, `QSPanel` and `QuickQSPanel` receive this call with the full list of
+   tiles. We will focus on these two classes.
 5. For each tile in this list, a `QSTileView` is created (collapsed or expanded) and attached to
    a `TileRecord` containing the tile backend and the view. Additionally:
     * a callback is attached to the tile to communicate between the backend and the view or the
@@ -469,12 +484,10 @@ of them are optional and depend on the requirements of the tile.
    that SystemUI knows how to create (to show to the user in the customization screen). The second
    one contains only the default tiles that the user will experience on a fresh boot or after they
    reset their tiles.
-6.
-In [SystemUI/res/values/tiles_states_strings.xml](/packages/SystemUI/res/values/tiles_states_strings.xml),
+6. In [SystemUI/res/values/tiles_states_strings.xml](/packages/SystemUI/res/values/tiles_states_strings.xml),
 add a new array for your tile. The name has to be `tile_states_<spec>`. Use a good description to
 help the translators.
-7.
-In [`SystemUI/src/com/android/systemui/qs/tileimpl/QSTileViewImpl.kt`](/packages/SystemUI/src/com/android/systemui/qs/tileimpl/QSTileViewImpl.kt),
+7. In [`SystemUI/src/com/android/systemui/qs/tileimpl/QSTileViewImpl.kt`](/packages/SystemUI/src/com/android/systemui/qs/tileimpl/QSTileViewImpl.kt),
 add a new element to the map in `SubtitleArrayMapping` corresponding to the resource created in the
 previous step.
 
@@ -570,3 +583,93 @@ type variable of type `State`.
 
 For information about this, use the Android Developer documentation
 for [TileService](https://developer.android.com/reference/android/service/quicksettings/TileService).
+
+## AutoAddable tiles
+
+AutoAddable tiles are tiles that are not part of the default set, but will be automatically added
+for the user, when the user enabled a feature for the first time. For example:
+* When the user creates a work profile, the work profile tile is automatically added.
+* When the user sets up a hotspot for the first time, the hotspot tile is automatically added.
+
+In order to declare a tile as auto-addable, there are two ways:
+
+* If the tile can be tied to a secure setting such that the tile should be auto added after that
+  setting has changed to a non-zero value for the first time, a new line can be added to the
+  string-array `config_quickSettingsAutoAdd` in [config.xml](/packages/SystemUI/res/values/config.xml).
+* If more specific behavior is needed, a new
+  [AutoAddable](/packages/SystemUI/src/com/android/systemui/qs/pipeline/domain/model/AutoAddable.kt)
+  can be added in the `autoaddables` package. This can have custom logic that produces a flow of
+  signals on when the tile should be auto-added (or auto-removed in special cases).
+
+  *Special case: If the data comes from a `CallbackController`, a special
+  `CallbackControllerAutoAddable` can be created instead that handles a lot of the common code.*
+
+### AutoAddRepository (and UserAutoAddRepository)
+
+These classes keep track of tiles that have been auto-added for each user, as a list of Tile specs.
+While the device is running, this is the source of truth of already auto-added tiles for that user.
+
+The list is persisted to `Settings.Secure` every time it changes so it will be available upon
+restart or backup. In particular, any changes in the secure setting while this repository is
+tracking the list of tiles will be reverted.
+
+The class provides a `Flow<Set<TileSpec>>` for each user that can be collected to keep track of the
+set of already auto added tiles.
+
+### AutoAddInteractor
+
+This class collects all registered (through Dagger) `AutoAddables` and merges all the signals for
+the current user. It will add/remove tiles as necessary and mark them as such in the
+`AutoAddRepository`.
+
+## Backup and restore
+
+It's important to point out that B&R of Quick Settings tiles only concerns itself with restoring,
+for each user, the list of current tiles and their order. The state of the tiles (or other things
+that can be accessed from them like list of WiFi networks) is the concern of each feature team and
+out of the scope of Quick Settings.
+
+In order to provide better support to restoring Quick Settings tiles and prevent overwritten or
+inconsistent data, the system has the following steps:
+
+1. When `Settings.Secure.SYSUI_QS_TILES` and `Settings.Secure.QS_AUTO_TILES` are restored, a
+  broadcast is sent to SystemUI. This is handled by
+  [SettingsHelper](/packages/SettingsProvider/src/com/android/providers/settings/SettingsHelper.java).
+  The broadcasts are received by [QSSettingsRestoredRepository](/packages/SystemUI/src/com/android/systemui/qs/pipeline/data/repository/QSSettingsRestoredRepository.kt)
+  and grouped by user into a data object. As described above, the change performed by the restore in
+  settings is overriden by the corresponding repositories.
+2. Once both settings have been restored, the data is reconciled with the current data, to account
+  for tiles that may have been auto-added between the start of SystemUI and the time the restore
+  happened. The guiding principles for the reconciliation are as follows:
+    * We assume that the user expects the restored tiles to be the ones to be present after restore,
+      so those are taken as the basis for the reconciliation.
+    * Any tile that was auto-added before the restore, but had not been auto-added in the source
+      device, is auto-added again (preferably in a similar position).
+    * Any tile that was auto-added before the restore, and it was also auto-added in the source
+      device, but not present in the restored tiles, is considered removed by the user and therefore
+      not restored.
+    * Every tile that was marked as auto-added (all tiles in source + tiles added before restore)
+      are set as auto-added.
+
+## Logs for debugging
+
+The following log buffers are used for Quick Settings debugging purposes:
+
+### QSLog
+
+Logs events in the individual tiles, like listening state, clicks, and status updates.
+
+### QSTileListLog
+
+Logs changes in the current set of tiles for each user, including when tiles are created or
+destroyed, and the reason for that. It also logs what operation caused the tiles to change
+(add, remove, change, restore).
+
+### QSAutoAddLog
+
+Logs operations of auto-add (or auto-remove) of tiles.
+
+### QSRestoreLog
+
+Logs the data obtained after a successful restore of the settings. This is the data that will be
+used for reconciliation.

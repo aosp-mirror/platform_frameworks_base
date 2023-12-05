@@ -24,6 +24,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.ui.viewmodel.OccludedToLockscreenTransitionViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.SharedNotificationContainerInteractor
 import com.android.systemui.util.kotlin.sample
@@ -38,6 +39,7 @@ import kotlinx.coroutines.flow.combineTransform
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 
@@ -50,6 +52,7 @@ constructor(
     keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
+    occludedToLockscreenTransitionViewModel: OccludedToLockscreenTransitionViewModel,
 ) {
     private val statesForConstrainedNotifications =
         setOf(
@@ -144,14 +147,20 @@ constructor(
                 initialValue = NotificationContainerBounds(0f, 0f),
             )
 
+    val alpha: Flow<Float> = occludedToLockscreenTransitionViewModel.lockscreenAlpha
+
     /**
      * Under certain scenarios, such as swiping up on the lockscreen, the container will need to be
      * translated as the keyguard fades out.
      */
     val translationY: Flow<Float> =
-        combine(isOnLockscreen, keyguardInteractor.keyguardTranslationY) {
+        combine(
             isOnLockscreen,
-            translationY ->
+            merge(
+                keyguardInteractor.keyguardTranslationY,
+                occludedToLockscreenTransitionViewModel.lockscreenTranslationY,
+            )
+        ) { isOnLockscreen, translationY ->
             if (isOnLockscreen) {
                 translationY
             } else {

@@ -29,3 +29,10 @@ flag {
     description: "Disable BOOT_COMPLETED broadcast FGS start for certain types"
     bug: "296558535"
 }
+
+flag {
+    name: "bfgs_managed_network_access"
+    namespace: "backstage_power"
+    description: "Restrict network access for certain applications in BFGS process state"
+    bug: "304347838"
+}

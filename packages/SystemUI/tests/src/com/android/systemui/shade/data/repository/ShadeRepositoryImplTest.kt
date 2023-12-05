@@ -225,4 +225,13 @@ class ShadeRepositoryImplTest : SysuiTestCase() {
             underTest.setLegacyQsFullscreen(true)
             assertThat(underTest.legacyQsFullscreen.value).isEqualTo(true)
         }
+
+    @Test
+    fun updateLegacyIsClosing() =
+        testScope.runTest {
+            assertThat(underTest.legacyIsClosing.value).isEqualTo(false)
+
+            underTest.setLegacyIsClosing(true)
+            assertThat(underTest.legacyIsClosing.value).isEqualTo(true)
+        }
 }

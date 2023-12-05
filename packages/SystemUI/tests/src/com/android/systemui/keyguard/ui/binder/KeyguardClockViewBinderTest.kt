@@ -22,10 +22,10 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.ClockConfig
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.ClockFaceController
-import com.android.systemui.plugins.ClockFaceLayout
+import com.android.systemui.plugins.clocks.ClockConfig
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockFaceController
+import com.android.systemui.plugins.clocks.ClockFaceLayout
 import com.android.systemui.util.mockito.whenever
 import kotlin.test.Test
 import org.junit.Before

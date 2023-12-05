@@ -3727,6 +3727,24 @@ public class ActivityRecordTests extends WindowTestsBase {
         verify(task).moveTaskToBack(any());
     }
 
+    /**
+     * Verifies the {@link ActivityRecord#moveFocusableActivityToTop} returns {@code false} if
+     * there's a PIP task on top.
+     */
+    @Test
+    public void testMoveFocusableActivityToTop() {
+        // Create a Task
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord ar = createActivityRecord(task);
+
+        // Create a PIP Task on top
+        final Task pipTask = createTask(mDisplayContent);
+        doReturn(true).when(pipTask).inPinnedWindowingMode();
+
+        // Verifies that the Task is not moving-to-top.
+        assertFalse(ar.moveFocusableActivityToTop("test"));
+    }
+
     private ICompatCameraControlCallback getCompatCameraControlCallback() {
         return new ICompatCameraControlCallback.Stub() {
             @Override

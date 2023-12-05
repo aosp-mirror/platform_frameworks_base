@@ -16,17 +16,11 @@
 
 package com.android.server.wm.utils;
 
-import static android.view.WindowInsets.Type.displayCutout;
-import static android.view.WindowInsets.Type.systemBars;
-import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import android.app.Activity;
 import android.app.KeyguardManager;
 import android.os.Bundle;
-import android.view.WindowInsetsController;
-import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.annotation.Nullable;
@@ -35,7 +29,6 @@ import androidx.annotation.Nullable;
  * TestActivity that will ensure it dismisses keyguard and shows as a fullscreen activity.
  */
 public class TestActivity extends Activity {
-    private static final int sTypeMask = systemBars() | displayCutout();
     private FrameLayout mParentLayout;
 
     @Override
@@ -47,13 +40,6 @@ public class TestActivity extends Activity {
                 FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT);
         setContentView(mParentLayout, layoutParams);
-
-        WindowInsetsController windowInsetsController = getWindow().getInsetsController();
-        windowInsetsController.hide(sTypeMask);
-        WindowManager.LayoutParams params = getWindow().getAttributes();
-        params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        getWindow().setAttributes(params);
-        getWindow().setDecorFitsSystemWindows(false);
 
         final KeyguardManager keyguardManager = getInstrumentation().getContext().getSystemService(
                 KeyguardManager.class);

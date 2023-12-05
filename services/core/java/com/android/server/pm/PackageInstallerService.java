@@ -67,6 +67,7 @@ import android.content.pm.PackageInstaller.SessionParams;
 import android.content.pm.PackageInstaller.UnarchivalStatus;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.DeleteFlags;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
 import android.content.pm.parsing.FrameworkParsingPackageUtils;
@@ -1390,11 +1391,14 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         final PackageDeleteObserverAdapter adapter = new PackageDeleteObserverAdapter(mContext,
                 statusReceiver, versionedPackage.getPackageName(),
                 canSilentlyInstallPackage, userId);
-        if (mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
+        final boolean shouldShowConfirmationDialog =
+                (flags & PackageManager.DELETE_SHOW_DIALOG) != 0;
+        if (!shouldShowConfirmationDialog
+                && mContext.checkCallingOrSelfPermission(Manifest.permission.DELETE_PACKAGES)
                     == PackageManager.PERMISSION_GRANTED) {
             // Sweet, call straight through!
             mPm.deletePackageVersioned(versionedPackage, adapter.getBinder(), userId, flags);
-        } else if (canSilentlyInstallPackage) {
+        } else if (!shouldShowConfirmationDialog && canSilentlyInstallPackage) {
             // Allow the device owner and affiliated profile owner to silently delete packages
             // Need to clear the calling identity to get DELETE_PACKAGES permission
             final long ident = Binder.clearCallingIdentity();
@@ -1419,6 +1423,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             intent.setData(Uri.fromParts("package", versionedPackage.getPackageName(), null));
             intent.putExtra(PackageInstaller.EXTRA_CALLBACK,
                     new PackageManager.UninstallCompleteCallback(adapter.getBinder().asBinder()));
+            if ((flags & PackageManager.DELETE_ARCHIVE) != 0) {
+                // Delete flags are passed to the uninstaller activity so it can be preserved
+                // in the follow-up uninstall operation after the user confirmation
+                intent.putExtra(PackageInstaller.EXTRA_DELETE_FLAGS, flags);
+            }
             adapter.onUserActionRequired(intent);
         }
     }
@@ -1631,9 +1640,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             @NonNull String packageName,
             @NonNull String callerPackageName,
             @NonNull IntentSender intentSender,
-            @NonNull UserHandle userHandle) {
+            @NonNull UserHandle userHandle,
+            @DeleteFlags int flags) {
         mPackageArchiver.requestArchive(packageName, callerPackageName, intentSender,
-                userHandle);
+                userHandle, flags);
     }
 
     @Override

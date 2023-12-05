@@ -46,3 +46,7 @@ class UnknownApiException(message: String) : Exception(message), UserErrorExcept
  */
 class InvalidAnnotationException(message: String) : Exception(message), UserErrorException
 
+/**
+ * We use this for general "user" errors.
+ */
+class HostStubGenUserErrorException(message: String) : Exception(message), UserErrorException

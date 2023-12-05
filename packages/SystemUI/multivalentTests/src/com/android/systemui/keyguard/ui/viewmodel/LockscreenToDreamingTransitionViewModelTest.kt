@@ -27,7 +27,6 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -55,11 +54,7 @@ class LockscreenToDreamingTransitionViewModelTest : SysuiTestCase() {
     private val repository = kosmos.fakeKeyguardTransitionRepository
     private val shadeRepository = kosmos.shadeRepository
     private val keyguardRepository = kosmos.fakeKeyguardRepository
-    private val underTest =
-        LockscreenToDreamingTransitionViewModel(
-            interactor = kosmos.keyguardTransitionInteractor,
-            shadeDependentFlows = kosmos.shadeDependentFlows,
-        )
+    private val underTest = kosmos.lockscreenToDreamingTransitionViewModel
 
     @Test
     fun lockscreenFadeOut() =

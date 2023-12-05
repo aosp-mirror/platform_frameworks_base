@@ -25,16 +25,18 @@ import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.customization.R
 import com.android.systemui.log.core.MessageBuffer
-import com.android.systemui.plugins.ClockAnimations
-import com.android.systemui.plugins.ClockConfig
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.ClockEvents
-import com.android.systemui.plugins.ClockFaceConfig
-import com.android.systemui.plugins.ClockFaceController
-import com.android.systemui.plugins.ClockFaceEvents
-import com.android.systemui.plugins.ClockSettings
-import com.android.systemui.plugins.DefaultClockFaceLayout
-import com.android.systemui.plugins.WeatherData
+import com.android.systemui.plugins.clocks.AlarmData
+import com.android.systemui.plugins.clocks.ClockAnimations
+import com.android.systemui.plugins.clocks.ClockConfig
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockEvents
+import com.android.systemui.plugins.clocks.ClockFaceConfig
+import com.android.systemui.plugins.clocks.ClockFaceController
+import com.android.systemui.plugins.clocks.ClockFaceEvents
+import com.android.systemui.plugins.clocks.ClockSettings
+import com.android.systemui.plugins.clocks.DefaultClockFaceLayout
+import com.android.systemui.plugins.clocks.WeatherData
+import com.android.systemui.plugins.clocks.ZenData
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone
@@ -256,6 +258,8 @@ class DefaultClockController(
         }
 
         override fun onWeatherDataChanged(data: WeatherData) {}
+        override fun onAlarmDataChanged(data: AlarmData) {}
+        override fun onZenDataChanged(data: ZenData) {}
     }
 
     open inner class DefaultClockAnimations(
