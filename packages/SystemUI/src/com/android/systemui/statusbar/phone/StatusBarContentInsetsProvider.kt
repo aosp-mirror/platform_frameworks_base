@@ -16,13 +16,16 @@
 
 package com.android.systemui.statusbar.phone
 
+import android.annotation.Px
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Insets
 import android.graphics.Point
 import android.graphics.Rect
 import android.util.LruCache
 import android.util.Pair
 import android.view.DisplayCutout
+import android.view.Surface
 import androidx.annotation.VisibleForTesting
 import com.android.internal.policy.SystemBarUtils
 import com.android.systemui.Dumpable
@@ -154,13 +157,13 @@ class StatusBarContentInsetsProvider @Inject constructor(
     }
 
     /**
-     * Calculate the distance from the left and right edges of the screen to the status bar
+     * Calculate the distance from the left, right and top edges of the screen to the status bar
      * content area. This differs from the content area rects in that these values can be used
      * directly as padding.
      *
      * @param rotation the target rotation for which to calculate insets
      */
-    fun getStatusBarContentInsetsForRotation(@Rotation rotation: Int): Pair<Int, Int> =
+    fun getStatusBarContentInsetsForRotation(@Rotation rotation: Int): Insets =
         traceSection(tag = "StatusBarContentInsetsProvider.getStatusBarContentInsetsForRotation") {
             val displayCutout = checkNotNull(context.display).cutout
             val key = getCacheKey(rotation, displayCutout)
@@ -175,15 +178,14 @@ class StatusBarContentInsetsProvider @Inject constructor(
             val area = insetsCache[key] ?: getAndSetCalculatedAreaForRotation(
                 rotation, displayCutout, getResourcesForRotation(rotation, context), key)
 
-            Pair(area.left, width - area.right)
+            Insets.of(area.left, area.top, /* right= */ width - area.right, /* bottom= */ 0)
         }
 
     /**
-     * Calculate the left and right insets for the status bar content in the device's current
-     * rotation
+     * Calculate the insets for the status bar content in the device's current rotation
      * @see getStatusBarContentAreaForRotation
      */
-    fun getStatusBarContentInsetsForCurrentRotation(): Pair<Int, Int> {
+    fun getStatusBarContentInsetsForCurrentRotation(): Insets {
         return getStatusBarContentInsetsForRotation(getExactRotation(context))
     }
 
@@ -251,6 +253,10 @@ class StatusBarContentInsetsProvider @Inject constructor(
             minRight = max(minDotPadding, roundedCornerPadding)
         }
 
+        val bottomAlignedMargin = getBottomAlignedMargin(targetRotation, rotatedResources)
+        val statusBarContentHeight =
+                rotatedResources.getDimensionPixelSize(R.dimen.status_bar_icon_size_sp)
+
         return calculateInsetsForRotationWithRotatedResources(
                 currentRotation,
                 targetRotation,
@@ -260,7 +266,22 @@ class StatusBarContentInsetsProvider @Inject constructor(
                 minLeft,
                 minRight,
                 configurationController.isLayoutRtl,
-                dotWidth)
+                dotWidth,
+                bottomAlignedMargin,
+                statusBarContentHeight)
+    }
+
+    @Px
+    private fun getBottomAlignedMargin(targetRotation: Int, resources: Resources): Int {
+        val dimenRes =
+                when (targetRotation) {
+                    Surface.ROTATION_0 -> R.dimen.status_bar_bottom_aligned_margin_rotation_0
+                    Surface.ROTATION_90 -> R.dimen.status_bar_bottom_aligned_margin_rotation_90
+                    Surface.ROTATION_180 -> R.dimen.status_bar_bottom_aligned_margin_rotation_180
+                    Surface.ROTATION_270 -> R.dimen.status_bar_bottom_aligned_margin_rotation_270
+                    else -> throw IllegalStateException("Unknown rotation: $targetRotation")
+                }
+        return resources.getDimensionPixelSize(dimenRes)
     }
 
     fun getStatusBarPaddingTop(@Rotation rotation: Int? = null): Int {
@@ -329,8 +350,7 @@ fun getPrivacyChipBoundingRectForInsets(
 }
 
 /**
- * Calculates the exact left and right positions for the status bar contents for the given
- * rotation
+ * Calculates the exact left and right positions for the status bar contents for the given rotation
  *
  * @param currentRotation current device rotation
  * @param targetRotation rotation for which to calculate the status bar content rect
@@ -341,9 +361,12 @@ fun getPrivacyChipBoundingRectForInsets(
  * @param minRight the minimum padding to enforce on the right
  * @param isRtl current layout direction is Right-To-Left or not
  * @param dotWidth privacy dot image width (0 if privacy dot is disabled)
- *
+ * @param bottomAlignedMargin the bottom margin that the status bar content should have. -1 if none,
+ *   and content should be centered vertically.
+ * @param statusBarContentHeight the height of the status bar contents (icons, text, etc)
  * @see [RotationUtils#getResourcesForRotation]
  */
+@VisibleForTesting
 fun calculateInsetsForRotationWithRotatedResources(
     @Rotation currentRotation: Int,
     @Rotation targetRotation: Int,
@@ -353,7 +376,9 @@ fun calculateInsetsForRotationWithRotatedResources(
     minLeft: Int,
     minRight: Int,
     isRtl: Boolean,
-    dotWidth: Int
+    dotWidth: Int,
+    bottomAlignedMargin: Int,
+    statusBarContentHeight: Int
 ): Rect {
     /*
     TODO: Check if this is ever used for devices with no rounded corners
@@ -363,7 +388,7 @@ fun calculateInsetsForRotationWithRotatedResources(
 
     val rotZeroBounds = getRotationZeroDisplayBounds(maxBounds, currentRotation)
 
-    val sbLeftRight = getStatusBarLeftRight(
+    return getStatusBarContentBounds(
             displayCutout,
             statusBarHeight,
             rotZeroBounds.right,
@@ -375,9 +400,9 @@ fun calculateInsetsForRotationWithRotatedResources(
             isRtl,
             dotWidth,
             targetRotation,
-            currentRotation)
-
-    return sbLeftRight
+            currentRotation,
+            bottomAlignedMargin,
+            statusBarContentHeight)
 }
 
 /**
@@ -399,26 +424,30 @@ fun calculateInsetsForRotationWithRotatedResources(
  * @return a Rect which exactly calculates the Status Bar's content rect relative to the target
  * rotation
  */
-private fun getStatusBarLeftRight(
-    displayCutout: DisplayCutout?,
-    sbHeight: Int,
-    width: Int,
-    height: Int,
-    cWidth: Int,
-    cHeight: Int,
-    minLeft: Int,
-    minRight: Int,
-    isRtl: Boolean,
-    dotWidth: Int,
-    @Rotation targetRotation: Int,
-    @Rotation currentRotation: Int
+private fun getStatusBarContentBounds(
+        displayCutout: DisplayCutout?,
+        sbHeight: Int,
+        width: Int,
+        height: Int,
+        cWidth: Int,
+        cHeight: Int,
+        minLeft: Int,
+        minRight: Int,
+        isRtl: Boolean,
+        dotWidth: Int,
+        @Rotation targetRotation: Int,
+        @Rotation currentRotation: Int,
+        bottomAlignedMargin: Int,
+        statusBarContentHeight: Int
 ): Rect {
+    val insetTop = getInsetTop(bottomAlignedMargin, statusBarContentHeight, sbHeight)
+
     val logicalDisplayWidth = if (targetRotation.isHorizontal()) height else width
 
     val cutoutRects = displayCutout?.boundingRects
     if (cutoutRects == null || cutoutRects.isEmpty()) {
         return Rect(minLeft,
-                0,
+                insetTop,
                 logicalDisplayWidth - minRight,
                 sbHeight)
     }
@@ -455,7 +484,48 @@ private fun getStatusBarLeftRight(
         //                    is very close to but not directly touch edges.
     }
 
-    return Rect(leftMargin, 0, logicalDisplayWidth - rightMargin, sbHeight)
+    return Rect(leftMargin, insetTop, logicalDisplayWidth - rightMargin, sbHeight)
+}
+
+/*
+ * Returns the inset top of the status bar.
+ *
+ * Only greater than 0, when we want the content to be bottom aligned.
+ *
+ * Common case when we want content to be vertically centered within the status bar.
+ * Example dimensions:
+ * - Status bar height: 50dp
+ * - Content height: 20dp
+ *  _______________________________________________
+ *  |                                             |
+ *  |                                             |
+ *  | 09:00                            5G [] 74%  |  20dp Content CENTER_VERTICAL gravity
+ *  |                                             |
+ *  |_____________________________________________|
+ *
+ *  Case when we want bottom alignment and a bottom margin of 10dp.
+ *  We need to make the status bar height artificially smaller using top padding/inset.
+ *  - Status bar height: 50dp
+ *  - Content height: 20dp
+ *  - Bottom margin: 10dp
+ *   ______________________________________________
+ *  |_____________________________________________| 10dp top inset/padding
+ *  |                                             | 40dp new artificial status bar height
+ *  | 09:00                            5G [] 74%  | 20dp Content CENTER_VERTICAL gravity
+ *  |_____________________________________________| 10dp bottom margin
+ */
+@Px
+private fun getInsetTop(
+        bottomAlignedMargin: Int,
+        statusBarContentHeight: Int,
+        statusBarHeight: Int
+): Int {
+    val bottomAlignmentEnabled = bottomAlignedMargin >= 0
+    if (!bottomAlignmentEnabled) {
+        return 0
+    }
+    val newArtificialStatusBarHeight = bottomAlignedMargin * 2 + statusBarContentHeight
+    return statusBarHeight - newArtificialStatusBarHeight
 }
 
 private fun sbRect(
