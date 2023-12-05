@@ -4623,7 +4623,7 @@ public class ComputerEngine implements Computer {
     @Override
     public List<ApplicationInfo> getInstalledApplications(
             @PackageManager.ApplicationInfoFlagsBits long flags, @UserIdInt int userId,
-            int callingUid) {
+            int callingUid, boolean forceAllowCrossUser) {
         if (getInstantAppPackageName(callingUid) != null) {
             return Collections.emptyList();
         }
@@ -4633,12 +4633,14 @@ public class ComputerEngine implements Computer {
         final boolean listApex = (flags & MATCH_APEX) != 0;
         final boolean listArchivedOnly = !listUninstalled && (flags & MATCH_ARCHIVED_PACKAGES) != 0;
 
-        enforceCrossUserPermission(
-                callingUid,
-                userId,
-                false /* requireFullPermission */,
-                false /* checkShell */,
-                "get installed application info");
+        if (!forceAllowCrossUser) {
+            enforceCrossUserPermission(
+                    callingUid,
+                    userId,
+                    false /* requireFullPermission */,
+                    false /* checkShell */,
+                    "get installed application info");
+        }
 
         ArrayList<ApplicationInfo> list;
         final ArrayMap<String, ? extends PackageStateInternal> packageStates =
