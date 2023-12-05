@@ -566,8 +566,10 @@ public abstract class AccessibilityService extends Service {
     public static final int GLOBAL_ACTION_TAKE_SCREENSHOT = 9;
 
     /**
-     * Action to send the KEYCODE_HEADSETHOOK KeyEvent, which is used to answer/hang up calls and
-     * play/stop media
+     * Action to send the KEYCODE_HEADSETHOOK KeyEvent, which is used to answer and hang up calls
+     * and play and stop media. Calling takes priority. If there is an incoming call,
+     * this action can be used to answer that call, and if there is an ongoing call, to hang up on
+     * that call.
      */
     public static final int GLOBAL_ACTION_KEYCODE_HEADSETHOOK = 10;
 
