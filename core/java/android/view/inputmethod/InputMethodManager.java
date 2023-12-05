@@ -2198,7 +2198,8 @@ public final class InputMethodManager {
             Log.w(TAG, "showSoftInputUnchecked() is a hidden method, which will be"
                     + " removed soon. If you are using androidx.appcompat.widget.SearchView,"
                     + " please update to version 26.0 or newer version.");
-            if (mCurRootView == null || mCurRootView.getView() == null) {
+            final View rootView = mCurRootView != null ? mCurRootView.getView() : null;
+            if (rootView == null) {
                 ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 Log.w(TAG, "No current root view, ignoring showSoftInputUnchecked()");
                 return;
@@ -2211,7 +2212,7 @@ public final class InputMethodManager {
             mH.executeOrSendMessage(Message.obtain(mH, MSG_ON_SHOW_REQUESTED));
             IInputMethodManagerGlobalInvoker.showSoftInput(
                     mClient,
-                    mCurRootView.getView().getWindowToken(),
+                    rootView.getWindowToken(),
                     statsToken,
                     flags,
                     mCurRootView.getLastClickToolType(),
@@ -3121,7 +3122,8 @@ public final class InputMethodManager {
                 ActivityThread::currentApplication);
 
         synchronized (mH) {
-            if (mCurRootView == null || mCurRootView.getView() == null) {
+            final View rootView = mCurRootView != null ? mCurRootView.getView() : null;
+            if (rootView == null) {
                 ImeTracker.forLogging().onFailed(statsToken, ImeTracker.PHASE_CLIENT_VIEW_SERVED);
                 ImeTracker.forLatency().onHideFailed(statsToken,
                         ImeTracker.PHASE_CLIENT_VIEW_SERVED, ActivityThread::currentApplication);
@@ -3133,7 +3135,7 @@ public final class InputMethodManager {
 
             IInputMethodManagerGlobalInvoker.hideSoftInput(
                     mClient,
-                    mCurRootView.getView().getWindowToken(),
+                    rootView.getWindowToken(),
                     statsToken,
                     HIDE_NOT_ALWAYS,
                     null,
