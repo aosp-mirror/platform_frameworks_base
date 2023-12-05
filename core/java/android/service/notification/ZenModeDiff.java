@@ -464,7 +464,7 @@ public class ZenModeDiff {
         public static final String FIELD_MODIFIED = "modified";
         public static final String FIELD_PKG = "pkg";
         public static final String FIELD_ALLOW_MANUAL = "allowManualInvocation";
-        public static final String FIELD_ICON_RES = "iconResId";
+        public static final String FIELD_ICON_RES = "iconResName";
         public static final String FIELD_TRIGGER_DESCRIPTION = "triggerDescription";
         public static final String FIELD_TYPE = "type";
         // NOTE: new field strings must match the variable names in ZenModeConfig.ZenRule
@@ -559,8 +559,8 @@ public class ZenModeDiff {
                     addField(FIELD_ALLOW_MANUAL,
                             new FieldDiff<>(from.allowManualInvocation, to.allowManualInvocation));
                 }
-                if (!Objects.equals(from.iconResId, to.iconResId)) {
-                    addField(FIELD_ICON_RES, new FieldDiff<>(from.iconResId, to.iconResId));
+                if (!Objects.equals(from.iconResName, to.iconResName)) {
+                    addField(FIELD_ICON_RES, new FieldDiff<>(from.iconResName, to.iconResName));
                 }
             }
         }
