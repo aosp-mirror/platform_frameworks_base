@@ -1023,7 +1023,13 @@ public class BubbleStackView extends FrameLayout
                         updateOverflowVisibility();
                         updatePointerPosition(false);
                         requestUpdate();
-                        showManageMenu(mShowingManage);
+                        if (mShowingManage) {
+                            // if we're showing the menu after rotation, post it to the looper
+                            // to make sure that the location of the menu button is correct
+                            post(() -> showManageMenu(true));
+                        } else {
+                            showManageMenu(false);
+                        }
 
                         PointF p = mPositioner.getExpandedBubbleXY(getBubbleIndex(mExpandedBubble),
                                 getState());
