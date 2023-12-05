@@ -31,6 +31,7 @@ import com.android.systemui.flags.ReleasedFlag
 import com.android.systemui.flags.ResourceBooleanFlag
 import com.android.systemui.flags.UnreleasedFlag
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
+import com.android.systemui.media.controls.util.MediaInSceneContainerFlag
 import com.android.systemui.res.R
 import dagger.Module
 import dagger.Provides
@@ -81,6 +82,10 @@ constructor(
             AconfigFlagMustBeEnabled(
                 flagName = KeyguardShadeMigrationNssl.FLAG_NAME,
                 flagValue = KeyguardShadeMigrationNssl.isEnabled,
+            ),
+            AconfigFlagMustBeEnabled(
+                flagName = MediaInSceneContainerFlag.FLAG_NAME,
+                flagValue = MediaInSceneContainerFlag.isEnabled,
             ),
         ) +
             classicFlagTokens.map { flagToken -> FlagMustBeEnabled(flagToken) } +
