@@ -37,11 +37,12 @@ class OccludedToAodTransitionViewModel
 constructor(
     interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = FromOccludedTransitionInteractor.TO_AOD_DURATION,
-            transitionFlow = interactor.transition(KeyguardState.OCCLUDED, KeyguardState.AOD),
+        animationFlow.setup(
+            duration = FromOccludedTransitionInteractor.TO_AOD_DURATION,
+            stepFlow = interactor.transition(KeyguardState.OCCLUDED, KeyguardState.AOD),
         )
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =

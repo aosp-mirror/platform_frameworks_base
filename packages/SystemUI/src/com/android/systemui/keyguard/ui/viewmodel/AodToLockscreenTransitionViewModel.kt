@@ -39,24 +39,25 @@ class AodToLockscreenTransitionViewModel
 constructor(
     interactor: KeyguardTransitionInteractor,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
+    animationFlow: KeyguardTransitionAnimationFlow,
 ) : DeviceEntryIconTransition {
 
     private val transitionAnimation =
-        KeyguardTransitionAnimationFlow(
-            transitionDuration = TO_LOCKSCREEN_DURATION,
-            transitionFlow = interactor.aodToLockscreenTransition,
+        animationFlow.setup(
+            duration = TO_LOCKSCREEN_DURATION,
+            stepFlow = interactor.aodToLockscreenTransition,
         )
 
     /** Ensure alpha is set to be visible */
     val lockscreenAlpha: Flow<Float> =
-        transitionAnimation.createFlow(
+        transitionAnimation.sharedFlow(
             duration = 500.milliseconds,
             onStart = { 1f },
             onStep = { 1f },
         )
 
     val shortcutsAlpha: Flow<Float> =
-        transitionAnimation.createFlow(
+        transitionAnimation.sharedFlow(
             duration = 167.milliseconds,
             startTime = 67.milliseconds,
             onStep = { it },
@@ -67,7 +68,7 @@ constructor(
         deviceEntryUdfpsInteractor.isUdfpsSupported.flatMapLatest { isUdfps ->
             if (isUdfps) {
                 // fade in
-                transitionAnimation.createFlow(
+                transitionAnimation.sharedFlow(
                     duration = 250.milliseconds,
                     onStep = { it },
                     onFinish = { 1f },

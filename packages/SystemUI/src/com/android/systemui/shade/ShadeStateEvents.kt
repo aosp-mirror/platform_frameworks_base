@@ -27,10 +27,6 @@ interface ShadeStateEvents {
 
     /** Callbacks for certain notification panel events. */
     interface ShadeStateEventsListener {
-
-        /** Invoked when the notification panel starts or stops collapsing. */
-        fun onPanelCollapsingChanged(isCollapsing: Boolean) {}
-
         /**
          * Invoked when the notification panel starts or stops launching an [android.app.Activity].
          */

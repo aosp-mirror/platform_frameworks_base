@@ -2086,15 +2086,17 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testShellTransitRotation() {
-        DisplayContent dc = createNewDisplay();
-        dc.setLastHasContent();
+        final DisplayContent dc = mDisplayContent;
+        // Create 2 visible activities to verify that they can both receive the new configuration.
+        final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        doReturn(true).when(activity1).isSyncFinished(any());
+        doReturn(true).when(activity2).isSyncFinished(any());
 
         final TestTransitionPlayer testPlayer = registerTestTransitionPlayer();
         final DisplayRotation dr = dc.getDisplayRotation();
-        doCallRealMethod().when(dr).updateRotationUnchecked(anyBoolean());
-        // Rotate 180 degree so the display doesn't have configuration change. This condition is
-        // used for the later verification of stop-freezing (without setting mWaitingForConfig).
-        doReturn((dr.getRotation() + 2) % 4).when(dr).rotationForOrientation(anyInt(), anyInt());
+        spyOn(dr);
+        doReturn((dr.getRotation() + 1) % 4).when(dr).rotationForOrientation(anyInt(), anyInt());
         mWm.mDisplayChangeController =
                 new IDisplayChangeWindowController.Stub() {
                     @Override
@@ -2109,11 +2111,8 @@ public class DisplayContentTests extends WindowTestsBase {
                     }
                 };
 
-        // kill any existing rotation animation (vestigial from test setup).
-        dc.setRotationAnimation(null);
-
         final int origRot = dc.getConfiguration().windowConfiguration.getRotation();
-
+        dc.setLastHasContent();
         mWm.updateRotation(true /* alwaysSendConfiguration */, false /* forceRelayout */);
         // Should create a transition request without performing rotation
         assertNotNull(testPlayer.mLastRequest);
@@ -2122,6 +2121,10 @@ public class DisplayContentTests extends WindowTestsBase {
         // Once transition starts, rotation is applied and transition shows DC rotating.
         testPlayer.startTransition();
         waitUntilHandlersIdle();
+        verify(activity1).ensureActivityConfiguration(anyInt(), anyBoolean(), anyBoolean(),
+                anyBoolean());
+        verify(activity2).ensureActivityConfiguration(anyInt(), anyBoolean(), anyBoolean(),
+                anyBoolean());
         assertNotEquals(origRot, dc.getConfiguration().windowConfiguration.getRotation());
         assertNotNull(testPlayer.mLastReady);
         assertTrue(testPlayer.mController.isPlaying());

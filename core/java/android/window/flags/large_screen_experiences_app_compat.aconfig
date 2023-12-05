@@ -15,3 +15,11 @@ flag {
   bug: "302387383"
   is_fixed_read_only: true
 }
+
+flag {
+  name: "density_390_api"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether the API DisplayMetrics.DENSITY_390 is available"
+  bug: "297550533"
+  is_fixed_read_only: true
+}

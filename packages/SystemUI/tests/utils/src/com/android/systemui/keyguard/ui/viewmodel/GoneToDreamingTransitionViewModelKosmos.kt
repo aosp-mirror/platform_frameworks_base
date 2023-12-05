@@ -12,20 +12,21 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-package com.android.systemui.keyguard.shared.model
+@file:OptIn(ExperimentalCoroutinesApi::class)
 
-/**
- * Provides a stateful representation of the visibility of the KeyguardRootView
- *
- * @param statusBarState State of the status bar represented by [StatusBarState]
- * @param goingToFullShade Whether status bar is going to full shade
- * @param occlusionTransitionRunning Whether the occlusion transition is running in this instant
- */
-data class KeyguardRootViewVisibilityState(
-    val statusBarState: Int,
-    val goingToFullShade: Boolean,
-    val occlusionTransitionRunning: Boolean,
-)
+package com.android.systemui.keyguard.ui.viewmodel
+
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
+import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+
+val Kosmos.goneToDreamingTransitionViewModel by Fixture {
+    GoneToDreamingTransitionViewModel(
+        interactor = keyguardTransitionInteractor,
+        animationFlow = keyguardTransitionAnimationFlow,
+    )
+}

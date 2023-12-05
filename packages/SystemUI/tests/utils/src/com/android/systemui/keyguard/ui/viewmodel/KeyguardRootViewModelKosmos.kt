@@ -18,7 +18,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import android.content.applicationContext
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.keyguard.domain.interactor.burnInInteractor
@@ -33,7 +33,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 val Kosmos.keyguardRootViewModel by Fixture {
     KeyguardRootViewModel(
-        context = applicationContext,
+        configurationInteractor = configurationInteractor,
         deviceEntryInteractor = deviceEntryInteractor,
         dozeParameters = dozeParameters,
         keyguardInteractor = keyguardInteractor,
@@ -42,6 +42,7 @@ val Kosmos.keyguardRootViewModel by Fixture {
         burnInInteractor = burnInInteractor,
         goneToAodTransitionViewModel = goneToAodTransitionViewModel,
         aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
+        occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
         screenOffAnimationController = screenOffAnimationController,
         keyguardClockViewModel = keyguardClockViewModel,
         featureFlags = FakeFeatureFlagsClassic(),

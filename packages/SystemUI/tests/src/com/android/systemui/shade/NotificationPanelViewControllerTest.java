@@ -362,6 +362,28 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
+    public void onInterceptTouchEvent_nsslMigrationOff_userActivity() {
+        mSetFlagsRule.disableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL);
+
+        mTouchHandler.onInterceptTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
+                0 /* metaState */));
+
+        verify(mCentralSurfaces).userActivity();
+    }
+
+    @Test
+    public void onInterceptTouchEvent_nsslMigrationOn_userActivity_not_called() {
+        mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_KEYGUARD_SHADE_MIGRATION_NSSL);
+
+        mTouchHandler.onInterceptTouchEvent(MotionEvent.obtain(0L /* downTime */,
+                0L /* eventTime */, MotionEvent.ACTION_DOWN, 0f /* x */, 0f /* y */,
+                0 /* metaState */));
+
+        verify(mCentralSurfaces, times(0)).userActivity();
+    }
+
+    @Test
     public void testOnTouchEvent_expansionResumesAfterBriefTouch() {
         mFalsingManager.setIsClassifierEnabled(true);
         mFalsingManager.setIsFalseTouch(false);

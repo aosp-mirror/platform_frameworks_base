@@ -21,66 +21,45 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.statusbar.phone.statusBarKeyguardViewManager
+import com.android.systemui.testKosmos
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import org.mockito.Mock
-import org.mockito.MockitoAnnotations
 
 @ExperimentalCoroutinesApi
 @RunWith(JUnit4::class)
 @SmallTest
 class AlternateBouncerViewModelTest : SysuiTestCase() {
-
-    private lateinit var testScope: TestScope
-
-    @Mock private lateinit var statusBarKeyguardViewManager: StatusBarKeyguardViewManager
-
-    private lateinit var transitionRepository: FakeKeyguardTransitionRepository
-    private lateinit var transitionInteractor: KeyguardTransitionInteractor
-    private lateinit var underTest: AlternateBouncerViewModel
-
-    @Before
-    fun setup() {
-        MockitoAnnotations.initMocks(this)
-        testScope = TestScope()
-
-        val transitionInteractorWithDependencies =
-            KeyguardTransitionInteractorFactory.create(testScope.backgroundScope)
-        transitionInteractor = transitionInteractorWithDependencies.keyguardTransitionInteractor
-        transitionRepository = transitionInteractorWithDependencies.repository
-        underTest =
-            AlternateBouncerViewModel(
-                statusBarKeyguardViewManager,
-                transitionInteractor,
-            )
-    }
+    private val kosmos = testKosmos()
+    private val testScope = kosmos.testScope
+    private val transitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val statusBarKeyguardViewManager = kosmos.statusBarKeyguardViewManager
+    private val underTest = kosmos.alternateBouncerViewModel
 
     @Test
     fun transitionToAlternateBouncer_scrimAlphaUpdate() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val scrimAlphas by collectValues(underTest.scrimAlpha)
 
-            transitionRepository.sendTransitionStep(
-                stepToAlternateBouncer(0f, TransitionState.STARTED)
+            transitionRepository.sendTransitionSteps(
+                listOf(
+                    stepToAlternateBouncer(0f, TransitionState.STARTED),
+                    stepToAlternateBouncer(.4f),
+                    stepToAlternateBouncer(.6f),
+                    stepToAlternateBouncer(1f),
+                ),
+                testScope,
             )
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(.4f))
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(.6f))
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(1f))
 
             assertThat(scrimAlphas.size).isEqualTo(4)
             scrimAlphas.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
@@ -88,15 +67,18 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
 
     @Test
     fun transitionFromAlternateBouncer_scrimAlphaUpdate() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val scrimAlphas by collectValues(underTest.scrimAlpha)
 
-            transitionRepository.sendTransitionStep(
-                stepFromAlternateBouncer(0f, TransitionState.STARTED)
+            transitionRepository.sendTransitionSteps(
+                listOf(
+                    stepToAlternateBouncer(0f, TransitionState.STARTED),
+                    stepToAlternateBouncer(.4f),
+                    stepToAlternateBouncer(.6f),
+                    stepToAlternateBouncer(1f),
+                ),
+                testScope,
             )
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(.4f))
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(.6f))
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(1f))
 
             assertThat(scrimAlphas.size).isEqualTo(4)
             scrimAlphas.forEach { assertThat(it).isIn(Range.closed(0f, 1f)) }
@@ -104,43 +86,57 @@ class AlternateBouncerViewModelTest : SysuiTestCase() {
 
     @Test
     fun forcePluginOpen() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val forcePluginOpen by collectLastValue(underTest.forcePluginOpen)
-            transitionRepository.sendTransitionStep(
-                stepToAlternateBouncer(0f, TransitionState.STARTED)
+
+            transitionRepository.sendTransitionSteps(
+                listOf(
+                    stepToAlternateBouncer(0f, TransitionState.STARTED),
+                    stepToAlternateBouncer(.4f),
+                    stepToAlternateBouncer(.6f),
+                    stepToAlternateBouncer(1f),
+                ),
+                testScope,
             )
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(.3f))
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(.6f))
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(1f))
             assertThat(forcePluginOpen).isTrue()
 
-            transitionRepository.sendTransitionStep(
-                stepFromAlternateBouncer(0f, TransitionState.STARTED)
+            transitionRepository.sendTransitionSteps(
+                listOf(
+                    stepFromAlternateBouncer(0f, TransitionState.STARTED),
+                    stepFromAlternateBouncer(.3f),
+                    stepFromAlternateBouncer(.6f),
+                    stepFromAlternateBouncer(1f),
+                ),
+                testScope,
             )
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(.3f))
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(.6f))
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(1f))
             assertThat(forcePluginOpen).isFalse()
         }
 
     @Test
     fun registerForDismissGestures() =
-        runTest(UnconfinedTestDispatcher()) {
+        testScope.runTest {
             val registerForDismissGestures by collectLastValue(underTest.registerForDismissGestures)
-            transitionRepository.sendTransitionStep(
-                stepToAlternateBouncer(0f, TransitionState.STARTED)
+
+            transitionRepository.sendTransitionSteps(
+                listOf(
+                    stepToAlternateBouncer(0f, TransitionState.STARTED),
+                    stepToAlternateBouncer(.4f),
+                    stepToAlternateBouncer(.6f),
+                    stepToAlternateBouncer(1f),
+                ),
+                testScope,
             )
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(.3f))
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(.6f))
-            transitionRepository.sendTransitionStep(stepToAlternateBouncer(1f))
             assertThat(registerForDismissGestures).isTrue()
 
-            transitionRepository.sendTransitionStep(
-                stepFromAlternateBouncer(0f, TransitionState.STARTED)
+            transitionRepository.sendTransitionSteps(
+                listOf(
+                    stepFromAlternateBouncer(0f, TransitionState.STARTED),
+                    stepFromAlternateBouncer(.3f),
+                    stepFromAlternateBouncer(.6f),
+                    stepFromAlternateBouncer(1f),
+                ),
+                testScope,
             )
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(.3f))
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(.6f))
-            transitionRepository.sendTransitionStep(stepFromAlternateBouncer(1f))
             assertThat(registerForDismissGestures).isFalse()
         }
 

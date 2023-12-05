@@ -2552,6 +2552,7 @@ public abstract class PackageManager {
             DELETE_SYSTEM_APP,
             DELETE_DONT_KILL_APP,
             DELETE_CHATTY,
+            DELETE_SHOW_DIALOG,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface DeleteFlags {}
@@ -2595,13 +2596,19 @@ public abstract class PackageManager {
     public static final int DELETE_DONT_KILL_APP = 0x00000008;
 
     /**
-     * Flag parameter for {@link #deletePackage} to indicate that the deletion is an archival. This
+     * Flag parameter for {@link PackageInstaller#uninstall(VersionedPackage, int, IntentSender)} to
+     * indicate that the deletion is an archival. This
      * flag is only for internal usage as part of
-     * {@link PackageInstaller#requestArchive(String, IntentSender)}.
-     *
-     * @hide
+     * {@link PackageInstaller#requestArchive}.
      */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public static final int DELETE_ARCHIVE = 0x00000010;
+
+    /**
+     * Show a confirmation dialog to the user when app is being deleted.
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
+    public static final int DELETE_SHOW_DIALOG = 0x00000020;
 
     /**
      * Flag parameter for {@link #deletePackage} to indicate that package deletion
@@ -8964,7 +8971,7 @@ public abstract class PackageManager {
      * Returns true if an app is archivable.
      *
      * @throws NameNotFoundException if the given package name is not available to the caller.
-     * @see PackageInstaller#requestArchive(String, IntentSender)
+     * @see PackageInstaller#requestArchive
      */
     @FlaggedApi(android.content.pm.Flags.FLAG_ARCHIVING)
     public boolean isAppArchivable(@NonNull String packageName) throws NameNotFoundException {

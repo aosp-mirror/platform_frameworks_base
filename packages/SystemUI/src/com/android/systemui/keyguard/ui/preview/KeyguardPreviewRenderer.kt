@@ -27,6 +27,8 @@ import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
+import android.provider.Settings
+import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.Display
 import android.view.Display.DEFAULT_DISPLAY
@@ -47,6 +49,7 @@ import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
@@ -64,6 +67,7 @@ import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombin
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.monet.ColorScheme
+import com.android.systemui.monet.Style
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
@@ -79,13 +83,21 @@ import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
 import com.android.systemui.temporarydisplay.chipbar.ChipbarCoordinator
+import com.android.systemui.util.settings.SecureSettings
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import org.json.JSONException
+import org.json.JSONObject
 
 /** Renders the preview of the lock screen. */
 class KeyguardPreviewRenderer
@@ -93,8 +105,10 @@ class KeyguardPreviewRenderer
 @AssistedInject
 constructor(
     @Application private val context: Context,
+    @Application applicationScope: CoroutineScope,
     @Main private val mainDispatcher: CoroutineDispatcher,
     @Main private val mainHandler: Handler,
+    @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val clockViewModel: KeyguardPreviewClockViewModel,
     private val smartspaceViewModel: KeyguardPreviewSmartspaceViewModel,
     private val bottomAreaViewModel: KeyguardBottomAreaViewModel,
@@ -118,6 +132,7 @@ constructor(
     private val chipbarCoordinator: ChipbarCoordinator,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val shadeInteractor: ShadeInteractor,
+    private val secureSettings: SecureSettings,
 ) {
     val hostToken: IBinder? = bundle.getBinder(KEY_HOST_TOKEN)
     private val width: Int = bundle.getInt(KEY_VIEW_WIDTH)
@@ -156,7 +171,13 @@ constructor(
 
     private val shortcutsBindings = mutableSetOf<KeyguardQuickAffordanceViewBinder.Binding>()
 
+    private val coroutineScope: CoroutineScope
+    private var themeStyle: Style? = null
+
     init {
+        coroutineScope = CoroutineScope(applicationScope.coroutineContext + Job())
+        disposables.add(DisposableHandle { coroutineScope.cancel() })
+
         if (keyguardBottomAreaRefactor()) {
             quickAffordancesCombinedViewModel.enablePreviewMode(
                 initiallySelectedSlotId =
@@ -553,29 +574,54 @@ constructor(
     }
 
     private fun onClockChanged() {
-        val clock = clockRegistry.createCurrentClock()
-        clockController.clock = clock
+        coroutineScope.launch {
+            val clock = clockRegistry.createCurrentClock()
+            clockController.clock = clock
 
-        if (clockRegistry.seedColor == null) {
-            // Seed color null means users do override any color on the clock. The default color
-            // will need to use wallpaper's extracted color and consider if the wallpaper's color
-            // is dark or a light.
-            // TODO(b/277832214) we can potentially simplify this code by checking for
-            // wallpaperColors being null in the if clause above and removing the many ?.
-            val wallpaperColorScheme = wallpaperColors?.let { ColorScheme(it, darkTheme = false) }
-            val lightClockColor = wallpaperColorScheme?.accent1?.s100
-            val darkClockColor = wallpaperColorScheme?.accent2?.s600
+            val colors = wallpaperColors
+            if (clockRegistry.seedColor == null && colors != null) {
+                // Seed color null means users do not override any color on the clock. The default
+                // color will need to use wallpaper's extracted color and consider if the
+                // wallpaper's color is dark or light.
+                val style = themeStyle ?: fetchThemeStyleFromSetting().also { themeStyle = it }
+                val wallpaperColorScheme = ColorScheme(colors, darkTheme = false, style)
+                val lightClockColor = wallpaperColorScheme.accent1.s100
+                val darkClockColor = wallpaperColorScheme.accent2.s600
 
-            // Note that when [wallpaperColors] is null, isWallpaperDark is true.
-            val isWallpaperDark: Boolean =
-                (wallpaperColors?.colorHints?.and(WallpaperColors.HINT_SUPPORTS_DARK_TEXT)) == 0
-            clock.events.onSeedColorChanged(
-                if (isWallpaperDark) lightClockColor else darkClockColor
-            )
+                // Note that when [wallpaperColors] is null, isWallpaperDark is true.
+                val isWallpaperDark: Boolean =
+                    (colors.colorHints.and(WallpaperColors.HINT_SUPPORTS_DARK_TEXT)) == 0
+                clock.events.onSeedColorChanged(
+                    if (isWallpaperDark) lightClockColor else darkClockColor
+                )
+            }
+
+            updateLargeClock(clock)
+            updateSmallClock(clock)
         }
+    }
 
-        updateLargeClock(clock)
-        updateSmallClock(clock)
+    private suspend fun fetchThemeStyleFromSetting(): Style {
+        val overlayPackageJson =
+            withContext(backgroundDispatcher) {
+                secureSettings.getString(
+                    Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
+                )
+            }
+        return if (!overlayPackageJson.isNullOrEmpty()) {
+            try {
+                val jsonObject = JSONObject(overlayPackageJson)
+                Style.valueOf(jsonObject.getString(OVERLAY_CATEGORY_THEME_STYLE))
+            } catch (e: (JSONException)) {
+                Log.i(TAG, "Failed to parse THEME_CUSTOMIZATION_OVERLAY_PACKAGES.", e)
+                Style.TONAL_SPOT
+            } catch (e: IllegalArgumentException) {
+                Log.i(TAG, "Failed to parse THEME_CUSTOMIZATION_OVERLAY_PACKAGES.", e)
+                Style.TONAL_SPOT
+            }
+        } else {
+            Style.TONAL_SPOT
+        }
     }
 
     private fun updateLargeClock(clock: ClockController) {
@@ -601,6 +647,8 @@ constructor(
     }
 
     companion object {
+        private const val TAG = "KeyguardPreviewRenderer"
+        private const val OVERLAY_CATEGORY_THEME_STYLE = "android.theme.customization.theme_style"
         private const val KEY_HOST_TOKEN = "host_token"
         private const val KEY_VIEW_WIDTH = "width"
         private const val KEY_VIEW_HEIGHT = "height"

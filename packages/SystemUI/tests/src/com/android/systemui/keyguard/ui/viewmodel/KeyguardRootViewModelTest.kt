@@ -24,48 +24,41 @@ import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardClockSwitch.LARGE
 import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.Flags.FLAG_NEW_AOD_TRANSITION
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
 import com.android.systemui.collectLastValue
-import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
+import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.deviceentry.data.repository.FakeDeviceEntryRepository
-import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
+import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
+import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.flags.featureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ClockController
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.statusbar.notification.data.repository.FakeNotificationsKeyguardViewStateRepository
-import com.android.systemui.statusbar.phone.DozeParameters
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.util.mockito.mock
+import com.android.systemui.statusbar.notification.data.repository.fakeNotificationsKeyguardViewStateRepository
+import com.android.systemui.statusbar.notification.stack.domain.interactor.notificationsKeyguardInteractor
+import com.android.systemui.statusbar.phone.dozeParameters
+import com.android.systemui.statusbar.phone.screenOffAnimationController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
 import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -75,49 +68,48 @@ import org.mockito.Answers
 import org.mockito.Mock
 import org.mockito.Mockito.RETURNS_DEEP_STUBS
 import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.reset
-import org.mockito.Mockito.withSettings
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardRootViewModelTest : SysuiTestCase() {
+    private val kosmos = testKosmos().apply {
+        featureFlagsClassic.apply { set(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT, false) }
+    }
+    private val testScope = kosmos.testScope
+    private val repository = kosmos.fakeKeyguardRepository
+    private val configurationRepository = kosmos.fakeConfigurationRepository
+    private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val screenOffAnimationController = kosmos.screenOffAnimationController
+    private val deviceEntryRepository = kosmos.fakeDeviceEntryRepository
+    private val notificationsKeyguardInteractor = kosmos.notificationsKeyguardInteractor
+    private val fakeNotificationsKeyguardViewStateRepository =
+        kosmos.fakeNotificationsKeyguardViewStateRepository
+    private val dozeParameters = kosmos.dozeParameters
     private lateinit var underTest: KeyguardRootViewModel
-    private lateinit var testScope: TestScope
-    private lateinit var repository: FakeKeyguardRepository
-    private lateinit var keyguardInteractor: KeyguardInteractor
-    private lateinit var configurationRepository: FakeConfigurationRepository
+
     @Mock private lateinit var burnInInteractor: BurnInInteractor
-    @Mock private lateinit var keyguardClockViewModel: KeyguardClockViewModel
-    @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
+    private val burnInFlow = MutableStateFlow(BurnInModel())
+
     @Mock private lateinit var goneToAodTransitionViewModel: GoneToAodTransitionViewModel
+    private val enterFromTopAnimationAlpha = MutableStateFlow(0f)
+
     @Mock
     private lateinit var aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var clockController: ClockController
+    @Mock
+    private lateinit var occludedToLockscreenTransitionViewModel:
+        OccludedToLockscreenTransitionViewModel
+    private val occludedToLockscreenTranslationY = MutableStateFlow(0f)
+    private val occludedToLockscreenAlpha = MutableStateFlow(0f)
 
-    private val burnInFlow = MutableStateFlow(BurnInModel())
-    private val goneToAodTransitionViewModelVisibility = MutableStateFlow(0)
-    private val enterFromTopAnimationAlpha = MutableStateFlow(0f)
-    private val goneToAodTransitionStep = MutableSharedFlow<TransitionStep>(replay = 1)
-    private val dozeAmountTransitionStep = MutableSharedFlow<TransitionStep>(replay = 1)
-    private val clockSize = MutableStateFlow(LARGE)
-    private val startedKeyguardState = MutableStateFlow(KeyguardState.GONE)
-    private val featureFlags: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic()
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS) private lateinit var clockController: ClockController
 
     @Before
     fun setUp() {
-        val testDispatcher = StandardTestDispatcher()
-        testScope = TestScope(testDispatcher)
         MockitoAnnotations.initMocks(this)
 
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-
-        featureFlags.set(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT, false)
-
-        val withDeps = KeyguardInteractorFactory.create(featureFlags = featureFlags)
-        keyguardInteractor = withDeps.keyguardInteractor
-        repository = withDeps.repository
-        configurationRepository = withDeps.configurationRepository
+        mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
 
         whenever(goneToAodTransitionViewModel.enterFromTopTranslationY(anyInt()))
             .thenReturn(emptyFlow<Float>())
@@ -126,34 +118,29 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
 
         whenever(burnInInteractor.keyguardBurnIn).thenReturn(burnInFlow)
 
-        whenever(keyguardTransitionInteractor.goneToAodTransition)
-            .thenReturn(goneToAodTransitionStep)
-        whenever(keyguardTransitionInteractor.dozeAmountTransition)
-            .thenReturn(dozeAmountTransitionStep)
-        whenever(keyguardTransitionInteractor.startedKeyguardState).thenReturn(startedKeyguardState)
-        whenever(keyguardClockViewModel.clockSize).thenReturn(clockSize)
+        whenever(occludedToLockscreenTransitionViewModel.lockscreenTranslationY)
+            .thenReturn(occludedToLockscreenTranslationY)
+        whenever(occludedToLockscreenTransitionViewModel.lockscreenAlpha)
+            .thenReturn(occludedToLockscreenAlpha)
 
         underTest =
             KeyguardRootViewModel(
-                context,
-                deviceEntryInteractor =
-                    mock { whenever(isBypassEnabled).thenReturn(MutableStateFlow(false)) },
-                dozeParameters = mock(),
-                keyguardInteractor,
-                keyguardTransitionInteractor,
-                notificationsKeyguardInteractor =
-                    mock {
-                        whenever(areNotificationsFullyHidden).thenReturn(emptyFlow())
-                        whenever(isPulseExpanding).thenReturn(emptyFlow())
-                    },
-                burnInInteractor,
-                keyguardClockViewModel,
-                goneToAodTransitionViewModel,
-                aodToLockscreenTransitionViewModel,
-                screenOffAnimationController = mock(),
+                configurationInteractor = kosmos.configurationInteractor,
+                deviceEntryInteractor = kosmos.deviceEntryInteractor,
+                dozeParameters = kosmos.dozeParameters,
+                keyguardInteractor = kosmos.keyguardInteractor,
+                keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
+                notificationsKeyguardInteractor = kosmos.notificationsKeyguardInteractor,
+                burnInInteractor = burnInInteractor,
+                keyguardClockViewModel = kosmos.keyguardClockViewModel,
+                goneToAodTransitionViewModel = goneToAodTransitionViewModel,
+                aodToLockscreenTransitionViewModel = aodToLockscreenTransitionViewModel,
+                occludedToLockscreenTransitionViewModel = occludedToLockscreenTransitionViewModel,
+                screenOffAnimationController = screenOffAnimationController,
                 // TODO(b/310989341): remove after change to aconfig
-                featureFlags
+                featureFlags = kosmos.featureFlagsClassic
             )
+
         underTest.clockControllerProvider = Provider { clockController }
     }
 
@@ -161,8 +148,8 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     fun alpha() =
         testScope.runTest {
             val value = collectLastValue(underTest.alpha)
+            assertThat(value()).isEqualTo(0f)
 
-            assertThat(value()).isEqualTo(1f)
             repository.setKeyguardAlpha(0.1f)
             assertThat(value()).isEqualTo(0.1f)
             repository.setKeyguardAlpha(0.5f)
@@ -171,6 +158,8 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             assertThat(value()).isEqualTo(0.2f)
             repository.setKeyguardAlpha(0f)
             assertThat(value()).isEqualTo(0f)
+            occludedToLockscreenAlpha.value = 0.8f
+            assertThat(value()).isEqualTo(0.8f)
         }
 
     @Test
@@ -181,7 +170,15 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             val scale by collectLastValue(underTest.scale)
 
             // Set to not dozing (on lockscreen)
-            dozeAmountTransitionStep.emit(TransitionStep(value = 0f))
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.LOCKSCREEN,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                ),
+                validateStep = false,
+            )
 
             // Trigger a change to the burn-in model
             burnInFlow.value =
@@ -206,7 +203,15 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             underTest.statusViewTop = 100
 
             // Set to dozing (on AOD)
-            dozeAmountTransitionStep.emit(TransitionStep(value = 1f))
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                ),
+                validateStep = false,
+            )
             // Trigger a change to the burn-in model
             burnInFlow.value =
                 BurnInModel(
@@ -214,12 +219,21 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
                     translationY = 30,
                     scale = 0.5f,
                 )
+
             assertThat(translationX).isEqualTo(20)
             assertThat(translationY).isEqualTo(30)
             assertThat(scale).isEqualTo(Pair(0.5f, true /* scaleClockOnly */))
 
             // Set to the beginning of GONE->AOD transition
-            goneToAodTransitionStep.emit(TransitionStep(value = 0f))
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    value = 0f,
+                    transitionState = TransitionState.STARTED
+                ),
+                validateStep = false,
+            )
             assertThat(translationX).isEqualTo(0)
             assertThat(translationY).isEqualTo(0)
             assertThat(scale).isEqualTo(Pair(1f, true /* scaleClockOnly */))
@@ -236,7 +250,16 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             underTest.topInset = 80
 
             // Set to dozing (on AOD)
-            dozeAmountTransitionStep.emit(TransitionStep(value = 1f))
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                ),
+                validateStep = false,
+            )
+
             // Trigger a change to the burn-in model
             burnInFlow.value =
                 BurnInModel(
@@ -250,7 +273,15 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             assertThat(scale).isEqualTo(Pair(0.5f, true /* scaleClockOnly */))
 
             // Set to the beginning of GONE->AOD transition
-            goneToAodTransitionStep.emit(TransitionStep(value = 0f))
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    value = 0f,
+                    transitionState = TransitionState.STARTED
+                ),
+                validateStep = false,
+            )
             assertThat(translationX).isEqualTo(0)
             assertThat(translationY).isEqualTo(0)
             assertThat(scale).isEqualTo(Pair(1f, true /* scaleClockOnly */))
@@ -266,7 +297,15 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             val scale by collectLastValue(underTest.scale)
 
             // Set to dozing (on AOD)
-            dozeAmountTransitionStep.emit(TransitionStep(value = 1f))
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.GONE,
+                    to = KeyguardState.AOD,
+                    value = 1f,
+                    transitionState = TransitionState.FINISHED
+                ),
+                validateStep = false,
+            )
 
             // Trigger a change to the burn-in model
             burnInFlow.value =
@@ -286,10 +325,15 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val burnInLayerVisibility by collectLastValue(underTest.burnInLayerVisibility)
 
-            startedKeyguardState.value = KeyguardState.OCCLUDED
-            assertThat(burnInLayerVisibility).isNull()
-
-            startedKeyguardState.value = KeyguardState.AOD
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.AOD,
+                    value = 0f,
+                    transitionState = TransitionState.STARTED
+                ),
+                validateStep = false,
+            )
             assertThat(burnInLayerVisibility).isEqualTo(View.VISIBLE)
         }
 
@@ -304,165 +348,124 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
             enterFromTopAnimationAlpha.value = 1f
             assertThat(burnInLayerAlpha).isEqualTo(1f)
         }
-}
 
-@SmallTest
-class KeyguardRootViewModelTestWithFakes : SysuiTestCase() {
-
-    @Component(modules = [SysUITestModule::class])
-    @SysUISingleton
-    interface TestComponent : SysUITestComponent<KeyguardRootViewModel> {
-        val deviceEntryRepository: FakeDeviceEntryRepository
-        val notifsKeyguardRepository: FakeNotificationsKeyguardViewStateRepository
-        val repository: FakeKeyguardRepository
-        val transitionRepository: FakeKeyguardTransitionRepository
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-                mocks: TestMocksModule,
-            ): TestComponent
-        }
-    }
-
-    private val clockController: ClockController =
-        mock(withSettings().defaultAnswer(RETURNS_DEEP_STUBS))
-    private val dozeParams: DozeParameters = mock()
-    private val screenOffAnimController: ScreenOffAnimationController = mock()
-
-    private fun runTest(block: suspend TestComponent.() -> Unit): Unit =
-        DaggerKeyguardRootViewModelTestWithFakes_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags = FakeFeatureFlagsClassicModule(),
-                mocks =
-                    TestMocksModule(
-                        dozeParameters = dozeParams,
-                        screenOffAnimationController = screenOffAnimController,
-                    ),
+    @Test
+    fun iconContainer_isNotVisible_notOnKeyguard_dontShowAodIconsWhenShade() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+            runCurrent()
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.OFF,
+                to = KeyguardState.GONE,
+                testScope,
             )
-            .runTest {
-                reset(clockController)
-                underTest.clockControllerProvider = Provider { clockController }
-                block()
-            }
+            whenever(screenOffAnimationController.shouldShowAodIconsWhenShade()).thenReturn(false)
+            runCurrent()
 
-    @Before
-    fun before() {
-        mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
-    }
+            assertThat(isVisible?.value).isFalse()
+            assertThat(isVisible?.isAnimating).isFalse()
+        }
 
     @Test
-    fun iconContainer_isNotVisible_notOnKeyguard_dontShowAodIconsWhenShade() = runTest {
-        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
-        runCurrent()
-        transitionRepository.sendTransitionSteps(
-            from = KeyguardState.OFF,
-            to = KeyguardState.GONE,
-            testScope,
-        )
-        whenever(screenOffAnimController.shouldShowAodIconsWhenShade()).thenReturn(false)
-        runCurrent()
+    fun iconContainer_isVisible_bypassEnabled() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+            runCurrent()
+            deviceEntryRepository.setBypassEnabled(true)
+            runCurrent()
 
-        assertThat(isVisible?.value).isFalse()
-        assertThat(isVisible?.isAnimating).isFalse()
-    }
+            assertThat(isVisible?.value).isTrue()
+        }
 
     @Test
-    fun iconContainer_isVisible_bypassEnabled() = runTest {
-        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
-        runCurrent()
-        deviceEntryRepository.setBypassEnabled(true)
-        runCurrent()
+    fun iconContainer_isNotVisible_pulseExpanding_notBypassing() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+            runCurrent()
+            fakeNotificationsKeyguardViewStateRepository.setPulseExpanding(true)
+            deviceEntryRepository.setBypassEnabled(false)
+            runCurrent()
 
-        assertThat(isVisible?.value).isTrue()
-    }
-
-    @Test
-    fun iconContainer_isNotVisible_pulseExpanding_notBypassing() = runTest {
-        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
-        runCurrent()
-        notifsKeyguardRepository.setPulseExpanding(true)
-        deviceEntryRepository.setBypassEnabled(false)
-        runCurrent()
-
-        assertThat(isVisible?.value).isEqualTo(false)
-    }
+            assertThat(isVisible?.value).isEqualTo(false)
+        }
 
     @Test
-    fun iconContainer_isVisible_notifsFullyHidden_bypassEnabled() = runTest {
-        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
-        runCurrent()
-        notifsKeyguardRepository.setPulseExpanding(false)
-        deviceEntryRepository.setBypassEnabled(true)
-        notifsKeyguardRepository.setNotificationsFullyHidden(true)
-        runCurrent()
+    fun iconContainer_isVisible_notifsFullyHidden_bypassEnabled() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+            runCurrent()
+            fakeNotificationsKeyguardViewStateRepository.setPulseExpanding(false)
+            deviceEntryRepository.setBypassEnabled(true)
+            fakeNotificationsKeyguardViewStateRepository.setNotificationsFullyHidden(true)
+            runCurrent()
 
-        assertThat(isVisible?.value).isTrue()
-        assertThat(isVisible?.isAnimating).isTrue()
-    }
-
-    @Test
-    fun iconContainer_isVisible_notifsFullyHidden_bypassDisabled_aodDisabled() = runTest {
-        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
-        runCurrent()
-        notifsKeyguardRepository.setPulseExpanding(false)
-        deviceEntryRepository.setBypassEnabled(false)
-        whenever(dozeParams.alwaysOn).thenReturn(false)
-        notifsKeyguardRepository.setNotificationsFullyHidden(true)
-        runCurrent()
-
-        assertThat(isVisible?.value).isTrue()
-        assertThat(isVisible?.isAnimating).isFalse()
-    }
+            assertThat(isVisible?.value).isTrue()
+            assertThat(isVisible?.isAnimating).isTrue()
+        }
 
     @Test
-    fun iconContainer_isVisible_notifsFullyHidden_bypassDisabled_displayNeedsBlanking() = runTest {
-        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
-        runCurrent()
-        notifsKeyguardRepository.setPulseExpanding(false)
-        deviceEntryRepository.setBypassEnabled(false)
-        whenever(dozeParams.alwaysOn).thenReturn(true)
-        whenever(dozeParams.displayNeedsBlanking).thenReturn(true)
-        notifsKeyguardRepository.setNotificationsFullyHidden(true)
-        runCurrent()
+    fun iconContainer_isVisible_notifsFullyHidden_bypassDisabled_aodDisabled() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+            runCurrent()
+            fakeNotificationsKeyguardViewStateRepository.setPulseExpanding(false)
+            deviceEntryRepository.setBypassEnabled(false)
+            whenever(dozeParameters.alwaysOn).thenReturn(false)
+            fakeNotificationsKeyguardViewStateRepository.setNotificationsFullyHidden(true)
+            runCurrent()
 
-        assertThat(isVisible?.value).isTrue()
-        assertThat(isVisible?.isAnimating).isFalse()
-    }
-
-    @Test
-    fun iconContainer_isVisible_notifsFullyHidden_bypassDisabled() = runTest {
-        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
-        runCurrent()
-        notifsKeyguardRepository.setPulseExpanding(false)
-        deviceEntryRepository.setBypassEnabled(false)
-        whenever(dozeParams.alwaysOn).thenReturn(true)
-        whenever(dozeParams.displayNeedsBlanking).thenReturn(false)
-        notifsKeyguardRepository.setNotificationsFullyHidden(true)
-        runCurrent()
-
-        assertThat(isVisible?.value).isTrue()
-        assertThat(isVisible?.isAnimating).isTrue()
-    }
+            assertThat(isVisible?.value).isTrue()
+            assertThat(isVisible?.isAnimating).isFalse()
+        }
 
     @Test
-    fun isIconContainerVisible_stopAnimation() = runTest {
-        val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
-        runCurrent()
-        notifsKeyguardRepository.setPulseExpanding(false)
-        deviceEntryRepository.setBypassEnabled(false)
-        whenever(dozeParams.alwaysOn).thenReturn(true)
-        whenever(dozeParams.displayNeedsBlanking).thenReturn(false)
-        notifsKeyguardRepository.setNotificationsFullyHidden(true)
-        runCurrent()
+    fun iconContainer_isVisible_notifsFullyHidden_bypassDisabled_displayNeedsBlanking() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+            runCurrent()
+            fakeNotificationsKeyguardViewStateRepository.setPulseExpanding(false)
+            deviceEntryRepository.setBypassEnabled(false)
+            whenever(dozeParameters.alwaysOn).thenReturn(true)
+            whenever(dozeParameters.displayNeedsBlanking).thenReturn(true)
+            fakeNotificationsKeyguardViewStateRepository.setNotificationsFullyHidden(true)
+            runCurrent()
 
-        assertThat(isVisible?.isAnimating).isEqualTo(true)
-        isVisible?.stopAnimating()
-        runCurrent()
+            assertThat(isVisible?.value).isTrue()
+            assertThat(isVisible?.isAnimating).isFalse()
+        }
 
-        assertThat(isVisible?.isAnimating).isEqualTo(false)
-    }
+    @Test
+    fun iconContainer_isVisible_notifsFullyHidden_bypassDisabled() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+            runCurrent()
+            fakeNotificationsKeyguardViewStateRepository.setPulseExpanding(false)
+            deviceEntryRepository.setBypassEnabled(false)
+            whenever(dozeParameters.alwaysOn).thenReturn(true)
+            whenever(dozeParameters.displayNeedsBlanking).thenReturn(false)
+            fakeNotificationsKeyguardViewStateRepository.setNotificationsFullyHidden(true)
+            runCurrent()
+
+            assertThat(isVisible?.value).isTrue()
+            assertThat(isVisible?.isAnimating).isTrue()
+        }
+
+    @Test
+    fun isIconContainerVisible_stopAnimation() =
+        testScope.runTest {
+            val isVisible by collectLastValue(underTest.isNotifIconContainerVisible)
+            runCurrent()
+            fakeNotificationsKeyguardViewStateRepository.setPulseExpanding(false)
+            deviceEntryRepository.setBypassEnabled(false)
+            whenever(dozeParameters.alwaysOn).thenReturn(true)
+            whenever(dozeParameters.displayNeedsBlanking).thenReturn(false)
+            fakeNotificationsKeyguardViewStateRepository.setNotificationsFullyHidden(true)
+            runCurrent()
+
+            assertThat(isVisible?.isAnimating).isEqualTo(true)
+            isVisible?.stopAnimating()
+            runCurrent()
+
+            assertThat(isVisible?.isAnimating).isEqualTo(false)
+        }
 }

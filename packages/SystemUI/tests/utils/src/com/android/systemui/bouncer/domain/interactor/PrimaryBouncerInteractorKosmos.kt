@@ -13,22 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.hoststubgen.utils
 
-import com.android.hoststubgen.asm.getDirectOuterClassName
-import com.google.common.truth.Truth.assertThat
-import org.junit.Test
+package com.android.systemui.bouncer.domain.interactor
 
-class AsmUtilsTest {
-    private fun checkGetDirectOuterClassName(input: String, expected: String?) {
-        assertThat(getDirectOuterClassName(input)).isEqualTo(expected)
-    }
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.mock
 
-    @Test
-    fun testGetDirectOuterClassName() {
-        checkGetDirectOuterClassName("a", null)
-        checkGetDirectOuterClassName("a\$x", "a")
-        checkGetDirectOuterClassName("a.b.c\$x", "a.b.c")
-        checkGetDirectOuterClassName("a.b.c\$x\$y", "a.b.c\$x")
-    }
-}
+var Kosmos.primaryBouncerInteractor by Kosmos.Fixture { mock<PrimaryBouncerInteractor>() }

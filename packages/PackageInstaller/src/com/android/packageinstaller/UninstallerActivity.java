@@ -19,6 +19,7 @@ package com.android.packageinstaller;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.content.pm.Flags.usePiaV2;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+
 import static com.android.packageinstaller.PackageUtil.getMaxTargetSdkVersionForUid;
 
 import android.Manifest;
@@ -55,8 +56,8 @@ import com.android.packageinstaller.handheld.UninstallAlertDialogFragment;
 import com.android.packageinstaller.television.ErrorFragment;
 import com.android.packageinstaller.television.UninstallAlertFragment;
 import com.android.packageinstaller.television.UninstallAppProgress;
-
 import com.android.packageinstaller.v2.ui.UninstallLaunch;
+
 import java.util.List;
 
 /*
@@ -76,6 +77,7 @@ public class UninstallerActivity extends Activity {
         public boolean allUsers;
         public UserHandle user;
         public PackageManager.UninstallCompleteCallback callback;
+        public int deleteFlags;
     }
 
     private String mPackageName;
@@ -226,8 +228,24 @@ public class UninstallerActivity extends Activity {
                 // Continue as the ActivityInfo isn't critical.
             }
         }
+        parseDeleteFlags(intent);
 
         showConfirmationDialog();
+    }
+
+    /**
+     * Parses specific {@link android.content.pm.PackageManager.DeleteFlags} from {@link Intent}
+     * to archive an app if requested.
+     *
+     * Do not parse any flags because developers might pass here any flags which might cause
+     * unintended behaviour.
+     * For more context {@link com.android.server.pm.PackageArchiver#requestArchive}.
+     */
+    private void parseDeleteFlags(Intent intent) {
+        int deleteFlags = intent.getIntExtra(PackageInstaller.EXTRA_DELETE_FLAGS, 0);
+        int archive = deleteFlags & PackageManager.DELETE_ARCHIVE;
+        int keepData = deleteFlags & PackageManager.DELETE_KEEP_DATA;
+        mDialogInfo.deleteFlags = archive | keepData;
     }
 
     public DialogInfo getDialogInfo() {
@@ -347,7 +365,10 @@ public class UninstallerActivity extends Activity {
             if (returnResult || getCallingActivity() != null) {
                 newIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
             }
-
+            if (mDialogInfo.deleteFlags != 0) {
+                newIntent.putExtra(PackageInstaller.EXTRA_DELETE_FLAGS,
+                        mDialogInfo.deleteFlags);
+            }
             startActivity(newIntent);
         } else {
             int uninstallId;
@@ -393,6 +414,7 @@ public class UninstallerActivity extends Activity {
 
                 int flags = mDialogInfo.allUsers ? PackageManager.DELETE_ALL_USERS : 0;
                 flags |= keepData ? PackageManager.DELETE_KEEP_DATA : 0;
+                flags |= mDialogInfo.deleteFlags;
 
                 createContextAsUser(mDialogInfo.user, 0).getPackageManager().getPackageInstaller()
                         .uninstall(new VersionedPackage(mDialogInfo.appInfo.packageName,
