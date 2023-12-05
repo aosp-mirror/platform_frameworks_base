@@ -39,6 +39,7 @@ import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.media.audio.Flags.alarmMinVolumeZero;
 import static com.android.media.audio.Flags.bluetoothMacAddressAnonymization;
 import static com.android.media.audio.Flags.disablePrescaleAbsoluteVolume;
@@ -6785,7 +6786,8 @@ public class AudioService extends IAudioService.Stub
         return mContentResolver;
     }
 
-    /*package*/ SettingsAdapter getSettings() {
+    @VisibleForTesting(visibility = PACKAGE)
+    public SettingsAdapter getSettings() {
         return mSettings;
     }
 
@@ -11250,7 +11252,9 @@ public class AudioService extends IAudioService.Stub
         return mDeviceBroker.isBluetoothAudioDeviceCategoryFixed(address);
     }
 
-    /*package*/void onUpdatedAdiDeviceState(AdiDeviceState deviceState) {
+    /** Update the sound dose and spatializer state based on the new AdiDeviceState. */
+    @VisibleForTesting(visibility = PACKAGE)
+    public void onUpdatedAdiDeviceState(AdiDeviceState deviceState) {
         if (deviceState == null) {
             return;
         }

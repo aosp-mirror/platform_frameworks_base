@@ -31,6 +31,8 @@ import static android.media.AudioSystem.isBluetoothScoOutDevice;
 import static android.media.audio.Flags.automaticBtDeviceType;
 
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothAdapter;
@@ -347,7 +349,8 @@ public class AudioDeviceInventory {
      * @return the found {@link AdiDeviceState} or {@code null} otherwise.
      */
     @Nullable
-    AdiDeviceState findBtDeviceStateForAddress(String address, int deviceType) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public AdiDeviceState findBtDeviceStateForAddress(String address, int deviceType) {
         Set<Integer> deviceSet;
         if (isBluetoothA2dpOutDevice(deviceType)) {
             deviceSet = DEVICE_OUT_ALL_A2DP_SET;
