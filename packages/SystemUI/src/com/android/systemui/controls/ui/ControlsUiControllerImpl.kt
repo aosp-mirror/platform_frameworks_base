@@ -32,6 +32,7 @@ import android.graphics.drawable.LayerDrawable
 import android.os.Trace
 import android.service.controls.Control
 import android.service.controls.ControlsProviderService
+import android.service.controls.flags.Flags.homePanelDream
 import android.util.Log
 import android.view.ContextThemeWrapper
 import android.view.Gravity
@@ -471,12 +472,17 @@ class ControlsUiControllerImpl @Inject constructor (
         val pendingIntent = PendingIntent.getActivityAsUser(
                 context,
                 0,
-                Intent()
-                        .setComponent(componentName)
-                        .putExtra(
-                                ControlsProviderService.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
-                                setting
-                        ),
+                Intent().apply {
+                    component = componentName
+                    putExtra(
+                        ControlsProviderService.EXTRA_LOCKSCREEN_ALLOW_TRIVIAL_CONTROLS,
+                        setting
+                    )
+                    if (homePanelDream()) {
+                        putExtra(ControlsProviderService.EXTRA_CONTROLS_SURFACE,
+                            ControlsProviderService.CONTROLS_SURFACE_ACTIVITY_PANEL)
+                    }
+                },
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
                 null,
                 userTracker.userHandle
