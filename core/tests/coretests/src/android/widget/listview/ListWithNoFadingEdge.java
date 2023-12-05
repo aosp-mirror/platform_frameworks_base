@@ -16,7 +16,7 @@
 
 package android.widget.listview;
 
-import android.util.ListScenario;
+import android.widget.ListScenario;
 
 public class ListWithNoFadingEdge extends ListScenario {
 
