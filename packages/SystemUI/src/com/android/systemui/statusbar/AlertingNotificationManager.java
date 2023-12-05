@@ -18,16 +18,16 @@ package com.android.systemui.statusbar;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.os.Handler;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
 import java.util.stream.Stream;
@@ -46,13 +46,12 @@ public abstract class AlertingNotificationManager {
     protected int mMinimumDisplayTime;
     protected int mStickyForSomeTimeAutoDismissTime;
     protected int mAutoDismissTime;
-    @VisibleForTesting
-    public Handler mHandler;
+    private DelayableExecutor mExecutor;
 
-    public AlertingNotificationManager(HeadsUpManagerLogger logger, @Main Handler handler,
-            SystemClock systemClock) {
+    public AlertingNotificationManager(HeadsUpManagerLogger logger,
+            SystemClock systemClock, @Main DelayableExecutor executor) {
         mLogger = logger;
-        mHandler = handler;
+        mExecutor = executor;
         mSystemClock = systemClock;
     }
 
@@ -264,6 +263,7 @@ public abstract class AlertingNotificationManager {
         public long mEarliestRemovalTime;
 
         @Nullable protected Runnable mRemoveAlertRunnable;
+        @Nullable private Runnable mCancelRemoveAlertRunnable;
 
         public void setEntry(@NonNull final NotificationEntry entry) {
             setEntry(entry, () -> removeAlertEntry(entry.getKey()));
@@ -291,13 +291,15 @@ public abstract class AlertingNotificationManager {
             if (updatePostTime) {
                 mPostTime = Math.max(mPostTime, now);
             }
-            removeAutoRemovalCallbacks("updateEntry (will be rescheduled)");
 
-            if (!isSticky()) {
-                final long finishTime = calculateFinishTime();
-                final long timeLeft = Math.max(finishTime - now, mMinimumDisplayTime);
-                mHandler.postDelayed(mRemoveAlertRunnable, timeLeft);
+            if (isSticky()) {
+                removeAutoRemovalCallbacks("updateEntry (sticky)");
+                return;
             }
+
+            final long finishTime = calculateFinishTime();
+            final long timeLeft = Math.max(finishTime - now, mMinimumDisplayTime);
+            scheduleAutoRemovalCallback(timeLeft, "updateEntry (not sticky)");
         }
 
         /**
@@ -340,10 +342,41 @@ public abstract class AlertingNotificationManager {
          * Clear any pending removal runnables.
          */
         public void removeAutoRemovalCallbacks(@Nullable String reason) {
-            if (mRemoveAlertRunnable != null) {
+            final boolean removed = removeAutoRemovalCallbackInternal();
+
+            if (removed) {
                 mLogger.logAutoRemoveCanceled(mEntry, reason);
-                mHandler.removeCallbacks(mRemoveAlertRunnable);
             }
+        }
+
+        private void scheduleAutoRemovalCallback(long delayMillis, @NonNull String reason) {
+            if (mRemoveAlertRunnable == null) {
+                Log.wtf(TAG, "scheduleAutoRemovalCallback with no callback set");
+                return;
+            }
+
+            final boolean removed = removeAutoRemovalCallbackInternal();
+
+            if (removed) {
+                mLogger.logAutoRemoveRescheduled(mEntry, delayMillis, reason);
+            } else {
+                mLogger.logAutoRemoveScheduled(mEntry, delayMillis, reason);
+            }
+
+
+            mCancelRemoveAlertRunnable = mExecutor.executeDelayed(mRemoveAlertRunnable,
+                    delayMillis);
+        }
+
+        private boolean removeAutoRemovalCallbackInternal() {
+            final boolean scheduled = (mCancelRemoveAlertRunnable != null);
+
+            if (scheduled) {
+                mCancelRemoveAlertRunnable.run();
+                mCancelRemoveAlertRunnable = null;
+            }
+
+            return scheduled;
         }
 
         /**
@@ -351,10 +384,8 @@ public abstract class AlertingNotificationManager {
          */
         public void removeAsSoonAsPossible() {
             if (mRemoveAlertRunnable != null) {
-                removeAutoRemovalCallbacks("removeAsSoonAsPossible (will be rescheduled)");
-
                 final long timeLeft = mEarliestRemovalTime - mSystemClock.elapsedRealtime();
-                mHandler.postDelayed(mRemoveAlertRunnable, timeLeft);
+                scheduleAutoRemovalCallback(timeLeft, "removeAsSoonAsPossible");
             }
         }
 
