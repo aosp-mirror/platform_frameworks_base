@@ -286,15 +286,12 @@ public class LongArrayMultiStateCounter_host {
         return getInstance(instanceId).mArrayLength;
     }
 
-    public static void native_setValues(long instanceId, int state, long containerInstanceId) {
-        getInstance(instanceId).setValue(state,
-                LongArrayContainer_host.getInstance(containerInstanceId));
+    public static void native_setValues(long instanceId, int state, long[] values) {
+        getInstance(instanceId).setValue(state, values);
     }
 
-    public static void native_updateValues(long instanceId, long containerInstanceId,
-            long timestampMs) {
-        getInstance(instanceId).updateValue(
-                LongArrayContainer_host.getInstance(containerInstanceId), timestampMs);
+    public static void native_updateValues(long instanceId, long[] values, long timestampMs) {
+        getInstance(instanceId).updateValue(values, timestampMs);
     }
 
     public static void native_setState(long instanceId, int state, long timestampMs) {
@@ -305,19 +302,16 @@ public class LongArrayMultiStateCounter_host {
         getInstance(targetInstanceId).copyStatesFrom(getInstance(sourceInstanceId));
     }
 
-    public static void native_incrementValues(long instanceId, long containerInstanceId,
-            long timestampMs) {
-        getInstance(instanceId).incrementValues(
-                LongArrayContainer_host.getInstance(containerInstanceId), timestampMs);
+    public static void native_incrementValues(long instanceId, long[] delta, long timestampMs) {
+        getInstance(instanceId).incrementValues(delta, timestampMs);
     }
 
-    public static void native_addCounts(long instanceId, long containerInstanceId) {
-        getInstance(instanceId).addCounts(LongArrayContainer_host.getInstance(containerInstanceId));
+    public static void native_addCounts(long instanceId, long[] counts) {
+        getInstance(instanceId).addCounts(counts);
     }
 
-    public static void native_getCounts(long instanceId, long containerInstanceId, int state) {
-        getInstance(instanceId).getValues(LongArrayContainer_host.getInstance(containerInstanceId),
-                state);
+    public static void native_getCounts(long instanceId, long[] counts, int state) {
+        getInstance(instanceId).getValues(counts, state);
     }
 
     public static void native_reset(long instanceId) {

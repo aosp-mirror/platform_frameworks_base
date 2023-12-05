@@ -394,10 +394,7 @@ public class CpuPowerCalculatorTest {
         doAnswer(invocation -> {
             LongArrayMultiStateCounter counter = invocation.getArgument(1);
             long timestampMs = invocation.getArgument(2);
-            LongArrayMultiStateCounter.LongArrayContainer container =
-                    new LongArrayMultiStateCounter.LongArrayContainer(NUM_CPU_FREQS);
-            container.setValues(cpuTimes);
-            counter.updateValues(container, timestampMs);
+            counter.updateValues(cpuTimes, timestampMs);
             return null;
         }).when(mMockKernelSingleUidTimeReader).addDelta(eq(uid),
                 any(LongArrayMultiStateCounter.class), anyLong());

@@ -438,10 +438,7 @@ public class BatteryStatsImplTest {
         doAnswer(invocation -> {
             LongArrayMultiStateCounter counter = invocation.getArgument(1);
             long timestampMs = invocation.getArgument(2);
-            LongArrayMultiStateCounter.LongArrayContainer container =
-                    new LongArrayMultiStateCounter.LongArrayContainer(NUM_CPU_FREQS);
-            container.setValues(cpuTimes);
-            counter.updateValues(container, timestampMs);
+            counter.updateValues(cpuTimes, timestampMs);
             return null;
         }).when(mKernelSingleUidTimeReader).addDelta(eq(testUid),
                 any(LongArrayMultiStateCounter.class), anyLong());
@@ -451,20 +448,13 @@ public class BatteryStatsImplTest {
         doAnswer(invocation -> {
             LongArrayMultiStateCounter counter = invocation.getArgument(1);
             long timestampMs = invocation.getArgument(2);
-            LongArrayMultiStateCounter.LongArrayContainer deltaContainer =
-                    invocation.getArgument(3);
-
-            LongArrayMultiStateCounter.LongArrayContainer container =
-                    new LongArrayMultiStateCounter.LongArrayContainer(NUM_CPU_FREQS);
-            container.setValues(cpuTimes);
-            counter.updateValues(container, timestampMs);
-            if (deltaContainer != null) {
-                deltaContainer.setValues(delta);
-            }
+            long[] deltaOut = invocation.getArgument(3);
+            counter.updateValues(cpuTimes, timestampMs);
+            System.arraycopy(delta, 0, deltaOut, 0, delta.length);
             return null;
         }).when(mKernelSingleUidTimeReader).addDelta(eq(testUid),
                 any(LongArrayMultiStateCounter.class), anyLong(),
-                any(LongArrayMultiStateCounter.LongArrayContainer.class));
+                any(long[].class));
     }
 
     @Test
