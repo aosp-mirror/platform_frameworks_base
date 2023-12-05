@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
+import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.keyguardRootViewModel
@@ -382,6 +383,29 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             val bottom = 456f
             keyguardRootViewModel.onNotificationContainerBoundsChanged(top, bottom)
             assertThat(bounds).isEqualTo(NotificationContainerBounds(top, bottom))
+        }
+
+    @Test
+    fun shadeCollpaseFadeIn() =
+        testScope.runTest {
+            // Start on lockscreen without the shade
+            underTest.setShadeCollapseFadeInComplete(false)
+            showLockscreen()
+
+            val fadeIn by collectLastValue(underTest.shadeCollpaseFadeIn)
+            assertThat(fadeIn).isEqualTo(false)
+
+            // ... then the shade expands
+            showLockscreenWithShadeExpanded()
+            assertThat(fadeIn).isEqualTo(false)
+
+            // ... it collapses
+            showLockscreen()
+            assertThat(fadeIn).isEqualTo(true)
+
+            // ... now send animation complete signal
+            underTest.setShadeCollapseFadeInComplete(true)
+            assertThat(fadeIn).isEqualTo(false)
         }
 
     private suspend fun showLockscreen() {

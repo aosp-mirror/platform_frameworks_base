@@ -2677,17 +2677,20 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         if (mIsOcclusionTransitionRunning) {
             return;
         }
-        float alpha = 1f;
-        if (mClosingWithAlphaFadeOut && !mExpandingFromHeadsUp
+
+        if (!KeyguardShadeMigrationNssl.isEnabled()) {
+            float alpha = 1f;
+            if (mClosingWithAlphaFadeOut && !mExpandingFromHeadsUp
                 && !mHeadsUpManager.hasPinnedHeadsUp()) {
-            alpha = getFadeoutAlpha();
-        }
-        if (mBarState == KEYGUARD
+                alpha = getFadeoutAlpha();
+            }
+            if (mBarState == KEYGUARD
                 && !mKeyguardBypassController.getBypassEnabled()
                 && !mQsController.getFullyExpanded()) {
-            alpha *= mClockPositionResult.clockAlpha;
+                alpha *= mClockPositionResult.clockAlpha;
+            }
+            mNotificationStackScrollLayoutController.setMaxAlphaForExpansion(alpha);
         }
-        mNotificationStackScrollLayoutController.setMaxAlphaForExpansion(alpha);
     }
 
     private float getFadeoutAlpha() {

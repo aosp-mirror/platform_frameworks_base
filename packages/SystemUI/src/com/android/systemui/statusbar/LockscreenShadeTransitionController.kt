@@ -351,7 +351,6 @@ constructor(
         )
         nsslController.resetScrollPosition()
         nsslController.resetCheckSnoozeLeavebehind()
-        shadeRepository.setLegacyLockscreenShadeTracking(false)
         setDragDownAmountAnimated(0f)
     }
 
@@ -378,7 +377,6 @@ constructor(
                 cancel()
             }
         }
-        shadeRepository.setLegacyLockscreenShadeTracking(true)
     }
 
     /** Do we need a falsing check currently? */
@@ -836,7 +834,12 @@ class DragDownHelper(
                     initialTouchX = x
                     dragDownCallback.onDragDownStarted(startingChild)
                     dragDownAmountOnStart = dragDownCallback.dragDownAmount
-                    return startingChild != null || dragDownCallback.isDragDownAnywhereEnabled
+                    val intercepted =
+                        startingChild != null || dragDownCallback.isDragDownAnywhereEnabled
+                    if (intercepted) {
+                        shadeRepository.setLegacyLockscreenShadeTracking(true)
+                    }
+                    return intercepted
                 }
             }
         }
@@ -964,6 +967,7 @@ class DragDownHelper(
         }
         isDraggingDown = false
         isTrackpadReverseScroll = false
+        shadeRepository.setLegacyLockscreenShadeTracking(false)
         dragDownCallback.onDragDownReset()
     }
 
