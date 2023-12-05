@@ -57,10 +57,13 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
+
+        tapl.enableBlockTimeout(true)
     }
 
     @Test
     open fun enterSplitScreenByDragFromShortcut() {
+        tapl.showTaskbarIfHidden()
         tapl.launchedAppState.taskbar
             .getAppIcon(secondaryApp.appName)
             .openDeepShortcutMenu()
@@ -81,5 +84,6 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun teardwon() {
         primaryApp.exit(wmHelper)
         secondaryApp.exit(wmHelper)
+        tapl.enableBlockTimeout(false)
     }
 }

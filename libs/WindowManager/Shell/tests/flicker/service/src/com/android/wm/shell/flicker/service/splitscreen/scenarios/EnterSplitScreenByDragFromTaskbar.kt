@@ -52,6 +52,8 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
 
+        tapl.enableBlockTimeout(true)
+
         tapl.goHome()
         SplitScreenUtils.createShortcutOnHotseatIfNotExist(tapl, secondaryApp.appName)
         primaryApp.launchViaIntent(wmHelper)
@@ -59,6 +61,7 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
     @Test
     open fun enterSplitScreenByDragFromTaskbar() {
+        tapl.showTaskbarIfHidden()
         tapl.launchedAppState.taskbar
             .getAppIcon(secondaryApp.appName)
             .dragToSplitscreen(secondaryApp.packageName, primaryApp.packageName)
@@ -69,5 +72,6 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun teardown() {
         primaryApp.exit(wmHelper)
         secondaryApp.exit(wmHelper)
+        tapl.enableBlockTimeout(false)
     }
 }

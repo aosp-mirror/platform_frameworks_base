@@ -57,10 +57,13 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
+
+        tapl.enableBlockTimeout(true)
     }
 
     @Test
     open fun enterSplitScreenByDragFromAllApps() {
+        tapl.showTaskbarIfHidden()
         tapl.launchedAppState.taskbar
             .openAllApps()
             .getAppIcon(secondaryApp.appName)
@@ -72,5 +75,6 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun teardown() {
         primaryApp.exit(wmHelper)
         secondaryApp.exit(wmHelper)
+        tapl.enableBlockTimeout(false)
     }
 }
