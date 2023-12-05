@@ -1117,6 +1117,7 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     }
 
     // Returns all actions matched with given class type.
+    @VisibleForTesting
     @ServiceThreadOnly
     <T extends HdmiCecFeatureAction> List<T> getActions(final Class<T> clazz) {
         assertRunOnServiceThread();
