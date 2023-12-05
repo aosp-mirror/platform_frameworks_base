@@ -7712,30 +7712,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     // be disabled device-wide.
     private void pushScreenCapturePolicy(int adminUserId) {
         // Update screen capture device-wide if disabled by the DO or COPE PO on the parent profile.
-        ActiveAdmin admin =
-                getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(
+        // Always do this regardless which user this method is called with. Probably a little
+        // wasteful but still safe.
+        ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceParentLocked(
                         UserHandle.USER_SYSTEM);
-        if (admin != null && admin.disableScreenCapture) {
-            setScreenCaptureDisabled(UserHandle.USER_ALL);
-        } else {
-            // Otherwise, update screen capture only for the calling user.
-            admin = getProfileOwnerAdminLocked(adminUserId);
-            if (admin != null && admin.disableScreenCapture) {
-                setScreenCaptureDisabled(adminUserId);
-            } else {
-                setScreenCaptureDisabled(UserHandle.USER_NULL);
-            }
-        }
+        setScreenCaptureDisabled(UserHandle.USER_ALL, admin != null && admin.disableScreenCapture);
+        // Update screen capture only for the calling user.
+        admin = getProfileOwnerAdminLocked(adminUserId);
+        setScreenCaptureDisabled(adminUserId, admin != null && admin.disableScreenCapture);
     }
 
     // Set the latest screen capture policy, overriding any existing ones.
     // userHandle can be one of USER_ALL, USER_NULL or a concrete userId.
-    private void setScreenCaptureDisabled(int userHandle) {
-        int current = mPolicyCache.getScreenCaptureDisallowedUser();
-        if (userHandle == current) {
-            return;
-        }
-        mPolicyCache.setScreenCaptureDisallowedUser(userHandle);
+    private void setScreenCaptureDisabled(int userHandle, boolean disabled) {
+        mPolicyCache.setScreenCaptureDisallowedUser(userHandle, disabled);
         updateScreenCaptureDisabled();
     }
 
