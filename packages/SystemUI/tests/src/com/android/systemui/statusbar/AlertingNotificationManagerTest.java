@@ -39,8 +39,8 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -84,8 +84,8 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
         private TestableAlertingNotificationManager(Handler handler) {
             super(new HeadsUpManagerLogger(logcatLogBuffer()), handler);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
-            mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
-            mStickyDisplayTime = TEST_STICKY_AUTO_DISMISS_TIME;
+            mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
+            mStickyForSomeTimeAutoDismissTime = TEST_STICKY_AUTO_DISMISS_TIME;
         }
 
         @Override

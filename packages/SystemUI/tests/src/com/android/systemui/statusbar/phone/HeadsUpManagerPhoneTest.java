@@ -107,7 +107,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     shadeInteractor
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
-            mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
+            mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
         }
     }
 

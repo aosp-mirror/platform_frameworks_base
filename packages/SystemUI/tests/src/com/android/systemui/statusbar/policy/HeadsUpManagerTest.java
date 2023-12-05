@@ -85,8 +85,8 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
             super(context, logger, handler, accessibilityManagerWrapper, uiEventLogger);
             mTouchAcceptanceDelay = TEST_TOUCH_ACCEPTANCE_TIME;
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
-            mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
-            mStickyDisplayTime = TEST_STICKY_AUTO_DISMISS_TIME;
+            mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
+            mStickyForSomeTimeAutoDismissTime = TEST_STICKY_AUTO_DISMISS_TIME;
         }
 
         // The following are only implemented by HeadsUpManagerPhone. If you need them, use that.

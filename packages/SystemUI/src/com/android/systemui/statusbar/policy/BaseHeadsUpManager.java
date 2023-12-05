@@ -93,8 +93,9 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
         mUiEventLogger = uiEventLogger;
         Resources resources = context.getResources();
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
-        mStickyDisplayTime = resources.getInteger(R.integer.sticky_heads_up_notification_time);
-        mAutoDismissNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
+        mStickyForSomeTimeAutoDismissTime = resources.getInteger(
+                R.integer.sticky_heads_up_notification_time);
+        mAutoDismissTime = resources.getInteger(R.integer.heads_up_notification_decay);
         mTouchAcceptanceDelay = resources.getInteger(R.integer.touch_acceptance_delay);
         mSnoozedPackages = new ArrayMap<>();
         int defaultSnoozeLengthMs =
@@ -519,12 +520,12 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
 
         /**
          * @return When the notification should auto-dismiss itself, based on
-         * {@link SystemClock#elapsedRealTime()}
+         * {@link SystemClock#elapsedRealtime()}
          */
         @Override
         protected long calculateFinishTime() {
             final long duration = getRecommendedHeadsUpTimeoutMs(
-                    isStickyForSomeTime() ? mStickyDisplayTime : mAutoDismissNotificationDecay);
+                    isStickyForSomeTime() ? mStickyForSomeTimeAutoDismissTime : mAutoDismissTime);
 
             return mPostTime + duration;
         }

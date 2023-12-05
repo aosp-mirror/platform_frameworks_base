@@ -49,8 +49,8 @@ public abstract class AlertingNotificationManager {
     }
 
     protected int mMinimumDisplayTime;
-    protected int mStickyDisplayTime;
-    protected int mAutoDismissNotificationDecay;
+    protected int mStickyForSomeTimeAutoDismissTime;
+    protected int mAutoDismissTime;
     @VisibleForTesting
     public Handler mHandler;
 
@@ -251,7 +251,7 @@ public abstract class AlertingNotificationManager {
     public long getEarliestRemovalTime(String key) {
         AlertEntry alerting = mAlertEntries.get(key);
         if (alerting != null) {
-            return Math.max(0, alerting.mEarliestRemovaltime - mClock.currentTimeMillis());
+            return Math.max(0, alerting.mEarliestRemovalTime - mClock.currentTimeMillis());
         }
         return 0;
     }
@@ -259,7 +259,7 @@ public abstract class AlertingNotificationManager {
     protected class AlertEntry implements Comparable<AlertEntry> {
         @Nullable public NotificationEntry mEntry;
         public long mPostTime;
-        public long mEarliestRemovaltime;
+        public long mEarliestRemovalTime;
 
         @Nullable protected Runnable mRemoveAlertRunnable;
 
@@ -284,7 +284,7 @@ public abstract class AlertingNotificationManager {
             mLogger.logUpdateEntry(mEntry, updatePostTime, reason);
 
             final long now = mClock.currentTimeMillis();
-            mEarliestRemovaltime = now + mMinimumDisplayTime;
+            mEarliestRemovalTime = now + mMinimumDisplayTime;
 
             if (updatePostTime) {
                 mPostTime = Math.max(mPostTime, now);
@@ -318,7 +318,7 @@ public abstract class AlertingNotificationManager {
          * @return true if the notification has been on screen long enough
          */
         public boolean wasShownLongEnough() {
-            return mEarliestRemovaltime < mClock.currentTimeMillis();
+            return mEarliestRemovalTime < mClock.currentTimeMillis();
         }
 
         @Override
@@ -351,7 +351,7 @@ public abstract class AlertingNotificationManager {
             if (mRemoveAlertRunnable != null) {
                 removeAutoRemovalCallbacks("removeAsSoonAsPossible (will be rescheduled)");
 
-                final long timeLeft = mEarliestRemovaltime - mClock.currentTimeMillis();
+                final long timeLeft = mEarliestRemovalTime - mClock.currentTimeMillis();
                 mHandler.postDelayed(mRemoveAlertRunnable, timeLeft);
             }
         }
@@ -366,7 +366,7 @@ public abstract class AlertingNotificationManager {
 
         /**
          * @return When the notification should auto-dismiss itself, based on
-         * {@link SystemClock#elapsedRealTime()}
+         * {@link SystemClock#elapsedRealtime()}
          */
         protected long calculateFinishTime() {
             // Overridden by HeadsUpManager HeadsUpEntry #calculateFinishTime
