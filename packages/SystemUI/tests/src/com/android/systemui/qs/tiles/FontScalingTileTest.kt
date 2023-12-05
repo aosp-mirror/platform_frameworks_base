@@ -24,6 +24,7 @@ import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.accessibility.fontscaling.FontScalingDialogDelegate
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.plugins.ActivityStarter
@@ -31,13 +32,12 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
-import com.android.systemui.settings.UserTracker
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
-import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -45,9 +45,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -64,8 +64,9 @@ class FontScalingTileTest : SysuiTestCase() {
     @Mock private lateinit var qsLogger: QSLogger
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
     @Mock private lateinit var uiEventLogger: QsEventLogger
-    @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var keyguardStateController: KeyguardStateController
+    @Mock private lateinit var fontScalingDialogDelegate: FontScalingDialogDelegate
+    @Mock private lateinit var dialog: SystemUIDialog
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var systemClock: FakeSystemClock
@@ -79,6 +80,7 @@ class FontScalingTileTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         `when`(qsHost.getContext()).thenReturn(mContext)
+        `when`(fontScalingDialogDelegate.createDialog()).thenReturn(dialog)
         systemClock = FakeSystemClock()
         backgroundDelayableExecutor = FakeExecutor(systemClock)
 
@@ -95,11 +97,7 @@ class FontScalingTileTest : SysuiTestCase() {
                 qsLogger,
                 keyguardStateController,
                 dialogLaunchAnimator,
-                FakeSettings(),
-                FakeSettings(),
-                FakeSystemClock(),
-                userTracker,
-                backgroundDelayableExecutor,
+                { fontScalingDialogDelegate },
             )
         fontScalingTile.initialize()
         testableLooper.processAllMessages()

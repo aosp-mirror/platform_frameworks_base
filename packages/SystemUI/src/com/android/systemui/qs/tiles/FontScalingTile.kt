@@ -23,7 +23,7 @@ import android.view.View
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.MetricsLogger
 import com.android.systemui.res.R
-import com.android.systemui.accessibility.fontscaling.FontScalingDialog
+import com.android.systemui.accessibility.fontscaling.FontScalingDialogDelegate
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.dagger.qualifiers.Background
@@ -36,14 +36,10 @@ import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.util.settings.SecureSettings
-import com.android.systemui.util.settings.SystemSettings
-import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
+import javax.inject.Provider
 
 class FontScalingTile
 @Inject
@@ -59,11 +55,7 @@ constructor(
     qsLogger: QSLogger,
     private val keyguardStateController: KeyguardStateController,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
-    private val systemSettings: SystemSettings,
-    private val secureSettings: SecureSettings,
-    private val systemClock: SystemClock,
-    private val userTracker: UserTracker,
-    @Background private val backgroundDelayableExecutor: DelayableExecutor
+    private val fontScalingDialogDelegateProvider: Provider<FontScalingDialogDelegate>
 ) :
     QSTileImpl<QSTile.State?>(
         host,
@@ -87,16 +79,7 @@ constructor(
         val animateFromView: Boolean = view != null && !keyguardStateController.isShowing
 
         val runnable = Runnable {
-            val dialog: SystemUIDialog =
-                FontScalingDialog(
-                    mContext,
-                    systemSettings,
-                    secureSettings,
-                    systemClock,
-                    userTracker,
-                    mainHandler,
-                    backgroundDelayableExecutor
-                )
+            val dialog: SystemUIDialog = fontScalingDialogDelegateProvider.get().createDialog()
             if (animateFromView) {
                 dialogLaunchAnimator.showFromView(
                     dialog,
