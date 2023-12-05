@@ -211,12 +211,6 @@ final class InputMethodUtils {
      */
     @UserHandleAware
     public static class InputMethodSettings {
-        private final TextUtils.SimpleStringSplitter mInputMethodSplitter =
-                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
-
-        private final TextUtils.SimpleStringSplitter mSubtypeSplitter =
-                new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
-
         @NonNull
         private Context mUserAwareContext;
         private ContentResolver mResolver;
@@ -428,8 +422,8 @@ final class InputMethodUtils {
 
         List<Pair<String, ArrayList<String>>> getEnabledInputMethodsAndSubtypeListLocked() {
             return buildInputMethodsAndSubtypeList(getEnabledInputMethodsStr(),
-                    mInputMethodSplitter,
-                    mSubtypeSplitter);
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR),
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR));
         }
 
         List<String> getEnabledInputMethodNames() {
@@ -700,16 +694,20 @@ final class InputMethodUtils {
             if (TextUtils.isEmpty(subtypeHistoryStr)) {
                 return imsList;
             }
-            mInputMethodSplitter.setString(subtypeHistoryStr);
-            while (mInputMethodSplitter.hasNext()) {
-                String nextImsStr = mInputMethodSplitter.next();
-                mSubtypeSplitter.setString(nextImsStr);
-                if (mSubtypeSplitter.hasNext()) {
+            final TextUtils.SimpleStringSplitter inputMethodSplitter =
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
+            final TextUtils.SimpleStringSplitter subtypeSplitter =
+                    new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
+            inputMethodSplitter.setString(subtypeHistoryStr);
+            while (inputMethodSplitter.hasNext()) {
+                String nextImsStr = inputMethodSplitter.next();
+                subtypeSplitter.setString(nextImsStr);
+                if (subtypeSplitter.hasNext()) {
                     String subtypeId = NOT_A_SUBTYPE_ID_STR;
                     // The first element is ime id.
-                    String imeId = mSubtypeSplitter.next();
-                    while (mSubtypeSplitter.hasNext()) {
-                        subtypeId = mSubtypeSplitter.next();
+                    String imeId = subtypeSplitter.next();
+                    while (subtypeSplitter.hasNext()) {
+                        subtypeId = subtypeSplitter.next();
                         break;
                     }
                     imsList.add(new Pair<>(imeId, subtypeId));
