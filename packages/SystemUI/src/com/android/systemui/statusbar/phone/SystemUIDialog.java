@@ -146,7 +146,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
          * When you just need a dialog, call this.
          */
         public SystemUIDialog create() {
-            return create(new DialogDelegate<>(){});
+            return create(new DialogDelegate<>(){}, mContext);
         }
 
         /**
@@ -155,13 +155,18 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
          *
          * When you need to customize the dialog, pass it a delegate.
          */
-        public SystemUIDialog create(Delegate delegate) {
-            return create((DialogDelegate<SystemUIDialog>) delegate);
+        public SystemUIDialog create(Delegate delegate, Context context) {
+            return create((DialogDelegate<SystemUIDialog>) delegate, context);
         }
 
-        private SystemUIDialog create(DialogDelegate<SystemUIDialog> dialogDelegate) {
+        public SystemUIDialog create(Delegate delegate) {
+            return create(delegate, mContext);
+        }
+
+        private SystemUIDialog create(DialogDelegate<SystemUIDialog> dialogDelegate,
+                Context context) {
             return new SystemUIDialog(
-                    mContext,
+                    context,
                     DEFAULT_THEME,
                     DEFAULT_DISMISS_ON_DEVICE_LOCK,
                     mFeatureFlags,
