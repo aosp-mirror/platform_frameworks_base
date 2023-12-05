@@ -5100,8 +5100,6 @@
   <java-symbol type="string" name="connected_display_unavailable_notification_title"/>
   <java-symbol type="string" name="connected_display_unavailable_notification_content"/>
   <java-symbol type="string" name="connected_display_thermally_unavailable_notification_content"/>
-  <java-symbol type="string" name="connected_display_cable_dont_support_displays_notification_title"/>
-  <java-symbol type="string" name="connected_display_cable_dont_support_displays_notification_content"/>
   <java-symbol type="string" name="concurrent_display_notification_name"/>
   <java-symbol type="string" name="concurrent_display_notification_active_title"/>
   <java-symbol type="string" name="concurrent_display_notification_active_content"/>
