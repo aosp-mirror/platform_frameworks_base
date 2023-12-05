@@ -23,6 +23,7 @@ import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.utils.SplitScreenUtils
+import org.junit.After
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -42,13 +43,20 @@ abstract class EnterSplitScreenByDragFromShortcutBenchmark(
         Assume.assumeTrue(tapl.isTablet)
     }
 
+    @After
+    fun after() {
+        tapl.enableBlockTimeout(false)
+    }
+
     protected val thisTransition: FlickerBuilder.() -> Unit = {
         setup {
             tapl.goHome()
             SplitScreenUtils.createShortcutOnHotseatIfNotExist(tapl, secondaryApp.appName)
             primaryApp.launchViaIntent(wmHelper)
+            tapl.enableBlockTimeout(true)
         }
         transitions {
+            tapl.showTaskbarIfHidden()
             tapl.launchedAppState.taskbar
                 .getAppIcon(secondaryApp.appName)
                 .openDeepShortcutMenu()
