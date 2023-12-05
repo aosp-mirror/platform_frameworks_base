@@ -16,15 +16,27 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import com.android.systemui.shade.data.repository.ShadeAnimationRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 /** Business logic related to shade animations and transitions. */
-interface ShadeAnimationInteractor {
+abstract class ShadeAnimationInteractor(
+    private val shadeAnimationRepository: ShadeAnimationRepository,
+) {
+    val isLaunchingActivity: StateFlow<Boolean> =
+        shadeAnimationRepository.isLaunchingActivity.asStateFlow()
+
+    fun setIsLaunchingActivity(launching: Boolean) {
+        shadeAnimationRepository.isLaunchingActivity.value = launching
+    }
+
     /**
      * Whether a short animation to close the shade or QS is running. This will be false if the user
      * is manually closing the shade or QS but true if they lift their finger and an animation
      * completes the close. Important: if QS is collapsing back to shade, this will be false because
      * that is not considered "closing".
      */
-    val isAnyCloseAnimationRunning: Flow<Boolean>
+    abstract val isAnyCloseAnimationRunning: Flow<Boolean>
 }

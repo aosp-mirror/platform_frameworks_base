@@ -146,4 +146,13 @@ class ShadeAnimationInteractorSceneContainerImplTest : SysuiTestCase() {
             // THEN qs is not animating closed
             Truth.assertThat(actual).isFalse()
         }
+
+    @Test
+    fun updateIsLaunchingActivity() =
+        testComponent.runTest {
+            Truth.assertThat(underTest.isLaunchingActivity.value).isEqualTo(false)
+
+            underTest.setIsLaunchingActivity(true)
+            Truth.assertThat(underTest.isLaunchingActivity.value).isEqualTo(true)
+        }
 }

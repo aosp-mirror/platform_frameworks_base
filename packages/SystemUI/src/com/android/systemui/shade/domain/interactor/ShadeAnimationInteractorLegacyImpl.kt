@@ -17,6 +17,7 @@
 package com.android.systemui.shade.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.data.repository.ShadeAnimationRepository
 import com.android.systemui.shade.data.repository.ShadeRepository
 import javax.inject.Inject
 
@@ -25,7 +26,8 @@ import javax.inject.Inject
 class ShadeAnimationInteractorLegacyImpl
 @Inject
 constructor(
+    shadeAnimationRepository: ShadeAnimationRepository,
     shadeRepository: ShadeRepository,
-) : ShadeAnimationInteractor {
+) : ShadeAnimationInteractor(shadeAnimationRepository) {
     override val isAnyCloseAnimationRunning = shadeRepository.legacyIsClosing
 }
