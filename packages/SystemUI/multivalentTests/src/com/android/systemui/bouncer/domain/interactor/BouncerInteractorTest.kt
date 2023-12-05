@@ -249,12 +249,10 @@ class BouncerInteractorTest : SysuiTestCase() {
     @Test
     fun throttling() =
         testScope.runTest {
-            val isThrottled by collectLastValue(underTest.isThrottled)
             val throttling by collectLastValue(underTest.throttling)
             val message by collectLastValue(underTest.message)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            assertThat(isThrottled).isFalse()
-            assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
+            assertThat(throttling).isNull()
             repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) { times ->
                 // Wrong PIN.
                 assertThat(underTest.authenticate(listOf(6, 7, 8, 9)))
@@ -265,7 +263,6 @@ class BouncerInteractorTest : SysuiTestCase() {
                     assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
                 }
             }
-            assertThat(isThrottled).isTrue()
             assertThat(throttling)
                 .isEqualTo(
                     AuthenticationThrottlingModel(
@@ -300,20 +297,12 @@ class BouncerInteractorTest : SysuiTestCase() {
                 }
             }
             assertThat(message).isEqualTo("")
-            assertThat(isThrottled).isFalse()
-            assertThat(throttling)
-                .isEqualTo(
-                    AuthenticationThrottlingModel(
-                        failedAttemptCount =
-                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
-                    )
-                )
+            assertThat(throttling).isNull()
 
             // Correct PIN and no longer throttled so changes to the Gone scene:
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(isThrottled).isFalse()
-            assertThat(throttling).isEqualTo(AuthenticationThrottlingModel())
+            assertThat(throttling).isNull()
         }
 
     @Test

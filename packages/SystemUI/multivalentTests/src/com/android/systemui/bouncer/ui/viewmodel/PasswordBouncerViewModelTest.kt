@@ -337,20 +337,14 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
             }
             val remainingTimeMs = 30_000
             authenticationRepository.setThrottleDuration(remainingTimeMs)
-            authenticationRepository.setThrottling(
+            authenticationRepository.throttling.value =
                 AuthenticationThrottlingModel(
                     failedAttemptCount = failedAttemptCount,
                     remainingMs = remainingTimeMs,
                 )
-            )
         } else {
             authenticationRepository.reportAuthenticationAttempt(true)
-            authenticationRepository.setThrottling(
-                AuthenticationThrottlingModel(
-                    failedAttemptCount = failedAttemptCount,
-                    remainingMs = 0,
-                )
-            )
+            authenticationRepository.throttling.value = null
         }
 
         runCurrent()
