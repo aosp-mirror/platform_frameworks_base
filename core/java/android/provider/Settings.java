@@ -37,7 +37,6 @@ import android.app.ActivityThread;
 import android.app.AppOpsManager;
 import android.app.Application;
 import android.app.AutomaticZenRule;
-import android.app.Flags;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.SearchManager;
@@ -1921,7 +1920,7 @@ public final class Settings {
      * <p>
      * Output: Nothing.
      */
-    @FlaggedApi(Flags.FLAG_MODES_API)
+    @FlaggedApi(android.app.Flags.FLAG_MODES_API)
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_AUTOMATIC_ZEN_RULE_SETTINGS
             = "android.settings.AUTOMATIC_ZEN_RULE_SETTINGS";
@@ -1931,7 +1930,7 @@ public final class Settings {
      * <p>
      * This must be passed as an extra field to the {@link #ACTION_AUTOMATIC_ZEN_RULE_SETTINGS}.
      */
-    @FlaggedApi(Flags.FLAG_MODES_API)
+    @FlaggedApi(android.app.Flags.FLAG_MODES_API)
     public static final String EXTRA_AUTOMATIC_ZEN_RULE_ID
             = "android.provider.extra.AUTOMATIC_ZEN_RULE_ID";
 
@@ -4086,6 +4085,7 @@ public final class Settings {
          */
         @RequiresPermission(Manifest.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE)
         @SystemApi
+        @FlaggedApi(Flags.FLAG_SYSTEM_SETTINGS_DEFAULT)
         public static boolean putString(@NonNull ContentResolver resolver, @NonNull String name,
                 @Nullable String value, boolean makeDefault, boolean overrideableByRestore) {
             return putStringForUser(resolver, name, value, /* tag= */ null,
@@ -4140,6 +4140,7 @@ public final class Settings {
          * @hide
          */
         @SystemApi
+        @FlaggedApi(Flags.FLAG_SYSTEM_SETTINGS_DEFAULT)
         public static void resetToDefaults(@NonNull ContentResolver resolver,
                 @Nullable String tag) {
             resetToDefaultsAsUser(resolver, tag, RESET_MODE_PACKAGE_DEFAULTS,

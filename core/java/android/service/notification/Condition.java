@@ -257,7 +257,10 @@ public final class Condition implements Parcelable {
         throw new IllegalArgumentException("state is invalid: " + state);
     }
 
-    /** Provides a human-readable string version of the Source enum. */
+    /**
+     * Provides a human-readable string version of the Source enum.
+     * @hide
+     */
     @FlaggedApi(Flags.FLAG_MODES_API)
     public static @NonNull String sourceToString(@Source int source) {
         if (source == SOURCE_UNKNOWN) return "SOURCE_UNKNOWN";
