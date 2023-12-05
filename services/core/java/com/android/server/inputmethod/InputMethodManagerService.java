@@ -4073,14 +4073,18 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 final List<InputMethodInfo> enabled = mSettings.getEnabledInputMethodListLocked();
                 if (enabled != null) {
                     final int enabledCount = enabled.size();
-                    final String locale = mCurrentSubtype == null
-                            ? mRes.getConfiguration().locale.toString()
-                            : mCurrentSubtype.getLocale();
+                    final String locale;
+                    if (mCurrentSubtype != null
+                            && !TextUtils.isEmpty(mCurrentSubtype.getLocale())) {
+                        locale = mCurrentSubtype.getLocale();
+                    } else {
+                        locale = mRes.getConfiguration().locale.toString();
+                    }
                     for (int i = 0; i < enabledCount; ++i) {
                         final InputMethodInfo imi = enabled.get(i);
                         if (imi.getSubtypeCount() > 0 && imi.isSystem()) {
                             InputMethodSubtype keyboardSubtype =
-                                    SubtypeUtils.findLastResortApplicableSubtypeLocked(mRes,
+                                    SubtypeUtils.findLastResortApplicableSubtypeLocked(
                                             SubtypeUtils.getSubtypes(imi),
                                             SubtypeUtils.SUBTYPE_MODE_KEYBOARD, locale, true);
                             if (keyboardSubtype != null) {
@@ -5430,12 +5434,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 if (explicitlyOrImplicitlyEnabledSubtypes.size() == 1) {
                     mCurrentSubtype = explicitlyOrImplicitlyEnabledSubtypes.get(0);
                 } else if (explicitlyOrImplicitlyEnabledSubtypes.size() > 1) {
+                    final String locale = mRes.getConfiguration().locale.toString();
                     mCurrentSubtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
-                            mRes, explicitlyOrImplicitlyEnabledSubtypes,
-                            SubtypeUtils.SUBTYPE_MODE_KEYBOARD, null, true);
+                            explicitlyOrImplicitlyEnabledSubtypes,
+                            SubtypeUtils.SUBTYPE_MODE_KEYBOARD, locale, true);
                     if (mCurrentSubtype == null) {
                         mCurrentSubtype = SubtypeUtils.findLastResortApplicableSubtypeLocked(
-                                mRes, explicitlyOrImplicitlyEnabledSubtypes, null, null, true);
+                                explicitlyOrImplicitlyEnabledSubtypes, null, locale, true);
                     }
                 }
             } else {

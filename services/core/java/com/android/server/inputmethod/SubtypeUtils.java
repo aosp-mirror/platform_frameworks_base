@@ -220,7 +220,7 @@ final class SubtypeUtils {
 
         if (applicableSubtypes.isEmpty()) {
             InputMethodSubtype lastResortKeyboardSubtype = findLastResortApplicableSubtypeLocked(
-                    res, subtypes, SUBTYPE_MODE_KEYBOARD, systemLocale, true);
+                    subtypes, SUBTYPE_MODE_KEYBOARD, systemLocale, true);
             if (lastResortKeyboardSubtype != null) {
                 applicableSubtypes.add(lastResortKeyboardSubtype);
             }
@@ -249,13 +249,10 @@ final class SubtypeUtils {
      * @return the most applicable subtypeId
      */
     static InputMethodSubtype findLastResortApplicableSubtypeLocked(
-            Resources res, List<InputMethodSubtype> subtypes, String mode, String locale,
+            List<InputMethodSubtype> subtypes, String mode, @NonNull String locale,
             boolean canIgnoreLocaleAsLastResort) {
         if (subtypes == null || subtypes.isEmpty()) {
             return null;
-        }
-        if (TextUtils.isEmpty(locale)) {
-            locale = res.getConfiguration().locale.toString();
         }
         final String language = LocaleUtils.getLanguageFromLocaleString(locale);
         boolean partialMatchFound = false;
