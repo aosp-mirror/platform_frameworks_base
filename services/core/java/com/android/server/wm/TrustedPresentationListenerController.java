@@ -343,15 +343,15 @@ public class TrustedPresentationListenerController {
             var listener = trustedPresentationInfo.mListener;
             boolean lastState = trustedPresentationInfo.mLastComputedTrustedPresentationState;
             boolean newState =
-                    (alpha >= trustedPresentationInfo.mThresholds.mMinAlpha) && (fractionRendered
-                            >= trustedPresentationInfo.mThresholds.mMinFractionRendered);
+                    (alpha >= trustedPresentationInfo.mThresholds.minAlpha) && (fractionRendered
+                            >= trustedPresentationInfo.mThresholds.minFractionRendered);
             trustedPresentationInfo.mLastComputedTrustedPresentationState = newState;
 
             ProtoLog.v(WM_DEBUG_TPL,
                     "lastState=%s newState=%s alpha=%f minAlpha=%f fractionRendered=%f "
                             + "minFractionRendered=%f",
-                    lastState, newState, alpha, trustedPresentationInfo.mThresholds.mMinAlpha,
-                    fractionRendered, trustedPresentationInfo.mThresholds.mMinFractionRendered);
+                    lastState, newState, alpha, trustedPresentationInfo.mThresholds.minAlpha,
+                    fractionRendered, trustedPresentationInfo.mThresholds.minFractionRendered);
 
             if (lastState && !newState) {
                 // We were in the trusted presentation state, but now we left it,
@@ -371,13 +371,13 @@ public class TrustedPresentationListenerController {
                 trustedPresentationInfo.mEnteredTrustedPresentationStateTime = currTimeMs;
                 mHandler.postDelayed(() -> {
                     computeTpl(mLastWindowHandles);
-                }, (long) (trustedPresentationInfo.mThresholds.mStabilityRequirementMs * 1.5));
+                }, (long) (trustedPresentationInfo.mThresholds.stabilityRequirementMs * 1.5));
             }
 
             // Has the timer elapsed, but we are still in the state? Emit a callback if needed
             if (!trustedPresentationInfo.mLastReportedTrustedPresentationState && newState && (
                     currTimeMs - trustedPresentationInfo.mEnteredTrustedPresentationStateTime
-                            > trustedPresentationInfo.mThresholds.mStabilityRequirementMs)) {
+                            > trustedPresentationInfo.mThresholds.stabilityRequirementMs)) {
                 trustedPresentationInfo.mLastReportedTrustedPresentationState = true;
                 addListenerUpdate(listenerUpdates, listener,
                         trustedPresentationInfo.mId, /*presentationState*/ true);
@@ -438,8 +438,8 @@ public class TrustedPresentationListenerController {
         }
 
         private void checkValid(TrustedPresentationThresholds thresholds) {
-            if (thresholds.mMinAlpha <= 0 || thresholds.mMinFractionRendered <= 0
-                    || thresholds.mStabilityRequirementMs < 1) {
+            if (thresholds.minAlpha <= 0 || thresholds.minFractionRendered <= 0
+                    || thresholds.stabilityRequirementMs < 1) {
                 throw new IllegalArgumentException(
                         "TrustedPresentationThresholds values are invalid");
             }

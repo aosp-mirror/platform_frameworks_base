@@ -16,40 +16,53 @@
 
 package android.window;
 
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntRange;
+import android.annotation.SuppressLint;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
 
+import com.android.window.flags.Flags;
+
 /**
- * @hide
+ * Threshold values that are sent with
+ * {@link android.view.WindowManager#registerTrustedPresentationListener(IBinder,
+ * TrustedPresentationThresholds, Executor, Consumer)}
  */
+@FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
 public final class TrustedPresentationThresholds implements Parcelable {
     /**
      * The min alpha the {@link SurfaceControl} is required to have to be considered inside the
      * threshold.
      */
     @FloatRange(from = 0f, fromInclusive = false, to = 1f)
-    public final float mMinAlpha;
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
+    @SuppressLint("InternalField") // simple data class
+    public final float minAlpha;
 
     /**
      * The min fraction of the SurfaceControl that was presented to the user to be considered
      * inside the threshold.
      */
     @FloatRange(from = 0f, fromInclusive = false, to = 1f)
-    public final float mMinFractionRendered;
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
+    @SuppressLint("InternalField") // simple data class
+    public final float minFractionRendered;
 
     /**
      * The time in milliseconds required for the {@link SurfaceControl} to be in the threshold.
      */
     @IntRange(from = 1)
-    public final int mStabilityRequirementMs;
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
+    @SuppressLint("InternalField") // simple data class
+    public final int stabilityRequirementMs;
 
     private void checkValid() {
-        if (mMinAlpha <= 0 || mMinFractionRendered <= 0 || mStabilityRequirementMs < 1) {
+        if (minAlpha <= 0 || minFractionRendered <= 0 || stabilityRequirementMs < 1) {
             throw new IllegalArgumentException(
                     "TrustedPresentationThresholds values are invalid");
         }
@@ -67,33 +80,37 @@ public final class TrustedPresentationThresholds implements Parcelable {
      * @param stabilityRequirementMs The time in milliseconds required for the
      *                               {@link SurfaceControl} to be in the threshold.
      */
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
     public TrustedPresentationThresholds(
             @FloatRange(from = 0f, fromInclusive = false, to = 1f) float minAlpha,
             @FloatRange(from = 0f, fromInclusive = false, to = 1f) float minFractionRendered,
             @IntRange(from = 1) int stabilityRequirementMs) {
-        this.mMinAlpha = minAlpha;
-        this.mMinFractionRendered = minFractionRendered;
-        this.mStabilityRequirementMs = stabilityRequirementMs;
+        this.minAlpha = minAlpha;
+        this.minFractionRendered = minFractionRendered;
+        this.stabilityRequirementMs = stabilityRequirementMs;
         checkValid();
     }
 
     @Override
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
     public String toString() {
         return "TrustedPresentationThresholds { "
-                + "minAlpha = " + mMinAlpha + ", "
-                + "minFractionRendered = " + mMinFractionRendered + ", "
-                + "stabilityRequirementMs = " + mStabilityRequirementMs
+                + "minAlpha = " + minAlpha + ", "
+                + "minFractionRendered = " + minFractionRendered + ", "
+                + "stabilityRequirementMs = " + stabilityRequirementMs
                 + " }";
     }
 
     @Override
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        dest.writeFloat(mMinAlpha);
-        dest.writeFloat(mMinFractionRendered);
-        dest.writeInt(mStabilityRequirementMs);
+        dest.writeFloat(minAlpha);
+        dest.writeFloat(minFractionRendered);
+        dest.writeInt(stabilityRequirementMs);
     }
 
     @Override
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
     public int describeContents() {
         return 0;
     }
@@ -102,24 +119,24 @@ public final class TrustedPresentationThresholds implements Parcelable {
      * @hide
      */
     TrustedPresentationThresholds(@NonNull Parcel in) {
-        mMinAlpha = in.readFloat();
-        mMinFractionRendered = in.readFloat();
-        mStabilityRequirementMs = in.readInt();
+        minAlpha = in.readFloat();
+        minFractionRendered = in.readFloat();
+        stabilityRequirementMs = in.readInt();
 
         checkValid();
     }
 
-    /**
-     * @hide
-     */
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
     public static final @NonNull Creator<TrustedPresentationThresholds> CREATOR =
             new Creator<TrustedPresentationThresholds>() {
                 @Override
+                @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
                 public TrustedPresentationThresholds[] newArray(int size) {
                     return new TrustedPresentationThresholds[size];
                 }
 
                 @Override
+                @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
                 public TrustedPresentationThresholds createFromParcel(@NonNull Parcel in) {
                     return new TrustedPresentationThresholds(in);
                 }

@@ -820,7 +820,8 @@ public final class WindowManagerGlobal {
                 Consumer<Boolean> listener, Executor executor) {
             synchronized (mTplLock) {
                 if (mListeners.containsKey(listener)) {
-                    throw new AndroidRuntimeException("Trying to add duplicate listener");
+                    Log.i(TAG, "Updating listener " + listener + " thresholds to " + thresholds);
+                    removeListener(listener);
                 }
                 int id = sId++;
                 mListeners.put(listener, new Pair<>(id, executor));

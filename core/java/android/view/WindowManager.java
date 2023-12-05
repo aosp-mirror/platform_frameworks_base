@@ -126,6 +126,8 @@ import android.window.ITrustedPresentationListener;
 import android.window.TaskFpsCallback;
 import android.window.TrustedPresentationThresholds;
 
+import com.android.window.flags.Flags;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -5888,18 +5890,18 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
-     * Add a trusted presentation listener associated with a window. If the listener has already
-     * been registered, an AndroidRuntimeException will be thrown.
+     * Add a trusted presentation listener associated with a window.
      *
-     * @param window  The Window to add the trusted presentation listener for
+     * <p> If this listener is already registered then the window and thresholds will be updated.
+     *
+     * @param window     The Window to add the trusted presentation listener for
      * @param thresholds The {@link TrustedPresentationThresholds} that will specify
      *                   when the to invoke the callback.
      * @param executor   The {@link Executor} where the callback will be invoked on.
-     * @param listener   The {@link ITrustedPresentationListener} that will receive the callbacks
+     * @param listener   The {@link Consumer} that will receive the callbacks
      *                  when entered or exited trusted presentation per the thresholds.
-     *
-     * @hide b/287076178 un-hide with API bump
      */
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
     default void registerTrustedPresentationListener(@NonNull IBinder window,
             @NonNull TrustedPresentationThresholds thresholds,  @NonNull Executor executor,
             @NonNull Consumer<Boolean> listener) {
@@ -5910,10 +5912,9 @@ public interface WindowManager extends ViewManager {
      * Removes a presentation listener associated with a window. If the listener was not previously
      * registered, the call will be a noop.
      *
-     * @hide
-     * @see #registerTrustedPresentationListener(IBinder,
-     * TrustedPresentationThresholds, Executor, Consumer)
+     * @see WindowManager#registerTrustedPresentationListener(IBinder, TrustedPresentationThresholds, Executor, Consumer)
      */
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
     default void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
         throw new UnsupportedOperationException();
     }
