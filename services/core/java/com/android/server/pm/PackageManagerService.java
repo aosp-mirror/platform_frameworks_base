@@ -4604,6 +4604,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                             userIds, null, broadcastAllowList, null,
                             null);
                 });
+                mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_UNSTOPPED,
+                        packageName, extras, userIds, null /* instantUserIds */,
+                        broadcastAllowList, mHandler);
             }
         }
     }
