@@ -64,7 +64,7 @@ public class DreamOverlayStateController implements
     public static final int STATE_DREAM_EXIT_ANIMATIONS_RUNNING = 1 << 3;
     public static final int STATE_HAS_ASSISTANT_ATTENTION = 1 << 4;
     public static final int STATE_DREAM_OVERLAY_STATUS_BAR_VISIBLE = 1 << 5;
-
+    private static final int STATE_HOME_CONTROL_ACTIVE = 1 << 6;
     private static final int OP_CLEAR_STATE = 1;
     private static final int OP_SET_STATE = 2;
 
@@ -186,7 +186,7 @@ public class DreamOverlayStateController implements
      * Returns collection of present {@link Complication}.
      */
     public Collection<Complication> getComplications(boolean filterByAvailability) {
-        if (isLowLightActive()) {
+        if (isLowLightActive() || containsState(STATE_HOME_CONTROL_ACTIVE)) {
             // Don't show complications on low light.
             return Collections.emptyList();
         }
@@ -348,6 +348,14 @@ public class DreamOverlayStateController implements
             notifyCallbacks(Callback::onExitLowLight);
         }
         modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_LOW_LIGHT_ACTIVE);
+    }
+
+    /**
+     * Sets whether home control panel is active.
+     * @param active {@code true} if home control panel is active, {@code false} otherwise.
+     */
+    public void setHomeControlPanelActive(boolean active) {
+        modifyState(active ? OP_SET_STATE : OP_CLEAR_STATE, STATE_HOME_CONTROL_ACTIVE);
     }
 
     /**
