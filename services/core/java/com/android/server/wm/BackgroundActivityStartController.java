@@ -205,27 +205,6 @@ public class BackgroundActivityStartController {
         return activity != null && packageName.equals(activity.getPackageName());
     }
 
-    /**
-     * @see #checkBackgroundActivityStart(int, int, String, int, int, WindowProcessController,
-     *      PendingIntentRecord, BackgroundStartPrivileges, Intent, ActivityOptions)
-     */
-    boolean shouldAbortBackgroundActivityStart(
-            int callingUid,
-            int callingPid,
-            final String callingPackage,
-            int realCallingUid,
-            int realCallingPid,
-            WindowProcessController callerApp,
-            PendingIntentRecord originatingPendingIntent,
-            BackgroundStartPrivileges forcedBalByPiSender,
-            Intent intent,
-            ActivityOptions checkedOptions) {
-        return checkBackgroundActivityStart(callingUid, callingPid, callingPackage,
-                realCallingUid, realCallingPid,
-                callerApp, originatingPendingIntent,
-                forcedBalByPiSender, intent, checkedOptions).blocks();
-    }
-
     private class BalState {
 
         private final String mCallingPackage;
@@ -255,6 +234,7 @@ public class BackgroundActivityStartController {
                  WindowProcessController callerApp,
                  PendingIntentRecord originatingPendingIntent,
                  BackgroundStartPrivileges forcedBalByPiSender,
+                 ActivityRecord resultRecord,
                  Intent intent,
                  ActivityOptions checkedOptions) {
             this.mCallingPackage = callingPackage;
@@ -267,7 +247,9 @@ public class BackgroundActivityStartController {
             mOriginatingPendingIntent = originatingPendingIntent;
             mIntent = intent;
             mRealCallingPackage = mService.getPackageNameIfUnique(realCallingUid, realCallingPid);
-            if (originatingPendingIntent == null) {
+            if (originatingPendingIntent == null // not a PendingIntent
+                    || resultRecord != null // sent for result
+            ) {
                 // grant BAL privileges unless explicitly opted out
                 mBalAllowedByPiCreatorWithHardening = mBalAllowedByPiCreator =
                         checkedOptions.getPendingIntentCreatorBackgroundActivityStartMode()
@@ -535,6 +517,7 @@ public class BackgroundActivityStartController {
      * @param forcedBalByPiSender If set to allow, the
      *        PendingIntent's sender will try to force allow background activity starts.
      *        This is only possible if the sender of the PendingIntent is a system process.
+     * @param resultRecord If not null, this indicates that the caller expects a result.
      * @param intent Intent that should be started.
      * @param checkedOptions ActivityOptions to allow specific opt-ins/opt outs.
      *
@@ -550,6 +533,7 @@ public class BackgroundActivityStartController {
             WindowProcessController callerApp,
             PendingIntentRecord originatingPendingIntent,
             BackgroundStartPrivileges forcedBalByPiSender,
+            ActivityRecord resultRecord,
             Intent intent,
             ActivityOptions checkedOptions) {
 
@@ -560,7 +544,7 @@ public class BackgroundActivityStartController {
 
         BalState state = new BalState(callingUid, callingPid, callingPackage,
                 realCallingUid, realCallingPid, callerApp, originatingPendingIntent,
-                forcedBalByPiSender, intent, checkedOptions);
+                forcedBalByPiSender, resultRecord, intent, checkedOptions);
 
         // In the case of an SDK sandbox calling uid, check if the corresponding app uid has a
         // visible window.
