@@ -23,6 +23,7 @@ import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_2;
 import static com.android.server.hdmi.Constants.ADDR_RECORDER_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
+import static com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -1712,18 +1713,21 @@ public class HdmiCecLocalDeviceTvTest {
                 HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
         HdmiCecMessage activeSourceFromTv =
                 HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
-
         mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
         mNativeWrapper.setPollAddressResponse(ADDR_PLAYBACK_1, SendMessageResult.SUCCESS);
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
+        assertThat(mHdmiControlService.getLocalActiveSource()).isEqualTo(
+                new ActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS));
         mNativeWrapper.clearResultMessages();
         mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
         mTestLooper.dispatchAll();
 
         assertThat(mNativeWrapper.getResultMessages()).contains(activeSourceFromTv);
+        assertThat(mHdmiControlService.getLocalActiveSource()).isEqualTo(
+                new ActiveSource(mTvLogicalAddress, mTvPhysicalAddress));
     }
 
     @Test

@@ -198,6 +198,9 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
                         mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
                                 getDeviceInfo().getLogicalAddress(),
                                 getDeviceInfo().getPhysicalAddress()));
+                        updateActiveSource(getDeviceInfo().getLogicalAddress(),
+                                getDeviceInfo().getPhysicalAddress(),
+                                "RequestActiveSourceAction#finishWithCallback()");
                     }
                 }
             }));
