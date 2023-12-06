@@ -1,0 +1,51 @@
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+filegroup {
+    name: "framework-nfc-non-updatable-sources",
+    path: "java",
+    srcs: [],
+}
+
+filegroup {
+    name: "framework-nfc-updatable-sources",
+    path: "java",
+    srcs: [
+        "java/**/*.java",
+        "java/**/*.aidl",
+    ],
+    exclude_srcs: [
+        ":framework-nfc-non-updatable-sources",
+    ],
+}
+
+java_sdk_library {
+    name: "framework-nfc",
+    libs: [
+        "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
+    ],
+    srcs: [
+        ":framework-nfc-updatable-sources",
+    ],
+    defaults: ["framework-non-updatable-unbundled-defaults"],
+    permitted_packages: [
+        "android.nfc",
+        "com.android.nfc",
+    ],
+    hidden_api_packages: [
+        "com.android.nfc",
+    ],
+    aidl: {
+        include_dirs: [
+	    // TODO (b/303286040): Remove these when we change to |framework-module-defaults|
+            "frameworks/base/nfc/java",
+            "frameworks/base/core/java",
+        ],
+    },
+}
