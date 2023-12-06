@@ -26,6 +26,7 @@ import com.android.systemui.media.dagger.MediaModule
 import com.android.systemui.shade.ShadeViewController
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -39,7 +40,7 @@ class CommunalViewModel
 constructor(
     private val communalInteractor: CommunalInteractor,
     tutorialInteractor: CommunalTutorialInteractor,
-    shadeViewController: ShadeViewController,
+    shadeViewController: Provider<ShadeViewController>,
     powerManager: PowerManager,
     @Named(MediaModule.COMMUNAL_HUB) mediaHost: MediaHost,
 ) : BaseCommunalViewModel(communalInteractor, shadeViewController, powerManager, mediaHost) {
