@@ -955,6 +955,7 @@ public class PipTransition extends PipTransitionController {
         } else {
             throw new RuntimeException("Unrecognized animation type: " + enterAnimationType);
         }
+        mPipOrganizer.mPipOverlay = animator.getContentOverlayLeash();
         animator.setTransitionDirection(TRANSITION_DIRECTION_TO_PIP)
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(mEnterExitAnimationDuration);

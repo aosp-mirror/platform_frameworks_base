@@ -770,6 +770,7 @@ public class PipAnimationController {
                     }
                     if (mContentOverlay != null) {
                         mContentOverlay.onAnimationEnd(tx, destBounds);
+                        clearContentOverlay();
                     }
                 }
 
