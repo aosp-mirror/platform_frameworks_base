@@ -2908,46 +2908,69 @@ class MediaRouter2ServiceImpl {
             if (service == null) {
                 return;
             }
-            List<RouterRecord> activeRouterRecords = Collections.emptyList();
+            List<RouterRecord> activeRouterRecords;
             List<RouterRecord> allRouterRecords = getRouterRecords();
-            List<ManagerRecord> managerRecords = getManagerRecords();
 
-            boolean isManagerScanning = false;
-            if (Flags.disableScreenOffBroadcastReceiver()
-                    || service.mPowerManager.isInteractive()) {
-                isManagerScanning = managerRecords.stream().anyMatch(manager ->
-                        manager.mIsScanning && service.mActivityManager
-                                .getPackageImportance(manager.mOwnerPackageName)
-                                <= sPackageImportanceForScanning);
+            boolean areManagersScanning = areManagersScanning(service, getManagerRecords());
 
-                if (isManagerScanning) {
-                    activeRouterRecords = allRouterRecords;
-                } else {
-                    activeRouterRecords =
-                            allRouterRecords.stream()
-                                    .filter(
-                                            record ->
-                                                    service.mActivityManager.getPackageImportance(
-                                                                    record.mPackageName)
-                                                            <= sPackageImportanceForScanning)
-                                    .collect(Collectors.toList());
-                }
+            if (areManagersScanning) {
+                activeRouterRecords = allRouterRecords;
+            } else {
+                activeRouterRecords = getIndividuallyActiveRouters(service, allRouterRecords);
             }
 
-            for (MediaRoute2Provider provider : mRouteProviders) {
-                if (provider instanceof MediaRoute2ProviderServiceProxy) {
-                    ((MediaRoute2ProviderServiceProxy) provider)
-                            .setManagerScanning(isManagerScanning);
-                }
-            }
+            updateManagerScanningForProviders(areManagersScanning);
 
-            // Build a composite RouteDiscoveryPreference that matches all of the routes
-            // that match one or more of the individual discovery preferences. It may also
-            // match additional routes. The composite RouteDiscoveryPreference can be used
-            // to query route providers once to obtain all of the routes of interest, which
-            // can be subsequently filtered for the individual discovery preferences.
-            Set<String> preferredFeatures = new HashSet<>();
             Set<String> activelyScanningPackages = new HashSet<>();
+            RouteDiscoveryPreference newPreference =
+                    buildCompositeDiscoveryPreference(
+                            activeRouterRecords, areManagersScanning, activelyScanningPackages);
+
+            if (updateScanningOnUserRecord(service, activelyScanningPackages, newPreference)) {
+                updateDiscoveryPreferenceForProviders(activelyScanningPackages);
+            }
+        }
+
+        private void updateDiscoveryPreferenceForProviders(Set<String> activelyScanningPackages) {
+            for (MediaRoute2Provider provider : mRouteProviders) {
+                provider.updateDiscoveryPreference(
+                        activelyScanningPackages, mUserRecord.mCompositeDiscoveryPreference);
+            }
+        }
+
+        private boolean updateScanningOnUserRecord(
+                MediaRouter2ServiceImpl service,
+                Set<String> activelyScanningPackages,
+                RouteDiscoveryPreference newPreference) {
+            synchronized (service.mLock) {
+                if (newPreference.equals(mUserRecord.mCompositeDiscoveryPreference)
+                        && activelyScanningPackages.equals(mUserRecord.mActivelyScanningPackages)) {
+                    return false;
+                }
+                mUserRecord.mCompositeDiscoveryPreference = newPreference;
+                mUserRecord.mActivelyScanningPackages = activelyScanningPackages;
+            }
+            return true;
+        }
+
+        /**
+         * Returns a composite {@link RouteDiscoveryPreference} that aggregates every router
+         * record's individual discovery preference.
+         *
+         * <p>The {@link RouteDiscoveryPreference#shouldPerformActiveScan() active scan value} of
+         * the composite discovery preference is true if one of the router records is actively
+         * scanning or if {@code shouldForceActiveScan} is true.
+         *
+         * <p>The composite RouteDiscoveryPreference is used to query route providers once to obtain
+         * all the routes of interest, which can be subsequently filtered for the individual
+         * discovery preferences.
+         */
+        @NonNull
+        private static RouteDiscoveryPreference buildCompositeDiscoveryPreference(
+                List<RouterRecord> activeRouterRecords,
+                boolean shouldForceActiveScan,
+                Set<String> activelyScanningPackages) {
+            Set<String> preferredFeatures = new HashSet<>();
             boolean activeScan = false;
             for (RouterRecord activeRouterRecord : activeRouterRecords) {
                 RouteDiscoveryPreference preference = activeRouterRecord.mDiscoveryPreference;
@@ -2957,21 +2980,51 @@ class MediaRouter2ServiceImpl {
                     activelyScanningPackages.add(activeRouterRecord.mPackageName);
                 }
             }
-            RouteDiscoveryPreference newPreference = new RouteDiscoveryPreference.Builder(
-                    List.copyOf(preferredFeatures), activeScan || isManagerScanning).build();
+            return new RouteDiscoveryPreference.Builder(
+                            List.copyOf(preferredFeatures), activeScan || shouldForceActiveScan)
+                    .build();
+        }
 
-            synchronized (service.mLock) {
-                if (newPreference.equals(mUserRecord.mCompositeDiscoveryPreference)
-                        && activelyScanningPackages.equals(mUserRecord.mActivelyScanningPackages)) {
-                    return;
-                }
-                mUserRecord.mCompositeDiscoveryPreference = newPreference;
-                mUserRecord.mActivelyScanningPackages = activelyScanningPackages;
-            }
+        private void updateManagerScanningForProviders(boolean isManagerScanning) {
             for (MediaRoute2Provider provider : mRouteProviders) {
-                provider.updateDiscoveryPreference(
-                        activelyScanningPackages, mUserRecord.mCompositeDiscoveryPreference);
+                if (provider instanceof MediaRoute2ProviderServiceProxy) {
+                    ((MediaRoute2ProviderServiceProxy) provider)
+                            .setManagerScanning(isManagerScanning);
+                }
             }
+        }
+
+        @NonNull
+        private static List<RouterRecord> getIndividuallyActiveRouters(
+                MediaRouter2ServiceImpl service, List<RouterRecord> allRouterRecords) {
+            if (!Flags.disableScreenOffBroadcastReceiver()
+                    && !service.mPowerManager.isInteractive()) {
+                return Collections.emptyList();
+            }
+
+            return allRouterRecords.stream()
+                    .filter(
+                            record ->
+                                    service.mActivityManager.getPackageImportance(
+                                                    record.mPackageName)
+                                            <= sPackageImportanceForScanning)
+                    .collect(Collectors.toList());
+        }
+
+        private static boolean areManagersScanning(
+                MediaRouter2ServiceImpl service, List<ManagerRecord> managerRecords) {
+            if (!Flags.disableScreenOffBroadcastReceiver()
+                    && !service.mPowerManager.isInteractive()) {
+                return false;
+            }
+
+            return managerRecords.stream()
+                    .anyMatch(
+                            manager ->
+                                    manager.mIsScanning
+                                            && service.mActivityManager.getPackageImportance(
+                                                            manager.mOwnerPackageName)
+                                                    <= sPackageImportanceForScanning);
         }
 
         private MediaRoute2Provider findProvider(@Nullable String providerId) {
