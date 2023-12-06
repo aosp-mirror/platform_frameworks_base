@@ -119,7 +119,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM* vm, void*) {
 
     // Set the location of ICU data
     auto stringPath = (jstring)env->CallStaticObjectMethod(system, getPropertyMethod,
-                                                           env->NewStringUTF("icu.dir"),
+                                                           env->NewStringUTF("icu.data.path"),
                                                            env->NewStringUTF(""));
     const char* path = env->GetStringUTFChars(stringPath, 0);
     if (!fileExists(path)) {
