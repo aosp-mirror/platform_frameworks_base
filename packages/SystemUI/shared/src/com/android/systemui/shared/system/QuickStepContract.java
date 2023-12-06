@@ -103,8 +103,6 @@ public class QuickStepContract {
     public static final int SYSUI_STATE_BACK_DISABLED = 1 << 22;
     // The bubble stack is expanded AND the mange menu for bubbles is expanded on top of it.
     public static final int SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED = 1 << 23;
-    // The current app is in immersive mode
-    public static final int SYSUI_STATE_IMMERSIVE_MODE = 1 << 24;
     // The voice interaction session window is showing
     public static final int SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING = 1 << 25;
     // Freeform windows are showing in desktop mode
@@ -162,7 +160,6 @@ public class QuickStepContract {
             SYSUI_STATE_DEVICE_DOZING,
             SYSUI_STATE_BACK_DISABLED,
             SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED,
-            SYSUI_STATE_IMMERSIVE_MODE,
             SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING,
             SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE,
             SYSUI_STATE_DEVICE_DREAMING,
@@ -246,9 +243,6 @@ public class QuickStepContract {
         }
         if ((flags & SYSUI_STATE_BUBBLES_MANAGE_MENU_EXPANDED) != 0) {
             str.add("bubbles_mange_menu_expanded");
-        }
-        if ((flags & SYSUI_STATE_IMMERSIVE_MODE) != 0) {
-            str.add("immersive_mode");
         }
         if ((flags & SYSUI_STATE_VOICE_INTERACTION_WINDOW_SHOWING) != 0) {
             str.add("vis_win_showing");
