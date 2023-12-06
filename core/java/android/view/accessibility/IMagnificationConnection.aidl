@@ -23,11 +23,11 @@ import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 
 /**
  * Interface for interaction between {@link AccessibilityManagerService}
- * and {@link WindowMagnification} in SystemUI.
+ * and {@link Magnification} in SystemUI.
  *
  * @hide
  */
-oneway interface IWindowMagnificationConnection {
+oneway interface IMagnificationConnection {
 
     /**
      * Enables window magnification on specified display with given center and scale and animation.

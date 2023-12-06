@@ -5137,12 +5137,6 @@ public class UserManagerService extends IUserManager.Stub {
             mPm.createNewUser(userId, userTypeInstallablePackages, disallowedPackages);
             t.traceEnd();
 
-            userInfo.partial = false;
-            synchronized (mPackagesLock) {
-                writeUserLP(userData);
-            }
-            updateUserIds();
-
             Bundle restrictions = new Bundle();
             if (isGuest) {
                 // Guest default restrictions can be modified via setDefaultGuestRestrictions.
@@ -5159,6 +5153,12 @@ public class UserManagerService extends IUserManager.Stub {
             synchronized (mRestrictionsLock) {
                 mBaseUserRestrictions.updateRestrictions(userId, restrictions);
             }
+
+            userInfo.partial = false;
+            synchronized (mPackagesLock) {
+                writeUserLP(userData);
+            }
+            updateUserIds();
 
             t.traceBegin("PM.onNewUserCreated-" + userId);
             mPm.onNewUserCreated(userId, /* convertedFromPreCreated= */ false);

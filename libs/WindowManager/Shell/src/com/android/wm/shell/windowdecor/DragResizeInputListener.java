@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERL
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
 
+import static com.android.input.flags.Flags.enablePointerChoreographer;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;
 import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT;
@@ -63,6 +64,7 @@ import java.util.function.Supplier;
 class DragResizeInputListener implements AutoCloseable {
     private static final String TAG = "DragResizeInputListener";
     private final IWindowSession mWindowSession = WindowManagerGlobal.getWindowSession();
+    private final Context mContext;
     private final Handler mHandler;
     private final Choreographer mChoreographer;
     private final InputManager mInputManager;
@@ -110,6 +112,7 @@ class DragResizeInputListener implements AutoCloseable {
             Supplier<SurfaceControl.Transaction> surfaceControlTransactionSupplier,
             DisplayController displayController) {
         mInputManager = context.getSystemService(InputManager.class);
+        mContext = context;
         mHandler = handler;
         mChoreographer = choreographer;
         mSurfaceControlTransactionSupplier = surfaceControlTransactionSupplier;
@@ -451,7 +454,9 @@ class DragResizeInputListener implements AutoCloseable {
                 }
                 case MotionEvent.ACTION_HOVER_ENTER:
                 case MotionEvent.ACTION_HOVER_MOVE: {
-                    updateCursorType(e.getXCursorPosition(), e.getYCursorPosition());
+                    updateCursorType(e.getDisplayId(), e.getDeviceId(),
+                            e.getPointerId(/*pointerIndex=*/0), e.getXCursorPosition(),
+                            e.getYCursorPosition());
                     result = true;
                     break;
                 }
@@ -579,7 +584,8 @@ class DragResizeInputListener implements AutoCloseable {
             return 0;
         }
 
-        private void updateCursorType(float x, float y) {
+        private void updateCursorType(int displayId, int deviceId, int pointerId, float x,
+                float y) {
             @DragPositioningCallback.CtrlType int ctrlType = calculateResizeHandlesCtrlType(x, y);
 
             int cursorType = PointerIcon.TYPE_DEFAULT;
@@ -611,7 +617,12 @@ class DragResizeInputListener implements AutoCloseable {
             // where views in the task can receive input events because we can't set touch regions
             // of input sinks to have rounded corners.
             if (mLastCursorType != cursorType || cursorType != PointerIcon.TYPE_DEFAULT) {
-                mInputManager.setPointerIconType(cursorType);
+                if (enablePointerChoreographer()) {
+                    mInputManager.setPointerIcon(PointerIcon.getSystemIcon(mContext, cursorType),
+                            displayId, deviceId, pointerId, mInputChannel.getToken());
+                } else {
+                    mInputManager.setPointerIconType(cursorType);
+                }
                 mLastCursorType = cursorType;
             }
         }

@@ -307,9 +307,10 @@ public class VibratorManagerServiceTest {
 
                     @Override
                     void addService(String name, IBinder service) {
-                        Object serviceInstance = service;
-                        mExternalVibratorService =
-                                (VibratorManagerService.ExternalVibratorService) serviceInstance;
+                        if (service instanceof VibratorManagerService.ExternalVibratorService) {
+                            mExternalVibratorService =
+                                    (VibratorManagerService.ExternalVibratorService) service;
+                        }
                     }
 
                     HapticFeedbackVibrationProvider createHapticFeedbackVibrationProvider(

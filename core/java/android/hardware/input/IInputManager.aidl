@@ -169,6 +169,8 @@ interface IInputManager {
 
     void setPointerIconType(int typeId);
     void setCustomPointerIcon(in PointerIcon icon);
+    boolean setPointerIcon(in PointerIcon icon, int displayId, int deviceId, int pointerId,
+            in IBinder inputToken);
 
     oneway void requestPointerCapture(IBinder inputChannelToken, boolean enabled);
 

@@ -153,7 +153,7 @@ public class CommandQueue extends IStatusBar.Stub implements
     private static final int MSG_HIDE_TOAST                        = 53 << MSG_SHIFT;
     private static final int MSG_TRACING_STATE_CHANGED             = 54 << MSG_SHIFT;
     private static final int MSG_SUPPRESS_AMBIENT_DISPLAY          = 55 << MSG_SHIFT;
-    private static final int MSG_REQUEST_WINDOW_MAGNIFICATION_CONNECTION = 56 << MSG_SHIFT;
+    private static final int MSG_REQUEST_MAGNIFICATION_CONNECTION = 56 << MSG_SHIFT;
     //TODO(b/169175022) Update name and when feature name is locked.
     private static final int MSG_EMERGENCY_ACTION_LAUNCH_GESTURE      = 58 << MSG_SHIFT;
     private static final int MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED = 59 << MSG_SHIFT;
@@ -426,11 +426,11 @@ public class CommandQueue extends IStatusBar.Stub implements
         /**
          * Requests {@link com.android.systemui.accessibility.Magnification} to invoke
          * {@code android.view.accessibility.AccessibilityManager#
-         * setWindowMagnificationConnection(IWindowMagnificationConnection)}
+         * setMagnificationConnection(IMagnificationConnection)}
          *
          * @param connect {@code true} if needs connection, otherwise set the connection to null.
          */
-        default void requestWindowMagnificationConnection(boolean connect) { }
+        default void requestMagnificationConnection(boolean connect) { }
 
         /**
          * @see IStatusBar#setNavigationBarLumaSamplingEnabled(int, boolean)
@@ -1125,9 +1125,9 @@ public class CommandQueue extends IStatusBar.Stub implements
     }
 
     @Override
-    public void requestWindowMagnificationConnection(boolean connect) {
+    public void requestMagnificationConnection(boolean connect) {
         synchronized (mLock) {
-            mHandler.obtainMessage(MSG_REQUEST_WINDOW_MAGNIFICATION_CONNECTION, connect)
+            mHandler.obtainMessage(MSG_REQUEST_MAGNIFICATION_CONNECTION, connect)
                     .sendToTarget();
         }
     }
@@ -1767,9 +1767,9 @@ public class CommandQueue extends IStatusBar.Stub implements
                         callbacks.suppressAmbientDisplay((boolean) msg.obj);
                     }
                     break;
-                case MSG_REQUEST_WINDOW_MAGNIFICATION_CONNECTION:
+                case MSG_REQUEST_MAGNIFICATION_CONNECTION:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).requestWindowMagnificationConnection((Boolean) msg.obj);
+                        mCallbacks.get(i).requestMagnificationConnection((Boolean) msg.obj);
                     }
                     break;
                 case MSG_SET_NAVIGATION_BAR_LUMA_SAMPLING_ENABLED:

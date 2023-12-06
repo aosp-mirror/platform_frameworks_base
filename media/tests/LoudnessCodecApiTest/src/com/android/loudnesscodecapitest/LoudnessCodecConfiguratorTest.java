@@ -19,6 +19,7 @@ package com.android.loudnesscodecapitest;
 import static android.media.audio.Flags.FLAG_LOUDNESS_CONFIGURATOR_API;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -153,18 +154,12 @@ public class LoudnessCodecConfiguratorTest {
 
     @Test
     @RequiresFlagsEnabled(FLAG_LOUDNESS_CONFIGURATOR_API)
-    public void addMediaCodecTwice_ignoresSecondCall() throws Exception {
-        final ArgumentCaptor<List> argument = ArgumentCaptor.forClass(List.class);
-        final AudioTrack track = createAudioTrack();
+    public void addMediaCodecTwice_triggersIAE() throws Exception {
         final MediaCodec mediaCodec = createAndConfigureMediaCodec();
 
         mLcc.addMediaCodec(mediaCodec);
-        mLcc.addMediaCodec(mediaCodec);
-        mLcc.setAudioTrack(track);
 
-        verify(mAudioService, times(1)).startLoudnessCodecUpdates(
-                eq(track.getPlayerIId()), argument.capture());
-        assertEquals(argument.getValue().size(), 1);
+        assertThrows(IllegalArgumentException.class, () -> mLcc.addMediaCodec(mediaCodec));
     }
 
     @Test
@@ -227,15 +222,15 @@ public class LoudnessCodecConfiguratorTest {
 
     @Test
     @RequiresFlagsEnabled(FLAG_LOUDNESS_CONFIGURATOR_API)
-    public void removeWrongMediaCodecAfterSetTrack_noAudioServiceRemoveCall() throws Exception {
+    public void removeWrongMediaCodecAfterSetTrack_triggersIAE() throws Exception {
         final AudioTrack track = createAudioTrack();
 
         mLcc.addMediaCodec(createAndConfigureMediaCodec());
         mLcc.setAudioTrack(track);
         verify(mAudioService).startLoudnessCodecUpdates(eq(track.getPlayerIId()), anyList());
 
-        mLcc.removeMediaCodec(createAndConfigureMediaCodec());
-        verify(mAudioService, times(0)).removeLoudnessCodecInfo(eq(track.getPlayerIId()), any());
+        assertThrows(IllegalArgumentException.class,
+                () -> mLcc.removeMediaCodec(createAndConfigureMediaCodec()));
     }
 
     private static AudioTrack createAudioTrack() {

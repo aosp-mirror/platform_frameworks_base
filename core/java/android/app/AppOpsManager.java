@@ -8370,9 +8370,29 @@ public class AppOpsManager {
      * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
      * @hide
      */
+    public int unsafeCheckOpRawNoThrow(int op, @NonNull AttributionSource attributionSource) {
+        return unsafeCheckOpRawNoThrow(op, attributionSource.getUid(),
+                attributionSource.getPackageName(), attributionSource.getDeviceId());
+    }
+
+    /**
+     * Returns the <em>raw</em> mode associated with the op.
+     * Does not throw a security exception, does not translate {@link #MODE_FOREGROUND}.
+     * @hide
+     */
     public int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName) {
+        return unsafeCheckOpRawNoThrow(op, uid, packageName, Context.DEVICE_ID_DEFAULT);
+    }
+
+    private int unsafeCheckOpRawNoThrow(int op, int uid, @NonNull String packageName,
+            int virtualDeviceId) {
         try {
-            return mService.checkOperationRaw(op, uid, packageName, null);
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                return mService.checkOperationRaw(op, uid, packageName, null);
+            } else {
+                return mService.checkOperationRawForDevice(op, uid, packageName, null,
+                        Context.DEVICE_ID_DEFAULT);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8517,12 +8537,29 @@ public class AppOpsManager {
     }
 
     /**
+     * @see #noteOp(String, int, String, String, String)
+     *
+     * @hide
+     */
+    public int noteOpNoThrow(int op, @NonNull AttributionSource attributionSource,
+            @Nullable String message) {
+        return noteOpNoThrow(op, attributionSource.getUid(), attributionSource.getPackageName(),
+                attributionSource.getAttributionTag(), attributionSource.getDeviceId(), message);
+    }
+
+    /**
      * @see #noteOpNoThrow(String, int, String, String, String)
      *
      * @hide
      */
     public int noteOpNoThrow(int op, int uid, @Nullable String packageName,
             @Nullable String attributionTag, @Nullable String message) {
+        return noteOpNoThrow(op, uid, packageName, attributionTag, Context.DEVICE_ID_DEFAULT,
+                message);
+    }
+
+    private int noteOpNoThrow(int op, int uid, @Nullable String packageName,
+            @Nullable String attributionTag, int virtualDeviceId, @Nullable String message) {
         try {
             collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(uid, packageName, op);
@@ -8535,9 +8572,15 @@ public class AppOpsManager {
                 }
             }
 
-            SyncNotedAppOp syncOp = mService.noteOperation(op, uid, packageName, attributionTag,
+            SyncNotedAppOp syncOp;
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                syncOp = mService.noteOperation(op, uid, packageName, attributionTag,
                     collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
-
+            } else {
+                syncOp = mService.noteOperationForDevice(op, uid, packageName, attributionTag,
+                    virtualDeviceId, collectionMode == COLLECT_ASYNC, message,
+                    shouldCollectMessage);
+            }
             if (syncOp.getOpMode() == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
                     collectNotedOpForSelf(syncOp);
@@ -8775,7 +8818,8 @@ public class AppOpsManager {
     @UnsupportedAppUsage
     public int checkOp(int op, int uid, String packageName) {
         try {
-            int mode = mService.checkOperation(op, uid, packageName);
+            int mode = mService.checkOperationForDevice(op, uid, packageName,
+                Context.DEVICE_ID_DEFAULT);
             if (mode == MODE_ERRORED) {
                 throw new SecurityException(buildSecurityExceptionMsg(op, uid, packageName));
             }
@@ -8783,6 +8827,19 @@ public class AppOpsManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Like {@link #checkOp} but instead of throwing a {@link SecurityException}, it
+     * returns {@link #MODE_ERRORED}.
+     *
+     * @see #checkOp(int, int, String)
+     *
+     * @hide
+     */
+    public int checkOpNoThrow(int op, AttributionSource attributionSource) {
+        return checkOpNoThrow(op, attributionSource.getUid(), attributionSource.getPackageName(),
+                attributionSource.getDeviceId());
     }
 
     /**
@@ -8795,8 +8852,18 @@ public class AppOpsManager {
      */
     @UnsupportedAppUsage
     public int checkOpNoThrow(int op, int uid, String packageName) {
+        return checkOpNoThrow(op, uid, packageName, Context.DEVICE_ID_DEFAULT);
+    }
+
+    private int checkOpNoThrow(int op, int uid, String packageName, int virtualDeviceId) {
         try {
-            int mode = mService.checkOperation(op, uid, packageName);
+            int mode;
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                mode = mService.checkOperation(op, uid, packageName);
+            } else {
+                mode = mService.checkOperationForDevice(op, uid, packageName, virtualDeviceId);
+            }
+
             return mode == AppOpsManager.MODE_FOREGROUND ? AppOpsManager.MODE_ALLOWED : mode;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -9026,9 +9093,32 @@ public class AppOpsManager {
      *
      * @hide
      */
+    public int startOpNoThrow(@NonNull IBinder token, int op,
+            @NonNull AttributionSource attributionSource,
+            boolean startIfModeDefault, @Nullable String message,
+            @AttributionFlags int attributionFlags, int attributionChainId) {
+        return startOpNoThrow(token, op, attributionSource.getUid(),
+                attributionSource.getPackageName(), startIfModeDefault,
+                attributionSource.getAttributionTag(), attributionSource.getDeviceId(),
+                message, attributionFlags, attributionChainId);
+    }
+
+    /**
+     * @see #startOpNoThrow(String, int, String, String, String)
+     *
+     * @hide
+     */
     public int startOpNoThrow(@NonNull IBinder token, int op, int uid, @NonNull String packageName,
             boolean startIfModeDefault, @Nullable String attributionTag, @Nullable String message,
             @AttributionFlags int attributionFlags, int attributionChainId) {
+        return startOpNoThrow(token, op, uid, packageName, startIfModeDefault, attributionTag,
+                Context.DEVICE_ID_DEFAULT, message, attributionFlags, attributionChainId);
+    }
+
+    private int startOpNoThrow(@NonNull IBinder token, int op, int uid, @NonNull String packageName,
+            boolean startIfModeDefault, @Nullable String attributionTag, int virtualDeviceId,
+            @Nullable String message, @AttributionFlags int attributionFlags,
+            int attributionChainId) {
         try {
             collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(uid, packageName, op);
@@ -9041,10 +9131,17 @@ public class AppOpsManager {
                 }
             }
 
-            SyncNotedAppOp syncOp = mService.startOperation(token, op, uid, packageName,
+            SyncNotedAppOp syncOp;
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                syncOp = mService.startOperation(token, op, uid, packageName,
                     attributionTag, startIfModeDefault, collectionMode == COLLECT_ASYNC, message,
                     shouldCollectMessage, attributionFlags, attributionChainId);
-
+            } else {
+                syncOp = mService.startOperationForDevice(token, op, uid, packageName,
+                    attributionTag, virtualDeviceId, startIfModeDefault,
+                    collectionMode == COLLECT_ASYNC, message, shouldCollectMessage,
+                    attributionFlags, attributionChainId);
+            }
             if (syncOp.getOpMode() == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
                     collectNotedOpForSelf(syncOp);
@@ -9252,10 +9349,31 @@ public class AppOpsManager {
      *
      * @hide
      */
+    public void finishOp(IBinder token, int op, @NonNull AttributionSource attributionSource) {
+        finishOp(token, op, attributionSource.getUid(),
+                attributionSource.getPackageName(), attributionSource.getAttributionTag(),
+                attributionSource.getDeviceId());
+    }
+
+    /**
+     * @see #finishOp(String, int, String, String)
+     *
+     * @hide
+     */
     public void finishOp(IBinder token, int op, int uid, @NonNull String packageName,
             @Nullable String attributionTag) {
+        finishOp(token, op, uid, packageName, attributionTag, Context.DEVICE_ID_DEFAULT);
+    }
+
+    private void finishOp(IBinder token, int op, int uid, @NonNull String packageName,
+            @Nullable String attributionTag, int virtualDeviceId ) {
         try {
-            mService.finishOperation(token, op, uid, packageName, attributionTag);
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                mService.finishOperation(token, op, uid, packageName, attributionTag);
+            } else {
+                mService.finishOperationForDevice(token, op, uid, packageName, attributionTag,
+                    virtualDeviceId);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

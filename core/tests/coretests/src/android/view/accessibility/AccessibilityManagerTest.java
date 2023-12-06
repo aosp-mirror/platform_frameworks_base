@@ -208,14 +208,14 @@ public class AccessibilityManagerTest {
     }
 
     @Test
-    public void testSetWindowMagnificationConnection() throws Exception {
+    public void testSetMagnificationConnection() throws Exception {
         AccessibilityManager manager = createManager(WITH_A11Y_ENABLED);
-        IWindowMagnificationConnection connection = Mockito.mock(
-                IWindowMagnificationConnection.class);
+        IMagnificationConnection connection = Mockito.mock(
+                IMagnificationConnection.class);
 
-        manager.setWindowMagnificationConnection(connection);
+        manager.setMagnificationConnection(connection);
 
-        verify(mMockService).setWindowMagnificationConnection(connection);
+        verify(mMockService).setMagnificationConnection(connection);
     }
 
     @Test

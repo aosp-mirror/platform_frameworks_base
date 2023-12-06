@@ -16,8 +16,8 @@
 
 package com.android.server.accessibility.magnification;
 
-import static com.android.server.accessibility.magnification.MockWindowMagnificationConnection.TEST_DISPLAY;
-import static com.android.server.accessibility.magnification.MockWindowMagnificationConnection.TEST_DISPLAY_2;
+import static com.android.server.accessibility.magnification.MockMagnificationConnection.TEST_DISPLAY;
+import static com.android.server.accessibility.magnification.MockMagnificationConnection.TEST_DISPLAY_2;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -79,7 +79,7 @@ public class MagnificationConnectionManagerTest {
     private static final int CURRENT_USER_ID = UserHandle.USER_SYSTEM;
     private static final int SERVICE_ID = 1;
 
-    private MockWindowMagnificationConnection mMockConnection;
+    private MockMagnificationConnection mMockConnection;
     @Mock
     private Context mContext;
     @Mock
@@ -99,7 +99,7 @@ public class MagnificationConnectionManagerTest {
         LocalServices.removeServiceForTest(StatusBarManagerInternal.class);
         LocalServices.addService(StatusBarManagerInternal.class, mMockStatusBarManagerInternal);
         mResolver = new MockContentResolver();
-        mMockConnection = new MockWindowMagnificationConnection();
+        mMockConnection = new MockMagnificationConnection();
         mMagnificationConnectionManager = new MagnificationConnectionManager(mContext, new Object(),
                 mMockCallback, mMockTrace, new MagnificationScaleProvider(mContext));
 
@@ -128,7 +128,7 @@ public class MagnificationConnectionManagerTest {
                         connect ? mMockConnection.getConnection() : null);
             }
             return true;
-        }).when(mMockStatusBarManagerInternal).requestWindowMagnificationConnection(anyBoolean());
+        }).when(mMockStatusBarManagerInternal).requestMagnificationConnection(anyBoolean());
     }
 
     @Test
@@ -169,8 +169,7 @@ public class MagnificationConnectionManagerTest {
     public void setSecondConnectionAndFormerConnectionBinderDead_hasWrapperAndNotCallUnlinkToDeath()
             throws RemoteException {
         mMagnificationConnectionManager.setConnection(mMockConnection.getConnection());
-        MockWindowMagnificationConnection secondConnection =
-                new MockWindowMagnificationConnection();
+        MockMagnificationConnection secondConnection = new MockMagnificationConnection();
 
         mMagnificationConnectionManager.setConnection(secondConnection.getConnection());
         mMockConnection.getDeathRecipient().binderDied();
@@ -620,13 +619,13 @@ public class MagnificationConnectionManagerTest {
         assertTrue(mMagnificationConnectionManager.requestConnection(false));
 
         verify(mMockConnection.getConnection()).disableWindowMagnification(TEST_DISPLAY, null);
-        verify(mMockStatusBarManagerInternal).requestWindowMagnificationConnection(false);
+        verify(mMockStatusBarManagerInternal).requestMagnificationConnection(false);
     }
 
     @Test
     public void requestConnection_requestWindowMagnificationConnection() throws RemoteException {
         assertTrue(mMagnificationConnectionManager.requestConnection(true));
-        verify(mMockStatusBarManagerInternal).requestWindowMagnificationConnection(true);
+        verify(mMockStatusBarManagerInternal).requestMagnificationConnection(true);
     }
 
     @Test

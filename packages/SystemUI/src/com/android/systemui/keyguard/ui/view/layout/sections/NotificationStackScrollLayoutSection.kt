@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.notification.stack.ui.viewbinder.Notificat
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.SharedNotificationContainerBinder
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationStackAppearanceViewModel
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.DisposableHandle
 
 abstract class NotificationStackScrollLayoutSection
@@ -48,6 +49,7 @@ constructor(
     private val ambientState: AmbientState,
     private val controller: NotificationStackScrollLayoutController,
     private val notificationStackSizeCalculator: NotificationStackSizeCalculator,
+    private val mainDispatcher: CoroutineDispatcher,
 ) : KeyguardSection() {
     private val placeHolderId = R.id.nssl_placeholder
     private var disposableHandle: DisposableHandle? = null
@@ -79,6 +81,7 @@ constructor(
                 sceneContainerFlags,
                 controller,
                 notificationStackSizeCalculator,
+                mainDispatcher,
             )
         if (sceneContainerFlags.flexiNotifsEnabled()) {
             NotificationStackAppearanceViewBinder.bind(

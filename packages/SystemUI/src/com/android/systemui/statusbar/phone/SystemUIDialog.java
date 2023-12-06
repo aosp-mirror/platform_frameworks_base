@@ -203,6 +203,28 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             SysUiState sysUiState,
             BroadcastDispatcher broadcastDispatcher,
             DialogLaunchAnimator dialogLaunchAnimator,
+            Delegate delegate) {
+        this(
+                context,
+                theme,
+                dismissOnDeviceLock,
+                featureFlags,
+                dialogManager,
+                sysUiState,
+                broadcastDispatcher,
+                dialogLaunchAnimator,
+                (DialogDelegate<SystemUIDialog>) delegate);
+    }
+
+    public SystemUIDialog(
+            Context context,
+            int theme,
+            boolean dismissOnDeviceLock,
+            FeatureFlags featureFlags,
+            SystemUIDialogManager dialogManager,
+            SysUiState sysUiState,
+            BroadcastDispatcher broadcastDispatcher,
+            DialogLaunchAnimator dialogLaunchAnimator,
             DialogDelegate<SystemUIDialog> delegate) {
         super(context, theme);
         mContext = context;

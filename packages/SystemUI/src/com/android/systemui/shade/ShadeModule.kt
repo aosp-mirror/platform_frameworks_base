@@ -18,6 +18,8 @@ package com.android.systemui.shade
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.data.repository.ShadeRepositoryImpl
 import com.android.systemui.shade.domain.interactor.BaseShadeInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl
@@ -63,6 +65,10 @@ abstract class ShadeModule {
             }
         }
     }
+
+    @Binds
+    @SysUISingleton
+    abstract fun bindsShadeRepository(impl: ShadeRepositoryImpl): ShadeRepository
 
     @Binds
     @SysUISingleton

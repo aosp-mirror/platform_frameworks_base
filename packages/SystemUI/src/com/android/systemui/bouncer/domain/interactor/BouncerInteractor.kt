@@ -61,12 +61,8 @@ constructor(
 
     /** The user-facing message to show in the bouncer. */
     val message: StateFlow<String?> =
-        combine(
-                repository.message,
-                authenticationInteractor.isThrottled,
-                authenticationInteractor.throttling,
-            ) { message, isThrottled, throttling ->
-                messageOrThrottlingMessage(message, isThrottled, throttling)
+        combine(repository.message, authenticationInteractor.throttling) { message, throttling ->
+                messageOrThrottlingMessage(message, throttling)
             }
             .stateIn(
                 scope = applicationScope,
@@ -74,19 +70,15 @@ constructor(
                 initialValue =
                     messageOrThrottlingMessage(
                         repository.message.value,
-                        authenticationInteractor.isThrottled.value,
                         authenticationInteractor.throttling.value,
                     )
             )
 
-    /** The current authentication throttling state, only meaningful if [isThrottled] is `true`. */
-    val throttling: StateFlow<AuthenticationThrottlingModel> = authenticationInteractor.throttling
-
     /**
-     * Whether currently throttled and the user has to wait before being able to try another
-     * authentication attempt.
+     * The current authentication throttling state, set when the user has to wait before being able
+     * to try another authentication attempt. `null` indicates throttling isn't active.
      */
-    val isThrottled: StateFlow<Boolean> = authenticationInteractor.isThrottled
+    val throttling: StateFlow<AuthenticationThrottlingModel?> = authenticationInteractor.throttling
 
     /** Whether the auto confirm feature is enabled for the currently-selected user. */
     val isAutoConfirmEnabled: StateFlow<Boolean> = authenticationInteractor.isAutoConfirmEnabled
@@ -113,8 +105,8 @@ constructor(
         if (flags.isEnabled()) {
             // Clear the message if moved from throttling to no-longer throttling.
             applicationScope.launch {
-                isThrottled.pairwise().collect { (wasThrottled, currentlyThrottled) ->
-                    if (wasThrottled && !currentlyThrottled) {
+                throttling.pairwise().collect { (previous, current) ->
+                    if (previous != null && current == null) {
                         clearMessage()
                     }
                 }
@@ -261,11 +253,10 @@ constructor(
 
     private fun messageOrThrottlingMessage(
         message: String?,
-        isThrottled: Boolean,
-        throttlingModel: AuthenticationThrottlingModel,
+        throttlingModel: AuthenticationThrottlingModel?,
     ): String {
         return when {
-            isThrottled ->
+            throttlingModel != null ->
                 applicationContext.getString(
                     com.android.internal.R.string.lockscreen_too_many_failed_attempts_countdown,
                     throttlingModel.remainingMs.milliseconds.inWholeSeconds,

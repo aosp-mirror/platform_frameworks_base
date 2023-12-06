@@ -39,9 +39,11 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.ShadeStateEvents;
-import com.android.systemui.shade.ShadeStateEvents.ShadeStateEventsListener;
+import com.android.systemui.shade.data.repository.FakeShadeRepository;
+import com.android.systemui.shade.data.repository.ShadeAnimationRepository;
+import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractor;
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl;
 import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder;
@@ -65,8 +67,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
 
-import kotlinx.coroutines.flow.MutableStateFlow;
-import kotlinx.coroutines.flow.StateFlowKt;
 import kotlinx.coroutines.test.TestScope;
 
 @SmallTest
@@ -82,25 +82,22 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     @Mock private StatusBarStateController mStatusBarStateController;
     @Mock private Pluggable.PluggableListener<NotifStabilityManager> mInvalidateListener;
     @Mock private HeadsUpManager mHeadsUpManager;
-    @Mock private ShadeStateEvents mShadeStateEvents;
     @Mock private VisibilityLocationProvider mVisibilityLocationProvider;
     @Mock private VisualStabilityProvider mVisualStabilityProvider;
-    @Mock private ShadeAnimationInteractor mShadeAnimationInteractor;
 
     @Captor private ArgumentCaptor<WakefulnessLifecycle.Observer> mWakefulnessObserverCaptor;
     @Captor private ArgumentCaptor<StatusBarStateController.StateListener> mSBStateListenerCaptor;
-    @Captor private ArgumentCaptor<ShadeStateEventsListener> mNotifPanelEventsCallbackCaptor;
     @Captor private ArgumentCaptor<NotifStabilityManager> mNotifStabilityManagerCaptor;
 
     private FakeSystemClock mFakeSystemClock = new FakeSystemClock();
     private FakeExecutor mFakeExecutor = new FakeExecutor(mFakeSystemClock);
     private final TestScope mTestScope = TestScopeProvider.getTestScope();
     private final JavaAdapter mJavaAdapter = new JavaAdapter(mTestScope.getBackgroundScope());
-    private final MutableStateFlow<Boolean> mShadeClosing = StateFlowKt.MutableStateFlow(false);
 
+    private ShadeAnimationInteractor mShadeAnimationInteractor;
+    private ShadeRepository mShadeRepository;
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
     private StatusBarStateController.StateListener mStatusBarStateListener;
-    private ShadeStateEvents.ShadeStateEventsListener mNotifPanelEventsCallback;
     private NotifStabilityManager mNotifStabilityManager;
     private NotificationEntry mEntry;
     private GroupEntry mGroupEntry;
@@ -109,18 +106,19 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        mShadeRepository = new FakeShadeRepository();
+        mShadeAnimationInteractor = new ShadeAnimationInteractorLegacyImpl(
+                new ShadeAnimationRepository(), mShadeRepository);
         mCoordinator = new VisualStabilityCoordinator(
                 mFakeExecutor,
                 mDumpManager,
                 mHeadsUpManager,
-                mShadeStateEvents,
                 mShadeAnimationInteractor,
                 mJavaAdapter,
                 mStatusBarStateController,
                 mVisibilityLocationProvider,
                 mVisualStabilityProvider,
                 mWakefulnessLifecycle);
-        when(mShadeAnimationInteractor.isAnyCloseAnimationRunning()).thenReturn(mShadeClosing);
         mCoordinator.attach(mNotifPipeline);
 
         // capture arguments:
@@ -129,10 +127,6 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
 
         verify(mStatusBarStateController).addCallback(mSBStateListenerCaptor.capture());
         mStatusBarStateListener = mSBStateListenerCaptor.getValue();
-
-        verify(mShadeStateEvents).addShadeStateEventsListener(
-                mNotifPanelEventsCallbackCaptor.capture());
-        mNotifPanelEventsCallback = mNotifPanelEventsCallbackCaptor.getValue();
 
         verify(mNotifPipeline).setVisualStabilityManager(mNotifStabilityManagerCaptor.capture());
         mNotifStabilityManager = mNotifStabilityManagerCaptor.getValue();
@@ -558,11 +552,12 @@ public class VisualStabilityCoordinatorTest extends SysuiTestCase {
     }
 
     private void setActivityLaunching(boolean activityLaunching) {
-        mNotifPanelEventsCallback.onLaunchingActivityChanged(activityLaunching);
+        mShadeAnimationInteractor.setIsLaunchingActivity(activityLaunching);
+        mTestScope.getTestScheduler().runCurrent();
     }
 
     private void setPanelCollapsing(boolean collapsing) {
-        mShadeClosing.setValue(collapsing);
+        mShadeRepository.setLegacyIsClosing(collapsing);
         mTestScope.getTestScheduler().runCurrent();
     }
 

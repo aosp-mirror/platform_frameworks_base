@@ -81,6 +81,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -192,8 +193,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     private static final String TRIGGER_DESC = "Every Night, 10pm to 6am";
     private static final int TYPE = TYPE_BEDTIME;
     private static final boolean ALLOW_MANUAL = true;
-    private static final int ICON_RES_ID = 1234;
-    private static final int INTERRUPTION_FILTER = Settings.Global.ZEN_MODE_ALARMS;
+    private static final String ICON_RES_NAME = "com.android.server.notification:drawable/res_name";
+    private static final int ICON_RES_ID = 123;
+    private static final int INTERRUPTION_FILTER_ZR = Settings.Global.ZEN_MODE_ALARMS;
+
+    private static final int INTERRUPTION_FILTER_AZR
+            = NotificationManager.INTERRUPTION_FILTER_ALARMS;
     private static final boolean ENABLED = true;
     private static final int CREATION_TIME = 123;
 
@@ -216,8 +221,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
 
         mTestableLooper = TestableLooper.get(this);
+        mContext.ensureTestableResources();
         mContentResolver = mContext.getContentResolver();
-        mResources = spy(mContext.getResources());
+        mResources = mock(Resources.class, withSettings()
+                .spiedInstance(mContext.getResources()));
         String pkg = mContext.getPackageName();
         try {
             when(mResources.getXml(R.xml.default_zen_mode_config)).thenReturn(
@@ -226,6 +233,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
             Log.d("ZenModeHelperTest", "Couldn't mock default zen mode config xml file err=" +
                     e.toString());
         }
+        when(mResources.getIdentifier(ICON_RES_NAME, null, null)).thenReturn(ICON_RES_ID);
+        when(mResources.getResourceName(ICON_RES_ID)).thenReturn(ICON_RES_NAME);
+        when(mPackageManager.getResourcesForApplication(anyString())).thenReturn(
+                mResources);
 
         when(mContext.getSystemService(AppOpsManager.class)).thenReturn(mAppOps);
         when(mContext.getSystemService(NotificationManager.class)).thenReturn(mNotificationManager);
@@ -3053,7 +3064,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         rule.enabled = ENABLED;
         rule.creationTime = 123;
         rule.id = "id";
-        rule.zenMode = INTERRUPTION_FILTER;
+        rule.zenMode = INTERRUPTION_FILTER_ZR;
         rule.modified = true;
         rule.name = NAME;
         rule.snoozing = true;
@@ -3062,7 +3073,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         rule.allowManualInvocation = ALLOW_MANUAL;
         rule.type = TYPE;
-        rule.iconResId = ICON_RES_ID;
+        rule.iconResName = ICON_RES_NAME;
         rule.triggerDescription = TRIGGER_DESC;
 
         mZenModeHelper.mConfig.automaticRules.put(rule.id, rule);
@@ -3071,8 +3082,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertEquals(NAME, actual.getName());
         assertEquals(OWNER, actual.getOwner());
         assertEquals(CONDITION_ID, actual.getConditionId());
-        assertEquals(NotificationManager.INTERRUPTION_FILTER_ALARMS,
-                actual.getInterruptionFilter());
+        assertEquals(INTERRUPTION_FILTER_AZR, actual.getInterruptionFilter());
         assertEquals(ENABLED, actual.isEnabled());
         assertEquals(POLICY, actual.getZenPolicy());
         assertEquals(CONFIG_ACTIVITY, actual.getConfigurationActivity());
@@ -3082,6 +3092,43 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertEquals(OWNER.getPackageName(), actual.getPackageName());
         assertEquals(ICON_RES_ID, actual.getIconResId());
         assertEquals(TRIGGER_DESC, actual.getTriggerDescription());
+    }
+
+    @Test
+    public void automaticZenRuleToZenRule_allFields() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+        when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(
+                new String[] {OWNER.getPackageName()});
+
+        AutomaticZenRule azr = new AutomaticZenRule.Builder(NAME, CONDITION_ID)
+                .setEnabled(true)
+                .setConfigurationActivity(CONFIG_ACTIVITY)
+                .setTriggerDescription(TRIGGER_DESC)
+                .setCreationTime(CREATION_TIME)
+                .setIconResId(ICON_RES_ID)
+                .setZenPolicy(POLICY)
+                .setInterruptionFilter(INTERRUPTION_FILTER_AZR)
+                .setType(TYPE)
+                .setOwner(OWNER)
+                .setManualInvocationAllowed(ALLOW_MANUAL)
+                .build();
+
+        ZenModeConfig.ZenRule rule = new ZenModeConfig.ZenRule();
+
+        mZenModeHelper.populateZenRule(OWNER.getPackageName(), azr, rule, true, FROM_APP);
+
+        assertEquals(NAME, rule.name);
+        assertEquals(OWNER, rule.component);
+        assertEquals(CONDITION_ID, rule.conditionId);
+        assertEquals(INTERRUPTION_FILTER_ZR, rule.zenMode);
+        assertEquals(ENABLED, rule.enabled);
+        assertEquals(POLICY, rule.zenPolicy);
+        assertEquals(CONFIG_ACTIVITY, rule.configurationActivity);
+        assertEquals(TYPE, rule.type);
+        assertEquals(ALLOW_MANUAL, rule.allowManualInvocation);
+        assertEquals(OWNER.getPackageName(), rule.getPkg());
+        assertEquals(ICON_RES_NAME, rule.iconResName);
+        assertEquals(TRIGGER_DESC, rule.triggerDescription);
     }
 
     @Test

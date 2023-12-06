@@ -19,11 +19,11 @@ package com.android.settingslib.spaprivileged.model.app
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import android.graphics.drawable.Drawable
+import android.util.IconDrawableFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.platform.LocalContext
-import com.android.settingslib.Utils
 import com.android.settingslib.spa.framework.compose.rememberContext
 import com.android.settingslib.spaprivileged.R
 import com.android.settingslib.spaprivileged.framework.common.userManager
@@ -65,6 +65,7 @@ interface AppRepository {
 
 internal class AppRepositoryImpl(private val context: Context) : AppRepository {
     private val packageManager = context.packageManager
+    private val iconDrawableFactory = IconDrawableFactory.newInstance(context)
 
     override fun loadLabel(app: ApplicationInfo): String = app.loadLabel(packageManager).toString()
 
@@ -72,7 +73,7 @@ internal class AppRepositoryImpl(private val context: Context) : AppRepository {
     override fun produceIcon(app: ApplicationInfo) =
         produceState<Drawable?>(initialValue = null, app) {
             withContext(Dispatchers.IO) {
-                value = Utils.getBadgedIcon(context, app)
+                value = iconDrawableFactory.getBadgedIcon(app)
             }
         }
 

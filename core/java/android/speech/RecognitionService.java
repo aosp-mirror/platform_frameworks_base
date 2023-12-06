@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
+import android.annotation.TestApi;
 import android.app.AppOpsManager;
 import android.app.Service;
 import android.content.AttributionSource;
@@ -514,8 +515,14 @@ public abstract class RecognitionService extends Service {
     @Override
     public final IBinder onBind(final Intent intent) {
         if (DBG) Log.d(TAG, "#onBind, intent=" + intent);
+        onBindInternal();
         return mBinder;
     }
+
+    /** @hide */
+    @SuppressLint("UnflaggedApi") // @TestApi without associated feature.
+    @TestApi
+    public void onBindInternal() { }
 
     @Override
     public void onDestroy() {

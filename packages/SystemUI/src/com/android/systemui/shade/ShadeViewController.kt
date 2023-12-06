@@ -158,9 +158,6 @@ interface ShadeViewController {
     /** Sets progress of the predictive back animation. */
     fun onBackProgressed(progressFraction: Float)
 
-    /** Sets whether the status bar launch animation is currently running. */
-    fun setIsLaunchAnimationRunning(running: Boolean)
-
     /** Sets the alpha value of the shade to a value between 0 and 255. */
     fun setAlpha(alpha: Int, animate: Boolean)
 

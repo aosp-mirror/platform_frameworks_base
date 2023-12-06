@@ -321,7 +321,7 @@
     <!-- Dialog body shown when the user is trying to restore an app but the installer responsible
          for the action is in a disabled state. [CHAR LIMIT=none] -->
     <string name="unarchive_error_installer_disabled_body">
-        To restore this app, enable the
+        To restore this app, enable
         <xliff:g id="installername" example="App Store">%1$s</xliff:g> in Settings
     </string>
 

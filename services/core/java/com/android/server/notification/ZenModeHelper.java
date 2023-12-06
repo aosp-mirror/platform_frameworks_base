@@ -28,6 +28,8 @@ import static android.service.notification.NotificationServiceProto.ROOT_CONFIG;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 
 import android.annotation.IntDef;
+import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.UserIdInt;
@@ -79,6 +81,7 @@ import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ZenRule;
 import android.service.notification.ZenModeProto;
 import android.service.notification.ZenPolicy;
+import android.text.TextUtils;
 import android.util.AndroidRuntimeException;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -868,12 +871,13 @@ public class ZenModeHelper {
         return null;
     }
 
-    private static void populateZenRule(String pkg, AutomaticZenRule automaticZenRule, ZenRule rule,
+    @VisibleForTesting
+    void populateZenRule(String pkg, AutomaticZenRule automaticZenRule, ZenRule rule,
             boolean isNew, @ChangeOrigin int origin) {
-        // TODO: b/308671593,b/311406021 - Handle origins more precisely:
-        //  - FROM_USER can override anything and updates bitmask of user-modified fields;
-        //  - FROM_SYSTEM_OR_SYSTEMUI can override anything and preserves bitmask;
-        //  - FROM_APP can only update if not user-modified.
+            // TODO: b/308671593,b/311406021 - Handle origins more precisely:
+            //  - FROM_USER can override anything and updates bitmask of user-modified fields;
+            //  - FROM_SYSTEM_OR_SYSTEMUI can override anything and preserves bitmask;
+            //  - FROM_APP can only update if not user-modified.
         if (rule.enabled != automaticZenRule.isEnabled()) {
             rule.snoozing = false;
         }
@@ -902,14 +906,14 @@ public class ZenModeHelper {
 
         if (Flags.modesApi()) {
             rule.allowManualInvocation = automaticZenRule.isManualInvocationAllowed();
-            rule.iconResId = automaticZenRule.getIconResId();
+            rule.iconResName = drawableResIdToResName(rule.pkg, automaticZenRule.getIconResId());
             rule.triggerDescription = automaticZenRule.getTriggerDescription();
             rule.type = automaticZenRule.getType();
         }
     }
 
-    /** "
-     * Fix" {@link ZenDeviceEffects} that are being stored as part of a new or updated ZenRule.
+    /**
+     * Fix {@link ZenDeviceEffects} that are being stored as part of a new or updated ZenRule.
      *
      * <ul>
      *     <li> Apps cannot turn on hidden effects (those tagged as {@code @hide}) since they are
@@ -952,13 +956,13 @@ public class ZenModeHelper {
         }
     }
 
-    private static AutomaticZenRule zenRuleToAutomaticZenRule(ZenRule rule) {
+    private AutomaticZenRule zenRuleToAutomaticZenRule(ZenRule rule) {
         AutomaticZenRule azr;
         if (Flags.modesApi()) {
             azr = new AutomaticZenRule.Builder(rule.name, rule.conditionId)
                     .setManualInvocationAllowed(rule.allowManualInvocation)
                     .setCreationTime(rule.creationTime)
-                    .setIconResId(rule.iconResId)
+                    .setIconResId(drawableResNameToResId(rule.pkg, rule.iconResName))
                     .setType(rule.type)
                     .setZenPolicy(rule.zenPolicy)
                     .setDeviceEffects(rule.zenDeviceEffects)
@@ -1942,6 +1946,35 @@ public class ZenModeHelper {
                 .build();
     }
 
+    private int drawableResNameToResId(String packageName, String resourceName) {
+        if (TextUtils.isEmpty(resourceName)) {
+            return 0;
+        }
+        try {
+            final Resources res = mPm.getResourcesForApplication(packageName);
+            return res.getIdentifier(resourceName, null, null);
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.w(TAG, "cannot load rule icon for pkg", e);
+        }
+        return 0;
+    }
+
+    private String drawableResIdToResName(String packageName, @DrawableRes int resId) {
+        if (resId == 0) {
+            return null;
+        }
+        try {
+            final Resources res = mPm.getResourcesForApplication(packageName);
+            final String fullName = res.getResourceName(resId);
+
+            return fullName;
+        } catch (PackageManager.NameNotFoundException | Resources.NotFoundException e) {
+            Log.e(TAG, "Resource name for ID=" + resId + " not found in package " + packageName
+                    + ". Resource IDs may change when the application is upgraded, and the system"
+                    + " may not be able to find the correct resource.");
+            return null;
+        }
+    }
     private final class Metrics extends Callback {
         private static final String COUNTER_MODE_PREFIX = "dnd_mode_";
         private static final String COUNTER_TYPE_PREFIX = "dnd_type_";
