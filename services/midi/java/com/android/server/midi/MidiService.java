@@ -31,6 +31,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.Property;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
@@ -1396,16 +1397,20 @@ public class MidiService extends IMidiManager.Stub {
         XmlResourceParser parser = null;
 
         try {
-            parser = serviceInfo.loadXmlMetaData(mPackageManager,
-                    MidiDeviceService.SERVICE_INTERFACE);
-            if (parser == null) return;
+            if (serviceInfo == null) {
+                Log.w(TAG, "Skipping null service info");
+                return;
+            }
 
             // ignore virtual device servers that do not require the correct permission
             if (!android.Manifest.permission.BIND_MIDI_DEVICE_SERVICE.equals(
                     serviceInfo.permission)) {
-                Log.w(TAG, "Skipping MIDI device service " + serviceInfo.packageName
-                        + ": it does not require the permission "
-                        + android.Manifest.permission.BIND_MIDI_DEVICE_SERVICE);
+                return;
+            }
+            parser = serviceInfo.loadXmlMetaData(mPackageManager,
+                    MidiDeviceService.SERVICE_INTERFACE);
+            if (parser == null) {
+                Log.w(TAG, "loading xml metadata failed");
                 return;
             }
 
@@ -1533,27 +1538,45 @@ public class MidiService extends IMidiManager.Stub {
         XmlResourceParser parser = null;
 
         try {
-            ComponentName componentName = new ComponentName(serviceInfo.packageName,
-                    serviceInfo.name);
-            int resId = mPackageManager.getProperty(MidiUmpDeviceService.SERVICE_INTERFACE,
-                    componentName).getResourceId();
-            Resources resources = mPackageManager.getResourcesForApplication(
-                    serviceInfo.packageName);
-            parser = resources.getXml(resId);
-            if (parser == null) return;
+            if (serviceInfo == null) {
+                Log.w(TAG, "Skipping null service info");
+                return;
+            }
 
             // ignore virtual device servers that do not require the correct permission
             if (!android.Manifest.permission.BIND_MIDI_DEVICE_SERVICE.equals(
                     serviceInfo.permission)) {
-                Log.w(TAG, "Skipping MIDI device service " + serviceInfo.packageName
-                        + ": it does not require the permission "
-                        + android.Manifest.permission.BIND_MIDI_DEVICE_SERVICE);
                 return;
             }
 
             if (!virtualUmp()) {
                 Log.w(TAG, "Skipping MIDI device service " + serviceInfo.packageName
                         + ": virtual UMP flag not enabled");
+                return;
+            }
+
+            ComponentName componentName = new ComponentName(serviceInfo.packageName,
+                    serviceInfo.name);
+            Property property = mPackageManager.getProperty(MidiUmpDeviceService.SERVICE_INTERFACE,
+                    componentName);
+            if (property == null) {
+                Log.w(TAG, "Getting MidiUmpDeviceService property failed");
+                return;
+            }
+            int resId = property.getResourceId();
+            if (resId == 0) {
+                Log.w(TAG, "Getting MidiUmpDeviceService resourceId failed");
+                return;
+            }
+            Resources resources = mPackageManager.getResourcesForApplication(
+                    serviceInfo.packageName);
+            if (resources == null) {
+                Log.w(TAG, "Getting resource failed " + serviceInfo.packageName);
+                return;
+            }
+            parser = resources.getXml(resId);
+            if (parser == null) {
+                Log.w(TAG, "Getting XML failed " + resId);
                 return;
             }
 
