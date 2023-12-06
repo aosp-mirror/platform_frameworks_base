@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.UserHandleAware;
 import android.annotation.UserIdInt;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -34,7 +33,6 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Printer;
@@ -219,21 +217,7 @@ final class InputMethodUtils {
 
         @NonNull
         private Context mUserAwareContext;
-        private ContentResolver mResolver;
         private final ArrayMap<String, InputMethodInfo> mMethodMap;
-
-        /**
-         * On-memory data store to emulate when {@link #mCopyOnWrite} is {@code true}.
-         */
-        private final ArrayMap<String, String> mCopyOnWriteDataStore = new ArrayMap<>();
-
-        private static final ArraySet<String> CLONE_TO_MANAGED_PROFILE = new ArraySet<>();
-        static {
-            Settings.Secure.getCloneToManagedProfileSettings(CLONE_TO_MANAGED_PROFILE);
-        }
-
-        private static final UserManagerInternal sUserManagerInternal =
-                LocalServices.getService(UserManagerInternal.class);
 
         private boolean mCopyOnWrite = false;
         @NonNull
@@ -281,7 +265,6 @@ final class InputMethodUtils {
             mUserAwareContext = context.getUserId() == userId
                     ? context
                     : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
-            mResolver = mUserAwareContext.getContentResolver();
         }
 
         InputMethodSettings(@NonNull Context context,
@@ -305,7 +288,6 @@ final class InputMethodUtils {
                 Slog.d(TAG, "--- Switch the current user from " + mCurrentUserId + " to " + userId);
             }
             if (mCurrentUserId != userId || mCopyOnWrite != copyOnWrite) {
-                mCopyOnWriteDataStore.clear();
                 mEnabledInputMethodsStrCache = "";
                 // TODO: mCurrentProfileIds should be cleared here.
             }
@@ -318,50 +300,28 @@ final class InputMethodUtils {
         }
 
         private void putString(@NonNull String key, @Nullable String str) {
-            if (mCopyOnWrite) {
-                mCopyOnWriteDataStore.put(key, str);
-            } else {
-                final int userId = CLONE_TO_MANAGED_PROFILE.contains(key)
-                        ? sUserManagerInternal.getProfileParentId(mCurrentUserId) : mCurrentUserId;
-                Settings.Secure.putStringForUser(mResolver, key, str, userId);
-            }
+            SecureSettingsWrapper.putString(key, str, mCurrentUserId);
         }
 
         @Nullable
         private String getString(@NonNull String key, @Nullable String defaultValue) {
-            final String result;
-            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
-                result = mCopyOnWriteDataStore.get(key);
-            } else {
-                result = Settings.Secure.getStringForUser(mResolver, key, mCurrentUserId);
-            }
-            return result != null ? result : defaultValue;
+            return SecureSettingsWrapper.getString(key, defaultValue, mCurrentUserId);
         }
 
         private void putInt(String key, int value) {
-            if (mCopyOnWrite) {
-                mCopyOnWriteDataStore.put(key, String.valueOf(value));
-            } else {
-                final int userId = CLONE_TO_MANAGED_PROFILE.contains(key)
-                        ? sUserManagerInternal.getProfileParentId(mCurrentUserId) : mCurrentUserId;
-                Settings.Secure.putIntForUser(mResolver, key, value, userId);
-            }
+            SecureSettingsWrapper.putInt(key, value, mCurrentUserId);
         }
 
         private int getInt(String key, int defaultValue) {
-            if (mCopyOnWrite && mCopyOnWriteDataStore.containsKey(key)) {
-                final String result = mCopyOnWriteDataStore.get(key);
-                return result != null ? Integer.parseInt(result) : defaultValue;
-            }
-            return Settings.Secure.getIntForUser(mResolver, key, defaultValue, mCurrentUserId);
+            return SecureSettingsWrapper.getInt(key, defaultValue, mCurrentUserId);
         }
 
         private void putBoolean(String key, boolean value) {
-            putInt(key, value ? 1 : 0);
+            SecureSettingsWrapper.putBoolean(key, value, mCurrentUserId);
         }
 
         private boolean getBoolean(String key, boolean defaultValue) {
-            return getInt(key, defaultValue ? 1 : 0) == 1;
+            return SecureSettingsWrapper.getBoolean(key, defaultValue, mCurrentUserId);
         }
 
         public void setCurrentProfileIds(int[] currentProfileIds) {
@@ -1029,9 +989,7 @@ final class InputMethodUtils {
     static List<String> getEnabledInputMethodIdsForFiltering(@NonNull Context context,
             @UserIdInt int userId) {
         final String enabledInputMethodsStr = TextUtils.nullIfEmpty(
-                Settings.Secure.getStringForUser(
-                        context.getContentResolver(),
-                        Settings.Secure.ENABLED_INPUT_METHODS,
+                SecureSettingsWrapper.getString(Settings.Secure.ENABLED_INPUT_METHODS, null,
                         userId));
         if (enabledInputMethodsStr == null) {
             return List.of();

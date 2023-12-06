@@ -1611,8 +1611,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void onUserUnlocking(@NonNull TargetUser user) {
             // Called on ActivityManager thread.
+            SecureSettingsWrapper.onUserUnlocking(user.getUserIdentifier());
             mService.mHandler.obtainMessage(MSG_SYSTEM_UNLOCK_USER, user.getUserIdentifier(), 0)
                     .sendToTarget();
+        }
+
+        @Override
+        public void onUserStarting(TargetUser user) {
+            // Called on ActivityManager thread.
+            SecureSettingsWrapper.onUserStarting(user.getUserIdentifier());
         }
     }
 
@@ -1665,6 +1672,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             @Nullable InputMethodBindingController bindingControllerForTesting) {
         mContext = context;
         mRes = context.getResources();
+        SecureSettingsWrapper.onStart(mContext);
         // TODO(b/196206770): Disallow I/O on this thread. Currently it's needed for loading
         // additional subtypes in switchUserOnHandlerLocked().
         final ServiceThread thread =
