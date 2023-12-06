@@ -4071,7 +4071,7 @@ public final class ActivityThread extends ClientTransactionHandler
         final LoadedApk sdkApk = getPackageInfo(
                 contextInfo.getSdkApplicationInfo(),
                 r.packageInfo.getCompatibilityInfo(),
-                ActivityContextInfo.CONTEXT_FLAGS);
+                contextInfo.getContextFlags());
 
         final ContextImpl activityContext = ContextImpl.createActivityContext(
                 this, sdkApk, r.activityInfo, r.token, displayId, r.overrideConfig);
