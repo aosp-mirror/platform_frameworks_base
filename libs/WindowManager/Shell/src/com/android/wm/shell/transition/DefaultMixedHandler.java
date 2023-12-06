@@ -48,6 +48,7 @@ import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
@@ -898,6 +899,18 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         // task enter split.
         if (mPipHandler != null) {
             return mPipHandler.isInPipPackage(SplitScreenUtils.getPackageName(intent.getIntent()));
+        }
+        return false;
+    }
+
+    /** Use to when split use taskId to enter, check if this enter transition should be mixed or
+     * not.*/
+    public boolean shouldSplitEnterMixed(int taskId, ShellTaskOrganizer shellTaskOrganizer) {
+        // Check if this intent package is same as pip one or not, if true we want let the pip
+        // task enter split.
+        if (mPipHandler != null) {
+            return mPipHandler.isInPipPackage(
+                    SplitScreenUtils.getPackageName(taskId, shellTaskOrganizer));
         }
         return false;
     }
