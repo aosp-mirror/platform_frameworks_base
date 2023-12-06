@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.am;
+package com.android.server.utils;
 
 import static android.text.TextUtils.formatSimple;
 
@@ -77,7 +77,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @hide
  */
-class AnrTimer<V> {
+public class AnrTimer<V> {
 
     /**
      * The log tag.
@@ -568,7 +568,7 @@ class AnrTimer<V> {
      * @param label A name for this instance.
      * @param extend A flag to indicate if expired timers can be granted extensions.
      */
-    AnrTimer(@NonNull Handler handler, int what, @NonNull String label, boolean extend) {
+    public AnrTimer(@NonNull Handler handler, int what, @NonNull String label, boolean extend) {
         this(handler, what, label, extend, new Injector(handler));
     }
 
@@ -580,7 +580,7 @@ class AnrTimer<V> {
      * @param what The "what" parameter for the expiration message.
      * @param label A name for this instance.
      */
-    AnrTimer(@NonNull Handler handler, int what, @NonNull String label) {
+    public AnrTimer(@NonNull Handler handler, int what, @NonNull String label) {
         this(handler, what, label, false);
     }
 
@@ -591,7 +591,7 @@ class AnrTimer<V> {
      *
      * @return true if the service is flag-enabled.
      */
-    boolean serviceEnabled() {
+    public boolean serviceEnabled() {
         return mFeature.enabled();
     }
 
@@ -856,7 +856,7 @@ class AnrTimer<V> {
      * @param timeoutMs The timer timeout, in milliseconds.
      * @return true if the timer was successfully created.
      */
-    boolean start(@NonNull V arg, int pid, int uid, long timeoutMs) {
+    public boolean start(@NonNull V arg, int pid, int uid, long timeoutMs) {
         return mFeature.start(arg, pid, uid, timeoutMs);
     }
 
@@ -867,7 +867,7 @@ class AnrTimer<V> {
      *
      * @return true if the timer was found and was running.
      */
-    boolean cancel(@NonNull V arg) {
+    public boolean cancel(@NonNull V arg) {
         return mFeature.cancel(arg);
     }
 
@@ -878,7 +878,7 @@ class AnrTimer<V> {
      *
      * @return true if the timer was found and was expired.
      */
-    boolean accept(@NonNull V arg) {
+    public boolean accept(@NonNull V arg) {
         return mFeature.accept(arg);
     }
 
@@ -892,7 +892,7 @@ class AnrTimer<V> {
      *
      * @return true if the timer was found and was expired.
      */
-    boolean discard(@NonNull V arg) {
+    public boolean discard(@NonNull V arg) {
         return mFeature.discard(arg);
     }
 
@@ -1010,7 +1010,7 @@ class AnrTimer<V> {
     /**
      * Dumpsys output.
      */
-    static void dump(@NonNull PrintWriter pw, boolean verbose) {
+    public static void dump(@NonNull PrintWriter pw, boolean verbose) {
         final IndentingPrintWriter ipw = new IndentingPrintWriter(pw);
         ipw.println("AnrTimer statistics");
         ipw.increaseIndent();
