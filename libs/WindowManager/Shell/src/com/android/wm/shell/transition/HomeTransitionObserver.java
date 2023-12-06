@@ -57,7 +57,9 @@ public class HomeTransitionObserver implements TransitionObserver,
             @NonNull SurfaceControl.Transaction finishTransaction) {
         for (TransitionInfo.Change change : info.getChanges()) {
             final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
-            if (taskInfo == null || taskInfo.taskId == -1) {
+            if (taskInfo == null
+                    || taskInfo.taskId == -1
+                    || !taskInfo.isRunning) {
                 continue;
             }
 
