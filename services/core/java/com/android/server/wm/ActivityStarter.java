@@ -556,30 +556,11 @@ class ActivityStarter {
                     computeResolveFilterUid(callingUid, realCallingUid, filterCallingUid),
                     realCallingPid);
             if (resolveInfo == null) {
-                final UserInfo userInfo = supervisor.getUserInfo(userId);
-                if (userInfo != null && userInfo.isManagedProfile()) {
-                    // Special case for managed profiles, if attempting to launch non-cryto aware
-                    // app in a locked managed profile from an unlocked parent allow it to resolve
-                    // as user will be sent via confirm credentials to unlock the profile.
-                    final UserManager userManager = UserManager.get(supervisor.mService.mContext);
-                    boolean profileLockedAndParentUnlockingOrUnlocked = false;
-                    final long token = Binder.clearCallingIdentity();
-                    try {
-                        final UserInfo parent = userManager.getProfileParent(userId);
-                        profileLockedAndParentUnlockingOrUnlocked = (parent != null)
-                                && userManager.isUserUnlockingOrUnlocked(parent.id)
-                                && !userManager.isUserUnlockingOrUnlocked(userId);
-                    } finally {
-                        Binder.restoreCallingIdentity(token);
-                    }
-                    if (profileLockedAndParentUnlockingOrUnlocked) {
-                        resolveInfo = supervisor.resolveIntent(intent, resolvedType, userId,
-                                PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                                computeResolveFilterUid(callingUid, realCallingUid,
-                                        filterCallingUid), realCallingPid);
-                    }
-                }
+                // Special case for profiles: If attempting to launch non-crypto aware app in a
+                // locked profile or launch an app in a profile that is stopped by quiet mode from
+                // an unlocked parent, allow it to resolve as user will be sent via confirm
+                // credentials to unlock the profile.
+                resolveInfo = resolveIntentForLockedOrStoppedProfiles(supervisor);
             }
 
             // Collect information about the target of the Intent.
@@ -592,6 +573,36 @@ class ActivityStarter {
                         intent, resolvedCallingUid, activityInfo.applicationInfo.packageName,
                         UserHandle.getUserId(activityInfo.applicationInfo.uid));
             }
+        }
+
+        /**
+         * Resolve intent for locked or stopped profiles if the parent profile is unlocking or
+         * unlocked.
+         */
+        ResolveInfo resolveIntentForLockedOrStoppedProfiles(
+                ActivityTaskSupervisor supervisor) {
+            final UserInfo userInfo = supervisor.getUserInfo(userId);
+            if (userInfo != null && userInfo.isProfile()) {
+                final UserManager userManager = UserManager.get(supervisor.mService.mContext);
+                boolean profileLockedAndParentUnlockingOrUnlocked = false;
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    final UserInfo parent = userManager.getProfileParent(userId);
+                    profileLockedAndParentUnlockingOrUnlocked = (parent != null)
+                            && userManager.isUserUnlockingOrUnlocked(parent.id)
+                            && !userManager.isUserUnlockingOrUnlocked(userId);
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
+                if (profileLockedAndParentUnlockingOrUnlocked) {
+                    return supervisor.resolveIntent(intent, resolvedType, userId,
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                            computeResolveFilterUid(callingUid, realCallingUid,
+                                    filterCallingUid), realCallingPid);
+                }
+            }
+            return null;
         }
     }
 

@@ -223,7 +223,7 @@ class ActivityStartInterceptor {
             // before issuing the work challenge.
             return true;
         }
-        if (interceptLockedManagedProfileIfNeeded()) {
+        if (interceptLockedProfileIfNeeded()) {
             return true;
         }
         if (interceptHomeIfNeeded()) {
@@ -377,7 +377,7 @@ class ActivityStartInterceptor {
         return true;
     }
 
-    private boolean interceptLockedManagedProfileIfNeeded() {
+    private boolean interceptLockedProfileIfNeeded() {
         final Intent interceptingIntent = interceptWithConfirmCredentialsIfNeeded(mAInfo, mUserId);
         if (interceptingIntent == null) {
             return false;
