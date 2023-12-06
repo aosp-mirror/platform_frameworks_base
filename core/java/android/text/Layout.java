@@ -18,6 +18,7 @@ package android.text;
 
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_USE_BOUNDS_FOR_WIDTH;
+import static com.android.text.flags.Flags.FLAG_INTER_CHARACTER_JUSTIFICATION;
 
 import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
@@ -50,8 +51,10 @@ import com.android.internal.util.GrowingArrayUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.text.BreakIterator;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A base class that manages text layout in visual elements on
@@ -669,7 +672,8 @@ public abstract class Layout {
             int start = previousLineEnd;
             previousLineEnd = getLineStart(lineNum + 1);
             final boolean justify = isJustificationRequired(lineNum);
-            int end = getLineVisibleEnd(lineNum, start, previousLineEnd);
+            int end = getLineVisibleEnd(lineNum, start, previousLineEnd,
+                    true /* trailingSpaceAtLastLineIsVisible */);
             paint.setStartHyphenEdit(getStartHyphenEdit(lineNum));
             paint.setEndHyphenEdit(getEndHyphenEdit(lineNum));
 
@@ -1056,7 +1060,7 @@ public abstract class Layout {
             if (isJustificationRequired(line)) {
                 tl.justify(getJustifyWidth(line));
             }
-            tl.metrics(null, rectF, false);
+            tl.metrics(null, rectF, false, null);
 
             float lineLeft = rectF.left;
             float lineRight = rectF.right;
@@ -1456,7 +1460,7 @@ public abstract class Layout {
         tl.set(mPaint, mText, start, end, dir, directions, hasTab, tabStops,
                 getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
                 isFallbackLineSpacingEnabled());
-        float wid = tl.measure(offset - start, trailing, null, null);
+        float wid = tl.measure(offset - start, trailing, null, null, null);
         TextLine.recycle(tl);
 
         if (clamped && wid > mWidth) {
@@ -1792,9 +1796,66 @@ public abstract class Layout {
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
-        final float width = tl.metrics(null, null, mUseBoundsForWidth);
+        final float width = tl.metrics(null, null, mUseBoundsForWidth, null);
         TextLine.recycle(tl);
         return width;
+    }
+
+    /**
+     * Returns the number of letter spacing unit in the line.
+     *
+     * <p>
+     * This API returns a number of letters that is a target of letter spacing. The letter spacing
+     * won't be added to the middle of the characters that are needed to be treated as a single,
+     * e.g., ligatured or conjunct form. Note that this value is different from the number of]
+     * grapheme clusters that is calculated by {@link BreakIterator#getCharacterInstance(Locale)}.
+     * For example, if the "fi" is ligatured, the ligatured form is treated as single uni and letter
+     * spacing is not added, but it has two separate grapheme cluster.
+     *
+     * <p>
+     * This value is used for calculating the letter spacing amount for the justification because
+     * the letter spacing is applied between clusters. For example, if extra {@code W} pixels needed
+     * to be filled by letter spacing, the amount of letter spacing to be applied is
+     * {@code W}/(letter spacing unit count - 1) px.
+     *
+     * @param line the index of the line
+     * @param includeTrailingWhitespace whether to include trailing whitespace
+     * @return the number of cluster count in the line.
+     */
+    @IntRange(from = 0)
+    @FlaggedApi(FLAG_INTER_CHARACTER_JUSTIFICATION)
+    public int getLineLetterSpacingUnitCount(@IntRange(from = 0) int line,
+            boolean includeTrailingWhitespace) {
+        final int start = getLineStart(line);
+        final int end = includeTrailingWhitespace ? getLineEnd(line)
+                : getLineVisibleEnd(line, getLineStart(line), getLineStart(line + 1),
+                        false  // trailingSpaceAtLastLineIsVisible: Treating trailing whitespaces at
+                               // the last line as a invisible chars for single line justification.
+                );
+
+        final Directions directions = getLineDirections(line);
+        // Returned directions can actually be null
+        if (directions == null) {
+            return 0;
+        }
+        final int dir = getParagraphDirection(line);
+
+        final TextLine tl = TextLine.obtain();
+        final TextPaint paint = mWorkPaint;
+        paint.set(mPaint);
+        paint.setStartHyphenEdit(getStartHyphenEdit(line));
+        paint.setEndHyphenEdit(getEndHyphenEdit(line));
+        tl.set(paint, mText, start, end, dir, directions,
+                false, null, // tab width is not used for cluster counting.
+                getEllipsisStart(line), getEllipsisStart(line) + getEllipsisCount(line),
+                isFallbackLineSpacingEnabled());
+        if (mLineInfo == null) {
+            mLineInfo = new TextLine.LineInfo();
+        }
+        mLineInfo.setClusterCount(0);
+        tl.metrics(null, null, mUseBoundsForWidth, mLineInfo);
+        TextLine.recycle(tl);
+        return mLineInfo.getClusterCount();
     }
 
     /**
@@ -1823,7 +1884,7 @@ public abstract class Layout {
         if (isJustificationRequired(line)) {
             tl.justify(getJustifyWidth(line));
         }
-        final float width = tl.metrics(null, null, mUseBoundsForWidth);
+        final float width = tl.metrics(null, null, mUseBoundsForWidth, null);
         TextLine.recycle(tl);
         return width;
     }
@@ -2432,14 +2493,21 @@ public abstract class Layout {
      * is not counted) on the specified line.
      */
     public int getLineVisibleEnd(int line) {
-        return getLineVisibleEnd(line, getLineStart(line), getLineStart(line+1));
+        return getLineVisibleEnd(line, getLineStart(line), getLineStart(line + 1),
+                true /* trailingSpaceAtLastLineIsVisible */);
     }
 
-    private int getLineVisibleEnd(int line, int start, int end) {
+    private int getLineVisibleEnd(int line, int start, int end,
+            boolean trailingSpaceAtLastLineIsVisible) {
         CharSequence text = mText;
         char ch;
-        if (line == getLineCount() - 1) {
-            return end;
+
+        // Historically, trailing spaces at the last line is counted as visible. However, this
+        // doesn't work well for justification.
+        if (trailingSpaceAtLastLineIsVisible) {
+            if (line == getLineCount() - 1) {
+                return end;
+            }
         }
 
         for (; end > start; end--) {
@@ -2939,7 +3007,7 @@ public abstract class Layout {
             tl.set(paint, text, start, end, dir, directions, hasTabs, tabStops,
                     0 /* ellipsisStart */, 0 /* ellipsisEnd */,
                     false /* use fallback line spacing. unused */);
-            return margin + Math.abs(tl.metrics(null, null, useBoundsForWidth));
+            return margin + Math.abs(tl.metrics(null, null, useBoundsForWidth, null));
         } finally {
             TextLine.recycle(tl);
             if (mt != null) {
@@ -3336,6 +3404,8 @@ public abstract class Layout {
     private LineBreakConfig mLineBreakConfig;
     private boolean mUseBoundsForWidth;
     private @Nullable Paint.FontMetrics mMinimumFontMetrics;
+
+    private TextLine.LineInfo mLineInfo = null;
 
     /** @hide */
     @IntDef(prefix = { "DIR_" }, value = {
