@@ -19,6 +19,8 @@ package com.android.systemui.keyguard.ui.binder
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.DrawableRes
+import android.annotation.SuppressLint
+import android.graphics.Point
 import android.view.HapticFeedbackConstants
 import android.view.View
 import android.view.View.OnLayoutChangeListener
@@ -47,6 +49,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.OccludingAppDeviceEntryMessageViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -73,6 +76,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalCoroutinesApi::class)
 object KeyguardRootViewBinder {
 
+    @SuppressLint("ClickableViewAccessibility")
     @JvmStatic
     fun bind(
         view: ViewGroup,
@@ -87,6 +91,7 @@ object KeyguardRootViewBinder {
         interactionJankMonitor: InteractionJankMonitor?,
         deviceEntryHapticsInteractor: DeviceEntryHapticsInteractor?,
         vibratorHelper: VibratorHelper?,
+        falsingManager: FalsingManager?,
     ): DisposableHandle {
         var onLayoutChangeListener: OnLayoutChange? = null
         val childViews = mutableMapOf<Int, View>()
@@ -94,6 +99,16 @@ object KeyguardRootViewBinder {
         val burnInLayerId = R.id.burn_in_layer
         val aodNotificationIconContainerId = R.id.aod_notification_icon_container
         val largeClockId = R.id.lockscreen_clock_view_large
+
+        if (keyguardBottomAreaRefactor()) {
+            view.setOnTouchListener { _, event ->
+                if (falsingManager?.isFalseTap(FalsingManager.LOW_PENALTY) == false) {
+                    viewModel.setRootViewLastTapPosition(Point(event.x.toInt(), event.y.toInt()))
+                }
+                false
+            }
+        }
+
         val disposableHandle =
             view.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
