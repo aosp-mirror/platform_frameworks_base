@@ -46,11 +46,11 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.om.OverlayConfig;
+import com.android.internal.pm.parsing.PackageParser2;
 import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.EventLogTags;
 import com.android.server.pm.parsing.PackageCacher;
-import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.utils.WatchedArrayMap;
 
