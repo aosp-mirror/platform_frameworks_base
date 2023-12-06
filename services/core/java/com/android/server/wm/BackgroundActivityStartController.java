@@ -614,6 +614,15 @@ public class BackgroundActivityStartController {
                 == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED;
         if (callerCanAllow && realCallerCanAllow) {
             // Both caller and real caller allow with system defined behavior
+            if (state.mBalAllowedByPiCreatorWithHardening.allowsBackgroundActivityStarts()) {
+                // Will be allowed even with BAL hardening.
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Activity start allowed by caller. "
+                            + state.dump(resultForCaller, resultForRealCaller));
+                }
+                // return the realCaller result for backwards compatibility
+                return statsLog(resultForRealCaller, state);
+            }
             if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG,
                         "With Android 15 BAL hardening this activity start may be blocked"
@@ -632,6 +641,14 @@ public class BackgroundActivityStartController {
         }
         if (callerCanAllow) {
             // Allowed before V by creator
+            if (state.mBalAllowedByPiCreatorWithHardening.allowsBackgroundActivityStarts()) {
+                // Will be allowed even with BAL hardening.
+                if (DEBUG_ACTIVITY_STARTS) {
+                    Slog.d(TAG, "Activity start allowed by caller. "
+                            + state.dump(resultForCaller, resultForRealCaller));
+                }
+                return statsLog(resultForCaller, state);
+            }
             if (state.mBalAllowedByPiCreator.allowsBackgroundActivityStarts()) {
                 Slog.wtf(TAG,
                         "With Android 15 BAL hardening this activity start may be blocked"
