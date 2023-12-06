@@ -21,6 +21,8 @@ import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 
+import static com.android.window.flags.Flags.multiCrop;
+
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -857,8 +859,7 @@ public class WallpaperManager {
      */
     public static boolean isMultiCropEnabled() {
         if (sGlobals == null) {
-            sIsMultiCropEnabled = SystemProperties.getBoolean(
-                    "persist.wm.debug.wallpaper_multi_crop", false);
+            sIsMultiCropEnabled = multiCrop();
         }
         if (sIsMultiCropEnabled == null) {
             try {

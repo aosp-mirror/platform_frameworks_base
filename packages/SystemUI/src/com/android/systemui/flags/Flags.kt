@@ -438,12 +438,6 @@ object Flags {
     val LOCKSCREEN_ENABLE_LANDSCAPE =
             unreleasedFlag("lockscreen.enable_landscape")
 
-    // TODO(b/281648899): Tracking bug
-    @Keep
-    @JvmField
-    val WALLPAPER_MULTI_CROP =
-        sysPropBooleanFlag("persist.wm.debug.wallpaper_multi_crop", default = false)
-
     // 1200 - predictive back
     @Keep
     @JvmField
