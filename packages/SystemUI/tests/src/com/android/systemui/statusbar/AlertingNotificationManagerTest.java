@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
+import com.android.systemui.util.settings.FakeGlobalSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -74,6 +75,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     protected final Runnable mTestTimeoutRunnable = () -> mTimedOut = true;
 
     protected Handler mTestHandler;
+    protected final FakeGlobalSettings mGlobalSettings = new FakeGlobalSettings();
     protected boolean mTimedOut = false;
 
     @Mock protected ExpandableNotificationRow mRow;

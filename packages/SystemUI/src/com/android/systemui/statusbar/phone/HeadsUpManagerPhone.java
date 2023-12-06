@@ -49,6 +49,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.OnHeadsUpPhoneListenerChange;
 import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.settings.GlobalSettings;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -115,11 +116,12 @@ public class HeadsUpManagerPhone extends BaseHeadsUpManager implements OnHeadsUp
             VisualStabilityProvider visualStabilityProvider,
             ConfigurationController configurationController,
             @Main Handler handler,
+            GlobalSettings globalSettings,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             UiEventLogger uiEventLogger,
             JavaAdapter javaAdapter,
             ShadeInteractor shadeInteractor) {
-        super(context, logger, handler, accessibilityManagerWrapper, uiEventLogger);
+        super(context, logger, handler, globalSettings, accessibilityManagerWrapper, uiEventLogger);
         Resources resources = mContext.getResources();
         mExtensionTime = resources.getInteger(R.integer.ambient_notification_extension_time);
         statusBarStateController.addCallback(mStatusBarStateListener);

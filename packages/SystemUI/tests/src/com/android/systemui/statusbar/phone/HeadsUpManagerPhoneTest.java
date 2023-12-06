@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.settings.GlobalSettings;
 
 import org.junit.After;
 import org.junit.Before;
@@ -87,6 +88,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 KeyguardBypassController keyguardBypassController,
                 ConfigurationController configurationController,
                 Handler handler,
+                GlobalSettings globalSettings,
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
                 UiEventLogger uiEventLogger,
                 JavaAdapter javaAdapter,
@@ -101,6 +103,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     visualStabilityProvider,
                     configurationController,
                     handler,
+                    globalSettings,
                     accessibilityManagerWrapper,
                     uiEventLogger,
                     javaAdapter,
@@ -121,6 +124,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mBypassController,
                 mConfigurationController,
                 mTestHandler,
+                mGlobalSettings,
                 mAccessibilityManagerWrapper,
                 mUiEventLogger,
                 mJavaAdapter,

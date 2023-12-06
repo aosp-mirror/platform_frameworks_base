@@ -26,7 +26,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.util.ArrayMap;
 import android.view.accessibility.AccessibilityManager;
 
@@ -40,6 +39,7 @@ import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.util.ListenerSet;
+import com.android.systemui.util.settings.GlobalSettings;
 
 import java.io.PrintWriter;
 
@@ -85,6 +85,7 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
     public BaseHeadsUpManager(@NonNull final Context context,
             HeadsUpManagerLogger logger,
             @Main Handler handler,
+            GlobalSettings globalSettings,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             UiEventLogger uiEventLogger) {
         super(logger, handler);
@@ -101,21 +102,22 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
         int defaultSnoozeLengthMs =
                 resources.getInteger(R.integer.heads_up_default_snooze_length_ms);
 
-        mSnoozeLengthMs = Settings.Global.getInt(context.getContentResolver(),
-                SETTING_HEADS_UP_SNOOZE_LENGTH_MS, defaultSnoozeLengthMs);
+        mSnoozeLengthMs = globalSettings.getInt(SETTING_HEADS_UP_SNOOZE_LENGTH_MS,
+                defaultSnoozeLengthMs);
         ContentObserver settingsObserver = new ContentObserver(handler) {
             @Override
             public void onChange(boolean selfChange) {
-                final int packageSnoozeLengthMs = Settings.Global.getInt(
-                        context.getContentResolver(), SETTING_HEADS_UP_SNOOZE_LENGTH_MS, -1);
+                final int packageSnoozeLengthMs = globalSettings.getInt(
+                        SETTING_HEADS_UP_SNOOZE_LENGTH_MS, -1);
                 if (packageSnoozeLengthMs > -1 && packageSnoozeLengthMs != mSnoozeLengthMs) {
                     mSnoozeLengthMs = packageSnoozeLengthMs;
                     mLogger.logSnoozeLengthChange(packageSnoozeLengthMs);
                 }
             }
         };
-        context.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(SETTING_HEADS_UP_SNOOZE_LENGTH_MS), false,
+        globalSettings.registerContentObserver(
+                globalSettings.getUriFor(SETTING_HEADS_UP_SNOOZE_LENGTH_MS),
+                /* notifyForDescendants = */ false,
                 settingsObserver);
     }
 
