@@ -17,11 +17,13 @@
 package com.android.server.policy;
 
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
+import static android.Manifest.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW;
 import static android.Manifest.permission.SYSTEM_ALERT_WINDOW;
 import static android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY;
 import static android.app.AppOpsManager.OP_CREATE_ACCESSIBILITY_OVERLAY;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.AppOpsManager.OP_TOAST_WINDOW;
+import static android.content.PermissionChecker.PID_UNKNOWN;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
@@ -117,6 +119,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.PermissionChecker;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -690,6 +693,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private final com.android.internal.policy.LogDecelerateInterpolator mLogDecelerateInterpolator
             = new LogDecelerateInterpolator(100, 0);
+    private final DeferredKeyActionExecutor mDeferredKeyActionExecutor =
+            new DeferredKeyActionExecutor();
 
     private volatile int mTopFocusedDisplayId = INVALID_DISPLAY;
 
@@ -698,6 +703,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private KeyCombinationManager mKeyCombinationManager;
     private SingleKeyGestureDetector mSingleKeyGestureDetector;
     private GestureLauncherService mGestureLauncherService;
+    private ButtonOverridePermissionChecker mButtonOverridePermissionChecker;
 
     private boolean mLockNowPending = false;
 
@@ -725,6 +731,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private static final int MSG_RINGER_TOGGLE_CHORD = 24;
     private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 25;
     private static final int MSG_LOG_KEYBOARD_SYSTEM_EVENT = 26;
+    private static final int MSG_SET_DEFERRED_KEY_ACTIONS_EXECUTABLE = 27;
 
     private class PolicyHandler extends Handler {
 
@@ -792,7 +799,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mAutofillManagerInternal.onBackKeyPressed();
                     break;
                 case MSG_SYSTEM_KEY_PRESS:
-                    sendSystemKeyToStatusBar((KeyEvent) msg.obj);
+                    KeyEvent event = (KeyEvent) msg.obj;
+                    sendSystemKeyToStatusBar(event);
+                    event.recycle();
                     break;
                 case MSG_HANDLE_ALL_APPS:
                     launchAllAppsAction();
@@ -808,6 +817,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     break;
                 case MSG_LOG_KEYBOARD_SYSTEM_EVENT:
                     handleKeyboardSystemEvent(KeyboardLogEvent.from(msg.arg1), (KeyEvent) msg.obj);
+                    break;
+                case MSG_SET_DEFERRED_KEY_ACTIONS_EXECUTABLE:
+                    final int keyCode = msg.arg1;
+                    final long downTime = (Long) msg.obj;
+                    mDeferredKeyActionExecutor.setActionsExecutable(keyCode, downTime);
                     break;
             }
         }
@@ -2234,6 +2248,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         IActivityManager getActivityManagerService() {
             return ActivityManager.getService();
         }
+
+        ButtonOverridePermissionChecker getButtonOverridePermissionChecker() {
+            return new ButtonOverridePermissionChecker();
+        }
     }
 
     /** {@inheritDoc} */
@@ -2499,6 +2517,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mKeyguardDelegate = injector.getKeyguardServiceDelegate();
         initKeyCombinationRules();
         initSingleKeyGestureRules(injector.getLooper());
+        mButtonOverridePermissionChecker = injector.getButtonOverridePermissionChecker();
         mSideFpsEventHandler = new SideFpsEventHandler(mContext, mHandler, mPowerManager);
     }
 
@@ -2768,17 +2787,33 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (mShouldEarlyShortPressOnStemPrimary) {
                 return;
             }
-            stemPrimaryPress(1 /*count*/);
+            // Short-press should be triggered only if app doesn't handle it.
+            mDeferredKeyActionExecutor.queueKeyAction(
+                    KeyEvent.KEYCODE_STEM_PRIMARY, downTime, () -> stemPrimaryPress(1 /*count*/));
         }
 
         @Override
         void onLongPress(long eventTime) {
-            stemPrimaryLongPress(eventTime);
+            // Long-press should be triggered only if app doesn't handle it.
+            mDeferredKeyActionExecutor.queueKeyAction(
+                    KeyEvent.KEYCODE_STEM_PRIMARY,
+                    eventTime,
+                    () -> stemPrimaryLongPress(eventTime));
         }
 
         @Override
         void onMultiPress(long downTime, int count, int unusedDisplayId) {
-            stemPrimaryPress(count);
+            // Triple-press stem to toggle accessibility gesture should always be triggered
+            // regardless of if app handles it.
+            if (count == 3
+                    && mTriplePressOnStemPrimaryBehavior
+                    == TRIPLE_PRESS_PRIMARY_TOGGLE_ACCESSIBILITY) {
+                stemPrimaryPress(count);
+            } else {
+                // Other multi-press gestures should be triggered only if app doesn't handle it.
+                mDeferredKeyActionExecutor.queueKeyAction(
+                        KeyEvent.KEYCODE_STEM_PRIMARY, downTime, () -> stemPrimaryPress(count));
+            }
         }
 
         @Override
@@ -2792,7 +2827,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mBackgroundRecentTaskInfoOnStemPrimarySingleKeyUp =
                         mActivityTaskManagerInternal.getMostRecentTaskFromBackground();
                 if (mShouldEarlyShortPressOnStemPrimary) {
-                    stemPrimaryPress(1 /*pressCount*/);
+                    // Key-up gesture should be triggered only if app doesn't handle it.
+                    mDeferredKeyActionExecutor.queueKeyAction(
+                            KeyEvent.KEYCODE_STEM_PRIMARY, eventTime, () -> stemPrimaryPress(1));
                 }
             }
         }
@@ -3750,6 +3787,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     return true;
                 }
                 break;
+            case KeyEvent.KEYCODE_STEM_PRIMARY:
+                if (prepareToSendSystemKeyToApplication(focusedToken, event)) {
+                    // Send to app.
+                    return false;
+                } else {
+                    // Intercepted.
+                    sendSystemKeyToStatusBarAsync(event);
+                    return true;
+                }
         }
         if (isValidGlobalKey(keyCode)
                 && mGlobalKeyManager.handleGlobalKey(mContext, keyCode, event)) {
@@ -3758,6 +3804,60 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Reserve all the META modifier combos for system behavior
         return (metaState & KeyEvent.META_META_ON) != 0;
+    }
+
+    /**
+     * In this function, we check whether a system key should be sent to the application. We also
+     * detect the key gesture on this key, even if the key will be sent to the app. The gesture
+     * action, if any, will not be executed immediately. It will be queued and execute only after
+     * the application tells us that it didn't handle this key.
+     *
+     * @return true if this key should be sent to the application. This also means that the target
+     *     application has the necessary permissions to receive this key. Return false otherwise.
+     */
+    private boolean prepareToSendSystemKeyToApplication(IBinder focusedToken, KeyEvent event) {
+        final int keyCode = event.getKeyCode();
+        if (!event.isSystem()) {
+            Log.wtf(
+                    TAG,
+                    "Illegal keycode provided to prepareToSendSystemKeyToApplication: "
+                            + KeyEvent.keyCodeToString(keyCode));
+            return false;
+        }
+        final boolean isDown = event.getAction() == KeyEvent.ACTION_DOWN;
+        if (isDown && event.getRepeatCount() == 0) {
+            // This happens at the initial DOWN event. Check focused window permission now.
+            final KeyInterceptionInfo info =
+                    mWindowManagerInternal.getKeyInterceptionInfoFromToken(focusedToken);
+            if (info != null
+                    && mButtonOverridePermissionChecker.canAppOverrideSystemKey(
+                            mContext, info.windowOwnerUid)) {
+                // Focused window has the permission. Pass the event to it.
+                return true;
+            } else {
+                // Focused window doesn't have the permission. Intercept the event.
+                // If the initial DOWN event is intercepted, follow-up events will be intercepted
+                // too. So we know the gesture won't be handled by app, and can handle the gesture
+                // in system.
+                setDeferredKeyActionsExecutableAsync(keyCode, event.getDownTime());
+                return false;
+            }
+        } else {
+            // This happens after the initial DOWN event. We will just reuse the initial decision.
+            // I.e., if the initial DOWN event was dispatched, follow-up events should be
+            // dispatched. Otherwise, follow-up events should be consumed.
+            final Set<Integer> consumedKeys = mConsumedKeysForDevice.get(event.getDeviceId());
+            final boolean wasConsumed = consumedKeys != null && consumedKeys.contains(keyCode);
+            return !wasConsumed;
+        }
+    }
+
+    private void setDeferredKeyActionsExecutableAsync(int keyCode, long downTime) {
+        Message msg = Message.obtain(mHandler, MSG_SET_DEFERRED_KEY_ACTIONS_EXECUTABLE);
+        msg.arg1 = keyCode;
+        msg.obj = downTime;
+        msg.setAsynchronous(true);
+        msg.sendToTarget();
     }
 
     @SuppressLint("MissingPermission")
@@ -3977,9 +4077,32 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mContext.closeSystemDialogs();
                 }
                 return true;
+            case KeyEvent.KEYCODE_STEM_PRIMARY:
+                handleUnhandledSystemKey(event);
+                sendSystemKeyToStatusBarAsync(event);
+                return true;
         }
 
         return false;
+    }
+
+    /**
+     * Called when a system key was sent to application and was unhandled. We will execute any
+     * queued actions associated with this key code at this point.
+     */
+    private void handleUnhandledSystemKey(KeyEvent event) {
+        if (!event.isSystem()) {
+            Log.wtf(
+                    TAG,
+                    "Illegal keycode provided to handleUnhandledSystemKey: "
+                            + KeyEvent.keyCodeToString(event.getKeyCode()));
+            return;
+        }
+        if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+            // If the initial DOWN event is unhandled by app, follow-up events will also be
+            // unhandled by app. So we can handle the key event in system.
+            setDeferredKeyActionsExecutableAsync(event.getKeyCode(), event.getDownTime());
+        }
     }
 
     private void sendSwitchKeyboardLayout(@NonNull KeyEvent event, int direction) {
@@ -4904,9 +5027,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_MACRO_4:
                 result &= ~ACTION_PASS_TO_USER;
                 break;
-            case KeyEvent.KEYCODE_STEM_PRIMARY:
-                sendSystemKeyToStatusBarAsync(event);
-                break;
         }
 
         if (useHapticFeedback) {
@@ -5016,7 +5136,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * Notify the StatusBar that a system key was pressed without blocking the current thread.
      */
     private void sendSystemKeyToStatusBarAsync(KeyEvent keyEvent) {
-        Message message = mHandler.obtainMessage(MSG_SYSTEM_KEY_PRESS, keyEvent);
+        // Make a copy because the event may be recycled.
+        Message message = mHandler.obtainMessage(MSG_SYSTEM_KEY_PRESS, KeyEvent.obtain(keyEvent));
         message.setAsynchronous(true);
         mHandler.sendMessage(message);
     }
@@ -6468,6 +6589,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mGlobalKeyManager.dump(prefix, pw);
         mKeyCombinationManager.dump(prefix, pw);
         mSingleKeyGestureDetector.dump(prefix, pw);
+        mDeferredKeyActionExecutor.dump(prefix, pw);
 
         if (mWakeGestureListener != null) {
             mWakeGestureListener.dump(pw, prefix);
@@ -6791,6 +6913,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             Slog.e(TAG, "Could not resolve activity with : "
                     + intent.getComponent().flattenToString()
                     + " name.");
+        }
+    }
+
+    /** A helper class to check button override permission. */
+    static class ButtonOverridePermissionChecker {
+        boolean canAppOverrideSystemKey(Context context, int uid) {
+            return PermissionChecker.checkPermissionForDataDelivery(
+                            context,
+                            OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW,
+                            PID_UNKNOWN,
+                            uid,
+                            null,
+                            null,
+                            null)
+                    == PERMISSION_GRANTED;
         }
     }
 }
