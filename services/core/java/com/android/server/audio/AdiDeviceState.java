@@ -235,9 +235,10 @@ public final class AdiDeviceState {
      * {@link AdiDeviceState#toPersistableString()}.
      */
     public static int getPeristedMaxSize() {
-        return 36;  /* (mDeviceType)2 + (mDeviceAddress)17 + (mInternalDeviceType)9 + (mSAEnabled)1
+        return 39;  /* (mDeviceType)2 + (mDeviceAddress)17 + (mInternalDeviceType)9 + (mSAEnabled)1
                            + (mHasHeadTracker)1 + (mHasHeadTrackerEnabled)1
-                           + (SETTINGS_FIELD_SEPARATOR)5 */
+                           + (mAudioDeviceCategory)1 + (SETTINGS_FIELD_SEPARATOR)6
+                           + (SETTING_DEVICE_SEPARATOR)1 */
     }
 
     @Nullable
