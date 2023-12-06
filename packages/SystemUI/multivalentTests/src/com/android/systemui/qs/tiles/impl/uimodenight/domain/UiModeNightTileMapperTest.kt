@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.impl.uimodenight.domain
 
 import android.app.UiModeManager
+import android.graphics.drawable.TestStubDrawable
 import android.text.TextUtils
 import android.view.View
 import android.widget.Switch
@@ -41,7 +42,15 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
     private val qsTileConfig = kosmos.qsUiModeNightTileConfig
 
     private val mapper by lazy {
-        UiModeNightTileMapper(context.orCreateTestableResources.resources)
+        UiModeNightTileMapper(
+            context.orCreateTestableResources
+                .apply {
+                    addOverride(R.drawable.qs_light_dark_theme_icon_off, TestStubDrawable())
+                    addOverride(R.drawable.qs_light_dark_theme_icon_on, TestStubDrawable())
+                }
+                .resources,
+            context.theme
+        )
     }
 
     private fun createUiNightModeTileState(
@@ -60,7 +69,7 @@ class UiModeNightTileMapperTest : SysuiTestCase() {
         expandedAccessibilityClass: KClass<out View>? = Switch::class,
     ): QSTileState {
         return QSTileState(
-            { Icon.Resource(iconRes, null) },
+            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
             label,
             activationState,
             secondaryLabel,
