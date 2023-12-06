@@ -338,16 +338,24 @@ public abstract class VisualQueryDetectionService extends Service
 
     /**
      * Overrides {@link Context#openFileInput} to read files with the given file names under the
-     * internal app storage of the {@link VoiceInteractionService}, i.e., only files stored in
-     * {@link Context#getFilesDir()} can be opened.
+     * internal app storage of the {@link VoiceInteractionService}, i.e., the input file path would
+     * be added with {@link Context#getFilesDir()} as prefix.
+     *
+     * @param filename Relative path of a file under {@link Context#getFilesDir()}.
+     * @throws FileNotFoundException if the file does not exist or cannot be open.
      */
     @Override
-    public @Nullable FileInputStream openFileInput(@NonNull String filename) throws
+    public @NonNull FileInputStream openFileInput(@NonNull String filename) throws
             FileNotFoundException {
         try {
             AndroidFuture<ParcelFileDescriptor> future = new AndroidFuture<>();
+            assert mDetectorSessionStorageService != null;
             mDetectorSessionStorageService.openFile(filename, future);
             ParcelFileDescriptor pfd = future.get();
+            if (pfd == null) {
+                throw new FileNotFoundException(
+                        "File does not exist. Unable to open " + filename + ".");
+            }
             return new FileInputStream(pfd.getFileDescriptor());
         } catch (RemoteException | ExecutionException | InterruptedException e) {
             Log.w(TAG, "Cannot open file due to remote service failure");
