@@ -131,7 +131,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telefone"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistência de voz"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Carteira"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Leitor de código QR"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Leitor de QR code"</string>
     <string name="accessibility_unlock_button" msgid="3613812140816244310">"Desbloqueado"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloqueado"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"Verificando rosto"</string>
@@ -549,7 +549,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"Desbloquear para usar"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"Ocorreu um problema ao carregar os cards. Tente novamente mais tarde"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Configurações de tela de bloqueio"</string>
-    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Leitor de código QR"</string>
+    <string name="qr_code_scanner_title" msgid="1938155688725760702">"Leitor de QR code"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Atualizando"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Perfil de trabalho"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Modo avião"</string>
@@ -1007,7 +1007,7 @@
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Como funciona a transmissão"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmitir"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"As pessoas próximas a você com dispositivos Bluetooth compatíveis podem ouvir a mídia que você está transmitindo"</string>
-    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"As pessoas próximas com dispositivos Bluetooth compatíveis podem ler seu código QR ou usar o nome da transmissão e a senha para ouvir a transmissão."</string>
+    <string name="media_output_broadcasting_message" msgid="4150299923404886073">"As pessoas próximas com dispositivos Bluetooth compatíveis podem ler seu QR code ou usar o nome da transmissão e a senha para ouvir a transmissão."</string>
     <string name="media_output_broadcast_name" msgid="8786127091542624618">"Nome da transmissão"</string>
     <string name="media_output_broadcast_code" msgid="870795639644728542">"Senha"</string>
     <string name="media_output_broadcast_dialog_save" msgid="7910865591430010198">"Salvar"</string>
