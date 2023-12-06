@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.concurrency
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.time.fakeSystemClock
 
-@OptIn(ExperimentalCoroutinesApi::class)
-var Kosmos.statusBarKeyguardViewManager by Kosmos.Fixture { mock<StatusBarKeyguardViewManager>() }
+var Kosmos.fakeExecutor by Kosmos.Fixture { FakeExecutor(fakeSystemClock) }

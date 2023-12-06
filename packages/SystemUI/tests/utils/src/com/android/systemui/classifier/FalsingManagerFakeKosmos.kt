@@ -14,11 +14,8 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.classifier
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
-var Kosmos.statusBarKeyguardViewManager by Kosmos.Fixture { mock<StatusBarKeyguardViewManager>() }
+val Kosmos.fakeFalsingManager by Kosmos.Fixture { FalsingManagerFake() }

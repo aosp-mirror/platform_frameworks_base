@@ -20,31 +20,29 @@ package com.android.systemui.statusbar.notification.icon.domain.interactor
 
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.statusbar.data.repository.notificationListenerSettingsRepository
 import com.android.systemui.statusbar.notification.data.repository.notificationsKeyguardViewStateRepository
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
 import com.android.wm.shell.bubbles.bubblesOptional
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-val Kosmos.alwaysOnDisplayNotificationIconsInteractor by
-    Kosmos.Fixture {
-        AlwaysOnDisplayNotificationIconsInteractor(
-            deviceEntryInteractor = deviceEntryInteractor,
-            iconsInteractor = notificationIconsInteractor,
-        )
-    }
-val Kosmos.statusBarNotificationIconsInteractor by
-    Kosmos.Fixture {
-        StatusBarNotificationIconsInteractor(
-            iconsInteractor = notificationIconsInteractor,
-            settingsRepository = notificationListenerSettingsRepository,
-        )
-    }
-val Kosmos.notificationIconsInteractor by
-    Kosmos.Fixture {
-        NotificationIconsInteractor(
-            activeNotificationsInteractor = activeNotificationsInteractor,
-            bubbles = bubblesOptional,
-            keyguardViewStateRepository = notificationsKeyguardViewStateRepository,
-        )
-    }
+val Kosmos.alwaysOnDisplayNotificationIconsInteractor by Fixture {
+    AlwaysOnDisplayNotificationIconsInteractor(
+        deviceEntryInteractor = deviceEntryInteractor,
+        iconsInteractor = notificationIconsInteractor,
+    )
+}
+val Kosmos.statusBarNotificationIconsInteractor by Fixture {
+    StatusBarNotificationIconsInteractor(
+        iconsInteractor = notificationIconsInteractor,
+        settingsRepository = notificationListenerSettingsRepository,
+    )
+}
+val Kosmos.notificationIconsInteractor by Fixture {
+    NotificationIconsInteractor(
+        activeNotificationsInteractor = activeNotificationsInteractor,
+        bubbles = bubblesOptional,
+        keyguardViewStateRepository = notificationsKeyguardViewStateRepository,
+    )
+}

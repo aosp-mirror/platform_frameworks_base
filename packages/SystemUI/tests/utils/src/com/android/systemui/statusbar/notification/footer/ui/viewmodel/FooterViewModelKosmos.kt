@@ -14,11 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
 
-@OptIn(ExperimentalCoroutinesApi::class)
-var Kosmos.statusBarKeyguardViewManager by Kosmos.Fixture { mock<StatusBarKeyguardViewManager>() }
+val Kosmos.footerViewModel by Fixture {
+    FooterViewModel(
+        activeNotificationsInteractor = activeNotificationsInteractor,
+        seenNotificationsInteractor = seenNotificationsInteractor,
+        shadeInteractor = shadeInteractor,
+    )
+}

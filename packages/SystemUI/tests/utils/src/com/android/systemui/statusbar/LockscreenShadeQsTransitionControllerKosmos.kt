@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.phone
+package com.android.systemui.statusbar
 
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.util.mockito.mock
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
-var Kosmos.statusBarKeyguardViewManager by Kosmos.Fixture { mock<StatusBarKeyguardViewManager>() }
+var Kosmos.lockscreenShadeQsTransitionControllerFactory by Fixture {
+    mock<LockscreenShadeQsTransitionController.Factory>()
+}
