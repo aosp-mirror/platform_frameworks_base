@@ -34,8 +34,9 @@ import com.android.compose.nestedscroll.PriorityNestedScrollConnection
  */
 enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
     /**
-     * During scene transitions, scroll events are consumed by the [SceneTransitionLayout] instead
-     * of the scrollable component.
+     * During scene transitions, if we are within
+     * [SceneTransitionLayoutImpl.transitionInterceptionThreshold], the [SceneTransitionLayout]
+     * consumes scroll events instead of the scrollable component.
      */
     DuringTransitionBetweenScenes(canStartOnPostFling = false),
 
