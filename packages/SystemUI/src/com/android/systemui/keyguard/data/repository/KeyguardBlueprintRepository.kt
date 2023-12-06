@@ -28,7 +28,7 @@ import java.util.TreeMap
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 /**
  * Manages blueprint changes for the lockscreen.
@@ -48,16 +48,13 @@ constructor(
     configurationRepository: ConfigurationRepository,
     blueprints: Set<@JvmSuppressWildcards KeyguardBlueprint>,
 ) {
-    private val blueprintIdMap: TreeMap<String, KeyguardBlueprint> = TreeMap()
-    private val _blueprint: MutableSharedFlow<KeyguardBlueprint> = MutableSharedFlow(replay = 1)
-    val blueprint: Flow<KeyguardBlueprint> = _blueprint.asSharedFlow()
-
+    // This is TreeMap so that we can order the blueprints and assign numerical values to the
+    // blueprints in the adb tool.
+    private val blueprintIdMap: TreeMap<String, KeyguardBlueprint> =
+        TreeMap<String, KeyguardBlueprint>().apply { putAll(blueprints.associateBy { it.id }) }
+    val blueprint: MutableStateFlow<KeyguardBlueprint> = MutableStateFlow(blueprintIdMap[DEFAULT]!!)
+    val refreshBluePrint: MutableSharedFlow<Unit> = MutableSharedFlow(extraBufferCapacity = 1)
     val configurationChange: Flow<Unit> = configurationRepository.onAnyConfigurationChange
-
-    init {
-        blueprintIdMap.putAll(blueprints.associateBy { it.id })
-        applyBlueprint(blueprintIdMap[DEFAULT]!!)
-    }
 
     /**
      * Emits the blueprint value to the collectors.
@@ -96,14 +93,17 @@ constructor(
 
     /** Emits the blueprint value to the collectors. */
     fun applyBlueprint(blueprint: KeyguardBlueprint?) {
-        blueprint?.let { _blueprint.tryEmit(it) }
+        if (blueprint == this.blueprint.value) {
+            refreshBlueprint()
+            return
+        }
+
+        blueprint?.let { this.blueprint.value = it }
     }
 
     /** Re-emits the last emitted blueprint value if possible. */
     fun refreshBlueprint() {
-        if (_blueprint.replayCache.isNotEmpty()) {
-            _blueprint.tryEmit(_blueprint.replayCache.last())
-        }
+        refreshBluePrint.tryEmit(Unit)
     }
 
     /** Prints all available blueprints to the PrintWriter. */
