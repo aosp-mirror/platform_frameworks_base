@@ -89,6 +89,7 @@ import com.android.server.wm.WindowManagerService.H;
 import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -106,7 +107,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final WindowProcessController mProcess;
     private final String mStringName;
     SurfaceSession mSurfaceSession;
-    private int mNumWindow = 0;
+    private final ArrayList<WindowState> mAddedWindows = new ArrayList<>();
     // Set of visible application overlay window surfaces connected to this session.
     private final ArraySet<WindowSurfaceController> mAppOverlaySurfaces = new ArraySet<>();
     // Set of visible alert window surfaces connected to this session.
@@ -192,8 +193,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         try {
             mCallback.asBinder().linkToDeath(this, 0);
         } catch (RemoteException e) {
-            // The caller has died, so we can just forget about this.
-            // Hmmm, should we call killSessionLocked()??
+            mClientDead = true;
         }
     }
 
@@ -211,12 +211,27 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
     }
 
+    boolean isClientDead() {
+        return mClientDead;
+    }
+
     @Override
     public void binderDied() {
         synchronized (mService.mGlobalLock) {
             mCallback.asBinder().unlinkToDeath(this, 0);
             mClientDead = true;
-            killSessionLocked();
+            try {
+                for (int i = mAddedWindows.size() - 1; i >= 0; i--) {
+                    final WindowState w = mAddedWindows.get(i);
+                    Slog.i(TAG_WM, "WIN DEATH: " + w);
+                    if (w.mActivityRecord != null && w.mActivityRecord.findMainWindow() == w) {
+                        mService.mSnapshotController.onAppDied(w.mActivityRecord);
+                    }
+                    w.removeIfPossible();
+                }
+            } finally {
+                killSessionLocked();
+            }
         }
     }
 
@@ -739,7 +754,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
     }
 
-    void windowAddedLocked() {
+    void onWindowAdded(WindowState w) {
         if (mPackageName == null) {
             mPackageName = mProcess.mInfo.packageName;
             mRelayoutTag = "relayoutWindow: " + mPackageName;
@@ -755,12 +770,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                 mService.dispatchNewAnimatorScaleLocked(this);
             }
         }
-        mNumWindow++;
+        mAddedWindows.add(w);
     }
 
-    void windowRemovedLocked() {
-        mNumWindow--;
-        killSessionLocked();
+    void onWindowRemoved(WindowState w) {
+        mAddedWindows.remove(w);
+        if (mAddedWindows.isEmpty()) {
+            killSessionLocked();
+        }
     }
 
 
@@ -827,7 +844,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     private void killSessionLocked() {
-        if (mNumWindow > 0 || !mClientDead) {
+        if (!mClientDead) {
             return;
         }
 
@@ -836,10 +853,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             return;
         }
 
-        if (DEBUG) {
-            Slog.v(TAG_WM, "Last window removed from " + this
-                    + ", destroying " + mSurfaceSession);
-        }
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "  KILL SURFACE SESSION %s", mSurfaceSession);
         try {
             mSurfaceSession.kill();
@@ -848,6 +861,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
                     + " in session " + this + ": " + e.toString());
         }
         mSurfaceSession = null;
+        mAddedWindows.clear();
         mAlertWindowSurfaces.clear();
         mAppOverlaySurfaces.clear();
         setHasOverlayUi(false);
@@ -867,7 +881,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        pw.print(prefix); pw.print("mNumWindow="); pw.print(mNumWindow);
+        pw.print(prefix); pw.print("numWindow="); pw.print(mAddedWindows.size());
                 pw.print(" mCanAddInternalSystemWindow="); pw.print(mCanAddInternalSystemWindow);
                 pw.print(" mAppOverlaySurfaces="); pw.print(mAppOverlaySurfaces);
                 pw.print(" mAlertWindowSurfaces="); pw.print(mAlertWindowSurfaces);

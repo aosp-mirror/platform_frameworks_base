@@ -367,12 +367,6 @@
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
-    "-1770075711": {
-      "message": "Adding window client %s that is dead, aborting.",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
     "-1768557332": {
       "message": "removeWallpaperAnimation()",
       "level": "DEBUG",
@@ -3229,6 +3223,12 @@
       "group": "WM_DEBUG_LOCKTASK",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
+    "723575093": {
+      "message": "Attempted to add window with a client %s that is dead. Aborting.",
+      "level": "WARN",
+      "group": "WM_ERROR",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "726205185": {
       "message": "Moving to DESTROYED: %s (destroy skipped)",
       "level": "VERBOSE",
@@ -4212,12 +4212,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "1720696061": {
-      "message": "Adding window to Display that has been removed.",
-      "level": "WARN",
-      "group": "WM_ERROR",
-      "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
     "1730300180": {
       "message": "PendingStartTransaction found",
