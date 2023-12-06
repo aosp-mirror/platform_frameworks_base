@@ -10,6 +10,13 @@ flag {
 }
 
 flag {
+    name: "a11y_qs_shortcut"
+    namespace: "accessibility"
+    description: "Add Quick Setting as one of the a11y shortcut options"
+    bug: "297554934"
+}
+
+flag {
     namespace: "accessibility"
     name: "allow_shortcut_chooser_on_lockscreen"
     description: "Allows the a11y shortcut disambig dialog to appear on the lockscreen"
