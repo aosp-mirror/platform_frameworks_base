@@ -1722,7 +1722,11 @@ public class HdmiCecLocalDeviceTvTest {
         mNativeWrapper.clearResultMessages();
         mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
         mTestLooper.dispatchAll();
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSourceFromTv);
 
+        // Skip the retry.
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS);
+        mTestLooper.dispatchAll();
         assertThat(mNativeWrapper.getResultMessages()).contains(activeSourceFromTv);
     }
 
