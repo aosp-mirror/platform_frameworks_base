@@ -29,7 +29,7 @@ import com.android.systemui.qs.tileimpl.QSTileImpl
 
 /** Model describing the state that the QS Internet tile should be in. */
 sealed interface InternetTileModel {
-    val secondaryTitle: String?
+    val secondaryTitle: CharSequence?
     val secondaryLabel: Text?
     val iconId: Int?
     val icon: QSTile.Icon?
@@ -62,7 +62,7 @@ sealed interface InternetTileModel {
     }
 
     data class Active(
-        override val secondaryTitle: String? = null,
+        override val secondaryTitle: CharSequence? = null,
         override val secondaryLabel: Text? = null,
         override val iconId: Int? = null,
         override val icon: QSTile.Icon? = null,
@@ -71,7 +71,7 @@ sealed interface InternetTileModel {
     ) : InternetTileModel
 
     data class Inactive(
-        override val secondaryTitle: String? = null,
+        override val secondaryTitle: CharSequence? = null,
         override val secondaryLabel: Text? = null,
         override val iconId: Int? = null,
         override val icon: QSTile.Icon? = null,

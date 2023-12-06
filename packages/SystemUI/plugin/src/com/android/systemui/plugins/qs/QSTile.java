@@ -174,7 +174,7 @@ public interface QSTile {
         public String spec;
 
         /** Get the state text. */
-        public String getStateText(int arrayResId, Resources resources) {
+        public CharSequence getStateText(int arrayResId, Resources resources) {
             if (state == Tile.STATE_UNAVAILABLE || this instanceof QSTile.BooleanState) {
                 String[] array = resources.getStringArray(arrayResId);
                 return array[state];
@@ -184,13 +184,13 @@ public interface QSTile {
         }
 
         /** Get the text for secondaryLabel. */
-        public String getSecondaryLabel(String stateText) {
+        public CharSequence getSecondaryLabel(CharSequence stateText) {
             // Use a local reference as the value might change from other threads
             CharSequence localSecondaryLabel = secondaryLabel;
             if (TextUtils.isEmpty(localSecondaryLabel)) {
                 return stateText;
             }
-            return localSecondaryLabel.toString();
+            return localSecondaryLabel;
         }
 
         public boolean copyTo(State other) {
