@@ -1695,19 +1695,23 @@ public class ActivityManagerService extends IActivityManager.Stub
     private static final int INDEX_NATIVE_PSS = 0;
     private static final int INDEX_NATIVE_SWAP_PSS = 1;
     private static final int INDEX_NATIVE_RSS = 2;
-    private static final int INDEX_DALVIK_PSS = 3;
-    private static final int INDEX_DALVIK_SWAP_PSS = 4;
-    private static final int INDEX_DALVIK_RSS = 5;
-    private static final int INDEX_OTHER_PSS = 6;
-    private static final int INDEX_OTHER_SWAP_PSS = 7;
-    private static final int INDEX_OTHER_RSS = 8;
-    private static final int INDEX_TOTAL_PSS = 9;
-    private static final int INDEX_TOTAL_SWAP_PSS = 10;
-    private static final int INDEX_TOTAL_RSS = 11;
-    private static final int INDEX_TOTAL_NATIVE_PSS = 12;
-    private static final int INDEX_TOTAL_MEMTRACK_GRAPHICS = 13;
-    private static final int INDEX_TOTAL_MEMTRACK_GL = 14;
-    private static final int INDEX_LAST = 15;
+    private static final int INDEX_NATIVE_PRIVATE_DIRTY = 3;
+    private static final int INDEX_DALVIK_PSS = 4;
+    private static final int INDEX_DALVIK_SWAP_PSS = 5;
+    private static final int INDEX_DALVIK_RSS = 6;
+    private static final int INDEX_DALVIK_PRIVATE_DIRTY = 7;
+    private static final int INDEX_OTHER_PSS = 8;
+    private static final int INDEX_OTHER_SWAP_PSS = 9;
+    private static final int INDEX_OTHER_RSS = 10;
+    private static final int INDEX_OTHER_PRIVATE_DIRTY = 11;
+    private static final int INDEX_TOTAL_PSS = 12;
+    private static final int INDEX_TOTAL_SWAP_PSS = 13;
+    private static final int INDEX_TOTAL_RSS = 14;
+    private static final int INDEX_TOTAL_PRIVATE_DIRTY = 15;
+    private static final int INDEX_TOTAL_NATIVE_PSS = 16;
+    private static final int INDEX_TOTAL_MEMTRACK_GRAPHICS = 17;
+    private static final int INDEX_TOTAL_MEMTRACK_GL = 18;
+    private static final int INDEX_LAST = 19;
 
     /**
      * Used to notify activity lifecycle events.
@@ -11452,13 +11456,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long pss;
         final long swapPss;
         final long mRss;
+        final long mPrivateDirty;
         final int id; // pid
         final int userId;
         final boolean hasActivities;
         ArrayList<MemItem> subitems;
 
-        MemItem(String label, String shortLabel, long pss, long swapPss, long rss, int id,
-                @UserIdInt int userId,
+        MemItem(String label, String shortLabel, long pss, long swapPss, long rss,
+                long privateDirty, int id, @UserIdInt int userId,
                 boolean hasActivities) {
             this.isProc = true;
             this.label = label;
@@ -11466,18 +11471,21 @@ public class ActivityManagerService extends IActivityManager.Stub
             this.pss = pss;
             this.swapPss = swapPss;
             this.mRss = rss;
+            this.mPrivateDirty = privateDirty;
             this.id = id;
             this.userId = userId;
             this.hasActivities = hasActivities;
         }
 
-        MemItem(String label, String shortLabel, long pss, long swapPss, long rss, int id) {
+        MemItem(String label, String shortLabel, long pss, long swapPss, long rss,
+                long privateDirty, int id) {
             this.isProc = false;
             this.label = label;
             this.shortLabel = shortLabel;
             this.pss = pss;
             this.swapPss = swapPss;
             this.mRss = rss;
+            this.mPrivateDirty = privateDirty;
             this.id = id;
             this.userId = UserHandle.USER_SYSTEM;
             this.hasActivities = false;
@@ -11502,7 +11510,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static final void dumpMemItems(PrintWriter pw, String prefix, String tag,
             ArrayList<MemItem> items, boolean sort, boolean isCompact, boolean dumpPss,
-            boolean dumpSwapPss) {
+            boolean dumpSwapPss, boolean dumpPrivateDirty) {
         if (sort && !isCompact) {
             sortMemItems(items, dumpPss);
         }
@@ -11510,14 +11518,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (int i=0; i<items.size(); i++) {
             MemItem mi = items.get(i);
             if (!isCompact) {
-                if (dumpPss && dumpSwapPss) {
-                    pw.printf("%s%s: %-60s (%s in swap)\n", prefix, stringifyKBSize(mi.pss),
-                            mi.label, stringifyKBSize(mi.swapPss));
-                } else {
-                    pw.printf("%s%s: %s%s\n", prefix, stringifyKBSize(dumpPss ? mi.pss : mi.mRss),
+                pw.printf("%s%s: %s%s\n", prefix, stringifyKBSize(dumpPss ? mi.pss : mi.mRss),
                             mi.label,
                             mi.userId != UserHandle.USER_SYSTEM ? " (user " + mi.userId + ")" : "");
+                if (dumpPss && dumpSwapPss) {
+                    pw.printf("(%s in swap%s", stringifyKBSize(mi.swapPss),
+                            dumpPrivateDirty ? ", " : ")");
                 }
+                if (dumpPrivateDirty) {
+                    pw.printf("%s%s private dirty)", dumpSwapPss ? "" : "(",
+                            stringifyKBSize(mi.mPrivateDirty));
+                }
+                pw.printf("\n");
             } else if (mi.isProc) {
                 pw.print("proc,"); pw.print(tag); pw.print(","); pw.print(mi.shortLabel);
                 pw.print(","); pw.print(mi.id); pw.print(",");
@@ -11531,7 +11543,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (mi.subitems != null) {
                 dumpMemItems(pw, prefix + "    ", mi.shortLabel, mi.subitems,
-                        true, isCompact, dumpPss, dumpSwapPss);
+                        true, isCompact, dumpPss, dumpSwapPss, dumpPrivateDirty);
             }
         }
     }
@@ -11699,6 +11711,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         boolean isCheckinRequest;
         boolean dumpSwapPss;
         boolean dumpProto;
+        boolean mDumpPrivateDirty;
     }
 
     @NeverCompile // Avoid size overhead of debugging code.
@@ -11717,6 +11730,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         opts.isCheckinRequest = false;
         opts.dumpSwapPss = false;
         opts.dumpProto = asProto;
+        opts.mDumpPrivateDirty = false;
 
         int opti = 0;
         while (opti < args.length) {
@@ -11739,6 +11753,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 opts.dumpSummaryOnly = true;
             } else if ("-S".equals(opt)) {
                 opts.dumpSwapPss = true;
+            } else if ("-p".equals(opt)) {
+                opts.mDumpPrivateDirty = true;
             } else if ("--unreachable".equals(opt)) {
                 opts.dumpUnreachable = true;
             } else if ("--oom".equals(opt)) {
@@ -11759,6 +11775,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  -c: dump in a compact machine-parseable representation.");
                 pw.println("  -s: dump only summary of application memory usage.");
                 pw.println("  -S: dump also SwapPss.");
+                pw.println("  -p: dump also private dirty memory usage.");
                 pw.println("  --oom: only show processes organized by oom adj.");
                 pw.println("  --local: only collect details locally, don't call process.");
                 pw.println("  --package: interpret process arg as package, dumping all");
@@ -11877,14 +11894,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                 EmptyArray.LONG;
         long[] dalvikSubitemRss = opts.dumpDalvik ? new long[Debug.MemoryInfo.NUM_DVK_STATS] :
                 EmptyArray.LONG;
+        long[] dalvikSubitemPrivateDirty = opts.dumpDalvik
+                ? new long[Debug.MemoryInfo.NUM_DVK_STATS] : EmptyArray.LONG;
         long[] miscPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
         long[] miscSwapPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
         long[] miscRss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
+        long[] miscPrivateDirty = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
         long[] memtrackTmp = new long[4];
 
         long oomPss[] = new long[DUMP_MEM_OOM_LABEL.length];
         long oomSwapPss[] = new long[DUMP_MEM_OOM_LABEL.length];
         long[] oomRss = new long[DUMP_MEM_OOM_LABEL.length];
+        long[] oomPrivateDirty = new long[DUMP_MEM_OOM_LABEL.length];
         ArrayList<MemItem>[] oomProcs = (ArrayList<MemItem>[])
                 new ArrayList[DUMP_MEM_OOM_LABEL.length];
 
@@ -11980,6 +12001,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final long myTotalUss = mi.getTotalUss();
                 final long myTotalRss = mi.getTotalRss();
                 final long myTotalSwapPss = mi.getTotalSwappedOutPss();
+                final long myTotalPrivateDirty = mi.getTotalPrivateDirty();
 
                 synchronized (mProcLock) {
                     if (r.getThread() != null && oomAdj == r.mState.getSetAdjWithServices()) {
@@ -11993,29 +12015,36 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ss[INDEX_TOTAL_PSS] += myTotalPss;
                     ss[INDEX_TOTAL_SWAP_PSS] += myTotalSwapPss;
                     ss[INDEX_TOTAL_RSS] += myTotalRss;
+                    ss[INDEX_TOTAL_PRIVATE_DIRTY] += myTotalPrivateDirty;
                     ss[INDEX_TOTAL_MEMTRACK_GRAPHICS] += memtrackGraphics;
                     ss[INDEX_TOTAL_MEMTRACK_GL] += memtrackGl;
                     MemItem pssItem = new MemItem(r.processName + " (pid " + pid +
                             (hasActivities ? " / activities)" : ")"), r.processName, myTotalPss,
-                            myTotalSwapPss, myTotalRss, pid, r.userId, hasActivities);
+                            myTotalSwapPss, myTotalRss, myTotalPrivateDirty,
+                            pid, r.userId, hasActivities);
                     procMems.add(pssItem);
                     procMemsMap.put(pid, pssItem);
 
                     ss[INDEX_NATIVE_PSS] += mi.nativePss;
                     ss[INDEX_NATIVE_SWAP_PSS] += mi.nativeSwappedOutPss;
                     ss[INDEX_NATIVE_RSS] += mi.nativeRss;
+                    ss[INDEX_NATIVE_PRIVATE_DIRTY] += mi.nativePrivateDirty;
                     ss[INDEX_DALVIK_PSS] += mi.dalvikPss;
                     ss[INDEX_DALVIK_SWAP_PSS] += mi.dalvikSwappedOutPss;
                     ss[INDEX_DALVIK_RSS] += mi.dalvikRss;
+                    ss[INDEX_DALVIK_PRIVATE_DIRTY] += mi.dalvikPrivateDirty;
                     for (int j=0; j<dalvikSubitemPss.length; j++) {
                         dalvikSubitemPss[j] += mi.getOtherPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
                         dalvikSubitemSwapPss[j] +=
                                 mi.getOtherSwappedOutPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
+                        dalvikSubitemPrivateDirty[j] +=
+                                mi.getOtherPrivateDirty(Debug.MemoryInfo.NUM_OTHER_STATS + j);
                         dalvikSubitemRss[j] += mi.getOtherRss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
                     }
                     ss[INDEX_OTHER_PSS] += mi.otherPss;
                     ss[INDEX_OTHER_RSS] += mi.otherRss;
                     ss[INDEX_OTHER_SWAP_PSS] += mi.otherSwappedOutPss;
+                    ss[INDEX_OTHER_PRIVATE_DIRTY] += mi.otherPrivateDirty;
                     for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
                         long mem = mi.getOtherPss(j);
                         miscPss[j] += mem;
@@ -12023,6 +12052,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mem = mi.getOtherSwappedOutPss(j);
                         miscSwapPss[j] += mem;
                         ss[INDEX_OTHER_SWAP_PSS] -= mem;
+                        mem = mi.getOtherPrivateDirty(j);
+                        miscPrivateDirty[j] += mem;
+                        ss[INDEX_OTHER_PRIVATE_DIRTY] -= mem;
                         mem = mi.getOtherRss(j);
                         miscRss[j] += mem;
                         ss[INDEX_OTHER_RSS] -= mem;
@@ -12039,6 +12071,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         && oomAdj < DUMP_MEM_OOM_ADJ[oomIndex + 1])) {
                             oomPss[oomIndex] += myTotalPss;
                             oomSwapPss[oomIndex] += myTotalSwapPss;
+                            oomPrivateDirty[oomIndex] += myTotalPrivateDirty;
                             if (oomProcs[oomIndex] == null) {
                                 oomProcs[oomIndex] = new ArrayList<MemItem>();
                             }
@@ -12085,6 +12118,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final long myTotalPss = info.getTotalPss();
                     final long myTotalSwapPss = info.getTotalSwappedOutPss();
                     final long myTotalRss = info.getTotalRss();
+                    final long myTotalPrivateDirty = info.getTotalPrivateDirty();
                     ss[INDEX_TOTAL_PSS] += myTotalPss;
                     ss[INDEX_TOTAL_SWAP_PSS] += myTotalSwapPss;
                     ss[INDEX_TOTAL_RSS] += myTotalRss;
@@ -12094,15 +12128,17 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                     MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
                             st.name, myTotalPss, info.getSummaryTotalSwapPss(), myTotalRss,
-                            st.pid, UserHandle.getUserId(st.uid), false);
+                            myTotalPrivateDirty, st.pid, UserHandle.getUserId(st.uid), false);
                     procMems.add(pssItem);
 
                     ss[INDEX_NATIVE_PSS] += info.nativePss;
                     ss[INDEX_NATIVE_SWAP_PSS] += info.nativeSwappedOutPss;
                     ss[INDEX_NATIVE_RSS] += info.nativeRss;
+                    ss[INDEX_NATIVE_PRIVATE_DIRTY] += info.nativePrivateDirty;
                     ss[INDEX_DALVIK_PSS] += info.dalvikPss;
                     ss[INDEX_DALVIK_SWAP_PSS] += info.dalvikSwappedOutPss;
                     ss[INDEX_DALVIK_RSS] += info.dalvikRss;
+                    ss[INDEX_DALVIK_PRIVATE_DIRTY] += info.dalvikPrivateDirty;
                     for (int j = 0; j < dalvikSubitemPss.length; j++) {
                         dalvikSubitemPss[j] += info.getOtherPss(
                                 Debug.MemoryInfo.NUM_OTHER_STATS + j);
@@ -12110,10 +12146,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 info.getOtherSwappedOutPss(Debug.MemoryInfo.NUM_OTHER_STATS + j);
                         dalvikSubitemRss[j] += info.getOtherRss(Debug.MemoryInfo.NUM_OTHER_STATS
                                 + j);
+                        dalvikSubitemPrivateDirty[j] +=
+                                info.getOtherPrivateDirty(Debug.MemoryInfo.NUM_OTHER_STATS + j);
                     }
                     ss[INDEX_OTHER_PSS] += info.otherPss;
                     ss[INDEX_OTHER_SWAP_PSS] += info.otherSwappedOutPss;
                     ss[INDEX_OTHER_RSS] += info.otherRss;
+                    ss[INDEX_OTHER_PRIVATE_DIRTY] += info.otherPrivateDirty;
                     for (int j = 0; j < Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
                         long mem = info.getOtherPss(j);
                         miscPss[j] += mem;
@@ -12124,6 +12163,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         mem = info.getOtherRss(j);
                         miscRss[j] += mem;
                         ss[INDEX_OTHER_RSS] -= mem;
+                        mem = info.getOtherPrivateDirty(j);
+                        miscPrivateDirty[j] += mem;
+                        ss[INDEX_OTHER_PRIVATE_DIRTY] -= mem;
                     }
                     oomPss[0] += myTotalPss;
                     oomSwapPss[0] += myTotalSwapPss;
@@ -12132,21 +12174,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     oomProcs[0].add(pssItem);
                     oomRss[0] += myTotalRss;
+                    oomPrivateDirty[0] += myTotalPrivateDirty;
                 }
             });
 
             ArrayList<MemItem> catMems = new ArrayList<MemItem>();
 
             catMems.add(new MemItem("Native", "Native",
-                    ss[INDEX_NATIVE_PSS], ss[INDEX_NATIVE_SWAP_PSS], ss[INDEX_NATIVE_RSS], -1));
+                    ss[INDEX_NATIVE_PSS], ss[INDEX_NATIVE_SWAP_PSS],
+                    ss[INDEX_NATIVE_RSS], ss[INDEX_NATIVE_PRIVATE_DIRTY], -1));
             final int dalvikId = -2;
             catMems.add(new MemItem("Dalvik", "Dalvik", ss[INDEX_DALVIK_PSS],
-                    ss[INDEX_DALVIK_SWAP_PSS], ss[INDEX_DALVIK_RSS], dalvikId));
+                    ss[INDEX_DALVIK_SWAP_PSS], ss[INDEX_DALVIK_RSS],
+                    ss[INDEX_DALVIK_PRIVATE_DIRTY], dalvikId));
             catMems.add(new MemItem("Unknown", "Unknown", ss[INDEX_OTHER_PSS],
-                    ss[INDEX_OTHER_SWAP_PSS], ss[INDEX_OTHER_RSS], -3));
+                    ss[INDEX_OTHER_SWAP_PSS], ss[INDEX_OTHER_RSS],
+                    ss[INDEX_OTHER_PRIVATE_DIRTY], -3));
             for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
                 String label = Debug.MemoryInfo.getOtherLabel(j);
-                catMems.add(new MemItem(label, label, miscPss[j], miscSwapPss[j], miscRss[j],  j));
+                catMems.add(new MemItem(label, label, miscPss[j], miscSwapPss[j], miscRss[j],
+                        miscPrivateDirty[j], j));
             }
             if (dalvikSubitemPss.length > 0) {
                 // Add dalvik subitems.
@@ -12172,7 +12219,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                         final String name = Debug.MemoryInfo.getOtherLabel(
                                 Debug.MemoryInfo.NUM_OTHER_STATS + j);
                         memItem.subitems.add(new MemItem(name, name, dalvikSubitemPss[j],
-                                dalvikSubitemSwapPss[j], dalvikSubitemRss[j], j));
+                                dalvikSubitemSwapPss[j], dalvikSubitemRss[j],
+                                dalvikSubitemPrivateDirty[j], j));
                     }
                 }
             }
@@ -12183,7 +12231,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     String label = opts.isCompact ? DUMP_MEM_OOM_COMPACT_LABEL[j]
                             : DUMP_MEM_OOM_LABEL[j];
                     MemItem item = new MemItem(label, label, oomPss[j], oomSwapPss[j], oomRss[j],
-                            DUMP_MEM_OOM_ADJ[j]);
+                            oomPrivateDirty[j], DUMP_MEM_OOM_ADJ[j]);
                     item.subitems = oomProcs[j];
                     oomMems.add(item);
                 }
@@ -12194,33 +12242,34 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!brief && !opts.oomOnly && !opts.isCompact) {
                 pw.println();
                 pw.println("Total RSS by process:");
-                dumpMemItems(pw, "  ", "proc", procMems, true, opts.isCompact, false, false);
+                dumpMemItems(pw, "  ", "proc", procMems, true, opts.isCompact, false, false, false);
                 pw.println();
             }
             if (!opts.isCompact) {
                 pw.println("Total RSS by OOM adjustment:");
             }
-            dumpMemItems(pw, "  ", "oom", oomMems, false, opts.isCompact, false, false);
+            dumpMemItems(pw, "  ", "oom", oomMems, false, opts.isCompact, false, false, false);
             if (!brief && !opts.oomOnly) {
                 PrintWriter out = categoryPw != null ? categoryPw : pw;
                 if (!opts.isCompact) {
                     out.println();
                     out.println("Total RSS by category:");
                 }
-                dumpMemItems(out, "  ", "cat", catMems, true, opts.isCompact, false, false);
+                dumpMemItems(out, "  ", "cat", catMems, true, opts.isCompact, false, false, false);
             }
             opts.dumpSwapPss = opts.dumpSwapPss && hasSwapPss && ss[INDEX_TOTAL_SWAP_PSS] != 0;
             if (!brief && !opts.oomOnly && !opts.isCompact) {
                 pw.println();
                 pw.println("Total PSS by process:");
                 dumpMemItems(pw, "  ", "proc", procMems, true, opts.isCompact, true,
-                        opts.dumpSwapPss);
+                        opts.dumpSwapPss, opts.mDumpPrivateDirty);
                 pw.println();
             }
             if (!opts.isCompact) {
                 pw.println("Total PSS by OOM adjustment:");
             }
-            dumpMemItems(pw, "  ", "oom", oomMems, false, opts.isCompact, true, opts.dumpSwapPss);
+            dumpMemItems(pw, "  ", "oom", oomMems, false, opts.isCompact, true, opts.dumpSwapPss,
+                    opts.mDumpPrivateDirty);
             if (!brief && !opts.oomOnly) {
                 PrintWriter out = categoryPw != null ? categoryPw : pw;
                 if (!opts.isCompact) {
@@ -12228,7 +12277,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     out.println("Total PSS by category:");
                 }
                 dumpMemItems(out, "  ", "cat", catMems, true, opts.isCompact, true,
-                        opts.dumpSwapPss);
+                        opts.dumpSwapPss, opts.mDumpPrivateDirty);
             }
             if (!opts.isCompact) {
                 pw.println();
@@ -12630,7 +12679,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ss[INDEX_TOTAL_RSS] += myTotalRss;
                 MemItem pssItem = new MemItem(r.processName + " (pid " + pid +
                         (hasActivities ? " / activities)" : ")"), r.processName, myTotalPss,
-                        myTotalSwapPss, myTotalRss, pid, r.userId, hasActivities);
+                        myTotalSwapPss, myTotalRss, 0, pid, r.userId, hasActivities);
                 procMems.add(pssItem);
                 procMemsMap.put(pid, pssItem);
 
@@ -12717,7 +12766,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     ss[INDEX_TOTAL_NATIVE_PSS] += myTotalPss;
 
                     MemItem pssItem = new MemItem(st.name + " (pid " + st.pid + ")",
-                            st.name, myTotalPss, info.getSummaryTotalSwapPss(), myTotalRss,
+                            st.name, myTotalPss, info.getSummaryTotalSwapPss(), myTotalRss, 0,
                             st.pid, UserHandle.getUserId(st.uid), false);
                     procMems.add(pssItem);
 
@@ -12762,15 +12811,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             ArrayList<MemItem> catMems = new ArrayList<MemItem>();
 
             catMems.add(new MemItem("Native", "Native", ss[INDEX_NATIVE_PSS],
-                    ss[INDEX_NATIVE_SWAP_PSS], ss[INDEX_NATIVE_RSS], -1));
+                    ss[INDEX_NATIVE_SWAP_PSS], ss[INDEX_NATIVE_RSS], 0, -1));
             final int dalvikId = -2;
             catMems.add(new MemItem("Dalvik", "Dalvik", ss[INDEX_DALVIK_PSS],
-                    ss[INDEX_DALVIK_SWAP_PSS], ss[INDEX_DALVIK_RSS], dalvikId));
+                    ss[INDEX_DALVIK_SWAP_PSS], ss[INDEX_DALVIK_RSS], 0, dalvikId));
             catMems.add(new MemItem("Unknown", "Unknown", ss[INDEX_OTHER_PSS],
-                    ss[INDEX_OTHER_SWAP_PSS], ss[INDEX_OTHER_RSS], -3));
+                    ss[INDEX_OTHER_SWAP_PSS], ss[INDEX_OTHER_RSS], 0, -3));
             for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
                 String label = Debug.MemoryInfo.getOtherLabel(j);
-                catMems.add(new MemItem(label, label, miscPss[j], miscSwapPss[j], miscRss[j], j));
+                catMems.add(new MemItem(label, label, miscPss[j], miscSwapPss[j],
+                        miscRss[j], 0, j));
             }
             if (dalvikSubitemPss.length > 0) {
                 // Add dalvik subitems.
@@ -12796,7 +12846,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         final String name = Debug.MemoryInfo.getOtherLabel(
                                 Debug.MemoryInfo.NUM_OTHER_STATS + j);
                         memItem.subitems.add(new MemItem(name, name, dalvikSubitemPss[j],
-                                dalvikSubitemSwapPss[j], dalvikSubitemRss[j], j));
+                                dalvikSubitemSwapPss[j], dalvikSubitemRss[j], 0, j));
                     }
                 }
             }
@@ -12806,7 +12856,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (oomPss[j] != 0) {
                     String label = opts.isCompact ? DUMP_MEM_OOM_COMPACT_LABEL[j]
                             : DUMP_MEM_OOM_LABEL[j];
-                    MemItem item = new MemItem(label, label, oomPss[j], oomSwapPss[j], oomRss[j],
+                    MemItem item = new MemItem(label, label, oomPss[j], oomSwapPss[j], oomRss[j], 0,
                             DUMP_MEM_OOM_ADJ[j]);
                     item.subitems = oomProcs[j];
                     oomMems.add(item);
