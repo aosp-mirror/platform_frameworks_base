@@ -23,11 +23,15 @@ import com.android.hoststubgen.asm.ClassNodes
 class AndroidHeuristicsFilter(
         private val classes: ClassNodes,
         val aidlPolicy: FilterPolicyWithReason?,
+        val featureFlagsPolicy: FilterPolicyWithReason?,
         fallback: OutputFilter
 ) : DelegatingFilter(fallback) {
     override fun getPolicyForClass(className: String): FilterPolicyWithReason {
         if (aidlPolicy != null && classes.isAidlClass(className)) {
             return aidlPolicy
+        }
+        if (featureFlagsPolicy != null && classes.isFeatureFlagsClass(className)) {
+            return featureFlagsPolicy
         }
         return super.getPolicyForClass(className)
     }
@@ -40,4 +44,16 @@ private fun ClassNodes.isAidlClass(className: String): Boolean {
     return hasClass(className) &&
             hasClass("$className\$Stub") &&
             hasClass("$className\$Stub\$Proxy")
+}
+
+/**
+ * @return if a given class "seems like" an feature flags class.
+ */
+private fun ClassNodes.isFeatureFlagsClass(className: String): Boolean {
+    // Matches template classes defined here:
+    // https://cs.android.com/android/platform/superproject/+/master:build/make/tools/aconfig/templates/
+    return className.endsWith("/Flags")
+            || className.endsWith("/FeatureFlags")
+            || className.endsWith("/FeatureFlagsImpl")
+            || className.endsWith("/FakeFeatureFlagsImpl");
 }
