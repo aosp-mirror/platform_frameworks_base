@@ -67,7 +67,7 @@ import org.mockito.Mock;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
+public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
     private static final int TEST_TOUCH_ACCEPTANCE_TIME = 200;
     private static final int TEST_A11Y_AUTO_DISMISS_TIME = 1_000;
     private static final int TEST_A11Y_TIMEOUT_TIME = 3_000;
