@@ -50,6 +50,7 @@ android_test {
         "FlickerTestsBase",
         "FlickerTestsAppLaunchCommon",
     ],
+    data: ["trace_config/*"],
 }
 
 android_test {
@@ -66,4 +67,5 @@ android_test {
         "FlickerTestsBase",
         "FlickerTestsAppLaunchCommon",
     ],
+    data: ["trace_config/*"],
 }

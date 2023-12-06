@@ -29,6 +29,8 @@ android_test {
     manifest: "AndroidManifest.xml",
     package_name: "com.android.server.wm.flicker",
     instrumentation_target_package: "com.android.server.wm.flicker",
+    test_config_template: "AndroidTestTemplate.xml",
     srcs: ["src/**/*"],
     static_libs: ["FlickerTestsBase"],
+    data: ["trace_config/*"],
 }

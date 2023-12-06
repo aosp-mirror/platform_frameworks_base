@@ -30,4 +30,5 @@ android_test {
     test_config_template: "AndroidTestTemplate.xml",
     srcs: ["src/**/*"],
     static_libs: ["FlickerTestsBase"],
+    data: ["trace_config/*"],
 }
