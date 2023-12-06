@@ -178,6 +178,7 @@ import static com.android.server.wm.WindowStateProto.UNRESTRICTED_KEEP_CLEAR_ARE
 import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
+import static com.android.window.flags.Flags.explicitRefreshRateHints;
 import static com.android.window.flags.Flags.secureWindowState;
 import static com.android.window.flags.Flags.surfaceTrustedOverlay;
 
@@ -5185,9 +5186,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         boolean voteChanged = refreshRatePolicy.updateFrameRateVote(this);
         if (voteChanged) {
-            getPendingTransaction().setFrameRate(
-                    mSurfaceControl, mFrameRateVote.mRefreshRate,
-                    mFrameRateVote.mCompatibility, Surface.CHANGE_FRAME_RATE_ALWAYS);
+            getPendingTransaction()
+                    .setFrameRate(mSurfaceControl, mFrameRateVote.mRefreshRate,
+                        mFrameRateVote.mCompatibility, Surface.CHANGE_FRAME_RATE_ALWAYS);
+            if (explicitRefreshRateHints()) {
+                getPendingTransaction().setFrameRateSelectionStrategy(mSurfaceControl,
+                        mFrameRateVote.mSelectionStrategy);
+            }
 
         }
     }

@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN;
 import static android.view.SurfaceControl.RefreshRateRange.FLOAT_TOLERANCE;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 
@@ -69,15 +70,20 @@ public class RefreshRatePolicyTest extends WindowTestsBase {
 
     private static final FrameRateVote FRAME_RATE_VOTE_NONE = new FrameRateVote();
     private static final FrameRateVote FRAME_RATE_VOTE_DENY_LIST =
-            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT);
+            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT,
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     private static final FrameRateVote FRAME_RATE_VOTE_LOW_EXACT =
-            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT);
+            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT,
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     private static final FrameRateVote FRAME_RATE_VOTE_HI_EXACT =
-            new FrameRateVote(HI_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT);
+            new FrameRateVote(HI_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_EXACT,
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     private static final FrameRateVote FRAME_RATE_VOTE_LOW_PREFERRED =
-            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+            new FrameRateVote(LOW_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
     private static final FrameRateVote FRAME_RATE_VOTE_HI_PREFERRED =
-            new FrameRateVote(HI_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
+            new FrameRateVote(HI_REFRESH_RATE, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
+                    FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
 
     // Parcel and Unparcel the LayoutParams in the window state to test the path the object
     // travels from the app's process to system server
