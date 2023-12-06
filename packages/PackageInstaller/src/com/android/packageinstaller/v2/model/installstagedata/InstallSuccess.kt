@@ -14,82 +14,33 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model.installstagedata;
+package com.android.packageinstaller.v2.model.installstagedata
 
-import android.content.Intent;
-import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
-import com.android.packageinstaller.v2.model.PackageUtil.AppSnippet;
+import android.content.Intent
+import android.graphics.drawable.Drawable
+import com.android.packageinstaller.v2.model.PackageUtil
+import android.content.pm.PackageManager
 
-public class InstallSuccess extends InstallStage {
-
-    private final int mStage = InstallStage.STAGE_SUCCESS;
-
-    @NonNull
-    private final AppSnippet mAppSnippet;
-    private final boolean mShouldReturnResult;
+class InstallSuccess(
+    private val appSnippet: PackageUtil.AppSnippet,
+    val shouldReturnResult: Boolean = false,
     /**
-     * <p>If the caller is requesting a result back, this will hold the Intent with
-     * EXTRA_INSTALL_RESULT set to INSTALL_SUCCEEDED which is sent back to the caller.</p>
-     * <p>If the caller doesn't want the result back, this will hold the Intent that launches
-     * the newly installed / updated app.</p>
+     *
+     * * If the caller is requesting a result back, this will hold the Intent with
+     * [Intent.EXTRA_INSTALL_RESULT] set to [PackageManager.INSTALL_SUCCEEDED] which is sent
+     * back to the caller.
+     *
+     * * If the caller doesn't want the result back, this will hold the Intent that launches
+     * the newly installed / updated app if a launchable activity exists.
      */
-    @NonNull
-    private final Intent mResultIntent;
+    val resultIntent: Intent? = null
+) : InstallStage() {
 
-    public InstallSuccess(@NonNull AppSnippet appSnippet, boolean shouldReturnResult,
-        @NonNull Intent launcherIntent) {
-        mAppSnippet = appSnippet;
-        mShouldReturnResult = shouldReturnResult;
-        mResultIntent = launcherIntent;
-    }
+    override val stageCode = STAGE_SUCCESS
 
-    @Override
-    public int getStageCode() {
-        return mStage;
-    }
+    val appIcon: Drawable?
+        get() = appSnippet.icon
 
-    @NonNull
-    public Drawable getAppIcon() {
-        return mAppSnippet.getIcon();
-    }
-
-    @NonNull
-    public String getAppLabel() {
-        return (String) mAppSnippet.getLabel();
-    }
-
-    public boolean shouldReturnResult() {
-        return mShouldReturnResult;
-    }
-
-    @NonNull
-    public Intent getResultIntent() {
-        return mResultIntent;
-    }
-
-    public static class Builder {
-
-        private final AppSnippet mAppSnippet;
-        private boolean mShouldReturnResult;
-        private Intent mLauncherIntent;
-
-        public Builder(@NonNull AppSnippet appSnippet) {
-            mAppSnippet = appSnippet;
-        }
-
-        public Builder setShouldReturnResult(boolean returnResult) {
-            mShouldReturnResult = returnResult;
-            return this;
-        }
-
-        public Builder setResultIntent(@NonNull Intent intent) {
-            mLauncherIntent = intent;
-            return this;
-        }
-
-        public InstallSuccess build() {
-            return new InstallSuccess(mAppSnippet, mShouldReturnResult, mLauncherIntent);
-        }
-    }
+    val appLabel: String?
+        get() = appSnippet.label as String?
 }

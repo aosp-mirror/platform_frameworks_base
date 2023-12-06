@@ -14,56 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model.installstagedata;
+package com.android.packageinstaller.v2.model.installstagedata
 
-import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import com.android.packageinstaller.v2.model.PackageUtil.AppSnippet;
+import android.graphics.drawable.Drawable
+import com.android.packageinstaller.v2.model.PackageUtil
 
-public class InstallFailed extends InstallStage {
+class InstallFailed(
+    private val appSnippet: PackageUtil.AppSnippet,
+    val legacyCode: Int,
+    val statusCode: Int,
+    val message: String?
+) : InstallStage() {
 
-    private final int mStage = InstallStage.STAGE_FAILED;
-    @NonNull
-    private final AppSnippet mAppSnippet;
-    private final int mStatusCode;
-    private final int mLegacyCode;
-    @Nullable
-    private final String mMessage;
+    override val stageCode = STAGE_FAILED
 
-    public InstallFailed(@NonNull AppSnippet appSnippet, int statusCode, int legacyCode,
-        @Nullable String message) {
-        mAppSnippet = appSnippet;
-        mLegacyCode = statusCode;
-        mStatusCode = legacyCode;
-        mMessage = message;
-    }
+    val appIcon: Drawable?
+        get() = appSnippet.icon
 
-    @Override
-    public int getStageCode() {
-        return mStage;
-    }
-
-    @NonNull
-    public Drawable getAppIcon() {
-        return mAppSnippet.getIcon();
-    }
-
-    @NonNull
-    public String getAppLabel() {
-        return (String) mAppSnippet.getLabel();
-    }
-
-    public int getStatusCode() {
-        return mStatusCode;
-    }
-
-    public int getLegacyCode() {
-        return mLegacyCode;
-    }
-
-    @Nullable
-    public String getMessage() {
-        return mMessage;
-    }
+    val appLabel: String?
+        get() = appSnippet.label as String?
 }

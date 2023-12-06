@@ -14,86 +14,29 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model.installstagedata;
+package com.android.packageinstaller.v2.model.installstagedata
 
-import android.graphics.drawable.Drawable;
-import androidx.annotation.Nullable;
-import com.android.packageinstaller.v2.model.PackageUtil.AppSnippet;
+import android.graphics.drawable.Drawable
+import com.android.packageinstaller.v2.model.PackageUtil
 
-public class InstallUserActionRequired extends InstallStage {
+class InstallUserActionRequired(
+    val actionReason: Int,
+    private val appSnippet: PackageUtil.AppSnippet? = null,
+    val isAppUpdating: Boolean = false,
+    val dialogMessage: String? = null
+) : InstallStage() {
 
-    public static final int USER_ACTION_REASON_UNKNOWN_SOURCE = 0;
-    public static final int USER_ACTION_REASON_ANONYMOUS_SOURCE = 1;
-    public static final int USER_ACTION_REASON_INSTALL_CONFIRMATION = 2;
-    private final int mStage = InstallStage.STAGE_USER_ACTION_REQUIRED;
-    private final int mActionReason;
-    @Nullable
-    private final AppSnippet mAppSnippet;
-    private final boolean mIsAppUpdating;
-    @Nullable
-    private final String mDialogMessage;
+    override val stageCode = STAGE_USER_ACTION_REQUIRED
 
-    public InstallUserActionRequired(int actionReason, @Nullable AppSnippet appSnippet,
-        boolean isUpdating, @Nullable String dialogMessage) {
-        mActionReason = actionReason;
-        mAppSnippet = appSnippet;
-        mIsAppUpdating = isUpdating;
-        mDialogMessage = dialogMessage;
-    }
+    val appIcon: Drawable?
+        get() = appSnippet?.icon
 
-    @Override
-    public int getStageCode() {
-        return mStage;
-    }
+    val appLabel: String?
+        get() = appSnippet?.let { appSnippet.label as String? }
 
-    @Nullable
-    public Drawable getAppIcon() {
-        return mAppSnippet != null ? mAppSnippet.getIcon() : null;
-    }
-
-    @Nullable
-    public String getAppLabel() {
-        return mAppSnippet != null ? (String) mAppSnippet.getLabel() : null;
-    }
-
-    public boolean isAppUpdating() {
-        return mIsAppUpdating;
-    }
-
-    @Nullable
-    public String getDialogMessage() {
-        return mDialogMessage;
-    }
-
-    public int getActionReason() {
-        return mActionReason;
-    }
-
-    public static class Builder {
-
-        private final int mActionReason;
-        private final AppSnippet mAppSnippet;
-        private boolean mIsAppUpdating;
-        private String mDialogMessage;
-
-        public Builder(int actionReason, @Nullable AppSnippet appSnippet) {
-            mActionReason = actionReason;
-            mAppSnippet = appSnippet;
-        }
-
-        public Builder setAppUpdating(boolean isUpdating) {
-            mIsAppUpdating = isUpdating;
-            return this;
-        }
-
-        public Builder setDialogMessage(@Nullable String message) {
-            mDialogMessage = message;
-            return this;
-        }
-
-        public InstallUserActionRequired build() {
-            return new InstallUserActionRequired(mActionReason, mAppSnippet, mIsAppUpdating,
-                mDialogMessage);
-        }
+    companion object {
+        const val USER_ACTION_REASON_UNKNOWN_SOURCE = 0
+        const val USER_ACTION_REASON_ANONYMOUS_SOURCE = 1
+        const val USER_ACTION_REASON_INSTALL_CONFIRMATION = 2
     }
 }

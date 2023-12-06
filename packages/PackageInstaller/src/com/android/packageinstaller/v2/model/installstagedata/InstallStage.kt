@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model.installstagedata;
+package com.android.packageinstaller.v2.model.installstagedata
 
-public abstract class InstallStage {
-
-    public static final int STAGE_DEFAULT = -1;
-    public static final int STAGE_ABORTED = 0;
-    public static final int STAGE_STAGING = 1;
-    public static final int STAGE_READY = 2;
-    public static final int STAGE_USER_ACTION_REQUIRED = 3;
-    public static final int STAGE_INSTALLING = 4;
-    public static final int STAGE_SUCCESS = 5;
-    public static final int STAGE_FAILED = 6;
+abstract class InstallStage {
 
     /**
      * @return the integer value representing current install stage.
      */
-    public abstract int getStageCode();
+    abstract val stageCode: Int
+
+    companion object {
+        const val STAGE_DEFAULT = -1
+        const val STAGE_ABORTED = 0
+        const val STAGE_STAGING = 1
+        const val STAGE_READY = 2
+        const val STAGE_USER_ACTION_REQUIRED = 3
+        const val STAGE_INSTALLING = 4
+        const val STAGE_SUCCESS = 5
+        const val STAGE_FAILED = 6
+    }
 }

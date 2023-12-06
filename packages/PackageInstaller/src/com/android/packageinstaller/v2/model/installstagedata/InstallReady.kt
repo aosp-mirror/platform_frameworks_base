@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model.installstagedata;
+package com.android.packageinstaller.v2.model.installstagedata
 
-public class InstallReady extends InstallStage{
+class InstallReady : InstallStage() {
 
-    private final int mStage = InstallStage.STAGE_READY;
-
-    @Override
-    public int getStageCode() {
-        return mStage;
-    }
+    override val stageCode = STAGE_READY
 }

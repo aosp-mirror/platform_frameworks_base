@@ -14,34 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model.installstagedata;
+package com.android.packageinstaller.v2.model.installstagedata
 
-import android.graphics.drawable.Drawable;
-import androidx.annotation.NonNull;
-import com.android.packageinstaller.v2.model.PackageUtil.AppSnippet;
+import android.graphics.drawable.Drawable
+import com.android.packageinstaller.v2.model.PackageUtil
 
-public class InstallInstalling extends InstallStage {
+class InstallInstalling(private val appSnippet: PackageUtil.AppSnippet) : InstallStage() {
 
-    private final int mStage = InstallStage.STAGE_INSTALLING;
-    @NonNull
-    private final AppSnippet mAppSnippet;
+    override val stageCode = STAGE_INSTALLING
 
-    public InstallInstalling(@NonNull AppSnippet appSnippet) {
-        mAppSnippet = appSnippet;
-    }
+    val appIcon: Drawable?
+        get() = appSnippet.icon
 
-    @Override
-    public int getStageCode() {
-        return mStage;
-    }
-
-    @NonNull
-    public Drawable getAppIcon() {
-        return mAppSnippet.getIcon();
-    }
-
-    @NonNull
-    public String getAppLabel() {
-        return (String) mAppSnippet.getLabel();
-    }
+    val appLabel: String?
+        get() = appSnippet.label as String?
 }
