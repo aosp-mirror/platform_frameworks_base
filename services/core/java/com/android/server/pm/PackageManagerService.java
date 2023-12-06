@@ -1379,9 +1379,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName,
                 userId);
-        final String initiatingPackageName = installSourceInfo.getInitiatingPackageName();
         final String installerPackageName;
         if (installSourceInfo != null) {
+            final String initiatingPackageName = installSourceInfo.getInitiatingPackageName();
             if (!isInstalledByAdb(initiatingPackageName)) {
                 installerPackageName = initiatingPackageName;
             } else {
