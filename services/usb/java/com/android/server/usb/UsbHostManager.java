@@ -221,9 +221,7 @@ public class UsbHostManager {
                 for (int line = 0; line < length / kDumpBytesPerLine; line++) {
                     StringBuilder sb = new StringBuilder();
                     for (int offset = 0; offset < kDumpBytesPerLine; offset++) {
-                        sb.append("0x")
-                            .append(String.format("0x%02X", mDescriptors[dataOffset++]))
-                            .append(" ");
+                        sb.append(String.format("0x%02X", mDescriptors[dataOffset++])).append(" ");
                     }
                     pw.println(sb.toString());
                 }
@@ -231,9 +229,7 @@ public class UsbHostManager {
                 // remainder
                 StringBuilder sb = new StringBuilder();
                 while (dataOffset < length) {
-                    sb.append("0x")
-                        .append(String.format("0x%02X", mDescriptors[dataOffset++]))
-                        .append(" ");
+                    sb.append(String.format("0x%02X", mDescriptors[dataOffset++])).append(" ");
                 }
                 pw.println(sb.toString());
             } else {
