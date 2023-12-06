@@ -43,16 +43,16 @@ public abstract class AlertingNotificationManager {
     protected final ArrayMap<String, AlertEntry> mAlertEntries = new ArrayMap<>();
     protected final HeadsUpManagerLogger mLogger;
 
-    public AlertingNotificationManager(HeadsUpManagerLogger logger, @Main Handler handler) {
-        mLogger = logger;
-        mHandler = handler;
-    }
-
     protected int mMinimumDisplayTime;
     protected int mStickyForSomeTimeAutoDismissTime;
     protected int mAutoDismissTime;
     @VisibleForTesting
     public Handler mHandler;
+
+    public AlertingNotificationManager(HeadsUpManagerLogger logger, @Main Handler handler) {
+        mLogger = logger;
+        mHandler = handler;
+    }
 
     /**
      * Called when posting a new notification that should alert the user and appear on screen.
