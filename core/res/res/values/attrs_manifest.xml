@@ -3438,6 +3438,20 @@
     <!-- Attributes that can be supplied in an AndroidManifest.xml
          <code>data</code> tag, a child of the
          {@link #AndroidManifestIntentFilter intent-filter} tag, describing
+         a group matching rule consisting of one or more
+         {@link #AndroidManifestData data} tags that must all match.  This
+         tag can be specified multiple times to create multiple groups that
+         will be matched in the order they are defined. -->
+    <declare-styleable name="AndroidManifestUriRelativeFilterGroup"
+        parent="AndroidManifestIntentFilter">
+        <!-- Specify if this group is allow rule or disallow rule.  If this
+             attribute is not specified then it is assumed to be true -->
+        <attr name="allow" format="boolean"/>
+    </declare-styleable>
+
+    <!-- Attributes that can be supplied in an AndroidManifest.xml
+         <code>data</code> tag, a child of the
+         {@link #AndroidManifestIntentFilter intent-filter} tag, describing
          the types of data that match.  This tag can be specified multiple
          times to supply multiple data options, as described in the
          {@link android.content.IntentFilter} class.  Note that all such
@@ -3445,7 +3459,8 @@
          <code>&lt;data android:scheme="myscheme" android:host="me.com" /&gt;</code>
          is equivalent to <code>&lt;data android:scheme="myscheme" /&gt;
          &lt;data android:host="me.com" /&gt;</code>. -->
-    <declare-styleable name="AndroidManifestData" parent="AndroidManifestIntentFilter">
+    <declare-styleable name="AndroidManifestData"
+        parent="AndroidManifestIntentFilter AndroidManifestUriRelativeFilterGroup">
         <!-- Specify a MIME type that is handled, as per
              {@link android.content.IntentFilter#addDataType
              IntentFilter.addDataType()}.
@@ -3549,6 +3564,70 @@
              IntentFilter.addDataPath()} with
              {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
         <attr name="pathSuffix" />
+        <!-- Specify a URI query that must exactly match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_LITERAL}. -->
+        <attr name="query" format="string" />
+        <!-- Specify a URI query that must be a prefix to match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_PREFIX}. -->
+        <attr name="queryPrefix" format="string" />
+        <!-- Specify a URI query that matches a simple pattern, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_SIMPLE_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="queryPattern" format="string" />
+        <!-- Specify a URI query that matches an advanced pattern, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_ADVANCED_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="queryAdvancedPattern" format="string" />
+        <!-- Specify a URI query that must be a suffix to match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
+        <attr name="querySuffix" format="string" />
+        <!-- Specify a URI fragment that must exactly match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_LITERAL}. -->
+        <attr name="fragment" format="string" />
+        <!-- Specify a URI fragment that must be a prefix to match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_PREFIX}. -->
+        <attr name="fragmentPrefix" format="string" />
+        <!-- Specify a URI fragment that matches a simple pattern, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_SIMPLE_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="fragmentPattern" format="string" />
+        <!-- Specify a URI fragment that matches an advanced pattern, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_ADVANCED_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="fragmentAdvancedPattern" format="string" />
+        <!-- Specify a URI fragment that must be a suffix to match, as a
+             {@link android.content.UriRelativeFilter UriRelativeFilter} with
+             {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
+        <attr name="fragmentSuffix" format="string" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml

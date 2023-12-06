@@ -415,6 +415,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor, android::IDiagn
   intent_filter_action["action"].Action(RequiredNameIsNotEmpty);
   intent_filter_action["category"].Action(RequiredNameIsNotEmpty);
   intent_filter_action["data"];
+  intent_filter_action["uri-relative-filter-group"];
+  intent_filter_action["uri-relative-filter-group"]["data"];
 
   // Common <meta-data> actions.
   xml::XmlNodeAction meta_data_action;

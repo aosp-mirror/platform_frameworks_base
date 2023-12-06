@@ -16,9 +16,12 @@
 
 package android.os;
 
+import android.annotation.IntDef;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
@@ -67,6 +70,17 @@ public class PatternMatcher implements Parcelable {
      * end of the string it is tested against.
      */
     public static final int PATTERN_SUFFIX = 4;
+
+    /** @hide */
+    @IntDef(value = {
+            PATTERN_LITERAL,
+            PATTERN_PREFIX,
+            PATTERN_SIMPLE_GLOB,
+            PATTERN_ADVANCED_GLOB,
+            PATTERN_SUFFIX,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PatternType {}
 
     // token types for advanced matching
     private static final int TOKEN_TYPE_LITERAL = 0;
