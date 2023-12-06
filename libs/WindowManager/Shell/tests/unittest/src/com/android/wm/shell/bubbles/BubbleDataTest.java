@@ -221,6 +221,22 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     @Test
+    public void testAddAppBubble_setsTime() {
+        // Setup
+        mBubbleData.setListener(mListener);
+
+        // Test
+        assertThat(mAppBubble.getLastActivity()).isEqualTo(0);
+        setCurrentTime(1000);
+        mBubbleData.notificationEntryUpdated(mAppBubble, true /* suppressFlyout*/,
+                false /* showInShade */);
+
+        // Verify
+        assertThat(mBubbleData.getBubbleInStackWithKey(mAppBubble.getKey())).isEqualTo(mAppBubble);
+        assertThat(mAppBubble.getLastActivity()).isEqualTo(1000);
+    }
+
+    @Test
     public void testRemoveBubble() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
