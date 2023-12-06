@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.filterNotNull
 
 @SysUISingleton
 class FakeDeviceEntryFaceAuthRepository @Inject constructor() : DeviceEntryFaceAuthRepository {
-
     override val isAuthenticated = MutableStateFlow(false)
     override val canRunFaceAuth = MutableStateFlow(false)
     private val _authenticationStatus = MutableStateFlow<FaceAuthenticationStatus?>(null)
