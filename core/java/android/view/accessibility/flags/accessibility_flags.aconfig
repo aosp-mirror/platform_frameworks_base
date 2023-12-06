@@ -17,17 +17,17 @@ flag {
 }
 
 flag {
+    name: "cleanup_accessibility_warning_dialog"
+    namespace: "accessibility"
+    description: "Cleans up duplicated or broken logic surrounding the accessibility warning dialog."
+    bug: "303511250"
+}
+
+flag {
     namespace: "accessibility"
     name: "collection_info_item_counts"
     description: "Fields for total items and the number of important for accessibility items in a collection"
     bug: "302376158"
-}
-
-flag {
-    name: "deduplicate_accessibility_warning_dialog"
-    namespace: "accessibility"
-    description: "Removes duplicate definition of the accessibility warning dialog."
-    bug: "303511250"
 }
 
 flag {

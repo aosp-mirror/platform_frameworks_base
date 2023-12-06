@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @RequiresFlagsEnabled(
-        android.view.accessibility.Flags.FLAG_DEDUPLICATE_ACCESSIBILITY_WARNING_DIALOG)
+        android.view.accessibility.Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
 public class AccessibilityServiceWarningTest {
     private static final String A11Y_SERVICE_PACKAGE_LABEL = "TestA11yService";
     private static final String A11Y_SERVICE_SUMMARY = "TestA11yService summary";

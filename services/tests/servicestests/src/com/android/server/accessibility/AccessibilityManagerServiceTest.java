@@ -21,6 +21,7 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
+import static android.view.accessibility.Flags.FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG;
 
 import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
@@ -850,6 +851,53 @@ public class AccessibilityManagerServiceTest {
         mA11yms.switchUser(mA11yms.getCurrentUserIdLocked() + 1);
 
         assertThat(lockState.get()).containsExactly(false);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
+    public void testIsAccessibilityServiceWarningRequired_requiredByDefault() {
+        mockManageAccessibilityGranted(mTestableContext);
+        final AccessibilityServiceInfo info = new AccessibilityServiceInfo();
+        info.setComponentName(COMPONENT_NAME);
+
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info)).isTrue();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
+    public void testIsAccessibilityServiceWarningRequired_notRequiredIfAlreadyEnabled() {
+        mockManageAccessibilityGranted(mTestableContext);
+        final AccessibilityServiceInfo info_a = new AccessibilityServiceInfo();
+        info_a.setComponentName(COMPONENT_NAME);
+        final AccessibilityServiceInfo info_b = new AccessibilityServiceInfo();
+        info_b.setComponentName(new ComponentName("package_b", "class_b"));
+        final AccessibilityUserState userState = mA11yms.getCurrentUserState();
+        userState.mEnabledServices.clear();
+        userState.mEnabledServices.add(info_b.getComponentName());
+
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_a)).isTrue();
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_b)).isFalse();
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_CLEANUP_ACCESSIBILITY_WARNING_DIALOG)
+    public void testIsAccessibilityServiceWarningRequired_notRequiredIfExistingShortcut() {
+        mockManageAccessibilityGranted(mTestableContext);
+        final AccessibilityServiceInfo info_a = new AccessibilityServiceInfo();
+        info_a.setComponentName(new ComponentName("package_a", "class_a"));
+        final AccessibilityServiceInfo info_b = new AccessibilityServiceInfo();
+        info_b.setComponentName(new ComponentName("package_b", "class_b"));
+        final AccessibilityServiceInfo info_c = new AccessibilityServiceInfo();
+        info_c.setComponentName(new ComponentName("package_c", "class_c"));
+        final AccessibilityUserState userState = mA11yms.getCurrentUserState();
+        userState.mAccessibilityButtonTargets.clear();
+        userState.mAccessibilityButtonTargets.add(info_b.getComponentName().flattenToString());
+        userState.mAccessibilityShortcutKeyTargets.clear();
+        userState.mAccessibilityShortcutKeyTargets.add(info_c.getComponentName().flattenToString());
+
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_a)).isTrue();
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_b)).isFalse();
+        assertThat(mA11yms.isAccessibilityServiceWarningRequired(info_c)).isFalse();
     }
 
     // Single package intents can trigger multiple PackageMonitor callbacks.
