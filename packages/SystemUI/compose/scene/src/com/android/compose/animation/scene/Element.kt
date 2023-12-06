@@ -615,7 +615,9 @@ private inline fun <T> computeValue(
     val toValues = element.sceneValues[toScene]
 
     if (fromValues == null && toValues == null) {
-        error("This should not happen, element $element is neither in $fromScene or $toScene")
+        // TODO(b/311600838): Throw an exception instead once layers of disposed elements are not
+        // run anymore.
+        return lastValue()
     }
 
     // The element is shared: interpolate between the value in fromScene and the value in toScene.
