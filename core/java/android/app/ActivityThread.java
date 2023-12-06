@@ -2292,7 +2292,8 @@ public final class ActivityThread extends ClientTransactionHandler
                     case DUMP_HEAP: return "DUMP_HEAP";
                     case DUMP_ACTIVITY: return "DUMP_ACTIVITY";
                     case SET_CORE_SETTINGS: return "SET_CORE_SETTINGS";
-                    case UPDATE_PACKAGE_COMPATIBILITY_INFO: return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
+                    case UPDATE_PACKAGE_COMPATIBILITY_INFO:
+                        return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
                     case DUMP_PROVIDER: return "DUMP_PROVIDER";
                     case UNSTABLE_PROVIDER_DIED: return "UNSTABLE_PROVIDER_DIED";
                     case REQUEST_ASSIST_CONTEXT_EXTRAS: return "REQUEST_ASSIST_CONTEXT_EXTRAS";
@@ -3804,7 +3805,7 @@ public final class ActivityThread extends ClientTransactionHandler
 
         boolean isSandboxActivityContext =
                 sandboxActivitySdkBasedContext()
-                        && SdkSandboxActivityAuthority.isSdkSandboxActivity(
+                        && SdkSandboxActivityAuthority.isSdkSandboxActivityIntent(
                                 mSystemContext, r.intent);
         boolean isSandboxedSdkContextUsed = false;
         ContextImpl activityBaseContext;

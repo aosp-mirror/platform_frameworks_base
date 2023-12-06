@@ -12606,8 +12606,11 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /**
-     * @deprecated Use {@link SdkSandboxActivityAuthority#isSdkSandboxActivity} instead.
+     * @deprecated Use {@link SdkSandboxActivityAuthority#isSdkSandboxActivityIntent} instead.
      * Once the other API is finalized this method will be removed.
+     *
+     * TODO(b/300059435): remove as part of the cleanup.
+     *
      * @hide
      */
     @Deprecated
