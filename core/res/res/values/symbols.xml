@@ -4142,6 +4142,7 @@
   <java-symbol type="array" name="config_foldedDeviceStates" />
   <java-symbol type="array" name="config_halfFoldedDeviceStates" />
   <java-symbol type="array" name="config_rearDisplayDeviceStates" />
+  <java-symbol type="array" name="config_concurrentDisplayDeviceStates" />
   <java-symbol type="bool" name="config_windowManagerHalfFoldAutoRotateOverride" />
   <java-symbol type="bool" name="config_windowManagerPauseRotationWhenUnfolding" />
   <java-symbol type="integer" name="config_pauseRotationWhenUnfolding_hingeEventTimeout" />

@@ -45,6 +45,15 @@
         android:text="@string/connected_display_dialog_start_mirroring"
         android:textAppearance="@style/TextAppearance.Dialog.Title" />
 
+    <TextView
+        android:id="@+id/dual_display_warning"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:visibility="gone"
+        android:text="@string/connected_display_dialog_dual_display_stop_warning"
+        android:textAppearance="@style/TextAppearance.Dialog.Body" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
