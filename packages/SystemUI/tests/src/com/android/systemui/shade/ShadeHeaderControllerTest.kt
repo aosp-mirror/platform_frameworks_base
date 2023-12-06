@@ -83,6 +83,7 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
+import android.graphics.Insets
 import org.mockito.junit.MockitoJUnit
 
 private val EMPTY_CHANGES = ConstraintsChanges()
@@ -930,12 +931,16 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
         return windowInsets
     }
 
-    private fun mockInsetsProvider(
-        insets: Pair<Int, Int> = 0 to 0,
-        cornerCutout: Boolean = false,
-    ) {
+    private fun mockInsetsProvider(insets: Pair<Int, Int> = 0 to 0, cornerCutout: Boolean = false) {
         whenever(insetsProvider.getStatusBarContentInsetsForCurrentRotation())
-            .thenReturn(insets.toAndroidPair())
+                .thenReturn(
+                        Insets.of(
+                                /* left= */ insets.first,
+                                /* top= */ 0,
+                                /* right= */ insets.second,
+                                /* bottom= */ 0
+                        )
+                )
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(cornerCutout)
     }
 
@@ -980,7 +985,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
             )
             .thenReturn(EMPTY_CHANGES)
         whenever(insetsProvider.getStatusBarContentInsetsForCurrentRotation())
-            .thenReturn(Pair(0, 0).toAndroidPair())
+            .thenReturn(Insets.NONE)
         whenever(insetsProvider.currentRotationHasCornerCutout()).thenReturn(false)
         setupCurrentInsets(null)
     }

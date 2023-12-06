@@ -24,11 +24,11 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags.TRANSIT_CLOCK
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.ClockId
-import com.android.systemui.plugins.ClockMetadata
-import com.android.systemui.plugins.ClockProviderPlugin
-import com.android.systemui.plugins.ClockSettings
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockId
+import com.android.systemui.plugins.clocks.ClockMetadata
+import com.android.systemui.plugins.clocks.ClockProviderPlugin
+import com.android.systemui.plugins.clocks.ClockSettings
 import com.android.systemui.plugins.PluginLifecycleManager
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
@@ -381,12 +381,15 @@ class ClockRegistryTest : SysuiTestCase() {
     }
 
     @Test
-    fun knownPluginAttached_clockAndListChanged_notLoaded() {
-        val lifecycle1 = FakeLifecycle("Metro", null).apply {
-            mComponentName = ComponentName("com.android.systemui.clocks.metro", "MetroClock")
+    fun knownPluginAttached_clockAndListChanged_loadedCurrent() {
+        val metroLifecycle = FakeLifecycle("Metro", null).apply {
+            mComponentName = ComponentName("com.android.systemui.clocks.metro", "Metro")
         }
-        val lifecycle2 = FakeLifecycle("BigNum", null).apply {
-            mComponentName = ComponentName("com.android.systemui.clocks.bignum", "BigNumClock")
+        val bignumLifecycle = FakeLifecycle("BigNum", null).apply {
+            mComponentName = ComponentName("com.android.systemui.clocks.bignum", "BigNum")
+        }
+        val calligraphyLifecycle = FakeLifecycle("Calligraphy", null).apply {
+            mComponentName = ComponentName("com.android.systemui.clocks.calligraphy", "Calligraphy")
         }
 
         var changeCallCount = 0
@@ -401,15 +404,21 @@ class ClockRegistryTest : SysuiTestCase() {
         assertEquals(1, changeCallCount)
         assertEquals(0, listChangeCallCount)
 
-        assertEquals(false, pluginListener.onPluginAttached(lifecycle1))
+        assertEquals(false, pluginListener.onPluginAttached(metroLifecycle))
         scheduler.runCurrent()
         assertEquals(1, changeCallCount)
         assertEquals(1, listChangeCallCount)
 
-        assertEquals(false, pluginListener.onPluginAttached(lifecycle2))
+        assertEquals(false, pluginListener.onPluginAttached(bignumLifecycle))
         scheduler.runCurrent()
         assertEquals(1, changeCallCount)
         assertEquals(2, listChangeCallCount)
+
+        // This returns true, but doesn't trigger onCurrentClockChanged yet
+        assertEquals(true, pluginListener.onPluginAttached(calligraphyLifecycle))
+        scheduler.runCurrent()
+        assertEquals(1, changeCallCount)
+        assertEquals(3, listChangeCallCount)
     }
 
     @Test

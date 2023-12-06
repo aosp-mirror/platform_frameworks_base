@@ -8955,9 +8955,9 @@ android.view.accessibility.IAccessibilityManager
 android.view.accessibility.IAccessibilityManagerClient$Stub$Proxy
 android.view.accessibility.IAccessibilityManagerClient$Stub
 android.view.accessibility.IAccessibilityManagerClient
-android.view.accessibility.IWindowMagnificationConnection$Stub$Proxy
-android.view.accessibility.IWindowMagnificationConnection$Stub
-android.view.accessibility.IWindowMagnificationConnection
+android.view.accessibility.IMagnificationConnection$Stub$Proxy
+android.view.accessibility.IMagnificationConnection$Stub
+android.view.accessibility.IMagnificationConnection
 android.view.accessibility.WeakSparseArray$WeakReferenceWithId
 android.view.accessibility.WeakSparseArray
 android.view.animation.AccelerateDecelerateInterpolator

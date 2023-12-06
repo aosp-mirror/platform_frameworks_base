@@ -383,6 +383,8 @@ applications that come with the platform
         <!-- Permission required for ShortcutManagerUsageTest CTS test. -->
         <permission name="android.permission.ACCESS_SHORTCUTS"/>
         <permission name="android.permission.REBOOT"/>
+        <!-- Permission required for NfcResolverActivity CTS tests. -->
+        <permission name="android.permission.SHOW_CUSTOMIZED_RESOLVER"/>
         <!-- Permission required for access VIBRATOR_STATE. -->
         <permission name="android.permission.ACCESS_VIBRATOR_STATE"/>
         <!-- Permission required for UsageStatsTest CTS test. -->

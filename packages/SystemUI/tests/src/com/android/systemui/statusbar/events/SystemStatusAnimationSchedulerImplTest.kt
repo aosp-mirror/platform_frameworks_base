@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.events
 
+import android.graphics.Insets
 import android.graphics.Rect
 import android.os.Process
 import android.testing.AndroidTestingRunner
@@ -91,15 +92,19 @@ class SystemStatusAnimationSchedulerImplTest : SysuiTestCase() {
 
         // StatusBarContentInsetProvider is mocked. Ensure that it returns some mocked values.
         whenever(statusBarContentInsetProvider.getStatusBarContentInsetsForCurrentRotation())
-            .thenReturn(android.util.Pair(10, 10))
+            .thenReturn(
+                Insets.of(/* left = */ 10, /* top = */ 10, /* right = */ 10, /* bottom = */ 0)
+            )
         whenever(statusBarContentInsetProvider.getStatusBarContentAreaForCurrentRotation())
-            .thenReturn(Rect(10, 0, 990, 100))
+            .thenReturn(
+                Rect(/* left = */ 10, /* top = */ 10, /* right = */ 990, /* bottom = */ 100)
+            )
 
         // StatusBarWindowController is mocked. The addViewToWindow function needs to be mocked to
         // ensure that the chip view is added to a parent view
         whenever(statusBarWindowController.addViewToWindow(any(), any())).then {
             val statusbarFake = FrameLayout(mContext)
-            statusbarFake.layout(0, 0, 1000, 100)
+            statusbarFake.layout(/* l = */ 0, /* t = */ 0, /* r = */ 1000, /* b = */ 100)
             statusbarFake.addView(
                 it.arguments[0] as View,
                 it.arguments[1] as FrameLayout.LayoutParams

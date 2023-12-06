@@ -125,6 +125,25 @@
     <dimen name="navigation_edge_cancelled_arrow_height">0dp</dimen>
     <dimen name="navigation_edge_cancelled_edge_corners">6dp</dimen>
 
+    <!--
+         NOTICE: STATUS BAR INTERNALS. DO NOT READ THESE OUTSIDE OF STATUS BAR.
+
+         Below are the bottom margin values for each rotation [1].
+         Only used when the value is >= 0.
+         A value of 0 means that the content has 0 bottom margin, and will be at the bottom of the
+         status bar.
+         When the value is < 0, the value is ignored, and content will be centered vertically.
+
+         [1] Rotation defined as in android.view.Surface.Rotation.
+         Rotation 0 means natural orientation. If a device is naturally portrait (e.g. a phone),
+         rotation 0 is portrait. If a device is naturally landscape (e.g a tablet), rotation 0 is
+         landscape.
+     -->
+    <dimen name="status_bar_bottom_aligned_margin_rotation_0">-1px</dimen>
+    <dimen name="status_bar_bottom_aligned_margin_rotation_90">-1px</dimen>
+    <dimen name="status_bar_bottom_aligned_margin_rotation_180">-1px</dimen>
+    <dimen name="status_bar_bottom_aligned_margin_rotation_270">-1px</dimen>
+
     <!-- Height of the system icons container view in the status bar -->
     <dimen name="status_bar_system_icons_height">@dimen/status_bar_icon_size_sp</dimen>
 

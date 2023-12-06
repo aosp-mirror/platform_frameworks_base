@@ -61,6 +61,7 @@ class SpeechRecognizerImpl extends SpeechRecognizer {
     private static final int MSG_SET_TEMPORARY_ON_DEVICE_COMPONENT = 5;
     private static final int MSG_CHECK_RECOGNITION_SUPPORT = 6;
     private static final int MSG_TRIGGER_MODEL_DOWNLOAD = 7;
+    private static final int MSG_DESTROY = 8;
 
     /** The actual RecognitionService endpoint */
     private IRecognitionService mService;
@@ -77,39 +78,31 @@ class SpeechRecognizerImpl extends SpeechRecognizer {
     private IRecognitionServiceManager mManagerService;
 
     /** Handler that will execute the main tasks */
-    private Handler mHandler = new Handler(Looper.getMainLooper()) {
+    private final Handler mHandler = new Handler(Looper.getMainLooper()) {
 
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case MSG_START:
-                    handleStartListening((Intent) msg.obj);
-                    break;
-                case MSG_STOP:
-                    handleStopMessage();
-                    break;
-                case MSG_CANCEL:
-                    handleCancelMessage();
-                    break;
-                case MSG_CHANGE_LISTENER:
-                    handleChangeListener((RecognitionListener) msg.obj);
-                    break;
-                case MSG_SET_TEMPORARY_ON_DEVICE_COMPONENT:
-                    handleSetTemporaryComponent((ComponentName) msg.obj);
-                    break;
-                case MSG_CHECK_RECOGNITION_SUPPORT:
+                case MSG_START -> handleStartListening((Intent) msg.obj);
+                case MSG_STOP -> handleStopMessage();
+                case MSG_CANCEL -> handleCancelMessage();
+                case MSG_CHANGE_LISTENER -> handleChangeListener((RecognitionListener) msg.obj);
+                case MSG_SET_TEMPORARY_ON_DEVICE_COMPONENT ->
+                        handleSetTemporaryComponent((ComponentName) msg.obj);
+                case MSG_CHECK_RECOGNITION_SUPPORT -> {
                     CheckRecognitionSupportArgs args = (CheckRecognitionSupportArgs) msg.obj;
                     handleCheckRecognitionSupport(
                             args.mIntent, args.mCallbackExecutor, args.mCallback);
-                    break;
-                case MSG_TRIGGER_MODEL_DOWNLOAD:
+                }
+                case MSG_TRIGGER_MODEL_DOWNLOAD -> {
                     ModelDownloadListenerArgs modelDownloadListenerArgs =
                             (ModelDownloadListenerArgs) msg.obj;
                     handleTriggerModelDownload(
                             modelDownloadListenerArgs.mIntent,
                             modelDownloadListenerArgs.mExecutor,
                             modelDownloadListenerArgs.mModelDownloadListener);
-                    break;
+                }
+                case MSG_DESTROY -> handleDestroy();
             }
         }
     };
@@ -433,6 +426,10 @@ class SpeechRecognizerImpl extends SpeechRecognizer {
 
     @Override
     public void destroy() {
+        putMessage(mHandler.obtainMessage(MSG_DESTROY));
+    }
+
+    private void handleDestroy() {
         if (mService != null) {
             try {
                 mService.cancel(mListener, /*isShutdown*/ true);

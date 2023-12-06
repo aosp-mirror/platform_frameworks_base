@@ -25,7 +25,6 @@ import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
-import com.android.systemui.shade.ShadeEventsModule;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationLaunchAnimatorControllerProvider;
@@ -100,7 +99,6 @@ import javax.inject.Provider;
         CoordinatorsModule.class,
         FooterViewModelModule.class,
         KeyguardNotificationVisibilityProviderModule.class,
-        ShadeEventsModule.class,
         NotificationDataLayerModule.class,
         NotifPipelineChoreographerModule.class,
         NotificationSectionHeadersModule.class,

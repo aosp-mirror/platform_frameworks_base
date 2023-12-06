@@ -29,7 +29,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.plugins.ClockController
+import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.res.R
 import kotlinx.coroutines.launch
 

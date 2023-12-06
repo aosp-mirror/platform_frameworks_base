@@ -1057,6 +1057,12 @@ public final class InputManager {
         mGlobal.setCustomPointerIcon(icon);
     }
 
+    /** @hide */
+    public boolean setPointerIcon(PointerIcon icon, int displayId, int deviceId, int pointerId,
+            IBinder inputToken) {
+        return mGlobal.setPointerIcon(icon, displayId, deviceId, pointerId, inputToken);
+    }
+
     /**
      * Check if showing a {@link android.view.PointerIcon} for styluses is enabled.
      *

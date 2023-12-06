@@ -11,6 +11,10 @@ android_test {
         "src/**/*.java",
     ],
 
+    exclude_srcs: [
+        "src/com/android/server/power/stats/PowerStatsStoreTest.java",
+    ],
+
     static_libs: [
         "services.core",
         "coretests-aidl",
@@ -51,4 +55,20 @@ android_test {
     optimize: {
         enabled: false,
     },
+}
+
+android_ravenwood_test {
+    name: "PowerStatsTestsRavenwood",
+    static_libs: [
+        "services.core",
+        "modules-utils-binary-xml",
+
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+    ],
+    srcs: [
+        "src/com/android/server/power/stats/PowerStatsStoreTest.java",
+    ],
+    sdk_version: "test_current",
+    auto_gen_config: true,
 }

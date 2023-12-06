@@ -278,8 +278,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     private boolean setAutoRevokeExemptedInternal(@NonNull AndroidPackage pkg, boolean exempted,
             @UserIdInt int userId) {
         final int packageUid = UserHandle.getUid(userId, pkg.getUid());
+        final AttributionSource attributionSource =
+                new AttributionSource(packageUid, pkg.getPackageName(), null);
+
         if (mAppOpsManager.checkOpNoThrow(AppOpsManager.OP_AUTO_REVOKE_MANAGED_BY_INSTALLER,
-                packageUid, pkg.getPackageName()) != MODE_ALLOWED) {
+                attributionSource) != MODE_ALLOWED) {
             // Allowlist user set - don't override
             return false;
         }
@@ -330,8 +333,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         final long identity = Binder.clearCallingIdentity();
         try {
+            final AttributionSource attributionSource =
+                    new AttributionSource(packageUid, packageName, null);
             return mAppOpsManager.checkOpNoThrow(
-                    AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, packageUid, packageName)
+                    AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, attributionSource)
                     == MODE_IGNORED;
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -1157,9 +1162,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     if (resolvedPackageName == null) {
                         return;
                     }
+                    final AttributionSource resolvedAccessorSource =
+                            accessorSource.withPackageName(resolvedPackageName);
+
                     appOpsManager.finishOp(attributionSourceState.token, op,
-                            accessorSource.getUid(), resolvedPackageName,
-                            accessorSource.getAttributionTag());
+                            resolvedAccessorSource);
                 } else {
                     final AttributionSource resolvedAttributionSource =
                             resolveAttributionSource(context, accessorSource);
@@ -1583,16 +1590,19 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (resolvedAccessorPackageName == null) {
                     return AppOpsManager.MODE_ERRORED;
                 }
+                final AttributionSource resolvedAttributionSource =
+                        accessorSource.withPackageName(resolvedAccessorPackageName);
                 final int opMode = appOpsManager.unsafeCheckOpRawNoThrow(op,
-                        accessorSource.getUid(), resolvedAccessorPackageName);
+                        resolvedAttributionSource);
                 final AttributionSource next = accessorSource.getNext();
                 if (!selfAccess && opMode == AppOpsManager.MODE_ALLOWED && next != null) {
                     final String resolvedNextPackageName = resolvePackageName(context, next);
                     if (resolvedNextPackageName == null) {
                         return AppOpsManager.MODE_ERRORED;
                     }
-                    return appOpsManager.unsafeCheckOpRawNoThrow(op, next.getUid(),
-                            resolvedNextPackageName);
+                    final AttributionSource resolvedNextAttributionSource =
+                            next.withPackageName(resolvedNextPackageName);
+                    return appOpsManager.unsafeCheckOpRawNoThrow(op, resolvedNextAttributionSource);
                 }
                 return opMode;
             } else if (startDataDelivery) {
@@ -1615,9 +1625,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // the operation. We return the less permissive of the two and check
                 // the permission op while start the attributed op.
                 if (attributedOp != AppOpsManager.OP_NONE && attributedOp != op) {
-                    checkedOpResult = appOpsManager.checkOpNoThrow(op,
-                            resolvedAttributionSource.getUid(), resolvedAttributionSource
-                                    .getPackageName());
+                    checkedOpResult = appOpsManager.checkOpNoThrow(op, resolvedAttributionSource);
                     if (checkedOpResult == MODE_ERRORED) {
                         return checkedOpResult;
                     }
@@ -1626,12 +1634,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 if (selfAccess) {
                     try {
                         startedOpResult = appOpsManager.startOpNoThrow(
-                                chainStartToken, startedOp,
-                                resolvedAttributionSource.getUid(),
-                                resolvedAttributionSource.getPackageName(),
-                                /*startIfModeDefault*/ false,
-                                resolvedAttributionSource.getAttributionTag(),
-                                message, proxyAttributionFlags, attributionChainId);
+                                chainStartToken, startedOp, resolvedAttributionSource,
+                                /*startIfModeDefault*/ false, message, proxyAttributionFlags,
+                                attributionChainId);
                     } catch (SecurityException e) {
                         Slog.w(LOG_TAG, "Datasource " + attributionSource + " protecting data with"
                                 + " platform defined runtime permission "
@@ -1676,9 +1681,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 // the operation. We return the less permissive of the two and check
                 // the permission op while start the attributed op.
                 if (attributedOp != AppOpsManager.OP_NONE && attributedOp != op) {
-                    checkedOpResult = appOpsManager.checkOpNoThrow(op,
-                            resolvedAttributionSource.getUid(), resolvedAttributionSource
-                                    .getPackageName());
+                    checkedOpResult = appOpsManager.checkOpNoThrow(op, resolvedAttributionSource);
                     if (checkedOpResult == MODE_ERRORED) {
                         return checkedOpResult;
                     }
@@ -1692,10 +1695,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     // As a fallback we note a proxy op that blames the app and the datasource.
                     try {
                         notedOpResult = appOpsManager.noteOpNoThrow(notedOp,
-                                resolvedAttributionSource.getUid(),
-                                resolvedAttributionSource.getPackageName(),
-                                resolvedAttributionSource.getAttributionTag(),
-                                message);
+                                resolvedAttributionSource, message);
                     } catch (SecurityException e) {
                         Slog.w(LOG_TAG, "Datasource " + attributionSource + " protecting data with"
                                 + " platform defined runtime permission "

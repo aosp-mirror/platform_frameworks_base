@@ -37,8 +37,8 @@ import android.view.View;
 
 import com.android.app.animation.Interpolators;
 import com.android.systemui.animation.ViewHierarchyAnimator;
-import com.android.systemui.plugins.ClockConfig;
-import com.android.systemui.plugins.ClockController;
+import com.android.systemui.plugins.clocks.ClockConfig;
+import com.android.systemui.plugins.clocks.ClockController;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;

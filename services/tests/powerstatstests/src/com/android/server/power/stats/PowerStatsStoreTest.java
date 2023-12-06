@@ -18,18 +18,18 @@ package com.android.server.power.stats;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.xmlpull.v1.XmlPullParser;
@@ -37,6 +37,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
@@ -44,14 +45,17 @@ import java.util.List;
 public class PowerStatsStoreTest {
     private static final long MAX_BATTERY_STATS_SNAPSHOT_STORAGE_BYTES = 2 * 1024;
 
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     private PowerStatsStore mPowerStatsStore;
     private File mStoreDirectory;
 
     @Before
-    public void setup() {
-        Context context = InstrumentationRegistry.getContext();
-
-        mStoreDirectory = new File(context.getCacheDir(), "PowerStatsStoreTest");
+    public void setup() throws IOException {
+        mStoreDirectory = Files.createTempDirectory("PowerStatsStoreTest").toFile();
         clearDirectory(mStoreDirectory);
 
         mPowerStatsStore = new PowerStatsStore(mStoreDirectory,

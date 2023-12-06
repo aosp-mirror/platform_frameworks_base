@@ -692,6 +692,7 @@ class DragState {
     void overridePointerIconLocked(int touchSource) {
         mTouchSource = touchSource;
         if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            // TODO(b/293587049): Pointer Icon Refactor: Set the pointer icon from the drag window.
             InputManagerGlobal.getInstance().setPointerIconType(PointerIcon.TYPE_GRABBING);
         }
     }

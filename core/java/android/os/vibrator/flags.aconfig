@@ -44,3 +44,10 @@ flag {
     description: "Enables the independent keyboard vibration settings feature"
     bug: "289107579"
 }
+
+flag {
+    namespace: "haptics"
+    name: "adaptive_haptics_enabled"
+    description: "Enables the adaptive haptics feature"
+    bug: "305961689"
+}

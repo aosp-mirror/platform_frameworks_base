@@ -25,6 +25,7 @@ READY_TEST_MODULES=(
   HostStubGenTest-framework-all-test-host-test
   hoststubgen-test-tiny-test
   CtsUtilTestCasesRavenwood
+  CtsOsTestCasesRavenwood # This one uses native sustitution, so let's run it too.
 )
 
 MUST_BUILD_MODULES=(

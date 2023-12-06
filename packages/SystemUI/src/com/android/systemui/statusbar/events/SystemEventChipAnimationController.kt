@@ -87,8 +87,8 @@ class SystemEventChipAnimationController @Inject constructor(
             animationWindowView.addView(
                     it.view,
                     layoutParamsDefault(
-                            if (animationWindowView.isLayoutRtl) insets.first
-                            else insets.second))
+                            if (animationWindowView.isLayoutRtl) insets.left
+                            else insets.right))
             it.view.alpha = 0f
             // For some reason, the window view's measured width is always 0 here, so use the
             // parent (status bar)
@@ -289,7 +289,7 @@ class SystemEventChipAnimationController @Inject constructor(
      */
     private fun updateChipBounds(chip: BackgroundAnimatableView, contentArea: Rect) {
         // decide which direction we're animating from, and then set some screen coordinates
-        val chipTop = (contentArea.bottom - chip.view.measuredHeight) / 2
+        val chipTop = contentArea.top + (contentArea.height() - chip.view.measuredHeight) / 2
         val chipBottom = chipTop + chip.view.measuredHeight
         val chipRight: Int
         val chipLeft: Int

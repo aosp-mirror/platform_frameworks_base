@@ -223,6 +223,9 @@ public final class PointerIcon implements Parcelable {
      * @throws IllegalArgumentException if context is null.
      */
     public static @NonNull PointerIcon getSystemIcon(@NonNull Context context, int type) {
+        // TODO(b/293587049): Pointer Icon Refactor: There is no need to load the system
+        // icon resource into memory outside of system server. Remove the need to load
+        // resources when getting a system icon.
         if (context == null) {
             throw new IllegalArgumentException("context must not be null");
         }

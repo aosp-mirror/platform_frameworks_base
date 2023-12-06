@@ -285,12 +285,12 @@ oneway interface IStatusBar
     void suppressAmbientDisplay(boolean suppress);
 
     /**
-     * Requests {@link WindowMagnification} to set window magnification connection through
-     * {@link AccessibilityManager#setWindowMagnificationConnection(IWindowMagnificationConnection)}
+     * Requests {@link Magnification} to set magnification connection to SystemUI through
+     * {@link AccessibilityManager#setMagnificationConnection(IMagnificationConnection)}
      *
      * @param connect {@code true} if needs connection, otherwise set the connection to null.
      */
-    void requestWindowMagnificationConnection(boolean connect);
+    void requestMagnificationConnection(boolean connect);
 
     /**
      * Allow for pass-through arguments from `adb shell cmd statusbar <args>`, and write to the

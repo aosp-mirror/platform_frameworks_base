@@ -23,11 +23,11 @@ import android.app.PendingIntent
 import android.app.StatusBarManager
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Insets
 import android.os.Bundle
 import android.os.Trace
 import android.os.Trace.TRACE_TAG_APP
 import android.provider.AlarmClock
-import android.util.Pair
 import android.view.DisplayCutout
 import android.view.View
 import android.view.WindowInsets
@@ -402,9 +402,9 @@ constructor(
     private fun updateConstraintsForInsets(view: MotionLayout, insets: WindowInsets) {
         val cutout = insets.displayCutout.also { this.cutout = it }
 
-        val sbInsets: Pair<Int, Int> = insetsProvider.getStatusBarContentInsetsForCurrentRotation()
-        val cutoutLeft = sbInsets.first
-        val cutoutRight = sbInsets.second
+        val sbInsets: Insets = insetsProvider.getStatusBarContentInsetsForCurrentRotation()
+        val cutoutLeft = sbInsets.left
+        val cutoutRight = sbInsets.right
         val hasCornerCutout: Boolean = insetsProvider.currentRotationHasCornerCutout()
         updateQQSPaddings()
         // Set these guides as the left/right limits for content that lives in the top row, using

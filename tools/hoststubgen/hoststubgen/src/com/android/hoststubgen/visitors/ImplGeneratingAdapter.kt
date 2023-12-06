@@ -192,18 +192,24 @@ class ImplGeneratingAdapter(
         }
 
         log.withIndent {
+            var willThrow = false
+            if (policy.policy == FilterPolicy.Throw) {
+                log.v("Making method throw...")
+                willThrow = true
+                innerVisitor = ThrowingMethodAdapter(
+                    access, name, descriptor, signature, exceptions, innerVisitor)
+                    .withAnnotation(HostStubGenProcessedAsThrow.CLASS_DESCRIPTOR)
+            }
             if ((access and Opcodes.ACC_NATIVE) != 0 && nativeSubstitutionClass != null) {
                 log.v("Rewriting native method...")
                 return NativeSubstitutingMethodAdapter(
                         access, name, descriptor, signature, exceptions, innerVisitor)
                     .withAnnotation(HostStubGenProcessedAsSubstitute.CLASS_DESCRIPTOR)
             }
-            if (policy.policy == FilterPolicy.Throw) {
-                log.v("Making method throw...")
-                return ThrowingMethodAdapter(
-                        access, name, descriptor, signature, exceptions, innerVisitor)
-                    .withAnnotation(HostStubGenProcessedAsThrow.CLASS_DESCRIPTOR)
+            if (willThrow) {
+                return innerVisitor
             }
+
             if (policy.policy == FilterPolicy.Ignore) {
                 when (Type.getReturnType(descriptor)) {
                     Type.VOID_TYPE -> {
@@ -218,8 +224,8 @@ class ImplGeneratingAdapter(
                 }
             }
         }
-        if (substituted && innerVisitor != null) {
-            innerVisitor.withAnnotation(HostStubGenProcessedAsSubstitute.CLASS_DESCRIPTOR)
+        if (substituted) {
+            innerVisitor?.withAnnotation(HostStubGenProcessedAsSubstitute.CLASS_DESCRIPTOR)
         }
 
         return innerVisitor
@@ -309,13 +315,13 @@ class ImplGeneratingAdapter(
             next: MethodVisitor?
     ) : MethodVisitor(OPCODE_VERSION, next) {
         override fun visitCode() {
-            super.visitCode()
-
             throw RuntimeException("NativeSubstitutingMethodVisitor should be called on " +
                     " native method, where visitCode() shouldn't be called.")
         }
 
         override fun visitEnd() {
+            super.visitCode()
+
             var targetDescriptor = descriptor
             var argOffset = 0
 

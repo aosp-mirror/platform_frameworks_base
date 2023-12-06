@@ -34,6 +34,9 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shade.ShadeController
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.data.repository.FakeShadeRepository
+import com.android.systemui.shade.data.repository.ShadeAnimationRepository
+import com.android.systemui.shade.domain.interactor.ShadeAnimationInteractorLegacyImpl
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -86,6 +89,8 @@ class ActivityStarterImplTest : SysuiTestCase() {
     @Mock private lateinit var activityIntentHelper: ActivityIntentHelper
     private lateinit var underTest: ActivityStarterImpl
     private val mainExecutor = FakeExecutor(FakeSystemClock())
+    private val shadeAnimationInteractor =
+        ShadeAnimationInteractorLegacyImpl(ShadeAnimationRepository(), FakeShadeRepository())
 
     @Before
     fun setUp() {
@@ -99,6 +104,7 @@ class ActivityStarterImplTest : SysuiTestCase() {
                 Lazy { keyguardViewMediator },
                 Lazy { shadeController },
                 Lazy { shadeViewController },
+                shadeAnimationInteractor,
                 Lazy { statusBarKeyguardViewManager },
                 Lazy { notifShadeWindowController },
                 activityLaunchAnimator,

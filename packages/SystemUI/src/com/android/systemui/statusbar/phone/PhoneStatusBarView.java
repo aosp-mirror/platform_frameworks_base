@@ -20,10 +20,10 @@ package com.android.systemui.statusbar.phone;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Pair;
 import android.view.DisplayCutout;
 import android.view.MotionEvent;
 import android.view.View;
@@ -271,13 +271,12 @@ public class PhoneStatusBarView extends FrameLayout {
     }
 
     private void updateSafeInsets() {
-        Pair<Integer, Integer> insets = mContentInsetsProvider
+        Insets insets = mContentInsetsProvider
                 .getStatusBarContentInsetsForCurrentRotation();
-
         setPadding(
-                insets.first,
-                getPaddingTop(),
-                insets.second,
+                insets.left,
+                insets.top,
+                insets.right,
                 getPaddingBottom());
     }
 }

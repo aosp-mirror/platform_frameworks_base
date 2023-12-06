@@ -11,7 +11,7 @@
  * KIND, either express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.android.systemui.plugins
+package com.android.systemui.plugins.clocks
 
 import android.content.res.Resources
 import android.graphics.Rect
@@ -20,6 +20,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.internal.annotations.Keep
 import com.android.systemui.log.core.MessageBuffer
+import com.android.systemui.plugins.Plugin
 import com.android.systemui.plugins.annotations.ProvidesInterface
 import java.io.PrintWriter
 import java.util.Locale
@@ -145,6 +146,12 @@ interface ClockEvents {
 
     /** Call whenever the weather data should update */
     fun onWeatherDataChanged(data: WeatherData)
+
+    /** Call with alarm information */
+    fun onAlarmDataChanged(data: AlarmData)
+
+    /** Call with zen/dnd information */
+    fun onZenDataChanged(data: ZenData)
 }
 
 /** Methods which trigger various clock animations */

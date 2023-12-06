@@ -59,7 +59,6 @@ class ShadeViewControllerEmptyImpl @Inject constructor() : ShadeViewController {
     }
     override fun onBackPressed() {}
     override fun onBackProgressed(progressFraction: Float) {}
-    override fun setIsLaunchAnimationRunning(running: Boolean) {}
     override fun setAlpha(alpha: Int, animate: Boolean) {}
     override fun setAlphaChangeAnimationEndAction(r: Runnable) {}
     override fun setPulsing(pulsing: Boolean) {}

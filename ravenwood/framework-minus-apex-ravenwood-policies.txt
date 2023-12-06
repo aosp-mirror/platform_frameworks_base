@@ -92,12 +92,6 @@ class com.android.internal.util.StringPool stubclass
 class com.android.internal.os.SomeArgs stubclass
 
 # Parcel
-class android.os.Parcel stubclass
-    method writeException (Ljava/lang/Exception;)V @writeException$ravenwood
-    method writeNoException ()V @writeNoException$ravenwood
-class android.os.Parcel !com.android.hoststubgen.nativesubstitution.Parcel_host
-
-class android.os.Parcelable stubclass
 class android.os.ParcelFormatException stubclass
 class android.os.BadParcelableException stubclass
 class android.os.BadTypeParcelableException stubclass

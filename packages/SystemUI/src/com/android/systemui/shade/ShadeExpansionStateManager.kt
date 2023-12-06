@@ -22,7 +22,6 @@ import android.os.Trace.TRACE_TAG_APP as TRACE_TAG
 import android.util.Log
 import androidx.annotation.FloatRange
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.shade.ShadeStateEvents.ShadeStateEventsListener
 import com.android.systemui.util.Compile
 import java.util.concurrent.CopyOnWriteArrayList
 import javax.inject.Inject
@@ -33,11 +32,10 @@ import javax.inject.Inject
  * TODO(b/200063118): Make this class the one source of truth for the state of panel expansion.
  */
 @SysUISingleton
-class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
+class ShadeExpansionStateManager @Inject constructor() {
 
     private val expansionListeners = CopyOnWriteArrayList<ShadeExpansionListener>()
     private val stateListeners = CopyOnWriteArrayList<ShadeStateListener>()
-    private val shadeStateEventsListeners = CopyOnWriteArrayList<ShadeStateEventsListener>()
 
     @PanelState private var state: Int = STATE_CLOSED
     @FloatRange(from = 0.0, to = 1.0) private var fraction: Float = 0f
@@ -64,14 +62,6 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
     /** Adds a listener that will be notified when the panel state has changed. */
     fun addStateListener(listener: ShadeStateListener) {
         stateListeners.add(listener)
-    }
-
-    override fun addShadeStateEventsListener(listener: ShadeStateEventsListener) {
-        shadeStateEventsListeners.addIfAbsent(listener)
-    }
-
-    override fun removeShadeStateEventsListener(listener: ShadeStateEventsListener) {
-        shadeStateEventsListeners.remove(listener)
     }
 
     /** Returns true if the panel is currently closed and false otherwise. */
@@ -155,12 +145,6 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
         debugLog("go state: ${this.state.panelStateToString()} -> ${state.panelStateToString()}")
         this.state = state
         stateListeners.forEach { it.onPanelStateChanged(state) }
-    }
-
-    fun notifyLaunchingActivityChanged(isLaunchingActivity: Boolean) {
-        for (cb in shadeStateEventsListeners) {
-            cb.onLaunchingActivityChanged(isLaunchingActivity)
-        }
     }
 
     private fun debugLog(msg: String) {

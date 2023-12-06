@@ -16,16 +16,22 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
+import android.os.PowerManager
+import android.os.SystemClock
+import android.view.MotionEvent
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.media.controls.ui.MediaHost
+import com.android.systemui.shade.ShadeViewController
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /** The base view model for the communal hub. */
 abstract class BaseCommunalViewModel(
     private val communalInteractor: CommunalInteractor,
+    private val shadeViewController: ShadeViewController,
+    private val powerManager: PowerManager,
     val mediaHost: MediaHost,
 ) {
     val isKeyguardVisible: Flow<Boolean> = communalInteractor.isKeyguardVisible
@@ -34,6 +40,26 @@ abstract class BaseCommunalViewModel(
 
     fun onSceneChanged(scene: CommunalSceneKey) {
         communalInteractor.onSceneChanged(scene)
+    }
+
+    // TODO(b/308813166): remove once CommunalContainer is moved lower in z-order and doesn't block
+    //  touches anymore.
+    /** Called when a touch is received outside the edge swipe area when hub mode is closed. */
+    fun onOuterTouch(motionEvent: MotionEvent) {
+        // Forward the touch to the shade so that basic gestures like swipe up/down for
+        // shade/bouncer work.
+        shadeViewController.handleExternalTouch(motionEvent)
+    }
+
+    // TODO(b/308813166): remove once CommunalContainer is moved lower in z-order and doesn't block
+    //  touches anymore.
+    /** Called to refresh the screen timeout when a user touch is received. */
+    fun onUserActivity() {
+        powerManager.userActivity(
+            SystemClock.uptimeMillis(),
+            PowerManager.USER_ACTIVITY_EVENT_TOUCH,
+            0
+        )
     }
 
     /** A list of all the communal content to be displayed in the communal hub. */

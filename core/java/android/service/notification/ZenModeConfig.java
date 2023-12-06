@@ -683,7 +683,7 @@ public class ZenModeConfig implements Parcelable {
         if (Flags.modesApi()) {
             rt.zenDeviceEffects = readZenDeviceEffectsXml(parser);
             rt.allowManualInvocation = safeBoolean(parser, RULE_ATT_ALLOW_MANUAL, false);
-            rt.iconResId = safeInt(parser, RULE_ATT_ICON, 0);
+            rt.iconResName = parser.getAttributeValue(null, RULE_ATT_ICON);
             rt.triggerDescription = parser.getAttributeValue(null, RULE_ATT_TRIGGER_DESC);
             rt.type = safeInt(parser, RULE_ATT_TYPE, AutomaticZenRule.TYPE_UNKNOWN);
         }
@@ -725,7 +725,9 @@ public class ZenModeConfig implements Parcelable {
         out.attributeBoolean(null, RULE_ATT_MODIFIED, rule.modified);
         if (Flags.modesApi()) {
             out.attributeBoolean(null, RULE_ATT_ALLOW_MANUAL, rule.allowManualInvocation);
-            out.attributeInt(null, RULE_ATT_ICON, rule.iconResId);
+            if (rule.iconResName != null) {
+                out.attribute(null, RULE_ATT_ICON, rule.iconResName);
+            }
             if (rule.triggerDescription != null) {
                 out.attribute(null, RULE_ATT_TRIGGER_DESC, rule.triggerDescription);
             }
@@ -1918,8 +1920,7 @@ public class ZenModeConfig implements Parcelable {
         public String pkg;
         public int type = AutomaticZenRule.TYPE_UNKNOWN;
         public String triggerDescription;
-        // TODO (b/308672670): switch to string res name
-        public int iconResId;
+        public String iconResName;
         public boolean allowManualInvocation;
 
         public ZenRule() { }
@@ -1950,7 +1951,7 @@ public class ZenModeConfig implements Parcelable {
             pkg = source.readString();
             if (Flags.modesApi()) {
                 allowManualInvocation = source.readBoolean();
-                iconResId = source.readInt();
+                iconResName = source.readString();
                 triggerDescription = source.readString();
                 type = source.readInt();
             }
@@ -1997,7 +1998,7 @@ public class ZenModeConfig implements Parcelable {
             dest.writeString(pkg);
             if (Flags.modesApi()) {
                 dest.writeBoolean(allowManualInvocation);
-                dest.writeInt(iconResId);
+                dest.writeString(iconResName);
                 dest.writeString(triggerDescription);
                 dest.writeInt(type);
             }
@@ -2026,7 +2027,7 @@ public class ZenModeConfig implements Parcelable {
             if (Flags.modesApi()) {
                 sb.append(",deviceEffects=").append(zenDeviceEffects)
                         .append(",allowManualInvocation=").append(allowManualInvocation)
-                        .append(",iconResId=").append(iconResId)
+                        .append(",iconResName=").append(iconResName)
                         .append(",triggerDescription=").append(triggerDescription)
                         .append(",type=").append(type);
             }
@@ -2085,7 +2086,7 @@ public class ZenModeConfig implements Parcelable {
                 return finalEquals
                         && Objects.equals(other.zenDeviceEffects, zenDeviceEffects)
                         && other.allowManualInvocation == allowManualInvocation
-                        && other.iconResId == iconResId
+                        && Objects.equals(other.iconResName, iconResName)
                         && Objects.equals(other.triggerDescription, triggerDescription)
                         && other.type == type;
             }
@@ -2098,7 +2099,7 @@ public class ZenModeConfig implements Parcelable {
             if (Flags.modesApi()) {
                 return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
                         component, configurationActivity, pkg, id, enabler, zenPolicy,
-                        zenDeviceEffects, modified, allowManualInvocation, iconResId,
+                        zenDeviceEffects, modified, allowManualInvocation, iconResName,
                         triggerDescription, type);
             }
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,

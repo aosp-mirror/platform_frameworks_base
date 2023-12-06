@@ -30,9 +30,9 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
-import com.android.systemui.plugins.ClockController
-import com.android.systemui.plugins.ClockFaceConfig
-import com.android.systemui.plugins.ClockFaceController
+import com.android.systemui.plugins.clocks.ClockController
+import com.android.systemui.plugins.clocks.ClockFaceConfig
+import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.settings.FakeSettings
