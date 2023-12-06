@@ -5365,6 +5365,14 @@ public class JobSchedulerService extends com.android.server.SystemService
             }
             pw.println();
 
+            pw.println("Aconfig flags:");
+            pw.increaseIndent();
+            pw.print(Flags.FLAG_THROW_ON_UNSUPPORTED_BIAS_USAGE,
+                    Flags.throwOnUnsupportedBiasUsage());
+            pw.println();
+            pw.decreaseIndent();
+            pw.println();
+
             for (int i = mJobRestrictions.size() - 1; i >= 0; i--) {
                 mJobRestrictions.get(i).dumpConstants(pw);
             }
