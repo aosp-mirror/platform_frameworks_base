@@ -22,6 +22,7 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VI
 import static com.android.internal.inputmethod.SoftInputShowHideReason.HIDE_SOFT_INPUT;
 import static com.android.internal.inputmethod.SoftInputShowHideReason.HIDE_SWITCH_USER;
 import static com.android.internal.inputmethod.SoftInputShowHideReason.SHOW_SOFT_INPUT;
+import static com.android.server.inputmethod.ClientController.ClientState;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME_EXPLICIT;
 import static com.android.server.inputmethod.ImeVisibilityStateComputer.STATE_HIDE_IME_NOT_ALWAYS;
@@ -68,8 +69,7 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
         super.setUp();
         mVisibilityApplier =
                 (DefaultImeVisibilityApplier) mInputMethodManagerService.getVisibilityApplier();
-        mInputMethodManagerService.setAttachedClientForTesting(
-                mock(InputMethodManagerService.ClientState.class));
+        mInputMethodManagerService.setAttachedClientForTesting(mock(ClientState.class));
     }
 
     @Test
