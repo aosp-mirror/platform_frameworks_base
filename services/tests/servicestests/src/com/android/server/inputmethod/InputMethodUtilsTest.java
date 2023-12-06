@@ -1234,7 +1234,7 @@ public class InputMethodUtilsTest {
         // Init InputMethodSettings for the owner user (userId=0), verify calls can get the
         // corresponding user's context, contentResolver and the resources configuration.
         InputMethodUtils.InputMethodSettings settings = new InputMethodUtils.InputMethodSettings(
-                ownerUserContext, methodMap, 0 /* userId */, true);
+                methodMap, 0 /* userId */, true);
         assertEquals(0, settings.getCurrentUserId());
 
         settings.isShowImeWithHardKeyboardEnabled();
