@@ -1162,6 +1162,13 @@ package android.content.pm {
     field public static final int SHOW_IN_LAUNCHER_WITH_PARENT = 0; // 0x0
   }
 
+  public static final class UserProperties.Builder {
+    ctor public UserProperties.Builder();
+    method @NonNull public android.content.pm.UserProperties build();
+    method @NonNull public android.content.pm.UserProperties.Builder setShowInQuietMode(int);
+    method @NonNull public android.content.pm.UserProperties.Builder setShowInSharingSurfaces(int);
+  }
+
 }
 
 package android.content.res {
