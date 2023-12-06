@@ -25,7 +25,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.view.accessibility.AccessibilityManager;
 
@@ -40,6 +39,7 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.util.ListenerSet;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
 
@@ -86,9 +86,10 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
             HeadsUpManagerLogger logger,
             @Main Handler handler,
             GlobalSettings globalSettings,
+            SystemClock systemClock,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             UiEventLogger uiEventLogger) {
-        super(logger, handler);
+        super(logger, handler, systemClock);
         mContext = context;
         mAccessibilityMgr = accessibilityManagerWrapper;
         mUiEventLogger = uiEventLogger;
@@ -234,7 +235,7 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
         final String key = snoozeKey(packageName, mUser);
         Long snoozedUntil = mSnoozedPackages.get(key);
         if (snoozedUntil != null) {
-            if (snoozedUntil > mClock.currentTimeMillis()) {
+            if (snoozedUntil > mSystemClock.elapsedRealtime()) {
                 mLogger.logIsSnoozedReturned(key);
                 return true;
             }
@@ -253,7 +254,7 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
             String packageName = entry.mEntry.getSbn().getPackageName();
             String snoozeKey = snoozeKey(packageName, mUser);
             mLogger.logPackageSnoozed(snoozeKey);
-            mSnoozedPackages.put(snoozeKey, mClock.currentTimeMillis() + mSnoozeLengthMs);
+            mSnoozedPackages.put(snoozeKey, mSystemClock.elapsedRealtime() + mSnoozeLengthMs);
         }
     }
 
@@ -311,7 +312,7 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
     protected void dumpInternal(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("  mTouchAcceptanceDelay="); pw.println(mTouchAcceptanceDelay);
         pw.print("  mSnoozeLengthMs="); pw.println(mSnoozeLengthMs);
-        pw.print("  now="); pw.println(mClock.currentTimeMillis());
+        pw.print("  now="); pw.println(mSystemClock.elapsedRealtime());
         pw.print("  mUser="); pw.println(mUser);
         for (AlertEntry entry: mAlertEntries.values()) {
             pw.print("  HeadsUpEntry="); pw.println(entry.mEntry);

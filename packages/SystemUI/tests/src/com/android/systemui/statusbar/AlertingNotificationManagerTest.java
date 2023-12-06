@@ -46,6 +46,8 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.time.SystemClock;
+import com.android.systemui.util.time.SystemClockImpl;
 
 import org.junit.After;
 import org.junit.Before;
@@ -76,6 +78,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
 
     protected Handler mTestHandler;
     protected final FakeGlobalSettings mGlobalSettings = new FakeGlobalSettings();
+    protected final SystemClock mSystemClock = new SystemClockImpl();
     protected boolean mTimedOut = false;
 
     @Mock protected ExpandableNotificationRow mRow;
@@ -89,8 +92,8 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     private static class TestableAlertingNotificationManager extends AlertingNotificationManager {
         private AlertEntry mLastCreatedEntry;
 
-        private TestableAlertingNotificationManager(Handler handler) {
-            super(new HeadsUpManagerLogger(logcatLogBuffer()), handler);
+        private TestableAlertingNotificationManager(Handler handler, SystemClock systemClock) {
+            super(new HeadsUpManagerLogger(logcatLogBuffer()), handler, systemClock);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
             mStickyForSomeTimeAutoDismissTime = TEST_STICKY_AUTO_DISMISS_TIME;
@@ -115,7 +118,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     }
 
     protected AlertingNotificationManager createAlertingNotificationManager() {
-        return new TestableAlertingNotificationManager(mTestHandler);
+        return new TestableAlertingNotificationManager(mTestHandler, mSystemClock);
     }
 
     protected StatusBarNotification createSbn(int id, Notification n) {

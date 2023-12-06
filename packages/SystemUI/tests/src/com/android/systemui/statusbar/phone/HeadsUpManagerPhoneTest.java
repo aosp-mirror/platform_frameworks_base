@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -89,6 +90,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 ConfigurationController configurationController,
                 Handler handler,
                 GlobalSettings globalSettings,
+                SystemClock systemClock,
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
                 UiEventLogger uiEventLogger,
                 JavaAdapter javaAdapter,
@@ -104,6 +106,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     configurationController,
                     handler,
                     globalSettings,
+                    systemClock,
                     accessibilityManagerWrapper,
                     uiEventLogger,
                     javaAdapter,
@@ -125,6 +128,7 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mConfigurationController,
                 mTestHandler,
                 mGlobalSettings,
+                mSystemClock,
                 mAccessibilityManagerWrapper,
                 mUiEventLogger,
                 mJavaAdapter,

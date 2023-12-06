@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -100,10 +101,11 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
                 HeadsUpManagerLogger logger,
                 Handler handler,
                 GlobalSettings globalSettings,
+                SystemClock systemClock,
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
                 UiEventLogger uiEventLogger) {
-            super(context, logger, handler, globalSettings, accessibilityManagerWrapper,
-                    uiEventLogger);
+            super(context, logger, handler, globalSettings, systemClock,
+                    accessibilityManagerWrapper, uiEventLogger);
             mTouchAcceptanceDelay = TEST_TOUCH_ACCEPTANCE_TIME;
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
@@ -182,7 +184,7 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
 
     private BaseHeadsUpManager createHeadsUpManager() {
         return new TestableHeadsUpManager(mContext, mLogger, mTestHandler, mGlobalSettings,
-                mAccessibilityMgr, mUiEventLoggerFake);
+                mSystemClock, mAccessibilityMgr, mUiEventLoggerFake);
     }
 
     @Override

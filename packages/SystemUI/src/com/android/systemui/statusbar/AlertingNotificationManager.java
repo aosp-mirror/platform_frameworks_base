@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.accessibility.AccessibilityEvent;
@@ -29,6 +28,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
+import com.android.systemui.util.time.SystemClock;
 
 import java.util.stream.Stream;
 
@@ -39,7 +39,7 @@ import java.util.stream.Stream;
  */
 public abstract class AlertingNotificationManager {
     private static final String TAG = "AlertNotifManager";
-    protected final Clock mClock = new Clock();
+    protected final SystemClock mSystemClock;
     protected final ArrayMap<String, AlertEntry> mAlertEntries = new ArrayMap<>();
     protected final HeadsUpManagerLogger mLogger;
 
@@ -49,9 +49,11 @@ public abstract class AlertingNotificationManager {
     @VisibleForTesting
     public Handler mHandler;
 
-    public AlertingNotificationManager(HeadsUpManagerLogger logger, @Main Handler handler) {
+    public AlertingNotificationManager(HeadsUpManagerLogger logger, @Main Handler handler,
+            SystemClock systemClock) {
         mLogger = logger;
         mHandler = handler;
+        mSystemClock = systemClock;
     }
 
     /**
@@ -251,7 +253,7 @@ public abstract class AlertingNotificationManager {
     public long getEarliestRemovalTime(String key) {
         AlertEntry alerting = mAlertEntries.get(key);
         if (alerting != null) {
-            return Math.max(0, alerting.mEarliestRemovalTime - mClock.currentTimeMillis());
+            return Math.max(0, alerting.mEarliestRemovalTime - mSystemClock.elapsedRealtime());
         }
         return 0;
     }
@@ -283,7 +285,7 @@ public abstract class AlertingNotificationManager {
         public void updateEntry(boolean updatePostTime, @Nullable String reason) {
             mLogger.logUpdateEntry(mEntry, updatePostTime, reason);
 
-            final long now = mClock.currentTimeMillis();
+            final long now = mSystemClock.elapsedRealtime();
             mEarliestRemovalTime = now + mMinimumDisplayTime;
 
             if (updatePostTime) {
@@ -318,7 +320,7 @@ public abstract class AlertingNotificationManager {
          * @return true if the notification has been on screen long enough
          */
         public boolean wasShownLongEnough() {
-            return mEarliestRemovalTime < mClock.currentTimeMillis();
+            return mEarliestRemovalTime < mSystemClock.elapsedRealtime();
         }
 
         @Override
@@ -351,7 +353,7 @@ public abstract class AlertingNotificationManager {
             if (mRemoveAlertRunnable != null) {
                 removeAutoRemovalCallbacks("removeAsSoonAsPossible (will be rescheduled)");
 
-                final long timeLeft = mEarliestRemovalTime - mClock.currentTimeMillis();
+                final long timeLeft = mEarliestRemovalTime - mSystemClock.elapsedRealtime();
                 mHandler.postDelayed(mRemoveAlertRunnable, timeLeft);
             }
         }
@@ -361,7 +363,7 @@ public abstract class AlertingNotificationManager {
          * @return the post time
          */
         protected long calculatePostTime() {
-            return mClock.currentTimeMillis();
+            return mSystemClock.elapsedRealtime();
         }
 
         /**
@@ -371,12 +373,6 @@ public abstract class AlertingNotificationManager {
         protected long calculateFinishTime() {
             // Overridden by HeadsUpManager HeadsUpEntry #calculateFinishTime
             return 0;
-        }
-    }
-
-    protected final static class Clock {
-        public long currentTimeMillis() {
-            return SystemClock.elapsedRealtime();
         }
     }
 }
