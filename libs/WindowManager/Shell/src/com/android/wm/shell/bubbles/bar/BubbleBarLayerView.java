@@ -18,6 +18,7 @@ package com.android.wm.shell.bubbles.bar;
 
 import static com.android.wm.shell.animation.Interpolators.ALPHA_IN;
 import static com.android.wm.shell.animation.Interpolators.ALPHA_OUT;
+import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_GESTURE;
 
 import android.annotation.Nullable;
 import android.content.Context;
@@ -36,7 +37,6 @@ import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
-import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.bubbles.DeviceConfig;
 import com.android.wm.shell.bubbles.DismissViewUtils;
 import com.android.wm.shell.common.bubbles.DismissView;
@@ -206,10 +206,13 @@ public class BubbleBarLayerView extends FrameLayout
                 }
             });
 
-            mDragController = new BubbleBarExpandedViewDragController(mExpandedView, mDismissView,
+            mDragController = new BubbleBarExpandedViewDragController(
+                    mExpandedView,
+                    mDismissView,
+                    mAnimationHelper,
                     () -> {
                         mBubbleController.dismissBubble(mExpandedBubble.getKey(),
-                                Bubbles.DISMISS_USER_GESTURE);
+                                DISMISS_USER_GESTURE);
                         return Unit.INSTANCE;
                     });
 
@@ -241,7 +244,11 @@ public class BubbleBarLayerView extends FrameLayout
         mIsExpanded = false;
         final BubbleBarExpandedView viewToRemove = mExpandedView;
         mEducationViewController.hideEducation(/* animated = */ true);
-        mAnimationHelper.animateCollapse(() -> removeView(viewToRemove));
+        if (mDragController != null && mDragController.isStuckToDismiss()) {
+            mAnimationHelper.animateDismiss(() -> removeView(viewToRemove));
+        } else {
+            mAnimationHelper.animateCollapse(() -> removeView(viewToRemove));
+        }
         mBubbleController.getSysuiProxy().onStackExpandChanged(false);
         mExpandedView = null;
         mDragController = null;
