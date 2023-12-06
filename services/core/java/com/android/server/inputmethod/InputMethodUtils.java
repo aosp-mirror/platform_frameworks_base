@@ -43,6 +43,7 @@ import android.view.textservice.SpellCheckerInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.StartInputFlags;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.textservices.TextServicesManagerInternal;
@@ -326,11 +327,7 @@ final class InputMethodUtils {
 
         public boolean isCurrentProfile(int userId) {
             synchronized (this) {
-                if (userId == mCurrentUserId) return true;
-                for (int i = 0; i < mCurrentProfileIds.length; i++) {
-                    if (userId == mCurrentProfileIds[i]) return true;
-                }
-                return false;
+                return ArrayUtils.contains(mCurrentProfileIds, userId);
             }
         }
 
