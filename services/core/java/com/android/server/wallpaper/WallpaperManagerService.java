@@ -2975,7 +2975,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             if (!mContext.bindServiceAsUser(intent, newConn,
                     Context.BIND_AUTO_CREATE | Context.BIND_SHOWING_UI
                             | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE
-                            | Context.BIND_INCLUDE_CAPABILITIES,
+                            | Context.BIND_INCLUDE_CAPABILITIES
+                            | Context.BIND_DENY_ACTIVITY_STARTS,
                     new UserHandle(serviceUserId))) {
                 String msg = "Unable to bind service: "
                         + componentName;
