@@ -554,6 +554,11 @@ public class PipTransition extends PipTransitionController {
                 }
             }
         }
+        // if overlay is present remove it immediately, as exit transition came before it faded out
+        if (mPipOrganizer.mSwipePipToHomeOverlay != null) {
+            startTransaction.remove(mPipOrganizer.mSwipePipToHomeOverlay);
+            clearSwipePipToHomeOverlay();
+        }
         if (pipChange == null) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: No window of exiting PIP is found. Can't play expand animation", TAG);
@@ -1007,7 +1012,6 @@ public class PipTransition extends PipTransitionController {
             // the overlay to the final PIP task.
             startTransaction.reparent(swipePipToHomeOverlay, leash)
                     .setLayer(swipePipToHomeOverlay, Integer.MAX_VALUE);
-            mPipOrganizer.mSwipePipToHomeOverlay = null;
         }
 
         final Rect sourceBounds = pipTaskInfo.configuration.windowConfiguration.getBounds();
@@ -1029,7 +1033,7 @@ public class PipTransition extends PipTransitionController {
         sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
         if (swipePipToHomeOverlay != null) {
             mPipOrganizer.fadeOutAndRemoveOverlay(swipePipToHomeOverlay,
-                    null /* callback */, false /* withStartDelay */);
+                    this::clearSwipePipToHomeOverlay /* callback */, false /* withStartDelay */);
         }
         mPipTransitionState.setInSwipePipToHomeTransition(false);
     }
@@ -1171,6 +1175,10 @@ public class PipTransition extends PipTransitionController {
         mPipMenuController.movePipMenu(null, null, destinationBounds,
                 PipMenuController.ALPHA_NO_CHANGE);
         mPipMenuController.updateMenuBounds(destinationBounds);
+    }
+
+    private void clearSwipePipToHomeOverlay() {
+        mPipOrganizer.mSwipePipToHomeOverlay = null;
     }
 
     @Override
