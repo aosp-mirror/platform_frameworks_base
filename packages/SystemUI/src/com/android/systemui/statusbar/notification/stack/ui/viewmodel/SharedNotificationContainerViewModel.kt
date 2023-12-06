@@ -83,6 +83,14 @@ constructor(
                     marginTop =
                         if (it.useLargeScreenHeader) it.marginTopLargeScreen else it.marginTop,
                     useSplitShade = it.useSplitShade,
+                    paddingTop =
+                        if (it.useSplitShade) {
+                            // When in split shade, the margin is applied twice as the legacy shade
+                            // code uses it to calculate padding.
+                            it.keyguardSplitShadeTopMargin - 2 * it.marginTopLargeScreen
+                        } else {
+                            0
+                        }
                 )
             }
             .distinctUntilChanged()
@@ -156,11 +164,7 @@ constructor(
                 ),
             ) { onLockscreen, bounds, config, (top, isInTransitionToAnyState, qsExpansion) ->
                 if (onLockscreen) {
-                    if (config.useSplitShade) {
-                        bounds.copy(top = 0f)
-                    } else {
-                        bounds
-                    }
+                    bounds.copy(top = bounds.top + config.paddingTop)
                 } else {
                     // When QS expansion > 0, it should directly set the top padding so do not
                     // animate it
@@ -268,5 +272,6 @@ constructor(
         val marginEnd: Int,
         val marginBottom: Int,
         val useSplitShade: Boolean,
+        val paddingTop: Int,
     )
 }
