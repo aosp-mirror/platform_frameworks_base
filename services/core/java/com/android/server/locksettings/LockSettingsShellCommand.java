@@ -155,43 +155,45 @@ class LockSettingsShellCommand extends ShellCommand {
         try (final PrintWriter pw = getOutPrintWriter();) {
             pw.println("lockSettings service commands:");
             pw.println("");
-            pw.println("NOTE: when lock screen is set, all commands require the --old <CREDENTIAL>"
-                    + " argument.");
+            pw.println("NOTE: when a secure lock screen is set, most commands require the");
+            pw.println("--old <CREDENTIAL> option.");
             pw.println("");
             pw.println("  help");
             pw.println("    Prints this help text.");
             pw.println("");
-            pw.println("  get-disabled [--old <CREDENTIAL>] [--user USER_ID]");
-            pw.println("    Checks whether lock screen is disabled.");
+            pw.println("  get-disabled [--user USER_ID]");
+            pw.println("    Prints true if the lock screen is completely disabled, i.e. set to None.");
+            pw.println("    Otherwise prints false.");
             pw.println("");
-            pw.println("  set-disabled [--old <CREDENTIAL>] [--user USER_ID] <true|false>");
-            pw.println("    When true, disables lock screen.");
+            pw.println("  set-disabled [--user USER_ID] <true|false>");
+            pw.println("    Sets whether the lock screen is disabled. If the lock screen is secure, this");
+            pw.println("    has no immediate effect. I.e. this can only change between Swipe and None.");
             pw.println("");
             pw.println("  set-pattern [--old <CREDENTIAL>] [--user USER_ID] <PATTERN>");
-            pw.println("    Sets the lock screen as pattern, using the given PATTERN to unlock.");
+            pw.println("    Sets a secure lock screen that uses the given PATTERN. PATTERN is a series");
+            pw.println("    of digits 1-9 that identify the cells of the pattern.");
             pw.println("");
             pw.println("  set-pin [--old <CREDENTIAL>] [--user USER_ID] <PIN>");
-            pw.println("    Sets the lock screen as PIN, using the given PIN to unlock.");
+            pw.println("    Sets a secure lock screen that uses the given PIN.");
             pw.println("");
             pw.println("  set-password [--old <CREDENTIAL>] [--user USER_ID] <PASSWORD>");
-            pw.println("    Sets the lock screen as password, using the given PASSWORD to unlock.");
+            pw.println("    Sets a secure lock screen that uses the given PASSWORD.");
             pw.println("");
             pw.println("  clear [--old <CREDENTIAL>] [--user USER_ID]");
-            pw.println("    Clears the lock credentials.");
+            pw.println("    Clears the lock credential.");
             pw.println("");
             pw.println("  verify [--old <CREDENTIAL>] [--user USER_ID]");
-            pw.println("    Verifies the lock credentials.");
+            pw.println("    Verifies the lock credential.");
             pw.println("");
             pw.println("  remove-cache [--user USER_ID]");
             pw.println("    Removes cached unified challenge for the managed profile.");
             pw.println("");
             pw.println("  set-resume-on-reboot-provider-package <package_name>");
-            pw.println("    Sets the package name for server based resume on reboot service "
-                    + "provider.");
+            pw.println("    Sets the package name for server based resume on reboot service provider.");
             pw.println("");
             pw.println("  require-strong-auth [--user USER_ID] <reason>");
-            pw.println("    Requires the strong authentication. The current supported reasons: "
-                    + "STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN.");
+            pw.println("    Requires strong authentication. The current supported reasons:");
+            pw.println("    STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN.");
             pw.println("");
         }
     }
