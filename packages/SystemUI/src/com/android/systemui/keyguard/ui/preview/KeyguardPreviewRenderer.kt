@@ -376,6 +376,7 @@ constructor(
                     null, // jank monitor not required for preview mode
                     null, // device entry haptics not required preview mode
                     null, // device entry haptics not required for preview mode
+                    null, // falsing manager not required for preview mode
                 )
             )
         }

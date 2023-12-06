@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.graphics.Point
 import android.util.MathUtils
 import android.view.View.VISIBLE
 import com.android.app.animation.Interpolators
@@ -100,6 +101,9 @@ constructor(
             .map { VISIBLE }
 
     val goneToAodTransition = keyguardTransitionInteractor.transition(from = GONE, to = AOD)
+
+    /** Last point that the root view was tapped */
+    val lastRootViewTapPosition: Flow<Point?> = keyguardInteractor.lastRootViewTapPosition
 
     /** the shared notification container bounds *on the lockscreen* */
     val notificationBounds: StateFlow<NotificationContainerBounds> =
@@ -261,5 +265,9 @@ constructor(
                 AnimatableEvent(fullyHidden, animate)
             }
             .toAnimatedValueFlow()
+    }
+
+    fun setRootViewLastTapPosition(point: Point) {
+        keyguardInteractor.setLastRootViewTapPosition(point)
     }
 }

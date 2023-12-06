@@ -29,15 +29,15 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import androidx.core.view.isVisible
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
-import com.android.systemui.res.R
 import com.android.systemui.animation.view.LaunchableLinearLayout
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardSettingsViewBinder
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import javax.inject.Inject
 import kotlinx.coroutines.DisposableHandle
@@ -47,6 +47,8 @@ class DefaultSettingsPopupMenuSection
 constructor(
     @Main private val resources: Resources,
     private val keyguardSettingsMenuViewModel: KeyguardSettingsMenuViewModel,
+    private val keyguardLongPressViewModel: KeyguardLongPressViewModel,
+    private val keyguardRootViewModel: KeyguardRootViewModel,
     private val vibratorHelper: VibratorHelper,
     private val activityStarter: ActivityStarter,
 ) : KeyguardSection() {
@@ -73,6 +75,8 @@ constructor(
                 KeyguardSettingsViewBinder.bind(
                     constraintLayout.requireViewById<View>(R.id.keyguard_settings_button),
                     keyguardSettingsMenuViewModel,
+                    keyguardLongPressViewModel,
+                    keyguardRootViewModel,
                     vibratorHelper,
                     activityStarter,
                 )
