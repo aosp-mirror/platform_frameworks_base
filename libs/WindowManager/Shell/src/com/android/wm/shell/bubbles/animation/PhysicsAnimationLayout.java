@@ -204,6 +204,13 @@ public class PhysicsAnimationLayout extends FrameLayout {
             return animationForChild(mLayout.getChildAt(index));
         }
 
+
+        protected MultiAnimationStarter animationsForChildrenFromIndex(
+                int startIndex, ChildAnimationConfigurator configurator) {
+            return animationsForChildrenFromIndex(startIndex, /* fadeChildren= */ false,
+                    configurator);
+        }
+
         /**
          * Returns a {@link MultiAnimationStarter} whose startAll method will start the physics
          * animations for all children from startIndex onward. The provided configurator will be
@@ -211,14 +218,16 @@ public class PhysicsAnimationLayout extends FrameLayout {
          * animation appropriately.
          */
         protected MultiAnimationStarter animationsForChildrenFromIndex(
-                int startIndex, ChildAnimationConfigurator configurator) {
+                int startIndex, boolean fadeChildren, ChildAnimationConfigurator configurator) {
             final Set<DynamicAnimation.ViewProperty> allAnimatedProperties = new HashSet<>();
             final List<PhysicsPropertyAnimator> allChildAnims = new ArrayList<>();
 
             // Retrieve the animator for each child, ask the configurator to configure it, then save
             // it and the properties it chose to animate.
             for (int i = startIndex; i < mLayout.getChildCount(); i++) {
-                final PhysicsPropertyAnimator anim = animationForChildAtIndex(i);
+                final PhysicsPropertyAnimator anim = fadeChildren
+                        ? animationForChildAtIndex(i).alpha(0)
+                        : animationForChildAtIndex(i);
                 configurator.configureAnimationForChildAtIndex(i, anim);
                 allAnimatedProperties.addAll(anim.getAnimatedProperties());
                 allChildAnims.add(anim);

@@ -106,7 +106,7 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
         verify(afterExpand).run();
 
         Runnable afterCollapse = mock(Runnable.class);
-        mExpandedController.collapseBackToStack(mExpansionPoint, afterCollapse);
+        mExpandedController.collapseBackToStack(mExpansionPoint, false, afterCollapse);
         waitForPropertyAnimations(DynamicAnimation.TRANSLATION_X, DynamicAnimation.TRANSLATION_Y);
 
         testStackedAtPosition(mExpansionPoint.x, mExpansionPoint.y, -1);
