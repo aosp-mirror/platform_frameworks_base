@@ -480,7 +480,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"साउन्ड तथा भाइब्रेसन"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"सेटिङ"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"भोल्युम घटाएर सुरक्षित स्तरमा पुर्‍याइएको छ"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"हेडफोनको भोल्युम सिफारिस गरिएको समयभन्दा लामो समयदेखि उच्च छ"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"हेडफोनको भोल्युम धेरै बेरदेखि उच्च छ"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"यो हप्ता हेडफोनको भोल्युमले सुरक्षित स्तरको सीमा नाघेको छ"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"सुनिराख्नुहोस्"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"भोल्युम घटाउनुहोस्"</string>
@@ -795,7 +795,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Wi‑Fi अफ छ"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"ब्लुटुथ निष्क्रिय छ"</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"ब्लुटुथ अफ छ"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"बाधा नपुर्‍याउनुहोस् नामक विकल्प निष्क्रिय छ"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Do Not Disturb अन छ"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"कुनै स्वचालित नियमले बाधा नपुऱ्याउनुहोस् नामक विकल्पलाई सक्रियो गऱ्यो (<xliff:g id="ID_1">%s</xliff:g>)।"</string>

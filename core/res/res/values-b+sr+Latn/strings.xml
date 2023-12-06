@@ -314,7 +314,7 @@
     <string name="permgrouplab_readMediaAural" msgid="1858331312624942053">"Muzika i zvuk"</string>
     <string name="permgroupdesc_readMediaAural" msgid="7565467343667089595">"pristup muzici i audio sadržaju na uređaju"</string>
     <string name="permgrouplab_readMediaVisual" msgid="4724874717811908660">"Slike i video snimci"</string>
-    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"pristup slikama i video snimcima na uređaju"</string>
+    <string name="permgroupdesc_readMediaVisual" msgid="4080463241903508688">"pristup slikama i videima na uređaju"</string>
     <string name="permgrouplab_microphone" msgid="2480597427667420076">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"snima zvuk"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fizičke aktivnosti"</string>

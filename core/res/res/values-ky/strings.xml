@@ -1378,7 +1378,7 @@
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Сыноо программасынын режими иштетилди"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Сыноо программасынын режимин өчүрүү үчүн баштапкы параметрлерге кайтарыңыз."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Сериялык консоль иштетилди"</string>
-    <string name="console_running_notification_message" msgid="7892751888125174039">"Майнаптуулугуна таасири тиет. Аны өчүрүү үчүн операциялык тутумду жүктөгүчтү текшериңиз."</string>
+    <string name="console_running_notification_message" msgid="7892751888125174039">"Майнаптуулугуна таасири тиет. Өчүрүү үчүн операциялык тутумду жүктөгүчтү текшериңиз."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"Cынамык MTE иштетилди"</string>
     <string name="mte_override_notification_message" msgid="2441170442725738942">"Иштин майнаптуулугуна жана туруктуулугуна кедергиси тийиши мүмкүн. Өчүрүү үчүн түзмөктү өчүрүп-күйгүзүңүз. Эгер arm64.memtag.bootctl аркылуу иштетилген болсо, алдын ала \"none\" маанисин орнотуңуз."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"USB портунда суюктук же урандылар бар"</string>
@@ -1682,8 +1682,8 @@
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Өчүрүү"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Сунушталган деңгээлден да катуулатып уккуңуз келеби?\n\nМузыканы узакка чейин катуу уксаңыз, угууңуз начарлап кетиши мүмкүн."</string>
-    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Үнүн катуу кылып уга бересизби?\n\nГарнитуранын үнүн катуу чыгарып, сунушталган убакыттан узагыраак угуп жатасыз. Этияттаңыз, кулагыңыздын угуусу начарлап кетиши мүмкүн"</string>
-    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Үнүн катуу кылып угуп жатасыз\n\nГарнитуранын үнүн катуу чыгарып, сунушталган убакыттан узагыраак угуп жатасыз. Этияттаңыз, кулагыңыздын угуусу начарлап кетиши мүмкүн"</string>
+    <string name="csd_dose_reached_warning" product="default" msgid="491875107583931974">"Үнүн катуу кылып уга бересизби?\n\nГарнитуранын үнүн катуу чыгарып, сунушталгандан узагыраак угуп жатасыз. Этияттаңыз, кулагыңыздын угуусу начарлап кетиши мүмкүн"</string>
+    <string name="csd_momentary_exposure_warning" product="default" msgid="7730840903435405501">"Үнүн катуу кылып угуп жатасыз\n\nГарнитуранын үнүн сунушталгандан катуураак кылып угуп жатасыз. Этияттаңыз, кулагыңыздын угуусу начарлап кетиши мүмкүн"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Ыкчам иштетесизби?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Атайын мүмкүнчүлүктөр функциясын пайдалануу үчүн ал күйгүзүлгөндө, үндү катуулатып/акырындаткан эки баскычты тең 3 секунддай коё бербей басып туруңуз."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"Атайын мүмкүнчүлүктөрдүн ыкчам баскычын иштетесизби?"</string>

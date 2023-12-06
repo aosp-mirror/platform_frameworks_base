@@ -1631,7 +1631,7 @@
     <string name="media_route_chooser_title_for_remote_display" msgid="3105906508794326446">"Cast skærm til enhed"</string>
     <string name="media_route_chooser_searching" msgid="6119673534251329535">"Søger efter enheder…"</string>
     <string name="media_route_chooser_extended_settings" msgid="2506352159381327741">"Indstillinger"</string>
-    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Afbryd forbindelsen"</string>
+    <string name="media_route_controller_disconnect" msgid="7362617572732576959">"Afbryd forbindelse"</string>
     <string name="media_route_status_scanning" msgid="8045156315309594482">"Søger..."</string>
     <string name="media_route_status_connecting" msgid="5845597961412010540">"Opretter forbindelse..."</string>
     <string name="media_route_status_available" msgid="1477537663492007608">"Tilgængelig"</string>
@@ -2056,7 +2056,7 @@
     <string name="popup_window_default_title" msgid="6907717596694826919">"Pop op-vindue"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"<xliff:g id="NUMBER">%1$d</xliff:g> mere"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"Appversionen er nedgraderet, eller også er den ikke kompatibel med denne genvej"</string>
-    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"Genvejen kunne ikke gendannes, da appen ikke understøtter backup og gendannelse"</string>
+    <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"Genvejen kunne ikke gendannes, da appen ikke understøtter sikkerhedskopiering og gendannelse"</string>
     <string name="shortcut_restore_signature_mismatch" msgid="579345304221605479">"Genvejen kunne ikke gendannes på grund af uoverensstemmelse i appsignatur"</string>
     <string name="shortcut_restore_unknown_issue" msgid="2478146134395982154">"Genvejen kunne ikke gendannes"</string>
     <string name="shortcut_disabled_reason_unknown" msgid="753074793553599166">"Genvejen er deaktiveret"</string>
