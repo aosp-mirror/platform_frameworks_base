@@ -14,58 +14,41 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model.uninstallstagedata;
+package com.android.packageinstaller.v2.model.uninstallstagedata
 
-import android.app.Activity;
-import com.android.packageinstaller.R;
+import android.app.Activity
+import com.android.packageinstaller.R
 
-public class UninstallAborted extends UninstallStage {
+class UninstallAborted(val abortReason: Int) : UninstallStage() {
 
-    public static final int ABORT_REASON_GENERIC_ERROR = 0;
-    public static final int ABORT_REASON_APP_UNAVAILABLE = 1;
-    public static final int ABORT_REASON_USER_NOT_ALLOWED = 2;
-    private final int mStage = UninstallStage.STAGE_ABORTED;
-    private final int mAbortReason;
-    private final int mDialogTitleResource;
-    private final int mDialogTextResource;
-    private final int mActivityResultCode = Activity.RESULT_FIRST_USER;
+    var dialogTitleResource = 0
+    var dialogTextResource = 0
+    val activityResultCode = Activity.RESULT_FIRST_USER
 
-    public UninstallAborted(int abortReason) {
-        mAbortReason = abortReason;
-        switch (abortReason) {
-            case ABORT_REASON_APP_UNAVAILABLE -> {
-                mDialogTitleResource = R.string.app_not_found_dlg_title;
-                mDialogTextResource = R.string.app_not_found_dlg_text;
+    init {
+        when (abortReason) {
+            ABORT_REASON_APP_UNAVAILABLE -> {
+                dialogTitleResource = R.string.app_not_found_dlg_title
+                dialogTextResource = R.string.app_not_found_dlg_text
             }
-            case ABORT_REASON_USER_NOT_ALLOWED -> {
-                mDialogTitleResource = 0;
-                mDialogTextResource = R.string.user_is_not_allowed_dlg_text;
+
+            ABORT_REASON_USER_NOT_ALLOWED -> {
+                dialogTitleResource = 0
+                dialogTextResource = R.string.user_is_not_allowed_dlg_text
             }
-            default -> {
-                mDialogTitleResource = 0;
-                mDialogTextResource = R.string.generic_error_dlg_text;
+
+            else -> {
+                dialogTitleResource = 0
+                dialogTextResource = R.string.generic_error_dlg_text
             }
         }
     }
 
-    public int getAbortReason() {
-        return mAbortReason;
-    }
+    override val stageCode = STAGE_ABORTED
 
-    public int getActivityResultCode() {
-        return mActivityResultCode;
-    }
-
-    public int getDialogTitleResource() {
-        return mDialogTitleResource;
-    }
-
-    public int getDialogTextResource() {
-        return mDialogTextResource;
-    }
-
-    @Override
-    public int getStageCode() {
-        return mStage;
+    companion object {
+        const val ABORT_REASON_GENERIC_ERROR = 0
+        const val ABORT_REASON_APP_UNAVAILABLE = 1
+        const val ABORT_REASON_USER_NOT_ALLOWED = 2
     }
 }

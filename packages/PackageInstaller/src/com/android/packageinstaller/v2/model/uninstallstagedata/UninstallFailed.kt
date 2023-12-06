@@ -14,106 +14,38 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model.uninstallstagedata;
+package com.android.packageinstaller.v2.model.uninstallstagedata
 
-import android.app.Activity;
-import android.app.Notification;
-import android.content.Intent;
+import android.app.Activity
+import android.app.Notification
+import android.content.Intent
 
-public class UninstallFailed extends UninstallStage {
-
-    private final int mStage = UninstallStage.STAGE_FAILED;
-    private final boolean mReturnResult;
+class UninstallFailed(
+    val returnResult: Boolean,
     /**
      * If the caller wants the result back, the intent will hold the uninstall failure status code
      * and legacy code.
      */
-    private final Intent mResultIntent;
+    val resultIntent: Intent? = null,
+    val activityResultCode: Int = Activity.RESULT_CANCELED,
+    /**
+     * ID used to show [uninstallNotification]
+     */
+    val uninstallNotificationId: Int? = null,
     /**
      * When the user does not request a result back, this notification will be shown indicating the
      * reason for uninstall failure.
      */
-    private final Notification mUninstallNotification;
-    /**
-     * ID used to show {@link #mUninstallNotification}
-     */
-    private final int mUninstallId;
-    private final int mActivityResultCode;
+    val uninstallNotification: Notification? = null,
+) : UninstallStage() {
 
-    public UninstallFailed(boolean returnResult, Intent resultIntent, int activityResultCode,
-        int uninstallId, Notification uninstallNotification) {
-        mReturnResult = returnResult;
-        mResultIntent = resultIntent;
-        mActivityResultCode = activityResultCode;
-        mUninstallId = uninstallId;
-        mUninstallNotification = uninstallNotification;
-    }
+    override val stageCode = STAGE_FAILED
 
-    public boolean returnResult() {
-        return mReturnResult;
-    }
-
-    public Intent getResultIntent() {
-        return mResultIntent;
-    }
-
-    public int getActivityResultCode() {
-        return mActivityResultCode;
-    }
-
-    public Notification getUninstallNotification() {
-        return mUninstallNotification;
-    }
-
-    public int getUninstallId() {
-        return mUninstallId;
-    }
-
-    @Override
-    public int getStageCode() {
-        return mStage;
-    }
-
-    public static class Builder {
-
-        private final boolean mReturnResult;
-        private int mActivityResultCode = Activity.RESULT_CANCELED;
-        /**
-         * See {@link UninstallFailed#mResultIntent}
-         */
-        private Intent mResultIntent = null;
-        /**
-         * See {@link UninstallFailed#mUninstallNotification}
-         */
-        private Notification mUninstallNotification;
-        /**
-         * See {@link UninstallFailed#mUninstallId}
-         */
-        private int mUninstallId;
-
-        public Builder(boolean returnResult) {
-            mReturnResult = returnResult;
-        }
-
-        public Builder setUninstallNotification(int uninstallId, Notification notification) {
-            mUninstallId = uninstallId;
-            mUninstallNotification = notification;
-            return this;
-        }
-
-        public Builder setResultIntent(Intent intent) {
-            mResultIntent = intent;
-            return this;
-        }
-
-        public Builder setActivityResultCode(int resultCode) {
-            mActivityResultCode = resultCode;
-            return this;
-        }
-
-        public UninstallFailed build() {
-            return new UninstallFailed(mReturnResult, mResultIntent, mActivityResultCode,
-                mUninstallId, mUninstallNotification);
+    init {
+        if (uninstallNotification != null && uninstallNotificationId == null) {
+            throw IllegalArgumentException(
+                "uninstallNotification cannot be set without uninstallNotificationId"
+            )
         }
     }
 }

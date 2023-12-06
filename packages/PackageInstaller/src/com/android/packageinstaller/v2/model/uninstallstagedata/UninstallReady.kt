@@ -13,15 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.packageinstaller.v2.model.uninstallstagedata
 
-package com.android.packageinstaller.v2.model.uninstallstagedata;
+class UninstallReady : UninstallStage() {
 
-public class UninstallReady extends UninstallStage {
-
-    private final int mStage = UninstallStage.STAGE_READY;
-
-    @Override
-    public int getStageCode() {
-        return mStage;
-    }
+    override val stageCode = STAGE_READY
 }

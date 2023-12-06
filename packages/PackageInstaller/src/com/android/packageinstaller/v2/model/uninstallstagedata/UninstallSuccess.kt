@@ -13,67 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.packageinstaller.v2.model.uninstallstagedata
 
-package com.android.packageinstaller.v2.model.uninstallstagedata;
+import android.content.Intent
 
-import android.content.Intent;
+class UninstallSuccess(
+    val resultIntent: Intent? = null,
+    val activityResultCode: Int = 0,
+    val message: String? = null
+) : UninstallStage() {
 
-public class UninstallSuccess extends UninstallStage {
-
-    private final int mStage = UninstallStage.STAGE_SUCCESS;
-    private final String mMessage;
-    private final Intent mResultIntent;
-    private final int mActivityResultCode;
-
-    public UninstallSuccess(Intent resultIntent, int activityResultCode, String message) {
-        mResultIntent = resultIntent;
-        mActivityResultCode = activityResultCode;
-        mMessage = message;
-    }
-
-    public String getMessage() {
-        return mMessage;
-    }
-
-    public Intent getResultIntent() {
-        return mResultIntent;
-    }
-
-    public int getActivityResultCode() {
-        return mActivityResultCode;
-    }
-
-    @Override
-    public int getStageCode() {
-        return mStage;
-    }
-
-    public static class Builder {
-
-        private Intent mResultIntent;
-        private int mActivityResultCode;
-        private String mMessage;
-
-        public Builder() {
-        }
-
-        public Builder setResultIntent(Intent intent) {
-            mResultIntent = intent;
-            return this;
-        }
-
-        public Builder setActivityResultCode(int resultCode) {
-            mActivityResultCode = resultCode;
-            return this;
-        }
-
-        public Builder setMessage(String message) {
-            mMessage = message;
-            return this;
-        }
-
-        public UninstallSuccess build() {
-            return new UninstallSuccess(mResultIntent, mActivityResultCode, mMessage);
-        }
-    }
+    override val stageCode = STAGE_SUCCESS
 }

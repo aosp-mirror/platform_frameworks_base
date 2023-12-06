@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.packageinstaller.v2.model.uninstallstagedata
 
-package com.android.packageinstaller.v2.model.uninstallstagedata;
+abstract class UninstallStage {
 
-public abstract class UninstallStage {
+    abstract val stageCode: Int
 
-    public static final int STAGE_DEFAULT = -1;
-    public static final int STAGE_ABORTED = 0;
-    public static final int STAGE_READY = 1;
-    public static final int STAGE_USER_ACTION_REQUIRED = 2;
-    public static final int STAGE_UNINSTALLING = 3;
-    public static final int STAGE_SUCCESS = 4;
-    public static final int STAGE_FAILED = 5;
-
-    public abstract int getStageCode();
+    companion object {
+        const val STAGE_DEFAULT = -1
+        const val STAGE_ABORTED = 0
+        const val STAGE_READY = 1
+        const val STAGE_USER_ACTION_REQUIRED = 2
+        const val STAGE_UNINSTALLING = 3
+        const val STAGE_SUCCESS = 4
+        const val STAGE_FAILED = 5
+    }
 }

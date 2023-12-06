@@ -13,31 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.packageinstaller.v2.model.uninstallstagedata
 
-package com.android.packageinstaller.v2.model.uninstallstagedata;
+class UninstallUninstalling(val appLabel: CharSequence, val isCloneUser: Boolean) :
+    UninstallStage() {
 
-public class UninstallUninstalling extends UninstallStage {
-
-    private final int mStage = UninstallStage.STAGE_UNINSTALLING;
-
-    private final CharSequence mAppLabel;
-    private final boolean mIsCloneUser;
-
-    public UninstallUninstalling(CharSequence appLabel, boolean isCloneUser) {
-        mAppLabel = appLabel;
-        mIsCloneUser = isCloneUser;
-    }
-
-    public CharSequence getAppLabel() {
-        return mAppLabel;
-    }
-
-    public boolean isCloneUser() {
-        return mIsCloneUser;
-    }
-
-    @Override
-    public int getStageCode() {
-        return mStage;
-    }
+    override val stageCode = STAGE_UNINSTALLING
 }
