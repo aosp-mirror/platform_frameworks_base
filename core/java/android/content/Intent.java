@@ -2805,7 +2805,7 @@ public class Intent implements Parcelable, Cloneable {
      * and the package in the stopped state cannot self-start for any reason unless there's an
      * explicit request to start a component in the package. The {@link #ACTION_PACKAGE_UNSTOPPED}
      * broadcast is sent when such an explicit process start occurs and the package is taken
-     * out of the stopped state.
+     * out of the stopped state. The data contains the name of the package.
      * </p>
      * <ul>
      * <li> {@link #EXTRA_UID} containing the integer uid assigned to the package.
