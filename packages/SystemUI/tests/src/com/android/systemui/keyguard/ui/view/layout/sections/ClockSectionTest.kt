@@ -20,7 +20,6 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
@@ -43,7 +42,6 @@ class ClockSectionTest : SysuiTestCase() {
     @Mock private lateinit var keyguardClockViewModel: KeyguardClockViewModel
     @Mock private lateinit var smartspaceViewModel: KeyguardSmartspaceViewModel
     @Mock private lateinit var splitShadeStateController: SplitShadeStateController
-    private var featureFlags: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic()
 
     private lateinit var underTest: ClockSection
 
@@ -88,7 +86,6 @@ class ClockSectionTest : SysuiTestCase() {
                 smartspaceViewModel,
                 mContext,
                 splitShadeStateController,
-                featureFlags
             )
     }
 
@@ -145,24 +142,6 @@ class ClockSectionTest : SysuiTestCase() {
 
         val expectedSmallClockTopMargin = SMALL_CLOCK_TOP_NON_SPLIT_SHADE
         assetSmallClockTop(cs, expectedSmallClockTopMargin)
-    }
-
-    @Test
-    fun testLargeClockShouldBeCentered() {
-        underTest.setClockShouldBeCentered(true)
-        val cs = ConstraintSet()
-        underTest.applyDefaultConstraints(cs)
-        val constraint = cs.getConstraint(R.id.lockscreen_clock_view_large)
-        assertThat(constraint.layout.endToEnd).isEqualTo(ConstraintSet.PARENT_ID)
-    }
-
-    @Test
-    fun testLargeClockShouldNotBeCentered() {
-        underTest.setClockShouldBeCentered(false)
-        val cs = ConstraintSet()
-        underTest.applyDefaultConstraints(cs)
-        val constraint = cs.getConstraint(R.id.lockscreen_clock_view_large)
-        assertThat(constraint.layout.endToEnd).isEqualTo(R.id.split_shade_guideline)
     }
 
     private fun setLargeClock(useLargeClock: Boolean) {

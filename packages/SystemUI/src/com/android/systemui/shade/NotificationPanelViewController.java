@@ -1720,9 +1720,12 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         }
         // To prevent the weather clock from overlapping with the notification shelf on AOD, we use
         // the small clock here
-        if (mKeyguardStatusViewController.isLargeClockBlockingNotificationShelf()
-                && hasVisibleNotifications() && isOnAod()) {
-            return SMALL;
+        // With migrateClocksToBlueprint, weather clock will have behaviors similar to other clocks
+        if (!migrateClocksToBlueprint()) {
+            if (mKeyguardStatusViewController.isLargeClockBlockingNotificationShelf()
+                    && hasVisibleNotifications() && isOnAod()) {
+                return SMALL;
+            }
         }
         return LARGE;
     }
@@ -1742,8 +1745,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         } else {
             layout = mNotificationContainerParent;
         }
+
         if (migrateClocksToBlueprint()) {
-            mKeyguardInteractor.setClockShouldBeCentered(shouldBeCentered);
+            mKeyguardInteractor.setClockShouldBeCentered(mSplitShadeEnabled && shouldBeCentered);
         } else {
             mKeyguardStatusViewController.updateAlignment(
                     layout, mSplitShadeEnabled, shouldBeCentered, animate);

@@ -27,7 +27,7 @@ import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
-import com.android.systemui.flags.FeatureFlagsClassic
+import com.android.systemui.Flags
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardClockViewBinder
@@ -50,19 +50,21 @@ internal fun ConstraintSet.setAlpha(
     alpha: Float,
 ) = views.forEach { view -> this.setAlpha(view.id, alpha) }
 
-class ClockSection
+open class ClockSection
 @Inject
 constructor(
     private val clockInteractor: KeyguardClockInteractor,
-    private val keyguardClockViewModel: KeyguardClockViewModel,
-    val smartspaceViewModel: KeyguardSmartspaceViewModel,
+    protected val keyguardClockViewModel: KeyguardClockViewModel,
+    private val smartspaceViewModel: KeyguardSmartspaceViewModel,
     private val context: Context,
     private val splitShadeStateController: SplitShadeStateController,
-    private val featureFlags: FeatureFlagsClassic,
 ) : KeyguardSection() {
     override fun addViews(constraintLayout: ConstraintLayout) {}
 
     override fun bindData(constraintLayout: ConstraintLayout) {
+        if (!Flags.migrateClocksToBlueprint()) {
+            return
+        }
         KeyguardClockViewBinder.bind(
             this,
             constraintLayout,
@@ -72,6 +74,9 @@ constructor(
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
+        if (!Flags.migrateClocksToBlueprint()) {
+            return
+        }
         clockInteractor.clock?.let { clock ->
             constraintSet.applyDeltaFrom(buildConstraints(clock, constraintSet))
         }
@@ -94,16 +99,6 @@ constructor(
         }
     }
 
-    var largeClockEndGuideline = PARENT_ID
-
-    // Return if largeClockEndGuideline changes,
-    // and use it to decide whether to refresh blueprint
-    fun setClockShouldBeCentered(shouldBeCentered: Boolean): Boolean {
-        val previousValue = largeClockEndGuideline
-        largeClockEndGuideline = if (shouldBeCentered) PARENT_ID else R.id.split_shade_guideline
-        return previousValue != largeClockEndGuideline
-    }
-
     private fun getTargetClockFace(clock: ClockController): ClockFaceLayout =
         if (keyguardClockViewModel.useLargeClock) getLargeClockFace(clock)
         else getSmallClockFace(clock)
@@ -113,10 +108,10 @@ constructor(
 
     private fun getLargeClockFace(clock: ClockController): ClockFaceLayout = clock.largeClock.layout
     private fun getSmallClockFace(clock: ClockController): ClockFaceLayout = clock.smallClock.layout
-    fun applyDefaultConstraints(constraints: ConstraintSet) {
+    open fun applyDefaultConstraints(constraints: ConstraintSet) {
         constraints.apply {
             connect(R.id.lockscreen_clock_view_large, START, PARENT_ID, START)
-            connect(R.id.lockscreen_clock_view_large, END, largeClockEndGuideline, END)
+            connect(R.id.lockscreen_clock_view_large, END, PARENT_ID, END)
             connect(R.id.lockscreen_clock_view_large, BOTTOM, R.id.lock_icon_view, TOP)
             var largeClockTopMargin =
                 context.resources.getDimensionPixelSize(R.dimen.status_bar_height) +

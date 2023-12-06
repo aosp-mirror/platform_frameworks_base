@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
-import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
@@ -36,7 +35,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import javax.inject.Inject
 
-class SmartspaceSection
+open class SmartspaceSection
 @Inject
 constructor(
     val keyguardClockViewModel: KeyguardClockViewModel,
@@ -45,9 +44,13 @@ constructor(
     val smartspaceController: LockscreenSmartspaceController,
     val keyguardUnlockAnimationController: KeyguardUnlockAnimationController,
 ) : KeyguardSection() {
-    private var smartspaceView: View? = null
-    private var weatherView: View? = null
-    private var dateView: View? = null
+    var smartspaceView by keyguardSmartspaceViewModel::smartspaceView
+    var weatherView by keyguardSmartspaceViewModel::weatherView
+    var dateView by keyguardSmartspaceViewModel::dateView
+
+    val smartspaceViewId = keyguardSmartspaceViewModel.smartspaceViewId
+    val weatherViewId = keyguardSmartspaceViewModel.weatherId
+    val dateViewId = keyguardSmartspaceViewModel.dateId
 
     override fun addViews(constraintLayout: ConstraintLayout) {
         if (!migrateClocksToBlueprint()) {
@@ -67,10 +70,21 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        KeyguardSmartspaceViewBinder.bind(this, constraintLayout, keyguardClockViewModel)
+        if (!migrateClocksToBlueprint()) {
+            return
+        }
+        KeyguardSmartspaceViewBinder.bind(
+            this,
+            constraintLayout,
+            keyguardClockViewModel,
+            keyguardSmartspaceViewModel,
+        )
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
+        if (!migrateClocksToBlueprint()) {
+            return
+        }
         // Generally, weather should be next to dateView
         // smartspace should be below date & weather views
         constraintSet.apply {
@@ -130,7 +144,20 @@ constructor(
                     }
                 }
             }
-            updateVisibility(constraintSet)
+        }
+        updateVisibility(constraintSet)
+    }
+
+    override fun removeViews(constraintLayout: ConstraintLayout) {
+        if (!migrateClocksToBlueprint()) {
+            return
+        }
+        listOf(smartspaceView, dateView, weatherView).forEach {
+            it?.let {
+                if (it.parent == constraintLayout) {
+                    constraintLayout.removeView(it)
+                }
+            }
         }
     }
 
@@ -155,16 +182,6 @@ constructor(
                     if (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) ConstraintSet.GONE
                     else ConstraintSet.VISIBLE
                 )
-            }
-        }
-    }
-
-    override fun removeViews(constraintLayout: ConstraintLayout) {
-        listOf(smartspaceView, dateView, weatherView).forEach {
-            it?.let {
-                if (it.parent == constraintLayout) {
-                    constraintLayout.removeView(it)
-                }
             }
         }
     }

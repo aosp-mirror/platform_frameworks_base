@@ -28,7 +28,6 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.common.ui.ConfigurationState
-import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
@@ -49,7 +48,6 @@ class AodNotificationIconsSection
 constructor(
     private val context: Context,
     private val configurationState: ConfigurationState,
-    private val featureFlags: FeatureFlagsClassic,
     private val iconBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
@@ -119,14 +117,8 @@ constructor(
             }
         constraintSet.apply {
             if (migrateClocksToBlueprint()) {
-                connect(
-                    nicId,
-                    TOP,
-                    smartspaceViewModel.smartspaceViewId,
-                    topAlignment,
-                    bottomMargin
-                )
-                setGoneMargin(nicId, topAlignment, bottomMargin)
+                connect(nicId, TOP, smartspaceViewModel.smartspaceViewId, BOTTOM, bottomMargin)
+                setGoneMargin(nicId, BOTTOM, bottomMargin)
             } else {
                 connect(nicId, TOP, R.id.keyguard_status_view, topAlignment, bottomMargin)
             }
