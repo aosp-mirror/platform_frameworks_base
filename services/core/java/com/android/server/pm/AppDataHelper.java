@@ -26,7 +26,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.os.CreateAppDataArgs;
 import android.os.Environment;
 import android.os.FileUtils;
@@ -57,6 +56,7 @@ import dalvik.system.VMRuntime;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -97,7 +97,22 @@ public class AppDataHelper {
         synchronized (mPm.mLock) {
             ps = mPm.mSettings.getPackageLPr(pkg.getPackageName());
         }
-        prepareAppDataPostCommitLIF(ps, 0 /* previousAppId */);
+
+        prepareAppDataPostCommitLIF(ps, 0 /* previousAppId */, getInstalledUsersForPackage(ps));
+    }
+
+    private int[] getInstalledUsersForPackage(PackageSetting ps) {
+        UserManagerInternal umInternal = mInjector.getUserManagerInternal();
+        var users = umInternal.getUsers(false /*excludeDying*/);
+        int[] userIds = new int[users.size()];
+        int userIdsCount = 0;
+        for (int i = 0, size = users.size(); i < size; ++i) {
+            int userId = users.get(i).id;
+            if (ps.getInstalled(userId)) {
+                userIds[userIdsCount++] = userId;
+            }
+        }
+        return Arrays.copyOf(userIds, userIdsCount);
     }
 
     /**
@@ -106,7 +121,7 @@ public class AppDataHelper {
      * @see #prepareAppDataAfterInstallLIF
      */
     @GuardedBy("mPm.mInstallLock")
-    public void prepareAppDataPostCommitLIF(PackageSetting ps, int previousAppId) {
+    public void prepareAppDataPostCommitLIF(PackageSetting ps, int previousAppId, int[] userIds) {
         synchronized (mPm.mLock) {
             mPm.mSettings.writeKernelMappingLPr(ps);
         }
@@ -121,31 +136,29 @@ public class AppDataHelper {
         UserManagerInternal umInternal = mInjector.getUserManagerInternal();
         StorageManagerInternal smInternal = mInjector.getLocalService(
                 StorageManagerInternal.class);
-        for (UserInfo user : umInternal.getUsers(false /*excludeDying*/)) {
+        for (int userId : userIds) {
             final int flags;
-            if (StorageManager.isCeStorageUnlocked(user.id)
-                    && smInternal.isCeStoragePrepared(user.id)) {
+            if (StorageManager.isCeStorageUnlocked(userId)
+                    && smInternal.isCeStoragePrepared(userId)) {
                 flags = StorageManager.FLAG_STORAGE_DE | StorageManager.FLAG_STORAGE_CE;
-            } else if (umInternal.isUserRunning(user.id)) {
+            } else if (umInternal.isUserRunning(userId)) {
                 flags = StorageManager.FLAG_STORAGE_DE;
             } else {
                 continue;
             }
 
-            if (ps.getInstalled(user.id)) {
-                // TODO: when user data is locked, mark that we're still dirty
-                prepareAppData(batch, ps, previousAppId, user.id, flags).thenRun(() -> {
-                    // Note: this code block is executed with the Installer lock
-                    // already held, since it's invoked as a side-effect of
-                    // executeBatchLI()
-                    if (umInternal.isUserUnlockingOrUnlocked(user.id)) {
-                        // Prepare app data on external storage; currently this is used to
-                        // setup any OBB dirs that were created by the installer correctly.
-                        int uid = UserHandle.getUid(user.id, ps.getAppId());
-                        smInternal.prepareAppDataAfterInstall(ps.getPackageName(), uid);
-                    }
-                });
-            }
+            // TODO: when user data is locked, mark that we're still dirty
+            prepareAppData(batch, ps, previousAppId, userId, flags).thenRun(() -> {
+                // Note: this code block is executed with the Installer lock
+                // already held, since it's invoked as a side-effect of
+                // executeBatchLI()
+                if (umInternal.isUserUnlockingOrUnlocked(userId)) {
+                    // Prepare app data on external storage; currently this is used to
+                    // setup any OBB dirs that were created by the installer correctly.
+                    int uid = UserHandle.getUid(userId, ps.getAppId());
+                    smInternal.prepareAppDataAfterInstall(ps.getPackageName(), uid);
+                }
+            });
         }
         executeBatchLI(batch);
     }
