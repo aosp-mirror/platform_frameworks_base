@@ -17,12 +17,14 @@
 package android.hardware.display;
 
 import android.Manifest;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.metrics.LogMaker;
@@ -397,6 +399,8 @@ public final class ColorDisplayManager {
      * @return {@code true} if the display is not at full saturation
      * @hide
      */
+    @TestApi
+    @FlaggedApi(android.app.Flags.FLAG_MODES_API)
     @RequiresPermission(Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS)
     public boolean isSaturationActivated() {
         return mManager.isSaturationActivated();
