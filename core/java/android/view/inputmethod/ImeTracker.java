@@ -737,7 +737,7 @@ public interface ImeTracker {
          */
         public void onCancelAnimation(@AnimationType int animType) {
             final int cujType = getImeInsetsCujFromAnimation(animType);
-            if (cujType == -1) {
+            if (cujType != -1) {
                 InteractionJankMonitor.getInstance().cancel(cujType);
             }
         }
