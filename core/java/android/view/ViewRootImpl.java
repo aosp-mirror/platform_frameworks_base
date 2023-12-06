@@ -12032,6 +12032,18 @@ public final class ViewRootImpl implements ViewParent,
         scheduleTraversals();
     }
 
+    @Override
+    public void addTrustedPresentationCallback(@NonNull SurfaceControl.Transaction t,
+            @NonNull SurfaceControl.TrustedPresentationThresholds thresholds,
+            @NonNull Executor executor, @NonNull Consumer<Boolean> listener) {
+        t.setTrustedPresentationCallback(getSurfaceControl(), thresholds, executor, listener);
+    }
+
+    @Override
+    public void removeTrustedPresentationCallback(@NonNull SurfaceControl.Transaction t,
+            @NonNull Consumer<Boolean> listener) {
+        t.clearTrustedPresentationCallback(getSurfaceControl());
+    }
 
     private void logAndTrace(String msg) {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
