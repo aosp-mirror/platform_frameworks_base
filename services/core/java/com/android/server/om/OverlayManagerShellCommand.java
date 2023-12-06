@@ -317,11 +317,11 @@ final class OverlayManagerShellCommand extends ShellCommand {
             return 1;
         }
         final String overlayPackageName = "com.android.shell";
-        FabricatedOverlay.Builder overlayBuilder = new FabricatedOverlay.Builder(
-                overlayPackageName, name, targetPackage)
-                .setTargetOverlayable(targetOverlayable);
+        FabricatedOverlay overlay = new FabricatedOverlay(name, targetPackage);
+        overlay.setTargetOverlayable(targetOverlayable);
+        overlay.setOwningPackage(overlayPackageName);
         if (filename != null) {
-            int result = addOverlayValuesFromXml(overlayBuilder, targetPackage, filename);
+            int result = addOverlayValuesFromXml(overlay, targetPackage, filename);
             if (result != 0) {
                 return result;
             }
@@ -329,18 +329,18 @@ final class OverlayManagerShellCommand extends ShellCommand {
             final String resourceName = getNextArgRequired();
             final String typeStr = getNextArgRequired();
             final String strData = String.join(" ", peekRemainingArgs());
-            if (addOverlayValue(overlayBuilder, resourceName, typeStr, strData, config) != 0) {
+            if (addOverlayValue(overlay, resourceName, typeStr, strData, config) != 0) {
                 return 1;
             }
         }
 
         mInterface.commit(new OverlayManagerTransaction.Builder()
-                .registerFabricatedOverlay(overlayBuilder.build()).build());
+                .registerFabricatedOverlay(overlay).build());
         return 0;
     }
 
     private int addOverlayValuesFromXml(
-            FabricatedOverlay.Builder overlayBuilder, String targetPackage, String filename) {
+            FabricatedOverlay overlay, String targetPackage, String filename) {
         final PrintWriter err = getErrPrintWriter();
         File file = new File(filename);
         if (!file.exists()) {
@@ -388,7 +388,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
                             return 1;
                         }
                         String config = parser.getAttributeValue(null, "config");
-                        if (addOverlayValue(overlayBuilder, targetPackage + ':' + target,
+                        if (addOverlayValue(overlay, targetPackage + ':' + target,
                                   overlayType, value, config) != 0) {
                             return 1;
                         }
@@ -405,8 +405,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
         return 0;
     }
 
-    private int addOverlayValue(FabricatedOverlay.Builder overlayBuilder,
-            String resourceName, String typeString, String valueString, String configuration) {
+    private int addOverlayValue(FabricatedOverlay overlay, String resourceName, String typeString,
+                                String valueString, String configuration) {
         final int type;
         typeString = typeString.toLowerCase(Locale.getDefault());
         if (TYPE_MAP.containsKey(typeString)) {
@@ -419,10 +419,14 @@ final class OverlayManagerShellCommand extends ShellCommand {
             }
         }
         if (type == TypedValue.TYPE_STRING) {
-            overlayBuilder.setResourceValue(resourceName, type, valueString, configuration);
+            overlay.setResourceValue(resourceName, type, valueString, configuration);
         } else if (type < 0) {
             ParcelFileDescriptor pfd =  openFileForSystem(valueString, "r");
-            overlayBuilder.setResourceValue(resourceName, pfd, configuration);
+            if (valueString.endsWith(".9.png")) {
+                overlay.setNinePatchResourceValue(resourceName, pfd, configuration);
+            } else {
+                overlay.setResourceValue(resourceName, pfd, configuration);
+            }
         } else {
             final int intData;
             if (valueString.startsWith("0x")) {
@@ -430,7 +434,7 @@ final class OverlayManagerShellCommand extends ShellCommand {
             } else {
                 intData = Integer.parseUnsignedInt(valueString);
             }
-            overlayBuilder.setResourceValue(resourceName, type, intData, configuration);
+            overlay.setResourceValue(resourceName, type, intData, configuration);
         }
         return 0;
     }

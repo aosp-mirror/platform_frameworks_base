@@ -24,3 +24,10 @@ flag {
     # This flag is read in PackageParser at boot time, and in aapt2 which is a build tool.
     is_fixed_read_only: true
 }
+
+flag {
+    name: "nine_patch_frro"
+    namespace: "resource_manager"
+    description: "Feature flag for creating an frro from a 9-patch"
+    bug: "309232726"
+}

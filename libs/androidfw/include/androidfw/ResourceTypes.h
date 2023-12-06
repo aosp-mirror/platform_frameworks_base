@@ -1875,6 +1875,7 @@ struct FabricatedOverlayEntryParameters {
   off64_t binary_data_offset;
   size_t binary_data_size;
   std::string configuration;
+  bool nine_patch;
 };
 
 class AssetManager2;

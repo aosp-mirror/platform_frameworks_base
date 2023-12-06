@@ -45,6 +45,7 @@ struct TargetValue {
   std::optional<android::base::borrowed_fd> data_binary_value;
   off64_t data_binary_offset;
   size_t data_binary_size;
+  bool nine_patch;
 };
 
 struct TargetValueWithConfig {
