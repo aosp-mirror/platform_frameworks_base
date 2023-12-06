@@ -45,7 +45,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /**
  * Hosts application business logic related to user authentication.
@@ -228,10 +227,6 @@ constructor(
             // Since authentication succeeded, we should refresh throttling to make sure that our
             // state is completely reflecting the upstream source of truth.
             refreshThrottling()
-
-            // Force a garbage collection in an attempt to erase any credentials left in memory.
-            // Do it after a 5-sec delay to avoid making the bouncer dismiss animation janky.
-            initiateGarbageCollection(delayMs = 5000)
         }
 
         return if (authenticationResult.isSuccessful) {
@@ -312,15 +307,6 @@ constructor(
                         .map { LockPatternView.Cell.of(it.y, it.x) }
                 )
             else -> null
-        }
-    }
-
-    private suspend fun initiateGarbageCollection(delayMs: Long) {
-        withContext(backgroundDispatcher) {
-            delay(delayMs)
-            System.gc()
-            System.runFinalization()
-            System.gc()
         }
     }
 
