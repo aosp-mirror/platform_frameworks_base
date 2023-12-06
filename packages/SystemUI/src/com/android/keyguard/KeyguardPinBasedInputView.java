@@ -168,7 +168,6 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView 
 
         // Set selected property on so the view can send accessibility events.
         mPasswordEntry.setSelected(true);
-        mPasswordEntry.setDefaultFocusHighlightEnabled(false);
 
         mOkButton = findViewById(R.id.key_enter);
 
