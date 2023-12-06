@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Random;
+import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -141,5 +142,20 @@ public class UsageEventsQueryTest {
         } catch (IllegalArgumentException e) {
             fail("Valid event type: " + eventType);
         }
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_FILTER_BASED_EVENT_QUERY_API)
+    public void testQueryEventPackages() {
+        UsageEventsQuery.Builder queryBuilder = new UsageEventsQuery.Builder(1000, 2000);
+
+        // Test with duplicate package names and empty package name
+        final String pkgName = "test.package.name";
+        UsageEventsQuery query = queryBuilder.setPackageNames(pkgName, pkgName, "", pkgName)
+                .build();
+        Set<String> pkgNameSet = query.getPackageNames();
+        // Duplicated package names and empty package name will be ignored.
+        assertEquals(pkgNameSet.size(), 1);
+        assertEquals(pkgName, pkgNameSet.iterator().next());
     }
 }
