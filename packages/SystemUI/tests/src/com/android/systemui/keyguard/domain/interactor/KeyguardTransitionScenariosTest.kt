@@ -43,7 +43,6 @@ import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.se
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.shade.domain.model.ShadeModel
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
@@ -1329,12 +1328,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // GIVEN the keyguard is showing locked
             keyguardRepository.setStatusBarState(StatusBarState.KEYGUARD)
             runCurrent()
-            shadeRepository.setShadeModel(
-                ShadeModel(
-                    expansionAmount = .9f,
-                    isUserDragging = true,
-                )
-            )
+            shadeRepository.setLegacyShadeTracking(true)
+            shadeRepository.setLegacyShadeExpansion(.9f)
             runCurrent()
 
             // THEN a transition from LOCKSCREEN => PRIMARY_BOUNCER should occur
@@ -1350,12 +1345,8 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             // WHEN the user stops dragging and shade is back to expanded
             clearInvocations(transitionRepository)
             runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.PRIMARY_BOUNCER)
-            shadeRepository.setShadeModel(
-                ShadeModel(
-                    expansionAmount = 1f,
-                    isUserDragging = false,
-                )
-            )
+            shadeRepository.setLegacyShadeTracking(false)
+            shadeRepository.setLegacyShadeExpansion(1f)
             runCurrent()
 
             // THEN a transition from PRIMARY_BOUNCER => LOCKSCREEN should occur

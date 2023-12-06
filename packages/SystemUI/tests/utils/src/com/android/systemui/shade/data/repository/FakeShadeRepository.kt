@@ -18,21 +18,14 @@
 package com.android.systemui.shade.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.shade.domain.model.ShadeModel
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 /** Fake implementation of [ShadeRepository] */
 @SysUISingleton
 class FakeShadeRepository @Inject constructor() : ShadeRepository {
-
-    private val _shadeModel = MutableStateFlow(ShadeModel())
-    override val shadeModel: Flow<ShadeModel> = _shadeModel
-
     private val _qsExpansion = MutableStateFlow(0f)
     override val qsExpansion = _qsExpansion
 
@@ -112,10 +105,6 @@ class FakeShadeRepository @Inject constructor() : ShadeRepository {
     @Deprecated("Use ShadeInteractor instead")
     override fun setLegacyIsClosing(isClosing: Boolean) {
         _legacyIsClosing.value = isClosing
-    }
-
-    fun setShadeModel(model: ShadeModel) {
-        _shadeModel.value = model
     }
 
     override fun setQsExpansion(qsExpansion: Float) {

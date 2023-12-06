@@ -30,7 +30,6 @@ import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.runCurrent
 import com.android.systemui.runTest
 import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.shade.domain.model.ShadeModel
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
 import com.android.systemui.user.domain.UserDomainLayerModule
 import com.android.systemui.util.mockito.mock
@@ -83,23 +82,13 @@ class DefaultUdfpsTouchOverlayViewModelTest : SysuiTestCase() {
 
     private fun TestComponent.shadeExpanded(expanded: Boolean) {
         if (expanded) {
-            shadeRepository.setShadeModel(
-                ShadeModel(
-                    expansionAmount = 1f,
-                    isExpanded = true,
-                    isUserDragging = false,
-                )
-            )
+            shadeRepository.setLegacyShadeExpansion(1f)
+            shadeRepository.setLegacyShadeTracking(false)
             shadeRepository.setLegacyExpandedOrAwaitingInputTransfer(true)
         } else {
             keyguardRepository.setStatusBarState(StatusBarState.SHADE)
-            shadeRepository.setShadeModel(
-                ShadeModel(
-                    expansionAmount = 0f,
-                    isExpanded = false,
-                    isUserDragging = false,
-                )
-            )
+            shadeRepository.setLegacyShadeExpansion(0f)
+            shadeRepository.setLegacyShadeTracking(false)
             shadeRepository.setLegacyExpandedOrAwaitingInputTransfer(false)
         }
     }
