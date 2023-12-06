@@ -152,7 +152,8 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback,
                 mDisallowedAreaForEndBoundsHeight, mTaskBoundsAtDragStart, mRepositionStartPoint,
                 y)) {
             DragPositioningCallbackUtility.onDragEnd(mRepositionTaskBounds,
-                    mTaskBoundsAtDragStart, mStableBounds, mRepositionStartPoint, x, y);
+                    mTaskBoundsAtDragStart, mRepositionStartPoint, x, y,
+                    mDesktopWindowDecoration.calculateValidDragArea());
             DragPositioningCallbackUtility.applyTaskBoundsChange(new WindowContainerTransaction(),
                     mDesktopWindowDecoration, mRepositionTaskBounds, mTaskOrganizer);
         }

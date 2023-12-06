@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.WindowInsets.Type.statusBars;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
@@ -177,6 +178,13 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
      *                 constructor.
      */
     abstract void relayout(RunningTaskInfo taskInfo);
+
+    /**
+     * Used by the {@link DragPositioningCallback} associated with the implementing class to
+     * enforce drags ending in a valid position. A null result means no restriction.
+     */
+    @Nullable
+    abstract Rect calculateValidDragArea();
 
     void relayout(RelayoutParams params, SurfaceControl.Transaction startT,
             SurfaceControl.Transaction finishT, WindowContainerTransaction wct, T rootView,
