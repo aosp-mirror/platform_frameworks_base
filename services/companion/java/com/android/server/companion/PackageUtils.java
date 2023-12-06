@@ -19,6 +19,7 @@ package com.android.server.companion;
 import static android.content.pm.PackageManager.FEATURE_COMPANION_DEVICE_SETUP;
 import static android.content.pm.PackageManager.GET_CONFIGURATIONS;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
+import static android.os.Binder.getCallingUid;
 
 import static com.android.server.companion.CompanionDeviceManagerService.DEBUG;
 import static com.android.server.companion.CompanionDeviceManagerService.TAG;
@@ -41,6 +42,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.os.Binder;
+import android.os.Process;
 import android.util.Log;
 import android.util.Slog;
 
@@ -80,6 +82,11 @@ public final class PackageUtils {
 
     static void enforceUsesCompanionDeviceFeature(@NonNull Context context,
             @UserIdInt int userId, @NonNull String packageName) {
+        // Allow system server to create CDM associations without FEATURE_COMPANION_DEVICE_SETUP
+        if (getCallingUid() == Process.SYSTEM_UID) {
+            return;
+        }
+
         String requiredFeature = FEATURE_COMPANION_DEVICE_SETUP;
 
         FeatureInfo[] requestedFeatures = getPackageInfo(context, userId, packageName).reqFeatures;
