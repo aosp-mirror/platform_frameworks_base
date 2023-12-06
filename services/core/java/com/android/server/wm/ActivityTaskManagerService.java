@@ -4259,7 +4259,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void dumpActivityContainersLocked(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER CONTAINERS (dumpsys activity containers)");
-        mRootWindowContainer.dumpChildrenNames(pw, " ");
+        mRootWindowContainer.dumpChildrenNames(pw, "");
         pw.println(" ");
     }
 
