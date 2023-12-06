@@ -1188,23 +1188,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     /**
-     * {@link BroadcastReceiver} that is intended to listen to broadcasts sent to the system user
-     * only.
-     */
-    private final class ImmsBroadcastReceiverForSystemUser extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-            if (Intent.ACTION_USER_ADDED.equals(action)
-                    || Intent.ACTION_USER_REMOVED.equals(action)) {
-                updateCurrentProfileIds();
-            } else {
-                Slog.w(TAG, "Unexpected intent " + intent);
-            }
-        }
-    }
-
-    /**
      * {@link BroadcastReceiver} that is intended to listen to broadcasts sent to all the users.
      */
     private final class ImmsBroadcastReceiverForAllUsers extends BroadcastReceiver {
@@ -1708,7 +1691,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(mContext, mMethodMap, userId, !mSystemReady);
 
-        updateCurrentProfileIds();
         AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, userId);
         mSwitchingController =
                 InputMethodSubtypeSwitchingController.createInstanceLocked(mSettings, context);
@@ -1826,7 +1808,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         final boolean useCopyOnWriteSettings =
                 !mSystemReady || !mUserManagerInternal.isUserUnlockingOrUnlocked(newUserId);
         mSettings.switchCurrentUser(newUserId, useCopyOnWriteSettings);
-        updateCurrentProfileIds();
         // Additional subtypes should be reset when the user is changed
         AdditionalSubtypeUtils.load(mAdditionalSubtypeMap, newUserId);
         final String defaultImiId = mSettings.getSelectedInputMethod();
@@ -1877,12 +1858,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    void updateCurrentProfileIds() {
-        mSettings.setCurrentProfileIds(
-                mUserManagerInternal.getProfileIds(mSettings.getCurrentUserId(),
-                        false /* enabledOnly */));
-    }
-
     /**
      * TODO(b/32343335): The entire systemRunning() method needs to be revisited.
      */
@@ -1928,12 +1903,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
                 mMyPackageMonitor.register(mContext, null, UserHandle.ALL, true);
                 mSettingsObserver.registerContentObserverLocked(currentUserId);
-
-                final IntentFilter broadcastFilterForSystemUser = new IntentFilter();
-                broadcastFilterForSystemUser.addAction(Intent.ACTION_USER_ADDED);
-                broadcastFilterForSystemUser.addAction(Intent.ACTION_USER_REMOVED);
-                mContext.registerReceiver(new ImmsBroadcastReceiverForSystemUser(),
-                        broadcastFilterForSystemUser);
 
                 final IntentFilter broadcastFilterForAllUsers = new IntentFilter();
                 broadcastFilterForAllUsers.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -3796,8 +3765,14 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             mVisibilityStateComputer.mShowForced = false;
         }
 
-        // cross-profile access is always allowed here to allow profile-switching.
-        if (!mSettings.isCurrentProfile(userId)) {
+        final int currentUserId = mSettings.getCurrentUserId();
+        if (userId != currentUserId) {
+            if (ArrayUtils.contains(
+                    mUserManagerInternal.getProfileIds(currentUserId, false), userId)) {
+                // cross-profile access is always allowed here to allow profile-switching.
+                scheduleSwitchUserTaskLocked(userId, cs.mClient);
+                return InputBindResult.USER_SWITCHING;
+            }
             Slog.w(TAG, "A background user is requesting window. Hiding IME.");
             Slog.w(TAG, "If you need to impersonate a foreground user/profile from"
                     + " a background user, use EditorInfo.targetInputMethodUser with"
@@ -3805,11 +3780,6 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             hideCurrentInputLocked(mCurFocusedWindow, null /* statsToken */, 0 /* flags */,
                     null /* resultReceiver */, SoftInputShowHideReason.HIDE_INVALID_USER);
             return InputBindResult.INVALID_USER;
-        }
-
-        if (userId != mSettings.getCurrentUserId()) {
-            scheduleSwitchUserTaskLocked(userId, cs.mClient);
-            return InputBindResult.USER_SWITCHING;
         }
 
         final boolean sameWindowFocused = mCurFocusedWindow == windowToken;

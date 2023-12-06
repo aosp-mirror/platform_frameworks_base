@@ -43,14 +43,12 @@ import android.view.textservice.SpellCheckerInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.StartInputFlags;
-import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.textservices.TextServicesManagerInternal;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -219,7 +217,6 @@ final class InputMethodUtils {
         private String mEnabledInputMethodsStrCache = "";
         @UserIdInt
         private int mCurrentUserId;
-        private int[] mCurrentProfileIds = new int[0];
 
         private static void buildEnabledInputMethodsSettingString(
                 StringBuilder builder, Pair<String, ArrayList<String>> ime) {
@@ -284,14 +281,12 @@ final class InputMethodUtils {
             }
             if (mCurrentUserId != userId || mCopyOnWrite != copyOnWrite) {
                 mEnabledInputMethodsStrCache = "";
-                // TODO: mCurrentProfileIds should be cleared here.
             }
             if (mUserAwareContext.getUserId() != userId) {
                 initContentWithUserContext(mUserAwareContext, userId);
             }
             mCurrentUserId = userId;
             mCopyOnWrite = copyOnWrite;
-            // TODO: mCurrentProfileIds should be updated here.
         }
 
         private void putString(@NonNull String key, @Nullable String str) {
@@ -317,18 +312,6 @@ final class InputMethodUtils {
 
         private boolean getBoolean(String key, boolean defaultValue) {
             return SecureSettingsWrapper.getBoolean(key, defaultValue, mCurrentUserId);
-        }
-
-        public void setCurrentProfileIds(int[] currentProfileIds) {
-            synchronized (this) {
-                mCurrentProfileIds = currentProfileIds;
-            }
-        }
-
-        public boolean isCurrentProfile(int userId) {
-            synchronized (this) {
-                return ArrayUtils.contains(mCurrentProfileIds, userId);
-            }
         }
 
         ArrayList<InputMethodInfo> getEnabledInputMethodListLocked() {
@@ -905,7 +888,6 @@ final class InputMethodUtils {
 
         public void dumpLocked(final Printer pw, final String prefix) {
             pw.println(prefix + "mCurrentUserId=" + mCurrentUserId);
-            pw.println(prefix + "mCurrentProfileIds=" + Arrays.toString(mCurrentProfileIds));
             pw.println(prefix + "mCopyOnWrite=" + mCopyOnWrite);
             pw.println(prefix + "mEnabledInputMethodsStrCache=" + mEnabledInputMethodsStrCache);
         }
