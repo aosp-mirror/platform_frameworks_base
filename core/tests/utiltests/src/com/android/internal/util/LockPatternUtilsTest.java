@@ -43,6 +43,8 @@ import android.content.pm.UserInfo;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 
@@ -58,6 +60,7 @@ import com.android.internal.widget.LockPatternUtils;
 
 import com.google.android.collect.Lists;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -68,7 +71,10 @@ import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@IgnoreUnderRavenwood(blockedBy = LockPatternUtils.class)
 public class LockPatternUtilsTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private static final int DEMO_USER_ID = 5;
 

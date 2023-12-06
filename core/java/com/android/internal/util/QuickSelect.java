@@ -28,6 +28,7 @@ import java.util.List;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class QuickSelect {
     private static <T> int selectImpl(@NonNull List<T> list, int left, int right, int k,
             @NonNull Comparator<? super T> comparator) {

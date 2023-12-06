@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-package android.widget.listview;
+package com.android.internal.util;
 
-import android.widget.ListScenario;
+import static org.junit.Assert.assertEquals;
 
-/**
- * Exposes fading in and out multiple items.
- */
-public class ListOfShortShortTallShortShort extends ListScenario {
+import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-    protected void init(Params params) {
-        params.setNumItems(5)
-                .setItemScreenSizeFactor(0.1)
-                .setFadingEdgeScreenSizeFactor(0.22)
-                .setPositionScreenSizeFactorOverride(2, 1.1);
+@RunWith(AndroidJUnit4.class)
+public class FastMathTest {
+    @Test
+    public void testRound() {
+        assertEquals(-1, FastMath.round(-1.0f));
+        assertEquals(0, FastMath.round(0.0f));
+        assertEquals(1, FastMath.round(1.0f));
     }
 }

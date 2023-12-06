@@ -21,6 +21,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import android.annotation.NonNull;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ExceptionUtils;
 
 import com.android.modules.utils.FastDataInput;
@@ -29,6 +30,7 @@ import com.android.modules.utils.FastDataOutput;
 import libcore.util.HexEncoding;
 
 import org.junit.Assume;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -51,6 +53,9 @@ import java.util.function.Consumer;
 
 @RunWith(Parameterized.class)
 public class FastDataTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private final boolean use4ByteSequence;
 
     private static final String TEST_SHORT_STRING = "a";
@@ -59,7 +64,12 @@ public class FastDataTest {
 
     @Parameters(name = "use4ByteSequence={0}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] { {true}, {false} });
+        if (RavenwoodRule.isUnderRavenwood()) {
+            // TODO: 4-byte sequences are only supported on ART
+            return Arrays.asList(new Object[][]{{false}});
+        } else {
+            return Arrays.asList(new Object[][]{{true}, {false}});
+        }
     }
 
     public FastDataTest(boolean use4ByteSequence) {

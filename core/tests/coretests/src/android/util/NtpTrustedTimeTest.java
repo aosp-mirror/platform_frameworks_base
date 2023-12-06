@@ -31,10 +31,15 @@ import static java.lang.String.join;
 import static java.util.Arrays.asList;
 
 import android.net.Network;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -51,7 +56,10 @@ import java.util.stream.Stream;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = NtpTrustedTime.class)
 public class NtpTrustedTimeTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private static final Duration VALID_TIMEOUT = Duration.ofSeconds(5);
 

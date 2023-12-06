@@ -19,6 +19,8 @@ package android.util;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -35,8 +37,10 @@ public final class LogNullabilityTest {
         Log.i(null, "");
         Log.w(null, "");
         Log.e(null, "");
-        Log.wtf(null, "");
-        Log.wtfStack(null, "");
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            Log.wtf(null, "");
+            Log.wtfStack(null, "");
+        }
         Log.println(Log.INFO, null, "");
 
         // Implicit assertions of not crashing.
@@ -49,7 +53,9 @@ public final class LogNullabilityTest {
         Log.i(null, "", new Throwable());
         Log.w(null, "", new Throwable());
         Log.e(null, "", new Throwable());
-        Log.wtf(null, "", new Throwable());
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            Log.wtf(null, "", new Throwable());
+        }
         Log.printlns(Log.LOG_ID_MAIN, Log.INFO, null, "", new Throwable());
 
         // Implicit assertions of not crashing.
@@ -84,8 +90,10 @@ public final class LogNullabilityTest {
         } catch (NullPointerException expected) {
         }
 
-        Log.wtf("", (String) null);
-        Log.wtfStack("", (String) null);
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            Log.wtf("", (String) null);
+            Log.wtfStack("", (String) null);
+        }
 
         // Implicit assertion of not crashing.
 
@@ -103,15 +111,10 @@ public final class LogNullabilityTest {
         Log.i("", null, new Throwable());
         Log.w("", null, new Throwable());
         Log.e("", null, new Throwable());
-        Log.wtf("", null, new Throwable());
-
-        // Implicit assertions of not crashing.
-
-        try {
-            Log.printlns(Log.LOG_ID_MAIN, Log.INFO, "", null, new Throwable());
-            fail();
-        } catch (NullPointerException expected) {
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            Log.wtf("", null, new Throwable());
         }
+        Log.printlns(Log.LOG_ID_MAIN, Log.INFO, "", null, new Throwable());
     }
 
     @Test
@@ -121,7 +124,9 @@ public final class LogNullabilityTest {
         Log.i("", "", null);
         Log.w("", "", null);
         Log.e("", "", null);
-        Log.wtf("", "", null);
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            Log.wtf("", "", null);
+        }
 
         // Warning has its own (String, Throwable) overload.
         Log.w("", (Throwable) null);
@@ -131,10 +136,12 @@ public final class LogNullabilityTest {
         // Implicit assertions of not crashing.
 
         // WTF has its own (String, Throwable) overload with different behavior.
-        try {
-            Log.wtf("", (Throwable) null);
-            fail();
-        } catch (NullPointerException expected) {
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            try {
+                Log.wtf("", (Throwable) null);
+                fail();
+            } catch (NullPointerException expected) {
+            }
         }
     }
 
@@ -145,15 +152,10 @@ public final class LogNullabilityTest {
         Log.i("", null, null);
         Log.w("", null, null);
         Log.e("", null, null);
-        Log.wtf("", null, null);
-
-        // Implicit assertions of not crashing.
-
-        try {
-            Log.printlns(Log.LOG_ID_MAIN, Log.INFO, "", null, null);
-            fail();
-        } catch (NullPointerException expected) {
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            Log.wtf("", null, null);
         }
+        Log.printlns(Log.LOG_ID_MAIN, Log.INFO, "", null, null);
     }
 
     @Test

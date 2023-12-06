@@ -16,7 +16,7 @@
 
 package android.widget.gridview;
 
-import android.util.GridScenario;
+import android.widget.GridScenario;
 
 /**
  * A grid with vertical spacing between rows that stacks from the bottom

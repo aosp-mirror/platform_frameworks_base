@@ -16,7 +16,7 @@
 
 package android.widget.gridview;
 
-import android.util.GridScenario;
+import android.widget.GridScenario;
 
 /**
  * Basic bottom stacking from bottom scenario, nothing fancy. The grid items do not fit on the
