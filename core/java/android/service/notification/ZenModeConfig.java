@@ -185,7 +185,13 @@ public class ZenModeConfig implements Parcelable {
             SUPPRESSED_EFFECT_SCREEN_OFF | SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                     | SUPPRESSED_EFFECT_LIGHTS | SUPPRESSED_EFFECT_PEEK | SUPPRESSED_EFFECT_AMBIENT;
 
-    public static final int XML_VERSION = 8;
+    // ZenModeConfig XML versions distinguishing key changes.
+    public static final int XML_VERSION_ZEN_UPGRADE = 8;
+    public static final int XML_VERSION_MODES_API = 11;
+
+    // TODO: b/310620812 - Update XML_VERSION and update default_zen_config.xml accordingly when
+    //       modes_api is inlined.
+    private static final int XML_VERSION = 10;
     public static final String ZEN_TAG = "zen";
     private static final String ZEN_ATT_VERSION = "version";
     private static final String ZEN_ATT_USER = "user";
@@ -586,6 +592,10 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
+    public static int getCurrentXmlVersion() {
+        return Flags.modesApi() ? XML_VERSION_MODES_API : XML_VERSION;
+    }
+
     public static ZenModeConfig readXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         int type = parser.getEventType();
@@ -593,7 +603,7 @@ public class ZenModeConfig implements Parcelable {
         String tag = parser.getName();
         if (!ZEN_TAG.equals(tag)) return null;
         final ZenModeConfig rt = new ZenModeConfig();
-        rt.version = safeInt(parser, ZEN_ATT_VERSION, XML_VERSION);
+        rt.version = safeInt(parser, ZEN_ATT_VERSION, getCurrentXmlVersion());
         rt.user = safeInt(parser, ZEN_ATT_USER, rt.user);
         boolean readSuppressedEffects = false;
         while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
@@ -707,14 +717,16 @@ public class ZenModeConfig implements Parcelable {
     /**
      * Writes XML of current ZenModeConfig
      * @param out serializer
-     * @param version uses XML_VERSION if version is null
+     * @param version uses the current XML version if version is null
      * @throws IOException
      */
+
     public void writeXml(TypedXmlSerializer out, Integer version, boolean forBackup)
             throws IOException {
+        int xmlVersion = getCurrentXmlVersion();
         out.startTag(null, ZEN_TAG);
         out.attribute(null, ZEN_ATT_VERSION, version == null
-                ? Integer.toString(XML_VERSION) : Integer.toString(version));
+                ? Integer.toString(xmlVersion) : Integer.toString(version));
         out.attributeInt(null, ZEN_ATT_USER, user);
         out.startTag(null, ALLOW_TAG);
         out.attributeBoolean(null, ALLOW_ATT_CALLS, allowCalls);

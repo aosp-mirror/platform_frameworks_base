@@ -1750,6 +1750,20 @@ public class NotificationManager {
             @NonNull ComponentName listener, boolean granted) {
         setNotificationListenerAccessGranted(listener, granted, true);
     }
+    /**
+     * Gets the device-default notification policy as a ZenPolicy.
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_MODES_API)
+    public @NonNull ZenPolicy getDefaultZenPolicy() {
+        INotificationManager service = getService();
+        try {
+            return service.getDefaultZenPolicy();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * For apps targeting {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and above, the

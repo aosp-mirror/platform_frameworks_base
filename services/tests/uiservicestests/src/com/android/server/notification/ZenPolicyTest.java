@@ -269,6 +269,78 @@ public class ZenPolicyTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testZenPolicyOverwrite_allUnsetPolicies() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+
+        ZenPolicy.Builder builder = new ZenPolicy.Builder();
+        ZenPolicy unset = builder.build();
+
+        builder.allowCalls(ZenPolicy.PEOPLE_TYPE_CONTACTS);
+        builder.allowMedia(false);
+        builder.allowEvents(true);
+        builder.showFullScreenIntent(false);
+        builder.showInNotificationList(false);
+        ZenPolicy set = builder.build();
+
+        ZenPolicy overwritten = set.overwrittenWith(unset);
+        assertThat(overwritten).isEqualTo(set);
+
+        // should actually work the other way too.
+        ZenPolicy overwrittenWithSet = unset.overwrittenWith(set);
+        assertThat(overwrittenWithSet).isEqualTo(set);
+    }
+
+    @Test
+    public void testZenPolicyOverwrite_someOverlappingFields_takeNewPolicy() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MODES_API);
+
+        ZenPolicy p1 = new ZenPolicy.Builder()
+                .allowCalls(ZenPolicy.PEOPLE_TYPE_CONTACTS)
+                .allowMessages(ZenPolicy.PEOPLE_TYPE_STARRED)
+                .allowMedia(false)
+                .showBadges(true)
+                .build();
+
+        ZenPolicy p2 = new ZenPolicy.Builder()
+                .allowRepeatCallers(false)
+                .allowConversations(ZenPolicy.CONVERSATION_SENDERS_IMPORTANT)
+                .allowMessages(ZenPolicy.PEOPLE_TYPE_NONE)
+                .showBadges(false)
+                .showPeeking(true)
+                .build();
+
+        // when p1 is overwritten with p2, all values from p2 win regardless of strictness, and
+        // remaining fields take values from p1.
+        ZenPolicy p1OverwrittenWithP2 = p1.overwrittenWith(p2);
+        assertThat(p1OverwrittenWithP2.getPriorityCallSenders())
+                .isEqualTo(ZenPolicy.PEOPLE_TYPE_CONTACTS);  // from p1
+        assertThat(p1OverwrittenWithP2.getPriorityMessageSenders())
+                .isEqualTo(ZenPolicy.PEOPLE_TYPE_NONE);  // from p2
+        assertThat(p1OverwrittenWithP2.getPriorityCategoryRepeatCallers())
+                .isEqualTo(ZenPolicy.STATE_DISALLOW);  // from p2
+        assertThat(p1OverwrittenWithP2.getPriorityCategoryMedia())
+                .isEqualTo(ZenPolicy.STATE_DISALLOW);  // from p1
+        assertThat(p1OverwrittenWithP2.getVisualEffectBadge())
+                .isEqualTo(ZenPolicy.STATE_DISALLOW);  // from p2
+        assertThat(p1OverwrittenWithP2.getVisualEffectPeek())
+                .isEqualTo(ZenPolicy.STATE_ALLOW); // from p2
+
+        ZenPolicy p2OverwrittenWithP1 = p2.overwrittenWith(p1);
+        assertThat(p2OverwrittenWithP1.getPriorityCallSenders())
+                .isEqualTo(ZenPolicy.PEOPLE_TYPE_CONTACTS);  // from p1
+        assertThat(p2OverwrittenWithP1.getPriorityMessageSenders())
+                .isEqualTo(ZenPolicy.PEOPLE_TYPE_STARRED);  // from p1
+        assertThat(p2OverwrittenWithP1.getPriorityCategoryRepeatCallers())
+                .isEqualTo(ZenPolicy.STATE_DISALLOW);  // from p2
+        assertThat(p2OverwrittenWithP1.getPriorityCategoryMedia())
+                .isEqualTo(ZenPolicy.STATE_DISALLOW);  // from p1
+        assertThat(p2OverwrittenWithP1.getVisualEffectBadge())
+                .isEqualTo(ZenPolicy.STATE_ALLOW);  // from p1
+        assertThat(p2OverwrittenWithP1.getVisualEffectPeek())
+                .isEqualTo(ZenPolicy.STATE_ALLOW); // from p2
+    }
+
+    @Test
     public void testZenPolicyMessagesInvalid() {
         ZenPolicy.Builder builder = new ZenPolicy.Builder();
 
