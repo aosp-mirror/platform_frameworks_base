@@ -66,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"ایپ ڈیٹا کا <xliff:g id="SIZE">%1$s</xliff:g> رکھیں۔"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"کیا آپ یہ ایپ حذف کرنا چاہتے ہیں؟"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"کیا آپ یہ ایپ اَن انسٹال کرنا چاہتے ہیں؟ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کلون کو بھی حذف کر دیا جائے گا۔"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"کیا آپ اس ایپ کو اپنی نجی جگہ سے اَن انسٹال کرنا چاہتے ہیں؟"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"چل رہے اَن انسٹالز"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ناکام اَن انسٹالز"</string>
     <string name="uninstalling" msgid="8709566347688966845">"اَن انسٹال ہو رہا ہے…"</string>
@@ -106,4 +107,21 @@
     <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="APPNAME">%1$s</xliff:g> کو <xliff:g id="INSTALLERNAME">%1$s</xliff:g> سے بحال کریں"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"یہ ایپ پس منظر میں ڈاؤن لوڈ ہونا شروع ہو جائے گی"</string>
     <string name="restore" msgid="8460854736328970444">"بحال کریں"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"آپ آف لائن ہیں"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"جب آپ انٹرنیٹ سے منسلک ہوں گے تو یہ ایپ خودکار طور پر بحال ہو جائے گی"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"کچھ غلط ہو گیا"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"اس ایپ کو بحال کرنے کی کوشش میں ایک مسئلہ تھا"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"کافی اسٹوریج نہیں ہے"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"اس ایپ کو بحال کرنے کے لیے، آپ اس آلہ پر اسپیس خالی کر سکتے ہیں۔ درکار اسٹوریج: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"کارروائی درکار ہے"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"اس ایپ کو بحال کرنے کے لیے اگلے مراحل کی پیروی کریں"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> غیر فعال ہے"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> اَن انسٹال ہو گیا ہے"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"اس ایپ کو بحال کرنے کے لیے، آپ کو <xliff:g id="INSTALLERNAME">%1$s</xliff:g> انسٹال کرنا ہوگا"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"جاری رکھیں"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"اسٹوریج صاف کریں"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"ترتیبات"</string>
+    <string name="close" msgid="5214897374055647996">"بند کریں"</string>
 </resources>

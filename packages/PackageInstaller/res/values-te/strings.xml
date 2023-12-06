@@ -66,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> యాప్ డేటాను ఉంచండి."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"మీరు ఈ యాప్‌ను తొలగించాలనుకుంటున్నారా?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"మీరు ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> క్లోన్ కూడా తొలగించబడుతుంది."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"మీరు మీ ప్రైవేట్ స్పేస్ నుండి ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"అన్ఇన్‌స్టాల్ చేయబడుతున్నవి"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"విఫలమైన అన్‌ఇన్‌స్టాల్‌లు"</string>
     <string name="uninstalling" msgid="8709566347688966845">"అన్ఇన్‌స్టాల్ చేస్తోంది…"</string>
@@ -106,4 +107,21 @@
     <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> నుండి <xliff:g id="APPNAME">%1$s</xliff:g>‌ను రీస్టోర్ చేయాలా?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"ఈ యాప్ బ్యాక్‌గ్రౌండ్‌లో డౌన్‌లోడ్ అవ్వడం ప్రారంభమవుతుంది"</string>
     <string name="restore" msgid="8460854736328970444">"రీస్టోర్ చేయండి"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"మీరు ఆఫ్‌లైన్‌లో ఉన్నారు"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"మీరు ఇంటర్నెట్‌కు కనెక్ట్ అయ్యి ఉన్నప్పుడు ఈ యాప్ ఆటోమేటిక్‌గా రీస్టోర్ చేయబడుతుంది"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"ఏదో పొరపాటు జరిగింది"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"ఈ యాప్‌ను రీస్టోర్ చేయడానికి ట్రై చేస్తున్నపుడు సమస్య ఏర్పడింది"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"తగినంత స్టోరేజ్ స్పేస్ లేదు"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"ఈ యాప్‌ను రీస్టోర్ చేయడానికి, మీరు ఈ పరికరంలో స్పేస్‌ను ఖాళీ చేయవచ్చు. స్టోరేజ్ అవసరం: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"మీరు పూర్తి చేయాల్సిన చర్య"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"ఈ యాప్‌ను రీస్టోర్ చేయడానికి తదుపరి దశలను ఫాలో అవ్వండి"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> డిజేబుల్ చేయబడింది"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> అన్‌ఇన్‌స్టాల్ చేయబడింది"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"ఈ యాప్‌ను రీస్టోర్ చేయడానికి, మీరు <xliff:g id="INSTALLERNAME">%1$s</xliff:g>‌ను ఇన్‌స్టాల్ చేయాలి"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"కొనసాగించండి"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"స్టోరేజ్‌ను క్లియర్ చేయండి"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"సెట్టింగ్‌లు"</string>
+    <string name="close" msgid="5214897374055647996">"మూసివేయండి"</string>
 </resources>

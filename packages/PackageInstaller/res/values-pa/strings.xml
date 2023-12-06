@@ -66,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ਐਪ ਡਾਟਾ ਰੱਖੋ।"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਮਿਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ਦੇ ਕਲੋਨ ਨੂੰ ਵੀ ਮਿਟਾਇਆ ਜਾਵੇਗਾ।"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"ਕੀ ਤੁਸੀਂ ਇਸ ਐਪ ਨੂੰ ਆਪਣੇ ਨਿੱਜੀ ਸਪੇਸ ਤੋਂ ਅਣਸਥਾਪਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"ਚੱਲ ਰਹੀਆਂ ਅਣਸਥਾਪਨਾਵਾਂ"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ਅਸਫਲ ਅਣਸਥਾਪਨਾਵਾਂ"</string>
     <string name="uninstalling" msgid="8709566347688966845">"ਅਣਸਥਾਪਤ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
@@ -106,4 +107,21 @@
     <string name="unarchive_application_title" msgid="7958278328280721421">"ਕੀ <xliff:g id="APPNAME">%1$s</xliff:g> ਨੂੰ <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ਤੋਂ ਮੁੜ-ਬਹਾਲ ਕਰਨਾ ਹੈ?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"ਇਹ ਐਪ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਡਾਊਨਲੋਡ ਹੋਣੀ ਸ਼ੁਰੂ ਹੋ ਜਾਵੇਗੀ"</string>
     <string name="restore" msgid="8460854736328970444">"ਮੁੜ-ਬਹਾਲ ਕਰੋ"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"ਤੁਸੀਂ ਆਫ਼ਲਾਈਨ ਹੋ"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"ਜਦੋਂ ਤੁਸੀਂ ਇੰਟਰਨੈੱਟ ਨਾਲ ਕਨੈਕਟ ਹੁੰਦੇ ਹੋ, ਤਾਂ ਇਹ ਐਪ ਸਵੈਚਲਿਤ ਤੌਰ \'ਤੇ ਮੁੜ-ਬਹਾਲ ਹੋ ਜਾਵੇਗੀ"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"ਕੋਈ ਗੜਬੜ ਹੋ ਗਈ"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਬਹਾਲ ਕਰਨ ਵੇਲੇ ਕੋਈ ਸਮੱਸਿਆ ਆਈ"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"ਲੋੜੀਂਦੀ ਸਟੋਰੇਜ ਨਹੀਂ ਹੈ"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਬਹਾਲ ਕਰਨ ਲਈ, ਤੁਸੀਂ ਆਪਣੇ ਡੀਵਾਈਸ \'ਤੇ ਜਗ੍ਹਾ ਖਾਲੀ ਕਰ ਸਕਦੇ ਹੋ। ਲੋੜੀਂਦੀ ਸਟੋਰੇਜ: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"ਕਾਰਵਾਈ ਦੀ ਲੋੜ"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਬਹਾਲ ਕਰਨ ਲਈ ਅਗਲੇ ਪੜਾਵਾਂ ਦੀ ਪਾਲਣਾ ਕਰੋ"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ਨੂੰ ਅਣਸਥਾਪਤ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"ਇਸ ਐਪ ਨੂੰ ਮੁੜ-ਬਹਾਲ ਕਰਨ ਲਈ, ਤੁਹਾਨੂੰ <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ਨੂੰ ਸਥਾਪਤ ਕਰਨ ਦੀ ਲੋੜ ਪਵੇਗੀ"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"ਜਾਰੀ ਰੱਖੋ"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"ਸਟੋਰੇਜ ਕਲੀਅਰ ਕਰੋ"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"ਸੈਟਿੰਗਾਂ"</string>
+    <string name="close" msgid="5214897374055647996">"ਬੰਦ ਕਰੋ"</string>
 </resources>
