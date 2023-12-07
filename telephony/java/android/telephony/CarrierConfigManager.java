@@ -2179,6 +2179,14 @@ public class CarrierConfigManager {
      */
     public static final String KEY_MMS_NETWORK_RELEASE_TIMEOUT_MILLIS_INT =
             "mms_network_release_timeout_millis_int";
+    /**
+     * Maximum size in bytes of the PDU to send or download when connected to a non-terrestrial
+     * network. MmsService will return a result code of MMS_ERROR_TOO_LARGE_FOR_TRANSPORT if
+     * the PDU exceeds this limit when connected to a non-terrestrial network.
+     * @hide
+     */
+    public static final String KEY_MMS_MAX_NTN_PAYLOAD_SIZE_BYTES_INT =
+            "mms_max_ntn_payload_size_bytes_int";
 
     /**
      * The flatten {@link android.content.ComponentName componentName} of the activity that can
@@ -10365,6 +10373,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_MMS_SMS_TO_MMS_TEXT_THRESHOLD_INT, -1);
         sDefaults.putInt(KEY_MMS_SUBJECT_MAX_LENGTH_INT, 40);
         sDefaults.putInt(KEY_MMS_NETWORK_RELEASE_TIMEOUT_MILLIS_INT, 5 * 1000);
+        sDefaults.putInt(KEY_MMS_MAX_NTN_PAYLOAD_SIZE_BYTES_INT, 3 * 1000);
         sDefaults.putString(KEY_MMS_EMAIL_GATEWAY_NUMBER_STRING, "");
         sDefaults.putString(KEY_MMS_HTTP_PARAMS_STRING, "");
         sDefaults.putString(KEY_MMS_NAI_SUFFIX_STRING, "");
