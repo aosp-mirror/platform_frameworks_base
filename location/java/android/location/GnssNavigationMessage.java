@@ -78,7 +78,7 @@ public final class GnssNavigationMessage implements Parcelable {
     public static final int TYPE_GAL_F = 0x0602;
     /**
      * NavIC L5 C/A message contained in the structure.
-     * @deprecated Use {@link #TYPE_IRN_L5} instead.
+     * @deprecated deprecated.
      */
     @Deprecated
     public static final int TYPE_IRN_L5CA = 0x0701;
