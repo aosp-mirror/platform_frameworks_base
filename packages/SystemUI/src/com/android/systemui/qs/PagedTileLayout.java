@@ -554,6 +554,12 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         if (shouldNotRunAnimation(tilesToReveal)) {
             return;
         }
+        // This method has side effects (beings the fake drag, if it returns true). If we have
+        // decided that we want to do a tile reveal, we do a last check to verify that we can
+        // actually perform a fake drag.
+        if (!beginFakeDrag()) {
+            return;
+        }
 
         final int lastPageNumber = mPages.size() - 1;
         final TileLayout lastPage = mPages.get(lastPageNumber);
@@ -588,8 +594,10 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     private boolean shouldNotRunAnimation(Set<String> tilesToReveal) {
+        // None of these have side effects. That way, we don't need to rely on short-circuiting
+        // behavior
         boolean noAnimationNeeded = tilesToReveal.isEmpty() || mPages.size() < 2;
-        boolean scrollingInProgress = getScrollX() != 0 || !beginFakeDrag();
+        boolean scrollingInProgress = getScrollX() != 0 || !isFakeDragging();
         // isRunningInTestHarness() to disable animation in functional testing as it caused
         // flakiness and is not needed there. Alternative solutions were more complex and would
         // still be either potentially flaky or modify internal data.

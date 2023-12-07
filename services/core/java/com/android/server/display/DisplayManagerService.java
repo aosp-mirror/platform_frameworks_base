@@ -2868,7 +2868,16 @@ public final class DisplayManagerService extends SystemService {
 
     // Check if the target app is in cached mode
     private boolean isUidCached(int uid) {
-        if (mActivityManagerInternal == null) {
+        // Only query procState and importance for Android apps, which have UIDs starting
+        // from FIRST_APPLICATION_UID. .
+        //
+        // Other processes with UID < FIRST_APPLICATION_UID can also register to DMS for
+        // display events. E.g. Android Studio executes a screen sharing process to provide
+        // display mirroring functionality. That process inherits the UID of adb. Depending
+        // on adb mode, it can be shell (2000) or root (0). Those processes are not Android
+        // apps and not managed by AMS. Treat them as non-cached so never ignore or defer
+        // display events to them.
+        if (mActivityManagerInternal == null || uid < FIRST_APPLICATION_UID) {
             return false;
         }
         int procState = mActivityManagerInternal.getUidProcessState(uid);
