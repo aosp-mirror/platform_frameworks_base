@@ -98,7 +98,10 @@ public final class BackgroundJobsController extends StateController {
             switch (action) {
                 case Intent.ACTION_PACKAGE_RESTARTED: {
                     synchronized (mLock) {
-                        mPackageStoppedState.add(pkgUid, pkgName, Boolean.TRUE);
+                        // ACTION_PACKAGE_RESTARTED doesn't always mean the app is placed and kept
+                        // in the stopped state, so don't put TRUE in the cache. Remove any existing
+                        // entry and rely on an explicit call to PackageManager's isStopped() API.
+                        mPackageStoppedState.delete(pkgUid, pkgName);
                         updateJobRestrictionsForUidLocked(pkgUid, false);
                     }
                 }
