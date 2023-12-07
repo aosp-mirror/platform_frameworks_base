@@ -444,18 +444,27 @@ public class VirtualDeviceManagerServiceTest {
     }
 
     @Test
+    public void isDeviceIdValid_invalidDeviceId_returnsFalse() {
+        assertThat(mVdm.isValidVirtualDeviceId(DEVICE_ID_INVALID)).isFalse();
+        assertThat(mLocalService.isValidVirtualDeviceId(DEVICE_ID_INVALID)).isFalse();
+    }
+
+    @Test
     public void isDeviceIdValid_defaultDeviceId_returnsFalse() {
         assertThat(mVdm.isValidVirtualDeviceId(DEVICE_ID_DEFAULT)).isFalse();
+        assertThat(mLocalService.isValidVirtualDeviceId(DEVICE_ID_DEFAULT)).isFalse();
     }
 
     @Test
     public void isDeviceIdValid_validVirtualDeviceId_returnsTrue() {
         assertThat(mVdm.isValidVirtualDeviceId(mDeviceImpl.getDeviceId())).isTrue();
+        assertThat(mLocalService.isValidVirtualDeviceId(mDeviceImpl.getDeviceId())).isTrue();
     }
 
     @Test
     public void isDeviceIdValid_nonExistentDeviceId_returnsFalse() {
         assertThat(mVdm.isValidVirtualDeviceId(mDeviceImpl.getDeviceId() + 1)).isFalse();
+        assertThat(mLocalService.isValidVirtualDeviceId(mDeviceImpl.getDeviceId() + 1)).isFalse();
     }
 
     @Test
