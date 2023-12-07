@@ -76,6 +76,19 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
     @Mock private AccessibilityManagerWrapper mAccessibilityMgr;
 
+    static {
+        assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME);
+        assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME);
+        assertThat(TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(TEST_A11Y_AUTO_DISMISS_TIME);
+
+        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_AUTO_DISMISS_TIME).isLessThan(
+                TEST_TIMEOUT_TIME);
+        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(
+                TEST_TIMEOUT_TIME);
+        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_A11Y_AUTO_DISMISS_TIME).isLessThan(
+                TEST_A11Y_TIMEOUT_TIME);
+    }
+
     private final class TestableHeadsUpManager extends BaseHeadsUpManager {
         TestableHeadsUpManager(Context context,
                 HeadsUpManagerLogger logger,
@@ -216,17 +229,6 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
     public void setUp() {
         initMocks(this);
         super.setUp();
-
-        assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME);
-        assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME);
-        assertThat(TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(TEST_A11Y_AUTO_DISMISS_TIME);
-
-        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_AUTO_DISMISS_TIME).isLessThan(
-                TEST_TIMEOUT_TIME);
-        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(
-                TEST_TIMEOUT_TIME);
-        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_A11Y_AUTO_DISMISS_TIME).isLessThan(
-                TEST_A11Y_TIMEOUT_TIME);
     }
 
     @After

@@ -78,6 +78,12 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
 
     @Mock protected ExpandableNotificationRow mRow;
 
+    static {
+        assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME);
+        assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME);
+        assertThat(TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(TEST_TIMEOUT_TIME);
+    }
+
     private static class TestableAlertingNotificationManager extends AlertingNotificationManager {
         private AlertEntry mLastCreatedEntry;
 
@@ -167,10 +173,6 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mTestHandler = Handler.createAsync(Looper.myLooper());
-
-        assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME);
-        assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME);
-        assertThat(TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(TEST_TIMEOUT_TIME);
     }
 
     @After
