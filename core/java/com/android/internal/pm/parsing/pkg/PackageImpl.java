@@ -726,24 +726,9 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
                 this.usesSdkLibrariesVersionsMajor, versionMajor, true);
         this.usesSdkLibrariesCertDigests = ArrayUtils.appendElement(String[].class,
                 this.usesSdkLibrariesCertDigests, certSha256Digests, true);
-        this.usesSdkLibrariesOptional = appendBoolean(this.usesSdkLibrariesOptional,
+        this.usesSdkLibrariesOptional = ArrayUtils.appendBoolean(this.usesSdkLibrariesOptional,
                 usesSdkLibrariesOptional);
         return this;
-    }
-
-    /**
-     * Adds value to given array if not already present, providing set-like
-     * behavior.
-     */
-    public static boolean[] appendBoolean(@Nullable boolean[] cur, boolean val) {
-        if (cur == null) {
-            return new boolean[] { val };
-        }
-        final int N = cur.length;
-        boolean[] ret = new boolean[N + 1];
-        System.arraycopy(cur, 0, ret, 0, N);
-        ret[N] = val;
-        return ret;
     }
 
     @Override
