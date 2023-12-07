@@ -42,6 +42,7 @@ import java.util.Objects;
  * information collected from the AndroidManifest.xml's
  * &lt;intent&gt; tags.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ResolveInfo implements Parcelable {
     private static final String TAG = "ResolveInfo";
     private static final String INTENT_FORWARDER_ACTIVITY =
@@ -227,6 +228,7 @@ public class ResolveInfo implements Parcelable {
      * item does not have a label, its name is returned.
      */
     @NonNull
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public CharSequence loadLabel(@NonNull PackageManager pm) {
         if (nonLocalizedLabel != null) {
             return nonLocalizedLabel;
@@ -304,6 +306,7 @@ public class ResolveInfo implements Parcelable {
      * @return Returns a Drawable containing the resolution's icon.  If the
      * item does not have an icon, the default activity icon is returned.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public Drawable loadIcon(PackageManager pm) {
         Drawable dr = null;
         if (resolvePackageName != null && iconResourceId != 0) {

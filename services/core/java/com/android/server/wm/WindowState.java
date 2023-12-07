@@ -1189,11 +1189,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Adding %s to %s", this, parentWindow);
             parentWindow.addChild(this, sWindowSubLayerComparator);
         }
-
-        if (token.mRoundedCornerOverlay) {
-            mWmService.mTrustedPresentationListenerController.addIgnoredWindowTokens(
-                    getWindowToken());
-        }
     }
 
     @Override
@@ -2398,9 +2393,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         mWmService.postWindowRemoveCleanupLocked(this);
-
-        mWmService.mTrustedPresentationListenerController.removeIgnoredWindowTokens(
-                getWindowToken());
     }
 
     @Override

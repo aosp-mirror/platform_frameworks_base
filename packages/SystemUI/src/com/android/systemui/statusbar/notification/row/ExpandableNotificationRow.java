@@ -139,7 +139,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private static final long RECENTLY_ALERTED_THRESHOLD_MS = TimeUnit.SECONDS.toMillis(30);
     private static final SourceType BASE_VALUE = SourceType.from("BaseValue");
     private static final SourceType FROM_PARENT = SourceType.from("FromParent(ENR)");
-    private static final SourceType PINNED = SourceType.from("Pinned");
 
     // We don't correctly track dark mode until the content views are inflated, so always update
     // the background on first content update just in case it happens to be during a theme change.
@@ -147,7 +146,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private boolean mIsSnoozed;
     private boolean mShowSnooze = false;
     private boolean mIsFaded;
-    private boolean mAnimatePinnedRoundness = false;
 
     /**
      * Listener for when {@link ExpandableNotificationRow} is laid out.
@@ -1052,14 +1050,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         setChronometerRunning(mLastChronometerRunning);
         if (isAboveShelf() != wasAboveShelf) {
             mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
-        }
-        if (pinned) {
-            // Should be animated if someone explicitly set it to 0 and the row is shown.
-            boolean animated = mAnimatePinnedRoundness && isShown();
-            requestRoundness(/* top = */ 1f, /* bottom = */ 1f, PINNED, animated);
-        } else {
-            requestRoundnessReset(PINNED);
-            mAnimatePinnedRoundness = true;
         }
     }
 

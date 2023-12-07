@@ -23,8 +23,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
@@ -42,7 +41,6 @@ object KeyguardClockViewBinder {
         keyguardRootView: ConstraintLayout,
         viewModel: KeyguardClockViewModel,
         keyguardClockInteractor: KeyguardClockInteractor,
-        featureFlags: FeatureFlagsClassic,
     ) {
         keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -52,7 +50,7 @@ object KeyguardClockViewBinder {
         keyguardRootView.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) return@launch
+                    if (!migrateClocksToBlueprint()) return@launch
                     viewModel.currentClock.collect { currentClock ->
                         cleanupClockViews(viewModel.clock, keyguardRootView, viewModel.burnInLayer)
                         viewModel.clock = currentClock
@@ -65,19 +63,19 @@ object KeyguardClockViewBinder {
                 // will trigger both shouldBeCentered and clockSize change
                 // we should avoid this
                 launch {
-                    if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) return@launch
+                    if (!migrateClocksToBlueprint()) return@launch
                     viewModel.clockSize.collect {
                         applyConstraints(clockSection, keyguardRootView, true)
                     }
                 }
                 launch {
-                    if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) return@launch
+                    if (!migrateClocksToBlueprint()) return@launch
                     viewModel.clockShouldBeCentered.collect {
                         applyConstraints(clockSection, keyguardRootView, true)
                     }
                 }
                 launch {
-                    if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) return@launch
+                    if (!migrateClocksToBlueprint()) return@launch
                     viewModel.hasCustomWeatherDataDisplay.collect {
                         applyConstraints(clockSection, keyguardRootView, true)
                     }

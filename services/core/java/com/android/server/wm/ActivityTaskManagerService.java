@@ -76,6 +76,7 @@ import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IMMERSIVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_LOCKTASK;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.am.ActivityManagerServiceDumpActivitiesProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.CONFIG_WILL_CHANGE;
@@ -125,7 +126,6 @@ import static com.android.server.wm.RootWindowContainer.MATCH_ATTACHED_TASK_OR_R
 import static com.android.server.wm.Task.REPARENT_KEEP_ROOT_TASK_AT_FRONT;
 import static com.android.server.wm.WindowManagerService.MY_PID;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
-import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -1261,10 +1261,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 true /*validateIncomingUser*/);
     }
 
-    static boolean isSdkSandboxActivity(Context context, Intent intent) {
+    static boolean isSdkSandboxActivityIntent(Context context, Intent intent) {
         return intent != null
                 && (sandboxActivitySdkBasedContext()
-                        ? SdkSandboxActivityAuthority.isSdkSandboxActivity(context, intent)
+                        ? SdkSandboxActivityAuthority.isSdkSandboxActivityIntent(context, intent)
                         : intent.isSandboxActivity(context));
     }
 
@@ -1278,7 +1278,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityAsUser");
 
-        if (isSdkSandboxActivity(mContext, intent)) {
+        if (isSdkSandboxActivityIntent(mContext, intent)) {
             SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
                     SdkSandboxManagerLocal.class);
             sdkSandboxManagerLocal.enforceAllowedToHostSandboxedActivity(

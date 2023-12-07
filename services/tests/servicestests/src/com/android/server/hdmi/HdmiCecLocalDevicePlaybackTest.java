@@ -1774,6 +1774,18 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
+    public void wakeUp_hotPlugIn_invokesDeviceDiscoveryOnce() {
+        mNativeWrapper.setPollAddressResponse(Constants.ADDR_PLAYBACK_2, SendMessageResult.SUCCESS);
+        mHdmiControlService.onWakeUp(HdmiControlService.WAKE_UP_SCREEN_ON);
+        mTestLooper.dispatchAll();
+
+        mNativeWrapper.onHotplugEvent(1, true);
+        mTestLooper.dispatchAll();
+
+        assertThat(mHdmiCecLocalDevicePlayback.getActions(DeviceDiscoveryAction.class)).hasSize(1);
+    }
+
+    @Test
     public void hotplugDetectionAction_addDevice() {
         int otherPlaybackLogicalAddress = mPlaybackLogicalAddress == Constants.ADDR_PLAYBACK_2
                 ? Constants.ADDR_PLAYBACK_1 : Constants.ADDR_PLAYBACK_2;

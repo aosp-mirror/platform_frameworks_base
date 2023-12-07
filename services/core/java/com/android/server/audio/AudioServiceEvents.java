@@ -120,6 +120,8 @@ public class AudioServiceEvents {
             return new StringBuilder("setWiredDeviceConnectionState(")
                     .append(" type:").append(
                             Integer.toHexString(mState.mAttributes.getInternalType()))
+                    .append(" (").append(AudioSystem.isInputDevice(
+                            mState.mAttributes.getInternalType()) ? "source" : "sink").append(") ")
                     .append(" state:").append(AudioSystem.deviceStateToString(mState.mState))
                     .append(" addr:").append(mState.mAttributes.getAddress())
                     .append(" name:").append(mState.mAttributes.getName())

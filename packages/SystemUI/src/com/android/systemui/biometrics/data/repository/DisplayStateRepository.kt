@@ -60,6 +60,8 @@ interface DisplayStateRepository {
     val currentRotation: StateFlow<DisplayRotation>
 }
 
+// TODO(b/296211844): This class could directly use DeviceStateRepository and DisplayRepository
+// instead.
 @SysUISingleton
 class DisplayStateRepositoryImpl
 @Inject

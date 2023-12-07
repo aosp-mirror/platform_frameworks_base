@@ -17,17 +17,18 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.graphics.Point
 import android.util.MathUtils
 import android.view.View.VISIBLE
 import com.android.app.animation.Interpolators
 import com.android.keyguard.KeyguardClockSwitch.LARGE
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.Flags.newAodTransition
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -82,7 +83,7 @@ constructor(
 ) {
     var clockControllerProvider: Provider<ClockController>? = null
         get() {
-            if (featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            if (migrateClocksToBlueprint()) {
                 return Provider { keyguardClockViewModel.clock }
             } else {
                 return field
@@ -100,6 +101,9 @@ constructor(
             .map { VISIBLE }
 
     val goneToAodTransition = keyguardTransitionInteractor.transition(from = GONE, to = AOD)
+
+    /** Last point that the root view was tapped */
+    val lastRootViewTapPosition: Flow<Point?> = keyguardInteractor.lastRootViewTapPosition
 
     /** the shared notification container bounds *on the lockscreen* */
     val notificationBounds: StateFlow<NotificationContainerBounds> =
@@ -134,7 +138,7 @@ constructor(
                 // Ensure the desired translation doesn't encroach on the top inset
                 val burnInY = MathUtils.lerp(0, burnIn.translationY, interpolation).toInt()
                 val translationY =
-                    if (featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+                    if (migrateClocksToBlueprint()) {
                         burnInY
                     } else {
                         -(statusViewTop - Math.max(topInset, statusViewTop + burnInY))
@@ -261,5 +265,9 @@ constructor(
                 AnimatableEvent(fullyHidden, animate)
             }
             .toAnimatedValueFlow()
+    }
+
+    fun setRootViewLastTapPosition(point: Point) {
+        keyguardInteractor.setLastRootViewTapPosition(point)
     }
 }

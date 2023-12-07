@@ -22,6 +22,7 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED
+import android.content.Context
 import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.hardware.display.VirtualDisplay
@@ -39,7 +40,8 @@ import android.view.SurfaceControl
 import android.view.SurfaceView
 import android.view.WindowInsets.Type.navigationBars
 import android.view.WindowInsets.Type.statusBars
-import androidx.core.content.getSystemService
+import android.view.WindowManager
+import android.window.TransitionInfo
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
@@ -291,6 +293,30 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
     }
 
     @Test
+    fun testRelayoutBlockedDuringKeyguardTransition() {
+        val transition = mock(IBinder::class.java)
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decoration = setUpMockDecorationForTask(task)
+        val transitionInfo = mock(TransitionInfo::class.java)
+        val transitionChange = mock(TransitionInfo.Change::class.java)
+        val taskInfo = mock(RunningTaskInfo()::class.java)
+
+        // Replicate a keyguard going away transition for a task
+        whenever(transitionInfo.getFlags())
+                .thenReturn(WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY)
+        whenever(transitionChange.getMode()).thenReturn(WindowManager.TRANSIT_TO_FRONT)
+        whenever(transitionChange.getTaskInfo()).thenReturn(taskInfo)
+
+        // Make sure a window decorations exists first by launching a freeform task.
+        onTaskOpening(task)
+        // OnTransition ready is called when a keyguard going away transition happens
+        desktopModeWindowDecorViewModel
+                .onTransitionReady(transition, transitionInfo, transitionChange)
+
+        verify(decoration).incrementRelayoutBlock()
+        verify(decoration).addTransitionPausingRelayout(transition)
+    }
+    @Test
     fun testRelayoutRunsWhenStatusBarsInsetsSourceVisibilityChanges() {
         val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM, focused = true)
         val decoration = setUpMockDecorationForTask(task)
@@ -401,7 +427,8 @@ class DesktopModeWindowDecorViewModelTests : ShellTestCase() {
 
     private fun createVirtualDisplay(): VirtualDisplay? {
         val surfaceView = SurfaceView(mContext)
-        return mContext.getSystemService<DisplayManager>()?.createVirtualDisplay(
+        val dm = mContext.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+        return dm.createVirtualDisplay(
                 "testEventReceiversOnMultipleDisplays",
                 /*width=*/ 400,
                 /*height=*/ 400,

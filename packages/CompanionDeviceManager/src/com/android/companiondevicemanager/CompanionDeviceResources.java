@@ -26,6 +26,7 @@ import static android.companion.AssociationRequest.DEVICE_PROFILE_WATCH;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_APP_STREAMING;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CALENDAR;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CALL_LOGS;
+import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CHANGE_MEDIA_OUTPUT;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_CONTACTS;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_MICROPHONE;
 import static com.android.companiondevicemanager.PermissionListAdapter.PERMISSION_NEARBY_DEVICES;
@@ -40,6 +41,8 @@ import static java.util.Collections.unmodifiableSet;
 
 import android.util.ArrayMap;
 import android.util.ArraySet;
+
+import com.android.media.flags.Flags;
 
 import java.util.Arrays;
 import java.util.List;
@@ -73,9 +76,15 @@ final class CompanionDeviceResources {
                 PERMISSION_NOTIFICATION, PERMISSION_STORAGE));
         map.put(DEVICE_PROFILE_NEARBY_DEVICE_STREAMING,
                 Arrays.asList(PERMISSION_NEARBY_DEVICE_STREAMING));
-        map.put(DEVICE_PROFILE_WATCH, Arrays.asList(PERMISSION_NOTIFICATION, PERMISSION_PHONE,
-                PERMISSION_CALL_LOGS, PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_CALENDAR,
-                PERMISSION_NEARBY_DEVICES));
+        if (!Flags.enablePrivilegedRoutingForMediaRoutingControl()) {
+            map.put(DEVICE_PROFILE_WATCH, Arrays.asList(PERMISSION_NOTIFICATION, PERMISSION_PHONE,
+                    PERMISSION_CALL_LOGS, PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_CALENDAR,
+                    PERMISSION_NEARBY_DEVICES));
+        } else {
+            map.put(DEVICE_PROFILE_WATCH, Arrays.asList(PERMISSION_NOTIFICATION, PERMISSION_PHONE,
+                    PERMISSION_CALL_LOGS, PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_CALENDAR,
+                    PERMISSION_NEARBY_DEVICES, PERMISSION_CHANGE_MEDIA_OUTPUT));
+        }
         map.put(DEVICE_PROFILE_GLASSES, Arrays.asList(PERMISSION_NOTIFICATION, PERMISSION_PHONE,
                 PERMISSION_SMS, PERMISSION_CONTACTS, PERMISSION_MICROPHONE,
                 PERMISSION_NEARBY_DEVICES));

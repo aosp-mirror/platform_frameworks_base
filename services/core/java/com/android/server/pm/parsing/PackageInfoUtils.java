@@ -152,7 +152,9 @@ public class PackageInfoUtils {
         info.compileSdkVersionCodename = pkg.getCompileSdkVersionCodeName();
         info.firstInstallTime = firstInstallTime;
         info.lastUpdateTime = lastUpdateTime;
-        info.setArchiveTimeMillis(state.getArchiveTimeMillis());
+        if (state.getArchiveState() != null) {
+            info.setArchiveTimeMillis(state.getArchiveState().getArchiveTimeMillis());
+        }
         if ((flags & PackageManager.GET_GIDS) != 0) {
             info.gids = gids;
         }
@@ -346,7 +348,7 @@ public class PackageInfoUtils {
     }
 
     /**
-     *  Retrieve the deprecated {@link PackageInfo.signatures} field of signing certificates
+     * Retrieve the deprecated {@link PackageInfo.signatures} field of signing certificates
      */
     public static Signature[] getDeprecatedSignatures(SigningDetails signingDetails, long flags) {
         if ((flags & PackageManager.GET_SIGNATURES) == 0) {

@@ -255,6 +255,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         } else {
             throw new UnsupportedOperationException();
         }
+        mBroadcastQueues[0] = mQueue;
 
         mQueue.start(mContext.getContentResolver());
     }

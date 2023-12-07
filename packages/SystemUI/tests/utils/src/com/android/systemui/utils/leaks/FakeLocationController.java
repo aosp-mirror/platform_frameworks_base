@@ -26,6 +26,7 @@ public class FakeLocationController extends BaseLeakChecker<LocationChangeCallba
         implements LocationController {
 
     private final List<LocationChangeCallback> mCallbacks = new ArrayList<>();
+    private boolean mLocationEnabled = false;
 
     public FakeLocationController(LeakCheck test) {
         super(test, "location");
@@ -38,13 +39,14 @@ public class FakeLocationController extends BaseLeakChecker<LocationChangeCallba
 
     @Override
     public boolean isLocationEnabled() {
-        return false;
+        return mLocationEnabled;
     }
 
     @Override
     public boolean setLocationEnabled(boolean enabled) {
+        mLocationEnabled = enabled;
         mCallbacks.forEach(callback -> callback.onLocationSettingsChanged(enabled));
-        return false;
+        return true;
     }
 
     @Override

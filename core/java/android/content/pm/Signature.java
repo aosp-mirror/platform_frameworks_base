@@ -43,6 +43,7 @@ import java.util.Arrays;
  * <p>
  * This class name is slightly misleading, since it's not actually a signature.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Signature implements Parcelable {
     private final byte[] mSignature;
     private int mHashCode;

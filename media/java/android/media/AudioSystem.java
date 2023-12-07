@@ -1305,6 +1305,11 @@ public class AudioSystem
     }
 
     /** @hide */
+    public static boolean isInputDevice(int deviceType) {
+        return (deviceType & DEVICE_BIT_IN) == DEVICE_BIT_IN;
+    }
+
+    /** @hide */
     public static boolean isBluetoothDevice(int deviceType) {
         return isBluetoothA2dpOutDevice(deviceType)
                 || isBluetoothScoDevice(deviceType)
@@ -1602,7 +1607,7 @@ public class AudioSystem
      * @return a string describing the device type
      */
     public static @NonNull String getDeviceName(int device) {
-        if ((device & DEVICE_BIT_IN) != 0) {
+        if (isInputDevice(device)) {
             return getInputDeviceName(device);
         }
         return getOutputDeviceName(device);

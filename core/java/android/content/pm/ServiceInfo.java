@@ -31,6 +31,7 @@ import java.lang.annotation.RetentionPolicy;
  * service. This corresponds to information collected from the
  * AndroidManifest.xml's &lt;service&gt; tags.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ServiceInfo extends ComponentInfo
         implements Parcelable {
     /**

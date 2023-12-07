@@ -31,6 +31,7 @@ import static android.view.contentcapture.ContentCaptureHelper.getSanitizedStrin
 import static android.view.contentcapture.ContentCaptureHelper.sDebug;
 import static android.view.contentcapture.ContentCaptureHelper.sVerbose;
 import static android.view.contentcapture.ContentCaptureManager.RESULT_CODE_FALSE;
+import static android.view.contentcapture.flags.Flags.runOnBackgroundThreadEnabled;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -209,14 +210,14 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 binder = resultData.getBinder(EXTRA_BINDER);
                 if (binder == null) {
                     Log.wtf(TAG, "No " + EXTRA_BINDER + " extra result");
-                    mainSession.mHandler.post(() -> mainSession.resetSession(
+                    mainSession.runOnContentCaptureThread(() -> mainSession.resetSession(
                             STATE_DISABLED | STATE_INTERNAL_ERROR));
                     return;
                 }
             } else {
                 binder = null;
             }
-            mainSession.mHandler.post(() ->
+            mainSession.runOnContentCaptureThread(() ->
                     mainSession.onSessionStarted(resultCode, binder));
         }
     }
@@ -256,7 +257,13 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      */
     void start(@NonNull IBinder token, @NonNull IBinder shareableActivityToken,
             @NonNull ComponentName component, int flags) {
-        runOnContentCaptureThread(() -> startImpl(token, shareableActivityToken, component, flags));
+        if (runOnBackgroundThreadEnabled()) {
+            runOnContentCaptureThread(
+                    () -> startImpl(token, shareableActivityToken, component, flags));
+        } else {
+            // Preserve the control arm behaviour.
+            startImpl(token, shareableActivityToken, component, flags);
+        }
     }
 
     private void startImpl(@NonNull IBinder token, @NonNull IBinder shareableActivityToken,
@@ -613,7 +620,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     @Override
     public void flush(@FlushReason int reason) {
-        runOnContentCaptureThread(() -> flushImpl(reason));
+        if (runOnBackgroundThreadEnabled()) {
+            runOnContentCaptureThread(() -> flushImpl(reason));
+        } else {
+            // Preserve the control arm behaviour.
+            flushImpl(reason);
+        }
     }
 
     private void flushImpl(@FlushReason int reason) {
@@ -904,7 +916,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     /** public because is also used by ViewRootImpl */
     public void notifyContentCaptureEvents(
             @NonNull SparseArray<ArrayList<Object>> contentCaptureEvents) {
-        runOnContentCaptureThread(() -> notifyContentCaptureEventsImpl(contentCaptureEvents));
+        if (runOnBackgroundThreadEnabled()) {
+            runOnContentCaptureThread(() -> notifyContentCaptureEventsImpl(contentCaptureEvents));
+        } else {
+            // Preserve the control arm behaviour.
+            notifyContentCaptureEventsImpl(contentCaptureEvents);
+        }
     }
 
     private void notifyContentCaptureEventsImpl(
@@ -1076,19 +1093,30 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
      * </p>
      */
     private void runOnContentCaptureThread(@NonNull Runnable r) {
-        if (!mHandler.getLooper().isCurrentThread()) {
-            mHandler.post(r);
+        if (runOnBackgroundThreadEnabled()) {
+            if (!mHandler.getLooper().isCurrentThread()) {
+                mHandler.post(r);
+            } else {
+                r.run();
+            }
         } else {
-            r.run();
+            // Preserve the control arm behaviour to always post to the handler.
+            mHandler.post(r);
         }
     }
 
     private void clearAndRunOnContentCaptureThread(@NonNull Runnable r, int what) {
-        if (!mHandler.getLooper().isCurrentThread()) {
+        if (runOnBackgroundThreadEnabled()) {
+            if (!mHandler.getLooper().isCurrentThread()) {
+                mHandler.removeMessages(what);
+                mHandler.post(r);
+            } else {
+                r.run();
+            }
+        } else {
+            // Preserve the control arm behaviour to always post to the handler.
             mHandler.removeMessages(what);
             mHandler.post(r);
-        } else {
-            r.run();
         }
     }
 }

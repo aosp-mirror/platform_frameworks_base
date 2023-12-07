@@ -25,6 +25,7 @@ import static com.android.app.animation.Interpolators.EMPHASIZED_DECELERATE;
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
 import static com.android.systemui.Flags.keyguardBottomAreaRefactor;
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.classifier.Classifier.BOUNCER_UNLOCK;
 import static com.android.systemui.classifier.Classifier.GENERIC;
 import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
@@ -1608,7 +1609,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         int userSwitcherPreferredY = mStatusBarHeaderHeightKeyguard;
         boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
         boolean shouldAnimateClockChange = mScreenOffAnimationController.shouldAnimateClockChange();
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             mKeyguardClockInteractor.setClockSize(computeDesiredClockSize());
         } else {
             mKeyguardStatusViewController.displayClock(computeDesiredClockSize(),
@@ -1741,7 +1742,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         } else {
             layout = mNotificationContainerParent;
         }
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             mKeyguardInteractor.setClockShouldBeCentered(shouldBeCentered);
         } else {
             mKeyguardStatusViewController.updateAlignment(

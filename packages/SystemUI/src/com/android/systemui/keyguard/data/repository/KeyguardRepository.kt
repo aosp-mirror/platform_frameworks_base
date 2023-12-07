@@ -157,6 +157,9 @@ interface KeyguardRepository {
 
     val lastDozeTapToWakePosition: StateFlow<Point?>
 
+    /** Last point that [KeyguardRootView] was tapped */
+    val lastRootViewTapPosition: MutableStateFlow<Point?>
+
     /** Observable for the [StatusBarState] */
     val statusBarState: StateFlow<StatusBarState>
 
@@ -417,6 +420,8 @@ constructor(
     override fun setLastDozeTapToWakePosition(position: Point) {
         _lastDozeTapToWakePosition.value = position
     }
+
+    override val lastRootViewTapPosition: MutableStateFlow<Point?> = MutableStateFlow(null)
 
     override val isDreamingWithOverlay: Flow<Boolean> =
         conflatedCallbackFlow {

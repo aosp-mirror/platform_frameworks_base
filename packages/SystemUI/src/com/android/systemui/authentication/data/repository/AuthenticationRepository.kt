@@ -21,7 +21,6 @@ package com.android.systemui.authentication.data.repository
 import android.app.admin.DevicePolicyManager
 import android.content.IntentFilter
 import android.os.UserHandle
-import com.android.internal.widget.LockPatternChecker
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.KeyguardSecurityModel
@@ -40,8 +39,6 @@ import dagger.Binds
 import dagger.Module
 import java.util.function.Function
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -193,8 +190,8 @@ constructor(
     override val throttling: MutableStateFlow<AuthenticationThrottlingModel?> =
         MutableStateFlow(null)
 
-    private val UserRepository.selectedUserId: Int
-        get() = getSelectedUserInfo().id
+    private val selectedUserId: Int
+        get() = userRepository.getSelectedUserInfo().id
 
     override val authenticationMethod: Flow<AuthenticationMethodModel> =
         combine(userRepository.selectedUserInfo, mobileConnectionsRepository.isAnySimSecure) {
@@ -233,19 +230,15 @@ constructor(
 
     override suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
         return withContext(backgroundDispatcher) {
-            blockingAuthenticationMethodInternal(userRepository.selectedUserId)
+            blockingAuthenticationMethodInternal(selectedUserId)
         }
     }
 
     override suspend fun getPinLength(): Int {
-        return withContext(backgroundDispatcher) {
-            val selectedUserId = userRepository.selectedUserId
-            lockPatternUtils.getPinLength(selectedUserId)
-        }
+        return withContext(backgroundDispatcher) { lockPatternUtils.getPinLength(selectedUserId) }
     }
 
     override suspend fun reportAuthenticationAttempt(isSuccessful: Boolean) {
-        val selectedUserId = userRepository.selectedUserId
         withContext(backgroundDispatcher) {
             if (isSuccessful) {
                 lockPatternUtils.reportSuccessfulPasswordAttempt(selectedUserId)
@@ -258,52 +251,32 @@ constructor(
 
     override suspend fun getFailedAuthenticationAttemptCount(): Int {
         return withContext(backgroundDispatcher) {
-            val selectedUserId = userRepository.selectedUserId
             lockPatternUtils.getCurrentFailedPasswordAttempts(selectedUserId)
         }
     }
 
     override suspend fun getThrottlingEndTimestamp(): Long {
         return withContext(backgroundDispatcher) {
-            val selectedUserId = userRepository.selectedUserId
             lockPatternUtils.getLockoutAttemptDeadline(selectedUserId)
         }
     }
 
     override suspend fun setThrottleDuration(durationMs: Int) {
         withContext(backgroundDispatcher) {
-            lockPatternUtils.setLockoutAttemptDeadline(
-                userRepository.selectedUserId,
-                durationMs,
-            )
+            lockPatternUtils.setLockoutAttemptDeadline(selectedUserId, durationMs)
         }
     }
 
     override suspend fun checkCredential(
         credential: LockscreenCredential
     ): AuthenticationResultModel {
-        return suspendCoroutine { continuation ->
-            LockPatternChecker.checkCredential(
-                lockPatternUtils,
-                credential,
-                userRepository.selectedUserId,
-                object : LockPatternChecker.OnCheckCallback {
-                    override fun onChecked(matched: Boolean, throttleTimeoutMs: Int) {
-                        continuation.resume(
-                            AuthenticationResultModel(
-                                isSuccessful = matched,
-                                throttleDurationMs = throttleTimeoutMs,
-                            )
-                        )
-                    }
-
-                    override fun onCancelled() {
-                        continuation.resume(AuthenticationResultModel(isSuccessful = false))
-                    }
-
-                    override fun onEarlyMatched() = Unit
-                }
-            )
+        return withContext(backgroundDispatcher) {
+            try {
+                val matched = lockPatternUtils.checkCredential(credential, selectedUserId) {}
+                AuthenticationResultModel(isSuccessful = matched, throttleDurationMs = 0)
+            } catch (ex: LockPatternUtils.RequestThrottledException) {
+                AuthenticationResultModel(isSuccessful = false, throttleDurationMs = ex.timeoutMs)
+            }
         }
     }
 

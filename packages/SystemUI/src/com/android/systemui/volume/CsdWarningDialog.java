@@ -157,6 +157,7 @@ public class CsdWarningDialog extends SystemUIDialog
         if (mCsdWarning == AudioManager.CSD_WARNING_DOSE_REPEATED_5X) {
             // only show a notification in case we reached 500% of dose
             show5XNotification();
+            dismissCsdDialog();
             return;
         }
         super.show();
@@ -217,6 +218,10 @@ public class CsdWarningDialog extends SystemUIDialog
 
     @Override
     public void onDismiss(DialogInterface unused) {
+        dismissCsdDialog();
+    }
+
+    private void dismissCsdDialog() {
         try {
             mContext.unregisterReceiver(mReceiver);
         } catch (IllegalArgumentException e) {

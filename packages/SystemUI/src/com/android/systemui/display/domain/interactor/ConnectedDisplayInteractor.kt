@@ -21,6 +21,7 @@ import android.companion.virtual.flags.Flags
 import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.display.data.repository.DeviceStateRepository
 import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.PendingDisplay
 import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor.State
@@ -55,6 +56,9 @@ interface ConnectedDisplayInteractor {
     /** Pending display that can be enabled to be used by the system. */
     val pendingDisplay: Flow<PendingDisplay?>
 
+    /** Pending display that can be enabled to be used by the system. */
+    val concurrentDisplaysInProgress: Flow<Boolean>
+
     /** Possible connected display state. */
     enum class State {
         DISCONNECTED,
@@ -84,6 +88,7 @@ constructor(
     private val virtualDeviceManager: VirtualDeviceManager,
     keyguardRepository: KeyguardRepository,
     displayRepository: DisplayRepository,
+    deviceStateRepository: DeviceStateRepository,
     @Background backgroundCoroutineDispatcher: CoroutineDispatcher,
 ) : ConnectedDisplayInteractor {
 
@@ -128,9 +133,16 @@ constructor(
             }
         }
 
+    override val concurrentDisplaysInProgress: Flow<Boolean> =
+        deviceStateRepository.state
+            .map { it == DeviceStateRepository.DeviceState.CONCURRENT_DISPLAY }
+            .distinctUntilChanged()
+            .flowOn(backgroundCoroutineDispatcher)
+
     private fun DisplayRepository.PendingDisplay.toInteractorPendingDisplay(): PendingDisplay =
         object : PendingDisplay {
             override suspend fun enable() = this@toInteractorPendingDisplay.enable()
+
             override suspend fun ignore() = this@toInteractorPendingDisplay.ignore()
         }
 

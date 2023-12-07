@@ -107,6 +107,7 @@ public class ExpandedAnimationController
     private Runnable mAfterExpand;
     private Runnable mAfterCollapse;
     private PointF mCollapsePoint;
+    private boolean mFadeBubblesDuringCollapse = false;
 
     /**
      * Whether the dragged out bubble is springing towards the touch point, rather than using the
@@ -201,12 +202,14 @@ public class ExpandedAnimationController
     }
 
     /** Animate collapsing the bubbles back to their stacked position. */
-    public void collapseBackToStack(PointF collapsePoint, Runnable after) {
+    public void collapseBackToStack(PointF collapsePoint, boolean fadeBubblesDuringCollapse,
+            Runnable after) {
         mAnimatingExpand = false;
         mPreparingToCollapse = false;
         mAnimatingCollapse = true;
         mAfterCollapse = after;
         mCollapsePoint = collapsePoint;
+        mFadeBubblesDuringCollapse = fadeBubblesDuringCollapse;
 
         startOrUpdatePathAnimation(false /* expanding */);
     }
@@ -253,6 +256,7 @@ public class ExpandedAnimationController
                 }
 
                 mAfterCollapse = null;
+                mFadeBubblesDuringCollapse = false;
             };
         }
 
@@ -262,7 +266,7 @@ public class ExpandedAnimationController
                         == LAYOUT_DIRECTION_RTL;
 
         // Animate each bubble individually, since each path will end in a different spot.
-        animationsForChildrenFromIndex(0, (index, animation) -> {
+        animationsForChildrenFromIndex(0, mFadeBubblesDuringCollapse, (index, animation) -> {
             final View bubble = mLayout.getChildAt(index);
 
             // Start a path at the bubble's current position.

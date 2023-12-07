@@ -66,6 +66,7 @@ import java.util.UUID;
  * corresponds to information collected from the AndroidManifest.xml's
  * &lt;application&gt; tag.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     private static final ForBoolean sForBoolean = Parcelling.Cache.getOrCreate(ForBoolean.class);
     private static final Parcelling.BuiltIn.ForStringSet sForStringSet =
@@ -1386,6 +1387,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      *
      * @see #category
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public static CharSequence getCategoryTitle(Context context, @Category int category) {
         switch (category) {
             case ApplicationInfo.CATEGORY_GAME:
@@ -2187,6 +2189,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @return Returns a CharSequence containing the application's description.
      * If there is no description, null is returned.
      */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public CharSequence loadDescription(PackageManager pm) {
         if (descriptionRes != 0) {
             CharSequence label = pm.getText(packageName, descriptionRes, this);
@@ -2222,6 +2225,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     /** {@hide} */
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = Environment.class)
     public void initForUser(int userId) {
         uid = UserHandle.getUid(userId, UserHandle.getAppId(uid));
 
@@ -2414,6 +2418,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      * @hide
      */
     @Override
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = android.content.res.Resources.class)
     public Drawable loadDefaultIcon(PackageManager pm) {
         if ((flags & FLAG_EXTERNAL_STORAGE) != 0
                 && isPackageUnavailable(pm)) {
@@ -2424,6 +2429,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
+    @android.ravenwood.annotation.RavenwoodThrow(blockedBy = PackageManager.class)
     private boolean isPackageUnavailable(PackageManager pm) {
         try {
             return pm.getPackageInfo(packageName, 0) == null;

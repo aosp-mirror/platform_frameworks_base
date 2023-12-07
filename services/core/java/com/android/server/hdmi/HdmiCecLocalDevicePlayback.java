@@ -126,6 +126,10 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private void launchDeviceDiscovery() {
         assertRunOnServiceThread();
         clearDeviceInfoList();
+        if (hasAction(DeviceDiscoveryAction.class)) {
+            Slog.i(TAG, "Device Discovery Action is in progress. Restarting.");
+            removeAction(DeviceDiscoveryAction.class);
+        }
         DeviceDiscoveryAction action = new DeviceDiscoveryAction(this,
                 new DeviceDiscoveryAction.DeviceDiscoveryCallback() {
                     @Override

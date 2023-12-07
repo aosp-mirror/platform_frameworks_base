@@ -26,9 +26,9 @@ import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
+import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
@@ -118,7 +118,7 @@ constructor(
                 BOTTOM
             }
         constraintSet.apply {
-            if (featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+            if (migrateClocksToBlueprint()) {
                 connect(
                     nicId,
                     TOP,

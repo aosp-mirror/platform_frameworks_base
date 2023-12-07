@@ -56,6 +56,8 @@
     <color name="kg_user_switcher_restricted_avatar_icon_color">@color/GM2_grey_600</color>
     <!-- Color of background circle of user avatars in keyguard user switcher -->
     <color name="user_avatar_color_bg">?android:attr/colorBackgroundFloating</color>
+    <!-- Color of border for keyguard password input when focused -->
+    <color name="bouncer_password_focus_color">@*android:color/system_secondary_light</color>
 
     <!-- Icon color for user avatars in user switcher quick settings -->
     <color name="qs_user_switcher_avatar_icon_color">#3C4043</color>

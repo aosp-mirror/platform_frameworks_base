@@ -22,6 +22,7 @@
 
 #include "android-base/errors.h"
 #include "android-base/file.h"  // for O_BINARY
+#include "android-base/logging.h"
 #include "android-base/macros.h"
 #include "android-base/utf8.h"
 
@@ -37,9 +38,9 @@ using ::android::base::unique_fd;
 namespace android {
 
 FileInputStream::FileInputStream(const std::string& path, size_t buffer_capacity)
-    : buffer_capacity_(buffer_capacity) {
+    : should_close_(true), buffer_capacity_(buffer_capacity) {
   int mode = O_RDONLY | O_CLOEXEC | O_BINARY;
-  fd_.reset(TEMP_FAILURE_RETRY(::android::base::utf8::open(path.c_str(), mode)));
+  fd_ = TEMP_FAILURE_RETRY(::android::base::utf8::open(path.c_str(), mode));
   if (fd_ == -1) {
     error_ = SystemErrorCodeToString(errno);
   } else {
@@ -48,13 +49,24 @@ FileInputStream::FileInputStream(const std::string& path, size_t buffer_capacity
 }
 
 FileInputStream::FileInputStream(int fd, size_t buffer_capacity)
-    : fd_(fd), buffer_capacity_(buffer_capacity) {
+    : fd_(fd), should_close_(true), buffer_capacity_(buffer_capacity) {
   if (fd_ < 0) {
     error_ = "Bad File Descriptor";
   } else {
     buffer_.reset(new uint8_t[buffer_capacity_]);
   }
 }
+
+FileInputStream::FileInputStream(android::base::borrowed_fd fd, size_t buffer_capacity)
+    : fd_(fd.get()), should_close_(false), buffer_capacity_(buffer_capacity) {
+
+  if (fd_ < 0) {
+    error_ = "Bad File Descriptor";
+  } else {
+    buffer_.reset(new uint8_t[buffer_capacity_]);
+  }
+}
+
 
 bool FileInputStream::Next(const void** data, size_t* size) {
   if (HadError()) {
@@ -73,7 +85,12 @@ bool FileInputStream::Next(const void** data, size_t* size) {
   ssize_t n = TEMP_FAILURE_RETRY(read(fd_, buffer_.get(), buffer_capacity_));
   if (n < 0) {
     error_ = SystemErrorCodeToString(errno);
-    fd_.reset();
+    if (fd_ != -1) {
+      if (should_close_) {
+        close(fd_);
+      }
+      fd_ = -1;
+    }
     buffer_.reset();
     return false;
   }

@@ -128,6 +128,9 @@ interface IAccessibilityManager {
     boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId);
     boolean sendRestrictedDialogIntent(String packageName, int uid, int userId);
 
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.MANAGE_ACCESSIBILITY)")
+    boolean isAccessibilityServiceWarningRequired(in AccessibilityServiceInfo info);
+
     parcelable WindowTransformationSpec {
         float[] transformationMatrix;
         MagnificationSpec magnificationSpec;

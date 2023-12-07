@@ -372,7 +372,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
     private static final String ATTR_ARCHIVE_INSTALLER_TITLE = "installer-title";
     private static final String ATTR_ARCHIVE_ICON_PATH = "icon-path";
     private static final String ATTR_ARCHIVE_MONOCHROME_ICON_PATH = "monochrome-icon-path";
-
     private static final String ATTR_ARCHIVE_TIME = "archive-time";
 
     private final Handler mHandler;
@@ -1933,8 +1932,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 ATTR_SPLASH_SCREEN_THEME);
                         final long firstInstallTime = parser.getAttributeLongHex(null,
                                 ATTR_FIRST_INSTALL_TIME, 0);
-                        final long archiveTime = parser.getAttributeLongHex(null,
-                                ATTR_ARCHIVE_TIME, 0);
                         final int minAspectRatio = parser.getAttributeInt(null,
                                 ATTR_MIN_ASPECT_RATIO,
                                 PackageManager.USER_MIN_ASPECT_RATIO_UNSET);
@@ -2022,7 +2019,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                                 firstInstallTime != 0 ? firstInstallTime
                                         : origFirstInstallTimes.getOrDefault(name, 0L),
                                 minAspectRatio, archiveState);
-                        ps.setArchiveTimeMillis(archiveTime, userId);
                         mDomainVerificationManager.setLegacyUserState(name, userId, verifState);
                     } else if (tagName.equals("preferred-activities")) {
                         readPreferredActivitiesLPw(parser, userId);
@@ -2054,6 +2050,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             throws XmlPullParserException, IOException {
         String installerTitle = parser.getAttributeValue(null,
                 ATTR_ARCHIVE_INSTALLER_TITLE);
+        final long archiveTimeMillis = parser.getAttributeLongHex(null, ATTR_ARCHIVE_TIME, 0);
         List<ArchiveState.ArchiveActivityInfo> activityInfos =
                 parseArchiveActivityInfos(parser);
 
@@ -2067,7 +2064,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             return null;
         }
 
-        return new ArchiveState(activityInfos, installerTitle);
+        return new ArchiveState(activityInfos, installerTitle, archiveTimeMillis);
     }
 
     private static List<ArchiveState.ArchiveActivityInfo> parseArchiveActivityInfos(
@@ -2385,8 +2382,6 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                         }
                         serializer.attributeLongHex(null, ATTR_FIRST_INSTALL_TIME,
                                 ustate.getFirstInstallTimeMillis());
-                        serializer.attributeLongHex(null, ATTR_ARCHIVE_TIME,
-                                ustate.getArchiveTimeMillis());
                         if (ustate.getUninstallReason()
                                 != PackageManager.UNINSTALL_REASON_UNKNOWN) {
                             serializer.attributeInt(null, ATTR_UNINSTALL_REASON,
@@ -2488,6 +2483,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
 
         serializer.startTag(null, TAG_ARCHIVE_STATE);
         serializer.attribute(null, ATTR_ARCHIVE_INSTALLER_TITLE, archiveState.getInstallerTitle());
+        serializer.attributeLongHex(null, ATTR_ARCHIVE_TIME, archiveState.getArchiveTimeMillis());
         for (ArchiveState.ArchiveActivityInfo activityInfo : archiveState.getActivityInfos()) {
             serializer.startTag(null, TAG_ARCHIVE_ACTIVITY_INFO);
             serializer.attribute(null, ATTR_ARCHIVE_ACTIVITY_TITLE, activityInfo.getTitle());
@@ -5293,9 +5289,11 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             date.setTime(pus.getFirstInstallTimeMillis());
             pw.println(sdf.format(date));
 
-            pw.print("      archiveTime=");
-            date.setTime(pus.getArchiveTimeMillis());
-            pw.println(sdf.format(date));
+            if (pus.getArchiveState() != null) {
+                pw.print("      archiveTime=");
+                date.setTime(pus.getArchiveState().getArchiveTimeMillis());
+                pw.println(sdf.format(date));
+            }
 
             pw.print("      uninstallReason=");
             pw.println(userState.getUninstallReason());

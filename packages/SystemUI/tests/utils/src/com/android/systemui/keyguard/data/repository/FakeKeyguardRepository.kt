@@ -119,6 +119,8 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha: StateFlow<Float> = _keyguardAlpha
 
+    override val lastRootViewTapPosition: MutableStateFlow<Point?> = MutableStateFlow(null)
+
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
     }

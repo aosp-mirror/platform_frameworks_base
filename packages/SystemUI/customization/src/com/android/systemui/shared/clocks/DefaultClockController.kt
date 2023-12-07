@@ -198,7 +198,6 @@ class DefaultClockController(
         }
 
         override fun recomputePadding(targetRegion: Rect?) {
-            // TODO(b/310989341): remove after changing migrate_clocks_to_blueprint to aconfig
             if (migratedClocks) {
                 return
             }

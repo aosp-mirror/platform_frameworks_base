@@ -24,13 +24,14 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalSceneKey
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.shade.ShadeViewController
+import javax.inject.Provider
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /** The base view model for the communal hub. */
 abstract class BaseCommunalViewModel(
     private val communalInteractor: CommunalInteractor,
-    private val shadeViewController: ShadeViewController,
+    private val shadeViewController: Provider<ShadeViewController>,
     private val powerManager: PowerManager,
     val mediaHost: MediaHost,
 ) {
@@ -48,7 +49,7 @@ abstract class BaseCommunalViewModel(
     fun onOuterTouch(motionEvent: MotionEvent) {
         // Forward the touch to the shade so that basic gestures like swipe up/down for
         // shade/bouncer work.
-        shadeViewController.handleExternalTouch(motionEvent)
+        shadeViewController.get().handleExternalTouch(motionEvent)
     }
 
     // TODO(b/308813166): remove once CommunalContainer is moved lower in z-order and doesn't block

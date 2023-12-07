@@ -21,7 +21,6 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.Flags.MIGRATE_CLOCKS_TO_BLUEPRINT
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
@@ -82,7 +81,6 @@ class ClockSectionTest : SysuiTestCase() {
             .thenReturn(SMART_SPACE_DATE_WEATHER_HEIGHT)
         whenever(smartspaceViewModel.getDimen("enhanced_smartspace_height"))
             .thenReturn(ENHANCED_SMART_SPACE_HEIGHT)
-        featureFlags.set(MIGRATE_CLOCKS_TO_BLUEPRINT, true)
         underTest =
             ClockSection(
                 keyguardClockInteractor,

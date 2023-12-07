@@ -9,5 +9,10 @@
     {
       "name": "SettingsSpaUnitTests"
     }
+  ],
+  "postsubmit": [
+    {
+      "name": "SpaScreenshotTests"
+    }
   ]
 }

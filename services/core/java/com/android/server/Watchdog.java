@@ -103,7 +103,7 @@ public class Watchdog implements Dumpable {
     // will be half the full timeout).
     //
     // The pre-watchdog event is similar to a full watchdog except it does not crash system server.
-    private static final int PRE_WATCHDOG_TIMEOUT_RATIO = 3;
+    private static final int PRE_WATCHDOG_TIMEOUT_RATIO = 4;
 
     // These are temporally ordered: larger values as lateness increases
     static final int COMPLETED = 0;

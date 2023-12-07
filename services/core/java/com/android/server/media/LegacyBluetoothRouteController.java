@@ -132,12 +132,6 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
         mContext.unregisterReceiver(mDeviceStateChangedReceiver);
     }
 
-    @Override
-    public boolean selectRoute(String deviceAddress) {
-        // No-op as the class decides if a route is selected based on Bluetooth events.
-        return false;
-    }
-
     /**
      * Transfers to a given bluetooth route.
      * The dedicated BT device with the route would be activated.
