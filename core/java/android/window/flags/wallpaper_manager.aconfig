@@ -13,3 +13,10 @@ flag {
   description: "Support storing different wallpaper crops for different display dimensions. Only effective after rebooting."
   bug: "281648899"
 }
+
+flag {
+  name: "no_consecutive_visibility_events"
+  namespace: "systemui"
+  description: "Prevent the system from sending consecutive onVisibilityChanged(false) events."
+  bug: "285631818"
+}
