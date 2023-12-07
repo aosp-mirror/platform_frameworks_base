@@ -66,8 +66,6 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
     public static final int MODE_ON = 1;
     public static final int MODE_OFF = 2;
     public static final int MODE_ESTIMATE = 3;
-    @VisibleForTesting
-    public static final long LAYOUT_TRANSITION_DURATION = 200;
 
     private final AccessorizedBatteryDrawable mDrawable;
     private final ImageView mBatteryIconView;
@@ -136,7 +134,7 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
 
     private void setupLayoutTransition() {
         LayoutTransition transition = new LayoutTransition();
-        transition.setDuration(LAYOUT_TRANSITION_DURATION);
+        transition.setDuration(200);
 
         // Animates appearing/disappearing of the battery percentage text using fade-in/fade-out
         // and disables all other animation types
