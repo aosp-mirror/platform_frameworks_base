@@ -3855,8 +3855,9 @@
              device -->
         <attr name="isVrOnly" format="boolean"/>
         <!-- Specifies if an IME can only be used on a display created by a virtual device.
-             @hide @SystemApi
-             @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") -->
+             @see android.companion.virtual.VirtualDeviceParams.Builder#setInputMethodComponent
+             @hide @SystemApi -->
+        <!-- @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") -->
         <attr name="isVirtualDeviceOnly" format="boolean"/>
         <attr name="__removed2" format="boolean" />
         <!-- Specifies whether the IME supports showing inline suggestions. -->

@@ -104,6 +104,7 @@ import com.android.server.LocalServices;
 import com.android.server.companion.virtual.GenericWindowPolicyController.RunningAppsChangedListener;
 import com.android.server.companion.virtual.audio.VirtualAudioController;
 import com.android.server.companion.virtual.camera.VirtualCameraController;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -352,6 +353,14 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             flags |= DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
         }
         mBaseVirtualDisplayFlags = flags;
+
+        if (Flags.vdmCustomIme() && mParams.getInputMethodComponent() != null) {
+            final String imeId = mParams.getInputMethodComponent().flattenToShortString();
+            Slog.d(TAG, "Setting custom input method " + imeId + " as default for virtual device "
+                    + deviceId);
+            InputMethodManagerInternal.get().setVirtualDeviceInputMethodForAllUsers(
+                    mDeviceId, imeId);
+        }
     }
 
     @VisibleForTesting
@@ -554,6 +563,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mAppToken.unlinkToDeath(this, 0);
             if (mCameraAccessController != null) {
                 mCameraAccessController.stopObservingIfNeeded();
+            }
+
+            // Clear any previously set custom IME components.
+            if (Flags.vdmCustomIme() && mParams.getInputMethodComponent() != null) {
+                InputMethodManagerInternal.get().setVirtualDeviceInputMethodForAllUsers(
+                        mDeviceId, null);
             }
 
             mInputController.close();

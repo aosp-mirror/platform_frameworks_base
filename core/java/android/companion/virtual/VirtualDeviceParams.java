@@ -258,6 +258,7 @@ public final class VirtualDeviceParams implements Parcelable {
     // Mapping of @PolicyType to @DevicePolicy
     @NonNull private final SparseIntArray mDevicePolicies;
     @Nullable private final ComponentName mHomeComponent;
+    @Nullable private final ComponentName mInputMethodComponent;
     @NonNull private final List<VirtualSensorConfig> mVirtualSensorConfigs;
     @Nullable private final IVirtualSensorCallback mVirtualSensorCallback;
     private final int mAudioPlaybackSessionId;
@@ -273,6 +274,7 @@ public final class VirtualDeviceParams implements Parcelable {
             @Nullable String name,
             @NonNull SparseIntArray devicePolicies,
             @Nullable ComponentName homeComponent,
+            @Nullable ComponentName inputMethodComponent,
             @NonNull List<VirtualSensorConfig> virtualSensorConfigs,
             @Nullable IVirtualSensorCallback virtualSensorCallback,
             int audioPlaybackSessionId,
@@ -289,6 +291,7 @@ public final class VirtualDeviceParams implements Parcelable {
         mName = name;
         mDevicePolicies = Objects.requireNonNull(devicePolicies);
         mHomeComponent = homeComponent;
+        mInputMethodComponent = inputMethodComponent;
         mVirtualSensorConfigs = Objects.requireNonNull(virtualSensorConfigs);
         mVirtualSensorCallback = virtualSensorCallback;
         mAudioPlaybackSessionId = audioPlaybackSessionId;
@@ -312,6 +315,7 @@ public final class VirtualDeviceParams implements Parcelable {
         mAudioPlaybackSessionId = parcel.readInt();
         mAudioRecordingSessionId = parcel.readInt();
         mHomeComponent = parcel.readTypedObject(ComponentName.CREATOR);
+        mInputMethodComponent = parcel.readTypedObject(ComponentName.CREATOR);
     }
 
     /**
@@ -333,6 +337,18 @@ public final class VirtualDeviceParams implements Parcelable {
     @Nullable
     public ComponentName getHomeComponent() {
         return mHomeComponent;
+    }
+
+    /**
+     * Returns the custom component used as input method on all displays owned by this virtual
+     * device.
+     *
+     * @see Builder#setInputMethodComponent
+     */
+    @FlaggedApi(Flags.FLAG_VDM_CUSTOM_IME)
+    @Nullable
+    public ComponentName getInputMethodComponent() {
+        return mInputMethodComponent;
     }
 
     /**
@@ -532,6 +548,7 @@ public final class VirtualDeviceParams implements Parcelable {
         dest.writeInt(mAudioPlaybackSessionId);
         dest.writeInt(mAudioRecordingSessionId);
         dest.writeTypedObject(mHomeComponent, flags);
+        dest.writeTypedObject(mInputMethodComponent, flags);
     }
 
     @Override
@@ -563,6 +580,8 @@ public final class VirtualDeviceParams implements Parcelable {
                 && Objects.equals(mActivityPolicyExemptions, that.mActivityPolicyExemptions)
                 && mDefaultActivityPolicy == that.mDefaultActivityPolicy
                 && Objects.equals(mName, that.mName)
+                && Objects.equals(mHomeComponent, that.mHomeComponent)
+                && Objects.equals(mInputMethodComponent, that.mInputMethodComponent)
                 && mAudioPlaybackSessionId == that.mAudioPlaybackSessionId
                 && mAudioRecordingSessionId == that.mAudioRecordingSessionId;
     }
@@ -572,7 +591,8 @@ public final class VirtualDeviceParams implements Parcelable {
         int hashCode = Objects.hash(
                 mLockState, mUsersWithMatchingAccounts, mCrossTaskNavigationExemptions,
                 mDefaultNavigationPolicy, mActivityPolicyExemptions, mDefaultActivityPolicy, mName,
-                mDevicePolicies, mHomeComponent, mAudioPlaybackSessionId, mAudioRecordingSessionId);
+                mDevicePolicies, mHomeComponent, mInputMethodComponent, mAudioPlaybackSessionId,
+                mAudioRecordingSessionId);
         for (int i = 0; i < mDevicePolicies.size(); i++) {
             hashCode = 31 * hashCode + mDevicePolicies.keyAt(i);
             hashCode = 31 * hashCode + mDevicePolicies.valueAt(i);
@@ -593,6 +613,7 @@ public final class VirtualDeviceParams implements Parcelable {
                 + " mName=" + mName
                 + " mDevicePolicies=" + mDevicePolicies
                 + " mHomeComponent=" + mHomeComponent
+                + " mInputMethodComponent=" + mInputMethodComponent
                 + " mAudioPlaybackSessionId=" + mAudioPlaybackSessionId
                 + " mAudioRecordingSessionId=" + mAudioRecordingSessionId
                 + ")";
@@ -612,6 +633,8 @@ public final class VirtualDeviceParams implements Parcelable {
         pw.println(prefix + "mActivityPolicyExemptions=" + mActivityPolicyExemptions);
         pw.println(prefix + "mDevicePolicies=" + mDevicePolicies);
         pw.println(prefix + "mVirtualSensorConfigs=" + mVirtualSensorConfigs);
+        pw.println(prefix + "mHomeComponent=" + mHomeComponent);
+        pw.println(prefix + "mInputMethodComponent=" + mInputMethodComponent);
         pw.println(prefix + "mAudioPlaybackSessionId=" + mAudioPlaybackSessionId);
         pw.println(prefix + "mAudioRecordingSessionId=" + mAudioRecordingSessionId);
     }
@@ -644,16 +667,17 @@ public final class VirtualDeviceParams implements Parcelable {
         private int mDefaultActivityPolicy = ACTIVITY_POLICY_DEFAULT_ALLOWED;
         private boolean mDefaultActivityPolicyConfigured = false;
         @Nullable private String mName;
-        @NonNull private SparseIntArray mDevicePolicies = new SparseIntArray();
+        @NonNull private final SparseIntArray mDevicePolicies = new SparseIntArray();
         private int mAudioPlaybackSessionId = AUDIO_SESSION_ID_GENERATE;
         private int mAudioRecordingSessionId = AUDIO_SESSION_ID_GENERATE;
 
-        @NonNull private List<VirtualSensorConfig> mVirtualSensorConfigs = new ArrayList<>();
+        @NonNull private final List<VirtualSensorConfig> mVirtualSensorConfigs = new ArrayList<>();
         @Nullable private Executor mVirtualSensorCallbackExecutor;
         @Nullable private VirtualSensorCallback mVirtualSensorCallback;
         @Nullable private Executor mVirtualSensorDirectChannelCallbackExecutor;
         @Nullable private VirtualSensorDirectChannelCallback mVirtualSensorDirectChannelCallback;
         @Nullable private ComponentName mHomeComponent;
+        @Nullable private ComponentName mInputMethodComponent;
 
         private static class VirtualSensorCallbackDelegate extends IVirtualSensorCallback.Stub {
             @NonNull
@@ -745,6 +769,28 @@ public final class VirtualDeviceParams implements Parcelable {
         @NonNull
         public Builder setHomeComponent(@Nullable ComponentName homeComponent) {
             mHomeComponent = homeComponent;
+            return this;
+        }
+
+        /**
+         * Specifies a component to be used as input method on all displays owned by this virtual
+         * device.
+         *
+         * @param inputMethodComponent The component name to be used as input method. Must comply to
+         *   all general input method requirements described in the guide to
+         *   <a href="{@docRoot}guide/topics/text/creating-input-method.html">
+         *   Creating an Input Method</a>. If the given component is not available for any user that
+         *   may interact with the virtual device, then there will effectively be no IME on this
+         *   device's displays for that user.
+         *
+         * @see android.inputmethodservice.InputMethodService
+         * @attr ref android.R.styleable#InputMethod_isVirtualDeviceOnly
+         * @attr ref android.R.styleable#InputMethod_showInInputMethodPicker
+         */
+        @FlaggedApi(Flags.FLAG_VDM_CUSTOM_IME)
+        @NonNull
+        public Builder setInputMethodComponent(@Nullable ComponentName inputMethodComponent) {
+            mInputMethodComponent = inputMethodComponent;
             return this;
         }
 
@@ -1136,6 +1182,7 @@ public final class VirtualDeviceParams implements Parcelable {
                     mName,
                     mDevicePolicies,
                     mHomeComponent,
+                    mInputMethodComponent,
                     mVirtualSensorConfigs,
                     virtualSensorCallbackDelegate,
                     mAudioPlaybackSessionId,

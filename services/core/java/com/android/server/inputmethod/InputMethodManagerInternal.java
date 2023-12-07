@@ -120,6 +120,25 @@ public abstract class InputMethodManagerInternal {
             @UserIdInt int userId);
 
     /**
+     * Makes the input method associated with {@code imeId} the default input method for all users
+     * on displays that are owned by the virtual device with the given {@code deviceId}. If the
+     * input method associated with {@code imeId} is not available, there will be no IME on the
+     * relevant displays.
+     *
+     * <p>The caller of this method is responsible for resetting it to {@code null} after the
+     * virtual device is closed.</p>
+     *
+     * @param deviceId the device ID on which to use the given input method as default.
+     * @param imeId  the input method ID to be used as default on the given device. If {@code null},
+     *               then any existing input method association with that device will be removed.
+     * @throws IllegalArgumentException if a non-{@code null} input method ID is passed for a
+     *                                  device ID that already has a custom input method set or if
+     *                                  the device ID is not a valid virtual device.
+     */
+    public abstract void setVirtualDeviceInputMethodForAllUsers(
+            int deviceId, @Nullable String imeId);
+
+    /**
      * Registers a new {@link InputMethodListListener}.
      *
      * @param listener the listener to add
@@ -247,6 +266,11 @@ public abstract class InputMethodManagerInternal {
                 public boolean setInputMethodEnabled(String imeId, boolean enabled,
                         @UserIdInt int userId) {
                     return false;
+                }
+
+                @Override
+                public void setVirtualDeviceInputMethodForAllUsers(
+                        int deviceId, @Nullable String imeId) {
                 }
 
                 @Override

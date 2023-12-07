@@ -169,6 +169,7 @@ import com.android.internal.os.TransferPipe;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
 import com.android.internal.view.IInputMethodManager;
 import com.android.server.AccessibilityManagerInternal;
 import com.android.server.EventLogTags;
@@ -312,6 +313,9 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     // All known input methods.
     final ArrayList<InputMethodInfo> mMethodList = new ArrayList<>();
     private final ArrayMap<String, InputMethodInfo> mMethodMap = new ArrayMap<>();
+    // Mapping from deviceId to the device-specific imeId for that device.
+    private final SparseArray<String> mVirtualDeviceMethodMap = new SparseArray<>();
+
     final InputMethodSubtypeSwitchingController mSwitchingController;
     final HardwareKeyboardShortcutController mHardwareKeyboardShortcutController =
             new HardwareKeyboardShortcutController();
@@ -5616,6 +5620,23 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                             settings.getEnabledInputMethodsAndSubtypeListLocked(), imeId);
                 }
                 return true;
+            }
+        }
+
+        @Override
+        public void setVirtualDeviceInputMethodForAllUsers(int deviceId, @Nullable String imeId) {
+            // TODO(b/287269288): validate that id belongs to a valid virtual device instead.
+            Preconditions.checkArgument(deviceId == Context.DEVICE_ID_DEFAULT,
+                    "DeviceId " + deviceId + " does not belong to a virtual device.");
+            synchronized (ImfLock.class) {
+                if (imeId == null) {
+                    mVirtualDeviceMethodMap.remove(deviceId);
+                } else if (mVirtualDeviceMethodMap.contains(deviceId)) {
+                    throw new IllegalArgumentException("Virtual device " + deviceId
+                            + " already has a custom input method component");
+                } else {
+                    mVirtualDeviceMethodMap.put(deviceId, imeId);
+                }
             }
         }
 
