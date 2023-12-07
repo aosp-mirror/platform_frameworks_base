@@ -86,6 +86,8 @@ public class SystemSensorManager extends SensorManager {
     private static native long nativeCreate(String opPackageName);
     private static native boolean nativeGetSensorAtIndex(long nativeInstance,
             Sensor sensor, int index);
+    private static native boolean nativeGetDefaultDeviceSensorAtIndex(long nativeInstance,
+            Sensor sensor, int index);
     private static native void nativeGetDynamicSensors(long nativeInstance, List<Sensor> list);
     private static native void nativeGetRuntimeSensors(
             long nativeInstance, int deviceId, List<Sensor> list);
@@ -162,11 +164,14 @@ public class SystemSensorManager extends SensorManager {
         // initialize the sensor list
         for (int index = 0;; ++index) {
             Sensor sensor = new Sensor();
-            if (!nativeGetSensorAtIndex(mNativeInstance, sensor, index)) break;
+            if (android.companion.virtual.flags.Flags.enableNativeVdm()) {
+                if (!nativeGetDefaultDeviceSensorAtIndex(mNativeInstance, sensor, index)) break;
+            } else {
+                if (!nativeGetSensorAtIndex(mNativeInstance, sensor, index)) break;
+            }
             mFullSensorsList.add(sensor);
             mHandleToSensor.put(sensor.getHandle(), sensor);
         }
-
     }
 
     /** @hide */
