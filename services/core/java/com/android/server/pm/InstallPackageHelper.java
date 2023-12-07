@@ -732,7 +732,7 @@ final class InstallPackageHelper {
                     synchronized (mPm.mInstallLock) {
                         // We don't need to freeze for a brand new install
                         mAppDataHelper.prepareAppDataPostCommitLIF(
-                                pkgSetting, /* previousAppId= */0);
+                                pkgSetting, /* previousAppId= */0, new int[] { userId });
                     }
                 }
                 // TODO(b/278553670) Store archive state for the user.
@@ -2448,7 +2448,7 @@ final class InstallPackageHelper {
             }
 
             // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
-            mAppDataHelper.prepareAppDataPostCommitLIF(ps, 0);
+            mAppDataHelper.prepareAppDataPostCommitLIF(ps, 0, installRequest.getNewUsers());
             if (installRequest.isClearCodeCache()) {
                 mAppDataHelper.clearAppDataLeafLIF(packageName, ps.getVolumeUuid(),
                         UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
