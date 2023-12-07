@@ -131,10 +131,6 @@ private fun shouldComposeMovableElement(
 
     val fromScene = (transitionState as TransitionState.Transition).fromScene
     val toScene = transitionState.toScene
-    if (fromScene == toScene) {
-        check(fromScene == scene)
-        return true
-    }
 
     val fromReady = layoutImpl.isSceneReady(fromScene)
     val toReady = layoutImpl.isSceneReady(toScene)

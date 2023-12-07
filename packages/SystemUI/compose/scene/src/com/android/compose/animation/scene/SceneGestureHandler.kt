@@ -49,8 +49,12 @@ internal class SceneGestureHandler(
             layoutImpl.state.transitionState = value
         }
 
-    internal var swipeTransition: SwipeTransition = SwipeTransition(currentScene, currentScene, 1f)
-        private set
+    private var _swipeTransition: SwipeTransition? = null
+    internal var swipeTransition: SwipeTransition
+        get() = _swipeTransition ?: error("SwipeTransition needs to be initialized")
+        set(value) {
+            _swipeTransition = value
+        }
 
     private fun updateTransition(newTransition: SwipeTransition, force: Boolean = false) {
         if (isDrivingTransition || force) transitionState = newTransition
@@ -61,7 +65,7 @@ internal class SceneGestureHandler(
         get() = layoutImpl.scene(transitionState.currentScene)
 
     internal val isDrivingTransition
-        get() = transitionState == swipeTransition
+        get() = transitionState == _swipeTransition
 
     /**
      * The velocity threshold at which the intent of the user is to swipe up or down. It is the same
@@ -224,7 +228,7 @@ internal class SceneGestureHandler(
         val absoluteDistance = swipeTransition.distance.absoluteValue
 
         // If the swipe was not committed, don't do anything.
-        if (fromScene == toScene || swipeTransition._currentScene != toScene) {
+        if (swipeTransition._currentScene != toScene) {
             return Pair(fromScene, 0f)
         }
 
@@ -455,14 +459,10 @@ internal class SceneGestureHandler(
          * above or to the left of [toScene].
          */
         val distance: Float
-    ) : TransitionState.Transition {
+    ) : TransitionState.Transition(_fromScene.key, _toScene.key) {
         var _currentScene by mutableStateOf(_fromScene)
         override val currentScene: SceneKey
             get() = _currentScene.key
-
-        override val fromScene: SceneKey = _fromScene.key
-
-        override val toScene: SceneKey = _toScene.key
 
         override val progress: Float
             get() {
