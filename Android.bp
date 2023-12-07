@@ -428,7 +428,6 @@ java_library {
     name: "framework-non-updatable-unbundled-impl-libs",
     static_libs: [
         "framework-location.impl",
-        "framework-nfc.impl",
     ],
     sdk_version: "core_platform",
     installable: false,
