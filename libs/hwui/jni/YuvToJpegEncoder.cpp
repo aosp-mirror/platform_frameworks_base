@@ -401,7 +401,7 @@ bool P010Yuv420ToJpegREncoder::encode(JNIEnv* env,
     if (int success = jpegREncoder.encodeJPEGR(&p010, &yuv420,
             hdrTransferFunction,
             &jpegR, jpegQuality,
-            exif.length > 0 ? &exif : NULL); success != android::OK) {
+            exif.length > 0 ? &exif : NULL); success != JPEGR_NO_ERROR) {
         ALOGW("Encode JPEG/R failed, error code: %d.", success);
         return false;
     }
