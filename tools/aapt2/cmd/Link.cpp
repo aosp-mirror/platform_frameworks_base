@@ -388,7 +388,7 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
   // Build up the rules for degrading newer attributes to older ones.
   // NOTE(adamlesinski): These rules are hardcoded right now, but they should be
   // generated from the attribute definitions themselves (b/62028956).
-  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::paddingHorizontal)) {
+  if (symm->FindById(R::attr::paddingHorizontal)) {
     std::vector<ReplacementAttr> replacements{
         {"paddingLeft", R::attr::paddingLeft, Attribute(android::ResTable_map::TYPE_DIMENSION)},
         {"paddingRight", R::attr::paddingRight, Attribute(android::ResTable_map::TYPE_DIMENSION)},
@@ -397,7 +397,7 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
         util::make_unique<DegradeToManyRule>(std::move(replacements));
   }
 
-  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::paddingVertical)) {
+  if (symm->FindById(R::attr::paddingVertical)) {
     std::vector<ReplacementAttr> replacements{
         {"paddingTop", R::attr::paddingTop, Attribute(android::ResTable_map::TYPE_DIMENSION)},
         {"paddingBottom", R::attr::paddingBottom, Attribute(android::ResTable_map::TYPE_DIMENSION)},
@@ -406,7 +406,7 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
         util::make_unique<DegradeToManyRule>(std::move(replacements));
   }
 
-  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::layout_marginHorizontal)) {
+  if (symm->FindById(R::attr::layout_marginHorizontal)) {
     std::vector<ReplacementAttr> replacements{
         {"layout_marginLeft", R::attr::layout_marginLeft,
          Attribute(android::ResTable_map::TYPE_DIMENSION)},
@@ -417,7 +417,7 @@ ResourceFileFlattener::ResourceFileFlattener(const ResourceFileFlattenerOptions&
         util::make_unique<DegradeToManyRule>(std::move(replacements));
   }
 
-  if (const SymbolTable::Symbol* s = symm->FindById(R::attr::layout_marginVertical)) {
+  if (symm->FindById(R::attr::layout_marginVertical)) {
     std::vector<ReplacementAttr> replacements{
         {"layout_marginTop", R::attr::layout_marginTop,
          Attribute(android::ResTable_map::TYPE_DIMENSION)},
