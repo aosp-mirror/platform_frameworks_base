@@ -1540,6 +1540,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 continue;
             }
             pkgSetting
+                    .setPkg(null)
                     .modifyUserState(userId)
                     .setInstalled(false)
                     .setArchiveState(archiveState);

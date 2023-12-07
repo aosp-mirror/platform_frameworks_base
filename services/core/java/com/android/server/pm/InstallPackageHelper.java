@@ -731,7 +731,8 @@ final class InstallPackageHelper {
 
                     synchronized (mPm.mInstallLock) {
                         // We don't need to freeze for a brand new install
-                        mAppDataHelper.prepareAppDataAfterInstallLIF(pkgSetting.getPkg());
+                        mAppDataHelper.prepareAppDataPostCommitLIF(
+                                pkgSetting, /* previousAppId= */0);
                     }
                 }
                 // TODO(b/278553670) Store archive state for the user.
@@ -2432,9 +2433,9 @@ final class InstallPackageHelper {
             final boolean instantApp = ((installRequest.getScanFlags() & SCAN_AS_INSTANT_APP) != 0);
             final boolean isApex = ((installRequest.getScanFlags() & SCAN_AS_APEX) != 0);
             final PackageSetting ps = installRequest.getScannedPackageSetting();
+            final String packageName = ps.getPackageName();
+            final String codePath = ps.getPathString();
             final AndroidPackage pkg = ps.getPkg();
-            final String packageName = pkg.getPackageName();
-            final String codePath = pkg.getPath();
             final boolean onIncremental = mIncrementalManager != null
                     && isIncrementalPath(codePath);
             if (onIncremental) {
@@ -2447,18 +2448,19 @@ final class InstallPackageHelper {
             }
 
             // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
-            mAppDataHelper.prepareAppDataPostCommitLIF(pkg, 0);
+            mAppDataHelper.prepareAppDataPostCommitLIF(ps, 0);
             if (installRequest.isClearCodeCache()) {
-                mAppDataHelper.clearAppDataLIF(pkg, UserHandle.USER_ALL,
-                        FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
-                                | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+                mAppDataHelper.clearAppDataLeafLIF(packageName, ps.getVolumeUuid(),
+                        UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
+                        | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
             }
-            if (installRequest.isInstallReplace()) {
-                mDexManager.notifyPackageUpdated(pkg.getPackageName(),
+            if (installRequest.isInstallReplace() && pkg != null) {
+                mDexManager.notifyPackageUpdated(packageName,
                         pkg.getBaseApkPath(), pkg.getSplitCodePaths());
             }
 
-            if (!useArtService()) { // ART Service handles this on demand instead.
+            // ART Service handles this on demand instead.
+            if (!useArtService() && pkg != null) {
                 // Prepare the application profiles for the new code paths.
                 // This needs to be done before invoking dexopt so that any install-time profile
                 // can be used for optimizations.
@@ -2523,6 +2525,7 @@ final class InstallPackageHelper {
                     (!instantApp || android.provider.Settings.Global.getInt(
                             mContext.getContentResolver(),
                             android.provider.Settings.Global.INSTANT_APP_DEXOPT_ENABLED, 0) != 0)
+                            && pkg != null
                             && !pkg.isDebuggable()
                             && (!onIncremental)
                             && dexoptOptions.isCompilationEnabled()
