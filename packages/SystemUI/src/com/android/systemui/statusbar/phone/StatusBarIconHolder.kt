@@ -21,23 +21,24 @@ import android.graphics.drawable.Icon
 import android.os.UserHandle
 import com.android.internal.statusbar.StatusBarIcon
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState
+import com.android.systemui.statusbar.pipeline.icons.shared.model.ModernStatusBarViewCreator
 
 /** Wraps [com.android.internal.statusbar.StatusBarIcon] so we can still have a uniform list */
-class StatusBarIconHolder private constructor() {
-    @IntDef(TYPE_ICON, TYPE_MOBILE_NEW, TYPE_WIFI_NEW)
+open class StatusBarIconHolder private constructor() {
+    @IntDef(TYPE_ICON, TYPE_MOBILE_NEW, TYPE_WIFI_NEW, TYPE_BINDABLE)
     @Retention(AnnotationRetention.SOURCE)
     internal annotation class IconType
 
     var icon: StatusBarIcon? = null
 
     @IconType
-    var type = TYPE_ICON
-        private set
+    open var type = TYPE_ICON
+        internal set
 
     var tag = 0
         private set
 
-    var isVisible: Boolean
+    open var isVisible: Boolean
         get() =
             when (type) {
                 TYPE_ICON -> icon!!.visible
@@ -45,6 +46,7 @@ class StatusBarIconHolder private constructor() {
                 // The new pipeline controls visibilities via the view model and
                 // view binder, so
                 // this is effectively an unused return value.
+                TYPE_BINDABLE,
                 TYPE_MOBILE_NEW,
                 TYPE_WIFI_NEW -> true
                 else -> true
@@ -55,6 +57,7 @@ class StatusBarIconHolder private constructor() {
             }
             when (type) {
                 TYPE_ICON -> icon!!.visible = visible
+                TYPE_BINDABLE,
                 TYPE_MOBILE_NEW,
                 TYPE_WIFI_NEW -> {}
             }
@@ -93,6 +96,9 @@ class StatusBarIconHolder private constructor() {
       view holder system."""
         )
         const val TYPE_WIFI_NEW = 4
+
+        /** Only applicable to [BindableIconHolder] */
+        const val TYPE_BINDABLE = 5
 
         /** Returns a human-readable string representing the given type. */
         fun getTypeString(@IconType type: Int): String {
@@ -152,6 +158,27 @@ class StatusBarIconHolder private constructor() {
                 )
             holder.tag = state.subId
             return holder
+        }
+    }
+
+    /**
+     * Subclass of StatusBarIconHolder that is responsible only for the registration of an icon into
+     * the [StatusBarIconList]. A bindable icon takes care of its own display, including hiding
+     * itself under the correct conditions.
+     *
+     * StatusBarIconController will register all available bindable icons on init (see
+     * [BindableIconsRepository]), and will ignore any call to setIcon for these.
+     *
+     * [initializer] a view creator that can bind the relevant view models to the created view.
+     */
+    class BindableIconHolder(val initializer: ModernStatusBarViewCreator) : StatusBarIconHolder() {
+        override var type: Int = TYPE_BINDABLE
+
+        /** This is unused, as bindable icons use their own view binders to control visibility */
+        override var isVisible: Boolean = true
+
+        override fun toString(): String {
+            return ("StatusBarIconHolder(type=BINDABLE)")
         }
     }
 }
