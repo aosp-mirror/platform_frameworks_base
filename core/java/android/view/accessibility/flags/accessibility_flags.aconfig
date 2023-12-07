@@ -39,6 +39,13 @@ flag {
 
 flag {
     namespace: "accessibility"
+    name: "copy_events_for_gesture_detection"
+    description: "Creates copies of MotionEvents and GestureEvents in GestureMatcher"
+    bug: "280130713"
+}
+
+flag {
+    namespace: "accessibility"
     name: "flash_notification_system_api"
     description: "Makes flash notification APIs as system APIs for calling from mainline module"
     bug: "303131332"
