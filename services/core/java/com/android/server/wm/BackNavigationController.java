@@ -258,11 +258,11 @@ class BackNavigationController {
                 // activity, we won't close the activity.
                 backType = BackNavigationInfo.TYPE_DIALOG_CLOSE;
                 removedWindowContainer = window;
-            } else if (!currentActivity.occludesParent() || currentActivity.showWallpaper()) {
-                // skip if current activity is translucent
+            } else if (hasTranslucentActivity(currentActivity, prevActivities)) {
+                // skip if one of participant activity is translucent
                 backType = BackNavigationInfo.TYPE_CALLBACK;
             } else if (prevActivities.size() > 0) {
-                if (!isOccluded || prevActivities.get(0).canShowWhenLocked()) {
+                if (!isOccluded || isAllActivitiesCanShowWhenLocked(prevActivities)) {
                     // We have another Activity in the same currentTask to go to
                     final WindowContainer parent = currentActivity.getParent();
                     final boolean canCustomize = parent != null
@@ -307,7 +307,7 @@ class BackNavigationController {
                     findAdjacentActivityIfExist(tmpPre, prevActivities);
                 }
                 if (prevTask == null || prevActivities.isEmpty()
-                        || (isOccluded && !prevActivities.get(0).canShowWhenLocked())) {
+                        || (isOccluded && !isAllActivitiesCanShowWhenLocked(prevActivities))) {
                     backType = BackNavigationInfo.TYPE_CALLBACK;
                 } else if (prevTask.isActivityTypeHome()) {
                     removedWindowContainer = currentTask;
@@ -506,6 +506,30 @@ class BackNavigationController {
             return;
         }
         outList.add(topActivity);
+    }
+
+    private static boolean hasTranslucentActivity(@NonNull ActivityRecord currentActivity,
+            @NonNull ArrayList<ActivityRecord> prevActivities) {
+        if (!currentActivity.occludesParent() || currentActivity.showWallpaper()) {
+            return true;
+        }
+        for (int i = prevActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord test = prevActivities.get(i);
+            if (!test.occludesParent() || test.showWallpaper()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isAllActivitiesCanShowWhenLocked(
+            @NonNull ArrayList<ActivityRecord> prevActivities) {
+        for (int i = prevActivities.size() - 1; i >= 0; --i) {
+            if (!prevActivities.get(i).canShowWhenLocked()) {
+                return false;
+            }
+        }
+        return !prevActivities.isEmpty();
     }
 
     boolean isMonitoringTransition() {
