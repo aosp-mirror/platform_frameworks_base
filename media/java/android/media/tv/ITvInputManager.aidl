@@ -110,6 +110,10 @@ interface ITvInputManager {
     void pauseRecording(in IBinder sessionToken, in Bundle params, int userId);
     void resumeRecording(in IBinder sessionToken, in Bundle params, int userId);
 
+    // For playback control
+    void startPlayback(in IBinder sessionToken, int userId);
+    void stopPlayback(in IBinder sessionToken, int mode, int userId);
+
     // For broadcast info
     void requestBroadcastInfo(in IBinder sessionToken, in BroadcastInfoRequest request, int userId);
     void removeBroadcastInfo(in IBinder sessionToken, int id, int userId);
