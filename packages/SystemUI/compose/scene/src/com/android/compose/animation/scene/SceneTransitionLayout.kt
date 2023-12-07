@@ -132,8 +132,8 @@ interface SceneScope {
      */
     fun Modifier.nestedScrollToScene(
         orientation: Orientation,
-        startBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoOverscroll,
-        endBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoOverscroll,
+        startBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
+        endBehavior: NestedScrollBehavior = NestedScrollBehavior.EdgeNoPreview,
     ): Modifier
 
     /**

@@ -44,22 +44,22 @@ enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
      * Overscroll will only be used by the [SceneTransitionLayout] to move to the next scene if the
      * gesture begins at the edge of the scrollable component (so that a scroll in that direction
      * can no longer be consumed). If the gesture is partially consumed by the scrollable component,
-     * there will be NO overscroll effect between scenes.
+     * there will be NO preview of the next scene.
      *
      * In addition, during scene transitions, scroll events are consumed by the
      * [SceneTransitionLayout] instead of the scrollable component.
      */
-    EdgeNoOverscroll(canStartOnPostFling = false),
+    EdgeNoPreview(canStartOnPostFling = false),
 
     /**
      * Overscroll will only be used by the [SceneTransitionLayout] to move to the next scene if the
      * gesture begins at the edge of the scrollable component. If the gesture is partially consumed
-     * by the scrollable component, there will be an overscroll effect between scenes.
+     * by the scrollable component, there will be a preview of the next scene.
      *
      * In addition, during scene transitions, scroll events are consumed by the
      * [SceneTransitionLayout] instead of the scrollable component.
      */
-    EdgeWithOverscroll(canStartOnPostFling = true),
+    EdgeWithPreview(canStartOnPostFling = true),
 
     /**
      * Any overscroll will be used by the [SceneTransitionLayout] to move to the next scene.
@@ -67,7 +67,7 @@ enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
      * In addition, during scene transitions, scroll events are consumed by the
      * [SceneTransitionLayout] instead of the scrollable component.
      */
-    Always(canStartOnPostFling = true),
+    EdgeAlways(canStartOnPostFling = true),
 }
 
 internal fun Modifier.nestedScrollToScene(

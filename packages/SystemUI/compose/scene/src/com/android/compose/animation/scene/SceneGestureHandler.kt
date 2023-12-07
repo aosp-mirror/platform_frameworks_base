@@ -577,15 +577,15 @@ internal class SceneNestedScrollHandler(
                         canChangeScene = false // unused: added for consistency
                         false
                     }
-                    NestedScrollBehavior.EdgeNoOverscroll -> {
+                    NestedScrollBehavior.EdgeNoPreview -> {
                         canChangeScene = isZeroOffset
                         isZeroOffset && hasNextScene(offsetAvailable)
                     }
-                    NestedScrollBehavior.EdgeWithOverscroll -> {
+                    NestedScrollBehavior.EdgeWithPreview -> {
                         canChangeScene = isZeroOffset
                         hasNextScene(offsetAvailable)
                     }
-                    NestedScrollBehavior.Always -> {
+                    NestedScrollBehavior.EdgeAlways -> {
                         canChangeScene = true
                         hasNextScene(offsetAvailable)
                     }
