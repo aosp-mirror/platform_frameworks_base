@@ -19,8 +19,8 @@ package com.android.systemui.bouncer.ui.viewmodel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.res.R
@@ -243,12 +243,12 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun onImeVisibilityChanged_falseAfterTrue_whileThrottling_doesNothing() =
+    fun onImeVisibilityChanged_falseAfterTrue_whileLockedOut_doesNothing() =
         testScope.runTest {
             val events by collectValues(bouncerInteractor.onImeHiddenByUser)
             assertThat(events).isEmpty()
             underTest.onImeVisibilityChanged(isVisible = true)
-            setThrottling(true)
+            setLockout(true)
 
             underTest.onImeVisibilityChanged(isVisible = false)
 
@@ -284,11 +284,11 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun isTextFieldFocusRequested_focusLostWhileThrottling_staysFalse() =
+    fun isTextFieldFocusRequested_focusLostWhileLockedOut_staysFalse() =
         testScope.runTest {
             val isTextFieldFocusRequested by collectLastValue(underTest.isTextFieldFocusRequested)
             underTest.onTextFieldFocusChanged(isFocused = true)
-            setThrottling(true)
+            setLockout(true)
 
             underTest.onTextFieldFocusChanged(isFocused = false)
 
@@ -296,14 +296,14 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun isTextFieldFocusRequested_throttlingCountdownEnds_becomesTrue() =
+    fun isTextFieldFocusRequested_lockoutCountdownEnds_becomesTrue() =
         testScope.runTest {
             val isTextFieldFocusRequested by collectLastValue(underTest.isTextFieldFocusRequested)
             underTest.onTextFieldFocusChanged(isFocused = true)
-            setThrottling(true)
+            setLockout(true)
             underTest.onTextFieldFocusChanged(isFocused = false)
 
-            setThrottling(false)
+            setLockout(false)
 
             assertThat(isTextFieldFocusRequested).isTrue()
         }
@@ -327,24 +327,24 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
         switchToScene(SceneKey.Bouncer)
     }
 
-    private suspend fun TestScope.setThrottling(
-        isThrottling: Boolean,
+    private suspend fun TestScope.setLockout(
+        isLockedOut: Boolean,
         failedAttemptCount: Int = 5,
     ) {
-        if (isThrottling) {
+        if (isLockedOut) {
             repeat(failedAttemptCount) {
                 authenticationRepository.reportAuthenticationAttempt(false)
             }
             val remainingTimeSeconds = 30
-            authenticationRepository.setThrottleDuration(remainingTimeSeconds * 1000)
-            authenticationRepository.throttling.value =
-                AuthenticationThrottlingModel(
+            authenticationRepository.setLockoutDuration(remainingTimeSeconds * 1000)
+            authenticationRepository.lockout.value =
+                AuthenticationLockoutModel(
                     failedAttemptCount = failedAttemptCount,
                     remainingSeconds = remainingTimeSeconds,
                 )
         } else {
             authenticationRepository.reportAuthenticationAttempt(true)
-            authenticationRepository.throttling.value = null
+            authenticationRepository.lockout.value = null
         }
 
         runCurrent()

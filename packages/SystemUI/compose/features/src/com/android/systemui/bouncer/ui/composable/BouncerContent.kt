@@ -203,7 +203,7 @@ private fun SceneScope.FoldSplittable(
     modifier: Modifier = Modifier,
 ) {
     val message: BouncerViewModel.MessageViewModel by viewModel.message.collectAsState()
-    val dialogMessage: String? by viewModel.throttlingDialogMessage.collectAsState()
+    val dialogMessage: String? by viewModel.dialogMessage.collectAsState()
     var dialog: Dialog? by remember { mutableStateOf(null) }
     val actionButton: BouncerActionButtonModel? by viewModel.actionButton.collectAsState()
     val splitRatio =
@@ -320,7 +320,7 @@ private fun SceneScope.FoldSplittable(
                             DialogInterface.BUTTON_NEUTRAL,
                             context.getString(R.string.ok),
                         ) { _, _ ->
-                            viewModel.onThrottlingDialogDismissed()
+                            viewModel.onDialogDismissed()
                         }
                         setCancelable(false)
                         setCanceledOnTouchOutside(false)

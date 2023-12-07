@@ -80,7 +80,7 @@ class PatternBouncerViewModel(
 
     override val authenticationMethod = AuthenticationMethodModel.Pattern
 
-    override val throttlingMessageId = R.string.kg_too_many_failed_pattern_attempts_dialog_message
+    override val lockoutMessageId = R.string.kg_too_many_failed_pattern_attempts_dialog_message
 
     /** Notifies that the user has started a drag gesture across the dot grid. */
     fun onDragStart() {

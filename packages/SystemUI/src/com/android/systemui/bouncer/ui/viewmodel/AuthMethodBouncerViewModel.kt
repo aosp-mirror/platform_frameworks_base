@@ -50,12 +50,12 @@ sealed class AuthMethodBouncerViewModel(
     abstract val authenticationMethod: AuthenticationMethodModel
 
     /**
-     * String resource ID of the failure message to be shown during throttling.
+     * String resource ID of the failure message to be shown during lockout.
      *
      * The message must include 2 number parameters: the first one indicating how many unsuccessful
-     * attempts were made, and the second one indicating in how many seconds throttling will expire.
+     * attempts were made, and the second one indicating in how many seconds lockout will expire.
      */
-    @get:StringRes abstract val throttlingMessageId: Int
+    @get:StringRes abstract val lockoutMessageId: Int
 
     /** Notifies that the UI has been shown to the user. */
     fun onShown() {
