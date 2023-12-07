@@ -177,7 +177,7 @@ constructor(
             }
             .stateIn(
                 scope = applicationScope,
-                started = SharingStarted.WhileSubscribed(),
+                started = SharingStarted.Lazily,
                 initialValue = NotificationContainerBounds(),
             )
 
