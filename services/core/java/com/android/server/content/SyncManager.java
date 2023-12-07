@@ -439,7 +439,7 @@ public class SyncManager {
         }
     };
 
-    private class PackageMonitorImpl extends PackageMonitor {
+    private static class PackageMonitorImpl extends PackageMonitor {
         @Override
         public boolean onHandleForceStop(Intent intent, String[] packageNames, int uid,
                 boolean doit, Bundle extras) {
