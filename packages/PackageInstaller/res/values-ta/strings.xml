@@ -66,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"<xliff:g id="SIZE">%1$s</xliff:g> ஆப்ஸ் தரவை வைத்திரு."</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"இந்த ஆப்ஸை நீக்க வேண்டுமா?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"இந்த ஆப்ஸை நிறுவல் நீக்க வேண்டுமா? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> குளோனும் நீக்கப்படும்."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"உங்கள் தனிப்பட்ட சேமிப்பிடத்திலிருந்து இந்த ஆப்ஸை நிறுவல் நீக்க வேண்டுமா?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"இயக்கத்திலுள்ள நிறுவல் நீக்கங்கள்"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"தோல்வியுற்ற நிறுவல் நீக்கங்கள்"</string>
     <string name="uninstalling" msgid="8709566347688966845">"நிறுவல் நீக்குகிறது…"</string>
@@ -106,4 +107,21 @@
     <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g>ல் இருந்து <xliff:g id="APPNAME">%1$s</xliff:g> ஐ மீட்டெடுக்கவா?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"இந்த ஆப்ஸ் பின்னணியில் பதிவிறக்கத் தொடங்கும்"</string>
     <string name="restore" msgid="8460854736328970444">"மீட்டெடு"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"ஆஃப்லைனில் உள்ளீர்கள்"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"நீங்கள் இணையத்துடன் இணைக்கப்பட்டிருக்கும்போது இந்த ஆப்ஸ் தானாக மீட்டெடுக்கப்படும்"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"ஏதோ தவறாகிவிட்டது"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"இந்த ஆப்ஸை மீட்டெடுக்க முயலும்போது சிக்கல் ஏற்பட்டது"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"போதுமான சேமிப்பகம் இல்லை"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"இந்த ஆப்ஸை மீட்டெடுக்க, இந்தச் சாதனத்தில் உள்ள சேமிப்பகத்தை காலியாக்கலாம். தேவைப்படும் சேமிப்பகம்: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"நடவடிக்கை தேவை"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"இந்த ஆப்ஸை மீட்டெடுக்க அடுத்த வழிமுறைகளைப் பின்பற்றுங்கள்"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> முடக்கப்பட்டுள்ளது"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> நிறுவல் நீக்கப்பட்டது"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"இந்த ஆப்ஸை மீட்டெடுக்க <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ஐ நிறுவ வேண்டும்"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"தொடர்க"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"சேமிப்பகத்தைக் காலியாக்கு"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"அமைப்புகள்"</string>
+    <string name="close" msgid="5214897374055647996">"மூடுக"</string>
 </resources>
