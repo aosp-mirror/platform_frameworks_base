@@ -14,113 +14,104 @@
  * limitations under the License.
  */
 
-package com.android.packageinstaller.v2.model;
+package com.android.packageinstaller.v2.model
 
-import static android.content.res.AssetFileDescriptor.UNKNOWN_LENGTH;
+import android.content.Context
+import android.content.pm.PackageInstaller
+import android.content.res.AssetFileDescriptor
+import android.net.Uri
+import android.os.AsyncTask
+import android.util.Log
+import androidx.lifecycle.MutableLiveData
+import com.android.packageinstaller.v2.model.InstallRepository.SessionStageListener
+import java.io.IOException
 
-import android.content.Context;
-import android.content.pm.PackageInstaller;
-import android.content.pm.PackageInstaller.SessionInfo;
-import android.content.res.AssetFileDescriptor;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.util.Log;
-import androidx.lifecycle.MutableLiveData;
-import com.android.packageinstaller.v2.model.InstallRepository.SessionStageListener;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+class SessionStager internal constructor(
+    private val context: Context,
+    private val uri: Uri,
+    private val stagedSessionId: Int,
+    private val listener: SessionStageListener,
+) : AsyncTask<Void, Int, PackageInstaller.SessionInfo?>() {
 
-public class SessionStager extends AsyncTask<Void, Integer, SessionInfo> {
-
-    private static final String TAG = SessionStager.class.getSimpleName();
-    private final Context mContext;
-    private final Uri mUri;
-    private final int mStagedSessionId;
-    private final MutableLiveData<Integer> mProgressLiveData = new MutableLiveData<>(0);
-    private final SessionStageListener mListener;
-
-    SessionStager(Context context, Uri uri, int stagedSessionId, SessionStageListener listener) {
-        mContext = context;
-        mUri = uri;
-        mStagedSessionId = stagedSessionId;
-        mListener = listener;
+    companion object {
+        private val LOG_TAG = SessionStager::class.java.simpleName
     }
 
-    @Override
-    protected PackageInstaller.SessionInfo doInBackground(Void... params) {
-        PackageInstaller pi = mContext.getPackageManager().getPackageInstaller();
-        try (PackageInstaller.Session session = pi.openSession(mStagedSessionId);
-            InputStream in = mContext.getContentResolver().openInputStream(mUri)) {
-            session.setStagingProgress(0);
+    val progress = MutableLiveData(0)
 
-            if (in == null) {
-                return null;
-            }
-            final long sizeBytes = getContentSizeBytes();
-            mProgressLiveData.postValue(sizeBytes > 0 ? 0 : -1);
+    override fun doInBackground(vararg params: Void): PackageInstaller.SessionInfo? {
+        val pi = context.packageManager.packageInstaller
+        try {
+            val session = pi.openSession(stagedSessionId)
+            context.contentResolver.openInputStream(uri).use { instream ->
+                session.setStagingProgress(0f)
 
-            long totalRead = 0;
-            try (OutputStream out = session.openWrite("PackageInstaller", 0, sizeBytes)) {
-                byte[] buffer = new byte[1024 * 1024];
-                while (true) {
-                    int numRead = in.read(buffer);
+                if (instream == null) {
+                    return null
+                }
 
-                    if (numRead == -1) {
-                        session.fsync(out);
-                        break;
-                    }
+                val sizeBytes = getContentSizeBytes()
+                progress.postValue(if (sizeBytes > 0) 0 else -1)
 
-                    if (isCancelled()) {
-                        break;
-                    }
+                var totalRead: Long = 0
+                session.openWrite("PackageInstaller", 0, sizeBytes).use { out ->
+                    val buffer = ByteArray(1024 * 1024)
+                    while (true) {
+                        val numRead = instream.read(buffer)
 
-                    out.write(buffer, 0, numRead);
-                    if (sizeBytes > 0) {
-                        totalRead += numRead;
-                        float fraction = ((float) totalRead / (float) sizeBytes);
-                        session.setStagingProgress(fraction);
-                        publishProgress((int) (fraction * 100.0));
+                        if (numRead == -1) {
+                            session.fsync(out)
+                            break
+                        }
+
+                        if (isCancelled) {
+                            break
+                        }
+
+                        out.write(buffer, 0, numRead)
+                        if (sizeBytes > 0) {
+                            totalRead += numRead.toLong()
+                            val fraction = totalRead.toFloat() / sizeBytes.toFloat()
+                            session.setStagingProgress(fraction)
+                            publishProgress((fraction * 100.0).toInt())
+                        }
                     }
                 }
+                return pi.getSessionInfo(stagedSessionId)!!
             }
-            return pi.getSessionInfo(mStagedSessionId);
-        } catch (IOException | SecurityException | IllegalStateException
-                 | IllegalArgumentException e) {
-            Log.w(TAG, "Error staging apk from content URI", e);
-            return null;
+
+        } catch (e: Exception) {
+            Log.w(LOG_TAG, "Error staging apk from content URI", e)
+            return null
         }
     }
 
-    private long getContentSizeBytes() {
-        try (AssetFileDescriptor afd = mContext.getContentResolver()
-            .openAssetFileDescriptor(mUri, "r")) {
-            return afd != null ? afd.getLength() : UNKNOWN_LENGTH;
-        } catch (IOException e) {
-            Log.w(TAG, "Failed to open asset file descriptor", e);
-            return UNKNOWN_LENGTH;
+    private fun getContentSizeBytes(): Long {
+        return try {
+            context.contentResolver
+                .openAssetFileDescriptor(uri, "r")
+                .use { afd -> afd?.length ?: AssetFileDescriptor.UNKNOWN_LENGTH }
+        } catch (e: IOException) {
+            Log.w(LOG_TAG, "Failed to open asset file descriptor", e)
+            AssetFileDescriptor.UNKNOWN_LENGTH
         }
     }
 
-    public MutableLiveData<Integer> getProgress() {
-        return mProgressLiveData;
+    override fun onPostExecute(sessionInfo: PackageInstaller.SessionInfo?) {
+        if ((sessionInfo == null)
+            || !sessionInfo.isActive
+            || (sessionInfo.resolvedBaseApkPath == null)
+        ) {
+            Log.w(LOG_TAG, "Session info is invalid: $sessionInfo")
+            listener.onStagingFailure()
+            return
+        }
+        listener.onStagingSuccess(sessionInfo)
     }
 
-    @Override
-    protected void onProgressUpdate(Integer... progress) {
-        if (progress != null && progress.length > 0) {
-            mProgressLiveData.setValue(progress[0]);
+    override fun onProgressUpdate(vararg progressVal: Int?) {
+        if (progressVal.isNotEmpty()) {
+            progress.value = progressVal[0]
         }
-    }
-
-    @Override
-    protected void onPostExecute(SessionInfo sessionInfo) {
-        if (sessionInfo == null || !sessionInfo.isActive()
-            || sessionInfo.getResolvedBaseApkPath() == null) {
-            Log.w(TAG, "Session info is invalid: " + sessionInfo);
-            mListener.onStagingFailure();
-            return;
-        }
-        mListener.onStagingSuccess(sessionInfo);
     }
 }
