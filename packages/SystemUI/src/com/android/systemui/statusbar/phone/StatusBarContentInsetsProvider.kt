@@ -42,6 +42,9 @@ import com.android.systemui.util.leak.RotationUtils.Rotation
 import com.android.systemui.util.leak.RotationUtils.getExactRotation
 import com.android.systemui.util.leak.RotationUtils.getResourcesForRotation
 import com.android.app.tracing.traceSection
+import com.android.systemui.BottomMarginCommand
+import com.android.systemui.StatusBarInsetsCommand
+import com.android.systemui.statusbar.commandline.CommandRegistry
 import java.io.PrintWriter
 import java.lang.Math.max
 import javax.inject.Inject
@@ -64,7 +67,8 @@ import javax.inject.Inject
 class StatusBarContentInsetsProvider @Inject constructor(
     val context: Context,
     val configurationController: ConfigurationController,
-    val dumpManager: DumpManager
+    val dumpManager: DumpManager,
+    val commandRegistry: CommandRegistry,
 ) : CallbackController<StatusBarContentInsetsChangedListener>,
         ConfigurationController.ConfigurationListener,
         Dumpable {
@@ -80,6 +84,13 @@ class StatusBarContentInsetsProvider @Inject constructor(
     init {
         configurationController.addCallback(this)
         dumpManager.registerDumpable(TAG, this)
+        commandRegistry.registerCommand(StatusBarInsetsCommand.NAME) {
+            StatusBarInsetsCommand(object : StatusBarInsetsCommand.Callback {
+                override fun onExecute(command: StatusBarInsetsCommand, printWriter: PrintWriter) {
+                    executeCommand(command, printWriter)
+                }
+            })
+        }
     }
 
     override fun addCallback(listener: StatusBarContentInsetsChangedListener) {
@@ -271,8 +282,41 @@ class StatusBarContentInsetsProvider @Inject constructor(
                 statusBarContentHeight)
     }
 
+    private fun executeCommand(command: StatusBarInsetsCommand, printWriter: PrintWriter) {
+        command.bottomMargin?.let { executeBottomMarginCommand(it, printWriter) }
+    }
+
+    private fun executeBottomMarginCommand(command: BottomMarginCommand, printWriter: PrintWriter) {
+        val rotation = command.rotationValue
+        if (rotation == null) {
+            printWriter.println(
+                    "Rotation should be one of ${BottomMarginCommand.ROTATION_DEGREES_OPTIONS}"
+            )
+            return
+        }
+        val marginBottomDp = command.marginBottomDp
+        if (marginBottomDp == null) {
+            printWriter.println("Margin bottom not set.")
+            return
+        }
+        setBottomMarginOverride(rotation, marginBottomDp)
+    }
+
+    private val marginBottomOverrides = mutableMapOf<Int, Int>()
+
+    private fun setBottomMarginOverride(rotation: Int, marginBottomDp: Float) {
+        insetsCache.evictAll()
+        val marginBottomPx = (marginBottomDp * context.resources.displayMetrics.density).toInt()
+        marginBottomOverrides[rotation] = marginBottomPx
+        notifyInsetsChanged()
+    }
+
     @Px
     private fun getBottomAlignedMargin(targetRotation: Int, resources: Resources): Int {
+        val override = marginBottomOverrides[targetRotation]
+        if (override != null) {
+            return override
+        }
         val dimenRes =
                 when (targetRotation) {
                     Surface.ROTATION_0 -> R.dimen.status_bar_bottom_aligned_margin_rotation_0
@@ -294,6 +338,7 @@ class StatusBarContentInsetsProvider @Inject constructor(
             pw.println("$key -> $rect")
         }
         pw.println(insetsCache)
+        pw.println("Bottom margin overrides: $marginBottomOverrides")
     }
 
     private fun getCacheKey(

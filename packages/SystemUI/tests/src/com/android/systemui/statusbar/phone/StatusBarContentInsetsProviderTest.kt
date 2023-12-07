@@ -24,6 +24,7 @@ import android.view.DisplayCutout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.leak.RotationUtils
 import com.android.systemui.util.leak.RotationUtils.ROTATION_LANDSCAPE
@@ -31,6 +32,7 @@ import com.android.systemui.util.leak.RotationUtils.ROTATION_NONE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_SEASCAPE
 import com.android.systemui.util.leak.RotationUtils.ROTATION_UPSIDE_DOWN
 import com.android.systemui.util.leak.RotationUtils.Rotation
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.assertTrue
@@ -39,7 +41,6 @@ import org.junit.Test
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mock
 import org.mockito.Mockito.`when`
-import org.mockito.Mockito.mock
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -556,7 +557,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
     fun testDisplayChanged_returnsUpdatedInsets() {
         // GIVEN: get insets on the first display and switch to the second display
         val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
-            mock(DumpManager::class.java))
+            mock<DumpManager>(), mock<CommandRegistry>())
 
         configuration.windowConfiguration.setMaxBounds(Rect(0, 0, 1080, 2160))
         val firstDisplayInsets = provider.getStatusBarContentAreaForRotation(ROTATION_NONE)
@@ -575,7 +576,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         // GIVEN: get insets on the first display, switch to the second display,
         // get insets and switch back
         val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
-            mock(DumpManager::class.java))
+            mock<DumpManager>(), mock<CommandRegistry>())
 
         configuration.windowConfiguration.setMaxBounds(Rect(0, 0, 1080, 2160))
         val firstDisplayInsetsFirstCall = provider
@@ -601,7 +602,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
         configuration.windowConfiguration.setMaxBounds(0, 0, 100, 100)
         configurationController.onConfigurationChanged(configuration)
         val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
-                mock(DumpManager::class.java))
+                mock<DumpManager>(), mock<CommandRegistry>())
         val listener = object : StatusBarContentInsetsChangedListener {
             var triggered = false
 
@@ -623,7 +624,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
     fun onDensityOrFontScaleChanged_listenerNotified() {
         configuration.densityDpi = 12
         val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
-                mock(DumpManager::class.java))
+                mock<DumpManager>(), mock<CommandRegistry>())
         val listener = object : StatusBarContentInsetsChangedListener {
             var triggered = false
 
@@ -644,7 +645,7 @@ class StatusBarContentInsetsProviderTest : SysuiTestCase() {
     @Test
     fun onThemeChanged_listenerNotified() {
         val provider = StatusBarContentInsetsProvider(contextMock, configurationController,
-                mock(DumpManager::class.java))
+                mock<DumpManager>(), mock<CommandRegistry>())
         val listener = object : StatusBarContentInsetsChangedListener {
             var triggered = false
 
