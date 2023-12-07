@@ -26,6 +26,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -33,12 +34,17 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.coretests.R;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class InputMethodInfoTest {
+
+    @Rule
+    public SetFlagsRule mSetFlagsRule =
+            new SetFlagsRule(SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
 
     @Test
     public void testEqualsAndHashCode() throws Exception {
@@ -109,6 +115,19 @@ public class InputMethodInfoTest {
         final InputMethodInfo clone = cloneViaParcel(imi);
 
         assertThat(clone.isVrOnly(), is(true));
+    }
+
+    @Test
+    public void testIsVirtualDeviceOnly() throws Exception {
+        mSetFlagsRule.enableFlags(android.companion.virtual.flags.Flags.FLAG_VDM_CUSTOM_IME);
+
+        final InputMethodInfo imi = buildInputMethodForTest(R.xml.ime_meta_virtual_device_only);
+
+        assertThat(imi.isVirtualDeviceOnly(), is(true));
+
+        final InputMethodInfo clone = cloneViaParcel(imi);
+
+        assertThat(clone.isVirtualDeviceOnly(), is(true));
     }
 
     private InputMethodInfo buildInputMethodForTest(final @XmlRes int metaDataRes)
