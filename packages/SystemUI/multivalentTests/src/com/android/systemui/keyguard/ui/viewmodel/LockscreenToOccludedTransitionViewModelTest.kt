@@ -25,7 +25,7 @@ import com.android.systemui.common.ui.data.repository.fakeConfigurationRepositor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.Flags
-import com.android.systemui.flags.featureFlagsClassic
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -49,7 +49,7 @@ import org.junit.runner.RunWith
 class LockscreenToOccludedTransitionViewModelTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
-            featureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
     private val testScope = kosmos.testScope
     private val repository = kosmos.fakeKeyguardTransitionRepository
