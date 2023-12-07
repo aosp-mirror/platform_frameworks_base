@@ -39,7 +39,7 @@ import org.junit.runners.Parameterized
  * states for onUserAdded(), onStorageVolumeAdded() and onPackageAdded() in AppIdPermissionPolicy
  */
 @RunWith(Parameterized::class)
-class AppIdPermissionPolicyPermissionStatesTest : BaseAppIdPermissionPolicyTest() {
+class AppIdPermissionPolicyPermissionStatesTest : BasePermissionPolicyTest() {
     @Parameterized.Parameter(0) lateinit var action: Action
 
     @Before

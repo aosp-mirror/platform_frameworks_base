@@ -1555,7 +1555,7 @@ class PermissionService(private val service: AccessCheckingService) :
             deviceId == Context.DEVICE_ID_DEFAULT) {
             with(policy) { getPermissionFlags(appId, userId, permissionName) }
         } else {
-            if (permissionName !in DevicePermissionPolicy.DEVICE_AWARE_PERMISSIONS) {
+            if (permissionName !in DEVICE_AWARE_PERMISSIONS) {
                 Slog.i(
                     LOG_TAG,
                     "$permissionName is not device aware permission, " +
@@ -1591,7 +1591,7 @@ class PermissionService(private val service: AccessCheckingService) :
             deviceId == Context.DEVICE_ID_DEFAULT) {
             with(policy) { setPermissionFlags(appId, userId, permissionName, flags) }
         } else {
-            if (permissionName !in DevicePermissionPolicy.DEVICE_AWARE_PERMISSIONS) {
+            if (permissionName !in DEVICE_AWARE_PERMISSIONS) {
                 Slog.i(
                     LOG_TAG,
                     "$permissionName is not device aware permission, " +
@@ -2314,20 +2314,19 @@ class PermissionService(private val service: AccessCheckingService) :
 
     override fun onSystemReady() {
         service.onSystemReady()
+
         virtualDeviceManagerInternal =
             LocalServices.getService(VirtualDeviceManagerInternal::class.java)
-
         virtualDeviceManagerInternal?.allPersistentDeviceIds?.let { persistentDeviceIds ->
             service.mutateState {
-                with(devicePolicy) { removeInactiveDevicesPermission(persistentDeviceIds) }
+                with(devicePolicy) { trimDevicePermissionStates(persistentDeviceIds) }
             }
         }
-
-        // trim permission states for the external devices, when they are removed.
         virtualDeviceManagerInternal?.registerPersistentDeviceIdRemovedListener { persistentDeviceId
             ->
             service.mutateState { with(devicePolicy) { onDeviceIdRemoved(persistentDeviceId) } }
         }
+
         permissionControllerManager =
             PermissionControllerManager(context, PermissionThread.getHandler())
     }
@@ -2862,5 +2861,14 @@ class PermissionService(private val service: AccessCheckingService) :
             PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE or
                 PackageManager.FLAG_PERMISSION_WHITELIST_SYSTEM or
                 PackageManager.FLAG_PERMISSION_WHITELIST_INSTALLER
+
+        /** These permissions are supported for virtual devices. */
+        // TODO: b/298661870 - Use new API to get the list of device aware permissions.
+        val DEVICE_AWARE_PERMISSIONS =
+            if (Flags.deviceAwarePermissionApisEnabled()) {
+                setOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
+            } else {
+                emptySet<String>()
+            }
     }
 }
