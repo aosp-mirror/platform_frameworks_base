@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.companion.virtual.IVirtualDevice;
 import android.companion.virtual.VirtualDevice;
 import android.companion.virtual.sensor.VirtualSensor;
+import android.content.Context;
 import android.os.LocaleList;
 import android.util.ArraySet;
 
@@ -147,6 +148,14 @@ public abstract class VirtualDeviceManagerInternal {
      * @return the set of display ids for all VirtualDisplays owned by the device
      */
     public abstract @NonNull ArraySet<Integer> getDisplayIdsForDevice(int deviceId);
+
+    /**
+     * Checks whether the passed {@code deviceId} is a valid virtual device ID or not.
+     *
+     * <p>{@link Context#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
+     * device which is not a virtual device.</p>
+     */
+    public abstract boolean isValidVirtualDeviceId(int deviceId);
 
     /**
      * Returns the ID of the device which owns the display with the given ID.
