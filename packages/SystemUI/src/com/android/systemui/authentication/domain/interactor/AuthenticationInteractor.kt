@@ -95,15 +95,14 @@ constructor(
      *
      * Note that the length of the PIN is also important to take into consideration, please see
      * [hintedPinLength].
-     *
-     * During throttling, this is always disabled (`false`).
      */
     val isAutoConfirmEnabled: StateFlow<Boolean> =
-        combine(repository.isAutoConfirmFeatureEnabled, repository.throttling) {
+        combine(repository.isAutoConfirmFeatureEnabled, repository.hasThrottlingOccurred) {
                 featureEnabled,
-                throttling ->
-                // Disable auto-confirm during throttling.
-                featureEnabled && throttling == null
+                hasThrottlingOccurred ->
+                // Disable auto-confirm if throttling occurred since the last successful
+                // authentication attempt.
+                featureEnabled && !hasThrottlingOccurred
             }
             .stateIn(
                 scope = applicationScope,
@@ -221,6 +220,7 @@ constructor(
             repository.setThrottleDuration(
                 durationMs = authenticationResult.throttleDurationMs,
             )
+            repository.hasThrottlingOccurred.value = true
             startThrottlingCountdown()
         }
 
@@ -228,6 +228,8 @@ constructor(
             // Since authentication succeeded, we should refresh throttling to make sure that our
             // state is completely reflecting the upstream source of truth.
             refreshThrottling()
+
+            repository.hasThrottlingOccurred.value = false
         }
 
         return if (authenticationResult.isSuccessful) {

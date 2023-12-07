@@ -40,9 +40,6 @@ class FakeAuthenticationRepository(
     private val currentTime: () -> Long,
 ) : AuthenticationRepository {
 
-    private val _isAutoConfirmFeatureEnabled = MutableStateFlow(false)
-    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
-        _isAutoConfirmFeatureEnabled.asStateFlow()
     override val authenticationChallengeResult = MutableSharedFlow<Boolean>()
 
     override val hintedPinLength: Int = HINTING_PIN_LENGTH
@@ -52,6 +49,12 @@ class FakeAuthenticationRepository(
 
     override val throttling: MutableStateFlow<AuthenticationThrottlingModel?> =
         MutableStateFlow(null)
+
+    override val hasThrottlingOccurred = MutableStateFlow(false)
+
+    private val _isAutoConfirmFeatureEnabled = MutableStateFlow(false)
+    override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
+        _isAutoConfirmFeatureEnabled.asStateFlow()
 
     private val _authenticationMethod =
         MutableStateFlow<AuthenticationMethodModel>(DEFAULT_AUTHENTICATION_METHOD)
@@ -107,6 +110,9 @@ class FakeAuthenticationRepository(
 
     override suspend fun setThrottleDuration(durationMs: Int) {
         throttlingEndTimestamp = if (durationMs > 0) currentTime() + durationMs else 0
+        if (durationMs > 0) {
+            hasThrottlingOccurred.value = true
+        }
     }
 
     override suspend fun checkCredential(
@@ -128,6 +134,7 @@ class FakeAuthenticationRepository(
         return if (
             isSuccessful || failedAttemptCount < MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING - 1
         ) {
+            hasThrottlingOccurred.value = false
             AuthenticationResultModel(
                 isSuccessful = isSuccessful,
                 throttleDurationMs = 0,

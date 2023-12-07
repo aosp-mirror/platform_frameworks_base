@@ -313,6 +313,59 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun isAutoConfirmEnabled_featureDisabled_returnsFalse() =
+        testScope.runTest {
+            val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
+            utils.authenticationRepository.setAutoConfirmFeatureEnabled(false)
+
+            assertThat(isAutoConfirmEnabled).isFalse()
+        }
+
+    @Test
+    fun isAutoConfirmEnabled_featureEnabled_returnsTrue() =
+        testScope.runTest {
+            val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
+            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
+
+            assertThat(isAutoConfirmEnabled).isTrue()
+        }
+
+    @Test
+    fun isAutoConfirmEnabled_featureEnabledButDisabledByThrottling() =
+        testScope.runTest {
+            val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
+            val throttling by collectLastValue(underTest.throttling)
+            utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
+
+            // The feature is enabled.
+            assertThat(isAutoConfirmEnabled).isTrue()
+
+            // Make many wrong attempts to trigger throttling.
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) {
+                underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
+            }
+            assertThat(throttling).isNotNull()
+
+            // Throttling disabled auto-confirm.
+            assertThat(isAutoConfirmEnabled).isFalse()
+
+            // Move the clock forward one more second, to completely finish the throttling period:
+            advanceTimeBy(FakeAuthenticationRepository.THROTTLE_DURATION_MS + 1000L)
+            assertThat(throttling).isNull()
+
+            // Auto-confirm is still disabled, because throttling occurred at least once in this
+            // session.
+            assertThat(isAutoConfirmEnabled).isFalse()
+
+            // Correct PIN and unlocks successfully, resetting the 'session'.
+            assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
+                .isEqualTo(AuthenticationResult.SUCCEEDED)
+
+            // Auto-confirm is re-enabled.
+            assertThat(isAutoConfirmEnabled).isTrue()
+        }
+
+    @Test
     fun throttling() =
         testScope.runTest {
             val throttling by collectLastValue(underTest.throttling)
@@ -350,6 +403,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 )
 
             // Move the clock forward to ALMOST skip the throttling, leaving one second to go:
+            val throttleTimeoutSec = FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS
             repeat(FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS - 1) { time ->
                 advanceTimeBy(1000)
                 assertThat(throttling)
@@ -358,8 +412,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                             failedAttemptCount =
                                 FakeAuthenticationRepository
                                     .MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
-                            remainingSeconds =
-                                FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS - (time + 1),
+                            remainingSeconds = throttleTimeoutSec - (time + 1),
                         )
                     )
             }
