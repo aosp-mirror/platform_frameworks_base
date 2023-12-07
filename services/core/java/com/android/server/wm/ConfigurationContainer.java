@@ -23,7 +23,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.app.WindowConfigurationProto.WINDOWING_MODE;
@@ -739,17 +741,43 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
      * level with the input prefix.
      */
     public void dumpChildrenNames(PrintWriter pw, String prefix) {
-        final String childPrefix = prefix + " ";
+        dumpChildrenNames(pw, prefix, true /* isLastChild */);
+    }
+
+    /**
+     * Dumps the names of this container children in the input print writer indenting each
+     * level with the input prefix.
+     */
+    public void dumpChildrenNames(PrintWriter pw, String prefix, boolean isLastChild) {
+        int curWinMode = getWindowingMode();
+        String winMode = windowingModeToString(curWinMode);
+        if (curWinMode != WINDOWING_MODE_UNDEFINED &&
+                curWinMode != WINDOWING_MODE_FULLSCREEN) {
+            winMode = winMode.toUpperCase();
+        }
+        int requestedWinMode = getRequestedOverrideWindowingMode();
+        String overrideWinMode = windowingModeToString(requestedWinMode);
+        if (requestedWinMode != WINDOWING_MODE_UNDEFINED &&
+                requestedWinMode != WINDOWING_MODE_FULLSCREEN) {
+            overrideWinMode = overrideWinMode.toUpperCase();
+        }
+        String actType = activityTypeToString(getActivityType());
+        if (getActivityType() != ACTIVITY_TYPE_UNDEFINED
+                && getActivityType() != ACTIVITY_TYPE_STANDARD) {
+            actType = actType.toUpperCase();
+        }
+        pw.print(prefix + (isLastChild ? "└─ " : "├─ "));
         pw.println(getName()
-                + " type=" + activityTypeToString(getActivityType())
-                + " mode=" + windowingModeToString(getWindowingMode())
-                + " override-mode=" + windowingModeToString(getRequestedOverrideWindowingMode())
+                + " type=" + actType
+                + " mode=" + winMode
+                + " override-mode=" + overrideWinMode
                 + " requested-bounds=" + getRequestedOverrideBounds().toShortString()
                 + " bounds=" + getBounds().toShortString());
+
+        String childPrefix = prefix + (isLastChild ? "   " : "│  ");
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final E cc = getChildAt(i);
-            pw.print(childPrefix + "#" + i + " ");
-            cc.dumpChildrenNames(pw, childPrefix);
+            cc.dumpChildrenNames(pw, childPrefix, i == 0 /* isLastChild */);
         }
     }
 

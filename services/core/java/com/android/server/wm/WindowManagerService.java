@@ -7076,7 +7076,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             } else if ("containers".equals(cmd)) {
                 synchronized (mGlobalLock) {
-                    mRoot.dumpChildrenNames(pw, " ");
+                    mRoot.dumpChildrenNames(pw, "");
                     pw.println(" ");
                     mRoot.forAllWindows(w -> {pw.println(w);}, true /* traverseTopToBottom */);
                 }
