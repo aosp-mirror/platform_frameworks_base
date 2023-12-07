@@ -28,6 +28,7 @@ import android.hardware.security.keymint.SecurityLevel;
 import android.hardware.security.keymint.Tag;
 import android.os.Build;
 import android.os.StrictMode;
+import android.security.Flags;
 import android.security.KeyPairGeneratorSpec;
 import android.security.KeyStore2;
 import android.security.KeyStoreException;
@@ -853,6 +854,22 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                             KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST, mgf1Digest
                     ));
                 });
+
+                /* If the MGF1 Digest setter is not set, fall back to the previous behaviour:
+                 * Add, as MGF1 Digest function, all the primary digests.
+                 * Avoid adding the default MGF1 digest as it will have been included in the
+                 * mKeymasterMgf1Digests field.
+                 */
+                if (!getMgf1DigestSetterFlag()) {
+                    final int defaultMgf1Digest = KeyProperties.Digest.toKeymaster(
+                            DEFAULT_MGF1_DIGEST);
+                    ArrayUtils.forEach(mKeymasterDigests, (digest) -> {
+                        if (digest != defaultMgf1Digest) {
+                            params.add(KeyStore2ParameterUtils.makeEnum(
+                                    KeymasterDefs.KM_TAG_RSA_OAEP_MGF_DIGEST, digest));
+                        }
+                    });
+                }
             }
         });
         ArrayUtils.forEach(mKeymasterSignaturePaddings, (padding) -> {
@@ -927,6 +944,16 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
         return params;
     }
+
+    private static boolean getMgf1DigestSetterFlag() {
+        try {
+            return Flags.mgf1DigestSetter();
+        } catch (SecurityException e) {
+            Log.w(TAG, "Cannot read MGF1 Digest setter flag value", e);
+            return false;
+        }
+    }
+
 
     private void addAlgorithmSpecificParameters(List<KeyParameter> params) {
         switch (mKeymasterAlgorithm) {
