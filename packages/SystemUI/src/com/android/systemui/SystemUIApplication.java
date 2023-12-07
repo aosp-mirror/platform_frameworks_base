@@ -110,6 +110,10 @@ public class SystemUIApplication extends Application implements
         View.setTracedRequestLayoutClassClass(
                 SystemProperties.get("persist.debug.trace_request_layout_class", null));
 
+        if (Flags.enableLayoutTracing()) {
+            View.setTraceLayoutSteps(true);
+        }
+
         if (Process.myUserHandle().equals(UserHandle.SYSTEM)) {
             IntentFilter bootCompletedFilter = new
                     IntentFilter(Intent.ACTION_LOCKED_BOOT_COMPLETED);
