@@ -91,6 +91,8 @@ import java.util.function.Function;
 public class VibratorManagerService extends IVibratorManagerService.Stub {
     private static final String TAG = "VibratorManagerService";
     private static final String EXTERNAL_VIBRATOR_SERVICE = "external_vibrator_service";
+    private static final String VIBRATOR_CONTROL_SERVICE =
+            "android.frameworks.vibrator.IVibratorControlService/default";
     private static final boolean DEBUG = false;
     private static final VibrationAttributes DEFAULT_ATTRIBUTES =
             new VibrationAttributes.Builder().build();
@@ -269,6 +271,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         context.registerReceiver(mIntentReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         injector.addService(EXTERNAL_VIBRATOR_SERVICE, new ExternalVibratorService());
+        injector.addService(VIBRATOR_CONTROL_SERVICE,
+                new VibratorControlService(new VibratorControllerHolder(), mLock));
+
     }
 
     /** Finish initialization at boot phase {@link SystemService#PHASE_SYSTEM_SERVICES_READY}. */
