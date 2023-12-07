@@ -66,12 +66,14 @@ object ComposeFacade : BaseComposeFacade {
         activity: ComponentActivity,
         viewModel: BaseCommunalViewModel,
         onOpenWidgetPicker: () -> Unit,
+        onEditDone: () -> Unit,
     ) {
         activity.setContent {
             PlatformTheme {
                 CommunalHub(
                     viewModel = viewModel,
                     onOpenWidgetPicker = onOpenWidgetPicker,
+                    onEditDone = onEditDone,
                 )
             }
         }
