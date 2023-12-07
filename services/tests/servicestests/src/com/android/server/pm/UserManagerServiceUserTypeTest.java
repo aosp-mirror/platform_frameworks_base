@@ -29,7 +29,6 @@ import static com.android.server.pm.UserTypeDetails.UNLIMITED_NUMBER_OF_USERS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
@@ -96,7 +95,8 @@ public class UserManagerServiceUserTypeTest {
                 .setShowInQuietMode(30)
                 .setInheritDevicePolicy(340)
                 .setDeleteAppWithParent(true)
-                .setAlwaysVisible(true);
+                .setAlwaysVisible(true)
+                .setCrossProfileContentSharingStrategy(1);
 
         final UserTypeDetails type = new UserTypeDetails.Builder()
                 .setName("a.name")
@@ -175,6 +175,8 @@ public class UserManagerServiceUserTypeTest {
                 .getInheritDevicePolicy());
         assertTrue(type.getDefaultUserPropertiesReference().getDeleteAppWithParent());
         assertTrue(type.getDefaultUserPropertiesReference().getAlwaysVisible());
+        assertEquals(1, type.getDefaultUserPropertiesReference()
+                .getCrossProfileContentSharingStrategy());
 
         assertEquals(23, type.getBadgeLabel(0));
         assertEquals(24, type.getBadgeLabel(1));
@@ -231,6 +233,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(UserProperties.SHOW_IN_LAUNCHER_SEPARATE, props.getShowInSharingSurfaces());
         assertEquals(UserProperties.SHOW_IN_QUIET_MODE_PAUSED,
                 props.getShowInQuietMode());
+        assertEquals(UserProperties.CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION,
+                props.getCrossProfileContentSharingStrategy());
 
         assertFalse(type.hasBadge());
     }
@@ -323,7 +327,8 @@ public class UserManagerServiceUserTypeTest {
                 .setShowInSharingSurfaces(22)
                 .setShowInQuietMode(24)
                 .setDeleteAppWithParent(true)
-                .setAlwaysVisible(false);
+                .setAlwaysVisible(false)
+                .setCrossProfileContentSharingStrategy(1);
 
         final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
         builders.put(userTypeAosp1, new UserTypeDetails.Builder()
@@ -370,6 +375,8 @@ public class UserManagerServiceUserTypeTest {
                 aospType.getDefaultUserPropertiesReference().getShowInQuietMode());
         assertTrue(aospType.getDefaultUserPropertiesReference().getDeleteAppWithParent());
         assertFalse(aospType.getDefaultUserPropertiesReference().getAlwaysVisible());
+        assertEquals(1, aospType.getDefaultUserPropertiesReference()
+                .getCrossProfileContentSharingStrategy());
 
         // userTypeAosp2 should be modified.
         aospType = builders.get(userTypeAosp2).createUserTypeDetails();
@@ -422,6 +429,8 @@ public class UserManagerServiceUserTypeTest {
                 .getInheritDevicePolicy());
         assertFalse(aospType.getDefaultUserPropertiesReference().getDeleteAppWithParent());
         assertTrue(aospType.getDefaultUserPropertiesReference().getAlwaysVisible());
+        assertEquals(0, aospType.getDefaultUserPropertiesReference()
+                .getCrossProfileContentSharingStrategy());
 
         // userTypeOem1 should be created.
         UserTypeDetails.Builder customType = builders.get(userTypeOem1);
