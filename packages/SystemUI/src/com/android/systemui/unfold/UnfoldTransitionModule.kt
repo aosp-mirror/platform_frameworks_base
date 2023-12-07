@@ -68,6 +68,7 @@ class UnfoldTransitionModule {
 
     @Provides
     @UnfoldBgProgressFlag
+    @Singleton
     fun unfoldBgProgressFlag() = Flags.unfoldAnimationBackgroundProgress()
 
     /** A globally available FoldStateListener that allows one to query the fold state. */
