@@ -188,7 +188,7 @@ public class LogModule {
             LogBufferFactory factory,
             QSPipelineFlagsRepository flags
     ) {
-        if (flags.getPipelineTilesEnabled()) {
+        if (flags.getTilesEnabled()) {
             // we use
             return factory.create("QSLog", 450 /* maxSize */, false /* systrace */);
         } else {

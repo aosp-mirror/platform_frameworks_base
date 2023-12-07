@@ -57,6 +57,8 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.settings.SecureSettings;
 
+import dagger.Lazy;
+
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
@@ -72,8 +74,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-
-import dagger.Lazy;
 
 /** Platform implementation of the quick settings tile host
  *
@@ -151,7 +151,7 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, P
 
         mShadeController = shadeController;
 
-        if (featureFlags.getPipelineTilesEnabled()) {
+        if (featureFlags.getTilesEnabled()) {
             mQsFactories.add(newQsTileFactoryProvider.get());
         }
         mQsFactories.add(defaultFactory);
