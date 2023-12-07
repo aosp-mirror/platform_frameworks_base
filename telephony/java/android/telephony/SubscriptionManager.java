@@ -109,10 +109,6 @@ import java.util.stream.Collectors;
  * Then for SDK 35+, if the caller identity is personal profile, then
  * {@link #getActiveSubscriptionInfoList} will return subscription 1 only and vice versa.
  *
- * <p>If the caller needs to see all subscriptions across user profiles,
- * use {@link #createForAllUserProfiles} to convert the instance to see all. Additional permission
- * may be required as documented on the each API.
- *
  */
 @SystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_TELEPHONY_SUBSCRIPTION)
@@ -1815,9 +1811,6 @@ public class SubscriptionManager {
      * Then for SDK 35+, if the caller identity is personal profile, then this will return
      * subscription 1 only and vice versa.
      *
-     * <p>If the caller needs to see all subscriptions across user profiles,
-     * use {@link #createForAllUserProfiles} to convert this instance to see all.
-     *
      * <p> The records will be sorted by {@link SubscriptionInfo#getSimSlotIndex} then by
      * {@link SubscriptionInfo#getSubscriptionId}.
      *
@@ -2084,9 +2077,6 @@ public class SubscriptionManager {
      * Get the active subscription count associated with the current caller user profile for
      * Android SDK 35(V) and above, while Android SDK 34(U) and below can see all subscriptions as
      * it does today.
-     *
-     * <p>If the caller needs to see all subscriptions across user profiles,
-     * use {@link #createForAllUserProfiles} to convert this instance to see all.
      *
      * @return The current number of active subscriptions.
      *
