@@ -919,6 +919,10 @@ public abstract class PackageManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface InstrumentationInfoFlags {}
 
+    //-------------------------------------------------------------------------
+    // Beginning of GET_ and MATCH_ flags
+    //-------------------------------------------------------------------------
+
     /**
      * {@link PackageInfo} flag: return information about
      * activities in the package in {@link PackageInfo#activities}.
@@ -1216,28 +1220,19 @@ public abstract class PackageManager {
      */
     public static final int MATCH_DIRECT_BOOT_AUTO = 0x10000000;
 
-    /**
-     * {@link ResolveInfo} flag: allow matching components across clone profile
-     * <p>
-     * This flag is used only for query and not resolution, the default behaviour would be to
-     * restrict querying across clone profile. This flag would be honored only if caller have
-     * permission {@link Manifest.permission.QUERY_CLONED_APPS}.
-     *
-     *  @hide
-     * <p>
-     */
-    @SystemApi
-    public static final int MATCH_CLONE_PROFILE = 0x20000000;
-
-    /**
-     * @deprecated Use {@link #GET_ATTRIBUTIONS_LONG} to avoid unintended sign extension.
-     */
-    @Deprecated
-    public static final int GET_ATTRIBUTIONS = 0x80000000;
-
     /** @hide */
     @Deprecated
     public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
+
+    /**
+     * @deprecated Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
+     *
+     * @hide
+     */
+    @SuppressLint("UnflaggedApi") // Just adding the @Deprecated annotation
+    @Deprecated
+    @SystemApi
+    public static final int MATCH_CLONE_PROFILE = 0x20000000;
 
     /**
      * {@link PackageInfo} flag: include system apps that are in the uninstalled state and have
@@ -1255,6 +1250,12 @@ public abstract class PackageManager {
      * for activation at next reboot.
      */
     public static final int MATCH_APEX = 0x40000000;
+
+    /**
+     * @deprecated Use {@link #GET_ATTRIBUTIONS_LONG} to avoid unintended sign extension.
+     */
+    @Deprecated
+    public static final int GET_ATTRIBUTIONS = 0x80000000;
 
     /**
      * {@link PackageInfo} flag: return all attributions declared in the package manifest
@@ -1280,6 +1281,23 @@ public abstract class PackageManager {
      */
     @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED)
     public static final long MATCH_QUARANTINED_COMPONENTS = 1L << 33;
+
+    /**
+     * {@link ResolveInfo} flag: allow matching components across clone profile
+     * <p>
+     * This flag is used only for query and not resolution, the default behaviour would be to
+     * restrict querying across clone profile. This flag would be honored only if caller have
+     * permission {@link Manifest.permission.QUERY_CLONED_APPS}.
+     *
+     * @hide
+     */
+    @FlaggedApi(android.content.pm.Flags.FLAG_FIX_DUPLICATED_FLAGS)
+    @SystemApi
+    public static final long MATCH_CLONE_PROFILE_LONG = 1L << 34;
+
+    //-------------------------------------------------------------------------
+    // End of GET_ and MATCH_ flags
+    //-------------------------------------------------------------------------
 
     /**
      * Flag for {@link #addCrossProfileIntentFilter}: if this flag is set: when
