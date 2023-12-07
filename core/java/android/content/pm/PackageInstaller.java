@@ -1262,7 +1262,7 @@ public class PackageInstaller {
      *                      {@code statusReceiver} if timeout happens before commit.
      * @throws IllegalArgumentException if the {@code statusReceiver} from an immutable
      *             {@link android.app.PendingIntent} when caller has a target SDK of API
-     *             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
+     *             35 or above.
      */
     public void commitSessionAfterInstallConstraintsAreMet(int sessionId,
             @NonNull IntentSender statusReceiver, @NonNull InstallConstraints constraints,
@@ -1972,7 +1972,7 @@ public class PackageInstaller {
          *             {@link #openWrite(String, long, long)} are still open.
          * @throws IllegalArgumentException if the {@code statusReceiver} from an immutable
          *             {@link android.app.PendingIntent} when caller has a target SDK of API
-         *             version {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
+         *             version 35 or above.
          *
          * @see android.app.admin.DevicePolicyManager
          * @see #requestUserPreapproval
@@ -2003,7 +2003,7 @@ public class PackageInstaller {
          *                       individual status codes on how to handle them.
          * @throws IllegalArgumentException if the {@code statusReceiver} from an immutable
          *             {@link android.app.PendingIntent} when caller has a target SDK of API
-         *             {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} or above.
+         *             35 or above.
          *
          * @hide
          */
