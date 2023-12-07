@@ -24,7 +24,7 @@ import android.graphics.Rect;
  *
  * @hide
  */
- oneway interface IWindowMagnificationConnectionCallback {
+ oneway interface IMagnificationConnectionCallback {
 
     /**
      * Called when the bounds of the mirrow window is changed.
