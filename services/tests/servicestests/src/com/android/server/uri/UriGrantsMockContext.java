@@ -21,11 +21,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
 import android.app.ActivityManagerInternal;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -33,18 +29,19 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.PathPermission;
 import android.content.pm.ProviderInfo;
 import android.net.Uri;
-import android.os.FileUtils;
 import android.os.PatternMatcher;
 import android.os.Process;
 import android.os.UserHandle;
-import android.test.mock.MockContentResolver;
+import android.test.mock.MockContext;
 import android.test.mock.MockPackageManager;
 
 import com.android.server.LocalServices;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
-public class UriGrantsMockContext extends ContextWrapper {
+public class UriGrantsMockContext extends MockContext {
     static final String TAG = "UriGrants";
 
     static final int FLAG_READ = Intent.FLAG_GRANT_READ_URI_PERMISSION;
@@ -98,19 +95,14 @@ public class UriGrantsMockContext extends ContextWrapper {
     private final File mDir;
 
     private final MockPackageManager mPackage;
-    private final MockContentResolver mResolver;
 
     final ActivityManagerInternal mAmInternal;
     final PackageManagerInternal mPmInternal;
 
-    public UriGrantsMockContext(@NonNull Context base) {
-        super(base);
-        mDir = new File(base.getFilesDir(), TAG);
-        mDir.mkdirs();
-        FileUtils.deleteContents(mDir);
+    public UriGrantsMockContext() throws IOException {
+        mDir = Files.createTempDirectory(TAG).toFile();
 
         mPackage = new MockPackageManager();
-        mResolver = new MockContentResolver(this);
 
         mAmInternal = mock(ActivityManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityManagerInternal.class);
@@ -236,11 +228,6 @@ public class UriGrantsMockContext extends ContextWrapper {
     @Override
     public PackageManager getPackageManager() {
         return mPackage;
-    }
-
-    @Override
-    public ContentResolver getContentResolver() {
-        return mResolver;
     }
 
     @Override
