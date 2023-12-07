@@ -322,6 +322,23 @@ public final class Looper {
 
     @android.ravenwood.annotation.RavenwoodReplace
     private static int getThresholdOverride() {
+        // Allow overriding the threshold for all processes' main looper with a system prop.
+        // e.g. adb shell 'setprop log.looper.any.main.slow 1 && stop && start'
+        if (myLooper() == getMainLooper()) {
+            final int globalOverride = SystemProperties.getInt("log.looper.any.main.slow", -1);
+            if (globalOverride >= 0) {
+                return globalOverride;
+            }
+        }
+
+        // Allow overriding the threshold for all threads within a process with a system prop.
+        // e.g. adb shell 'setprop log.looper.1000.any.slow 1 && stop && start'
+        final int processOverride = SystemProperties.getInt("log.looper."
+                + Process.myUid() + ".any.slow", -1);
+        if (processOverride >= 0) {
+            return processOverride;
+        }
+
         return SystemProperties.getInt("log.looper."
                 + Process.myUid() + "."
                 + Thread.currentThread().getName()
