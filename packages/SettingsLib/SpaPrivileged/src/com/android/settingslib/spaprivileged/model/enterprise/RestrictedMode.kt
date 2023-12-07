@@ -18,6 +18,7 @@ package com.android.settingslib.spaprivileged.model.enterprise
 
 import android.app.admin.DevicePolicyResources.Strings.Settings
 import android.content.Context
+import android.content.Intent
 import com.android.settingslib.RestrictedLockUtils
 import com.android.settingslib.widget.restricted.R
 
@@ -31,6 +32,11 @@ interface BlockedByAdmin : RestrictedMode {
     fun getSummary(checked: Boolean?): String
     fun sendShowAdminSupportDetailsIntent()
 }
+
+interface BlockedByEcm : RestrictedMode {
+    fun showRestrictedSettingsDetails()
+}
+
 
 internal data class BlockedByAdminImpl(
     private val context: Context,
@@ -53,5 +59,15 @@ internal data class BlockedByAdminImpl(
 
     override fun sendShowAdminSupportDetailsIntent() {
         RestrictedLockUtils.sendShowAdminSupportDetailsIntent(context, enforcedAdmin)
+    }
+}
+
+internal data class BlockedByEcmImpl(
+    private val context: Context,
+    private val intent: Intent,
+) : BlockedByEcm {
+
+    override fun showRestrictedSettingsDetails() {
+        context.startActivity(intent)
     }
 }

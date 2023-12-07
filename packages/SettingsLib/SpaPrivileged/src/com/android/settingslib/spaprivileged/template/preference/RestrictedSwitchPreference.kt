@@ -40,7 +40,7 @@ internal fun RestrictedSwitchPreference(
     restrictions: Restrictions,
     restrictionsProviderFactory: RestrictionsProviderFactory,
 ) {
-    if (restrictions.keys.isEmpty()) {
+    if (restrictions.isEmpty()) {
         SwitchPreference(model)
         return
     }

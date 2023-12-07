@@ -41,6 +41,7 @@ import com.android.settingslib.spaprivileged.framework.compose.getPlaceholder
 import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.userId
+import com.android.settingslib.spaprivileged.model.enterprise.EnhancedConfirmation
 import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
@@ -149,11 +150,17 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
 
     @Composable
     fun getSummary(record: T): () -> String {
-        val restrictions = remember(record.app.userId) {
+        val restrictions = remember(record.app.userId,
+                record.app.uid, record.app.packageName) {
             Restrictions(
                 userId = record.app.userId,
                 keys = listModel.switchRestrictionKeys,
-            )
+                enhancedConfirmation = listModel.enhancedConfirmationKey?.let {
+                    EnhancedConfirmation(
+                        key = it,
+                        uid = record.app.uid,
+                        packageName = record.app.packageName)
+                })
         }
         val restrictedMode by restrictionsProviderFactory.rememberRestrictedMode(restrictions)
         val allowed = listModel.isAllowed(record)

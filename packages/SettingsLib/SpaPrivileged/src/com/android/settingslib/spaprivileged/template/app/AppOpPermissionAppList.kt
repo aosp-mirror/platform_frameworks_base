@@ -47,6 +47,9 @@ abstract class AppOpPermissionListModel(
     abstract val appOp: Int
     abstract val permission: String
 
+    override val enhancedConfirmationKey: String?
+        get() = AppOpsManager.opToPublicName(appOp)
+
     /**
      * When set, specifies the broader permission who trumps the [permission].
      *
