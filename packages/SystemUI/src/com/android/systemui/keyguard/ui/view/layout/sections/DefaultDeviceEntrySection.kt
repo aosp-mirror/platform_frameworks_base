@@ -49,6 +49,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import dagger.Lazy
 import javax.inject.Inject
@@ -76,6 +77,7 @@ constructor(
     @Application private val scope: CoroutineScope,
     private val swipeUpAnywhereGestureHandler: Lazy<SwipeUpAnywhereGestureHandler>,
     private val tapGestureDetector: Lazy<TapGestureDetector>,
+    private val vibratorHelper: Lazy<VibratorHelper>,
 ) : KeyguardSection() {
     private val deviceEntryIconViewId = R.id.device_entry_icon_view
     private val alternateBouncerViewId = R.id.alternate_bouncer
@@ -114,6 +116,7 @@ constructor(
                     deviceEntryForegroundViewModel.get(),
                     deviceEntryBackgroundViewModel.get(),
                     falsingManager.get(),
+                    vibratorHelper.get(),
                 )
             }
             constraintLayout.findViewById<FrameLayout?>(alternateBouncerViewId)?.let {

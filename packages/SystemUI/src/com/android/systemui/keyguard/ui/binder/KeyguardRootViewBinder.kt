@@ -68,7 +68,6 @@ import javax.inject.Provider
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -253,27 +252,21 @@ object KeyguardRootViewBinder {
 
                     if (deviceEntryHapticsInteractor != null && vibratorHelper != null) {
                         launch {
-                            deviceEntryHapticsInteractor.playSuccessHaptic
-                                .filter { it }
-                                .collect {
-                                    vibratorHelper.performHapticFeedback(
-                                        view,
-                                        HapticFeedbackConstants.CONFIRM,
-                                    )
-                                    deviceEntryHapticsInteractor.handleSuccessHaptic()
-                                }
+                            deviceEntryHapticsInteractor.playSuccessHaptic.collect {
+                                vibratorHelper.performHapticFeedback(
+                                    view,
+                                    HapticFeedbackConstants.CONFIRM,
+                                )
+                            }
                         }
 
                         launch {
-                            deviceEntryHapticsInteractor.playErrorHaptic
-                                .filter { it }
-                                .collect {
-                                    vibratorHelper.performHapticFeedback(
-                                        view,
-                                        HapticFeedbackConstants.REJECT,
-                                    )
-                                    deviceEntryHapticsInteractor.handleErrorHaptic()
-                                }
+                            deviceEntryHapticsInteractor.playErrorHaptic.collect {
+                                vibratorHelper.performHapticFeedback(
+                                    view,
+                                    HapticFeedbackConstants.REJECT,
+                                )
+                            }
                         }
                     }
                 }

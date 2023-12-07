@@ -6,6 +6,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -38,6 +39,7 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
     private val testUtils = SceneTestUtils(this)
     private val testScope = testUtils.testScope
     private val userRepository = FakeUserRepository()
+    private val keyguardRepository = FakeKeyguardRepository()
 
     private lateinit var underTest: DeviceEntryRepository
 
@@ -55,6 +57,7 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
                 lockPatternUtils = lockPatternUtils,
                 keyguardBypassController = keyguardBypassController,
                 keyguardStateController = keyguardStateController,
+                keyguardRepository = keyguardRepository,
             )
         testScope.runCurrent()
     }
