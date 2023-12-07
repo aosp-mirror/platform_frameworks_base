@@ -882,7 +882,6 @@ package android.companion {
 
   public final class CompanionDeviceManager {
     method @RequiresPermission("android.permission.MANAGE_COMPANION_DEVICES") public void enableSecureTransport(boolean);
-    field @FlaggedApi("android.companion.companion_transport_apis") public static final int MESSAGE_REQUEST_PING = 1669362552; // 0x63807378
   }
 
   public abstract class CompanionDeviceService extends android.app.Service {
