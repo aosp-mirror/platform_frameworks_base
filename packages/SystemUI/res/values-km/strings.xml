@@ -640,14 +640,10 @@
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ប៊ូតុង <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Home"</string>
     <string name="keyboard_key_back" msgid="4185420465469481999">"Back"</string>
-    <!-- no translation found for keyboard_key_dpad_up (7199805608386368673) -->
-    <skip />
-    <!-- no translation found for keyboard_key_dpad_down (3354221123220737397) -->
-    <skip />
-    <!-- no translation found for keyboard_key_dpad_left (144176368026538621) -->
-    <skip />
-    <!-- no translation found for keyboard_key_dpad_right (8485763312139820037) -->
-    <skip />
+    <string name="keyboard_key_dpad_up" msgid="7199805608386368673">"ព្រួញ​ឡើង​លើ"</string>
+    <string name="keyboard_key_dpad_down" msgid="3354221123220737397">"ព្រួញ​ចុះ​ក្រោម"</string>
+    <string name="keyboard_key_dpad_left" msgid="144176368026538621">"ព្រួញ​ទៅឆ្វេង"</string>
+    <string name="keyboard_key_dpad_right" msgid="8485763312139820037">"ព្រួញទៅ​ស្ដាំ"</string>
     <string name="keyboard_key_dpad_center" msgid="4079412840715672825">"Center"</string>
     <string name="keyboard_key_tab" msgid="4592772350906496730">"Tab"</string>
     <string name="keyboard_key_space" msgid="6980847564173394012">"Space"</string>
@@ -675,10 +671,8 @@
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"ការជូនដំណឹង"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"ផ្លូវកាត់ក្ដារចុច"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"ប្ដូរប្លង់ក្ដារចុច"</string>
-    <!-- no translation found for keyboard_shortcut_join (3578314570034512676) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_clear_text (6631051796030377857) -->
-    <skip />
+    <string name="keyboard_shortcut_join" msgid="3578314570034512676">"ឬ"</string>
+    <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"សម្អាត​សំណួរ​ស្វែងរក"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ផ្លូវកាត់"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ស្វែងរកផ្លូវកាត់"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"រកផ្លូវកាត់មិនឃើញទេ"</string>
@@ -686,16 +680,11 @@
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"បញ្ចូល"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"កម្មវិធីដែលបើក"</string>
     <string name="keyboard_shortcut_search_category_current_app" msgid="2011953559133734491">"កម្មវិធីបច្ចុប្បន្ន"</string>
-    <!-- no translation found for keyboard_shortcut_a11y_show_search_results (2865241062981833705) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_a11y_filter_system (7744143131119370483) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_a11y_filter_input (4589316004510335529) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_a11y_filter_open_apps (6175417687221004059) -->
-    <skip />
-    <!-- no translation found for keyboard_shortcut_a11y_filter_current_app (7944592357493737911) -->
-    <skip />
+    <string name="keyboard_shortcut_a11y_show_search_results" msgid="2865241062981833705">"កំពុងបង្ហាញលទ្ធផល​ស្វែងរក"</string>
+    <string name="keyboard_shortcut_a11y_filter_system" msgid="7744143131119370483">"កំពុងបង្ហាញផ្លូវកាត់ប្រព័ន្ធ"</string>
+    <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"កំពុងបង្ហាញផ្លូវកាត់បញ្ចូល"</string>
+    <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"កំពុងបង្ហាញផ្លូវកាត់ដែលបើកកម្មវិធី"</string>
+    <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"កំពុងបង្ហាញផ្លូវកាត់សម្រាប់កម្មវិធីបច្ចុប្បន្ន"</string>
     <string name="group_system_access_notification_shade" msgid="1619028907006553677">"មើលការជូនដំណឹង"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"ថតរូប​អេក្រង់"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"បង្ហាញផ្លូវកាត់"</string>
