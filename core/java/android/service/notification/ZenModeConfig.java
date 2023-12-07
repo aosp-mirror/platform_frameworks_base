@@ -205,6 +205,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String ALLOW_ATT_CONV = "convos";
     private static final String ALLOW_ATT_CONV_FROM = "convosFrom";
     private static final String ALLOW_ATT_CHANNELS = "channels";
+    private static final String USER_MODIFIED_FIELDS = "policyUserModifiedFields";
     private static final String DISALLOW_TAG = "disallow";
     private static final String DISALLOW_ATT_VISUAL_EFFECTS = "visualEffects";
     private static final String STATE_TAG = "state";
@@ -247,6 +248,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String RULE_ATT_MODIFIED = "modified";
     private static final String RULE_ATT_ALLOW_MANUAL = "userInvokable";
     private static final String RULE_ATT_TYPE = "type";
+    private static final String RULE_ATT_USER_MODIFIED_FIELDS = "userModifiedFields";
     private static final String RULE_ATT_ICON = "rule_icon";
     private static final String RULE_ATT_TRIGGER_DESC = "triggerDesc";
 
@@ -261,6 +263,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String DEVICE_EFFECT_DISABLE_TOUCH = "zdeDisableTouch";
     private static final String DEVICE_EFFECT_MINIMIZE_RADIO_USAGE = "zdeMinimizeRadioUsage";
     private static final String DEVICE_EFFECT_MAXIMIZE_DOZE = "zdeMaximizeDoze";
+    private static final String DEVICE_EFFECT_USER_MODIFIED_FIELDS = "zdeUserModifiedFields";
 
     @UnsupportedAppUsage
     public boolean allowAlarms = DEFAULT_ALLOW_ALARMS;
@@ -748,6 +751,7 @@ public class ZenModeConfig implements Parcelable {
             rt.iconResName = parser.getAttributeValue(null, RULE_ATT_ICON);
             rt.triggerDescription = parser.getAttributeValue(null, RULE_ATT_TRIGGER_DESC);
             rt.type = safeInt(parser, RULE_ATT_TYPE, AutomaticZenRule.TYPE_UNKNOWN);
+            rt.userModifiedFields = safeInt(parser, RULE_ATT_USER_MODIFIED_FIELDS, 0);
         }
         return rt;
     }
@@ -794,6 +798,7 @@ public class ZenModeConfig implements Parcelable {
                 out.attribute(null, RULE_ATT_TRIGGER_DESC, rule.triggerDescription);
             }
             out.attributeInt(null, RULE_ATT_TYPE, rule.type);
+            out.attributeInt(null, RULE_ATT_USER_MODIFIED_FIELDS, rule.userModifiedFields);
         }
     }
 
@@ -856,6 +861,7 @@ public class ZenModeConfig implements Parcelable {
                 builder.allowChannels(channels);
                 policySet = true;
             }
+            builder.setUserModifiedFields(safeInt(parser, USER_MODIFIED_FIELDS, 0));
         }
 
         if (calls != ZenPolicy.PEOPLE_TYPE_UNSET) {
@@ -968,6 +974,7 @@ public class ZenModeConfig implements Parcelable {
 
         if (Flags.modesApi()) {
             writeZenPolicyState(ALLOW_ATT_CHANNELS, policy.getAllowedChannels(), out);
+            out.attributeInt(null, USER_MODIFIED_FIELDS, policy.getUserModifiedFields());
         }
     }
 
@@ -993,6 +1000,7 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
+    @FlaggedApi(Flags.FLAG_MODES_API)
     @Nullable
     private static ZenDeviceEffects readZenDeviceEffectsXml(TypedXmlPullParser parser) {
         ZenDeviceEffects deviceEffects = new ZenDeviceEffects.Builder()
@@ -1012,11 +1020,13 @@ public class ZenModeConfig implements Parcelable {
                 .setShouldMinimizeRadioUsage(
                         safeBoolean(parser, DEVICE_EFFECT_MINIMIZE_RADIO_USAGE, false))
                 .setShouldMaximizeDoze(safeBoolean(parser, DEVICE_EFFECT_MAXIMIZE_DOZE, false))
+                .setUserModifiedFields(safeInt(parser, DEVICE_EFFECT_USER_MODIFIED_FIELDS, 0))
                 .build();
 
         return deviceEffects.hasEffects() ? deviceEffects : null;
     }
 
+    @FlaggedApi(Flags.FLAG_MODES_API)
     private static void writeZenDeviceEffectsXml(ZenDeviceEffects deviceEffects,
             TypedXmlSerializer out) throws IOException {
         writeBooleanIfTrue(out, DEVICE_EFFECT_DISPLAY_GRAYSCALE,
@@ -1035,6 +1045,8 @@ public class ZenModeConfig implements Parcelable {
         writeBooleanIfTrue(out, DEVICE_EFFECT_MINIMIZE_RADIO_USAGE,
                 deviceEffects.shouldMinimizeRadioUsage());
         writeBooleanIfTrue(out, DEVICE_EFFECT_MAXIMIZE_DOZE, deviceEffects.shouldMaximizeDoze());
+        out.attributeInt(null, DEVICE_EFFECT_USER_MODIFIED_FIELDS,
+                deviceEffects.getUserModifiedFields());
     }
 
     private static void writeBooleanIfTrue(TypedXmlSerializer out, String att, boolean value)
@@ -1985,6 +1997,7 @@ public class ZenModeConfig implements Parcelable {
         public String triggerDescription;
         public String iconResName;
         public boolean allowManualInvocation;
+        public int userModifiedFields;
 
         public ZenRule() { }
 
@@ -2017,7 +2030,20 @@ public class ZenModeConfig implements Parcelable {
                 iconResName = source.readString();
                 triggerDescription = source.readString();
                 type = source.readInt();
+                userModifiedFields = source.readInt();
             }
+        }
+
+        /**
+         * @see AutomaticZenRule#canUpdate()
+         */
+        @FlaggedApi(Flags.FLAG_MODES_API)
+        public boolean canBeUpdatedByApp() {
+            // The rule is considered updateable if its bitmask has no user modifications, and
+            // the bitmasks of the policy and device effects have no modification.
+            return userModifiedFields == 0
+                    && (zenPolicy == null || zenPolicy.getUserModifiedFields() == 0)
+                    && (zenDeviceEffects == null || zenDeviceEffects.getUserModifiedFields() == 0);
         }
 
         @Override
@@ -2064,6 +2090,7 @@ public class ZenModeConfig implements Parcelable {
                 dest.writeString(iconResName);
                 dest.writeString(triggerDescription);
                 dest.writeInt(type);
+                dest.writeInt(userModifiedFields);
             }
         }
 
@@ -2092,7 +2119,8 @@ public class ZenModeConfig implements Parcelable {
                         .append(",allowManualInvocation=").append(allowManualInvocation)
                         .append(",iconResName=").append(iconResName)
                         .append(",triggerDescription=").append(triggerDescription)
-                        .append(",type=").append(type);
+                        .append(",type=").append(type)
+                        .append(",userModifiedFields=").append(userModifiedFields);
             }
 
             return sb.append(']').toString();
@@ -2151,7 +2179,8 @@ public class ZenModeConfig implements Parcelable {
                         && other.allowManualInvocation == allowManualInvocation
                         && Objects.equals(other.iconResName, iconResName)
                         && Objects.equals(other.triggerDescription, triggerDescription)
-                        && other.type == type;
+                        && other.type == type
+                        && other.userModifiedFields == userModifiedFields;
             }
 
             return finalEquals;
@@ -2163,7 +2192,7 @@ public class ZenModeConfig implements Parcelable {
                 return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
                         component, configurationActivity, pkg, id, enabler, zenPolicy,
                         zenDeviceEffects, modified, allowManualInvocation, iconResName,
-                        triggerDescription, type);
+                        triggerDescription, type, userModifiedFields);
             }
             return Objects.hash(enabled, snoozing, name, zenMode, conditionId, condition,
                     component, configurationActivity, pkg, id, enabler, zenPolicy, modified);
