@@ -34,7 +34,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import android.app.Notification;
 import android.app.PendingIntent;
@@ -57,17 +56,25 @@ import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
-public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
+public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
     private static final int TEST_TOUCH_ACCEPTANCE_TIME = 200;
     private static final int TEST_A11Y_AUTO_DISMISS_TIME = 1_000;
     private static final int TEST_A11Y_TIMEOUT_TIME = 3_000;
@@ -76,17 +83,33 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
     @Mock private AccessibilityManagerWrapper mAccessibilityMgr;
 
+    static {
+        assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME);
+        assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME);
+        assertThat(TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(TEST_A11Y_AUTO_DISMISS_TIME);
+
+        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_AUTO_DISMISS_TIME).isLessThan(
+                TEST_TIMEOUT_TIME);
+        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(
+                TEST_TIMEOUT_TIME);
+        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_A11Y_AUTO_DISMISS_TIME).isLessThan(
+                TEST_A11Y_TIMEOUT_TIME);
+    }
+
     private final class TestableHeadsUpManager extends BaseHeadsUpManager {
         TestableHeadsUpManager(Context context,
                 HeadsUpManagerLogger logger,
                 Handler handler,
+                GlobalSettings globalSettings,
+                SystemClock systemClock,
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
                 UiEventLogger uiEventLogger) {
-            super(context, logger, handler, accessibilityManagerWrapper, uiEventLogger);
+            super(context, logger, handler, globalSettings, systemClock,
+                    accessibilityManagerWrapper, uiEventLogger);
             mTouchAcceptanceDelay = TEST_TOUCH_ACCEPTANCE_TIME;
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
-            mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
-            mStickyDisplayTime = TEST_STICKY_AUTO_DISMISS_TIME;
+            mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
+            mStickyForSomeTimeAutoDismissTime = TEST_STICKY_AUTO_DISMISS_TIME;
         }
 
         // The following are only implemented by HeadsUpManagerPhone. If you need them, use that.
@@ -160,8 +183,8 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     }
 
     private BaseHeadsUpManager createHeadsUpManager() {
-        return new TestableHeadsUpManager(mContext, mLogger, mTestHandler, mAccessibilityMgr,
-                mUiEventLoggerFake);
+        return new TestableHeadsUpManager(mContext, mLogger, mTestHandler, mGlobalSettings,
+                mSystemClock, mAccessibilityMgr, mUiEventLoggerFake);
     }
 
     @Override
@@ -214,19 +237,7 @@ public class HeadsUpManagerTest extends AlertingNotificationManagerTest {
     @Before
     @Override
     public void setUp() {
-        initMocks(this);
         super.setUp();
-
-        assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME);
-        assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME);
-        assertThat(TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(TEST_A11Y_AUTO_DISMISS_TIME);
-
-        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_AUTO_DISMISS_TIME).isLessThan(
-                TEST_TIMEOUT_TIME);
-        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(
-                TEST_TIMEOUT_TIME);
-        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_A11Y_AUTO_DISMISS_TIME).isLessThan(
-                TEST_A11Y_TIMEOUT_TIME);
     }
 
     @After

@@ -46,6 +46,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
 import com.android.systemui.util.kotlin.JavaAdapter;
+import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 
 import org.junit.After;
 import org.junit.Before;
@@ -87,6 +89,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 KeyguardBypassController keyguardBypassController,
                 ConfigurationController configurationController,
                 Handler handler,
+                GlobalSettings globalSettings,
+                SystemClock systemClock,
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
                 UiEventLogger uiEventLogger,
                 JavaAdapter javaAdapter,
@@ -101,13 +105,15 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                     visualStabilityProvider,
                     configurationController,
                     handler,
+                    globalSettings,
+                    systemClock,
                     accessibilityManagerWrapper,
                     uiEventLogger,
                     javaAdapter,
                     shadeInteractor
             );
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
-            mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
+            mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
         }
     }
 
@@ -121,6 +127,8 @@ public class HeadsUpManagerPhoneTest extends AlertingNotificationManagerTest {
                 mBypassController,
                 mConfigurationController,
                 mTestHandler,
+                mGlobalSettings,
+                mSystemClock,
                 mAccessibilityManagerWrapper,
                 mUiEventLogger,
                 mJavaAdapter,
