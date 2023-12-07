@@ -35,7 +35,7 @@ import com.android.systemui.bouncer.shared.model.BouncerMessageModel
 import com.android.systemui.bouncer.ui.BouncerView
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.SystemPropertiesHelper
 import com.android.systemui.keyguard.DismissCallbackRegistry
@@ -62,7 +62,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -108,17 +107,18 @@ class BouncerMessageInteractorTest : SysuiTestCase() {
 
     suspend fun TestScope.init() {
         userRepository.setSelectedUserInfo(PRIMARY_USER)
-        val featureFlags = FakeFeatureFlags().apply { set(Flags.REVAMPED_BOUNCER_MESSAGES, true) }
+        val featureFlags =
+            FakeFeatureFlagsClassic().apply { set(Flags.REVAMPED_BOUNCER_MESSAGES, true) }
         primaryBouncerInteractor =
             PrimaryBouncerInteractor(
                 bouncerRepository,
-                Mockito.mock(BouncerView::class.java),
-                Mockito.mock(Handler::class.java),
-                Mockito.mock(KeyguardStateController::class.java),
-                Mockito.mock(KeyguardSecurityModel::class.java),
-                Mockito.mock(PrimaryBouncerCallbackInteractor::class.java),
-                Mockito.mock(FalsingCollector::class.java),
-                Mockito.mock(DismissCallbackRegistry::class.java),
+                mock(BouncerView::class.java),
+                mock(Handler::class.java),
+                mock(KeyguardStateController::class.java),
+                mock(KeyguardSecurityModel::class.java),
+                mock(PrimaryBouncerCallbackInteractor::class.java),
+                mock(FalsingCollector::class.java),
+                mock(DismissCallbackRegistry::class.java),
                 context,
                 keyguardUpdateMonitor,
                 fakeTrustRepository,

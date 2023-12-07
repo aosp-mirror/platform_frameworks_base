@@ -29,7 +29,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteracto
 import com.android.systemui.res.R
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
-import kotlin.math.ceil
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
@@ -268,7 +267,7 @@ class BouncerInteractorTest : SysuiTestCase() {
                     AuthenticationThrottlingModel(
                         failedAttemptCount =
                             FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
-                        remainingMs = FakeAuthenticationRepository.THROTTLE_DURATION_MS,
+                        remainingSeconds = FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS,
                     )
                 )
             assertTryAgainMessage(
@@ -286,8 +285,7 @@ class BouncerInteractorTest : SysuiTestCase() {
                     .toInt()
             )
 
-            throttling?.remainingMs?.let { remainingMs ->
-                val seconds = ceil(remainingMs / 1000f).toInt()
+            throttling?.remainingSeconds?.let { seconds ->
                 repeat(seconds) { time ->
                     advanceTimeBy(1000)
                     val remainingTimeSec = seconds - time - 1

@@ -29,6 +29,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
+import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
@@ -283,7 +284,7 @@ constructor(
                 if (remainingMs > 0) {
                     AuthenticationThrottlingModel(
                         failedAttemptCount = failedAttemptCount.await(),
-                        remainingMs = remainingMs.toInt(),
+                        remainingSeconds = ceil(remainingMs / 1000f).toInt(),
                     )
                 } else {
                     null // Throttling ended.
