@@ -15,11 +15,12 @@
  */
 package com.android.systemui.statusbar.notification.collection.coordinator
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.setFlagValue
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
@@ -40,10 +41,9 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations.initMocks
+import org.mockito.Mockito.`when` as whenever
 
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
@@ -66,12 +66,6 @@ class StackCoordinatorTest : SysuiTestCase() {
     fun setUp() {
         initMocks(this)
         entry = NotificationEntryBuilder().setSection(section).build()
-        setUpWithFlags()
-    }
-
-    private fun setUpWithFlags(vararg flags: Pair<String, Boolean>) {
-        flags.forEach { (name, value) -> mSetFlagsRule.setFlagValue(name, value) }
-        reset(pipeline)
         coordinator =
             StackCoordinator(
                 groupExpansionManagerImpl,
@@ -86,15 +80,15 @@ class StackCoordinatorTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(NotificationIconContainerRefactor.FLAG_NAME)
     fun testUpdateNotificationIcons() {
-        setUpWithFlags(NotificationIconContainerRefactor.FLAG_NAME to false)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(notificationIconAreaController).updateNotificationIcons(eq(listOf(entry)))
     }
 
     @Test
+    @EnableFlags(NotificationIconContainerRefactor.FLAG_NAME)
     fun testSetRenderedListOnInteractor() {
-        setUpWithFlags(NotificationIconContainerRefactor.FLAG_NAME to true)
         afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
         verify(renderListInteractor).setRenderedList(eq(listOf(entry)))
     }

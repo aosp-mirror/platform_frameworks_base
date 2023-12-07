@@ -18,6 +18,7 @@ package com.android.systemui.display.domain.interactor
 
 import android.companion.virtual.VirtualDeviceManager
 import android.companion.virtual.flags.Flags.FLAG_INTERACTIVE_SCREEN_MIRROR
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Display
@@ -75,7 +76,6 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        mSetFlagsRule.disableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
         whenever(virtualDeviceManager.isVirtualDeviceOwnedMirrorDisplay(anyInt())).thenReturn(false)
         fakeKeyguardRepository.setKeyguardShowing(false)
     }
@@ -160,9 +160,9 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
     fun displayState_virtualDeviceOwnedMirrorVirtualDisplay_connected() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
             whenever(virtualDeviceManager.isVirtualDeviceOwnedMirrorDisplay(anyInt()))
                 .thenReturn(true)
             val value by lastValue()
@@ -183,9 +183,9 @@ class ConnectedDisplayInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
     fun virtualDeviceOwnedMirrorVirtualDisplay_emitsConnectedDisplayAddition() =
         testScope.runTest {
-            mSetFlagsRule.enableFlags(FLAG_INTERACTIVE_SCREEN_MIRROR)
             whenever(virtualDeviceManager.isVirtualDeviceOwnedMirrorDisplay(anyInt()))
                 .thenReturn(true)
             var count = 0

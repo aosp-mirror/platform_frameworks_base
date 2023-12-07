@@ -21,6 +21,8 @@ import android.content.Intent
 import android.content.pm.PackageManager.NameNotFoundException
 import android.content.res.Resources
 import android.content.res.Resources.NotFoundException
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.test.suitebuilder.annotation.SmallTest
 import com.android.systemui.Flags.FLAG_SYSUI_TEAMFOOD
 import com.android.systemui.SysuiTestCase
@@ -68,15 +70,14 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     private val serverFlagReader = ServerFlagReaderFake()
 
     private val teamfoodableFlagA = UnreleasedFlag(name = "a", namespace = "test", teamfood = true)
-    private val teamfoodableFlagB = ReleasedFlag(name = "b", namespace = "test", teamfood = true)
+    private val releasedFlagB = ReleasedFlag(name = "b", namespace = "test")
 
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        mSetFlagsRule.disableFlags(FLAG_SYSUI_TEAMFOOD)
 
         flagMap.put(teamfoodableFlagA.name, teamfoodableFlagA)
-        flagMap.put(teamfoodableFlagB.name, teamfoodableFlagB)
+        flagMap.put(releasedFlagB.name, releasedFlagB)
         mFeatureFlagsClassicDebug =
             FeatureFlagsClassicDebug(
                 flagManager,
@@ -99,7 +100,6 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
 
     @Test
     fun readBooleanFlag() {
-        // Remember that the TEAMFOOD flag is id#1 and has special behavior.
         whenever(flagManager.readFlagValue<Boolean>(eq("3"), any())).thenReturn(true)
         whenever(flagManager.readFlagValue<Boolean>(eq("4"), any())).thenReturn(false)
 
@@ -122,9 +122,10 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_SYSUI_TEAMFOOD)
     fun teamFoodFlag_False() {
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagA)).isFalse()
-        assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagB)).isTrue()
+        assertThat(mFeatureFlagsClassicDebug.isEnabled(releasedFlagB)).isTrue()
 
         // Regular boolean flags should still test the same.
         // Only our teamfoodableFlag should change.
@@ -132,10 +133,10 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_SYSUI_TEAMFOOD)
     fun teamFoodFlag_True() {
-        mSetFlagsRule.enableFlags(FLAG_SYSUI_TEAMFOOD)
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagA)).isTrue()
-        assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagB)).isTrue()
+        assertThat(mFeatureFlagsClassicDebug.isEnabled(releasedFlagB)).isTrue()
 
         // Regular boolean flags should still test the same.
         // Only our teamfoodableFlag should change.
@@ -143,14 +144,14 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_SYSUI_TEAMFOOD)
     fun teamFoodFlag_Overridden() {
         whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagA.name), any()))
             .thenReturn(true)
-        whenever(flagManager.readFlagValue<Boolean>(eq(teamfoodableFlagB.name), any()))
+        whenever(flagManager.readFlagValue<Boolean>(eq(releasedFlagB.name), any()))
             .thenReturn(false)
-        mSetFlagsRule.enableFlags(FLAG_SYSUI_TEAMFOOD)
         assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagA)).isTrue()
-        assertThat(mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagB)).isFalse()
+        assertThat(mFeatureFlagsClassicDebug.isEnabled(releasedFlagB)).isFalse()
 
         // Regular boolean flags should still test the same.
         // Only our teamfoodableFlag should change.
@@ -400,6 +401,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_SYSUI_TEAMFOOD)
     fun serverSide_OverrideUncached_NoRestart() {
         // No one has read the flag, so it's not in the cache.
         serverFlagReader.setFlagValue(
@@ -411,6 +413,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_SYSUI_TEAMFOOD)
     fun serverSide_Override_Restarts() {
         // Read it to put it in the cache.
         mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagA)
@@ -423,6 +426,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(FLAG_SYSUI_TEAMFOOD)
     fun serverSide_RedundantOverride_NoRestart() {
         // Read it to put it in the cache.
         mFeatureFlagsClassicDebug.isEnabled(teamfoodableFlagA)

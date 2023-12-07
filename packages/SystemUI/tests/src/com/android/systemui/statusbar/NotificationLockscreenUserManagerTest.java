@@ -55,8 +55,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.platform.test.annotations.DisableFlags;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.FlagsParameterization;
 import android.provider.Settings;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.SparseArray;
 
@@ -96,12 +98,26 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.Executor;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper
 public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(FLAG_ALLOW_PRIVATE_PROFILE);
+    }
+
+    public NotificationLockscreenUserManagerTest(FlagsParameterization flags) {
+        mSetFlagsRule.setFlagsParameterization(flags);
+    }
+
     private static final int TEST_PROFILE_USERHANDLE = 12;
     @Mock
     private NotificationPresenter mPresenter;
@@ -762,8 +778,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_ALLOW_PRIVATE_PROFILE)
     public void testProfileAvailabilityIntent() {
-        mSetFlagsRule.enableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
         mLockscreenUserManager.mCurrentProfiles.clear();
         assertEquals(0, mLockscreenUserManager.mCurrentProfiles.size());
         mLockscreenUserManager.mCurrentProfiles.append(0, mock(UserInfo.class));
@@ -773,8 +789,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(FLAG_ALLOW_PRIVATE_PROFILE)
     public void testProfileUnAvailabilityIntent() {
-        mSetFlagsRule.enableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
         mLockscreenUserManager.mCurrentProfiles.clear();
         assertEquals(0, mLockscreenUserManager.mCurrentProfiles.size());
         mLockscreenUserManager.mCurrentProfiles.append(0, mock(UserInfo.class));
@@ -784,8 +800,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_ALLOW_PRIVATE_PROFILE)
     public void testManagedProfileAvailabilityIntent() {
-        mSetFlagsRule.disableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
         mLockscreenUserManager.mCurrentProfiles.clear();
         mLockscreenUserManager.mCurrentManagedProfiles.clear();
         assertEquals(0, mLockscreenUserManager.mCurrentProfiles.size());
@@ -798,8 +814,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(FLAG_ALLOW_PRIVATE_PROFILE)
     public void testManagedProfileUnAvailabilityIntent() {
-        mSetFlagsRule.disableFlags(FLAG_ALLOW_PRIVATE_PROFILE);
         mLockscreenUserManager.mCurrentProfiles.clear();
         mLockscreenUserManager.mCurrentManagedProfiles.clear();
         assertEquals(0, mLockscreenUserManager.mCurrentProfiles.size());
