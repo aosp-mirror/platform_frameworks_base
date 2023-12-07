@@ -12312,6 +12312,16 @@ public final class Settings {
         public static final String PRIVATE_SPACE_AUTO_LOCK = "private_space_auto_lock";
 
         /**
+         * Toggle for enabling stylus pointer icon. Pointer icons for styluses will only be be shown
+         * when this is enabled. Enabling this alone won't enable the stylus pointer;
+         * config_enableStylusPointerIcon needs to be true as well.
+         *
+         * @hide
+         */
+        @Readable
+        public static final String STYLUS_POINTER_ICON_ENABLED = "stylus_pointer_icon_enabled";
+
+        /**
          * These entries are considered common between the personal and the managed profile,
          * since the managed profile doesn't get to change them.
          */

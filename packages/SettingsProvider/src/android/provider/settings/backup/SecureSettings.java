@@ -261,6 +261,7 @@ public class SecureSettings {
         Settings.Secure.CREDENTIAL_SERVICE,
         Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
         Settings.Secure.EVEN_DIMMER_ACTIVATED,
-        Settings.Secure.EVEN_DIMMER_MIN_NITS
+        Settings.Secure.EVEN_DIMMER_MIN_NITS,
+        Settings.Secure.STYLUS_POINTER_ICON_ENABLED,
     };
 }
