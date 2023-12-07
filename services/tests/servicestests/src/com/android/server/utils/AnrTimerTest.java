@@ -30,13 +30,19 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.annotations.GuardedBy;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @SmallTest
 @Presubmit
+@RunWith(Parameterized.class)
 public class AnrTimerTest {
 
     // The commonly used message timeout key.
@@ -106,6 +112,16 @@ public class AnrTimerTest {
     }
 
     /**
+     * Force AnrTimer to use the test parameter for the feature flag.
+     */
+    class TestInjector extends AnrTimer.Injector {
+        @Override
+        boolean anrTimerServiceEnabled() {
+            return mEnabled;
+        }
+    }
+
+    /**
      * An instrumented AnrTimer.
      */
     private static class TestAnrTimer extends AnrTimer<TestArg> {
@@ -137,6 +153,17 @@ public class AnrTimerTest {
         assertEquals(actual.what, MSG_TIMEOUT);
     }
 
+    @Parameters(name = "featureEnabled={0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] { {false}, {true} });
+    }
+
+    /** True if the feature is enabled. */
+    private boolean mEnabled;
+
+    public AnrTimerTest(boolean featureEnabled) {
+        mEnabled = featureEnabled;
+    }
 
     /**
      * Verify that a simple expiration succeeds.  The timer is started for 10ms.  The test
