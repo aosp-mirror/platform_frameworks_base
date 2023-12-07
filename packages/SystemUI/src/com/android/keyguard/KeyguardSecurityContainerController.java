@@ -337,6 +337,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput) {
             mViewMediatorCallback.setNeedsInput(needsInput);
         }
+
+        @Override
+        public void showCurrentSecurityScreen() {
+            showPrimarySecurityScreen(false);
+        }
     };
 
     private final SwipeListener mSwipeListener = new SwipeListener() {
