@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.accessibility
+package com.android.systemui.qs.tiles.impl.colorcorrection.domain.model
 
-import com.android.systemui.accessibility.data.repository.ColorCorrectionRepository
-import com.android.systemui.accessibility.data.repository.ColorCorrectionRepositoryImpl
-import com.android.systemui.accessibility.qs.QSAccessibilityModule
-import dagger.Binds
-import dagger.Module
-
-@Module(includes = [QSAccessibilityModule::class])
-interface AccessibilityModule {
-    @Binds
-    abstract fun colorCorrectionRepository(
-        impl: ColorCorrectionRepositoryImpl
-    ): ColorCorrectionRepository
-}
+/**
+ * Color correction tile model.
+ *
+ * @param isEnabled is true when the color correction is enabled;
+ */
+@JvmInline value class ColorCorrectionTileModel(val isEnabled: Boolean)
