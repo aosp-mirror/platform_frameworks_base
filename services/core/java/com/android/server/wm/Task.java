@@ -5815,8 +5815,7 @@ class Task extends TaskFragment {
             }
 
             mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
-                    mDisplayContent.mDisplayId, false /* markFrozenIfConfigChanged */,
-                    false /* deferResume */);
+                    mDisplayContent.mDisplayId, false /* deferResume */);
         } finally {
             if (mTransitionController.isShellTransitionsEnabled()) {
                 mAtmService.continueWindowLayout();

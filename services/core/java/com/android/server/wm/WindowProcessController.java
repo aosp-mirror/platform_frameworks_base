@@ -915,7 +915,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             int i = mActivities.size();
             while (i > 0) {
                 i--;
-                mActivities.get(i).stopFreezingScreenLocked(true);
+                mActivities.get(i).stopFreezingScreen(true /* unfreezeNow */, true /* force */);
             }
         }
     }

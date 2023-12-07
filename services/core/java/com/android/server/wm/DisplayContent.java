@@ -1695,7 +1695,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             final ActivityRecord activityRecord = (ActivityRecord) requestingContainer;
             final boolean kept = updateDisplayOverrideConfigurationLocked(config, activityRecord,
                     false /* deferResume */, null /* result */);
-            activityRecord.frozenBeforeDestroy = true;
             if (!kept) {
                 mRootWindowContainer.resumeFocusedTasksTopActivities();
             }

@@ -1485,7 +1485,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 // TODO: Remove this once visibilities are set correctly immediately when
                 // starting an activity.
                 notUpdated = !mRootWindowContainer.ensureVisibilityAndConfig(next, getDisplayId(),
-                        true /* markFrozenIfConfigChanged */, false /* deferResume */);
+                        false /* deferResume */);
             }
 
             if (notUpdated) {
@@ -1856,7 +1856,7 @@ class TaskFragment extends WindowContainer<WindowContainer> {
             // In that case go ahead and remove the freeze this activity has on the screen
             // since it is no longer visible.
             if (prev != null) {
-                prev.stopFreezingScreenLocked(true /*force*/);
+                prev.stopFreezingScreen(true /* unfreezeNow */, true /* force */);
             }
             mPausingActivity = null;
         }
