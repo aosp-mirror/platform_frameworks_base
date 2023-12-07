@@ -216,7 +216,11 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
 
     private void notifyKeyguardFaceAuthEnabledChanged() {
         // Copy the list to allow removal during callback.
-        new ArrayList<>(mCallbacks).forEach(Callback::onFaceEnrolledChanged);
+        new ArrayList<>(mCallbacks).forEach(callback -> {
+            if (callback != null) {
+                callback.onFaceEnrolledChanged();
+            }
+        });
     }
 
     private void notifyUnlockedChanged() {

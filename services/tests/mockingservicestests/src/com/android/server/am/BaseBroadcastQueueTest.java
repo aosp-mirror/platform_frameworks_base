@@ -93,6 +93,8 @@ public abstract class BaseBroadcastQueueTest {
             .spyStatic(ProcessList.class)
             .build();
 
+    final BroadcastQueue[] mBroadcastQueues = new BroadcastQueue[1];
+
     @Mock
     AppOpsService mAppOpsService;
     @Mock
@@ -162,7 +164,9 @@ public abstract class BaseBroadcastQueueTest {
     }
 
     public void tearDown() throws Exception {
-        mHandlerThread.quit();
+        if (mHandlerThread != null) {
+            mHandlerThread.quit();
+        }
     }
 
     static int getUidForPackage(@NonNull String packageName) {
@@ -201,6 +205,11 @@ public abstract class BaseBroadcastQueueTest {
         @Override
         public ProcessList getProcessList(ActivityManagerService service) {
             return mProcessList;
+        }
+
+        @Override
+        public BroadcastQueue[] getBroadcastQueues(ActivityManagerService service) {
+            return mBroadcastQueues;
         }
     }
 

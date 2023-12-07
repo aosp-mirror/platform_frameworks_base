@@ -55,3 +55,10 @@ flag {
     description: "Allow access to privileged routing capabilities to MEDIA_ROUTING_CONTROL holders."
     bug: "305919655"
 }
+
+flag {
+    name: "enable_cross_user_routing_in_media_router2"
+    namespace: "media_solutions"
+    description: "Allows clients of privileged MediaRouter2 that hold INTERACT_ACROSS_USERS_FULL to control routing across users."
+    bug: "288580225"
+}

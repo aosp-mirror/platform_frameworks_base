@@ -1279,7 +1279,7 @@ public abstract class PackageManager {
      * @see #isPackageQuarantined
      */
     @FlaggedApi(android.content.pm.Flags.FLAG_QUARANTINED_ENABLED)
-    public static final long MATCH_QUARANTINED_COMPONENTS = 0x100000000L;
+    public static final long MATCH_QUARANTINED_COMPONENTS = 1L << 33;
 
     /**
      * Flag for {@link #addCrossProfileIntentFilter}: if this flag is set: when

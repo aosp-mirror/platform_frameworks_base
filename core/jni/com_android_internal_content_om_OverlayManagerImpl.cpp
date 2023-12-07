@@ -46,6 +46,7 @@ static struct fabricated_overlay_internal_entry_offsets_t {
     jfieldID configuration;
     jfieldID binaryDataOffset;
     jfieldID binaryDataSize;
+    jfieldID isNinePatch;
 } gFabricatedOverlayInternalEntryOffsets;
 
 static struct parcel_file_descriptor_offsets_t {
@@ -288,13 +289,16 @@ static void CreateFrroFile(JNIEnv* env, jclass /*clazz*/, jstring jsFrroFilePath
                 env->GetLongField(entry, gFabricatedOverlayInternalEntryOffsets.binaryDataOffset);
         const auto data_size =
                 env->GetLongField(entry, gFabricatedOverlayInternalEntryOffsets.binaryDataSize);
+        const auto nine_patch =
+                env->GetBooleanField(entry, gFabricatedOverlayInternalEntryOffsets.isNinePatch);
         entries_params.push_back(
                 FabricatedOverlayEntryParameters{resourceName.c_str(), (DataType)dataType,
                                                  (DataValue)data,
                                                  string_data.value_or(std::string()), binary_data,
                                                  static_cast<off64_t>(data_offset),
                                                  static_cast<size_t>(data_size),
-                                                 configuration.value_or(std::string())});
+                                                 configuration.value_or(std::string()),
+                                                 static_cast<bool>(nine_patch)});
         ALOGV("resourceName = %s, dataType = 0x%08x, data = 0x%08x, dataString = %s,"
               " binaryData = %d, configuration = %s",
               resourceName.c_str(), dataType, data, string_data.value_or(std::string()).c_str(),
@@ -455,6 +459,9 @@ int register_com_android_internal_content_om_OverlayManagerImpl(JNIEnv* env) {
     gFabricatedOverlayInternalEntryOffsets.binaryDataSize =
             GetFieldIDOrDie(env, gFabricatedOverlayInternalEntryOffsets.classObject,
                             "binaryDataSize", "J");
+    gFabricatedOverlayInternalEntryOffsets.isNinePatch =
+            GetFieldIDOrDie(env, gFabricatedOverlayInternalEntryOffsets.classObject, "isNinePatch",
+                            "Z");
 
     jclass parcelFileDescriptorClass =
             android::FindClassOrDie(env, "android/os/ParcelFileDescriptor");

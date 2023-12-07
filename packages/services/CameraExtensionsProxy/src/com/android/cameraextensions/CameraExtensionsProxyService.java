@@ -1329,7 +1329,7 @@ public class CameraExtensionsProxyService extends Service {
         }
 
         @Override
-        public void onCaptureSessionStart(IRequestProcessorImpl requestProcessor) {
+        public void onCaptureSessionStart(IRequestProcessorImpl requestProcessor, String statsKey) {
             mSessionProcessor.onCaptureSessionStart(
                     new RequestProcessorStub(requestProcessor, mCameraId));
         }

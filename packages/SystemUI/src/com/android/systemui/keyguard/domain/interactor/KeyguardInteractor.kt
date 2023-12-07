@@ -171,6 +171,9 @@ constructor(
     /** Whether the keyguard is going away. */
     val isKeyguardGoingAway: Flow<Boolean> = repository.isKeyguardGoingAway
 
+    /** Last point that [KeyguardRootView] view was tapped */
+    val lastRootViewTapPosition: Flow<Point?> = repository.lastRootViewTapPosition.asStateFlow()
+
     /** Whether the primary bouncer is showing or not. */
     val primaryBouncerShowing: Flow<Boolean> = bouncerRepository.primaryBouncerShow
 
@@ -302,6 +305,10 @@ constructor(
 
     fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
         repository.setClockShouldBeCentered(shouldBeCentered)
+    }
+
+    fun setLastRootViewTapPosition(point: Point?) {
+        repository.lastRootViewTapPosition.value = point
     }
 
     companion object {

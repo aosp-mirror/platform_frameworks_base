@@ -77,9 +77,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.notNull;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -112,6 +112,7 @@ import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Condition;
+import android.service.notification.DeviceEffectsApplier;
 import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
@@ -188,8 +189,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
             .appendPath("test")
             .build();
 
-    private static final Condition CONDITION = new Condition(CONDITION_ID, "",
+    private static final Condition CONDITION_TRUE = new Condition(CONDITION_ID, "",
             Condition.STATE_TRUE);
+    private static final Condition CONDITION_FALSE = new Condition(CONDITION_ID, "",
+            Condition.STATE_FALSE);
     private static final String TRIGGER_DESC = "Every Night, 10pm to 6am";
     private static final int TYPE = TYPE_BEDTIME;
     private static final boolean ALLOW_MANUAL = true;
@@ -201,6 +204,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
             = NotificationManager.INTERRUPTION_FILTER_ALARMS;
     private static final boolean ENABLED = true;
     private static final int CREATION_TIME = 123;
+    private static final ZenDeviceEffects NO_EFFECTS = new ZenDeviceEffects.Builder().build();
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -212,6 +216,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     private TestableLooper mTestableLooper;
     private ZenModeHelper mZenModeHelper;
     private ContentResolver mContentResolver;
+    @Mock DeviceEffectsApplier mDeviceEffectsApplier;
     @Mock AppOpsManager mAppOps;
     TestableFlagResolver mTestFlagResolver = new TestableFlagResolver();
     ZenModeEventLoggerFake mZenModeEventLogger;
@@ -238,8 +243,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         when(mPackageManager.getResourcesForApplication(anyString())).thenReturn(
                 mResources);
 
-        when(mContext.getSystemService(AppOpsManager.class)).thenReturn(mAppOps);
-        when(mContext.getSystemService(NotificationManager.class)).thenReturn(mNotificationManager);
+        mContext.addMockSystemService(AppOpsManager.class, mAppOps);
+        mContext.addMockSystemService(NotificationManager.class, mNotificationManager);
+
         mConditionProviders = new ConditionProviders(mContext, new UserProfiles(),
                 AppGlobals.getPackageManager());
         mConditionProviders.addSystemProvider(new CountdownConditionProvider());
@@ -609,7 +615,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // and we're setting zen mode on
         Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 0);
-        mZenModeHelper.mIsBootComplete = true;
+        mZenModeHelper.mIsSystemServicesReady = true;
         mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
         mZenModeHelper.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
@@ -624,7 +630,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // doesn't show upgrade notification if stored settings says don't show
         Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 0);
-        mZenModeHelper.mIsBootComplete = true;
+        mZenModeHelper.mIsSystemServicesReady = true;
         mZenModeHelper.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
         verify(mNotificationManager, never()).notify(eq(ZenModeHelper.TAG),
@@ -636,7 +642,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // doesn't show upgrade notification since zen was already updated
         Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 1);
-        mZenModeHelper.mIsBootComplete = true;
+        mZenModeHelper.mIsSystemServicesReady = true;
         mZenModeHelper.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
         verify(mNotificationManager, never()).notify(eq(ZenModeHelper.TAG),
@@ -3060,7 +3066,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         rule.configurationActivity = CONFIG_ACTIVITY;
         rule.component = OWNER;
         rule.conditionId = CONDITION_ID;
-        rule.condition = CONDITION;
+        rule.condition = CONDITION_TRUE;
         rule.enabled = ENABLED;
         rule.creationTime = 123;
         rule.id = "id";
@@ -3347,6 +3353,84 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 FROM_SYSTEM_OR_SYSTEMUI);
 
         assertEquals(false, mZenModeHelper.mConfig.automaticRules.get(createdId).snoozing);
+    }
+
+    @Test
+    public void testDeviceEffects_applied() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
+
+        ZenDeviceEffects effects = new ZenDeviceEffects.Builder()
+                .setShouldSuppressAmbientDisplay(true)
+                .setShouldDimWallpaper(true)
+                .build();
+        String ruleId = addRuleWithEffects(effects);
+        verify(mDeviceEffectsApplier, never()).apply(any());
+
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_TRUE, CUSTOM_PKG_UID, false);
+        mTestableLooper.processAllMessages();
+
+        verify(mDeviceEffectsApplier).apply(eq(effects));
+    }
+
+    @Test
+    public void testDeviceEffects_onDeactivateRule_applied() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
+
+        ZenDeviceEffects zde = new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build();
+        String ruleId = addRuleWithEffects(zde);
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_TRUE, CUSTOM_PKG_UID, false);
+        mTestableLooper.processAllMessages();
+        verify(mDeviceEffectsApplier).apply(eq(zde));
+
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_FALSE, CUSTOM_PKG_UID, false);
+        mTestableLooper.processAllMessages();
+
+        verify(mDeviceEffectsApplier).apply(eq(NO_EFFECTS));
+    }
+
+    @Test
+    public void testDeviceEffects_noChangeToConsolidatedEffects_notApplied() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+        mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
+
+        ZenDeviceEffects zde = new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build();
+        String ruleId = addRuleWithEffects(zde);
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_TRUE, CUSTOM_PKG_UID, false);
+        mTestableLooper.processAllMessages();
+        verify(mDeviceEffectsApplier).apply(eq(zde));
+
+        // Now create and activate a second rule that doesn't add any more effects.
+        String secondRuleId = addRuleWithEffects(zde);
+        mZenModeHelper.setAutomaticZenRuleState(secondRuleId, CONDITION_TRUE, CUSTOM_PKG_UID,
+                false);
+        mTestableLooper.processAllMessages();
+
+        verifyNoMoreInteractions(mDeviceEffectsApplier);
+    }
+
+    @Test
+    public void testDeviceEffects_activeBeforeApplierProvided_appliedWhenProvided() {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+
+        ZenDeviceEffects zde = new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build();
+        String ruleId = addRuleWithEffects(zde);
+        verify(mDeviceEffectsApplier, never()).apply(any());
+
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_TRUE, CUSTOM_PKG_UID, false);
+        mTestableLooper.processAllMessages();
+        verify(mDeviceEffectsApplier, never()).apply(any());
+
+        mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
+        verify(mDeviceEffectsApplier).apply(eq(zde));
+    }
+
+    private String addRuleWithEffects(ZenDeviceEffects effects) {
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("Test", CONDITION_ID)
+                .setDeviceEffects(effects)
+                .build();
+        return mZenModeHelper.addAutomaticZenRule("pkg", rule, "", CUSTOM_PKG_UID, FROM_APP);
     }
 
     @Test

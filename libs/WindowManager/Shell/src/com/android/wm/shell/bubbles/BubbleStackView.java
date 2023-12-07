@@ -2462,6 +2462,7 @@ public class BubbleStackView extends FrameLayout
         final Runnable collapseBackToStack = () ->
                 mExpandedAnimationController.collapseBackToStack(
                         mStackAnimationController.getStackPositionAlongNearestHorizontalEdge(),
+                        /* fadeBubblesDuringCollapse= */ mRemovingLastBubbleWhileExpanded,
                         () -> {
                             mBubbleContainer.setActiveController(mStackAnimationController);
                             updateOverflowVisibility();

@@ -18,17 +18,14 @@ package com.android.server.wm.flicker.activityembedding.rotation
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
-import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.setRotation
 import org.junit.Test
 
 /** Base class for app rotation tests */
-abstract class RotationTransition(flicker: LegacyFlickerTest) : BaseTest(flicker) {
-    protected abstract val testApp: StandardAppHelper
-
+abstract class RotationTransition(flicker: LegacyFlickerTest) : ActivityEmbeddingTestBase(flicker) {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
         setup { this.setRotation(flicker.scenario.startRotation) }

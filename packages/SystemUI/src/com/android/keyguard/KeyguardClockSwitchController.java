@@ -21,6 +21,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.keyguard.KeyguardClockSwitch.LARGE;
 import static com.android.keyguard.KeyguardClockSwitch.SMALL;
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
@@ -43,7 +44,6 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
@@ -232,7 +232,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
         mClockChangedListener = new ClockRegistry.ClockChangeListener() {
             @Override
             public void onCurrentClockChanged() {
-                if (!featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+                if (!migrateClocksToBlueprint()) {
                     setClock(mClockRegistry.createCurrentClock());
                 }
             }
@@ -367,7 +367,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
                 addDateWeatherView();
             }
         }
-        if (!mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (!migrateClocksToBlueprint()) {
             setDateWeatherVisibility();
             setWeatherVisibility();
         }
@@ -418,7 +418,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void addDateWeatherView() {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return;
         }
         mDateWeatherView = (ViewGroup) mSmartspaceController.buildAndConnectDateView(mView);
@@ -434,7 +434,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void addWeatherView() {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return;
         }
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
@@ -447,7 +447,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void addSmartspaceView() {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return;
         }
 
@@ -650,7 +650,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void setClock(ClockController clock) {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return;
         }
         if (clock != null && mLogBuffer != null) {
@@ -664,7 +664,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
 
     @Nullable
     public ClockController getClock() {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return mKeyguardClockInteractor.getClock();
         } else {
             return mClockEventController.getClock();
@@ -676,7 +676,7 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     private void updateDoubleLineClock() {
-        if (mFeatureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)) {
+        if (migrateClocksToBlueprint()) {
             return;
         }
         mCanShowDoubleLineClock = mSecureSettings.getIntForUser(

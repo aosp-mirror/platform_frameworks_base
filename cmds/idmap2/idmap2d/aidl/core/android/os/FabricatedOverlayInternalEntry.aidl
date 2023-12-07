@@ -28,4 +28,5 @@ parcelable FabricatedOverlayInternalEntry {
     @nullable @utf8InCpp String configuration;
     long binaryDataOffset;
     long binaryDataSize;
+    boolean isNinePatch;
 }

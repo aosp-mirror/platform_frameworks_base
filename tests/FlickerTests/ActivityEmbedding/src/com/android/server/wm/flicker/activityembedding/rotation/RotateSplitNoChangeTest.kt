@@ -43,8 +43,6 @@ import org.junit.runners.Parameterized
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 open class RotateSplitNoChangeTest(flicker: LegacyFlickerTest) : RotationTransition(flicker) {
-
-    override val testApp = ActivityEmbeddingAppHelper(instrumentation)
     override val transition: FlickerBuilder.() -> Unit
         get() = {
             super.transition(this)

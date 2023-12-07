@@ -17,6 +17,5 @@
 <com.android.systemui.biometrics.ui.view.UdfpsTouchOverlay xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/udfps_touch_overlay"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:contentDescription="@string/accessibility_fingerprint_label">
+    android:layout_height="match_parent">
 </com.android.systemui.biometrics.ui.view.UdfpsTouchOverlay>

@@ -39,6 +39,7 @@ import com.android.systemui.smartspace.data.repository.FakeSmartspaceRepository
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
+import javax.inject.Provider
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -83,7 +84,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
         underTest =
             CommunalEditModeViewModel(
                 withDeps.communalInteractor,
-                shadeViewController,
+                Provider { shadeViewController },
                 powerManager,
                 mediaHost,
             )

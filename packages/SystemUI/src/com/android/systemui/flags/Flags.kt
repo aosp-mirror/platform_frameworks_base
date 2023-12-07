@@ -230,11 +230,6 @@ object Flags {
     @JvmField val MIGRATE_KEYGUARD_STATUS_BAR_VIEW =
         unreleasedFlag("migrate_keyguard_status_bar_view")
 
-    /** Migrate clocks from keyguard status view to keyguard root view*/
-    // TODO(b/301502635): Tracking Bug.
-    @JvmField val MIGRATE_CLOCKS_TO_BLUEPRINT =
-            unreleasedFlag("migrate_clocks_to_blueprint")
-
     /** Enables preview loading animation in the wallpaper picker. */
     // TODO(b/274443705): Tracking Bug
     @JvmField
@@ -442,12 +437,6 @@ object Flags {
     @JvmField
     val LOCKSCREEN_ENABLE_LANDSCAPE =
             unreleasedFlag("lockscreen.enable_landscape")
-
-    // TODO(b/281648899): Tracking bug
-    @Keep
-    @JvmField
-    val WALLPAPER_MULTI_CROP =
-        sysPropBooleanFlag("persist.wm.debug.wallpaper_multi_crop", default = false)
 
     // 1200 - predictive back
     @Keep

@@ -17,6 +17,7 @@ package com.android.systemui.display.ui.viewmodel
 
 import android.app.Dialog
 import android.content.Context
+import com.android.server.policy.feature.flags.Flags
 import com.android.systemui.biometrics.Utils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -28,8 +29,9 @@ import com.android.systemui.statusbar.policy.ConfigurationController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 /**
@@ -44,25 +46,33 @@ constructor(
     private val connectedDisplayInteractor: ConnectedDisplayInteractor,
     @Application private val scope: CoroutineScope,
     @Background private val bgDispatcher: CoroutineDispatcher,
-    private val configurationController: ConfigurationController
+    private val configurationController: ConfigurationController,
 ) {
 
     private var dialog: Dialog? = null
 
     /** Starts listening for pending displays. */
     fun init() {
-        connectedDisplayInteractor.pendingDisplay
-            .onEach { pendingDisplay ->
+        val pendingDisplayFlow = connectedDisplayInteractor.pendingDisplay
+        val concurrentDisplaysInProgessFlow =
+            if (Flags.enableDualDisplayBlocking()) {
+                connectedDisplayInteractor.concurrentDisplaysInProgress
+            } else {
+                flow { emit(false) }
+            }
+        pendingDisplayFlow
+            .combine(concurrentDisplaysInProgessFlow) { pendingDisplay, concurrentDisplaysInProgress
+                ->
                 if (pendingDisplay == null) {
                     hideDialog()
                 } else {
-                    showDialog(pendingDisplay)
+                    showDialog(pendingDisplay, concurrentDisplaysInProgress)
                 }
             }
             .launchIn(scope)
     }
 
-    private fun showDialog(pendingDisplay: PendingDisplay) {
+    private fun showDialog(pendingDisplay: PendingDisplay, concurrentDisplaysInProgess: Boolean) {
         hideDialog()
         dialog =
             MirroringConfirmationDialog(
@@ -77,6 +87,7 @@ constructor(
                     },
                     navbarBottomInsetsProvider = { Utils.getNavbarInsets(context).bottom },
                     configurationController,
+                    showConcurrentDisplayInfo = concurrentDisplaysInProgess
                 )
                 .apply { show() }
     }

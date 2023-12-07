@@ -23,6 +23,7 @@ import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.wm.shell.flicker.utils.SplitScreenUtils
+import org.junit.After
 import org.junit.Assume
 import org.junit.Before
 import org.junit.FixMethodOrder
@@ -44,6 +45,7 @@ abstract class EnterSplitScreenByDragFromTaskbarBenchmark(override val flicker: 
                 primaryApp.launchViaIntent(wmHelper)
             }
             transitions {
+                tapl.showTaskbarIfHidden()
                 tapl.launchedAppState.taskbar
                     .getAppIcon(secondaryApp.appName)
                     .dragToSplitscreen(secondaryApp.packageName, primaryApp.packageName)
@@ -54,6 +56,12 @@ abstract class EnterSplitScreenByDragFromTaskbarBenchmark(override val flicker: 
     @Before
     fun before() {
         Assume.assumeTrue(tapl.isTablet)
+        tapl.enableBlockTimeout(true)
+    }
+
+    @After
+    fun after() {
+        tapl.enableBlockTimeout(false)
     }
 
     companion object {

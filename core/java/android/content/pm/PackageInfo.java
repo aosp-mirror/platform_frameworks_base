@@ -29,6 +29,7 @@ import android.os.Parcelable;
  * Overall information about the contents of a package.  This corresponds
  * to all of the information collected from AndroidManifest.xml.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PackageInfo implements Parcelable {
     /**
      * The name of this package.  From the &lt;manifest&gt; tag's "name"

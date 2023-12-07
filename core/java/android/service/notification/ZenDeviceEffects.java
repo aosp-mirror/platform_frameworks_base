@@ -18,6 +18,7 @@ package android.service.notification;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -356,6 +357,27 @@ public final class ZenDeviceEffects implements Parcelable {
         @NonNull
         public Builder setShouldMaximizeDoze(boolean maximizeDoze) {
             mMaximizeDoze = maximizeDoze;
+            return this;
+        }
+
+        /**
+         * Applies the effects that are {@code true} on the supplied {@link ZenDeviceEffects} to
+         * this builder (essentially logically-ORing the effect set).
+         * @hide
+         */
+        @NonNull
+        public Builder add(@Nullable ZenDeviceEffects effects) {
+            if (effects == null) return this;
+            if (effects.shouldDisplayGrayscale()) setShouldDisplayGrayscale(true);
+            if (effects.shouldSuppressAmbientDisplay()) setShouldSuppressAmbientDisplay(true);
+            if (effects.shouldDimWallpaper()) setShouldDimWallpaper(true);
+            if (effects.shouldUseNightMode()) setShouldUseNightMode(true);
+            if (effects.shouldDisableAutoBrightness()) setShouldDisableAutoBrightness(true);
+            if (effects.shouldDisableTapToWake()) setShouldDisableTapToWake(true);
+            if (effects.shouldDisableTiltToWake()) setShouldDisableTiltToWake(true);
+            if (effects.shouldDisableTouch()) setShouldDisableTouch(true);
+            if (effects.shouldMinimizeRadioUsage()) setShouldMinimizeRadioUsage(true);
+            if (effects.shouldMaximizeDoze()) setShouldMaximizeDoze(true);
             return this;
         }
 

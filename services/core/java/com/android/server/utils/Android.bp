@@ -1,0 +1,10 @@
+aconfig_declarations {
+    name: "com.android.server.utils-aconfig",
+    package: "com.android.server.utils",
+    srcs: ["*.aconfig"],
+}
+
+java_aconfig_library {
+    name: "com.android.server.utils_aconfig-java",
+    aconfig_declarations: "com.android.server.utils-aconfig",
+}

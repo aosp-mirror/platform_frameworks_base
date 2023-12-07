@@ -16,6 +16,8 @@
 
 package com.android.keyguard.dagger;
 
+import static com.android.systemui.Flags.migrateClocksToBlueprint;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.view.LayoutInflater;
@@ -68,7 +70,7 @@ public abstract class ClockRegistryModule {
                         layoutInflater,
                         resources,
                         featureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION),
-                        featureFlags.isEnabled(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT)),
+                        migrateClocksToBlueprint()),
                 context.getString(R.string.lockscreen_clock_id_fallback),
                 logBuffer,
                 /* keepAllLoaded = */ false,

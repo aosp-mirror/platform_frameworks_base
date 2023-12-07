@@ -40,6 +40,7 @@ import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPL
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
 
+import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
@@ -246,8 +247,15 @@ public class DragAndDropPolicy {
             @SplitPosition int position) {
         final boolean isTask = description.hasMimeType(MIMETYPE_APPLICATION_TASK);
         final boolean isShortcut = description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT);
-        final Bundle opts = intent.hasExtra(EXTRA_ACTIVITY_OPTIONS)
-                ? intent.getBundleExtra(EXTRA_ACTIVITY_OPTIONS) : new Bundle();
+        final ActivityOptions baseActivityOpts = ActivityOptions.makeBasic();
+        baseActivityOpts.setDisallowEnterPictureInPictureWhileLaunching(true);
+        final Bundle opts = baseActivityOpts.toBundle();
+        if (intent.hasExtra(EXTRA_ACTIVITY_OPTIONS)) {
+            opts.putAll(intent.getBundleExtra(EXTRA_ACTIVITY_OPTIONS));
+        }
+        // Put BAL flags to avoid activity start aborted.
+        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
+        opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
         final UserHandle user = intent.getParcelableExtra(EXTRA_USER);
 
         if (isTask) {
@@ -259,9 +267,6 @@ public class DragAndDropPolicy {
             mStarter.startShortcut(packageName, id, position, opts, user);
         } else {
             final PendingIntent launchIntent = intent.getParcelableExtra(EXTRA_PENDING_INTENT);
-            // Put BAL flags to avoid activity start aborted.
-            opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED, true);
-            opts.putBoolean(KEY_PENDING_INTENT_BACKGROUND_ACTIVITY_ALLOWED_BY_PERMISSION, true);
             mStarter.startIntent(launchIntent, user.getIdentifier(), null /* fillIntent */,
                     position, opts);
         }

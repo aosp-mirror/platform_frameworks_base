@@ -242,6 +242,18 @@ public class BubblePositioner {
         return mDeviceConfig.isLandscape();
     }
 
+    /**
+     * On large screen (not small tablet), while in portrait, expanded bubbles are aligned to
+     * the bottom of the screen.
+     *
+     * @return whether bubbles are bottom aligned while expanded
+     */
+    public boolean areBubblesBottomAligned() {
+        return isLargeScreen()
+                && !mDeviceConfig.isSmallTablet()
+                && !isLandscape();
+    }
+
     /** @return whether the screen is considered large. */
     public boolean isLargeScreen() {
         return mDeviceConfig.isLargeScreen();
@@ -417,7 +429,10 @@ public class BubblePositioner {
                 - bottomPadding;
     }
 
-    private int getExpandedViewHeightForLargeScreen() {
+    /**
+     * Returns the height to use for the expanded view when showing on a large screen.
+     */
+    public int getExpandedViewHeightForLargeScreen() {
         // the expanded view height on large tablets is calculated based on the shortest screen
         // size and is the same in both portrait and landscape
         int maxVerticalInset = Math.max(mInsets.top, mInsets.bottom);
@@ -460,13 +475,21 @@ public class BubblePositioner {
         boolean isOverflow = bubble == null || BubbleOverflow.KEY.equals(bubble.getKey());
         float expandedViewHeight = getExpandedViewHeight(bubble);
         float topAlignment = getExpandedViewYTopAligned();
+        int manageButtonHeight =
+                isOverflow ? mExpandedViewPadding : mManageButtonHeightIncludingMargins;
+
+        // On largescreen portrait bubbles are bottom aligned.
+        if (areBubblesBottomAligned() && expandedViewHeight == MAX_HEIGHT) {
+            return mPositionRect.bottom - manageButtonHeight
+                    - getExpandedViewHeightForLargeScreen() - mPointerWidth;
+        }
+
         if (!showBubblesVertically() || expandedViewHeight == MAX_HEIGHT) {
             // Top-align when bubbles are shown at the top or are max size.
             return topAlignment;
         }
+
         // If we're here, we're showing vertically & developer has made height less than maximum.
-        int manageButtonHeight =
-                isOverflow ? mExpandedViewPadding : mManageButtonHeightIncludingMargins;
         float pointerPosition = getPointerPosition(bubblePosition);
         float bottomIfCentered = pointerPosition + (expandedViewHeight / 2) + manageButtonHeight;
         float topIfCentered = pointerPosition - (expandedViewHeight / 2);
@@ -524,14 +547,8 @@ public class BubblePositioner {
             // Last bubble has screen index 0 and first bubble has max screen index value.
             onScreenIndex = state.numberOfBubbles - 1 - index;
         }
-
         final float positionInRow = onScreenIndex * (mBubbleSize + mSpacingBetweenBubbles);
-        final float expandedStackSize = getExpandedStackSize(state.numberOfBubbles);
-        final float centerPosition = showBubblesVertically
-                ? mPositionRect.centerY()
-                : mPositionRect.centerX();
-        // alignment - centered on the edge
-        final float rowStart = centerPosition - (expandedStackSize / 2f);
+        final float rowStart = getBubbleRowStart(state);
         float x;
         float y;
         if (showBubblesVertically) {
@@ -557,6 +574,25 @@ public class BubblePositioner {
         return new PointF(x, y);
     }
 
+    private float getBubbleRowStart(BubbleStackView.StackViewState state) {
+        final float expandedStackSize = getExpandedStackSize(state.numberOfBubbles);
+        final float rowStart;
+        if (areBubblesBottomAligned()) {
+            final float expandedViewHeight = getExpandedViewHeightForLargeScreen();
+            final float expandedViewBottom = mScreenRect.bottom
+                    - Math.max(mInsets.bottom, mInsets.top)
+                    - mManageButtonHeight - mPointerWidth;
+            final float expandedViewCenter = expandedViewBottom - (expandedViewHeight / 2f);
+            rowStart = expandedViewCenter - (expandedStackSize / 2f);
+        } else {
+            final float centerPosition = showBubblesVertically()
+                    ? mPositionRect.centerY()
+                    : mPositionRect.centerX();
+            rowStart = centerPosition - (expandedStackSize / 2f);
+        }
+        return rowStart;
+    }
+
     /**
      * Returns the position of the bubble on-screen when the stack is expanded and the IME
      * is showing.
@@ -577,9 +613,8 @@ public class BubblePositioner {
         final float bottomHeight = getImeHeight() + mInsets.bottom + (mSpacingBetweenBubbles * 2);
         final float bottomInset = mScreenRect.bottom - bottomHeight;
         final float expandedStackSize = getExpandedStackSize(state.numberOfBubbles);
-        final float centerPosition = mPositionRect.centerY();
-        final float rowBottom = centerPosition + (expandedStackSize / 2f);
-        final float rowTop = centerPosition - (expandedStackSize / 2f);
+        final float rowTop = getBubbleRowStart(state);
+        final float rowBottom = rowTop + expandedStackSize;
         float rowTopForIme = rowTop;
         if (rowBottom > bottomInset) {
             // We overlap with IME, must shift the bubbles

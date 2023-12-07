@@ -61,7 +61,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 import com.android.packageinstaller.R;
-import com.android.packageinstaller.v2.model.EventResultPersister.OutOfIdsException;
+import com.android.packageinstaller.common.EventResultPersister;
+import com.android.packageinstaller.common.InstallEventReceiver;
 import com.android.packageinstaller.v2.model.PackageUtil.AppSnippet;
 import com.android.packageinstaller.v2.model.installstagedata.InstallAborted;
 import com.android.packageinstaller.v2.model.installstagedata.InstallFailed;
@@ -773,7 +774,7 @@ public class InstallRepository {
             mInstallResult.setValue(new InstallInstalling(mAppSnippet));
             installId = InstallEventReceiver.addObserver(mContext,
                 EventResultPersister.GENERATE_NEW_ID, this::setStageBasedOnResult);
-        } catch (OutOfIdsException e) {
+        } catch (EventResultPersister.OutOfIdsException e) {
             setStageBasedOnResult(PackageInstaller.STATUS_FAILURE,
                 PackageManager.INSTALL_FAILED_INTERNAL_ERROR, null, -1);
             return;

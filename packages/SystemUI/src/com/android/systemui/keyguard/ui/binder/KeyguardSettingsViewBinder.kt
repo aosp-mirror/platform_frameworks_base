@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.ui.binder
 
+import android.graphics.Rect
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
@@ -25,6 +26,8 @@ import com.android.systemui.animation.ActivityLaunchAnimator
 import com.android.systemui.animation.view.LaunchableLinearLayout
 import com.android.systemui.common.ui.binder.IconViewBinder
 import com.android.systemui.common.ui.binder.TextViewBinder
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardLongPressViewModel
+import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSettingsMenuViewModel
 import com.android.systemui.keyguard.util.WallpaperPickerIntentUtils
 import com.android.systemui.keyguard.util.WallpaperPickerIntentUtils.LAUNCH_SOURCE_KEYGUARD
@@ -35,12 +38,15 @@ import com.android.systemui.statusbar.VibratorHelper
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 
 object KeyguardSettingsViewBinder {
     fun bind(
         parentView: View,
         viewModel: KeyguardSettingsMenuViewModel,
+        longPressViewModel: KeyguardLongPressViewModel,
+        rootViewModel: KeyguardRootViewModel,
         vibratorHelper: VibratorHelper,
         activityStarter: ActivityStarter
     ): DisposableHandle {
@@ -86,6 +92,18 @@ object KeyguardSettingsViewBinder {
                                     )
                                     viewModel.onSettingsShown()
                                 }
+                        }
+                    }
+
+                    launch {
+                        rootViewModel.lastRootViewTapPosition.filterNotNull().collect { point ->
+                            if (view.isVisible) {
+                                val hitRect = Rect()
+                                view.getHitRect(hitRect)
+                                if (!hitRect.contains(point.x, point.y)) {
+                                    longPressViewModel.onTouchedOutside()
+                                }
+                            }
                         }
                     }
                 }

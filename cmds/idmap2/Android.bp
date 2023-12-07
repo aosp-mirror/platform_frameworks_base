@@ -86,6 +86,7 @@ cc_library {
             static_libs: [
                 "libidmap2_policies",
                 "libidmap2_protos",
+                "libpng",
             ],
             shared_libs: [
                 "libandroidfw",
@@ -107,6 +108,7 @@ cc_library {
                 "libcutils",
                 "libidmap2_policies",
                 "libidmap2_protos",
+                "libpng",
                 "libprotobuf-cpp-lite",
                 "libutils",
                 "libz",
@@ -185,6 +187,7 @@ cc_test {
     static_libs: [
         "libgmock",
         "libidmap2_protos",
+        "libpng",
     ],
     target: {
         android: {
@@ -258,6 +261,7 @@ cc_binary {
                 "libbase",
                 "libcutils",
                 "libidmap2",
+                "libpng",
                 "libprotobuf-cpp-lite",
                 "libutils",
                 "libz",
@@ -275,6 +279,7 @@ cc_binary {
                 "libidmap2",
                 "libidmap2_policies",
                 "liblog",
+                "libpng",
                 "libprotobuf-cpp-lite",
                 "libutils",
                 "libziparchive",

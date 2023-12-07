@@ -68,7 +68,6 @@ constructor(
             constraintLayout,
             keyguardClockViewModel,
             clockInteractor,
-            featureFlags
         )
     }
 

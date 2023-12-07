@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <string>
+#include <unistd.h>
 
 #include "Streams.h"
 #include "android-base/macros.h"
@@ -35,6 +36,16 @@ class FileInputStream : public InputStream {
   // Take ownership of `fd`.
   explicit FileInputStream(int fd, size_t buffer_capacity = kDefaultBufferCapacity);
 
+  // Take ownership of `fd`.
+  explicit FileInputStream(android::base::borrowed_fd fd,
+                           size_t buffer_capacity = kDefaultBufferCapacity);
+
+  ~FileInputStream() {
+    if (should_close_ && (fd_ != -1)) {
+      close(fd_);
+    }
+  }
+
   bool Next(const void** data, size_t* size) override;
 
   void BackUp(size_t count) override;
@@ -50,8 +61,9 @@ class FileInputStream : public InputStream {
  private:
   DISALLOW_COPY_AND_ASSIGN(FileInputStream);
 
-  android::base::unique_fd fd_;
+  int fd_ = -1;
   std::string error_;
+  bool should_close_;
   std::unique_ptr<uint8_t[]> buffer_;
   size_t buffer_capacity_ = 0u;
   size_t buffer_offset_ = 0u;

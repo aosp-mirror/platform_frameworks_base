@@ -21,6 +21,8 @@ import static android.media.AudioSystem.DEVICE_NONE;
 import static android.media.AudioSystem.isBluetoothDevice;
 import static android.media.audio.Flags.automaticBtDeviceType;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.AudioDeviceAttributes;
@@ -31,13 +33,16 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.util.Objects;
 
 /**
  * Class representing all devices that were previously or are currently connected. Data is
  * persisted in {@link android.provider.Settings.Secure}
  */
-/*package*/ final class AdiDeviceState {
+@VisibleForTesting(visibility = PACKAGE)
+public final class AdiDeviceState {
     private static final String TAG = "AS.AdiDeviceState";
 
     private static final String SETTING_FIELD_SEPARATOR = ",";

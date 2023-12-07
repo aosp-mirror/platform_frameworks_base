@@ -30,7 +30,6 @@ import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryRepository
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
-import com.android.systemui.flags.Flags
 import com.android.systemui.flags.featureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -72,10 +71,7 @@ import org.mockito.MockitoAnnotations
 @SmallTest
 @RunWith(JUnit4::class)
 class KeyguardRootViewModelTest : SysuiTestCase() {
-    private val kosmos =
-        testKosmos().apply {
-            featureFlagsClassic.apply { set(Flags.MIGRATE_CLOCKS_TO_BLUEPRINT, false) }
-        }
+    private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
     private val repository = kosmos.fakeKeyguardRepository
     private val configurationRepository = kosmos.fakeConfigurationRepository
@@ -110,6 +106,7 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
 
         mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
         mSetFlagsRule.enableFlags(FLAG_NEW_AOD_TRANSITION)
+        mSetFlagsRule.disableFlags(AConfigFlags.FLAG_MIGRATE_CLOCKS_TO_BLUEPRINT)
 
         whenever(goneToAodTransitionViewModel.enterFromTopTranslationY(anyInt()))
             .thenReturn(emptyFlow<Float>())

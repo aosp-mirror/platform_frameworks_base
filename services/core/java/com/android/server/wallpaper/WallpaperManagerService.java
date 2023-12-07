@@ -40,6 +40,7 @@ import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_INFO;
 import static com.android.server.wallpaper.WallpaperUtils.WALLPAPER_LOCK_ORIG;
 import static com.android.server.wallpaper.WallpaperUtils.getWallpaperDir;
 import static com.android.server.wallpaper.WallpaperUtils.makeWallpaperIdLocked;
+import static com.android.window.flags.Flags.multiCrop;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -93,7 +94,6 @@ import android.os.ResultReceiver;
 import android.os.SELinux;
 import android.os.ShellCallback;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -1516,8 +1516,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mColorsChangedListeners = new SparseArray<>();
         mWallpaperDataParser = new WallpaperDataParser(mContext, mWallpaperDisplayHelper,
                 mWallpaperCropper);
-        mIsMultiCropEnabled =
-                SystemProperties.getBoolean("persist.wm.debug.wallpaper_multi_crop", false);
+        mIsMultiCropEnabled = multiCrop();
         LocalServices.addService(WallpaperManagerInternal.class, new LocalService());
     }
 

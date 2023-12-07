@@ -15,6 +15,7 @@
  */
 package android.hardware.camera2;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -39,10 +40,14 @@ import android.os.ConditionVariable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
+import android.util.FeatureFlagUtils;
+import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Range;
 import android.util.Size;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -129,6 +134,12 @@ public final class CameraExtensionCharacteristics {
     public static final int EXTENSION_NIGHT = 4;
 
     /**
+     * An extension that aims to lock and stabilize a given region or object of interest.
+     */
+    @FlaggedApi(Flags.FLAG_CONCERT_MODE)
+    public static final int EXTENSION_EYES_FREE_VIDEOGRAPHY = 5;
+
+    /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -136,7 +147,8 @@ public final class CameraExtensionCharacteristics {
                 EXTENSION_FACE_RETOUCH,
                 EXTENSION_BOKEH,
                 EXTENSION_HDR,
-                EXTENSION_NIGHT})
+                EXTENSION_NIGHT,
+                EXTENSION_EYES_FREE_VIDEOGRAPHY})
     public @interface Extension {
     }
 
@@ -594,8 +606,13 @@ public final class CameraExtensionCharacteristics {
             return Collections.unmodifiableList(ret);
         }
 
+        IntArray extensionList = new IntArray(EXTENSION_LIST.length);
+        extensionList.addAll(EXTENSION_LIST);
+        if (Flags.concertMode()) {
+            extensionList.add(EXTENSION_EYES_FREE_VIDEOGRAPHY);
+        }
         try {
-            for (int extensionType : EXTENSION_LIST) {
+            for (int extensionType : extensionList.toArray()) {
                 if (isExtensionSupported(mCameraId, extensionType, mCharacteristicsMapNative)) {
                     ret.add(extensionType);
                 }

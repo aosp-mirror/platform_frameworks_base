@@ -23,13 +23,6 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
-filegroup {
-    name: "FlickerServiceTests-src",
-    srcs: [
-        "src/**/*",
-    ],
-}
-
 java_defaults {
     name: "FlickerTestsDefault",
     platform_apis: true,
@@ -49,10 +42,7 @@ java_defaults {
         "wm-flicker-common-app-helpers",
         "wm-shell-flicker-utils",
     ],
-    data: [
-        ":FlickerTestApp",
-        "trace_config/*",
-    ],
+    data: [":FlickerTestApp"],
 }
 
 java_library {

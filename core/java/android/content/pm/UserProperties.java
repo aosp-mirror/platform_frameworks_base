@@ -1076,6 +1076,8 @@ public final class UserProperties implements Parcelable {
      * Intended for building default values (and so all properties are present in the built object).
      * @hide
      */
+    @TestApi
+    @SuppressLint("UnflaggedApi") // b/306636213
     public static final class Builder {
         // UserProperties fields and their default values.
         private @ShowInLauncher int mShowInLauncher = SHOW_IN_LAUNCHER_WITH_PARENT;
@@ -1099,54 +1101,82 @@ public final class UserProperties implements Parcelable {
         private boolean mDeleteAppWithParent = false;
         private boolean mAlwaysVisible = false;
 
+        /**
+         * @hide
+         */
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @TestApi
+        public Builder() {}
+
+        /** @hide */
         public Builder setShowInLauncher(@ShowInLauncher int showInLauncher) {
             mShowInLauncher = showInLauncher;
             return this;
         }
 
+        /** @hide */
         public Builder setStartWithParent(boolean startWithParent) {
             mStartWithParent = startWithParent;
             return this;
         }
 
-        /** Sets the value for {@link #mShowInSettings} */
+        /** Sets the value for {@link #mShowInSettings}
+         * @hide
+         */
         public Builder setShowInSettings(@ShowInSettings int showInSettings) {
             mShowInSettings = showInSettings;
             return this;
         }
 
-        /** Sets the value for {@link #mShowInQuietMode} */
+        /** Sets the value for {@link #mShowInQuietMode}
+         * @hide
+         */
+        @TestApi
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @NonNull
         public Builder setShowInQuietMode(@ShowInQuietMode int showInQuietMode) {
             mShowInQuietMode = showInQuietMode;
             return this;
         }
 
-        /** Sets the value for {@link #mShowInSharingSurfaces}. */
+        /** Sets the value for {@link #mShowInSharingSurfaces}.
+         * @hide
+         */
+        @TestApi
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @NonNull
         public Builder setShowInSharingSurfaces(@ShowInSharingSurfaces int showInSharingSurfaces) {
             mShowInSharingSurfaces = showInSharingSurfaces;
             return this;
         }
 
-        /** Sets the value for {@link #mInheritDevicePolicy}*/
+        /** Sets the value for {@link #mInheritDevicePolicy}
+         * @hide
+         */
         public Builder setInheritDevicePolicy(
                 @InheritDevicePolicy int inheritRestrictionsDevicePolicy) {
             mInheritDevicePolicy = inheritRestrictionsDevicePolicy;
             return this;
         }
 
+        /** @hide */
         public Builder setUseParentsContacts(boolean useParentsContacts) {
             mUseParentsContacts = useParentsContacts;
             return this;
         }
 
-        /** Sets the value for {@link #mUpdateCrossProfileIntentFiltersOnOTA} */
+        /** Sets the value for {@link #mUpdateCrossProfileIntentFiltersOnOTA}
+         * @hide
+         */
         public Builder setUpdateCrossProfileIntentFiltersOnOTA(boolean
                 updateCrossProfileIntentFiltersOnOTA) {
             mUpdateCrossProfileIntentFiltersOnOTA = updateCrossProfileIntentFiltersOnOTA;
             return this;
         }
 
-        /** Sets the value for {@link #mCrossProfileIntentFilterAccessControl} */
+        /** Sets the value for {@link #mCrossProfileIntentFilterAccessControl}
+         * @hide
+         */
         public Builder setCrossProfileIntentFilterAccessControl(
                 @CrossProfileIntentFilterAccessControlLevel int
                         crossProfileIntentFilterAccessControl) {
@@ -1154,24 +1184,30 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
-        /** Sets the value for {@link #mCrossProfileIntentResolutionStrategy} */
+        /** Sets the value for {@link #mCrossProfileIntentResolutionStrategy}
+         * @hide
+         */
         public Builder setCrossProfileIntentResolutionStrategy(@CrossProfileIntentResolutionStrategy
                 int crossProfileIntentResolutionStrategy) {
             mCrossProfileIntentResolutionStrategy = crossProfileIntentResolutionStrategy;
             return this;
         }
 
+        /** @hide */
         public Builder setMediaSharedWithParent(boolean mediaSharedWithParent) {
             mMediaSharedWithParent = mediaSharedWithParent;
             return this;
         }
 
+        /** @hide */
         public Builder setCredentialShareableWithParent(boolean credentialShareableWithParent) {
             mCredentialShareableWithParent = credentialShareableWithParent;
             return this;
         }
 
-        /** Sets the value for {@link #mAuthAlwaysRequiredToDisableQuietMode} */
+        /** Sets the value for {@link #mAuthAlwaysRequiredToDisableQuietMode}
+         * @hide
+         */
         public Builder setAuthAlwaysRequiredToDisableQuietMode(
                 boolean authAlwaysRequiredToDisableQuietMode) {
             mAuthAlwaysRequiredToDisableQuietMode =
@@ -1179,19 +1215,28 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
-        /** Sets the value for {@link #mDeleteAppWithParent}*/
+        /** Sets the value for {@link #mDeleteAppWithParent}
+         * @hide
+         */
         public Builder setDeleteAppWithParent(boolean deleteAppWithParent) {
             mDeleteAppWithParent = deleteAppWithParent;
             return this;
         }
 
-        /** Sets the value for {@link #mAlwaysVisible}*/
+        /** Sets the value for {@link #mAlwaysVisible}
+         * @hide
+         */
         public Builder setAlwaysVisible(boolean alwaysVisible) {
             mAlwaysVisible = alwaysVisible;
             return this;
         }
 
-        /** Builds a UserProperties object with *all* values populated. */
+        /** Builds a UserProperties object with *all* values populated.
+         * @hide
+         */
+        @TestApi
+        @SuppressLint("UnflaggedApi") // b/306636213
+        @NonNull
         public UserProperties build() {
             return new UserProperties(
                     mShowInLauncher,

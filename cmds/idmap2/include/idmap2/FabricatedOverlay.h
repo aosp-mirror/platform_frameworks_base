@@ -19,6 +19,8 @@
 
 #include <libidmap2/proto/fabricated_v1.pb.h>
 
+#include "androidfw/Streams.h"
+
 #include <istream>
 #include <map>
 #include <memory>
@@ -51,7 +53,8 @@ struct FabricatedOverlay {
                               std::optional<android::base::borrowed_fd>&& binary_value,
                               off64_t data_binary_offset,
                               size_t data_binary_size,
-                              const std::string& configuration);
+                              const std::string& configuration,
+                              bool nine_patch);
 
     inline Builder& setFrroPath(std::string frro_path) {
       frro_path_ = std::move(frro_path);
@@ -70,6 +73,7 @@ struct FabricatedOverlay {
       off64_t data_binary_offset;
       size_t data_binary_size;
       std::string configuration;
+      bool nine_patch;
     };
 
     std::string package_name_;
@@ -81,7 +85,7 @@ struct FabricatedOverlay {
   };
 
   struct BinaryData {
-    android::base::borrowed_fd file_descriptor;
+    std::unique_ptr<android::InputStream> input_stream;
     off64_t offset;
     size_t size;
   };

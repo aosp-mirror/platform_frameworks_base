@@ -420,7 +420,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     @Override
     ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom,
             ActivityRecord boundary) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return null;
         }
         return super.getActivity(callback, traverseTopToBottom, boundary);
@@ -428,23 +428,39 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     Task getTask(Predicate<Task> callback, boolean traverseTopToBottom) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return null;
         }
         return super.getTask(callback, traverseTopToBottom);
     }
 
     @Override
+    Task getRootTask(Predicate<Task> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS) {
+            return null;
+        }
+        return super.getRootTask(callback, traverseTopToBottom);
+    }
+
+    @Override
     boolean forAllActivities(Predicate<ActivityRecord> callback, boolean traverseTopToBottom) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return false;
         }
         return super.forAllActivities(callback, traverseTopToBottom);
     }
 
     @Override
+    void forAllActivities(Consumer<ActivityRecord> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS) {
+            return;
+        }
+        super.forAllActivities(callback, traverseTopToBottom);
+    }
+
+    @Override
     boolean forAllRootTasks(Predicate<Task> callback, boolean traverseTopToBottom) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return false;
         }
         return super.forAllRootTasks(callback, traverseTopToBottom);
@@ -452,7 +468,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     boolean forAllTasks(Predicate<Task> callback) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return false;
         }
         return super.forAllTasks(callback);
@@ -460,10 +476,26 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
     @Override
     boolean forAllLeafTasks(Predicate<Task> callback) {
-        if (mType == Type.ABOVE_TASKS || mType == Type.BELOW_TASKS) {
+        if (mType == Type.ABOVE_TASKS) {
             return false;
         }
         return super.forAllLeafTasks(callback);
+    }
+
+    @Override
+    void forAllLeafTasks(Consumer<Task> callback, boolean traverseTopToBottom) {
+        if (mType == Type.ABOVE_TASKS) {
+            return;
+        }
+        super.forAllLeafTasks(callback, traverseTopToBottom);
+    }
+
+    @Override
+    boolean forAllLeafTaskFragments(Predicate<TaskFragment> callback) {
+        if (mType == Type.ABOVE_TASKS) {
+            return false;
+        }
+        return super.forAllLeafTaskFragments(callback);
     }
 
     @Override

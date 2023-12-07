@@ -24,6 +24,7 @@ import android.os.PatternMatcher;
  * Description of permissions needed to access a particular path
  * in a {@link ProviderInfo}.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PathPermission extends PatternMatcher {
     private final String mReadPermission;
     private final String mWritePermission;
