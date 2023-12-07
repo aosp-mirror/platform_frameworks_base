@@ -73,7 +73,8 @@ public class AmbientContextManagerService extends
     private static final Set<Integer> DEFAULT_EVENT_SET = Sets.newHashSet(
             AmbientContextEvent.EVENT_COUGH,
             AmbientContextEvent.EVENT_SNORE,
-            AmbientContextEvent.EVENT_BACK_DOUBLE_TAP);
+            AmbientContextEvent.EVENT_BACK_DOUBLE_TAP,
+            AmbientContextEvent.EVENT_HEART_RATE);
 
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = true;
