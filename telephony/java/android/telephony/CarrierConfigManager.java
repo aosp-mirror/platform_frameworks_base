@@ -9593,6 +9593,84 @@ public class CarrierConfigManager {
             "satellite_connection_hysteresis_sec_int";
 
     /**
+     * This threshold is used when connected to a non-terrestrial LTE network.
+     * A list of 4 NTN LTE RSRP thresholds above which a signal level is considered POOR,
+     * MODERATE, GOOD, or EXCELLENT, to be used in SignalStrength reporting.
+     *
+     * Note that the min and max thresholds are fixed at -140 and -44, as explained in
+     * TS 136.133 9.1.4 - RSRP Measurement Report Mapping.
+     * <p>
+     * See SignalStrength#MAX_LTE_RSRP and SignalStrength#MIN_LTE_RSRP. Any signal level outside
+     * these boundaries is considered invalid.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_NTN_LTE_RSRP_THRESHOLDS_INT_ARRAY =
+            "ntn_lte_rsrp_thresholds_int_array";
+
+    /**
+     * This threshold is used when connected to a non-terrestrial LTE network.
+     * A list of 4 customized NTN LTE Reference Signal Received Quality (RSRQ) thresholds.
+     *
+     * Reference: TS 136.133 v12.6.0 section 9.1.7 - RSRQ Measurement Report Mapping.
+     *
+     * 4 threshold integers must be within the boundaries [-34 dB, 3 dB], and the levels are:
+     *     "NONE: [-34, threshold1)"
+     *     "POOR: [threshold1, threshold2)"
+     *     "MODERATE: [threshold2, threshold3)"
+     *     "GOOD:  [threshold3, threshold4)"
+     *     "EXCELLENT:  [threshold4, 3]"
+     *
+     * This key is considered invalid if the format is violated. If the key is invalid or
+     * not configured, a default value set will apply.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_NTN_LTE_RSRQ_THRESHOLDS_INT_ARRAY =
+            "ntn_lte_rsrq_thresholds_int_array";
+
+    /**
+     * This threshold is used when connected to a non-terrestrial LTE network.
+     * A list of 4 customized NTN LTE Reference Signal Signal to Noise Ratio (RSSNR) thresholds.
+     *
+     * 4 threshold integers must be within the boundaries [-20 dB, 30 dB], and the levels are:
+     *     "NONE: [-20, threshold1)"
+     *     "POOR: [threshold1, threshold2)"
+     *     "MODERATE: [threshold2, threshold3)"
+     *     "GOOD:  [threshold3, threshold4)"
+     *     "EXCELLENT:  [threshold4, 30]"
+     *
+     * This key is considered invalid if the format is violated. If the key is invalid or
+     * not configured, a default value set will apply.
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_NTN_LTE_RSSNR_THRESHOLDS_INT_ARRAY =
+            "ntn_lte_rssnr_thresholds_int_array";
+
+    /**
+     * This threshold is used when connected to a non-terrestrial LTE network.
+     * Bit-field integer to determine whether to use Reference Signal Received Power (RSRP),
+     * Reference Signal Received Quality (RSRQ), or/and Reference Signal Signal to Noise Ratio
+     * (RSSNR) for the number of NTN LTE signal bars and signal criteria reporting enabling.
+     *
+     * <p> If a measure is not set, signal criteria reporting from modem will not be triggered and
+     * not be used for calculating signal level. If multiple measures are set bit, the parameter
+     * whose value is smallest is used to indicate the signal level.
+     * <UL>
+     *  <LI>RSRP = 1 << 0</LI>
+     *  <LI>RSRQ = 1 << 1</LI>
+     *  <LI>RSSNR = 1 << 2</LI>
+     * </UL>
+     * <p> The value of this key must be bitwise OR of CellSignalStrengthLte#USE_RSRP,
+     * CellSignalStrengthLte#USE_RSRQ, CellSignalStrengthLte#USE_RSSNR.
+     *
+     * <p> For example, if both RSRP and RSRQ are used, the value of key is 3 (1 << 0 | 1 << 1).
+     * If the key is invalid or not configured, a default value (RSRP = 1 << 0) will apply.
+     *
+     */
+    @FlaggedApi(Flags.FLAG_CARRIER_ENABLED_SATELLITE_FLAG)
+    public static final String KEY_PARAMETERS_USED_FOR_NTN_LTE_SIGNAL_BAR_INT =
+            "parameters_used_for_ntn_lte_signal_bar_int";
+
+    /**
      * Indicating whether DUN APN should be disabled when the device is roaming. In that case,
      * the default APN (i.e. internet) will be used for tethering.
      *
@@ -10628,6 +10706,32 @@ public class CarrierConfigManager {
                 PersistableBundle.EMPTY);
         sDefaults.putBoolean(KEY_SATELLITE_ATTACH_SUPPORTED_BOOL, false);
         sDefaults.putInt(KEY_SATELLITE_CONNECTION_HYSTERESIS_SEC_INT, 300);
+        sDefaults.putIntArray(KEY_NTN_LTE_RSRP_THRESHOLDS_INT_ARRAY,
+                // Boundaries: [-140 dBm, -44 dBm]
+                new int[]{
+                        -128, /* SIGNAL_STRENGTH_POOR */
+                        -118, /* SIGNAL_STRENGTH_MODERATE */
+                        -108, /* SIGNAL_STRENGTH_GOOD */
+                        -98  /* SIGNAL_STRENGTH_GREAT */
+                });
+        sDefaults.putIntArray(KEY_NTN_LTE_RSRQ_THRESHOLDS_INT_ARRAY,
+                // Boundaries: [-34 dB, 3 dB]
+                new int[]{
+                        -20, /* SIGNAL_STRENGTH_POOR */
+                        -17, /* SIGNAL_STRENGTH_MODERATE */
+                        -14, /* SIGNAL_STRENGTH_GOOD */
+                        -11  /* SIGNAL_STRENGTH_GREAT */
+                });
+        sDefaults.putIntArray(KEY_NTN_LTE_RSSNR_THRESHOLDS_INT_ARRAY,
+                // Boundaries: [-20 dBm, 30 dBm]
+                new int[] {
+                        -3, /* SIGNAL_STRENGTH_POOR */
+                        1, /* SIGNAL_STRENGTH_MODERATE */
+                        5,  /* SIGNAL_STRENGTH_GOOD */
+                        13   /* SIGNAL_STRENGTH_GREAT */
+                });
+        sDefaults.putInt(KEY_PARAMETERS_USED_FOR_NTN_LTE_SIGNAL_BAR_INT,
+                CellSignalStrengthLte.USE_RSRP);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
