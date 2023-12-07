@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
+package com.android.systemui.qs.tiles.impl.flashlight.domain.interactor
+
 import android.app.ActivityManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx.click
-import com.android.systemui.qs.tiles.impl.flashlight.domain.interactor.FlashlightTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.flashlight.domain.model.FlashlightTileModel
 import com.android.systemui.statusbar.policy.FlashlightController
 import com.android.systemui.util.mockito.mock
