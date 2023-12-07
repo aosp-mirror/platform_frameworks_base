@@ -204,6 +204,13 @@ flag {
 }
 
 flag {
+  name: "enable_layout_tracing"
+  namespace: "systemui"
+  description: "Enables detailed traversal slices during measure and layout in perfetto traces"
+  bug: "315274804"
+}
+
+flag {
    name: "quick_settings_visual_haptics_longpress"
    namespace: "systemui"
    description: "Enable special visual and haptic effects for quick settings tiles with long-press actions"
