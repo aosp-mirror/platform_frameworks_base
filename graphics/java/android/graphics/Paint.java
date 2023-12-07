@@ -1739,10 +1739,6 @@ public class Paint {
     /**
      * Get the elegant metrics flag.
      *
-     * From API {@link Build.VERSION_CODES#VANILLA_ICE_CREAM}, the default value will be true by
-     * default if the app has a target SDK of API {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} or
-     * later.
-     *
      * @return true if elegant metrics are enabled for text drawing.
      */
     public boolean isElegantTextHeight() {
