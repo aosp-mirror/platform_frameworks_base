@@ -15,25 +15,14 @@
  */
 package com.android.systemui.shade.data.repository
 
-import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
-import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.shade.ShadeExpansionChangeEvent
-import com.android.systemui.shade.ShadeExpansionListener
-import com.android.systemui.shade.ShadeExpansionStateManager
-import com.android.systemui.shade.domain.model.ShadeModel
 import javax.inject.Inject
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 
+/** Data for the shade, mostly related to expansion of the shade and quick settings. */
 interface ShadeRepository {
-    /** ShadeModel information regarding shade expansion events */
-    val shadeModel: Flow<ShadeModel>
-
     /**
      * Amount qs has expanded, [0-1]. 0 means fully collapsed, 1 means fully expanded. Quick
      * Settings can be expanded without the full shade expansion.
@@ -167,34 +156,7 @@ interface ShadeRepository {
 
 /** Business logic for shade interactions */
 @SysUISingleton
-class ShadeRepositoryImpl
-@Inject
-constructor(shadeExpansionStateManager: ShadeExpansionStateManager) : ShadeRepository {
-    override val shadeModel: Flow<ShadeModel> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : ShadeExpansionListener {
-                        override fun onPanelExpansionChanged(event: ShadeExpansionChangeEvent) {
-                            // Don't propagate ShadeExpansionChangeEvent.dragDownPxAmount field.
-                            // It is too noisy and produces extra events that consumers won't care
-                            // about
-                            val info =
-                                ShadeModel(
-                                    expansionAmount = event.fraction,
-                                    isExpanded = event.expanded,
-                                    isUserDragging = event.tracking
-                                )
-                            trySendWithFailureLogging(info, TAG, "updated shade expansion info")
-                        }
-                    }
-
-                val currentState = shadeExpansionStateManager.addExpansionListener(callback)
-                callback.onPanelExpansionChanged(currentState)
-
-                awaitClose { shadeExpansionStateManager.removeExpansionListener(callback) }
-            }
-            .distinctUntilChanged()
-
+class ShadeRepositoryImpl @Inject constructor() : ShadeRepository {
     private val _qsExpansion = MutableStateFlow(0f)
     override val qsExpansion: StateFlow<Float> = _qsExpansion.asStateFlow()
 

@@ -224,8 +224,8 @@ constructor(
         configurationInteractor
             .dimensionPixelSize(R.dimen.keyguard_translate_distance_on_swipe_up)
             .flatMapLatest { translationDistance ->
-                shadeRepository.shadeModel.map {
-                    if (it.expansionAmount == 0f) {
+                shadeRepository.legacyShadeExpansion.map {
+                    if (it == 0f) {
                         // Reset the translation value
                         0f
                     } else {
@@ -233,7 +233,7 @@ constructor(
                         MathUtils.lerp(
                             translationDistance,
                             0,
-                            Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(it.expansionAmount)
+                            Interpolators.FAST_OUT_LINEAR_IN.getInterpolation(it)
                         )
                     }
                 }
