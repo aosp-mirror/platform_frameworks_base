@@ -41,4 +41,7 @@ constructor(
 
     /** The corner radius of the notification stack, in dp. */
     val cornerRadiusDp: StateFlow<Float> = stackAppearanceInteractor.cornerRadiusDp
+
+    /** The y-coordinate in px of top of the contents of the notification stack. */
+    val contentTop: StateFlow<Float> = stackAppearanceInteractor.contentTop
 }

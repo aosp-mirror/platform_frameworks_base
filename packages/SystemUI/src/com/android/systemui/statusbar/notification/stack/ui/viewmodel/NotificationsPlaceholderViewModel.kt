@@ -21,9 +21,11 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
 import com.android.systemui.statusbar.notification.stack.shared.flexiNotifsEnabled
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -35,6 +37,7 @@ class NotificationsPlaceholderViewModel
 @Inject
 constructor(
     private val interactor: NotificationStackAppearanceInteractor,
+    shadeInteractor: ShadeInteractor,
     flags: SceneContainerFlags,
     featureFlags: FeatureFlagsClassic,
 ) {
@@ -66,4 +69,22 @@ constructor(
 
     /** The corner radius of the placeholder, in dp. */
     val cornerRadiusDp: StateFlow<Float> = interactor.cornerRadiusDp
+
+    /**
+     * The height in px of the contents of notification stack. Depending on the number of
+     * notifications, this can exceed the space available on screen to show notifications, at which
+     * point the notification stack should become scrollable.
+     */
+    val intrinsicContentHeight = interactor.intrinsicContentHeight
+
+    /**
+     * The amount [0-1] that the shade has been opened. At 0, the shade is closed; at 1, the shade
+     * is open.
+     */
+    val expandFraction: Flow<Float> = shadeInteractor.shadeExpansion
+
+    /** Sets the y-coord in px of the top of the contents of the notification stack. */
+    fun onContentTopChanged(padding: Float) {
+        interactor.setContentTop(padding)
+    }
 }

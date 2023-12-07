@@ -249,6 +249,9 @@
     -->
     <item type="id" name="tag_smartspace_view" />
 
+    <!-- ID of the Scene Container root Composable view -->
+    <item type='id' name="scene_container_root_composable" />
+
     <!-- Tag set on the Compose implementation of the QS footer actions. -->
     <item type="id" name="tag_compose_qs_footer_actions" />
 
