@@ -3216,6 +3216,12 @@ public final class ViewRootImpl implements ViewParent,
                 endDragResizing();
                 destroyHardwareResources();
             }
+
+            if (sToolkitSetFrameRateReadOnlyFlagValue && viewVisibility == View.VISIBLE) {
+                // Boost frame rate when the viewVisibility becomes true.
+                // This is mainly for lanuchers that lanuch new windows.
+                boostFrameRate(FRAME_RATE_TOUCH_BOOST_TIME);
+            }
         }
 
         // Non-visible windows can't hold accessibility focus.
@@ -3924,6 +3930,11 @@ public final class ViewRootImpl implements ViewParent,
                                 == ViewGroup.FOCUS_AFTER_DESCENDANTS) {
                     focused.restoreDefaultFocus();
                 }
+            }
+
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                // Boost the frame rate when the ViewRootImpl first becomes available.
+                boostFrameRate(FRAME_RATE_TOUCH_BOOST_TIME);
             }
         }
 
@@ -12036,7 +12047,7 @@ public final class ViewRootImpl implements ViewParent,
         try {
             if (mLastPreferredFrameRateCategory != frameRateCategory) {
                 mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
-                    frameRateCategory, false).applyAsyncUnsafe();
+                        frameRateCategory, false).applyAsyncUnsafe();
                 mLastPreferredFrameRateCategory = frameRateCategory;
             }
         } catch (Exception e) {
@@ -12157,6 +12168,22 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public float getPreferredFrameRate() {
         return mPreferredFrameRate;
+    }
+
+    /**
+     * Get the value of mIsFrameRateBoosting
+     */
+    @VisibleForTesting
+    public boolean getIsFrameRateBoosting() {
+        return mIsFrameRateBoosting;
+    }
+
+    private void boostFrameRate(int boostTimeOut) {
+        mIsFrameRateBoosting = true;
+        setPreferredFrameRateCategory(mPreferredFrameRateCategory);
+        mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
+        mHandler.sendEmptyMessageDelayed(MSG_TOUCH_BOOST_TIMEOUT,
+                boostTimeOut);
     }
 
     @Override
