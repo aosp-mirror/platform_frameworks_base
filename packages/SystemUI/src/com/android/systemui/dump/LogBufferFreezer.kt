@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Trace
 import android.os.UserHandle
 import android.util.Log
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -53,6 +54,8 @@ class LogBufferFreezer constructor(
     }
 
     private fun onBugreportStarted() {
+        Trace.instantForTrack(Trace.TRACE_TAG_APP, "bugreport",
+                "BUGREPORT_STARTED broadcast received")
         pendingToken?.run()
 
         Log.i(TAG, "Freezing log buffers")
