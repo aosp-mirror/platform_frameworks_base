@@ -179,8 +179,10 @@ android_ravenwood_test {
         "androidx.test.ext.junit",
         "mockito_ravenwood",
         "platform-test-annotations",
+        "flag-junit",
     ],
     srcs: [
+        "src/android/os/BuildTest.java",
         "src/android/os/FileUtilsTest.java",
         "src/android/util/**/*.java",
         "src/com/android/internal/util/**/*.java",
