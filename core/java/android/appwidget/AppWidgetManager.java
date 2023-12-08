@@ -16,6 +16,8 @@
 
 package android.appwidget;
 
+import static android.appwidget.flags.Flags.remoteAdapterConversion;
+
 import android.annotation.BroadcastBehavior;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -566,11 +568,9 @@ public class AppWidgetManager {
     private void tryAdapterConversion(
             FunctionalUtils.RemoteExceptionIgnoringConsumer<RemoteViews> action,
             RemoteViews original, String failureMsg) {
-        final boolean isConvertingAdapter = RemoteViews.isAdapterConversionEnabled()
+        if (remoteAdapterConversion()
                 && (mHasPostedLegacyLists = mHasPostedLegacyLists
-                        || (original != null && original.hasLegacyLists()));
-
-        if (isConvertingAdapter) {
+                        || (original != null && original.hasLegacyLists()))) {
             final RemoteViews viewsCopy = new RemoteViews(original);
             Runnable updateWidgetWithTask = () -> {
                 try {
@@ -587,13 +587,12 @@ public class AppWidgetManager {
             }
 
             updateWidgetWithTask.run();
-            return;
-        }
-
-        try {
-            action.acceptOrThrow(original);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+        } else {
+            try {
+                action.acceptOrThrow(original);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -838,22 +837,20 @@ public class AppWidgetManager {
             return;
         }
 
-        if (!RemoteViews.isAdapterConversionEnabled()) {
+        if (remoteAdapterConversion()) {
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                mHasPostedLegacyLists = true;
+                createUpdateExecutorIfNull().execute(() -> notifyCollectionWidgetChange(
+                        appWidgetIds, viewId));
+            } else {
+                notifyCollectionWidgetChange(appWidgetIds, viewId);
+            }
+        } else {
             try {
                 mService.notifyAppWidgetViewDataChanged(mPackageName, appWidgetIds, viewId);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }
-
-            return;
-        }
-
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            mHasPostedLegacyLists = true;
-            createUpdateExecutorIfNull().execute(() -> notifyCollectionWidgetChange(appWidgetIds,
-                    viewId));
-        } else {
-            notifyCollectionWidgetChange(appWidgetIds, viewId);
         }
     }
 
