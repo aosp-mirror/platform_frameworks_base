@@ -151,6 +151,19 @@ public class GenericWindowPolicyControllerTest {
     }
 
     @Test
+    public void userNotAllowlisted_launchIsBlocked() {
+        GenericWindowPolicyController gwpc = createGwpcWithNoAllowedUsers();
+        gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
+
+        ActivityInfo activityInfo = getActivityInfo(
+                NONBLOCKED_APP_PACKAGE_NAME,
+                NONBLOCKED_APP_PACKAGE_NAME,
+                /* displayOnRemoteDevices */ true,
+                /* targetDisplayCategory */ null);
+        assertActivityIsBlocked(gwpc, activityInfo);
+    }
+
+    @Test
     public void openNonBlockedAppOnVirtualDisplay_isNotBlocked() {
         GenericWindowPolicyController gwpc = createGwpc();
         gwpc.setDisplayId(DISPLAY_ID, /* isMirrorDisplay= */ false);
@@ -687,6 +700,26 @@ public class GenericWindowPolicyControllerTest {
                 0,
                 0,
                 /* allowedUsers= */ new ArraySet<>(getCurrentUserId()),
+                /* activityLaunchAllowedByDefault= */ true,
+                /* activityPolicyExemptions= */ new ArraySet<>(),
+                /* crossTaskNavigationAllowedByDefault= */ true,
+                /* crossTaskNavigationExemptions= */ new ArraySet<>(),
+                /* permissionDialogComponent= */ null,
+                /* activityListener= */ mActivityListener,
+                /* pipBlockedCallback= */ mPipBlockedCallback,
+                /* activityBlockedCallback= */ mActivityBlockedCallback,
+                /* secureWindowCallback= */ mSecureWindowCallback,
+                /* intentListenerCallback= */ mIntentListenerCallback,
+                /* displayCategories= */ new ArraySet<>(),
+                /* showTasksInHostDeviceRecents= */ true,
+                /* customHomeComponent= */ null);
+    }
+
+    private GenericWindowPolicyController createGwpcWithNoAllowedUsers() {
+        return new GenericWindowPolicyController(
+                0,
+                0,
+                /* allowedUsers= */ new ArraySet<>(),
                 /* activityLaunchAllowedByDefault= */ true,
                 /* activityPolicyExemptions= */ new ArraySet<>(),
                 /* crossTaskNavigationAllowedByDefault= */ true,
