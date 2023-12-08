@@ -209,12 +209,14 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.permission.PermissionManager;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.service.notification.Adjustment;
 import android.service.notification.ConversationChannelWrapper;
+import android.service.notification.DeviceEffectsApplier;
 import android.service.notification.NotificationListenerFilter;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationRankingUpdate;
@@ -626,6 +628,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     private void initNMS() throws Exception {
+        initNMS(SystemService.PHASE_BOOT_COMPLETED);
+    }
+
+    private void initNMS(int upToBootPhase) throws Exception {
         mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
                 mNotificationInstanceIdSequence);
 
@@ -653,13 +659,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 mAmi, mToastRateLimiter, mPermissionHelper, mock(UsageStatsManagerInternal.class),
                 mTelecomManager, mLogger, mTestFlagResolver, mPermissionManager,
                 mPowerManager, mPostNotificationTrackerFactory);
+
         // Return first true for RoleObserver main-thread check
         when(mMainLooper.isCurrentThread()).thenReturn(true).thenReturn(false);
-        mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
+
+        if (upToBootPhase >= SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY, mMainLooper);
+        }
+
         Mockito.reset(mHistoryManager);
         verify(mHistoryManager, never()).onBootPhaseAppsCanStart();
-        mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START, mMainLooper);
-        verify(mHistoryManager).onBootPhaseAppsCanStart();
+
+        if (upToBootPhase >= SystemService.PHASE_THIRD_PARTY_APPS_CAN_START) {
+            mService.onBootPhase(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START, mMainLooper);
+            verify(mHistoryManager).onBootPhaseAppsCanStart();
+        }
 
         // TODO b/291907312: remove feature flag
         if (Flags.refactorAttentionHelper()) {
@@ -905,7 +919,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mTestNotificationChannel.setAllowBubbles(channelEnabled);
     }
 
-    private void setUpPrefsForHistory(int uid, boolean globalEnabled) {
+    private void setUpPrefsForHistory(int uid, boolean globalEnabled) throws Exception {
+        initNMS(SystemService.PHASE_ACTIVITY_MANAGER_READY);
+
         // Sets NOTIFICATION_HISTORY_ENABLED setting for calling process uid
         Settings.Secure.putIntForUser(mContext.getContentResolver(),
                 Settings.Secure.NOTIFICATION_HISTORY_ENABLED, globalEnabled ? 1 : 0, uid);
@@ -10039,7 +10055,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testHandleOnPackageRemoved_ClearsHistory() throws RemoteException {
+    public void testHandleOnPackageRemoved_ClearsHistory() throws Exception {
         // Enables Notification History setting
         setUpPrefsForHistory(mUid, true /* =enabled */);
 
@@ -13155,6 +13171,34 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         simulateProfileAvailabilityActions(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         verify(mWorkerHandler).post(any(Runnable.class));
         verify(mSnoozeHelper).clearData(anyInt());
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void setDeviceEffectsApplier_succeeds() throws Exception {
+        initNMS(SystemService.PHASE_SYSTEM_SERVICES_READY);
+
+        mInternalService.setDeviceEffectsApplier(mock(DeviceEffectsApplier.class));
+        // No exception!
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void setDeviceEffectsApplier_tooLate_throws() throws Exception {
+        initNMS(SystemService.PHASE_THIRD_PARTY_APPS_CAN_START);
+
+        assertThrows(IllegalStateException.class, () ->
+                mInternalService.setDeviceEffectsApplier(mock(DeviceEffectsApplier.class)));
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void setDeviceEffectsApplier_calledTwice_throws() throws Exception {
+        initNMS(SystemService.PHASE_SYSTEM_SERVICES_READY);
+
+        mInternalService.setDeviceEffectsApplier(mock(DeviceEffectsApplier.class));
+        assertThrows(IllegalStateException.class, () ->
+                mInternalService.setDeviceEffectsApplier(mock(DeviceEffectsApplier.class)));
     }
 
     @Test
