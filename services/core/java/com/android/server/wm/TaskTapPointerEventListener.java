@@ -45,6 +45,10 @@ public class TaskTapPointerEventListener implements PointerEventListener {
 
     public TaskTapPointerEventListener(WindowManagerService service,
             DisplayContent displayContent) {
+        // TODO(b/315321016): Remove this class when the flag rollout is complete.
+        if (com.android.input.flags.Flags.removePointerEventTrackingInWm()) {
+            throw new IllegalStateException("TaskTapPointerEventListener should not be used!");
+        }
         mService = service;
         mDisplayContent = displayContent;
     }

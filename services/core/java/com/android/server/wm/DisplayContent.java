@@ -546,10 +546,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     boolean isDefaultDisplay;
 
     /** Detect user tapping outside of current focused task bounds .*/
+    // TODO(b/315321016): Remove once pointer event detection is removed from WM.
     @VisibleForTesting
     final TaskTapPointerEventListener mTapDetector;
 
     /** Detect user tapping outside of current focused root task bounds .*/
+    // TODO(b/315321016): Remove once pointer event detection is removed from WM.
     private Region mTouchExcludeRegion = new Region();
 
     /** Save allocating when calculating rects */
@@ -1194,12 +1196,18 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 "PointerEventDispatcher" + mDisplayId, mDisplayId);
         mPointerEventDispatcher = new PointerEventDispatcher(inputChannel);
 
-        // Tap Listeners are supported for:
-        // 1. All physical displays (multi-display).
-        // 2. VirtualDisplays on VR, AA (and everything else).
-        mTapDetector = new TaskTapPointerEventListener(mWmService, this);
-        registerPointerEventListener(mTapDetector);
-        registerPointerEventListener(mWmService.mMousePositionTracker);
+        if (com.android.input.flags.Flags.removePointerEventTrackingInWm()) {
+            mTapDetector = null;
+        } else {
+            // Tap Listeners are supported for:
+            // 1. All physical displays (multi-display).
+            // 2. VirtualDisplays on VR, AA (and everything else).
+            mTapDetector = new TaskTapPointerEventListener(mWmService, this);
+            registerPointerEventListener(mTapDetector);
+        }
+        if (mWmService.mMousePositionTracker != null) {
+            registerPointerEventListener(mWmService.mMousePositionTracker);
+        }
         if (mWmService.mAtmService.getRecentTasks() != null) {
             registerPointerEventListener(
                     mWmService.mAtmService.getRecentTasks().getInputListener());
@@ -3265,6 +3273,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void updateTouchExcludeRegion() {
+        if (mTapDetector == null) {
+            // The touch exclude region is used to detect the region outside of the focused task
+            // so that the tap detector can detect outside touches. Don't calculate the exclude
+            // region when the tap detector is disabled.
+            return;
+        }
         final Task focusedTask = (mFocusedApp != null ? mFocusedApp.getTask() : null);
         if (focusedTask == null) {
             mTouchExcludeRegion.setEmpty();
@@ -3303,6 +3317,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     private void processTaskForTouchExcludeRegion(Task task, Task focusedTask, int delta) {
+        if (mTapDetector == null) {
+            // The touch exclude region is used to detect the region outside of the focused task
+            // so that the tap detector can detect outside touches. Don't calculate the exclude
+            // region when the tap detector is disabled.
+        }
         final ActivityRecord topVisibleActivity = task.getTopVisibleActivity();
 
         if (topVisibleActivity == null || !topVisibleActivity.hasContentToDisplay()) {
