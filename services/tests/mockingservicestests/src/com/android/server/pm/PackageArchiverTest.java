@@ -343,7 +343,7 @@ public class PackageArchiverTest {
 
     @Test
     public void archiveApp_appOptedOutOfArchiving() {
-        when(mAppOpsManager.checkOp(
+        when(mAppOpsManager.checkOpNoThrow(
                 eq(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED),
                 anyInt(), eq(PACKAGE))).thenReturn(MODE_IGNORED);
 
@@ -430,7 +430,7 @@ public class PackageArchiverTest {
     @Test
     public void isAppArchivable_appOptedOutOfArchiving()
             throws PackageManager.NameNotFoundException {
-        when(mAppOpsManager.checkOp(
+        when(mAppOpsManager.checkOpNoThrow(
                 eq(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED),
                 anyInt(), eq(PACKAGE))).thenReturn(MODE_IGNORED);
 
