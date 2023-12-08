@@ -5299,11 +5299,11 @@ public class NotificationManagerService extends SystemService {
         public void setZenMode(int mode, Uri conditionId, String reason) throws RemoteException {
             enforceSystemOrSystemUI("INotificationManager.setZenMode");
             final int callingUid = Binder.getCallingUid();
-            final boolean isSystemOrSystemUi = isCallerSystemOrSystemUi();
             final long identity = Binder.clearCallingIdentity();
             try {
-                mZenModeHelper.setManualZenMode(mode, conditionId, null, reason, callingUid,
-                        isSystemOrSystemUi);
+                mZenModeHelper.setManualZenMode(mode, conditionId,
+                        ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI, // Checked by enforce()
+                        reason, /* caller= */ null, callingUid);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -5360,10 +5360,11 @@ public class NotificationManagerService extends SystemService {
             }
 
             return mZenModeHelper.addAutomaticZenRule(rulePkg, automaticZenRule,
-                    "addAutomaticZenRule", Binder.getCallingUid(),
-                    // TODO: b/308670715: Distinguish FROM_APP from FROM_USER
-                    isCallerSystemOrSystemUi() ? ZenModeHelper.FROM_SYSTEM_OR_SYSTEMUI
-                            : ZenModeHelper.FROM_APP);
+                    // TODO: b/308670715: Distinguish origin properly (e.g. USER if creating a rule
+                    //  manually in Settings).
+                    isCallerSystemOrSystemUi() ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
+                            : ZenModeConfig.UPDATE_ORIGIN_APP,
+                    "addAutomaticZenRule", Binder.getCallingUid());
         }
 
         @Override
@@ -5379,11 +5380,12 @@ public class NotificationManagerService extends SystemService {
             Objects.requireNonNull(automaticZenRule.getConditionId(), "ConditionId is null");
             enforcePolicyAccess(Binder.getCallingUid(), "updateAutomaticZenRule");
 
+            // TODO: b/308670715: Distinguish origin properly (e.g. USER if updating a rule
+            //  manually in Settings).
             return mZenModeHelper.updateAutomaticZenRule(id, automaticZenRule,
-                    "updateAutomaticZenRule", Binder.getCallingUid(),
-                    // TODO: b/308670715: Distinguish FROM_APP from FROM_USER
-                    isCallerSystemOrSystemUi() ? ZenModeHelper.FROM_SYSTEM_OR_SYSTEMUI
-                            : ZenModeHelper.FROM_APP);
+                    isCallerSystemOrSystemUi() ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
+                            : ZenModeConfig.UPDATE_ORIGIN_APP,
+                    "updateAutomaticZenRule", Binder.getCallingUid());
         }
 
         @Override
@@ -5392,8 +5394,12 @@ public class NotificationManagerService extends SystemService {
             // Verify that they can modify zen rules.
             enforcePolicyAccess(Binder.getCallingUid(), "removeAutomaticZenRule");
 
-            return mZenModeHelper.removeAutomaticZenRule(id, "removeAutomaticZenRule",
-                    Binder.getCallingUid(), isCallerSystemOrSystemUi());
+            // TODO: b/308670715: Distinguish origin properly (e.g. USER if removing a rule
+            //  manually in Settings).
+            return mZenModeHelper.removeAutomaticZenRule(id,
+                    isCallerSystemOrSystemUi() ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
+                            : ZenModeConfig.UPDATE_ORIGIN_APP,
+                    "removeAutomaticZenRule", Binder.getCallingUid());
         }
 
         @Override
@@ -5402,8 +5408,9 @@ public class NotificationManagerService extends SystemService {
             enforceSystemOrSystemUI("removeAutomaticZenRules");
 
             return mZenModeHelper.removeAutomaticZenRules(packageName,
-                    packageName + "|removeAutomaticZenRules", Binder.getCallingUid(),
-                    isCallerSystemOrSystemUi());
+                    isCallerSystemOrSystemUi() ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
+                            : ZenModeConfig.UPDATE_ORIGIN_APP,
+                    packageName + "|removeAutomaticZenRules", Binder.getCallingUid());
         }
 
         @Override
@@ -5421,8 +5428,12 @@ public class NotificationManagerService extends SystemService {
 
             enforcePolicyAccess(Binder.getCallingUid(), "setAutomaticZenRuleState");
 
-            mZenModeHelper.setAutomaticZenRuleState(id, condition, Binder.getCallingUid(),
-                    isCallerSystemOrSystemUi());
+            // TODO: b/308670715: Distinguish origin properly (e.g. USER if toggling a rule
+            //  manually in Settings).
+            mZenModeHelper.setAutomaticZenRuleState(id, condition,
+                    isCallerSystemOrSystemUi() ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
+                            : ZenModeConfig.UPDATE_ORIGIN_APP,
+                    Binder.getCallingUid());
         }
 
         @Override
@@ -5440,8 +5451,11 @@ public class NotificationManagerService extends SystemService {
 
             final long identity = Binder.clearCallingIdentity();
             try {
-                mZenModeHelper.setManualZenMode(zen, null, pkg, "setInterruptionFilter",
-                        callingUid, isSystemOrSystemUi);
+                mZenModeHelper.setManualZenMode(zen, null,
+                        isSystemOrSystemUi ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
+                                : ZenModeConfig.UPDATE_ORIGIN_APP,
+                        /* reason= */ "setInterruptionFilter", /* caller= */ pkg,
+                        callingUid);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -5806,7 +5820,10 @@ public class NotificationManagerService extends SystemService {
                 } else {
                     ZenLog.traceSetNotificationPolicy(pkg, applicationInfo.targetSdkVersion,
                             policy);
-                    mZenModeHelper.setNotificationPolicy(policy, callingUid, isSystemOrSystemUi);
+                    mZenModeHelper.setNotificationPolicy(policy,
+                            isSystemOrSystemUi ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
+                                    : ZenModeConfig.UPDATE_ORIGIN_APP,
+                            callingUid);
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to set notification policy", e);
