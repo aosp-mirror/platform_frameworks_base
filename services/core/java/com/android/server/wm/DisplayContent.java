@@ -1636,12 +1636,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWmService.mWindowPlacerLocked.performSurfacePlacement();
     }
 
-    void sendNewConfiguration() {
+    /** Returns {@code true} if the display configuration is changed. */
+    boolean sendNewConfiguration() {
         if (!isReady()) {
-            return;
+            return false;
         }
         if (mRemoteDisplayChangeController.isWaitingForRemoteDisplayChange()) {
-            return;
+            return false;
         }
 
         final Transition.ReadyCondition displayConfig = mTransitionController.isCollecting()
@@ -1656,7 +1657,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             displayConfig.meet();
         }
         if (configUpdated) {
-            return;
+            return true;
         }
 
         // The display configuration doesn't change. If there is a launching transformed app, that
@@ -1674,6 +1675,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             setLayoutNeeded();
             mWmService.mWindowPlacerLocked.performSurfacePlacement();
         }
+        return false;
     }
 
     @Override
