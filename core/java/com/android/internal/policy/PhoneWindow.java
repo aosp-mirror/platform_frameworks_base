@@ -118,6 +118,7 @@ import android.window.OnBackInvokedDispatcher;
 import android.window.ProxyOnBackInvokedDispatcher;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.view.menu.ContextMenuBuilder;
 import com.android.internal.view.menu.IconMenuPresenter;
 import com.android.internal.view.menu.ListMenuPresenter;
@@ -374,7 +375,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
     boolean mDecorFitsSystemWindows = true;
 
-    private final boolean mDefaultEdgeToEdge;
+    @VisibleForTesting
+    public final boolean mDefaultEdgeToEdge;
 
     private final ProxyOnBackInvokedDispatcher mProxyOnBackInvokedDispatcher;
 
@@ -2448,6 +2450,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         // Apply data from current theme.
 
         TypedArray a = getWindowStyle();
+        WindowManager.LayoutParams params = getAttributes();
 
         if (false) {
             System.out.println("From style:");
@@ -2467,8 +2470,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             setFlags(0, flagsToUpdate);
         } else {
             setFlags(FLAG_LAYOUT_IN_SCREEN|FLAG_LAYOUT_INSET_DECOR, flagsToUpdate);
-            getAttributes().setFitInsetsSides(0);
-            getAttributes().setFitInsetsTypes(0);
+            params.setFitInsetsSides(0);
+            params.setFitInsetsTypes(0);
+            if (mDefaultEdgeToEdge) {
+                params.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+            }
         }
 
         if (a.getBoolean(R.styleable.Window_windowNoTitle, false)) {
@@ -2585,8 +2591,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mEnsureNavigationBarContrastWhenTransparent = a.getBoolean(
                     R.styleable.Window_enforceNavigationBarContrast, true);
         }
-
-        WindowManager.LayoutParams params = getAttributes();
 
         // Non-floating windows on high end devices must put up decor beneath the system bars and
         // therefore must know about visibility changes of those.
