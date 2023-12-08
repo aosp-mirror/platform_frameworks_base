@@ -1788,4 +1788,40 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     boolean getUnpairing() {
         return mUnpairing;
     }
+
+    ListenableFuture<Void> syncProfileForMemberDevice() {
+        return ThreadUtils.getBackgroundExecutor()
+            .submit(
+                () -> {
+                    List<Pair<LocalBluetoothProfile, Boolean>> toSync =
+                        Stream.of(
+                            mProfileManager.getA2dpProfile(),
+                            mProfileManager.getHeadsetProfile(),
+                            mProfileManager.getHearingAidProfile(),
+                            mProfileManager.getLeAudioProfile(),
+                            mProfileManager.getLeAudioBroadcastAssistantProfile())
+                        .filter(Objects::nonNull)
+                        .map(profile -> new Pair<>(profile, profile.isEnabled(mDevice)))
+                        .toList();
+
+                    for (var t : toSync) {
+                        LocalBluetoothProfile profile = t.first;
+                        boolean enabledForMain = t.second;
+
+                        for (var member : mMemberDevices) {
+                            BluetoothDevice btDevice = member.getDevice();
+
+                            if (enabledForMain != profile.isEnabled(btDevice)) {
+                                Log.d(TAG, "Syncing profile " + profile + " to "
+                                        + enabledForMain + " for member device "
+                                        + btDevice.getAnonymizedAddress() + " of main device "
+                                        + mDevice.getAnonymizedAddress());
+                                profile.setEnabled(btDevice, enabledForMain);
+                            }
+                        }
+                    }
+                    return null;
+                }
+            );
+    }
 }

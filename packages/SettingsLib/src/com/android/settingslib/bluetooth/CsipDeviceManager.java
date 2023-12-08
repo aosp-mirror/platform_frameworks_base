@@ -379,6 +379,7 @@ public class CsipDeviceManager {
         if (hasChanged) {
             log("addMemberDevicesIntoMainDevice: After changed, CachedBluetoothDevice list: "
                     + mCachedDevices);
+            preferredMainDevice.syncProfileForMemberDevice();
         }
         return hasChanged;
     }
