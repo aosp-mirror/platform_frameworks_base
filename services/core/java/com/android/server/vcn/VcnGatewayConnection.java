@@ -915,9 +915,11 @@ public class VcnGatewayConnection extends StateMachine {
             // TODO(b/180132994): explore safely removing this Thread check
             mVcnContext.ensureRunningOnLooperThread();
 
-            logInfo(
-                    "Selected underlying network changed: "
-                            + (underlying == null ? null : underlying.network));
+            if (!UnderlyingNetworkRecord.isSameNetwork(mUnderlying, underlying)) {
+                logInfo(
+                        "Selected underlying network changed: "
+                                + (underlying == null ? null : underlying.network));
+            }
 
             // TODO(b/179091925): Move the delayed-message handling to BaseState
 
