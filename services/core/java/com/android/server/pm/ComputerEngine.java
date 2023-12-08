@@ -895,6 +895,9 @@ public class ComputerEngine implements Computer {
             @PackageManager.ResolveInfoFlagsBits long flags, int filterCallingUid, int userId) {
         ParsedActivity a = mComponentResolver.getActivity(component);
 
+        // Allow to match activities of quarantined packages.
+        flags |= PackageManager.MATCH_QUARANTINED_COMPONENTS;
+
         if (DEBUG_PACKAGE_INFO) Log.v(TAG, "getActivityInfo " + component + ": " + a);
 
         AndroidPackage pkg = a == null ? null : mPackages.get(a.getPackageName());
