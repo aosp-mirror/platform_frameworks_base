@@ -1355,6 +1355,27 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
             new Key<Boolean>("android.control.autoframingAvailable", boolean.class);
 
     /**
+     * <p>The operating luminance range of low light boost measured in lux (lx).</p>
+     * <p><b>Range of valid values:</b><br></p>
+     * <p>The lower bound indicates the lowest scene luminance value the AE mode
+     * 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY' can operate within. Scenes of lower luminance
+     * than this may receive less brightening, increased noise, or artifacts.</p>
+     * <p>The upper bound indicates the luminance threshold at the point when the mode is enabled.
+     * For example, 'Range[0.3, 30.0]' defines 0.3 lux being the lowest scene luminance the
+     * mode can reliably support. 30.0 lux represents the threshold when this mode is
+     * activated. Scenes measured at less than or equal to 30 lux will activate low light
+     * boost.</p>
+     * <p>If this key is defined, then the AE mode 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY' will
+     * also be present.</p>
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_CAMERA_AE_MODE_LOW_LIGHT_BOOST)
+    public static final Key<android.util.Range<Float>> CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE =
+            new Key<android.util.Range<Float>>("android.control.lowLightBoostInfoLuminanceRange", new TypeReference<android.util.Range<Float>>() {{ }});
+
+    /**
      * <p>List of edge enhancement modes for {@link CaptureRequest#EDGE_MODE android.edge.mode} that are supported by this camera
      * device.</p>
      * <p>Full-capability camera devices must always support OFF; camera devices that support
