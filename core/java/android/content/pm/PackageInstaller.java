@@ -4381,6 +4381,17 @@ public class PackageInstaller {
             return pendingUserActionReason;
         }
 
+        /**
+         * Returns true if the session is an unarchival.
+         *
+         * @see PackageInstaller#requestUnarchive
+         */
+        @FlaggedApi(Flags.FLAG_ARCHIVING)
+        public boolean isUnarchival() {
+            return (installFlags & PackageManager.INSTALL_UNARCHIVE) != 0;
+        }
+
+
         @Override
         public int describeContents() {
             return 0;
