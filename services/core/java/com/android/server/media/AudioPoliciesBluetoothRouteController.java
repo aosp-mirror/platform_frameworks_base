@@ -39,6 +39,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.media.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -219,7 +220,10 @@ import java.util.stream.Collectors;
         BluetoothRouteInfo
                 newBtRoute = new BluetoothRouteInfo();
         newBtRoute.mBtDevice = device;
-        String deviceName = device.getName();
+        String deviceName =
+                Flags.enableUseOfBluetoothDeviceGetAliasForMr2infoGetName()
+                        ? device.getAlias()
+                        : device.getName();
         if (TextUtils.isEmpty(deviceName)) {
             deviceName = mContext.getResources().getText(R.string.unknownName).toString();
         }
