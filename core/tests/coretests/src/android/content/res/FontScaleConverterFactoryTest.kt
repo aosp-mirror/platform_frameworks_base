@@ -28,8 +28,13 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.lang.IllegalStateException
 import kotlin.random.Random.Default.nextFloat
 
+/**
+ * Unit tests for FontScaleConverterFactory. Note that some similar tests are in
+ * cts/tests/tests/content/src/android/content/res/cts/FontScaleConverterFactoryTest.kt
+ */
 @Presubmit
 @RunWith(AndroidJUnit4::class)
 class FontScaleConverterFactoryTest {
@@ -102,6 +107,10 @@ class FontScaleConverterFactoryTest {
     @Test
     fun tablesMatchAndAreMonotonicallyIncreasing() {
         FontScaleConverterFactory.LOOKUP_TABLES.forEach { _, lookupTable ->
+            if (lookupTable !is FontScaleConverterImpl) {
+                throw IllegalStateException("Didn't return a FontScaleConverterImpl")
+            }
+
             assertThat(lookupTable.mToDpValues).hasLength(lookupTable.mFromSpValues.size)
             assertThat(lookupTable.mToDpValues).isNotEmpty()
 

@@ -16,6 +16,7 @@
 
 package android.content.res;
 
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.MathUtils;
@@ -24,10 +25,14 @@ import android.util.SparseArray;
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
- * Stores lookup tables for creating {@link FontScaleConverter}s at various scales.
+ * Creates {@link FontScaleConverter}s at various scales.
  *
- * @hide
+ * Generally you shouldn't need this; you can use {@link
+ * android.util.TypedValue#applyDimension(int, float, DisplayMetrics)} directly and it will do the
+ * scaling conversion for you. But for UI frameworks or other situations where you need to do the
+ * conversion without an Android Context, you can use this class.
  */
+@FlaggedApi(Flags.FLAG_FONT_SCALE_CONVERTER_PUBLIC)
 public class FontScaleConverterFactory {
     private static final float SCALE_KEY_MULTIPLIER = 100f;
 
@@ -42,7 +47,7 @@ public class FontScaleConverterFactory {
         // manually tweaked for optimum readability.
         put(
                 /* scaleKey= */ 1.15f,
-                new FontScaleConverter(
+                new FontScaleConverterImpl(
                         /* fromSp= */
                         new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
                         /* toDp=   */
@@ -51,7 +56,7 @@ public class FontScaleConverterFactory {
 
         put(
                 /* scaleKey= */ 1.3f,
-                new FontScaleConverter(
+                new FontScaleConverterImpl(
                         /* fromSp= */
                         new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
                         /* toDp=   */
@@ -60,7 +65,7 @@ public class FontScaleConverterFactory {
 
         put(
                 /* scaleKey= */ 1.5f,
-                new FontScaleConverter(
+                new FontScaleConverterImpl(
                         /* fromSp= */
                         new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
                         /* toDp=   */
@@ -69,7 +74,7 @@ public class FontScaleConverterFactory {
 
         put(
                 /* scaleKey= */ 1.8f,
-                new FontScaleConverter(
+                new FontScaleConverterImpl(
                         /* fromSp= */
                         new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
                         /* toDp=   */
@@ -78,7 +83,7 @@ public class FontScaleConverterFactory {
 
         put(
                 /* scaleKey= */ 2f,
-                new FontScaleConverter(
+                new FontScaleConverterImpl(
                         /* fromSp= */
                         new float[] {   8f,   10f,   12f,   14f,   18f,   20f,   24f,   30f,  100},
                         /* toDp=   */
@@ -101,9 +106,8 @@ public class FontScaleConverterFactory {
      *
      * <p>Example usage:
      * <code>isNonLinearFontScalingActive(getResources().getConfiguration().fontScale)</code>
-     *
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_FONT_SCALE_CONVERTER_PUBLIC)
     public static boolean isNonLinearFontScalingActive(float fontScale) {
         return fontScale >= sMinScaleBeforeCurvesApplied;
     }
@@ -114,9 +118,8 @@ public class FontScaleConverterFactory {
      * @param fontScale the scale factor, usually from {@link Configuration#fontScale}.
      *
      * @return a converter for the given scale, or null if non-linear scaling should not be used.
-     *
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_FONT_SCALE_CONVERTER_PUBLIC)
     @Nullable
     public static FontScaleConverter forScale(float fontScale) {
         if (!isNonLinearFontScalingActive(fontScale)) {
@@ -142,7 +145,7 @@ public class FontScaleConverterFactory {
             // them a straight linear table instead.
             // This works because when FontScaleConverter encounters a size beyond its bounds, it
             // calculates a linear fontScale factor using the ratio of the last element pair.
-            return new FontScaleConverter(new float[] {1f}, new float[] {fontScale});
+            return new FontScaleConverterImpl(new float[] {1f}, new float[] {fontScale});
         } else {
             float startScale = getScaleFromKey(LOOKUP_TABLES.keyAt(lowerIndex));
             float endScale = getScaleFromKey(LOOKUP_TABLES.keyAt(higherIndex));
@@ -176,7 +179,7 @@ public class FontScaleConverterFactory {
             dpInterpolated[i] = MathUtils.lerp(startDp, endDp, interpolationPoint);
         }
 
-        return new FontScaleConverter(commonSpSizes, dpInterpolated);
+        return new FontScaleConverterImpl(commonSpSizes, dpInterpolated);
     }
 
     private static int getKey(float fontScale) {
