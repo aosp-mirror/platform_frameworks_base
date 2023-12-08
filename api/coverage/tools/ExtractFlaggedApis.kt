@@ -23,35 +23,43 @@ import java.io.FileWriter
 /** Usage: extract-flagged-apis <api text file> <output .pb file> */
 fun main(args: Array<String>) {
     var cb = ApiFile.parseApi(listOf(File(args[0])))
-    val flagToApi = mutableMapOf<String, MutableList<String>>()
-    cb.getPackages()
-        .allClasses()
-        .filter { it.methods().size > 0 }
-        .forEach {
-            for (method in it.methods()) {
-                val flagValue =
-                    method.modifiers
-                        .findAnnotation("android.annotation.FlaggedApi")
-                        ?.findAttribute("value")
-                        ?.value
-                        ?.value()
-                if (flagValue != null && flagValue is String) {
-                    val methodQualifiedName = "${it.qualifiedName()}.${method.name()}"
-                    if (flagToApi.containsKey(flagValue)) {
-                        flagToApi.get(flagValue)?.add(methodQualifiedName)
-                    } else {
-                        flagToApi.put(flagValue, mutableListOf(methodQualifiedName))
+    var builder = FlagApiMap.newBuilder()
+    for (pkg in cb.getPackages().packages) {
+        var packageName = pkg.qualifiedName()
+        pkg.allClasses()
+            .filter { it.methods().size > 0 }
+            .forEach {
+                for (method in it.methods()) {
+                    val flagValue =
+                        method.modifiers
+                            .findAnnotation("android.annotation.FlaggedApi")
+                            ?.findAttribute("value")
+                            ?.value
+                            ?.value()
+                    if (flagValue != null && flagValue is String) {
+                        var api =
+                            JavaMethod.newBuilder()
+                                .setPackageName(packageName)
+                                .setClassName(it.fullName())
+                                .setMethodName(method.name())
+                        for (param in method.parameters()) {
+                            api.addParameterTypes(param.type().toTypeString())
+                        }
+                        if (builder.containsFlagToApi(flagValue)) {
+                            var updatedApis =
+                                builder
+                                    .getFlagToApiOrThrow(flagValue)
+                                    .toBuilder()
+                                    .addJavaMethods(api)
+                                    .build()
+                            builder.putFlagToApi(flagValue, updatedApis)
+                        } else {
+                            var apis = FlaggedApis.newBuilder().addJavaMethods(api).build()
+                            builder.putFlagToApi(flagValue, apis)
+                        }
                     }
                 }
             }
-        }
-    var builder = FlagApiMap.newBuilder()
-    for (flag in flagToApi.keys) {
-        var flaggedApis = FlaggedApis.newBuilder()
-        for (method in flagToApi.get(flag).orEmpty()) {
-            flaggedApis.addFlaggedApi(FlaggedApi.newBuilder().setQualifiedName(method))
-        }
-        builder.putFlagToApi(flag, flaggedApis.build())
     }
     val flagApiMap = builder.build()
     FileWriter(args[1]).use { it.write(flagApiMap.toString()) }
