@@ -27,6 +27,7 @@ aconfig_srcjars = [
     ":android.os.vibrator.flags-aconfig-java{.generated_srcjars}",
     ":android.security.flags-aconfig-java{.generated_srcjars}",
     ":android.service.chooser.flags-aconfig-java{.generated_srcjars}",
+    ":android.service.dreams.flags-aconfig-java{.generated_srcjars}",
     ":android.service.notification.flags-aconfig-java{.generated_srcjars}",
     ":android.view.flags-aconfig-java{.generated_srcjars}",
     ":android.view.accessibility.flags-aconfig-java{.generated_srcjars}",
@@ -738,6 +739,19 @@ aconfig_declarations {
 java_aconfig_library {
     name: "framework-jobscheduler-job.flags-aconfig-java",
     aconfig_declarations: "framework-jobscheduler-job.flags-aconfig",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
+// Dreams
+aconfig_declarations {
+    name: "android.service.dreams.flags-aconfig",
+    package: "android.service.dreams",
+    srcs: ["core/java/android/service/dreams/flags.aconfig"],
+}
+
+java_aconfig_library {
+    name: "android.service.dreams.flags-aconfig-java",
+    aconfig_declarations: "android.service.dreams.flags-aconfig",
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
