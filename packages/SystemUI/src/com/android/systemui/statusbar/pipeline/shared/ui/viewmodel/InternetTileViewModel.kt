@@ -17,13 +17,14 @@
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
 import android.content.Context
-import com.android.systemui.res.R
+import android.text.Html
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.ethernet.domain.EthernetInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
@@ -120,7 +121,7 @@ constructor(
                     InternetTileModel.Active(
                         secondaryTitle = secondary,
                         icon = SignalIcon(signalIcon.toSignalDrawableState()),
-                        stateDescription = ContentDescription.Loaded(secondary),
+                        stateDescription = ContentDescription.Loaded(secondary.toString()),
                         contentDescription = ContentDescription.Loaded(internetLabel),
                     )
                 }
@@ -130,22 +131,25 @@ constructor(
     private fun mobileDataContentConcat(
         networkName: String?,
         dataContentDescription: CharSequence?
-    ): String {
+    ): CharSequence {
         if (dataContentDescription == null) {
             return networkName ?: ""
         }
         if (networkName == null) {
-            return dataContentDescription.toString()
+            return Html.fromHtml(dataContentDescription.toString(), 0)
         }
 
-        return context.getString(
-            R.string.mobile_carrier_text_format,
-            networkName,
-            dataContentDescription
+        return Html.fromHtml(
+            context.getString(
+                R.string.mobile_carrier_text_format,
+                networkName,
+                dataContentDescription
+            ),
+            0
         )
     }
 
-    private fun loadString(resId: Int): String? =
+    private fun loadString(resId: Int): CharSequence? =
         if (resId > 0) {
             context.getString(resId)
         } else {

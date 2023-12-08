@@ -18,6 +18,7 @@ package com.android.server.voiceinteraction;
 
 import android.Manifest;
 import android.annotation.CallbackExecutor;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -1567,15 +1568,18 @@ public class VoiceInteractionManagerService extends SystemService {
         }
 
         @Override
-        public boolean setSandboxedDetectionTrainingDataOp(int opMode) {
-            synchronized (this) {
-                enforceIsCallerPreinstalledAssistant();
+        @EnforcePermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION)
+        public void setIsReceiveSandboxedTrainingDataAllowed(boolean allowed) {
+            super.setIsReceiveSandboxedTrainingDataAllowed_enforcePermission();
 
+            synchronized (this) {
                 if (mImpl == null) {
-                    Slog.w(TAG, "setSandboxedDetectionTrainingDataop without running"
-                            + " voice interaction service");
-                    return false;
+                    throw new IllegalStateException(
+                            "setIsReceiveSandboxedTrainingDataAllowed without running voice "
+                                    + "interaction service");
                 }
+
+                enforceIsCallerPreinstalledAssistant();
 
                 int callingUid = Binder.getCallingUid();
                 final long caller = Binder.clearCallingIdentity();
@@ -1584,12 +1588,11 @@ public class VoiceInteractionManagerService extends SystemService {
                             mContext.getSystemService(Context.APP_OPS_SERVICE);
                     appOpsManager.setUidMode(
                             AppOpsManager.OP_RECEIVE_SANDBOXED_DETECTION_TRAINING_DATA,
-                            callingUid, opMode);
+                            callingUid, allowed ? AppOpsManager.MODE_ALLOWED :
+                                    AppOpsManager.MODE_ERRORED);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
-
-                return true;
             }
         }
 

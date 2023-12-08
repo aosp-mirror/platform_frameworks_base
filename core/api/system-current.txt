@@ -251,6 +251,7 @@ package android {
     field public static final String OBSERVE_SENSOR_PRIVACY = "android.permission.OBSERVE_SENSOR_PRIVACY";
     field public static final String OPEN_ACCESSIBILITY_DETAILS_SETTINGS = "android.permission.OPEN_ACCESSIBILITY_DETAILS_SETTINGS";
     field public static final String OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD = "android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD";
+    field @FlaggedApi("com.android.input.flags.override_key_behavior_permission_apis") public static final String OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW = "android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW";
     field public static final String PACKAGE_VERIFICATION_AGENT = "android.permission.PACKAGE_VERIFICATION_AGENT";
     field public static final String PACKET_KEEPALIVE_OFFLOAD = "android.permission.PACKET_KEEPALIVE_OFFLOAD";
     field public static final String PEERS_MAC_ADDRESS = "android.permission.PEERS_MAC_ADDRESS";
@@ -417,6 +418,7 @@ package android {
     field public static final int allowClearUserDataOnFailedRestore = 16844288; // 0x1010600
     field public static final int gameSessionService = 16844373; // 0x1010655
     field public static final int hotwordDetectionService = 16844326; // 0x1010626
+    field @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") public static final int isVirtualDeviceOnly;
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int minExtensionVersion = 16844305; // 0x1010611
     field public static final int playHomeTransitionSound = 16844358; // 0x1010646
@@ -3246,6 +3248,7 @@ package android.companion.virtual {
     method @Deprecated public int getDefaultNavigationPolicy();
     method public int getDevicePolicy(int);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @Nullable public android.content.ComponentName getHomeComponent();
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @Nullable public android.content.ComponentName getInputMethodComponent();
     method public int getLockState();
     method @Nullable public String getName();
     method @NonNull public java.util.Set<android.os.UserHandle> getUsersWithMatchingAccounts();
@@ -3279,6 +3282,7 @@ package android.companion.virtual {
     method @Deprecated @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setBlockedCrossTaskNavigations(@NonNull java.util.Set<android.content.ComponentName>);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setDevicePolicy(int, int);
     method @FlaggedApi("android.companion.virtual.flags.vdm_custom_home") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setHomeComponent(@Nullable android.content.ComponentName);
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setInputMethodComponent(@Nullable android.content.ComponentName);
     method @NonNull @RequiresPermission(value=android.Manifest.permission.ADD_ALWAYS_UNLOCKED_DISPLAY, conditional=true) public android.companion.virtual.VirtualDeviceParams.Builder setLockState(int);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setName(@NonNull String);
     method @NonNull public android.companion.virtual.VirtualDeviceParams.Builder setUsersWithMatchingAccounts(@NonNull java.util.Set<android.os.UserHandle>);
@@ -13040,6 +13044,7 @@ package android.service.voice {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.HotwordDetector createHotwordDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.HotwordDetector.Callback);
     method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.VisualQueryDetector createVisualQueryDetector(@Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.VisualQueryDetector.Callback);
+    method @FlaggedApi("android.service.voice.flags.allow_training_data_egress_from_hds") @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public void setIsReceiveSandboxedTrainingDataAllowed(boolean);
   }
 
 }
@@ -17287,6 +17292,10 @@ package android.view.displayhash {
 }
 
 package android.view.inputmethod {
+
+  public final class InputMethodInfo implements android.os.Parcelable {
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") public boolean isVirtualDeviceOnly();
+  }
 
   public final class InputMethodManager {
     method @Nullable @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.view.inputmethod.InputMethodInfo getCurrentInputMethodInfoAsUser(@NonNull android.os.UserHandle);

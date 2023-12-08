@@ -130,8 +130,8 @@ public class DisplayNotificationManager implements ConnectedDisplayUsbErrorsDete
         }
 
         sendErrorNotification(createErrorNotification(
-                R.string.connected_display_cable_dont_support_displays_notification_title,
-                R.string.connected_display_cable_dont_support_displays_notification_content,
+                R.string.connected_display_unavailable_notification_title,
+                R.string.connected_display_unavailable_notification_content,
                 R.drawable.usb_cable_unknown_issue));
     }
 

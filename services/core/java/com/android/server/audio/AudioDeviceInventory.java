@@ -1501,7 +1501,7 @@ public class AudioDeviceInventory {
             } else {
                 status = addOp.deviceRoleAction(useCase, role, devices);
                 if (status == AudioSystem.SUCCESS) {
-                    rolesMap.put(key, devices);
+                    rolesMap.put(key, new ArrayList(devices));
                 }
             }
             return status;

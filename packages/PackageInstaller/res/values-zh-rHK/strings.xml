@@ -66,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"保留應用程式資料 (<xliff:g id="SIZE">%1$s</xliff:g>)。"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"要刪除此應用程式嗎？"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"要解除安裝此應用程式嗎？「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」複製本亦將被刪除。"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"要從私人空間解除安裝此應用程式嗎？"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"正在執行的解除安裝操作"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"失敗的解除安裝操作"</string>
     <string name="uninstalling" msgid="8709566347688966845">"正在解除安裝…"</string>
@@ -106,4 +107,21 @@
     <string name="unarchive_application_title" msgid="7958278328280721421">"要從「<xliff:g id="INSTALLERNAME">%1$s</xliff:g>」還原「<xliff:g id="APPNAME">%1$s</xliff:g>」嗎？"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"此應用程式將開始在背景下載"</string>
     <string name="restore" msgid="8460854736328970444">"還原"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"你已離線"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"連接互聯網後，系統就會自動還原此應用程式"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"發生問題"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"嘗試還原此應用程式時發生問題"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"儲存空間不足"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"如要還原此應用程式，請騰出此裝置的儲存空間。需要的儲存空間大小：<xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"請即行動"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"按照後續步驟還原此應用程式"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"已停用 <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"已解除安裝 <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"如要還原此應用程式，你必須安裝 <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"繼續"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"清除儲存空間"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"設定"</string>
+    <string name="close" msgid="5214897374055647996">"關閉"</string>
 </resources>

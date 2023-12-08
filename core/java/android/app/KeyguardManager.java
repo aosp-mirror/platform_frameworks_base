@@ -683,10 +683,11 @@ public class KeyguardManager {
      * <p>
      * Specifically, this returns {@code true} if at least one of the following is true:
      * <ul>
-     *   <li>The {@link Context}'s user has a secure lock screen. A full user has a secure lock
-     *   screen if its lock screen is set to PIN, pattern, or password, as opposed to swipe or none.
-     *   A profile that uses a unified challenge is considered to have a secure lock screen if and
-     *   only if its parent user has a secure lock screen.</li>
+     *   <li>The {@link Context}'s user has a secure lock screen. A full user or a profile that uses
+     *   a separate challenge has a secure lock screen if its lock screen is set to PIN, pattern, or
+     *   password, as opposed to swipe or none. A profile that uses a unified challenge is
+     *   considered to have a secure lock screen if and only if its parent user has a secure lock
+     *   screen.</li>
      *   <li>At least one SIM card is currently locked and requires a PIN.</li>
      * </ul>
      * <p>
@@ -733,8 +734,15 @@ public class KeyguardManager {
      * <p>
      * For a user that is not the current user but can be switched to (usually this means "another
      * full user"), and that has a PIN, pattern, or password, the device is always considered
-     * locked. For a profile with a unified challenge, the device is considered locked if and only
-     * if the device is locked for the parent user.
+     * locked.
+     * <p>
+     * For a profile with a unified challenge, the device locked state is the same as that of the
+     * parent user.
+     * <p>
+     * For a profile with a separate challenge, the device becomes unlocked when the profile's PIN,
+     * pattern, password, or biometric is verified. It becomes locked when the parent user becomes
+     * locked, the screen turns off, the device reboots, the device policy controller locks the
+     * profile, or the timeout set by the device policy controller expires.
      *
      * @return {@code true} if the device is currently locked for the user
      * @see #isKeyguardLocked()
@@ -770,9 +778,10 @@ public class KeyguardManager {
      * Returns whether the user has a secure lock screen.
      * <p>
      * This returns {@code true} if the {@link Context}'s user has a secure lock screen. A full user
-     * has a secure lock screen if its lock screen is set to PIN, pattern, or password, as opposed
-     * to swipe or none. A profile that uses a unified challenge is considered to have a secure lock
-     * screen if and only if its parent user has a secure lock screen.
+     * or a profile that uses a separate challenge has a secure lock screen if its lock screen is
+     * set to PIN, pattern, or password, as opposed to swipe or none. A profile that uses a unified
+     * challenge is considered to have a secure lock screen if and only if its parent user has a
+     * secure lock screen.
      * <p>
      * This method does not consider whether the lock screen is currently showing or not.
      * <p>

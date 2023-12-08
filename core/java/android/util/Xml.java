@@ -334,6 +334,7 @@ public class Xml {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void copy(@NonNull XmlPullParser in, @NonNull XmlSerializer out)
             throws XmlPullParserException, IOException {
         // Some parsers may have already consumed the event that starts the
@@ -393,6 +394,7 @@ public class Xml {
      * unsupported, which can confuse serializers. This method normalizes empty
      * strings to be {@code null}.
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     private static @Nullable String normalizeNamespace(@Nullable String namespace) {
         if (namespace == null || namespace.isEmpty()) {
             return null;

@@ -8,6 +8,13 @@ flag {
 }
 
 flag {
+    name: "mgf1_digest_setter"
+    namespace: "hardware_backed_security"
+    description: "Feature flag for mgf1 digest setter in key generation and import parameters."
+    bug: "308378912"
+}
+
+flag {
     name: "fix_unlocked_device_required_keys_v2"
     namespace: "hardware_backed_security"
     description: "Fix bugs in behavior of UnlockedDeviceRequired keystore keys"

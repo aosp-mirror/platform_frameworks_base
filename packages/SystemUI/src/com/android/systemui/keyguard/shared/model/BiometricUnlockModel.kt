@@ -51,9 +51,21 @@ enum class BiometricUnlockModel {
     companion object {
         private val wakeAndUnlockModes =
             setOf(WAKE_AND_UNLOCK, WAKE_AND_UNLOCK_FROM_DREAM, WAKE_AND_UNLOCK_PULSING)
+        private val dismissesKeyguardModes =
+            setOf(
+                WAKE_AND_UNLOCK,
+                WAKE_AND_UNLOCK_PULSING,
+                UNLOCK_COLLAPSING,
+                WAKE_AND_UNLOCK_FROM_DREAM,
+                DISMISS_BOUNCER
+            )
 
         fun isWakeAndUnlock(model: BiometricUnlockModel): Boolean {
             return wakeAndUnlockModes.contains(model)
+        }
+
+        fun dismissesKeyguard(model: BiometricUnlockModel): Boolean {
+            return dismissesKeyguardModes.contains(model)
         }
     }
 }

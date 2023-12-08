@@ -27,6 +27,7 @@ import java.util.Arrays;
  * full, oldest events are dropped when new events are added.
  * {@hide}
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class RingBuffer<T> {
 
     // Array for storing events.

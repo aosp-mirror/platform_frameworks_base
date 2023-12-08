@@ -27,8 +27,6 @@ import com.android.systemui.authentication.shared.model.AuthenticationThrottling
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
@@ -335,7 +333,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     AuthenticationThrottlingModel(
                         failedAttemptCount =
                             FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
-                        remainingMs = FakeAuthenticationRepository.THROTTLE_DURATION_MS,
+                        remainingSeconds = FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS,
                     )
                 )
 
@@ -347,15 +345,12 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     AuthenticationThrottlingModel(
                         failedAttemptCount =
                             FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
-                        remainingMs = FakeAuthenticationRepository.THROTTLE_DURATION_MS,
+                        remainingSeconds = FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS,
                     )
                 )
 
             // Move the clock forward to ALMOST skip the throttling, leaving one second to go:
-            val throttleTimeoutSec =
-                FakeAuthenticationRepository.THROTTLE_DURATION_MS.milliseconds.inWholeSeconds
-                    .toInt()
-            repeat(throttleTimeoutSec - 1) { time ->
+            repeat(FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS - 1) { time ->
                 advanceTimeBy(1000)
                 assertThat(throttling)
                     .isEqualTo(
@@ -363,9 +358,8 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                             failedAttemptCount =
                                 FakeAuthenticationRepository
                                     .MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
-                            remainingMs =
-                                ((throttleTimeoutSec - (time + 1)).seconds.inWholeMilliseconds)
-                                    .toInt(),
+                            remainingSeconds =
+                                FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS - (time + 1),
                         )
                     )
             }

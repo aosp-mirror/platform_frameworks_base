@@ -90,6 +90,7 @@ import android.view.autofill.AutofillManagerInternal;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.accessibility.AccessibilityShortcutController;
+import com.android.internal.policy.KeyInterceptionInfo;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.GestureLauncherService;
 import com.android.server.LocalServices;
@@ -162,6 +163,9 @@ class TestPhoneWindowManager {
 
     @Mock private KeyguardServiceDelegate mKeyguardServiceDelegate;
 
+    @Mock
+    private PhoneWindowManager.ButtonOverridePermissionChecker mButtonOverridePermissionChecker;
+
     private StaticMockitoSession mMockitoSession;
     private OffsettableClock mClock = new OffsettableClock();
     private TestLooper mTestLooper = new TestLooper(() -> mClock.now());
@@ -188,6 +192,10 @@ class TestPhoneWindowManager {
 
         IActivityManager getActivityManagerService() {
             return mActivityManagerService;
+        }
+
+        PhoneWindowManager.ButtonOverridePermissionChecker getButtonOverridePermissionChecker() {
+            return mButtonOverridePermissionChecker;
         }
     }
 
@@ -304,6 +312,11 @@ class TestPhoneWindowManager {
         doReturn(false).when(mPhoneWindowManager).keyguardOn();
         doNothing().when(mContext).startActivityAsUser(any(), any());
         doNothing().when(mContext).startActivityAsUser(any(), any(), any());
+
+        KeyInterceptionInfo interceptionInfo = new KeyInterceptionInfo(0, 0, null, 0);
+        doReturn(interceptionInfo)
+                .when(mWindowManagerInternal).getKeyInterceptionInfoFromToken(any());
+
         Mockito.reset(mContext);
     }
 
@@ -523,6 +536,11 @@ class TestPhoneWindowManager {
 
     void overrideStemPressTargetActivity(ComponentName component) {
         mPhoneWindowManager.mPrimaryShortPressTargetActivity = component;
+    }
+
+    void overrideFocusedWindowButtonOverridePermission(boolean granted) {
+        doReturn(granted)
+                .when(mButtonOverridePermissionChecker).canAppOverrideSystemKey(any(), anyInt());
     }
 
     /**

@@ -22,7 +22,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.ACTIVITY_BG_START_GRACE_PERIOD_MS;
 import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_ALLOW;
-import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_FG_ONLY;
+import static com.android.server.wm.ActivityTaskManagerService.APP_SWITCH_DISALLOW;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_FOREGROUND;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_GRACE_PERIOD;
 import static com.android.server.wm.BackgroundActivityStartController.BAL_ALLOW_PERMISSION;
@@ -49,6 +49,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.wm.BackgroundActivityStartController.BalVerdict;
+import com.android.window.flags.Flags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -113,13 +114,17 @@ class BackgroundLaunchProcessController {
                     "process allowed by token");
         }
         // Allow if the caller is bound by a UID that's currently foreground.
-        if (isBoundByForegroundUid()) {
+        // But still respect the appSwitchState.
+        boolean allowBoundByForegroundUid =
+                Flags.balRespectAppSwitchStateWhenCheckBoundByForegroundUid()
+                ? appSwitchState != APP_SWITCH_DISALLOW && isBoundByForegroundUid()
+                : isBoundByForegroundUid();
+        if (allowBoundByForegroundUid) {
             return new BalVerdict(BAL_ALLOW_VISIBLE_WINDOW, /*background*/ false,
                     "process bound by foreground uid");
         }
         // Allow if the caller has an activity in any foreground task.
-        if (hasActivityInVisibleTask
-                && (appSwitchState == APP_SWITCH_ALLOW || appSwitchState == APP_SWITCH_FG_ONLY)) {
+        if (hasActivityInVisibleTask && appSwitchState != APP_SWITCH_DISALLOW) {
             return new BalVerdict(BAL_ALLOW_FOREGROUND, /*background*/ false,
                     "process has activity in foreground task");
         }

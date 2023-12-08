@@ -221,6 +221,22 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     @Test
+    public void testAddAppBubble_setsTime() {
+        // Setup
+        mBubbleData.setListener(mListener);
+
+        // Test
+        assertThat(mAppBubble.getLastActivity()).isEqualTo(0);
+        setCurrentTime(1000);
+        mBubbleData.notificationEntryUpdated(mAppBubble, true /* suppressFlyout*/,
+                false /* showInShade */);
+
+        // Verify
+        assertThat(mBubbleData.getBubbleInStackWithKey(mAppBubble.getKey())).isEqualTo(mAppBubble);
+        assertThat(mAppBubble.getLastActivity()).isEqualTo(1000);
+    }
+
+    @Test
     public void testRemoveBubble() {
         // Setup
         sendUpdatedEntryAtTime(mEntryA1, 1000);
@@ -1162,7 +1178,7 @@ public class BubbleDataTest extends ShellTestCase {
     }
 
     @Test
-    public void test_removeAppBubble_skipsOverflow() {
+    public void test_removeAppBubble_overflows() {
         String appBubbleKey = mAppBubble.getKey();
         mBubbleData.notificationEntryUpdated(mAppBubble, true /* suppressFlyout*/,
                 false /* showInShade */);
@@ -1170,7 +1186,7 @@ public class BubbleDataTest extends ShellTestCase {
 
         mBubbleData.dismissBubbleWithKey(appBubbleKey, Bubbles.DISMISS_USER_GESTURE);
 
-        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNull();
+        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isEqualTo(mAppBubble);
         assertThat(mBubbleData.getBubbleInStackWithKey(appBubbleKey)).isNull();
     }
 

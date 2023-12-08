@@ -36,6 +36,8 @@ import com.android.systemui.unfold.FoldStateLogger;
 import com.android.systemui.unfold.FoldStateLoggingProvider;
 import com.android.systemui.unfold.SysUIUnfoldComponent;
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider;
+import com.android.systemui.unfold.dagger.UnfoldBg;
+import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder;
 import com.android.wm.shell.back.BackAnimation;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.desktopmode.DesktopMode;
@@ -137,19 +139,26 @@ public interface SysUIComponent {
                             c.getUnfoldHapticsPlayer();
                             c.getNaturalRotationUnfoldProgressProvider().init();
                             c.getUnfoldLatencyTracker().init();
-                            c.getFoldStateLoggingProvider()
-                                    .ifPresent(FoldStateLoggingProvider::init);
-                            c.getFoldStateLogger().ifPresent(FoldStateLogger::init);
-                            final UnfoldTransitionProgressProvider progressProvider =
-                                    Flags.unfoldAnimationBackgroundProgress()
-                                            ? c.getBgUnfoldTransitionProgressProvider()
-                                            : c.getUnfoldTransitionProgressProvider();
-                            progressProvider.addCallback(c.getUnfoldTransitionProgressForwarder());
                         });
         // No init method needed, just needs to be gotten so that it's created.
         getMediaMuteAwaitConnectionCli();
         getNearbyMediaDevicesManager();
         getConnectingDisplayViewModel().init();
+        getFoldStateLoggingProvider().ifPresent(FoldStateLoggingProvider::init);
+        getFoldStateLogger().ifPresent(FoldStateLogger::init);
+
+        Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider;
+
+        if (Flags.unfoldAnimationBackgroundProgress()) {
+            unfoldTransitionProgressProvider = getBgUnfoldTransitionProgressProvider();
+        } else {
+            unfoldTransitionProgressProvider = getUnfoldTransitionProgressProvider();
+        }
+        unfoldTransitionProgressProvider
+                .ifPresent(
+                        (progressProvider) ->
+                                getUnfoldTransitionProgressForwarder()
+                                        .ifPresent(progressProvider::addCallback));
     }
 
     /**
@@ -169,6 +178,37 @@ public interface SysUIComponent {
      */
     @SysUISingleton
     ContextComponentHelper getContextComponentHelper();
+
+    /**
+     * Creates a UnfoldTransitionProgressProvider that calculates progress in the background.
+     */
+    @SysUISingleton
+    @UnfoldBg
+    Optional<UnfoldTransitionProgressProvider> getBgUnfoldTransitionProgressProvider();
+
+    /**
+     * Creates a UnfoldTransitionProgressProvider that calculates progress in the main thread.
+     */
+    @SysUISingleton
+    Optional<UnfoldTransitionProgressProvider> getUnfoldTransitionProgressProvider();
+
+    /**
+     * Creates a UnfoldTransitionProgressForwarder.
+     */
+    @SysUISingleton
+    Optional<UnfoldTransitionProgressForwarder> getUnfoldTransitionProgressForwarder();
+
+    /**
+     * Creates a FoldStateLoggingProvider.
+     */
+    @SysUISingleton
+    Optional<FoldStateLoggingProvider> getFoldStateLoggingProvider();
+
+    /**
+     * Creates a FoldStateLogger.
+     */
+    @SysUISingleton
+    Optional<FoldStateLogger> getFoldStateLogger();
 
     /**
      * Main dependency providing module.

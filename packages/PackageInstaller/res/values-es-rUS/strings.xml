@@ -66,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"Guardar <xliff:g id="SIZE">%1$s</xliff:g> en datos de apps"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"¿Quieres borrar esta app?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"¿Quieres desinstalar esta app? También se borrará el clon de <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>."</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"¿Quieres desinstalar esta app de tu espacio privado?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Desinstalaciones activas"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Desinstalaciones con errores"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Desinstalando…"</string>
@@ -106,4 +107,21 @@
     <string name="unarchive_application_title" msgid="7958278328280721421">"¿Quieres restablecer <xliff:g id="APPNAME">%1$s</xliff:g> desde <xliff:g id="INSTALLERNAME">%1$s</xliff:g>?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"Esta app comenzará la descarga en segundo plano"</string>
     <string name="restore" msgid="8460854736328970444">"Restablecer"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"No tienes conexión"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"Se restablecerá automáticamente esta app cuando te conectes a Internet"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"Se produjo un error"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"Hubo un problema al intentar restablecer esta app"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"No hay suficiente espacio de almacenamiento"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"Para restablecer la app, deberás liberar espacio en este dispositivo. Almacenamiento requerido: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"Acción obligatoria"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"Sigue los próximos pasos para restablecer esta app"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"Se inhabilitó <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"No se instaló <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Para restablecer esta app, deberás instalar <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Continuar"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"Liberar almacenamiento"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"Configuración"</string>
+    <string name="close" msgid="5214897374055647996">"Cerrar"</string>
 </resources>

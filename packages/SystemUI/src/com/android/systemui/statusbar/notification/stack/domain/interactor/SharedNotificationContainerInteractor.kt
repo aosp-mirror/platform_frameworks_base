@@ -68,6 +68,8 @@ constructor(
                         marginTop = getDimensionPixelSize(R.dimen.notification_panel_margin_top),
                         marginTopLargeScreen =
                             getDimensionPixelSize(R.dimen.large_screen_shade_header_height),
+                        keyguardSplitShadeTopMargin =
+                            getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin),
                     )
                 }
             }
@@ -95,5 +97,6 @@ constructor(
         val marginBottom: Int,
         val marginTop: Int,
         val marginTopLargeScreen: Int,
+        val keyguardSplitShadeTopMargin: Int,
     )
 }

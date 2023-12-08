@@ -461,7 +461,7 @@ final class InputMonitor {
                         // in animating before the next app window focused, or IME icon
                         // persists on the bottom when swiping the task to recents.
                         InputMethodManagerInternal.get().updateImeWindowStatus(
-                                true /* disableImeIcon */);
+                                true /* disableImeIcon */, mDisplayContent.getDisplayId());
                     }
                 }
                 return;

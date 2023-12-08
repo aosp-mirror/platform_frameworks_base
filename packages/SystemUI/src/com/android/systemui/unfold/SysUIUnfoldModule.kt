@@ -21,7 +21,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.shade.NotificationPanelUnfoldAnimationController
 import com.android.systemui.statusbar.phone.StatusBarMoveFromCenterAnimationController
 import com.android.systemui.unfold.dagger.UnfoldBg
-import com.android.systemui.unfold.progress.UnfoldTransitionProgressForwarder
 import com.android.systemui.unfold.util.NaturalRotationUnfoldProgressProvider
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.unfold.util.UnfoldKeyguardVisibilityManager
@@ -107,20 +106,4 @@ interface SysUIUnfoldComponent {
     fun getUnfoldLatencyTracker(): UnfoldLatencyTracker
 
     fun getNaturalRotationUnfoldProgressProvider(): NaturalRotationUnfoldProgressProvider
-
-    /** Creates a UnfoldTransitionProgressProvider that calculates progress in the main thread. */
-    fun getUnfoldTransitionProgressProvider(): UnfoldTransitionProgressProvider
-
-    /** Creates a UnfoldTransitionProgressProvider that calculates progress in the background. */
-    @UnfoldBg
-    fun getBgUnfoldTransitionProgressProvider(): UnfoldTransitionProgressProvider
-
-    /** Creates a UnfoldTransitionProgressForwarder. */
-    fun getUnfoldTransitionProgressForwarder(): UnfoldTransitionProgressForwarder
-
-    /** Creates a FoldStateLoggingProvider. */
-    fun getFoldStateLoggingProvider(): Optional<FoldStateLoggingProvider>
-
-    /** Creates a FoldStateLogger. */
-    fun getFoldStateLogger(): Optional<FoldStateLogger>
 }

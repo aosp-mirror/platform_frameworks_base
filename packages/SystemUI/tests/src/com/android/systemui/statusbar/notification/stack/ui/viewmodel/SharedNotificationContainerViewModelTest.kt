@@ -100,6 +100,34 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun validatePaddingTopInSplitShade() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, true)
+            overrideResource(R.dimen.large_screen_shade_header_height, 10)
+            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
+
+            val dimens by collectLastValue(underTest.configurationBasedDimensions)
+
+            configurationRepository.onAnyConfigurationChange()
+
+            assertThat(dimens!!.paddingTop).isEqualTo(30)
+        }
+
+    @Test
+    fun validatePaddingTop() =
+        testScope.runTest {
+            overrideResource(R.bool.config_use_split_notification_shade, false)
+            overrideResource(R.dimen.large_screen_shade_header_height, 10)
+            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
+
+            val dimens by collectLastValue(underTest.configurationBasedDimensions)
+
+            configurationRepository.onAnyConfigurationChange()
+
+            assertThat(dimens!!.paddingTop).isEqualTo(0)
+        }
+
+    @Test
     fun validateMarginEnd() =
         testScope.runTest {
             overrideResource(R.dimen.notification_panel_margin_horizontal, 50)
@@ -226,9 +254,9 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun positionOnLockscreenNotInSplitShade() =
+    fun boundsOnLockscreenNotInSplitShade() =
         testScope.runTest {
-            val position by collectLastValue(underTest.bounds)
+            val bounds by collectLastValue(underTest.bounds)
 
             // When not in split shade
             overrideResource(R.bool.config_use_split_notification_shade, false)
@@ -242,16 +270,19 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
                 NotificationContainerBounds(top = 1f, bottom = 2f)
             )
 
-            assertThat(position).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 2f))
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 1f, bottom = 2f))
         }
 
     @Test
-    fun positionOnLockscreenInSplitShade() =
+    fun boundsOnLockscreenInSplitShade() =
         testScope.runTest {
-            val position by collectLastValue(underTest.bounds)
+            val bounds by collectLastValue(underTest.bounds)
 
             // When in split shade
             overrideResource(R.bool.config_use_split_notification_shade, true)
+            overrideResource(R.dimen.large_screen_shade_header_height, 10)
+            overrideResource(R.dimen.keyguard_split_shade_top_margin, 50)
+
             configurationRepository.onAnyConfigurationChange()
             runCurrent()
 
@@ -263,8 +294,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            // Top should be overridden to 0f
-            assertThat(position).isEqualTo(NotificationContainerBounds(top = 0f, bottom = 2f))
+            // Top should be equal to bounds (1) + padding adjustment (30)
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = 31f, bottom = 2f))
         }
 
     @Test

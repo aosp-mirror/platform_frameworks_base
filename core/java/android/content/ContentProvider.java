@@ -117,6 +117,7 @@ import java.util.Objects;
  * developer guide.</p>
  * </div>
  */
+@android.ravenwood.annotation.RavenwoodKeepPartialClass
 public abstract class ContentProvider implements ContentInterface, ComponentCallbacks2 {
 
     private static final String TAG = "ContentProvider";
@@ -2781,6 +2782,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     private Uri maybeGetUriWithoutUserId(Uri uri) {
         if (mSingleUser) {
             return uri;
@@ -2789,6 +2791,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int getUserIdFromAuthority(String auth, int defaultUserId) {
         if (auth == null) return defaultUserId;
         int end = auth.lastIndexOf('@');
@@ -2803,17 +2806,20 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int getUserIdFromAuthority(String auth) {
         return getUserIdFromAuthority(auth, UserHandle.USER_CURRENT);
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int getUserIdFromUri(Uri uri, int defaultUserId) {
         if (uri == null) return defaultUserId;
         return getUserIdFromAuthority(uri.getAuthority(), defaultUserId);
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static int getUserIdFromUri(Uri uri) {
         return getUserIdFromUri(uri, UserHandle.USER_CURRENT);
     }
@@ -2824,6 +2830,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * @hide
      */
     @TestApi
+    @android.ravenwood.annotation.RavenwoodKeep
     public @NonNull static UserHandle getUserHandleFromUri(@NonNull Uri uri) {
         return UserHandle.of(getUserIdFromUri(uri, Process.myUserHandle().getIdentifier()));
     }
@@ -2834,6 +2841,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      * If there is no userId in the authority, it symply returns the argument
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static String getAuthorityWithoutUserId(String auth) {
         if (auth == null) return null;
         int end = auth.lastIndexOf('@');
@@ -2841,6 +2849,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static Uri getUriWithoutUserId(Uri uri) {
         if (uri == null) return null;
         Uri.Builder builder = uri.buildUpon();
@@ -2849,6 +2858,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     }
 
     /** @hide */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static boolean uriHasUserId(Uri uri) {
         if (uri == null) return false;
         return !TextUtils.isEmpty(uri.getUserInfo());
@@ -2872,6 +2882,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      */
     @NonNull
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @android.ravenwood.annotation.RavenwoodKeep
     public static Uri createContentUriForUser(
             @NonNull Uri contentUri, @NonNull UserHandle userHandle) {
         if (!ContentResolver.SCHEME_CONTENT.equals(contentUri.getScheme())) {
@@ -2898,6 +2909,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
 
     /** @hide */
     @UnsupportedAppUsage
+    @android.ravenwood.annotation.RavenwoodKeep
     public static Uri maybeAddUserId(Uri uri, int userId) {
         if (uri == null) return null;
         if (userId != UserHandle.USER_CURRENT

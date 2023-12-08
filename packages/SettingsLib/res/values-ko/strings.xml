@@ -567,12 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC를 통해 연결됨"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC를 통해 연결됨"</string>
-    <!-- no translation found for tv_media_transfer_default (5403053145185843843) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (692569220956829921) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (8181494402866565865) -->
-    <skip />
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV 기본값"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI 출력"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"내부 스피커"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"연결 중에 문제가 발생했습니다. 기기를 껐다가 다시 켜 보세요."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"유선 오디오 기기"</string>
     <string name="help_label" msgid="3528360748637781274">"고객센터"</string>

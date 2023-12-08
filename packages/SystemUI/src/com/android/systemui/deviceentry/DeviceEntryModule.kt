@@ -1,6 +1,5 @@
 package com.android.systemui.deviceentry
 
-import com.android.systemui.deviceentry.data.repository.DeviceEntryHapticsRepositoryModule
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepositoryModule
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import dagger.Module
@@ -10,7 +9,6 @@ import dagger.multibindings.Multibinds
     includes =
         [
             DeviceEntryRepositoryModule::class,
-            DeviceEntryHapticsRepositoryModule::class,
         ],
 )
 abstract class DeviceEntryModule {

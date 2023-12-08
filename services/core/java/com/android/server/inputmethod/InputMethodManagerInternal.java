@@ -120,6 +120,25 @@ public abstract class InputMethodManagerInternal {
             @UserIdInt int userId);
 
     /**
+     * Makes the input method associated with {@code imeId} the default input method for all users
+     * on displays that are owned by the virtual device with the given {@code deviceId}. If the
+     * input method associated with {@code imeId} is not available, there will be no IME on the
+     * relevant displays.
+     *
+     * <p>The caller of this method is responsible for resetting it to {@code null} after the
+     * virtual device is closed.</p>
+     *
+     * @param deviceId the device ID on which to use the given input method as default.
+     * @param imeId  the input method ID to be used as default on the given device. If {@code null},
+     *               then any existing input method association with that device will be removed.
+     * @throws IllegalArgumentException if a non-{@code null} input method ID is passed for a
+     *                                  device ID that already has a custom input method set or if
+     *                                  the device ID is not a valid virtual device.
+     */
+    public abstract void setVirtualDeviceInputMethodForAllUsers(
+            int deviceId, @Nullable String imeId);
+
+    /**
      * Registers a new {@link InputMethodListListener}.
      *
      * @param listener the listener to add
@@ -159,9 +178,12 @@ public abstract class InputMethodManagerInternal {
     /**
      * Updates the IME visibility, back disposition and show IME picker status for SystemUI.
      * TODO(b/189923292): Making SystemUI to be true IME icon controller vs. presenter that
-     *     controlled by IMMS.
+     * controlled by IMMS.
+     *
+     * @param disableImeIcon indicates whether IME icon should be enabled or not
+     * @param displayId      the display for which to update the IME window status
      */
-    public abstract void updateImeWindowStatus(boolean disableImeIcon);
+    public abstract void updateImeWindowStatus(boolean disableImeIcon, int displayId);
 
     /**
      * Finish stylus handwriting by calling {@link InputMethodService#finishStylusHandwriting()} if
@@ -247,6 +269,11 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
+                public void setVirtualDeviceInputMethodForAllUsers(
+                        int deviceId, @Nullable String imeId) {
+                }
+
+                @Override
                 public void registerInputMethodListListener(InputMethodListListener listener) {
                 }
 
@@ -269,7 +296,7 @@ public abstract class InputMethodManagerInternal {
                 }
 
                 @Override
-                public void updateImeWindowStatus(boolean disableImeIcon) {
+                public void updateImeWindowStatus(boolean disableImeIcon, int displayId) {
                 }
 
                 @Override

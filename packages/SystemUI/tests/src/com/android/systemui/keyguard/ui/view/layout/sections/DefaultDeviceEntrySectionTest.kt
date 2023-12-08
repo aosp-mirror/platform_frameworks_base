@@ -39,6 +39,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
 import com.android.systemui.statusbar.NotificationShadeWindowController
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.gesture.TapGestureDetector
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -91,6 +92,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
                 TestScope().backgroundScope,
                 { mock(SwipeUpAnywhereGestureHandler::class.java) },
                 { mock(TapGestureDetector::class.java) },
+                { mock(VibratorHelper::class.java) },
             )
     }
 

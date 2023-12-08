@@ -1058,6 +1058,12 @@ public final class CameraExtensionCharacteristics {
      * <p>The set returned is not modifiable, so any attempts to modify it will throw
      * a {@code UnsupportedOperationException}.</p>
      *
+     * <p>Devices launching on Android {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
+     * or newer versions are required to support {@link CaptureRequest#CONTROL_AF_MODE},
+     * {@link CaptureRequest#CONTROL_AF_REGIONS}, {@link CaptureRequest#CONTROL_AF_TRIGGER},
+     * {@link CaptureRequest#CONTROL_ZOOM_RATIO} for
+     * {@link CameraExtensionCharacteristics#EXTENSION_NIGHT}.</p>
+     *
      * @param extension the extension type
      *
      * @return non-modifiable set of capture keys supported by camera extension session initialized
@@ -1138,6 +1144,12 @@ public final class CameraExtensionCharacteristics {
      * <p>In case the set is empty, then the extension is not able to support any capture results
      * and the {@link CameraExtensionSession.ExtensionCaptureCallback#onCaptureResultAvailable}
      * callback will not be fired.</p>
+     *
+     * <p>Devices launching on Android {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
+     * or newer versions are required to support {@link CaptureResult#CONTROL_AF_MODE},
+     * {@link CaptureResult#CONTROL_AF_REGIONS}, {@link CaptureResult#CONTROL_AF_TRIGGER},
+     * {@link CaptureResult#CONTROL_AF_STATE}, {@link CaptureResult#CONTROL_ZOOM_RATIO} for
+     * {@link CameraExtensionCharacteristics#EXTENSION_NIGHT}.</p>
      *
      * @param extension the extension type
      *

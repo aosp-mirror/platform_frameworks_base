@@ -63,7 +63,6 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
-import kotlin.test.Ignore
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -396,7 +395,6 @@ class SceneFrameworkIntegrationTest : SysuiTestCase() {
         }
 
     @Test
-    @Ignore("b/315130482")
     fun deviceGoesToSleep_wakeUp_unlock() =
         testScope.runTest {
             unlockDevice()

@@ -208,8 +208,6 @@ final class InputMethodUtils {
      */
     @UserHandleAware
     public static class InputMethodSettings {
-        @NonNull
-        private Context mUserAwareContext;
         private final ArrayMap<String, InputMethodInfo> mMethodMap;
 
         private boolean mCopyOnWrite = false;
@@ -253,17 +251,9 @@ final class InputMethodUtils {
             return imsList;
         }
 
-        private void initContentWithUserContext(@NonNull Context context, @UserIdInt int userId) {
-            mUserAwareContext = context.getUserId() == userId
-                    ? context
-                    : context.createContextAsUser(UserHandle.of(userId), 0 /* flags */);
-        }
-
-        InputMethodSettings(@NonNull Context context,
-                ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
+        InputMethodSettings(ArrayMap<String, InputMethodInfo> methodMap, @UserIdInt int userId,
                 boolean copyOnWrite) {
             mMethodMap = methodMap;
-            initContentWithUserContext(context, userId);
             switchCurrentUser(userId, copyOnWrite);
         }
 
@@ -281,9 +271,6 @@ final class InputMethodUtils {
             }
             if (mCurrentUserId != userId || mCopyOnWrite != copyOnWrite) {
                 mEnabledInputMethodsStrCache = "";
-            }
-            if (mUserAwareContext.getUserId() != userId) {
-                initContentWithUserContext(mUserAwareContext, userId);
             }
             mCurrentUserId = userId;
             mCopyOnWrite = copyOnWrite;

@@ -23,6 +23,7 @@ package com.android.internal.util;
  *
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class StringPool {
 
     private final String[] mPool = new String[512];

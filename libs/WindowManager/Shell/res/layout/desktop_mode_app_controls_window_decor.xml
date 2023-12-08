@@ -21,8 +21,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
-    android:orientation="horizontal"
-    android:background="@drawable/desktop_mode_decor_title">
+    android:orientation="horizontal">
 
     <LinearLayout
         android:id="@+id/open_menu_button"
@@ -45,7 +44,6 @@
             android:layout_width="0dp"
             android:layout_height="20dp"
             android:minWidth="80dp"
-            android:textColor="@color/desktop_mode_caption_app_name_dark"
             android:textAppearance="@android:style/TextAppearance.Material.Title"
             android:textSize="14sp"
             android:textFontWeight="500"
@@ -62,7 +60,6 @@
             android:layout_height="16dp"
             android:contentDescription="@string/expand_menu_text"
             android:src="@drawable/ic_baseline_expand_more_24"
-            android:tint="@color/desktop_mode_caption_expand_button_dark"
             android:background="@null"
             android:scaleType="fitCenter"
             android:clickable="false"
@@ -87,8 +84,7 @@
         android:src="@drawable/decor_desktop_mode_maximize_button_dark"
         android:scaleType="fitCenter"
         android:gravity="end"
-        android:background="@null"
-        android:tint="@color/desktop_mode_caption_maximize_button_dark"/>
+        android:background="@null"/>
 
     <ImageButton
         android:id="@+id/close_window"
@@ -100,6 +96,5 @@
         android:src="@drawable/decor_close_button_dark"
         android:scaleType="fitCenter"
         android:gravity="end"
-        android:background="@null"
-        android:tint="@color/desktop_mode_caption_close_button_dark"/>
+        android:background="@null"/>
 </com.android.wm.shell.windowdecor.WindowDecorLinearLayout>

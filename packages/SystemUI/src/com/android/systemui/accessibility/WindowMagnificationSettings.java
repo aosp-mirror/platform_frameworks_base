@@ -59,8 +59,8 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
-import com.android.systemui.res.R;
 import com.android.systemui.common.ui.view.SeekBarWithIconButtonsView;
+import com.android.systemui.res.R;
 import com.android.systemui.util.settings.SecureSettings;
 
 import java.lang.annotation.Retention;
@@ -671,17 +671,17 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
     }
 
     private Rect getDraggableWindowBounds() {
-        final int layoutMargin = mContext.getResources().getDimensionPixelSize(
-                R.dimen.magnification_switch_button_margin);
         final WindowMetrics windowMetrics = mWindowManager.getCurrentWindowMetrics();
         final Insets windowInsets = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(
                 WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+        // re-measure the settings panel view so that we can get the correct view size to inset
+        int unspecificSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        mSettingView.measure(unspecificSpec, unspecificSpec);
+
         final Rect boundRect = new Rect(windowMetrics.getBounds());
         boundRect.offsetTo(0, 0);
-        boundRect.inset(0, 0, mParams.width, mParams.height);
+        boundRect.inset(0, 0, mSettingView.getMeasuredWidth(), mSettingView.getMeasuredHeight());
         boundRect.inset(windowInsets);
-        boundRect.inset(layoutMargin, layoutMargin);
-
         return boundRect;
     }
 

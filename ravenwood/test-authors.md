@@ -71,10 +71,10 @@ public class MyCodeTest {
 Once you’ve defined your test, you can use typical commands to execute it locally:
 
 ```
-$ atest MyTestsRavenwood
+$ atest --host MyTestsRavenwood
 ```
 
-> **Note:** There's a known bug where `atest` currently requires a connected device to run Ravenwood tests, but that device isn't used for testing.
+> **Note:** There's a known bug where `atest` currently requires a connected device to run Ravenwood tests, but that device isn't used for testing. Using the `--host` argument above is a way to bypass this requirement until bug #312525698 is fixed.
 
 You can also run your new tests automatically via `TEST_MAPPING` rules like this:
 
@@ -88,6 +88,27 @@ You can also run your new tests automatically via `TEST_MAPPING` rules like this
   ]
 }
 ```
+
+## Strategies for feature flags
+
+Ravenwood supports writing tests against logic that uses feature flags through the existing `SetFlagsRule` infrastructure maintained by the feature flagging team:
+
+```
+import android.platform.test.flag.junit.SetFlagsRule;
+
+@RunWith(AndroidJUnit4.class)
+public class MyCodeTest {
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
+    @Test
+    public void testEnabled() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_MY_FLAG);
+        // verify test logic that depends on flag being enabled
+    }
+```
+
+This naturally composes together well with any `RavenwoodRule` that your test may need.
 
 ## Strategies for migration/bivalent tests
 

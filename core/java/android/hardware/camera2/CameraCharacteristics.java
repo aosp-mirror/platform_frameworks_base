@@ -35,6 +35,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.camera.flags.Flags;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -206,6 +207,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     private List<CameraCharacteristics.Key<?>> mKeysNeedingPermission;
     private List<CaptureRequest.Key<?>> mAvailableRequestKeys;
     private List<CaptureRequest.Key<?>> mAvailableSessionKeys;
+    private List<CameraCharacteristics.Key<?>> mAvailableSessionCharacteristicsKeys;
     private List<CaptureRequest.Key<?>> mAvailablePhysicalRequestKeys;
     private List<CaptureResult.Key<?>> mAvailableResultKeys;
     private ArrayList<RecommendedStreamConfigurationMap> mRecommendedConfigurations;
@@ -543,6 +545,27 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
                             /*includeSynthetic*/ false);
         }
         return mAvailableSessionKeys;
+    }
+
+    /**
+     * <p>Get the keys in Camera Characteristics whose values are capture session specific.
+     * The session specific characteristics can be acquired by calling
+     * CameraDevice.getSessionCharacteristics(). </p>
+     *
+     * <p>Note that getAvailableSessionKeys returns the CaptureRequest keys that are difficult to
+     * apply per-frame, whereas this function returns CameraCharacteristics keys that are dependent
+     * on a particular SessionConfiguration.</p>
+     *
+     * @return List of CameraCharacteristic keys containing characterisitics specific to a session
+     * configuration. For Android 15, this list only contains CONTROL_ZOOM_RATIO_RANGE.
+     */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
+    public List<CameraCharacteristics.Key<?>> getAvailableSessionCharacteristicsKeys() {
+        if (mAvailableSessionCharacteristicsKeys == null) {
+            mAvailableSessionCharacteristicsKeys = Arrays.asList(CONTROL_ZOOM_RATIO_RANGE);
+        }
+        return mAvailableSessionCharacteristicsKeys;
     }
 
     /**

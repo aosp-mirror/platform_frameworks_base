@@ -278,10 +278,6 @@ object Flags {
             "qs_user_detail_shortcut"
         )
 
-    // TODO(b/296357483): Tracking Bug
-    @JvmField
-    val QS_PIPELINE_NEW_TILES = unreleasedFlag("qs_pipeline_new_tiles")
-
     // TODO(b/254512383): Tracking Bug
     @JvmField
     val FULL_SCREEN_USER_SWITCHER =

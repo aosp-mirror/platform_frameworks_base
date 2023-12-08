@@ -59,6 +59,4 @@ android_app {
     platform_apis: true,
     resource_dirs: ["res"],
     certificate: "platform",
-    // This app uses allowlisted privileged permissions.
-    privileged: true,
 }

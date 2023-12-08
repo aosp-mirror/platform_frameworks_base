@@ -567,12 +567,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"បានភ្ជាប់តាមរយៈ ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"បានភ្ជាប់តាមរយៈ eARC"</string>
-    <!-- no translation found for tv_media_transfer_default (5403053145185843843) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_hdmi (692569220956829921) -->
-    <skip />
-    <!-- no translation found for tv_media_transfer_internal_speakers (8181494402866565865) -->
-    <skip />
+    <string name="tv_media_transfer_default" msgid="5403053145185843843">"លំនាំដើម​ទូរទស្សន៍"</string>
+    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"ធាតុចេញ HDMI"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ឧបករណ៍បំពងសំឡេងខាងក្នុង"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"មាន​បញ្ហា​ក្នុងការ​ភ្ជាប់។ បិទ រួច​បើក​ឧបករណ៍​វិញ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ឧបករណ៍​សំឡេងប្រើខ្សែ"</string>
     <string name="help_label" msgid="3528360748637781274">"ជំនួយ និងមតិកែលម្អ"</string>

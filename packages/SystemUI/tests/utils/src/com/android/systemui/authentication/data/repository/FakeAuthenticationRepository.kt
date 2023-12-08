@@ -166,7 +166,8 @@ class FakeAuthenticationRepository(
                 AuthenticationPatternCoordinate(0, 2),
             )
         const val MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING = 5
-        const val THROTTLE_DURATION_MS = 30000
+        const val THROTTLE_DURATION_SECONDS = 30
+        const val THROTTLE_DURATION_MS = THROTTLE_DURATION_SECONDS * 1000
         const val HINTING_PIN_LENGTH = 6
         val DEFAULT_PIN = buildList { repeat(HINTING_PIN_LENGTH) { add(it + 1) } }
 

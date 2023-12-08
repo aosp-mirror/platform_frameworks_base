@@ -66,6 +66,7 @@
     <string name="uninstall_keep_data" msgid="7002379587465487550">"অ্যাপ ডেটার মধ্যে <xliff:g id="SIZE">%1$s</xliff:g> রেখে দিন।"</string>
     <string name="uninstall_application_text_current_user_clone_profile" msgid="835170400160011636">"আপনি এই অ্যাপ মুছে ফেলতে চান?"</string>
     <string name="uninstall_application_text_with_clone_instance" msgid="6944473334273349036">"আপনি এই অ্যাপ আনইনস্টল করতে চান? <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ক্লোনও মুছে ফেলা হবে।"</string>
+    <string name="uninstall_application_text_current_user_private_profile" msgid="867004464945674674">"আপনার ব্যক্তিগত স্পেস থেকে এই অ্যাপ আনইনস্টল করতে চান?"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"আনইনস্টল করা হচ্ছে"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"আনইনস্টল করা যায়নি"</string>
     <string name="uninstalling" msgid="8709566347688966845">"আনইনস্টল করা হচ্ছে…"</string>
@@ -106,4 +107,21 @@
     <string name="unarchive_application_title" msgid="7958278328280721421">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> থেকে <xliff:g id="APPNAME">%1$s</xliff:g> ফিরিয়ে আনবেন?"</string>
     <string name="unarchive_body_text" msgid="8244155079861708964">"এই অ্যাপটি ব্যাকগ্রাউন্ডে ডাউনলোড হওয়া শুরু হবে"</string>
     <string name="restore" msgid="8460854736328970444">"ফিরিয়ে আনুন"</string>
+    <string name="unarchive_error_offline_title" msgid="4021785324565678605">"আপনি অফলাইন আছেন"</string>
+    <string name="unarchive_error_offline_body" msgid="255717000519772755">"আপনি ইন্টারনেটের সাথে কানেক্ট থাকাকালীন এই অ্যাপ অটোমেটিক ফিরিয়ে আনা হবে"</string>
+    <string name="unarchive_error_generic_title" msgid="7123457671482449992">"কোনও সমস্যা হয়েছে"</string>
+    <string name="unarchive_error_generic_body" msgid="4486803312463813079">"এই অ্যাপ ফিরিয়ে আনতে চেষ্টা করার সময় সমস্যা হয়েছে"</string>
+    <string name="unarchive_error_storage_title" msgid="5080723357273852630">"পর্যাপ্ত স্টোরেজ নেই"</string>
+    <string name="unarchive_error_storage_body" msgid="6879544407568780524">"এই অ্যাপ ফিরিয়ে আনতে, এই ডিভাইসের স্পেস খালি করতে পারেন। স্টোরেজ প্রয়োজন: <xliff:g id="BYTES">%1$s</xliff:g>"</string>
+    <string name="unarchive_action_required_title" msgid="4971245740162604619">"ব্যবস্থা নিতে হবে"</string>
+    <string name="unarchive_action_required_body" msgid="1679431572983989231">"এই অ্যাপ ফিরিয়ে আনতে পরবর্তী ধাপগুলি ফলো করুন"</string>
+    <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> বন্ধ করা হয়েছে"</string>
+    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
+    <skip />
+    <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> আনইনস্টল করা হয়েছে"</string>
+    <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"এই অ্যাপ ফিরিয়ে আনতে, আপনাকে <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ইনস্টল করতে হবে"</string>
+    <string name="unarchive_action_required_continue" msgid="5711202111224184257">"চালিয়ে যান"</string>
+    <string name="unarchive_clear_storage_button" msgid="1549537154535608744">"স্টোরেজ মুছুন"</string>
+    <string name="unarchive_settings_button" msgid="3504171760009177425">"সেটিংস"</string>
+    <string name="close" msgid="5214897374055647996">"বন্ধ করুন"</string>
 </resources>
