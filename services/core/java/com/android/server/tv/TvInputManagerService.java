@@ -1856,7 +1856,7 @@ public final class TvInputManagerService extends SystemService {
                                     logExternalInputEvent(
                                             FrameworkStatsLog
                                                     .EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__TUNED,
-                                            sessionState.inputId, sessionState);
+                                            sessionActualInputId, sessionState);
                                 }
                                 mOnScreenInputId = sessionActualInputId;
                                 mOnScreenSessionState = sessionState;
@@ -3119,20 +3119,20 @@ public final class TvInputManagerService extends SystemService {
     @GuardedBy("mLock")
     private void logExternalInputEvent(int eventType, String inputId, SessionState sessionState) {
         UserState userState = getOrCreateUserStateLocked(sessionState.userId);
-        // Try finding the actual input id in inputMap. If not found, find the input id as is.
-        String inputIdForLogging = getSessionActualInputId(sessionState);
-        TvInputState tvInputState = userState.inputMap.get(inputIdForLogging);
+        TvInputState tvInputState = userState.inputMap.get(inputId);
         if (tvInputState == null) {
-            inputIdForLogging = inputId;
-            tvInputState = userState.inputMap.get(inputIdForLogging);
+            Slog.w(TAG, "Cannot find input state for input id " + inputId);
+            // If input id is not found, try to find the input id of this sessionState.
+            inputId = sessionState.inputId;
+            tvInputState = userState.inputMap.get(inputId);
         }
         if (tvInputState == null) {
-            Slog.w(TAG, "Cannot find input state for input id " + inputIdForLogging);
+            Slog.w(TAG, "Cannot find input state for sessionState.inputId " + inputId);
             return;
         }
         TvInputInfo tvInputInfo = tvInputState.info;
         if (tvInputInfo == null) {
-            Slog.w(TAG, "TvInputInfo is null for input id " + inputIdForLogging);
+            Slog.w(TAG, "TvInputInfo is null for input id " + inputId);
             return;
         }
         int inputState = tvInputState.state;
@@ -3675,7 +3675,7 @@ public final class TvInputManagerService extends SystemService {
                                 logExternalInputEvent(
                                         FrameworkStatsLog
                                                 .EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__TUNED,
-                                        mSessionState.inputId, mSessionState);
+                                        sessionActualInputId, mSessionState);
                             }
                             mOnScreenInputId = sessionActualInputId;
                             mOnScreenSessionState = mSessionState;
