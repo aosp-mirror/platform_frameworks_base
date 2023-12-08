@@ -17,9 +17,11 @@
 package android.os;
 
 import static android.os.Flags.FLAG_STATE_OF_HEALTH_PUBLIC;
+import static android.os.Flags.FLAG_BATTERY_PART_STATUS_API;
 
 import android.Manifest.permission;
 import android.annotation.FlaggedApi;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
@@ -236,6 +238,31 @@ public class BatteryManager {
     public static final int CHARGING_POLICY_ADAPTIVE_LONGLIFE =
                                             OsProtoEnums.CHARGING_POLICY_ADAPTIVE_LONGLIFE; // = 4
 
+    // values for "battery part status" property
+    /**
+     * Battery part status is not supported.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int PART_STATUS_UNSUPPORTED = 0;
+
+    /**
+     * Battery is the original device battery.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int PART_STATUS_ORIGINAL = 1;
+
+    /**
+     * Battery has been replaced.
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int PART_STATUS_REPLACED = 2;
+
     /** @hide */
     @SuppressLint("UnflaggedApi") // TestApi without associated feature.
     @TestApi
@@ -366,6 +393,32 @@ public class BatteryManager {
     @FlaggedApi(FLAG_STATE_OF_HEALTH_PUBLIC)
     public static final int BATTERY_PROPERTY_STATE_OF_HEALTH = 10;
 
+    /**
+     * Battery part serial number.
+     *
+     * <p class="note">
+     * The sender must hold the {@link android.Manifest.permission#BATTERY_STATS} permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(permission.BATTERY_STATS)
+    @SystemApi
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int BATTERY_PROPERTY_SERIAL_NUMBER = 11;
+
+    /**
+     * Battery part status from a BATTERY_PART_STATUS_* value.
+     *
+     * <p class="note">
+     * The sender must hold the {@link android.Manifest.permission#BATTERY_STATS} permission.
+     *
+     * @hide
+     */
+    @RequiresPermission(permission.BATTERY_STATS)
+    @SystemApi
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public static final int BATTERY_PROPERTY_PART_STATUS = 12;
+
     private final Context mContext;
     private final IBatteryStats mBatteryStats;
     private final IBatteryPropertiesRegistrar mBatteryPropertiesRegistrar;
@@ -431,6 +484,25 @@ public class BatteryManager {
     }
 
     /**
+     * Same as queryProperty, but for strings.
+     */
+    private String queryStringProperty(int id) {
+        if (mBatteryPropertiesRegistrar == null) {
+            return null;
+        }
+
+        try {
+            BatteryProperty prop = new BatteryProperty();
+            if (mBatteryPropertiesRegistrar.getProperty(id, prop) == 0) {
+                return prop.getString();
+            }
+            return null;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Return the value of a battery property of integer type.
      *
      * @param id identifier of the requested property
@@ -461,6 +533,21 @@ public class BatteryManager {
      */
     public long getLongProperty(int id) {
         return queryProperty(id);
+    }
+
+    /**
+     * Return the value of a battery property of String type. If the
+     * platform does not provide the property queried, this value will
+     * be null.
+     *
+     * @param id identifier of the requested property.
+     *
+     * @return the property value, or null if not supported.
+     */
+    @Nullable
+    @FlaggedApi(FLAG_BATTERY_PART_STATUS_API)
+    public String getStringProperty(int id) {
+        return queryStringProperty(id);
     }
 
     /**

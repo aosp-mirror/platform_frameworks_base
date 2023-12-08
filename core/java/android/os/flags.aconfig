@@ -106,3 +106,11 @@ flag {
     bug: "305311707"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "battery_part_status_api"
+    namespace: "phoenix"
+    description: "Feature flag for adding Health HAL v3 APIs."
+    is_fixed_read_only: true
+    bug: "309792384"
+}
