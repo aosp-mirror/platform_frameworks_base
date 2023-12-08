@@ -58,6 +58,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.utils.EventLogger;
@@ -1077,8 +1078,8 @@ public class BtHelper {
         return mLeAudio.getGroupId(device);
     }
 
-    /*package*/ List<String> getLeAudioGroupAddresses(int groupId) {
-        List<String> addresses = new ArrayList<String>();
+    /*package*/ List<Pair<String, String>> getLeAudioGroupAddresses(int groupId) {
+        List<Pair<String, String>> addresses = new ArrayList<>();
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter == null || mLeAudio == null) {
             return addresses;
@@ -1086,7 +1087,7 @@ public class BtHelper {
         List<BluetoothDevice> activeDevices = adapter.getActiveDevices(BluetoothProfile.LE_AUDIO);
         for (BluetoothDevice device : activeDevices) {
             if (device != null && mLeAudio.getGroupId(device) == groupId) {
-                addresses.add(device.getAddress());
+                addresses.add(new Pair(device.getAddress(), device.getIdentityAddress()));
             }
         }
         return addresses;
