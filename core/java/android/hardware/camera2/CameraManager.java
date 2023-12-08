@@ -1844,11 +1844,34 @@ public final class CameraManager {
      * Remaps Camera Ids in the CameraService.
      *
      * @hide
-    */
+     */
     @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
     public void remapCameraIds(@NonNull CameraIdRemapping cameraIdRemapping)
             throws CameraAccessException, SecurityException, IllegalArgumentException {
         CameraManagerGlobal.get().remapCameraIds(cameraIdRemapping);
+    }
+
+    /**
+     * Injects session params into existing clients in the CameraService.
+     *
+     * @param cameraId       The camera id of client to inject session params into.
+     *                       If no such client exists for cameraId, no injection will
+     *                       take place.
+     * @param sessionParams  A {@link CaptureRequest} object containing the
+     *                       the sessionParams to inject into the existing client.
+     *
+     * @throws CameraAccessException    {@link CameraAccessException#CAMERA_DISCONNECTED} will be
+     *                                  thrown if camera service is not available. Further, if
+     *                                  if no such client exists for cameraId,
+     *                                  {@link CameraAccessException#CAMERA_ERROR} will be thrown.
+     * @throws SecurityException        If the caller does not have permission to inject session
+     *                                  params
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.CAMERA_INJECT_EXTERNAL_CAMERA)
+    public void injectSessionParams(@NonNull String cameraId, @NonNull CaptureRequest sessionParams)
+            throws CameraAccessException, SecurityException {
+        CameraManagerGlobal.get().injectSessionParams(cameraId, sessionParams);
     }
 
     /**
@@ -2100,6 +2123,30 @@ public final class CameraManager {
                 try {
                     cameraService.remapCameraIds(cameraIdRemapping);
                     mActiveCameraIdRemapping = cameraIdRemapping;
+                } catch (ServiceSpecificException e) {
+                    throwAsPublicException(e);
+                } catch (RemoteException e) {
+                    throw new CameraAccessException(
+                            CameraAccessException.CAMERA_DISCONNECTED,
+                            "Camera service is currently unavailable.");
+                }
+            }
+        }
+
+        /** Injects session params into an existing client for cameraid. */
+        public void injectSessionParams(@NonNull String cameraId,
+                @NonNull CaptureRequest sessionParams)
+                throws CameraAccessException, SecurityException {
+            synchronized (mLock) {
+                ICameraService cameraService = getCameraService();
+                if (cameraService == null) {
+                    throw new CameraAccessException(
+                            CameraAccessException.CAMERA_DISCONNECTED,
+                            "Camera service is currently unavailable.");
+                }
+
+                try {
+                    cameraService.injectSessionParams(cameraId, sessionParams.getNativeMetadata());
                 } catch (ServiceSpecificException e) {
                     throwAsPublicException(e);
                 } catch (RemoteException e) {
