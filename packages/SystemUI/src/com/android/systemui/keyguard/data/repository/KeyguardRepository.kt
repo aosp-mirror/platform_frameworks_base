@@ -160,6 +160,9 @@ interface KeyguardRepository {
     /** Last point that [KeyguardRootView] was tapped */
     val lastRootViewTapPosition: MutableStateFlow<Point?>
 
+    /** Is the ambient indication area visible? */
+    val ambientIndicationVisible: MutableStateFlow<Boolean>
+
     /** Observable for the [StatusBarState] */
     val statusBarState: StateFlow<StatusBarState>
 
@@ -422,6 +425,8 @@ constructor(
     }
 
     override val lastRootViewTapPosition: MutableStateFlow<Point?> = MutableStateFlow(null)
+
+    override val ambientIndicationVisible: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override val isDreamingWithOverlay: Flow<Boolean> =
         conflatedCallbackFlow {

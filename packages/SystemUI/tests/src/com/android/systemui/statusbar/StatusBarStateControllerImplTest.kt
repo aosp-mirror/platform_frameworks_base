@@ -27,6 +27,7 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeCommandQueue
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
@@ -53,6 +54,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeUserSe
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.android.systemui.statusbar.policy.data.repository.FakeDeviceProvisioningRepository
 import com.android.systemui.util.mockito.mock
+import kotlinx.coroutines.flow.emptyFlow
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -83,6 +85,7 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
         FromPrimaryBouncerTransitionInteractor
     @Mock lateinit var interactionJankMonitor: InteractionJankMonitor
     @Mock lateinit var mockDarkAnimator: ObjectAnimator
+    @Mock lateinit var deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor
 
     private lateinit var controller: StatusBarStateControllerImpl
     private lateinit var uiEventLogger: UiEventLoggerFake
@@ -164,6 +167,8 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                 mock(),
                 powerInteractor
             )
+
+        whenever(deviceEntryUdfpsInteractor.isUdfpsSupported).thenReturn(emptyFlow())
         shadeInteractor =
             ShadeInteractorImpl(
                 testScope.backgroundScope,
@@ -181,7 +186,9 @@ class StatusBarStateControllerImplTest : SysuiTestCase() {
                     SharedNotificationContainerInteractor(
                         configurationRepository,
                         mContext,
-                        ResourcesSplitShadeStateController()
+                        ResourcesSplitShadeStateController(),
+                        keyguardInteractor,
+                        deviceEntryUdfpsInteractor,
                     ),
                     shadeRepository,
                 )

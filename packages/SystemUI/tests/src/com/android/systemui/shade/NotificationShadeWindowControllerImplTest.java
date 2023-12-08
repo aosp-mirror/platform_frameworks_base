@@ -23,6 +23,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -54,6 +56,7 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -233,6 +236,11 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                 mKeyguardSecurityModel,
                 mSelectedUserInteractor,
                 powerInteractor);
+
+        DeviceEntryUdfpsInteractor deviceEntryUdfpsInteractor =
+                mock(DeviceEntryUdfpsInteractor.class);
+        when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(emptyFlow());
+
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
                 new FakeDeviceProvisioningRepository(),
@@ -249,7 +257,9 @@ public class NotificationShadeWindowControllerImplTest extends SysuiTestCase {
                         new SharedNotificationContainerInteractor(
                                 configurationRepository,
                                 mContext,
-                                new ResourcesSplitShadeStateController()),
+                                new ResourcesSplitShadeStateController(),
+                                keyguardInteractor,
+                                deviceEntryUdfpsInteractor),
                         shadeRepository
                 )
         );
