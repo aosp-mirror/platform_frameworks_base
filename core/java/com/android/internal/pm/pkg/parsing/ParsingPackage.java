@@ -112,7 +112,7 @@ public interface ParsingPackage {
     ParsingPackage addUsesOptionalNativeLibrary(String libraryName);
 
     ParsingPackage addUsesSdkLibrary(String libraryName, long versionMajor,
-            String[] certSha256Digests);
+            String[] certSha256Digests, boolean usesSdkLibrariesOptional);
 
     ParsingPackage addUsesStaticLibrary(String libraryName, long version,
             String[] certSha256Digests);

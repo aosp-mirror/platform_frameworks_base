@@ -2598,6 +2598,8 @@ public class ParsingPackageUtils {
                     R.styleable.AndroidManifestUsesSdkLibrary_versionMajor, -1);
             String certSha256Digest = sa.getNonResourceString(R.styleable
                     .AndroidManifestUsesSdkLibrary_certDigest);
+            boolean optional =
+                    sa.getBoolean(R.styleable.AndroidManifestUsesSdkLibrary_optional, false);
 
             // Since an APK providing a static shared lib can only provide the lib - fail if
             // malformed
@@ -2641,7 +2643,8 @@ public class ParsingPackageUtils {
             System.arraycopy(additionalCertSha256Digests, 0, certSha256Digests,
                     1, additionalCertSha256Digests.length);
 
-            return input.success(pkg.addUsesSdkLibrary(lname, versionMajor, certSha256Digests));
+            return input.success(
+                    pkg.addUsesSdkLibrary(lname, versionMajor, certSha256Digests, optional));
         } finally {
             sa.recycle();
         }

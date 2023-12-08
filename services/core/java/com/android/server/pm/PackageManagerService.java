@@ -7113,9 +7113,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         if (info == null) {
                             continue;
                         }
-                        final List<VersionedPackage> dependents =
-                                computer.getPackagesUsingSharedLibrary(info, 0, Process.SYSTEM_UID,
-                                        userId);
+                        var usingSharedLibraryPair = computer.getPackagesUsingSharedLibrary(info, 0,
+                                Process.SYSTEM_UID, userId);
+                        final List<VersionedPackage> dependents = usingSharedLibraryPair.first;
                         if (dependents == null) {
                             continue;
                         }

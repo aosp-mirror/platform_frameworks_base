@@ -18,7 +18,6 @@ package com.android.server.pm;
 
 import static android.Manifest.permission.CONTROL_KEYGUARD;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
-import static android.content.pm.Flags.sdkLibIndependence;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.DELETE_KEEP_DATA;
@@ -40,6 +39,7 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationPackageManager;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.IPackageDeleteObserver2;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
@@ -71,8 +71,6 @@ import com.android.server.pm.pkg.PackageUserState;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
 import dalvik.system.VMRuntime;
-
-import java.util.List;
 
 /**
  * Deletes a package. Uninstall if installed, or at least deletes the base directory if it's called
@@ -181,16 +179,36 @@ final class DeletePackageHelper {
                 }
 
                 if (libraryInfo != null) {
+                    boolean flagSdkLibIndependence = Flags.sdkLibIndependence();
                     for (int currUserId : allUsers) {
                         if (removeUser != UserHandle.USER_ALL && removeUser != currUserId) {
                             continue;
                         }
-                        List<VersionedPackage> libClientPackages =
-                                computer.getPackagesUsingSharedLibrary(libraryInfo,
-                                        MATCH_KNOWN_PACKAGES, Process.SYSTEM_UID, currUserId);
-                        boolean allowSdkLibIndependence =
-                                (pkg.getSdkLibraryName() != null) && sdkLibIndependence();
-                        if (!ArrayUtils.isEmpty(libClientPackages) && !allowSdkLibIndependence) {
+                        var libClientPackagesPair = computer.getPackagesUsingSharedLibrary(
+                                libraryInfo, MATCH_KNOWN_PACKAGES, Process.SYSTEM_UID, currUserId);
+                        var libClientPackages = libClientPackagesPair.first;
+                        var libClientOptional = libClientPackagesPair.second;
+                        // We by default don't allow removing a package if the host lib is still be
+                        // used by other client packages
+                        boolean allowLibIndependence = false;
+                        // Only when the sdkLibIndependence flag is enabled we will respect the
+                        // "optional" attr in uses-sdk-library. Only allow to remove sdk-lib host
+                        // package if no required clients depend on it
+                        if ((pkg.getSdkLibraryName() != null)
+                                && !ArrayUtils.isEmpty(libClientPackages)
+                                && !ArrayUtils.isEmpty(libClientOptional)
+                                && (libClientPackages.size() == libClientOptional.size())
+                                && flagSdkLibIndependence) {
+                            allowLibIndependence = true;
+                            for (int i = 0; i < libClientPackages.size(); i++) {
+                                boolean usesSdkLibOptional = libClientOptional.get(i);
+                                if (!usesSdkLibOptional) {
+                                    allowLibIndependence = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!ArrayUtils.isEmpty(libClientPackages) && !allowLibIndependence) {
                             Slog.w(TAG, "Not removing package " + pkg.getManifestPackageName()
                                     + " hosting lib " + libraryInfo.getName() + " version "
                                     + libraryInfo.getLongVersion() + " used by " + libClientPackages

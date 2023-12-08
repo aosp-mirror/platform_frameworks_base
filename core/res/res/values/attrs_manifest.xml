@@ -2515,6 +2515,10 @@
         <attr name="versionMajor" format="integer" />
         <!-- The SHA-256 digest of the SDK library signing certificate. -->
         <attr name="certDigest" format="string" />
+        <!-- Specify whether the SDK is optional. The default is false, false means app can be
+        installed even if the SDK library doesn't exist, and the SDK library can be uninstalled
+        when the app is still installed. -->
+        <attr name="optional" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>static-library</code> tag declares that this apk is providing itself
