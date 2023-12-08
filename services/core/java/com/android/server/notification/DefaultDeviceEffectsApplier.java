@@ -32,6 +32,8 @@ import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ConfigChangeOrigin;
 
+import com.android.internal.annotations.GuardedBy;
+
 /** Default implementation for {@link DeviceEffectsApplier}. */
 class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
 
@@ -49,6 +51,10 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
     private final PowerManager mPowerManager;
     private final UiModeManager mUiModeManager;
     private final WallpaperManager mWallpaperManager;
+
+    private final Object mRegisterReceiverLock = new Object();
+    @GuardedBy("mRegisterReceiverLock")
+    private boolean mIsScreenOffReceiverRegistered;
 
     private ZenDeviceEffects mLastAppliedEffects = new ZenDeviceEffects.Builder().build();
     private boolean mPendingNightMode;
@@ -96,7 +102,6 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
 
     private void updateOrScheduleNightMode(boolean useNightMode, @ConfigChangeOrigin int origin) {
         mPendingNightMode = useNightMode;
-        safeUnregisterReceiver(mNightModeWhenScreenOff);
 
         // Changing the theme can be disruptive for the user (Activities are likely recreated, may
         // lose some state). Therefore we only apply the change immediately if the rule was
@@ -106,17 +111,18 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
                 || origin == ZenModeConfig.UPDATE_ORIGIN_USER
                 || origin == ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
                 || !mPowerManager.isInteractive()) {
+            unregisterScreenOffReceiver();
             updateNightModeImmediately(useNightMode);
         } else {
-            mContext.registerReceiver(mNightModeWhenScreenOff, SCREEN_OFF_INTENT_FILTER,
-                    Context.RECEIVER_NOT_EXPORTED);
+            registerScreenOffReceiver();
         }
     }
 
+    @GuardedBy("mRegisterReceiverLock")
     private final BroadcastReceiver mNightModeWhenScreenOff = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            safeUnregisterReceiver(mNightModeWhenScreenOff);
+            unregisterScreenOffReceiver();
             updateNightModeImmediately(mPendingNightMode);
         }
     };
@@ -130,11 +136,22 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
         });
     }
 
-    private void safeUnregisterReceiver(BroadcastReceiver br) {
-        try {
-            mContext.unregisterReceiver(br);
-        } catch (IllegalArgumentException e) {
-            // It's fine, we haven't registered it yet.
+    private void registerScreenOffReceiver() {
+        synchronized (mRegisterReceiverLock) {
+            if (!mIsScreenOffReceiverRegistered) {
+                mContext.registerReceiver(mNightModeWhenScreenOff, SCREEN_OFF_INTENT_FILTER,
+                        Context.RECEIVER_NOT_EXPORTED);
+                mIsScreenOffReceiverRegistered = true;
+            }
+        }
+    }
+
+    private void unregisterScreenOffReceiver() {
+        synchronized (mRegisterReceiverLock) {
+            if (mIsScreenOffReceiverRegistered) {
+                mIsScreenOffReceiverRegistered = false;
+                mContext.unregisterReceiver(mNightModeWhenScreenOff);
+            }
         }
     }
 }

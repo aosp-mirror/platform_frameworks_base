@@ -27,7 +27,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -200,7 +199,7 @@ public class DefaultDeviceEffectsApplierTest {
         // So the effect is applied, and we stopped listening for this event.
         verify(mUiModeManager).setNightModeActivatedForCustomMode(
                 eq(MODE_NIGHT_CUSTOM_TYPE_BEDTIME), eq(true));
-        verify(mContext, atLeastOnce()).unregisterReceiver(eq(screenOffReceiver));
+        verify(mContext).unregisterReceiver(eq(screenOffReceiver));
     }
 
     @Test
