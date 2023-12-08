@@ -62,3 +62,10 @@ flag {
     description: "Allows clients of privileged MediaRouter2 that hold INTERACT_ACROSS_USERS_FULL to control routing across users."
     bug: "288580225"
 }
+
+flag {
+    name: "enable_use_of_bluetooth_device_get_alias_for_mr2info_get_name"
+    namespace: "media_solutions"
+    description: "Use BluetoothDevice.getAlias to populate the name of Bluetooth MediaRoute2Infos."
+    bug: "314324170"
+}
