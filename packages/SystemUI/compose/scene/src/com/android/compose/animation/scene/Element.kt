@@ -213,22 +213,11 @@ internal class ElementNode(
     override fun onDetach() {
         super.onDetach()
         removeNodeFromSceneValues()
+        maybePruneMaps(layoutImpl, element, sceneValues)
     }
 
     private fun removeNodeFromSceneValues() {
         sceneValues.nodes.remove(this)
-
-        // If element is not composed from this scene anymore, remove the scene values. This works
-        // because [onAttach] is called before [onDetach], so if an element is moved from the UI
-        // tree we will first add the new code location then remove the old one.
-        if (sceneValues.nodes.isEmpty()) {
-            element.sceneValues.remove(sceneValues.scene)
-        }
-
-        // If the element is not composed in any scene, remove it from the elements map.
-        if (element.sceneValues.isEmpty()) {
-            layoutImpl.elements.remove(element.key)
-        }
     }
 
     fun update(
@@ -237,12 +226,16 @@ internal class ElementNode(
         element: Element,
         sceneValues: Element.TargetValues,
     ) {
+        check(layoutImpl == this.layoutImpl && scene == this.scene)
         removeNodeFromSceneValues()
-        this.layoutImpl = layoutImpl
-        this.scene = scene
+
+        val prevElement = this.element
+        val prevSceneValues = this.sceneValues
         this.element = element
         this.sceneValues = sceneValues
+
         addNodeToSceneValues()
+        maybePruneMaps(layoutImpl, prevElement, prevSceneValues)
     }
 
     override fun ContentDrawScope.draw() {
@@ -257,6 +250,28 @@ internal class ElementNode(
                     if (drawScale.pivot.isUnspecified) center else drawScale.pivot,
                 ) {
                     this@draw.drawContent()
+                }
+            }
+        }
+    }
+
+    companion object {
+        private fun maybePruneMaps(
+            layoutImpl: SceneTransitionLayoutImpl,
+            element: Element,
+            sceneValues: Element.TargetValues,
+        ) {
+            // If element is not composed from this scene anymore, remove the scene values. This
+            // works because [onAttach] is called before [onDetach], so if an element is moved from
+            // the UI tree we will first add the new code location then remove the old one.
+            if (
+                sceneValues.nodes.isEmpty() && element.sceneValues[sceneValues.scene] == sceneValues
+            ) {
+                element.sceneValues.remove(sceneValues.scene)
+
+                // If the element is not composed in any scene, remove it from the elements map.
+                if (element.sceneValues.isEmpty() && layoutImpl.elements[element.key] == element) {
+                    layoutImpl.elements.remove(element.key)
                 }
             }
         }
