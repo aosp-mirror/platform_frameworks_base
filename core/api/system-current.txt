@@ -12929,6 +12929,7 @@ package android.service.voice {
     field public static final int CONFIDENCE_LEVEL_LOW = 1; // 0x1
     field public static final int CONFIDENCE_LEVEL_MEDIUM = 2; // 0x2
     field public static final int CONFIDENCE_LEVEL_NONE = 0; // 0x0
+    field @FlaggedApi("android.service.voice.flags.allow_hotword_bump_egress") public static final int CONFIDENCE_LEVEL_VERY_HIGH = 4; // 0x4
     field @NonNull public static final android.os.Parcelable.Creator<android.service.voice.HotwordRejectedResult> CREATOR;
   }
 
