@@ -57,7 +57,7 @@ public class NetworkPriorityClassifierTest extends NetworkEvaluationTestBase {
     private UnderlyingNetworkRecord mCellNetworkRecord;
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         super.setUp();
 
         mWifiNetworkRecord = getTestNetworkRecord(WIFI_NETWORK_CAPABILITIES);
