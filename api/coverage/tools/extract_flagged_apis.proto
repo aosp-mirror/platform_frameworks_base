@@ -25,10 +25,13 @@ message FlagApiMap {
 }
 
 message FlaggedApis {
-  repeated FlaggedApi flagged_api = 1;
+  repeated JavaMethod java_methods = 1;
 }
 
-message FlaggedApi {
-  string qualified_name = 1;
+message JavaMethod {
+  string package_name = 1;
+  string class_name = 2;
+  string method_name = 3;
+  repeated string parameter_types = 4;
 }
 
