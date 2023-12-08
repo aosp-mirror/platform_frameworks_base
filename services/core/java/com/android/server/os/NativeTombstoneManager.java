@@ -92,12 +92,15 @@ public final class NativeTombstoneManager {
         mHandler = thread.getThreadHandler();
 
         mWatcher = new TombstoneWatcher();
-        mWatcher.startWatching();
     }
 
     void onSystemReady() {
         registerForUserRemoval();
         registerForPackageRemoval();
+        // TombstoneWatcher depends on DropboxManagerService.
+        // DropboxManagerService started before systemReady.
+        // So it is good to call startWatching here.
+        mWatcher.startWatching();
 
         // Scan existing tombstones.
         mHandler.post(() -> {
