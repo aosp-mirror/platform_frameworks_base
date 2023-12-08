@@ -5334,14 +5334,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public String addAutomaticZenRule(AutomaticZenRule automaticZenRule, String pkg) {
-            Objects.requireNonNull(automaticZenRule, "automaticZenRule is null");
-            Objects.requireNonNull(automaticZenRule.getName(), "Name is null");
-            if (automaticZenRule.getOwner() == null
-                    && automaticZenRule.getConfigurationActivity() == null) {
-                throw new NullPointerException(
-                        "Rule must have a conditionproviderservice and/or configuration activity");
-            }
-            Objects.requireNonNull(automaticZenRule.getConditionId(), "ConditionId is null");
+            validateAutomaticZenRule(automaticZenRule);
             checkCallerIsSameApp(pkg);
             if (automaticZenRule.getZenPolicy() != null
                     && automaticZenRule.getInterruptionFilter() != INTERRUPTION_FILTER_PRIORITY) {
@@ -5367,16 +5360,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule)
-                throws RemoteException {
-            Objects.requireNonNull(automaticZenRule, "automaticZenRule is null");
-            Objects.requireNonNull(automaticZenRule.getName(), "Name is null");
-            if (automaticZenRule.getOwner() == null
-                    && automaticZenRule.getConfigurationActivity() == null) {
-                throw new NullPointerException(
-                        "Rule must have a conditionproviderservice and/or configuration activity");
-            }
-            Objects.requireNonNull(automaticZenRule.getConditionId(), "ConditionId is null");
+        public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule) {
+            validateAutomaticZenRule(automaticZenRule);
             enforcePolicyAccess(Binder.getCallingUid(), "updateAutomaticZenRule");
 
             return mZenModeHelper.updateAutomaticZenRule(id, automaticZenRule,
@@ -5384,6 +5369,29 @@ public class NotificationManagerService extends SystemService {
                     // TODO: b/308670715: Distinguish FROM_APP from FROM_USER
                     isCallerSystemOrSystemUi() ? ZenModeHelper.FROM_SYSTEM_OR_SYSTEMUI
                             : ZenModeHelper.FROM_APP);
+        }
+
+        private void validateAutomaticZenRule(AutomaticZenRule rule) {
+            Objects.requireNonNull(rule, "automaticZenRule is null");
+            Objects.requireNonNull(rule.getName(), "Name is null");
+            if (rule.getOwner() == null
+                    && rule.getConfigurationActivity() == null) {
+                throw new NullPointerException(
+                        "Rule must have a conditionproviderservice and/or configuration activity");
+            }
+            Objects.requireNonNull(rule.getConditionId(), "ConditionId is null");
+
+            if (android.app.Flags.modesApi()) {
+                if (rule.getType() == AutomaticZenRule.TYPE_MANAGED) {
+                    int uid = Binder.getCallingUid();
+                    boolean isDeviceOwner = Binder.withCleanCallingIdentity(
+                            () -> mDpm.isActiveDeviceOwner(uid));
+                    if (!isDeviceOwner) {
+                        throw new IllegalArgumentException(
+                                "Only Device Owners can use AutomaticZenRules with TYPE_MANAGED");
+                    }
+                }
+            }
         }
 
         @Override
