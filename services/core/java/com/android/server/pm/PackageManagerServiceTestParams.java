@@ -65,6 +65,7 @@ public final class PackageManagerServiceTestParams {
     public ComponentName instantAppResolverSettingsComponent;
     public boolean isPreNmr1Upgrade;
     public boolean isPreQupgrade;
+    public int priorSdkVersion = -1;
     public boolean isUpgrade;
     public LegacyPermissionManagerInternal legacyPermissionManagerInternal;
     public DisplayMetrics Metrics;
