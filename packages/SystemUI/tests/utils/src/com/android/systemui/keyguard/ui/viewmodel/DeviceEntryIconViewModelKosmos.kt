@@ -16,7 +16,6 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.deviceentry.domain.interactor.deviceEntryHapticsInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryInteractor
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryUdfpsInteractor
 import com.android.systemui.keyguard.domain.interactor.burnInInteractor
@@ -45,7 +44,6 @@ val Kosmos.deviceEntryIconViewModel by Fixture {
         shadeDependentFlows = shadeDependentFlows,
         sceneContainerFlags = sceneContainerFlags,
         keyguardViewController = { statusBarKeyguardViewManager },
-        deviceEntryHapticsInteractor = deviceEntryHapticsInteractor,
         deviceEntryInteractor = deviceEntryInteractor,
     )
 }

@@ -16,7 +16,7 @@
 
 package android.widget.listview;
 
-import android.util.ListScenario;
+import android.widget.ListScenario;
 
 /**
  * Two short items separated by one that is taller than the screen.

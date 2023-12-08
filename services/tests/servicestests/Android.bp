@@ -79,6 +79,7 @@ android_test {
         "coretests-aidl",
         "securebox",
         "flag-junit",
+        "ravenwood-junit",
     ],
 
     libs: [
@@ -138,6 +139,23 @@ android_test {
         ":com.android.apex.cts.shim.v2_unsigned_apk_container_prebuilt",
     ],
     resource_zips: [":FrameworksServicesTests_apks_as_resources"],
+}
+
+android_ravenwood_test {
+    name: "FrameworksServicesTestsRavenwood",
+    libs: [
+        "android.test.mock",
+    ],
+    static_libs: [
+        "androidx.annotation_annotation",
+        "androidx.test.rules",
+        "mockito_ravenwood",
+        "services.core",
+    ],
+    srcs: [
+        "src/com/android/server/uri/**/*.java",
+    ],
+    auto_gen_config: true,
 }
 
 java_library {

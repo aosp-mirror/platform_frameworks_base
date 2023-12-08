@@ -16,6 +16,7 @@
 
 package android.hardware.camera2;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -27,6 +28,8 @@ import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.os.Handler;
 import android.view.Surface;
+
+import com.android.internal.camera.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1412,7 +1415,35 @@ public abstract class CameraDevice implements AutoCloseable {
         throw new UnsupportedOperationException("Subclasses must override this method");
     }
 
-    /**
+  /**
+   * <p>Get camera characteristics for a particular session configuration by the camera device.</p>
+   *
+   * <p>The camera characteristics returned here is typically more limited than the characteristics
+   * returned from {@link CameraManager#getCameraCharacteristics}. The keys that have more limited
+   * values are listed in
+   * {@link CameraCharacteristics#getAvailableSessionCharacteristicsKeys}. </p>
+   *
+   * <p>Other than that, the characteristics returned here can be used in the same way as those
+   * returned from {@link CameraManager#getCameraCharacteristics}.</p>
+   *
+   * @param sessionConfig : The session configuration for which characteristics are fetched.
+   * @return CameraCharacteristics specific to a given session configuration.
+   * @throws UnsupportedOperationException if the query operation is not supported by the camera
+   *                                       device
+   * @throws IllegalArgumentException if the session configuration is invalid
+   * @throws CameraAccessException if the camera device is no longer connected or has
+   *                               encountered a fatal error
+   * @throws IllegalStateException if the camera device has been closed
+   * @see android.hardware.camera2.CameraCharacteristics#getAvailableSessionCharacteristicsKeys
+   */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_FEATURE_COMBINATION_QUERY)
+    public CameraCharacteristics getSessionCharacteristics(
+            @NonNull SessionConfiguration sessionConfig) throws CameraAccessException {
+        throw new UnsupportedOperationException("Subclasses must override this method");
+    }
+
+  /**
      * A callback objects for receiving updates about the state of a camera device.
      *
      * <p>A callback instance must be provided to the {@link CameraManager#openCamera} method to

@@ -261,7 +261,7 @@ final class RemovePackageHelper {
             sus = mPm.mSettings.getSharedUserSettingLPr(ps);
         }
 
-        mAppDataHelper.destroyAppProfilesLIF(pkg);
+        mAppDataHelper.destroyAppProfilesLIF(ps.getPackageName());
 
         final List<AndroidPackage> sharedUserPkgs =
                 sus != null ? sus.getPackages() : Collections.emptyList();
@@ -354,7 +354,7 @@ final class RemovePackageHelper {
             }
             mAppDataHelper.destroyAppDataLIF(resolvedPkg, UserHandle.USER_ALL,
                     FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL);
-            mAppDataHelper.destroyAppProfilesLIF(resolvedPkg);
+            mAppDataHelper.destroyAppProfilesLIF(resolvedPkg.getPackageName());
             if (outInfo != null) {
                 outInfo.mDataRemoved = true;
             }

@@ -10,6 +10,13 @@ flag {
 }
 
 flag {
+    name: "a11y_qs_shortcut"
+    namespace: "accessibility"
+    description: "Add Quick Setting as one of the a11y shortcut options"
+    bug: "297554934"
+}
+
+flag {
     namespace: "accessibility"
     name: "allow_shortcut_chooser_on_lockscreen"
     description: "Allows the a11y shortcut disambig dialog to appear on the lockscreen"
@@ -28,6 +35,13 @@ flag {
     name: "collection_info_item_counts"
     description: "Fields for total items and the number of important for accessibility items in a collection"
     bug: "302376158"
+}
+
+flag {
+    namespace: "accessibility"
+    name: "copy_events_for_gesture_detection"
+    description: "Creates copies of MotionEvents and GestureEvents in GestureMatcher"
+    bug: "280130713"
 }
 
 flag {

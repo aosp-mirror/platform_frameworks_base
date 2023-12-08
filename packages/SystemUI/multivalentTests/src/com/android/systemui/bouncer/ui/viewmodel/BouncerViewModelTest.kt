@@ -26,6 +26,7 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -144,7 +145,9 @@ class BouncerViewModelTest : SysuiTestCase() {
             }
             assertThat(message?.isUpdateAnimated).isFalse()
 
-            throttling?.remainingMs?.let { remainingMs -> advanceTimeBy(remainingMs.toLong()) }
+            throttling?.remainingSeconds?.let { remainingSeconds ->
+                advanceTimeBy(remainingSeconds.seconds.inWholeMilliseconds)
+            }
             assertThat(message?.isUpdateAnimated).isTrue()
         }
 
@@ -167,7 +170,9 @@ class BouncerViewModelTest : SysuiTestCase() {
             }
             assertThat(isInputEnabled).isFalse()
 
-            throttling?.remainingMs?.let { milliseconds -> advanceTimeBy(milliseconds.toLong()) }
+            throttling?.remainingSeconds?.let { remainingSeconds ->
+                advanceTimeBy(remainingSeconds.seconds.inWholeMilliseconds)
+            }
             assertThat(isInputEnabled).isTrue()
         }
 

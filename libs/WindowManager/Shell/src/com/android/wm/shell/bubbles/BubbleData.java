@@ -784,8 +784,7 @@ public class BubbleData {
         if (bubble.getPendingIntentCanceled()
                 || !(reason == Bubbles.DISMISS_AGED
                 || reason == Bubbles.DISMISS_USER_GESTURE
-                || reason == Bubbles.DISMISS_RELOAD_FROM_DISK)
-                || bubble.isAppBubble()) {
+                || reason == Bubbles.DISMISS_RELOAD_FROM_DISK)) {
             return;
         }
         if (DEBUG_BUBBLE_DATA) {

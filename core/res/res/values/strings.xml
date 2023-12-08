@@ -6312,11 +6312,6 @@ ul.</string>
     <!-- Content of connected display unavailable due to thermals notification. [CHAR LIMIT=NONE] -->
     <string name="connected_display_thermally_unavailable_notification_content">Your device is too warm and can\'t mirror to the display until it cools down</string>
 
-    <!-- Title of cable don't support displays notifications. [CHAR LIMIT=NONE] -->
-    <string name="connected_display_cable_dont_support_displays_notification_title">Cable may not support displays</string>
-    <!-- Content of cable don't support displays notification. [CHAR LIMIT=NONE] -->
-    <string name="connected_display_cable_dont_support_displays_notification_content">Your USB-C cable may not connect to displays properly</string>
-
     <!-- Name of concurrent display notifications. [CHAR LIMIT=NONE] -->
     <string name="concurrent_display_notification_name">Dual screen</string>
     <!-- Title of concurrent display active notification. [CHAR LIMIT=NONE] -->

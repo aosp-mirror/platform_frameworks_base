@@ -46,7 +46,7 @@ internal fun Modifier.swipeToScene(gestureHandler: SceneGestureHandler): Modifie
         // user can't swipe in the other direction.
         startDragImmediately =
             gestureHandler.isDrivingTransition &&
-                gestureHandler.isAnimatingOffset &&
+                gestureHandler.swipeTransition.isAnimatingOffset &&
                 !canOppositeSwipe,
         onDragStarted = gestureHandler.draggable::onDragStarted,
         onDragDelta = gestureHandler.draggable::onDelta,

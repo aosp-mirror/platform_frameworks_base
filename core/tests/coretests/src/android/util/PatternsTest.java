@@ -16,17 +16,25 @@
 
 package android.util;
 
-import androidx.test.filters.SmallTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import junit.framework.TestCase;
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PatternsTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class PatternsTest {
 
     // Tests for Patterns.TOP_LEVEL_DOMAIN
 
+    @Test
     @SmallTest
     public void testTldPattern() throws Exception {
         boolean t;
@@ -58,36 +66,42 @@ public class PatternsTest extends TestCase {
 
     // Tests for Patterns.IANA_TOP_LEVEL_DOMAINS
 
+    @Test
     @SmallTest
     public void testIanaTopLevelDomains_matchesValidTld() throws Exception {
         Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
         assertTrue("Should match 'com'", pattern.matcher("com").matches());
     }
 
+    @Test
     @SmallTest
     public void testIanaTopLevelDomains_matchesValidNewTld() throws Exception {
         Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
         assertTrue("Should match 'me'", pattern.matcher("me").matches());
     }
 
+    @Test
     @SmallTest
     public void testIanaTopLevelDomains_matchesPunycodeTld() throws Exception {
         Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
         assertTrue("Should match Punycode TLD", pattern.matcher("xn--qxam").matches());
     }
 
+    @Test
     @SmallTest
     public void testIanaTopLevelDomains_matchesIriTLD() throws Exception {
         Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
         assertTrue("Should match IRI TLD", pattern.matcher("\uD55C\uAD6D").matches());
     }
 
+    @Test
     @SmallTest
     public void testIanaTopLevelDomains_doesNotMatchWrongTld() throws Exception {
         Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
         assertFalse("Should not match 'mem'", pattern.matcher("mem").matches());
     }
 
+    @Test
     @SmallTest
     public void testIanaTopLevelDomains_doesNotMatchWrongPunycodeTld() throws Exception {
         Pattern pattern = Pattern.compile(Patterns.IANA_TOP_LEVEL_DOMAINS);
@@ -96,6 +110,7 @@ public class PatternsTest extends TestCase {
 
     // Tests for Patterns.WEB_URL
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesValidUrlWithSchemeAndHostname() throws Exception {
         String url = "http://www.android.com";
@@ -103,6 +118,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesValidUrlWithSchemeHostnameAndNewTld() throws Exception {
         String url = "http://www.android.me";
@@ -110,6 +126,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesValidUrlWithHostnameAndNewTld() throws Exception {
         String url = "android.me";
@@ -117,6 +134,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesChinesePunycodeUrlWithProtocol() throws Exception {
         String url = "http://xn--fsqu00a.xn--0zwm56d";
@@ -124,6 +142,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesChinesePunycodeUrlWithoutProtocol() throws Exception {
         String url = "xn--fsqu00a.xn--0zwm56d";
@@ -131,6 +150,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesArabicPunycodeUrlWithProtocol() throws Exception {
         String url = "http://xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx";
@@ -138,6 +158,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesArabicPunycodeUrlWithoutProtocol() throws Exception {
         String url = "xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx";
@@ -145,6 +166,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesUrlWithUnicodeDomainNameWithProtocol() throws Exception {
         String url = "http://\uD604\uAE08\uC601\uC218\uC99D.kr";
@@ -152,6 +174,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesUrlWithUnicodeDomainNameWithoutProtocol() throws Exception {
         String url = "\uD604\uAE08\uC601\uC218\uC99D.kr";
@@ -159,6 +182,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesUrlWithUnicodeTld() throws Exception {
         String url = "\uB3C4\uBA54\uC778.\uD55C\uAD6D";
@@ -166,6 +190,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesUrlWithUnicodePath() throws Exception {
         String url = "http://brainstormtech.blogs.fortune.cnn.com/2010/03/11/" +
@@ -174,19 +199,22 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_doesNotMatchValidUrlWithInvalidProtocol() throws Exception {
-        String url = "ftp://www.example.com";
+        String url = "invalid://www.example.com";
         assertFalse("Should not match URL with invalid protocol",
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesValidUrlWithPort() throws Exception {
         String url = "http://www.example.com:8080";
         assertTrue("Should match URL with port", Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesUrlWithPortAndQuery() throws Exception {
         String url = "http://www.example.com:8080/?foo=bar";
@@ -194,12 +222,14 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesUrlWithTilde() throws Exception {
         String url = "http://www.example.com:8080/~user/?foo=bar";
         assertTrue("Should match URL with tilde", Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesProtocolCaseInsensitive() throws Exception {
         String url = "hTtP://android.com";
@@ -207,6 +237,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesDomainNameWithDash() throws Exception {
         String url = "http://a-nd.r-oid.com";
@@ -218,6 +249,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesDomainNameWithUnderscore() throws Exception {
         String url = "http://a_nd.r_oid.com";
@@ -229,6 +261,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesPathAndQueryWithDollarSign() throws Exception {
         String url = "http://android.com/path$?v=$val";
@@ -240,6 +273,7 @@ public class PatternsTest extends TestCase {
                 Patterns.WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testWebUrl_matchesEmptyPathWithQueryParams() throws Exception {
         String url = "http://android.com?q=v";
@@ -261,6 +295,7 @@ public class PatternsTest extends TestCase {
 
     // Tests for Patterns.AUTOLINK_WEB_URL
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesValidUrlWithSchemeAndHostname() throws Exception {
         String url = "http://www.android.com";
@@ -268,6 +303,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesValidUrlWithSchemeHostnameAndNewTld() throws Exception {
         String url = "http://www.android.me";
@@ -275,6 +311,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesValidUrlWithHostnameAndNewTld() throws Exception {
         String url = "android.me";
@@ -286,6 +323,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesChinesePunycodeUrlWithProtocol() throws Exception {
         String url = "http://xn--fsqu00a.xn--0zwm56d";
@@ -293,6 +331,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesChinesePunycodeUrlWithoutProtocol() throws Exception {
         String url = "xn--fsqu00a.xn--0zwm56d";
@@ -300,6 +339,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesArabicPunycodeUrlWithProtocol() throws Exception {
         String url = "http://xn--4gbrim.xn--rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx";
@@ -307,6 +347,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesArabicPunycodeUrlWithoutProtocol() throws Exception {
         String url = "xn--4gbrim.xn--rmckbbajlc6dj7bxne2c.xn--wgbh1c/ar/default.aspx";
@@ -314,6 +355,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_doesNotMatchPunycodeTldThatStartsWithDash() throws Exception {
         String url = "http://xn--fsqu00a.-xn--0zwm56d";
@@ -321,6 +363,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_doesNotMatchPunycodeTldThatEndsWithDash() throws Exception {
         String url = "http://xn--fsqu00a.xn--0zwm56d-";
@@ -328,6 +371,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesUrlWithUnicodeDomainName() throws Exception {
         String url = "http://\uD604\uAE08\uC601\uC218\uC99D.kr";
@@ -339,6 +383,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesUrlWithUnicodeTld() throws Exception {
         String url = "\uB3C4\uBA54\uC778.\uD55C\uAD6D";
@@ -346,6 +391,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesUrlWithUnicodePath() throws Exception {
         String url = "http://brainstormtech.blogs.fortune.cnn.com/2010/03/11/" +
@@ -354,13 +400,15 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_doesNotMatchValidUrlWithInvalidProtocol() throws Exception {
-        String url = "ftp://www.example.com";
+        String url = "invalid://www.example.com";
         assertFalse("Should not match URL with invalid protocol",
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesValidUrlWithPort() throws Exception {
         String url = "http://www.example.com:8080";
@@ -368,6 +416,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesUrlWithPortAndQuery() throws Exception {
         String url = "http://www.example.com:8080/?foo=bar";
@@ -375,6 +424,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesUrlWithTilde() throws Exception {
         String url = "http://www.example.com:8080/~user/?foo=bar";
@@ -382,6 +432,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesProtocolCaseInsensitive() throws Exception {
         String url = "hTtP://android.com";
@@ -389,6 +440,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesUrlStartingWithHttpAndDoesNotHaveTld() throws Exception {
         String url = "http://android/#notld///a/n/d/r/o/i/d&p1=1&p2=2";
@@ -396,6 +448,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_doesNotMatchUrlsWithoutProtocolAndWithUnknownTld()
             throws Exception {
@@ -405,13 +458,15 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_doesNotPartiallyMatchUnknownProtocol() throws Exception {
-        String url = "ftp://foo.bar/baz";
+        String url = "invalid://foo.bar/baz";
         assertFalse("Should not partially match URL with unknown protocol",
                 Patterns.AUTOLINK_WEB_URL.matcher(url).find());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesValidUrlWithEmoji() throws Exception {
         String url = "Thank\u263A.com";
@@ -419,6 +474,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_doesNotMatchUrlsWithEmojiWithoutProtocolAndWithoutKnownTld()
             throws Exception {
@@ -427,6 +483,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_doesNotMatchEmailAddress()
             throws Exception {
@@ -435,6 +492,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesDomainNameWithSurrogatePairs() throws Exception {
         String url = "android\uD83C\uDF38.com";
@@ -442,6 +500,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesTldWithSurrogatePairs() throws Exception {
         String url = "http://android.\uD83C\uDF38com";
@@ -449,6 +508,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesPathWithSurrogatePairs() throws Exception {
         String url = "http://android.com/path-with-\uD83C\uDF38?v=\uD83C\uDF38";
@@ -456,6 +516,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_doesNotMatchUrlWithExcludedSurrogate() throws Exception {
         String url = "http://android\uD83F\uDFFE.com";
@@ -463,6 +524,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_doesNotMatchUnicodeSpaces() throws Exception {
         String part1 = "http://and";
@@ -493,6 +555,7 @@ public class PatternsTest extends TestCase {
         }
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesDomainNameWithDash() throws Exception {
         String url = "http://a-nd.r-oid.com";
@@ -504,6 +567,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesDomainNameWithUnderscore() throws Exception {
         String url = "http://a_nd.r_oid.com";
@@ -515,6 +579,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesPathAndQueryWithDollarSign() throws Exception {
         String url = "http://android.com/path$?v=$val";
@@ -526,6 +591,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkWebUrl_matchesEmptyPathWithQueryParams() throws Exception {
         String url = "http://android.com?q=v";
@@ -547,6 +613,7 @@ public class PatternsTest extends TestCase {
 
     // Tests for Patterns.IP_ADDRESS
 
+    @Test
     @SmallTest
     public void testIpPattern() throws Exception {
         boolean t;
@@ -560,6 +627,7 @@ public class PatternsTest extends TestCase {
 
     // Tests for Patterns.DOMAIN_NAME
 
+    @Test
     @SmallTest
     public void testDomain_matchesPunycodeTld() throws Exception {
         String domain = "xn--fsqu00a.xn--0zwm56d";
@@ -567,6 +635,7 @@ public class PatternsTest extends TestCase {
                 Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
 
+    @Test
     @SmallTest
     public void testDomain_doesNotMatchPunycodeThatStartsWithDash() throws Exception {
         String domain = "xn--fsqu00a.-xn--0zwm56d";
@@ -574,6 +643,7 @@ public class PatternsTest extends TestCase {
                 Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
 
+    @Test
     @SmallTest
     public void testDomain_doesNotMatchPunycodeThatEndsWithDash() throws Exception {
         String domain = "xn--fsqu00a.xn--0zwm56d-";
@@ -581,6 +651,7 @@ public class PatternsTest extends TestCase {
                 Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
 
+    @Test
     @SmallTest
     public void testDomain_doesNotMatchPunycodeLongerThanAllowed() throws Exception {
         String tld = "xn--";
@@ -592,6 +663,7 @@ public class PatternsTest extends TestCase {
                 Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
 
+    @Test
     @SmallTest
     public void testDomain_matchesObsoleteTld() throws Exception {
         String domain = "test.yu";
@@ -599,6 +671,7 @@ public class PatternsTest extends TestCase {
                 Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
 
+    @Test
     @SmallTest
     public void testDomain_matchesWithSubDomain() throws Exception {
         String domain = "mail.example.com";
@@ -606,6 +679,7 @@ public class PatternsTest extends TestCase {
                 Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
 
+    @Test
     @SmallTest
     public void testDomain_matchesWithoutSubDomain() throws Exception {
         String domain = "android.me";
@@ -613,6 +687,7 @@ public class PatternsTest extends TestCase {
                 Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
 
+    @Test
     @SmallTest
     public void testDomain_matchesUnicodeDomainNames() throws Exception {
         String domain = "\uD604\uAE08\uC601\uC218\uC99D.kr";
@@ -620,6 +695,7 @@ public class PatternsTest extends TestCase {
                 Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
 
+    @Test
     @SmallTest
     public void testDomain_doesNotMatchInvalidDomain() throws Exception {
         String domain = "__+&42.xer";
@@ -627,6 +703,7 @@ public class PatternsTest extends TestCase {
                 Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
 
+    @Test
     @SmallTest
     public void testDomain_matchesPunycodeArabicDomainName() throws Exception {
         String domain = "xn--4gbrim.xn----rmckbbajlc6dj7bxne2c.xn--wgbh1c";
@@ -634,6 +711,7 @@ public class PatternsTest extends TestCase {
                 Patterns.DOMAIN_NAME.matcher(domain).matches());
     }
 
+    @Test
     @SmallTest
     public void testDomain_matchesDomainNameWithDash() throws Exception {
         String url = "http://a-nd.r-oid.com";
@@ -645,6 +723,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_WEB_URL.matcher(url).matches());
     }
 
+    @Test
     @SmallTest
     public void testDomain_matchesDomainNameWithUnderscore() throws Exception {
         String url = "http://a_nd.r_oid.com";
@@ -658,6 +737,7 @@ public class PatternsTest extends TestCase {
 
     // Tests for Patterns.AUTOLINK_EMAIL_ADDRESS
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesShortValidEmail() throws Exception {
         String email = "a@a.co";
@@ -665,6 +745,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesRegularEmail() throws Exception {
         String email = "email@android.com";
@@ -672,6 +753,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesEmailWithMultipleSubdomains() throws Exception {
         String email = "email@e.somelongdomainnameforandroid.abc.uk";
@@ -679,6 +761,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesLocalPartWithDot() throws Exception {
         String email = "e.mail@android.com";
@@ -686,6 +769,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesLocalPartWithPlus() throws Exception {
         String email = "e+mail@android.com";
@@ -693,6 +777,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesLocalPartWithUnderscore() throws Exception {
         String email = "e_mail@android.com";
@@ -700,6 +785,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesLocalPartWithDash() throws Exception {
         String email = "e-mail@android.com";
@@ -707,6 +793,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesLocalPartWithApostrophe() throws Exception {
         String email = "e'mail@android.com";
@@ -714,6 +801,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesLocalPartWithDigits() throws Exception {
         String email = "123@android.com";
@@ -721,6 +809,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesUnicodeLocalPart() throws Exception {
         String email = "\uD604\uAE08\uC601\uC218\uC99D@android.kr";
@@ -728,6 +817,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesLocalPartWithEmoji() throws Exception {
         String email = "smiley\u263A@android.com";
@@ -735,6 +825,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesLocalPartWithSurrogatePairs() throws Exception {
         String email = "\uD83C\uDF38@android.com";
@@ -742,6 +833,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesDomainWithDash() throws Exception {
         String email = "email@an-droid.com";
@@ -749,6 +841,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesUnicodeDomain() throws Exception {
         String email = "email@\uD604\uAE08\uC601\uC218\uC99D.kr";
@@ -756,6 +849,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesUnicodeLocalPartAndDomain() throws Exception {
         String email = "\uD604\uAE08\uC601\uC218\uC99D@\uD604\uAE08\uC601\uC218\uC99D.kr";
@@ -763,6 +857,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesDomainWithEmoji() throws Exception {
         String email = "smiley@\u263Aandroid.com";
@@ -770,6 +865,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesDomainWithSurrogatePairs() throws Exception {
         String email = "email@\uD83C\uDF38android.com";
@@ -777,6 +873,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesLocalPartAndDomainWithSurrogatePairs()
             throws Exception {
@@ -785,6 +882,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_doesNotMatchStringWithoutAtSign() throws Exception {
         String email = "android.com";
@@ -792,6 +890,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_doesNotMatchPlainString() throws Exception {
         String email = "email";
@@ -799,6 +898,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_doesNotMatchStringWithMultipleAtSigns() throws Exception {
         String email = "email@android@android.com";
@@ -806,6 +906,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_doesNotMatchEmailWithoutTld() throws Exception {
         String email = "email@android";
@@ -813,6 +914,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_doesNotMatchLocalPartEndingWithDot() throws Exception {
         String email = "email.@android.com";
@@ -820,6 +922,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_doesNotMatchLocalPartStartingWithDot() throws Exception {
         String email = ".email@android.com";
@@ -827,6 +930,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_doesNotMatchDomainStartingWithDash() throws Exception {
         String email = "email@-android.com";
@@ -834,6 +938,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_doesNotMatchDomainWithConsecutiveDots() throws Exception {
         String email = "email@android..com";
@@ -841,6 +946,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_doesNotMatchEmailWithIpAsDomain() throws Exception {
         String email = "email@127.0.0.1";
@@ -848,6 +954,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_doesNotMatchEmailWithInvalidTld() throws Exception {
         String email = "email@android.c";
@@ -855,6 +962,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesLocalPartUpTo64Chars() throws Exception {
         String localPart = "";
@@ -871,6 +979,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesSubdomainUpTo63Chars() throws Exception {
         String subdomain = "";
@@ -888,6 +997,7 @@ public class PatternsTest extends TestCase {
                 Patterns.AUTOLINK_EMAIL_ADDRESS.matcher(email).matches());
     }
 
+    @Test
     @SmallTest
     public void testAutoLinkEmailAddress_matchesDomainUpTo255Chars() throws Exception {
         String longDomain = "";
@@ -909,6 +1019,7 @@ public class PatternsTest extends TestCase {
 
     // Tests for Patterns.PHONE
 
+    @Test
     @SmallTest
     public void testPhonePattern() throws Exception {
         boolean t;

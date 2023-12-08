@@ -233,6 +233,29 @@ public class BackNavigationControllerTests extends WindowTestsBase {
         assertThat(typeToString(backNavigationInfo.getType()))
                 .isEqualTo(typeToString(BackNavigationInfo.TYPE_CALLBACK));
 
+        // reset drawing status, test if top activity is translucent
+        backNavigationInfo.onBackNavigationFinished(false);
+        mBackNavigationController.clearBackAnimations();
+        makeWindowVisibleAndDrawn(testCase.recordFront.findMainWindow());
+        // simulate translucent
+        testCase.recordFront.setOccludesParent(false);
+        backNavigationInfo = startBackNavigation();
+        assertThat(typeToString(backNavigationInfo.getType()))
+                .isEqualTo(typeToString(BackNavigationInfo.TYPE_CALLBACK));
+        testCase.recordFront.setOccludesParent(true);
+
+        // reset drawing status, test if bottom activity is translucent
+        backNavigationInfo.onBackNavigationFinished(false);
+        mBackNavigationController.clearBackAnimations();
+        makeWindowVisibleAndDrawn(testCase.recordBack.findMainWindow());
+        // simulate translucent
+        testCase.recordBack.setOccludesParent(false);
+        backNavigationInfo = startBackNavigation();
+        assertThat(typeToString(backNavigationInfo.getType()))
+                .isEqualTo(typeToString(BackNavigationInfo.TYPE_CALLBACK));
+        testCase.recordBack.setOccludesParent(true);
+
+        // reset drawing status, test canShowWhenLocked
         backNavigationInfo.onBackNavigationFinished(false);
         mBackNavigationController.clearBackAnimations();
         doReturn(true).when(testCase.recordBack).canShowWhenLocked();

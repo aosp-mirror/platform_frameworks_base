@@ -379,7 +379,8 @@ public class PackageInstaller {
 
     /**
      * If true, the requestor of the unarchival has specified that the app should be unarchived
-     * for all users.
+     * for all users. Sent as part of the {@link android.content.Intent#ACTION_UNARCHIVE_PACKAGE}
+     * intent.
      */
     @FlaggedApi(Flags.FLAG_ARCHIVING)
     public static final String EXTRA_UNARCHIVE_ALL_USERS =
@@ -395,6 +396,9 @@ public class PackageInstaller {
      * <p> If the status is not {@link #UNARCHIVAL_OK}, then {@link Intent#EXTRA_INTENT} will be set
      * with an intent for a corresponding follow-up action (e.g. storage clearing dialog) or a
      * failure dialog.
+     *
+     * <p> Used as part of {@link #requestUnarchive} to return the status of the unarchival through
+     * the {@link IntentSender}.
      *
      * @see #requestUnarchive
      */
@@ -704,7 +708,8 @@ public class PackageInstaller {
     /**
      * The installer responsible for the unarchival is disabled.
      *
-     * <p> Should only be used by the system.
+     * <p> The system will return this status if appropriate. Installers do not need to verify for
+     * this error.
      */
     @FlaggedApi(Flags.FLAG_ARCHIVING)
     public static final int UNARCHIVAL_ERROR_INSTALLER_DISABLED = 4;
@@ -712,7 +717,8 @@ public class PackageInstaller {
     /**
      * The installer responsible for the unarchival has been uninstalled
      *
-     * <p> Should only be used by the system.
+     * <p> The system will return this status if appropriate. Installers do not need to verify for
+     * this error.
      */
     @FlaggedApi(Flags.FLAG_ARCHIVING)
     public static final int UNARCHIVAL_ERROR_INSTALLER_UNINSTALLED = 5;

@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.ui.binder
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -30,6 +31,7 @@ import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryForegroundViewModel
 import com.android.systemui.keyguard.ui.viewmodel.DeviceEntryIconViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.FalsingManager
+import com.android.systemui.statusbar.VibratorHelper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
@@ -51,6 +53,7 @@ object DeviceEntryIconViewBinder {
         fgViewModel: DeviceEntryForegroundViewModel,
         bgViewModel: DeviceEntryBackgroundViewModel,
         falsingManager: FalsingManager,
+        vibratorHelper: VibratorHelper,
     ) {
         DeviceEntryUdfpsRefactor.isUnexpectedlyInLegacyMode()
         val longPressHandlingView = view.longPressHandlingView
@@ -62,6 +65,10 @@ object DeviceEntryIconViewBinder {
                     if (falsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) {
                         return
                     }
+                    vibratorHelper.performHapticFeedback(
+                        view,
+                        HapticFeedbackConstants.CONFIRM,
+                    )
                     viewModel.onLongPress()
                 }
             }

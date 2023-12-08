@@ -19,10 +19,10 @@ package com.android.systemui.statusbar.notification.stack.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runCurrent
@@ -56,6 +56,7 @@ class SharedNotificationContainerInteractorTest : SysuiTestCase() {
         overrideResource(R.dimen.notification_panel_margin_bottom, 10)
         overrideResource(R.dimen.notification_panel_margin_top, 10)
         overrideResource(R.dimen.large_screen_shade_header_height, 0)
+        overrideResource(R.dimen.keyguard_split_shade_top_margin, 55)
 
         val dimens = collectLastValue(underTest.configurationBasedDimensions)
 
@@ -70,5 +71,6 @@ class SharedNotificationContainerInteractorTest : SysuiTestCase() {
         assertThat(lastDimens.marginBottom).isGreaterThan(0)
         assertThat(lastDimens.marginTop).isGreaterThan(0)
         assertThat(lastDimens.marginTopLargeScreen).isEqualTo(0)
+        assertThat(lastDimens.keyguardSplitShadeTopMargin).isEqualTo(55)
     }
 }

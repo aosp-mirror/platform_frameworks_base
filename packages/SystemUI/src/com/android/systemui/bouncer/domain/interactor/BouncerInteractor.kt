@@ -32,7 +32,6 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlags
 import com.android.systemui.util.kotlin.pairwise
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -259,7 +258,7 @@ constructor(
             throttlingModel != null ->
                 applicationContext.getString(
                     com.android.internal.R.string.lockscreen_too_many_failed_attempts_countdown,
-                    throttlingModel.remainingMs.milliseconds.inWholeSeconds,
+                    throttlingModel.remainingSeconds,
                 )
             message != null -> message
             else -> ""

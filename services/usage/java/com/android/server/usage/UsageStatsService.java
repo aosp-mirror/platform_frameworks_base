@@ -332,6 +332,7 @@ public class UsageStatsService extends SystemService implements
                         mUsageEventListeners.valueAt(i).onUsageEvent(userId, event);
                     }
                 }
+                return true;
             }
         }
         return false;
@@ -1973,6 +1974,8 @@ public class UsageStatsService extends SystemService implements
                 + ": " + Flags.userInteractionTypeApi());
         pw.println("    " + Flags.FLAG_USE_PARCELED_LIST
                 + ": " + Flags.useParceledList());
+        pw.println("    " + Flags.FLAG_FILTER_BASED_EVENT_QUERY_API
+                + ": " + Flags.filterBasedEventQueryApi());
 
         final int[] userIds;
         synchronized (mLock) {
@@ -2245,7 +2248,7 @@ public class UsageStatsService extends SystemService implements
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final boolean obfuscateInstantApps = shouldObfuscateInstantAppsForCaller(
-                    callingUid, userId);
+                    callingUid, UserHandle.getCallingUserId());
 
             final long token = Binder.clearCallingIdentity();
             try {
@@ -2384,6 +2387,7 @@ public class UsageStatsService extends SystemService implements
             if (!hasQueryPermission(callingPackage)) {
                 return null;
             }
+
             return queryEventsHelper(UserHandle.getCallingUserId(), query.getBeginTimeMillis(),
                     query.getEndTimeMillis(), callingPackage, query.getEventTypeFilter());
         }

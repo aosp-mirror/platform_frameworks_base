@@ -21,11 +21,15 @@ import android.content.Context
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardBlueprintRepository
+import com.android.systemui.keyguard.shared.model.KeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.DefaultKeyguardBlueprint
 import com.android.systemui.keyguard.ui.view.layout.blueprints.SplitShadeKeyguardBlueprint
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
@@ -39,7 +43,18 @@ constructor(
     private val splitShadeStateController: SplitShadeStateController,
 ) {
 
-    val blueprint = keyguardBlueprintRepository.blueprint
+    /**
+     * The current blueprint for the lockscreen.
+     *
+     * This flow can also emit the same blueprint value if refreshBlueprint is emitted.
+     */
+    val blueprint: Flow<KeyguardBlueprint> =
+        merge(
+            keyguardBlueprintRepository.blueprint,
+            keyguardBlueprintRepository.refreshBluePrint.map {
+                keyguardBlueprintRepository.blueprint.value
+            }
+        )
 
     init {
         applicationScope.launch {
@@ -90,5 +105,9 @@ constructor(
     /** Re-emits the blueprint value to the collectors. */
     fun refreshBlueprint() {
         keyguardBlueprintRepository.refreshBlueprint()
+    }
+
+    fun getCurrentBlueprint(): KeyguardBlueprint {
+        return keyguardBlueprintRepository.blueprint.value
     }
 }

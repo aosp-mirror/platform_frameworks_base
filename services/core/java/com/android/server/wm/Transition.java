@@ -1390,7 +1390,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     // recents, in case IME icon may missing if the moving task has already been
                     // the current focused task.
                     InputMethodManagerInternal.get().updateImeWindowStatus(
-                            false /* disableImeIcon */);
+                            false /* disableImeIcon */, dc.getDisplayId());
                 }
                 // An uncommitted transient launch can leave incomplete lifecycles if visibilities
                 // didn't change (eg. re-ordering with translucent tasks will leave launcher

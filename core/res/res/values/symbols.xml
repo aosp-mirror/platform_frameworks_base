@@ -2094,6 +2094,7 @@
   <java-symbol type="integer" name="config_autoBrightnessShortTermModelTimeout" />
   <java-symbol type="integer" name="config_progressTimeoutFallbackHome" />
   <java-symbol type="integer" name="config_shutdownBatteryTemperature" />
+  <java-symbol type="bool" name="config_shutdownIfNoPower" />
   <java-symbol type="integer" name="config_undockedHdmiRotation" />
   <java-symbol type="integer" name="config_virtualKeyQuietTimeMillis" />
   <java-symbol type="integer" name="config_brightness_ramp_rate_fast" />
@@ -5106,8 +5107,6 @@
   <java-symbol type="string" name="connected_display_unavailable_notification_title"/>
   <java-symbol type="string" name="connected_display_unavailable_notification_content"/>
   <java-symbol type="string" name="connected_display_thermally_unavailable_notification_content"/>
-  <java-symbol type="string" name="connected_display_cable_dont_support_displays_notification_title"/>
-  <java-symbol type="string" name="connected_display_cable_dont_support_displays_notification_content"/>
   <java-symbol type="string" name="concurrent_display_notification_name"/>
   <java-symbol type="string" name="concurrent_display_notification_active_title"/>
   <java-symbol type="string" name="concurrent_display_notification_active_content"/>

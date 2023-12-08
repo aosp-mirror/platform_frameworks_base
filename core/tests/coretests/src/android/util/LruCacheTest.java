@@ -16,7 +16,14 @@
 
 package android.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
+
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,13 +31,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public final class LruCacheTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public final class LruCacheTest {
     private int expectedCreateCount;
     private int expectedPutCount;
     private int expectedHitCount;
     private int expectedMissCount;
     private int expectedEvictionCount;
 
+    @Test
     public void testStatistics() {
         LruCache<String, String> cache = new LruCache<String, String>(3);
         assertStatistics(cache);
@@ -80,6 +89,7 @@ public final class LruCacheTest extends TestCase {
         assertSnapshot(cache, "e", "E", "b", "B", "c", "C");
     }
 
+    @Test
     public void testStatisticsWithCreate() {
         LruCache<String, String> cache = newCreatingCache();
         assertStatistics(cache);
@@ -104,18 +114,21 @@ public final class LruCacheTest extends TestCase {
         assertSnapshot(cache, "cc", "created-cc", "dd", "created-dd", "aa", "created-aa");
     }
 
+    @Test
     public void testCreateOnCacheMiss() {
         LruCache<String, String> cache = newCreatingCache();
         String created = cache.get("aa");
         assertEquals("created-aa", created);
     }
 
+    @Test
     public void testNoCreateOnCacheHit() {
         LruCache<String, String> cache = newCreatingCache();
         cache.put("aa", "put-aa");
         assertEquals("put-aa", cache.get("aa"));
     }
 
+    @Test
     public void testConstructorDoesNotAllowZeroCacheSize() {
         try {
             new LruCache<String, String>(0);
@@ -124,6 +137,7 @@ public final class LruCacheTest extends TestCase {
         }
     }
 
+    @Test
     public void testCannotPutNullKey() {
         LruCache<String, String> cache = new LruCache<String, String>(3);
         try {
@@ -133,6 +147,7 @@ public final class LruCacheTest extends TestCase {
         }
     }
 
+    @Test
     public void testCannotPutNullValue() {
         LruCache<String, String> cache = new LruCache<String, String>(3);
         try {
@@ -142,6 +157,7 @@ public final class LruCacheTest extends TestCase {
         }
     }
 
+    @Test
     public void testToString() {
         LruCache<String, String> cache = new LruCache<String, String>(3);
         assertEquals("LruCache[maxSize=3,hits=0,misses=0,hitRate=0%]", cache.toString());
@@ -160,6 +176,7 @@ public final class LruCacheTest extends TestCase {
         assertEquals("LruCache[maxSize=3,hits=3,misses=2,hitRate=60%]", cache.toString());
     }
 
+    @Test
     public void testEvictionWithSingletonCache() {
         LruCache<String, String> cache = new LruCache<String, String>(1);
         cache.put("a", "A");
@@ -167,6 +184,7 @@ public final class LruCacheTest extends TestCase {
         assertSnapshot(cache, "b", "B");
     }
 
+    @Test
     public void testEntryEvictedWhenFull() {
         List<String> log = new ArrayList<String>();
         LruCache<String, String> cache = newRemovalLogCache(log);
@@ -184,6 +202,7 @@ public final class LruCacheTest extends TestCase {
      * Replacing the value for a key doesn't cause an eviction but it does bring
      * the replaced entry to the front of the queue.
      */
+    @Test
     public void testPutCauseEviction() {
         List<String> log = new ArrayList<String>();
         LruCache<String, String> cache = newRemovalLogCache(log);
@@ -196,6 +215,7 @@ public final class LruCacheTest extends TestCase {
         assertSnapshot(cache, "a", "A", "c", "C", "b", "B2");
     }
 
+    @Test
     public void testCustomSizesImpactsSize() {
         LruCache<String, String> cache = new LruCache<String, String>(10) {
             @Override protected int sizeOf(String key, String value) {
@@ -212,6 +232,7 @@ public final class LruCacheTest extends TestCase {
         assertEquals(6, cache.size());
     }
 
+    @Test
     public void testEvictionWithCustomSizes() {
         LruCache<String, String> cache = new LruCache<String, String>(4) {
             @Override protected int sizeOf(String key, String value) {
@@ -241,6 +262,7 @@ public final class LruCacheTest extends TestCase {
         assertSnapshot(cache, "j", "JJJ");
     }
 
+    @Test
     public void testEvictionThrowsWhenSizesAreInconsistent() {
         LruCache<String, int[]> cache = new LruCache<String, int[]>(4) {
             @Override protected int sizeOf(String key, int[] value) {
@@ -263,6 +285,7 @@ public final class LruCacheTest extends TestCase {
         }
     }
 
+    @Test
     public void testEvictionThrowsWhenSizesAreNegative() {
         LruCache<String, String> cache = new LruCache<String, String>(4) {
             @Override protected int sizeOf(String key, String value) {
@@ -282,6 +305,7 @@ public final class LruCacheTest extends TestCase {
      * because evicting a small element may be insufficient to make room for a
      * large element.
      */
+    @Test
     public void testDifferentElementSizes() {
         LruCache<String, String> cache = new LruCache<String, String>(10) {
             @Override protected int sizeOf(String key, String value) {
@@ -299,6 +323,7 @@ public final class LruCacheTest extends TestCase {
         assertSnapshot(cache, "e", "12345678");
     }
 
+    @Test
     public void testEvictAll() {
         List<String> log = new ArrayList<String>();
         LruCache<String, String> cache = newRemovalLogCache(log);
@@ -310,6 +335,7 @@ public final class LruCacheTest extends TestCase {
         assertEquals(Arrays.asList("a=A", "b=B", "c=C"), log);
     }
 
+    @Test
     public void testEvictAllEvictsSizeZeroElements() {
         LruCache<String, String> cache = new LruCache<String, String>(10) {
             @Override protected int sizeOf(String key, String value) {
@@ -323,6 +349,7 @@ public final class LruCacheTest extends TestCase {
         assertSnapshot(cache);
     }
 
+    @Test
     public void testRemoveWithCustomSizes() {
         LruCache<String, String> cache = new LruCache<String, String>(10) {
             @Override protected int sizeOf(String key, String value) {
@@ -335,6 +362,7 @@ public final class LruCacheTest extends TestCase {
         assertEquals(4, cache.size());
     }
 
+    @Test
     public void testRemoveAbsentElement() {
         LruCache<String, String> cache = new LruCache<String, String>(10);
         cache.put("a", "A");
@@ -343,6 +371,7 @@ public final class LruCacheTest extends TestCase {
         assertEquals(2, cache.size());
     }
 
+    @Test
     public void testRemoveNullThrows() {
         LruCache<String, String> cache = new LruCache<String, String>(10);
         try {
@@ -352,6 +381,7 @@ public final class LruCacheTest extends TestCase {
         }
     }
 
+    @Test
     public void testRemoveCallsEntryRemoved() {
         List<String> log = new ArrayList<String>();
         LruCache<String, String> cache = newRemovalLogCache(log);
@@ -360,6 +390,7 @@ public final class LruCacheTest extends TestCase {
         assertEquals(Arrays.asList("a=A>null"), log);
     }
 
+    @Test
     public void testPutCallsEntryRemoved() {
         List<String> log = new ArrayList<String>();
         LruCache<String, String> cache = newRemovalLogCache(log);
@@ -368,6 +399,7 @@ public final class LruCacheTest extends TestCase {
         assertEquals(Arrays.asList("a=A>A2"), log);
     }
 
+    @Test
     public void testEntryRemovedIsCalledWithoutSynchronization() {
         LruCache<String, String> cache = new LruCache<String, String>(3) {
             @Override protected void entryRemoved(
@@ -385,6 +417,7 @@ public final class LruCacheTest extends TestCase {
         cache.evictAll();     // multiple eviction
     }
 
+    @Test
     public void testCreateIsCalledWithoutSynchronization() {
         LruCache<String, String> cache = new LruCache<String, String>(3) {
             @Override protected String create(String key) {
@@ -401,6 +434,7 @@ public final class LruCacheTest extends TestCase {
      * working. The map value should be returned by get(), and the created value
      * should be released with entryRemoved().
      */
+    @Test
     public void testCreateWithConcurrentPut() {
         final List<String> log = new ArrayList<String>();
         LruCache<String, String> cache = new LruCache<String, String>(3) {
@@ -423,6 +457,7 @@ public final class LruCacheTest extends TestCase {
      * the first create to return is returned by both gets. The other created
      * values should be released with entryRemove().
      */
+    @Test
     public void testCreateWithConcurrentCreate() {
         final List<String> log = new ArrayList<String>();
         LruCache<String, Integer> cache = new LruCache<String, Integer>(3) {

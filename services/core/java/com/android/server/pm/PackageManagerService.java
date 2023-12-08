@@ -1379,9 +1379,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName,
                 userId);
-        final String initiatingPackageName = installSourceInfo.getInitiatingPackageName();
         final String installerPackageName;
         if (installSourceInfo != null) {
+            final String initiatingPackageName = installSourceInfo.getInitiatingPackageName();
             if (!isInstalledByAdb(initiatingPackageName)) {
                 installerPackageName = initiatingPackageName;
             } else {
@@ -1540,6 +1540,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 continue;
             }
             pkgSetting
+                    .setPkg(null)
                     .modifyUserState(userId)
                     .setInstalled(false)
                     .setArchiveState(archiveState);
@@ -4604,6 +4605,9 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                             userIds, null, broadcastAllowList, null,
                             null);
                 });
+                mPackageMonitorCallbackHelper.notifyPackageMonitor(Intent.ACTION_PACKAGE_UNSTOPPED,
+                        packageName, extras, userIds, null /* instantUserIds */,
+                        broadcastAllowList, mHandler);
             }
         }
     }

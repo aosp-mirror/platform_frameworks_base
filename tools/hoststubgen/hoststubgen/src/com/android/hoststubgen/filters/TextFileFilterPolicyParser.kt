@@ -62,7 +62,8 @@ fun createFilterFromTextPolicyFile(
 
         var lineNo = 0
 
-        var aidlPolicy: FilterPolicy? = null
+        var aidlPolicy: FilterPolicyWithReason? = null
+        var featureFlagsPolicy: FilterPolicyWithReason? = null
 
         try {
             BufferedReader(FileReader(filename)).use { reader ->
@@ -130,7 +131,15 @@ fun createFilterFromTextPolicyFile(
                                             throw ParseException(
                                                     "Policy for AIDL classes already defined")
                                         }
-                                        aidlPolicy = policy
+                                        aidlPolicy = policy.withReason("$FILTER_REASON (AIDL)")
+                                    }
+                                    SpecialClass.FeatureFlags -> {
+                                        if (featureFlagsPolicy != null) {
+                                            throw ParseException(
+                                                    "Policy for feature flags already defined")
+                                        }
+                                        featureFlagsPolicy =
+                                                policy.withReason("$FILTER_REASON (feature flags)")
                                     }
                                 }
                             }
@@ -196,10 +205,10 @@ fun createFilterFromTextPolicyFile(
         }
 
         var ret: OutputFilter = imf
-        aidlPolicy?.let { policy ->
+        if (aidlPolicy != null || featureFlagsPolicy != null) {
             log.d("AndroidHeuristicsFilter enabled")
             ret = AndroidHeuristicsFilter(
-                    classes, policy.withReason("$FILTER_REASON (AIDL)"), imf)
+                    classes, aidlPolicy, featureFlagsPolicy, imf)
         }
         return ret
     }
@@ -208,6 +217,7 @@ fun createFilterFromTextPolicyFile(
 private enum class SpecialClass {
     NotSpecial,
     Aidl,
+    FeatureFlags,
 }
 
 private fun resolveSpecialClass(className: String): SpecialClass {
@@ -216,6 +226,7 @@ private fun resolveSpecialClass(className: String): SpecialClass {
     }
     when (className.lowercase()) {
         ":aidl" -> return SpecialClass.Aidl
+        ":feature_flags" -> return SpecialClass.FeatureFlags
     }
     throw ParseException("Invalid special class name \"$className\"")
 }

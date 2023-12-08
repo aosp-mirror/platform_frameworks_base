@@ -93,8 +93,8 @@ public class PackageUserStateUtils {
      * this object exists means that the package must be installed or has data on at least one user;
      * <li> If it is not installed but still has data (i.e., it was previously uninstalled with
      * {@link PackageManager#DELETE_KEEP_DATA}), return true if the caller requested
-     * {@link PackageManager#MATCH_UNINSTALLED_PACKAGES}.
-     * Always available for {@link PackageManager#MATCH_ARCHIVED_PACKAGES}.
+     * {@link PackageManager#MATCH_UNINSTALLED_PACKAGES} or
+     * {@link PackageManager#MATCH_ARCHIVED_PACKAGES};
      * </ul><p>
      */
     public static boolean isAvailable(@NonNull PackageUserState state, long flags) {
@@ -109,19 +109,11 @@ public class PackageUserStateUtils {
         if (state.isInstalled()) {
             if (!state.isHidden()) {
                 return true;
-            } else {
-                return matchDataExists;
-            }
+            } else return matchDataExists;
+        } else {
+            // not installed
+            return matchDataExists && state.dataExists();
         }
-
-        // not installed
-        if (matchUninstalled) {
-            return state.dataExists();
-        }
-
-        // archived or installed as archived
-        // TODO(b/314808978): Create data folders during install-archived.
-        return matchArchived;
     }
 
     public static boolean reportIfDebug(boolean result, long flags) {

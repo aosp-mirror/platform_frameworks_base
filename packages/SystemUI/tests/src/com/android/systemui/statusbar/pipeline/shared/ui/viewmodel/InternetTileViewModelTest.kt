@@ -337,12 +337,12 @@ class InternetTileViewModelTest : SysuiTestCase() {
                 networkName.value = NetworkNameModel.Default("test network")
             }
 
-            assertThat(latest?.secondaryTitle).contains("test network")
+            assertThat(latest?.secondaryTitle.toString()).contains("test network")
             assertThat(latest?.secondaryLabel).isNull()
             assertThat(latest?.icon).isInstanceOf(SignalIcon::class.java)
             assertThat(latest?.iconId).isNull()
             assertThat(latest?.stateDescription.loadContentDescription(context))
-                .isEqualTo(latest?.secondaryTitle)
+                .isEqualTo(latest?.secondaryTitle.toString())
             assertThat(latest?.contentDescription.loadContentDescription(context))
                 .isEqualTo(internet)
         }

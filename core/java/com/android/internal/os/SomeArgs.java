@@ -26,6 +26,7 @@ import android.os.Build;
  * it is responsibility of the client to recycle and instance
  * once it is no longer used.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class SomeArgs {
 
     private static final int MAX_POOL_SIZE = 10;

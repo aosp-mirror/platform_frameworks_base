@@ -24,6 +24,7 @@ import java.util.HashMap;
 /**
  * Provides static methods for creating mutable {@code Maps} instances easily.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Maps {
     /**
      * Creates a {@code HashMap} instance.

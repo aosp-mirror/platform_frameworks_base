@@ -40,7 +40,6 @@ import java.util.concurrent.Executor;
 
 /**
  * A service that receives calls from the system with device events.
- * See {@link #onDeviceEvent(AssociationInfo, int)}.
  *
  * <p>
  * Companion applications must create a service that {@code extends}
@@ -311,10 +310,7 @@ public abstract class CompanionDeviceService extends Service {
      * Called by system whenever a device associated with this app is connected.
      *
      * @param associationInfo A record for the companion device.
-     *
-     * @deprecated please override {@link #onDeviceEvent(AssociationInfo, int)} instead.
      */
-    @Deprecated
     @MainThread
     public void onDeviceAppeared(@NonNull AssociationInfo associationInfo) {
         if (!associationInfo.isSelfManaged()) {
@@ -326,10 +322,7 @@ public abstract class CompanionDeviceService extends Service {
      * Called by system whenever a device associated with this app is disconnected.
      *
      * @param associationInfo A record for the companion device.
-     *
-     * @deprecated please override {@link #onDeviceEvent(AssociationInfo, int)} instead.
      */
-    @Deprecated
     @MainThread
     public void onDeviceDisappeared(@NonNull AssociationInfo associationInfo) {
         if (!associationInfo.isSelfManaged()) {

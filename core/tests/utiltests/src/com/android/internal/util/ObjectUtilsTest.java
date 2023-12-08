@@ -15,11 +15,18 @@
  */
 package com.android.internal.util;
 
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import static org.junit.Assert.assertEquals;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @SmallTest
-public class ObjectUtilsTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class ObjectUtilsTest {
+    @Test
     public void testCompare() {
         assertEquals(0, ObjectUtils.compare(null, null));
         assertEquals(1, ObjectUtils.compare("a", null));

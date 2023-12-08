@@ -859,6 +859,11 @@ public class VirtualDeviceManagerService extends SystemService {
         }
 
         @Override
+        public boolean isValidVirtualDeviceId(int deviceId) {
+            return mImpl.isValidVirtualDeviceId(deviceId);
+        }
+
+        @Override
         public @Nullable String getPersistentIdForDevice(int deviceId) {
             if (deviceId == Context.DEVICE_ID_DEFAULT) {
                 return VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;

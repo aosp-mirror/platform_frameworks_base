@@ -20,7 +20,6 @@ package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.keyguard.logging.biometricUnlockLogger
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
-import com.android.systemui.deviceentry.data.repository.fakeDeviceEntryHapticsRepository
 import com.android.systemui.keyevent.domain.interactor.keyEventInteractor
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.kosmos.Kosmos
@@ -31,7 +30,9 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 val Kosmos.deviceEntryHapticsInteractor by
     Kosmos.Fixture {
         DeviceEntryHapticsInteractor(
-            repository = fakeDeviceEntryHapticsRepository,
+            deviceEntryInteractor = deviceEntryInteractor,
+            deviceEntryFingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor,
+            deviceEntryBiometricAuthInteractor = deviceEntryBiometricAuthInteractor,
             fingerprintPropertyRepository = fingerprintPropertyRepository,
             biometricSettingsRepository = biometricSettingsRepository,
             keyEventInteractor = keyEventInteractor,

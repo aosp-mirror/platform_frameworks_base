@@ -19,29 +19,47 @@ package com.android.wm.shell.bubbles.bar
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.graphics.PointF
+import android.graphics.Rect
 import android.view.MotionEvent
 import android.view.View
 import com.android.wm.shell.animation.Interpolators
+import com.android.wm.shell.common.bubbles.DismissView
 import com.android.wm.shell.common.bubbles.RelativeTouchListener
 
 /** Controller for handling drag interactions with [BubbleBarExpandedView] */
-class BubbleBarExpandedViewDragController(private val expandedView: BubbleBarExpandedView) {
+class BubbleBarExpandedViewDragController(
+    private val expandedView: BubbleBarExpandedView,
+    private val dismissView: DismissView,
+    private val onDismissed: () -> Unit
+) {
 
     init {
         expandedView.handleView.setOnTouchListener(HandleDragListener())
     }
 
-    private fun resetExpandedViewPosition(initialX: Float, initialY: Float) {
-        val listener = object : AnimatorListenerAdapter() {
-            override fun onAnimationStart(animation: Animator) {
-                expandedView.isAnimating = true
-            }
-
-            override fun onAnimationEnd(animation: Animator) {
-                expandedView.isAnimating = false
-            }
+    private fun finishDrag(x: Float, y: Float, viewInitialX: Float, viewInitialY: Float) {
+        val dismissCircleBounds = Rect().apply { dismissView.circle.getBoundsOnScreen(this) }
+        if (dismissCircleBounds.contains(x.toInt(), y.toInt())) {
+            onDismissed()
+        } else {
+            resetExpandedViewPosition(viewInitialX, viewInitialY)
         }
-        expandedView.animate()
+        dismissView.hide()
+    }
+
+    private fun resetExpandedViewPosition(initialX: Float, initialY: Float) {
+        val listener =
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator) {
+                    expandedView.isAnimating = true
+                }
+
+                override fun onAnimationEnd(animation: Animator) {
+                    expandedView.isAnimating = false
+                }
+            }
+        expandedView
+            .animate()
             .translationX(initialX)
             .translationY(initialY)
             .setDuration(RESET_POSITION_ANIM_DURATION)
@@ -74,6 +92,7 @@ class BubbleBarExpandedViewDragController(private val expandedView: BubbleBarExp
         ) {
             expandedView.translationX = expandedViewRestPosition.x + dx
             expandedView.translationY = expandedViewRestPosition.y + dy
+            dismissView.show()
         }
 
         override fun onUp(
@@ -86,11 +105,12 @@ class BubbleBarExpandedViewDragController(private val expandedView: BubbleBarExp
             velX: Float,
             velY: Float
         ) {
-            resetExpandedViewPosition(expandedViewRestPosition.x, expandedViewRestPosition.y)
+            finishDrag(ev.rawX, ev.rawY, expandedViewRestPosition.x, expandedViewRestPosition.y)
         }
 
         override fun onCancel(v: View, ev: MotionEvent, viewInitialX: Float, viewInitialY: Float) {
             resetExpandedViewPosition(expandedViewRestPosition.x, expandedViewRestPosition.y)
+            dismissView.hide()
         }
     }
 

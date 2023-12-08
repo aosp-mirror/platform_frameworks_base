@@ -66,8 +66,8 @@ internal fun Modifier.multiPointerDraggable(
     orientation: Orientation,
     enabled: Boolean,
     startDragImmediately: Boolean,
-    onDragStarted: (layoutSize: IntSize, startedPosition: Offset, pointersDown: Int) -> Unit,
-    onDragDelta: (Float) -> Unit,
+    onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
+    onDragDelta: (delta: Float) -> Unit,
     onDragStopped: (velocity: Float) -> Unit,
 ): Modifier =
     this.then(
@@ -86,7 +86,7 @@ private data class MultiPointerDraggableElement(
     private val enabled: Boolean,
     private val startDragImmediately: Boolean,
     private val onDragStarted:
-        (layoutSize: IntSize, startedPosition: Offset, pointersDown: Int) -> Unit,
+        (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
     private val onDragDelta: (Float) -> Unit,
     private val onDragStopped: (velocity: Float) -> Unit,
 ) : ModifierNodeElement<MultiPointerDraggableNode>() {
@@ -114,7 +114,7 @@ private class MultiPointerDraggableNode(
     orientation: Orientation,
     enabled: Boolean,
     var startDragImmediately: Boolean,
-    var onDragStarted: (layoutSize: IntSize, startedPosition: Offset, pointersDown: Int) -> Unit,
+    var onDragStarted: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
     var onDragDelta: (Float) -> Unit,
     var onDragStopped: (velocity: Float) -> Unit,
 ) : PointerInputModifierNode, DelegatingNode(), CompositionLocalConsumerModifierNode {
@@ -153,9 +153,9 @@ private class MultiPointerDraggableNode(
             return
         }
 
-        val onDragStart: (Offset, Int) -> Unit = { startedPosition, pointersDown ->
+        val onDragStart: (Offset, Float, Int) -> Unit = { startedPosition, overSlop, pointersDown ->
             velocityTracker.resetTracking()
-            onDragStarted(size, startedPosition, pointersDown)
+            onDragStarted(startedPosition, overSlop, pointersDown)
         }
 
         val onDragCancel: () -> Unit = { onDragStopped(/* velocity= */ 0f) }
@@ -203,7 +203,7 @@ private class MultiPointerDraggableNode(
 private suspend fun PointerInputScope.detectDragGestures(
     orientation: Orientation,
     startDragImmediately: () -> Boolean,
-    onDragStart: (startedPosition: Offset, pointersDown: Int) -> Unit,
+    onDragStart: (startedPosition: Offset, overSlop: Float, pointersDown: Int) -> Unit,
     onDragEnd: () -> Unit,
     onDragCancel: () -> Unit,
     onDrag: (change: PointerInputChange, dragAmount: Float) -> Unit,
@@ -241,7 +241,7 @@ private suspend fun PointerInputScope.detectDragGestures(
                 }
             }
 
-            onDragStart(drag.position, pressed.size)
+            onDragStart(drag.position, overSlop, pressed.size)
             onDrag(drag, overSlop)
 
             val successful =

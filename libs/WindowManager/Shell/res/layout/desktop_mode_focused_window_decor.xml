@@ -20,8 +20,7 @@
     android:id="@+id/desktop_mode_caption"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_horizontal"
-    android:background="@drawable/desktop_mode_decor_title">
+    android:gravity="center_horizontal">
 
     <ImageButton
         android:id="@+id/caption_handle"
@@ -33,5 +32,4 @@
         tools:tint="@color/desktop_mode_caption_handle_bar_dark"
         android:scaleType="fitXY"
         android:background="?android:selectableItemBackground"/>
-
 </com.android.wm.shell.windowdecor.WindowDecorLinearLayout>

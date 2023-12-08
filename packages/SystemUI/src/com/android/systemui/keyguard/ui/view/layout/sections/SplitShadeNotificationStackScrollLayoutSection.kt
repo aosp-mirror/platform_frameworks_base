@@ -87,8 +87,13 @@ constructor(
                 )
                 setGoneMargin(R.id.nssl_placeholder, TOP, bottomMargin)
             } else {
-                connect(R.id.nssl_placeholder, TOP, R.id.keyguard_status_view, TOP, bottomMargin)
+                val splitShadeTopMargin =
+                    context.resources.getDimensionPixelSize(
+                        R.dimen.large_screen_shade_header_height
+                    )
+                connect(R.id.nssl_placeholder, TOP, PARENT_ID, TOP, splitShadeTopMargin)
             }
+
             connect(R.id.nssl_placeholder, START, PARENT_ID, START)
             connect(R.id.nssl_placeholder, END, PARENT_ID, END)
 
