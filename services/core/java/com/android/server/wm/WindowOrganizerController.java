@@ -63,6 +63,7 @@ import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_START_SHORTCUT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
+import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
@@ -1178,6 +1179,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 mService.mRootWindowContainer.moveActivityToPinnedRootTask(
                         pipActivity, null /* launchIntoPipHostActivity */,
                         "moveActivityToPinnedRootTask", null /* transition */, entryBounds);
+
+                // Continue the pausing process after potential task reparenting.
+                if (pipActivity.isState(PAUSING) && pipActivity.mPauseSchedulePendingForPip) {
+                    pipActivity.getTask().schedulePauseActivity(
+                            pipActivity, false /* userLeaving */,
+                            false /* pauseImmediately */, true /* autoEnteringPip */, "auto-pip");
+                }
+
                 effects |= TRANSACT_EFFECTS_LIFECYCLE;
                 break;
             }
