@@ -250,7 +250,7 @@ public final class RequestProcessor {
          */
         @FlaggedApi(Flags.FLAG_CONCERT_MODE)
         @NonNull
-        List<Pair<CaptureRequest.Key, Object>> getParameters() {
+        public List<Pair<CaptureRequest.Key, Object>> getParameters() {
             return mParameters;
         }
 
