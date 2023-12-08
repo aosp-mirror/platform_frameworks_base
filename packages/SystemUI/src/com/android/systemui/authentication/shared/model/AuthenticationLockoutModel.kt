@@ -16,17 +16,17 @@
 
 package com.android.systemui.authentication.shared.model
 
-/** Models a state for throttling the next authentication attempt. */
-data class AuthenticationThrottlingModel(
+/** Models a state for temporarily locking out the next authentication attempt. */
+data class AuthenticationLockoutModel(
 
-    /** Number of failed authentication attempts so far. If not throttling this will be `0`. */
+    /** Number of failed authentication attempts so far. If not locked out this will be `0`. */
     val failedAttemptCount: Int = 0,
 
     /**
      * Remaining amount of time, in seconds, before another authentication attempt can be done. If
-     * not throttling this will be `0`.
+     * not locked out this will be `0`.
      *
-     * This number is changed throughout the timeout.
+     * This number is changed throughout the lockout.
      *
      * Note: this isn't precise (in milliseconds), but rounded up to ensure "at most" this amount of
      * seconds remains.

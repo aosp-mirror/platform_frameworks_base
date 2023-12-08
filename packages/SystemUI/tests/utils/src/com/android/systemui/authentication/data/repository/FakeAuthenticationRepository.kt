@@ -20,10 +20,10 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockPatternView
 import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode
+import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.authentication.shared.model.AuthenticationResultModel
-import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
@@ -47,10 +47,9 @@ class FakeAuthenticationRepository(
     private val _isPatternVisible = MutableStateFlow(true)
     override val isPatternVisible: StateFlow<Boolean> = _isPatternVisible.asStateFlow()
 
-    override val throttling: MutableStateFlow<AuthenticationThrottlingModel?> =
-        MutableStateFlow(null)
+    override val lockout: MutableStateFlow<AuthenticationLockoutModel?> = MutableStateFlow(null)
 
-    override val hasThrottlingOccurred = MutableStateFlow(false)
+    override val hasLockoutOccurred = MutableStateFlow(false)
 
     private val _isAutoConfirmFeatureEnabled = MutableStateFlow(false)
     override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
@@ -70,7 +69,7 @@ class FakeAuthenticationRepository(
         _isPinEnhancedPrivacyEnabled.asStateFlow()
 
     private var failedAttemptCount = 0
-    private var throttlingEndTimestamp = 0L
+    private var lockoutEndTimestamp = 0L
     private var credentialOverride: List<Any>? = null
     private var securityMode: SecurityMode = DEFAULT_AUTHENTICATION_METHOD.toSecurityMode()
 
@@ -106,18 +105,18 @@ class FakeAuthenticationRepository(
         return failedAttemptCount
     }
 
-    override suspend fun getThrottlingEndTimestamp(): Long {
-        return throttlingEndTimestamp
+    override suspend fun getLockoutEndTimestamp(): Long {
+        return lockoutEndTimestamp
     }
 
     fun setAutoConfirmFeatureEnabled(isEnabled: Boolean) {
         _isAutoConfirmFeatureEnabled.value = isEnabled
     }
 
-    override suspend fun setThrottleDuration(durationMs: Int) {
-        throttlingEndTimestamp = if (durationMs > 0) currentTime() + durationMs else 0
+    override suspend fun setLockoutDuration(durationMs: Int) {
+        lockoutEndTimestamp = if (durationMs > 0) currentTime() + durationMs else 0
         if (durationMs > 0) {
-            hasThrottlingOccurred.value = true
+            hasLockoutOccurred.value = true
         }
     }
 
@@ -137,18 +136,16 @@ class FakeAuthenticationRepository(
                 else -> error("Unexpected credential type ${credential.type}!")
             }
 
-        return if (
-            isSuccessful || failedAttemptCount < MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING - 1
-        ) {
-            hasThrottlingOccurred.value = false
+        return if (isSuccessful || failedAttemptCount < MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
+            hasLockoutOccurred.value = false
             AuthenticationResultModel(
                 isSuccessful = isSuccessful,
-                throttleDurationMs = 0,
+                lockoutDurationMs = 0,
             )
         } else {
             AuthenticationResultModel(
                 isSuccessful = false,
-                throttleDurationMs = THROTTLE_DURATION_MS,
+                lockoutDurationMs = LOCKOUT_DURATION_MS,
             )
         }
     }
@@ -178,9 +175,9 @@ class FakeAuthenticationRepository(
                 AuthenticationPatternCoordinate(0, 1),
                 AuthenticationPatternCoordinate(0, 2),
             )
-        const val MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING = 5
-        const val THROTTLE_DURATION_SECONDS = 30
-        const val THROTTLE_DURATION_MS = THROTTLE_DURATION_SECONDS * 1000
+        const val MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT = 5
+        const val LOCKOUT_DURATION_SECONDS = 30
+        const val LOCKOUT_DURATION_MS = LOCKOUT_DURATION_SECONDS * 1000
         const val HINTING_PIN_LENGTH = 6
         val DEFAULT_PIN = buildList { repeat(HINTING_PIN_LENGTH) { add(it + 1) } }
 

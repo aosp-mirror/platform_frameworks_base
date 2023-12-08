@@ -46,7 +46,7 @@ class PasswordBouncerViewModel(
 
     override val authenticationMethod = AuthenticationMethodModel.Password
 
-    override val throttlingMessageId = R.string.kg_too_many_failed_password_attempts_dialog_message
+    override val lockoutMessageId = R.string.kg_too_many_failed_password_attempts_dialog_message
 
     /** Whether the input method editor (for example, the software keyboard) is visible. */
     private var isImeVisible: Boolean = false
@@ -56,13 +56,13 @@ class PasswordBouncerViewModel(
 
     /** Whether the UI should request focus on the text field element. */
     val isTextFieldFocusRequested =
-        combine(interactor.throttling, isTextFieldFocused) { throttling, hasFocus ->
+        combine(interactor.lockout, isTextFieldFocused) { throttling, hasFocus ->
                 throttling == null && !hasFocus
             }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = interactor.throttling.value == null && !isTextFieldFocused.value,
+                initialValue = interactor.lockout.value == null && !isTextFieldFocused.value,
             )
 
     override fun onHidden() {
@@ -104,7 +104,7 @@ class PasswordBouncerViewModel(
      * hidden.
      */
     suspend fun onImeVisibilityChanged(isVisible: Boolean) {
-        if (isImeVisible && !isVisible && interactor.throttling.value == null) {
+        if (isImeVisible && !isVisible && interactor.lockout.value == null) {
             interactor.onImeHiddenByUser()
         }
 

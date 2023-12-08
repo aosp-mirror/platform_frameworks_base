@@ -24,9 +24,9 @@ import android.os.UserHandle
 import com.android.internal.widget.LockPatternUtils
 import com.android.internal.widget.LockscreenCredential
 import com.android.keyguard.KeyguardSecurityModel
+import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationResultModel
-import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -80,13 +80,14 @@ interface AuthenticationRepository {
     val isPatternVisible: StateFlow<Boolean>
 
     /**
-     * The current authentication throttling state, set when the user has to wait before being able
-     * to try another authentication attempt. `null` indicates throttling isn't active.
+     * The current authentication lockout (aka "throttling") state, set when the user has to wait
+     * before being able to try another authentication attempt. `null` indicates throttling isn't
+     * active.
      */
-    val throttling: MutableStateFlow<AuthenticationThrottlingModel?>
+    val lockout: MutableStateFlow<AuthenticationLockoutModel?>
 
     /** Whether throttling has occurred at least once since the last successful authentication. */
-    val hasThrottlingOccurred: MutableStateFlow<Boolean>
+    val hasLockoutOccurred: MutableStateFlow<Boolean>
 
     /**
      * Whether the auto confirm feature is enabled for the currently-selected user.
@@ -145,18 +146,18 @@ interface AuthenticationRepository {
     suspend fun getFailedAuthenticationAttemptCount(): Int
 
     /**
-     * Returns the timestamp for when the current throttling will end, allowing the user to attempt
+     * Returns the timestamp for when the current lockout will end, allowing the user to attempt
      * authentication again.
      *
      * Note that this is in milliseconds and it matches [SystemClock.elapsedRealtime].
      */
-    suspend fun getThrottlingEndTimestamp(): Long
+    suspend fun getLockoutEndTimestamp(): Long
 
     /**
-     * Sets the throttling timeout duration (time during which the user should not be allowed to
+     * Sets the lockout timeout duration (time during which the user should not be allowed to
      * attempt authentication).
      */
-    suspend fun setThrottleDuration(durationMs: Int)
+    suspend fun setLockoutDuration(durationMs: Int)
 
     /**
      * Checks the given [LockscreenCredential] to see if it's correct, returning an
@@ -188,10 +189,9 @@ constructor(
             getFreshValue = lockPatternUtils::isVisiblePatternEnabled,
         )
 
-    override val throttling: MutableStateFlow<AuthenticationThrottlingModel?> =
-        MutableStateFlow(null)
+    override val lockout: MutableStateFlow<AuthenticationLockoutModel?> = MutableStateFlow(null)
 
-    override val hasThrottlingOccurred: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    override val hasLockoutOccurred: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
         refreshingFlow(
@@ -267,13 +267,13 @@ constructor(
         }
     }
 
-    override suspend fun getThrottlingEndTimestamp(): Long {
+    override suspend fun getLockoutEndTimestamp(): Long {
         return withContext(backgroundDispatcher) {
             lockPatternUtils.getLockoutAttemptDeadline(selectedUserId)
         }
     }
 
-    override suspend fun setThrottleDuration(durationMs: Int) {
+    override suspend fun setLockoutDuration(durationMs: Int) {
         withContext(backgroundDispatcher) {
             lockPatternUtils.setLockoutAttemptDeadline(selectedUserId, durationMs)
         }
@@ -285,9 +285,9 @@ constructor(
         return withContext(backgroundDispatcher) {
             try {
                 val matched = lockPatternUtils.checkCredential(credential, selectedUserId) {}
-                AuthenticationResultModel(isSuccessful = matched, throttleDurationMs = 0)
+                AuthenticationResultModel(isSuccessful = matched, lockoutDurationMs = 0)
             } catch (ex: LockPatternUtils.RequestThrottledException) {
-                AuthenticationResultModel(isSuccessful = false, throttleDurationMs = ex.timeoutMs)
+                AuthenticationResultModel(isSuccessful = false, lockoutDurationMs = ex.timeoutMs)
             }
         }
     }

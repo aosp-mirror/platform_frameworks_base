@@ -21,9 +21,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
+import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
-import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
@@ -76,12 +76,12 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withCorrectPin_succeeds() =
         testScope.runTest {
-            val throttling by collectLastValue(underTest.throttling)
+            val lockout by collectLastValue(underTest.lockout)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
 
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(throttling).isNull()
+            assertThat(lockout).isNull()
             assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
         }
 
@@ -130,14 +130,14 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     @Test
     fun authenticate_withCorrectPassword_succeeds() =
         testScope.runTest {
-            val throttling by collectLastValue(underTest.throttling)
+            val lockout by collectLastValue(underTest.lockout)
             utils.authenticationRepository.setAuthenticationMethod(
                 AuthenticationMethodModel.Password
             )
 
             assertThat(underTest.authenticate("password".toList()))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(throttling).isNull()
+            assertThat(lockout).isNull()
             assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
         }
 
@@ -187,7 +187,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
     fun tryAutoConfirm_withAutoConfirmPinAndShorterPin_returnsNull() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            val throttling by collectLastValue(underTest.throttling)
+            val lockout by collectLastValue(underTest.lockout)
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(AuthenticationMethodModel.Pin)
                 setAutoConfirmFeatureEnabled(true)
@@ -203,7 +203,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                     )
                 )
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(throttling).isNull()
+            assertThat(lockout).isNull()
             assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
         }
 
@@ -265,7 +265,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun tryAutoConfirm_withAutoConfirmCorrectPinButDuringThrottling_returnsNull() =
+    fun tryAutoConfirm_withAutoConfirmCorrectPinButDuringLockout_returnsNull() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
             val isUnlocked by collectLastValue(utils.deviceEntryRepository.isUnlocked)
@@ -273,7 +273,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             utils.authenticationRepository.apply {
                 setAuthenticationMethod(AuthenticationMethodModel.Pin)
                 setAutoConfirmFeatureEnabled(true)
-                setThrottleDuration(42)
+                setLockoutDuration(42)
             }
 
             val authResult =
@@ -334,30 +334,30 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun isAutoConfirmEnabled_featureEnabledButDisabledByThrottling() =
+    fun isAutoConfirmEnabled_featureEnabledButDisabledByLockout() =
         testScope.runTest {
             val isAutoConfirmEnabled by collectLastValue(underTest.isAutoConfirmEnabled)
-            val throttling by collectLastValue(underTest.throttling)
+            val lockout by collectLastValue(underTest.lockout)
             utils.authenticationRepository.setAutoConfirmFeatureEnabled(true)
 
             // The feature is enabled.
             assertThat(isAutoConfirmEnabled).isTrue()
 
-            // Make many wrong attempts to trigger throttling.
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) {
+            // Make many wrong attempts to trigger lockout.
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
                 underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
             }
-            assertThat(throttling).isNotNull()
+            assertThat(lockout).isNotNull()
             assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(1)
 
-            // Throttling disabled auto-confirm.
+            // Lockout disabled auto-confirm.
             assertThat(isAutoConfirmEnabled).isFalse()
 
-            // Move the clock forward one more second, to completely finish the throttling period:
-            advanceTimeBy(FakeAuthenticationRepository.THROTTLE_DURATION_MS + 1000L)
-            assertThat(throttling).isNull()
+            // Move the clock forward one more second, to completely finish the lockout period:
+            advanceTimeBy(FakeAuthenticationRepository.LOCKOUT_DURATION_MS + 1000L)
+            assertThat(lockout).isNull()
 
-            // Auto-confirm is still disabled, because throttling occurred at least once in this
+            // Auto-confirm is still disabled, because lockout occurred at least once in this
             // session.
             assertThat(isAutoConfirmEnabled).isFalse()
 
@@ -372,66 +372,65 @@ class AuthenticationInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun throttling() =
+    fun lockout() =
         testScope.runTest {
-            val throttling by collectLastValue(underTest.throttling)
+            val lockout by collectLastValue(underTest.lockout)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN)
-            assertThat(throttling).isNull()
+            assertThat(lockout).isNull()
 
-            // Make many wrong attempts, but just shy of what's needed to get throttled:
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING - 1) {
+            // Make many wrong attempts, but just shy of what's needed to get locked out:
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
                 underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
-                assertThat(throttling).isNull()
+                assertThat(lockout).isNull()
             }
 
-            // Make one more wrong attempt, leading to throttling:
+            // Make one more wrong attempt, leading to lockout:
             underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
-            assertThat(throttling)
+            assertThat(lockout)
                 .isEqualTo(
-                    AuthenticationThrottlingModel(
+                    AuthenticationLockoutModel(
                         failedAttemptCount =
-                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
-                        remainingSeconds = FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS,
+                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT,
+                        remainingSeconds = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS,
                     )
                 )
             assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(1)
 
-            // Correct PIN, but throttled, so doesn't attempt it:
+            // Correct PIN, but locked out, so doesn't attempt it:
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SKIPPED)
-            assertThat(throttling)
+            assertThat(lockout)
                 .isEqualTo(
-                    AuthenticationThrottlingModel(
+                    AuthenticationLockoutModel(
                         failedAttemptCount =
-                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
-                        remainingSeconds = FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS,
+                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT,
+                        remainingSeconds = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS,
                     )
                 )
 
-            // Move the clock forward to ALMOST skip the throttling, leaving one second to go:
-            val throttleTimeoutSec = FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS
-            repeat(FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS - 1) { time ->
+            // Move the clock forward to ALMOST skip the lockout, leaving one second to go:
+            val lockoutTimeoutSec = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS
+            repeat(FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS - 1) { time ->
                 advanceTimeBy(1000)
-                assertThat(throttling)
+                assertThat(lockout)
                     .isEqualTo(
-                        AuthenticationThrottlingModel(
+                        AuthenticationLockoutModel(
                             failedAttemptCount =
-                                FakeAuthenticationRepository
-                                    .MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
-                            remainingSeconds = throttleTimeoutSec - (time + 1),
+                                FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT,
+                            remainingSeconds = lockoutTimeoutSec - (time + 1),
                         )
                     )
             }
 
-            // Move the clock forward one more second, to completely finish the throttling period:
+            // Move the clock forward one more second, to completely finish the lockout period:
             advanceTimeBy(1000)
-            assertThat(throttling).isNull()
+            assertThat(lockout).isNull()
 
-            // Correct PIN and no longer throttled so unlocks successfully:
+            // Correct PIN and no longer locked out so unlocks successfully:
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(throttling).isNull()
+            assertThat(lockout).isNull()
         }
 
     @Test
