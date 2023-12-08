@@ -2037,9 +2037,8 @@ public class AudioDeviceBroker {
                     } break;
 
                 case MSG_L_UPDATED_ADI_DEVICE_STATE:
-                    synchronized (mDeviceStateLock) {
-                        mAudioService.onUpdatedAdiDeviceState((AdiDeviceState) msg.obj);
-                    } break;
+                    mAudioService.onUpdatedAdiDeviceState((AdiDeviceState) msg.obj);
+                    break;
 
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
