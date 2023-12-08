@@ -16,8 +16,10 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.app.trust.TrustManager
 import android.content.Context
 import android.hardware.biometrics.BiometricFaceConstants
+import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.FaceAuthUiEvent
 import com.android.keyguard.FaceWakeUpTriggersConfig
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -83,6 +85,7 @@ constructor(
     private val faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig,
     private val powerInteractor: PowerInteractor,
     private val biometricSettingsRepository: BiometricSettingsRepository,
+    private val trustManager: TrustManager,
 ) : CoreStartable, KeyguardFaceAuthInteractor {
 
     private val listeners: MutableList<FaceAuthenticationListener> = mutableListOf()
@@ -289,6 +292,20 @@ constructor(
             .launchIn(applicationScope)
         repository.isAuthRunning
             .onEach { running -> listeners.forEach { it.onRunningStateChanged(running) } }
+            .flowOn(mainDispatcher)
+            .launchIn(applicationScope)
+        repository.isAuthenticated
+            .sample(userRepository.selectedUserInfo, ::Pair)
+            .onEach { (isAuthenticated, userInfo) ->
+                if (!isAuthenticated) {
+                    faceAuthenticationLogger.clearFaceRecognized()
+                    trustManager.clearAllBiometricRecognized(BiometricSourceType.FACE, userInfo.id)
+                }
+            }
+            .flowOn(backgroundDispatcher)
+            .onEach { (isAuthenticated, _) ->
+                listeners.forEach { it.onAuthenticatedChanged(isAuthenticated) }
+            }
             .flowOn(mainDispatcher)
             .launchIn(applicationScope)
 

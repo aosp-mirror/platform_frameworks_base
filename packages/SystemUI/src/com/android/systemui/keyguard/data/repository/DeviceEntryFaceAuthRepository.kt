@@ -326,7 +326,7 @@ constructor(
                     it.selectionStatus == SelectionStatus.SELECTION_IN_PROGRESS
                 },
             )
-            .flowOn(backgroundDispatcher)
+            .flowOn(mainDispatcher) // should revoke auth ASAP in the main thread
             .onEach { anyOfThemIsTrue ->
                 if (anyOfThemIsTrue) {
                     clearPendingAuthRequest("Resetting auth status")

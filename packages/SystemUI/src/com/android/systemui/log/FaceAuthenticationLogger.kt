@@ -132,6 +132,10 @@ constructor(
         logBuffer.log(TAG, DEBUG, "Face authentication failed")
     }
 
+    fun clearFaceRecognized() {
+        logBuffer.log(TAG, DEBUG, "Clear face recognized")
+    }
+
     fun authenticationError(
         errorCode: Int,
         errString: CharSequence?,
