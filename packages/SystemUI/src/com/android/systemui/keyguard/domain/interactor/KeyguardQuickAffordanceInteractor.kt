@@ -120,10 +120,14 @@ constructor(
      * This is useful for experiences like the lock screen preview mode, where the affordances must
      * always be visible.
      */
-    fun quickAffordanceAlwaysVisible(
+    suspend fun quickAffordanceAlwaysVisible(
         position: KeyguardQuickAffordancePosition,
     ): Flow<KeyguardQuickAffordanceModel> {
-        return quickAffordanceInternal(position)
+        return if (isFeatureDisabledByDevicePolicy()) {
+            flowOf(KeyguardQuickAffordanceModel.Hidden)
+        } else {
+            quickAffordanceInternal(position)
+        }
     }
 
     /**
