@@ -226,12 +226,17 @@ interface PropertyTransformationBuilder {
     )
 
     /**
-     * Scale the element(s) matching [matcher] so that it grows/shrinks to the same size as [anchor]
-     * .
+     * Scale the element(s) matching [matcher] so that it grows/shrinks to the same size as
+     * [anchor].
      *
      * Note: This currently only works if [anchor] is a shared element of this transition.
      */
-    fun anchoredSize(matcher: ElementMatcher, anchor: ElementKey)
+    fun anchoredSize(
+        matcher: ElementMatcher,
+        anchor: ElementKey,
+        anchorWidth: Boolean = true,
+        anchorHeight: Boolean = true,
+    )
 }
 
 /** The edge of a [SceneTransitionLayout]. */
