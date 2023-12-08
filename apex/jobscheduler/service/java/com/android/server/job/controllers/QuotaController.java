@@ -36,6 +36,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.UidObserver;
+import android.app.job.JobInfo;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManagerInternal;
 import android.app.usage.UsageStatsManagerInternal.UsageEventListener;
@@ -772,18 +773,23 @@ public final class QuotaController extends StateController {
         if (!jobStatus.shouldTreatAsExpeditedJob()) {
             // If quota is currently "free", then the job can run for the full amount of time,
             // regardless of bucket (hence using charging instead of isQuotaFreeLocked()).
-            if (mService.isBatteryCharging()
-                    // The top and foreground cases here were added because apps in those states
-                    // aren't really restricted and the work could be something the user is
-                    // waiting for. Now that user-initiated jobs are a defined concept, we may
-                    // not need these exemptions as much. However, UIJs are currently limited
-                    // (as of UDC) to data transfer work. There may be other work that could
-                    // rely on this exception. Once we add more UIJ types, we can re-evaluate
-                    // the need for these exceptions.
-                    // TODO: re-evaluate the need for these exceptions
-                    || mTopAppCache.get(jobStatus.getSourceUid())
+            if (mService.isBatteryCharging()) {
+                return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
+            }
+            // The top and foreground cases here were added because apps in those states
+            // aren't really restricted and the work could be something the user is
+            // waiting for. Now that user-initiated jobs are a defined concept, we may
+            // not need these exemptions as much. However, UIJs are currently limited
+            // (as of UDC) to data transfer work. There may be other work that could
+            // rely on this exception. Once we add more UIJ types, we can re-evaluate
+            // the need for these exceptions.
+            // TODO: re-evaluate the need for these exceptions
+            final boolean isInPrivilegedState = mTopAppCache.get(jobStatus.getSourceUid())
                     || isTopStartedJobLocked(jobStatus)
-                    || isUidInForeground(jobStatus.getSourceUid())) {
+                    || isUidInForeground(jobStatus.getSourceUid());
+            final boolean isJobImportant = jobStatus.getEffectivePriority() >= JobInfo.PRIORITY_HIGH
+                    || (jobStatus.getFlags() & JobInfo.FLAG_IMPORTANT_WHILE_FOREGROUND) != 0;
+            if (isInPrivilegedState && isJobImportant) {
                 return mConstants.RUNTIME_FREE_QUOTA_MAX_LIMIT_MS;
             }
             return getTimeUntilQuotaConsumedLocked(
