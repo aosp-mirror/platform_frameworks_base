@@ -78,6 +78,11 @@ interface IVirtualDeviceManager {
     int getDeviceIdForDisplayId(int displayId);
 
     /**
+     * Returns the display name corresponding to the given persistent device ID, if any.
+     */
+    CharSequence getDisplayNameForPersistentDeviceId(in String persistentDeviceId);
+
+    /**
      * Checks whether the passed {@code deviceId} is a valid virtual device ID or not.
      * {@link VirtualDeviceManager#DEVICE_ID_DEFAULT} is not valid as it is the ID of the default
      * device which is not a virtual device. {@code deviceId} must correspond to a virtual device
