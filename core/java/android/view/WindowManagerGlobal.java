@@ -30,9 +30,13 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.util.AndroidRuntimeException;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.inputmethod.InputMethodManager;
+import android.window.ITrustedPresentationListener;
+import android.window.TrustedPresentationThresholds;
 
 import com.android.internal.util.FastPrintWriter;
 
@@ -43,6 +47,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -142,6 +147,9 @@ public final class WindowManagerGlobal {
     private WeakHashMap<IBinder, ProposedRotationListenerDelegate> mProposedRotationListenerMap;
 
     private Runnable mSystemPropertyUpdater;
+
+    private final TrustedPresentationListener mTrustedPresentationListener =
+            new TrustedPresentationListener();
 
     private WindowManagerGlobal() {
     }
@@ -324,7 +332,7 @@ public final class WindowManagerGlobal {
             final Context context = view.getContext();
             if (context != null
                     && (context.getApplicationInfo().flags
-                            & ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
+                    & ApplicationInfo.FLAG_HARDWARE_ACCELERATED) != 0) {
                 wparams.flags |= WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED;
             }
         }
@@ -482,7 +490,7 @@ public final class WindowManagerGlobal {
                     if (who != null) {
                         WindowLeaked leak = new WindowLeaked(
                                 what + " " + who + " has leaked window "
-                                + root.getView() + " that was originally added here");
+                                        + root.getView() + " that was originally added here");
                         leak.setStackTrace(root.getLocation().getStackTrace());
                         Log.e(TAG, "", leak);
                     }
@@ -790,6 +798,87 @@ public final class WindowManagerGlobal {
         }
     }
 
+    public void registerTrustedPresentationListener(@NonNull IBinder window,
+            @NonNull TrustedPresentationThresholds thresholds, Executor executor,
+            @NonNull Consumer<Boolean> listener) {
+        mTrustedPresentationListener.addListener(window, thresholds, listener, executor);
+    }
+
+    public void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
+        mTrustedPresentationListener.removeListener(listener);
+    }
+
+    private final class TrustedPresentationListener extends
+            ITrustedPresentationListener.Stub {
+        private static int sId = 0;
+        private final ArrayMap<Consumer<Boolean>, Pair<Integer, Executor>> mListeners =
+                new ArrayMap<>();
+
+        private final Object mTplLock = new Object();
+
+        private void addListener(IBinder window, TrustedPresentationThresholds thresholds,
+                Consumer<Boolean> listener, Executor executor) {
+            synchronized (mTplLock) {
+                if (mListeners.containsKey(listener)) {
+                    Log.i(TAG, "Updating listener " + listener + " thresholds to " + thresholds);
+                    removeListener(listener);
+                }
+                int id = sId++;
+                mListeners.put(listener, new Pair<>(id, executor));
+                try {
+                    WindowManagerGlobal.getWindowManagerService()
+                            .registerTrustedPresentationListener(window, this, thresholds, id);
+                } catch (RemoteException e) {
+                    e.rethrowAsRuntimeException();
+                }
+            }
+        }
+
+        private void removeListener(Consumer<Boolean> listener) {
+            synchronized (mTplLock) {
+                var removedListener = mListeners.remove(listener);
+                if (removedListener == null) {
+                    Log.i(TAG, "listener " + listener + " does not exist.");
+                    return;
+                }
+
+                try {
+                    WindowManagerGlobal.getWindowManagerService()
+                            .unregisterTrustedPresentationListener(this, removedListener.first);
+                } catch (RemoteException e) {
+                    e.rethrowAsRuntimeException();
+                }
+            }
+        }
+
+        @Override
+        public void onTrustedPresentationChanged(int[] inTrustedStateListenerIds,
+                int[] outOfTrustedStateListenerIds) {
+            ArrayList<Runnable> firedListeners = new ArrayList<>();
+            synchronized (mTplLock) {
+                mListeners.forEach((listener, idExecutorPair) -> {
+                    final var listenerId =  idExecutorPair.first;
+                    final var executor = idExecutorPair.second;
+                    for (int id : inTrustedStateListenerIds) {
+                        if (listenerId == id) {
+                            firedListeners.add(() -> executor.execute(
+                                    () -> listener.accept(/*presentationState*/true)));
+                        }
+                    }
+                    for (int id : outOfTrustedStateListenerIds) {
+                        if (listenerId == id) {
+                            firedListeners.add(() -> executor.execute(
+                                    () -> listener.accept(/*presentationState*/false)));
+                        }
+                    }
+                });
+            }
+            for (int i = 0; i < firedListeners.size(); i++) {
+                firedListeners.get(i).run();
+            }
+        }
+    }
+
     /** @hide */
     public void addWindowlessRoot(ViewRootImpl impl) {
         synchronized (mLock) {
@@ -801,7 +890,7 @@ public final class WindowManagerGlobal {
     public void removeWindowlessRoot(ViewRootImpl impl) {
         synchronized (mLock) {
             mWindowlessRoots.remove(impl);
-	}
+        }
     }
 
     public void setRecentsAppBehindSystemBars(boolean behindSystemBars) {
