@@ -43,3 +43,11 @@ flag {
     description: "Collect sepolicy hash from sysfs"
     bug: "308471499"
 }
+
+flag {
+    name: "frp_enforcement"
+    namespace: "android_hw_security"
+    description: "This flag controls whether PDB enforces FRP"
+    bug: "290312729"
+    is_fixed_read_only: true
+}
