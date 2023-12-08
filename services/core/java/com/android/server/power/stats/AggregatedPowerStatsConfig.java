@@ -19,7 +19,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.os.BatteryConsumer;
 
-import com.android.internal.os.MultiStateStats;
 import com.android.internal.os.PowerStats;
 
 import java.lang.annotation.Retention;

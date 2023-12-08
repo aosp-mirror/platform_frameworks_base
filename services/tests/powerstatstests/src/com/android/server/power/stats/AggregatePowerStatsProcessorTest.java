@@ -26,8 +26,6 @@ import android.os.BatteryConsumer;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.os.MultiStateStats;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 

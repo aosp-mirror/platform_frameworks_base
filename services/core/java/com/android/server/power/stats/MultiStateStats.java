@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.internal.os;
+package com.android.server.power.stats;
 
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.LongArrayMultiStateCounter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
