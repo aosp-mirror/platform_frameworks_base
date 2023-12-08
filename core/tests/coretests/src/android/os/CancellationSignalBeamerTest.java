@@ -22,6 +22,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
 import android.os.CancellationSignalBeamer.Receiver;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.PollingCheck;
 import android.util.PollingCheck.PollingCheckCondition;
 
@@ -29,6 +31,8 @@ import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -40,11 +44,20 @@ import java.util.concurrent.CountDownLatch;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@IgnoreUnderRavenwood(blockedBy = CancellationSignalBeamer.class)
 public class CancellationSignalBeamerTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
-    private CancellationSignal mSenderSignal = new CancellationSignal();
+    private CancellationSignal mSenderSignal;
     private CancellationSignal mReceivedSignal;
-    private Context mContext = InstrumentationRegistry.getInstrumentation().getContext();
+    private Context mContext;
+
+    @Before
+    public void setUp() {
+        mSenderSignal = new CancellationSignal();
+        mContext = InstrumentationRegistry.getInstrumentation().getContext();
+    }
 
     @Test
     public void testBeam_null() {
@@ -208,17 +221,22 @@ public class CancellationSignalBeamerTest {
         mReceivedSignal = mReceiver.unbeam(cancellationSignalToken);
     }
 
-    private final Sender mSender = new Sender() {
-        @Override
-        public void onCancel(IBinder token) {
-            mReceiver.cancel(token);
-        }
+    private Sender mSender;
+    private Receiver mReceiver;
 
-        @Override
-        public void onForget(IBinder token) {
-            mReceiver.forget(token);
-        }
-    };
+    @Before
+    public void setUpSenderReceiver() {
+        mSender = new Sender() {
+            @Override
+            public void onCancel(IBinder token) {
+                mReceiver.cancel(token);
+            }
 
-    private final Receiver mReceiver = new Receiver(false);
+            @Override
+            public void onForget(IBinder token) {
+                mReceiver.forget(token);
+            }
+        };
+        mReceiver = new Receiver(false);
+    }
 }

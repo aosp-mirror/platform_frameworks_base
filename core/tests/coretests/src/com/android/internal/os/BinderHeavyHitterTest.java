@@ -16,11 +16,19 @@
 
 package com.android.internal.os;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import android.os.Binder;
+
+import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BinderCallHeavyHitterWatcher.HeavyHitterContainer;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,7 +37,8 @@ import java.util.Random;
 /**
  * Tests for {@link BinderCallHeavyHitterWatcher}.
  */
-public final class BinderHeavyHitterTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public final class BinderHeavyHitterTest {
 
     private boolean mListenerNotified = false;
 
@@ -114,6 +123,7 @@ public final class BinderHeavyHitterTest extends TestCase {
         }
     }
 
+    @Test
     public void testPositive() throws Exception {
         BinderCallHeavyHitterWatcher watcher = BinderCallHeavyHitterWatcher.getInstance();
         try {
@@ -142,6 +152,7 @@ public final class BinderHeavyHitterTest extends TestCase {
         }
     }
 
+    @Test
     public void testNegative() throws Exception {
         BinderCallHeavyHitterWatcher watcher = BinderCallHeavyHitterWatcher.getInstance();
         try {

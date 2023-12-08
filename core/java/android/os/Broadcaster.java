@@ -19,6 +19,7 @@ package android.os;
 import android.compat.annotation.UnsupportedAppUsage;
 
 /** @hide */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class Broadcaster
 {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)

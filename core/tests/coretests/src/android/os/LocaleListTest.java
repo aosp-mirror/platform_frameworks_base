@@ -16,13 +16,29 @@
 
 package android.os;
 
-import androidx.test.filters.SmallTest;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
-import junit.framework.TestCase;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.Locale;
 
-public class LocaleListTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = LocaleList.class)
+public class LocaleListTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    @Test
     @SmallTest
     public void testConstructor() throws Exception {
         LocaleList ll;
@@ -51,6 +67,7 @@ public class LocaleListTest extends TestCase {
         assertEquals("fr,de", ll.toLanguageTags());
     }
 
+    @Test
     @SmallTest
     public void testConstructor_nullThrows() throws Exception {
         try {
@@ -61,6 +78,7 @@ public class LocaleListTest extends TestCase {
         }
     }
 
+    @Test
     @SmallTest
     public void testGetDefault_localeSetDefaultCalledButNoChangeNecessary() throws Exception {
         final Locale originalLocale = Locale.getDefault();
@@ -82,6 +100,7 @@ public class LocaleListTest extends TestCase {
         LocaleList.setDefault(originalLocaleList, originalLocaleIndex);
     }
 
+    @Test
     @SmallTest
     public void testIntersection() {
         LocaleList localesWithN = new LocaleList(

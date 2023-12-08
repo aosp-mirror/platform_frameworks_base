@@ -28,12 +28,15 @@ import static org.junit.Assert.assertEquals;
 
 import android.content.Context;
 import android.os.storage.StorageManager;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -43,7 +46,11 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 
 @RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = Environment.class)
 public class EnvironmentTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private File dir;
 
     private static Context getContext() {

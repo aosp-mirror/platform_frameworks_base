@@ -16,18 +16,35 @@
 
 package android.os;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class HandlerThreadTest extends TestCase {
+@RunWith(AndroidJUnit4.class)
+public class HandlerThreadTest {
     private static final int TEST_WHAT = 1;
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private boolean mGotMessage = false;
     private int mGotMessageWhat = -1;
     private volatile boolean mDidSetup = false;
     private volatile int mLooperTid = -1;
-    
+
+    @Test
     @MediumTest
     public void testHandlerThread() throws Exception {
         HandlerThread th1 =  new HandlerThread("HandlerThreadTest") {
