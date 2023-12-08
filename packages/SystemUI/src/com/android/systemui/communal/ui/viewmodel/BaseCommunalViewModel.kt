@@ -22,6 +22,7 @@ import android.view.MotionEvent
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.media.controls.ui.MediaHost
 import com.android.systemui.shade.ShadeViewController
 import kotlinx.coroutines.flow.Flow
@@ -40,6 +41,15 @@ abstract class BaseCommunalViewModel(
 
     fun onSceneChanged(scene: CommunalSceneKey) {
         communalInteractor.onSceneChanged(scene)
+    }
+
+    /**
+     * Updates the transition state of the hub [SceneTransitionLayout].
+     *
+     * Note that you must call is with `null` when the UI is done or risk a memory leak.
+     */
+    fun setTransitionState(transitionState: Flow<ObservableCommunalTransitionState>?) {
+        communalInteractor.setTransitionState(transitionState)
     }
 
     // TODO(b/308813166): remove once CommunalContainer is moved lower in z-order and doesn't block

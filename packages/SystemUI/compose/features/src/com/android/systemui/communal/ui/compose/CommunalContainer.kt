@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,15 +29,20 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.FixedSizeEdgeDetector
+import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.SceneTransitionLayoutState
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.SwipeDirection
+import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
 import com.android.systemui.communal.shared.model.CommunalSceneKey
+import com.android.systemui.communal.shared.model.ObservableCommunalTransitionState
 import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
 
 object Communal {
@@ -60,7 +66,7 @@ val sceneTransitions = transitions {
  * This is a temporary container to allow the communal UI to use [SceneTransitionLayout] for gesture
  * handling and transitions before the full Flexiglass layout is ready.
  */
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalCoroutinesApi::class)
 @Composable
 fun CommunalContainer(
     modifier: Modifier = Modifier,
@@ -79,6 +85,15 @@ fun CommunalContainer(
     var showSceneTransitionLayout by remember { mutableStateOf(true) }
     if (!showSceneTransitionLayout || !isKeyguardShowing) {
         return
+    }
+
+    // This effect exposes the SceneTransitionLayout's observable transition state to the rest of
+    // the system, and unsets it when the view is disposed to avoid a memory leak.
+    DisposableEffect(viewModel, sceneTransitionLayoutState) {
+        viewModel.setTransitionState(
+            sceneTransitionLayoutState.observableTransitionState().map { it.toModel() }
+        )
+        onDispose { viewModel.setTransitionState(null) }
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -171,18 +186,40 @@ private fun SceneScope.CommunalScene(
     Box(modifier.element(Communal.Elements.Content)) { CommunalHub(viewModel = viewModel) }
 }
 
-// TODO(b/293899074): Remove these conversions once Compose can be used throughout SysUI.
+// TODO(b/315490861): Remove these conversions once Compose can be used throughout SysUI.
 object TransitionSceneKey {
     val Blank = CommunalSceneKey.Blank.toTransitionSceneKey()
     val Communal = CommunalSceneKey.Communal.toTransitionSceneKey()
 }
 
+// TODO(b/315490861): Remove these conversions once Compose can be used throughout SysUI.
+fun SceneKey.toCommunalSceneKey(): CommunalSceneKey {
+    return this.identity as CommunalSceneKey
+}
+
+// TODO(b/315490861): Remove these conversions once Compose can be used throughout SysUI.
 fun CommunalSceneKey.toTransitionSceneKey(): SceneKey {
     return SceneKey(name = toString(), identity = this)
 }
 
-fun SceneKey.toCommunalSceneKey(): CommunalSceneKey {
-    return this.identity as CommunalSceneKey
+/**
+ * Converts between the [SceneTransitionLayout] state class and our forked data class that can be
+ * used throughout SysUI.
+ */
+// TODO(b/315490861): Remove these conversions once Compose can be used throughout SysUI.
+fun ObservableTransitionState.toModel(): ObservableCommunalTransitionState {
+    return when (this) {
+        is ObservableTransitionState.Idle ->
+            ObservableCommunalTransitionState.Idle(scene.toCommunalSceneKey())
+        is ObservableTransitionState.Transition ->
+            ObservableCommunalTransitionState.Transition(
+                fromScene = fromScene.toCommunalSceneKey(),
+                toScene = toScene.toCommunalSceneKey(),
+                progress = progress,
+                isInitiatedByUserInput = isInitiatedByUserInput,
+                isUserInputOngoing = isUserInputOngoing,
+            )
+    }
 }
 
 object ContainerDimensions {
