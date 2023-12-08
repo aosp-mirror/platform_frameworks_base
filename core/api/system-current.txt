@@ -4009,7 +4009,7 @@ package android.content.pm {
     field public static final int DELETE_FAILED_OWNER_BLOCKED = -4; // 0xfffffffc
     field public static final int DELETE_KEEP_DATA = 1; // 0x1
     field public static final int DELETE_SUCCEEDED = 1; // 0x1
-    field @FlaggedApi("android.permission.flags.device_aware_permission_apis") public static final String EXTRA_REQUEST_PERMISSIONS_DEVICE_ID = "android.content.pm.extra.REQUEST_PERMISSIONS_DEVICE_ID";
+    field @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public static final String EXTRA_REQUEST_PERMISSIONS_DEVICE_ID = "android.content.pm.extra.REQUEST_PERMISSIONS_DEVICE_ID";
     field public static final String EXTRA_REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
@@ -4115,7 +4115,7 @@ package android.content.pm {
 
   public static interface PackageManager.OnPermissionsChangedListener {
     method public void onPermissionsChanged(int);
-    method @FlaggedApi("android.permission.flags.device_aware_permission_apis") public default void onPermissionsChanged(int, @NonNull String);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public default void onPermissionsChanged(int, @NonNull String);
   }
 
   public static final class PackageManager.UninstallCompleteCallback implements android.os.Parcelable {
@@ -10927,13 +10927,13 @@ package android.permission {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void onGetUnusedAppCount(@NonNull java.util.function.IntConsumer);
     method @BinderThread public abstract void onGrantOrUpgradeDefaultRuntimePermissions(@NonNull Runnable);
     method @Deprecated @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String);
-    method @FlaggedApi("android.permission.flags.device_aware_permission_apis") @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String, int);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String, int);
     method @Deprecated @BinderThread public void onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @Deprecated @BinderThread public void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,java.util.List<java.lang.String>>>);
     method @Deprecated @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, @NonNull Runnable);
-    method @FlaggedApi("android.permission.flags.device_aware_permission_apis") @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, int, @NonNull Runnable);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, int, @NonNull Runnable);
     method @Deprecated @BinderThread public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull android.permission.AdminPermissionControlParams, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onStageAndApplyRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);

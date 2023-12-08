@@ -731,7 +731,7 @@ public abstract class PackageManager {
          * @see VirtualDeviceManager.VirtualDevice#getPersistentDeviceId()
          * @see VirtualDeviceManager#PERSISTENT_DEVICE_ID_DEFAULT
          */
-        @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+        @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
         default void onPermissionsChanged(int uid, @NonNull String persistentDeviceId) {
             Objects.requireNonNull(persistentDeviceId);
             if (Objects.equals(persistentDeviceId,
@@ -4893,7 +4893,7 @@ public abstract class PackageManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public static final String EXTRA_REQUEST_PERMISSIONS_DEVICE_ID =
             "android.content.pm.extra.REQUEST_PERMISSIONS_DEVICE_ID";
 

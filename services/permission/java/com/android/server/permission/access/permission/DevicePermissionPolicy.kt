@@ -304,7 +304,7 @@ class DevicePermissionPolicy : SchemePolicy() {
         /** These permissions are supported for virtual devices. */
         // TODO: b/298661870 - Use new API to get the list of device aware permissions.
         val DEVICE_AWARE_PERMISSIONS =
-            if (Flags.deviceAwarePermissionApis()) {
+            if (Flags.deviceAwarePermissionApisEnabled()) {
                 setOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
             } else {
                 emptySet<String>()
