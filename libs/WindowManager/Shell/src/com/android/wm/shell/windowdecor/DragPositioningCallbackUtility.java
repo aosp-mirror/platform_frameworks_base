@@ -26,9 +26,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
-import android.window.WindowContainerTransaction;
 
-import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 
 /**
@@ -130,8 +128,7 @@ public class DragPositioningCallbackUtility {
             Rect taskBoundsAtDragStart, PointF repositionStartPoint, SurfaceControl.Transaction t,
             float x, float y) {
         updateTaskBounds(repositionTaskBounds, taskBoundsAtDragStart, repositionStartPoint, x, y);
-        t.setPosition(decoration.mTaskSurface, repositionTaskBounds.left,
-                repositionTaskBounds.top);
+        t.setPosition(decoration.mTaskSurface, repositionTaskBounds.left, repositionTaskBounds.top);
     }
 
     private static void updateTaskBounds(Rect repositionTaskBounds, Rect taskBoundsAtDragStart,
@@ -186,18 +183,6 @@ public class DragPositioningCallbackUtility {
         } else if (repositionTaskBounds.top > validDragArea.bottom) {
             repositionTaskBounds.offset(0, validDragArea.bottom - repositionTaskBounds.top);
         }
-    }
-
-    /**
-     * Apply a bounds change to a task.
-     * @param windowDecoration decor of task we are changing bounds for
-     * @param taskBounds new bounds of this task
-     * @param taskOrganizer applies the provided WindowContainerTransaction
-     */
-    static void applyTaskBoundsChange(WindowContainerTransaction wct,
-            WindowDecoration windowDecoration, Rect taskBounds, ShellTaskOrganizer taskOrganizer) {
-        wct.setBounds(windowDecoration.mTaskInfo.token, taskBounds);
-        taskOrganizer.applyTransaction(wct);
     }
 
     private static float getMinWidth(DisplayController displayController,
