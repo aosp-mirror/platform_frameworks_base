@@ -26,5 +26,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @SysUISingleton
 class NotificationStackAppearanceRepository @Inject constructor() {
     /** The bounds of the notification stack in the current scene. */
-    val stackBounds = MutableStateFlow(NotificationContainerBounds(0f, 0f))
+    val stackBounds = MutableStateFlow(NotificationContainerBounds())
+
+    /** The corner radius of the notification stack, in dp. */
+    val cornerRadiusDp = MutableStateFlow(32f)
 }

@@ -413,7 +413,7 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
             val top = 123f
             val bottom = 456f
             keyguardRootViewModel.onNotificationContainerBoundsChanged(top, bottom)
-            assertThat(bounds).isEqualTo(NotificationContainerBounds(top, bottom))
+            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = top, bottom = bottom))
         }
 
     @Test
