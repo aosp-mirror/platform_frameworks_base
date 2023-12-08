@@ -899,6 +899,24 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
 
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+    public void setDisplayImePolicy(int displayId, @WindowManager.DisplayImePolicy int policy) {
+        super.setDisplayImePolicy_enforcePermission();
+        synchronized (mVirtualDeviceLock) {
+            if (!mVirtualDisplays.contains(displayId)) {
+                throw new SecurityException("Display ID " + displayId
+                        + " not found for this virtual device");
+            }
+        }
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            mInputController.setDisplayImePolicy(displayId, policy);
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    @Override // Binder call
+    @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Nullable
     public List<VirtualSensor> getVirtualSensorList() {
         super.getVirtualSensorList_enforcePermission();
@@ -1095,7 +1113,12 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mInputController.setPointerAcceleration(1f, displayId);
             mInputController.setDisplayEligibilityForPointerCapture(/* isEligible= */ false,
                     displayId);
-            mInputController.setLocalIme(displayId);
+            // WM throws a SecurityException if the display is untrusted.
+            if ((mDisplayManagerInternal.getDisplayInfo(displayId).flags & Display.FLAG_TRUSTED)
+                    == Display.FLAG_TRUSTED) {
+                mInputController.setDisplayImePolicy(displayId,
+                        WindowManager.DISPLAY_IME_POLICY_LOCAL);
+            }
         } finally {
             Binder.restoreCallingIdentity(token);
         }
