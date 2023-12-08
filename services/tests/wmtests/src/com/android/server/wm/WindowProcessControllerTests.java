@@ -38,7 +38,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -432,7 +431,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
         mWpc.updateAppSpecificSettingsForAllActivitiesInPackage(DEFAULT_COMPONENT_PACKAGE_NAME,
                 Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"),
                 GRAMMATICAL_GENDER_NOT_SPECIFIED);
-        verify(activity).ensureActivityConfiguration(anyInt(), anyBoolean());
+        verify(activity).ensureActivityConfiguration();
     }
 
     @Test
@@ -443,7 +442,7 @@ public class WindowProcessControllerTests extends WindowTestsBase {
                 Configuration.UI_MODE_NIGHT_YES, LocaleList.forLanguageTags("en-XA"),
                 GRAMMATICAL_GENDER_NOT_SPECIFIED);
         verify(activity, never()).applyAppSpecificConfig(anyInt(), any(), anyInt());
-        verify(activity, never()).ensureActivityConfiguration(anyInt(), anyBoolean());
+        verify(activity, never()).ensureActivityConfiguration();
     }
 
     @Test

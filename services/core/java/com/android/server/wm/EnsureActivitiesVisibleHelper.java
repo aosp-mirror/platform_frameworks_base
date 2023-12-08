@@ -33,8 +33,6 @@ class EnsureActivitiesVisibleHelper {
     private boolean mAboveTop;
     private boolean mContainerShouldBeVisible;
     private boolean mBehindFullyOccludedContainer;
-    private int mConfigChanges;
-    private boolean mPreserveWindows;
     private boolean mNotifyClients;
 
     EnsureActivitiesVisibleHelper(TaskFragment container) {
@@ -45,14 +43,10 @@ class EnsureActivitiesVisibleHelper {
      * Update all attributes except {@link mTaskFragment} to use in subsequent calculations.
      *
      * @param starting The activity that is being started
-     * @param configChanges Parts of the configuration that changed for this activity for evaluating
-     *                      if the screen should be frozen.
-     * @param preserveWindows Flag indicating whether windows should be preserved when updating.
      * @param notifyClients Flag indicating whether the configuration and visibility changes shoulc
      *                      be sent to the clients.
      */
-    void reset(ActivityRecord starting, int configChanges, boolean preserveWindows,
-            boolean notifyClients) {
+    void reset(ActivityRecord starting, boolean notifyClients) {
         mStarting = starting;
         mTopRunningActivity = mTaskFragment.topRunningActivity();
         // If the top activity is not fullscreen, then we need to make sure any activities under it
@@ -60,33 +54,26 @@ class EnsureActivitiesVisibleHelper {
         mAboveTop = mTopRunningActivity != null;
         mContainerShouldBeVisible = mTaskFragment.shouldBeVisible(mStarting);
         mBehindFullyOccludedContainer = !mContainerShouldBeVisible;
-        mConfigChanges = configChanges;
-        mPreserveWindows = preserveWindows;
         mNotifyClients = notifyClients;
     }
 
     /**
      * Update and commit visibility with an option to also update the configuration of visible
      * activities.
-     * @see Task#ensureActivitiesVisible(ActivityRecord, int, boolean)
-     * @see RootWindowContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
+     * @see Task#ensureActivitiesVisible(ActivityRecord)
+     * @see RootWindowContainer#ensureActivitiesVisible()
      * @param starting The top most activity in the task.
      *                 The activity is either starting or resuming.
      *                 Caller should ensure starting activity is visible.
      *
-     * @param configChanges Parts of the configuration that changed for this activity for evaluating
-     *                      if the screen should be frozen.
-     * @param preserveWindows Flag indicating whether windows should be preserved when updating.
      * @param notifyClients Flag indicating whether the configuration and visibility changes shoulc
      *                      be sent to the clients.
      */
-    void process(@Nullable ActivityRecord starting, int configChanges, boolean preserveWindows,
-            boolean notifyClients) {
-        reset(starting, configChanges, preserveWindows, notifyClients);
+    void process(@Nullable ActivityRecord starting, boolean notifyClients) {
+        reset(starting, notifyClients);
 
         if (DEBUG_VISIBILITY) {
-            Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + mTopRunningActivity
-                    + " configChanges=0x" + Integer.toHexString(configChanges));
+            Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + mTopRunningActivity);
         }
         if (mTopRunningActivity != null && mTaskFragment.asTask() != null) {
             // TODO(14709632): Check if this needed to be implemented in TaskFragment.
@@ -107,8 +94,7 @@ class EnsureActivitiesVisibleHelper {
             final TaskFragment childTaskFragment = child.asTaskFragment();
             if (childTaskFragment != null
                     && childTaskFragment.getTopNonFinishingActivity() != null) {
-                childTaskFragment.updateActivityVisibilities(starting, configChanges,
-                        preserveWindows, notifyClients);
+                childTaskFragment.updateActivityVisibilities(starting, notifyClients);
                 // The TaskFragment should fully occlude the activities below if the bounds
                 // equals to its parent task, unless it is translucent.
                 mBehindFullyOccludedContainer |=
@@ -188,13 +174,11 @@ class EnsureActivitiesVisibleHelper {
             // First: if this is not the current activity being started, make
             // sure it matches the current configuration.
             if (r != mStarting && mNotifyClients) {
-                r.ensureActivityConfiguration(0 /* globalChanges */, mPreserveWindows,
-                        true /* ignoreVisibility */);
+                r.ensureActivityConfiguration(true /* ignoreVisibility */);
             }
 
             if (!r.attachedToProcess()) {
-                makeVisibleAndRestartIfNeeded(mStarting, mConfigChanges,
-                        resumeTopActivity && isTop, r);
+                makeVisibleAndRestartIfNeeded(mStarting, resumeTopActivity && isTop, r);
             } else if (r.isVisibleRequested()) {
                 // If this activity is already visible, then there is nothing to do here.
                 if (DEBUG_VISIBILITY) {
@@ -213,8 +197,6 @@ class EnsureActivitiesVisibleHelper {
             } else {
                 r.makeVisibleIfNeeded(mStarting, mNotifyClients);
             }
-            // Aggregate current change flags.
-            mConfigChanges |= r.configChangeFlags;
         } else {
             if (DEBUG_VISIBILITY) {
                 Slog.v(TAG_VISIBILITY, "Make invisible? " + r
@@ -242,15 +224,12 @@ class EnsureActivitiesVisibleHelper {
         }
     }
 
-    private void makeVisibleAndRestartIfNeeded(ActivityRecord starting, int configChanges,
+    private void makeVisibleAndRestartIfNeeded(ActivityRecord starting,
             boolean andResume, ActivityRecord r) {
         // This activity needs to be visible, but isn't even running...
         // get it started and resume if no other root task in this root task is resumed.
         if (DEBUG_VISIBILITY) {
             Slog.v(TAG_VISIBILITY, "Start and freeze screen for " + r);
-        }
-        if (r != starting) {
-            r.startFreezingScreenLocked(configChanges);
         }
         if (!r.isVisibleRequested() || r.mLaunchTaskBehind) {
             if (DEBUG_VISIBILITY) {

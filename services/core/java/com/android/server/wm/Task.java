@@ -90,7 +90,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.wm.ActivityTaskManagerService.H.FIRST_ACTIVITY_TASK_MSG;
 import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
@@ -760,7 +759,7 @@ class Task extends TaskFragment {
             return;
         }
         mResizeMode = resizeMode;
-        mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+        mRootWindowContainer.ensureActivitiesVisible();
         mRootWindowContainer.resumeFocusedTasksTopActivities();
         updateTaskDescription();
     }
@@ -801,15 +800,14 @@ class Task extends TaskFragment {
             if (setBounds(bounds, forced) != BOUNDS_CHANGE_NONE) {
                 final ActivityRecord r = topRunningActivityLocked();
                 if (r != null) {
-                    kept = r.ensureActivityConfiguration(0 /* globalChanges */,
-                            preserveWindow);
+                    kept = r.ensureActivityConfiguration();
                     // Preserve other windows for resizing because if resizing happens when there
                     // is a dialog activity in the front, the activity that still shows some
                     // content to the user will become black and cause flickers. Note in most cases
                     // this won't cause tons of irrelevant windows being preserved because only
                     // activities in this task may experience a bounds change. Configs for other
                     // activities stay the same.
-                    mRootWindowContainer.ensureActivitiesVisible(r, 0, preserveWindow);
+                    mRootWindowContainer.ensureActivitiesVisible(r);
                     if (!kept) {
                         mRootWindowContainer.resumeFocusedTasksTopActivities();
                     }
@@ -915,7 +913,7 @@ class Task extends TaskFragment {
         if (!deferResume) {
             // The task might have already been running and its visibility needs to be synchronized
             // with the visibility of the root task / windows.
-            root.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+            root.ensureActivitiesVisible();
             root.resumeFocusedTasksTopActivities();
         }
 
@@ -4752,7 +4750,7 @@ class Task extends TaskFragment {
         }
 
         if (!mTaskSupervisor.isRootVisibilityUpdateDeferred()) {
-            mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+            mRootWindowContainer.ensureActivitiesVisible();
             mRootWindowContainer.resumeFocusedTasksTopActivities();
         }
     }
@@ -4793,8 +4791,7 @@ class Task extends TaskFragment {
         mRootWindowContainer.resumeFocusedTasksTopActivities();
         // Update visibility of activities before notifying WM. This way it won't try to resize
         // windows that are no longer visible.
-        mRootWindowContainer.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                !PRESERVE_WINDOWS);
+        mRootWindowContainer.ensureActivitiesVisible();
     }
 
     final boolean isOnHomeDisplay() {
@@ -4938,41 +4935,27 @@ class Task extends TaskFragment {
      * @param starting The top most activity in the task.
      *                 The activity is either starting or resuming.
      *                 Caller should ensure starting activity is visible.
-     * @param preserveWindows Flag indicating whether windows should be preserved when updating
-     *                        configuration in {@link EnsureActivitiesVisibleHelper}.
-     * @param configChanges Parts of the configuration that changed for this activity for evaluating
-     *                      if the screen should be frozen as part of
-     *                      {@link EnsureActivitiesVisibleHelper}.
-     *
      */
-    void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
-            boolean preserveWindows) {
-        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */);
+    void ensureActivitiesVisible(@Nullable ActivityRecord starting) {
+        ensureActivitiesVisible(starting, true /* notifyClients */);
     }
 
     /**
      * Ensure visibility with an option to also update the configuration of visible activities.
-     * @see #ensureActivitiesVisible(ActivityRecord, int, boolean)
-     * @see RootWindowContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
+     * @see #ensureActivitiesVisible(ActivityRecord)
+     * @see RootWindowContainer#ensureActivitiesVisible()
      * @param starting The top most activity in the task.
      *                 The activity is either starting or resuming.
      *                 Caller should ensure starting activity is visible.
      * @param notifyClients Flag indicating whether the visibility updates should be sent to the
      *                      clients in {@link EnsureActivitiesVisibleHelper}.
-     * @param preserveWindows Flag indicating whether windows should be preserved when updating
-     *                        configuration in {@link EnsureActivitiesVisibleHelper}.
-     * @param configChanges Parts of the configuration that changed for this activity for evaluating
-     *                      if the screen should be frozen as part of
-     *                      {@link EnsureActivitiesVisibleHelper}.
      */
     // TODO: Should be re-worked based on the fact that each task as a root task in most cases.
-    void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients) {
+    void ensureActivitiesVisible(@Nullable ActivityRecord starting, boolean notifyClients) {
         mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
             forAllLeafTasks(task -> {
-                task.updateActivityVisibilities(starting, configChanges, preserveWindows,
-                        notifyClients);
+                task.updateActivityVisibilities(starting, notifyClients);
             }, true /* traverseTopToBottom */);
 
             if (mTranslucentActivityWaiting != null &&
@@ -5273,7 +5256,7 @@ class Task extends TaskFragment {
             // tell WindowManager that r is visible even though it is at the back of the root
             // task.
             r.setVisibility(true);
-            ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);
+            ensureActivitiesVisible(null /* starting */);
             // If launching behind, the app will start regardless of what's above it, so mark it
             // as unknown even before prior `pause`. This also prevents a race between set-ready
             // and activityPause. Launch-behind is basically only used for dream now.

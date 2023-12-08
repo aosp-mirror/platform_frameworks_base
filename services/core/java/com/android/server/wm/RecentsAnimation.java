@@ -28,7 +28,6 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_RECENTS_ANIMATIONS;
 import static com.android.server.wm.ActivityRecord.State.STOPPED;
 import static com.android.server.wm.ActivityRecord.State.STOPPING;
-import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_TOP;
@@ -126,8 +125,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 // The activity may be relaunched if it cannot handle the current configuration
                 // changes. The activity will be paused state if it is relaunched, otherwise it
                 // keeps the original stopped state.
-                targetActivity.ensureActivityConfiguration(0 /* globalChanges */,
-                        false /* preserveWindow */, true /* ignoreVisibility */);
+                targetActivity.ensureActivityConfiguration(true /* ignoreVisibility */);
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Updated config=%s",
                         targetActivity.getConfiguration());
             }
@@ -261,7 +259,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
 
             // If we updated the launch-behind state, update the visibility of the activities after
             // we fetch the visible tasks to be controlled by the animation
-            mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
+            mService.mRootWindowContainer.ensureActivitiesVisible();
 
             ActivityOptions options = null;
             if (eventTime > 0) {
@@ -380,8 +378,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                         // transition (the target activity will be one of closing apps).
                         if (!controller.shouldDeferCancelWithScreenshot()
                                 && !targetRootTask.isFocusedRootTaskOnDisplay()) {
-                            targetRootTask.ensureActivitiesVisible(null /* starting */,
-                                    0 /* starting */, false /* preserveWindows */);
+                            targetRootTask.ensureActivitiesVisible(null /* starting */);
                         }
                         // Keep target root task in place, nothing changes, so ignore the transition
                         // logic below
@@ -389,7 +386,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                     }
 
                     mWindowManager.prepareAppTransitionNone();
-                    mService.mRootWindowContainer.ensureActivitiesVisible(null, 0, false);
+                    mService.mRootWindowContainer.ensureActivitiesVisible();
                     mService.mRootWindowContainer.resumeFocusedTasksTopActivities();
 
                     // No reason to wait for the pausing activity in this case, as the hiding of
