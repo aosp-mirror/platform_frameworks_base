@@ -20,7 +20,6 @@ import android.annotation.Nullable;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.PersistableBundle;
-import android.util.FastImmutableArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
@@ -30,8 +29,9 @@ import com.android.internal.os.PowerStats;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 /**
  * Collects snapshots of power-related system statistics.
@@ -246,8 +246,7 @@ public abstract class PowerStatsCollector {
 
     @GuardedBy("this")
     @SuppressWarnings("unchecked")
-    private volatile FastImmutableArraySet<Consumer<PowerStats>> mConsumerList =
-            new FastImmutableArraySet<Consumer<PowerStats>>(new Consumer[0]);
+    private volatile List<Consumer<PowerStats>> mConsumerList = Collections.emptyList();
 
     public PowerStatsCollector(Handler handler, long throttlePeriodMs, Clock clock) {
         mHandler = handler;
@@ -262,9 +261,13 @@ public abstract class PowerStatsCollector {
     @SuppressWarnings("unchecked")
     public void addConsumer(Consumer<PowerStats> consumer) {
         synchronized (this) {
-            mConsumerList = new FastImmutableArraySet<Consumer<PowerStats>>(
-                    Stream.concat(mConsumerList.stream(), Stream.of(consumer))
-                            .toArray(Consumer[]::new));
+            if (mConsumerList.contains(consumer)) {
+                return;
+            }
+
+            List<Consumer<PowerStats>> newList = new ArrayList<>(mConsumerList);
+            newList.add(consumer);
+            mConsumerList = Collections.unmodifiableList(newList);
         }
     }
 
@@ -275,9 +278,9 @@ public abstract class PowerStatsCollector {
     @SuppressWarnings("unchecked")
     public void removeConsumer(Consumer<PowerStats> consumer) {
         synchronized (this) {
-            mConsumerList = new FastImmutableArraySet<Consumer<PowerStats>>(
-                    mConsumerList.stream().filter(c -> c != consumer)
-                            .toArray(Consumer[]::new));
+            List<Consumer<PowerStats>> newList = new ArrayList<>(mConsumerList);
+            newList.remove(consumer);
+            mConsumerList = Collections.unmodifiableList(newList);
         }
     }
 
@@ -302,8 +305,9 @@ public abstract class PowerStatsCollector {
         if (stats == null) {
             return;
         }
-        for (Consumer<PowerStats> consumer : mConsumerList) {
-            consumer.accept(stats);
+        List<Consumer<PowerStats>> consumerList = mConsumerList;
+        for (int i = consumerList.size() - 1; i >= 0; i--) {
+            consumerList.get(i).accept(stats);
         }
     }
 
