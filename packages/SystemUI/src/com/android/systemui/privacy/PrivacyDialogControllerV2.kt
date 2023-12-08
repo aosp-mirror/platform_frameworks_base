@@ -278,7 +278,12 @@ class PrivacyDialogControllerV2(
                     d.setShowForAllUsers(true)
                     d.addOnDismissListener(onDialogDismissed)
                     if (view != null) {
-                        dialogLaunchAnimator.showFromView(d, view)
+                        val controller = getPrivacyDialogController(view)
+                        if (controller == null) {
+                            d.show()
+                        } else {
+                            dialogLaunchAnimator.show(d, controller)
+                        }
                     } else {
                         d.show()
                     }
@@ -288,6 +293,13 @@ class PrivacyDialogControllerV2(
                     privacyLogger.logEmptyDialog()
                 }
             }
+        }
+    }
+
+    private fun getPrivacyDialogController(source: View): DialogLaunchAnimator.Controller? {
+        val delegate = DialogLaunchAnimator.Controller.fromView(source) ?: return null
+        return object : DialogLaunchAnimator.Controller by delegate {
+            override fun shouldAnimateExit() = false
         }
     }
 
