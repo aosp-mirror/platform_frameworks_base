@@ -25,7 +25,7 @@ import android.testing.AndroidTestingRunner
 
 import com.android.wm.shell.R
 import com.android.wm.shell.ShellTestCase
-import com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT
+import com.android.wm.shell.common.pip.PipBoundsState.STASH_TYPE_RIGHT
 import com.android.wm.shell.pip.tv.TvPipBoundsController.POSITION_DEBOUNCE_TIMEOUT_MILLIS
 import com.android.wm.shell.pip.tv.TvPipKeepClearAlgorithm.Placement
 

@@ -49,6 +49,7 @@ import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.InsetsSource.FLAG_INSETS_ROUNDED_CORNER;
 import static android.view.SurfaceControl.METADATA_TASK_ID;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
@@ -1271,6 +1272,10 @@ class Task extends TaskFragment {
         if (isPersistable) {
             mLastTimeMoved = System.currentTimeMillis();
         }
+        if (toTop && inRecents) {
+            // If task is in recents, ensure it is at the top
+            mTaskSupervisor.mRecentTasks.add(this);
+        }
     }
 
     // Close up recents linked list.
@@ -1841,6 +1846,9 @@ class Task extends TaskFragment {
                 td.setStatusBarColor(atd.getStatusBarColor());
                 td.setEnsureStatusBarContrastWhenTransparent(
                         atd.getEnsureStatusBarContrastWhenTransparent());
+            }
+            if (td.getStatusBarAppearance() == 0) {
+                td.setStatusBarAppearance(atd.getStatusBarAppearance());
             }
             if (td.getNavigationBarColor() == 0) {
                 td.setNavigationBarColor(atd.getNavigationBarColor());
@@ -2805,7 +2813,7 @@ class Task extends TaskFragment {
         final WindowManager.LayoutParams attrs = win.mAttrs;
         visibleFrame.set(win.getFrame());
         visibleFrame.inset(win.getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
-                visibleFrame, attrs.type, win.getWindowingMode(), attrs.softInputMode,
+                visibleFrame, attrs.type, win.getActivityType(), attrs.softInputMode,
                 attrs.flags));
         out.union(visibleFrame);
     }
@@ -2858,7 +2866,7 @@ class Task extends TaskFragment {
                     getDisplayContent().getInsetsStateController().getRawInsetsState();
             for (int i = state.sourceSize() - 1; i >= 0; i--) {
                 final InsetsSource source = state.sourceAt(i);
-                if (source.insetsRoundedCornerFrame()) {
+                if (source.hasFlags(FLAG_INSETS_ROUNDED_CORNER)) {
                     animationBounds.inset(source.calculateVisibleInsets(animationBounds));
                 }
             }
@@ -2870,8 +2878,8 @@ class Task extends TaskFragment {
             // No need to check if allowed if it's leaving dragResize
             if (dragResizing
                     && !(getRootTask().getWindowingMode() == WINDOWING_MODE_FREEFORM)) {
-                throw new IllegalArgumentException("Drag resize not allow for root task id="
-                        + getRootTaskId());
+                Slog.e(TAG, "Drag resize isn't allowed for root task id=" + getRootTaskId());
+                return;
             }
             mDragResizing = dragResizing;
             resetDragResizingChangeReported();
@@ -3451,6 +3459,9 @@ class Task extends TaskFragment {
         info.topActivityLetterboxHorizontalPosition = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxWidth = TaskInfo.PROPERTY_VALUE_UNSET;
         info.topActivityLetterboxHeight = TaskInfo.PROPERTY_VALUE_UNSET;
+        info.isUserFullscreenOverrideEnabled = top != null
+                && top.mLetterboxUiController.shouldApplyUserFullscreenOverride();
+        info.isTopActivityTransparent = top != null && !top.fillsParent();
         info.isFromLetterboxDoubleTap = top != null && top.mLetterboxUiController.isFromDoubleTap();
         if (info.isLetterboxDoubleTapEnabled) {
             info.topActivityLetterboxWidth = top.getBounds().width();
@@ -3465,6 +3476,11 @@ class Task extends TaskFragment {
                         top.mLetterboxUiController.getLetterboxPositionForVerticalReachability();
             }
         }
+        // User Aspect Ratio Settings is enabled if the app is not in SCM
+        info.topActivityEligibleForUserAspectRatioButton = top != null
+                && !info.topActivityInSizeCompat
+                && top.mLetterboxUiController.shouldEnableUserAspectRatioSettings();
+        info.topActivityBoundsLetterboxed = top != null && top.areBoundsLetterboxed();
     }
 
     /**
@@ -4491,6 +4507,10 @@ class Task extends TaskFragment {
         return mForceHiddenFlags != 0;
     }
 
+    boolean isForceHiddenForPinnedTask() {
+        return (mForceHiddenFlags & FLAG_FORCE_HIDDEN_FOR_PINNED_TASK) != 0;
+    }
+
     @Override
     protected boolean isForceTranslucent() {
         return mForceTranslucent;
@@ -5238,17 +5258,21 @@ class Task extends TaskFragment {
             // Ensure that we do not trigger entering PiP an activity on the root pinned task.
             return;
         }
-        final boolean isTransient = opts != null && opts.getTransientLaunch();
-        final Task targetRootTask = toFrontTask != null
-                ? toFrontTask.getRootTask() : toFrontActivity.getRootTask();
-        if (targetRootTask != null && (targetRootTask.isActivityTypeAssistant() || isTransient)) {
-            // Ensure the task/activity being brought forward is not the assistant and is not
-            // transient. In the case of transient-launch, we want to wait until the end of the
-            // transition and only allow switch if the transient launch was committed.
+        final Task targetRootTask = toFrontTask != null ? toFrontTask.getRootTask()
+                : toFrontActivity != null ? toFrontActivity.getRootTask() : null;
+        if (targetRootTask == null) {
+            Slog.e(TAG, "No root task for enter pip, both to front task and activity are null?");
             return;
         }
-        pipCandidate.supportsEnterPipOnTaskSwitch = true;
+        final boolean isTransient = opts != null && opts.getTransientLaunch()
+                || (targetRootTask.mTransitionController.isTransientHide(targetRootTask));
 
+        // Ensure the task/activity being brought forward is not the assistant and is not transient
+        // nor transient hide target. In the case of transient-launch, we want to wait until the end
+        // of the transition and only allow to enter pip on task switch after the transient launch
+        // was committed.
+        pipCandidate.supportsEnterPipOnTaskSwitch = !targetRootTask.isActivityTypeAssistant()
+                && !isTransient;
     }
 
     /**
@@ -5393,8 +5417,7 @@ class Task extends TaskFragment {
         // Basic case: for simple app-centric recents, we need to recreate
         // the task if the affinity has changed.
 
-        final String affinity = ActivityRecord.computeTaskAffinity(destAffinity, srec.getUid(),
-                srec.launchMode, srec.mActivityComponent);
+        final String affinity = ActivityRecord.computeTaskAffinity(destAffinity, srec.getUid());
         if (srec == null || srec.getTask().affinity == null
                 || !srec.getTask().affinity.equals(affinity)) {
             return true;

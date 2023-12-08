@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -88,7 +87,7 @@ constructor(
                             QuickAccessWalletController.WalletChangeEvent.DEFAULT_PAYMENT_APP_CHANGE
                         )
                         walletController.updateWalletPreference()
-                        walletController.queryWalletCards(callback)
+                        walletController.queryWalletCards(callback, MAX_CARDS)
 
                         awaitClose {
                             walletController.unregisterWalletChangeObservers(
@@ -152,5 +151,6 @@ constructor(
 
     companion object {
         private const val TAG = "WalletSuggestions"
+        private const val MAX_CARDS = 50
     }
 }

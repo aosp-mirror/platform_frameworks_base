@@ -70,6 +70,9 @@ public class UserManagerServiceTest {
 
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         mUserManagerService = new UserManagerService(InstrumentationRegistry.getContext());
+        // Put the current user to mUsers. UMS can't find userlist.xml, and fallbackToSingleUserLP.
+        mUserManagerService.putUserInfo(
+                new UserInfo(ActivityManager.getCurrentUser(), "Current User", 0));
 
         restrictionsFile = new File(mContext.getCacheDir(), "restrictions.xml");
         restrictionsFile.delete();

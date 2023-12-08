@@ -86,7 +86,7 @@ public class NavBarFadeAnimationController extends FadeAnimationController{
                 ANIMATION_TYPE_TOKEN_TRANSFORM);
         if (controller == null) {
             fadeAnim.run();
-        } else if (!controller.isTargetToken(mNavigationBar.mToken)) {
+        } else if (!controller.hasFadeOperation(mNavigationBar.mToken)) {
             // If fade rotation animation is running and the nav bar is not controlled by it:
             // - For fade-in animation, defer the animation until fade rotation animation finishes.
             // - For fade-out animation, just play the animation.

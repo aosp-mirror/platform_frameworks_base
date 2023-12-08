@@ -108,7 +108,7 @@ public class ExpandableNotificationRowDragControllerTest extends SysuiTestCase {
 
         mRow.doDragCallback(0, 0);
         verify(controller).startDragAndDrop(mRow);
-        verify(mShadeController).animateCollapsePanels(eq(0), eq(true),
+        verify(mShadeController).animateCollapseShade(eq(0), eq(true),
                 eq(false), anyFloat());
         verify(mNotificationPanelLogger, times(1)).logNotificationDrag(any());
     }

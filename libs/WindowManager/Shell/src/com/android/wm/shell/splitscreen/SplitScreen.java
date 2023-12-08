@@ -18,6 +18,7 @@ package com.android.wm.shell.splitscreen;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.ActivityManager;
 import android.graphics.Rect;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
@@ -61,6 +62,14 @@ public interface SplitScreen {
         default void onTaskStageChanged(int taskId, @StageType int stage, boolean visible) {}
         default void onSplitBoundsChanged(Rect rootBounds, Rect mainBounds, Rect sideBounds) {}
         default void onSplitVisibilityChanged(boolean visible) {}
+    }
+
+    /** Callback interface for listening to requests to enter split select */
+    interface SplitSelectListener {
+        default boolean onRequestEnterSplitSelect(ActivityManager.RunningTaskInfo taskInfo,
+                int splitPosition, Rect taskBounds) {
+            return false;
+        }
     }
 
     /** Registers listener that gets split screen callback. */

@@ -16,15 +16,20 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.data.repository.prod
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 
 @SmallTest
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 class DisabledWifiRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: DisabledWifiRepository

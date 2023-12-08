@@ -215,7 +215,7 @@ class WalletContextualSuggestionsControllerTest : SysuiTestCase() {
         cards: List<WalletCard> = emptyList(),
         shouldFail: Boolean = false
     ) {
-        whenever(walletController.queryWalletCards(any())).thenAnswer { invocation ->
+        whenever(walletController.queryWalletCards(any(), anyInt())).thenAnswer { invocation ->
             with(
                 invocation.arguments[0] as QuickAccessWalletClient.OnWalletCardsRetrievedCallback
             ) {

@@ -46,6 +46,8 @@
                     <xs:annotation name="nonnull"/>
                     <xs:annotation name="final"/>
                 </xs:element>
+                <xs:element type="luxThrottling" name="luxThrottling" minOccurs="0"
+                            maxOccurs="1"/>
                 <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0"
                             maxOccurs="1"/>
                 <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1"/>
@@ -136,6 +138,39 @@
             <xs:element name="quirk" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
         </xs:sequence>
     </xs:complexType>
+
+    <xs:complexType name="luxThrottling">
+        <xs:sequence>
+            <xs:element name="brightnessLimitMap" type="brightnessLimitMap"
+                        maxOccurs="unbounded">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="brightnessLimitMap">
+        <xs:sequence>
+            <xs:element name="type" type="PredefinedBrightnessLimitNames">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <!-- lux level from light sensor to screen brightness recommended max value map.
+            Screen brightness recommended max value is to highBrightnessMode.transitionPoint and must be below that -->
+            <xs:element name="map" type="nonNegativeFloatToFloatMap">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Predefined type names as defined by DisplayDeviceConfig.BrightnessLimitMapType -->
+    <xs:simpleType  name="PredefinedBrightnessLimitNames">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="default"/>
+            <xs:enumeration value="adaptive"/>
+        </xs:restriction>
+    </xs:simpleType>
 
     <xs:complexType name="highBrightnessMode">
         <xs:all>
@@ -544,6 +579,10 @@
                     minOccurs="1" maxOccurs="1">
             <xs:annotation name="final"/>
         </xs:element>
+        <xs:element type ="xs:string" name="refreshRateThermalThrottlingId">
+            <xs:annotation name="nullable"/>
+            <xs:annotation name="final"/>
+        </xs:element>
         <xs:element name="blockingZoneThreshold" type="blockingZoneThreshold"
                     minOccurs="1" maxOccurs="1">
             <xs:annotation name="final"/>
@@ -574,5 +613,28 @@
                     minOccurs="1" maxOccurs="1">
             <xs:annotation name="final"/>
         </xs:element>
+    </xs:complexType>
+
+    <!-- generic types -->
+    <xs:complexType name="nonNegativeFloatToFloatPoint">
+        <xs:sequence>
+            <xs:element name="first" type="nonNegativeDecimal">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+            <xs:element name="second" type="nonNegativeDecimal">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="nonNegativeFloatToFloatMap">
+        <xs:sequence>
+            <xs:element name="point" type="nonNegativeFloatToFloatPoint" maxOccurs="unbounded">
+                <xs:annotation name="nonnull"/>
+                <xs:annotation name="final"/>
+            </xs:element>
+        </xs:sequence>
     </xs:complexType>
 </xs:schema>

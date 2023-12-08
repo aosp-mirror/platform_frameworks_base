@@ -42,8 +42,6 @@ public class QuickStepContract {
             "com.google.android.apps.nexuslauncher.NexusLauncherActivity";
 
     public static final String KEY_EXTRA_SYSUI_PROXY = "extra_sysui_proxy";
-    public static final String KEY_EXTRA_WINDOW_CORNER_RADIUS = "extra_window_corner_radius";
-    public static final String KEY_EXTRA_SUPPORTS_WINDOW_CORNERS = "extra_supports_window_corners";
     public static final String KEY_EXTRA_UNFOLD_ANIMATION_FORWARDER = "extra_unfold_animation";
     // See ISysuiUnlockAnimationController.aidl
     public static final String KEY_EXTRA_UNLOCK_ANIMATION_CONTROLLER = "unlock_animation";
@@ -324,7 +322,7 @@ public class QuickStepContract {
      * Returns whether the specified sysui state is such that the back gesture should be
      * disabled.
      */
-    public static boolean isBackGestureDisabled(int sysuiStateFlags) {
+    public static boolean isBackGestureDisabled(int sysuiStateFlags, boolean forTrackpad) {
         // Always allow when the bouncer/global actions/voice session is showing (even on top of
         // the keyguard)
         if ((sysuiStateFlags & SYSUI_STATE_BOUNCER_SHOWING) != 0
@@ -335,16 +333,23 @@ public class QuickStepContract {
         if ((sysuiStateFlags & SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY) != 0) {
             sysuiStateFlags &= ~SYSUI_STATE_NAV_BAR_HIDDEN;
         }
+
+        return (sysuiStateFlags & getBackGestureDisabledMask(forTrackpad)) != 0;
+    }
+
+    private static int getBackGestureDisabledMask(boolean forTrackpad) {
         // Disable when in immersive, or the notifications are interactive
-        int disableFlags = SYSUI_STATE_NAV_BAR_HIDDEN | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+        int disableFlags = SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+        if (!forTrackpad) {
+            disableFlags |= SYSUI_STATE_NAV_BAR_HIDDEN;
+        }
 
         // EdgeBackGestureHandler ignores Back gesture when SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED.
         // To allow Shade to respond to Back, we're bypassing this check (behind a flag).
         if (!ALLOW_BACK_GESTURE_IN_SHADE) {
             disableFlags |= SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
         }
-
-        return (sysuiStateFlags & disableFlags) != 0;
+        return disableFlags;
     }
 
     /**

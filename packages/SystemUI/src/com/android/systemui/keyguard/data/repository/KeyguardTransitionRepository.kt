@@ -47,6 +47,11 @@ import kotlinx.coroutines.flow.filter
  * To create or modify logic that controls when and how transitions get created, look at
  * [TransitionInteractor]. These interactors will call [startTransition] and [updateTransition] on
  * this repository.
+ *
+ * To print all transitions to logcat to help with debugging, run this command:
+ * adb shell settings put global systemui/buffer/KeyguardLog VERBOSE
+ *
+ * This will print all keyguard transitions to logcat with the KeyguardTransitionAuditLogger tag.
  */
 interface KeyguardTransitionRepository {
     /**

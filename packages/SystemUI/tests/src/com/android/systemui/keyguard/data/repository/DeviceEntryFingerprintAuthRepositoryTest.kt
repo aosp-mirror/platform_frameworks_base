@@ -26,7 +26,11 @@ import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,7 +53,6 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
-    @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var authController: AuthController
     @Captor
     private lateinit var updateMonitorCallback: ArgumentCaptor<KeyguardUpdateMonitorCallback>
@@ -68,7 +71,6 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
                 authController,
                 keyguardUpdateMonitor,
                 testScope.backgroundScope,
-                dumpManager,
             )
     }
 
@@ -176,5 +178,130 @@ class DeviceEntryFingerprintAuthRepositoryTest : SysuiTestCase() {
             whenever(authController.isUdfpsSupported).thenReturn(true)
             callback.value.onAllAuthenticatorsRegistered(TYPE_FINGERPRINT)
             assertThat(availableFpSensorType()).isEqualTo(BiometricType.UNDER_DISPLAY_FINGERPRINT)
+        }
+
+    @Test
+    fun onFingerprintSuccess_successAuthenticationStatus() =
+        testScope.runTest {
+            val authenticationStatus by collectLastValue(underTest.authenticationStatus)
+            runCurrent()
+
+            verify(keyguardUpdateMonitor).registerCallback(updateMonitorCallback.capture())
+            updateMonitorCallback.value.onBiometricAuthenticated(
+                0,
+                BiometricSourceType.FINGERPRINT,
+                true,
+            )
+
+            val status = authenticationStatus as SuccessFingerprintAuthenticationStatus
+            assertThat(status.userId).isEqualTo(0)
+            assertThat(status.isStrongBiometric).isEqualTo(true)
+        }
+
+    @Test
+    fun onFingerprintFailed_failedAuthenticationStatus() =
+        testScope.runTest {
+            val authenticationStatus by collectLastValue(underTest.authenticationStatus)
+            runCurrent()
+
+            verify(keyguardUpdateMonitor).registerCallback(updateMonitorCallback.capture())
+            updateMonitorCallback.value.onBiometricAuthFailed(
+                BiometricSourceType.FINGERPRINT,
+            )
+
+            assertThat(authenticationStatus)
+                .isInstanceOf(FailFingerprintAuthenticationStatus::class.java)
+        }
+
+    @Test
+    fun onFingerprintError_errorAuthenticationStatus() =
+        testScope.runTest {
+            val authenticationStatus by collectLastValue(underTest.authenticationStatus)
+            runCurrent()
+
+            verify(keyguardUpdateMonitor).registerCallback(updateMonitorCallback.capture())
+            updateMonitorCallback.value.onBiometricError(
+                1,
+                "test_string",
+                BiometricSourceType.FINGERPRINT,
+            )
+
+            val status = authenticationStatus as ErrorFingerprintAuthenticationStatus
+            assertThat(status.msgId).isEqualTo(1)
+            assertThat(status.msg).isEqualTo("test_string")
+        }
+
+    @Test
+    fun onFingerprintHelp_helpAuthenticationStatus() =
+        testScope.runTest {
+            val authenticationStatus by collectLastValue(underTest.authenticationStatus)
+            runCurrent()
+
+            verify(keyguardUpdateMonitor).registerCallback(updateMonitorCallback.capture())
+            updateMonitorCallback.value.onBiometricHelp(
+                1,
+                "test_string",
+                BiometricSourceType.FINGERPRINT,
+            )
+
+            val status = authenticationStatus as HelpFingerprintAuthenticationStatus
+            assertThat(status.msgId).isEqualTo(1)
+            assertThat(status.msg).isEqualTo("test_string")
+        }
+
+    @Test
+    fun onFingerprintAcquired_acquiredAuthenticationStatus() =
+        testScope.runTest {
+            val authenticationStatus by collectLastValue(underTest.authenticationStatus)
+            runCurrent()
+
+            verify(keyguardUpdateMonitor).registerCallback(updateMonitorCallback.capture())
+            updateMonitorCallback.value.onBiometricAcquired(
+                BiometricSourceType.FINGERPRINT,
+                5,
+            )
+
+            val status = authenticationStatus as AcquiredFingerprintAuthenticationStatus
+            assertThat(status.acquiredInfo).isEqualTo(5)
+        }
+
+    @Test
+    fun onFaceCallbacks_fingerprintAuthenticationStatusIsUnchanged() =
+        testScope.runTest {
+            val authenticationStatus by collectLastValue(underTest.authenticationStatus)
+            runCurrent()
+
+            verify(keyguardUpdateMonitor).registerCallback(updateMonitorCallback.capture())
+            updateMonitorCallback.value.onBiometricAuthenticated(
+                0,
+                BiometricSourceType.FACE,
+                true,
+            )
+            assertThat(authenticationStatus).isNull()
+
+            updateMonitorCallback.value.onBiometricAuthFailed(
+                BiometricSourceType.FACE,
+            )
+            assertThat(authenticationStatus).isNull()
+
+            updateMonitorCallback.value.onBiometricHelp(
+                1,
+                "test_string",
+                BiometricSourceType.FACE,
+            )
+            assertThat(authenticationStatus).isNull()
+
+            updateMonitorCallback.value.onBiometricAcquired(
+                BiometricSourceType.FACE,
+                5,
+            )
+            assertThat(authenticationStatus).isNull()
+
+            updateMonitorCallback.value.onBiometricError(
+                1,
+                "test_string",
+                BiometricSourceType.FACE,
+            )
+            assertThat(authenticationStatus).isNull()
         }
 }

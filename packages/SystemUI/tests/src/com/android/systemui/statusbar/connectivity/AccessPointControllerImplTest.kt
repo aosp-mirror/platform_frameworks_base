@@ -23,6 +23,7 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.lifecycle.Lifecycle
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.wifitrackerlib.WifiEntry
 import com.android.wifitrackerlib.WifiPickerTracker
@@ -31,7 +32,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyList
 import org.mockito.Captor
 import org.mockito.Mock
@@ -52,7 +52,7 @@ class AccessPointControllerImplTest : SysuiTestCase() {
     private lateinit var userTracker: UserTracker
     @Mock
     private lateinit var wifiPickerTrackerFactory:
-            AccessPointControllerImpl.WifiPickerTrackerFactory
+            WifiPickerTrackerFactory
     @Mock
     private lateinit var wifiPickerTracker: WifiPickerTracker
     @Mock

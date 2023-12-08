@@ -24,13 +24,17 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.ColorDrawable;
+import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 
 import com.android.wm.shell.bubbles.BubbleController;
+import com.android.wm.shell.bubbles.BubbleOverflow;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.BubbleViewProvider;
+
+import java.util.function.Consumer;
 
 /**
  * Similar to {@link com.android.wm.shell.bubbles.BubbleStackView}, this view is added to window
@@ -48,11 +52,13 @@ public class BubbleBarLayerView extends FrameLayout
     private final BubbleController mBubbleController;
     private final BubblePositioner mPositioner;
     private final BubbleBarAnimationHelper mAnimationHelper;
+    private final BubbleEducationViewController mEducationViewController;
     private final View mScrimView;
 
     @Nullable
     private BubbleViewProvider mExpandedBubble;
     private BubbleBarExpandedView mExpandedView;
+    private @Nullable Consumer<String> mUnBubbleConversationCallback;
 
     // TODO(b/273310265) - currently the view is always on the right, need to update for RTL.
     /** Whether the expanded view is displaying on the left of the screen or not. */
@@ -64,6 +70,10 @@ public class BubbleBarLayerView extends FrameLayout
     private final Region mTouchableRegion = new Region();
     private final Rect mTempRect = new Rect();
 
+    // Used to ensure touch target size for the menu shown on a bubble expanded view
+    private TouchDelegate mHandleTouchDelegate;
+    private final Rect mHandleTouchBounds = new Rect();
+
     public BubbleBarLayerView(Context context, BubbleController controller) {
         super(context);
         mBubbleController = controller;
@@ -71,6 +81,10 @@ public class BubbleBarLayerView extends FrameLayout
 
         mAnimationHelper = new BubbleBarAnimationHelper(context,
                 this, mPositioner);
+        mEducationViewController = new BubbleEducationViewController(context, (boolean visible) -> {
+            if (mExpandedView == null) return;
+            mExpandedView.setObscured(visible);
+        });
 
         mScrimView = new View(getContext());
         mScrimView.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
@@ -81,9 +95,7 @@ public class BubbleBarLayerView extends FrameLayout
         mScrimView.setBackgroundDrawable(new ColorDrawable(
                 getResources().getColor(android.R.color.system_neutral1_1000)));
 
-        setOnClickListener(view -> {
-            mBubbleController.collapseStack();
-        });
+        setOnClickListener(view -> hideMenuOrCollapse());
     }
 
     @Override
@@ -99,6 +111,7 @@ public class BubbleBarLayerView extends FrameLayout
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
 
         if (mExpandedView != null) {
+            mEducationViewController.hideManageEducation(/* animated = */ false);
             removeView(mExpandedView);
             mExpandedView = null;
         }
@@ -141,17 +154,55 @@ public class BubbleBarLayerView extends FrameLayout
             mExpandedView = null;
         }
         if (mExpandedView == null) {
+            if (expandedView.getParent() != null) {
+                // Expanded view might be animating collapse and is still attached
+                // Cancel current animations and remove from parent
+                mAnimationHelper.cancelAnimations();
+                removeView(expandedView);
+            }
             mExpandedBubble = b;
             mExpandedView = expandedView;
-            final int width = mPositioner.getExpandedViewWidthForBubbleBar();
-            final int height = mPositioner.getExpandedViewHeightForBubbleBar();
+            boolean isOverflowExpanded = b.getKey().equals(BubbleOverflow.KEY);
+            final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
+            final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
             mExpandedView.setVisibility(GONE);
+            mExpandedView.setY(mPositioner.getExpandedViewBottomForBubbleBar() - height);
+            mExpandedView.setLayerBoundsSupplier(() -> new Rect(0, 0, getWidth(), getHeight()));
+            mExpandedView.setListener(new BubbleBarExpandedView.Listener() {
+                @Override
+                public void onTaskCreated() {
+                    mEducationViewController.maybeShowManageEducation(b, mExpandedView);
+                }
+
+                @Override
+                public void onUnBubbleConversation(String bubbleKey) {
+                    if (mUnBubbleConversationCallback != null) {
+                        mUnBubbleConversationCallback.accept(bubbleKey);
+                    }
+                }
+
+                @Override
+                public void onBackPressed() {
+                    hideMenuOrCollapse();
+                }
+            });
+
             addView(mExpandedView, new FrameLayout.LayoutParams(width, height));
         }
 
         mIsExpanded = true;
         mBubbleController.getSysuiProxy().onStackExpandChanged(true);
-        mAnimationHelper.animateExpansion(mExpandedBubble);
+        mAnimationHelper.animateExpansion(mExpandedBubble, () -> {
+            if (mExpandedView == null) return;
+            // Touch delegate for the menu
+            BubbleBarHandleView view = mExpandedView.getHandleView();
+            view.getBoundsOnScreen(mHandleTouchBounds);
+            mHandleTouchBounds.top -= mPositioner.getBubblePaddingTop();
+            mHandleTouchDelegate = new TouchDelegate(mHandleTouchBounds,
+                    mExpandedView.getHandleView());
+            setTouchDelegate(mHandleTouchDelegate);
+        });
+
         showScrim(true);
     }
 
@@ -159,18 +210,38 @@ public class BubbleBarLayerView extends FrameLayout
     public void collapse() {
         mIsExpanded = false;
         final BubbleBarExpandedView viewToRemove = mExpandedView;
+        mEducationViewController.hideManageEducation(/* animated = */ true);
         mAnimationHelper.animateCollapse(() -> removeView(viewToRemove));
         mBubbleController.getSysuiProxy().onStackExpandChanged(false);
         mExpandedView = null;
+        setTouchDelegate(null);
         showScrim(false);
+    }
+
+    /** Sets the function to call to un-bubble the given conversation. */
+    public void setUnBubbleConversationCallback(
+            @Nullable Consumer<String> unBubbleConversationCallback) {
+        mUnBubbleConversationCallback = unBubbleConversationCallback;
+    }
+
+    /** Hides the current modal education/menu view, expanded view or collapses the bubble stack */
+    private void hideMenuOrCollapse() {
+        if (mEducationViewController.isManageEducationVisible()) {
+            mEducationViewController.hideManageEducation(/* animated = */ true);
+        } else if (isExpanded() && mExpandedView != null) {
+            mExpandedView.hideMenuOrCollapse();
+        } else {
+            mBubbleController.collapseStack();
+        }
     }
 
     /** Updates the expanded view size and position. */
     private void updateExpandedView() {
         if (mExpandedView == null) return;
+        boolean isOverflowExpanded = mExpandedBubble.getKey().equals(BubbleOverflow.KEY);
         final int padding = mPositioner.getBubbleBarExpandedViewPadding();
-        final int width = mPositioner.getExpandedViewWidthForBubbleBar();
-        final int height = mPositioner.getExpandedViewHeightForBubbleBar();
+        final int width = mPositioner.getExpandedViewWidthForBubbleBar(isOverflowExpanded);
+        final int height = mPositioner.getExpandedViewHeightForBubbleBar(isOverflowExpanded);
         FrameLayout.LayoutParams lp = (LayoutParams) mExpandedView.getLayoutParams();
         lp.width = width;
         lp.height = height;
@@ -180,7 +251,7 @@ public class BubbleBarLayerView extends FrameLayout
         } else {
             mExpandedView.setX(mPositioner.getAvailableRect().width() - width - padding);
         }
-        mExpandedView.setY(mPositioner.getInsets().top + padding);
+        mExpandedView.setY(mPositioner.getExpandedViewBottomForBubbleBar() - height);
         mExpandedView.updateLocation();
     }
 

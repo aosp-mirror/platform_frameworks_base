@@ -17,8 +17,8 @@
 package com.android.server.wm.flicker.rotation
 
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -27,18 +27,16 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class ChangeAppRotationTestCfArm(flicker: FlickerTest) : ChangeAppRotationTest(flicker) {
+class ChangeAppRotationTestCfArm(flicker: LegacyFlickerTest) : ChangeAppRotationTest(flicker) {
     companion object {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.rotationTests] for configuring screen orientation and navigation
-         * modes.
+         * See [LegacyFlickerTestFactory.rotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.rotationTests()
-        }
+        fun getParams() = LegacyFlickerTestFactory.rotationTests()
     }
 }

@@ -20,7 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -48,7 +48,11 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
 
         keyguardTransitionRepository = FakeKeyguardTransitionRepository()
         val interactor =
-            KeyguardTransitionInteractor(keyguardTransitionRepository, testScope.backgroundScope)
+            KeyguardTransitionInteractorFactory.create(
+                    scope = TestScope().backgroundScope,
+                    repository = keyguardTransitionRepository,
+                )
+                .keyguardTransitionInteractor
         underTest = CollapsedStatusBarViewModelImpl(interactor, testScope.backgroundScope)
     }
 

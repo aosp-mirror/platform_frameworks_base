@@ -232,15 +232,9 @@ public class ActivityThreadTest {
 
             // Execute a local relaunch item with current scaled config (e.g. simulate recreate),
             // the config should not be scaled again.
-            final Configuration currentConfig = activity.getResources().getConfiguration();
-            final ClientTransaction localTransaction =
-                    newTransaction(activityThread, activity.getActivityToken());
-            localTransaction.addCallback(ActivityRelaunchItem.obtain(
-                    null /* pendingResults */, null /* pendingIntents */, 0 /* configChanges */,
-                    new MergedConfiguration(currentConfig, currentConfig),
-                    true /* preserveWindow */));
             InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                    () -> activityThread.executeTransaction(localTransaction));
+                    () -> activityThread.executeTransaction(
+                            newRelaunchResumeTransaction(activity)));
 
             assertScreenScale(scale, activity, originalActivityConfig, originalActivityMetrics);
         } finally {
@@ -451,8 +445,10 @@ public class ActivityThreadTest {
         final Rect bounds = activity.getWindowManager().getCurrentWindowMetrics().getBounds();
         assertEquals(activityConfigPortrait.windowConfiguration.getBounds(), bounds);
 
-        // Ensure changes in window configuration bounds are reported
-        assertEquals(numOfConfig + 1, activity.mNumOfConfigChanges);
+        // Ensure that Activity#onConfigurationChanged() not be called because the changes in
+        // WindowConfiguration shouldn't be reported, and we only apply the latest Configuration
+        // update in transaction.
+        assertEquals(numOfConfig, activity.mNumOfConfigChanges);
     }
 
     @Test
@@ -784,8 +780,10 @@ public class ActivityThreadTest {
     }
 
     private static ClientTransaction newRelaunchResumeTransaction(Activity activity) {
+        final Configuration currentConfig = activity.getResources().getConfiguration();
         final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(null,
-                null, 0, new MergedConfiguration(), false /* preserveWindow */);
+                null, 0, new MergedConfiguration(currentConfig, currentConfig),
+                false /* preserveWindow */);
         final ResumeActivityItem resumeStateRequest =
                 ResumeActivityItem.obtain(true /* isForward */,
                         false /* shouldSendCompatFakeFocus*/);
@@ -884,12 +882,13 @@ public class ActivityThreadTest {
             mConfig.setTo(config);
             ++mNumOfConfigChanges;
 
-            if (mConfigLatch != null) {
+            final CountDownLatch configLatch = mConfigLatch;
+            if (configLatch != null) {
                 if (mTestLatch != null) {
                     mTestLatch.countDown();
                 }
                 try {
-                    mConfigLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
+                    configLatch.await(TIMEOUT_SEC, TimeUnit.SECONDS);
                 } catch (InterruptedException e) {
                     throw new IllegalStateException(e);
                 }

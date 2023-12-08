@@ -40,13 +40,14 @@ import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
-import android.window.WindowContainerTransactionCallback;
 
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.split.SplitScreenUtils;
+import com.android.wm.shell.desktopmode.DesktopModeController;
+import com.android.wm.shell.desktopmode.DesktopModeStatus;
+import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
-import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
@@ -70,6 +71,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     private RecentsTransitionHandler mRecentsHandler;
     private StageCoordinator mSplitHandler;
     private final KeyguardTransitionHandler mKeyguardHandler;
+    private DesktopModeController mDesktopModeController;
+    private DesktopTasksController mDesktopTasksController;
     private UnfoldTransitionHandler mUnfoldHandler;
 
     private static class MixedTransition {
@@ -87,8 +90,11 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         /** Keyguard exit/occlude/unocclude transition. */
         static final int TYPE_KEYGUARD = 5;
 
+        /** Recents Transition while in desktop mode. */
+        static final int TYPE_RECENTS_DURING_DESKTOP = 6;
+
         /** Fuld/Unfold transition. */
-        static final int TYPE_UNFOLD = 6;
+        static final int TYPE_UNFOLD = 7;
 
         /** The default animation for this mixed transition. */
         static final int ANIM_TYPE_DEFAULT = 0;
@@ -107,6 +113,14 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         WindowContainerTransaction mFinishWCT = null;
 
         /**
+         * Whether the transition has request for remote transition while mLeftoversHandler
+         * isn't remote transition handler.
+         * If true and the mLeftoversHandler can handle the transition, need to notify remote
+         * transition handler to consume the transition.
+         */
+        boolean mHasRequestToRemote;
+
+        /**
          * Mixed transitions are made up of multiple "parts". This keeps track of how many
          * parts are currently animating.
          */
@@ -117,14 +131,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             mTransition = transition;
         }
 
-        void joinFinishArgs(WindowContainerTransaction wct,
-                WindowContainerTransactionCallback wctCB) {
-            if (wctCB != null) {
-                // Technically can probably support 1, but don't want to encourage CB usage since
-                // it creates instabliity, so just throw.
-                throw new IllegalArgumentException("Can't mix transitions that require finish"
-                        + " sync callback");
-            }
+        void joinFinishArgs(WindowContainerTransaction wct) {
             if (wct != null) {
                 if (mFinishWCT == null) {
                     mFinishWCT = wct;
@@ -139,17 +146,20 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
 
     public DefaultMixedHandler(@NonNull ShellInit shellInit, @NonNull Transitions player,
             Optional<SplitScreenController> splitScreenControllerOptional,
-            Optional<PipTouchHandler> pipTouchHandlerOptional,
+            @Nullable PipTransitionController pipTransitionController,
             Optional<RecentsTransitionHandler> recentsHandlerOptional,
             KeyguardTransitionHandler keyguardHandler,
+            Optional<DesktopModeController> desktopModeControllerOptional,
+            Optional<DesktopTasksController> desktopTasksControllerOptional,
             Optional<UnfoldTransitionHandler> unfoldHandler) {
         mPlayer = player;
         mKeyguardHandler = keyguardHandler;
-        if (Transitions.ENABLE_SHELL_TRANSITIONS && pipTouchHandlerOptional.isPresent()
+        if (Transitions.ENABLE_SHELL_TRANSITIONS
+                && pipTransitionController != null
                 && splitScreenControllerOptional.isPresent()) {
             // Add after dependencies because it is higher priority
             shellInit.addInitCallback(() -> {
-                mPipHandler = pipTouchHandlerOptional.get().getTransitionHandler();
+                mPipHandler = pipTransitionController;
                 mSplitHandler = splitScreenControllerOptional.get().getTransitionHandler();
                 mPlayer.addHandler(this);
                 if (mSplitHandler != null) {
@@ -159,6 +169,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 if (mRecentsHandler != null) {
                     mRecentsHandler.addMixer(this);
                 }
+                mDesktopModeController = desktopModeControllerOptional.orElse(null);
+                mDesktopTasksController = desktopTasksControllerOptional.orElse(null);
                 mUnfoldHandler = unfoldHandler.orElse(null);
             }, this);
         }
@@ -200,6 +212,10 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                     MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE, transition);
             mixed.mLeftoversHandler = handler.first;
             mActiveTransitions.add(mixed);
+            if (mixed.mLeftoversHandler != mPlayer.getRemoteTransitionHandler()) {
+                mixed.mHasRequestToRemote = true;
+                mPlayer.getRemoteTransitionHandler().handleRequest(transition, request);
+            }
             return handler.second;
         } else if (mSplitHandler.isSplitScreenVisible()
                 && isOpeningType(request.getType())
@@ -239,7 +255,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
 
     @Override
     public Transitions.TransitionHandler handleRecentsRequest(WindowContainerTransaction outWCT) {
-        if (mRecentsHandler != null && mSplitHandler.isSplitScreenVisible()) {
+        if (mRecentsHandler != null && (mSplitHandler.isSplitScreenVisible()
+                || DesktopModeStatus.isActive(mPlayer.getContext()))) {
             return this;
         }
         return null;
@@ -252,6 +269,13 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                     + "Split-Screen is foreground, so treat it as Mixed.");
             final MixedTransition mixed = new MixedTransition(
                     MixedTransition.TYPE_RECENTS_DURING_SPLIT, transition);
+            mixed.mLeftoversHandler = mRecentsHandler;
+            mActiveTransitions.add(mixed);
+        } else if (DesktopModeStatus.isActive(mPlayer.getContext())) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a recents request while "
+                    + "desktop mode is active, so treat it as Mixed.");
+            final MixedTransition mixed = new MixedTransition(
+                    MixedTransition.TYPE_RECENTS_DURING_DESKTOP, transition);
             mixed.mLeftoversHandler = mRecentsHandler;
             mActiveTransitions.add(mixed);
         } else {
@@ -303,12 +327,24 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         // the time of handleRequest, but we need more information than is available at that time.
         if (KeyguardTransitionHandler.handles(info)) {
             if (mixed != null && mixed.mType != MixedTransition.TYPE_KEYGUARD) {
-                ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
-                        "Converting mixed transition into a keyguard transition");
-                onTransitionConsumed(transition, false, null);
+                final MixedTransition keyguardMixed =
+                        new MixedTransition(MixedTransition.TYPE_KEYGUARD, transition);
+                mActiveTransitions.add(keyguardMixed);
+                final boolean hasAnimateKeyguard = animateKeyguard(keyguardMixed, info,
+                        startTransaction, finishTransaction, finishCallback);
+                if (hasAnimateKeyguard) {
+                    ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                            "Converting mixed transition into a keyguard transition");
+                    // Consume the original mixed transition
+                    onTransitionConsumed(transition, false, null);
+                    return true;
+                } else {
+                    // Keyguard handler cannot handle it, process through original mixed
+                    mActiveTransitions.remove(keyguardMixed);
+                }
+            } else if (mPipHandler != null) {
+                mPipHandler.syncPipSurfaceState(info, startTransaction, finishTransaction);
             }
-            mixed = new MixedTransition(MixedTransition.TYPE_KEYGUARD, transition);
-            mActiveTransitions.add(mixed);
         }
 
         if (mixed == null) return false;
@@ -319,8 +355,17 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         } else if (mixed.mType == MixedTransition.TYPE_DISPLAY_AND_SPLIT_CHANGE) {
             return false;
         } else if (mixed.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
-            return animateOpenIntentWithRemoteAndPip(mixed, info, startTransaction,
-                    finishTransaction, finishCallback);
+            final boolean handledToPip = animateOpenIntentWithRemoteAndPip(mixed, info,
+                    startTransaction, finishTransaction, finishCallback);
+            // Consume the transition on remote handler if the leftover handler already handle this
+            // transition. And if it cannot, the transition will be handled by remote handler, so
+            // don't consume here.
+            // Need to check leftOverHandler as it may change in #animateOpenIntentWithRemoteAndPip
+            if (handledToPip && mixed.mHasRequestToRemote
+                    && mixed.mLeftoversHandler != mPlayer.getRemoteTransitionHandler()) {
+                mPlayer.getRemoteTransitionHandler().onTransitionConsumed(transition, false, null);
+            }
+            return handledToPip;
         } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_SPLIT) {
             for (int i = info.getChanges().size() - 1; i >= 0; --i) {
                 final TransitionInfo.Change change = info.getChanges().get(i);
@@ -339,6 +384,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                     finishCallback);
         } else if (mixed.mType == MixedTransition.TYPE_KEYGUARD) {
             return animateKeyguard(mixed, info, startTransaction, finishTransaction,
+                    finishCallback);
+        } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_DESKTOP) {
+            return animateRecentsDuringDesktop(mixed, info, startTransaction, finishTransaction,
                     finishCallback);
         } else if (mixed.mType == MixedTransition.TYPE_UNFOLD) {
             return animateUnfold(mixed, info, startTransaction, finishTransaction, finishCallback);
@@ -366,12 +414,12 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 info.getChanges().remove(i);
             }
         }
-        Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
+        Transitions.TransitionFinishCallback finishCB = (wct) -> {
             --mixed.mInFlightSubAnimations;
-            mixed.joinFinishArgs(wct, wctCB);
+            mixed.joinFinishArgs(wct);
             if (mixed.mInFlightSubAnimations > 0) return;
             mActiveTransitions.remove(mixed);
-            finishCallback.onTransitionFinished(mixed.mFinishWCT, wctCB);
+            finishCallback.onTransitionFinished(mixed.mFinishWCT);
         };
         if (pipChange == null) {
             if (mixed.mLeftoversHandler != null) {
@@ -438,17 +486,18 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             return false;
         }
         final boolean isGoingHome = homeIsOpening;
-        Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
+        Transitions.TransitionFinishCallback finishCB = (wct) -> {
             --mixed.mInFlightSubAnimations;
-            mixed.joinFinishArgs(wct, wctCB);
+            mixed.joinFinishArgs(wct);
             if (mixed.mInFlightSubAnimations > 0) return;
             mActiveTransitions.remove(mixed);
             if (isGoingHome) {
                 mSplitHandler.onTransitionAnimationComplete();
             }
-            finishCallback.onTransitionFinished(mixed.mFinishWCT, wctCB);
+            finishCallback.onTransitionFinished(mixed.mFinishWCT);
         };
-        if (isGoingHome) {
+        if (isGoingHome || mSplitHandler.getSplitItemPosition(pipChange.getLastParent())
+                != SPLIT_POSITION_UNDEFINED) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Animation is actually mixed "
                     + "since entering-PiP caused us to leave split and return home.");
             // We need to split the transition into 2 parts: the pip part (animated by pip)
@@ -518,10 +567,27 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     }
 
     /**
+     * This is intended to be called by SplitCoordinator as a helper to mix a split handling
+     * transition with an entering-pip change. The use-case for this is when an auto-pip change
+     * gets collected into the transition which has already claimed by
+     * StageCoordinator.handleRequest. This happens when launching a fullscreen app while having an
+     * auto-pip activity in the foreground split pair.
+     */
+    // TODO(b/287704263): Remove when split/mixed are reversed.
+    public boolean animatePendingEnterPipFromSplit(IBinder transition, TransitionInfo info,
+            SurfaceControl.Transaction startT, SurfaceControl.Transaction finishT,
+            Transitions.TransitionFinishCallback finishCallback) {
+        final MixedTransition mixed = new MixedTransition(
+                MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT, transition);
+        mActiveTransitions.add(mixed);
+        return animateEnterPipFromSplit(mixed, info, startT, finishT, finishCallback);
+    }
+
+    /**
      * This is intended to be called by SplitCoordinator as a helper to mix an already-pending
      * split transition with a display-change. The use-case for this is when a display
      * change/rotation gets collected into a split-screen enter/exit transition which has already
-     * been claimed by StageCoordinator.handleRequest . This happens during launcher tests.
+     * been claimed by StageCoordinator.handleRequest. This happens during launcher tests.
      */
     public boolean animatePendingSplitWithDisplayChange(@NonNull IBinder transition,
             @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startT,
@@ -545,12 +611,12 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         // We need to split the transition into 2 parts: the split part and the display part.
         mixed.mInFlightSubAnimations = 2;
 
-        Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
+        Transitions.TransitionFinishCallback finishCB = (wct) -> {
             --mixed.mInFlightSubAnimations;
-            mixed.joinFinishArgs(wct, wctCB);
+            mixed.joinFinishArgs(wct);
             if (mixed.mInFlightSubAnimations > 0) return;
             mActiveTransitions.remove(mixed);
-            finishCallback.onTransitionFinished(mixed.mFinishWCT, null /* wctCB */);
+            finishCallback.onTransitionFinished(mixed.mFinishWCT);
         };
 
         // Dispatch the display change. This will most-likely be taken by the default handler.
@@ -573,7 +639,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         // Split-screen is only interested in the recents transition finishing (and merging), so
         // just wrap finish and start recents animation directly.
-        Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
+        Transitions.TransitionFinishCallback finishCB = (wct) -> {
             mixed.mInFlightSubAnimations = 0;
             mActiveTransitions.remove(mixed);
             // If pair-to-pair switching, the post-recents clean-up isn't needed.
@@ -585,7 +651,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 mSplitHandler.onRecentsPairToPairAnimationFinish(wct);
             }
             mSplitHandler.onTransitionAnimationComplete();
-            finishCallback.onTransitionFinished(wct, wctCB);
+            finishCallback.onTransitionFinished(wct);
         };
         mixed.mInFlightSubAnimations = 1;
         mSplitHandler.onRecentsInSplitAnimationStart(info);
@@ -603,11 +669,11 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        final Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
+        final Transitions.TransitionFinishCallback finishCB = (wct) -> {
             mixed.mInFlightSubAnimations--;
             if (mixed.mInFlightSubAnimations == 0) {
                 mActiveTransitions.remove(mixed);
-                finishCallback.onTransitionFinished(wct, wctCB);
+                finishCallback.onTransitionFinished(wct);
             }
         };
         mixed.mInFlightSubAnimations++;
@@ -623,21 +689,48 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         return true;
     }
 
+    private boolean animateRecentsDuringDesktop(@NonNull final MixedTransition mixed,
+            @NonNull TransitionInfo info,
+            @NonNull SurfaceControl.Transaction startTransaction,
+            @NonNull SurfaceControl.Transaction finishTransaction,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        boolean consumed = mRecentsHandler.startAnimation(
+                mixed.mTransition, info, startTransaction, finishTransaction, finishCallback);
+        if (!consumed) {
+            return false;
+        }
+        //Sync desktop mode state (proto 1)
+        if (mDesktopModeController != null) {
+            mDesktopModeController.syncSurfaceState(info, finishTransaction);
+            return true;
+        }
+        //Sync desktop mode state (proto 2)
+        if (mDesktopTasksController != null) {
+            mDesktopTasksController.syncSurfaceState(info, finishTransaction);
+            return true;
+        }
+
+        return false;
+    }
+
     private boolean animateUnfold(@NonNull final MixedTransition mixed,
             @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        final Transitions.TransitionFinishCallback finishCB = (wct, wctCB) -> {
+        final Transitions.TransitionFinishCallback finishCB = (wct) -> {
             mixed.mInFlightSubAnimations--;
             if (mixed.mInFlightSubAnimations > 0) return;
             mActiveTransitions.remove(mixed);
-            finishCallback.onTransitionFinished(wct, wctCB);
+            finishCallback.onTransitionFinished(wct);
         };
         mixed.mInFlightSubAnimations = 1;
         // Sync pip state.
         if (mPipHandler != null) {
             mPipHandler.syncPipSurfaceState(info, startTransaction, finishTransaction);
+        }
+        if (mSplitHandler != null && mSplitHandler.isSplitActive()) {
+            mSplitHandler.updateSurfaces(startTransaction);
         }
         return mUnfoldHandler.startAnimation(
                 mixed.mTransition, info, startTransaction, finishTransaction, finishCB);
@@ -657,6 +750,13 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     /** @return whether the transition-request represents a pip-entry. */
     public boolean requestHasPipEnter(TransitionRequestInfo request) {
         return mPipHandler.requestHasPipEnter(request);
+    }
+
+    /** Whether a particular change is a window that is entering pip. */
+    // TODO(b/287704263): Remove when split/mixed are reversed.
+    public boolean isEnteringPip(TransitionInfo.Change change,
+            @WindowManager.TransitionType int transitType) {
+        return mPipHandler.isEnteringPip(change, transitType);
     }
 
     @Override
@@ -702,6 +802,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                         finishCallback);
             } else if (mixed.mType == MixedTransition.TYPE_KEYGUARD) {
                 mKeyguardHandler.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
+            } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_DESKTOP) {
+                mixed.mLeftoversHandler.mergeAnimation(transition, info, t, mergeTarget,
+                        finishCallback);
             } else if (mixed.mType == MixedTransition.TYPE_UNFOLD) {
                 mUnfoldHandler.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
             } else {
@@ -729,8 +832,13 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             mixed.mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
         } else if (mixed.mType == MixedTransition.TYPE_KEYGUARD) {
             mKeyguardHandler.onTransitionConsumed(transition, aborted, finishT);
+        } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_DESKTOP) {
+            mixed.mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
         } else if (mixed.mType == MixedTransition.TYPE_UNFOLD) {
             mUnfoldHandler.onTransitionConsumed(transition, aborted, finishT);
+        }
+        if (mixed.mHasRequestToRemote) {
+            mPlayer.getRemoteTransitionHandler().onTransitionConsumed(transition, aborted, finishT);
         }
     }
 }

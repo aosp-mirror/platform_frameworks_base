@@ -46,7 +46,6 @@ class NotificationShadeWindowState(
     @JvmField var forceUserActivity: Boolean = false,
     @JvmField var launchingActivityFromNotification: Boolean = false,
     @JvmField var mediaBackdropShowing: Boolean = false,
-    @JvmField var wallpaperSupportsAmbientMode: Boolean = false,
     @JvmField var windowNotTouchable: Boolean = false,
     @JvmField var componentsForcingTopUi: MutableSet<String> = mutableSetOf(),
     @JvmField var forceOpenTokens: MutableSet<Any> = mutableSetOf(),
@@ -84,7 +83,6 @@ class NotificationShadeWindowState(
             forceUserActivity.toString(),
             launchingActivityFromNotification.toString(),
             mediaBackdropShowing.toString(),
-            wallpaperSupportsAmbientMode.toString(),
             windowNotTouchable.toString(),
             componentsForcingTopUi.toString(),
             forceOpenTokens.toString(),
@@ -124,7 +122,6 @@ class NotificationShadeWindowState(
             forceUserActivity: Boolean,
             launchingActivity: Boolean,
             backdropShowing: Boolean,
-            wallpaperSupportsAmbientMode: Boolean,
             notTouchable: Boolean,
             componentsForcingTopUi: MutableSet<String>,
             forceOpenTokens: MutableSet<Any>,
@@ -153,7 +150,6 @@ class NotificationShadeWindowState(
                 this.forceUserActivity = forceUserActivity
                 this.launchingActivityFromNotification = launchingActivity
                 this.mediaBackdropShowing = backdropShowing
-                this.wallpaperSupportsAmbientMode = wallpaperSupportsAmbientMode
                 this.windowNotTouchable = notTouchable
                 this.componentsForcingTopUi.clear()
                 this.componentsForcingTopUi.addAll(componentsForcingTopUi)
@@ -174,7 +170,7 @@ class NotificationShadeWindowState(
          * @see [NotificationShadeWindowState.asStringList]
          */
         fun toList(): List<Row> {
-            return buffer.asSequence().map { it.asStringList }.toList()
+            return buffer.map { it.asStringList }
         }
     }
 
@@ -200,7 +196,6 @@ class NotificationShadeWindowState(
                 "forceUserActivity",
                 "launchingActivity",
                 "backdropShowing",
-                "wallpaperSupportsAmbientMode",
                 "notTouchable",
                 "componentsForcingTopUi",
                 "forceOpenTokens",

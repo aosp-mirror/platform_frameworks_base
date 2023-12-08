@@ -24,4 +24,6 @@ enum class StatusBarLocation {
     KEYGUARD,
     /** Quick settings (inside the shade). */
     QS,
+    /** ShadeCarrierGroup (above QS status bar in expanded mode). */
+    SHADE_CARRIER_GROUP,
 }

@@ -35,7 +35,10 @@ import androidx.test.filters.SmallTest;
 import com.android.internal.util.function.TriConsumer;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
+import com.android.wm.shell.common.pip.PhoneSizeSpecSource;
+import com.android.wm.shell.common.pip.PipBoundsState;
+import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.SizeSpecSource;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,6 +61,7 @@ public class PipBoundsStateTest extends ShellTestCase {
     private static final int OVERRIDABLE_MIN_SIZE = 40;
 
     private PipBoundsState mPipBoundsState;
+    private SizeSpecSource mSizeSpecSource;
     private ComponentName mTestComponentName1;
     private ComponentName mTestComponentName2;
 
@@ -69,8 +73,8 @@ public class PipBoundsStateTest extends ShellTestCase {
                 OVERRIDABLE_MIN_SIZE);
 
         PipDisplayLayoutState pipDisplayLayoutState = new PipDisplayLayoutState(mContext);
-        mPipBoundsState = new PipBoundsState(mContext,
-                new PipSizeSpecHandler(mContext, pipDisplayLayoutState), pipDisplayLayoutState);
+        mSizeSpecSource = new PhoneSizeSpecSource(mContext, pipDisplayLayoutState);
+        mPipBoundsState = new PipBoundsState(mContext, mSizeSpecSource, pipDisplayLayoutState);
         mTestComponentName1 = new ComponentName(mContext, "component1");
         mTestComponentName2 = new ComponentName(mContext, "component2");
     }

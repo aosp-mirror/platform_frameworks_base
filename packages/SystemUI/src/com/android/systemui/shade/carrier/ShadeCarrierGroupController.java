@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.carrier;
 
+import static android.telephony.SubscriptionManager.INVALID_SIM_SLOT_INDEX;
 import static android.view.View.IMPORTANT_FOR_ACCESSIBILITY_YES;
 
 import android.annotation.MainThread;
@@ -46,8 +47,17 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.connectivity.MobileDataIndicators;
 import com.android.systemui.statusbar.connectivity.NetworkController;
 import com.android.systemui.statusbar.connectivity.SignalCallback;
+import com.android.systemui.statusbar.connectivity.ui.MobileContextProvider;
+import com.android.systemui.statusbar.phone.StatusBarLocation;
+import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
+import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter;
+import com.android.systemui.statusbar.pipeline.mobile.ui.binder.MobileIconsBinder;
+import com.android.systemui.statusbar.pipeline.mobile.ui.view.ModernShadeCarrierGroupMobileView;
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel;
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.ShadeCarrierGroupMobileIconViewModel;
 import com.android.systemui.util.CarrierConfigTracker;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -62,12 +72,16 @@ public class ShadeCarrierGroupController {
 
     private final ActivityStarter mActivityStarter;
     private final Handler mBgHandler;
+    private final Context mContext;
     private final NetworkController mNetworkController;
     private final CarrierTextManager mCarrierTextManager;
     private final TextView mNoSimTextView;
     // Non final for testing
     private H mMainHandler;
     private final Callback mCallback;
+    private final MobileIconsViewModel mMobileIconsViewModel;
+    private final MobileContextProvider mMobileContextProvider;
+    private final StatusBarPipelineFlags mStatusBarPipelineFlags;
     private boolean mListening;
     private final CellSignalState[] mInfos =
             new CellSignalState[SIM_SLOTS];
@@ -91,7 +105,7 @@ public class ShadeCarrierGroupController {
                         Log.w(TAG, "setMobileDataIndicators - slot: " + slotIndex);
                         return;
                     }
-                    if (slotIndex == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
+                    if (slotIndex == INVALID_SIM_SLOT_INDEX) {
                         Log.e(TAG, "Invalid SIM slot index for subscription: " + indicators.subId);
                         return;
                     }
@@ -129,15 +143,25 @@ public class ShadeCarrierGroupController {
         }
     }
 
-    private ShadeCarrierGroupController(ShadeCarrierGroup view, ActivityStarter activityStarter,
-            @Background Handler bgHandler, @Main Looper mainLooper,
+    private ShadeCarrierGroupController(
+            ShadeCarrierGroup view,
+            ActivityStarter activityStarter,
+            @Background Handler bgHandler,
+            @Main Looper mainLooper,
             NetworkController networkController,
-            CarrierTextManager.Builder carrierTextManagerBuilder, Context context,
-            CarrierConfigTracker carrierConfigTracker, SlotIndexResolver slotIndexResolver) {
-
+            CarrierTextManager.Builder carrierTextManagerBuilder,
+            Context context,
+            CarrierConfigTracker carrierConfigTracker,
+            SlotIndexResolver slotIndexResolver,
+            MobileUiAdapter mobileUiAdapter,
+            MobileContextProvider mobileContextProvider,
+            StatusBarPipelineFlags statusBarPipelineFlags
+    ) {
+        mContext = context;
         mActivityStarter = activityStarter;
         mBgHandler = bgHandler;
         mNetworkController = networkController;
+        mStatusBarPipelineFlags = statusBarPipelineFlags;
         mCarrierTextManager = carrierTextManagerBuilder
                 .setShowAirplaneMode(false)
                 .setShowMissingSim(false)
@@ -161,6 +185,14 @@ public class ShadeCarrierGroupController {
         mCarrierGroups[0] = view.getCarrier1View();
         mCarrierGroups[1] = view.getCarrier2View();
         mCarrierGroups[2] = view.getCarrier3View();
+
+        mMobileContextProvider = mobileContextProvider;
+        mMobileIconsViewModel = mobileUiAdapter.getMobileIconsViewModel();
+
+        if (mStatusBarPipelineFlags.useNewShadeCarrierGroupMobileIcons()) {
+            mobileUiAdapter.setShadeCarrierGroupController(this);
+            MobileIconsBinder.bind(view, mMobileIconsViewModel);
+        }
 
         mCarrierDividers[0] = view.getCarrierDivider1();
         mCarrierDividers[1] = view.getCarrierDivider2();
@@ -191,6 +223,50 @@ public class ShadeCarrierGroupController {
                 setListening(false);
             }
         });
+    }
+
+    /** Updates the number of visible mobile icons using the new pipeline. */
+    public void updateModernMobileIcons(List<Integer> subIds) {
+        if (!mStatusBarPipelineFlags.useNewShadeCarrierGroupMobileIcons()) {
+            Log.d(TAG, "ignoring new pipeline callback because new mobile icon is disabled");
+            return;
+        }
+
+        for (ShadeCarrier carrier : mCarrierGroups) {
+            carrier.removeModernMobileView();
+        }
+
+        List<IconData> iconDataList = processSubIdList(subIds);
+
+        for (IconData iconData : iconDataList) {
+            ShadeCarrier carrier = mCarrierGroups[iconData.slotIndex];
+
+            Context mobileContext =
+                    mMobileContextProvider.getMobileContextForSub(iconData.subId, mContext);
+            ModernShadeCarrierGroupMobileView modernMobileView = ModernShadeCarrierGroupMobileView
+                    .constructAndBind(
+                        mobileContext,
+                        mMobileIconsViewModel.getLogger(),
+                        "mobile_carrier_shade_group",
+                        (ShadeCarrierGroupMobileIconViewModel) mMobileIconsViewModel
+                                .viewModelForSub(iconData.subId,
+                                    StatusBarLocation.SHADE_CARRIER_GROUP)
+                    );
+            carrier.addModernMobileView(modernMobileView);
+        }
+    }
+
+    @VisibleForTesting
+    List<IconData> processSubIdList(List<Integer> subIds) {
+        return subIds
+                .stream()
+                .limit(SIM_SLOTS)
+                .map(subId -> new IconData(subId, getSlotIndex(subId)))
+                .filter(iconData ->
+                        iconData.slotIndex < SIM_SLOTS
+                                && iconData.slotIndex != INVALID_SIM_SLOT_INDEX
+                )
+                .toList();
     }
 
     @VisibleForTesting
@@ -269,8 +345,12 @@ public class ShadeCarrierGroupController {
             }
         }
 
-        for (int i = 0; i < SIM_SLOTS; i++) {
-            mCarrierGroups[i].updateState(mInfos[i], singleCarrier);
+        if (mStatusBarPipelineFlags.useNewShadeCarrierGroupMobileIcons()) {
+            Log.d(TAG, "ignoring old pipeline callback because new mobile icon is enabled");
+        } else {
+            for (int i = 0; i < SIM_SLOTS; i++) {
+                mCarrierGroups[i].updateState(mInfos[i], singleCarrier);
+            }
         }
 
         mCarrierDividers[0].setVisibility(
@@ -306,7 +386,7 @@ public class ShadeCarrierGroupController {
                         Log.w(TAG, "updateInfoCarrier - slot: " + slot);
                         continue;
                     }
-                    if (slot == SubscriptionManager.INVALID_SIM_SLOT_INDEX) {
+                    if (slot == INVALID_SIM_SLOT_INDEX) {
                         Log.e(TAG,
                                 "Invalid SIM slot index for subscription: "
                                         + info.subscriptionIds[i]);
@@ -385,12 +465,24 @@ public class ShadeCarrierGroupController {
         private final Context mContext;
         private final CarrierConfigTracker mCarrierConfigTracker;
         private final SlotIndexResolver mSlotIndexResolver;
+        private final MobileUiAdapter mMobileUiAdapter;
+        private final MobileContextProvider mMobileContextProvider;
+        private final StatusBarPipelineFlags mStatusBarPipelineFlags;
 
         @Inject
-        public Builder(ActivityStarter activityStarter, @Background Handler handler,
-                @Main Looper looper, NetworkController networkController,
-                CarrierTextManager.Builder carrierTextControllerBuilder, Context context,
-                CarrierConfigTracker carrierConfigTracker, SlotIndexResolver slotIndexResolver) {
+        public Builder(
+                ActivityStarter activityStarter,
+                @Background Handler handler,
+                @Main Looper looper,
+                NetworkController networkController,
+                CarrierTextManager.Builder carrierTextControllerBuilder,
+                Context context,
+                CarrierConfigTracker carrierConfigTracker,
+                SlotIndexResolver slotIndexResolver,
+                MobileUiAdapter mobileUiAdapter,
+                MobileContextProvider mobileContextProvider,
+                StatusBarPipelineFlags statusBarPipelineFlags
+        ) {
             mActivityStarter = activityStarter;
             mHandler = handler;
             mLooper = looper;
@@ -399,6 +491,9 @@ public class ShadeCarrierGroupController {
             mContext = context;
             mCarrierConfigTracker = carrierConfigTracker;
             mSlotIndexResolver = slotIndexResolver;
+            mMobileUiAdapter = mobileUiAdapter;
+            mMobileContextProvider = mobileContextProvider;
+            mStatusBarPipelineFlags = statusBarPipelineFlags;
         }
 
         public Builder setShadeCarrierGroup(ShadeCarrierGroup view) {
@@ -407,9 +502,20 @@ public class ShadeCarrierGroupController {
         }
 
         public ShadeCarrierGroupController build() {
-            return new ShadeCarrierGroupController(mView, mActivityStarter, mHandler, mLooper,
-                    mNetworkController, mCarrierTextControllerBuilder, mContext,
-                    mCarrierConfigTracker, mSlotIndexResolver);
+            return new ShadeCarrierGroupController(
+                    mView,
+                    mActivityStarter,
+                    mHandler,
+                    mLooper,
+                    mNetworkController,
+                    mCarrierTextControllerBuilder,
+                    mContext,
+                    mCarrierConfigTracker,
+                    mSlotIndexResolver,
+                    mMobileUiAdapter,
+                    mMobileContextProvider,
+                    mStatusBarPipelineFlags
+            );
         }
     }
 
@@ -446,6 +552,17 @@ public class ShadeCarrierGroupController {
         @Override
         public int getSlotIndex(int subscriptionId) {
             return SubscriptionManager.getSlotIndex(subscriptionId);
+        }
+    }
+
+    @VisibleForTesting
+    static class IconData {
+        public final int subId;
+        public final int slotIndex;
+
+        IconData(int subId, int slotIndex) {
+            this.subId = subId;
+            this.slotIndex = slotIndex;
         }
     }
 }

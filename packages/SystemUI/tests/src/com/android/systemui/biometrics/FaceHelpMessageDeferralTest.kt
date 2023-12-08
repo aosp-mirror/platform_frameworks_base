@@ -184,7 +184,43 @@ class FaceHelpMessageDeferralTest : SysuiTestCase() {
         assertFalse(biometricMessageDeferral.shouldDefer(4))
     }
 
-    private fun createMsgDeferral(messagesToDefer: Set<Int>): BiometricMessageDeferral {
-        return BiometricMessageDeferral(messagesToDefer, threshold, logger, dumpManager)
+    @Test
+    fun testDeferredMessage_meetThresholdWithIgnoredFrames() {
+        val biometricMessageDeferral =
+            createMsgDeferral(
+                messagesToDefer = setOf(1),
+                acquiredInfoToIgnore = setOf(4),
+            )
+
+        // WHEN more nonDeferredMessages are shown than the deferred message; HOWEVER the
+        // nonDeferredMessages are in acquiredInfoToIgnore
+        val totalMessages = 10
+        val nonDeferredMessagesCount = (totalMessages * threshold).toInt() + 1
+        for (i in 0 until nonDeferredMessagesCount) {
+            biometricMessageDeferral.processFrame(4)
+            biometricMessageDeferral.updateMessage(4, "non-deferred-msg")
+        }
+        for (i in nonDeferredMessagesCount until totalMessages) {
+            biometricMessageDeferral.processFrame(1)
+            biometricMessageDeferral.updateMessage(1, "msgId-1")
+        }
+
+        // THEN the deferred message met the threshold excluding the acquiredInfoToIgnore,
+        // so the message id deferred
+        assertTrue(biometricMessageDeferral.shouldDefer(1))
+        assertEquals("msgId-1", biometricMessageDeferral.getDeferredMessage())
+    }
+
+    private fun createMsgDeferral(
+        messagesToDefer: Set<Int>,
+        acquiredInfoToIgnore: Set<Int> = emptySet(),
+    ): BiometricMessageDeferral {
+        return BiometricMessageDeferral(
+            messagesToDefer,
+            acquiredInfoToIgnore,
+            threshold,
+            logger,
+            dumpManager,
+        )
     }
 }

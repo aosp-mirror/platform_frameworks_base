@@ -20,6 +20,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainRunna
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.graphics.ImageFormat;
 import android.hardware.ICameraService;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -1148,11 +1149,7 @@ public class CameraDeviceImpl extends CameraDevice
                             "remove holder for requestId %d, "
                             + "because lastFrame is %d.",
                             requestId, lastFrameNumber));
-                }
-            }
 
-            if (holder != null) {
-                if (DEBUG) {
                     Log.v(TAG, "immediately trigger onCaptureSequenceAborted because"
                             + " request did not reach HAL");
                 }
@@ -1476,6 +1473,12 @@ public class CameraDeviceImpl extends CameraDevice
             if (format == inputFormat) {
                 validFormat = true;
             }
+        }
+
+        // Allow RAW formats, even when not advertised.
+        if (inputFormat == ImageFormat.RAW_PRIVATE || inputFormat == ImageFormat.RAW10
+                || inputFormat == ImageFormat.RAW12 || inputFormat == ImageFormat.RAW_SENSOR) {
+            return true;
         }
 
         if (validFormat == false) {
@@ -2173,11 +2176,9 @@ public class CameraDeviceImpl extends CameraDevice
 
                 final CaptureCallbackHolder holder =
                         CameraDeviceImpl.this.mCaptureCallbackMap.get(requestId);
-                final CaptureRequest request = holder.getRequest(resultExtras.getSubsequenceId());
 
                 boolean isPartialResult =
                         (resultExtras.getPartialResultCount() < mTotalPartialCount);
-                int requestType = request.getRequestType();
 
                 // Check if we have a callback for this
                 if (holder == null) {
@@ -2187,12 +2188,11 @@ public class CameraDeviceImpl extends CameraDevice
                                         + frameNumber);
                     }
 
-                    updateTracker(requestId, frameNumber, requestType, /*result*/null,
-                            isPartialResult);
-
                     return;
                 }
 
+                final CaptureRequest request = holder.getRequest(resultExtras.getSubsequenceId());
+                int requestType = request.getRequestType();
                 if (isClosed()) {
                     if (DEBUG) {
                         Log.d(TAG,
@@ -2543,19 +2543,32 @@ public class CameraDeviceImpl extends CameraDevice
         HashMap<String, CameraCharacteristics> characteristicsMap = new HashMap<>(
                 mPhysicalIdsToChars);
         characteristicsMap.put(mCameraId, mCharacteristics);
+        boolean initializationFailed = true;
+        IBinder token = new Binder(TAG + " : " + mNextSessionId++);
         try {
+            boolean ret = CameraExtensionCharacteristics.registerClient(mContext, token);
+            if (!ret) {
+                token = null;
+                throw new UnsupportedOperationException("Unsupported extension!");
+            }
+
             if (CameraExtensionCharacteristics.areAdvancedExtensionsSupported()) {
                 mCurrentAdvancedExtensionSession =
                         CameraAdvancedExtensionSessionImpl.createCameraAdvancedExtensionSession(
                                 this, characteristicsMap, mContext, extensionConfiguration,
-                                mNextSessionId++);
+                                mNextSessionId, token);
             } else {
                 mCurrentExtensionSession = CameraExtensionSessionImpl.createCameraExtensionSession(
                         this, characteristicsMap, mContext, extensionConfiguration,
-                        mNextSessionId++);
+                        mNextSessionId, token);
             }
+            initializationFailed = false;
         } catch (RemoteException e) {
             throw new CameraAccessException(CameraAccessException.CAMERA_ERROR);
+        } finally {
+            if (initializationFailed && (token != null)) {
+                CameraExtensionCharacteristics.unregisterClient(mContext, token);
+            }
         }
     }
 }

@@ -35,13 +35,14 @@ class SnapshotWindowCreator {
     void makeTaskSnapshotWindow(StartingWindowInfo startingWindowInfo, TaskSnapshot snapshot) {
         final int taskId = startingWindowInfo.taskInfo.taskId;
         // Remove any existing starting window for this task before adding.
-        mStartingWindowRecordManager.removeWindow(taskId, true);
+        mStartingWindowRecordManager.removeWindow(taskId);
         final TaskSnapshotWindow surface = TaskSnapshotWindow.create(startingWindowInfo,
                 startingWindowInfo.appToken, snapshot, mMainExecutor,
-                () -> mStartingWindowRecordManager.removeWindow(taskId, true));
+                () -> mStartingWindowRecordManager.removeWindow(taskId));
         if (surface != null) {
             final SnapshotWindowRecord tView = new SnapshotWindowRecord(surface,
-                    startingWindowInfo.taskInfo.topActivityType, mMainExecutor);
+                    startingWindowInfo.taskInfo.topActivityType, mMainExecutor,
+                    taskId, mStartingWindowRecordManager);
             mStartingWindowRecordManager.addRecord(taskId, tView);
         }
     }
@@ -50,8 +51,9 @@ class SnapshotWindowCreator {
         private final TaskSnapshotWindow mTaskSnapshotWindow;
 
         SnapshotWindowRecord(TaskSnapshotWindow taskSnapshotWindow,
-                int activityType, ShellExecutor removeExecutor) {
-            super(activityType, removeExecutor);
+                int activityType, ShellExecutor removeExecutor, int id,
+                StartingSurfaceDrawer.StartingWindowRecordManager recordManager) {
+            super(activityType, removeExecutor, id, recordManager);
             mTaskSnapshotWindow = taskSnapshotWindow;
             mBGColor = mTaskSnapshotWindow.getBackgroundColor();
         }

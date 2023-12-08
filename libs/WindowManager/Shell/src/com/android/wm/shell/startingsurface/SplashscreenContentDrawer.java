@@ -385,8 +385,8 @@ public class SplashscreenContentDrawer {
     private static int estimateWindowBGColor(Drawable themeBGDrawable) {
         final DrawableColorTester themeBGTester = new DrawableColorTester(
                 themeBGDrawable, DrawableColorTester.TRANSLUCENT_FILTER /* filterType */);
-        if (themeBGTester.passFilterRatio() != 1) {
-            // the window background is translucent, unable to draw
+        if (themeBGTester.passFilterRatio() < 0.5f) {
+            // more than half pixels of the window background is translucent, unable to draw
             Slog.w(TAG, "Window background is translucent, fill background with black color");
             return getSystemBGColor();
         } else {

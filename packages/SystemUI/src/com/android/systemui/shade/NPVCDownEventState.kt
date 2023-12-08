@@ -108,7 +108,7 @@ class NPVCDownEventState private constructor(
          * @see NPVCDownEventState.asStringList
          */
         fun toList(): List<Row> {
-            return buffer.asSequence().map { it.asStringList }.toList()
+            return buffer.map { it.asStringList }
         }
     }
 

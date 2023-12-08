@@ -108,6 +108,7 @@ static struct {
     jmethodID notifySensorEvent;
     jmethodID notifySensorAccuracy;
     jmethodID notifyStylusGestureStarted;
+    jmethodID isInputMethodConnectionActive;
     jmethodID notifyVibratorState;
     jmethodID filterInputEvent;
     jmethodID interceptKeyBeforeQueueing;
@@ -279,7 +280,7 @@ public:
     base::Result<std::unique_ptr<InputChannel>> createInputChannel(const std::string& name);
     base::Result<std::unique_ptr<InputChannel>> createInputMonitor(int32_t displayId,
                                                                    const std::string& name,
-                                                                   int32_t pid);
+                                                                   gui::Pid pid);
     status_t removeInputChannel(const sp<IBinder>& connectionToken);
     status_t pilferPointers(const sp<IBinder>& token);
 
@@ -322,6 +323,7 @@ public:
 
     TouchAffineTransformation getTouchAffineTransformation(JNIEnv* env, jfloatArray matrixArr);
     void notifyStylusGestureStarted(int32_t deviceId, nsecs_t eventTime) override;
+    bool isInputMethodConnectionActive() override;
 
     /* --- InputDispatcherPolicyInterface implementation --- */
 
@@ -330,9 +332,9 @@ public:
     void notifyConfigurationChanged(nsecs_t when) override;
     // ANR-related callbacks -- start
     void notifyNoFocusedWindowAnr(const std::shared_ptr<InputApplicationHandle>& handle) override;
-    void notifyWindowUnresponsive(const sp<IBinder>& token, std::optional<int32_t> pid,
+    void notifyWindowUnresponsive(const sp<IBinder>& token, std::optional<gui::Pid> pid,
                                   const std::string& reason) override;
-    void notifyWindowResponsive(const sp<IBinder>& token, std::optional<int32_t> pid) override;
+    void notifyWindowResponsive(const sp<IBinder>& token, std::optional<gui::Pid> pid) override;
     // ANR-related callbacks -- end
     void notifyInputChannelBroken(const sp<IBinder>& token) override;
     void notifyFocusChanged(const sp<IBinder>& oldToken, const sp<IBinder>& newToken) override;
@@ -355,6 +357,8 @@ public:
     void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) override;
     void setPointerCapture(const PointerCaptureRequest& request) override;
     void notifyDropWindow(const sp<IBinder>& token, float x, float y) override;
+    void notifyDeviceInteraction(int32_t deviceId, nsecs_t timestamp,
+                                 const std::set<gui::Uid>& uids) override;
 
     /* --- PointerControllerPolicyInterface implementation --- */
 
@@ -539,7 +543,7 @@ base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChann
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputMonitor(
-        int32_t displayId, const std::string& name, int32_t pid) {
+        int32_t displayId, const std::string& name, gui::Pid pid) {
     ATRACE_CALL();
     return mInputManager->getDispatcher().createInputMonitor(displayId, name, pid);
 }
@@ -883,7 +887,7 @@ void NativeInputManager::notifyNoFocusedWindowAnr(
 }
 
 void NativeInputManager::notifyWindowUnresponsive(const sp<IBinder>& token,
-                                                  std::optional<int32_t> pid,
+                                                  std::optional<gui::Pid> pid,
                                                   const std::string& reason) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     ALOGD("notifyWindowUnresponsive");
@@ -897,12 +901,12 @@ void NativeInputManager::notifyWindowUnresponsive(const sp<IBinder>& token,
     ScopedLocalRef<jstring> reasonObj(env, env->NewStringUTF(reason.c_str()));
 
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyWindowUnresponsive, tokenObj,
-                        pid.value_or(0), pid.has_value(), reasonObj.get());
+                        pid.value_or(gui::Pid{0}).val(), pid.has_value(), reasonObj.get());
     checkAndClearExceptionFromCallback(env, "notifyWindowUnresponsive");
 }
 
 void NativeInputManager::notifyWindowResponsive(const sp<IBinder>& token,
-                                                std::optional<int32_t> pid) {
+                                                std::optional<gui::Pid> pid) {
 #if DEBUG_INPUT_DISPATCHER_POLICY
     ALOGD("notifyWindowResponsive");
 #endif
@@ -914,7 +918,7 @@ void NativeInputManager::notifyWindowResponsive(const sp<IBinder>& token,
     jobject tokenObj = javaObjectForIBinder(env, token);
 
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyWindowResponsive, tokenObj,
-                        pid.value_or(0), pid.has_value());
+                        pid.value_or(gui::Pid{0}).val(), pid.has_value());
     checkAndClearExceptionFromCallback(env, "notifyWindowResponsive");
 }
 
@@ -964,6 +968,15 @@ void NativeInputManager::notifyDropWindow(const sp<IBinder>& token, float x, flo
     jobject tokenObj = javaObjectForIBinder(env, token);
     env->CallVoidMethod(mServiceObj, gServiceClassInfo.notifyDropWindow, tokenObj, x, y);
     checkAndClearExceptionFromCallback(env, "notifyDropWindow");
+}
+
+void NativeInputManager::notifyDeviceInteraction(int32_t deviceId, nsecs_t timestamp,
+                                                 const std::set<gui::Uid>& uids) {
+    static const bool ENABLE_INPUT_DEVICE_USAGE_METRICS =
+            sysprop::InputProperties::enable_input_device_usage_metrics().value_or(true);
+    if (!ENABLE_INPUT_DEVICE_USAGE_METRICS) return;
+
+    mInputManager->getMetricsCollector().notifyDeviceInteraction(deviceId, timestamp, uids);
 }
 
 void NativeInputManager::notifySensorEvent(int32_t deviceId, InputDeviceSensorType sensorType,
@@ -1295,6 +1308,14 @@ void NativeInputManager::notifyStylusGestureStarted(int32_t deviceId, nsecs_t ev
     checkAndClearExceptionFromCallback(env, "notifyStylusGestureStarted");
 }
 
+bool NativeInputManager::isInputMethodConnectionActive() {
+    JNIEnv* env = jniEnv();
+    const jboolean result =
+            env->CallBooleanMethod(mServiceObj, gServiceClassInfo.isInputMethodConnectionActive);
+    checkAndClearExceptionFromCallback(env, "isInputMethodConnectionActive");
+    return result;
+}
+
 bool NativeInputManager::filterInputEvent(const InputEvent& inputEvent, uint32_t policyFlags) {
     ATRACE_CALL();
     JNIEnv* env = jniEnv();
@@ -1596,8 +1617,8 @@ PointerIconStyle NativeInputManager::getDefaultPointerIconId() {
 }
 
 PointerIconStyle NativeInputManager::getDefaultStylusIconId() {
-    // TODO: add resource for default stylus icon and change this
-    return PointerIconStyle::TYPE_CROSSHAIR;
+    // Use the empty icon as the default pointer icon for a hovering stylus.
+    return PointerIconStyle::TYPE_NULL;
 }
 
 PointerIconStyle NativeInputManager::getCustomPointerIconId() {
@@ -1808,7 +1829,7 @@ static jobject nativeCreateInputMonitor(JNIEnv* env, jobject nativeImplObj, jint
     std::string name = nameChars.c_str();
 
     base::Result<std::unique_ptr<InputChannel>> inputChannel =
-            im->createInputMonitor(displayId, name, pid);
+            im->createInputMonitor(displayId, name, gui::Pid{pid});
 
     if (!inputChannel.ok()) {
         std::string message = inputChannel.error().message();
@@ -1853,7 +1874,8 @@ static jboolean nativeSetInTouchMode(JNIEnv* env, jobject nativeImplObj, jboolea
                                      jint pid, jint uid, jboolean hasPermission, jint displayId) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    return im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode, pid, uid,
+    return im->getInputManager()->getDispatcher().setInTouchMode(inTouchMode, gui::Pid{pid},
+                                                                 gui::Uid{static_cast<uid_t>(uid)},
                                                                  hasPermission, displayId);
 }
 
@@ -1869,7 +1891,7 @@ static jint nativeInjectInputEvent(JNIEnv* env, jobject nativeImplObj, jobject i
                                    jint timeoutMillis, jint policyFlags) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
-    const std::optional<int32_t> targetUid = injectIntoUid ? std::make_optional(uid) : std::nullopt;
+    const auto targetUid = injectIntoUid ? std::make_optional<gui::Uid>(uid) : std::nullopt;
     // static_cast is safe because the value was already checked at the Java layer
     InputEventInjectionSync mode = static_cast<InputEventInjectionSync>(syncMode);
 
@@ -2214,13 +2236,25 @@ static jobject nativeGetLights(JNIEnv* env, jobject nativeImplObj, jint deviceId
             jCapability |= env->GetStaticIntField(gLightClassInfo.clazz,
                                                   gLightClassInfo.lightCapabilityColorRgb);
         }
+
+        ScopedLocalRef<jintArray> jPreferredBrightnessLevels{env};
+        if (!lightInfo.preferredBrightnessLevels.empty()) {
+            std::vector<int32_t> vec;
+            for (auto it : lightInfo.preferredBrightnessLevels) {
+              vec.push_back(ftl::to_underlying(it));
+            }
+            jPreferredBrightnessLevels.reset(env->NewIntArray(vec.size()));
+            env->SetIntArrayRegion(jPreferredBrightnessLevels.get(), 0, vec.size(), vec.data());
+        }
+
         ScopedLocalRef<jobject> lightObj(env,
                                          env->NewObject(gLightClassInfo.clazz,
                                                         gLightClassInfo.constructor,
                                                         static_cast<jint>(lightInfo.id),
                                                         env->NewStringUTF(lightInfo.name.c_str()),
                                                         static_cast<jint>(lightInfo.ordinal),
-                                                        jTypeId, jCapability));
+                                                        jTypeId, jCapability,
+                                                        jPreferredBrightnessLevels.get()));
         // Add light object to list
         env->CallBooleanMethod(jLights, gArrayListClassInfo.add, lightObj.get());
     }
@@ -2719,6 +2753,9 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.notifyStylusGestureStarted, clazz, "notifyStylusGestureStarted",
                   "(IJ)V");
 
+    GET_METHOD_ID(gServiceClassInfo.isInputMethodConnectionActive, clazz,
+                  "isInputMethodConnectionActive", "()Z");
+
     GET_METHOD_ID(gServiceClassInfo.notifyVibratorState, clazz, "notifyVibratorState", "(IZ)V");
 
     GET_METHOD_ID(gServiceClassInfo.notifyNoFocusedWindowAnr, clazz, "notifyNoFocusedWindowAnr",
@@ -2846,7 +2883,7 @@ int register_android_server_InputManager(JNIEnv* env) {
     FIND_CLASS(gLightClassInfo.clazz, "android/hardware/lights/Light");
     gLightClassInfo.clazz = jclass(env->NewGlobalRef(gLightClassInfo.clazz));
     GET_METHOD_ID(gLightClassInfo.constructor, gLightClassInfo.clazz, "<init>",
-                  "(ILjava/lang/String;III)V");
+                  "(ILjava/lang/String;III[I)V");
 
     gLightClassInfo.clazz = jclass(env->NewGlobalRef(gLightClassInfo.clazz));
     gLightClassInfo.lightTypeInput =

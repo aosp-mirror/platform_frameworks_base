@@ -25,7 +25,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
 import android.hardware.input.InputManagerGlobal;
@@ -51,8 +50,6 @@ import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.IAccessibilityManager;
 import android.window.ScreenCapture;
 import android.window.ScreenCapture.CaptureArgs;
-import android.window.ScreenCapture.ScreenshotHardwareBuffer;
-import android.window.ScreenCapture.SynchronousScreenCaptureListener;
 
 import libcore.io.IoUtils;
 
@@ -224,56 +221,54 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public Bitmap takeScreenshot(Rect crop) {
+    public boolean takeScreenshot(Rect crop, ScreenCapture.ScreenCaptureListener listener) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
+
         final long identity = Binder.clearCallingIdentity();
         try {
             final CaptureArgs captureArgs = new CaptureArgs.Builder<>()
                     .setSourceCrop(crop)
                     .build();
-            SynchronousScreenCaptureListener syncScreenCapture =
-                    ScreenCapture.createSyncCaptureListener();
-            mWindowManager.captureDisplay(DEFAULT_DISPLAY, captureArgs,
-                    syncScreenCapture);
-            final ScreenshotHardwareBuffer screenshotBuffer =
-                    syncScreenCapture.getBuffer();
-            return screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+            mWindowManager.captureDisplay(DEFAULT_DISPLAY, captureArgs, listener);
         } catch (RemoteException re) {
             re.rethrowAsRuntimeException();
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        return null;
+
+        return true;
     }
 
     @Nullable
     @Override
-    public Bitmap takeSurfaceControlScreenshot(@NonNull SurfaceControl surfaceControl) {
+    public boolean takeSurfaceControlScreenshot(@NonNull SurfaceControl surfaceControl,
+            ScreenCapture.ScreenCaptureListener listener) {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
             throwIfNotConnectedLocked();
         }
 
-        ScreenCapture.ScreenshotHardwareBuffer captureBuffer;
         final long identity = Binder.clearCallingIdentity();
         try {
-            captureBuffer = ScreenCapture.captureLayers(
+            ScreenCapture.LayerCaptureArgs args =
                     new ScreenCapture.LayerCaptureArgs.Builder(surfaceControl)
-                            .setChildrenOnly(false)
-                            .build());
+                    .setChildrenOnly(false)
+                    .build();
+            int status = ScreenCapture.captureLayers(args, listener);
+
+            if (status != 0) {
+                return false;
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
 
-        if (captureBuffer == null) {
-            return null;
-        }
-        return captureBuffer.asBitmap();
+        return true;
     }
 
     @Override

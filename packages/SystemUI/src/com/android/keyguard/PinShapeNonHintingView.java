@@ -16,7 +16,7 @@
 
 package com.android.keyguard;
 
-import static com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.ColorId.PIN_SHAPES;
+import static com.android.systemui.bouncer.shared.constants.KeyguardBouncerConstants.ColorId.PIN_SHAPES;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;

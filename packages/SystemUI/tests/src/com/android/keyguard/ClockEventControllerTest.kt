@@ -18,24 +18,26 @@ package com.android.keyguard
 import android.content.BroadcastReceiver
 import android.testing.AndroidTestingRunner
 import android.view.View
-import android.widget.TextView
+import android.view.ViewTreeObserver
+import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.ClockAnimations
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockEvents
-import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceConfig
+import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.ClockTickRate
-import com.android.systemui.log.LogBuffer
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController
@@ -54,6 +56,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyFloat
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
@@ -81,7 +84,13 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var bgExecutor: Executor
     @Mock private lateinit var featureFlags: FeatureFlags
     @Mock private lateinit var smallClockController: ClockFaceController
+    @Mock private lateinit var smallClockView: View
+    @Mock private lateinit var smallClockViewTreeObserver: ViewTreeObserver
+    @Mock private lateinit var smallClockFrame: FrameLayout
+    @Mock private lateinit var smallClockFrameViewTreeObserver: ViewTreeObserver
     @Mock private lateinit var largeClockController: ClockFaceController
+    @Mock private lateinit var largeClockView: View
+    @Mock private lateinit var largeClockViewTreeObserver: ViewTreeObserver
     @Mock private lateinit var smallClockEvents: ClockFaceEvents
     @Mock private lateinit var largeClockEvents: ClockFaceEvents
     @Mock private lateinit var parentView: View
@@ -97,8 +106,12 @@ class ClockEventControllerTest : SysuiTestCase() {
     fun setUp() {
         whenever(clock.smallClock).thenReturn(smallClockController)
         whenever(clock.largeClock).thenReturn(largeClockController)
-        whenever(smallClockController.view).thenReturn(TextView(context))
-        whenever(largeClockController.view).thenReturn(TextView(context))
+        whenever(smallClockController.view).thenReturn(smallClockView)
+        whenever(smallClockView.parent).thenReturn(smallClockFrame)
+        whenever(smallClockView.viewTreeObserver).thenReturn(smallClockViewTreeObserver)
+        whenever(smallClockFrame.viewTreeObserver).thenReturn(smallClockFrameViewTreeObserver)
+        whenever(largeClockController.view).thenReturn(largeClockView)
+        whenever(largeClockView.viewTreeObserver).thenReturn(largeClockViewTreeObserver)
         whenever(smallClockController.events).thenReturn(smallClockEvents)
         whenever(largeClockController.events).thenReturn(largeClockEvents)
         whenever(clock.events).thenReturn(events)
@@ -118,8 +131,11 @@ class ClockEventControllerTest : SysuiTestCase() {
                 commandQueue = commandQueue,
                 featureFlags = featureFlags,
                 bouncerRepository = bouncerRepository,
+                configurationRepository = FakeConfigurationRepository(),
             ),
-            KeyguardTransitionInteractor(transitionRepository, TestScope().backgroundScope),
+            KeyguardTransitionInteractorFactory.create(
+                    scope = TestScope().backgroundScope,
+            ).keyguardTransitionInteractor,
             broadcastDispatcher,
             batteryController,
             keyguardUpdateMonitor,
@@ -156,9 +172,8 @@ class ClockEventControllerTest : SysuiTestCase() {
 
     @Test
     fun themeChanged_verifyClockPaletteUpdated() = runBlocking(IMMEDIATE) {
-        // TODO(b/266103601): delete this test and add more coverage for updateColors()
-        // verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
-        // verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
+         verify(smallClockEvents).onRegionDarknessChanged(anyBoolean())
+         verify(largeClockEvents).onRegionDarknessChanged(anyBoolean())
 
         val captor = argumentCaptor<ConfigurationController.ConfigurationListener>()
         verify(configurationController).addCallback(capture(captor))
@@ -298,7 +313,37 @@ class ClockEventControllerTest : SysuiTestCase() {
         verify(configurationController).removeCallback(any())
         verify(batteryController).removeCallback(any())
         verify(keyguardUpdateMonitor).removeCallback(any())
+        verify(smallClockController.view)
+                .removeOnAttachStateChangeListener(underTest.smallClockOnAttachStateChangeListener)
+        verify(largeClockController.view)
+                .removeOnAttachStateChangeListener(underTest.largeClockOnAttachStateChangeListener)
     }
+
+    @Test
+    fun registerOnAttachStateChangeListener_validate() = runBlocking(IMMEDIATE) {
+        verify(smallClockController.view)
+            .addOnAttachStateChangeListener(underTest.smallClockOnAttachStateChangeListener)
+        verify(largeClockController.view)
+            .addOnAttachStateChangeListener(underTest.largeClockOnAttachStateChangeListener)
+    }
+
+    @Test
+    fun registerAndRemoveOnGlobalLayoutListener_correctly() = runBlocking(IMMEDIATE) {
+        underTest.smallClockOnAttachStateChangeListener!!.onViewAttachedToWindow(smallClockView)
+        verify(smallClockFrame.viewTreeObserver).addOnGlobalLayoutListener(any())
+        underTest.smallClockOnAttachStateChangeListener!!.onViewDetachedFromWindow(smallClockView)
+        verify(smallClockFrame.viewTreeObserver).removeOnGlobalLayoutListener(any())
+    }
+
+    @Test
+    fun registerOnGlobalLayoutListener_RemoveOnAttachStateChangeListener_correctly() =
+        runBlocking(IMMEDIATE) {
+            underTest.smallClockOnAttachStateChangeListener!!
+                .onViewAttachedToWindow(smallClockView)
+            verify(smallClockFrame.viewTreeObserver).addOnGlobalLayoutListener(any())
+            underTest.unregisterListeners()
+            verify(smallClockFrame.viewTreeObserver).removeOnGlobalLayoutListener(any())
+        }
 
     companion object {
         private val IMMEDIATE = Dispatchers.Main.immediate

@@ -16,7 +16,7 @@
 
 package android.view;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.view.InsetsSource.ID_IME;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -81,8 +81,7 @@ public class ImeInsetsSourceConsumerTest {
                     Insets.of(10, 10, 10, 10), rect, rect, rect, rect));
             mController.calculateInsets(
                     false,
-                    false,
-                    TYPE_APPLICATION, WINDOWING_MODE_UNDEFINED,
+                    TYPE_APPLICATION, ACTIVITY_TYPE_UNDEFINED,
                     SOFT_INPUT_ADJUST_RESIZE, 0, 0);
             mImeConsumer = mController.getImeSourceConsumer();
         });

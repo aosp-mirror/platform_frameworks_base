@@ -180,23 +180,25 @@ class TaskFragmentContainer {
                 throw new IllegalArgumentException(
                         "pairedPrimaryContainer must be in the same Task");
             }
-            final int primaryIndex = taskContainer.mContainers.indexOf(pairedPrimaryContainer);
-            taskContainer.mContainers.add(primaryIndex + 1, this);
+            final int primaryIndex = taskContainer.indexOf(pairedPrimaryContainer);
+            taskContainer.addTaskFragmentContainer(primaryIndex + 1, this);
         } else if (pendingAppearedActivity != null) {
             // The TaskFragment will be positioned right above the pending appeared Activity. If any
             // existing TaskFragment is empty with pending Intent, it is likely that the Activity of
             // the pending Intent hasn't been created yet, so the new Activity should be below the
             // empty TaskFragment.
-            int i = taskContainer.mContainers.size() - 1;
+            final List<TaskFragmentContainer> containers =
+                    taskContainer.getTaskFragmentContainers();
+            int i = containers.size() - 1;
             for (; i >= 0; i--) {
-                final TaskFragmentContainer container = taskContainer.mContainers.get(i);
+                final TaskFragmentContainer container = containers.get(i);
                 if (!container.isEmpty() || container.getPendingAppearedIntent() == null) {
                     break;
                 }
             }
-            taskContainer.mContainers.add(i + 1, this);
+            taskContainer.addTaskFragmentContainer(i + 1, this);
         } else {
-            taskContainer.mContainers.add(this);
+            taskContainer.addTaskFragmentContainer(this);
         }
         if (pendingAppearedActivity != null) {
             addPendingAppearedActivity(pendingAppearedActivity);

@@ -235,6 +235,7 @@ final class HandwritingModeController {
     @Nullable
     HandwritingSession startHandwritingSession(
             int requestId, int imePid, int imeUid, IBinder focusedWindowToken) {
+        clearPendingHandwritingDelegation();
         if (mHandwritingSurface == null) {
             Slog.e(TAG, "Cannot start handwriting session: Handwriting was not initialized.");
             return null;
@@ -289,6 +290,10 @@ final class HandwritingModeController {
     @UiThread
     void reset() {
         reset(false /* reinitializing */);
+    }
+
+    void setInkWindowInitializer(Runnable inkWindowInitializer) {
+        mInkWindowInitRunnable = inkWindowInitializer;
     }
 
     private void reset(boolean reinitializing) {

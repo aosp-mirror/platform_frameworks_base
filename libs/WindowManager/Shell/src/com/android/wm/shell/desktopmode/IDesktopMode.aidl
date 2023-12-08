@@ -16,6 +16,9 @@
 
 package com.android.wm.shell.desktopmode;
 
+import android.app.ActivityManager.RunningTaskInfo;
+import com.android.wm.shell.desktopmode.IDesktopTaskListener;
+
 /**
  * Interface that is exposed to remote callers to manipulate desktop mode features.
  */
@@ -24,6 +27,21 @@ interface IDesktopMode {
     /** Show apps on the desktop on the given display */
     void showDesktopApps(int displayId);
 
+    /** Stash apps on the desktop to allow launching another app from home screen */
+    void stashDesktopApps(int displayId);
+
+    /** Hide apps that may be stashed */
+    void hideStashedDesktopApps(int displayId);
+
+    /** Bring task with the given id to front */
+    oneway void showDesktopApp(int taskId);
+
     /** Get count of visible desktop tasks on the given display */
     int getVisibleTaskCount(int displayId);
+
+    /** Perform cleanup transactions after the animation to split select is complete */
+    oneway void onDesktopSplitSelectAnimComplete(in RunningTaskInfo taskInfo);
+
+    /** Set listener that will receive callbacks about updates to desktop tasks */
+    oneway void setTaskListener(IDesktopTaskListener listener);
 }

@@ -954,4 +954,11 @@ public abstract class WindowManagerInternal {
 
     /** Returns the SurfaceControl accessibility services should use for accessibility overlays. */
     public abstract SurfaceControl getA11yOverlayLayer(int displayId);
+
+    /**
+     * Device has a software navigation bar (separate from the status bar) on specific display.
+     *
+     * @param displayId the id of display to check if there is a software navigation bar.
+     */
+    public abstract boolean hasNavigationBar(int displayId);
 }

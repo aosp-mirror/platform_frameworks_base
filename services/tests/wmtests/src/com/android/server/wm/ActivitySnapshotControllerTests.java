@@ -18,6 +18,9 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static org.junit.Assert.assertEquals;
 
 import android.platform.test.annotations.Presubmit;
@@ -27,6 +30,8 @@ import androidx.test.filters.SmallTest;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.ArrayList;
 
 /**
  * Test class for {@link ActivitySnapshotController}.
@@ -42,13 +47,13 @@ public class ActivitySnapshotControllerTests extends WindowTestsBase {
     private ActivitySnapshotController mActivitySnapshotController;
     @Before
     public void setUp() throws Exception {
+        spyOn(mWm.mSnapshotController.mActivitySnapshotController);
         mActivitySnapshotController = mWm.mSnapshotController.mActivitySnapshotController;
+        doReturn(false).when(mActivitySnapshotController).shouldDisableSnapshots();
         mActivitySnapshotController.resetTmpFields();
     }
     @Test
     public void testOpenActivityTransition() {
-        final SnapshotController.TransitionState transitionState =
-                new SnapshotController.TransitionState();
         final Task task = createTask(mDisplayContent);
         // note for createAppWindow: the new child is added at index 0
         final WindowState openingWindow = createAppWindow(task,
@@ -59,14 +64,12 @@ public class ActivitySnapshotControllerTests extends WindowTestsBase {
                 "closingWindow");
         closingWindow.mActivityRecord.commitVisibility(
                 false /* visible */, true /* performLayout */);
-        transitionState.addParticipant(closingWindow.mActivityRecord, false);
-        transitionState.addParticipant(openingWindow.mActivityRecord, true);
-        mActivitySnapshotController.handleOpenActivityTransition(transitionState);
+        final ArrayList<WindowContainer> windows = new ArrayList<>();
+        windows.add(openingWindow.mActivityRecord);
+        windows.add(closingWindow.mActivityRecord);
+        mActivitySnapshotController.handleTransitionFinish(windows);
 
-        assertEquals(1, mActivitySnapshotController.mPendingCaptureActivity.size());
         assertEquals(0, mActivitySnapshotController.mPendingRemoveActivity.size());
-        assertEquals(closingWindow.mActivityRecord,
-                mActivitySnapshotController.mPendingCaptureActivity.valueAt(0));
         mActivitySnapshotController.resetTmpFields();
 
         // simulate three activity
@@ -74,19 +77,15 @@ public class ActivitySnapshotControllerTests extends WindowTestsBase {
                 "belowClose");
         belowClose.mActivityRecord.commitVisibility(
                 false /* visible */, true /* performLayout */);
-        mActivitySnapshotController.handleOpenActivityTransition(transitionState);
-        assertEquals(1, mActivitySnapshotController.mPendingCaptureActivity.size());
+        windows.add(belowClose.mActivityRecord);
+        mActivitySnapshotController.handleTransitionFinish(windows);
         assertEquals(1, mActivitySnapshotController.mPendingRemoveActivity.size());
-        assertEquals(closingWindow.mActivityRecord,
-                mActivitySnapshotController.mPendingCaptureActivity.valueAt(0));
         assertEquals(belowClose.mActivityRecord,
                 mActivitySnapshotController.mPendingRemoveActivity.valueAt(0));
     }
 
     @Test
     public void testCloseActivityTransition() {
-        final SnapshotController.TransitionState transitionState =
-                new SnapshotController.TransitionState();
         final Task task = createTask(mDisplayContent);
         // note for createAppWindow: the new child is added at index 0
         final WindowState closingWindow = createAppWindow(task, ACTIVITY_TYPE_STANDARD,
@@ -97,10 +96,10 @@ public class ActivitySnapshotControllerTests extends WindowTestsBase {
                 ACTIVITY_TYPE_STANDARD, "openingWindow");
         openingWindow.mActivityRecord.commitVisibility(
                 true /* visible */, true /* performLayout */);
-        transitionState.addParticipant(closingWindow.mActivityRecord, false);
-        transitionState.addParticipant(openingWindow.mActivityRecord, true);
-        mActivitySnapshotController.handleCloseActivityTransition(transitionState);
-        assertEquals(0, mActivitySnapshotController.mPendingCaptureActivity.size());
+        final ArrayList<WindowContainer> windows = new ArrayList<>();
+        windows.add(openingWindow.mActivityRecord);
+        windows.add(closingWindow.mActivityRecord);
+        mActivitySnapshotController.handleTransitionFinish(windows);
         assertEquals(1, mActivitySnapshotController.mPendingDeleteActivity.size());
         assertEquals(openingWindow.mActivityRecord,
                 mActivitySnapshotController.mPendingDeleteActivity.valueAt(0));
@@ -111,8 +110,8 @@ public class ActivitySnapshotControllerTests extends WindowTestsBase {
                 "belowOpen");
         belowOpen.mActivityRecord.commitVisibility(
                 false /* visible */, true /* performLayout */);
-        mActivitySnapshotController.handleCloseActivityTransition(transitionState);
-        assertEquals(0, mActivitySnapshotController.mPendingCaptureActivity.size());
+        windows.add(belowOpen.mActivityRecord);
+        mActivitySnapshotController.handleTransitionFinish(windows);
         assertEquals(1, mActivitySnapshotController.mPendingDeleteActivity.size());
         assertEquals(1, mActivitySnapshotController.mPendingLoadActivity.size());
         assertEquals(openingWindow.mActivityRecord,
@@ -123,10 +122,6 @@ public class ActivitySnapshotControllerTests extends WindowTestsBase {
 
     @Test
     public void testTaskTransition() {
-        final SnapshotController.TransitionState taskCloseTransition =
-                new SnapshotController.TransitionState();
-        final SnapshotController.TransitionState taskOpenTransition =
-                new SnapshotController.TransitionState();
         final Task closeTask = createTask(mDisplayContent);
         // note for createAppWindow: the new child is added at index 0
         final WindowState closingWindow = createAppWindow(closeTask, ACTIVITY_TYPE_STANDARD,
@@ -147,10 +142,10 @@ public class ActivitySnapshotControllerTests extends WindowTestsBase {
                 "openingWindowBelow");
         openingWindowBelow.mActivityRecord.commitVisibility(
                 false /* visible */, true /* performLayout */);
-        taskCloseTransition.addParticipant(closeTask, false);
-        taskOpenTransition.addParticipant(openTask, true);
-        mActivitySnapshotController.handleCloseTaskTransition(taskCloseTransition);
-        mActivitySnapshotController.handleOpenTaskTransition(taskOpenTransition);
+        final ArrayList<WindowContainer> windows = new ArrayList<>();
+        windows.add(closeTask);
+        windows.add(openTask);
+        mActivitySnapshotController.handleTransitionFinish(windows);
 
         assertEquals(1, mActivitySnapshotController.mPendingRemoveActivity.size());
         assertEquals(closingWindowBelow.mActivityRecord,

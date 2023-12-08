@@ -302,9 +302,6 @@
     <!-- Determines whether the shell features all run on another thread. -->
     <bool name="config_enableShellMainThread">true</bool>
 
-    <!-- SystemUIFactory component -->
-    <string name="config_systemUIFactoryComponent" translatable="false">com.android.systemui.SystemUIInitializerImpl</string>
-
     <!-- QS tile shape store width. negative implies fill configuration instead of stroke-->
     <dimen name="config_qsTileStrokeWidthActive">-1dp</dimen>
     <dimen name="config_qsTileStrokeWidthInactive">-1dp</dimen>
@@ -660,6 +657,14 @@
     <integer-array name="config_face_help_msgs_defer_until_timeout">
     </integer-array>
 
+    <!-- Which face help messages to ignore when determining the % of frames that meet
+         config_face_help_msgs_defer_until_timeout_threshold -->
+    <integer-array name="config_face_help_msgs_ignore">
+        <item>20</item> <!-- FACE_ACQUIRED_START -->
+        <item>23</item> <!-- FACE_ACQUIRED_UNKNOWN -->
+        <item>24</item> <!-- FACE_ACQUIRED_FIRST_FRAME_RECEIVED -->
+    </integer-array>
+
     <!-- Percentage of face auth frames received required to show a deferred message at
          FACE_ERROR_TIMEOUT. See config_face_help_msgs_defer_until_timeout for messages
          that are deferred.-->
@@ -684,7 +689,6 @@
         <item>6</item> <!-- WAKE_REASON_WAKE_KEY -->
         <item>7</item> <!-- WAKE_REASON_WAKE_MOTION -->
         <item>9</item> <!-- WAKE_REASON_LID -->
-        <item>10</item> <!-- WAKE_REASON_DISPLAY_GROUP_ADDED -->
         <item>12</item> <!-- WAKE_REASON_UNFOLD_DEVICE -->
         <item>15</item> <!-- WAKE_REASON_TAP -->
         <item>16</item> <!-- WAKE_REASON_LIFT -->
@@ -700,6 +704,10 @@
          4 : DEVICE_POSTURE_FLIPPED
     -->
     <integer name="config_face_auth_supported_posture">0</integer>
+
+    <!-- Components to allow running fingerprint listening if their activity is occluding the lock screen. -->
+    <string-array name="config_fingerprint_listen_on_occluding_activity_packages" translatable="false">
+    </string-array>
 
     <!-- Whether the communal service should be enabled -->
     <bool name="config_communalServiceEnabled">false</bool>
@@ -773,6 +781,9 @@
 
     <!-- Flag to enable privacy dot views, it shall be true for normal case -->
     <bool name="config_enablePrivacyDot">true</bool>
+
+    <!-- Flag to enable privacy chip animation, it shall be true for normal case -->
+    <bool name="config_enablePrivacyChipAnimation">true</bool>
 
     <!-- Class for the communal source connector to be used -->
     <string name="config_communalSourceConnector" translatable="false"></string>
@@ -914,4 +925,7 @@
     "$packageName" part that will be replaced by the code with the package name of the target app.
     -->
     <string name="config_appStoreAppLinkTemplate" translatable="false"></string>
+
+    <!-- Flag controlling whether visual query attention detection has been enabled. -->
+    <bool name="config_enableVisualQueryAttentionDetection">false</bool>
 </resources>

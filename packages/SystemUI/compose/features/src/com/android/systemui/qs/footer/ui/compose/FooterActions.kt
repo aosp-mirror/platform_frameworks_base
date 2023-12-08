@@ -121,8 +121,8 @@ fun FooterActions(
         }
     }
 
-    val backgroundColor = colorAttr(R.attr.underSurfaceColor)
-    val contentColor = LocalAndroidColorScheme.current.deprecated.textColorPrimary
+    val backgroundColor = colorAttr(R.attr.underSurface)
+    val contentColor = LocalAndroidColorScheme.current.onSurface
     val backgroundTopRadius = dimensionResource(R.dimen.qs_corner_radius)
     val backgroundModifier =
         remember(
@@ -268,7 +268,7 @@ private fun NumberButton(
     val interactionSource = remember { MutableInteractionSource() }
 
     Expandable(
-        color = colorAttr(R.attr.offStateColor),
+        color = colorAttr(R.attr.shadeInactive),
         shape = CircleShape,
         onClick = onClick,
         interactionSource = interactionSource,
@@ -287,7 +287,7 @@ private fun NumberButton(
                     number.toString(),
                     modifier = Modifier.align(Alignment.Center),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = LocalAndroidColorScheme.current.deprecated.textColorPrimary,
+                    color = colorAttr(R.attr.onShadeInactiveVariant),
                     // TODO(b/242040009): This should only use a standard text style instead and
                     // should not override the text size.
                     fontSize = 18.sp,
@@ -305,7 +305,7 @@ private fun NumberButton(
 @Composable
 private fun NewChangesDot(modifier: Modifier = Modifier) {
     val contentDescription = stringResource(R.string.fgs_dot_content_description)
-    val color = LocalAndroidColorScheme.current.deprecated.colorAccentTertiary
+    val color = LocalAndroidColorScheme.current.tertiary
 
     Canvas(modifier.size(12.dp).semantics { this.contentDescription = contentDescription }) {
         drawCircle(color)
@@ -323,10 +323,9 @@ private fun TextButton(
 ) {
     Expandable(
         shape = CircleShape,
-        color = colorAttr(R.attr.underSurfaceColor),
-        contentColor = LocalAndroidColorScheme.current.deprecated.textColorSecondary,
-        borderStroke =
-            BorderStroke(1.dp, LocalAndroidColorScheme.current.deprecated.colorBackground),
+        color = colorAttr(R.attr.underSurface),
+        contentColor = LocalAndroidColorScheme.current.onSurfaceVariant,
+        borderStroke = BorderStroke(1.dp, colorAttr(R.attr.onShadeActive)),
         modifier = modifier.padding(horizontal = 4.dp),
         onClick = onClick,
     ) {

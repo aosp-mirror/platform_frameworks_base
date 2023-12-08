@@ -24,7 +24,7 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.customization.R
-import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.ClockAnimations
 import com.android.systemui.plugins.ClockConfig
 import com.android.systemui.plugins.ClockController
@@ -62,9 +62,10 @@ class DefaultClockController(
     private val burmeseLineSpacing =
         resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale_burmese)
     private val defaultLineSpacing = resources.getFloat(R.dimen.keyguard_clock_line_spacing_scale)
+    protected var onSecondaryDisplay: Boolean = false
 
     override val events: DefaultClockEvents
-    override val config = ClockConfig()
+    override val config = ClockConfig(DEFAULT_CLOCK_ID)
 
     init {
         val parent = FrameLayout(ctx)
@@ -108,10 +109,10 @@ class DefaultClockController(
 
         override val config = ClockFaceConfig()
 
-        override var logBuffer: LogBuffer?
-            get() = view.logBuffer
+        override var messageBuffer: MessageBuffer?
+            get() = view.messageBuffer
             set(value) {
-                view.logBuffer = value
+                view.messageBuffer = value
             }
 
         override var animations: DefaultClockAnimations = DefaultClockAnimations(view, 0f, 0f)
@@ -141,6 +142,11 @@ class DefaultClockController(
                 override fun onFontSettingChanged(fontSizePx: Float) {
                     view.setTextSize(TypedValue.COMPLEX_UNIT_PX, fontSizePx)
                     recomputePadding(targetRegion)
+                }
+
+                override fun onSecondaryDisplayChanged(onSecondaryDisplay: Boolean) {
+                    this@DefaultClockController.onSecondaryDisplay = onSecondaryDisplay
+                    recomputePadding(null)
                 }
             }
 
@@ -182,13 +188,19 @@ class DefaultClockController(
         override fun recomputePadding(targetRegion: Rect?) {
             // We center the view within the targetRegion instead of within the parent
             // view by computing the difference and adding that to the padding.
-            val parent = view.parent
-            val yDiff =
-                if (targetRegion != null && parent is View && parent.isLaidOut())
-                    targetRegion.centerY() - parent.height / 2f
-                else 0f
             val lp = view.getLayoutParams() as FrameLayout.LayoutParams
-            lp.topMargin = (-0.5f * view.bottom + yDiff).toInt()
+            lp.topMargin =
+                if (onSecondaryDisplay) {
+                    // On the secondary display we don't want any additional top/bottom margin.
+                    0
+                } else {
+                    val parent = view.parent
+                    val yDiff =
+                        if (targetRegion != null && parent is View && parent.isLaidOut())
+                            targetRegion.centerY() - parent.height / 2f
+                        else 0f
+                    (-0.5f * view.bottom + yDiff).toInt()
+                }
             view.setLayoutParams(lp)
         }
 

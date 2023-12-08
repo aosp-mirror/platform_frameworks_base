@@ -115,4 +115,13 @@ oneway interface IWindowMagnificationConnection {
      * @param callback the interface to be called.
      */
     void setConnectionCallback(in IWindowMagnificationConnectionCallback callback);
+
+    /**
+     * Notify System UI the magnification scale on the specified display for userId is changed.
+     *
+     * @param userId the user id.
+     * @param displayId the logical display id.
+     * @param scale magnification scale.
+     */
+    void onUserMagnificationScaleChanged(int userId, int displayId, float scale);
 }

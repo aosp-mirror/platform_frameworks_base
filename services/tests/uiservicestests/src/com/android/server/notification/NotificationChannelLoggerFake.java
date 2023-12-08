@@ -16,24 +16,44 @@
 
 package com.android.server.notification;
 
+import android.annotation.Nullable;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 
+import com.google.common.base.MoreObjects;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class NotificationChannelLoggerFake implements NotificationChannelLogger {
     static class CallRecord {
-        public NotificationChannelEvent event;
-        CallRecord(NotificationChannelEvent event) {
+        public final NotificationChannelEvent event;
+        @Nullable public final String channelId;
+
+        CallRecord(NotificationChannelEvent event, @Nullable String channelId) {
             this.event = event;
+            this.channelId = channelId;
         }
 
         @Override
         public String toString() {
-            return "CallRecord{" +
-                    "event=" + event +
-                    '}';
+            return MoreObjects.toStringHelper(this)
+                    .add("event", event)
+                    .add(channelId, channelId)
+                    .toString();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return (obj instanceof CallRecord other)
+                    && Objects.equals(this.event, other.event)
+                    && Objects.equals(this.channelId, other.channelId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(event, channelId);
         }
     }
 
@@ -47,20 +67,24 @@ public class NotificationChannelLoggerFake implements NotificationChannelLogger 
         return mCalls.get(index);
     }
 
+    void clear() {
+        mCalls.clear();
+    }
+
     @Override
     public void logNotificationChannel(NotificationChannelEvent event, NotificationChannel channel,
             int uid, String pkg, int oldImportance, int newImportance) {
-        mCalls.add(new CallRecord(event));
+        mCalls.add(new CallRecord(event, channel.getId()));
     }
 
     @Override
     public void logNotificationChannelGroup(NotificationChannelEvent event,
             NotificationChannelGroup channelGroup, int uid, String pkg, boolean wasBlocked) {
-        mCalls.add(new CallRecord(event));
+        mCalls.add(new CallRecord(event, channelGroup.getId()));
     }
 
     @Override
     public void logAppEvent(NotificationChannelEvent event, int uid, String pkg) {
-        mCalls.add(new CallRecord(event));
+        mCalls.add(new CallRecord(event, null));
     }
 }

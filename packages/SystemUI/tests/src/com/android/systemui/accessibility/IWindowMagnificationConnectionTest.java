@@ -16,8 +16,10 @@
 
 package com.android.systemui.accessibility;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -183,6 +185,20 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mMagnificationSettingsController).closeMagnificationSettings();
+    }
+
+    @Test
+    public void onUserMagnificationScaleChanged() throws RemoteException {
+        final int testUserId = 1;
+        final float testScale = 3.0f;
+        mIWindowMagnificationConnection.onUserMagnificationScaleChanged(
+                testUserId, TEST_DISPLAY, testScale);
+        waitForIdleSync();
+
+        assertTrue(mWindowMagnification.mUsersScales.contains(testUserId));
+        assertEquals(mWindowMagnification.mUsersScales.get(testUserId).get(TEST_DISPLAY),
+                (Float) testScale);
+        verify(mMagnificationSettingsController).setMagnificationScale(eq(testScale));
     }
 
     private class FakeControllerSupplier extends

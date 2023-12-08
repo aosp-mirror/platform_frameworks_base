@@ -43,6 +43,8 @@ android_test_helper_app {
     },
     export_package_resources: true,
     sdk_version: "current",
+
+    certificate: "platform",
 }
 
 android_library {

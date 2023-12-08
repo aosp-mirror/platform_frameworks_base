@@ -18,6 +18,7 @@ package com.android.systemui.biometrics
 
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
+import androidx.test.filters.RequiresDevice
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shade.ShadeExpansionStateManager
 import org.junit.Assert
@@ -30,6 +31,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyZeroInteractions
 import org.mockito.junit.MockitoJUnit
 
+@RequiresDevice
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {

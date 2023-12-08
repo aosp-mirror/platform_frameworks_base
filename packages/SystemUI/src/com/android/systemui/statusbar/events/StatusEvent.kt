@@ -24,6 +24,7 @@ import android.widget.ImageView
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.privacy.PrivacyItem
 import com.android.systemui.statusbar.BatteryStatusChip
+import com.android.systemui.statusbar.ConnectedDisplayChip
 
 typealias ViewCreator = (context: Context) -> BackgroundAnimatableView
 
@@ -80,6 +81,23 @@ class BatteryEvent(@IntRange(from = 0, to = 100) val batteryLevel: Int) : Status
         BatteryStatusChip(context).apply {
             setBatteryLevel(batteryLevel)
         }
+    }
+
+    override fun toString(): String {
+        return javaClass.simpleName
+    }
+}
+
+/** Event that triggers a connected display chip in the status bar. */
+class ConnectedDisplayEvent : StatusEvent {
+    /** Priority is set higher than [BatteryEvent]. */
+    override val priority = 60
+    override var forceVisible = false
+    override val showAnimation = true
+    override var contentDescription: String? = ""
+
+    override val viewCreator: ViewCreator = { context ->
+        ConnectedDisplayChip(context)
     }
 
     override fun toString(): String {

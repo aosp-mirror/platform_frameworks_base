@@ -1608,7 +1608,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1621,7 +1621,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1634,7 +1634,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }

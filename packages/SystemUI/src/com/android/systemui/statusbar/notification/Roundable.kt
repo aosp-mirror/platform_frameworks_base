@@ -4,6 +4,9 @@ import android.util.FloatProperty
 import android.view.View
 import androidx.annotation.FloatRange
 import com.android.systemui.R
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.Flags
+import com.android.systemui.flags.ViewRefactorFlag
 import com.android.systemui.statusbar.notification.stack.AnimationProperties
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import kotlin.math.abs
@@ -19,6 +22,8 @@ import kotlin.math.abs
 interface Roundable {
     /** Properties required for a Roundable */
     val roundableState: RoundableState
+
+    val clipHeight: Int
 
     /** Current top roundness */
     @get:FloatRange(from = 0.0, to = 1.0)
@@ -36,11 +41,15 @@ interface Roundable {
 
     /** Current top corner in pixel, based on [topRoundness] and [maxRadius] */
     val topCornerRadius: Float
-        get() = topRoundness * maxRadius
+        get() =
+            if (roundableState.newHeadsUpAnim.isEnabled) roundableState.topCornerRadius
+            else topRoundness * maxRadius
 
     /** Current bottom corner in pixel, based on [bottomRoundness] and [maxRadius] */
     val bottomCornerRadius: Float
-        get() = bottomRoundness * maxRadius
+        get() =
+            if (roundableState.newHeadsUpAnim.isEnabled) roundableState.bottomCornerRadius
+            else bottomRoundness * maxRadius
 
     /** Get and update the current radii */
     val updatedRadii: FloatArray
@@ -303,13 +312,18 @@ interface Roundable {
  * @param roundable Target of the radius animation
  * @param maxRadius Max corner radius in pixels
  */
-class RoundableState(
+class RoundableState
+@JvmOverloads
+constructor(
     internal val targetView: View,
     private val roundable: Roundable,
     maxRadius: Float,
+    featureFlags: FeatureFlags? = null
 ) {
     internal var maxRadius = maxRadius
         private set
+
+    internal val newHeadsUpAnim = ViewRefactorFlag(featureFlags, Flags.IMPROVED_HUN_ANIMATIONS)
 
     /** Animatable for top roundness */
     private val topAnimatable = topAnimatable(roundable)
@@ -326,6 +340,41 @@ class RoundableState(
     @set:FloatRange(from = 0.0, to = 1.0)
     internal var bottomRoundness = 0f
         private set
+
+    internal val topCornerRadius: Float
+        get() {
+            val height = roundable.clipHeight
+            val topRadius = topRoundness * maxRadius
+            val bottomRadius = bottomRoundness * maxRadius
+
+            if (height == 0) {
+                return 0f
+            } else if (topRadius + bottomRadius > height) {
+                // The sum of top and bottom corner radii should be at max the clipped height
+                val overShoot = topRadius + bottomRadius - height
+                return topRadius - (overShoot * topRoundness / (topRoundness + bottomRoundness))
+            }
+
+            return topRadius
+        }
+
+    internal val bottomCornerRadius: Float
+        get() {
+            val height = roundable.clipHeight
+            val topRadius = topRoundness * maxRadius
+            val bottomRadius = bottomRoundness * maxRadius
+
+            if (height == 0) {
+                return 0f
+            } else if (topRadius + bottomRadius > height) {
+                // The sum of top and bottom corner radii should be at max the clipped height
+                val overShoot = topRadius + bottomRadius - height
+                return bottomRadius -
+                    (overShoot * bottomRoundness / (topRoundness + bottomRoundness))
+            }
+
+            return bottomRadius
+        }
 
     /** Last requested top roundness associated by [SourceType] */
     internal val topRoundnessMap = mutableMapOf<SourceType, Float>()

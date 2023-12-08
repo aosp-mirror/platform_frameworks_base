@@ -57,7 +57,7 @@ public class RowContentBindStage extends BindStage<RowContentBindParams> {
             @NonNull StageCallback callback) {
         RowContentBindParams params = getStageParams(entry);
 
-        mLogger.logStageParams(entry, params);
+        mLogger.logExecutingStage(entry, params);
 
         // Resolve content to bind/unbind.
         @InflationFlag int inflationFlags = params.getContentViews();
@@ -96,7 +96,10 @@ public class RowContentBindStage extends BindStage<RowContentBindParams> {
     protected void abortStage(
             @NonNull NotificationEntry entry,
             @NonNull ExpandableNotificationRow row) {
-        mBinder.cancelBind(entry, row);
+        final boolean cancelledBind = mBinder.cancelBind(entry, row);
+        if (cancelledBind) {
+            mLogger.logAbortStageCancelledBind(entry);
+        }
     }
 
     @Override

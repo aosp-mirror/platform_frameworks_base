@@ -17,7 +17,11 @@
 package com.android.wm.shell.common.split;
 
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
+import static android.view.PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
+
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.CURSOR_HOVER_STATES_ENABLED;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -25,6 +29,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.provider.DeviceConfig;
 import android.util.AttributeSet;
 import android.util.Property;
 import android.view.GestureDetector;
@@ -32,6 +37,7 @@ import android.view.InsetsController;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.MotionEvent;
+import android.view.PointerIcon;
 import android.view.SurfaceControlViewHost;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -46,7 +52,7 @@ import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.internal.policy.DividerSnapAlgorithm;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
@@ -222,7 +228,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             for (int i = insetsState.sourceSize() - 1; i >= 0; i--) {
                 final InsetsSource source = insetsState.sourceAt(i);
                 if (source.getType() == WindowInsets.Type.navigationBars()
-                        && source.insetsRoundedCornerFrame()) {
+                        && source.hasFlags(InsetsSource.FLAG_INSETS_ROUNDED_CORNER)) {
                     mTempRect.inset(source.calculateVisibleInsets(mTempRect));
                 }
             }
@@ -267,6 +273,12 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             mSplitWindowManager.setTouchRegion(mTempRect);
             mSetTouchRegion = false;
         }
+    }
+
+    @Override
+    public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+        return PointerIcon.getSystemIcon(getContext(),
+                isLandscape() ? TYPE_HORIZONTAL_DOUBLE_ARROW : TYPE_VERTICAL_DOUBLE_ARROW);
     }
 
     @Override
@@ -371,6 +383,43 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mViewHost.relayout(lp);
     }
 
+    @Override
+    public boolean onHoverEvent(MotionEvent event) {
+        if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI, CURSOR_HOVER_STATES_ENABLED,
+                /* defaultValue = */ false)) {
+            return false;
+        }
+
+        if (event.getAction() == MotionEvent.ACTION_HOVER_ENTER) {
+            setHovering();
+            return true;
+        } else if (event.getAction() == MotionEvent.ACTION_HOVER_EXIT) {
+            releaseHovering();
+            return true;
+        }
+        return false;
+    }
+
+    @VisibleForTesting
+    void setHovering() {
+        mHandle.setHovering(true, true);
+        mHandle.animate()
+                .setInterpolator(Interpolators.TOUCH_RESPONSE)
+                .setDuration(TOUCH_ANIMATION_DURATION)
+                .translationZ(mTouchElevation)
+                .start();
+    }
+
+    @VisibleForTesting
+    void releaseHovering() {
+        mHandle.setHovering(false, true);
+        mHandle.animate()
+                .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                .setDuration(TOUCH_RELEASE_ANIMATION_DURATION)
+                .translationZ(0)
+                .start();
+    }
+
     /**
      * Set divider should interactive to user or not.
      *
@@ -384,7 +433,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 "Set divider bar %s from %s", interactive ? "interactive" : "non-interactive",
                 from);
         mInteractive = interactive;
-        if (!mInteractive && mMoving) {
+        if (!mInteractive && hideHandle && mMoving) {
             final int position = mSplitLayout.getDividePosition();
             mSplitLayout.flingDividePosition(
                     mLastDraggingPosition,

@@ -132,9 +132,6 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         final Context mContext;
         final InternetDialogController mInternetDialogController;
 
-        @VisibleForTesting
-        protected WifiUtils.InternetIconInjector mWifiIconInjector;
-
         InternetViewHolder(View view, InternetDialogController internetDialogController) {
             super(view);
             mContext = view.getContext();
@@ -146,12 +143,10 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             mWifiTitleText = view.requireViewById(R.id.wifi_title);
             mWifiSummaryText = view.requireViewById(R.id.wifi_summary);
             mWifiEndIcon = view.requireViewById(R.id.wifi_end_icon);
-            mWifiIconInjector = mInternetDialogController.getWifiIconInjector();
         }
 
         void onBind(@NonNull WifiEntry wifiEntry) {
-            mWifiIcon.setImageDrawable(
-                    getWifiDrawable(wifiEntry.getLevel(), wifiEntry.shouldShowXLevelIcon()));
+            mWifiIcon.setImageDrawable(getWifiDrawable(wifiEntry));
             setWifiNetworkLayout(wifiEntry.getTitle(),
                     Html.fromHtml(wifiEntry.getSummary(false), Html.FROM_HTML_MODE_LEGACY));
 
@@ -213,13 +208,8 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         }
 
         @Nullable
-        Drawable getWifiDrawable(int level, boolean hasNoInternet) {
-            // If the Wi-Fi level is equal to WIFI_LEVEL_UNREACHABLE(-1), then a null drawable
-            // will be returned.
-            if (level == WifiEntry.WIFI_LEVEL_UNREACHABLE) {
-                return null;
-            }
-            final Drawable drawable = mWifiIconInjector.getIcon(hasNoInternet, level);
+        Drawable getWifiDrawable(@NonNull WifiEntry wifiEntry) {
+            Drawable drawable = mInternetDialogController.getWifiDrawable(wifiEntry);
             if (drawable == null) {
                 return null;
             }

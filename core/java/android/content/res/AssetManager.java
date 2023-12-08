@@ -528,6 +528,10 @@ public final class AssetManager implements AutoCloseable {
         if (!mOpen) {
             throw new RuntimeException("AssetManager has been closed");
         }
+        // Let's still check if the native object exists, given all the memory corruptions.
+        if (mObject == 0) {
+            throw new RuntimeException("AssetManager is open but the native object is gone");
+        }
     }
 
     /**
@@ -1153,6 +1157,7 @@ public final class AssetManager implements AutoCloseable {
     int[] getAttributeResolutionStack(long themePtr, @AttrRes int defStyleAttr,
             @StyleRes int defStyleRes, @StyleRes int xmlStyle) {
         synchronized (this) {
+            ensureValidLocked();
             return nativeAttributeResolutionStack(
                     mObject, themePtr, xmlStyle, defStyleAttr, defStyleRes);
         }
