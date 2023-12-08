@@ -1121,6 +1121,7 @@ class ActivityStarter {
                             callerApp,
                             request.originatingPendingIntent,
                             request.forcedBalByPiSender,
+                            resultRecord,
                             intent,
                             checkedOptions);
                 request.logMessage.append(" (").append(balVerdict).append(")");

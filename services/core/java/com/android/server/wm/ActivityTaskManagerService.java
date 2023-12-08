@@ -103,6 +103,7 @@ import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_FIRST_ORD
 import static com.android.server.wm.ActivityInterceptorCallback.SYSTEM_LAST_ORDERED_ID;
 import static com.android.server.wm.ActivityRecord.State.PAUSING;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_ROOT_TASK;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
@@ -118,6 +119,7 @@ import static com.android.server.wm.ActivityTaskSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.wm.ActivityTaskSupervisor.REMOVE_FROM_RECENTS;
+import static com.android.server.wm.BackgroundActivityStartController.BalVerdict;
 import static com.android.server.wm.LockTaskController.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
@@ -2242,7 +2244,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         final BackgroundActivityStartController balController =
                 mTaskSupervisor.getBackgroundActivityLaunchController();
-        if (balController.shouldAbortBackgroundActivityStart(
+        final BalVerdict balVerdict = balController.checkBackgroundActivityStart(
                 callingUid,
                 callingPid,
                 callingPackage,
@@ -2252,10 +2254,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 null,
                 BackgroundStartPrivileges.NONE,
                 null,
-                null)) {
-            if (!isBackgroundActivityStartsEnabled()) {
-                return;
-            }
+                null,
+                null);
+        if (balVerdict.blocks() && !isBackgroundActivityStartsEnabled()) {
+            Slog.w(TAG, "moveTaskToFront blocked: " + balVerdict);
+            return;
+        }
+        if (DEBUG_ACTIVITY_STARTS) {
+            Slog.d(TAG, "moveTaskToFront allowed: " + balVerdict);
         }
         try {
             final Task task = mRootWindowContainer.anyTaskForId(taskId);
