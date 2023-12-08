@@ -160,7 +160,6 @@ public class PreferencesHelper implements RankingConfig {
     static final boolean DEFAULT_BUBBLES_ENABLED = true;
     @VisibleForTesting
     static final int DEFAULT_BUBBLE_PREFERENCE = BUBBLE_PREFERENCE_NONE;
-    static final boolean DEFAULT_MEDIA_NOTIFICATION_FILTERING = true;
 
     private static final int NOTIFICATION_UPDATE_LOG_SUBTYPE_FROM_APP = 0;
     private static final int NOTIFICATION_UPDATE_LOG_SUBTYPE_FROM_USER = 1;
@@ -199,7 +198,7 @@ public class PreferencesHelper implements RankingConfig {
     private SparseBooleanArray mBubblesEnabled;
     private SparseBooleanArray mLockScreenShowNotifications;
     private SparseBooleanArray mLockScreenPrivateNotifications;
-    private boolean mIsMediaNotificationFilteringEnabled = DEFAULT_MEDIA_NOTIFICATION_FILTERING;
+    private boolean mIsMediaNotificationFilteringEnabled;
     // When modes_api flag is enabled, this value only tracks whether the current user has any
     // channels marked as "priority channels", but not necessarily whether they are permitted
     // to bypass DND by current zen policy.
@@ -223,6 +222,8 @@ public class PreferencesHelper implements RankingConfig {
         mAppOps = appOpsManager;
         mUserProfiles = userProfiles;
         mShowReviewPermissionsNotification = showReviewPermissionsNotification;
+        mIsMediaNotificationFilteringEnabled = context.getResources()
+                .getBoolean(R.bool.config_quickSettingsShowMediaPlayer);
 
         XML_VERSION = 4;
 
@@ -2687,8 +2688,11 @@ public class PreferencesHelper implements RankingConfig {
 
     /** Requests check of the feature setting for showing media notifications in quick settings. */
     public void updateMediaNotificationFilteringEnabled() {
+        // TODO(b/192412820): Consolidate SHOW_MEDIA_ON_QUICK_SETTINGS into compile-time value.
         final boolean newValue = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1) > 0;
+                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1) > 0
+                        && mContext.getResources().getBoolean(
+                                R.bool.config_quickSettingsShowMediaPlayer);
         if (newValue != mIsMediaNotificationFilteringEnabled) {
             mIsMediaNotificationFilteringEnabled = newValue;
             updateConfig();
