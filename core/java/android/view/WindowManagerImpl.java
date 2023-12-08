@@ -37,6 +37,7 @@ import android.os.StrictMode;
 import android.util.Log;
 import android.window.ITaskFpsCallback;
 import android.window.TaskFpsCallback;
+import android.window.TrustedPresentationThresholds;
 import android.window.WindowContext;
 import android.window.WindowMetricsController;
 import android.window.WindowProvider;
@@ -507,5 +508,18 @@ public final class WindowManagerImpl implements WindowManager {
             e.rethrowAsRuntimeException();
         }
         return false;
+    }
+
+    @Override
+    public void registerTrustedPresentationListener(@NonNull IBinder window,
+            @NonNull TrustedPresentationThresholds thresholds, @NonNull Executor executor,
+            @NonNull Consumer<Boolean> listener) {
+        mGlobal.registerTrustedPresentationListener(window, thresholds, executor, listener);
+    }
+
+    @Override
+    public void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
+        mGlobal.unregisterTrustedPresentationListener(listener);
+
     }
 }

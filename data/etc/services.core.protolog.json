@@ -595,6 +595,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-1518132958": {
+      "message": "fractionRendered boundsOverSource=%f",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
+    },
     "-1517908912": {
       "message": "requestScrollCapture: caught exception dispatching to window.token=%s",
       "level": "WARN",
@@ -960,6 +966,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONTENT_RECORDING",
       "at": "com\/android\/server\/wm\/ContentRecorder.java"
+    },
+    "-1209762265": {
+      "message": "Registering listener=%s with id=%d for window=%s with %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "-1209252064": {
       "message": "Clear animatingExit: reason=clearAnimatingFlags win=%s",
@@ -1332,6 +1344,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
+    },
+    "-888703350": {
+      "message": "Skipping %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "-883738232": {
       "message": "Adding more than one toast window for UID at a time.",
@@ -2803,6 +2821,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "360319850": {
+      "message": "fractionRendered scale=%f",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
+    },
     "364992694": {
       "message": "freezeDisplayRotation: current rotation=%d, new rotation=%d, caller=%s",
       "level": "VERBOSE",
@@ -2983,6 +3007,12 @@
       "group": "WM_DEBUG_BACK_PREVIEW",
       "at": "com\/android\/server\/wm\/BackNavigationController.java"
     },
+    "532771960": {
+      "message": "Adding untrusted state listener=%s with id=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
+    },
     "535103992": {
       "message": "Wallpaper may change!  Adjusting",
       "level": "VERBOSE",
@@ -3060,6 +3090,12 @@
       "level": "ERROR",
       "group": "WM_DEBUG_DREAM",
       "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
+    },
+    "605179032": {
+      "message": "checkIfInThreshold fractionRendered=%f alpha=%f currTimeMs=%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "608694300": {
       "message": "  NEW SURFACE SESSION %s",
@@ -3288,6 +3324,12 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "824532141": {
+      "message": "lastState=%s newState=%s alpha=%f minAlpha=%f fractionRendered=%f minFractionRendered=%f",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "829434921": {
       "message": "Draw state now committed in %s",
@@ -3583,6 +3625,12 @@
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
     },
+    "1090378847": {
+      "message": "Checking %d windows",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
+    },
     "1100065297": {
       "message": "Attempted to get IME policy of a display that does not exist: %d",
       "level": "WARN",
@@ -3714,6 +3762,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1251721200": {
+      "message": "unregister failed, couldn't find deathRecipient for %s with id=%d",
+      "level": "ERROR",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "1252594551": {
       "message": "Window types in WindowContext and LayoutParams.type should match! Type from LayoutParams is %d, but type from WindowContext is %d",
@@ -3853,6 +3907,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
     },
+    "1382634842": {
+      "message": "Unregistering listener=%s with id=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
+    },
     "1393721079": {
       "message": "Starting remote display change: from [rot = %d], to [%dx%d, rot = %d]",
       "level": "VERBOSE",
@@ -3900,6 +3960,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1445704347": {
+      "message": "coveredRegionsAbove updated with %s frame:%s region:%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "1448683958": {
       "message": "Override pending remote transitionSet=%b adapter=%s",
@@ -4201,6 +4267,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
+    "1786463281": {
+      "message": "Adding trusted state listener=%s with id=%d",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
+    },
     "1789321832": {
       "message": "Then token:%s is invalid. It might be removed",
       "level": "WARN",
@@ -4374,6 +4446,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
+    },
+    "1955470028": {
+      "message": "computeFractionRendered: visibleRegion=%s screenBounds=%s contentSize=%s scale=%f,%f",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_TPL",
+      "at": "com\/android\/server\/wm\/TrustedPresentationListenerController.java"
     },
     "1964565370": {
       "message": "Starting remote animation",
@@ -4657,6 +4735,9 @@
       "tag": "WindowManager"
     },
     "WM_DEBUG_TASKS": {
+      "tag": "WindowManager"
+    },
+    "WM_DEBUG_TPL": {
       "tag": "WindowManager"
     },
     "WM_DEBUG_WALLPAPER": {
