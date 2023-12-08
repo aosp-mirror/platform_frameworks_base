@@ -1137,7 +1137,7 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             runCurrent()
 
             // WHEN primary bouncer shows
-            bouncerRepository.setPrimaryShow(true) // beverlyt
+            bouncerRepository.setPrimaryShow(true)
             runCurrent()
 
             val info =
@@ -1226,6 +1226,36 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
             assertThat(info.ownerName).isEqualTo("FromDreamingTransitionInteractor")
             assertThat(info.from).isEqualTo(KeyguardState.DREAMING)
             assertThat(info.to).isEqualTo(KeyguardState.OCCLUDED)
+            assertThat(info.animator).isNotNull()
+
+            coroutineContext.cancelChildren()
+        }
+
+    @Test
+    fun dreamingToAod() =
+        testScope.runTest {
+            // GIVEN a prior transition has run to DREAMING
+            keyguardRepository.setDreaming(true)
+            runTransitionAndSetWakefulness(KeyguardState.LOCKSCREEN, KeyguardState.DREAMING)
+            runCurrent()
+
+            // WHEN the device starts DOZE_AOD
+            keyguardRepository.setDozeTransitionModel(
+                DozeTransitionModel(
+                    from = DozeStateModel.INITIALIZED,
+                    to = DozeStateModel.DOZE_AOD,
+                )
+            )
+            runCurrent()
+
+            val info =
+                withArgCaptor<TransitionInfo> {
+                    verify(transitionRepository).startTransition(capture())
+                }
+            // THEN a transition to AOD should occur
+            assertThat(info.ownerName).isEqualTo("FromDreamingTransitionInteractor")
+            assertThat(info.from).isEqualTo(KeyguardState.DREAMING)
+            assertThat(info.to).isEqualTo(KeyguardState.AOD)
             assertThat(info.animator).isNotNull()
 
             coroutineContext.cancelChildren()

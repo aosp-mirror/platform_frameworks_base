@@ -197,7 +197,38 @@ open class UdfpsKeyguardViewControllerLegacy(
                 listenForGoneToAodTransition(this)
                 listenForLockscreenAodTransitions(this)
                 listenForAodToOccludedTransitions(this)
+                listenForAlternateBouncerToAodTransitions(this)
+                listenForDreamingToAodTransitions(this)
             }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForDreamingToAodTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor.transition(KeyguardState.DREAMING, KeyguardState.AOD).collect {
+                transitionStep ->
+                view.onDozeAmountChanged(
+                    transitionStep.value,
+                    transitionStep.value,
+                    ANIMATE_APPEAR_ON_SCREEN_OFF,
+                )
+            }
+        }
+    }
+
+    @VisibleForTesting
+    suspend fun listenForAlternateBouncerToAodTransitions(scope: CoroutineScope): Job {
+        return scope.launch {
+            transitionInteractor
+                .transition(KeyguardState.ALTERNATE_BOUNCER, KeyguardState.AOD)
+                .collect { transitionStep ->
+                    view.onDozeAmountChanged(
+                        transitionStep.value,
+                        transitionStep.value,
+                        UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN,
+                    )
+                }
         }
     }
 
@@ -246,7 +277,10 @@ open class UdfpsKeyguardViewControllerLegacy(
     suspend fun listenForLockscreenAodTransitions(scope: CoroutineScope): Job {
         return scope.launch {
             transitionInteractor.dozeAmountTransition.collect { transitionStep ->
-                if (transitionStep.transitionState == TransitionState.CANCELED) {
+                if (
+                    transitionStep.from == KeyguardState.AOD &&
+                        transitionStep.transitionState == TransitionState.CANCELED
+                ) {
                     if (
                         transitionInteractor.startedKeyguardTransitionStep.first().to !=
                             KeyguardState.AOD
