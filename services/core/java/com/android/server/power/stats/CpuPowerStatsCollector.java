@@ -78,7 +78,7 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private final SparseArray<UidStats> mUidStats = new SparseArray<>();
     private boolean mIsPerUidTimeInStateSupported;
     private PowerStatsInternal mPowerStatsInternal;
-    private int[] mCpuEnergyConsumerIds;
+    private int[] mCpuEnergyConsumerIds = new int[0];
     private PowerStats.Descriptor mPowerStatsDescriptor;
     // Reusable instance
     private PowerStats mCpuPowerStats;
@@ -286,8 +286,6 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
 
         if (mPowerStatsInternal != null) {
             readCpuEnergyConsumerIds();
-        } else {
-            mCpuEnergyConsumerIds = new int[0];
         }
 
         int cpuScalingStepCount = mCpuScalingPolicies.getScalingStepCount();
@@ -320,7 +318,6 @@ public class CpuPowerStatsCollector extends PowerStatsCollector {
     private void readCpuEnergyConsumerIds() {
         EnergyConsumer[] energyConsumerInfo = mPowerStatsInternal.getEnergyConsumerInfo();
         if (energyConsumerInfo == null) {
-            mCpuEnergyConsumerIds = new int[0];
             return;
         }
 
