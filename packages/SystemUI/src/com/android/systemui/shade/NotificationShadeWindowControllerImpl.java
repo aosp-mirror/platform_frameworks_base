@@ -59,6 +59,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.res.R;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.ui.view.WindowRootViewComponent;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.domain.interactor.ShadeInteractor;
@@ -116,6 +117,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     private final AuthController mAuthController;
     private final Lazy<SelectedUserInteractor> mUserInteractor;
     private final Lazy<ShadeInteractor> mShadeInteractorLazy;
+    private final SceneContainerFlags mSceneContainerFlags;
     private ViewGroup mWindowRootView;
     private LayoutParams mLp;
     private boolean mHasTopUi;
@@ -162,7 +164,8 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
             Lazy<ShadeInteractor> shadeInteractorLazy,
             ShadeWindowLogger logger,
             Lazy<SelectedUserInteractor> userInteractor,
-            UserTracker userTracker) {
+            UserTracker userTracker,
+            SceneContainerFlags sceneContainerFlags) {
         mContext = context;
         mWindowRootViewComponentFactory = windowRootViewComponentFactory;
         mWindowManager = windowManager;
@@ -180,6 +183,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         dumpManager.registerDumpable(this);
         mAuthController = authController;
         mUserInteractor = userInteractor;
+        mSceneContainerFlags = sceneContainerFlags;
         mLastKeyguardRotationAllowed = mKeyguardStateController.isKeyguardScreenRotationAllowed();
         mLockScreenDisplayTimeout = context.getResources()
                 .getInteger(R.integer.config_lockScreenDisplayTimeout);
@@ -286,6 +290,15 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         // TODO: Clean this up once that behavior moves into the Shell.
         mLp.privateFlags |= PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
         mLp.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+
+        if (mSceneContainerFlags.isEnabled()) {
+            // This prevents the appearance and disappearance of the software keyboard (also known
+            // as the "IME") from scrolling/panning the window to make room for the keyboard.
+            //
+            // The scene container logic does its own adjustment and animation when the IME appears
+            // or disappears.
+            mLp.softInputMode = LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
+        }
 
         mWindowManager.addView(mWindowRootView, mLp);
 

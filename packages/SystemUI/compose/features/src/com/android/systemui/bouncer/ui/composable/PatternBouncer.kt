@@ -24,6 +24,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -48,7 +50,6 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Easings
 import com.android.compose.modifiers.thenIf
 import com.android.internal.R
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout
 import com.android.systemui.bouncer.ui.viewmodel.PatternBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.PatternDotViewModel
 import kotlin.math.min
@@ -61,11 +62,14 @@ import kotlinx.coroutines.launch
  * UI for the input part of a pattern-requiring version of the bouncer.
  *
  * The user can press, hold, and drag their pointer to select dots along a grid of dots.
+ *
+ * If [centerDotsVertically] is `true`, the dots should be centered along the axis of interest; if
+ * `false`, the dots will be pushed towards the end/bottom of the axis.
  */
 @Composable
 internal fun PatternBouncer(
     viewModel: PatternBouncerViewModel,
-    layout: BouncerSceneLayout,
+    centerDotsVertically: Boolean,
     modifier: Modifier = Modifier,
 ) {
     DisposableEffect(Unit) {
@@ -197,6 +201,14 @@ internal fun PatternBouncer(
 
     Canvas(
         modifier
+            // Because the width also includes spacing to the left and right of the leftmost and
+            // rightmost dots in the grid and because UX mocks specify the width without that
+            // spacing, the actual width needs to be defined slightly bigger than the UX mock width.
+            .width((262 * colCount / 2).dp)
+            // Because the height also includes spacing above and below the topmost and bottommost
+            // dots in the grid and because UX mocks specify the height without that spacing, the
+            // actual height needs to be defined slightly bigger than the UX mock height.
+            .height((262 * rowCount / 2).dp)
             // Need to clip to bounds to make sure that the lines don't follow the input pointer
             // when it leaves the bounds of the dot grid.
             .clipToBounds()
@@ -260,7 +272,7 @@ internal fun PatternBouncer(
                     availableSize = containerSize.height,
                     spacingPerDot = spacing,
                     dotCount = rowCount,
-                    isCentered = layout.isCenteredVertically,
+                    isCentered = centerDotsVertically,
                 )
             offset = Offset(horizontalOffset, verticalOffset)
             scale = (colCount * spacing) / containerSize.width
@@ -422,10 +434,6 @@ private fun offset(
         default
     }
 }
-
-/** Whether the UI should be centered vertically. */
-private val BouncerSceneLayout.isCenteredVertically: Boolean
-    get() = this == BouncerSceneLayout.SPLIT
 
 private const val DOT_DIAMETER_DP = 16
 private const val SELECTED_DOT_DIAMETER_DP = 24

@@ -17,7 +17,6 @@
 package com.android.systemui.bouncer.ui.composable
 
 import android.view.ViewTreeObserver
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalTextStyle
@@ -31,7 +30,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
@@ -81,42 +79,38 @@ internal fun PasswordBouncer(
         }
     }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier,
-    ) {
-        val color = MaterialTheme.colorScheme.onSurfaceVariant
-        val lineWidthPx = with(LocalDensity.current) { 2.dp.toPx() }
+    val color = MaterialTheme.colorScheme.onSurfaceVariant
+    val lineWidthPx = with(LocalDensity.current) { 2.dp.toPx() }
 
-        TextField(
-            value = password,
-            onValueChange = viewModel::onPasswordInputChanged,
-            enabled = isInputEnabled,
-            visualTransformation = PasswordVisualTransformation(),
-            singleLine = true,
-            textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-            keyboardOptions =
-                KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done,
-                ),
-            keyboardActions =
-                KeyboardActions(
-                    onDone = { viewModel.onAuthenticateKeyPressed() },
-                ),
-            modifier =
-                Modifier.focusRequester(focusRequester)
-                    .onFocusChanged { viewModel.onTextFieldFocusChanged(it.isFocused) }
-                    .drawBehind {
-                        drawLine(
-                            color = color,
-                            start = Offset(x = 0f, y = size.height - lineWidthPx),
-                            end = Offset(size.width, y = size.height - lineWidthPx),
-                            strokeWidth = lineWidthPx,
-                        )
-                    },
-        )
-    }
+    TextField(
+        value = password,
+        onValueChange = viewModel::onPasswordInputChanged,
+        enabled = isInputEnabled,
+        visualTransformation = PasswordVisualTransformation(),
+        singleLine = true,
+        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+        keyboardOptions =
+            KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done,
+            ),
+        keyboardActions =
+            KeyboardActions(
+                onDone = { viewModel.onAuthenticateKeyPressed() },
+            ),
+        modifier =
+            modifier
+                .focusRequester(focusRequester)
+                .onFocusChanged { viewModel.onTextFieldFocusChanged(it.isFocused) }
+                .drawBehind {
+                    drawLine(
+                        color = color,
+                        start = Offset(x = 0f, y = size.height - lineWidthPx),
+                        end = Offset(size.width, y = size.height - lineWidthPx),
+                        strokeWidth = lineWidthPx,
+                    )
+                },
+    )
 }
 
 /** Returns a [State] with `true` when the IME/keyboard is visible and `false` when it's not. */
