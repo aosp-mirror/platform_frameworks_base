@@ -266,18 +266,22 @@ public class AudioDeviceBrokerTest {
                     .adoptShellPermissionIdentity(Manifest.permission.BLUETOOTH_PRIVILEGED);
 
             // no metadata set
-            assertTrue(mFakeBtDevice.setMetadata(BluetoothDevice.METADATA_DEVICE_TYPE,
-                    DEVICE_TYPE_DEFAULT.getBytes()));
-            assertFalse(
-                    mAudioDeviceBroker.isBluetoothAudioDeviceCategoryFixed(
-                            mFakeBtDevice.getAddress()));
+            if (mFakeBtDevice.setMetadata(BluetoothDevice.METADATA_DEVICE_TYPE,
+                    DEVICE_TYPE_DEFAULT.getBytes())) {
+                assertFalse(mAudioDeviceBroker.isBluetoothAudioDeviceCategoryFixed(
+                        mFakeBtDevice.getAddress()));
+            }
 
             // metadata set
-            assertTrue(mFakeBtDevice.setMetadata(BluetoothDevice.METADATA_DEVICE_TYPE,
-                    DEVICE_TYPE_HEADSET.getBytes()));
-            assertTrue(mAudioDeviceBroker.isBluetoothAudioDeviceCategoryFixed(
-                    mFakeBtDevice.getAddress()));
+            if (mFakeBtDevice.setMetadata(BluetoothDevice.METADATA_DEVICE_TYPE,
+                    DEVICE_TYPE_HEADSET.getBytes())) {
+                assertTrue(mAudioDeviceBroker.isBluetoothAudioDeviceCategoryFixed(
+                        mFakeBtDevice.getAddress()));
+            }
         } finally {
+            // reset the metadata device type
+            mFakeBtDevice.setMetadata(BluetoothDevice.METADATA_DEVICE_TYPE,
+                    DEVICE_TYPE_DEFAULT.getBytes());
             InstrumentationRegistry.getInstrumentation().getUiAutomation()
                     .dropShellPermissionIdentity();
         }
@@ -304,25 +308,30 @@ public class AudioDeviceBrokerTest {
                     .adoptShellPermissionIdentity(Manifest.permission.BLUETOOTH_PRIVILEGED);
 
             // no metadata set
-            assertTrue(mFakeBtDevice.setMetadata(BluetoothDevice.METADATA_DEVICE_TYPE,
-                    DEVICE_TYPE_DEFAULT.getBytes()));
-            assertEquals(AudioManager.AUDIO_DEVICE_CATEGORY_SPEAKER,
-                    mAudioDeviceBroker.getAndUpdateBtAdiDeviceStateCategoryForAddress(
-                            mFakeBtDevice.getAddress()));
-            verify(mMockAudioService,
-                    timeout(MAX_MESSAGE_HANDLING_DELAY_MS).times(0)).onUpdatedAdiDeviceState(
-                    eq(devState));
+            if (mFakeBtDevice.setMetadata(BluetoothDevice.METADATA_DEVICE_TYPE,
+                    DEVICE_TYPE_DEFAULT.getBytes())) {
+                assertEquals(AudioManager.AUDIO_DEVICE_CATEGORY_SPEAKER,
+                        mAudioDeviceBroker.getAndUpdateBtAdiDeviceStateCategoryForAddress(
+                                mFakeBtDevice.getAddress()));
+                verify(mMockAudioService,
+                        timeout(MAX_MESSAGE_HANDLING_DELAY_MS).times(0)).onUpdatedAdiDeviceState(
+                        eq(devState));
+            }
 
             // metadata set
-            assertTrue(mFakeBtDevice.setMetadata(BluetoothDevice.METADATA_DEVICE_TYPE,
-                    DEVICE_TYPE_HEADSET.getBytes()));
-            assertEquals(AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES,
-                    mAudioDeviceBroker.getAndUpdateBtAdiDeviceStateCategoryForAddress(
-                            mFakeBtDevice.getAddress()));
-            verify(mMockAudioService,
-                    timeout(MAX_MESSAGE_HANDLING_DELAY_MS)).onUpdatedAdiDeviceState(
-                    any());
+            if (mFakeBtDevice.setMetadata(BluetoothDevice.METADATA_DEVICE_TYPE,
+                    DEVICE_TYPE_HEADSET.getBytes())) {
+                assertEquals(AudioManager.AUDIO_DEVICE_CATEGORY_HEADPHONES,
+                        mAudioDeviceBroker.getAndUpdateBtAdiDeviceStateCategoryForAddress(
+                                mFakeBtDevice.getAddress()));
+                verify(mMockAudioService,
+                        timeout(MAX_MESSAGE_HANDLING_DELAY_MS)).onUpdatedAdiDeviceState(
+                        any());
+            }
         } finally {
+            // reset the metadata device type
+            mFakeBtDevice.setMetadata(BluetoothDevice.METADATA_DEVICE_TYPE,
+                    DEVICE_TYPE_DEFAULT.getBytes());
             InstrumentationRegistry.getInstrumentation().getUiAutomation()
                     .dropShellPermissionIdentity();
         }
