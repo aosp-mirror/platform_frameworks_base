@@ -144,6 +144,7 @@ import android.window.DisplayAreaInfo;
 import android.window.IDisplayAreaOrganizer;
 import android.window.ScreenCapture;
 import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
@@ -2010,6 +2011,53 @@ public class DisplayContentTests extends WindowTestsBase {
 
         mWm.stopFreezingDisplayLocked();
         assertFalse(mWm.mDisplayFrozen);
+    }
+
+    @Test
+    public void testRemoteDisplayChange() {
+        mWm.mDisplayChangeController = mock(IDisplayChangeWindowController.class);
+        final Boolean[] isWaitingForRemote = new Boolean[2];
+        final var callbacks = new RemoteDisplayChangeController.ContinueRemoteDisplayChangeCallback[
+                isWaitingForRemote.length];
+        for (int i = 0; i < isWaitingForRemote.length; i++) {
+            final int index = i;
+            var callback = new RemoteDisplayChangeController.ContinueRemoteDisplayChangeCallback() {
+                @Override
+                public void onContinueRemoteDisplayChange(WindowContainerTransaction transaction) {
+                    isWaitingForRemote[index] =
+                            mDisplayContent.mRemoteDisplayChangeController
+                                    .isWaitingForRemoteDisplayChange();
+                }
+            };
+            mDisplayContent.mRemoteDisplayChangeController.performRemoteDisplayChange(
+                    ROTATION_0, ROTATION_0, null /* newDisplayAreaInfo */, callback);
+            callbacks[i] = callback;
+        }
+
+        // The last callback is completed, all callbacks should be notified.
+        mDisplayContent.mRemoteDisplayChangeController.continueDisplayChange(callbacks[1],
+                null /* transaction */);
+        // When notifying 0, the callback 1 still exists.
+        assertTrue(isWaitingForRemote[0]);
+        assertFalse(isWaitingForRemote[1]);
+
+        // The first callback is completed, other callbacks after it should remain.
+        for (int i = 0; i < isWaitingForRemote.length; i++) {
+            isWaitingForRemote[i] = null;
+            mDisplayContent.mRemoteDisplayChangeController.performRemoteDisplayChange(
+                    ROTATION_0, ROTATION_0, null /* newDisplayAreaInfo */, callbacks[i]);
+        }
+        mDisplayContent.mRemoteDisplayChangeController.continueDisplayChange(callbacks[0],
+                null /* transaction */);
+        assertTrue(isWaitingForRemote[0]);
+        assertNull(isWaitingForRemote[1]);
+
+        // Complete the last callback. It should be able to consume pending config change.
+        mDisplayContent.mWaitingForConfig = true;
+        mDisplayContent.mRemoteDisplayChangeController.continueDisplayChange(callbacks[1],
+                null /* transaction */);
+        assertFalse(isWaitingForRemote[1]);
+        assertFalse(mDisplayContent.mWaitingForConfig);
     }
 
     @Test

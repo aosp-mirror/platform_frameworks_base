@@ -6509,7 +6509,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                          KeyChain.bindAsUser(mContext, userHandle)) {
                 IKeyChainService keyChain = keyChainConnection.getService();
                 return keyChain.setGrant(granteeUid, alias, hasGrant);
-            } catch (RemoteException e) {
+            } catch (RemoteException | AssertionError e) {
                 Slogf.e(LOG_TAG, "Setting grant for package.", e);
                 return false;
             }

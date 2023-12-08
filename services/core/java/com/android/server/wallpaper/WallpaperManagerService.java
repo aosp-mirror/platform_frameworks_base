@@ -3951,7 +3951,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         if (wallpaper == null) {
             // common case, this is the first lookup post-boot of the system or
             // unified lock, so we bring up the saved state lazily now and recheck.
-            int whichLoad = (which == FLAG_LOCK) ? FLAG_LOCK : FLAG_SYSTEM;
+            // if we're loading the system wallpaper for the first time, also load the lock
+            // wallpaper to determine if the system wallpaper is system+lock or system only.
+            int whichLoad = (which == FLAG_LOCK) ? FLAG_LOCK : FLAG_SYSTEM | FLAG_LOCK;
             loadSettingsLocked(userId, false, whichLoad);
             wallpaper = whichSet.get(userId);
             if (wallpaper == null) {
