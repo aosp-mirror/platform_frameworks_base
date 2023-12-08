@@ -1292,7 +1292,11 @@ public class SyncManager {
      */
     private boolean isPackageStopped(String packageName, int userId) {
         if (android.content.pm.Flags.stayStopped()) {
-            return mPackageManagerInternal.isPackageStopped(packageName, userId);
+            try {
+                return mPackageManagerInternal.isPackageStopped(packageName, userId);
+            } catch (IllegalArgumentException e) {
+                Log.d(TAG, "Couldn't determine stopped state for unknown package: " + packageName);
+            }
         }
         return false;
     }
