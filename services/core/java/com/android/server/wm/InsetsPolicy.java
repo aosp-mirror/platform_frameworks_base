@@ -391,10 +391,23 @@ class InsetsPolicy {
 
             if (originalImeSource != null) {
                 final boolean imeVisibility = w.isRequestedVisible(Type.ime());
-                final InsetsState state = copyState ? new InsetsState(originalState)
+                final InsetsState state = copyState
+                        ? new InsetsState(originalState)
                         : originalState;
                 final InsetsSource imeSource = new InsetsSource(originalImeSource);
                 imeSource.setVisible(imeVisibility);
+                state.addSource(imeSource);
+                return state;
+            }
+        } else if (w.mImeInsetsConsumed) {
+            // Set the IME source (if there is one) to be invisible if it has been consumed.
+            final InsetsSource originalImeSource = originalState.peekSource(ID_IME);
+            if (originalImeSource != null && originalImeSource.isVisible()) {
+                final InsetsState state = copyState
+                        ? new InsetsState(originalState)
+                        : originalState;
+                final InsetsSource imeSource = new InsetsSource(originalImeSource);
+                imeSource.setVisible(false);
                 state.addSource(imeSource);
                 return state;
             }
