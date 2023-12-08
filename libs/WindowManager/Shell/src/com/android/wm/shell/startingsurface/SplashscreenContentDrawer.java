@@ -253,7 +253,7 @@ public class SplashscreenContentDrawer {
                 : taskInfo.topActivityInfo;
         params.layoutInDisplayCutoutMode = a.getInt(
                 R.styleable.Window_windowLayoutInDisplayCutoutMode,
-                PhoneWindow.isEdgeToEdgeEnforced(activityInfo.applicationInfo, false /* local */)
+                PhoneWindow.isEdgeToEdgeEnforced(activityInfo.applicationInfo, false /* local */, a)
                         ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
                         : params.layoutInDisplayCutoutMode);
         params.windowAnimations = a.getResourceId(R.styleable.Window_windowAnimationStyle, 0);

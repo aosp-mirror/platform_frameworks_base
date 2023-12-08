@@ -1497,13 +1497,21 @@ public abstract class Window {
      * {@link View#SYSTEM_UI_LAYOUT_FLAGS} as well the
      * {@link WindowManager.LayoutParams#SOFT_INPUT_ADJUST_RESIZE} flag and fits content according
      * to these flags.
-     * </p>
+     *
      * <p>
      * If set to {@code false}, the framework will not fit the content view to the insets and will
      * just pass through the {@link WindowInsets} to the content view.
-     * </p>
+     *
+     * <p>
+     * If the app targets
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
+     * the behavior will be like setting this to {@code false}, and cannot be changed.
+     *
      * @param decorFitsSystemWindows Whether the decor view should fit root-level content views for
      *                               insets.
+     * @deprecated Make space in the container views to prevent the critical elements from getting
+     *             obscured by {@link WindowInsets.Type#systemBars()} or
+     *             {@link WindowInsets.Type#displayCutout()} instead.
      */
     public void setDecorFitsSystemWindows(boolean decorFitsSystemWindows) {
     }
@@ -2597,7 +2605,9 @@ public abstract class Window {
 
     /**
      * @return the color of the status bar.
+     * @deprecated This is no longer needed since the setter is deprecated.
      */
+    @Deprecated
     @ColorInt
     public abstract int getStatusBarColor();
 
@@ -2614,13 +2624,29 @@ public abstract class Window {
      * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN}.
      * <p>
      * The transitionName for the view background will be "android:status:background".
-     * </p>
+     *
+     * <p>
+     * If the color is transparent and the window enforces the status bar contrast, the system
+     * will determine whether a scrim is necessary and draw one on behalf of the app to ensure
+     * that the status bar has enough contrast with the contents of this app, and set an appropriate
+     * effective bar background accordingly.
+     *
+     * <p>
+     * If the app targets
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
+     * the color will be transparent and cannot be changed.
+     *
+     * @see #setNavigationBarContrastEnforced
+     * @deprecated Draw proper background behind {@link WindowInsets.Type#statusBars()}} instead.
      */
+    @Deprecated
     public abstract void setStatusBarColor(@ColorInt int color);
 
     /**
      * @return the color of the navigation bar.
+     * @deprecated This is no longer needed since the setter is deprecated.
      */
+    @Deprecated
     @ColorInt
     public abstract int getNavigationBarColor();
 
@@ -2637,9 +2663,24 @@ public abstract class Window {
      * {@link android.view.View#SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION}.
      * <p>
      * The transitionName for the view background will be "android:navigation:background".
-     * </p>
+     *
+     * <p>
+     * If the color is transparent and the window enforces the navigation bar contrast, the system
+     * will determine whether a scrim is necessary and draw one on behalf of the app to ensure that
+     * the navigation bar has enough contrast with the contents of this app, and set an appropriate
+     * effective bar background accordingly.
+     *
+     * <p>
+     * If the app targets
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
+     * the color will be transparent and cannot be changed.
+     *
      * @attr ref android.R.styleable#Window_navigationBarColor
+     * @see #setNavigationBarContrastEnforced
+     * @deprecated Draw proper background behind {@link WindowInsets.Type#navigationBars()} or
+     *             {@link WindowInsets.Type#tappableElement()} instead.
      */
+    @Deprecated
     public abstract void setNavigationBarColor(@ColorInt int color);
 
     /**
@@ -2651,9 +2692,17 @@ public abstract class Window {
      * {@link android.view.WindowManager.LayoutParams#FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS} and
      * {@link android.view.WindowManager.LayoutParams#FLAG_TRANSLUCENT_NAVIGATION} must not be set.
      *
+     * <p>
+     * If the app targets
+     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM VANILLA_ICE_CREAM} or above,
+     * the color will be transparent and cannot be changed.
+     *
      * @param dividerColor The color of the thin line.
      * @attr ref android.R.styleable#Window_navigationBarDividerColor
+     * @deprecated Draw proper background behind {@link WindowInsets.Type#navigationBars()} or
+     *             {@link WindowInsets.Type#tappableElement()} instead.
      */
+    @Deprecated
     public void setNavigationBarDividerColor(@ColorInt int dividerColor) {
     }
 
@@ -2663,7 +2712,9 @@ public abstract class Window {
      * @return The color of the navigation bar divider color.
      * @see #setNavigationBarColor(int)
      * @attr ref android.R.styleable#Window_navigationBarDividerColor
+     * @deprecated This is no longer needed since the setter is deprecated.
      */
+    @Deprecated
     public @ColorInt int getNavigationBarDividerColor() {
         return 0;
     }
@@ -2682,7 +2733,9 @@ public abstract class Window {
      * @see android.R.attr#enforceStatusBarContrast
      * @see #isStatusBarContrastEnforced
      * @see #setStatusBarColor
+     * @deprecated Draw proper background behind {@link WindowInsets.Type#statusBars()}} instead.
      */
+    @Deprecated
     public void setStatusBarContrastEnforced(boolean ensureContrast) {
     }
 
@@ -2697,7 +2750,9 @@ public abstract class Window {
      * @see android.R.attr#enforceStatusBarContrast
      * @see #setStatusBarContrastEnforced
      * @see #setStatusBarColor
+     * @deprecated This is not needed since the setter is deprecated.
      */
+    @Deprecated
     public boolean isStatusBarContrastEnforced() {
         return false;
     }
