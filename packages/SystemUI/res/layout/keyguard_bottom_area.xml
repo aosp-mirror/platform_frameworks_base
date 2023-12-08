@@ -106,5 +106,5 @@
     </FrameLayout>
 
     <include layout="@layout/ambient_indication"
-             android:id="@+id/ambient_indication_container" />
+             android:id="@id/ambient_indication_container" />
 </com.android.systemui.statusbar.phone.KeyguardBottomAreaView>
