@@ -314,9 +314,15 @@ public final class BackgroundJobsController extends StateController {
         if (mPackageStoppedState.contains(uid, packageName)) {
             return mPackageStoppedState.get(uid, packageName);
         }
-        final boolean isStopped = mPackageManagerInternal.isPackageStopped(packageName, uid);
-        mPackageStoppedState.add(uid, packageName, isStopped);
-        return isStopped;
+
+        try {
+            final boolean isStopped = mPackageManagerInternal.isPackageStopped(packageName, uid);
+            mPackageStoppedState.add(uid, packageName, isStopped);
+            return isStopped;
+        } catch (IllegalArgumentException e) {
+            Slog.d(TAG, "Couldn't determine stopped state for unknown package: " + packageName);
+            return false;
+        }
     }
 
     @GuardedBy("mLock")
