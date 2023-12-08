@@ -465,29 +465,6 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun showNextSecurityScreenOrFinish_setsSecurityScreenToPinAfterSimPinUnlock() {
-        // GIVEN the current security method is SimPin
-        whenever(keyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false)
-        whenever(keyguardUpdateMonitor.getUserUnlockedWithBiometric(TARGET_USER_ID))
-            .thenReturn(false)
-        underTest.showSecurityScreen(SecurityMode.SimPin)
-
-        // WHEN a request is made from the SimPin screens to show the next security method
-        whenever(keyguardSecurityModel.getSecurityMode(TARGET_USER_ID)).thenReturn(SecurityMode.PIN)
-        underTest.showNextSecurityScreenOrFinish(
-            /* authenticated= */ true,
-            TARGET_USER_ID,
-            /* bypassSecondaryLockScreen= */ true,
-            SecurityMode.SimPin
-        )
-
-        // THEN the next security method of PIN is set, and the keyguard is not marked as done
-        verify(viewMediatorCallback, never()).keyguardDonePending(anyInt())
-        verify(viewMediatorCallback, never()).keyguardDone(anyInt())
-        Truth.assertThat(underTest.currentSecurityMode).isEqualTo(SecurityMode.PIN)
-    }
-
-    @Test
     fun showNextSecurityScreenOrFinish_DeviceNotSecure() {
         // GIVEN the current security method is SimPin
         whenever(keyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false)
@@ -575,6 +552,57 @@ class KeyguardSecurityContainerControllerTest : SysuiTestCase() {
 
         // THEN the next security method of None will dismiss keyguard.
         verify(viewMediatorCallback).keyguardDone(anyInt())
+    }
+
+    @Test
+    fun showNextSecurityScreenOrFinish_SimPin_Password() {
+        // GIVEN the current security method is SimPin
+        whenever(keyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false)
+        whenever(keyguardUpdateMonitor.getUserUnlockedWithBiometric(TARGET_USER_ID))
+            .thenReturn(false)
+        underTest.showSecurityScreen(SecurityMode.SimPin)
+
+        // WHEN a request is made from the SimPin screens to show the next security method
+        whenever(keyguardSecurityModel.getSecurityMode(TARGET_USER_ID))
+            .thenReturn(SecurityMode.Password)
+        // WHEN security method is SWIPE
+        whenever(lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false)
+        whenever(deviceProvisionedController.isUserSetup(anyInt())).thenReturn(false)
+        underTest.showNextSecurityScreenOrFinish(
+            /* authenticated= */ true,
+            TARGET_USER_ID,
+            /* bypassSecondaryLockScreen= */ true,
+            SecurityMode.SimPin
+        )
+
+        // THEN we will not show the password screen.
+        verify(viewFlipperController, never())
+            .getSecurityView(eq(SecurityMode.Password), any(), any())
+    }
+
+    @Test
+    fun showNextSecurityScreenOrFinish_SimPin_SimPin() {
+        // GIVEN the current security method is SimPin
+        whenever(keyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false)
+        whenever(keyguardUpdateMonitor.getUserUnlockedWithBiometric(TARGET_USER_ID))
+            .thenReturn(false)
+        underTest.showSecurityScreen(SecurityMode.SimPin)
+
+        // WHEN a request is made from the SimPin screens to show the next security method
+        whenever(keyguardSecurityModel.getSecurityMode(TARGET_USER_ID))
+            .thenReturn(SecurityMode.SimPin)
+        // WHEN security method is SWIPE
+        whenever(lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false)
+        whenever(deviceProvisionedController.isUserSetup(anyInt())).thenReturn(false)
+        underTest.showNextSecurityScreenOrFinish(
+            /* authenticated= */ true,
+            TARGET_USER_ID,
+            /* bypassSecondaryLockScreen= */ true,
+            SecurityMode.SimPin
+        )
+
+        // THEN we will not show the password screen.
+        verify(viewFlipperController).getSecurityView(eq(SecurityMode.SimPin), any(), any())
     }
 
     @Test
