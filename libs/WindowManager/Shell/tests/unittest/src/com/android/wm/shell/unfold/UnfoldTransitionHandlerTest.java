@@ -98,10 +98,13 @@ public class UnfoldTransitionHandlerTest {
     }
 
     @Test
-    public void handleRequest_physicalDisplayChange_handlesTransition() {
+    public void handleRequest_physicalDisplayChangeUnfold_handlesTransition() {
         ActivityManager.RunningTaskInfo triggerTaskInfo = new ActivityManager.RunningTaskInfo();
         TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
-                Display.DEFAULT_DISPLAY).setPhysicalDisplayChanged(true);
+                Display.DEFAULT_DISPLAY)
+                .setPhysicalDisplayChanged(true)
+                .setStartAbsBounds(new Rect(0, 0, 100, 100))
+                .setEndAbsBounds(new Rect(0, 0, 200, 200));
         TransitionRequestInfo requestInfo = new TransitionRequestInfo(TRANSIT_CHANGE,
                 triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
 
@@ -109,6 +112,23 @@ public class UnfoldTransitionHandlerTest {
                 requestInfo);
 
         assertThat(result).isNotNull();
+    }
+
+    @Test
+    public void handleRequest_physicalDisplayChangeFold_doesNotHandleTransition() {
+        ActivityManager.RunningTaskInfo triggerTaskInfo = new ActivityManager.RunningTaskInfo();
+        TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
+                Display.DEFAULT_DISPLAY)
+                .setPhysicalDisplayChanged(true)
+                .setStartAbsBounds(new Rect(0, 0, 200, 200))
+                .setEndAbsBounds(new Rect(0, 0, 100, 100));
+        TransitionRequestInfo requestInfo = new TransitionRequestInfo(TRANSIT_CHANGE,
+                triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
+
+        WindowContainerTransaction result = mUnfoldTransitionHandler.handleRequest(mTransition,
+                requestInfo);
+
+        assertThat(result).isNull();
     }
 
     @Test
@@ -306,7 +326,10 @@ public class UnfoldTransitionHandlerTest {
     private TransitionRequestInfo createUnfoldTransitionRequestInfo() {
         ActivityManager.RunningTaskInfo triggerTaskInfo = new ActivityManager.RunningTaskInfo();
         TransitionRequestInfo.DisplayChange displayChange = new TransitionRequestInfo.DisplayChange(
-                Display.DEFAULT_DISPLAY).setPhysicalDisplayChanged(true);
+                Display.DEFAULT_DISPLAY)
+                .setPhysicalDisplayChanged(true)
+                .setStartAbsBounds(new Rect(0, 0, 100, 100))
+                .setEndAbsBounds(new Rect(0, 0, 200, 200));
         return new TransitionRequestInfo(TRANSIT_CHANGE,
                 triggerTaskInfo, /* remoteTransition= */ null, displayChange, 0 /* flags */);
     }

@@ -169,6 +169,12 @@
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
     },
+    "-1961637874": {
+      "message": "DeferredDisplayUpdater: applying DisplayInfo immediately",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/DeferredDisplayUpdater.java"
+    },
     "-1949279037": {
       "message": "Attempted to add input method window with bad token %s.  Aborting.",
       "level": "WARN",
@@ -312,6 +318,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_RESIZE",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "-1818910559": {
+      "message": "DeferredDisplayUpdater: applied DisplayInfo after deferring",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/DeferredDisplayUpdater.java"
     },
     "-1814361639": {
       "message": "Set IME snapshot position: (%d, %d)",
@@ -1909,6 +1921,12 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
+    "-415346336": {
+      "message": "DeferredDisplayUpdater: partially applying DisplayInfo immediately",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/DeferredDisplayUpdater.java"
+    },
     "-401282500": {
       "message": "destroyIfPossible: r=%s destroy returned removed=%s",
       "level": "DEBUG",
@@ -1956,6 +1974,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
+    },
+    "-376950429": {
+      "message": "DeferredDisplayUpdater: deferring DisplayInfo update",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/DeferredDisplayUpdater.java"
     },
     "-374767836": {
       "message": "setAppVisibility(%s, visible=%b): %s visible=%b mVisibleRequested=%b Callers=%s",
