@@ -82,6 +82,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
             assertThat(throttling).isNull()
+            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
         }
 
     @Test
@@ -137,6 +138,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
             assertThat(underTest.authenticate("password".toList()))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
             assertThat(throttling).isNull()
+            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
         }
 
     @Test
@@ -202,6 +204,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 )
                 .isEqualTo(AuthenticationResult.SKIPPED)
             assertThat(throttling).isNull()
+            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(0)
         }
 
     @Test
@@ -345,6 +348,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                 underTest.authenticate(listOf(5, 6, 7)) // Wrong PIN
             }
             assertThat(throttling).isNotNull()
+            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(1)
 
             // Throttling disabled auto-confirm.
             assertThat(isAutoConfirmEnabled).isFalse()
@@ -363,6 +367,8 @@ class AuthenticationInteractorTest : SysuiTestCase() {
 
             // Auto-confirm is re-enabled.
             assertThat(isAutoConfirmEnabled).isTrue()
+
+            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(1)
         }
 
     @Test
@@ -389,6 +395,7 @@ class AuthenticationInteractorTest : SysuiTestCase() {
                         remainingSeconds = FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS,
                     )
                 )
+            assertThat(utils.authenticationRepository.lockoutStartedReportCount).isEqualTo(1)
 
             // Correct PIN, but throttled, so doesn't attempt it:
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))

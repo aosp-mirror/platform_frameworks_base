@@ -138,6 +138,9 @@ interface AuthenticationRepository {
     /** Reports an authentication attempt. */
     suspend fun reportAuthenticationAttempt(isSuccessful: Boolean)
 
+    /** Reports that the user has entered a temporary device lockout (throttling). */
+    suspend fun reportLockoutStarted(durationMs: Int)
+
     /** Returns the current number of failed authentication attempts. */
     suspend fun getFailedAuthenticationAttemptCount(): Int
 
@@ -249,6 +252,12 @@ constructor(
                 lockPatternUtils.reportFailedPasswordAttempt(selectedUserId)
             }
             authenticationChallengeResult.emit(isSuccessful)
+        }
+    }
+
+    override suspend fun reportLockoutStarted(durationMs: Int) {
+        return withContext(backgroundDispatcher) {
+            lockPatternUtils.reportPasswordLockout(durationMs, selectedUserId)
         }
     }
 

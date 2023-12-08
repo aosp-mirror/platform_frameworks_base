@@ -74,6 +74,8 @@ class FakeAuthenticationRepository(
     private var credentialOverride: List<Any>? = null
     private var securityMode: SecurityMode = DEFAULT_AUTHENTICATION_METHOD.toSecurityMode()
 
+    var lockoutStartedReportCount = 0
+
     override suspend fun getAuthenticationMethod(): AuthenticationMethodModel {
         return authenticationMethod.value
     }
@@ -90,6 +92,10 @@ class FakeAuthenticationRepository(
     override suspend fun reportAuthenticationAttempt(isSuccessful: Boolean) {
         failedAttemptCount = if (isSuccessful) 0 else failedAttemptCount + 1
         authenticationChallengeResult.emit(isSuccessful)
+    }
+
+    override suspend fun reportLockoutStarted(durationMs: Int) {
+        lockoutStartedReportCount++
     }
 
     override suspend fun getPinLength(): Int {

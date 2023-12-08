@@ -217,16 +217,17 @@ constructor(
 
         // Check if we need to throttle and, if so, kick off the throttle countdown:
         if (!authenticationResult.isSuccessful && authenticationResult.throttleDurationMs > 0) {
-            repository.setThrottleDuration(
-                durationMs = authenticationResult.throttleDurationMs,
-            )
-            repository.hasThrottlingOccurred.value = true
+            repository.apply {
+                setThrottleDuration(durationMs = authenticationResult.throttleDurationMs)
+                reportLockoutStarted(durationMs = authenticationResult.throttleDurationMs)
+                hasThrottlingOccurred.value = true
+            }
             startThrottlingCountdown()
         }
 
         if (authenticationResult.isSuccessful) {
-            // Since authentication succeeded, we should refresh throttling to make sure that our
-            // state is completely reflecting the upstream source of truth.
+            // Since authentication succeeded, refresh throttling to make sure the state is
+            // completely reflecting the upstream source of truth.
             refreshThrottling()
 
             repository.hasThrottlingOccurred.value = false
