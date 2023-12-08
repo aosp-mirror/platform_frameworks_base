@@ -90,6 +90,7 @@ public class UserManagerServiceUserTypeTest {
                 .setMediaSharedWithParent(true)
                 .setCredentialShareableWithParent(false)
                 .setAuthAlwaysRequiredToDisableQuietMode(true)
+                .setAllowStoppingUserWithDelayedLocking(true)
                 .setShowInSettings(900)
                 .setShowInSharingSurfaces(20)
                 .setShowInQuietMode(30)
@@ -167,6 +168,8 @@ public class UserManagerServiceUserTypeTest {
         assertFalse(type.getDefaultUserPropertiesReference().isCredentialShareableWithParent());
         assertTrue(type.getDefaultUserPropertiesReference()
                 .isAuthAlwaysRequiredToDisableQuietMode());
+        assertTrue(type.getDefaultUserPropertiesReference()
+                .getAllowStoppingUserWithDelayedLocking());
         assertEquals(900, type.getDefaultUserPropertiesReference().getShowInSettings());
         assertEquals(20, type.getDefaultUserPropertiesReference().getShowInSharingSurfaces());
         assertEquals(30,
@@ -322,6 +325,7 @@ public class UserManagerServiceUserTypeTest {
                 .setMediaSharedWithParent(false)
                 .setCredentialShareableWithParent(true)
                 .setAuthAlwaysRequiredToDisableQuietMode(false)
+                .setAllowStoppingUserWithDelayedLocking(false)
                 .setShowInSettings(20)
                 .setInheritDevicePolicy(21)
                 .setShowInSharingSurfaces(22)
@@ -367,6 +371,8 @@ public class UserManagerServiceUserTypeTest {
                 .isCredentialShareableWithParent());
         assertFalse(aospType.getDefaultUserPropertiesReference()
                 .isAuthAlwaysRequiredToDisableQuietMode());
+        assertFalse(aospType.getDefaultUserPropertiesReference()
+                .getAllowStoppingUserWithDelayedLocking());
         assertEquals(20, aospType.getDefaultUserPropertiesReference().getShowInSettings());
         assertEquals(21, aospType.getDefaultUserPropertiesReference()
                 .getInheritDevicePolicy());
@@ -420,6 +426,8 @@ public class UserManagerServiceUserTypeTest {
                 .isCredentialShareableWithParent());
         assertTrue(aospType.getDefaultUserPropertiesReference()
                 .isAuthAlwaysRequiredToDisableQuietMode());
+        assertTrue(aospType.getDefaultUserPropertiesReference()
+                .getAllowStoppingUserWithDelayedLocking());
         assertEquals(23, aospType.getDefaultUserPropertiesReference().getShowInSettings());
         assertEquals(22,
                 aospType.getDefaultUserPropertiesReference().getShowInSharingSurfaces());

@@ -68,6 +68,8 @@ public final class UserProperties implements Parcelable {
             "authAlwaysRequiredToDisableQuietMode";
     private static final String ATTR_DELETE_APP_WITH_PARENT = "deleteAppWithParent";
     private static final String ATTR_ALWAYS_VISIBLE = "alwaysVisible";
+    private static final String ATTR_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING =
+            "allowStoppingUserWithDelayedLocking";
 
     private static final String ATTR_CROSS_PROFILE_CONTENT_SHARING_STRATEGY =
             "crossProfileContentSharingStrategy";
@@ -89,7 +91,8 @@ public final class UserProperties implements Parcelable {
             INDEX_SHOW_IN_QUIET_MODE,
             INDEX_SHOW_IN_SHARING_SURFACES,
             INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE,
-            INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY
+            INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY,
+            INDEX_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING,
     })
     @Retention(RetentionPolicy.SOURCE)
     private @interface PropertyIndex {
@@ -110,6 +113,7 @@ public final class UserProperties implements Parcelable {
     private static final int INDEX_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE = 13;
     private static final int INDEX_SHOW_IN_SHARING_SURFACES = 14;
     private static final int INDEX_CROSS_PROFILE_CONTENT_SHARING_STRATEGY = 15;
+    private static final int INDEX_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING = 16;
     /** A bit set, mapping each PropertyIndex to whether it is present (1) or absent (0). */
     private long mPropertiesPresent = 0;
 
@@ -450,6 +454,7 @@ public final class UserProperties implements Parcelable {
             setCrossProfileIntentResolutionStrategy(orig.getCrossProfileIntentResolutionStrategy());
             setDeleteAppWithParent(orig.getDeleteAppWithParent());
             setAlwaysVisible(orig.getAlwaysVisible());
+            setAllowStoppingUserWithDelayedLocking(orig.getAllowStoppingUserWithDelayedLocking());
         }
         if (hasManagePermission) {
             // Add items that require MANAGE_USERS or stronger.
@@ -725,6 +730,11 @@ public final class UserProperties implements Parcelable {
         this.mUpdateCrossProfileIntentFiltersOnOTA = val;
         setPresent(INDEX_UPDATE_CROSS_PROFILE_INTENT_FILTERS_ON_OTA);
     }
+    /**
+     Indicate if {@link com.android.server.pm.CrossProfileIntentFilter}s need to be updated during
+     OTA update between user-parent
+     */
+    private boolean mUpdateCrossProfileIntentFiltersOnOTA;
 
     /**
      * Returns whether a profile shares media with its parent user.
@@ -786,12 +796,38 @@ public final class UserProperties implements Parcelable {
     }
     private boolean mAuthAlwaysRequiredToDisableQuietMode;
 
-    /*
-     Indicate if {@link com.android.server.pm.CrossProfileIntentFilter}s need to be updated during
-     OTA update between user-parent
+    /**
+     * Returns whether a user (usually a profile) is allowed to leave the CE storage unlocked when
+     * stopped.
+     *
+     * <p> Setting this property to true will enable the user's CE storage to remain unlocked when
+     * the user is stopped using
+     * {@link com.android.server.am.ActivityManagerService#stopUserWithDelayedLocking(int,
+     * boolean, IStopUserCallback)}.
+     *
+     * <p> When this property is false, delayed locking may still be applicable at a global
+     * level for all users via the {@code config_multiuserDelayUserDataLocking}. That is, delayed
+     * locking for a user can happen if either the device configuration is set or if this property
+     * is set. When both, the config and the property value is false, the user storage is always
+     * locked when the user is stopped.
+     * @hide
      */
-    private boolean mUpdateCrossProfileIntentFiltersOnOTA;
-
+    public boolean getAllowStoppingUserWithDelayedLocking() {
+        if (isPresent(INDEX_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING)) {
+            return mAllowStoppingUserWithDelayedLocking;
+        }
+        if (mDefaultProperties != null) {
+            return mDefaultProperties.mAllowStoppingUserWithDelayedLocking;
+        }
+        throw new SecurityException(
+                "You don't have permission to query allowStoppingUserWithDelayedLocking");
+    }
+    /** @hide */
+    public void setAllowStoppingUserWithDelayedLocking(boolean val) {
+        this.mAllowStoppingUserWithDelayedLocking = val;
+        setPresent(INDEX_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING);
+    }
+    private boolean mAllowStoppingUserWithDelayedLocking;
 
     /**
      * Returns the user's {@link CrossProfileIntentFilterAccessControlLevel}.
@@ -899,6 +935,8 @@ public final class UserProperties implements Parcelable {
                 + ", mCredentialShareableWithParent=" + isCredentialShareableWithParent()
                 + ", mAuthAlwaysRequiredToDisableQuietMode="
                 + isAuthAlwaysRequiredToDisableQuietMode()
+                + ", mAllowStoppingUserWithDelayedLocking="
+                + getAllowStoppingUserWithDelayedLocking()
                 + ", mDeleteAppWithParent=" + getDeleteAppWithParent()
                 + ", mAlwaysVisible=" + getAlwaysVisible()
                 + ", mCrossProfileContentSharingStrategy=" + getCrossProfileContentSharingStrategy()
@@ -929,6 +967,8 @@ public final class UserProperties implements Parcelable {
                 + isCredentialShareableWithParent());
         pw.println(prefix + "    mAuthAlwaysRequiredToDisableQuietMode="
                 + isAuthAlwaysRequiredToDisableQuietMode());
+        pw.println(prefix + "    mAllowStoppingUserWithDelayedLocking="
+                + getAllowStoppingUserWithDelayedLocking());
         pw.println(prefix + "    mDeleteAppWithParent=" + getDeleteAppWithParent());
         pw.println(prefix + "    mAlwaysVisible=" + getAlwaysVisible());
         pw.println(prefix + "    mCrossProfileContentSharingStrategy="
@@ -1005,6 +1045,9 @@ public final class UserProperties implements Parcelable {
                 case ATTR_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE:
                     setAuthAlwaysRequiredToDisableQuietMode(parser.getAttributeBoolean(i));
                     break;
+                case ATTR_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING:
+                    setAllowStoppingUserWithDelayedLocking(parser.getAttributeBoolean(i));
+                    break;
                 case ATTR_DELETE_APP_WITH_PARENT:
                     setDeleteAppWithParent(parser.getAttributeBoolean(i));
                     break;
@@ -1079,6 +1122,10 @@ public final class UserProperties implements Parcelable {
             serializer.attributeBoolean(null, ATTR_AUTH_ALWAYS_REQUIRED_TO_DISABLE_QUIET_MODE,
                     mAuthAlwaysRequiredToDisableQuietMode);
         }
+        if (isPresent(INDEX_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING)) {
+            serializer.attributeBoolean(null, ATTR_ALLOW_STOPPING_USER_WITH_DELAYED_LOCKING,
+                    mAllowStoppingUserWithDelayedLocking);
+        }
         if (isPresent(INDEX_DELETE_APP_WITH_PARENT)) {
             serializer.attributeBoolean(null, ATTR_DELETE_APP_WITH_PARENT,
                     mDeleteAppWithParent);
@@ -1110,6 +1157,7 @@ public final class UserProperties implements Parcelable {
         dest.writeBoolean(mMediaSharedWithParent);
         dest.writeBoolean(mCredentialShareableWithParent);
         dest.writeBoolean(mAuthAlwaysRequiredToDisableQuietMode);
+        dest.writeBoolean(mAllowStoppingUserWithDelayedLocking);
         dest.writeBoolean(mDeleteAppWithParent);
         dest.writeBoolean(mAlwaysVisible);
         dest.writeInt(mCrossProfileContentSharingStrategy);
@@ -1136,6 +1184,7 @@ public final class UserProperties implements Parcelable {
         mMediaSharedWithParent = source.readBoolean();
         mCredentialShareableWithParent = source.readBoolean();
         mAuthAlwaysRequiredToDisableQuietMode = source.readBoolean();
+        mAllowStoppingUserWithDelayedLocking = source.readBoolean();
         mDeleteAppWithParent = source.readBoolean();
         mAlwaysVisible = source.readBoolean();
         mCrossProfileContentSharingStrategy = source.readInt();
@@ -1183,6 +1232,7 @@ public final class UserProperties implements Parcelable {
         private boolean mMediaSharedWithParent = false;
         private boolean mCredentialShareableWithParent = false;
         private boolean mAuthAlwaysRequiredToDisableQuietMode = false;
+        private boolean mAllowStoppingUserWithDelayedLocking = false;
         private boolean mDeleteAppWithParent = false;
         private boolean mAlwaysVisible = false;
         private @CrossProfileContentSharingStrategy int mCrossProfileContentSharingStrategy =
@@ -1302,6 +1352,16 @@ public final class UserProperties implements Parcelable {
             return this;
         }
 
+        /** Sets the value for {@link #mAllowStoppingUserWithDelayedLocking}
+         * @hide
+         */
+        public Builder setAllowStoppingUserWithDelayedLocking(
+                boolean allowStoppingUserWithDelayedLocking) {
+            mAllowStoppingUserWithDelayedLocking =
+                    allowStoppingUserWithDelayedLocking;
+            return this;
+        }
+
         /** Sets the value for {@link #mDeleteAppWithParent}
          * @hide
          */
@@ -1352,6 +1412,7 @@ public final class UserProperties implements Parcelable {
                     mMediaSharedWithParent,
                     mCredentialShareableWithParent,
                     mAuthAlwaysRequiredToDisableQuietMode,
+                    mAllowStoppingUserWithDelayedLocking,
                     mDeleteAppWithParent,
                     mAlwaysVisible,
                     mCrossProfileContentSharingStrategy);
@@ -1372,6 +1433,7 @@ public final class UserProperties implements Parcelable {
             boolean mediaSharedWithParent,
             boolean credentialShareableWithParent,
             boolean authAlwaysRequiredToDisableQuietMode,
+            boolean allowStoppingUserWithDelayedLocking,
             boolean deleteAppWithParent,
             boolean alwaysVisible,
             @CrossProfileContentSharingStrategy int crossProfileContentSharingStrategy) {
@@ -1390,6 +1452,7 @@ public final class UserProperties implements Parcelable {
         setCredentialShareableWithParent(credentialShareableWithParent);
         setAuthAlwaysRequiredToDisableQuietMode(
                 authAlwaysRequiredToDisableQuietMode);
+        setAllowStoppingUserWithDelayedLocking(allowStoppingUserWithDelayedLocking);
         setDeleteAppWithParent(deleteAppWithParent);
         setAlwaysVisible(alwaysVisible);
         setCrossProfileContentSharingStrategy(crossProfileContentSharingStrategy);
