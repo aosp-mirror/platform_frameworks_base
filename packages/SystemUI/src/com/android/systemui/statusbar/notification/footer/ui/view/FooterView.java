@@ -54,7 +54,7 @@ public class FooterView extends StackScrollerDecorView {
     private static final String TAG = "FooterView";
 
     private FooterViewButton mClearAllButton;
-    private FooterViewButton mManageButton;
+    private FooterViewButton mManageOrHistoryButton;
     private boolean mShowHistory;
     // String cache, for performance reasons.
     // Reading them from a Resources object can be quite slow sometimes.
@@ -68,6 +68,8 @@ public class FooterView extends StackScrollerDecorView {
 
     private @StringRes int mClearAllButtonTextId;
     private @StringRes int mClearAllButtonDescriptionId;
+    private @StringRes int mManageOrHistoryButtonTextId;
+    private @StringRes int mManageOrHistoryButtonDescriptionId;
     private @StringRes int mMessageStringId;
     private @DrawableRes int mMessageIconId;
 
@@ -155,6 +157,43 @@ public class FooterView extends StackScrollerDecorView {
         mClearAllButton.setContentDescription(getContext().getString(mClearAllButtonDescriptionId));
     }
 
+    /** Set the text label for the "Manage"/"History" button. */
+    public void setManageOrHistoryButtonText(@StringRes int textId) {
+        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) return;
+        if (mManageOrHistoryButtonTextId == textId) {
+            return; // nothing changed
+        }
+        mManageOrHistoryButtonTextId = textId;
+        updateManageOrHistoryButtonText();
+    }
+
+    private void updateManageOrHistoryButtonText() {
+        if (mManageOrHistoryButtonTextId == 0) {
+            return; // not initialized yet
+        }
+        mManageOrHistoryButton.setText(getContext().getString(mManageOrHistoryButtonTextId));
+    }
+
+    /** Set the accessibility content description for the "Clear all" button. */
+    public void setManageOrHistoryButtonDescription(@StringRes int contentDescriptionId) {
+        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
+            return;
+        }
+        if (mManageOrHistoryButtonDescriptionId == contentDescriptionId) {
+            return; // nothing changed
+        }
+        mManageOrHistoryButtonDescriptionId = contentDescriptionId;
+        updateManageOrHistoryButtonDescription();
+    }
+
+    private void updateManageOrHistoryButtonDescription() {
+        if (mManageOrHistoryButtonDescriptionId == 0) {
+            return; // not initialized yet
+        }
+        mManageOrHistoryButton.setContentDescription(
+                getContext().getString(mManageOrHistoryButtonDescriptionId));
+    }
+
     /** Set the string for a message to be shown instead of the buttons. */
     public void setMessageString(@StringRes int messageId) {
         if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) return;
@@ -172,7 +211,6 @@ public class FooterView extends StackScrollerDecorView {
         String messageString = getContext().getString(mMessageStringId);
         mSeenNotifsFooterTextView.setText(messageString);
     }
-
 
     /** Set the icon to be shown before the message (see {@link #setMessageString(int)}). */
     public void setMessageIcon(@DrawableRes int iconId) {
@@ -203,9 +241,11 @@ public class FooterView extends StackScrollerDecorView {
     protected void onFinishInflate() {
         super.onFinishInflate();
         mClearAllButton = (FooterViewButton) findSecondaryView();
-        mManageButton = findViewById(R.id.manage_text);
+        mManageOrHistoryButton = findViewById(R.id.manage_text);
         mSeenNotifsFooterTextView = findViewById(R.id.unlock_prompt_footer);
-        updateResources();
+        if (!FooterViewRefactor.isEnabled()) {
+            updateResources();
+        }
         updateContent();
         updateColors();
     }
@@ -213,11 +253,11 @@ public class FooterView extends StackScrollerDecorView {
     /** Show a message instead of the footer buttons. */
     public void setFooterLabelVisible(boolean isVisible) {
         if (isVisible) {
-            mManageButton.setVisibility(View.GONE);
+            mManageOrHistoryButton.setVisibility(View.GONE);
             mClearAllButton.setVisibility(View.GONE);
             mSeenNotifsFooterTextView.setVisibility(View.VISIBLE);
         } else {
-            mManageButton.setVisibility(View.VISIBLE);
+            mManageOrHistoryButton.setVisibility(View.VISIBLE);
             mClearAllButton.setVisibility(View.VISIBLE);
             mSeenNotifsFooterTextView.setVisibility(View.GONE);
         }
@@ -225,7 +265,7 @@ public class FooterView extends StackScrollerDecorView {
 
     /** Set onClickListener for the manage/history button. */
     public void setManageButtonClickListener(OnClickListener listener) {
-        mManageButton.setOnClickListener(listener);
+        mManageOrHistoryButton.setOnClickListener(listener);
     }
 
     /** Set onClickListener for the clear all (end) button. */
@@ -252,6 +292,7 @@ public class FooterView extends StackScrollerDecorView {
 
     /** Show "History" instead of "Manage" on the start button. */
     public void showHistory(boolean showHistory) {
+        FooterViewRefactor.assertInLegacyMode();
         if (mShowHistory == showHistory) {
             return;
         }
@@ -260,16 +301,12 @@ public class FooterView extends StackScrollerDecorView {
     }
 
     private void updateContent() {
-        if (mShowHistory) {
-            mManageButton.setText(mManageNotificationHistoryText);
-            mManageButton.setContentDescription(mManageNotificationHistoryText);
-        } else {
-            mManageButton.setText(mManageNotificationText);
-            mManageButton.setContentDescription(mManageNotificationText);
-        }
         if (FooterViewRefactor.isEnabled()) {
             updateClearAllButtonText();
             updateClearAllButtonDescription();
+
+            updateManageOrHistoryButtonText();
+            updateManageOrHistoryButtonDescription();
 
             updateMessageString();
             updateMessageIcon();
@@ -285,6 +322,14 @@ public class FooterView extends StackScrollerDecorView {
             // `updateResources`, which will eventually be removed. There are, however, still
             // situations in which we want to update the views even if the resource IDs didn't
             // change, such as configuration changes.
+            if (mShowHistory) {
+                mManageOrHistoryButton.setText(mManageNotificationHistoryText);
+                mManageOrHistoryButton.setContentDescription(mManageNotificationHistoryText);
+            } else {
+                mManageOrHistoryButton.setText(mManageNotificationText);
+                mManageOrHistoryButton.setContentDescription(mManageNotificationText);
+            }
+
             mClearAllButton.setText(R.string.clear_all_notifications_text);
             mClearAllButton.setContentDescription(
                     mContext.getString(R.string.accessibility_clear_all));
@@ -297,6 +342,7 @@ public class FooterView extends StackScrollerDecorView {
 
     /** Whether the start button shows "History" (true) or "Manage" (false). */
     public boolean isHistoryShown() {
+        FooterViewRefactor.assertInLegacyMode();
         return mShowHistory;
     }
 
@@ -304,7 +350,9 @@ public class FooterView extends StackScrollerDecorView {
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updateColors();
-        updateResources();
+        if (!FooterViewRefactor.isEnabled()) {
+            updateResources();
+        }
         updateContent();
     }
 
@@ -328,23 +376,22 @@ public class FooterView extends StackScrollerDecorView {
         }
         mClearAllButton.setBackground(clearAllBg);
         mClearAllButton.setTextColor(onSurface);
-        mManageButton.setBackground(manageBg);
-        mManageButton.setTextColor(onSurface);
+        mManageOrHistoryButton.setBackground(manageBg);
+        mManageOrHistoryButton.setTextColor(onSurface);
         mSeenNotifsFooterTextView.setTextColor(onSurface);
         mSeenNotifsFooterTextView.setCompoundDrawableTintList(ColorStateList.valueOf(onSurface));
     }
 
     private void updateResources() {
+        FooterViewRefactor.assertInLegacyMode();
         mManageNotificationText = getContext().getString(R.string.manage_notifications_text);
         mManageNotificationHistoryText = getContext()
                 .getString(R.string.manage_notifications_history_text);
-        if (!FooterViewRefactor.isEnabled()) {
-            int unlockIconSize = getResources()
-                    .getDimensionPixelSize(R.dimen.notifications_unseen_footer_icon_size);
-            mSeenNotifsFilteredText = getContext().getString(R.string.unlock_to_see_notif_text);
-            mSeenNotifsFilteredIcon = getContext().getDrawable(R.drawable.ic_friction_lock_closed);
-            mSeenNotifsFilteredIcon.setBounds(0, 0, unlockIconSize, unlockIconSize);
-        }
+        int unlockIconSize = getResources()
+                .getDimensionPixelSize(R.dimen.notifications_unseen_footer_icon_size);
+        mSeenNotifsFilteredText = getContext().getString(R.string.unlock_to_see_notif_text);
+        mSeenNotifsFilteredIcon = getContext().getDrawable(R.drawable.ic_friction_lock_closed);
+        mSeenNotifsFilteredIcon.setBounds(0, 0, unlockIconSize, unlockIconSize);
     }
 
     @Override

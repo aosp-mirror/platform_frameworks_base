@@ -23,36 +23,27 @@ import android.platform.test.annotations.EnableFlags
 import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.SysUITestComponent
-import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.TestMocksModule
-import com.android.systemui.collectLastValue
-import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.flags.FakeFeatureFlagsClassicModule
-import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
+import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.Flags
+import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
-import com.android.systemui.runCurrent
-import com.android.systemui.runTest
-import com.android.systemui.shade.data.repository.FakeShadeRepository
-import com.android.systemui.statusbar.notification.dagger.NotificationStatsLoggerModule
-import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.shade.data.repository.fakeShadeRepository
+import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
-import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModelModule
-import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule
-import com.android.systemui.statusbar.policy.FakeConfigurationController
-import com.android.systemui.statusbar.policy.data.repository.FakeZenModeRepository
-import com.android.systemui.unfold.UnfoldTransitionModule
-import com.android.systemui.user.domain.interactor.HeadlessSystemUserModeModule
+import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
+import com.android.systemui.statusbar.policy.fakeConfigurationController
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import dagger.BindsInstance
-import dagger.Component
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,46 +53,18 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 @EnableFlags(FooterViewRefactor.FLAG_NAME)
 class NotificationListViewModelTest : SysuiTestCase() {
-
-    @SysUISingleton
-    @Component(
-        modules =
-            [
-                SysUITestModule::class,
-                ActivatableNotificationViewModelModule::class,
-                FooterViewModelModule::class,
-                HeadlessSystemUserModeModule::class,
-                UnfoldTransitionModule.Bindings::class,
-                NotificationStatsLoggerModule::class,
-            ]
-    )
-    interface TestComponent : SysUITestComponent<NotificationListViewModel> {
-        val activeNotificationListRepository: ActiveNotificationListRepository
-        val keyguardTransitionRepository: FakeKeyguardTransitionRepository
-        val shadeRepository: FakeShadeRepository
-        val zenModeRepository: FakeZenModeRepository
-        val configurationController: FakeConfigurationController
-
-        @Component.Factory
-        interface Factory {
-            fun create(
-                @BindsInstance test: SysuiTestCase,
-                featureFlags: FakeFeatureFlagsClassicModule,
-                mocks: TestMocksModule,
-            ): TestComponent
+    private val kosmos =
+        testKosmos().apply {
+            fakeFeatureFlagsClassic.apply { set(Flags.FULL_SCREEN_USER_SWITCHER, false) }
         }
-    }
+    private val testScope = kosmos.testScope
+    private val activeNotificationListRepository = kosmos.activeNotificationListRepository
+    private val fakeKeyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
+    private val fakeShadeRepository = kosmos.fakeShadeRepository
+    private val zenModeRepository = kosmos.zenModeRepository
+    private val fakeConfigurationController = kosmos.fakeConfigurationController
 
-    private val testComponent: TestComponent =
-        DaggerNotificationListViewModelTest_TestComponent.factory()
-            .create(
-                test = this,
-                featureFlags =
-                    FakeFeatureFlagsClassicModule {
-                        set(com.android.systemui.flags.Flags.FULL_SCREEN_USER_SWITCHER, true)
-                    },
-                mocks = TestMocksModule()
-            )
+    val underTest = kosmos.notificationListViewModel
 
     @Before
     fun setUp() {
@@ -110,11 +73,11 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testIsImportantForAccessibility_falseWhenNoNotifs() =
-        testComponent.runTest {
+        testScope.runTest {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
             // WHEN on lockscreen
-            keyguardTransitionRepository.sendTransitionSteps(
+            fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.GONE,
                 to = KeyguardState.LOCKSCREEN,
                 testScope,
@@ -129,11 +92,11 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testIsImportantForAccessibility_trueWhenNotifs() =
-        testComponent.runTest {
+        testScope.runTest {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
             // WHEN on lockscreen
-            keyguardTransitionRepository.sendTransitionSteps(
+            fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.GONE,
                 to = KeyguardState.LOCKSCREEN,
                 testScope,
@@ -148,11 +111,11 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testIsImportantForAccessibility_trueWhenNotKeyguard() =
-        testComponent.runTest {
+        testScope.runTest {
             val important by collectLastValue(underTest.isImportantForAccessibility)
 
             // WHEN not on lockscreen
-            keyguardTransitionRepository.sendTransitionSteps(
+            fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.GONE,
                 testScope,
@@ -167,7 +130,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testShouldShowEmptyShadeView_trueWhenNoNotifs() =
-        testComponent.runTest {
+        testScope.runTest {
             val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
@@ -180,7 +143,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testShouldShowEmptyShadeView_falseWhenNotifs() =
-        testComponent.runTest {
+        testScope.runTest {
             val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has notifs
@@ -193,13 +156,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testShouldShowEmptyShadeView_falseWhenQsExpandedDefault() =
-        testComponent.runTest {
+        testScope.runTest {
             val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
             // AND quick settings are expanded
-            shadeRepository.legacyQsFullscreen.value = true
+            fakeShadeRepository.legacyQsFullscreen.value = true
             runCurrent()
 
             // THEN should not show
@@ -208,16 +171,16 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testShouldShowEmptyShadeView_trueWhenQsExpandedInSplitShade() =
-        testComponent.runTest {
+        testScope.runTest {
             val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
             // AND quick settings are expanded
-            shadeRepository.setQsExpansion(1f)
+            fakeShadeRepository.setQsExpansion(1f)
             // AND split shade is enabled
             overrideResource(R.bool.config_use_split_notification_shade, true)
-            configurationController.notifyConfigurationChanged()
+            fakeConfigurationController.notifyConfigurationChanged()
             runCurrent()
 
             // THEN should show
@@ -226,13 +189,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testShouldShowEmptyShadeView_falseWhenTransitioningToAOD() =
-        testComponent.runTest {
+        testScope.runTest {
             val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
             // AND transitioning to AOD
-            keyguardTransitionRepository.sendTransitionStep(
+            fakeKeyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(
                     transitionState = TransitionState.STARTED,
                     from = KeyguardState.LOCKSCREEN,
@@ -248,13 +211,13 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testShouldShowEmptyShadeView_falseWhenBouncerShowing() =
-        testComponent.runTest {
+        testScope.runTest {
             val shouldShow by collectLastValue(underTest.shouldShowEmptyShadeView)
 
             // WHEN has no notifs
             activeNotificationListRepository.setActiveNotifs(count = 0)
             // AND is on bouncer
-            keyguardTransitionRepository.sendTransitionSteps(
+            fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.PRIMARY_BOUNCER,
                 testScope,
@@ -267,7 +230,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testAreNotificationsHiddenInShade_true() =
-        testComponent.runTest {
+        testScope.runTest {
             val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
 
             zenModeRepository.setSuppressedVisualEffects(Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST)
@@ -279,7 +242,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testAreNotificationsHiddenInShade_false() =
-        testComponent.runTest {
+        testScope.runTest {
             val hidden by collectLastValue(underTest.areNotificationsHiddenInShade)
 
             zenModeRepository.setSuppressedVisualEffects(Policy.SUPPRESSED_EFFECT_NOTIFICATION_LIST)
@@ -291,7 +254,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testHasFilteredOutSeenNotifications_true() =
-        testComponent.runTest {
+        testScope.runTest {
             val hasFilteredNotifs by collectLastValue(underTest.hasFilteredOutSeenNotifications)
 
             activeNotificationListRepository.hasFilteredOutSeenNotifications.value = true
@@ -302,7 +265,7 @@ class NotificationListViewModelTest : SysuiTestCase() {
 
     @Test
     fun testHasFilteredOutSeenNotifications_false() =
-        testComponent.runTest {
+        testScope.runTest {
             val hasFilteredNotifs by collectLastValue(underTest.hasFilteredOutSeenNotifications)
 
             activeNotificationListRepository.hasFilteredOutSeenNotifications.value = false

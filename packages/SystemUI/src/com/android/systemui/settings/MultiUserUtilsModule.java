@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.settings.dagger;
+package com.android.systemui.settings;
 
 import android.app.ActivityManager;
 import android.app.IActivityManager;
@@ -29,14 +29,6 @@ import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlagsClassic;
-import com.android.systemui.settings.DisplayTracker;
-import com.android.systemui.settings.DisplayTrackerImpl;
-import com.android.systemui.settings.UserContentResolverProvider;
-import com.android.systemui.settings.UserContextProvider;
-import com.android.systemui.settings.UserFileManager;
-import com.android.systemui.settings.UserFileManagerImpl;
-import com.android.systemui.settings.UserTracker;
-import com.android.systemui.settings.UserTrackerImpl;
 
 import dagger.Binds;
 import dagger.Module;

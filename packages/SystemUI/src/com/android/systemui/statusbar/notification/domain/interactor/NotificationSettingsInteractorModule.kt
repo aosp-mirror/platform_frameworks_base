@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.notification.footer.ui.viewmodel
+package com.android.systemui.statusbar.notification.domain.interactor
 
-import android.annotation.StringRes
-import com.android.systemui.util.ui.AnimatedValue
-import kotlinx.coroutines.flow.Flow
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
+import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
+import dagger.Module
+import dagger.Provides
 
-data class FooterButtonViewModel(
-    @StringRes val labelId: Flow<Int>,
-    @StringRes val accessibilityDescriptionId: Flow<Int>,
-    val isVisible: Flow<AnimatedValue<Boolean>>,
-)
+@Module
+object NotificationSettingsInteractorModule {
+    @Provides
+    @SysUISingleton
+    fun provideNotificationSettingsInteractor(repository: NotificationSettingsRepository) =
+        NotificationSettingsInteractor(repository)
+}

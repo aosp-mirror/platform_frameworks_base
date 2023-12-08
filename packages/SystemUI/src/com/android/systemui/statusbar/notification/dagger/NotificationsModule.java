@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.notification.collection.render.NotifGutsVi
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
 import com.android.systemui.statusbar.notification.data.NotificationDataLayerModule;
+import com.android.systemui.statusbar.notification.domain.NotificationDomainLayerModule;
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor;
 import com.android.systemui.statusbar.notification.footer.ui.viewmodel.FooterViewModelModule;
 import com.android.systemui.statusbar.notification.icon.ConversationIconManager;
@@ -78,13 +79,13 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.StatusBarNotificationActivityStarter;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
-import javax.inject.Provider;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
+
+import javax.inject.Provider;
 
 /**
  * Dagger Module for classes found within the com.android.systemui.statusbar.notification package.
@@ -94,6 +95,7 @@ import dagger.multibindings.IntoMap;
         FooterViewModelModule.class,
         KeyguardNotificationVisibilityProviderModule.class,
         NotificationDataLayerModule.class,
+        NotificationDomainLayerModule.class,
         NotifPipelineChoreographerModule.class,
         NotificationSectionHeadersModule.class,
         ActivatableNotificationViewModelModule.class,
