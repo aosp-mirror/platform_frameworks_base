@@ -15,6 +15,7 @@
  */
 package com.android.server.pm
 
+import android.app.AppOpsManager
 import android.app.PropertyInvalidatedCache
 import android.content.Context
 import android.content.Intent
@@ -151,7 +152,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
                 .mockStatic(EventLog::class.java)
                 .mockStatic(LocalServices::class.java)
                 .mockStatic(LocalManagerRegistry::class.java)
-                .mockStatic(DeviceConfig::class.java)
+                .mockStatic(DeviceConfig::class.java, Mockito.CALLS_REAL_METHODS)
                 .mockStatic(HexEncoding::class.java)
                 .apply(withSession)
         session = apply.startMocking()
@@ -192,6 +193,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         val userManagerService: UserManagerService = mock()
         val componentResolver: ComponentResolver = mock()
         val permissionManagerInternal: PermissionManagerServiceInternal = mock()
+        val appOpsManager: AppOpsManager = mock()
         val incrementalManager: IncrementalManager = mock()
         val platformCompat: PlatformCompat = mock()
         val settings: Settings = mock()
@@ -304,6 +306,7 @@ class MockSystem(withSession: (StaticMockitoSessionBuilder) -> Unit = {}) {
         whenever(mocks.injector.defaultAppProvider) { mocks.defaultAppProvider }
         whenever(mocks.injector.backgroundHandler) { mocks.backgroundHandler }
         whenever(mocks.injector.updateOwnershipHelper) { mocks.updateOwnershipHelper }
+        whenever(mocks.injector.getSystemService(AppOpsManager::class.java)) { mocks.appOpsManager }
         wheneverStatic { SystemConfig.getInstance() }.thenReturn(mocks.systemConfig)
         whenever(mocks.systemConfig.availableFeatures).thenReturn(DEFAULT_AVAILABLE_FEATURES_MAP)
         whenever(mocks.systemConfig.sharedLibraries).thenReturn(DEFAULT_SHARED_LIBRARIES_LIST)

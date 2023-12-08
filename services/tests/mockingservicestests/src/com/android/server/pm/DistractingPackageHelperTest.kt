@@ -16,12 +16,14 @@
 
 package com.android.server.pm
 
+import android.app.AppOpsManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Binder
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
 import com.android.server.testutils.nullable
+import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,6 +32,7 @@ import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.clearInvocations
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+
 
 @RunWith(JUnit4::class)
 class DistractingPackageHelperTest : PackageHelperTestBase() {
@@ -40,6 +43,9 @@ class DistractingPackageHelperTest : PackageHelperTestBase() {
         super.setup()
         distractingPackageHelper = DistractingPackageHelper(
                 pms, broadcastHelper, suspendPackageHelper)
+        whenever(rule.mocks().appOpsManager.checkOpNoThrow(
+                eq(AppOpsManager.OP_SYSTEM_EXEMPT_FROM_SUSPENSION), any(), any()))
+                .thenReturn(AppOpsManager.MODE_DEFAULT)
     }
 
     @Test
