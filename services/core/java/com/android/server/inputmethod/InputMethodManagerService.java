@@ -5271,7 +5271,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                     return true;
                 }
             }
-            mSettings.appendAndPutEnabledInputMethodLocked(id, false);
+            mSettings.appendAndPutEnabledInputMethodLocked(id);
             // Previous state was disabled.
             return false;
         } else {
@@ -5608,7 +5608,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 if (enabled) {
                     if (!settings.getEnabledInputMethodListLocked().contains(
                             methodMap.get(imeId))) {
-                        settings.appendAndPutEnabledInputMethodLocked(imeId, false);
+                        settings.appendAndPutEnabledInputMethodLocked(imeId);
                     }
                 } else {
                     settings.buildAndPutEnabledInputMethodsStrRemovingIdLocked(
@@ -6336,7 +6336,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     }
                     if (!previouslyEnabled) {
-                        settings.appendAndPutEnabledInputMethodLocked(imeId, false);
+                        settings.appendAndPutEnabledInputMethodLocked(imeId);
                     }
                 }
             } else {
@@ -6480,7 +6480,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                         settings.putEnabledInputMethodsStr("");
                         nextEnabledImes.forEach(
                                 imi -> settings.appendAndPutEnabledInputMethodLocked(
-                                        imi.getId(), false));
+                                        imi.getId()));
 
                         // Reset selected IME.
                         settings.putSelectedInputMethod(nextIme);
