@@ -847,9 +847,12 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 .map(recentTasks -> recentTasks.findTaskInBackground(component, userId1))
                 .orElse(null);
         if (taskInfo != null) {
-            startTask(taskInfo.taskId, position, options);
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
-                    "Start task in background");
+            if (ENABLE_SHELL_TRANSITIONS) {
+                mStageCoordinator.startTask(taskInfo.taskId, position, options);
+            } else {
+                startTask(taskInfo.taskId, position, options);
+            }
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN, "Start task in background");
             return;
         }
         if (samePackage(packageName1, packageName2, userId1, userId2)) {

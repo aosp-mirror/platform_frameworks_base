@@ -263,6 +263,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mStartIntent2 = startIntent2;
             mActivatePosition = position;
         }
+        SplitRequest(int taskId1, int position) {
+            mActivateTaskId = taskId1;
+            mActivatePosition = position;
+        }
         SplitRequest(int taskId1, int taskId2, int position) {
             mActivateTaskId = taskId1;
             mActivateTaskId2 = taskId2;
@@ -554,6 +558,27 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } catch (ActivityNotFoundException e) {
             Slog.e(TAG, "Failed to launch shortcut", e);
         }
+    }
+
+    /** Use this method to launch an existing Task via a taskId */
+    void startTask(int taskId, @SplitPosition int position, @Nullable Bundle options) {
+        mSplitRequest = new SplitRequest(taskId, position);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        options = resolveStartStage(STAGE_TYPE_UNDEFINED, position, options, null /* wct */);
+        wct.startTask(taskId, options);
+        // If this should be mixed, send the task to avoid split handle transition directly.
+        if (mMixedHandler != null && mMixedHandler.shouldSplitEnterMixed(taskId, mTaskOrganizer)) {
+            mTaskOrganizer.applyTransaction(wct);
+            return;
+        }
+
+        // If split screen is not activated, we're expecting to open a pair of apps to split.
+        final int extraTransitType = mMainStage.isActive()
+                ? TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE : TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
+        prepareEnterSplitScreen(wct, null /* taskInfo */, position, !mIsDropEntering);
+
+        mSplitTransitions.startEnterTransition(TRANSIT_TO_FRONT, wct, null, this,
+                extraTransitType, !mIsDropEntering);
     }
 
     /** Launches an activity into split. */
@@ -1593,7 +1618,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             // Ensure to evict old splitting tasks because the new split pair might be composed by
             // one of the splitting tasks, evicting the task when finishing entering transition
             // won't guarantee to put the task to the indicated new position.
-            mMainStage.evictAllChildren(wct);
+            if (!mIsDropEntering) {
+                mMainStage.evictAllChildren(wct);
+            }
             mMainStage.reparentTopTask(wct);
             prepareSplitLayout(wct, resizeAnim);
         }
