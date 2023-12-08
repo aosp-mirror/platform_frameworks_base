@@ -1980,6 +1980,7 @@ public class ZenModeConfig implements Parcelable {
         @Nullable public ZenDeviceEffects zenDeviceEffects;
         public boolean modified;    // rule has been modified from initial creation
         public String pkg;
+        @AutomaticZenRule.Type
         public int type = AutomaticZenRule.TYPE_UNKNOWN;
         public String triggerDescription;
         public String iconResName;
