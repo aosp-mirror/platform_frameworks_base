@@ -36,9 +36,9 @@ import java.util.concurrent.Executor
  * A fake instance of [BroadcastDispatcher] for tests.
  *
  * Important: The *real* broadcast dispatcher will only send intents to receivers if the intent
- * matches the [IntentFilter] that the [BroadcastReceiver] was registered with. This fake class does
- * *not* do that matching by default. Use [sendIntentToMatchingReceiversOnly] to get the same
- * matching behavior as the real broadcast dispatcher.
+ * matches the [IntentFilter] that the [BroadcastReceiver] was registered with. This fake class
+ * exposes [sendIntentToMatchingReceiversOnly] to get the same matching behavior as the real
+ * broadcast dispatcher.
  */
 class FakeBroadcastDispatcher(
     context: SysuiTestableContext,
@@ -62,9 +62,6 @@ class FakeBroadcastDispatcher(
     ) {
 
     private val receivers: MutableSet<InternalReceiver> = ConcurrentHashMap.newKeySet()
-
-    val registeredReceivers: Set<BroadcastReceiver>
-        get() = receivers.map { it.receiver }.toSet()
 
     override fun registerReceiverWithHandler(
         receiver: BroadcastReceiver,
@@ -115,11 +112,15 @@ class FakeBroadcastDispatcher(
         }
     }
 
+    val numReceiversRegistered: Int
+        get() = receivers.size
+
     fun cleanUpReceivers(testName: String) {
-        registeredReceivers.forEach {
-            Log.i(testName, "Receiver not unregistered from dispatcher: $it")
+        receivers.forEach {
+            val receiver = it.receiver
+            Log.i(testName, "Receiver not unregistered from dispatcher: $receiver")
             if (shouldFailOnLeakedReceiver) {
-                throw IllegalStateException("Receiver not unregistered from dispatcher: $it")
+                throw IllegalStateException("Receiver not unregistered from dispatcher: $receiver")
             }
         }
         receivers.clear()

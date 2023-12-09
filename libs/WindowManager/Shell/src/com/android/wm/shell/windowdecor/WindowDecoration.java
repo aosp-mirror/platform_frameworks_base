@@ -64,6 +64,24 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         implements AutoCloseable {
 
     /**
+     * The Z-order of {@link #mCaptionContainerSurface}.
+     * <p>
+     * We use {@link #mDecorationContainerSurface} to define input window for task resizing; by
+     * layering it in front of {@link #mCaptionContainerSurface}, we can allow it to handle input
+     * prior to caption view itself, treating corner inputs as resize events rather than
+     * repositioning.
+     */
+    static final int CAPTION_LAYER_Z_ORDER = -1;
+    /**
+     * The Z-order of the task input sink in {@link DragPositioningCallback}.
+     * <p>
+     * This task input sink is used to prevent undesired dispatching of motion events out of task
+     * bounds; by layering it behind {@link #mCaptionContainerSurface}, we allow captions to handle
+     * input events first.
+     */
+    static final int INPUT_SINK_Z_ORDER = -2;
+
+    /**
      * System-wide context. Only used to create context with overridden configurations.
      */
     final Context mContext;
@@ -237,7 +255,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
 
         final int captionHeight = loadDimensionPixelSize(resources, params.mCaptionHeightId);
         final int captionWidth = taskBounds.width();
+
         startT.setWindowCrop(mCaptionContainerSurface, captionWidth, captionHeight)
+                .setLayer(mCaptionContainerSurface, CAPTION_LAYER_Z_ORDER)
                 .show(mCaptionContainerSurface);
 
         if (ViewRootImpl.CAPTION_ON_SHELL) {
@@ -248,6 +268,9 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             mCaptionInsetsRect.bottom = mCaptionInsetsRect.top + captionHeight + params.mCaptionY;
             wct.addInsetsSource(mTaskInfo.token,
                     mOwner, 0 /* index */, WindowInsets.Type.captionBar(), mCaptionInsetsRect);
+            wct.addInsetsSource(mTaskInfo.token,
+                    mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures(),
+                    mCaptionInsetsRect);
         } else {
             startT.hide(mCaptionContainerSurface);
         }
@@ -264,6 +287,7 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
                 .setColor(mTaskSurface, mTmpColor)
                 .show(mTaskSurface);
         finishT.setPosition(mTaskSurface, taskPosition.x, taskPosition.y)
+                .setShadowRadius(mTaskSurface, shadowRadius)
                 .setWindowCrop(mTaskSurface, outResult.mWidth, outResult.mHeight);
         if (mTaskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             startT.setCornerRadius(mTaskSurface, params.mCornerRadius);
@@ -299,6 +323,10 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
             }
             mViewHost.relayout(lp);
         }
+    }
+
+    int getCaptionHeightId() {
+        return Resources.ID_NULL;
     }
 
     /**
@@ -345,6 +373,8 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         final WindowContainerTransaction wct = mWindowContainerTransactionSupplier.get();
         wct.removeInsetsSource(mTaskInfo.token,
                 mOwner, 0 /* index */, WindowInsets.Type.captionBar());
+        wct.removeInsetsSource(mTaskInfo.token,
+                mOwner, 0 /* index */, WindowInsets.Type.mandatorySystemGestures());
         mTaskOrganizer.applyTransaction(wct);
     }
 
@@ -411,6 +441,21 @@ public abstract class WindowDecoration<T extends View & TaskFocusStateConsumer>
         ssg.add(viewHost.getSurfacePackage(), () -> viewHost.setView(v, lp));
         return new AdditionalWindow(windowSurfaceControl, viewHost,
                 mSurfaceControlTransactionSupplier);
+    }
+
+    /**
+     * Adds caption inset source to a WCT
+     */
+    public void addCaptionInset(WindowContainerTransaction wct) {
+        final int captionHeightId = getCaptionHeightId();
+        if (!ViewRootImpl.CAPTION_ON_SHELL || captionHeightId == Resources.ID_NULL) {
+            return;
+        }
+
+        final int captionHeight = loadDimensionPixelSize(mContext.getResources(), captionHeightId);
+        final Rect captionInsets = new Rect(0, 0, 0, captionHeight);
+        wct.addInsetsSource(mTaskInfo.token, mOwner, 0 /* index */, WindowInsets.Type.captionBar(),
+                captionInsets);
     }
 
     static class RelayoutParams {

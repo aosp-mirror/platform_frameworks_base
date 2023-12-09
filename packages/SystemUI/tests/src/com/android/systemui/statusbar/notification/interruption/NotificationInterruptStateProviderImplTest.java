@@ -426,23 +426,8 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_oldWhen_flagDisabled() throws Exception {
-        ensureStateForHeadsUpWhenAwake();
-        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(false);
-
-        NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
-        entry.getSbn().getNotification().when = makeWhenHoursAgo(25);
-
-        assertThat(mNotifInterruptionStateProvider.shouldHeadsUp(entry)).isTrue();
-
-        verify(mLogger, never()).logNoHeadsUpOldWhen(any(), anyLong(), anyLong());
-        verify(mLogger, never()).logMaybeHeadsUpDespiteOldWhen(any(), anyLong(), anyLong(), any());
-    }
-
-    @Test
     public void testShouldHeadsUp_oldWhen_whenNow() throws Exception {
         ensureStateForHeadsUpWhenAwake();
-        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
 
@@ -455,7 +440,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     @Test
     public void testShouldHeadsUp_oldWhen_whenRecent() throws Exception {
         ensureStateForHeadsUpWhenAwake();
-        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
         entry.getSbn().getNotification().when = makeWhenHoursAgo(13);
@@ -469,7 +453,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     @Test
     public void testShouldHeadsUp_oldWhen_whenZero() throws Exception {
         ensureStateForHeadsUpWhenAwake();
-        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
         entry.getSbn().getNotification().when = 0L;
@@ -484,7 +467,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     @Test
     public void testShouldHeadsUp_oldWhen_whenNegative() throws Exception {
         ensureStateForHeadsUpWhenAwake();
-        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
         entry.getSbn().getNotification().when = -1L;
@@ -498,7 +480,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     @Test
     public void testShouldHeadsUp_oldWhen_hasFullScreenIntent() throws Exception {
         ensureStateForHeadsUpWhenAwake();
-        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
         long when = makeWhenHoursAgo(25);
 
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silent= */ false);
@@ -514,7 +495,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     @Test
     public void testShouldHeadsUp_oldWhen_isForegroundService() throws Exception {
         ensureStateForHeadsUpWhenAwake();
-        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
         long when = makeWhenHoursAgo(25);
 
         NotificationEntry entry = createFgsNotification(IMPORTANCE_HIGH);
@@ -530,7 +510,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     @Test
     public void testShouldNotHeadsUp_oldWhen() throws Exception {
         ensureStateForHeadsUpWhenAwake();
-        when(mFlags.isNoHunForOldWhenEnabled()).thenReturn(true);
         long when = makeWhenHoursAgo(25);
 
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);

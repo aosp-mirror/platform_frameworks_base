@@ -22,6 +22,7 @@ import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.os.Build;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -1555,6 +1556,13 @@ public class UsageStatsDatabase {
             pw.println();
             pw.decreaseIndent();
         }
+    }
+
+    void deleteDataFor(String pkg) {
+        // reuse the existing prune method to delete data for the specified package.
+        // we'll use the current timestamp so that all events before now get pruned.
+        prunePackagesDataOnUpgrade(
+                new HashMap<>(Collections.singletonMap(pkg, SystemClock.elapsedRealtime())));
     }
 
     IntervalStats readIntervalStatsForFile(int interval, long fileName) {

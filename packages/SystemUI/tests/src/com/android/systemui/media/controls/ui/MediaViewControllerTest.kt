@@ -201,8 +201,8 @@ class MediaViewControllerTest : SysuiTestCase() {
         whenever(mockCopiedState.widgetStates)
             .thenReturn(
                 mutableMapOf(
-                    R.id.media_title1 to mediaTitleWidgetState,
-                    R.id.media_subtitle1 to mediaSubTitleWidgetState,
+                    R.id.media_title to mediaTitleWidgetState,
+                    R.id.media_subtitle to mediaSubTitleWidgetState,
                     R.id.media_cover1_container to mediaContainerWidgetState
                 )
             )

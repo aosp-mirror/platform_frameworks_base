@@ -22,6 +22,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
+import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileViewLogger
 import com.android.systemui.statusbar.pipeline.mobile.ui.VerboseMobileViewLogger
@@ -58,6 +59,8 @@ constructor(
     private val statusBarPipelineFlags: StatusBarPipelineFlags,
 ) {
     @VisibleForTesting val mobileIconSubIdCache = mutableMapOf<Int, MobileIconViewModel>()
+    @VisibleForTesting
+    val mobileIconInteractorSubIdCache = mutableMapOf<Int, MobileIconInteractor>()
 
     val subscriptionIdsFlow: StateFlow<List<Int>> =
         interactor.filteredSubscriptions
@@ -91,16 +94,17 @@ constructor(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     init {
-        scope.launch { subscriptionIdsFlow.collect { removeInvalidModelsFromCache(it) } }
+        scope.launch { subscriptionIdsFlow.collect { invalidateCaches(it) } }
     }
 
     fun viewModelForSub(subId: Int, location: StatusBarLocation): LocationBasedMobileViewModel {
         val common = commonViewModelForSub(subId)
         return LocationBasedMobileViewModel.viewModelForLocation(
             common,
-            statusBarPipelineFlags,
+            interactor.getMobileConnectionInteractorForSubId(subId),
             verboseLogger,
             location,
+            scope,
         )
     }
 
@@ -108,7 +112,7 @@ constructor(
         return mobileIconSubIdCache[subId]
             ?: MobileIconViewModel(
                     subId,
-                    interactor.createMobileConnectionInteractorForSubId(subId),
+                    interactor.getMobileConnectionInteractorForSubId(subId),
                     airplaneModeInteractor,
                     constants,
                     scope,
@@ -116,8 +120,12 @@ constructor(
                 .also { mobileIconSubIdCache[subId] = it }
     }
 
-    private fun removeInvalidModelsFromCache(subIds: List<Int>) {
+    private fun invalidateCaches(subIds: List<Int>) {
         val subIdsToRemove = mobileIconSubIdCache.keys.filter { !subIds.contains(it) }
         subIdsToRemove.forEach { mobileIconSubIdCache.remove(it) }
+
+        mobileIconInteractorSubIdCache.keys
+            .filter { !subIds.contains(it) }
+            .forEach { subId -> mobileIconInteractorSubIdCache.remove(subId) }
     }
 }

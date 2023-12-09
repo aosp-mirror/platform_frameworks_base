@@ -33,6 +33,7 @@ import android.testing.TestWithLooperRule;
 import android.testing.TestableLooper;
 import android.util.Log;
 
+import androidx.core.animation.AndroidXAnimatorIsolationRule;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
@@ -52,6 +53,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialogManager;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.Rule;
 import org.mockito.Mockito;
 
@@ -69,6 +71,12 @@ public abstract class SysuiTestCase {
     private static final String TAG = "SysuiTestCase";
 
     private Handler mHandler;
+
+    // set the lowest order so it's the outermost rule
+    @ClassRule(order = Integer.MIN_VALUE)
+    public static AndroidXAnimatorIsolationRule mAndroidXAnimatorIsolationRule =
+            new AndroidXAnimatorIsolationRule();
+
     @Rule
     public SysuiTestableContext mContext = new SysuiTestableContext(
             InstrumentationRegistry.getContext(), getLeakCheck());
@@ -90,8 +98,7 @@ public abstract class SysuiTestCase {
         if (isRobolectricTest()) {
             mContext = mContext.createDefaultDisplayContext();
         }
-        SystemUIInitializer initializer =
-                SystemUIInitializerFactory.createFromConfigNoAssert(mContext);
+        SystemUIInitializer initializer = new SystemUIInitializerImpl(mContext);
         initializer.init(true);
         mDependency = new TestableDependency(initializer.getSysUIComponent().createDependency());
         Dependency.setInstance(mDependency);

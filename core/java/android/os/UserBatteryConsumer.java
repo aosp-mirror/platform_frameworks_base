@@ -107,8 +107,8 @@ public class UserBatteryConsumer extends BatteryConsumer {
     public static final class Builder extends BaseBuilder<Builder> {
         private List<UidBatteryConsumer.Builder> mUidBatteryConsumers;
 
-        Builder(BatteryConsumerData data, int userId) {
-            super(data, CONSUMER_TYPE_USER);
+        Builder(BatteryConsumerData data, int userId, double minConsumedPowerThreshold) {
+            super(data, CONSUMER_TYPE_USER, minConsumedPowerThreshold);
             data.putLong(COLUMN_INDEX_USER_ID, userId);
         }
 

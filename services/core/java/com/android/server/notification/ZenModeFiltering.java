@@ -55,7 +55,7 @@ public class ZenModeFiltering {
 
     public ZenModeFiltering(Context context) {
         mContext = context;
-        mMessagingUtil = new NotificationMessagingUtil(mContext);
+        mMessagingUtil = new NotificationMessagingUtil(mContext, null);
     }
 
     public ZenModeFiltering(Context context, NotificationMessagingUtil messagingUtil) {

@@ -17,9 +17,11 @@
 package com.android.wm.shell.flicker.appcompat
 
 import android.platform.test.annotations.Postsubmit
+import android.tools.common.flicker.assertions.FlickerTest
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import android.tools.device.helpers.WindowUtils
 import androidx.test.filters.RequiresDevice
 import org.junit.Test
@@ -29,7 +31,7 @@ import org.junit.runners.Parameterized
 /**
  * Test restarting app in size compat mode.
  *
- * To run this test: `atest WMShellFlickerTests:RestartAppInSizeCompatModeTest`
+ * To run this test: `atest WMShellFlickerTestsOther:RestartAppInSizeCompatModeTest`
  *
  * Actions:
  * ```
@@ -46,7 +48,7 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
-class RestartAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flicker) {
+class RestartAppInSizeCompatModeTest(flicker: LegacyFlickerTest) : BaseAppCompat(flicker) {
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
@@ -69,13 +71,9 @@ class RestartAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flick
         }
     }
 
-    @Postsubmit
-    @Test
-    fun appLayerKeepVisible() = assertLetterboxAppLayerKeepVisible()
+    @Postsubmit @Test fun appLayerKeepVisible() = assertLetterboxAppLayerKeepVisible()
 
-    @Postsubmit
-    @Test
-    fun appIsLetterboxedAtStart() = assertAppLetterboxedAtStart()
+    @Postsubmit @Test fun appIsLetterboxedAtStart() = assertAppLetterboxedAtStart()
 
     @Postsubmit
     @Test
@@ -87,5 +85,19 @@ class RestartAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flick
     fun appWindowRemainInsideVisibleBounds() {
         val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)
         flicker.assertLayersEnd { visibleRegion(letterboxApp).coversAtMost(displayBounds) }
+    }
+
+    companion object {
+        /**
+         * Creates the test configurations.
+         *
+         * See [LegacyFlickerTestFactory.rotationTests] for configuring screen orientation and
+         * navigation modes.
+         */
+        @Parameterized.Parameters(name = "{0}")
+        @JvmStatic
+        fun getParams(): Collection<FlickerTest> {
+            return LegacyFlickerTestFactory.rotationTests()
+        }
     }
 }

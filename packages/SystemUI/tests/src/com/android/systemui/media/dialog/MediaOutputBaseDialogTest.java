@@ -63,7 +63,6 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -124,7 +123,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         mMediaOutputController = new MediaOutputController(mContext, TEST_PACKAGE,
                 mMediaSessionManager, mLocalBluetoothManager, mStarter,
                 mNotifCollection, mDialogLaunchAnimator,
-                Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
+                mNearbyMediaDevicesManager, mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
         mMediaOutputBaseDialogImpl = new MediaOutputBaseDialogImpl(mContext, mBroadcastSender,
                 mMediaOutputController);
@@ -276,6 +275,21 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
 
         verify(mLocalBluetoothLeBroadcast, never()).registerServiceCallBack(any(), any());
         verify(mLocalBluetoothLeBroadcast, never()).unregisterServiceCallBack(any());
+    }
+
+    @Test
+    public void
+            whenNotBroadcasting_verifyLeBroadcastServiceCallBackIsUnregisteredIfProfileEnabled() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        mIsBroadcasting = true;
+
+        mMediaOutputBaseDialogImpl.start();
+        verify(mLocalBluetoothLeBroadcast).registerServiceCallBack(any(), any());
+
+        mIsBroadcasting = false;
+        mMediaOutputBaseDialogImpl.stop();
+        verify(mLocalBluetoothLeBroadcast).unregisterServiceCallBack(any());
     }
 
     @Test

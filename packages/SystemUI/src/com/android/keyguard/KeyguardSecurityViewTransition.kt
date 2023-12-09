@@ -66,11 +66,11 @@ class KeyguardSecurityViewTransition : Transition() {
     }
 
     override fun createAnimator(
-        sceneRoot: ViewGroup?,
+        sceneRoot: ViewGroup,
         startValues: TransitionValues?,
         endValues: TransitionValues?
     ): Animator? {
-        if (sceneRoot == null || startValues == null || endValues == null) {
+        if (startValues == null || endValues == null) {
             return null
         }
 

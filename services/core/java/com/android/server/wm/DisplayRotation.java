@@ -303,8 +303,7 @@ public class DisplayRotation {
             mOrientationListener.setCurrentRotation(mRotation);
             mSettingsObserver = new SettingsObserver(uiHandler);
             mSettingsObserver.observe();
-            if (mSupportAutoRotation && mContext.getResources().getBoolean(
-                    R.bool.config_windowManagerHalfFoldAutoRotateOverride)) {
+            if (mSupportAutoRotation && isFoldable(mContext)) {
                 mFoldController = new FoldController();
             } else {
                 mFoldController = null;
@@ -312,6 +311,10 @@ public class DisplayRotation {
         } else {
             mFoldController = null;
         }
+    }
+
+    private static boolean isFoldable(Context context) {
+        return context.getResources().getIntArray(R.array.config_foldedDeviceStates).length > 0;
     }
 
     @VisibleForTesting
@@ -431,7 +434,8 @@ public class DisplayRotation {
         final boolean isTv = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
         mDefaultFixedToUserRotation =
-                (isCar || isTv || mService.mIsPc || mDisplayContent.forceDesktopMode())
+                (isCar || isTv || mService.mIsPc || mDisplayContent.forceDesktopMode()
+                        || mDisplayContent.isDisplayOrientationFixed())
                 // For debug purposes the next line turns this feature off with:
                 // $ adb shell setprop config.override_forced_orient true
                 // $ adb shell wm size reset
@@ -1463,11 +1467,6 @@ public class DisplayRotation {
             return false;
         }
 
-        // Do not show rotation choice when fold controller blocks rotation sensor
-        if (mFoldController != null && mFoldController.shouldIgnoreSensorRotation()) {
-            return false;
-        }
-
         // Don't show rotation choice if we are in tabletop or book modes.
         if (isTabletopAutoRotateOverrideEnabled()) return false;
 
@@ -1775,8 +1774,11 @@ public class DisplayRotation {
         private SensorEventListener mHingeAngleSensorEventListener;
         private final Set<Integer> mTabletopRotations;
         private final Runnable mActivityBoundsUpdateCallback;
+        private final boolean mAllowHalfFoldAutoRotationOverride;
 
         FoldController() {
+            mAllowHalfFoldAutoRotationOverride = mContext.getResources().getBoolean(
+                    R.bool.config_windowManagerHalfFoldAutoRotateOverride);
             mTabletopRotations = new ArraySet<>();
             int[] tabletop_rotations = mContext.getResources().getIntArray(
                     R.array.config_deviceTabletopRotations);
@@ -1894,12 +1896,14 @@ public class DisplayRotation {
         }
 
         boolean overrideFrozenRotation() {
-            return mDeviceState == DeviceStateController.DeviceState.HALF_FOLDED;
+            return mAllowHalfFoldAutoRotationOverride
+                    && mDeviceState == DeviceStateController.DeviceState.HALF_FOLDED;
         }
 
         boolean shouldRevertOverriddenRotation() {
             // When transitioning to open.
-            return mDeviceState == DeviceStateController.DeviceState.OPEN
+            return mAllowHalfFoldAutoRotationOverride
+                    && mDeviceState == DeviceStateController.DeviceState.OPEN
                     && !mShouldIgnoreSensorRotation // Ignore if the hinge angle still moving
                     && mInHalfFoldTransition
                     && mDisplayContent.getRotationReversionController().isOverrideActive(

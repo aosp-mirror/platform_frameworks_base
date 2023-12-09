@@ -29,6 +29,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.AutomaticBrightnessController;
 import com.android.server.display.BrightnessSetting;
 import com.android.server.display.DisplayBrightnessState;
+import com.android.server.display.brightness.strategy.AutomaticBrightnessStrategy;
 import com.android.server.display.brightness.strategy.DisplayBrightnessStrategy;
 
 import java.io.PrintWriter;
@@ -38,6 +39,8 @@ import java.io.PrintWriter;
  * display. Applies the chosen brightness.
  */
 public final class DisplayBrightnessController {
+    private static final int DEFAULT_USER_SERIAL = -1;
+
     // The ID of the display tied to this DisplayBrightnessController
     private final int mDisplayId;
 
@@ -132,11 +135,21 @@ public final class DisplayBrightnessController {
     public DisplayBrightnessState updateBrightness(
             DisplayManagerInternal.DisplayPowerRequest displayPowerRequest,
             int targetDisplayState) {
+
+        DisplayBrightnessState state;
         synchronized (mLock) {
             mDisplayBrightnessStrategy = mDisplayBrightnessStrategySelector.selectStrategy(
                     displayPowerRequest, targetDisplayState);
-            return mDisplayBrightnessStrategy.updateBrightness(displayPowerRequest);
+            state = mDisplayBrightnessStrategy.updateBrightness(displayPowerRequest);
         }
+
+        // This is a temporary measure until AutomaticBrightnessStrategy works as a traditional
+        // strategy.
+        // TODO: Remove when AutomaticBrightnessStrategy is populating the values directly.
+        if (state != null) {
+            state = addAutomaticBrightnessState(state);
+        }
+        return state;
     }
 
     /**
@@ -151,10 +164,10 @@ public final class DisplayBrightnessController {
     /**
      * Sets the brightness to follow
      */
-    public void setBrightnessToFollow(Float brightnessToFollow) {
+    public void setBrightnessToFollow(float brightnessToFollow, boolean slowChange) {
         synchronized (mLock) {
             mDisplayBrightnessStrategySelector.getFollowerDisplayBrightnessStrategy()
-                    .setBrightnessToFollow(brightnessToFollow);
+                    .setBrightnessToFollow(brightnessToFollow, slowChange);
         }
     }
 
@@ -274,8 +287,16 @@ public final class DisplayBrightnessController {
      * Notifies the brightnessSetting to persist the supplied brightness value.
      */
     public void setBrightness(float brightnessValue) {
+        setBrightness(brightnessValue, DEFAULT_USER_SERIAL);
+    }
+
+    /**
+     * Notifies the brightnessSetting to persist the supplied brightness value for a user.
+     */
+    public void setBrightness(float brightnessValue, int userSerial) {
         // Update the setting, which will eventually call back into DPC to have us actually
         // update the display with the new value.
+        mBrightnessSetting.setUserSerial(userSerial);
         mBrightnessSetting.setBrightness(brightnessValue);
         if (mDisplayId == Display.DEFAULT_DISPLAY && mPersistBrightnessNitsForDefaultDisplay) {
             float nits = convertToNits(brightnessValue);
@@ -309,6 +330,13 @@ public final class DisplayBrightnessController {
             AutomaticBrightnessController automaticBrightnessController) {
         mAutomaticBrightnessController = automaticBrightnessController;
         loadNitBasedBrightnessSetting();
+    }
+
+    /**
+     * TODO(b/253226419): Remove once auto-brightness is a fully-functioning strategy.
+     */
+    public AutomaticBrightnessStrategy getAutomaticBrightnessStrategy() {
+        return mDisplayBrightnessStrategySelector.getAutomaticBrightnessStrategy();
     }
 
     /**
@@ -413,6 +441,18 @@ public final class DisplayBrightnessController {
         synchronized (mLock) {
             return mDisplayBrightnessStrategy;
         }
+    }
+
+    /**
+     * TODO(b/253226419): Remove once auto-brightness is a fully-functioning strategy.
+     */
+    private DisplayBrightnessState addAutomaticBrightnessState(DisplayBrightnessState state) {
+        AutomaticBrightnessStrategy autoStrat = getAutomaticBrightnessStrategy();
+
+        DisplayBrightnessState.Builder builder = DisplayBrightnessState.Builder.from(state);
+        builder.setShouldUseAutoBrightness(
+                autoStrat != null && autoStrat.shouldUseAutoBrightness());
+        return builder.build();
     }
 
     @GuardedBy("mLock")

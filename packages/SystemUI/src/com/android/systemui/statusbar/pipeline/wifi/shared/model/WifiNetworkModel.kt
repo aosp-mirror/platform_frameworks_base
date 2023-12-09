@@ -17,11 +17,13 @@
 package com.android.systemui.statusbar.pipeline.wifi.shared.model
 
 import android.net.wifi.WifiManager.UNKNOWN_SSID
+import android.net.wifi.sharedconnectivity.app.NetworkProviderInfo
 import android.telephony.SubscriptionManager
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.log.table.Diffable
 import com.android.systemui.log.table.TableRowLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.wifitrackerlib.HotspotNetworkEntry.DeviceType
 
 /** Provides information about the current wifi network. */
 sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
@@ -52,6 +54,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             row.logChange(COL_LEVEL, LEVEL_DEFAULT)
             row.logChange(COL_NUM_LEVELS, NUM_LEVELS_DEFAULT)
             row.logChange(COL_SSID, null)
+            row.logChange(COL_HOTSPOT, null)
             row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
             row.logChange(COL_ONLINE_SIGN_UP, false)
             row.logChange(COL_PASSPOINT_NAME, null)
@@ -83,6 +86,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             row.logChange(COL_LEVEL, LEVEL_DEFAULT)
             row.logChange(COL_NUM_LEVELS, NUM_LEVELS_DEFAULT)
             row.logChange(COL_SSID, null)
+            row.logChange(COL_HOTSPOT, null)
             row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
             row.logChange(COL_ONLINE_SIGN_UP, false)
             row.logChange(COL_PASSPOINT_NAME, null)
@@ -110,6 +114,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             row.logChange(COL_LEVEL, LEVEL_DEFAULT)
             row.logChange(COL_NUM_LEVELS, NUM_LEVELS_DEFAULT)
             row.logChange(COL_SSID, null)
+            row.logChange(COL_HOTSPOT, null)
             row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
             row.logChange(COL_ONLINE_SIGN_UP, false)
             row.logChange(COL_PASSPOINT_NAME, null)
@@ -184,6 +189,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             row.logChange(COL_LEVEL, level)
             row.logChange(COL_NUM_LEVELS, numberOfLevels)
             row.logChange(COL_SSID, null)
+            row.logChange(COL_HOTSPOT, null)
             row.logChange(COL_PASSPOINT_ACCESS_POINT, false)
             row.logChange(COL_ONLINE_SIGN_UP, false)
             row.logChange(COL_PASSPOINT_NAME, null)
@@ -208,6 +214,12 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
 
         /** See [android.net.wifi.WifiInfo.ssid]. */
         val ssid: String? = null,
+
+        /**
+         * The type of device providing a hotspot connection, or [HotspotDeviceType.NONE] if this
+         * isn't a hotspot connection.
+         */
+        val hotspotDeviceType: HotspotDeviceType = WifiNetworkModel.HotspotDeviceType.NONE,
 
         /** See [android.net.wifi.WifiInfo.isPasspointAp]. */
         val isPasspointAccessPoint: Boolean = false,
@@ -247,6 +259,9 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             if (prevVal.ssid != ssid) {
                 row.logChange(COL_SSID, ssid)
             }
+            if (prevVal.hotspotDeviceType != hotspotDeviceType) {
+                row.logChange(COL_HOTSPOT, hotspotDeviceType.name)
+            }
 
             // TODO(b/238425913): The passpoint-related values are frequently never used, so it
             //   would be great to not log them when they're not used.
@@ -272,6 +287,7 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
             row.logChange(COL_LEVEL, level)
             row.logChange(COL_NUM_LEVELS, null)
             row.logChange(COL_SSID, ssid)
+            row.logChange(COL_HOTSPOT, hotspotDeviceType.name)
             row.logChange(COL_PASSPOINT_ACCESS_POINT, isPasspointAccessPoint)
             row.logChange(COL_ONLINE_SIGN_UP, isOnlineSignUpForPasspointAccessPoint)
             row.logChange(COL_PASSPOINT_NAME, passpointProviderFriendlyName)
@@ -298,12 +314,50 @@ sealed class WifiNetworkModel : Diffable<WifiNetworkModel> {
         }
 
         companion object {
+            // TODO(b/292534484): Use [com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MAX] instead
+            // once the migration to WifiTrackerLib is complete.
             @VisibleForTesting internal const val MAX_VALID_LEVEL = 4
         }
     }
 
     companion object {
+        // TODO(b/292534484): Use [com.android.wifitrackerlib.WifiEntry.WIFI_LEVEL_MIN] instead
+        // once the migration to WifiTrackerLib is complete.
         @VisibleForTesting internal const val MIN_VALID_LEVEL = 0
+    }
+
+    /**
+     * Enum for the type of device providing the hotspot connection, or [NONE] if this connection
+     * isn't a hotspot.
+     */
+    enum class HotspotDeviceType {
+        /* This wifi connection isn't a hotspot. */
+        NONE,
+        /** The device type for this hotspot is unknown. */
+        UNKNOWN,
+        PHONE,
+        TABLET,
+        LAPTOP,
+        WATCH,
+        AUTO,
+        /** The device type sent for this hotspot is invalid to SysUI. */
+        INVALID,
+    }
+
+    /**
+     * Converts a device type from [com.android.wifitrackerlib.HotspotNetworkEntry.deviceType] to
+     * our internal representation.
+     */
+    fun @receiver:DeviceType Int.toHotspotDeviceType(): HotspotDeviceType {
+        return when (this) {
+            NetworkProviderInfo.DEVICE_TYPE_UNKNOWN -> HotspotDeviceType.UNKNOWN
+            NetworkProviderInfo.DEVICE_TYPE_PHONE -> HotspotDeviceType.PHONE
+            NetworkProviderInfo.DEVICE_TYPE_TABLET -> HotspotDeviceType.TABLET
+            NetworkProviderInfo.DEVICE_TYPE_LAPTOP -> HotspotDeviceType.LAPTOP
+            NetworkProviderInfo.DEVICE_TYPE_WATCH -> HotspotDeviceType.WATCH
+            NetworkProviderInfo.DEVICE_TYPE_AUTO -> HotspotDeviceType.AUTO
+            else -> HotspotDeviceType.INVALID
+        }
     }
 }
 
@@ -319,6 +373,7 @@ const val COL_VALIDATED = "isValidated"
 const val COL_LEVEL = "level"
 const val COL_NUM_LEVELS = "maxLevel"
 const val COL_SSID = "ssid"
+const val COL_HOTSPOT = "hotspot"
 const val COL_PASSPOINT_ACCESS_POINT = "isPasspointAccessPoint"
 const val COL_ONLINE_SIGN_UP = "isOnlineSignUpForPasspointAccessPoint"
 const val COL_PASSPOINT_NAME = "passpointProviderFriendlyName"

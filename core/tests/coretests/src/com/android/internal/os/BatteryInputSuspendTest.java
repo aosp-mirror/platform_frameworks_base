@@ -99,6 +99,7 @@ public class BatteryInputSuspendTest {
                     if (isCharging(intent) == mExpectedChargingState) {
                         mReady.open();
                     }
+                    context.unregisterReceiver(this);
                 }
             }, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         }

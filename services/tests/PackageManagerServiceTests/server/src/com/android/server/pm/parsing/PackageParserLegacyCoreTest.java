@@ -106,8 +106,7 @@ public class PackageParserLegacyCoreTest {
                 minSdkCodename,
                 PLATFORM_VERSION,
                 isPlatformReleased ? CODENAMES_RELEASED : CODENAMES_PRE_RELEASE,
-                input,
-                null);
+                input);
 
         if (expectedMinSdk == -1) {
             assertTrue(result.isError());
@@ -210,7 +209,7 @@ public class PackageParserLegacyCoreTest {
                 targetSdkCodename,
                 isPlatformReleased ? CODENAMES_RELEASED : CODENAMES_PRE_RELEASE,
                 input,
-                allowUnknownCodenames, null);
+                allowUnknownCodenames);
 
         if (expectedTargetSdk == -1) {
             assertTrue(result.isError());

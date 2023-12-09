@@ -17,12 +17,13 @@
 package com.android.systemui.dump
 
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.LogcatEchoTracker
 
 /**
  * Creates a LogBuffer that will echo everything to logcat, which is useful for debugging tests.
  */
+@JvmOverloads
 fun logcatLogBuffer(name: String = "EchoToLogcatLogBuffer") =
     LogBuffer(name, 50, LogcatEchoTrackerAlways())
 

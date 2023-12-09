@@ -31,20 +31,25 @@ import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
 import com.android.systemui.dreams.DreamOverlayCallbackController
+import com.android.systemui.keyguard.ScreenLifecycle
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
 import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
+import com.android.systemui.keyguard.shared.model.ScreenModel
+import com.android.systemui.keyguard.shared.model.ScreenState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.DozeParameters
+import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.mockito.withArgCaptor
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -58,6 +63,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -70,34 +76,41 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
+    @Mock private lateinit var screenLifecycle: ScreenLifecycle
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
     @Mock private lateinit var dozeTransitionListener: DozeTransitionListener
     @Mock private lateinit var authController: AuthController
+    @Mock private lateinit var keyguardBypassController: KeyguardBypassController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var dreamOverlayCallbackController: DreamOverlayCallbackController
     @Mock private lateinit var dozeParameters: DozeParameters
     private val mainDispatcher = StandardTestDispatcher()
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
+    private lateinit var systemClock: FakeSystemClock
 
     private lateinit var underTest: KeyguardRepositoryImpl
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
+        systemClock = FakeSystemClock()
         underTest =
             KeyguardRepositoryImpl(
                 statusBarStateController,
                 wakefulnessLifecycle,
+                screenLifecycle,
                 biometricUnlockController,
                 keyguardStateController,
+                keyguardBypassController,
                 keyguardUpdateMonitor,
                 dozeTransitionListener,
                 dozeParameters,
                 authController,
                 dreamOverlayCallbackController,
-                mainDispatcher
+                mainDispatcher,
+                testScope.backgroundScope,
+                systemClock,
             )
     }
 
@@ -156,6 +169,20 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun dozeTimeTick() =
+        testScope.runTest {
+            val lastDozeTimeTick by collectLastValue(underTest.dozeTimeTick)
+            assertThat(lastDozeTimeTick).isEqualTo(0L)
+
+            // WHEN dozeTimeTick updated
+            systemClock.setUptimeMillis(systemClock.uptimeMillis() + 5)
+            underTest.dozeTimeTick()
+
+            // THEN listeners were updated to the latest uptime millis
+            assertThat(systemClock.uptimeMillis()).isEqualTo(lastDozeTimeTick)
+        }
+
+    @Test
     fun isKeyguardShowing() =
         testScope.runTest {
             whenever(keyguardStateController.isShowing).thenReturn(false)
@@ -167,7 +194,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             assertThat(underTest.isKeyguardShowing()).isFalse()
 
             val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController).addCallback(captor.capture())
+            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
 
             whenever(keyguardStateController.isShowing).thenReturn(true)
             captor.value.onKeyguardShowingChanged()
@@ -183,6 +210,20 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
 
             job.cancel()
         }
+
+    @Test
+    fun isBypassEnabled_disabledInController() {
+        whenever(keyguardBypassController.isBypassEnabled).thenReturn(false)
+        whenever(keyguardBypassController.bypassEnabled).thenReturn(false)
+        assertThat(underTest.isBypassEnabled()).isFalse()
+    }
+
+    @Test
+    fun isBypassEnabled_enabledInController() {
+        whenever(keyguardBypassController.isBypassEnabled).thenReturn(true)
+        whenever(keyguardBypassController.bypassEnabled).thenReturn(true)
+        assertThat(underTest.isBypassEnabled()).isTrue()
+    }
 
     @Test
     fun isAodAvailable() = runTest {
@@ -215,7 +256,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             assertThat(latest).isFalse()
 
             val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController).addCallback(captor.capture())
+            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
 
             whenever(keyguardStateController.isOccluded).thenReturn(true)
             captor.value.onKeyguardShowingChanged()
@@ -234,26 +275,23 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
     fun isKeyguardUnlocked() =
         testScope.runTest {
             whenever(keyguardStateController.isUnlocked).thenReturn(false)
-            var latest: Boolean? = null
-            val job = underTest.isKeyguardUnlocked.onEach { latest = it }.launchIn(this)
+            val isKeyguardUnlocked by collectLastValue(underTest.isKeyguardUnlocked)
 
             runCurrent()
-            assertThat(latest).isFalse()
+            assertThat(isKeyguardUnlocked).isFalse()
 
             val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController).addCallback(captor.capture())
+            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
 
             whenever(keyguardStateController.isUnlocked).thenReturn(true)
             captor.value.onUnlockedChanged()
             runCurrent()
-            assertThat(latest).isTrue()
+            assertThat(isKeyguardUnlocked).isTrue()
 
             whenever(keyguardStateController.isUnlocked).thenReturn(false)
-            captor.value.onUnlockedChanged()
+            captor.value.onKeyguardShowingChanged()
             runCurrent()
-            assertThat(latest).isFalse()
-
-            job.cancel()
+            assertThat(isKeyguardUnlocked).isFalse()
         }
 
     @Test
@@ -301,6 +339,16 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun isActiveDreamLockscreenHosted() =
+        testScope.runTest {
+            underTest.setIsActiveDreamLockscreenHosted(true)
+            assertThat(underTest.isActiveDreamLockscreenHosted.value).isEqualTo(true)
+
+            underTest.setIsActiveDreamLockscreenHosted(false)
+            assertThat(underTest.isActiveDreamLockscreenHosted.value).isEqualTo(false)
+        }
+
+    @Test
     fun wakefulness() =
         testScope.runTest {
             val values = mutableListOf<WakefulnessModel>()
@@ -343,8 +391,48 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
                 )
 
             job.cancel()
+        }
+
+    @Test
+    fun screenModel() =
+        testScope.runTest {
+            val values = mutableListOf<ScreenModel>()
+            val job = underTest.screenModel.onEach(values::add).launchIn(this)
+
             runCurrent()
-            verify(wakefulnessLifecycle).removeObserver(captor.value)
+            val captor = argumentCaptor<ScreenLifecycle.Observer>()
+            verify(screenLifecycle).addObserver(captor.capture())
+
+            whenever(screenLifecycle.getScreenState()).thenReturn(ScreenLifecycle.SCREEN_TURNING_ON)
+            captor.value.onScreenTurningOn()
+            runCurrent()
+
+            whenever(screenLifecycle.getScreenState()).thenReturn(ScreenLifecycle.SCREEN_ON)
+            captor.value.onScreenTurnedOn()
+            runCurrent()
+
+            whenever(screenLifecycle.getScreenState())
+                .thenReturn(ScreenLifecycle.SCREEN_TURNING_OFF)
+            captor.value.onScreenTurningOff()
+            runCurrent()
+
+            whenever(screenLifecycle.getScreenState()).thenReturn(ScreenLifecycle.SCREEN_OFF)
+            captor.value.onScreenTurnedOff()
+            runCurrent()
+
+            assertThat(values.map { it.state })
+                .isEqualTo(
+                    listOf(
+                        // Initial value will be OFF
+                        ScreenState.SCREEN_OFF,
+                        ScreenState.SCREEN_TURNING_ON,
+                        ScreenState.SCREEN_ON,
+                        ScreenState.SCREEN_TURNING_OFF,
+                        ScreenState.SCREEN_OFF,
+                    )
+                )
+
+            job.cancel()
         }
 
     @Test
@@ -367,7 +455,7 @@ class KeyguardRepositoryImplTest : SysuiTestCase() {
             assertThat(latest).isFalse()
 
             val captor = argumentCaptor<KeyguardStateController.Callback>()
-            verify(keyguardStateController).addCallback(captor.capture())
+            verify(keyguardStateController, atLeastOnce()).addCallback(captor.capture())
 
             whenever(keyguardStateController.isKeyguardGoingAway).thenReturn(true)
             captor.value.onKeyguardGoingAwayChanged()

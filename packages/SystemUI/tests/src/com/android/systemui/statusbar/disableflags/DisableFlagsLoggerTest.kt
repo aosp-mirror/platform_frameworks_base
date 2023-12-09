@@ -37,73 +37,8 @@ class DisableFlagsLoggerTest : SysuiTestCase() {
     private val disableFlagsLogger = DisableFlagsLogger(disable1Flags, disable2Flags)
 
     @Test
-    fun getDisableFlagsString_oldAndNewSame_newAndUnchangedLoggedOldNotLogged() {
-        val state = DisableFlagsLogger.DisableState(
-                0b111, // ABC
-                0b01 // mN
-        )
-
-        val result = disableFlagsLogger.getDisableFlagsString(state, state)
-
-        assertThat(result).doesNotContain("Old")
-        assertThat(result).contains("ABC.mN")
-        assertThat(result).contains("(unchanged)")
-    }
-
-    @Test
-    fun getDisableFlagsString_oldAndNewDifferent_statesAndDiffLogged() {
-        val result = disableFlagsLogger.getDisableFlagsString(
-                DisableFlagsLogger.DisableState(
-                        0b111, // ABC
-                        0b01, // mN
-                ),
-                DisableFlagsLogger.DisableState(
-                        0b001, // abC
-                        0b10 // Mn
-                )
-        )
-
-        assertThat(result).contains("Old: ABC.mN")
-        assertThat(result).contains("New: abC.Mn")
-        assertThat(result).contains("(changed: ab.Mn)")
-    }
-
-    @Test
-    fun getDisableFlagsString_onlyDisable2Different_diffLoggedCorrectly() {
-        val result = disableFlagsLogger.getDisableFlagsString(
-                DisableFlagsLogger.DisableState(
-                        0b001, // abC
-                        0b01, // mN
-                ),
-                DisableFlagsLogger.DisableState(
-                        0b001, // abC
-                        0b00 // mn
-                )
-        )
-
-        assertThat(result).contains("(changed: .n)")
-    }
-
-    @Test
-    fun getDisableFlagsString_nullOld_onlyNewStateLogged() {
-        val result = disableFlagsLogger.getDisableFlagsString(
-            old = null,
-            new = DisableFlagsLogger.DisableState(
-                0b001, // abC
-                0b01, // mN
-            ),
-        )
-
-        assertThat(result).doesNotContain("Old")
-        assertThat(result).contains("abC.mN")
-        assertThat(result).doesNotContain("(")
-        assertThat(result).doesNotContain(")")
-    }
-
-    @Test
     fun getDisableFlagsString_nullLocalModification_localModNotLogged() {
         val result = disableFlagsLogger.getDisableFlagsString(
-                DisableFlagsLogger.DisableState(0, 0),
                 DisableFlagsLogger.DisableState(1, 1),
                 newAfterLocalModification = null
         )
@@ -118,9 +53,7 @@ class DisableFlagsLoggerTest : SysuiTestCase() {
                 0b10 // mn
         )
 
-        val result = disableFlagsLogger.getDisableFlagsString(
-                DisableFlagsLogger.DisableState(0, 0), newState, newState
-        )
+        val result = disableFlagsLogger.getDisableFlagsString(newState, newState)
 
         assertThat(result).doesNotContain("local modification")
     }
@@ -128,7 +61,6 @@ class DisableFlagsLoggerTest : SysuiTestCase() {
     @Test
     fun getDisableFlagsString_newAfterLocalModificationDifferent_localModAndDiffLogged() {
         val result = disableFlagsLogger.getDisableFlagsString(
-                old = DisableFlagsLogger.DisableState(0, 0),
                 new = DisableFlagsLogger.DisableState(
                         0b000, // abc
                         0b00 // mn
@@ -140,6 +72,22 @@ class DisableFlagsLoggerTest : SysuiTestCase() {
         )
 
         assertThat(result).contains("local modification: Abc.Mn (changed: A.M)")
+    }
+
+    @Test
+    fun getDisableFlagsString_onlyDisable2Different_diffLoggedCorrectly() {
+        val result = disableFlagsLogger.getDisableFlagsString(
+            DisableFlagsLogger.DisableState(
+                0b001, // abC
+                0b01, // mN
+            ),
+            DisableFlagsLogger.DisableState(
+                0b001, // abC
+                0b00 // mn
+            )
+        )
+
+        assertThat(result).contains("(changed: .n)")
     }
 
     @Test

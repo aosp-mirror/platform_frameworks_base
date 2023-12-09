@@ -16,13 +16,40 @@
 
 package com.android.systemui.qs.pipeline.dagger
 
+import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.qs.pipeline.data.repository.AutoAddRepository
 import com.android.systemui.qs.pipeline.data.repository.AutoAddSettingRepository
+import com.android.systemui.qs.pipeline.domain.model.AutoAddable
+import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import dagger.Binds
 import dagger.Module
+import dagger.Provides
+import dagger.multibindings.Multibinds
 
-@Module
+@Module(
+    includes =
+        [
+            BaseAutoAddableModule::class,
+        ]
+)
 abstract class QSAutoAddModule {
 
     @Binds abstract fun bindAutoAddRepository(impl: AutoAddSettingRepository): AutoAddRepository
+
+    @Multibinds abstract fun providesAutoAddableSet(): Set<AutoAddable>
+
+    companion object {
+        /**
+         * Provides a logging buffer for all logs related to the new Quick Settings pipeline to log
+         * auto added tiles.
+         */
+        @Provides
+        @SysUISingleton
+        @QSAutoAddLog
+        fun provideQSAutoAddLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create(QSPipelineLogger.AUTO_ADD_TAG, maxSize = 100, systrace = false)
+        }
+    }
 }

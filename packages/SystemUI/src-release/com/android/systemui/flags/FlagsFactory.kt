@@ -29,35 +29,31 @@ object FlagsFactory {
         }
 
     fun unreleasedFlag(
-        id: Int,
         name: String,
         namespace: String = "systemui",
         teamfood: Boolean = false
     ): UnreleasedFlag {
         // Unreleased flags are always false in this build.
-        val flag = UnreleasedFlag(id = id, name = "", namespace = "", teamfood = false)
+        val flag = UnreleasedFlag(name = name, namespace = namespace, teamfood = false)
         return flag
     }
 
     fun releasedFlag(
-        id: Int,
         name: String,
         namespace: String = "systemui",
     ): ReleasedFlag {
-        val flag = ReleasedFlag(id = id, name = name, namespace = namespace, teamfood = false)
+        val flag = ReleasedFlag(name = name, namespace = namespace, teamfood = false)
         flagMap[name] = flag
         return flag
     }
 
     fun resourceBooleanFlag(
-        id: Int,
         @BoolRes resourceId: Int,
         name: String,
         namespace: String = "systemui",
     ): ResourceBooleanFlag {
         val flag =
             ResourceBooleanFlag(
-                id = id,
                 name = name,
                 namespace = namespace,
                 resourceId = resourceId,
@@ -68,13 +64,11 @@ object FlagsFactory {
     }
 
     fun sysPropBooleanFlag(
-        id: Int,
         name: String,
         namespace: String = "systemui",
         default: Boolean = false
     ): SysPropBooleanFlag {
-        val flag =
-            SysPropBooleanFlag(id = id, name = name, namespace = namespace, default = default)
+        val flag = SysPropBooleanFlag(name = name, namespace = namespace, default = default)
         flagMap[name] = flag
         return flag
     }

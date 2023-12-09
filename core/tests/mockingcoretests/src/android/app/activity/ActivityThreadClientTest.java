@@ -181,7 +181,7 @@ public class ActivityThreadClientTest {
 
             // Verify for ON_START state. Activity should be relaunched.
             getInstrumentation().runOnMainSync(() -> clientSession.startActivity(r));
-            recreateAndVerifyRelaunched(activityThread, activity[0], r, ON_START);
+            recreateAndVerifyRelaunched(activityThread, activity[0], r, ON_PAUSE);
 
             // Verify for ON_RESUME state. Activity should be relaunched.
             getInstrumentation().runOnMainSync(() -> clientSession.resumeActivity(r));

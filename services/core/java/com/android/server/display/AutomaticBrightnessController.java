@@ -223,11 +223,11 @@ public class AutomaticBrightnessController {
     private final ShortTermModel mShortTermModel;
     private final ShortTermModel mPausedShortTermModel;
 
-    // Controls High Brightness Mode.
-    private HighBrightnessModeController mHbmController;
+    // Controls Brightness range (including High Brightness Mode).
+    private final BrightnessRangeController mBrightnessRangeController;
 
     // Throttles (caps) maximum allowed brightness
-    private BrightnessThrottler mBrightnessThrottler;
+    private final BrightnessThrottler mBrightnessThrottler;
     private boolean mIsBrightnessThrottled;
 
     // Context-sensitive brightness configurations require keeping track of the foreground app's
@@ -257,7 +257,8 @@ public class AutomaticBrightnessController {
             HysteresisLevels screenBrightnessThresholds,
             HysteresisLevels ambientBrightnessThresholdsIdle,
             HysteresisLevels screenBrightnessThresholdsIdle, Context context,
-            HighBrightnessModeController hbmController, BrightnessThrottler brightnessThrottler,
+            BrightnessRangeController brightnessModeController,
+            BrightnessThrottler brightnessThrottler,
             BrightnessMappingStrategy idleModeBrightnessMapper, int ambientLightHorizonShort,
             int ambientLightHorizonLong, float userLux, float userBrightness) {
         this(new Injector(), callbacks, looper, sensorManager, lightSensor,
@@ -267,7 +268,7 @@ public class AutomaticBrightnessController {
                 darkeningLightDebounceConfig, resetAmbientLuxAfterWarmUpConfig,
                 ambientBrightnessThresholds, screenBrightnessThresholds,
                 ambientBrightnessThresholdsIdle, screenBrightnessThresholdsIdle, context,
-                hbmController, brightnessThrottler, idleModeBrightnessMapper,
+                brightnessModeController, brightnessThrottler, idleModeBrightnessMapper,
                 ambientLightHorizonShort, ambientLightHorizonLong, userLux, userBrightness
         );
     }
@@ -283,7 +284,8 @@ public class AutomaticBrightnessController {
             HysteresisLevels screenBrightnessThresholds,
             HysteresisLevels ambientBrightnessThresholdsIdle,
             HysteresisLevels screenBrightnessThresholdsIdle, Context context,
-            HighBrightnessModeController hbmController, BrightnessThrottler brightnessThrottler,
+            BrightnessRangeController brightnessModeController,
+            BrightnessThrottler brightnessThrottler,
             BrightnessMappingStrategy idleModeBrightnessMapper, int ambientLightHorizonShort,
             int ambientLightHorizonLong, float userLux, float userBrightness) {
         mInjector = injector;
@@ -326,7 +328,7 @@ public class AutomaticBrightnessController {
         mPendingForegroundAppPackageName = null;
         mForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
         mPendingForegroundAppCategory = ApplicationInfo.CATEGORY_UNDEFINED;
-        mHbmController = hbmController;
+        mBrightnessRangeController = brightnessModeController;
         mBrightnessThrottler = brightnessThrottler;
         mInteractiveModeBrightnessMapper = interactiveModeBrightnessMapper;
         mIdleModeBrightnessMapper = idleModeBrightnessMapper;
@@ -364,9 +366,10 @@ public class AutomaticBrightnessController {
     }
 
     /**
-     * @return The current brightness recommendation calculated from the current conditions.
-     * @param brightnessEvent Event object to populate with details about why the specific
-     *                        brightness was chosen.
+     * @param brightnessEvent Holds details about how the brightness is calculated.
+     *
+     * @return The current automatic brightness recommended value. Populates brightnessEvent
+     *         parameters with details about how the brightness was calculated.
      */
     public float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent) {
         if (brightnessEvent != null) {
@@ -607,10 +610,11 @@ public class AutomaticBrightnessController {
 
         pw.println();
         pw.println("  mInteractiveMapper=");
-        mInteractiveModeBrightnessMapper.dump(pw, mHbmController.getNormalBrightnessMax());
+        mInteractiveModeBrightnessMapper.dump(pw,
+                mBrightnessRangeController.getNormalBrightnessMax());
         if (mIdleModeBrightnessMapper != null) {
             pw.println("  mIdleMapper=");
-            mIdleModeBrightnessMapper.dump(pw, mHbmController.getNormalBrightnessMax());
+            mIdleModeBrightnessMapper.dump(pw, mBrightnessRangeController.getNormalBrightnessMax());
         }
 
         pw.println();
@@ -736,7 +740,7 @@ public class AutomaticBrightnessController {
             mAmbientDarkeningThreshold =
                     mAmbientBrightnessThresholds.getDarkeningThreshold(lux);
         }
-        mHbmController.onAmbientLuxChange(mAmbientLux);
+        mBrightnessRangeController.onAmbientLuxChange(mAmbientLux);
 
 
         // If the short term model was invalidated and the change is drastic enough, reset it.
@@ -976,9 +980,9 @@ public class AutomaticBrightnessController {
 
     // Clamps values with float range [0.0-1.0]
     private float clampScreenBrightness(float value) {
-        final float minBrightness = Math.min(mHbmController.getCurrentBrightnessMin(),
+        final float minBrightness = Math.min(mBrightnessRangeController.getCurrentBrightnessMin(),
                 mBrightnessThrottler.getBrightnessCap());
-        final float maxBrightness = Math.min(mHbmController.getCurrentBrightnessMax(),
+        final float maxBrightness = Math.min(mBrightnessRangeController.getCurrentBrightnessMax(),
                 mBrightnessThrottler.getBrightnessCap());
         return MathUtils.constrain(value, minBrightness, maxBrightness);
     }

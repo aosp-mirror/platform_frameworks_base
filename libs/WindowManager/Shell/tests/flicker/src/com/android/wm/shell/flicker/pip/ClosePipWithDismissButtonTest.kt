@@ -19,7 +19,7 @@ package com.android.wm.shell.flicker.pip
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import androidx.test.filters.RequiresDevice
 import org.junit.FixMethodOrder
 import org.junit.Test
@@ -53,7 +53,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ClosePipWithDismissButtonTest(flicker: FlickerTest) : ClosePipTransition(flicker) {
+open class ClosePipWithDismissButtonTest(flicker: LegacyFlickerTest) : ClosePipTransition(flicker) {
     override val thisTransition: FlickerBuilder.() -> Unit = {
         transitions { pipApp.closePipWindow(wmHelper) }
     }

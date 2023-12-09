@@ -3,7 +3,7 @@ package com.android.systemui.media.nearby
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.dagger.NearbyMediaDevicesLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import javax.inject.Inject
 
 /** Log messages for [NearbyMediaDevicesManager]. */

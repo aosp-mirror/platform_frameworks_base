@@ -54,19 +54,13 @@ import java.util.function.Consumer;
  * correctly on the screen.
  */
 public class NotificationIconContainer extends ViewGroup {
-    /**
-     * A float value indicating how much before the overflow start the icons should transform into
-     * a dot. A value of 0 means that they are exactly at the end and a value of 1 means it starts
-     * 1 icon width early.
-     */
-    public static final float OVERFLOW_EARLY_AMOUNT = 0.2f;
     private static final int NO_VALUE = Integer.MIN_VALUE;
     private static final String TAG = "NotificationIconContainer";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_OVERFLOW = false;
     private static final int CANNED_ANIMATION_DURATION = 100;
     private static final AnimationProperties DOT_ANIMATION_PROPERTIES = new AnimationProperties() {
-        private AnimationFilter mAnimationFilter = new AnimationFilter().animateX();
+        private final AnimationFilter mAnimationFilter = new AnimationFilter().animateX();
 
         @Override
         public AnimationFilter getAnimationFilter() {
@@ -75,7 +69,7 @@ public class NotificationIconContainer extends ViewGroup {
     }.setDuration(200);
 
     private static final AnimationProperties ICON_ANIMATION_PROPERTIES = new AnimationProperties() {
-        private AnimationFilter mAnimationFilter = new AnimationFilter()
+        private final AnimationFilter mAnimationFilter = new AnimationFilter()
                 .animateX()
                 .animateY()
                 .animateAlpha()
@@ -92,7 +86,7 @@ public class NotificationIconContainer extends ViewGroup {
      * Temporary AnimationProperties to avoid unnecessary allocations.
      */
     private static final AnimationProperties sTempProperties = new AnimationProperties() {
-        private AnimationFilter mAnimationFilter = new AnimationFilter();
+        private final AnimationFilter mAnimationFilter = new AnimationFilter();
 
         @Override
         public AnimationFilter getAnimationFilter() {
@@ -101,7 +95,7 @@ public class NotificationIconContainer extends ViewGroup {
     };
 
     private static final AnimationProperties ADD_ICON_PROPERTIES = new AnimationProperties() {
-        private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
+        private final AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
 
         @Override
         public AnimationFilter getAnimationFilter() {
@@ -115,7 +109,7 @@ public class NotificationIconContainer extends ViewGroup {
      */
     private static final AnimationProperties UNISOLATION_PROPERTY_OTHERS
             = new AnimationProperties() {
-        private AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
+        private final AnimationFilter mAnimationFilter = new AnimationFilter().animateAlpha();
 
         @Override
         public AnimationFilter getAnimationFilter() {
@@ -128,7 +122,7 @@ public class NotificationIconContainer extends ViewGroup {
      * This animates the translation back to the right position.
      */
     private static final AnimationProperties UNISOLATION_PROPERTY = new AnimationProperties() {
-        private AnimationFilter mAnimationFilter = new AnimationFilter().animateX();
+        private final AnimationFilter mAnimationFilter = new AnimationFilter().animateX();
 
         @Override
         public AnimationFilter getAnimationFilter() {
@@ -147,7 +141,6 @@ public class NotificationIconContainer extends ViewGroup {
     private boolean mIsStaticLayout = true;
     private final HashMap<View, IconState> mIconStates = new HashMap<>();
     private int mDotPadding;
-    private int mStaticDotRadius;
     private int mStaticDotDiameter;
     private int mActualLayoutWidth = NO_VALUE;
     private float mActualPaddingEnd = NO_VALUE;
@@ -170,7 +163,7 @@ public class NotificationIconContainer extends ViewGroup {
     private boolean mIsShowingOverflowDot;
     private StatusBarIconView mIsolatedIcon;
     private Rect mIsolatedIconLocation;
-    private int[] mAbsolutePosition = new int[2];
+    private final int[] mAbsolutePosition = new int[2];
     private View mIsolatedIconForAnimation;
     private int mThemedTextColorPrimary;
 
@@ -186,8 +179,8 @@ public class NotificationIconContainer extends ViewGroup {
         mMaxStaticIcons = getResources().getInteger(R.integer.max_notif_static_icons);
 
         mDotPadding = getResources().getDimensionPixelSize(R.dimen.overflow_icon_dot_padding);
-        mStaticDotRadius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
-        mStaticDotDiameter = 2 * mStaticDotRadius;
+        int staticDotRadius = getResources().getDimensionPixelSize(R.dimen.overflow_dot_radius);
+        mStaticDotDiameter = 2 * staticDotRadius;
 
         final Context themedContext = new ContextThemeWrapper(getContext(),
                 com.android.internal.R.style.Theme_DeviceDefault_DayNight);
@@ -339,6 +332,7 @@ public class NotificationIconContainer extends ViewGroup {
             }
         }
         if (child instanceof StatusBarIconView) {
+            ((StatusBarIconView) child).updateIconDimens();
             ((StatusBarIconView) child).setDozing(mDozing, false, 0);
         }
     }
@@ -447,9 +441,14 @@ public class NotificationIconContainer extends ViewGroup {
     @VisibleForTesting
     boolean isOverflowing(boolean isLastChild, float translationX, float layoutEnd,
             float iconSize) {
-        // Layout end, as used here, does not include padding end.
-        final float overflowX = isLastChild ? layoutEnd : layoutEnd - iconSize;
-        return translationX >= overflowX;
+        if (isLastChild) {
+            return translationX + iconSize > layoutEnd;
+        } else {
+            // If the child is not the last child, we need to ensure that we have room for the next
+            // icon and the dot. The dot could be as large as an icon, so verify that we have room
+            // for 2 icons.
+            return translationX + iconSize * 2f > layoutEnd;
+        }
     }
 
     /**
@@ -489,10 +488,7 @@ public class NotificationIconContainer extends ViewGroup {
             // First icon to overflow.
             if (firstOverflowIndex == -1 && isOverflowing) {
                 firstOverflowIndex = i;
-                mVisualOverflowStart = layoutEnd - mIconSize;
-                if (forceOverflow || mIsStaticLayout) {
-                    mVisualOverflowStart = Math.min(translationX, mVisualOverflowStart);
-                }
+                mVisualOverflowStart = translationX;
             }
             final float drawingScale = mOnLockScreen && view instanceof StatusBarIconView
                     ? ((StatusBarIconView) view).getIconScaleIncreased()
@@ -537,9 +533,10 @@ public class NotificationIconContainer extends ViewGroup {
             IconState iconState = mIconStates.get(mIsolatedIcon);
             if (iconState != null) {
                 // Most of the time the icon isn't yet added when this is called but only happening
-                // later
-                iconState.setXTranslation(mIsolatedIconLocation.left - mAbsolutePosition[0]
-                        - (1 - mIsolatedIcon.getIconScale()) * mIsolatedIcon.getWidth() / 2.0f);
+                // later. The isolated icon position left should equal to the mIsolatedIconLocation
+                // to ensure the icon be put at the center of the HUN icon placeholder,
+                // {@See HeadsUpAppearanceController#updateIsolatedIconLocation}.
+                iconState.setXTranslation(mIsolatedIconLocation.left - mAbsolutePosition[0]);
                 iconState.visibleState = StatusBarIconView.STATE_ICON;
             }
         }
@@ -695,7 +692,6 @@ public class NotificationIconContainer extends ViewGroup {
     }
 
     public class IconState extends ViewState {
-        public static final int NO_VALUE = NotificationIconContainer.NO_VALUE;
         public float iconAppearAmount = 1.0f;
         public float clampedAppearAmount = 1.0f;
         public int visibleState;
@@ -813,8 +809,6 @@ public class NotificationIconContainer extends ViewGroup {
                     super.applyToView(view);
                 }
                 sTempProperties.setAnimationEndAction(null);
-                boolean inShelf = iconAppearAmount == 1.0f;
-                icon.setIsInShelf(inShelf);
             }
             justAdded = false;
             justReplaced = false;

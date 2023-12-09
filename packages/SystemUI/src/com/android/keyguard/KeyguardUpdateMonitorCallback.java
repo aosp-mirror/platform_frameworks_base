@@ -327,4 +327,9 @@ public class KeyguardUpdateMonitorCallback {
      * Called when the enabled trust agents associated with the specified user.
      */
     public void onEnabledTrustAgentsChanged(int userId) { }
+
+    /**
+     * On biometric enrollment state changed
+     */
+    public void onBiometricEnrollmentStateChanged(BiometricSourceType biometricSourceType) { }
 }

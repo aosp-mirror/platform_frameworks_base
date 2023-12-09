@@ -89,17 +89,6 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        taskPositioner =
-            VeiledResizeTaskPositioner(
-                mockShellTaskOrganizer,
-                mockDesktopWindowDecoration,
-                mockDisplayController,
-                DISALLOWED_AREA_FOR_END_BOUNDS,
-                mockDragStartListener,
-                mockTransactionFactory,
-                mockTransitions
-            )
-
         whenever(taskToken.asBinder()).thenReturn(taskBinder)
         whenever(mockDisplayController.getDisplayLayout(DISPLAY_ID)).thenReturn(mockDisplayLayout)
         whenever(mockDisplayLayout.densityDpi()).thenReturn(DENSITY_DPI)
@@ -119,6 +108,17 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         }
         mockDesktopWindowDecoration.mDisplay = mockDisplay
         whenever(mockDisplay.displayId).thenAnswer { DISPLAY_ID }
+
+        taskPositioner =
+                VeiledResizeTaskPositioner(
+                        mockShellTaskOrganizer,
+                        mockDesktopWindowDecoration,
+                        mockDisplayController,
+                        mockDragStartListener,
+                        mockTransactionFactory,
+                        mockTransitions,
+                        DISALLOWED_AREA_FOR_END_BOUNDS_HEIGHT
+                )
     }
 
     @Test
@@ -269,7 +269,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         )
 
         val newX = STARTING_BOUNDS.left.toFloat() + 5
-        val newY = STARTING_BOUNDS.top.toFloat() + 5
+        val newY = DISALLOWED_AREA_FOR_END_BOUNDS_HEIGHT.toFloat() - 1
         taskPositioner.onDragPositioningMove(
                 newX,
                 newY
@@ -334,6 +334,38 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         })
     }
 
+    @Test
+    fun testDragResize_drag_taskPositionedInStableBounds() {
+        taskPositioner.onDragPositioningStart(
+                CTRL_TYPE_UNDEFINED, // drag
+                STARTING_BOUNDS.left.toFloat(),
+                STARTING_BOUNDS.top.toFloat()
+        )
+
+        val newX = STARTING_BOUNDS.left.toFloat()
+        val newY = STABLE_BOUNDS.top.toFloat() - 5
+        taskPositioner.onDragPositioningMove(
+                newX,
+                newY
+        )
+        verify(mockTransaction).setPosition(any(), eq(newX), eq(newY))
+
+        taskPositioner.onDragPositioningEnd(
+                newX,
+                newY
+        )
+        // Verify task's top bound is set to stable bounds top since dragged outside stable bounds
+        // but not in disallowed end bounds area.
+        verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder &&
+                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
+                        change.configuration.windowConfiguration.bounds.top ==
+                        STABLE_BOUNDS.top
+            }
+        })
+    }
+
     companion object {
         private const val TASK_ID = 5
         private const val MIN_WIDTH = 10
@@ -342,12 +374,13 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         private const val DEFAULT_MIN = 40
         private const val DISPLAY_ID = 1
         private const val NAVBAR_HEIGHT = 50
+        private const val CAPTION_HEIGHT = 50
+        private const val DISALLOWED_AREA_FOR_END_BOUNDS_HEIGHT = 10
         private val DISPLAY_BOUNDS = Rect(0, 0, 2400, 1600)
-        private val STARTING_BOUNDS = Rect(0, 0, 100, 100)
-        private val DISALLOWED_AREA_FOR_END_BOUNDS = Rect(0, 0, 50, 50)
+        private val STARTING_BOUNDS = Rect(100, 100, 200, 200)
         private val STABLE_BOUNDS = Rect(
             DISPLAY_BOUNDS.left,
-            DISPLAY_BOUNDS.top,
+            DISPLAY_BOUNDS.top + CAPTION_HEIGHT,
             DISPLAY_BOUNDS.right,
             DISPLAY_BOUNDS.bottom - NAVBAR_HEIGHT
         )

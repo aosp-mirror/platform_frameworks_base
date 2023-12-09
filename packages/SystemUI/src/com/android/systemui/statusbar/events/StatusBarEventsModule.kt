@@ -22,6 +22,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
@@ -36,6 +38,13 @@ interface StatusBarEventsModule {
 
         @Provides
         @SysUISingleton
+        @SystemStatusAnimationSchedulerLog
+        fun provideSystemStatusAnimationSchedulerLogBuffer(factory: LogBufferFactory): LogBuffer {
+            return factory.create("SystemStatusAnimationSchedulerLog", 60)
+        }
+
+        @Provides
+        @SysUISingleton
         fun provideSystemStatusAnimationScheduler(
                 featureFlags: FeatureFlags,
                 coordinator: SystemEventCoordinator,
@@ -44,7 +53,8 @@ interface StatusBarEventsModule {
                 dumpManager: DumpManager,
                 systemClock: SystemClock,
                 @Application coroutineScope: CoroutineScope,
-                @Main executor: DelayableExecutor
+                @Main executor: DelayableExecutor,
+                logger: SystemStatusAnimationSchedulerLogger
         ): SystemStatusAnimationScheduler {
             return if (featureFlags.isEnabled(Flags.PLUG_IN_STATUS_BAR_CHIP)) {
                 SystemStatusAnimationSchedulerImpl(
@@ -53,7 +63,8 @@ interface StatusBarEventsModule {
                         statusBarWindowController,
                         dumpManager,
                         systemClock,
-                        coroutineScope
+                        coroutineScope,
+                        logger
                 )
             } else {
                 SystemStatusAnimationSchedulerLegacyImpl(

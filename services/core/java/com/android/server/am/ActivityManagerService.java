@@ -559,6 +559,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     // How long we wait for a launched process to attach to the activity manager
     // before we decide it's never going to come up for real.
     static final int PROC_START_TIMEOUT = 10 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+
+    // How long we wait for a launched process to complete its app startup before we ANR.
+    static final int BIND_APPLICATION_TIMEOUT = 20 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+
     // How long we wait to kill an application zygote, after the last process using
     // it has gone away.
     static final int KILL_APP_ZYGOTE_DELAY_MS = 5 * 1000;
@@ -1624,6 +1628,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int UPDATE_CACHED_APP_HIGH_WATERMARK = 79;
     static final int ADD_UID_TO_OBSERVER_MSG = 80;
     static final int REMOVE_UID_FROM_OBSERVER_MSG = 81;
+    static final int BIND_APPLICATION_TIMEOUT_MSG = 82;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1980,6 +1985,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 case UPDATE_CACHED_APP_HIGH_WATERMARK: {
                     mAppProfiler.mCachedAppsWatermarkData.updateCachedAppsSnapshot((long) msg.obj);
                 } break;
+                case BIND_APPLICATION_TIMEOUT_MSG: {
+                    ProcessRecord app = (ProcessRecord) msg.obj;
+
+                    final String anrMessage;
+                    synchronized (app) {
+                        anrMessage = "Process " + app + " failed to complete startup";
+                    }
+
+                    mAnrHelper.appNotResponding(app, TimeoutRecord.forAppStart(anrMessage));
+                } break;
             }
         }
     }
@@ -2099,6 +2114,34 @@ public class ActivityManagerService extends IActivityManager.Stub
     private void setVoiceInteractionManagerProvider(
             @Nullable ActivityManagerInternal.VoiceInteractionManagerProvider provider) {
         mVoiceInteractionManagerProvider = provider;
+    }
+
+    /**
+     * Represents volatile states associated with a Dropbox entry.
+     * <p>
+     * These states, such as the process frozen state, can change quickly over time and thus
+     * should be captured as soon as possible to ensure accurate state. If a state is undefined,
+     * it means that the state was not read early and a fallback value can be used.
+     * </p>
+     */
+    static class VolatileDropboxEntryStates {
+        private final Boolean mIsProcessFrozen;
+
+        private VolatileDropboxEntryStates(Boolean frozenState) {
+            this.mIsProcessFrozen = frozenState;
+        }
+
+        public static VolatileDropboxEntryStates withProcessFrozenState(boolean frozenState) {
+            return new VolatileDropboxEntryStates(frozenState);
+        }
+
+        public static VolatileDropboxEntryStates emptyVolatileDropboxEnytyStates() {
+            return new VolatileDropboxEntryStates(null);
+        }
+
+        public Boolean isProcessFrozen() {
+            return mIsProcessFrozen;
+        }
     }
 
     static class MemBinder extends Binder {
@@ -3078,6 +3121,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    /**
+     * Enforces that the uid of the caller matches the uid of the package.
+     *
+     * @param packageName the name of the package to match uid against.
+     * @param callingUid the uid of the caller.
+     * @throws SecurityException if the calling uid doesn't match uid of the package.
+     */
+    private void enforceCallingPackage(String packageName, int callingUid) {
+        final int userId = UserHandle.getUserId(callingUid);
+        final int packageUid = getPackageManagerInternal().getPackageUid(packageName,
+                /*flags=*/ 0, userId);
+        if (packageUid != callingUid) {
+            throw new SecurityException(packageName + " does not belong to uid " + callingUid);
+        }
+    }
+
     @Override
     public void setPackageScreenCompatMode(String packageName, int mode) {
         mActivityTaskManager.setPackageScreenCompatMode(packageName, mode);
@@ -3469,6 +3528,12 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public boolean clearApplicationUserData(final String packageName, boolean keepState,
             final IPackageDataObserver observer, int userId) {
+        return clearApplicationUserData(packageName, keepState, /*isRestore=*/ false, observer,
+                userId);
+    }
+
+    private boolean clearApplicationUserData(final String packageName, boolean keepState,
+            boolean isRestore, final IPackageDataObserver observer, int userId) {
         enforceNotIsolatedCaller("clearApplicationUserData");
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
@@ -3564,6 +3629,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         intent.putExtra(Intent.EXTRA_UID,
                                 (appInfo != null) ? appInfo.uid : INVALID_UID);
                         intent.putExtra(Intent.EXTRA_USER_HANDLE, resolvedUserId);
+                        if (isRestore) {
+                            intent.putExtra(Intent.EXTRA_IS_RESTORE, true);
+                        }
                         if (isInstantApp) {
                             intent.putExtra(Intent.EXTRA_PACKAGE_NAME, packageName);
                         }
@@ -4555,14 +4623,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, pid, app.processName);
 
         synchronized (mProcLock) {
-            app.mState.setCurAdj(ProcessList.INVALID_ADJ);
-            app.mState.setSetAdj(ProcessList.INVALID_ADJ);
-            app.mState.setVerifiedAdj(ProcessList.INVALID_ADJ);
-            mOomAdjuster.setAttachingSchedGroupLSP(app);
-            app.mState.setForcingToImportant(null);
+            mOomAdjuster.setAttachingProcessStatesLSP(app);
             clearProcessForegroundLocked(app);
-            app.mState.setHasShownUi(false);
-            app.mState.setCached(false);
             app.setDebugging(false);
             app.setKilledByAm(false);
             app.setKilled(false);
@@ -4716,6 +4778,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.getDisabledCompatChanges(), serializedSystemFontMap,
                         app.getStartElapsedTime(), app.getStartUptime());
             }
+
+            Message msg = mHandler.obtainMessage(BIND_APPLICATION_TIMEOUT_MSG);
+            msg.obj = app;
+            mHandler.sendMessageDelayed(msg, BIND_APPLICATION_TIMEOUT);
+            mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
+
             if (profilerInfo != null) {
                 profilerInfo.closeFd();
                 profilerInfo = null;
@@ -4729,8 +4797,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.makeActive(thread, mProcessStats);
                 checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             }
+            app.setPendingFinishAttach(true);
+
             updateLruProcessLocked(app, false, null);
             checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
+
+            updateOomAdjLocked(app, OOM_ADJ_REASON_PROCESS_BEGIN);
+            checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
+
             final long now = SystemClock.uptimeMillis();
             synchronized (mAppProfiler.mProfilerLock) {
                 app.mProfile.setLastRequestedGc(now);
@@ -4746,8 +4820,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (!mConstants.mEnableWaitForFinishAttachApplication) {
                 finishAttachApplicationInner(startSeq, callingUid, pid);
-            } else {
-                app.setPendingFinishAttach(true);
             }
         } catch (Exception e) {
             // We need kill the process group here. (b/148588589)
@@ -4786,7 +4858,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (app != null && app.getStartUid() == uid && app.getStartSeq() == startSeq) {
-            mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
+            mHandler.removeMessages(BIND_APPLICATION_TIMEOUT_MSG, app);
         } else {
             Slog.wtf(TAG, "Mismatched or missing ProcessRecord: " + app + ". Pid: " + pid
                     + ". Uid: " + uid);
@@ -8833,7 +8905,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         addErrorToDropBox(
                 eventType, r, processName, null, null, null, null, null, null, crashInfo,
-                new Float(loadingProgress), incrementalMetrics, null);
+                new Float(loadingProgress), incrementalMetrics, null, null);
 
         // For GWP-ASan recoverable crashes, don't make the app crash (the whole point of
         // 'recoverable' is that the app doesn't crash). Normally, for nonrecoreable native crashes,
@@ -8942,7 +9014,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final StringBuilder sb = new StringBuilder(1024);
         synchronized (sb) {
-            appendDropBoxProcessHeaders(process, processName, sb);
+            appendDropBoxProcessHeaders(process, processName, null, sb);
             sb.append("Build: ").append(Build.FINGERPRINT).append("\n");
             sb.append("System-App: ").append(isSystemApp).append("\n");
             sb.append("Uptime-Millis: ").append(info.violationUptimeMillis).append("\n");
@@ -9045,7 +9117,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 callingPid, (r != null) ? r.getProcessClassEnum() : 0);
 
         addErrorToDropBox("wtf", r, processName, null, null, null, tag, null, null, crashInfo,
-                null, null, null);
+                null, null, null, null);
 
         return r;
     }
@@ -9070,7 +9142,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (Pair<String, ApplicationErrorReport.CrashInfo> p = list.poll();
                 p != null; p = list.poll()) {
             addErrorToDropBox("wtf", proc, "system_server", null, null, null, p.first, null, null,
-                    p.second, null, null, null);
+                    p.second, null, null, null, null);
         }
     }
 
@@ -9093,7 +9165,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * to append various headers to the dropbox log text.
      */
     void appendDropBoxProcessHeaders(ProcessRecord process, String processName,
-            final StringBuilder sb) {
+            final VolatileDropboxEntryStates volatileStates, final StringBuilder sb) {
         // Watchdog thread ends up invoking this function (with
         // a null ProcessRecord) to add the stack file to dropbox.
         // Do not acquire a lock on this (am) in such cases, as it
@@ -9112,7 +9184,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             sb.append("PID: ").append(process.getPid()).append("\n");
             sb.append("UID: ").append(process.uid).append("\n");
             if (process.mOptRecord != null) {
-                sb.append("Frozen: ").append(process.mOptRecord.isFrozen()).append("\n");
+                // Use 'isProcessFrozen' from 'volatileStates' if it'snon-null (present),
+                // otherwise use 'isFrozen' from 'mOptRecord'.
+                sb.append("Frozen: ").append(
+                    (volatileStates != null && volatileStates.isProcessFrozen() != null)
+                    ? volatileStates.isProcessFrozen() : process.mOptRecord.isFrozen()
+                ).append("\n");
             }
             int flags = process.info.flags;
             final IPackageManager pm = AppGlobals.getPackageManager();
@@ -9220,7 +9297,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             String subject, final String report, final File dataFile,
             final ApplicationErrorReport.CrashInfo crashInfo,
             @Nullable Float loadingProgress, @Nullable IncrementalMetrics incrementalMetrics,
-            @Nullable UUID errorId) {
+            @Nullable UUID errorId, @Nullable VolatileDropboxEntryStates volatileStates) {
         // NOTE -- this must never acquire the ActivityManagerService lock,
         // otherwise the watchdog may be prevented from resetting the system.
 
@@ -9242,7 +9319,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (rateLimitResult.shouldRateLimit()) return;
 
         final StringBuilder sb = new StringBuilder(1024);
-        appendDropBoxProcessHeaders(process, processName, sb);
+        appendDropBoxProcessHeaders(process, processName, volatileStates, sb);
         if (process != null) {
             sb.append("Foreground: ")
                     .append(process.isInterestingToUserLocked() ? "Yes" : "No")
@@ -9658,6 +9735,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != ROOT_UID && callingUid != Process.SHELL_UID) {
+            if (resultReceiver != null) {
+                resultReceiver.send(-1, null);
+            }
+            throw new SecurityException("Shell commands are only callable by root or shell");
+        }
         (new ActivityManagerShellCommand(this, false)).exec(
                 this, in, out, err, args, callback, resultReceiver);
     }
@@ -13630,13 +13714,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     // A backup agent has just come up
     @Override
     public void backupAgentCreated(String agentPackageName, IBinder agent, int userId) {
+        final int callingUid = Binder.getCallingUid();
+        enforceCallingPackage(agentPackageName, callingUid);
+
         // Resolve the target user id and enforce permissions.
-        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+        userId = mUserController.handleIncomingUser(Binder.getCallingPid(), callingUid,
                 userId, /* allowAll */ false, ALLOW_FULL_ONLY, "backupAgentCreated", null);
         if (DEBUG_BACKUP) {
             Slog.v(TAG_BACKUP, "backupAgentCreated: " + agentPackageName + " = " + agent
                     + " callingUserId = " + UserHandle.getCallingUserId() + " userId = " + userId
-                    + " callingUid = " + Binder.getCallingUid() + " uid = " + Process.myUid());
+                    + " callingUid = " + callingUid + " uid = " + Process.myUid());
         }
 
         synchronized(this) {
@@ -16688,7 +16775,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int i = 0; i < N; i++) {
                 PendingTempAllowlist ptw = list[i];
                 mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(ptw.targetUid,
-                        ptw.duration, ptw.type, true, ptw.reasonCode, ptw.tag,
+                        ptw.duration, ptw.type, false, ptw.reasonCode, ptw.tag,
                         ptw.callingUid);
             }
         }
@@ -18871,6 +18958,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mAppProfiler.mCachedAppsWatermarkData.getCachedAppsHighWatermarkStats(
                     atomTag, resetAfterPull);
         }
+
+        @Override
+        public boolean clearApplicationUserData(final String packageName, boolean keepState,
+                boolean isRestore, final IPackageDataObserver observer, int userId) {
+            return ActivityManagerService.this.clearApplicationUserData(packageName, keepState,
+                    isRestore, observer, userId);
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, TimeoutRecord timeoutRecord) {
@@ -19615,7 +19709,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (Display display : allDisplays) {
                 int displayId = display.getDisplayId();
                 // TODO(b/247592632): check other properties like isSecure or proper display type
-                if (display.isValid()
+                if (display.isValid() && ((display.getFlags() & Display.FLAG_PRIVATE) == 0)
                         && (allowOnDefaultDisplay || displayId != Display.DEFAULT_DISPLAY)) {
                     displayIds[numberValidDisplays++] = displayId;
                 }

@@ -634,7 +634,7 @@
          able to return to it. -->
     <attr name="noHistory" format="boolean" />
 
-    <!-- Specify whether an acitivty's task state should always be maintained
+    <!-- Specify whether an activity's task state should always be maintained
          by the system, or if it is allowed to reset the task to its initial
          state in certain situations.
 
@@ -731,15 +731,17 @@
          This is equivalent to calling {@link android.app.Activity#setVrModeEnabled} with the
          the given component name within the Activity that this attribute is set for.
          Declaring this will prevent the system from leaving VR mode during an Activity
-         transtion from one VR activity to another. -->
+         transition from one VR activity to another. -->
     <attr name="enableVrMode" format="string" />
 
-    <!-- Flag allowing the activity to specify which screen rotation animation
-         it desires.  Valid values are "rotate", "crossfade", and "jumpcut"
-         as described in {@link android.view.WindowManager.LayoutParams#rotationAnimation}.
-         Specifying your Rotation animation in the WindowManager.LayoutParams
-         may be racy with app startup and updattransitions occuring during application startup and thusly
-         the manifest attribute is preferred.
+    <!-- Flag that specifies the activity's preferred screen rotation animation.
+         Valid values are "rotate", "crossfade", "jumpcut", and "seamless" as
+         described in
+         {@link android.view.WindowManager.LayoutParams#rotationAnimation}.
+         Specifying your rotation animation in
+         <code>WindowManager.LayoutParams</code> may be racy with app startup
+         and update transitions that occur during application startup; and so,
+         specify the animation in the manifest attribute.
     -->
     <attr name="rotationAnimation">
       <flag name="rotate" value= "0" />
@@ -830,7 +832,7 @@
         <enum name="singleInstance" value="3" />
         <!-- The activity can only be running as the root activity of the task, the first activity
             that created the task, and therefore there will only be one instance of this activity
-            in a task. In constrast to the {@code singleTask} launch mode, this activity can be
+            in a task. In contrast to the {@code singleTask} launch mode, this activity can be
             started in multiple instances in different tasks if the
             {@code FLAG_ACTIVITY_MULTIPLE_TASK} or {@code FLAG_ACTIVITY_NEW_DOCUMENT} is set.-->
         <enum name="singleInstancePerTask" value="4" />
@@ -1328,7 +1330,7 @@
          <p>Such a document is any kind of item for which an application may want to
          maintain multiple simultaneous instances. Examples might be text files, web
          pages, spreadsheets, or emails. Each such document will be in a separate
-         task in the recent taskss list.
+         task in the recent tasks list.
 
          <p>This attribute is equivalent to adding the flag {@link
          android.content.Intent#FLAG_ACTIVITY_NEW_DOCUMENT} to every Intent used to launch
@@ -1771,7 +1773,7 @@
     </attr>
 
     <!-- Enable hardware memory tagging (ARM MTE) in this process.
-         When enabled, heap memory bugs like use-after-free and buffer overlow
+         When enabled, heap memory bugs like use-after-free and buffer overflow
          are detected and result in an immediate ("sync" mode) or delayed ("async"
          mode) crash instead of a silent memory corruption. Sync mode, while slower,
          provides enhanced bug reports including stack traces at the time of allocation

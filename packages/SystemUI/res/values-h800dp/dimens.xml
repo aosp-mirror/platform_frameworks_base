@@ -15,9 +15,6 @@
   -->
 
 <resources>
-    <!-- With the large clock, move up slightly from the center -->
-    <dimen name="keyguard_large_clock_top_margin">-112dp</dimen>
-
     <!-- Margin above the ambient indication container -->
     <dimen name="ambient_indication_container_margin_top">20dp</dimen>
 </resources>

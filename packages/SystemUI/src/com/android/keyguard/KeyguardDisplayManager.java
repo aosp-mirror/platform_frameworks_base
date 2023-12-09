@@ -43,16 +43,19 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.NavigationBarView;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
+import dagger.Lazy;
+
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
 
 @SysUISingleton
 public class KeyguardDisplayManager {
@@ -64,6 +67,9 @@ public class KeyguardDisplayManager {
     private final DisplayTracker mDisplayTracker;
     private final Lazy<NavigationBarController> mNavigationBarControllerLazy;
     private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
+    private final ConnectedDisplayKeyguardPresentation.Factory
+            mConnectedDisplayKeyguardPresentationFactory;
+    private final FeatureFlags mFeatureFlags;
     private final Context mContext;
 
     private boolean mShowing;
@@ -105,7 +111,10 @@ public class KeyguardDisplayManager {
             @Main Executor mainExecutor,
             @UiBackground Executor uiBgExecutor,
             DeviceStateHelper deviceStateHelper,
-            KeyguardStateController keyguardStateController) {
+            KeyguardStateController keyguardStateController,
+            ConnectedDisplayKeyguardPresentation.Factory
+                    connectedDisplayKeyguardPresentationFactory,
+            FeatureFlags featureFlags) {
         mContext = context;
         mNavigationBarControllerLazy = navigationBarControllerLazy;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
@@ -115,6 +124,8 @@ public class KeyguardDisplayManager {
         mDisplayTracker.addDisplayChangeCallback(mDisplayCallback, mainExecutor);
         mDeviceStateHelper = deviceStateHelper;
         mKeyguardStateController = keyguardStateController;
+        mConnectedDisplayKeyguardPresentationFactory = connectedDisplayKeyguardPresentationFactory;
+        mFeatureFlags = featureFlags;
     }
 
     private boolean isKeyguardShowable(Display display) {
@@ -185,8 +196,12 @@ public class KeyguardDisplayManager {
         return false;
     }
 
-    KeyguardPresentation createPresentation(Display display) {
-        return new KeyguardPresentation(mContext, display, mKeyguardStatusViewComponentFactory);
+    Presentation createPresentation(Display display) {
+        if (mFeatureFlags.isEnabled(Flags.ENABLE_CLOCK_KEYGUARD_PRESENTATION)) {
+            return mConnectedDisplayKeyguardPresentationFactory.create(display);
+        } else {
+            return new KeyguardPresentation(mContext, display, mKeyguardStatusViewComponentFactory);
+        }
     }
 
     /**

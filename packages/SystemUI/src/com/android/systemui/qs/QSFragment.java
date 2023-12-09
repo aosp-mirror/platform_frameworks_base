@@ -286,7 +286,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private void bindFooterActionsView(View root) {
         LinearLayout footerActionsView = root.findViewById(R.id.qs_footer_actions);
 
-        if (!ComposeFacade.INSTANCE.isComposeAvailable()) {
+        if (!mFeatureFlags.isEnabled(Flags.COMPOSE_QS_FOOTER_ACTIONS)
+                || !ComposeFacade.INSTANCE.isComposeAvailable()) {
             Log.d(TAG, "Binding the View implementation of the QS footer actions");
             mFooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
                     mListeningAndVisibilityLifecycleOwner);
@@ -755,8 +756,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             // Alpha progress should be linear on lockscreen shade expansion.
             return progress;
         }
-        if (mIsSmallScreen || !mFeatureFlags.isEnabled(
-                Flags.LARGE_SHADE_GRANULAR_ALPHA_INTERPOLATION)) {
+        if (mIsSmallScreen) {
             return ShadeInterpolation.getContentAlpha(progress);
         } else {
             return mLargeScreenShadeInterpolator.getQsAlpha(progress);

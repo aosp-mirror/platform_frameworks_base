@@ -24,6 +24,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -99,6 +100,7 @@ class VariableDateViewControllerTest : SysuiTestCase() {
         controller = VariableDateViewController(
                 systemClock,
                 broadcastDispatcher,
+                mock(),
                 testableHandler,
                 view
         )

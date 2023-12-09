@@ -153,7 +153,7 @@ public final class MediaProjectionManagerService extends SystemService
         mHandler = new Handler(Looper.getMainLooper());
         mClock = injector.createClock();
         mDeathEaters = new ArrayMap<IBinder, IBinder.DeathRecipient>();
-        mCallbackDelegate = new CallbackDelegate();
+        mCallbackDelegate = new CallbackDelegate(injector.createCallbackLooper());
         mAppOps = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mPackageManager = mContext.getPackageManager();
@@ -188,6 +188,11 @@ public final class MediaProjectionManagerService extends SystemService
         Clock createClock() {
             return SystemClock::uptimeMillis;
         }
+
+        /** Creates the {@link Looper} to be used when notifying callbacks. */
+        Looper createCallbackLooper() {
+            return Looper.getMainLooper();
+        }
     }
 
     @Override
@@ -220,6 +225,7 @@ public final class MediaProjectionManagerService extends SystemService
         mMediaRouter.rebindAsUser(to.getUserIdentifier());
         synchronized (mLock) {
             if (mProjectionGrant != null) {
+                Slog.d(TAG, "Content Recording: Stopped MediaProjection due to user switching");
                 mProjectionGrant.stop();
             }
         }
@@ -255,6 +261,8 @@ public final class MediaProjectionManagerService extends SystemService
         }
 
         synchronized (mLock) {
+            Slog.d(TAG,
+                    "Content Recording: Stopped MediaProjection due to foreground service change");
             if (mProjectionGrant != null) {
                 mProjectionGrant.stop();
             }
@@ -263,6 +271,8 @@ public final class MediaProjectionManagerService extends SystemService
 
     private void startProjectionLocked(final MediaProjection projection) {
         if (mProjectionGrant != null) {
+            Slog.d(TAG, "Content Recording: Stopped MediaProjection to start new "
+                    + "incoming projection");
             mProjectionGrant.stop();
         }
         if (mMediaRouteInfo != null) {
@@ -274,12 +284,15 @@ public final class MediaProjectionManagerService extends SystemService
     }
 
     private void stopProjectionLocked(final MediaProjection projection) {
+        Slog.d(TAG, "Content Recording: Stopped active MediaProjection and "
+                + "dispatching stop to callbacks");
         mProjectionToken = null;
         mProjectionGrant = null;
         dispatchStop(projection);
     }
 
-    private void addCallback(final IMediaProjectionWatcherCallback callback) {
+    @VisibleForTesting
+    void addCallback(final IMediaProjectionWatcherCallback callback) {
         IBinder.DeathRecipient deathRecipient = new IBinder.DeathRecipient() {
             @Override
             public void binderDied() {
@@ -326,6 +339,12 @@ public final class MediaProjectionManagerService extends SystemService
         mCallbackDelegate.dispatchStop(projection);
     }
 
+    private void dispatchSessionSet(
+            @NonNull MediaProjectionInfo projectionInfo,
+            @Nullable ContentRecordingSession session) {
+        mCallbackDelegate.dispatchSession(projectionInfo, session);
+    }
+
     /**
      * Returns {@code true} when updating the current mirroring session on WM succeeded, and
      * {@code false} otherwise.
@@ -339,6 +358,13 @@ public final class MediaProjectionManagerService extends SystemService
             if (!setSessionSucceeded) {
                 // Unable to start mirroring, so tear down this projection.
                 if (mProjectionGrant != null) {
+                    String projectionType = incomingSession != null
+                            ? ContentRecordingSession.recordContentToString(
+                                    incomingSession.getContentToRecord()) : "none";
+                    Slog.w(TAG, "Content Recording: Stopped MediaProjection due to failing to set "
+                            + "ContentRecordingSession - id= "
+                            + mProjectionGrant.getVirtualDisplayId() + "type=" + projectionType);
+
                     mProjectionGrant.stop();
                 }
                 return false;
@@ -346,6 +372,7 @@ public final class MediaProjectionManagerService extends SystemService
             if (mProjectionGrant != null) {
                 // Cache the session details.
                 mProjectionGrant.mSession = incomingSession;
+                dispatchSessionSet(mProjectionGrant.getProjectionInfo(), incomingSession);
             }
             return true;
         }
@@ -451,6 +478,9 @@ public final class MediaProjectionManagerService extends SystemService
                     // The grant may now be null if setting the session failed.
                     if (mProjectionGrant != null) {
                         // Always stop the projection.
+                        Slog.w(TAG, "Content Recording: Stopped MediaProjection due to user "
+                                + "consent result of CANCEL - "
+                                + "id= " + mProjectionGrant.getVirtualDisplayId());
                         mProjectionGrant.stop();
                     }
                     break;
@@ -659,6 +689,7 @@ public final class MediaProjectionManagerService extends SystemService
             try {
                 synchronized (mLock) {
                     if (mProjectionGrant != null) {
+                        Slog.d(TAG, "Content Recording: Stopping active projection");
                         mProjectionGrant.stop();
                     }
                 }
@@ -869,6 +900,10 @@ public final class MediaProjectionManagerService extends SystemService
                     MEDIA_PROJECTION_TOKEN_EVENT_CREATED);
         }
 
+        int getVirtualDisplayId() {
+            return mVirtualDisplayId;
+        }
+
         @Override // Binder call
         public boolean canProjectVideo() {
             return mType == MediaProjectionManager.TYPE_MIRRORING ||
@@ -921,6 +956,7 @@ public final class MediaProjectionManagerService extends SystemService
             if (callback == null) {
                 throw new IllegalArgumentException("callback must not be null");
             }
+            Slog.v(TAG, "Start the token instance " + this);
             // Cache result of calling into ActivityManagerService outside of the lock, to prevent
             // deadlock with WindowManagerService.
             final boolean hasFGS = mActivityManagerInternal.hasRunningForegroundService(
@@ -940,17 +976,13 @@ public final class MediaProjectionManagerService extends SystemService
                     throw new SecurityException("Media projections require a foreground service"
                             + " of type ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION");
                 }
-
-                mCallback = callback;
-                registerCallback(mCallback);
                 try {
                     mToken = callback.asBinder();
-                    mDeathEater = new IBinder.DeathRecipient() {
-                        @Override
-                        public void binderDied() {
-                            mCallbackDelegate.remove(callback);
-                            stop();
-                        }
+                    mDeathEater = () -> {
+                        Slog.d(TAG, "Content Recording: MediaProjection stopped by Binder death - "
+                                + "id= " + mVirtualDisplayId);
+                        mCallbackDelegate.remove(callback);
+                        stop();
                     };
                     mToken.linkToDeath(mDeathEater, 0);
                 } catch (RemoteException e) {
@@ -988,6 +1020,11 @@ public final class MediaProjectionManagerService extends SystemService
                     }
                 }
                 startProjectionLocked(this);
+
+                // Register new callbacks after stop has been dispatched to previous session.
+                mCallback = callback;
+                registerCallback(mCallback);
+
                 // Mark this token as used when the app gets the MediaProjection instance.
                 mCountStarts++;
             }
@@ -1020,6 +1057,9 @@ public final class MediaProjectionManagerService extends SystemService
                         Binder.restoreCallingIdentity(token);
                     }
                 }
+                Slog.d(TAG, "Content Recording: handling stopping this projection token"
+                        + " createTime= " + mCreateTimeMs
+                        + " countStarts= " + mCountStarts);
                 stopProjectionLocked(this);
                 mToken.unlinkToDeath(mDeathEater, 0);
                 mToken = null;
@@ -1145,6 +1185,8 @@ public final class MediaProjectionManagerService extends SystemService
                 if ((type & MediaRouter.ROUTE_TYPE_REMOTE_DISPLAY) != 0) {
                     mMediaRouteInfo = info;
                     if (mProjectionGrant != null) {
+                        Slog.d(TAG, "Content Recording: Stopped MediaProjection due to "
+                                + "route type of REMOTE_DISPLAY not selected");
                         mProjectionGrant.stop();
                     }
                 }
@@ -1168,8 +1210,8 @@ public final class MediaProjectionManagerService extends SystemService
         private Handler mHandler;
         private final Object mLock = new Object();
 
-        public CallbackDelegate() {
-            mHandler = new Handler(Looper.getMainLooper(), null, true /*async*/);
+        CallbackDelegate(Looper callbackLooper) {
+            mHandler = new Handler(callbackLooper, null, true /*async*/);
             mClientCallbacks = new ArrayMap<IBinder, IMediaProjectionCallback>();
             mWatcherCallbacks = new ArrayMap<IBinder, IMediaProjectionWatcherCallback>();
         }
@@ -1228,6 +1270,16 @@ public final class MediaProjectionManagerService extends SystemService
                 for (IMediaProjectionWatcherCallback callback : mWatcherCallbacks.values()) {
                     MediaProjectionInfo info = projection.getProjectionInfo();
                     mHandler.post(new WatcherStopCallback(info, callback));
+                }
+            }
+        }
+
+        public void dispatchSession(
+                @NonNull MediaProjectionInfo projectionInfo,
+                @Nullable ContentRecordingSession session) {
+            synchronized (mLock) {
+                for (IMediaProjectionWatcherCallback callback : mWatcherCallbacks.values()) {
+                    mHandler.post(new WatcherSessionCallback(callback, projectionInfo, session));
                 }
             }
         }
@@ -1306,7 +1358,7 @@ public final class MediaProjectionManagerService extends SystemService
             try {
                 mCallback.onStart(mInfo);
             } catch (RemoteException e) {
-                Slog.w(TAG, "Failed to notify media projection has stopped", e);
+                Slog.w(TAG, "Failed to notify media projection has started", e);
             }
         }
     }
@@ -1348,6 +1400,29 @@ public final class MediaProjectionManagerService extends SystemService
         }
     }
 
+    private static final class WatcherSessionCallback implements Runnable {
+        private final IMediaProjectionWatcherCallback mCallback;
+        private final MediaProjectionInfo mProjectionInfo;
+        private final ContentRecordingSession mSession;
+
+        WatcherSessionCallback(
+                @NonNull IMediaProjectionWatcherCallback callback,
+                @NonNull MediaProjectionInfo projectionInfo,
+                @Nullable ContentRecordingSession session) {
+            mCallback = callback;
+            mProjectionInfo = projectionInfo;
+            mSession = session;
+        }
+
+        @Override
+        public void run() {
+            try {
+                mCallback.onRecordingSessionSet(mProjectionInfo, mSession);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to notify content recording session changed", e);
+            }
+        }
+    }
 
     private static String typeToString(int type) {
         switch (type) {
@@ -1357,7 +1432,8 @@ public final class MediaProjectionManagerService extends SystemService
                 return "TYPE_MIRRORING";
             case MediaProjectionManager.TYPE_PRESENTATION:
                 return "TYPE_PRESENTATION";
+            default:
+                return Integer.toString(type);
         }
-        return Integer.toString(type);
     }
 }

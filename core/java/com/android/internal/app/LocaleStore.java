@@ -390,12 +390,17 @@ public class LocaleStore {
     public static Set<LocaleInfo> transformImeLanguageTagToLocaleInfo(
             List<InputMethodSubtype> list) {
         Set<LocaleInfo> imeLocales = new HashSet<>();
+        Set<String> languageTagSet = new HashSet<>();
         for (InputMethodSubtype subtype : list) {
-            Locale locale = Locale.forLanguageTag(subtype.getLanguageTag());
-            LocaleInfo cacheInfo  = getLocaleInfo(locale, sLocaleCache);
-            LocaleInfo localeInfo = new LocaleInfo(cacheInfo);
-            localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_IME_LANGUAGE;
-            imeLocales.add(localeInfo);
+            String languageTag = subtype.getLanguageTag();
+            if (!languageTagSet.contains(languageTag)) {
+                languageTagSet.add(languageTag);
+                Locale locale = Locale.forLanguageTag(languageTag);
+                LocaleInfo cacheInfo = getLocaleInfo(locale, sLocaleCache);
+                LocaleInfo localeInfo = new LocaleInfo(cacheInfo);
+                localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_IME_LANGUAGE;
+                imeLocales.add(localeInfo);
+            }
         }
         return imeLocales;
     }

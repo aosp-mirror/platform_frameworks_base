@@ -215,7 +215,7 @@ public class Monitor {
             mSubscriptions.put(token, state);
 
             // Add and associate conditions.
-            normalizedCondition.getConditions().stream().forEach(condition -> {
+            normalizedCondition.getConditions().forEach(condition -> {
                 if (!mConditions.containsKey(condition)) {
                     mConditions.put(condition, new ArraySet<>());
                     condition.addCallback(mConditionCallback);
@@ -321,7 +321,6 @@ public class Monitor {
             private final Callback mCallback;
             private final Subscription mNestedSubscription;
             private final ArraySet<Condition> mConditions;
-            private final ArraySet<Condition> mPreconditions;
 
             /**
              * Default constructor specifying the {@link Callback} for the {@link Subscription}.
@@ -337,8 +336,7 @@ public class Monitor {
             private Builder(Subscription nestedSubscription, Callback callback) {
                 mNestedSubscription = nestedSubscription;
                 mCallback = callback;
-                mConditions = new ArraySet();
-                mPreconditions = new ArraySet();
+                mConditions = new ArraySet<>();
             }
 
             /**
@@ -348,29 +346,6 @@ public class Monitor {
              */
             public Builder addCondition(Condition condition) {
                 mConditions.add(condition);
-                return this;
-            }
-
-            /**
-             * Adds a set of {@link Condition} to be a precondition for {@link Subscription}.
-             *
-             * @return The updated {@link Builder}.
-             */
-            public Builder addPreconditions(Set<Condition> condition) {
-                if (condition == null) {
-                    return this;
-                }
-                mPreconditions.addAll(condition);
-                return this;
-            }
-
-            /**
-             * Adds a {@link Condition} to be a precondition for {@link Subscription}.
-             *
-             * @return The updated {@link Builder}.
-             */
-            public Builder addPrecondition(Condition condition) {
-                mPreconditions.add(condition);
                 return this;
             }
 
@@ -394,11 +369,7 @@ public class Monitor {
              * @return The resulting {@link Subscription}.
              */
             public Subscription build() {
-                final Subscription subscription =
-                        new Subscription(mConditions, mCallback, mNestedSubscription);
-                return !mPreconditions.isEmpty()
-                        ? new Subscription(mPreconditions, null, subscription)
-                        : subscription;
+                return new Subscription(mConditions, mCallback, mNestedSubscription);
             }
         }
     }

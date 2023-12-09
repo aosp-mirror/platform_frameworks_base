@@ -20,8 +20,6 @@ package com.android.systemui.controls.panels
 import android.content.Context
 import android.content.SharedPreferences
 import com.android.systemui.R
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.DeviceControlsControllerImpl
@@ -33,7 +31,6 @@ constructor(
     private val context: Context,
     private val userFileManager: UserFileManager,
     private val userTracker: UserTracker,
-    private val featureFlags: FeatureFlags,
 ) : AuthorizedPanelsRepository {
 
     override fun getAuthorizedPanels(): Set<String> {
@@ -74,17 +71,8 @@ constructor(
                 userTracker.userId,
             )
 
-        // We should add default packages in two cases:
-        // 1) We've never run this
-        // 2) APP_PANELS_REMOVE_APPS_ALLOWED got disabled after user removed all apps
-        val needToSetup =
-            if (featureFlags.isEnabled(Flags.APP_PANELS_REMOVE_APPS_ALLOWED)) {
-                sharedPref.getStringSet(KEY, null) == null
-            } else {
-                // There might be an empty set that need to be overridden after the feature has been
-                // turned off after being turned on
-                sharedPref.getStringSet(KEY, null).isNullOrEmpty()
-            }
+        // We should add default packages when we've never run this
+        val needToSetup = sharedPref.getStringSet(KEY, null) == null
         if (needToSetup) {
             sharedPref.edit().putStringSet(KEY, getPreferredPackages()).apply()
         }

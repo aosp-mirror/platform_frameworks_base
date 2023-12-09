@@ -53,6 +53,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -545,23 +547,42 @@ public final class UserManagerTest {
     public void testRemoveUserWhenPossible_withProfiles() throws Exception {
         assumeHeadlessModeEnabled();
         assumeCloneEnabled();
-        final UserInfo parentUser = createUser("Human User", /* flags= */ 0);
-        final UserInfo cloneProfileUser = createProfileForUser("Clone Profile user",
+        final List<String> profileTypesToCreate = Arrays.asList(
                 UserManager.USER_TYPE_PROFILE_CLONE,
-                parentUser.id);
+                UserManager.USER_TYPE_PROFILE_MANAGED
+        );
 
-        final UserInfo workProfileUser = createProfileForUser("Work Profile user",
-                UserManager.USER_TYPE_PROFILE_MANAGED,
-                parentUser.id);
+        final UserInfo parentUser = createUser("Human User", /* flags= */ 0);
+        assertWithMessage("Could not create parent user")
+                .that(parentUser).isNotNull();
+
+        final List<Integer> profileIds = new ArrayList<>();
+        for (String profileType : profileTypesToCreate) {
+            final String name = profileType.substring(profileType.lastIndexOf('.') + 1);
+            if (mUserManager.canAddMoreProfilesToUser(profileType, parentUser.id)) {
+                final UserInfo profile = createProfileForUser(name, profileType, parentUser.id);
+                assertWithMessage("Could not create " + name)
+                        .that(profile).isNotNull();
+                profileIds.add(profile.id);
+            } else {
+                Slog.w(TAG, "Can not add " + name + " to user #" + parentUser.id);
+            }
+        }
+
+        // Test shouldn't pass or fail unless it's allowed to add profiles to secondary users.
+        assumeTrue("Not possible to create any profiles to user #" + parentUser.id,
+                profileIds.size() > 0);
 
         assertThat(mUserManager.removeUserWhenPossible(parentUser.getUserHandle(),
                 /* overrideDevicePolicy= */ false))
                 .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
         waitForUserRemoval(parentUser.id);
 
-        assertThat(hasUser(parentUser.id)).isFalse();
-        assertThat(hasUser(cloneProfileUser.id)).isFalse();
-        assertThat(hasUser(workProfileUser.id)).isFalse();
+        assertWithMessage("Parent user still exists")
+                .that(hasUser(parentUser.id)).isFalse();
+        profileIds.forEach(id ->
+                assertWithMessage("Profile still exists")
+                        .that(hasUser(id)).isFalse());
     }
 
     /** Tests creating a FULL user via specifying userType. */

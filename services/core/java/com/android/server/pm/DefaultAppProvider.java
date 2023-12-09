@@ -24,14 +24,10 @@ import android.os.Binder;
 import android.os.UserHandle;
 import android.util.Slog;
 
-import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.FgThread;
 
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -70,27 +66,19 @@ public class DefaultAppProvider {
      * Set the package name of the default browser.
      *
      * @param packageName package name of the default browser, or {@code null} to unset
-     * @param async whether the operation should be asynchronous
      * @param userId the user ID
-     * @return whether the default browser was successfully set.
      */
-    public boolean setDefaultBrowser(@Nullable String packageName, boolean async,
-            @UserIdInt int userId) {
-        if (userId == UserHandle.USER_ALL) {
-            return false;
-        }
+    public void setDefaultBrowser(@Nullable String packageName, @UserIdInt int userId) {
         final RoleManager roleManager = mRoleManagerSupplier.get();
         if (roleManager == null) {
-            return false;
+            return;
         }
         final UserHandle user = UserHandle.of(userId);
         final Executor executor = FgThread.getExecutor();
-        final AndroidFuture<Void> future = new AndroidFuture<>();
         final Consumer<Boolean> callback = successful -> {
-            if (successful) {
-                future.complete(null);
-            } else {
-                future.completeExceptionally(new RuntimeException());
+            if (!successful) {
+                Slog.e(PackageManagerService.TAG, "Failed to set default browser to "
+                        + packageName);
             }
         };
         final long identity = Binder.clearCallingIdentity();
@@ -102,19 +90,9 @@ public class DefaultAppProvider {
                 roleManager.clearRoleHoldersAsUser(RoleManager.ROLE_BROWSER, 0, user, executor,
                         callback);
             }
-            if (!async) {
-                try {
-                    future.get(5, TimeUnit.SECONDS);
-                } catch (InterruptedException | ExecutionException | TimeoutException e) {
-                    Slog.e(PackageManagerService.TAG, "Exception while setting default browser: "
-                            + packageName, e);
-                    return false;
-                }
-            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        return true;
     }
 
     /**

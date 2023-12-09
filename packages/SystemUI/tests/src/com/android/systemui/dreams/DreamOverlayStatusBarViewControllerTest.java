@@ -48,6 +48,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.core.FakeLogBuffer;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 import com.android.systemui.statusbar.policy.NextAlarmController;
@@ -114,6 +116,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
     @Mock
     UserTracker mUserTracker;
 
+    LogBuffer mLogBuffer = FakeLogBuffer.Factory.Companion.create();
+
     @Captor
     private ArgumentCaptor<DreamOverlayStateController.Callback> mCallbackCaptor;
 
@@ -146,7 +150,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mStatusBarWindowStateController,
                 mDreamOverlayStatusBarItemsProvider,
                 mDreamOverlayStateController,
-                mUserTracker);
+                mUserTracker,
+                mLogBuffer);
     }
 
     @Test
@@ -289,7 +294,8 @@ public class DreamOverlayStatusBarViewControllerTest extends SysuiTestCase {
                 mStatusBarWindowStateController,
                 mDreamOverlayStatusBarItemsProvider,
                 mDreamOverlayStateController,
-                mUserTracker);
+                mUserTracker,
+                mLogBuffer);
         controller.onViewAttached();
         verify(mView, never()).showIcon(
                 eq(DreamOverlayStatusBarView.STATUS_ICON_NOTIFICATIONS), eq(true), any());

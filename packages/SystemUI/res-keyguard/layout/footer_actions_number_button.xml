@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.QS.SecurityFooter"
         android:layout_gravity="center"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="?attr/onShadeInactiveVariant"
         android:textSize="18sp"/>
     <ImageView
         android:id="@+id/new_dot"

@@ -43,6 +43,13 @@ public abstract class RemoteViewsService extends Service {
     private static final Object sLock = new Object();
 
     /**
+     * Used for determining the maximum number of entries to retrieve from RemoteViewsFactory
+     *
+     * @hide
+     */
+    private static final int MAX_NUM_ENTRY = 10;
+
+    /**
      * An interface for an adapter between a remote collection view (ListView, GridView, etc) and
      * the underlying data for that view.  The implementor is responsible for making a RemoteView
      * for each item in the data set. This interface is a thin wrapper around {@link Adapter}.
@@ -225,6 +232,30 @@ public abstract class RemoteViewsService extends Service {
                     RemoteViewsService.sRemoteViewFactories.remove(fc);
                 }
             }
+        }
+
+        @Override
+        public RemoteViews.RemoteCollectionItems getRemoteCollectionItems() {
+            RemoteViews.RemoteCollectionItems items = new RemoteViews.RemoteCollectionItems
+                    .Builder().build();
+
+            try {
+                RemoteViews.RemoteCollectionItems.Builder itemsBuilder =
+                        new RemoteViews.RemoteCollectionItems.Builder();
+                mFactory.onDataSetChanged();
+
+                itemsBuilder.setHasStableIds(mFactory.hasStableIds());
+                final int numOfEntries = Math.min(mFactory.getCount(), MAX_NUM_ENTRY);
+                for (int i = 0; i < numOfEntries; i++) {
+                    itemsBuilder.addItem(mFactory.getItemId(i), mFactory.getViewAt(i));
+                }
+
+                items = itemsBuilder.build();
+            } catch (Exception ex) {
+                Thread t = Thread.currentThread();
+                Thread.getDefaultUncaughtExceptionHandler().uncaughtException(t, ex);
+            }
+            return items;
         }
 
         private RemoteViewsFactory mFactory;

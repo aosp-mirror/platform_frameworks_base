@@ -51,15 +51,11 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.notetask.NoteTaskInitializer;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shared.tracing.ProtoTraceable;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
-import com.android.systemui.tracing.ProtoTracer;
-import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
-import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
@@ -94,8 +90,7 @@ import javax.inject.Inject;
 @SysUISingleton
 public final class WMShell implements
         CoreStartable,
-        CommandQueue.Callbacks,
-        ProtoTraceable<SystemUiTraceProto> {
+        CommandQueue.Callbacks {
     private static final String TAG = WMShell.class.getName();
     private static final int INVALID_SYSUI_STATE_MASK =
             SYSUI_STATE_DIALOG_SHOWING
@@ -122,7 +117,6 @@ public final class WMShell implements
     private final ScreenLifecycle mScreenLifecycle;
     private final SysUiState mSysUiState;
     private final WakefulnessLifecycle mWakefulnessLifecycle;
-    private final ProtoTracer mProtoTracer;
     private final UserTracker mUserTracker;
     private final DisplayTracker mDisplayTracker;
     private final NoteTaskInitializer mNoteTaskInitializer;
@@ -184,7 +178,6 @@ public final class WMShell implements
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ScreenLifecycle screenLifecycle,
             SysUiState sysUiState,
-            ProtoTracer protoTracer,
             WakefulnessLifecycle wakefulnessLifecycle,
             UserTracker userTracker,
             DisplayTracker displayTracker,
@@ -203,7 +196,6 @@ public final class WMShell implements
         mOneHandedOptional = oneHandedOptional;
         mDesktopModeOptional = desktopMode;
         mWakefulnessLifecycle = wakefulnessLifecycle;
-        mProtoTracer = protoTracer;
         mUserTracker = userTracker;
         mDisplayTracker = displayTracker;
         mNoteTaskInitializer = noteTaskInitializer;
@@ -223,7 +215,6 @@ public final class WMShell implements
         // Subscribe to user changes
         mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
 
-        mProtoTracer.add(this);
         mCommandQueue.addCallback(this);
         mPipOptional.ifPresent(this::initPip);
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
@@ -361,9 +352,10 @@ public final class WMShell implements
     }
 
     @Override
-    public void writeToProto(SystemUiTraceProto proto) {
-        // Dump to WMShell proto here
-        // TODO: Figure out how we want to synchronize while dumping to proto
+    public boolean isDumpCritical() {
+        // Dump can't be critical because the shell has to dump on the main thread for
+        // synchronization reasons, which isn't reliably fast.
+        return false;
     }
 
     @Override

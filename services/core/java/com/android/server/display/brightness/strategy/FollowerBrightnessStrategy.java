@@ -37,9 +37,13 @@ public class FollowerBrightnessStrategy implements DisplayBrightnessStrategy {
     // Set to PowerManager.BRIGHTNESS_INVALID_FLOAT when there's no brightness to follow set.
     private float mBrightnessToFollow;
 
+    // Indicates whether we should ramp slowly to the brightness value to follow.
+    private boolean mBrightnessToFollowSlowChange;
+
     public FollowerBrightnessStrategy(int displayId) {
         mDisplayId = displayId;
         mBrightnessToFollow = PowerManager.BRIGHTNESS_INVALID_FLOAT;
+        mBrightnessToFollowSlowChange = false;
     }
 
     @Override
@@ -48,7 +52,7 @@ public class FollowerBrightnessStrategy implements DisplayBrightnessStrategy {
         // Todo(b/241308599): Introduce a validator class and add validations before setting
         // the brightness
         return BrightnessUtils.constructDisplayBrightnessState(BrightnessReason.REASON_FOLLOWER,
-                mBrightnessToFollow, mBrightnessToFollow, getName());
+                mBrightnessToFollow, mBrightnessToFollow, getName(), mBrightnessToFollowSlowChange);
     }
 
     @Override
@@ -60,8 +64,12 @@ public class FollowerBrightnessStrategy implements DisplayBrightnessStrategy {
         return mBrightnessToFollow;
     }
 
-    public void setBrightnessToFollow(float brightnessToFollow) {
+    /**
+     * Updates brightness value and brightness slowChange flag
+     **/
+    public void setBrightnessToFollow(float brightnessToFollow, boolean slowChange) {
         mBrightnessToFollow = brightnessToFollow;
+        mBrightnessToFollowSlowChange = slowChange;
     }
 
     /**
@@ -71,5 +79,6 @@ public class FollowerBrightnessStrategy implements DisplayBrightnessStrategy {
         writer.println("FollowerBrightnessStrategy:");
         writer.println("  mDisplayId=" + mDisplayId);
         writer.println("  mBrightnessToFollow:" + mBrightnessToFollow);
+        writer.println("  mBrightnessToFollowSlowChange:" + mBrightnessToFollowSlowChange);
     }
 }

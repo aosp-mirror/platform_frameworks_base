@@ -176,7 +176,7 @@ class HomeControlsKeyguardQuickAffordanceConfigParameterizedStateTest : SysuiTes
                     !isFeatureEnabled ->
                         KeyguardQuickAffordanceConfig.PickerScreenState.UnavailableOnDevice::class
                             .java
-                    hasServiceInfos && hasFavorites ->
+                    hasServiceInfos && (hasFavorites || hasPanels) ->
                         KeyguardQuickAffordanceConfig.PickerScreenState.Default::class.java
                     else -> KeyguardQuickAffordanceConfig.PickerScreenState.Disabled::class.java
                 }

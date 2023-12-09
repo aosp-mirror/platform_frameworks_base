@@ -24,6 +24,5 @@ android_test {
         "androidx.recyclerview_recyclerview",
         "androidx.leanback_leanback",
     ],
-    certificate: "platform",
     test_suites: ["device-tests"],
 }

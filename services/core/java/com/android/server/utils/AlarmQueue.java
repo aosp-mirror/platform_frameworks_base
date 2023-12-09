@@ -151,6 +151,10 @@ public abstract class AlarmQueue<K> implements AlarmManager.OnAlarmListener {
     @GuardedBy("mLock")
     @ElapsedRealtimeLong
     private long mTriggerTimeElapsed = NOT_SCHEDULED;
+    /** The last time an alarm went off (ie. the last time {@link #onAlarm()} was called}). */
+    @GuardedBy("mLock")
+    @ElapsedRealtimeLong
+    private long mLastFireTimeElapsed;
 
     /**
      * @param alarmTag               The tag to use when scheduling the alarm with AlarmManager.
@@ -284,7 +288,7 @@ public abstract class AlarmQueue<K> implements AlarmManager.OnAlarmListener {
     /** Sets an alarm with {@link AlarmManager} for the earliest alarm in the queue after now. */
     @GuardedBy("mLock")
     private void setNextAlarmLocked() {
-        setNextAlarmLocked(mInjector.getElapsedRealtime());
+        setNextAlarmLocked(mLastFireTimeElapsed + mMinTimeBetweenAlarmsMs);
     }
 
     /**
@@ -334,6 +338,7 @@ public abstract class AlarmQueue<K> implements AlarmManager.OnAlarmListener {
         final ArraySet<K> expired = new ArraySet<>();
         synchronized (mLock) {
             final long nowElapsed = mInjector.getElapsedRealtime();
+            mLastFireTimeElapsed = nowElapsed;
             while (mAlarmPriorityQueue.size() > 0) {
                 final Pair<K, Long> alarm = mAlarmPriorityQueue.peek();
                 if (alarm.second <= nowElapsed) {

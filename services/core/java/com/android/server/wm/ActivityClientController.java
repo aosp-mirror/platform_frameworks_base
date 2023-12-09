@@ -1162,9 +1162,7 @@ class ActivityClientController extends IActivityClientController.Stub {
                 fullscreenRequest, r);
         reportMultiwindowFullscreenRequestValidatingResult(callback, validateResult);
         if (validateResult != RESULT_APPROVED) {
-            if (queued) {
-                transition.abort();
-            }
+            transition.abort();
             return;
         }
         transition.collect(topFocusedRootTask);

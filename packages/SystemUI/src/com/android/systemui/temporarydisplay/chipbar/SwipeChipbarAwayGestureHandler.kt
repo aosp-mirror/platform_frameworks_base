@@ -19,10 +19,12 @@ package com.android.systemui.temporarydisplay.chipbar
 import android.content.Context
 import android.view.MotionEvent
 import android.view.View
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.statusbar.gesture.SwipeUpGestureHandler
 import com.android.systemui.statusbar.gesture.SwipeUpGestureLogger
 import com.android.systemui.util.boundsOnScreen
+import javax.inject.Inject
 
 /**
  * A class to detect when a user has swiped the chipbar away.
@@ -30,7 +32,10 @@ import com.android.systemui.util.boundsOnScreen
  * Effectively [SysUISingleton]. But, this shouldn't be created if the gesture isn't enabled. See
  * [TemporaryDisplayModule.provideSwipeChipbarAwayGestureHandler].
  */
-class SwipeChipbarAwayGestureHandler(
+@SysUISingleton
+class SwipeChipbarAwayGestureHandler
+@Inject
+constructor(
     context: Context,
     displayTracker: DisplayTracker,
     logger: SwipeUpGestureLogger,

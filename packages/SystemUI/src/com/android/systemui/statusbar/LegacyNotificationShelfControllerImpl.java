@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import android.view.View;
 
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationViewController;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowScope;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
@@ -52,7 +51,6 @@ public class LegacyNotificationShelfControllerImpl implements NotificationShelfC
         mActivatableNotificationViewController = activatableNotificationViewController;
         mKeyguardBypassController = keyguardBypassController;
         mStatusBarStateController = statusBarStateController;
-        mView.setSensitiveRevealAnimEndabled(featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM));
         mOnAttachStateChangeListener = new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {

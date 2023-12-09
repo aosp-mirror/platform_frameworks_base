@@ -46,6 +46,7 @@ public class StatusBarWindowView extends FrameLayout {
 
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setClipChildren(false);
     }
 
     @Override

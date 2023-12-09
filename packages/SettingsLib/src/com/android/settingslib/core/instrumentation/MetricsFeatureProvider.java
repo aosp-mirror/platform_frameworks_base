@@ -209,8 +209,7 @@ public class MetricsFeatureProvider {
         }
         final ComponentName cn = intent.getComponent();
         final String key = cn != null ? cn.flattenToString() : intent.getAction();
-        return logSettingsTileClick(key + (isWorkProfile ? "/work" : "/personal"),
-                sourceMetricsCategory);
+        return logSettingsTileClickWithProfile(key, sourceMetricsCategory, isWorkProfile);
     }
 
     /**
@@ -224,6 +223,22 @@ public class MetricsFeatureProvider {
             return false;
         }
         clicked(sourceMetricsCategory, logKey);
+        return true;
+    }
+
+    /**
+     * Logs an event when the setting key is clicked with a specific profile from Profile select
+     * dialog.
+     *
+     * @return true if the key is loggable, otherwise false
+     */
+    public boolean logSettingsTileClickWithProfile(String logKey, int sourceMetricsCategory,
+            boolean isWorkProfile) {
+        if (TextUtils.isEmpty(logKey)) {
+            // Not loggable
+            return false;
+        }
+        clicked(sourceMetricsCategory, logKey + (isWorkProfile ? "/work" : "/personal"));
         return true;
     }
 }

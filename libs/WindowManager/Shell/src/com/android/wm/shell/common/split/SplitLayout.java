@@ -24,9 +24,10 @@ import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_SPLIT_SCREEN_RESIZE;
-import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END;
-import static com.android.internal.policy.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START;
+import static com.android.wm.shell.common.split.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_END;
+import static com.android.wm.shell.common.split.DividerSnapAlgorithm.SnapTarget.FLAG_DISMISS_START;
 import static com.android.wm.shell.animation.Interpolators.DIM_INTERPOLATOR;
 import static com.android.wm.shell.animation.Interpolators.SLOWDOWN_INTERPOLATOR;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
@@ -58,8 +59,6 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.policy.DividerSnapAlgorithm;
-import com.android.internal.policy.DockedDividerUtils;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.animation.Interpolators;
@@ -593,9 +592,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     void flingDividePosition(int from, int to, int duration,
             @Nullable Runnable flingFinishedCallback) {
         if (from == to) {
-            // No animation run, still callback to stop resizing.
-            mSplitLayoutHandler.onLayoutSizeChanged(this);
-
             if (flingFinishedCallback != null) {
                 flingFinishedCallback.run();
             }
@@ -666,10 +662,22 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         set.setDuration(FLING_SWITCH_DURATION);
         set.addListener(new AnimatorListenerAdapter() {
             @Override
+            public void onAnimationStart(Animator animation) {
+                InteractionJankMonitorUtils.beginTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER,
+                        mContext, getDividerLeash(), null /*tag*/);
+            }
+
+            @Override
             public void onAnimationEnd(Animator animation) {
                 mDividePosition = dividerPos;
                 updateBounds(mDividePosition);
                 finishCallback.accept(insets);
+                InteractionJankMonitorUtils.endTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                InteractionJankMonitorUtils.cancelTracing(CUJ_SPLIT_SCREEN_DOUBLE_TAP_DIVIDER);
             }
         });
         set.start();
@@ -725,10 +733,6 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         return bounds.width() > bounds.height();
     }
 
-    public boolean isDensityChanged(int densityDpi) {
-        return mDensity != densityDpi;
-    }
-
     /**
      * Return if this layout is landscape.
      */
@@ -773,20 +777,25 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             ActivityManager.RunningTaskInfo task1, ActivityManager.RunningTaskInfo task2) {
         boolean boundsChanged = false;
         if (!mBounds1.equals(mWinBounds1) || !task1.token.equals(mWinToken1)) {
-            wct.setBounds(task1.token, mBounds1);
-            wct.setSmallestScreenWidthDp(task1.token, getSmallestWidthDp(mBounds1));
+            setTaskBounds(wct, task1, mBounds1);
             mWinBounds1.set(mBounds1);
             mWinToken1 = task1.token;
             boundsChanged = true;
         }
         if (!mBounds2.equals(mWinBounds2) || !task2.token.equals(mWinToken2)) {
-            wct.setBounds(task2.token, mBounds2);
-            wct.setSmallestScreenWidthDp(task2.token, getSmallestWidthDp(mBounds2));
+            setTaskBounds(wct, task2, mBounds2);
             mWinBounds2.set(mBounds2);
             mWinToken2 = task2.token;
             boundsChanged = true;
         }
         return boundsChanged;
+    }
+
+    /** Set bounds to the {@link WindowContainerTransaction} for single task. */
+    public void setTaskBounds(WindowContainerTransaction wct,
+            ActivityManager.RunningTaskInfo task, Rect bounds) {
+        wct.setBounds(task.token, bounds);
+        wct.setSmallestScreenWidthDp(task.token, getSmallestWidthDp(bounds));
     }
 
     private int getSmallestWidthDp(Rect bounds) {

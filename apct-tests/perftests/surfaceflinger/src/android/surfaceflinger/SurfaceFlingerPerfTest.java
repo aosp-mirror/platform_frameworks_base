@@ -17,10 +17,14 @@
 package android.surfaceflinger;
 
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceControl;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.filters.LargeTest;
@@ -191,6 +195,18 @@ public class SurfaceFlingerPerfTest {
                     InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot(
                             mActivity.getWindow());
             screenshot.recycle();
+            mTransaction.apply(true);
+        }
+    }
+
+    @Test
+    public void bufferQueue() throws Exception {
+        SurfaceView testSV = mActivity.mTestSurfaceView;
+        SurfaceHolder holder = testSV.getHolder();
+        holder.getSurface();
+        for (int i = 0; i < sProfilingIterations; i++) {
+            Canvas canvas = holder.lockCanvas();
+            holder.unlockCanvasAndPost(canvas);
             mTransaction.apply(true);
         }
     }

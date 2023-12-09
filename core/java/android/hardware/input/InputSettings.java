@@ -266,7 +266,7 @@ public class InputSettings {
      */
     public static boolean useTouchpadTapToClick(@NonNull Context context) {
         return Settings.System.getIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_TAP_TO_CLICK, 0, UserHandle.USER_CURRENT) == 1;
+                Settings.System.TOUCHPAD_TAP_TO_CLICK, 1, UserHandle.USER_CURRENT) == 1;
     }
 
     /**

@@ -47,12 +47,16 @@ public class BubbleDebugConfig {
     static final boolean DEBUG_USER_EDUCATION = false;
     static final boolean DEBUG_POSITIONER = false;
     public static final boolean DEBUG_COLLAPSE_ANIMATOR = false;
-    static final boolean DEBUG_BUBBLE_GESTURE = false;
     public static boolean DEBUG_EXPANDED_VIEW_DRAGGING = false;
 
     private static final boolean FORCE_SHOW_USER_EDUCATION = false;
     private static final String FORCE_SHOW_USER_EDUCATION_SETTING =
             "force_show_bubbles_user_education";
+    /**
+     * When set to true, bubbles user education flow never shows up.
+     */
+    private static final String FORCE_HIDE_USER_EDUCATION_SETTING =
+            "force_hide_bubbles_user_education";
 
     /**
      * @return whether we should force show user education for bubbles. Used for debugging & demos.
@@ -61,6 +65,14 @@ public class BubbleDebugConfig {
         boolean forceShow = Settings.Secure.getInt(context.getContentResolver(),
                 FORCE_SHOW_USER_EDUCATION_SETTING, 0) != 0;
         return FORCE_SHOW_USER_EDUCATION || forceShow;
+    }
+
+    /**
+     * @return whether we should never show user education for bubbles. Used in tests.
+     */
+    static boolean neverShowUserEducation(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                FORCE_HIDE_USER_EDUCATION_SETTING, 0) != 0;
     }
 
     static String formatBubblesString(List<Bubble> bubbles, BubbleViewProvider selected) {

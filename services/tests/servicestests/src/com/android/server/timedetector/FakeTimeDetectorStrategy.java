@@ -18,6 +18,8 @@ package com.android.server.timedetector;
 
 import android.annotation.UserIdInt;
 import android.app.time.ExternalTimeSuggestion;
+import android.app.time.TimeCapabilitiesAndConfig;
+import android.app.time.TimeConfiguration;
 import android.app.time.TimeState;
 import android.app.time.UnixEpochTime;
 import android.app.timedetector.ManualTimeSuggestion;
@@ -31,9 +33,19 @@ import com.android.server.timezonedetector.StateChangeListener;
  * in tests.
  */
 public class FakeTimeDetectorStrategy implements TimeDetectorStrategy {
+    private final FakeServiceConfigAccessor mFakeServiceConfigAccessor;
+
     // State
     private TimeState mTimeState;
     private NetworkTimeSuggestion mLatestNetworkTimeSuggestion;
+
+    FakeTimeDetectorStrategy() {
+        mFakeServiceConfigAccessor = new FakeServiceConfigAccessor();
+    }
+
+    void initializeConfiguration(ConfigurationInternal configuration) {
+        mFakeServiceConfigAccessor.initializeCurrentUserConfiguration(configuration);
+    }
 
     @Override
     public TimeState getTimeState() {
@@ -48,6 +60,26 @@ public class FakeTimeDetectorStrategy implements TimeDetectorStrategy {
     @Override
     public boolean confirmTime(UnixEpochTime confirmationTime) {
         return false;
+    }
+
+    @Override
+    public void addChangeListener(StateChangeListener listener) {
+        mFakeServiceConfigAccessor.addConfigurationInternalChangeListener(listener);
+    }
+
+    @Override
+    public TimeCapabilitiesAndConfig getCapabilitiesAndConfig(int userId,
+            boolean bypassUserPolicyChecks) {
+        ConfigurationInternal configurationInternal =
+                mFakeServiceConfigAccessor.getConfigurationInternal(userId);
+        return configurationInternal.createCapabilitiesAndConfig(bypassUserPolicyChecks);
+    }
+
+    @Override
+    public boolean updateConfiguration(int userId, TimeConfiguration configuration,
+            boolean bypassUserPolicyChecks) {
+        return mFakeServiceConfigAccessor.updateConfiguration(
+                userId, configuration, bypassUserPolicyChecks);
     }
 
     @Override

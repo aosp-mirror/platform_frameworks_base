@@ -62,6 +62,7 @@ constructor(
     private val hingeAngleListener = HingeAngleListener()
     private val screenListener = ScreenStatusListener()
     private val foldStateListener = FoldStateListener()
+    private val mainLooper = handler.looper
     private val timeoutRunnable = Runnable { cancelAnimation() }
     private val rotationListener = RotationListener {
         if (isTransitionInProgress) cancelAnimation()
@@ -77,22 +78,28 @@ constructor(
     private var isFolded = false
     private var isScreenOn = false
     private var isUnfoldHandled = true
+    private var isStarted = false
 
     override fun start() {
+        assertMainThread()
+        if (isStarted) return
         foldProvider.registerCallback(foldStateListener, mainExecutor)
         screenStatusProvider.addCallback(screenListener)
         hingeAngleProvider.addCallback(hingeAngleListener)
         rotationChangeProvider.addCallback(rotationListener)
         activityTypeProvider.init()
+        isStarted = true
     }
 
     override fun stop() {
+        assertMainThread()
         screenStatusProvider.removeCallback(screenListener)
         foldProvider.unregisterCallback(foldStateListener)
         hingeAngleProvider.removeCallback(hingeAngleListener)
         hingeAngleProvider.stop()
         rotationChangeProvider.removeCallback(rotationListener)
         activityTypeProvider.uninit()
+        isStarted = false
     }
 
     override fun addCallback(listener: FoldUpdatesListener) {
@@ -290,6 +297,14 @@ constructor(
     private inner class HingeAngleListener : Consumer<Float> {
         override fun accept(angle: Float) {
             onHingeAngle(angle)
+        }
+    }
+
+    private fun assertMainThread() {
+        check(mainLooper.isCurrentThread) {
+            ("should be called from the main thread." +
+                    " sMainLooper.threadName=" + mainLooper.thread.name +
+                    " Thread.currentThread()=" + Thread.currentThread().name)
         }
     }
 }

@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2023 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.android.systemui.biometrics.data.repository
 
 import android.hardware.biometrics.PromptInfo
@@ -12,6 +28,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 
 /**
  * A repository for the global state of BiometricPrompt.
@@ -40,7 +60,7 @@ interface PromptRepository {
      *
      * Note: overlaps/conflicts with [PromptInfo.isConfirmationRequested], which needs clean up.
      */
-    val isConfirmationRequired: StateFlow<Boolean>
+    val isConfirmationRequired: Flow<Boolean>
 
     /** Update the prompt configuration, which should be set before [isShowing]. */
     fun setPrompt(
@@ -48,7 +68,6 @@ interface PromptRepository {
         userId: Int,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
-        requireConfirmation: Boolean = false,
     )
 
     /** Unset the prompt info. */
@@ -56,8 +75,12 @@ interface PromptRepository {
 }
 
 @SysUISingleton
-class PromptRepositoryImpl @Inject constructor(private val authController: AuthController) :
-    PromptRepository {
+class PromptRepositoryImpl
+@Inject
+constructor(
+    private val faceSettings: FaceSettingsRepository,
+    private val authController: AuthController,
+) : PromptRepository {
 
     override val isShowing: Flow<Boolean> = conflatedCallbackFlow {
         val callback =
@@ -85,21 +108,30 @@ class PromptRepositoryImpl @Inject constructor(private val authController: AuthC
     private val _kind: MutableStateFlow<PromptKind> = MutableStateFlow(PromptKind.Biometric())
     override val kind = _kind.asStateFlow()
 
-    private val _isConfirmationRequired: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    override val isConfirmationRequired = _isConfirmationRequired.asStateFlow()
+    private val _faceSettings =
+        _userId.map { id -> faceSettings.forUser(id) }.distinctUntilChanged()
+    private val _faceSettingAlwaysRequireConfirmation =
+        _faceSettings.flatMapLatest { it.alwaysRequireConfirmationInApps }.distinctUntilChanged()
+
+    private val _isConfirmationRequired = _promptInfo.map { it?.isConfirmationRequested ?: false }
+    override val isConfirmationRequired =
+        combine(_isConfirmationRequired, _faceSettingAlwaysRequireConfirmation) {
+                appRequiresConfirmation,
+                forceRequireConfirmation ->
+                forceRequireConfirmation || appRequiresConfirmation
+            }
+            .distinctUntilChanged()
 
     override fun setPrompt(
         promptInfo: PromptInfo,
         userId: Int,
         gatekeeperChallenge: Long?,
         kind: PromptKind,
-        requireConfirmation: Boolean,
     ) {
         _kind.value = kind
         _userId.value = userId
         _challenge.value = gatekeeperChallenge
         _promptInfo.value = promptInfo
-        _isConfirmationRequired.value = requireConfirmation
     }
 
     override fun unsetPrompt() {
@@ -107,7 +139,6 @@ class PromptRepositoryImpl @Inject constructor(private val authController: AuthC
         _userId.value = null
         _challenge.value = null
         _kind.value = PromptKind.Biometric()
-        _isConfirmationRequired.value = false
     }
 
     companion object {
