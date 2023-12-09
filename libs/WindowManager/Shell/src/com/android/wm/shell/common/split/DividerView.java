@@ -83,6 +83,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private int mStartPos;
     private GestureDetector mDoubleTapDetector;
     private boolean mInteractive;
+    private boolean mHideHandle;
     private boolean mSetTouchRegion = true;
     private int mLastDraggingPosition;
     private int mHandleRegionWidth;
@@ -211,11 +212,8 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     }
 
     /** Sets up essential dependencies of the divider bar. */
-    public void setup(
-            SplitLayout layout,
-            SplitWindowManager splitWindowManager,
-            SurfaceControlViewHost viewHost,
-            InsetsState insetsState) {
+    public void setup(SplitLayout layout, SplitWindowManager splitWindowManager,
+            SurfaceControlViewHost viewHost, InsetsState insetsState) {
         mSplitLayout = layout;
         mSplitWindowManager = splitWindowManager;
         mViewHost = viewHost;
@@ -277,6 +275,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
                 R.dimen.docked_stack_divider_lift_elevation);
         mDoubleTapDetector = new GestureDetector(getContext(), new DoubleTapListener());
         mInteractive = true;
+        mHideHandle = false;
         setOnTouchListener(this);
         mHandle.setAccessibilityDelegate(mHandleDelegate);
         setWillNotDraw(false);
@@ -469,10 +468,11 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     void setInteractive(boolean interactive, boolean hideHandle, String from) {
         if (interactive == mInteractive) return;
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_SPLIT_SCREEN,
-                "Set divider bar %s from %s", interactive ? "interactive" : "non-interactive",
-                from);
+                "Set divider bar %s hide handle=%b from %s",
+                interactive ? "interactive" : "non-interactive", hideHandle, from);
         mInteractive = interactive;
-        if (!mInteractive && hideHandle && mMoving) {
+        mHideHandle = hideHandle;
+        if (!mInteractive && mHideHandle && mMoving) {
             final int position = mSplitLayout.getDividePosition();
             mSplitLayout.flingDividePosition(
                     mLastDraggingPosition,
@@ -482,7 +482,15 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
             mMoving = false;
         }
         releaseTouching();
-        mHandle.setVisibility(!mInteractive && hideHandle ? View.INVISIBLE : View.VISIBLE);
+        mHandle.setVisibility(!mInteractive && mHideHandle ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    boolean isInteractive() {
+        return mInteractive;
+    }
+
+    boolean isHandleHidden() {
+        return mHideHandle;
     }
 
     private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener {
