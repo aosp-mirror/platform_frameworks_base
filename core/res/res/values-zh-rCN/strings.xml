@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"键盘布局已设为<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>…点按即可更改。"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"已配置物理键盘"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"点按即可查看键盘"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"私密"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"克隆"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"工作"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"工作 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"工作 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"测试"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"共用"</string>
 </resources>
