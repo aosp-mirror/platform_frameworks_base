@@ -37,6 +37,7 @@ import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.ActivityOptions;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
@@ -709,7 +710,9 @@ public final class CompanionDeviceManager {
             IntentSender intentSender = mService
                     .requestNotificationAccess(component, mContext.getUserId())
                     .getIntentSender();
-            mContext.startIntentSender(intentSender, null, 0, 0, 0);
+            mContext.startIntentSender(intentSender, null, 0, 0, 0,
+                    ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
+                            ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED).toBundle());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (IntentSender.SendIntentException e) {
