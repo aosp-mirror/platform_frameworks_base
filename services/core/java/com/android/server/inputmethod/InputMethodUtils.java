@@ -362,10 +362,7 @@ final class InputMethodUtils {
             return result;
         }
 
-        void appendAndPutEnabledInputMethodLocked(String id, boolean reloadInputMethodStr) {
-            if (reloadInputMethodStr) {
-                getEnabledInputMethodsStr();
-            }
+        void appendAndPutEnabledInputMethodLocked(String id) {
             if (TextUtils.isEmpty(mEnabledInputMethodsStrCache)) {
                 // Add in the newly enabled input method.
                 putEnabledInputMethodsStr(id);
