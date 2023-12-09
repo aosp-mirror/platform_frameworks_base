@@ -481,10 +481,10 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
                 if (mDetectTwoFingerTripleTap) {
                     mGestureMatchers.add(new MultiFingerMultiTap(context, /* fingers= */ 2,
-                            /* taps= */ 3, MagnificationGestureMatcher.GESTURE_TRIPLE_TAP,
+                            /* taps= */ 2, MagnificationGestureMatcher.GESTURE_TRIPLE_TAP,
                             null));
                     mGestureMatchers.add(new MultiFingerMultiTapAndHold(context, /* fingers= */ 2,
-                            /* taps= */ 3, MagnificationGestureMatcher.GESTURE_TRIPLE_TAP_AND_HOLD,
+                            /* taps= */ 2, MagnificationGestureMatcher.GESTURE_TRIPLE_TAP_AND_HOLD,
                             null));
                 }
 

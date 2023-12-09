@@ -72,15 +72,15 @@ public class WindowMagnificationGestureHandlerTest {
     public static final int STATE_SHOW_MAGNIFIER_TRIPLE_TAP = 4;
     public static final int STATE_NOT_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD = 5;
     public static final int STATE_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD = 6;
-    public static final int STATE_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP = 7;
-    public static final int STATE_NOT_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP_AND_HOLD = 8;
-    public static final int STATE_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP_AND_HOLD = 9;
+    public static final int STATE_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP = 7;
+    public static final int STATE_NOT_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP_AND_HOLD = 8;
+    public static final int STATE_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP_AND_HOLD = 9;
     //TODO: Test it after can injecting Handler to GestureMatcher is available.
 
     public static final int FIRST_STATE = STATE_IDLE;
     public static final int LAST_STATE = STATE_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD;
     public static final int LAST_STATE_WITH_MULTI_FINGER =
-            STATE_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP_AND_HOLD;
+            STATE_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP_AND_HOLD;
 
     // Co-prime x and y, to potentially catch x-y-swapped errors
     public static final float DEFAULT_TAP_X = 301;
@@ -257,15 +257,15 @@ public class WindowMagnificationGestureHandlerTest {
             break;
             case STATE_SHOW_MAGNIFIER_SHORTCUT:
             case STATE_SHOW_MAGNIFIER_TRIPLE_TAP:
-            case STATE_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP:
+            case STATE_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP:
                 check(isWindowMagnifierEnabled(DISPLAY_0), state);
                 check(mWindowMagnificationGestureHandler.mCurrentState
                         == mWindowMagnificationGestureHandler.mDetectingState, state);
                 break;
             case STATE_NOT_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD:
             case STATE_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD:
-            case STATE_NOT_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP_AND_HOLD:
-            case STATE_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP_AND_HOLD: {
+            case STATE_NOT_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP_AND_HOLD:
+            case STATE_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP_AND_HOLD: {
                 check(isWindowMagnifierEnabled(DISPLAY_0), state);
                 check(mWindowMagnificationGestureHandler.mCurrentState
                         == mWindowMagnificationGestureHandler.mViewportDraggingState, state);
@@ -337,8 +337,7 @@ public class WindowMagnificationGestureHandlerTest {
                     tapAndHold();
                 }
                 break;
-                case STATE_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP: {
-                    twoFingerTap();
+                case STATE_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP: {
                     twoFingerTap();
                     twoFingerTap();
                     // Wait for two-finger tap gesture completed.
@@ -346,16 +345,14 @@ public class WindowMagnificationGestureHandlerTest {
                     InstrumentationRegistry.getInstrumentation().waitForIdleSync();
                 }
                 break;
-                case STATE_NOT_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP_AND_HOLD: {
-                    twoFingerTap();
+                case STATE_NOT_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP_AND_HOLD: {
                     twoFingerTap();
                     twoFingerTapAndHold();
                 }
                 break;
-                case STATE_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP_AND_HOLD: {
+                case STATE_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP_AND_HOLD: {
                     // enabled then perform two finger triple tap and hold gesture
                     goFromStateIdleTo(STATE_SHOW_MAGNIFIER_SHORTCUT);
-                    twoFingerTap();
                     twoFingerTap();
                     twoFingerTapAndHold();
                 }
@@ -394,16 +391,15 @@ public class WindowMagnificationGestureHandlerTest {
             }
             break;
             case STATE_NOT_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD:
-            case STATE_NOT_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP_AND_HOLD:
+            case STATE_NOT_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP_AND_HOLD:
                 send(upEvent(DEFAULT_TAP_X, DEFAULT_TAP_Y));
                 break;
             case STATE_ENABLED_SHOW_MAGNIFIER_TRIPLE_TAP_AND_HOLD:
-            case STATE_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP_AND_HOLD:
+            case STATE_ENABLED_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP_AND_HOLD:
                 send(upEvent(DEFAULT_TAP_X, DEFAULT_TAP_Y));
                 returnToNormalFrom(STATE_SHOW_MAGNIFIER_SHORTCUT);
                 break;
-            case STATE_SHOW_MAGNIFIER_TWO_FINGER_TRIPLE_TAP: {
-                twoFingerTap();
+            case STATE_SHOW_MAGNIFIER_TWO_FINGER_DOUBLE_TAP: {
                 twoFingerTap();
                 twoFingerTap();
                 // Wait for two-finger tap gesture completed.
