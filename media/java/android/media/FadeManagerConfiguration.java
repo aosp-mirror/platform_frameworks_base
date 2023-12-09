@@ -16,7 +16,7 @@
 
 package android.media;
 
-import static com.android.media.flags.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
+import static android.media.audiopolicy.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;

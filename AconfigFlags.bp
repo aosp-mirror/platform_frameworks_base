@@ -429,10 +429,7 @@ java_aconfig_library {
 aconfig_declarations {
     name: "com.android.media.flags.bettertogether-aconfig",
     package: "com.android.media.flags",
-    srcs: [
-        "media/java/android/media/flags/media_better_together.aconfig",
-        "media/java/android/media/flags/fade_manager_configuration.aconfig",
-    ],
+    srcs: ["media/java/android/media/flags/media_better_together.aconfig"],
 }
 
 java_aconfig_library {

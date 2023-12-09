@@ -16,7 +16,7 @@
 
 package com.android.audiopolicytest;
 
-import static com.android.media.flags.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
+import static android.media.audiopolicy.Flags.FLAG_ENABLE_FADE_MANAGER_CONFIGURATION;
 
 import static org.junit.Assert.assertThrows;
 
