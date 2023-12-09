@@ -465,7 +465,7 @@ public class PipTransition extends PipTransitionController {
                     mSurfaceTransactionHelper.crop(tx, leash, destinationBounds)
                             .resetScale(tx, leash, destinationBounds)
                             .round(tx, leash, true /* applyCornerRadius */);
-                    if (mPipOrganizer.mSwipePipToHomeOverlay != null && !mInitBounds.isEmpty()) {
+                    if (mPipOrganizer.mPipOverlay != null && !mInitBounds.isEmpty()) {
                         // Resetting the scale for pinned task while re-adjusting its crop,
                         // also scales the overlay. So we need to update the overlay leash too.
                         Rect overlayBounds = new Rect(destinationBounds);
@@ -476,7 +476,7 @@ public class PipTransition extends PipTransitionController {
                                 (destinationBounds.width() - overlaySize) / 2,
                                 (destinationBounds.height() - overlaySize) / 2);
                         mSurfaceTransactionHelper.resetScale(tx,
-                                mPipOrganizer.mSwipePipToHomeOverlay, overlayBounds);
+                                mPipOrganizer.mPipOverlay, overlayBounds);
                     }
                 }
                 mInitBounds.setEmpty();
@@ -615,9 +615,9 @@ public class PipTransition extends PipTransitionController {
             }
         }
         // if overlay is present remove it immediately, as exit transition came before it faded out
-        if (mPipOrganizer.mSwipePipToHomeOverlay != null) {
-            startTransaction.remove(mPipOrganizer.mSwipePipToHomeOverlay);
-            clearSwipePipToHomeOverlay();
+        if (mPipOrganizer.mPipOverlay != null) {
+            startTransaction.remove(mPipOrganizer.mPipOverlay);
+            clearPipOverlay();
         }
         if (pipChange == null) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -1077,7 +1077,7 @@ public class PipTransition extends PipTransitionController {
         if (mFixedRotationState == FIXED_ROTATION_CALLBACK && appBounds != null) {
             mInitBounds.set(appBounds);
         }
-        final SurfaceControl swipePipToHomeOverlay = mPipOrganizer.mSwipePipToHomeOverlay;
+        final SurfaceControl swipePipToHomeOverlay = mPipOrganizer.mPipOverlay;
         if (swipePipToHomeOverlay != null) {
             // Launcher fade in the overlay on top of the fullscreen Task. It is possible we
             // reparent the PIP activity to a new PIP task (in case there are other activities
@@ -1106,7 +1106,7 @@ public class PipTransition extends PipTransitionController {
         sendOnPipTransitionFinished(TRANSITION_DIRECTION_TO_PIP);
         if (swipePipToHomeOverlay != null) {
             mPipOrganizer.fadeOutAndRemoveOverlay(swipePipToHomeOverlay,
-                    this::clearSwipePipToHomeOverlay /* callback */, false /* withStartDelay */);
+                    this::clearPipOverlay /* callback */, false /* withStartDelay */);
         }
         mPipTransitionState.setInSwipePipToHomeTransition(false);
     }
@@ -1250,8 +1250,8 @@ public class PipTransition extends PipTransitionController {
         mPipMenuController.updateMenuBounds(destinationBounds);
     }
 
-    private void clearSwipePipToHomeOverlay() {
-        mPipOrganizer.mSwipePipToHomeOverlay = null;
+    private void clearPipOverlay() {
+        mPipOrganizer.mPipOverlay = null;
     }
 
     @Override
