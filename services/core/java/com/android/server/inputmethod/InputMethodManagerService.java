@@ -1713,7 +1713,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
                 com.android.internal.R.bool.config_preventImeStartupUnlessTextEditor);
         mNonPreemptibleInputMethods = mRes.getStringArray(
                 com.android.internal.R.array.config_nonPreemptibleInputMethods);
-        mHwController = new HandwritingModeController(thread.getLooper(),
+        mHwController = new HandwritingModeController(mContext, thread.getLooper(),
                 new InkWindowInitializer());
         registerDeviceListenerAndCheckStylusSupport();
     }
@@ -5626,7 +5626,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public void setVirtualDeviceInputMethodForAllUsers(int deviceId, @Nullable String imeId) {
             // TODO(b/287269288): validate that id belongs to a valid virtual device instead.
-            Preconditions.checkArgument(deviceId == Context.DEVICE_ID_DEFAULT,
+            Preconditions.checkArgument(deviceId != Context.DEVICE_ID_DEFAULT,
                     "DeviceId " + deviceId + " does not belong to a virtual device.");
             synchronized (ImfLock.class) {
                 if (imeId == null) {

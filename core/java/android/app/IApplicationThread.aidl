@@ -129,7 +129,7 @@ oneway interface IApplicationThread {
     void scheduleTrimMemory(int level);
     void dumpMemInfo(in ParcelFileDescriptor fd, in Debug.MemoryInfo mem, boolean checkin,
             boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable,
-            in String[] args);
+            boolean dumpAllocatorLogs, in String[] args);
     void dumpMemInfoProto(in ParcelFileDescriptor fd, in Debug.MemoryInfo mem,
             boolean dumpInfo, boolean dumpDalvik, boolean dumpSummaryOnly, boolean dumpUnreachable,
             in String[] args);

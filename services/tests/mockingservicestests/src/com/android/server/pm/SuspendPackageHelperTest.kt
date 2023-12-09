@@ -16,12 +16,14 @@
 
 package com.android.server.pm
 
+import android.app.AppOpsManager
 import android.content.Intent
 import android.content.pm.SuspendDialogInfo
 import android.os.Binder
 import android.os.PersistableBundle
 import com.android.server.testutils.any
 import com.android.server.testutils.eq
+import com.android.server.testutils.whenever
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,6 +34,12 @@ import org.mockito.Mockito.verify
 
 @RunWith(JUnit4::class)
 class SuspendPackageHelperTest : PackageHelperTestBase() {
+    override fun setup() {
+        super.setup()
+        whenever(rule.mocks().appOpsManager.checkOpNoThrow(
+                eq(AppOpsManager.OP_SYSTEM_EXEMPT_FROM_SUSPENSION), any(), any()))
+                .thenReturn(AppOpsManager.MODE_DEFAULT)
+    }
 
     @Test
     fun setPackagesSuspended() {

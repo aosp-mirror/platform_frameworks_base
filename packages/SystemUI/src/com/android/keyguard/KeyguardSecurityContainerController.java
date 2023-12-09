@@ -27,6 +27,8 @@ import static com.android.keyguard.KeyguardSecurityContainer.BOUNCER_DISMISS_SIM
 import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_PRIMARY;
 import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_SECONDARY_USER;
 import static com.android.keyguard.KeyguardSecurityContainer.USER_TYPE_WORK_PROFILE;
+import static com.android.keyguard.KeyguardSecurityModel.SecurityMode.SimPin;
+import static com.android.keyguard.KeyguardSecurityModel.SecurityMode.SimPuk;
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 import static com.android.systemui.flags.Flags.LOCKSCREEN_ENABLE_LANDSCAPE;
 import static com.android.systemui.flags.Flags.REVAMPED_BOUNCER_MESSAGES;
@@ -99,6 +101,7 @@ import com.android.systemui.util.settings.GlobalSettings;
 import dagger.Lazy;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -164,8 +167,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                     }
                     mCurrentUser = mSelectedUserInteractor.getSelectedUserId();
                     showPrimarySecurityScreen(false);
-                    if (mCurrentSecurityMode != SecurityMode.SimPin
-                            && mCurrentSecurityMode != SecurityMode.SimPuk) {
+                    if (mCurrentSecurityMode != SimPin
+                            && mCurrentSecurityMode != SimPuk) {
                         reinflateViewFlipper((l) -> {
                         });
                     }
@@ -333,6 +336,11 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         @Override
         public void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput) {
             mViewMediatorCallback.setNeedsInput(needsInput);
+        }
+
+        @Override
+        public void showCurrentSecurityScreen() {
+            showPrimarySecurityScreen(false);
         }
     };
 
@@ -888,7 +896,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                         finish = true;
                         eventSubtype = BOUNCER_DISMISS_SIM;
                         uiEvent = BouncerUiEvent.BOUNCER_DISMISS_SIM;
-                    } else {
+                    } else if (Arrays.asList(SimPin, SimPuk).contains(securityMode)) {
+                        // There are additional screens to the sim pin/puk flow.
                         showSecurityScreen(securityMode);
                     }
                     break;
@@ -1095,8 +1104,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     }
 
     private void configureMode() {
-        boolean useSimSecurity = mCurrentSecurityMode == SecurityMode.SimPin
-                || mCurrentSecurityMode == SecurityMode.SimPuk;
+        boolean useSimSecurity = mCurrentSecurityMode == SimPin
+                || mCurrentSecurityMode == SimPuk;
         int mode = KeyguardSecurityContainer.MODE_DEFAULT;
         if (canDisplayUserSwitcher() && !useSimSecurity) {
             mode = KeyguardSecurityContainer.MODE_USER_SWITCHER;

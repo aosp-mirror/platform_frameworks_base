@@ -39,12 +39,15 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpManagerLogger;
+import com.android.systemui.util.settings.FakeGlobalSettings;
+import com.android.systemui.util.time.SystemClock;
+import com.android.systemui.util.time.SystemClockImpl;
 
 import org.junit.After;
 import org.junit.Before;
@@ -74,18 +77,26 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     protected final Runnable mTestTimeoutRunnable = () -> mTimedOut = true;
 
     protected Handler mTestHandler;
+    protected final FakeGlobalSettings mGlobalSettings = new FakeGlobalSettings();
+    protected final SystemClock mSystemClock = new SystemClockImpl();
     protected boolean mTimedOut = false;
 
     @Mock protected ExpandableNotificationRow mRow;
 
+    static {
+        assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME);
+        assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME);
+        assertThat(TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(TEST_TIMEOUT_TIME);
+    }
+
     private static class TestableAlertingNotificationManager extends AlertingNotificationManager {
         private AlertEntry mLastCreatedEntry;
 
-        private TestableAlertingNotificationManager(Handler handler) {
-            super(new HeadsUpManagerLogger(logcatLogBuffer()), handler);
+        private TestableAlertingNotificationManager(Handler handler, SystemClock systemClock) {
+            super(new HeadsUpManagerLogger(logcatLogBuffer()), handler, systemClock);
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
-            mAutoDismissNotificationDecay = TEST_AUTO_DISMISS_TIME;
-            mStickyDisplayTime = TEST_STICKY_AUTO_DISMISS_TIME;
+            mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
+            mStickyForSomeTimeAutoDismissTime = TEST_STICKY_AUTO_DISMISS_TIME;
         }
 
         @Override
@@ -107,7 +118,7 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     }
 
     protected AlertingNotificationManager createAlertingNotificationManager() {
-        return new TestableAlertingNotificationManager(mTestHandler);
+        return new TestableAlertingNotificationManager(mTestHandler, mSystemClock);
     }
 
     protected StatusBarNotification createSbn(int id, Notification n) {
@@ -167,10 +178,6 @@ public class AlertingNotificationManagerTest extends SysuiTestCase {
     @Before
     public void setUp() {
         mTestHandler = Handler.createAsync(Looper.myLooper());
-
-        assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME);
-        assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME);
-        assertThat(TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(TEST_TIMEOUT_TIME);
     }
 
     @After

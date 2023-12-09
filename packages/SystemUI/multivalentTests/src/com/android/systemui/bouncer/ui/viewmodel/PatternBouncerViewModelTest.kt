@@ -304,13 +304,12 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
     fun onDragEnd_whenPatternTooShort() =
         testScope.runTest {
             val message by collectLastValue(bouncerViewModel.message)
-            val throttlingDialogMessage by
-                collectLastValue(bouncerViewModel.throttlingDialogMessage)
+            val dialogMessage by collectLastValue(bouncerViewModel.dialogMessage)
             lockDeviceAndOpenPatternBouncer()
 
             // Enter a pattern that's too short more than enough times that would normally trigger
-            // throttling if the pattern were not too short and wrong:
-            val attempts = FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING + 1
+            // lockout if the pattern were not too short and wrong:
+            val attempts = FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT + 1
             repeat(attempts) { attempt ->
                 underTest.onDragStart()
                 CORRECT_PATTERN.subList(
@@ -328,7 +327,7 @@ class PatternBouncerViewModelTest : SysuiTestCase() {
                 underTest.onDragEnd()
 
                 assertWithMessage("Attempt #$attempt").that(message?.text).isEqualTo(WRONG_PATTERN)
-                assertWithMessage("Attempt #$attempt").that(throttlingDialogMessage).isNull()
+                assertWithMessage("Attempt #$attempt").that(dialogMessage).isNull()
             }
         }
 

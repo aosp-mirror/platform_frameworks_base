@@ -153,6 +153,36 @@ public class KeyguardStateControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testCanSkipLockScreen_updateCalledOnFacesCleared() {
+        verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
+
+        // Cannot skip after there's a password/pin/pattern
+        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
+        ((KeyguardStateControllerImpl) mKeyguardStateController).update(false /* alwaysUpdate */);
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isFalse();
+
+        // Unless user is authenticated
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(anyInt())).thenReturn(true);
+        mUpdateCallbackCaptor.getValue().onFacesCleared();
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isTrue();
+    }
+
+    @Test
+    public void testCanSkipLockScreen_updateCalledOnFingerprintssCleared() {
+        verify(mKeyguardUpdateMonitor).registerCallback(mUpdateCallbackCaptor.capture());
+
+        // Cannot skip after there's a password/pin/pattern
+        when(mLockPatternUtils.isSecure(anyInt())).thenReturn(true);
+        ((KeyguardStateControllerImpl) mKeyguardStateController).update(false /* alwaysUpdate */);
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isFalse();
+
+        // Unless user is authenticated
+        when(mKeyguardUpdateMonitor.getUserCanSkipBouncer(anyInt())).thenReturn(true);
+        mUpdateCallbackCaptor.getValue().onFingerprintsCleared();
+        assertThat(mKeyguardStateController.canDismissLockScreen()).isTrue();
+    }
+
+    @Test
     public void testIsUnlocked() {
         // Is unlocked whenever the keyguard is not showing
         assertThat(mKeyguardStateController.isShowing()).isFalse();

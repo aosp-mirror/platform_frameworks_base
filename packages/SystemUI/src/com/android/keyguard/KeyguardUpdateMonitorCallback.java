@@ -291,9 +291,14 @@ public class KeyguardUpdateMonitorCallback {
     public void onLogoutEnabledChanged() { }
 
     /**
-     * Called when authenticated biometrics are cleared.
+     * Called when authenticated fingerprint biometrics are cleared.
      */
-    public void onBiometricsCleared() { }
+    public void onFingerprintsCleared() { }
+
+    /**
+     * Called when authenticated face biometrics have cleared.
+     */
+    public void onFacesCleared() { }
 
     /**
      * Called when the secondary lock screen requirement changes.

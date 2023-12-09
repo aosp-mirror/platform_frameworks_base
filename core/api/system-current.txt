@@ -3232,6 +3232,7 @@ package android.companion.virtual {
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void removeActivityPolicyExemption(@NonNull android.content.ComponentName);
     method public void removeSoundEffectListener(@NonNull android.companion.virtual.VirtualDeviceManager.SoundEffectListener);
     method @FlaggedApi("android.companion.virtual.flags.dynamic_policy") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDevicePolicy(int, int);
+    method @FlaggedApi("android.companion.virtual.flags.vdm_custom_ime") @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setDisplayImePolicy(int, int);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void setShowPointerIcon(boolean);
     method @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE) public void unregisterIntentInterceptor(@NonNull android.companion.virtual.VirtualDeviceManager.IntentInterceptorCallback);
   }
@@ -4008,7 +4009,7 @@ package android.content.pm {
     field public static final int DELETE_FAILED_OWNER_BLOCKED = -4; // 0xfffffffc
     field public static final int DELETE_KEEP_DATA = 1; // 0x1
     field public static final int DELETE_SUCCEEDED = 1; // 0x1
-    field @FlaggedApi("android.permission.flags.device_aware_permission_apis") public static final String EXTRA_REQUEST_PERMISSIONS_DEVICE_ID = "android.content.pm.extra.REQUEST_PERMISSIONS_DEVICE_ID";
+    field @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public static final String EXTRA_REQUEST_PERMISSIONS_DEVICE_ID = "android.content.pm.extra.REQUEST_PERMISSIONS_DEVICE_ID";
     field public static final String EXTRA_REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_LEGACY_ACCESS_PERMISSION_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_NAMES = "android.content.pm.extra.REQUEST_PERMISSIONS_NAMES";
     field public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
@@ -4089,7 +4090,8 @@ package android.content.pm {
     field @Deprecated public static final int INTENT_FILTER_VERIFICATION_SUCCESS = 1; // 0x1
     field @Deprecated public static final int MASK_PERMISSION_FLAGS = 255; // 0xff
     field public static final int MATCH_ANY_USER = 4194304; // 0x400000
-    field public static final int MATCH_CLONE_PROFILE = 536870912; // 0x20000000
+    field @Deprecated public static final int MATCH_CLONE_PROFILE = 536870912; // 0x20000000
+    field @FlaggedApi("android.content.pm.fix_duplicated_flags") public static final long MATCH_CLONE_PROFILE_LONG = 17179869184L; // 0x400000000L
     field public static final int MATCH_FACTORY_ONLY = 2097152; // 0x200000
     field public static final int MATCH_HIDDEN_UNTIL_INSTALLED_COMPONENTS = 536870912; // 0x20000000
     field public static final int MATCH_INSTANT = 8388608; // 0x800000
@@ -4113,7 +4115,7 @@ package android.content.pm {
 
   public static interface PackageManager.OnPermissionsChangedListener {
     method public void onPermissionsChanged(int);
-    method @FlaggedApi("android.permission.flags.device_aware_permission_apis") public default void onPermissionsChanged(int, @NonNull String);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") public default void onPermissionsChanged(int, @NonNull String);
   }
 
   public static final class PackageManager.UninstallCompleteCallback implements android.os.Parcelable {
@@ -4195,12 +4197,15 @@ package android.content.pm {
 
   public final class UserProperties implements android.os.Parcelable {
     method public int describeContents();
+    method public int getCrossProfileContentSharingStrategy();
     method public int getShowInQuietMode();
     method public int getShowInSharingSurfaces();
     method public boolean isCredentialShareableWithParent();
     method public boolean isMediaSharedWithParent();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.UserProperties> CREATOR;
+    field public static final int CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT = 1; // 0x1
+    field public static final int CROSS_PROFILE_CONTENT_SHARING_NO_DELEGATION = 0; // 0x0
     field public static final int SHOW_IN_QUIET_MODE_DEFAULT = 2; // 0x2
     field public static final int SHOW_IN_QUIET_MODE_HIDDEN = 1; // 0x1
     field public static final int SHOW_IN_QUIET_MODE_PAUSED = 0; // 0x0
@@ -4536,6 +4541,7 @@ package android.hardware.camera2.extension {
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public static final class RequestProcessor.Request {
     ctor @FlaggedApi("com.android.internal.camera.flags.concert_mode") public RequestProcessor.Request(@NonNull java.util.List<java.lang.Integer>, @NonNull java.util.List<android.util.Pair<android.hardware.camera2.CaptureRequest.Key,java.lang.Object>>, int);
+    method @FlaggedApi("com.android.internal.camera.flags.concert_mode") @NonNull public java.util.List<android.util.Pair<android.hardware.camera2.CaptureRequest.Key,java.lang.Object>> getParameters();
   }
 
   @FlaggedApi("com.android.internal.camera.flags.concert_mode") public static interface RequestProcessor.RequestCallback {
@@ -10921,13 +10927,13 @@ package android.permission {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_APP_HIBERNATION) public void onGetUnusedAppCount(@NonNull java.util.function.IntConsumer);
     method @BinderThread public abstract void onGrantOrUpgradeDefaultRuntimePermissions(@NonNull Runnable);
     method @Deprecated @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String);
-    method @FlaggedApi("android.permission.flags.device_aware_permission_apis") @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String, int);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @BinderThread public void onOneTimePermissionSessionTimeout(@NonNull String, int);
     method @Deprecated @BinderThread public void onRestoreDelayedRuntimePermissionsBackup(@NonNull String, @NonNull android.os.UserHandle, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @Deprecated @BinderThread public void onRestoreRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermission(@NonNull String, @NonNull String, @NonNull Runnable);
     method @BinderThread public abstract void onRevokeRuntimePermissions(@NonNull java.util.Map<java.lang.String,java.util.List<java.lang.String>>, boolean, int, @NonNull String, @NonNull java.util.function.Consumer<java.util.Map<java.lang.String,java.util.List<java.lang.String>>>);
     method @Deprecated @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, @NonNull Runnable);
-    method @FlaggedApi("android.permission.flags.device_aware_permission_apis") @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, int, @NonNull Runnable);
+    method @FlaggedApi("android.permission.flags.device_aware_permission_apis_enabled") @BinderThread public void onRevokeSelfPermissionsOnKill(@NonNull String, @NonNull java.util.List<java.lang.String>, int, @NonNull Runnable);
     method @Deprecated @BinderThread public abstract void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull String, @NonNull String, int, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onSetRuntimePermissionGrantStateByDeviceAdmin(@NonNull String, @NonNull android.permission.AdminPermissionControlParams, @NonNull java.util.function.Consumer<java.lang.Boolean>);
     method @BinderThread public void onStageAndApplyRuntimePermissionsBackup(@NonNull android.os.UserHandle, @NonNull java.io.InputStream, @NonNull Runnable);
@@ -17173,6 +17179,9 @@ package android.view {
     method @NonNull public default java.util.List<android.content.ComponentName> notifyScreenshotListeners(int);
     method public default void registerTaskFpsCallback(@IntRange(from=0) int, @NonNull java.util.concurrent.Executor, @NonNull android.window.TaskFpsCallback);
     method public default void unregisterTaskFpsCallback(@NonNull android.window.TaskFpsCallback);
+    field public static final int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1; // 0x1
+    field public static final int DISPLAY_IME_POLICY_HIDE = 2; // 0x2
+    field public static final int DISPLAY_IME_POLICY_LOCAL = 0; // 0x0
   }
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {

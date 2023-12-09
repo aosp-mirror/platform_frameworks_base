@@ -22,7 +22,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.bouncer.domain.interactor.primaryBouncerInteractor
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.Flags
-import com.android.systemui.flags.featureFlagsClassic
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -43,7 +43,7 @@ import org.junit.runner.RunWith
 class PrimaryBouncerToGoneTransitionViewModelTest : SysuiTestCase() {
     val kosmos =
         testKosmos().apply {
-            featureFlagsClassic.apply {
+            fakeFeatureFlagsClassic.apply {
                 set(Flags.REFACTOR_KEYGUARD_DISMISS_INTENT, false)
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
             }

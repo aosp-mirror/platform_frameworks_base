@@ -17,8 +17,10 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.app.trust.TrustManager
 import android.content.pm.UserInfo
 import android.hardware.biometrics.BiometricFaceConstants
+import android.hardware.biometrics.BiometricSourceType
 import android.os.Handler
 import android.os.PowerManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -62,6 +64,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.user.data.model.SelectionStatus
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -74,8 +77,11 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -99,7 +105,8 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
 
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
     @Mock private lateinit var faceWakeUpTriggersConfig: FaceWakeUpTriggersConfig
-    @Mock private lateinit var mSelectedUserInteractor: SelectedUserInteractor
+    @Mock private lateinit var selectedUserInteractor: SelectedUserInteractor
+    @Mock private lateinit var trustManager: TrustManager
 
     @Before
     fun setup() {
@@ -146,7 +153,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                         keyguardUpdateMonitor,
                         FakeTrustRepository(),
                         testScope.backgroundScope,
-                        mSelectedUserInteractor,
+                        selectedUserInteractor,
                         underTest,
                     )
                 },
@@ -169,6 +176,7 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
                 faceWakeUpTriggersConfig,
                 powerInteractor,
                 fakeBiometricSettingsRepository,
+                trustManager,
             )
     }
 
@@ -496,6 +504,22 @@ class KeyguardFaceAuthInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(faceAuthRepository.isLockedOut.value).isTrue()
+        }
+
+    @Test
+    fun whenIsAuthenticatedFalse_clearFaceBiometrics() =
+        testScope.runTest {
+            underTest.start()
+
+            faceAuthRepository.isAuthenticated.value = true
+            runCurrent()
+            verify(trustManager, never())
+                .clearAllBiometricRecognized(eq(BiometricSourceType.FACE), anyInt())
+
+            faceAuthRepository.isAuthenticated.value = false
+            runCurrent()
+
+            verify(trustManager).clearAllBiometricRecognized(eq(BiometricSourceType.FACE), anyInt())
         }
 
     companion object {

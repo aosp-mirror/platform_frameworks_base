@@ -405,9 +405,19 @@ public interface Computer extends PackageDataSnapshot {
     boolean isInstallDisabledForPackage(@NonNull String packageName, int uid,
             @UserIdInt int userId);
 
-    @Nullable
-    List<VersionedPackage> getPackagesUsingSharedLibrary(@NonNull SharedLibraryInfo libInfo,
-            @PackageManager.PackageInfoFlagsBits long flags, int callingUid, @UserIdInt int userId);
+    /**
+     * Returns a Pair that contains a list of packages that depend on the target library and the
+     * package library dependency information. The List&lt;VersionedPackage&gt; indicates a list of
+     * packages that depend on the target library, it may be null if no package depends on
+     * the target library. The List&lt;Boolean&gt; indicates whether each VersionedPackage in
+     * the List&lt;VersionedPackage&gt; optionally depends on the target library, where true means
+     * optional and false means required. It may be null if no package depends on
+     * the target library or without dependency information, e.g. uses-static-library.
+     */
+    @NonNull
+    Pair<List<VersionedPackage>, List<Boolean>> getPackagesUsingSharedLibrary(
+            @NonNull SharedLibraryInfo libInfo, @PackageManager.PackageInfoFlagsBits long flags,
+            int callingUid, @UserIdInt int userId);
 
     @Nullable
     ParceledListSlice<SharedLibraryInfo> getDeclaredSharedLibraries(

@@ -178,6 +178,7 @@ import static com.android.server.wm.WindowStateProto.UNRESTRICTED_KEEP_CLEAR_ARE
 import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
+import static com.android.window.flags.Flags.explicitRefreshRateHints;
 import static com.android.window.flags.Flags.secureWindowState;
 import static com.android.window.flags.Flags.surfaceTrustedOverlay;
 
@@ -666,6 +667,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * and false until the transaction to resize is sent.
      */
     boolean mSeamlesslyRotated = false;
+
+    /**
+     * Whether the IME insets have been consumed. If {@code true}, this window won't be able to
+     * receive visible IME insets; {@code false}, otherwise.
+     */
+    boolean mImeInsetsConsumed = false;
 
     /**
      * The insets state of sources provided by windows above the current window.
@@ -1189,6 +1196,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Adding %s to %s", this, parentWindow);
             parentWindow.addChild(this, sWindowSubLayerComparator);
         }
+
+        if (token.mRoundedCornerOverlay) {
+            mWmService.mTrustedPresentationListenerController.addIgnoredWindowTokens(
+                    getWindowToken());
+        }
     }
 
     @Override
@@ -1487,7 +1499,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             if (insetsChanged) {
                 mWindowFrames.setInsetsChanged(false);
-                mWmService.mWindowsInsetsChanged--;
+                if (mWmService.mWindowsInsetsChanged > 0) {
+                    mWmService.mWindowsInsetsChanged--;
+                }
                 if (mWmService.mWindowsInsetsChanged == 0) {
                     mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
                 }
@@ -2393,6 +2407,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         mWmService.postWindowRemoveCleanupLocked(this);
+
+        mWmService.mTrustedPresentationListenerController.removeIgnoredWindowTokens(
+                getWindowToken());
     }
 
     @Override
@@ -3796,13 +3813,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void notifyInsetsChanged() {
         ProtoLog.d(WM_DEBUG_WINDOW_INSETS, "notifyInsetsChanged for %s ", this);
-        mWindowFrames.setInsetsChanged(true);
+        if (!mWindowFrames.hasInsetsChanged()) {
+            mWindowFrames.setInsetsChanged(true);
 
-        // If the new InsetsState won't be dispatched before releasing WM lock, the following
-        // message will be executed.
-        mWmService.mWindowsInsetsChanged++;
-        mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
-        mWmService.mH.sendEmptyMessage(WindowManagerService.H.INSETS_CHANGED);
+            // If the new InsetsState won't be dispatched before releasing WM lock, the following
+            // message will be executed.
+            mWmService.mWindowsInsetsChanged++;
+            mWmService.mH.removeMessages(WindowManagerService.H.INSETS_CHANGED);
+            mWmService.mH.sendEmptyMessage(WindowManagerService.H.INSETS_CHANGED);
+        }
 
         final WindowContainer p = getParent();
         if (p != null) {
@@ -4192,6 +4211,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         } else {
             pw.print("null");
         }
+        pw.println();
 
         if (mXOffset != 0 || mYOffset != 0) {
             pw.println(prefix + "mXOffset=" + mXOffset + " mYOffset=" + mYOffset);
@@ -4224,6 +4244,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (computeDragResizing()) {
             pw.println(prefix + "computeDragResizing=" + computeDragResizing());
+        }
+        if (mImeInsetsConsumed) {
+            pw.println(prefix + "mImeInsetsConsumed=true");
         }
         pw.println(prefix + "isOnScreen=" + isOnScreen());
         pw.println(prefix + "isVisible=" + isVisible());
@@ -5185,9 +5208,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         boolean voteChanged = refreshRatePolicy.updateFrameRateVote(this);
         if (voteChanged) {
-            getPendingTransaction().setFrameRate(
-                    mSurfaceControl, mFrameRateVote.mRefreshRate,
-                    mFrameRateVote.mCompatibility, Surface.CHANGE_FRAME_RATE_ALWAYS);
+            getPendingTransaction()
+                    .setFrameRate(mSurfaceControl, mFrameRateVote.mRefreshRate,
+                        mFrameRateVote.mCompatibility, Surface.CHANGE_FRAME_RATE_ALWAYS);
+            if (explicitRefreshRateHints()) {
+                getPendingTransaction().setFrameRateSelectionStrategy(mSurfaceControl,
+                        mFrameRateVote.mSelectionStrategy);
+            }
 
         }
     }

@@ -25,7 +25,6 @@ import static com.android.systemui.flags.FlagManager.EXTRA_NAME;
 import static com.android.systemui.flags.FlagManager.EXTRA_VALUE;
 import static com.android.systemui.flags.FlagsCommonModule.ALL_FLAGS;
 import static com.android.systemui.shared.Flags.exampleSharedFlag;
-
 import static java.util.Objects.requireNonNull;
 
 import android.content.BroadcastReceiver;
@@ -508,9 +507,7 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
                 enabled = isEnabled((ResourceBooleanFlag) f);
                 overridden = readBooleanFlagOverride(f.getName()) != null;
             } else if (f instanceof SysPropBooleanFlag) {
-                // TODO(b/223379190): Teamfood not supported for sysprop flags yet.
                 enabled = isEnabled((SysPropBooleanFlag) f);
-                teamfood = false;
                 overridden = !mSystemProperties.get(f.getName()).isEmpty();
             } else {
                 // TODO: add support for other flag types.
@@ -519,7 +516,7 @@ public class FeatureFlagsClassicDebug implements FeatureFlagsClassic {
             }
 
             if (enabled) {
-                return new ReleasedFlag(f.getName(), f.getNamespace(), teamfood, overridden);
+                return new ReleasedFlag(f.getName(), f.getNamespace(), overridden);
             } else {
                 return new UnreleasedFlag(f.getName(), f.getNamespace(), teamfood, overridden);
             }

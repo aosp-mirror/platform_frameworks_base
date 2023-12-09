@@ -316,8 +316,25 @@ public class InternalResourceService extends SystemService {
                  */
                 @Override
                 public void onUsageEvent(int userId, @NonNull UsageEvents.Event event) {
-                    mHandler.obtainMessage(MSG_PROCESS_USAGE_EVENT, userId, 0, event)
-                            .sendToTarget();
+                    // Skip posting a message to the handler for events we don't care about.
+                    switch (event.getEventType()) {
+                        case UsageEvents.Event.ACTIVITY_RESUMED:
+                        case UsageEvents.Event.ACTIVITY_PAUSED:
+                        case UsageEvents.Event.ACTIVITY_STOPPED:
+                        case UsageEvents.Event.ACTIVITY_DESTROYED:
+                        case UsageEvents.Event.USER_INTERACTION:
+                        case UsageEvents.Event.CHOOSER_ACTION:
+                        case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
+                        case UsageEvents.Event.NOTIFICATION_SEEN:
+                            mHandler.obtainMessage(MSG_PROCESS_USAGE_EVENT, userId, 0, event)
+                                    .sendToTarget();
+                            break;
+                        default:
+                            if (DEBUG) {
+                                Slog.d(TAG, "Dropping event " + event.getEventType());
+                            }
+                            break;
+                    }
                 }
             };
 

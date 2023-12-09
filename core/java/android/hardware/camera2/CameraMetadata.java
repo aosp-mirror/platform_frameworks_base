@@ -2333,6 +2333,46 @@ public abstract class CameraMetadata<TKey> {
      */
     public static final int CONTROL_AE_MODE_ON_EXTERNAL_FLASH = 5;
 
+    /**
+     * <p>Like 'ON' but applies additional brightness boost in low light scenes.</p>
+     * <p>When the scene lighting conditions are within the range defined by
+     * {@link CameraCharacteristics#CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE android.control.lowLightBoostInfoLuminanceRange} this mode will apply additional
+     * brightness boost.</p>
+     * <p>This mode will automatically adjust the intensity of low light boost applied
+     * according to the scene lighting conditions. A darker scene will receive more boost
+     * while a brighter scene will receive less boost.</p>
+     * <p>This mode can ignore the set target frame rate to allow more light to be captured
+     * which can result in choppier motion. The frame rate can extend to lower than the
+     * {@link CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES android.control.aeAvailableTargetFpsRanges} but will not go below 10 FPS. This mode
+     * can also increase the sensor sensitivity gain which can result in increased luma
+     * and chroma noise. The sensor sensitivity gain can extend to higher values beyond
+     * {@link CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE android.sensor.info.sensitivityRange}. This mode may also apply additional
+     * processing to recover details in dark and bright areas of the image,and noise
+     * reduction at high sensitivity gain settings to manage the trade-off between light
+     * sensitivity and capture noise.</p>
+     * <p>This mode is restricted to two output surfaces. One output surface type can either
+     * be SurfaceView or TextureView. Another output surface type can either be MediaCodec
+     * or MediaRecorder. This mode cannot be used with a target FPS range higher than 30
+     * FPS.</p>
+     * <p>If the session configuration is not supported, the AE mode reported in the
+     * CaptureResult will be 'ON' instead of 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY'.</p>
+     * <p>The application can observe the CapturerResult field
+     * {@link CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE android.control.lowLightBoostState} to determine when low light boost is 'ACTIVE' or
+     * 'INACTIVE'.</p>
+     * <p>The low light boost is 'ACTIVE' once the scene lighting condition is less than the
+     * upper bound lux value defined by {@link CameraCharacteristics#CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE android.control.lowLightBoostInfoLuminanceRange}.
+     * This mode will be 'INACTIVE' once the scene lighting condition is greater than the
+     * upper bound lux value defined by {@link CameraCharacteristics#CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE android.control.lowLightBoostInfoLuminanceRange}.</p>
+     *
+     * @see CameraCharacteristics#CONTROL_AE_AVAILABLE_TARGET_FPS_RANGES
+     * @see CameraCharacteristics#CONTROL_LOW_LIGHT_BOOST_INFO_LUMINANCE_RANGE
+     * @see CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE
+     * @see CameraCharacteristics#SENSOR_INFO_SENSITIVITY_RANGE
+     * @see CaptureRequest#CONTROL_AE_MODE
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_AE_MODE_LOW_LIGHT_BOOST)
+    public static final int CONTROL_AE_MODE_ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY = 6;
+
     //
     // Enumeration values for CaptureRequest#CONTROL_AE_PRECAPTURE_TRIGGER
     //
@@ -4072,6 +4112,24 @@ public abstract class CameraMetadata<TKey> {
      * @see CaptureResult#CONTROL_AUTOFRAMING_STATE
      */
     public static final int CONTROL_AUTOFRAMING_STATE_CONVERGED = 2;
+
+    //
+    // Enumeration values for CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE
+    //
+
+    /**
+     * <p>The AE mode 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY' is enabled but not applied.</p>
+     * @see CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_AE_MODE_LOW_LIGHT_BOOST)
+    public static final int CONTROL_LOW_LIGHT_BOOST_STATE_INACTIVE = 0;
+
+    /**
+     * <p>The AE mode 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY' is enabled and applied.</p>
+     * @see CaptureResult#CONTROL_LOW_LIGHT_BOOST_STATE
+     */
+    @FlaggedApi(Flags.FLAG_CAMERA_AE_MODE_LOW_LIGHT_BOOST)
+    public static final int CONTROL_LOW_LIGHT_BOOST_STATE_ACTIVE = 1;
 
     //
     // Enumeration values for CaptureResult#FLASH_STATE

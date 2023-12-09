@@ -42,7 +42,7 @@ object FlagsFactory {
         name: String,
         namespace: String = "systemui",
     ): ReleasedFlag {
-        val flag = ReleasedFlag(name = name, namespace = namespace, teamfood = false)
+        val flag = ReleasedFlag(name = name, namespace = namespace)
         flagMap[name] = flag
         return flag
     }
@@ -57,7 +57,6 @@ object FlagsFactory {
                 name = name,
                 namespace = namespace,
                 resourceId = resourceId,
-                teamfood = false,
             )
         flagMap[name] = flag
         return flag

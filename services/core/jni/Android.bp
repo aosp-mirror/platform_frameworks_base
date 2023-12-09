@@ -187,7 +187,7 @@ cc_defaults {
         "android.hardware.power.stats@1.0",
         "android.hardware.power.stats-V1-ndk",
         "android.hardware.thermal@1.0",
-        "android.hardware.thermal-V1-ndk",
+        "android.hardware.thermal-V2-ndk",
         "android.hardware.tv.input@1.0",
         "android.hardware.tv.input-V2-ndk",
         "android.hardware.vibrator-V2-cpp",

@@ -23,7 +23,7 @@ import com.android.systemui.biometrics.data.repository.fingerprintPropertyReposi
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.Flags.FULL_SCREEN_USER_SWITCHER
-import com.android.systemui.flags.featureFlagsClassic
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -47,7 +47,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class LockscreenToAodTransitionViewModelTest : SysuiTestCase() {
     private val kosmos =
-        testKosmos().apply { featureFlagsClassic.apply { set(FULL_SCREEN_USER_SWITCHER, false) } }
+        testKosmos().apply {
+            fakeFeatureFlagsClassic.apply { set(FULL_SCREEN_USER_SWITCHER, false) }
+        }
     private val testScope = kosmos.testScope
     private val repository = kosmos.fakeKeyguardTransitionRepository
     private val shadeRepository = kosmos.shadeRepository

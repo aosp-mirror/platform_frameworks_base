@@ -26,6 +26,7 @@ import android.content.IntentFilter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.util.SparseSetArray;
 
 import com.android.internal.pm.pkg.component.ParsedComponent;
 import com.android.internal.pm.pkg.component.ParsedIntentInfo;
@@ -37,7 +38,6 @@ import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.utils.WatchedArraySet;
-import com.android.server.utils.WatchedSparseSetArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -213,7 +213,9 @@ final class AppsFilterUtils {
         /**
          * Computes component visibility of all packages in parallel from a thread pool.
          */
-        void execute(@NonNull WatchedSparseSetArray<Integer> outQueriesViaComponent) {
+        @NonNull
+        SparseSetArray<Integer> execute() {
+            final SparseSetArray<Integer> queriesViaComponent = new SparseSetArray<>();
             final ExecutorService pool = ConcurrentUtils.newFixedThreadPool(
                     MAX_THREADS, ParallelComputeComponentVisibility.class.getSimpleName(),
                     THREAD_PRIORITY_DEFAULT);
@@ -239,7 +241,7 @@ final class AppsFilterUtils {
                     try {
                         final ArraySet<Integer> visibleList = future.get();
                         if (visibleList.size() != 0) {
-                            outQueriesViaComponent.addAll(appId, visibleList);
+                            queriesViaComponent.addAll(appId, visibleList);
                         }
                     } catch (InterruptedException | ExecutionException e) {
                         throw new IllegalStateException(e);
@@ -248,6 +250,7 @@ final class AppsFilterUtils {
             } finally {
                 pool.shutdownNow();
             }
+            return queriesViaComponent;
         }
 
         /**

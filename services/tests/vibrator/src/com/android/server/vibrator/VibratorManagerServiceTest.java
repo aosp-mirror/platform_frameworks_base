@@ -307,10 +307,9 @@ public class VibratorManagerServiceTest {
 
                     @Override
                     void addService(String name, IBinder service) {
-                        if (service instanceof VibratorManagerService.ExternalVibratorService) {
-                            mExternalVibratorService =
-                                    (VibratorManagerService.ExternalVibratorService) service;
-                        }
+                        Object serviceInstance = service;
+                        mExternalVibratorService =
+                                (VibratorManagerService.ExternalVibratorService) serviceInstance;
                     }
 
                     HapticFeedbackVibrationProvider createHapticFeedbackVibrationProvider(
@@ -1396,6 +1395,17 @@ public class VibratorManagerServiceTest {
                 service, HapticFeedbackConstants.NO_HAPTICS, /* always= */ true);
 
         assertTrue(mVibratorProviders.get(1).getAllEffectSegments().isEmpty());
+    }
+
+    @Test
+    public void performHapticFeedback_usesServiceAsToken() throws Exception {
+        VibratorManagerService service = createSystemReadyService();
+
+        HalVibration vibration =
+                performHapticFeedbackAndWaitUntilFinished(
+                        service, HapticFeedbackConstants.SCROLL_TICK, /* always= */ true);
+
+        assertTrue(vibration.callerToken == service);
     }
 
     @Test

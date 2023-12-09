@@ -26,7 +26,6 @@ import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
 import com.android.systemui.Flags.migrateClocksToBlueprint
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.deviceentry.shared.DeviceEntryUdfpsRefactor
 import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardSmartspaceViewModel
 import com.android.systemui.res.R
@@ -92,13 +91,7 @@ constructor(
             connect(R.id.nssl_placeholder, START, PARENT_ID, START)
             connect(R.id.nssl_placeholder, END, PARENT_ID, END)
 
-            val lockId =
-                if (DeviceEntryUdfpsRefactor.isEnabled) {
-                    R.id.device_entry_icon_view
-                } else {
-                    R.id.lock_icon_view
-                }
-            connect(R.id.nssl_placeholder, BOTTOM, lockId, TOP)
+            addNotificationPlaceholderBarrier(this)
         }
     }
 }

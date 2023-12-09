@@ -22,7 +22,6 @@ import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.collection.ArrayMap
 import androidx.lifecycle.lifecycleScope
-import com.android.internal.policy.SystemBarUtils
 import com.android.internal.statusbar.StatusBarIcon
 import com.android.internal.util.ContrastColorUtil
 import com.android.systemui.common.ui.ConfigurationState
@@ -39,10 +38,8 @@ import com.android.systemui.statusbar.notification.icon.ui.viewmodel.Notificatio
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconsViewData
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconsViewData.LimitType
 import com.android.systemui.statusbar.phone.NotificationIconContainer
-import com.android.systemui.statusbar.policy.ConfigurationController
-import com.android.systemui.statusbar.policy.onConfigChanged
+import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import com.android.systemui.util.kotlin.mapValuesNotNullTo
-import com.android.systemui.util.kotlin.stateFlow
 import com.android.systemui.util.ui.isAnimating
 import com.android.systemui.util.ui.stopAnimating
 import com.android.systemui.util.ui.value
@@ -51,7 +48,6 @@ import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -59,20 +55,20 @@ import kotlinx.coroutines.launch
 /** Binds a view-model to a [NotificationIconContainer]. */
 object NotificationIconContainerViewBinder {
     @JvmStatic
-    fun bind(
+    fun bindWhileAttached(
         view: NotificationIconContainer,
         viewModel: NotificationIconContainerShelfViewModel,
         configuration: ConfigurationState,
-        configurationController: ConfigurationController,
+        systemBarUtilsState: SystemBarUtilsState,
         failureTracker: StatusBarIconViewBindingFailureTracker,
-        viewStore: ShelfNotificationIconViewStore,
+        viewStore: IconViewStore,
     ): DisposableHandle {
         return view.repeatWhenAttached {
             lifecycleScope.launch {
                 viewModel.icons.bindIcons(
                     view,
                     configuration,
-                    configurationController,
+                    systemBarUtilsState,
                     notifyBindingFailures = { failureTracker.shelfFailures = it },
                     viewStore,
                 )
@@ -81,66 +77,87 @@ object NotificationIconContainerViewBinder {
     }
 
     @JvmStatic
-    fun bind(
+    fun bindWhileAttached(
         view: NotificationIconContainer,
         viewModel: NotificationIconContainerStatusBarViewModel,
         configuration: ConfigurationState,
-        configurationController: ConfigurationController,
+        systemBarUtilsState: SystemBarUtilsState,
         failureTracker: StatusBarIconViewBindingFailureTracker,
-        viewStore: StatusBarNotificationIconViewStore,
-    ): DisposableHandle {
-        val contrastColorUtil = ContrastColorUtil.getInstance(view.context)
-        return view.repeatWhenAttached {
-            lifecycleScope.run {
-                launch {
-                    val iconColors: Flow<NotificationIconColors> =
-                        viewModel.iconColors.mapNotNull { it.iconColors(view.viewBounds) }
-                    viewModel.icons.bindIcons(
-                        view,
-                        configuration,
-                        configurationController,
-                        notifyBindingFailures = { failureTracker.statusBarFailures = it },
-                        viewStore,
-                    ) { _, sbiv ->
-                        StatusBarIconViewBinder.bindIconColors(
-                            sbiv,
-                            iconColors,
-                            contrastColorUtil,
-                        )
-                    }
-                }
-                launch { viewModel.bindIsolatedIcon(view, viewStore) }
-                launch { viewModel.animationsEnabled.bindAnimationsEnabled(view) }
+        viewStore: IconViewStore,
+    ): DisposableHandle =
+        view.repeatWhenAttached {
+            lifecycleScope.launch {
+                bind(view, viewModel, configuration, systemBarUtilsState, failureTracker, viewStore)
             }
         }
+
+    suspend fun bind(
+        view: NotificationIconContainer,
+        viewModel: NotificationIconContainerStatusBarViewModel,
+        configuration: ConfigurationState,
+        systemBarUtilsState: SystemBarUtilsState,
+        failureTracker: StatusBarIconViewBindingFailureTracker,
+        viewStore: IconViewStore,
+    ): Unit = coroutineScope {
+        launch {
+            val contrastColorUtil = ContrastColorUtil.getInstance(view.context)
+            val iconColors: Flow<NotificationIconColors> =
+                viewModel.iconColors.mapNotNull { it.iconColors(view.viewBounds) }
+            viewModel.icons.bindIcons(
+                view,
+                configuration,
+                systemBarUtilsState,
+                notifyBindingFailures = { failureTracker.statusBarFailures = it },
+                viewStore,
+            ) { _, sbiv ->
+                StatusBarIconViewBinder.bindIconColors(
+                    sbiv,
+                    iconColors,
+                    contrastColorUtil,
+                )
+            }
+        }
+        launch { viewModel.bindIsolatedIcon(view, viewStore) }
+        launch { viewModel.animationsEnabled.bindAnimationsEnabled(view) }
     }
 
     @JvmStatic
-    fun bind(
+    fun bindWhileAttached(
         view: NotificationIconContainer,
         viewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
         configuration: ConfigurationState,
-        configurationController: ConfigurationController,
+        systemBarUtilsState: SystemBarUtilsState,
         failureTracker: StatusBarIconViewBindingFailureTracker,
         viewStore: IconViewStore,
     ): DisposableHandle {
         return view.repeatWhenAttached {
             lifecycleScope.launch {
-                view.setUseIncreasedIconScale(true)
-                launch {
-                    viewModel.icons.bindIcons(
-                        view,
-                        configuration,
-                        configurationController,
-                        notifyBindingFailures = { failureTracker.aodFailures = it },
-                        viewStore,
-                    ) { _, sbiv ->
-                        viewModel.bindAodStatusBarIconView(sbiv, configuration)
-                    }
-                }
-                launch { viewModel.areContainerChangesAnimated.bindAnimationsEnabled(view) }
+                bind(view, viewModel, configuration, systemBarUtilsState, failureTracker, viewStore)
             }
         }
+    }
+
+    suspend fun bind(
+        view: NotificationIconContainer,
+        viewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
+        configuration: ConfigurationState,
+        systemBarUtilsState: SystemBarUtilsState,
+        failureTracker: StatusBarIconViewBindingFailureTracker,
+        viewStore: IconViewStore,
+    ): Unit = coroutineScope {
+        view.setUseIncreasedIconScale(true)
+        launch {
+            viewModel.icons.bindIcons(
+                view,
+                configuration,
+                systemBarUtilsState,
+                notifyBindingFailures = { failureTracker.aodFailures = it },
+                viewStore,
+            ) { _, sbiv ->
+                viewModel.bindAodStatusBarIconView(sbiv, configuration)
+            }
+        }
+        launch { viewModel.areContainerChangesAnimated.bindAnimationsEnabled(view) }
     }
 
     private suspend fun NotificationIconContainerAlwaysOnDisplayViewModel.bindAodStatusBarIconView(
@@ -199,7 +216,7 @@ object NotificationIconContainerViewBinder {
     private suspend fun Flow<NotificationIconsViewData>.bindIcons(
         view: NotificationIconContainer,
         configuration: ConfigurationState,
-        configurationController: ConfigurationController,
+        systemBarUtilsState: SystemBarUtilsState,
         notifyBindingFailures: (Collection<String>) -> Unit,
         viewStore: IconViewStore,
         bindIcon: suspend (iconKey: String, view: StatusBarIconView) -> Unit = { _, _ -> },
@@ -210,12 +227,8 @@ object NotificationIconContainerViewBinder {
             )
         val iconHorizontalPaddingFlow: Flow<Int> =
             configuration.getDimensionPixelSize(R.dimen.status_bar_icon_horizontal_margin)
-        val statusBarHeightFlow: StateFlow<Int> =
-            stateFlow(changedSignals = configurationController.onConfigChanged) {
-                SystemBarUtils.getStatusBarHeight(view.context)
-            }
         val layoutParams: Flow<FrameLayout.LayoutParams> =
-            combine(iconSizeFlow, iconHorizontalPaddingFlow, statusBarHeightFlow) {
+            combine(iconSizeFlow, iconHorizontalPaddingFlow, systemBarUtilsState.statusBarHeight) {
                 iconSize,
                 iconHPadding,
                 statusBarHeight,

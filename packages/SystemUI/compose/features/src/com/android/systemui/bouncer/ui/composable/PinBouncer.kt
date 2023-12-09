@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import com.android.compose.animation.Easings
 import com.android.compose.grid.VerticalGrid
 import com.android.compose.modifiers.thenIf
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout
 import com.android.systemui.bouncer.ui.viewmodel.ActionButtonAppearance
 import com.android.systemui.bouncer.ui.viewmodel.PinBouncerViewModel
 import com.android.systemui.common.shared.model.ContentDescription
@@ -70,7 +69,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun PinPad(
     viewModel: PinBouncerViewModel,
-    layout: BouncerSceneLayout,
+    verticalSpacing: Dp,
     modifier: Modifier = Modifier,
 ) {
     DisposableEffect(Unit) {
@@ -96,8 +95,8 @@ fun PinPad(
 
     VerticalGrid(
         columns = columns,
-        verticalSpacing = layout.verticalSpacing,
-        horizontalSpacing = calculateHorizontalSpacingBetweenColumns(layout.gridWidth),
+        verticalSpacing = verticalSpacing,
+        horizontalSpacing = calculateHorizontalSpacingBetweenColumns(gridWidth = 300.dp),
         modifier = modifier,
     ) {
         repeat(9) { index ->
@@ -354,14 +353,6 @@ private fun calculateHorizontalSpacingBetweenColumns(
 ): Dp {
     return (gridWidth - (pinButtonMaxSize * columns)) / (columns - 1)
 }
-
-/** The width of the grid of PIN pad buttons, in dips. */
-private val BouncerSceneLayout.gridWidth: Dp
-    get() = if (isUseCompactSize) 292.dp else 300.dp
-
-/** The spacing between rows of PIN pad buttons, in dips. */
-private val BouncerSceneLayout.verticalSpacing: Dp
-    get() = if (isUseCompactSize) 8.dp else 12.dp
 
 /** Number of columns in the PIN pad grid. */
 private const val columns = 3

@@ -127,6 +127,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         "getUsesSdkLibraries",
         "getUsesSdkLibrariesVersionsMajor",
         "getUsesSdkLibrariesCertDigests",
+        "getUsesSdkLibrariesOptional",
         // Tested through addUsesStaticLibrary
         "addUsesStaticLibrary",
         "getUsesStaticLibraries",
@@ -608,7 +609,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         .setSplitHasCode(1, false)
         .setSplitClassLoaderName(0, "testSplitClassLoaderNameZero")
         .setSplitClassLoaderName(1, "testSplitClassLoaderNameOne")
-        .addUsesSdkLibrary("testSdk", 2L, arrayOf("testCertDigest1"))
+        .addUsesSdkLibrary("testSdk", 2L, arrayOf("testCertDigest1"), true)
         .addUsesStaticLibrary("testStatic", 3L, arrayOf("testCertDigest2"))
 
     override fun finalizeObject(parcelable: Parcelable) {
@@ -661,6 +662,7 @@ class AndroidPackageTest : ParcelableComponentTest(AndroidPackage::class, Packag
         expect.that(after.usesSdkLibrariesCertDigests!!.size).isEqualTo(1)
         expect.that(after.usesSdkLibrariesCertDigests!![0]).asList()
                 .containsExactly("testCertDigest1")
+        expect.that(after.usesSdkLibrariesOptional).asList().containsExactly(true)
 
         expect.that(after.usesStaticLibraries).containsExactly("testStatic")
         expect.that(after.usesStaticLibrariesVersions).asList().containsExactly(3L)

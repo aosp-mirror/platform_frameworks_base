@@ -266,17 +266,20 @@ public class PackageInfoUtils {
         if ((flags & PackageManager.GET_ACTIVITIES) != 0) {
             final int N = pkg.getActivities().size();
             if (N > 0) {
+                // Allow to match activities of quarantined packages.
+                long aflags = flags | PackageManager.MATCH_QUARANTINED_COMPONENTS;
+
                 int num = 0;
                 final ActivityInfo[] res = new ActivityInfo[N];
                 for (int i = 0; i < N; i++) {
                     final ParsedActivity a = pkg.getActivities().get(i);
                     if (ComponentParseUtils.isMatch(state, pkgSetting.isSystem(), pkg.isEnabled(), a,
-                            flags)) {
+                            aflags)) {
                         if (PackageManager.APP_DETAILS_ACTIVITY_CLASS_NAME.equals(
                                 a.getName())) {
                             continue;
                         }
-                        res[num++] = generateActivityInfo(pkg, a, flags, state,
+                        res[num++] = generateActivityInfo(pkg, a, aflags, state,
                                 applicationInfo, userId, pkgSetting);
                     }
                 }

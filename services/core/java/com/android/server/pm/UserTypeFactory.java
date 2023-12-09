@@ -160,7 +160,9 @@ public final class UserTypeFactory {
                                 UserProperties.SHOW_IN_SHARING_SURFACES_WITH_PARENT)
                         .setMediaSharedWithParent(true)
                         .setCredentialShareableWithParent(true)
-                        .setDeleteAppWithParent(true));
+                        .setDeleteAppWithParent(true)
+                        .setCrossProfileContentSharingStrategy(UserProperties
+                                .CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT));
     }
 
     /**
@@ -309,6 +311,7 @@ public final class UserTypeFactory {
                         .setStartWithParent(true)
                         .setCredentialShareableWithParent(true)
                         .setAuthAlwaysRequiredToDisableQuietMode(true)
+                        .setAllowStoppingUserWithDelayedLocking(true)
                         .setMediaSharedWithParent(false)
                         .setShowInLauncher(UserProperties.SHOW_IN_LAUNCHER_SEPARATE)
                         .setShowInSettings(UserProperties.SHOW_IN_SETTINGS_SEPARATE)
@@ -318,7 +321,9 @@ public final class UserTypeFactory {
                                 UserProperties.SHOW_IN_SHARING_SURFACES_SEPARATE)
                         .setCrossProfileIntentFilterAccessControl(
                                 UserProperties.CROSS_PROFILE_INTENT_FILTER_ACCESS_LEVEL_SYSTEM)
-                        .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT));
+                        .setInheritDevicePolicy(UserProperties.INHERIT_DEVICE_POLICY_FROM_PARENT)
+                        .setCrossProfileContentSharingStrategy(
+                                UserProperties.CROSS_PROFILE_CONTENT_SHARING_DELEGATE_FROM_PARENT));
     }
 
     /**

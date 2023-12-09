@@ -161,13 +161,13 @@ constructor(
             if (it == null) {
                 notConnectedFlow
             } else {
-                val secondary = it.contentDescription.toString()
+                val secondary = it.contentDescription
                 flowOf(
                     InternetTileModel.Active(
-                        secondaryTitle = secondary,
+                        secondaryLabel = secondary?.toText(),
                         iconId = it.res,
                         stateDescription = null,
-                        contentDescription = ContentDescription.Loaded(secondary),
+                        contentDescription = secondary,
                     )
                 )
             }
@@ -241,5 +241,11 @@ constructor(
                 string.substring(1, length - 1)
             } else string
         }
+
+        private fun ContentDescription.toText(): Text =
+            when (this) {
+                is ContentDescription.Loaded -> Text.Loaded(this.description)
+                is ContentDescription.Resource -> Text.Resource(this.res)
+            }
     }
 }

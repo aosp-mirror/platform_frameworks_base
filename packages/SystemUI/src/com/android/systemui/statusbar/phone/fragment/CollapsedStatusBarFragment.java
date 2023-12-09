@@ -74,16 +74,14 @@ import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.statusbar.ui.SystemBarUtilsState;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.CarrierConfigTracker.CarrierConfigChangedListener;
 import com.android.systemui.util.CarrierConfigTracker.DefaultDataSubscriptionChangedListener;
 import com.android.systemui.util.settings.SecureSettings;
-
-import kotlin.Unit;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -94,6 +92,8 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+
+import kotlin.Unit;
 
 /**
  * Contains the collapsed status bar and handles hiding/showing based on disable flags
@@ -153,7 +153,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final NotificationIconContainerStatusBarViewModel mStatusBarIconsViewModel;
     private final ConfigurationState mConfigurationState;
-    private final ConfigurationController mConfigurationController;
+    private final SystemBarUtilsState mSystemBarUtilsState;
     private final StatusBarNotificationIconViewStore mStatusBarIconViewStore;
     private final DemoModeController mDemoModeController;
 
@@ -246,7 +246,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             NotificationIconContainerStatusBarViewModel statusBarIconsViewModel,
             ConfigurationState configurationState,
-            ConfigurationController configurationController,
+            SystemBarUtilsState systemBarUtilsState,
             StatusBarNotificationIconViewStore statusBarIconViewStore,
             DemoModeController demoModeController) {
         mStatusBarFragmentComponentFactory = statusBarFragmentComponentFactory;
@@ -275,7 +275,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mStatusBarIconsViewModel = statusBarIconsViewModel;
         mConfigurationState = configurationState;
-        mConfigurationController = configurationController;
+        mSystemBarUtilsState = systemBarUtilsState;
         mStatusBarIconViewStore = statusBarIconViewStore;
         mDemoModeController = demoModeController;
     }
@@ -466,11 +466,11 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                         .inflate(R.layout.notification_icon_area, notificationIconArea, true);
             NotificationIconContainer notificationIcons =
                     notificationIconArea.requireViewById(R.id.notificationIcons);
-            NotificationIconContainerViewBinder.bind(
+            NotificationIconContainerViewBinder.bindWhileAttached(
                     notificationIcons,
                     mStatusBarIconsViewModel,
                     mConfigurationState,
-                    mConfigurationController,
+                    mSystemBarUtilsState,
                     mIconViewBindingFailureTracker,
                     mStatusBarIconViewStore);
         } else {

@@ -16,7 +16,10 @@
 
 package com.android.systemui.flags
 
+import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
+import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.shared.KeyguardShadeMigrationNssl
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
@@ -29,5 +32,9 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
     override fun defineDependencies() {
         NotificationsLiveDataStoreRefactor.token dependsOn NotificationIconContainerRefactor.token
         FooterViewRefactor.token dependsOn NotificationIconContainerRefactor.token
+
+        val keyguardBottomAreaRefactor = FlagToken(
+                FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR, keyguardBottomAreaRefactor())
+        KeyguardShadeMigrationNssl.token dependsOn keyguardBottomAreaRefactor
     }
 }

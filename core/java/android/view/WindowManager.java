@@ -122,7 +122,11 @@ import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.window.ITrustedPresentationListener;
 import android.window.TaskFpsCallback;
+import android.window.TrustedPresentationThresholds;
+
+import com.android.window.flags.Flags;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -656,26 +660,35 @@ public interface WindowManager extends ViewManager {
 
     /**
      * Display IME Policy: The IME should appear on the local display.
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_LOCAL = 0;
 
     /**
-     * Display IME Policy: The IME should appear on the fallback display.
+     * Display IME Policy: The IME should appear on a fallback display.
+     *
+     * <p>The fallback display is always {@link Display#DEFAULT_DISPLAY}.</p>
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_FALLBACK_DISPLAY = 1;
 
     /**
      * Display IME Policy: The IME should be hidden.
      *
-     * Setting this policy will prevent the IME from making a connection. This
-     * will prevent any IME from receiving metadata about input.
+     * <p>Setting this policy will prevent the IME from making a connection. This
+     * will prevent any IME from receiving metadata about input and this display will effectively
+     * have no IME.</p>
+     *
      * @hide
      */
-    @TestApi
+    @SuppressLint("UnflaggedApi")  // promoting from @TestApi.
+    @SystemApi
     int DISPLAY_IME_POLICY_HIDE = 2;
 
     /**
@@ -3251,6 +3264,13 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC = 1 << 24;
 
         /**
+         * Flag to indicate that the window consumes the insets of {@link Type#ime()}. This makes
+         * windows below this window unable to receive visible IME insets.
+         * @hide
+         */
+        public static final int PRIVATE_FLAG_CONSUME_IME_INSETS = 1 << 25;
+
+        /**
          * Flag to indicate that the window is controlling the appearance of system bars. So we
          * don't need to adjust it by reading its system UI flags for compatibility.
          * @hide
@@ -3334,6 +3354,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION,
                 PRIVATE_FLAG_NOT_MAGNIFIABLE,
                 PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
+                PRIVATE_FLAG_CONSUME_IME_INSETS,
                 PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                 PRIVATE_FLAG_BEHAVIOR_CONTROLLED,
                 PRIVATE_FLAG_FIT_INSETS_CONTROLLED,
@@ -3432,6 +3453,10 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC,
                         name = "COLOR_SPACE_AGNOSTIC"),
                 @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_CONSUME_IME_INSETS,
+                        equals = PRIVATE_FLAG_CONSUME_IME_INSETS,
+                        name = "CONSUME_IME_INSETS"),
+                @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                         equals = PRIVATE_FLAG_APPEARANCE_CONTROLLED,
                         name = "APPEARANCE_CONTROLLED"),
@@ -3458,7 +3483,7 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
                         equals = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
-                        name = "PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY")
+                        name = "SYSTEM_APPLICATION_OVERLAY")
         })
         @PrivateFlags
         @TestApi
@@ -5882,6 +5907,36 @@ public interface WindowManager extends ViewManager {
     @TestApi
     @RequiresPermission(permission.ACCESS_SURFACE_FLINGER)
     default boolean replaceContentOnDisplayWithSc(int displayId, @NonNull SurfaceControl sc) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Add a trusted presentation listener associated with a window.
+     *
+     * <p> If this listener is already registered then the window and thresholds will be updated.
+     *
+     * @param window     The Window to add the trusted presentation listener for
+     * @param thresholds The {@link TrustedPresentationThresholds} that will specify
+     *                   when the to invoke the callback.
+     * @param executor   The {@link Executor} where the callback will be invoked on.
+     * @param listener   The {@link Consumer} that will receive the callbacks
+     *                  when entered or exited trusted presentation per the thresholds.
+     */
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
+    default void registerTrustedPresentationListener(@NonNull IBinder window,
+            @NonNull TrustedPresentationThresholds thresholds,  @NonNull Executor executor,
+            @NonNull Consumer<Boolean> listener) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Removes a presentation listener associated with a window. If the listener was not previously
+     * registered, the call will be a noop.
+     *
+     * @see WindowManager#registerTrustedPresentationListener(IBinder, TrustedPresentationThresholds, Executor, Consumer)
+     */
+    @FlaggedApi(Flags.FLAG_TRUSTED_PRESENTATION_LISTENER_FOR_WINDOW)
+    default void unregisterTrustedPresentationListener(@NonNull Consumer<Boolean> listener) {
         throw new UnsupportedOperationException();
     }
 }

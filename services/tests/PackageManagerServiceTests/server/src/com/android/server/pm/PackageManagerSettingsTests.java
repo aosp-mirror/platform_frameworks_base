@@ -817,12 +817,14 @@ public class PackageManagerSettingsTests {
 
         ps1.setUsesSdkLibraries(new String[] { "com.example.sdk.one" });
         ps1.setUsesSdkLibrariesVersionsMajor(new long[] { 12 });
+        ps1.setUsesSdkLibrariesOptional(new boolean[] {true});
         ps1.setFlags(ps1.getFlags() | ApplicationInfo.FLAG_SYSTEM);
         settingsUnderTest.mPackages.put(PACKAGE_NAME_1, ps1);
         assertThat(settingsUnderTest.disableSystemPackageLPw(PACKAGE_NAME_1, false), is(true));
 
         ps2.setUsesSdkLibraries(new String[] { "com.example.sdk.two" });
         ps2.setUsesSdkLibrariesVersionsMajor(new long[] { 34 });
+        ps2.setUsesSdkLibrariesOptional(new boolean[] {false});
         settingsUnderTest.mPackages.put(PACKAGE_NAME_2, ps2);
 
         settingsUnderTest.writeLPr(computer, /*sync=*/true);
@@ -838,18 +840,29 @@ public class PackageManagerSettingsTests {
         Truth.assertThat(readPs1).isNotNull();
         Truth.assertThat(readPs1.getUsesSdkLibraries()).isNotNull();
         Truth.assertThat(readPs1.getUsesSdkLibrariesVersionsMajor()).isNotNull();
+        Truth.assertThat(readPs1.getUsesSdkLibrariesOptional()).isNotNull();
         Truth.assertThat(readPs2).isNotNull();
         Truth.assertThat(readPs2.getUsesSdkLibraries()).isNotNull();
         Truth.assertThat(readPs2.getUsesSdkLibrariesVersionsMajor()).isNotNull();
+        Truth.assertThat(readPs2.getUsesSdkLibrariesOptional()).isNotNull();
 
         List<Long> ps1VersionsAsList = new ArrayList<>();
         for (long version : ps1.getUsesSdkLibrariesVersionsMajor()) {
             ps1VersionsAsList.add(version);
         }
 
+        List<Boolean> ps1RequireAsList = new ArrayList<>();
+        for (boolean optional : ps1.getUsesSdkLibrariesOptional()) {
+            ps1RequireAsList.add(optional);
+        }
+
         List<Long> ps2VersionsAsList = new ArrayList<>();
         for (long version : ps2.getUsesSdkLibrariesVersionsMajor()) {
             ps2VersionsAsList.add(version);
+        }
+        List<Boolean> ps2RequireAsList = new ArrayList<>();
+        for (boolean optional : ps2.getUsesSdkLibrariesOptional()) {
+            ps2RequireAsList.add(optional);
         }
 
         Truth.assertThat(readPs1.getUsesSdkLibraries()).asList()
@@ -858,11 +871,17 @@ public class PackageManagerSettingsTests {
         Truth.assertThat(readPs1.getUsesSdkLibrariesVersionsMajor()).asList()
                 .containsExactlyElementsIn(ps1VersionsAsList).inOrder();
 
+        Truth.assertThat(readPs1.getUsesSdkLibrariesOptional()).asList()
+                .containsExactlyElementsIn(ps1RequireAsList).inOrder();
+
         Truth.assertThat(readPs2.getUsesSdkLibraries()).asList()
                 .containsExactlyElementsIn(ps2.getUsesSdkLibraries()).inOrder();
 
         Truth.assertThat(readPs2.getUsesSdkLibrariesVersionsMajor()).asList()
                 .containsExactlyElementsIn(ps2VersionsAsList).inOrder();
+
+        Truth.assertThat(readPs2.getUsesSdkLibrariesOptional()).asList()
+                .containsExactlyElementsIn(ps2RequireAsList).inOrder();
     }
 
     @Test
@@ -1047,6 +1066,7 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -1087,6 +1107,7 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -1129,6 +1150,7 @@ public class PackageManagerSettingsTests {
                     UserManagerService.getInstance(),
                     null /*usesSdkLibraries*/,
                     null /*usesSdkLibrariesVersions*/,
+                    null /*usesSdkLibrariesOptional*/,
                     null /*usesStaticLibraries*/,
                     null /*usesStaticLibrariesVersions*/,
                     null /*mimeGroups*/,
@@ -1167,6 +1189,7 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -1214,6 +1237,7 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesSdkLibraries*/,
                 null /*usesSdkLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
                 null /*mimeGroups*/,
@@ -1263,6 +1287,7 @@ public class PackageManagerSettingsTests {
                 null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID(),
                 34 /*targetSdkVersion*/,
@@ -1311,6 +1336,7 @@ public class PackageManagerSettingsTests {
                 null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID(),
                 34 /*targetSdkVersion*/,
@@ -1356,6 +1382,7 @@ public class PackageManagerSettingsTests {
                 null /*usesSdkLibrariesVersions*/,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
+                null /*usesSdkLibrariesOptional*/,
                 null /*mimeGroups*/,
                 UUID.randomUUID(),
                 34 /*targetSdkVersion*/,

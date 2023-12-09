@@ -23,6 +23,7 @@ package {
     default_visibility: [
         "//visibility:override",
         "//frameworks/base/packages/SystemUI:__subpackages__",
+        "//platform_testing:__subpackages__"
     ],
 }
 

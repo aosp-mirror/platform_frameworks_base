@@ -608,6 +608,23 @@ public final class Settings {
 
     /**
      * Activity Action: Show settings to allow configuration of
+     * {@link Manifest.permission#MEDIA_ROUTING_CONTROL} permission.
+     *
+     * Input: Optionally, the Intent's data URI can specify the application package name to
+     * directly invoke the management GUI specific to the package name. For example
+     * "package:com.my.app". However, modifying this permission setting for any package is allowed
+     * only when that package holds an appropriate companion device profile such as
+     * {@link android.companion.AssociationRequest#DEVICE_PROFILE_WATCH}.
+     * <p>
+     * Output: Nothing.
+     */
+    @FlaggedApi("com.android.media.flags.enable_privileged_routing_for_media_routing_control")
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REQUEST_MEDIA_ROUTING_CONTROL =
+            "android.settings.REQUEST_MEDIA_ROUTING_CONTROL";
+
+    /**
+     * Activity Action: Show settings to allow configuration of
      * {@link Manifest.permission#RUN_USER_INITIATED_JOBS} permission
      *
      * Input: Optionally, the Intent's data URI can specify the application package name to

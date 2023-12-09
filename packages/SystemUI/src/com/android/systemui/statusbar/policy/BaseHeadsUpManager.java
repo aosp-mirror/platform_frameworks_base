@@ -25,8 +25,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.os.Handler;
-import android.os.SystemClock;
-import android.provider.Settings;
 import android.util.ArrayMap;
 import android.view.accessibility.AccessibilityManager;
 
@@ -40,6 +38,8 @@ import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.util.ListenerSet;
+import com.android.systemui.util.settings.GlobalSettings;
+import com.android.systemui.util.time.SystemClock;
 
 import java.io.PrintWriter;
 
@@ -85,36 +85,40 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
     public BaseHeadsUpManager(@NonNull final Context context,
             HeadsUpManagerLogger logger,
             @Main Handler handler,
+            GlobalSettings globalSettings,
+            SystemClock systemClock,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             UiEventLogger uiEventLogger) {
-        super(logger, handler);
+        super(logger, handler, systemClock);
         mContext = context;
         mAccessibilityMgr = accessibilityManagerWrapper;
         mUiEventLogger = uiEventLogger;
         Resources resources = context.getResources();
         mMinimumDisplayTime = resources.getInteger(R.integer.heads_up_notification_minimum_time);
-        mStickyDisplayTime = resources.getInteger(R.integer.sticky_heads_up_notification_time);
-        mAutoDismissNotificationDecay = resources.getInteger(R.integer.heads_up_notification_decay);
+        mStickyForSomeTimeAutoDismissTime = resources.getInteger(
+                R.integer.sticky_heads_up_notification_time);
+        mAutoDismissTime = resources.getInteger(R.integer.heads_up_notification_decay);
         mTouchAcceptanceDelay = resources.getInteger(R.integer.touch_acceptance_delay);
         mSnoozedPackages = new ArrayMap<>();
         int defaultSnoozeLengthMs =
                 resources.getInteger(R.integer.heads_up_default_snooze_length_ms);
 
-        mSnoozeLengthMs = Settings.Global.getInt(context.getContentResolver(),
-                SETTING_HEADS_UP_SNOOZE_LENGTH_MS, defaultSnoozeLengthMs);
+        mSnoozeLengthMs = globalSettings.getInt(SETTING_HEADS_UP_SNOOZE_LENGTH_MS,
+                defaultSnoozeLengthMs);
         ContentObserver settingsObserver = new ContentObserver(handler) {
             @Override
             public void onChange(boolean selfChange) {
-                final int packageSnoozeLengthMs = Settings.Global.getInt(
-                        context.getContentResolver(), SETTING_HEADS_UP_SNOOZE_LENGTH_MS, -1);
+                final int packageSnoozeLengthMs = globalSettings.getInt(
+                        SETTING_HEADS_UP_SNOOZE_LENGTH_MS, -1);
                 if (packageSnoozeLengthMs > -1 && packageSnoozeLengthMs != mSnoozeLengthMs) {
                     mSnoozeLengthMs = packageSnoozeLengthMs;
                     mLogger.logSnoozeLengthChange(packageSnoozeLengthMs);
                 }
             }
         };
-        context.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(SETTING_HEADS_UP_SNOOZE_LENGTH_MS), false,
+        globalSettings.registerContentObserver(
+                globalSettings.getUriFor(SETTING_HEADS_UP_SNOOZE_LENGTH_MS),
+                /* notifyForDescendants = */ false,
                 settingsObserver);
     }
 
@@ -231,7 +235,7 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
         final String key = snoozeKey(packageName, mUser);
         Long snoozedUntil = mSnoozedPackages.get(key);
         if (snoozedUntil != null) {
-            if (snoozedUntil > mClock.currentTimeMillis()) {
+            if (snoozedUntil > mSystemClock.elapsedRealtime()) {
                 mLogger.logIsSnoozedReturned(key);
                 return true;
             }
@@ -250,7 +254,7 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
             String packageName = entry.mEntry.getSbn().getPackageName();
             String snoozeKey = snoozeKey(packageName, mUser);
             mLogger.logPackageSnoozed(snoozeKey);
-            mSnoozedPackages.put(snoozeKey, mClock.currentTimeMillis() + mSnoozeLengthMs);
+            mSnoozedPackages.put(snoozeKey, mSystemClock.elapsedRealtime() + mSnoozeLengthMs);
         }
     }
 
@@ -308,7 +312,7 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
     protected void dumpInternal(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.print("  mTouchAcceptanceDelay="); pw.println(mTouchAcceptanceDelay);
         pw.print("  mSnoozeLengthMs="); pw.println(mSnoozeLengthMs);
-        pw.print("  now="); pw.println(mClock.currentTimeMillis());
+        pw.print("  now="); pw.println(mSystemClock.elapsedRealtime());
         pw.print("  mUser="); pw.println(mUser);
         for (AlertEntry entry: mAlertEntries.values()) {
             pw.print("  HeadsUpEntry="); pw.println(entry.mEntry);
@@ -519,12 +523,12 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
 
         /**
          * @return When the notification should auto-dismiss itself, based on
-         * {@link SystemClock#elapsedRealTime()}
+         * {@link SystemClock#elapsedRealtime()}
          */
         @Override
         protected long calculateFinishTime() {
             final long duration = getRecommendedHeadsUpTimeoutMs(
-                    isStickyForSomeTime() ? mStickyDisplayTime : mAutoDismissNotificationDecay);
+                    isStickyForSomeTime() ? mStickyForSomeTimeAutoDismissTime : mAutoDismissTime);
 
             return mPostTime + duration;
         }

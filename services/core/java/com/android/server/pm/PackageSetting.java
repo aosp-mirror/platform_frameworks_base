@@ -123,11 +123,15 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
     @Nullable
     private Map<String, Set<String>> mimeGroups;
 
+    // TODO(b/314036181): encapsulate all these fields for usesSdk, instead of having three
+    //  separate arrays.
     @Nullable
     private String[] usesSdkLibraries;
 
     @Nullable
     private long[] usesSdkLibrariesVersionsMajor;
+    @Nullable
+    private boolean[] usesSdkLibrariesOptional;
 
     @Nullable
     private String[] usesStaticLibraries;
@@ -701,6 +705,9 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
         usesSdkLibrariesVersionsMajor = other.usesSdkLibrariesVersionsMajor != null
                 ? Arrays.copyOf(other.usesSdkLibrariesVersionsMajor,
                 other.usesSdkLibrariesVersionsMajor.length) : null;
+        usesSdkLibrariesOptional = other.usesSdkLibrariesOptional != null
+                ? Arrays.copyOf(other.usesSdkLibrariesOptional,
+                other.usesSdkLibrariesOptional.length) : null;
 
         usesStaticLibraries = other.usesStaticLibraries != null
                 ? Arrays.copyOf(other.usesStaticLibraries,
@@ -1344,6 +1351,12 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     @NonNull
     @Override
+    public boolean[] getUsesSdkLibrariesOptional() {
+        return usesSdkLibrariesOptional == null ? EmptyArray.BOOLEAN : usesSdkLibrariesOptional;
+    }
+
+    @NonNull
+    @Override
     public String[] getUsesStaticLibraries() {
         return usesStaticLibraries == null ? EmptyArray.STRING : usesStaticLibraries;
     }
@@ -1440,6 +1453,12 @@ public class PackageSetting extends SettingBase implements PackageStateInternal 
 
     public PackageSetting setUsesSdkLibrariesVersionsMajor(long[] usesSdkLibrariesVersions) {
         this.usesSdkLibrariesVersionsMajor = usesSdkLibrariesVersions;
+        onChanged();
+        return this;
+    }
+
+    public PackageSetting setUsesSdkLibrariesOptional(boolean[] usesSdkLibrariesOptional) {
+        this.usesSdkLibrariesOptional = usesSdkLibrariesOptional;
         onChanged();
         return this;
     }

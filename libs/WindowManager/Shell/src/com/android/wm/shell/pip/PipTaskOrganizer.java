@@ -156,74 +156,77 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     // These callbacks are called on the update thread
     private final PipAnimationController.PipAnimationCallback mPipAnimationCallback =
             new PipAnimationController.PipAnimationCallback() {
-        private boolean mIsCancelled;
-        @Override
-        public void onPipAnimationStart(TaskInfo taskInfo,
-                PipAnimationController.PipTransitionAnimator animator) {
-            final int direction = animator.getTransitionDirection();
-            mIsCancelled = false;
-            sendOnPipTransitionStarted(direction);
-        }
+                private boolean mIsCancelled;
 
-        @Override
-        public void onPipAnimationEnd(TaskInfo taskInfo, SurfaceControl.Transaction tx,
-                PipAnimationController.PipTransitionAnimator animator) {
-            final int direction = animator.getTransitionDirection();
-            if (mIsCancelled) {
-                sendOnPipTransitionFinished(direction);
-                maybePerformFinishResizeCallback();
-                return;
-            }
-            final int animationType = animator.getAnimationType();
-            final Rect destinationBounds = animator.getDestinationBounds();
-            if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
-                fadeOutAndRemoveOverlay(animator.getContentOverlayLeash(),
-                        animator::clearContentOverlay, true /* withStartDelay*/);
-            }
-            if (mWaitForFixedRotation && animationType == ANIM_TYPE_BOUNDS
-                    && direction == TRANSITION_DIRECTION_TO_PIP) {
-                // Notify the display to continue the deferred orientation change.
-                final WindowContainerTransaction wct = new WindowContainerTransaction();
-                wct.scheduleFinishEnterPip(mToken, destinationBounds);
-                mTaskOrganizer.applyTransaction(wct);
-                // The final task bounds will be applied by onFixedRotationFinished so that all
-                // coordinates are in new rotation.
-                mSurfaceTransactionHelper.round(tx, mLeash, isInPip());
-                mDeferredAnimEndTransaction = tx;
-                return;
-            }
-            final boolean isExitPipDirection = isOutPipDirection(direction)
-                    || isRemovePipDirection(direction);
-            if (mPipTransitionState.getTransitionState() != PipTransitionState.EXITING_PIP
-                    || isExitPipDirection) {
-                // execute the finish resize callback if needed after the transaction is committed
-                tx.addTransactionCommittedListener(mMainExecutor,
-                        PipTaskOrganizer.this::maybePerformFinishResizeCallback);
+                @Override
+                public void onPipAnimationStart(TaskInfo taskInfo,
+                        PipAnimationController.PipTransitionAnimator animator) {
+                    final int direction = animator.getTransitionDirection();
+                    mIsCancelled = false;
+                    sendOnPipTransitionStarted(direction);
+                }
 
-                // Finish resize as long as we're not exiting PIP, or, if we are, only if this is
-                // the end of an exit PIP animation.
-                // This is necessary in case there was a resize animation ongoing when exit PIP
-                // started, in which case the first resize will be skipped to let the exit
-                // operation handle the final resize out of PIP mode. See b/185306679.
-                finishResizeDelayedIfNeeded(() -> {
-                    finishResize(tx, destinationBounds, direction, animationType);
-                    sendOnPipTransitionFinished(direction);
-                });
-            }
-        }
+                @Override
+                public void onPipAnimationEnd(TaskInfo taskInfo, SurfaceControl.Transaction tx,
+                        PipAnimationController.PipTransitionAnimator animator) {
+                    final int direction = animator.getTransitionDirection();
+                    if (mIsCancelled) {
+                        sendOnPipTransitionFinished(direction);
+                        maybePerformFinishResizeCallback();
+                        return;
+                    }
+                    final int animationType = animator.getAnimationType();
+                    final Rect destinationBounds = animator.getDestinationBounds();
+                    if (isInPipDirection(direction) && mPipOverlay != null) {
+                        fadeOutAndRemoveOverlay(mPipOverlay,
+                                null /* callback */, true /* withStartDelay*/);
+                    }
+                    if (mWaitForFixedRotation && animationType == ANIM_TYPE_BOUNDS
+                            && direction == TRANSITION_DIRECTION_TO_PIP) {
+                        // Notify the display to continue the deferred orientation change.
+                        final WindowContainerTransaction wct = new WindowContainerTransaction();
+                        wct.scheduleFinishEnterPip(mToken, destinationBounds);
+                        mTaskOrganizer.applyTransaction(wct);
+                        // The final task bounds will be applied by onFixedRotationFinished so
+                        // that all coordinates are in new rotation.
+                        mSurfaceTransactionHelper.round(tx, mLeash, isInPip());
+                        mDeferredAnimEndTransaction = tx;
+                        return;
+                    }
+                    final boolean isExitPipDirection = isOutPipDirection(direction)
+                            || isRemovePipDirection(direction);
+                    if (mPipTransitionState.getTransitionState() != PipTransitionState.EXITING_PIP
+                            || isExitPipDirection) {
+                        // execute the finish resize callback if needed after the transaction is
+                        // committed
+                        tx.addTransactionCommittedListener(mMainExecutor,
+                                PipTaskOrganizer.this::maybePerformFinishResizeCallback);
 
-        @Override
-        public void onPipAnimationCancel(TaskInfo taskInfo,
-                PipAnimationController.PipTransitionAnimator animator) {
-            final int direction = animator.getTransitionDirection();
-            mIsCancelled = true;
-            if (isInPipDirection(direction) && animator.getContentOverlayLeash() != null) {
-                fadeOutAndRemoveOverlay(animator.getContentOverlayLeash(),
-                        animator::clearContentOverlay, true /* withStartDelay */);
-            }
-            sendOnPipTransitionCancelled(direction);
-        }
-    };
+                        // Finish resize as long as we're not exiting PIP, or, if we are, only if
+                        // this is the end of an exit PIP animation.
+                        // This is necessary in case there was a resize animation ongoing when
+                        // exit PIP started, in which case the first resize will be skipped to
+                        // let the exit operation handle the final resize out of PIP mode.
+                        // See b/185306679.
+                        finishResizeDelayedIfNeeded(() -> {
+                            finishResize(tx, destinationBounds, direction, animationType);
+                            sendOnPipTransitionFinished(direction);
+                        });
+                    }
+                }
+
+                @Override
+                public void onPipAnimationCancel(TaskInfo taskInfo,
+                        PipAnimationController.PipTransitionAnimator animator) {
+                    final int direction = animator.getTransitionDirection();
+                    mIsCancelled = true;
+                    if (isInPipDirection(direction) && mPipOverlay != null) {
+                        fadeOutAndRemoveOverlay(mPipOverlay,
+                                null /* callback */, true /* withStartDelay */);
+                    }
+                    sendOnPipTransitionCancelled(direction);
+                }
+            };
 
     /**
      * Finishes resizing the PiP, delaying the operation if it has to be synced with the PiP menu.
@@ -327,10 +330,17 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
     /**
      * An optional overlay used to mask content changing between an app in/out of PiP, only set if
-     * {@link PipTransitionState#getInSwipePipToHomeTransition()} is true.
+     * {@link PipTransitionState#getInSwipePipToHomeTransition()} is true, only in gesture nav.
      */
     @Nullable
     SurfaceControl mSwipePipToHomeOverlay;
+
+    /**
+     * An optional overlay used to mask content changing between an app in/out of PiP, only set if
+     * {@link PipTransitionState#getInSwipePipToHomeTransition()} is false.
+     */
+    @Nullable
+    SurfaceControl mPipOverlay;
 
     public PipTaskOrganizer(Context context,
             @NonNull SyncTransactionQueue syncTransactionQueue,
@@ -1766,6 +1776,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     animator.setSnapshotContentOverlay(snapshot, sourceHintRect);
                 }
             }
+            mPipOverlay = animator.getContentOverlayLeash();
             // The destination bounds are used for the end rect of animation and the final bounds
             // after animation finishes. So after the animation is started, the destination bounds
             // can be updated to new rotation (computeRotatedBounds has changed the DisplayLayout
@@ -1879,6 +1890,14 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     private void removeContentOverlay(SurfaceControl surface, Runnable callback) {
+        if (mPipOverlay != null) {
+            if (mPipOverlay != surface) {
+                ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "%s: trying to remove overlay (%s) which is not local reference (%s)",
+                        TAG, surface, mPipOverlay);
+            }
+            mPipOverlay = null;
+        }
         if (mPipTransitionState.getTransitionState() == PipTransitionState.UNDEFINED) {
             // Avoid double removal, which is fatal.
             return;
@@ -1907,11 +1926,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     private void cancelCurrentAnimator() {
         final PipAnimationController.PipTransitionAnimator<?> animator =
                 mPipAnimationController.getCurrentAnimator();
+        // remove any overlays if present
+        if (mPipOverlay != null) {
+            removeContentOverlay(mPipOverlay, null /* callback */);
+        }
         if (animator != null) {
-            if (animator.getContentOverlayLeash() != null) {
-                removeContentOverlay(animator.getContentOverlayLeash(),
-                        animator::clearContentOverlay);
-            }
             PipAnimationController.quietCancel(animator);
             mPipAnimationController.resetAnimatorState();
         }

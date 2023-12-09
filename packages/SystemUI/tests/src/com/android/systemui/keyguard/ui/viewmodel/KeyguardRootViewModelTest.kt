@@ -144,19 +144,43 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
     @Test
     fun alpha() =
         testScope.runTest {
-            val value = collectLastValue(underTest.alpha)
-            assertThat(value()).isEqualTo(0f)
+            val alpha by collectLastValue(underTest.alpha)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.OFF,
+                to = KeyguardState.LOCKSCREEN,
+                testScope = testScope,
+            )
 
             repository.setKeyguardAlpha(0.1f)
-            assertThat(value()).isEqualTo(0.1f)
+            assertThat(alpha).isEqualTo(0.1f)
             repository.setKeyguardAlpha(0.5f)
-            assertThat(value()).isEqualTo(0.5f)
+            assertThat(alpha).isEqualTo(0.5f)
             repository.setKeyguardAlpha(0.2f)
-            assertThat(value()).isEqualTo(0.2f)
+            assertThat(alpha).isEqualTo(0.2f)
             repository.setKeyguardAlpha(0f)
-            assertThat(value()).isEqualTo(0f)
+            assertThat(alpha).isEqualTo(0f)
             occludedToLockscreenAlpha.value = 0.8f
-            assertThat(value()).isEqualTo(0.8f)
+            assertThat(alpha).isEqualTo(0.8f)
+        }
+
+    @Test
+    fun alphaWhenGoneEqualsZero() =
+        testScope.runTest {
+            val alpha by collectLastValue(underTest.alpha)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.GONE,
+                testScope = testScope,
+            )
+
+            repository.setKeyguardAlpha(0.1f)
+            assertThat(alpha).isEqualTo(0f)
+            repository.setKeyguardAlpha(0.5f)
+            assertThat(alpha).isEqualTo(0f)
+            repository.setKeyguardAlpha(1f)
+            assertThat(alpha).isEqualTo(0f)
         }
 
     @Test

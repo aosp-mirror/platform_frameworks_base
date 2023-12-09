@@ -26,6 +26,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
@@ -61,6 +62,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -79,7 +82,66 @@ import java.util.UUID;
  * @hide
  */
 public class ZenModeConfig implements Parcelable {
-    private static String TAG = "ZenModeConfig";
+    private static final String TAG = "ZenModeConfig";
+
+    /**
+     * The {@link ZenModeConfig} is being updated because of an unknown reason.
+     */
+    public static final int UPDATE_ORIGIN_UNKNOWN = 0;
+
+    /**
+     * The {@link ZenModeConfig} is being updated because of system initialization (i.e. load from
+     * storage, on device boot).
+     */
+    public static final int UPDATE_ORIGIN_INIT = 1;
+
+    /** The {@link ZenModeConfig} is being updated (replaced) because of a user switch or unlock. */
+    public static final int UPDATE_ORIGIN_INIT_USER = 2;
+
+    /** The {@link ZenModeConfig} is being updated because of a user action, for example:
+     * <ul>
+     *     <li>{@link NotificationManager#setAutomaticZenRuleState} with a
+     *     {@link Condition#source} equal to {@link Condition#SOURCE_USER_ACTION}.</li>
+     *     <li>Adding, updating, or removing a rule from Settings.</li>
+     *     <li>Directly activating or deactivating/snoozing a rule through some UI affordance (e.g.
+     *     Quick Settings).</li>
+     * </ul>
+     */
+    public static final int UPDATE_ORIGIN_USER = 3;
+
+    /**
+     * The {@link ZenModeConfig} is being "independently" updated by an app, and not as a result of
+     * a user's action inside that app (for example, activating an {@link AutomaticZenRule} based on
+     * a previously set schedule).
+     */
+    public static final int UPDATE_ORIGIN_APP = 4;
+
+    /**
+     * The {@link ZenModeConfig} is being updated by the System or SystemUI. Note that this only
+     * includes cases where the call is coming from the System/SystemUI but the change is not due to
+     * a user action (e.g. automatically activating a schedule-based rule). If the change is a
+     * result of a user action (e.g. activating a rule by tapping on its QS tile) then
+     * {@link #UPDATE_ORIGIN_USER} is used instead.
+     */
+    public static final int UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI = 5;
+
+    /**
+     * The {@link ZenModeConfig} is being updated (replaced) because the user's DND configuration
+     * is being restored from a backup.
+     */
+    public static final int UPDATE_ORIGIN_RESTORE_BACKUP = 6;
+
+    @IntDef(prefix = { "UPDATE_ORIGIN_" }, value = {
+            UPDATE_ORIGIN_UNKNOWN,
+            UPDATE_ORIGIN_INIT,
+            UPDATE_ORIGIN_INIT_USER,
+            UPDATE_ORIGIN_USER,
+            UPDATE_ORIGIN_APP,
+            UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI,
+            UPDATE_ORIGIN_RESTORE_BACKUP
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ConfigChangeOrigin {}
 
     public static final int SOURCE_ANYONE = Policy.PRIORITY_SENDERS_ANY;
     public static final int SOURCE_CONTACT = Policy.PRIORITY_SENDERS_CONTACTS;

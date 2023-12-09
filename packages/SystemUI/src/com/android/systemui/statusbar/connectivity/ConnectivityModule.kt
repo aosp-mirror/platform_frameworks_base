@@ -35,6 +35,10 @@ import com.android.systemui.qs.tiles.impl.airplane.domain.AirplaneModeMapper
 import com.android.systemui.qs.tiles.impl.airplane.domain.interactor.AirplaneModeTileDataInteractor
 import com.android.systemui.qs.tiles.impl.airplane.domain.interactor.AirplaneModeTileUserActionInteractor
 import com.android.systemui.qs.tiles.impl.airplane.domain.model.AirplaneModeTileModel
+import com.android.systemui.qs.tiles.impl.saver.domain.DataSaverTileMapper
+import com.android.systemui.qs.tiles.impl.saver.domain.interactor.DataSaverTileDataInteractor
+import com.android.systemui.qs.tiles.impl.saver.domain.interactor.DataSaverTileUserActionInteractor
+import com.android.systemui.qs.tiles.impl.saver.domain.model.DataSaverTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTilePolicy
 import com.android.systemui.qs.tiles.viewmodel.QSTileUIConfig
@@ -85,6 +89,7 @@ interface ConnectivityModule {
     companion object {
 
         const val AIRPLANE_MODE_TILE_SPEC = "airplane"
+        const val DATA_SAVER_TILE_SPEC = "saver"
 
         /** Inject InternetTile or InternetTileNewImpl into tileMap in QSModule */
         @Provides
@@ -128,6 +133,37 @@ interface ConnectivityModule {
         ): QSTileViewModel =
             factory.create(
                 TileSpec.create(AIRPLANE_MODE_TILE_SPEC),
+                userActionInteractor,
+                stateInteractor,
+                mapper,
+            )
+
+        @Provides
+        @IntoMap
+        @StringKey(DATA_SAVER_TILE_SPEC)
+        fun provideDataSaverTileConfig(uiEventLogger: QsEventLogger): QSTileConfig =
+            QSTileConfig(
+                tileSpec = TileSpec.create(DATA_SAVER_TILE_SPEC),
+                uiConfig =
+                    QSTileUIConfig.Resource(
+                        iconRes = R.drawable.qs_data_saver_icon_off,
+                        labelRes = R.string.data_saver,
+                    ),
+                instanceId = uiEventLogger.getNewInstanceId(),
+            )
+
+        /** Inject DataSaverTile into tileViewModelMap in QSModule */
+        @Provides
+        @IntoMap
+        @StringKey(DATA_SAVER_TILE_SPEC)
+        fun provideDataSaverTileViewModel(
+            factory: QSTileViewModelFactory.Static<DataSaverTileModel>,
+            mapper: DataSaverTileMapper,
+            stateInteractor: DataSaverTileDataInteractor,
+            userActionInteractor: DataSaverTileUserActionInteractor
+        ): QSTileViewModel =
+            factory.create(
+                TileSpec.create(DATA_SAVER_TILE_SPEC),
                 userActionInteractor,
                 stateInteractor,
                 mapper,

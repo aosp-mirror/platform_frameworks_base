@@ -599,8 +599,8 @@ public class ScanTests {
                 .setVolumeUuid(UUID_ONE.toString())
                 .addUsesStaticLibrary("some.static.library", 234L, new String[]{"testCert1"})
                 .addUsesStaticLibrary("some.other.static.library", 456L, new String[]{"testCert2"})
-                .addUsesSdkLibrary("some.sdk.library", 123L, new String[]{"testCert3"})
-                .addUsesSdkLibrary("some.other.sdk.library", 789L, new String[]{"testCert4"})
+                .addUsesSdkLibrary("some.sdk.library", 123L, new String[]{"testCert3"}, false)
+                .addUsesSdkLibrary("some.other.sdk.library", 789L, new String[]{"testCert4"}, true)
                 .hideAsParsed())
                 .setNativeLibraryRootDir("/data/tmp/randompath/base.apk:/lib")
                 .setVersionCodeMajor(1)
@@ -628,6 +628,7 @@ public class ScanTests {
         assertThat(pkgSetting.getUsesSdkLibraries(),
                 arrayContaining("some.sdk.library", "some.other.sdk.library"));
         assertThat(pkgSetting.getUsesSdkLibrariesVersionsMajor(), is(new long[]{123L, 789L}));
+        assertThat(pkgSetting.getUsesSdkLibrariesOptional(), is(new boolean[]{false, true}));
         assertThat(pkgSetting.getPkg(), is(scanResult.mRequest.mParsedPackage));
         assertThat(pkgSetting.getPath(), is(new File(createCodePath(packageName))));
         assertThat(pkgSetting.getVersionCode(),
