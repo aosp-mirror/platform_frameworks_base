@@ -33,7 +33,6 @@ import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
@@ -504,10 +503,6 @@ public final class SuspendPackageHelper {
             final String requiredPermissionControllerPackage =
                     getKnownPackageName(snapshot, KnownPackages.PACKAGE_PERMISSION_CONTROLLER,
                             userId);
-            final AppOpsManager appOpsManager = mInjector.getSystemService(AppOpsManager.class);
-            final boolean isSystemExemptFlagEnabled = DeviceConfig.getBoolean(
-                    DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                    SYSTEM_EXEMPT_FROM_SUSPENSION, /* defaultValue= */ true);
             for (int i = 0; i < packageNames.length; i++) {
                 canSuspend[i] = false;
                 final String packageName = packageNames[i];
@@ -581,9 +576,7 @@ public final class SuspendPackageHelper {
                                 + pkg.getStaticSharedLibraryName());
                         continue;
                     }
-                    if (isSystemExemptFlagEnabled && appOpsManager.checkOpNoThrow(
-                            AppOpsManager.OP_SYSTEM_EXEMPT_FROM_SUSPENSION, uid, packageName)
-                            == AppOpsManager.MODE_ALLOWED) {
+                    if (exemptFromSuspensionByAppOp(uid, packageName)) {
                         Slog.w(TAG, "Cannot suspend package \"" + packageName
                                 + "\": has OP_SYSTEM_EXEMPT_FROM_SUSPENSION set");
                         continue;
@@ -599,6 +592,13 @@ public final class SuspendPackageHelper {
             Binder.restoreCallingIdentity(token);
         }
         return canSuspend;
+    }
+
+    private boolean exemptFromSuspensionByAppOp(int uid, String packageName) {
+        final AppOpsManager appOpsManager = mInjector.getSystemService(AppOpsManager.class);
+        return appOpsManager.checkOpNoThrow(
+                AppOpsManager.OP_SYSTEM_EXEMPT_FROM_SUSPENSION, uid, packageName)
+                        == AppOpsManager.MODE_ALLOWED;
     }
 
     /**

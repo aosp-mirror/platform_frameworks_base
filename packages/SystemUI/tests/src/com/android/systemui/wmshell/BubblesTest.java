@@ -119,6 +119,7 @@ import com.android.systemui.scene.SceneTestUtils;
 import com.android.systemui.scene.data.repository.SceneContainerRepository;
 import com.android.systemui.scene.domain.interactor.SceneInteractor;
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags;
+import com.android.systemui.scene.shared.flag.SceneContainerFlags;
 import com.android.systemui.scene.shared.logger.SceneLogger;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.settings.UserTracker;
@@ -343,6 +344,8 @@ public class BubblesTest extends SysuiTestCase {
     private Icon mAppBubbleIcon;
     @Mock
     private Display mDefaultDisplay;
+    @Mock
+    private SceneContainerFlags mSceneContainerFlags;
 
     private final SceneTestUtils mUtils = new SceneTestUtils(this);
     private final TestScope mTestScope = mUtils.getTestScope();
@@ -503,7 +506,8 @@ public class BubblesTest extends SysuiTestCase {
                 () -> mShadeInteractor,
                 mShadeWindowLogger,
                 () -> mSelectedUserInteractor,
-                mUserTracker
+                mUserTracker,
+                mSceneContainerFlags
         );
         mNotificationShadeWindowController.fetchWindowRootView();
         mNotificationShadeWindowController.attach();

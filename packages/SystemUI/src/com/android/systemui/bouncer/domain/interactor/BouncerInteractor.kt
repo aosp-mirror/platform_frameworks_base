@@ -19,8 +19,8 @@ package com.android.systemui.bouncer.domain.interactor
 import android.content.Context
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
+import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.bouncer.data.repository.BouncerRepository
 import com.android.systemui.classifier.FalsingClassifier
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
@@ -60,24 +60,25 @@ constructor(
 
     /** The user-facing message to show in the bouncer. */
     val message: StateFlow<String?> =
-        combine(repository.message, authenticationInteractor.throttling) { message, throttling ->
-                messageOrThrottlingMessage(message, throttling)
+        combine(repository.message, authenticationInteractor.lockout) { message, lockout ->
+                messageOrLockoutMessage(message, lockout)
             }
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.WhileSubscribed(),
                 initialValue =
-                    messageOrThrottlingMessage(
+                    messageOrLockoutMessage(
                         repository.message.value,
-                        authenticationInteractor.throttling.value,
+                        authenticationInteractor.lockout.value,
                     )
             )
 
     /**
-     * The current authentication throttling state, set when the user has to wait before being able
-     * to try another authentication attempt. `null` indicates throttling isn't active.
+     * The current authentication lockout (aka "throttling") state, set when the user has to wait
+     * before being able to try another authentication attempt. `null` indicates lockout isn't
+     * active.
      */
-    val throttling: StateFlow<AuthenticationThrottlingModel?> = authenticationInteractor.throttling
+    val lockout: StateFlow<AuthenticationLockoutModel?> = authenticationInteractor.lockout
 
     /** Whether the auto confirm feature is enabled for the currently-selected user. */
     val isAutoConfirmEnabled: StateFlow<Boolean> = authenticationInteractor.isAutoConfirmEnabled
@@ -102,9 +103,9 @@ constructor(
 
     init {
         if (flags.isEnabled()) {
-            // Clear the message if moved from throttling to no-longer throttling.
+            // Clear the message if moved from locked-out to no-longer locked-out.
             applicationScope.launch {
-                throttling.pairwise().collect { (previous, current) ->
+                lockout.pairwise().collect { (previous, current) ->
                     if (previous != null && current == null) {
                         clearMessage()
                     }
@@ -213,9 +214,9 @@ constructor(
      * Shows the error message.
      *
      * Callers should use this instead of [authenticate] when they know ahead of time that an auth
-     * attempt will fail but aren't interested in the other side effects like triggering throttling.
+     * attempt will fail but aren't interested in the other side effects like triggering lockout.
      * For example, if the user entered a pattern that's too short, the system can show the error
-     * message without having the attempt trigger throttling.
+     * message without having the attempt trigger lockout.
      */
     private suspend fun showErrorMessage() {
         repository.setMessage(errorMessage(authenticationInteractor.getAuthenticationMethod()))
@@ -250,15 +251,15 @@ constructor(
         }
     }
 
-    private fun messageOrThrottlingMessage(
+    private fun messageOrLockoutMessage(
         message: String?,
-        throttlingModel: AuthenticationThrottlingModel?,
+        lockoutModel: AuthenticationLockoutModel?,
     ): String {
         return when {
-            throttlingModel != null ->
+            lockoutModel != null ->
                 applicationContext.getString(
                     com.android.internal.R.string.lockscreen_too_many_failed_attempts_countdown,
-                    throttlingModel.remainingSeconds,
+                    lockoutModel.remainingSeconds,
                 )
             message != null -> message
             else -> ""

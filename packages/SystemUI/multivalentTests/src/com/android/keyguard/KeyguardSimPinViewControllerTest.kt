@@ -34,11 +34,14 @@ import com.android.systemui.util.mockito.any
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
@@ -63,6 +66,8 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var keyguardMessageAreaController:
         KeyguardMessageAreaController<BouncerKeyguardMessageArea>
+    private val updateMonitorCallbackArgumentCaptor =
+        ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback::class.java)
 
     @Before
     fun setup() {
@@ -95,6 +100,9 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
                 mSelectedUserInteractor
             )
         underTest.init()
+        underTest.onResume(0)
+        verify(keyguardUpdateMonitor)
+            .registerCallback(updateMonitorCallbackArgumentCaptor.capture())
     }
 
     @Test
@@ -111,6 +119,7 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
 
     @Test
     fun onResume() {
+        reset(keyguardUpdateMonitor)
         underTest.onResume(KeyguardSecurityView.VIEW_REVEALED)
         verify(keyguardUpdateMonitor)
             .registerCallback(any(KeyguardUpdateMonitorCallback::class.java))
@@ -136,5 +145,23 @@ class KeyguardSimPinViewControllerTest : SysuiTestCase() {
     fun resetState() {
         underTest.resetState()
         verify(keyguardMessageAreaController).setMessage("")
+    }
+
+    @Test
+    fun onSimStateChangedFromPinToPuk_showsCurrentSecurityScreen() {
+        updateMonitorCallbackArgumentCaptor.value.onSimStateChanged(
+            /* subId= */ 0,
+            /* slotId= */ 0,
+            TelephonyManager.SIM_STATE_PIN_REQUIRED
+        )
+        verify(keyguardSecurityCallback, never()).showCurrentSecurityScreen()
+
+        updateMonitorCallbackArgumentCaptor.value.onSimStateChanged(
+            /* subId= */ 0,
+            /* slotId= */ 0,
+            TelephonyManager.SIM_STATE_PUK_REQUIRED
+        )
+
+        verify(keyguardSecurityCallback).showCurrentSecurityScreen()
     }
 }

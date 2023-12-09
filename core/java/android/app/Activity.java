@@ -5572,7 +5572,7 @@ public class Activity extends ContextThemeWrapper
      * @see #shouldShowRequestPermissionRationale
      * @see Context#DEVICE_ID_DEFAULT
      */
-    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public final void requestPermissions(@NonNull String[] permissions, int requestCode,
             int deviceId) {
         if (requestCode < 0) {
@@ -5645,7 +5645,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @see #requestPermissions
      */
-    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
             @NonNull int[] grantResults, int deviceId) {
         onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -5678,7 +5678,7 @@ public class Activity extends ContextThemeWrapper
      * @see #requestPermissions
      * @see #onRequestPermissionsResult
      */
-    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public boolean shouldShowRequestPermissionRationale(@NonNull String permission, int deviceId) {
         final PackageManager packageManager = getDeviceId() == deviceId ? getPackageManager()
                 : createDeviceContext(deviceId).getPackageManager();
@@ -9387,6 +9387,7 @@ public class Activity extends ContextThemeWrapper
      * @param allowed {@code true} to disable the UID restrictions; {@code false} to revert back to
      *                            the default behaviour
      */
+    @FlaggedApi(android.security.Flags.FLAG_ASM_RESTRICTIONS_ENABLED)
     public void setAllowCrossUidActivitySwitchFromBelow(boolean allowed) {
         ActivityClient.getInstance().setAllowCrossUidActivitySwitchFromBelow(mToken, allowed);
     }

@@ -95,7 +95,9 @@ final class SettingsState {
 
     static final int SETTINGS_VERSION_NEW_ENCODING = 121;
 
+    // LINT.IfChange
     public static final int MAX_LENGTH_PER_STRING = 32768;
+    // LINT.ThenChange(/services/core/java/com/android/server/audio/AudioDeviceInventory.java:settings_max_length_per_string)
     private static final long WRITE_SETTINGS_DELAY_MILLIS = 200;
     private static final long MAX_WRITE_SETTINGS_DELAY_MILLIS = 2000;
 

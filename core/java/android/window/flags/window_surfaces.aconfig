@@ -56,3 +56,11 @@ flag {
     is_fixed_read_only: true
     bug: "308662081"
 }
+
+flag {
+    namespace: "window_surfaces"
+    name: "trusted_presentation_listener_for_window"
+    description: "Enable trustedPresentationListener on windows public API"
+    is_fixed_read_only: true
+    bug: "278027319"
+}

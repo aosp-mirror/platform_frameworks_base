@@ -43,6 +43,7 @@ import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.R;
+import com.android.media.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -283,7 +284,10 @@ class LegacyBluetoothRouteController implements BluetoothRouteController {
         newBtRoute.mBtDevice = device;
 
         String routeId = device.getAddress();
-        String deviceName = device.getName();
+        String deviceName =
+                Flags.enableUseOfBluetoothDeviceGetAliasForMr2infoGetName()
+                        ? device.getAlias()
+                        : device.getName();
         if (TextUtils.isEmpty(deviceName)) {
             deviceName = mContext.getResources().getText(R.string.unknownName).toString();
         }

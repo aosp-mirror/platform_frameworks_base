@@ -22,12 +22,12 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.Assert.assertThrows;
 
 import android.os.BatteryConsumer;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.os.MultiStateStats;
-
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -38,6 +38,10 @@ import java.util.Arrays;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class MultiStateStatsTest {
+
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .build();
 
     public static final int DIMENSION_COUNT = 2;
 

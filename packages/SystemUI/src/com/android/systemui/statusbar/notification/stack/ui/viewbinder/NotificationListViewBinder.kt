@@ -40,7 +40,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.ui.viewbinder.HideNotificationsBinder.bindHideList
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationListViewModel
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
-import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.combine
@@ -53,12 +53,12 @@ constructor(
     private val viewModel: NotificationListViewModel,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val configuration: ConfigurationState,
-    private val configurationController: ConfigurationController,
     private val falsingManager: FalsingManager,
     private val iconAreaController: NotificationIconAreaController,
     private val iconViewBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
     private val metricsLogger: MetricsLogger,
     private val shelfIconViewStore: ShelfNotificationIconViewStore,
+    private val systemBarUtilsState: SystemBarUtilsState,
 ) {
 
     fun bind(
@@ -91,7 +91,7 @@ constructor(
             shelf,
             viewModel.shelf,
             configuration,
-            configurationController,
+            systemBarUtilsState,
             falsingManager,
             iconViewBindingFailureTracker,
             iconAreaController,

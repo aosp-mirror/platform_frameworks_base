@@ -53,6 +53,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.util.ArrayMap;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -356,6 +357,14 @@ public class VirtualDeviceInternal {
     void setShowPointerIcon(boolean showPointerIcon) {
         try {
             mVirtualDevice.setShowPointerIcon(showPointerIcon);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    void setDisplayImePolicy(int displayId, @WindowManager.DisplayImePolicy int policy) {
+        try {
+            mVirtualDevice.setDisplayImePolicy(displayId, policy);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

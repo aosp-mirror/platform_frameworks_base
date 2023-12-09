@@ -424,6 +424,7 @@ public abstract class IContextHubWrapper {
             // 9a17008d-6bf1-445a-9011-6d21bd985b6c
             private static final byte[] UUID = {-102, 23, 0, -115, 107, -15, 68, 90,
                                                 -112, 17, 109, 33, -67, -104, 91, 108};
+            private static final String NAME = "ContextHubService";
 
             ContextHubAidlCallback(int contextHubId, ICallback callback) {
                 mContextHubId = contextHubId;
@@ -466,8 +467,12 @@ public abstract class IContextHubWrapper {
                 // TODO(271471342): Implement
             }
 
-            public byte[] getUuid() throws RemoteException {
+            public byte[] getUuid() {
                 return UUID;
+            }
+
+            public String getName() {
+                return NAME;
             }
 
             @Override

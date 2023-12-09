@@ -108,3 +108,10 @@ flag {
     description: "Feature flag to reduce app crashes caused by split installs with INSTALL_DONT_KILL"
     bug: "291212866"
 }
+
+flag {
+    name: "fix_duplicated_flags"
+    namespace: "package_manager_service"
+    description: "Feature flag to fix duplicated PackageManager flag values"
+    bug: "314815969"
+}

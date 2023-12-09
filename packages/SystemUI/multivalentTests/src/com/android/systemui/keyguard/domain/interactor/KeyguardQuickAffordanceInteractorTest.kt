@@ -49,8 +49,10 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -92,6 +94,8 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     private lateinit var featureFlags: FakeFeatureFlags
     private lateinit var dockManager: DockManagerFake
     private lateinit var biometricSettingsRepository: FakeBiometricSettingsRepository
+
+    private val kosmos = testKosmos()
 
     @Before
     fun setUp() {
@@ -179,6 +183,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         underTest =
             KeyguardQuickAffordanceInteractor(
                 keyguardInteractor = withDeps.keyguardInteractor,
+                shadeInteractor = kosmos.shadeInteractor,
                 lockPatternUtils = lockPatternUtils,
                 keyguardStateController = keyguardStateController,
                 userTracker = userTracker,
@@ -336,6 +341,31 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                     underTest.quickAffordance(KeyguardQuickAffordancePosition.BOTTOM_START)
                 )
             assertThat(collectedValue()).isEqualTo(KeyguardQuickAffordanceModel.Hidden)
+        }
+
+    @Test
+    fun quickAffordanceAlwaysVisible_notVisible_restrictedByPolicyManager() =
+        testScope.runTest {
+            whenever(devicePolicyManager.getKeyguardDisabledFeatures(null, userTracker.userId))
+                .thenReturn(DevicePolicyManager.KEYGUARD_DISABLE_SHORTCUTS_ALL)
+
+            repository.setKeyguardShowing(false)
+            repository.setIsDozing(true)
+            homeControls.setState(
+                KeyguardQuickAffordanceConfig.LockScreenState.Visible(
+                    icon = ICON,
+                    activationState = ActivationState.Active,
+                )
+            )
+
+            val collectedValue by
+                collectLastValue(
+                    underTest.quickAffordanceAlwaysVisible(
+                        KeyguardQuickAffordancePosition.BOTTOM_START
+                    )
+                )
+
+            assertThat(collectedValue).isInstanceOf(KeyguardQuickAffordanceModel.Hidden::class.java)
         }
 
     @Test

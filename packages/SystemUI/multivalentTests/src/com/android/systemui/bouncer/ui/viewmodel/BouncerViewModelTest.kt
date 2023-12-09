@@ -135,17 +135,17 @@ class BouncerViewModelTest : SysuiTestCase() {
     fun message() =
         testScope.runTest {
             val message by collectLastValue(underTest.message)
-            val throttling by collectLastValue(bouncerInteractor.throttling)
+            val lockout by collectLastValue(bouncerInteractor.lockout)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(message?.isUpdateAnimated).isTrue()
 
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) {
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
                 // Wrong PIN.
                 bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
             }
             assertThat(message?.isUpdateAnimated).isFalse()
 
-            throttling?.remainingSeconds?.let { remainingSeconds ->
+            lockout?.remainingSeconds?.let { remainingSeconds ->
                 advanceTimeBy(remainingSeconds.seconds.inWholeMilliseconds)
             }
             assertThat(message?.isUpdateAnimated).isTrue()
@@ -160,37 +160,37 @@ class BouncerViewModelTest : SysuiTestCase() {
                         authViewModel?.isInputEnabled ?: emptyFlow()
                     }
                 )
-            val throttling by collectLastValue(bouncerInteractor.throttling)
+            val lockout by collectLastValue(bouncerInteractor.lockout)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
             assertThat(isInputEnabled).isTrue()
 
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) {
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
                 // Wrong PIN.
                 bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
             }
             assertThat(isInputEnabled).isFalse()
 
-            throttling?.remainingSeconds?.let { remainingSeconds ->
+            lockout?.remainingSeconds?.let { remainingSeconds ->
                 advanceTimeBy(remainingSeconds.seconds.inWholeMilliseconds)
             }
             assertThat(isInputEnabled).isTrue()
         }
 
     @Test
-    fun throttlingDialogMessage() =
+    fun dialogMessage() =
         testScope.runTest {
-            val throttlingDialogMessage by collectLastValue(underTest.throttlingDialogMessage)
+            val dialogMessage by collectLastValue(underTest.dialogMessage)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
 
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) {
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) {
                 // Wrong PIN.
-                assertThat(throttlingDialogMessage).isNull()
+                assertThat(dialogMessage).isNull()
                 bouncerInteractor.authenticate(listOf(3, 4, 5, 6))
             }
-            assertThat(throttlingDialogMessage).isNotEmpty()
+            assertThat(dialogMessage).isNotEmpty()
 
-            underTest.onThrottlingDialogDismissed()
-            assertThat(throttlingDialogMessage).isNull()
+            underTest.onDialogDismissed()
+            assertThat(dialogMessage).isNull()
         }
 
     @Test

@@ -264,12 +264,14 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
         whenever(lockscreenToPrimaryBouncerTransitionViewModel.shortcutsAlpha)
             .thenReturn(emptyFlow())
         whenever(shadeInteractor.qsExpansion).thenReturn(intendedShadeAlphaMutableStateFlow)
+        whenever(shadeInteractor.anyExpansion).thenReturn(MutableStateFlow(0f))
 
         underTest =
             KeyguardQuickAffordancesCombinedViewModel(
                 quickAffordanceInteractor =
                     KeyguardQuickAffordanceInteractor(
                         keyguardInteractor = keyguardInteractor,
+                        shadeInteractor = shadeInteractor,
                         lockPatternUtils = lockPatternUtils,
                         keyguardStateController = keyguardStateController,
                         userTracker = userTracker,

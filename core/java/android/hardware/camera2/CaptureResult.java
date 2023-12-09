@@ -2814,6 +2814,31 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
             new Key<Integer>("android.control.autoframingState", int.class);
 
     /**
+     * <p>Current state of the low light boost AE mode.</p>
+     * <p>When low light boost is enabled by setting the AE mode to
+     * 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY', it can dynamically apply a low light
+     * boost when the light level threshold is exceeded.</p>
+     * <p>This state indicates when low light boost is 'ACTIVE' and applied. Similarly, it can
+     * indicate when it is not being applied by returning 'INACTIVE'.</p>
+     * <p>This key will be absent from the CaptureResult if AE mode is not set to
+     * 'ON_LOW_LIGHT_BOOST_BRIGHTNESS_PRIORITY.</p>
+     * <p><b>Possible values:</b></p>
+     * <ul>
+     *   <li>{@link #CONTROL_LOW_LIGHT_BOOST_STATE_INACTIVE INACTIVE}</li>
+     *   <li>{@link #CONTROL_LOW_LIGHT_BOOST_STATE_ACTIVE ACTIVE}</li>
+     * </ul>
+     *
+     * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     * @see #CONTROL_LOW_LIGHT_BOOST_STATE_INACTIVE
+     * @see #CONTROL_LOW_LIGHT_BOOST_STATE_ACTIVE
+     */
+    @PublicKey
+    @NonNull
+    @FlaggedApi(Flags.FLAG_CAMERA_AE_MODE_LOW_LIGHT_BOOST)
+    public static final Key<Integer> CONTROL_LOW_LIGHT_BOOST_STATE =
+            new Key<Integer>("android.control.lowLightBoostState", int.class);
+
+    /**
      * <p>Operation mode for edge
      * enhancement.</p>
      * <p>Edge enhancement improves sharpness and details in the captured image. OFF means

@@ -16,6 +16,45 @@
 
 package com.android.systemui.flags
 
+import android.content.res.mainResources
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.util.mockito.mock
 
-val Kosmos.featureFlagsClassic by Kosmos.Fixture { FakeFeatureFlagsClassic() }
+/**
+ * Main fixture for supplying a [FeatureFlagsClassic]. Should be used by other fixtures. Unless
+ * overridden in the test, this by default uses [fakeFeatureFlagsClassic].
+ */
+var Kosmos.featureFlagsClassic: FeatureFlagsClassic by Kosmos.Fixture { fakeFeatureFlagsClassic }
+
+/**
+ * Fixture supplying a shared [FakeFeatureFlagsClassic] instance. Can be accessed in tests in order
+ * to override flag values.
+ */
+val Kosmos.fakeFeatureFlagsClassic by Kosmos.Fixture { FakeFeatureFlagsClassic() }
+
+/**
+ * Fixture supplying a real [FeatureFlagsClassicRelease] instance, for use by tests that want to
+ * reflect the current state of the device in release builds (example: screenshot tests).
+ *
+ * By default, this fixture is unused; tests should override [featureFlagsClassic] in order to
+ * utilize this fixture:
+ * ```kotlin
+ *   val kosmos = Kosmos()
+ *   kosmos.featureFlagsClassic = kosmos.featureFlagsClassicRelease
+ * ```
+ */
+val Kosmos.featureFlagsClassicRelease by
+    Kosmos.Fixture {
+        FeatureFlagsClassicRelease(
+            /* resources = */ mainResources,
+            /* systemProperties = */ systemPropertiesHelper,
+            /* serverFlagReader = */ serverFlagReader,
+            /* allFlags = */ FlagsCommonModule.providesAllFlags(),
+            /* restarter = */ restarter,
+        )
+    }
+
+val Kosmos.systemPropertiesHelper by Kosmos.Fixture { SystemPropertiesHelper() }
+var Kosmos.serverFlagReader: ServerFlagReader by Kosmos.Fixture { serverFlagReaderFake }
+val Kosmos.serverFlagReaderFake by Kosmos.Fixture { ServerFlagReaderFake() }
+var Kosmos.restarter: Restarter by Kosmos.Fixture { mock() }

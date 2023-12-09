@@ -173,7 +173,7 @@ public final class AttributionSource implements Parcelable {
 
     /** @hide */
     @TestApi
-    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public AttributionSource(int uid, int pid, @Nullable String packageName,
             @Nullable String attributionTag, @NonNull IBinder token,
             @Nullable String[] renouncedPermissions,
@@ -539,7 +539,7 @@ public final class AttributionSource implements Parcelable {
      * <p>
      * This device ID is used for permissions checking during attribution source validation.
      */
-    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+    @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
     public int getDeviceId() {
         return mAttributionSourceState.deviceId;
     }
@@ -727,7 +727,7 @@ public final class AttributionSource implements Parcelable {
          *
          * @return the builder
          */
-        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS)
+        @FlaggedApi(Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
         public @NonNull Builder setDeviceId(int deviceId) {
             checkNotUsed();
             mBuilderFieldsSet |= 0x12;

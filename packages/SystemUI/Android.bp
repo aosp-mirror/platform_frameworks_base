@@ -281,6 +281,7 @@ android_library {
         "com_android_systemui_flags_lib",
         "com_android_systemui_shared_flags_lib",
         "flag-junit-base",
+        "platform-parametric-runner-lib",
         "androidx.viewpager2_viewpager2",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",

@@ -1062,7 +1062,7 @@ public class PackageParserTest {
                 .addProtectedBroadcast("foo8")
                 .setSdkLibraryName("sdk12")
                 .setSdkLibVersionMajor(42)
-                .addUsesSdkLibrary("sdk23", 200, new String[]{"digest2"})
+                .addUsesSdkLibrary("sdk23", 200, new String[]{"digest2"}, true)
                 .setStaticSharedLibraryName("foo23")
                 .setStaticSharedLibraryVersion(100)
                 .addUsesStaticLibrary("foo23", 100, new String[]{"digest"})

@@ -24,7 +24,7 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.NotificationContainerBounds
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.Flags
-import com.android.systemui.flags.featureFlagsClassic
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.flag.FakeSceneContainerFlags
@@ -51,7 +51,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
     private val kosmos =
         testKosmos().apply {
             sceneContainerFlags = FakeSceneContainerFlags(enabled = true)
-            featureFlagsClassic.apply {
+            fakeFeatureFlagsClassic.apply {
                 set(Flags.FULL_SCREEN_USER_SWITCHER, false)
                 set(Flags.NSSL_DEBUG_LINES, false)
             }
@@ -67,9 +67,24 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
             val bounds by collectLastValue(appearanceViewModel.stackBounds)
 
             val top = 200f
+            val left = 0f
             val bottom = 550f
-            placeholderViewModel.onBoundsChanged(top, bottom)
-            assertThat(bounds).isEqualTo(NotificationContainerBounds(top = top, bottom = bottom))
+            val right = 100f
+            placeholderViewModel.onBoundsChanged(
+                left = left,
+                top = top,
+                right = right,
+                bottom = bottom
+            )
+            assertThat(bounds)
+                .isEqualTo(
+                    NotificationContainerBounds(
+                        left = left,
+                        top = top,
+                        right = right,
+                        bottom = bottom
+                    )
+                )
         }
 
     @Test

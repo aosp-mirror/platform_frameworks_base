@@ -1851,14 +1851,14 @@ public final class TvInputManagerService extends SystemService {
                             sessionState.currentChannel = channelUri;
                             notifyCurrentChannelInfosUpdatedLocked(userState);
                             if (!sessionState.isRecordingSession) {
-                                String actualInputId = getActualInputId(sessionState);
-                                if (!TextUtils.equals(mOnScreenInputId, actualInputId)) {
+                                String sessionActualInputId = getSessionActualInputId(sessionState);
+                                if (!TextUtils.equals(mOnScreenInputId, sessionActualInputId)) {
                                     logExternalInputEvent(
                                             FrameworkStatsLog
                                                     .EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__TUNED,
-                                            actualInputId, sessionState);
+                                            sessionState.inputId, sessionState);
                                 }
-                                mOnScreenInputId = actualInputId;
+                                mOnScreenInputId = sessionActualInputId;
                                 mOnScreenSessionState = sessionState;
                             }
                         }
@@ -2985,11 +2985,20 @@ public final class TvInputManagerService extends SystemService {
     // e.g. if an HDMI port has a CEC device plugged in, the actual input id of the HDMI
     // session should be the input id of CEC device instead of the default HDMI input id.
     @GuardedBy("mLock")
-    private String getActualInputId(SessionState sessionState) {
+    private String getSessionActualInputId(SessionState sessionState) {
         UserState userState = getOrCreateUserStateLocked(sessionState.userId);
         TvInputState tvInputState = userState.inputMap.get(sessionState.inputId);
+        if (tvInputState == null) {
+            Slog.w(TAG, "No TvInputState for sessionState.inputId " + sessionState.inputId);
+            return sessionState.inputId;
+        }
         TvInputInfo tvInputInfo = tvInputState.info;
-        String actualInputId = sessionState.inputId;
+        if (tvInputInfo == null) {
+            Slog.w(TAG, "TvInputInfo is null for input id " + sessionState.inputId);
+            return sessionState.inputId;
+        }
+
+        String sessionActualInputId = sessionState.inputId;
         switch (tvInputInfo.getType()) {
             case TvInputInfo.TYPE_HDMI:
                 // TODO: find a better approach towards active CEC device in future
@@ -2997,13 +3006,13 @@ public final class TvInputManagerService extends SystemService {
                         mTvInputHardwareManager.getHdmiParentInputMap();
                 if (hdmiParentInputMap.containsKey(sessionState.inputId)) {
                     List<String> parentInputList = hdmiParentInputMap.get(sessionState.inputId);
-                    actualInputId = parentInputList.get(0);
+                    sessionActualInputId = parentInputList.get(0);
                 }
                 break;
             default:
                 break;
         }
-        return actualInputId;
+        return sessionActualInputId;
     }
 
     @Nullable
@@ -3110,8 +3119,22 @@ public final class TvInputManagerService extends SystemService {
     @GuardedBy("mLock")
     private void logExternalInputEvent(int eventType, String inputId, SessionState sessionState) {
         UserState userState = getOrCreateUserStateLocked(sessionState.userId);
-        TvInputState tvInputState = userState.inputMap.get(inputId);
+        // Try finding the actual input id in inputMap. If not found, find the input id as is.
+        String inputIdForLogging = getSessionActualInputId(sessionState);
+        TvInputState tvInputState = userState.inputMap.get(inputIdForLogging);
+        if (tvInputState == null) {
+            inputIdForLogging = inputId;
+            tvInputState = userState.inputMap.get(inputIdForLogging);
+        }
+        if (tvInputState == null) {
+            Slog.w(TAG, "Cannot find input state for input id " + inputIdForLogging);
+            return;
+        }
         TvInputInfo tvInputInfo = tvInputState.info;
+        if (tvInputInfo == null) {
+            Slog.w(TAG, "TvInputInfo is null for input id " + inputIdForLogging);
+            return;
+        }
         int inputState = tvInputState.state;
         int inputType = tvInputInfo.getType();
         String displayName = tvInputInfo.loadLabel(mContext).toString();
@@ -3647,14 +3670,14 @@ public final class TvInputManagerService extends SystemService {
                         mSessionState.currentChannel = channelUri;
                         notifyCurrentChannelInfosUpdatedLocked(userState);
                         if (!mSessionState.isRecordingSession) {
-                            String actualInputId = getActualInputId(mSessionState);
-                            if (!TextUtils.equals(mOnScreenInputId, actualInputId)) {
+                            String sessionActualInputId = getSessionActualInputId(mSessionState);
+                            if (!TextUtils.equals(mOnScreenInputId, sessionActualInputId)) {
                                 logExternalInputEvent(
                                         FrameworkStatsLog
                                                 .EXTERNAL_TV_INPUT_EVENT__EVENT_TYPE__TUNED,
-                                        actualInputId, mSessionState);
+                                        mSessionState.inputId, mSessionState);
                             }
-                            mOnScreenInputId = actualInputId;
+                            mOnScreenInputId = sessionActualInputId;
                             mOnScreenSessionState = mSessionState;
                         }
                     }

@@ -21,9 +21,9 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.data.repository.FakeAuthenticationRepository
 import com.android.systemui.authentication.domain.interactor.AuthenticationResult
+import com.android.systemui.authentication.shared.model.AuthenticationLockoutModel
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
-import com.android.systemui.authentication.shared.model.AuthenticationThrottlingModel
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.res.R
@@ -246,46 +246,42 @@ class BouncerInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun throttling() =
+    fun lockout() =
         testScope.runTest {
-            val throttling by collectLastValue(underTest.throttling)
+            val lockout by collectLastValue(underTest.lockout)
             val message by collectLastValue(underTest.message)
             utils.authenticationRepository.setAuthenticationMethod(AuthenticationMethodModel.Pin)
-            assertThat(throttling).isNull()
-            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING) { times ->
+            assertThat(lockout).isNull()
+            repeat(FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT) { times ->
                 // Wrong PIN.
                 assertThat(underTest.authenticate(listOf(6, 7, 8, 9)))
                     .isEqualTo(AuthenticationResult.FAILED)
-                if (
-                    times < FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING - 1
-                ) {
+                if (times < FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT - 1) {
                     assertThat(message).isEqualTo(MESSAGE_WRONG_PIN)
                 }
             }
-            assertThat(throttling)
+            assertThat(lockout)
                 .isEqualTo(
-                    AuthenticationThrottlingModel(
+                    AuthenticationLockoutModel(
                         failedAttemptCount =
-                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_THROTTLING,
-                        remainingSeconds = FakeAuthenticationRepository.THROTTLE_DURATION_SECONDS,
+                            FakeAuthenticationRepository.MAX_FAILED_AUTH_TRIES_BEFORE_LOCKOUT,
+                        remainingSeconds = FakeAuthenticationRepository.LOCKOUT_DURATION_SECONDS,
                     )
                 )
             assertTryAgainMessage(
                 message,
-                FakeAuthenticationRepository.THROTTLE_DURATION_MS.milliseconds.inWholeSeconds
-                    .toInt()
+                FakeAuthenticationRepository.LOCKOUT_DURATION_MS.milliseconds.inWholeSeconds.toInt()
             )
 
-            // Correct PIN, but throttled, so doesn't change away from the bouncer scene:
+            // Correct PIN, but locked out, so doesn't change away from the bouncer scene:
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SKIPPED)
             assertTryAgainMessage(
                 message,
-                FakeAuthenticationRepository.THROTTLE_DURATION_MS.milliseconds.inWholeSeconds
-                    .toInt()
+                FakeAuthenticationRepository.LOCKOUT_DURATION_MS.milliseconds.inWholeSeconds.toInt()
             )
 
-            throttling?.remainingSeconds?.let { seconds ->
+            lockout?.remainingSeconds?.let { seconds ->
                 repeat(seconds) { time ->
                     advanceTimeBy(1000)
                     val remainingTimeSec = seconds - time - 1
@@ -295,12 +291,12 @@ class BouncerInteractorTest : SysuiTestCase() {
                 }
             }
             assertThat(message).isEqualTo("")
-            assertThat(throttling).isNull()
+            assertThat(lockout).isNull()
 
-            // Correct PIN and no longer throttled so changes to the Gone scene:
+            // Correct PIN and no longer locked out so changes to the Gone scene:
             assertThat(underTest.authenticate(FakeAuthenticationRepository.DEFAULT_PIN))
                 .isEqualTo(AuthenticationResult.SUCCEEDED)
-            assertThat(throttling).isNull()
+            assertThat(lockout).isNull()
         }
 
     @Test

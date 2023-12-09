@@ -63,6 +63,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Surface;
+import android.view.WindowManager;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -911,6 +912,24 @@ public final class VirtualDeviceManager {
         @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
         public void setShowPointerIcon(boolean showPointerIcon) {
             mVirtualDeviceInternal.setShowPointerIcon(showPointerIcon);
+        }
+
+        /**
+         * Specifies the IME behavior on the given display. By default, all displays created by
+         * virtual devices have {@link WindowManager#DISPLAY_IME_POLICY_LOCAL}.
+         *
+         * @param displayId the ID of the display to change the IME policy for. It must be owned by
+         *                  this virtual device.
+         * @param policy the IME policy to use on that display
+         * @throws SecurityException if the display is not owned by this device or is not
+         *                           {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED trusted}
+         */
+        @RequiresPermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
+        @FlaggedApi(Flags.FLAG_VDM_CUSTOM_IME)
+        public void setDisplayImePolicy(int displayId, @WindowManager.DisplayImePolicy int policy) {
+            if (Flags.vdmCustomIme()) {
+                mVirtualDeviceInternal.setDisplayImePolicy(displayId, policy);
+            }
         }
 
         /**

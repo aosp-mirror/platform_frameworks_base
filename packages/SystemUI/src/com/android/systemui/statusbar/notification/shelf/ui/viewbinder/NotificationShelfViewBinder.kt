@@ -29,7 +29,7 @@ import com.android.systemui.statusbar.notification.row.ui.viewbinder.Activatable
 import com.android.systemui.statusbar.notification.shared.NotificationIconContainerRefactor
 import com.android.systemui.statusbar.notification.shelf.ui.viewmodel.NotificationShelfViewModel
 import com.android.systemui.statusbar.phone.NotificationIconAreaController
-import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.statusbar.ui.SystemBarUtilsState
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.launch
 
@@ -39,7 +39,7 @@ object NotificationShelfViewBinder {
         shelf: NotificationShelf,
         viewModel: NotificationShelfViewModel,
         configuration: ConfigurationState,
-        configurationController: ConfigurationController,
+        systemBarUtilsState: SystemBarUtilsState,
         falsingManager: FalsingManager,
         iconViewBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
         notificationIconAreaController: NotificationIconAreaController,
@@ -48,11 +48,11 @@ object NotificationShelfViewBinder {
         ActivatableNotificationViewBinder.bind(viewModel, shelf, falsingManager)
         shelf.apply {
             if (NotificationIconContainerRefactor.isEnabled) {
-                NotificationIconContainerViewBinder.bind(
+                NotificationIconContainerViewBinder.bindWhileAttached(
                     shelfIcons,
                     viewModel.icons,
                     configuration,
-                    configurationController,
+                    systemBarUtilsState,
                     iconViewBindingFailureTracker,
                     shelfIconViewStore,
                 )

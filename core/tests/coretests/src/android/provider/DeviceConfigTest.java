@@ -831,6 +831,7 @@ public class DeviceConfigTest {
     }
 
     @Test
+    @FlakyTest(bugId = 299483542)
     public void onPropertiesChangedListener_setPropertiesCallback() {
         DeviceConfig.setProperty(NAMESPACE, KEY, VALUE, false);
         DeviceConfig.setProperty(NAMESPACE, KEY2, VALUE2, false);

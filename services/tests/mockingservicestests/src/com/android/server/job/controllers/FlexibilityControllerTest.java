@@ -30,15 +30,16 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.DEFAULT_FALLBACK_FLEXIBILITY_DEADLINE_MS;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.DEFAULT_UNSEEN_CONSTRAINT_GRACE_PERIOD_MS;
+import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_APPLIED_CONSTRAINTS;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_DEADLINE_PROXIMITY_LIMIT;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_FALLBACK_FLEXIBILITY_DEADLINE;
-import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_FLEXIBILITY_ENABLED;
 import static com.android.server.job.controllers.FlexibilityController.FcConfig.KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS;
-import static com.android.server.job.controllers.FlexibilityController.NUM_FLEXIBLE_CONSTRAINTS;
+import static com.android.server.job.controllers.FlexibilityController.FLEXIBLE_CONSTRAINTS;
 import static com.android.server.job.controllers.FlexibilityController.SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_BATTERY_NOT_LOW;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CHARGING;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CONNECTIVITY;
+import static com.android.server.job.controllers.JobStatus.CONSTRAINT_CONTENT_TRIGGER;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_FLEXIBLE;
 import static com.android.server.job.controllers.JobStatus.CONSTRAINT_IDLE;
 import static com.android.server.job.controllers.JobStatus.MIN_WINDOW_FOR_FLEXIBILITY_MS;
@@ -66,6 +67,7 @@ import android.os.Looper;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobStore;
@@ -129,6 +131,7 @@ public class FlexibilityControllerTest {
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.hasSystemFeature(
                 PackageManager.FEATURE_AUTOMOTIVE)).thenReturn(false);
+        when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_EMBEDDED)).thenReturn(false);
         // Used in FlexibilityController.FcConstants.
         doAnswer((Answer<Void>) invocationOnMock -> null)
                 .when(() -> DeviceConfig.addOnPropertiesChangedListener(
@@ -161,7 +164,8 @@ public class FlexibilityControllerTest {
 
         setDeviceConfigString(KEY_PERCENTS_TO_DROP_NUM_FLEXIBLE_CONSTRAINTS, "50,60,70,80");
         setDeviceConfigLong(KEY_DEADLINE_PROXIMITY_LIMIT, 0L);
-        setDeviceConfigBoolean(KEY_FLEXIBILITY_ENABLED, true);
+        setDeviceConfigInt(KEY_APPLIED_CONSTRAINTS, FLEXIBLE_CONSTRAINTS);
+        waitForQuietModuleThread();
     }
 
     @After
@@ -171,17 +175,22 @@ public class FlexibilityControllerTest {
         }
     }
 
-    private void setDeviceConfigBoolean(String key, boolean val) {
-        mDeviceConfigPropertiesBuilder.setBoolean(key, val);
-        synchronized (mFlexibilityController.mLock) {
-            mFlexibilityController.prepareForUpdatedConstantsLocked();
-            mFcConfig.processConstantLocked(mDeviceConfigPropertiesBuilder.build(), key);
-            mFlexibilityController.onConstantsUpdatedLocked();
-        }
+    private void setDeviceConfigInt(String key, int val) {
+        mDeviceConfigPropertiesBuilder.setInt(key, val);
+        updateDeviceConfig(key);
     }
 
     private void setDeviceConfigLong(String key, Long val) {
         mDeviceConfigPropertiesBuilder.setLong(key, val);
+        updateDeviceConfig(key);
+    }
+
+    private void setDeviceConfigString(String key, String val) {
+        mDeviceConfigPropertiesBuilder.setString(key, val);
+        updateDeviceConfig(key);
+    }
+
+    private void updateDeviceConfig(String key) {
         synchronized (mFlexibilityController.mLock) {
             mFlexibilityController.prepareForUpdatedConstantsLocked();
             mFcConfig.processConstantLocked(mDeviceConfigPropertiesBuilder.build(), key);
@@ -189,13 +198,9 @@ public class FlexibilityControllerTest {
         }
     }
 
-    private void setDeviceConfigString(String key, String val) {
-        mDeviceConfigPropertiesBuilder.setString(key, val);
-        synchronized (mFlexibilityController.mLock) {
-            mFlexibilityController.prepareForUpdatedConstantsLocked();
-            mFcConfig.processConstantLocked(mDeviceConfigPropertiesBuilder.build(), key);
-            mFlexibilityController.onConstantsUpdatedLocked();
-        }
+    private void waitForQuietModuleThread() {
+        assertTrue("Failed to wait for quiet module thread",
+                AppSchedulingModuleThread.getHandler().runWithScissors(() -> {}, 10_000L));
     }
 
     private static JobInfo.Builder createJob(int id) {
@@ -207,6 +212,10 @@ public class FlexibilityControllerTest {
         JobStatus js = JobStatus.createFromJobInfo(
                 jobInfo, 1000, SOURCE_PACKAGE, SOURCE_USER_ID, "FCTest", testTag);
         js.enqueueTime = FROZEN_TIME;
+        if (js.hasFlexibilityConstraint()) {
+            js.setNumAppliedFlexibleConstraints(Integer.bitCount(
+                    mFlexibilityController.getRelevantAppliedConstraintsLocked(js)));
+        }
         return js;
     }
 
@@ -215,18 +224,120 @@ public class FlexibilityControllerTest {
      */
     @Test
     public void testDefaultVariableValues() {
-        assertEquals(NUM_FLEXIBLE_CONSTRAINTS,
+        assertEquals(Integer.bitCount(FLEXIBLE_CONSTRAINTS),
                 mFlexibilityController.mFcConfig.DEFAULT_PERCENT_TO_DROP_FLEXIBLE_CONSTRAINTS.length
         );
     }
 
     @Test
-    public void testOnConstantsUpdated_DefaultFlexibility() {
+    public void testAppliedConstraints() {
+        setDeviceConfigInt(KEY_APPLIED_CONSTRAINTS, FLEXIBLE_CONSTRAINTS);
+
+        // Add connectivity to require 4 constraints
+        JobStatus connJs = createJobStatus("testAppliedConstraints",
+                createJob(0).setRequiredNetworkType(NETWORK_TYPE_ANY));
+        JobStatus nonConnJs = createJobStatus("testAppliedConstraints",
+                createJob(1).setRequiredNetworkType(NETWORK_TYPE_NONE));
+
+        mFlexibilityController.maybeStartTrackingJobLocked(connJs, null);
+        mFlexibilityController.maybeStartTrackingJobLocked(nonConnJs, null);
+
+        assertEquals(4, connJs.getNumAppliedFlexibleConstraints());
+        assertEquals(3, nonConnJs.getNumAppliedFlexibleConstraints());
+
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_BATTERY_NOT_LOW, true,
+                JobSchedulerService.sElapsedRealtimeClock.millis() - HOUR_IN_MILLIS);
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_CHARGING, false,
+                JobSchedulerService.sElapsedRealtimeClock.millis() - HOUR_IN_MILLIS);
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_IDLE, false,
+                JobSchedulerService.sElapsedRealtimeClock.millis() - HOUR_IN_MILLIS);
+        mFlexibilityController.setConstraintSatisfied(
+                CONSTRAINT_CONNECTIVITY, true,
+                JobSchedulerService.sElapsedRealtimeClock.millis() - HOUR_IN_MILLIS);
+        connJs.setTransportAffinitiesSatisfied(true);
+
+        synchronized (mFlexibilityController.mLock) {
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+
+        setDeviceConfigInt(KEY_APPLIED_CONSTRAINTS,
+                CONSTRAINT_BATTERY_NOT_LOW | CONSTRAINT_CONNECTIVITY);
+        waitForQuietModuleThread();
+
+        // Only battery-not-low (which is satisfied) applies to the non-connectivity job, so it
+        // should be able to run.
+        assertEquals(2, connJs.getNumAppliedFlexibleConstraints());
+        assertEquals(1, nonConnJs.getNumAppliedFlexibleConstraints());
+        synchronized (mFlexibilityController.mLock) {
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+
+        setDeviceConfigInt(KEY_APPLIED_CONSTRAINTS, CONSTRAINT_BATTERY_NOT_LOW);
+        waitForQuietModuleThread();
+
+        assertEquals(1, connJs.getNumAppliedFlexibleConstraints());
+        assertEquals(1, nonConnJs.getNumAppliedFlexibleConstraints());
+        synchronized (mFlexibilityController.mLock) {
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+
+        setDeviceConfigInt(KEY_APPLIED_CONSTRAINTS, CONSTRAINT_CONNECTIVITY);
+        waitForQuietModuleThread();
+
+        // No constraints apply to the non-connectivity job, so it should be able to run.
+        assertEquals(1, connJs.getNumAppliedFlexibleConstraints());
+        assertEquals(0, nonConnJs.getNumAppliedFlexibleConstraints());
+        synchronized (mFlexibilityController.mLock) {
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+
+        setDeviceConfigInt(KEY_APPLIED_CONSTRAINTS, CONSTRAINT_CHARGING);
+        waitForQuietModuleThread();
+
+        assertEquals(1, connJs.getNumAppliedFlexibleConstraints());
+        assertEquals(1, nonConnJs.getNumAppliedFlexibleConstraints());
+        synchronized (mFlexibilityController.mLock) {
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertFalse(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+
+        setDeviceConfigInt(KEY_APPLIED_CONSTRAINTS, 0);
+        waitForQuietModuleThread();
+
+        // No constraints apply, so they should be able to run.
+        assertEquals(0, connJs.getNumAppliedFlexibleConstraints());
+        assertEquals(0, nonConnJs.getNumAppliedFlexibleConstraints());
+        synchronized (mFlexibilityController.mLock) {
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+
+        // Invalid constraint to apply.
+        setDeviceConfigInt(KEY_APPLIED_CONSTRAINTS, CONSTRAINT_CONTENT_TRIGGER);
+        waitForQuietModuleThread();
+
+        // No constraints apply, so they should be able to run.
+        assertEquals(0, connJs.getNumAppliedFlexibleConstraints());
+        assertEquals(0, nonConnJs.getNumAppliedFlexibleConstraints());
+        synchronized (mFlexibilityController.mLock) {
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(connJs));
+            assertTrue(mFlexibilityController.hasEnoughSatisfiedConstraintsLocked(nonConnJs));
+        }
+    }
+
+    @Test
+    public void testOnConstantsUpdated_AppliedConstraints() {
         JobStatus js = createJobStatus("testDefaultFlexibilityConfig", createJob(0));
-        assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(js));
-        setDeviceConfigBoolean(KEY_FLEXIBILITY_ENABLED, false);
+        setDeviceConfigInt(KEY_APPLIED_CONSTRAINTS, 0);
         assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(js));
-        setDeviceConfigBoolean(KEY_FLEXIBILITY_ENABLED, true);
+        setDeviceConfigInt(KEY_APPLIED_CONSTRAINTS, FLEXIBLE_CONSTRAINTS);
         assertFalse(mFlexibilityController.isFlexibilitySatisfiedLocked(js));
     }
 
@@ -261,10 +372,10 @@ public class FlexibilityControllerTest {
                 new int[] {10, 20, 30, 40});
         assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10,
                 mFlexibilityController.getNextConstraintDropTimeElapsedLocked(js));
-        js.adjustNumRequiredFlexibleConstraints(-1);
+        js.setNumDroppedFlexibleConstraints(1);
         assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 2,
                 mFlexibilityController.getNextConstraintDropTimeElapsedLocked(js));
-        js.adjustNumRequiredFlexibleConstraints(-1);
+        js.setNumDroppedFlexibleConstraints(2);
         assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 3,
                 mFlexibilityController.getNextConstraintDropTimeElapsedLocked(js));
     }
@@ -303,12 +414,12 @@ public class FlexibilityControllerTest {
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 5,
                 nextTimeToDropNumConstraints);
-        js.adjustNumRequiredFlexibleConstraints(-1);
+        js.setNumDroppedFlexibleConstraints(1);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 6,
                 nextTimeToDropNumConstraints);
-        js.adjustNumRequiredFlexibleConstraints(-1);
+        js.setNumDroppedFlexibleConstraints(2);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(FROZEN_TIME + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 7,
@@ -321,11 +432,11 @@ public class FlexibilityControllerTest {
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(130400100, nextTimeToDropNumConstraints);
-        js.adjustNumRequiredFlexibleConstraints(-1);
+        js.setNumDroppedFlexibleConstraints(1);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(156320100L, nextTimeToDropNumConstraints);
-        js.adjustNumRequiredFlexibleConstraints(-1);
+        js.setNumDroppedFlexibleConstraints(2);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(182240100L, nextTimeToDropNumConstraints);
@@ -337,11 +448,11 @@ public class FlexibilityControllerTest {
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(129600100, nextTimeToDropNumConstraints);
-        js.adjustNumRequiredFlexibleConstraints(-1);
+        js.setNumDroppedFlexibleConstraints(1);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(155520100L, nextTimeToDropNumConstraints);
-        js.adjustNumRequiredFlexibleConstraints(-1);
+        js.setNumDroppedFlexibleConstraints(2);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(181440100L, nextTimeToDropNumConstraints);
@@ -357,12 +468,12 @@ public class FlexibilityControllerTest {
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(windowStart + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 5,
                 nextTimeToDropNumConstraints);
-        js.adjustNumRequiredFlexibleConstraints(-1);
+        js.setNumDroppedFlexibleConstraints(1);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(windowStart + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 6,
                 nextTimeToDropNumConstraints);
-        js.adjustNumRequiredFlexibleConstraints(-1);
+        js.setNumDroppedFlexibleConstraints(2);
         nextTimeToDropNumConstraints = mFlexibilityController
                 .getNextConstraintDropTimeElapsedLocked(js);
         assertEquals(windowStart + MIN_WINDOW_FOR_FLEXIBILITY_MS / 10 * 7,
@@ -580,10 +691,10 @@ public class FlexibilityControllerTest {
     }
 
     @Test
-    public void testWontStopJobFromRunning() {
-        JobStatus js = createJobStatus("testWontStopJobFromRunning", createJob(101));
+    public void testWontStopAlreadyRunningJob() {
+        JobStatus js = createJobStatus("testWontStopAlreadyRunningJob", createJob(101));
         // Stop satisfied constraints from causing a false positive.
-        js.adjustNumRequiredFlexibleConstraints(100);
+        js.setNumAppliedFlexibleConstraints(100);
         synchronized (mFlexibilityController.mLock) {
             when(mJobSchedulerService.isCurrentlyRunningLocked(js)).thenReturn(true);
             assertTrue(mFlexibilityController.isFlexibilitySatisfiedLocked(js));
@@ -593,10 +704,9 @@ public class FlexibilityControllerTest {
     @Test
     public void testFlexibilityTracker() {
         FlexibilityController.FlexibilityTracker flexTracker =
-                mFlexibilityController.new
-                        FlexibilityTracker(NUM_FLEXIBLE_CONSTRAINTS);
+                mFlexibilityController.new FlexibilityTracker(4);
         // Plus one for jobs with 0 required constraint.
-        assertEquals(NUM_FLEXIBLE_CONSTRAINTS + 1, flexTracker.size());
+        assertEquals(4 + 1, flexTracker.size());
         JobStatus[] jobs = new JobStatus[4];
         JobInfo.Builder jb;
         for (int i = 0; i < jobs.length; i++) {
@@ -622,21 +732,21 @@ public class FlexibilityControllerTest {
             assertEquals(3, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
 
-            flexTracker.adjustJobsRequiredConstraints(jobs[0], -1, FROZEN_TIME);
+            flexTracker.setNumDroppedFlexibleConstraints(jobs[0], 1);
             assertEquals(1, trackedJobs.get(0).size());
             assertEquals(0, trackedJobs.get(1).size());
             assertEquals(1, trackedJobs.get(2).size());
             assertEquals(2, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
 
-            flexTracker.adjustJobsRequiredConstraints(jobs[0], -1, FROZEN_TIME);
+            flexTracker.setNumDroppedFlexibleConstraints(jobs[0], 2);
             assertEquals(1, trackedJobs.get(0).size());
             assertEquals(1, trackedJobs.get(1).size());
             assertEquals(0, trackedJobs.get(2).size());
             assertEquals(2, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
 
-            flexTracker.adjustJobsRequiredConstraints(jobs[0], -1, FROZEN_TIME);
+            flexTracker.setNumDroppedFlexibleConstraints(jobs[0], 3);
             assertEquals(2, trackedJobs.get(0).size());
             assertEquals(0, trackedJobs.get(1).size());
             assertEquals(0, trackedJobs.get(2).size());
@@ -650,14 +760,14 @@ public class FlexibilityControllerTest {
             assertEquals(1, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
 
-            flexTracker.resetJobNumDroppedConstraints(jobs[0], FROZEN_TIME);
+            flexTracker.calculateNumDroppedConstraints(jobs[0], FROZEN_TIME);
             assertEquals(1, trackedJobs.get(0).size());
             assertEquals(0, trackedJobs.get(1).size());
             assertEquals(0, trackedJobs.get(2).size());
             assertEquals(2, trackedJobs.get(3).size());
             assertEquals(0, trackedJobs.get(4).size());
 
-            flexTracker.adjustJobsRequiredConstraints(jobs[0], -2, FROZEN_TIME);
+            flexTracker.setNumDroppedFlexibleConstraints(jobs[0], 2);
             assertEquals(1, trackedJobs.get(0).size());
             assertEquals(1, trackedJobs.get(1).size());
             assertEquals(0, trackedJobs.get(2).size());
@@ -669,7 +779,7 @@ public class FlexibilityControllerTest {
             JobSchedulerService.sElapsedRealtimeClock =
                     Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
 
-            flexTracker.resetJobNumDroppedConstraints(jobs[0], nowElapsed);
+            flexTracker.calculateNumDroppedConstraints(jobs[0], nowElapsed);
             assertEquals(1, trackedJobs.get(0).size());
             assertEquals(0, trackedJobs.get(1).size());
             assertEquals(1, trackedJobs.get(2).size());
@@ -779,9 +889,9 @@ public class FlexibilityControllerTest {
         mFlexibilityController.setConstraintSatisfied(
                 SYSTEM_WIDE_FLEXIBLE_CONSTRAINTS, false, FROZEN_TIME);
         // Require only a single constraint
-        jsAny.adjustNumRequiredFlexibleConstraints(-3);
-        jsCell.adjustNumRequiredFlexibleConstraints(-2);
-        jsWifi.adjustNumRequiredFlexibleConstraints(-2);
+        jsAny.setNumAppliedFlexibleConstraints(1);
+        jsCell.setNumAppliedFlexibleConstraints(1);
+        jsWifi.setNumAppliedFlexibleConstraints(1);
         synchronized (mFlexibilityController.mLock) {
             jsAny.setTransportAffinitiesSatisfied(false);
             jsCell.setTransportAffinitiesSatisfied(false);
@@ -1008,9 +1118,9 @@ public class FlexibilityControllerTest {
     }
 
     @Test
-    public void testResetJobNumDroppedConstraints() {
+    public void testCalculateNumDroppedConstraints() {
         JobInfo.Builder jb = createJob(22);
-        JobStatus js = createJobStatus("testResetJobNumDroppedConstraints", jb);
+        JobStatus js = createJobStatus("testCalculateNumDroppedConstraints", jb);
         long nowElapsed = FROZEN_TIME;
 
         mFlexibilityController.mFlexibilityTracker.add(js);
@@ -1025,14 +1135,14 @@ public class FlexibilityControllerTest {
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
 
         mFlexibilityController.mFlexibilityTracker
-                .adjustJobsRequiredConstraints(js, -1, nowElapsed);
+                .setNumDroppedFlexibleConstraints(js, 1);
 
         assertEquals(2, js.getNumRequiredFlexibleConstraints());
         assertEquals(1, js.getNumDroppedFlexibleConstraints());
         assertEquals(1, mFlexibilityController
                 .mFlexibilityTracker.getJobsByNumRequiredConstraints(2).size());
 
-        mFlexibilityController.mFlexibilityTracker.resetJobNumDroppedConstraints(js, nowElapsed);
+        mFlexibilityController.mFlexibilityTracker.calculateNumDroppedConstraints(js, nowElapsed);
 
         assertEquals(2, js.getNumRequiredFlexibleConstraints());
         assertEquals(1, js.getNumDroppedFlexibleConstraints());
@@ -1043,7 +1153,7 @@ public class FlexibilityControllerTest {
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
 
-        mFlexibilityController.mFlexibilityTracker.resetJobNumDroppedConstraints(js, nowElapsed);
+        mFlexibilityController.mFlexibilityTracker.calculateNumDroppedConstraints(js, nowElapsed);
 
         assertEquals(3, js.getNumRequiredFlexibleConstraints());
         assertEquals(0, js.getNumDroppedFlexibleConstraints());
@@ -1054,7 +1164,7 @@ public class FlexibilityControllerTest {
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
 
-        mFlexibilityController.mFlexibilityTracker.resetJobNumDroppedConstraints(js, nowElapsed);
+        mFlexibilityController.mFlexibilityTracker.calculateNumDroppedConstraints(js, nowElapsed);
 
         assertEquals(0, js.getNumRequiredFlexibleConstraints());
         assertEquals(3, js.getNumDroppedFlexibleConstraints());
@@ -1063,7 +1173,7 @@ public class FlexibilityControllerTest {
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(Instant.ofEpochMilli(nowElapsed), ZoneOffset.UTC);
 
-        mFlexibilityController.mFlexibilityTracker.resetJobNumDroppedConstraints(js, nowElapsed);
+        mFlexibilityController.mFlexibilityTracker.calculateNumDroppedConstraints(js, nowElapsed);
 
         assertEquals(1, js.getNumRequiredFlexibleConstraints());
         assertEquals(2, js.getNumDroppedFlexibleConstraints());
@@ -1139,20 +1249,28 @@ public class FlexibilityControllerTest {
     }
 
     @Test
-    public void testDeviceDisabledFlexibility_Auto() {
-        when(mPackageManager.hasSystemFeature(
-                PackageManager.FEATURE_AUTOMOTIVE)).thenReturn(true);
+    public void testUnsupportedDevice_Auto() {
+        runTestUnsupportedDevice(PackageManager.FEATURE_AUTOMOTIVE);
+    }
+
+    @Test
+    public void testUnsupportedDevice_Embedded() {
+        runTestUnsupportedDevice(PackageManager.FEATURE_EMBEDDED);
+    }
+
+    private void runTestUnsupportedDevice(String feature) {
+        when(mPackageManager.hasSystemFeature(feature)).thenReturn(true);
         mFlexibilityController =
                 new FlexibilityController(mJobSchedulerService, mPrefetchController);
-        assertFalse(mFlexibilityController.mFlexibilityEnabled);
+        assertFalse(mFlexibilityController.isEnabled());
 
-        JobStatus js = createJobStatus("testIsAuto", createJob(0));
+        JobStatus js = createJobStatus("testUnsupportedDevice", createJob(0));
 
         mFlexibilityController.maybeStartTrackingJobLocked(js, null);
         assertTrue(js.isConstraintSatisfied(CONSTRAINT_FLEXIBLE));
 
-        setDeviceConfigBoolean(KEY_FLEXIBILITY_ENABLED, true);
-        assertFalse(mFlexibilityController.mFlexibilityEnabled);
+        setDeviceConfigInt(KEY_APPLIED_CONSTRAINTS, FLEXIBLE_CONSTRAINTS);
+        assertFalse(mFlexibilityController.isEnabled());
 
         ArrayList<ArraySet<JobStatus>> jobs =
                 mFlexibilityController.mFlexibilityTracker.getArrayList();

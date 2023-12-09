@@ -105,7 +105,8 @@ open class MapsEnterPipTest(flicker: LegacyFlickerTest) : AppsEnterPipTransition
             )
             locationManager.setTestProviderEnabled(LocationManager.GPS_PROVIDER, true)
             mockLocationEnabled = true
-            mainHandler.post(updateLocation)
+            // postpone first location update to make sure GPS is set as test provider
+            mainHandler.postDelayed(updateLocation, 200)
 
             // normal app open through the Launcher All Apps
             // var mapsAddressOption = "Golden Gate Bridge"

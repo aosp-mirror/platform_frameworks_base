@@ -2037,9 +2037,8 @@ public class AudioDeviceBroker {
                     } break;
 
                 case MSG_L_UPDATED_ADI_DEVICE_STATE:
-                    synchronized (mDeviceStateLock) {
-                        mAudioService.onUpdatedAdiDeviceState((AdiDeviceState) msg.obj);
-                    } break;
+                    mAudioService.onUpdatedAdiDeviceState((AdiDeviceState) msg.obj);
+                    break;
 
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
@@ -2687,11 +2686,15 @@ public class AudioDeviceBroker {
             return;
         }
         final SettingsAdapter settingsAdapter = mAudioService.getSettings();
-        boolean res = settingsAdapter.putSecureStringForUser(mAudioService.getContentResolver(),
-                Settings.Secure.AUDIO_DEVICE_INVENTORY,
-                deviceSettings, UserHandle.USER_CURRENT);
-        if (!res) {
-            Log.e(TAG, "error saving AdiDeviceState: " + deviceSettings);
+        try {
+            boolean res = settingsAdapter.putSecureStringForUser(mAudioService.getContentResolver(),
+                    Settings.Secure.AUDIO_DEVICE_INVENTORY,
+                    deviceSettings, UserHandle.USER_CURRENT);
+            if (!res) {
+                Log.e(TAG, "error saving AdiDeviceState: " + deviceSettings);
+            }
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "error saving AdiDeviceState: " + deviceSettings, e);
         }
     }
 

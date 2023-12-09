@@ -104,4 +104,14 @@ public interface KeyguardSecurityCallback {
      */
     default void onSecurityModeChanged(SecurityMode securityMode, boolean needsInput) {
     }
+
+    /**
+     * Shows the security screen that should be shown.
+     *
+     * This can be considered as a "refresh" of the bouncer view. Based on certain parameters,
+     * we might switch to a different bouncer screen. e.g. SimPin to SimPuk.
+     */
+    default void showCurrentSecurityScreen() {
+
+    }
 }

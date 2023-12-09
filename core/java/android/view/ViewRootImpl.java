@@ -826,9 +826,17 @@ public final class ViewRootImpl implements ViewParent,
      * The resolved pointer icon type requested by this window.
      * A null value indicates the resolved pointer icon has not yet been calculated.
      */
+    // TODO(b/293587049): Remove pointer icon tracking by type when refactor is complete.
     @Nullable
     private Integer mPointerIconType = null;
     private PointerIcon mCustomPointerIcon = null;
+
+    /**
+     * The resolved pointer icon requested by this window.
+     * A null value indicates the resolved pointer icon has not yet been calculated.
+     */
+    @Nullable
+    private PointerIcon mResolvedPointerIcon = null;
 
     /**
      * see {@link #playSoundEffect(int)}
@@ -3216,6 +3224,12 @@ public final class ViewRootImpl implements ViewParent,
                 endDragResizing();
                 destroyHardwareResources();
             }
+
+            if (sToolkitSetFrameRateReadOnlyFlagValue && viewVisibility == View.VISIBLE) {
+                // Boost frame rate when the viewVisibility becomes true.
+                // This is mainly for lanuchers that lanuch new windows.
+                boostFrameRate(FRAME_RATE_TOUCH_BOOST_TIME);
+            }
         }
 
         // Non-visible windows can't hold accessibility focus.
@@ -3924,6 +3938,11 @@ public final class ViewRootImpl implements ViewParent,
                                 == ViewGroup.FOCUS_AFTER_DESCENDANTS) {
                     focused.restoreDefaultFocus();
                 }
+            }
+
+            if (sToolkitSetFrameRateReadOnlyFlagValue) {
+                // Boost the frame rate when the ViewRootImpl first becomes available.
+                boostFrameRate(FRAME_RATE_TOUCH_BOOST_TIME);
             }
         }
 
@@ -7399,12 +7418,14 @@ public final class ViewRootImpl implements ViewParent,
                 // Other apps or the window manager may change the icon type outside of
                 // this app, therefore the icon type has to be reset on enter/exit event.
                 mPointerIconType = null;
+                mResolvedPointerIcon = null;
             }
 
             if (action != MotionEvent.ACTION_HOVER_EXIT) {
                 // Resolve the pointer icon
                 if (!updatePointerIcon(event) && action == MotionEvent.ACTION_HOVER_MOVE) {
                     mPointerIconType = null;
+                    mResolvedPointerIcon = null;
                 }
             }
 
@@ -7459,6 +7480,7 @@ public final class ViewRootImpl implements ViewParent,
 
     private void resetPointerIcon(MotionEvent event) {
         mPointerIconType = null;
+        mResolvedPointerIcon = null;
         updatePointerIcon(event);
     }
 
@@ -7496,6 +7518,21 @@ public final class ViewRootImpl implements ViewParent,
             pointerIcon = mView.onResolvePointerIcon(event, pointerIndex);
         }
 
+        if (enablePointerChoreographer()) {
+            if (pointerIcon == null) {
+                pointerIcon = PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_NOT_SPECIFIED);
+            }
+            if (Objects.equals(mResolvedPointerIcon, pointerIcon)) {
+                return true;
+            }
+            mResolvedPointerIcon = pointerIcon;
+
+            InputManagerGlobal.getInstance()
+                    .setPointerIcon(pointerIcon, event.getDisplayId(),
+                            event.getDeviceId(), event.getPointerId(0), getInputToken());
+            return true;
+        }
+
         final int pointerType = (pointerIcon != null) ?
                 pointerIcon.getType() : PointerIcon.TYPE_NOT_SPECIFIED;
 
@@ -7503,34 +7540,18 @@ public final class ViewRootImpl implements ViewParent,
             mPointerIconType = pointerType;
             mCustomPointerIcon = null;
             if (mPointerIconType != PointerIcon.TYPE_CUSTOM) {
-                if (enablePointerChoreographer()) {
-                    InputManagerGlobal
-                            .getInstance()
-                            .setPointerIcon(PointerIcon.getSystemIcon(mContext, pointerType),
-                                    event.getDisplayId(), event.getDeviceId(),
-                                    event.getPointerId(pointerIndex), getInputToken());
-                } else {
-                    InputManagerGlobal
-                            .getInstance()
-                            .setPointerIconType(pointerType);
-                }
+                InputManagerGlobal
+                        .getInstance()
+                        .setPointerIconType(pointerType);
                 return true;
             }
         }
         if (mPointerIconType == PointerIcon.TYPE_CUSTOM &&
                 !pointerIcon.equals(mCustomPointerIcon)) {
             mCustomPointerIcon = pointerIcon;
-            if (enablePointerChoreographer()) {
-                InputManagerGlobal
-                        .getInstance()
-                        .setPointerIcon(mCustomPointerIcon,
-                                event.getDisplayId(), event.getDeviceId(),
-                                event.getPointerId(pointerIndex), getInputToken());
-            } else {
-                InputManagerGlobal
-                        .getInstance()
-                        .setCustomPointerIcon(mCustomPointerIcon);
-            }
+            InputManagerGlobal
+                    .getInstance()
+                    .setCustomPointerIcon(mCustomPointerIcon);
         }
         return true;
     }
@@ -12005,18 +12026,6 @@ public final class ViewRootImpl implements ViewParent,
         scheduleTraversals();
     }
 
-    @Override
-    public void addTrustedPresentationCallback(@NonNull SurfaceControl.Transaction t,
-            @NonNull SurfaceControl.TrustedPresentationThresholds thresholds,
-            @NonNull Executor executor, @NonNull Consumer<Boolean> listener) {
-        t.setTrustedPresentationCallback(getSurfaceControl(), thresholds, executor, listener);
-    }
-
-    @Override
-    public void removeTrustedPresentationCallback(@NonNull SurfaceControl.Transaction t,
-            @NonNull Consumer<Boolean> listener) {
-        t.clearTrustedPresentationCallback(getSurfaceControl());
-    }
 
     private void logAndTrace(String msg) {
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
@@ -12036,7 +12045,7 @@ public final class ViewRootImpl implements ViewParent,
         try {
             if (mLastPreferredFrameRateCategory != frameRateCategory) {
                 mFrameRateTransaction.setFrameRateCategory(mSurfaceControl,
-                    frameRateCategory, false).applyAsyncUnsafe();
+                        frameRateCategory, false).applyAsyncUnsafe();
                 mLastPreferredFrameRateCategory = frameRateCategory;
             }
         } catch (Exception e) {
@@ -12157,6 +12166,22 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public float getPreferredFrameRate() {
         return mPreferredFrameRate;
+    }
+
+    /**
+     * Get the value of mIsFrameRateBoosting
+     */
+    @VisibleForTesting
+    public boolean getIsFrameRateBoosting() {
+        return mIsFrameRateBoosting;
+    }
+
+    private void boostFrameRate(int boostTimeOut) {
+        mIsFrameRateBoosting = true;
+        setPreferredFrameRateCategory(mPreferredFrameRateCategory);
+        mHandler.removeMessages(MSG_TOUCH_BOOST_TIMEOUT);
+        mHandler.sendEmptyMessageDelayed(MSG_TOUCH_BOOST_TIMEOUT,
+                boostTimeOut);
     }
 
     @Override

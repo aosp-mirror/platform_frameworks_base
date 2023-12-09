@@ -484,7 +484,12 @@ public class KeyguardStateControllerImpl implements KeyguardStateController, Dum
         }
 
         @Override
-        public void onBiometricsCleared() {
+        public void onFingerprintsCleared() {
+            update(false /* alwaysUpdate */);
+        }
+
+        @Override
+        public void onFacesCleared() {
             update(false /* alwaysUpdate */);
         }
 

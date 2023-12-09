@@ -106,7 +106,7 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull TransitionFinishCallback finishCallback) {
-        if (hasUnfold(info) && transition != mTransition) {
+        if (shouldPlayUnfoldAnimation(info) && transition != mTransition) {
             // Take over transition that has unfold, we might receive it if no other handler
             // accepted request in handleRequest, e.g. for rotation + unfold or
             // TRANSIT_NONE + unfold transitions
@@ -213,14 +213,36 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     }
 
     /** Whether `request` contains an unfold action. */
-    public boolean hasUnfold(@NonNull TransitionRequestInfo request) {
+    public boolean shouldPlayUnfoldAnimation(@NonNull TransitionRequestInfo request) {
+        // Unfold animation won't play when animations are disabled
+        if (!ValueAnimator.areAnimatorsEnabled()) return false;
+
         return (request.getType() == TRANSIT_CHANGE
                 && request.getDisplayChange() != null
-                && request.getDisplayChange().isPhysicalDisplayChanged());
+                && isUnfoldDisplayChange(request.getDisplayChange()));
+    }
+
+    private boolean isUnfoldDisplayChange(
+            @NonNull TransitionRequestInfo.DisplayChange displayChange) {
+        if (!displayChange.isPhysicalDisplayChanged()) {
+            return false;
+        }
+
+        if (displayChange.getStartAbsBounds() == null || displayChange.getEndAbsBounds() == null) {
+            return false;
+        }
+
+        // Handle only unfolding, currently we don't have an animation when folding
+        final int endArea =
+                displayChange.getEndAbsBounds().width() * displayChange.getEndAbsBounds().height();
+        final int startArea = displayChange.getStartAbsBounds().width()
+                * displayChange.getStartAbsBounds().height();
+
+        return endArea > startArea;
     }
 
     /** Whether `transitionInfo` contains an unfold action. */
-    public boolean hasUnfold(@NonNull TransitionInfo transitionInfo) {
+    public boolean shouldPlayUnfoldAnimation(@NonNull TransitionInfo transitionInfo) {
         // Unfold animation won't play when animations are disabled
         if (!ValueAnimator.areAnimatorsEnabled()) return false;
 
@@ -250,7 +272,7 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        if (hasUnfold(request)) {
+        if (shouldPlayUnfoldAnimation(request)) {
             mTransition = transition;
             return new WindowContainerTransaction();
         }

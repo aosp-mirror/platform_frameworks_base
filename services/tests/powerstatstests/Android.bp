@@ -12,6 +12,7 @@ android_test {
     ],
 
     exclude_srcs: [
+        "src/com/android/server/power/stats/MultiStateStatsTest.java",
         "src/com/android/server/power/stats/PowerStatsStoreTest.java",
     ],
 
@@ -62,13 +63,12 @@ android_ravenwood_test {
     static_libs: [
         "services.core",
         "modules-utils-binary-xml",
-
         "androidx.annotation_annotation",
         "androidx.test.rules",
     ],
     srcs: [
+        "src/com/android/server/power/stats/MultiStateStatsTest.java",
         "src/com/android/server/power/stats/PowerStatsStoreTest.java",
     ],
-    sdk_version: "test_current",
     auto_gen_config: true,
 }

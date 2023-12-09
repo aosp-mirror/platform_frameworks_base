@@ -322,6 +322,14 @@ public interface PackageState {
     long[] getUsesSdkLibrariesVersionsMajor();
 
     /**
+     * @see R.styleable#AndroidManifestUsesSdkLibrary_optional
+     * @hide
+     */
+    @Immutable.Ignore
+    @NonNull
+    boolean[] getUsesSdkLibrariesOptional();
+
+    /**
      * @see R.styleable#AndroidManifestUsesStaticLibrary
      * @hide
      */

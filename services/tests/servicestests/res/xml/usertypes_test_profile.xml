@@ -40,11 +40,13 @@
             mediaSharedWithParent='true'
             credentialShareableWithParent='false'
             authAlwaysRequiredToDisableQuietMode='true'
+            allowStoppingUserWithDelayedLocking='true'
             showInSettings='23'
             hideInSettingsInQuietMode='true'
             inheritDevicePolicy='450'
             deleteAppWithParent='false'
             alwaysVisible='true'
+            crossProfileContentSharingStrategy='0'
         />
     </profile-type>
     <profile-type name='custom.test.1' max-allowed-per-parent='14' />

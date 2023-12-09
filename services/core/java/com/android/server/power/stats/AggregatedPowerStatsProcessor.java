@@ -19,7 +19,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Log;
 
-import com.android.internal.os.MultiStateStats;
 import com.android.internal.os.PowerStats;
 
 import java.util.ArrayList;

@@ -267,6 +267,8 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Nullable
     private String[][] usesSdkLibrariesCertDigests;
     @Nullable
+    private boolean[] usesSdkLibrariesOptional;
+    @Nullable
     @DataClass.ParcelWith(ForInternedString.class)
     private String sharedUserId;
     private int sharedUserLabel;
@@ -718,14 +720,31 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
 
     @Override
     public PackageImpl addUsesSdkLibrary(String libraryName, long versionMajor,
-            String[] certSha256Digests) {
+            String[] certSha256Digests, boolean usesSdkLibrariesOptional) {
         this.usesSdkLibraries = CollectionUtils.add(this.usesSdkLibraries,
                 TextUtils.safeIntern(libraryName));
         this.usesSdkLibrariesVersionsMajor = ArrayUtils.appendLong(
                 this.usesSdkLibrariesVersionsMajor, versionMajor, true);
         this.usesSdkLibrariesCertDigests = ArrayUtils.appendElement(String[].class,
                 this.usesSdkLibrariesCertDigests, certSha256Digests, true);
+        this.usesSdkLibrariesOptional = appendBoolean(this.usesSdkLibrariesOptional,
+                usesSdkLibrariesOptional);
         return this;
+    }
+
+    /**
+     * Adds value to given array if not already present, providing set-like
+     * behavior.
+     */
+    public static boolean[] appendBoolean(@Nullable boolean[] cur, boolean val) {
+        if (cur == null) {
+            return new boolean[] { val };
+        }
+        final int N = cur.length;
+        boolean[] ret = new boolean[N + 1];
+        System.arraycopy(cur, 0, ret, 0, N);
+        ret[N] = val;
+        return ret;
     }
 
     @Override
@@ -1467,6 +1486,12 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
     @Nullable
     @Override
     public long[] getUsesSdkLibrariesVersionsMajor() { return usesSdkLibrariesVersionsMajor; }
+
+    @Nullable
+    @Override
+    public boolean[] getUsesSdkLibrariesOptional() {
+        return usesSdkLibrariesOptional;
+    }
 
     @NonNull
     @Override
@@ -3126,6 +3151,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
                 dest.writeStringArray(this.usesSdkLibrariesCertDigests[index]);
             }
         }
+        dest.writeBooleanArray(this.usesSdkLibrariesOptional);
 
         sForInternedString.parcel(this.sharedUserId, dest, flags);
         dest.writeInt(this.sharedUserLabel);
@@ -3278,6 +3304,7 @@ public class PackageImpl implements ParsedPackage, AndroidPackageInternal,
                 }
             }
         }
+        this.usesSdkLibrariesOptional = in.createBooleanArray();
 
         this.sharedUserId = sForInternedString.unparcel(in);
         this.sharedUserLabel = in.readInt();

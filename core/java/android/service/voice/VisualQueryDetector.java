@@ -447,12 +447,12 @@ public class VisualQueryDetector {
         public void onOpenFile(String filename, AndroidFuture future) throws RemoteException {
             Slog.v(TAG, "BinderCallback#onOpenFile " + filename);
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
-                Slog.v(TAG, "onOpenFile: " + filename);
+                Slog.v(TAG, "onOpenFile: " + filename + "under internal app storage.");
                 File f = new File(mContext.getFilesDir(), filename);
                 ParcelFileDescriptor pfd = null;
                 try {
-                    Slog.d(TAG, "opened a file with ParcelFileDescriptor.");
                     pfd = ParcelFileDescriptor.open(f, ParcelFileDescriptor.MODE_READ_ONLY);
+                    Slog.d(TAG, "Successfully opened a file with ParcelFileDescriptor.");
                 } catch (FileNotFoundException e) {
                     Slog.e(TAG, "Cannot open file. No ParcelFileDescriptor returned.");
                 } finally {

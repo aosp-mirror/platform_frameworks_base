@@ -255,6 +255,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         private ArrayList<TaskState> mOpeningTasks = null;
 
         private WindowContainerToken mPipTask = null;
+        private int mPipTaskId = -1;
         private WindowContainerToken mRecentsTask = null;
         private int mRecentsTaskId = -1;
         private TransitionInfo mInfo = null;
@@ -904,12 +905,14 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         @Override
         public void setFinishTaskTransaction(int taskId,
                 PictureInPictureSurfaceTransaction finishTransaction, SurfaceControl overlay) {
-            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                    "[%d] RecentsController.setFinishTaskTransaction: taskId=%d",
-                    mInstanceId, taskId);
             mExecutor.execute(() -> {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                        "[%d] RecentsController.setFinishTaskTransaction: taskId=%d,"
+                                + " [mFinishCB is non-null]=%b",
+                        mInstanceId, taskId, mFinishCB != null);
                 if (mFinishCB == null) return;
                 mPipTransaction = finishTransaction;
+                mPipTaskId = taskId;
             });
         }
 
@@ -1003,10 +1006,35 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     // the leaf-tasks are not "independent" so aren't hidden by normal setup).
                     t.hide(mPausingTasks.get(i).mTaskSurface);
                 }
-                if (mPipTask != null && mPipTransaction != null && sendUserLeaveHint) {
-                    t.show(mInfo.getChange(mPipTask).getLeash());
-                    PictureInPictureSurfaceTransaction.apply(mPipTransaction,
-                            mInfo.getChange(mPipTask).getLeash(), t);
+                if (mPipTransaction != null && sendUserLeaveHint) {
+                    SurfaceControl pipLeash = null;
+                    if (mPipTask != null) {
+                        pipLeash = mInfo.getChange(mPipTask).getLeash();
+                    } else if (mPipTaskId != -1) {
+                        // find a task with taskId from #setFinishTaskTransaction()
+                        for (TransitionInfo.Change change : mInfo.getChanges()) {
+                            if (change.getTaskInfo() != null
+                                    && change.getTaskInfo().taskId == mPipTaskId) {
+                                pipLeash = change.getLeash();
+                                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                        "RecentsController.finishInner:"
+                                                + " found a change with taskId=%d", mPipTaskId);
+                            }
+                        }
+                    }
+                    if (pipLeash == null) {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "RecentsController.finishInner: no valid PiP leash;"
+                                        + "mPipTransaction=%s, mPipTask=%s, mPipTaskId=%d",
+                                mPipTransaction.toString(), mPipTask.toString(), mPipTaskId);
+                    } else {
+                        t.show(pipLeash);
+                        PictureInPictureSurfaceTransaction.apply(mPipTransaction, pipLeash, t);
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
+                                "RecentsController.finishInner: PiP transaction %s merged",
+                                mPipTransaction);
+                    }
+                    mPipTaskId = -1;
                     mPipTask = null;
                     mPipTransaction = null;
                 }

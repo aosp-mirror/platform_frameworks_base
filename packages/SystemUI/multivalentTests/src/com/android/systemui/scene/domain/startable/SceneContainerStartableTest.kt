@@ -19,6 +19,7 @@
 package com.android.systemui.scene.domain.startable
 
 import android.os.PowerManager
+import android.platform.test.annotations.EnableFlags
 import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -45,7 +46,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.clearInvocations
@@ -55,6 +55,7 @@ import org.mockito.Mockito.verify
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@EnableFlags(AconfigFlags.FLAG_SCENE_CONTAINER)
 class SceneContainerStartableTest : SysuiTestCase() {
 
     private val utils = SceneTestUtils(this)
@@ -92,11 +93,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
             simBouncerInteractor = utils.simBouncerInteractor,
             authenticationInteractor = authenticationInteractor,
         )
-
-    @Before
-    fun setUp() {
-        mSetFlagsRule.enableFlags(AconfigFlags.FLAG_SCENE_CONTAINER)
-    }
 
     @Test
     fun hydrateVisibility() =

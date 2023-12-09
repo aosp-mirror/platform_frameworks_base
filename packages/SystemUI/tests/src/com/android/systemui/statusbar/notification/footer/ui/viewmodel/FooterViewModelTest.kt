@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.notification.footer.ui.viewmodel
 
+import android.platform.test.annotations.EnableFlags
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
@@ -38,6 +38,7 @@ import com.android.systemui.runTest
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.collection.render.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.row.ui.viewmodel.ActivatableNotificationViewModelModule
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.user.domain.interactor.HeadlessSystemUserModeModule
@@ -55,6 +56,7 @@ import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
+@EnableFlags(FooterViewRefactor.FLAG_NAME)
 class FooterViewModelTest : SysuiTestCase() {
     private lateinit var footerViewModel: FooterViewModel
 
@@ -105,8 +107,6 @@ class FooterViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-
-        mSetFlagsRule.enableFlags(Flags.FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR)
 
         // The underTest in the component is Optional, because that matches the provider we
         // currently have for the footer view model.

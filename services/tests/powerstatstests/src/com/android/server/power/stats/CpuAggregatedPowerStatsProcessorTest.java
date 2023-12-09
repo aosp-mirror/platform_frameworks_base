@@ -38,7 +38,6 @@ import android.util.LongArray;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.os.MultiStateStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.PowerStats;
 

@@ -59,6 +59,7 @@ import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.RankingHelperProto;
+import android.service.notification.ZenModeConfig;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
@@ -1862,12 +1863,16 @@ public class PreferencesHelper implements RankingConfig {
     public void updateZenPolicy(boolean areChannelsBypassingDnd, int callingUid,
             boolean fromSystemOrSystemUi) {
         NotificationManager.Policy policy = mZenModeHelper.getNotificationPolicy();
-        mZenModeHelper.setNotificationPolicy(new NotificationManager.Policy(
-                policy.priorityCategories, policy.priorityCallSenders,
-                policy.priorityMessageSenders, policy.suppressedVisualEffects,
-                (areChannelsBypassingDnd ? NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND
-                        : 0),
-                policy.priorityConversationSenders), callingUid, fromSystemOrSystemUi);
+        mZenModeHelper.setNotificationPolicy(
+                new NotificationManager.Policy(
+                        policy.priorityCategories, policy.priorityCallSenders,
+                        policy.priorityMessageSenders, policy.suppressedVisualEffects,
+                        (areChannelsBypassingDnd
+                                ? NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND : 0),
+                        policy.priorityConversationSenders),
+                fromSystemOrSystemUi ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
+                        : ZenModeConfig.UPDATE_ORIGIN_APP,
+                callingUid);
     }
 
     // TODO: b/310620812 - rename to hasPriorityChannels() when modes_api is inlined.

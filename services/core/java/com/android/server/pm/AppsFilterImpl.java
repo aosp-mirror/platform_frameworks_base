@@ -54,6 +54,7 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
+import android.util.SparseSetArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -1030,14 +1031,18 @@ public final class AppsFilterImpl extends AppsFilterLocked implements Watchable,
     private void recomputeComponentVisibility(
             ArrayMap<String, ? extends PackageStateInternal> existingSettings) {
         final WatchedArraySet<String> protectedBroadcasts;
+        final WatchedArraySet<Integer> forceQueryable;
         synchronized (mProtectedBroadcastsLock) {
             protectedBroadcasts = mProtectedBroadcasts.snapshot();
         }
+        synchronized (mForceQueryableLock) {
+            forceQueryable = mForceQueryable.snapshot();
+        }
         final ParallelComputeComponentVisibility computer = new ParallelComputeComponentVisibility(
-                existingSettings, mForceQueryable, protectedBroadcasts);
+                existingSettings, forceQueryable, protectedBroadcasts);
+        SparseSetArray<Integer> queriesViaComponent = computer.execute();
         synchronized (mQueriesViaComponentLock) {
-            mQueriesViaComponent.clear();
-            computer.execute(mQueriesViaComponent);
+            mQueriesViaComponent.copyFrom(queriesViaComponent);
         }
 
         mQueriesViaComponentRequireRecompute.set(false);

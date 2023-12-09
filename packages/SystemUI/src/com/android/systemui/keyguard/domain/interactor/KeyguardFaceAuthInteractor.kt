@@ -78,6 +78,9 @@ interface KeyguardFaceAuthInteractor {
  * flows.
  */
 interface FaceAuthenticationListener {
+    /** Receive face isAuthenticated updates */
+    fun onAuthenticatedChanged(isAuthenticated: Boolean)
+
     /** Receive face authentication status updates */
     fun onAuthenticationStatusChanged(status: FaceAuthenticationStatus)
 

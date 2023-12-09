@@ -21,13 +21,13 @@ import androidx.annotation.VisibleForTesting
 /** Enumerates all known adaptive layout configurations. */
 enum class BouncerSceneLayout {
     /** The default UI with the bouncer laid out normally. */
-    STANDARD,
+    STANDARD_BOUNCER,
     /** The bouncer is displayed vertically stacked with the user switcher. */
-    STACKED,
+    BELOW_USER_SWITCHER,
     /** The bouncer is displayed side-by-side with the user switcher or an empty space. */
-    SIDE_BY_SIDE,
+    BESIDE_USER_SWITCHER,
     /** The bouncer is split in two with both sides shown side-by-side. */
-    SPLIT,
+    SPLIT_BOUNCER,
 }
 
 /** Enumerates the supported window size classes. */
@@ -48,19 +48,19 @@ fun calculateLayoutInternal(
     isSideBySideSupported: Boolean,
 ): BouncerSceneLayout {
     return when (height) {
-        SizeClass.COMPACT -> BouncerSceneLayout.SPLIT
+        SizeClass.COMPACT -> BouncerSceneLayout.SPLIT_BOUNCER
         SizeClass.MEDIUM ->
             when (width) {
-                SizeClass.COMPACT -> BouncerSceneLayout.STANDARD
-                SizeClass.MEDIUM -> BouncerSceneLayout.STANDARD
-                SizeClass.EXPANDED -> BouncerSceneLayout.SIDE_BY_SIDE
+                SizeClass.COMPACT -> BouncerSceneLayout.STANDARD_BOUNCER
+                SizeClass.MEDIUM -> BouncerSceneLayout.STANDARD_BOUNCER
+                SizeClass.EXPANDED -> BouncerSceneLayout.BESIDE_USER_SWITCHER
             }
         SizeClass.EXPANDED ->
             when (width) {
-                SizeClass.COMPACT -> BouncerSceneLayout.STANDARD
-                SizeClass.MEDIUM -> BouncerSceneLayout.STACKED
-                SizeClass.EXPANDED -> BouncerSceneLayout.SIDE_BY_SIDE
+                SizeClass.COMPACT -> BouncerSceneLayout.STANDARD_BOUNCER
+                SizeClass.MEDIUM -> BouncerSceneLayout.BELOW_USER_SWITCHER
+                SizeClass.EXPANDED -> BouncerSceneLayout.BESIDE_USER_SWITCHER
             }
-    }.takeIf { it != BouncerSceneLayout.SIDE_BY_SIDE || isSideBySideSupported }
-        ?: BouncerSceneLayout.STANDARD
+    }.takeIf { it != BouncerSceneLayout.BESIDE_USER_SWITCHER || isSideBySideSupported }
+        ?: BouncerSceneLayout.STANDARD_BOUNCER
 }

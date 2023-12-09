@@ -16,9 +16,10 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import androidx.test.filters.SmallTest
 import com.android.systemui.CoroutineTestScopeModule
-import com.android.systemui.Flags
 import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
@@ -29,6 +30,7 @@ import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepos
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.log.assertLogsWtf
 import com.android.systemui.runTest
 import com.android.systemui.statusbar.data.model.StatusBarMode
 import com.android.systemui.statusbar.data.repository.FakeStatusBarModeRepository
@@ -37,14 +39,15 @@ import com.android.systemui.statusbar.notification.data.model.activeNotification
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import org.junit.Before
 import org.junit.Test
 
 @SmallTest
@@ -78,11 +81,6 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
                 test = this,
                 testScope = CoroutineTestScopeModule(TestScope(UnconfinedTestDispatcher())),
             )
-
-    @Before
-    fun setUp() {
-        mSetFlagsRule.enableFlags(Flags.FLAG_NOTIFICATIONS_LIVE_DATA_STORE_REFACTOR)
-    }
 
     @Test
     fun isTransitioningFromLockscreenToOccluded_started_isTrue() =
@@ -347,6 +345,7 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
     fun areNotificationsLightsOut_lowProfileWithNotifications_true() =
         testComponent.runTest {
             statusBarModeRepository.defaultDisplay.statusBarMode.value =
@@ -360,6 +359,7 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
     fun areNotificationsLightsOut_lowProfileWithoutNotifications_false() =
         testComponent.runTest {
             statusBarModeRepository.defaultDisplay.statusBarMode.value =
@@ -373,6 +373,7 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
     fun areNotificationsLightsOut_defaultStatusBarModeWithoutNotifications_false() =
         testComponent.runTest {
             statusBarModeRepository.defaultDisplay.statusBarMode.value = StatusBarMode.TRANSPARENT
@@ -385,6 +386,7 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
         }
 
     @Test
+    @EnableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
     fun areNotificationsLightsOut_defaultStatusBarModeWithNotifications_false() =
         testComponent.runTest {
             statusBarModeRepository.defaultDisplay.statusBarMode.value = StatusBarMode.TRANSPARENT
@@ -394,6 +396,16 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
             val actual by collectLastValue(underTest.areNotificationsLightsOut(DISPLAY_ID))
 
             assertThat(actual).isFalse()
+        }
+
+    @Test
+    @DisableFlags(NotificationsLiveDataStoreRefactor.FLAG_NAME)
+    fun areNotificationsLightsOut_requiresFlagEnabled() =
+        testComponent.runTest {
+            assertLogsWtf {
+                val flow = underTest.areNotificationsLightsOut(DISPLAY_ID)
+                assertThat(flow).isEqualTo(emptyFlow<Boolean>())
+            }
         }
 
     private fun activeNotificationsStore(notifications: List<ActiveNotificationModel>) =

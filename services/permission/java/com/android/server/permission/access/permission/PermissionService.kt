@@ -1551,7 +1551,8 @@ class PermissionService(private val service: AccessCheckingService) :
         permissionName: String,
         deviceId: Int,
     ): Int {
-        return if (!Flags.deviceAwarePermissionApis() || deviceId == Context.DEVICE_ID_DEFAULT) {
+        return if (!Flags.deviceAwarePermissionApisEnabled() ||
+            deviceId == Context.DEVICE_ID_DEFAULT) {
             with(policy) { getPermissionFlags(appId, userId, permissionName) }
         } else {
             if (permissionName !in DevicePermissionPolicy.DEVICE_AWARE_PERMISSIONS) {
@@ -1586,7 +1587,8 @@ class PermissionService(private val service: AccessCheckingService) :
         deviceId: Int,
         flags: Int
     ): Boolean {
-        return if (!Flags.deviceAwarePermissionApis() || deviceId == Context.DEVICE_ID_DEFAULT) {
+        return if (!Flags.deviceAwarePermissionApisEnabled() ||
+            deviceId == Context.DEVICE_ID_DEFAULT) {
             with(policy) { setPermissionFlags(appId, userId, permissionName, flags) }
         } else {
             if (permissionName !in DevicePermissionPolicy.DEVICE_AWARE_PERMISSIONS) {

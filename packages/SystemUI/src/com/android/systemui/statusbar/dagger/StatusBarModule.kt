@@ -20,6 +20,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.statusbar.data.StatusBarDataLayerModule
 import com.android.systemui.statusbar.phone.LightBarController
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
+import com.android.systemui.statusbar.ui.SystemBarUtilsProxyImpl
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.ClassKey
@@ -33,7 +34,7 @@ import dagger.multibindings.IntoMap
  *   ([com.android.systemui.statusbar.pipeline.dagger.StatusBarPipelineModule],
  *   [com.android.systemui.statusbar.policy.dagger.StatusBarPolicyModule], etc.).
  */
-@Module(includes = [StatusBarDataLayerModule::class])
+@Module(includes = [StatusBarDataLayerModule::class, SystemBarUtilsProxyImpl.Module::class])
 abstract class StatusBarModule {
     @Binds
     @IntoMap
