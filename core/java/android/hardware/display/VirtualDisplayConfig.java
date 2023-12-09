@@ -447,7 +447,8 @@ public final class VirtualDisplayConfig implements Parcelable {
          * Sets whether this display supports showing home activities and wallpaper.
          *
          * <p>If set to {@code true}, then the home activity relevant to this display will be
-         * automatically launched upon the display creation.</p>
+         * automatically launched upon the display creation. If unset or set to {@code false}, the
+         * display will not host any activities upon creation.</p>
          *
          * <p>Note: setting to {@code true} requires the display to be trusted. If the display is
          * not trusted, this property is ignored.</p>
