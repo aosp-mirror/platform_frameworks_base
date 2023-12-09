@@ -109,7 +109,7 @@ public abstract class PipContentOverlay {
 
         @Override
         public void onAnimationEnd(SurfaceControl.Transaction atomicTx, Rect destinationBounds) {
-            // Do nothing. Color overlay should be fully opaque by now.
+            // Do nothing. Color overlay should be fully opaque by now, ready for fade out.
         }
 
         private float[] getContentOverlayColor(Context context) {
@@ -167,7 +167,7 @@ public abstract class PipContentOverlay {
 
         @Override
         public void onAnimationEnd(SurfaceControl.Transaction atomicTx, Rect destinationBounds) {
-            atomicTx.remove(mLeash);
+            // Do nothing. Snapshot overlay should be fully opaque by now, ready for fade out.
         }
     }
 
@@ -256,7 +256,7 @@ public abstract class PipContentOverlay {
 
         @Override
         public void onAnimationEnd(SurfaceControl.Transaction atomicTx, Rect destinationBounds) {
-            atomicTx.remove(mLeash);
+            // Do nothing. Icon overlay should be fully opaque by now, ready for fade out.
         }
 
         @Override
