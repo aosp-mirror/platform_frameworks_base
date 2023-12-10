@@ -563,7 +563,10 @@ public final class SmsManager {
      *  raw pdu of the status report is in the extended data ("pdu").
      *
      * @throws IllegalArgumentException if destinationAddress or text are empty
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void sendTextMessage(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
@@ -581,8 +584,11 @@ public final class SmsManager {
      * Used for logging and diagnostics purposes. The id may be 0.
      *
      * @throws IllegalArgumentException if destinationAddress or text are empty
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      *
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void sendTextMessage(
             @NonNull String destinationAddress, @Nullable String scAddress, @NonNull String text,
             @Nullable PendingIntent sentIntent, @Nullable PendingIntent deliveryIntent,
@@ -788,12 +794,16 @@ public final class SmsManager {
      * </p>
      *
      * @see #sendTextMessage(String, String, String, PendingIntent, PendingIntent)
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(allOf = {
             android.Manifest.permission.MODIFY_PHONE_STATE,
             android.Manifest.permission.SEND_SMS
     })
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void sendTextMessageWithoutPersisting(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent) {
@@ -908,7 +918,10 @@ public final class SmsManager {
      *  {@link #RESULT_REMOTE_EXCEPTION} for error.
      *
      * @throws IllegalArgumentException if the format is invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void injectSmsPdu(
             byte[] pdu, @SmsMessage.Format String format, PendingIntent receivedIntent) {
         if (!format.equals(SmsMessage.FORMAT_3GPP) && !format.equals(SmsMessage.FORMAT_3GPP2)) {
@@ -940,6 +953,7 @@ public final class SmsManager {
      * @return an <code>ArrayList</code> of strings that, in order, comprise the original message.
      * @throws IllegalArgumentException if text is null.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public ArrayList<String> divideMessage(String text) {
         if (null == text) {
             throw new IllegalArgumentException("text is null");
@@ -1046,7 +1060,10 @@ public final class SmsManager {
      *  extended data ("pdu").
      *
      * @throws IllegalArgumentException if destinationAddress or data are empty
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void sendMultipartTextMessage(
             String destinationAddress, String scAddress, ArrayList<String> parts,
             ArrayList<PendingIntent> sentIntents, ArrayList<PendingIntent> deliveryIntents) {
@@ -1062,8 +1079,10 @@ public final class SmsManager {
      * Used for logging and diagnostics purposes. The id may be 0.
      *
      * @throws IllegalArgumentException if destinationAddress or data are empty
-     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void sendMultipartTextMessage(
             @NonNull String destinationAddress, @Nullable String scAddress,
             @NonNull List<String> parts, @Nullable List<PendingIntent> sentIntents,
@@ -1089,7 +1108,11 @@ public final class SmsManager {
      *
      * @param packageName serves as the default package name if the package name that is
      *        associated with the user id is null.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void sendMultipartTextMessage(
             @NonNull String destinationAddress, @Nullable String scAddress,
             @NonNull List<String> parts, @Nullable List<PendingIntent> sentIntents,
@@ -1191,10 +1214,14 @@ public final class SmsManager {
      * </p>
      *
      * @see #sendMultipartTextMessage(String, String, ArrayList, ArrayList, ArrayList)
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      * @hide
      **/
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void sendMultipartTextMessageWithoutPersisting(
             String destinationAddress, String scAddress, List<String> parts,
             List<PendingIntent> sentIntents, List<PendingIntent> deliveryIntents) {
@@ -1498,7 +1525,10 @@ public final class SmsManager {
      *  raw pdu of the status report is in the extended data ("pdu").
      *
      * @throws IllegalArgumentException if destinationAddress or data are empty
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void sendDataMessage(
             String destinationAddress, String scAddress, short destinationPort,
             byte[] data, PendingIntent sentIntent, PendingIntent deliveryIntent) {
@@ -1609,6 +1639,7 @@ public final class SmsManager {
      * .{@link #createForSubscriptionId createForSubscriptionId(subId)} instead
      */
     @Deprecated
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public static SmsManager getSmsManagerForSubscriptionId(int subId) {
         return getSmsManagerForContextAndSubscriptionId(null, subId);
     }
@@ -1626,6 +1657,7 @@ public final class SmsManager {
      * @see SubscriptionManager#getActiveSubscriptionInfoList()
      * @see SubscriptionManager#getDefaultSmsSubscriptionId()
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public @NonNull SmsManager createForSubscriptionId(int subId) {
         return getSmsManagerForContextAndSubscriptionId(mContext, subId);
     }
@@ -1651,7 +1683,11 @@ public final class SmsManager {
      * @return associated subscription ID or {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID} if
      * the default subscription id cannot be determined or the device has multiple active
      * subscriptions and and no default is set ("ask every time") by the user.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public int getSubscriptionId() {
         try {
             return (mSubId == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID)
@@ -2018,10 +2054,14 @@ public final class SmsManager {
      *
      * @throws IllegalArgumentException if endMessageId < startMessageId
      * @deprecated Use {@link TelephonyManager#setCellBroadcastIdRanges} instead.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      * {@hide}
      */
     @Deprecated
     @SystemApi
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public boolean enableCellBroadcastRange(int startMessageId, int endMessageId,
             @android.telephony.SmsCbMessage.MessageFormat int ranType) {
         boolean success = false;
@@ -2079,11 +2119,15 @@ public final class SmsManager {
      * @see #enableCellBroadcastRange(int, int, int)
      *
      * @throws IllegalArgumentException if endMessageId < startMessageId
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
+     *
      * @deprecated Use {@link TelephonyManager#setCellBroadcastIdRanges} instead.
      * {@hide}
      */
     @Deprecated
     @SystemApi
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public boolean disableCellBroadcastRange(int startMessageId, int endMessageId,
             @android.telephony.SmsCbMessage.MessageFormat int ranType) {
         boolean success = false;
@@ -2223,7 +2267,11 @@ public final class SmsManager {
      * @return the user-defined default SMS subscription id, or the active subscription id if
      * there's only one active subscription available, otherwise
      * {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public static int getDefaultSmsSubscriptionId() {
         try {
             return getISmsService().getPreferredSmsSubscription();
@@ -2271,10 +2319,14 @@ public final class SmsManager {
      * </p>
      *
      * @return the total number of SMS records which can be stored on the SIM card.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
     @RequiresPermission(anyOf = {android.Manifest.permission.READ_PHONE_STATE,
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE})
     @IntRange(from = 0)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public int getSmsCapacityOnIcc() {
         int ret = 0;
         try {
@@ -2819,7 +2871,10 @@ public final class SmsManager {
      * <code>MMS_ERROR_DATA_DISABLED</code><br>
      * <code>MMS_ERROR_MMS_DISABLED_BY_CARRIER</code><br>
      * @throws IllegalArgumentException if contentUri is empty
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void sendMultimediaMessage(Context context, Uri contentUri, String locationUrl,
             Bundle configOverrides, PendingIntent sentIntent) {
         sendMultimediaMessage(context, contentUri, locationUrl, configOverrides, sentIntent,
@@ -2863,7 +2918,10 @@ public final class SmsManager {
      * @param messageId an id that uniquely identifies the message requested to be sent.
      * Used for logging and diagnostics purposes. The id may be 0.
      * @throws IllegalArgumentException if contentUri is empty
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void sendMultimediaMessage(@NonNull Context context, @NonNull Uri contentUri,
             @Nullable String locationUrl,
             @SuppressWarnings("NullableCollection") @Nullable Bundle configOverrides,
@@ -2922,7 +2980,10 @@ public final class SmsManager {
      * <code>MMS_ERROR_DATA_DISABLED</code><br>
      * <code>MMS_ERROR_MMS_DISABLED_BY_CARRIER</code><br>
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void downloadMultimediaMessage(Context context, String locationUrl, Uri contentUri,
             Bundle configOverrides, PendingIntent downloadedIntent) {
         downloadMultimediaMessage(context, locationUrl, contentUri, configOverrides,
@@ -2968,7 +3029,10 @@ public final class SmsManager {
      * @param messageId an id that uniquely identifies the message requested to be downloaded.
      * Used for logging and diagnostics purposes. The id may be 0.
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void downloadMultimediaMessage(@NonNull Context context, @NonNull String locationUrl,
             @NonNull Uri contentUri,
             @SuppressWarnings("NullableCollection") @Nullable Bundle configOverrides,
@@ -3079,7 +3143,11 @@ public final class SmsManager {
      *
      * @return the bundle key/values pairs that contains MMS configuration values
      *  or an empty Bundle if they cannot be found.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     @NonNull public Bundle getCarrierConfigValues() {
         try {
             ISms iSms = getISmsService();
@@ -3115,7 +3183,11 @@ public final class SmsManager {
      *
      * @return Token to include in an SMS message. The token will be 11 characters long.
      * @see android.provider.Telephony.Sms.Intents#getMessagesFromIntent
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public String createAppSpecificSmsToken(PendingIntent intent) {
         try {
             ISms iccSms = getISmsServiceOrThrow();
@@ -3233,7 +3305,11 @@ public final class SmsManager {
      *  message.
      * @param intent this intent is sent when the matching SMS message is received.
      * @return Token to include in an SMS message.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     @Nullable
     public String createAppSpecificSmsTokenWithPackageInfo(
             @Nullable String prefixes, @NonNull PendingIntent intent) {
@@ -3393,9 +3469,13 @@ public final class SmsManager {
      * </p>
      *
      * @return the SMSC address string, null if failed.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
     @SuppressAutoDoc // for carrier privileges and default SMS application.
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     @Nullable
     public String getSmscAddress() {
         String smsc = null;
@@ -3430,9 +3510,13 @@ public final class SmsManager {
      *
      * @param smsc the SMSC address string.
      * @return true for success, false otherwise. Failure can be due modem returning an error.
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      */
     @SuppressAutoDoc // for carrier privileges and default SMS application.
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public boolean setSmscAddress(@NonNull String smsc) {
         try {
             ISms iSms = getISmsService();
@@ -3455,10 +3539,14 @@ public final class SmsManager {
      *  {@link SmsManager#PREMIUM_SMS_CONSENT_ASK_USER},
      *  {@link SmsManager#PREMIUM_SMS_CONSENT_NEVER_ALLOW}, or
      *  {@link SmsManager#PREMIUM_SMS_CONSENT_ALWAYS_ALLOW}
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public @PremiumSmsConsent int getPremiumSmsConsent(@NonNull String packageName) {
         int permission = 0;
         try {
@@ -3479,10 +3567,14 @@ public final class SmsManager {
      * @param permission one of {@link SmsManager#PREMIUM_SMS_CONSENT_ASK_USER},
      *  {@link SmsManager#PREMIUM_SMS_CONSENT_NEVER_ALLOW}, or
      *  {@link SmsManager#PREMIUM_SMS_CONSENT_ALWAYS_ALLOW}
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      * @hide
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void setPremiumSmsConsent(
             @NonNull String packageName, @PremiumSmsConsent int permission) {
         try {
@@ -3498,11 +3590,15 @@ public final class SmsManager {
     /**
      * Reset all cell broadcast ranges. Previously enabled ranges will become invalid after this.
      * @deprecated Use {@link TelephonyManager#setCellBroadcastIdRanges} with empty list instead
+     *
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_MESSAGING}.
      * @hide
      */
     @Deprecated
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_CELL_BROADCASTS)
+    @RequiresFeature(PackageManager.FEATURE_TELEPHONY_MESSAGING)
     public void resetAllCellBroadcastRanges() {
         try {
             ISms iSms = getISmsService();
@@ -3530,6 +3626,8 @@ public final class SmsManager {
      * available.
      * @throws SecurityException if the caller does not have the required permission/privileges.
      * @throws IllegalStateException in case of telephony service is not available.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_SUBSCRIPTION}.
      * @hide
      */
     @NonNull
