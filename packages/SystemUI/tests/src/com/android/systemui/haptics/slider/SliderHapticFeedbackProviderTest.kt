@@ -71,7 +71,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             VibrationEffect.startComposition()
                 .addPrimitive(
                     VibrationEffect.Composition.PRIMITIVE_CLICK,
-                    scaleAtBookends(config.maxVelocityToScale)
+                    sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale),
                 )
                 .compose()
 
@@ -86,7 +86,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             VibrationEffect.startComposition()
                 .addPrimitive(
                     VibrationEffect.Composition.PRIMITIVE_CLICK,
-                    scaleAtBookends(config.maxVelocityToScale)
+                    sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale)
                 )
                 .compose()
 
@@ -102,7 +102,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             VibrationEffect.startComposition()
                 .addPrimitive(
                     VibrationEffect.Composition.PRIMITIVE_CLICK,
-                    scaleAtBookends(config.maxVelocityToScale)
+                    sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale),
                 )
                 .compose()
 
@@ -117,7 +117,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             VibrationEffect.startComposition()
                 .addPrimitive(
                     VibrationEffect.Composition.PRIMITIVE_CLICK,
-                    scaleAtBookends(config.maxVelocityToScale)
+                    sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale),
                 )
                 .compose()
 
@@ -132,7 +132,11 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
     fun playHapticAtProgress_onQuickSuccession_playsLowTicksOnce() {
         // GIVEN max velocity and slider progress
         val progress = 1f
-        val expectedScale = scaleAtProgressChange(config.maxVelocityToScale.toFloat(), progress)
+        val expectedScale =
+            sliderHapticFeedbackProvider.scaleOnDragTexture(
+                config.maxVelocityToScale,
+                progress,
+            )
         val ticks = VibrationEffect.startComposition()
         repeat(config.numberOfLowTicks) {
             ticks.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, expectedScale)
@@ -203,7 +207,11 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
     fun playHapticAtLowerBookend_afterPlayingAtProgress_playsTwice() {
         // GIVEN max velocity and slider progress
         val progress = 1f
-        val expectedScale = scaleAtProgressChange(config.maxVelocityToScale.toFloat(), progress)
+        val expectedScale =
+            sliderHapticFeedbackProvider.scaleOnDragTexture(
+                config.maxVelocityToScale,
+                progress,
+            )
         val ticks = VibrationEffect.startComposition()
         repeat(config.numberOfLowTicks) {
             ticks.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, expectedScale)
@@ -212,7 +220,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             VibrationEffect.startComposition()
                 .addPrimitive(
                     VibrationEffect.Composition.PRIMITIVE_CLICK,
-                    scaleAtBookends(config.maxVelocityToScale)
+                    sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale),
                 )
                 .compose()
 
@@ -232,7 +240,11 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
     fun playHapticAtUpperBookend_afterPlayingAtProgress_playsTwice() {
         // GIVEN max velocity and slider progress
         val progress = 1f
-        val expectedScale = scaleAtProgressChange(config.maxVelocityToScale.toFloat(), progress)
+        val expectedScale =
+            sliderHapticFeedbackProvider.scaleOnDragTexture(
+                config.maxVelocityToScale,
+                progress,
+            )
         val ticks = VibrationEffect.startComposition()
         repeat(config.numberOfLowTicks) {
             ticks.addPrimitive(VibrationEffect.Composition.PRIMITIVE_LOW_TICK, expectedScale)
@@ -241,7 +253,7 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
             VibrationEffect.startComposition()
                 .addPrimitive(
                     VibrationEffect.Composition.PRIMITIVE_CLICK,
-                    scaleAtBookends(config.maxVelocityToScale)
+                    sliderHapticFeedbackProvider.scaleOnEdgeCollision(config.maxVelocityToScale),
                 )
                 .compose()
 
@@ -289,28 +301,12 @@ class SliderHapticFeedbackProviderTest : SysuiTestCase() {
         assertEquals(-1f, sliderHapticFeedbackProvider.dragTextureLastProgress)
     }
 
-    private fun scaleAtBookends(velocity: Float): Float {
-        val range = config.upperBookendScale - config.lowerBookendScale
-        val interpolatedVelocity =
-            velocityInterpolator.getInterpolation(velocity / config.maxVelocityToScale)
-        return interpolatedVelocity * range + config.lowerBookendScale
-    }
-
-    private fun scaleAtProgressChange(velocity: Float, progress: Float): Float {
-        val range = config.progressBasedDragMaxScale - config.progressBasedDragMinScale
-        val interpolatedVelocity =
-            velocityInterpolator.getInterpolation(velocity / config.maxVelocityToScale)
-        val interpolatedProgress = progressInterpolator.getInterpolation(progress)
-        val bump = interpolatedVelocity * config.additionalVelocityMaxBump
-        return interpolatedProgress * range + config.progressBasedDragMinScale + bump
-    }
-
     private fun generateTicksComposition(velocity: Float, progress: Float): VibrationEffect {
         val ticks = VibrationEffect.startComposition()
         repeat(config.numberOfLowTicks) {
             ticks.addPrimitive(
                 VibrationEffect.Composition.PRIMITIVE_LOW_TICK,
-                scaleAtProgressChange(velocity, progress)
+                sliderHapticFeedbackProvider.scaleOnDragTexture(velocity, progress),
             )
         }
         return ticks.compose()
