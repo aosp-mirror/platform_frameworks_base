@@ -63,13 +63,13 @@ import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.wifi.WifiUtils;
 import com.android.settingslib.wifi.dpp.WifiDppIntentHelper;
-import com.android.systemui.res.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.res.R;
 import com.android.systemui.statusbar.connectivity.AccessPointController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -735,6 +735,44 @@ public class InternetDialogControllerTest extends SysuiTestCase {
         mConnectedWifiInternetMonitor.onUpdated();
 
         verify(mAccessPointController).scanForAccessPoints();
+    }
+
+    @Test
+    public void onWifiScan_isWifiEnabledFalse_callbackOnWifiScanFalse() {
+        reset(mInternetDialogCallback);
+        when(mWifiStateWorker.isWifiEnabled()).thenReturn(false);
+
+        mInternetDialogController.onWifiScan(true);
+
+        verify(mInternetDialogCallback).onWifiScan(false);
+    }
+
+    @Test
+    public void onWifiScan_isDeviceLockedTrue_callbackOnWifiScanFalse() {
+        reset(mInternetDialogCallback);
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+
+        mInternetDialogController.onWifiScan(true);
+
+        verify(mInternetDialogCallback).onWifiScan(false);
+    }
+
+    @Test
+    public void onWifiScan_onWifiScanFalse_callbackOnWifiScanFalse() {
+        reset(mInternetDialogCallback);
+
+        mInternetDialogController.onWifiScan(false);
+
+        verify(mInternetDialogCallback).onWifiScan(false);
+    }
+
+    @Test
+    public void onWifiScan_onWifiScanTrue_callbackOnWifiScanTrue() {
+        reset(mInternetDialogCallback);
+
+        mInternetDialogController.onWifiScan(true);
+
+        verify(mInternetDialogCallback).onWifiScan(true);
     }
 
     @Test

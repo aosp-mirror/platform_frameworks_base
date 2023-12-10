@@ -148,6 +148,24 @@ class AccessPointControllerImplTest : SysuiTestCase() {
     }
 
     @Test
+    fun onWifiEntriesChanged_reasonIsScanResults_fireWifiScanCallbackFalse() {
+        controller.addAccessPointCallback(callback)
+
+        controller.onWifiEntriesChanged(WifiPickerTracker.WIFI_ENTRIES_CHANGED_REASON_SCAN_RESULTS)
+
+        verify(callback).onWifiScan(false)
+    }
+
+    @Test
+    fun onScanRequested_fireWifiScanCallbackTrue() {
+        controller.addAccessPointCallback(callback)
+
+        controller.onScanRequested()
+
+        verify(callback).onWifiScan(true)
+    }
+
+    @Test
     fun testOnNumSavedNetworksChangedDoesntTriggerCallback() {
         controller.addAccessPointCallback(callback)
         controller.onNumSavedNetworksChanged()
