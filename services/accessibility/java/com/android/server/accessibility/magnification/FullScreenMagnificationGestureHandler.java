@@ -861,6 +861,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     }
 
     final class DetectingStateWithMultiFinger extends DetectingState {
+        private static final int TWO_FINGER_GESTURE_MAX_TAPS = 2;
         // A flag set to true when two fingers have touched down.
         // Used to indicate what next finger action should be.
         private boolean mIsTwoFingerCountReached = false;
@@ -917,7 +918,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                     mHandler.removeMessages(MESSAGE_TRANSITION_TO_DELEGATING_STATE);
 
                     if (event.getPointerCount() == 2) {
-                        if (isMultiFingerMultiTapTriggered(/* targetTapCount= */ 2, event)) {
+                        if (isMultiFingerMultiTapTriggered(
+                                TWO_FINGER_GESTURE_MAX_TAPS - 1, event)) {
                             // 3tap and hold
                             afterLongTapTimeoutTransitionToDraggingState(event);
                         } else {
@@ -962,7 +964,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                         // (which is a rare combo to be used aside from magnification)
                         if (isMultiTapTriggered(2 /* taps */) && event.getPointerCount() == 1) {
                             transitionToViewportDraggingStateAndClear(event);
-                        } else if (isMultiFingerMultiTapTriggered(/* targetTapCount= */ 2, event)
+                        } else if (isMultiFingerMultiTapTriggered(
+                                TWO_FINGER_GESTURE_MAX_TAPS - 1, event)
                                 && event.getPointerCount() == 2) {
                             transitionToViewportDraggingStateAndClear(event);
                         } else if (isActivated() && event.getPointerCount() == 2) {
@@ -1009,7 +1012,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                             mDisplayId, event.getX(), event.getY())) {
                         transitionToDelegatingStateAndClear();
 
-                    } else if (isMultiFingerMultiTapTriggered(/* targetTapCount= */ 3, event)) {
+                    } else if (isMultiFingerMultiTapTriggered(TWO_FINGER_GESTURE_MAX_TAPS, event)) {
                         // Placing multiple fingers before a single finger, because achieving a
                         // multi finger multi tap also means achieving a single finger triple tap
                         onTripleTap(event);
@@ -1051,7 +1054,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 mIsTwoFingerCountReached = false;
             }
 
-            if (mDetectTwoFingerTripleTap && mCompletedTapCount > 2) {
+            if (mDetectTwoFingerTripleTap && mCompletedTapCount > TWO_FINGER_GESTURE_MAX_TAPS - 1) {
                 final boolean enabled = !isActivated();
                 mMagnificationLogger.logMagnificationTwoFingerTripleTap(enabled);
             }
@@ -1075,7 +1078,7 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             // Only log the 3tap and hold event
             if (!shortcutTriggered) {
                 final boolean enabled = !isActivated();
-                if (mCompletedTapCount == 2) {
+                if (mCompletedTapCount == TWO_FINGER_GESTURE_MAX_TAPS - 1) {
                     // Two finger triple tap and hold
                     mMagnificationLogger.logMagnificationTwoFingerTripleTap(enabled);
                 } else {

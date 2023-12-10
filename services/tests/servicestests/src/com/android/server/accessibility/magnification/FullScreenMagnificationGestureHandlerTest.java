@@ -532,10 +532,9 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
-    public void testTwoFingerTripleTap_StateIsIdle_shouldInActivated() {
+    public void testTwoFingerDoubleTap_StateIsIdle_shouldInActivated() {
         goFromStateIdleTo(STATE_IDLE);
 
-        twoFingerTap();
         twoFingerTap();
         twoFingerTap();
 
@@ -546,11 +545,10 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
-    public void testTwoFingerTripleTap_StateIsActivated_shouldInIdle() {
+    public void testTwoFingerDoubleTap_StateIsActivated_shouldInIdle() {
         goFromStateIdleTo(STATE_ACTIVATED);
         reset(mMockMagnificationLogger);
 
-        twoFingerTap();
         twoFingerTap();
         twoFingerTap();
 
@@ -561,10 +559,9 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
-    public void testTwoFingerTripleTapAndHold_StateIsIdle_shouldZoomsImmediately() {
+    public void testTwoFingerDoubleTapAndHold_StateIsIdle_shouldZoomsImmediately() {
         goFromStateIdleTo(STATE_IDLE);
 
-        twoFingerTap();
         twoFingerTap();
         twoFingerTapAndHold();
 
@@ -575,10 +572,9 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Test
     @RequiresFlagsEnabled(Flags.FLAG_ENABLE_MAGNIFICATION_MULTIPLE_FINGER_MULTIPLE_TAP_GESTURE)
-    public void testTwoFingerTripleSwipeAndHold_StateIsIdle_shouldZoomsImmediately() {
+    public void testTwoFingerDoubleSwipeAndHold_StateIsIdle_shouldZoomsImmediately() {
         goFromStateIdleTo(STATE_IDLE);
 
-        twoFingerTap();
         twoFingerTap();
         twoFingerSwipeAndHold();
 
