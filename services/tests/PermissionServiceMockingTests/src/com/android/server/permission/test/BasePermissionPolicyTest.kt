@@ -53,7 +53,7 @@ import org.mockito.ArgumentMatchers.anyLong
  * Mocking unit test for AppIdPermissionPolicy.
  */
 @RunWith(AndroidJUnit4::class)
-abstract class BaseAppIdPermissionPolicyTest {
+abstract class BasePermissionPolicyTest {
     protected lateinit var oldState: MutableAccessState
     protected lateinit var newState: MutableAccessState
 

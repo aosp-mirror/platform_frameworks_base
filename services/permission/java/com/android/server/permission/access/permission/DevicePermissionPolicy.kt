@@ -16,9 +16,7 @@
 
 package com.android.server.permission.access.permission
 
-import android.Manifest
 import android.permission.PermissionManager
-import android.permission.flags.Flags
 import android.util.Slog
 import com.android.modules.utils.BinaryXmlPullParser
 import com.android.modules.utils.BinaryXmlSerializer
@@ -61,7 +59,7 @@ class DevicePermissionPolicy : SchemePolicy() {
         }
     }
 
-    fun MutateStateScope.removeInactiveDevicesPermission(activePersistentDeviceIds: Set<String>) {
+    fun MutateStateScope.trimDevicePermissionStates(deviceIds: Set<String>) {
         newState.userStates.forEachIndexed { _, userId, userState ->
             userState.appIdDevicePermissionFlags.forEachReversedIndexed { _, appId, _ ->
                 val appIdDevicePermissionFlags =
@@ -69,14 +67,11 @@ class DevicePermissionPolicy : SchemePolicy() {
                 val devicePermissionFlags =
                     appIdDevicePermissionFlags.mutate(appId) ?: return@forEachReversedIndexed
 
-                val removePersistentDeviceIds = mutableSetOf<String>()
-                devicePermissionFlags.forEachIndexed { _, deviceId, _ ->
-                    if (!activePersistentDeviceIds.contains(deviceId)) {
-                        removePersistentDeviceIds.add(deviceId)
+                devicePermissionFlags.forEachReversedIndexed { _, deviceId, _ ->
+                    if (deviceId !in deviceIds) {
+                        devicePermissionFlags -= deviceId
                     }
                 }
-
-                removePersistentDeviceIds.forEach { deviceId -> devicePermissionFlags -= deviceId }
             }
         }
     }
@@ -122,6 +117,10 @@ class DevicePermissionPolicy : SchemePolicy() {
         resetRuntimePermissions(packageName, userId)
     }
 
+    /**
+     * Reset permission states for all permissions requested by the given package, if no other
+     * package (sharing the App ID) request these permissions.
+     */
     fun MutateStateScope.resetRuntimePermissions(packageName: String, userId: Int) {
         // It's okay to skip resetting permissions for packages that are removed,
         // because their states will be trimmed in onPackageRemoved()/onAppIdRemoved()
@@ -144,6 +143,7 @@ class DevicePermissionPolicy : SchemePolicy() {
         }
     }
 
+    // Trims permission state for permissions not requested by the App ID anymore.
     private fun MutateStateScope.trimPermissionStates(appId: Int) {
         val requestedPermissions = MutableIndexedSet<String>()
         forEachPackageInAppId(appId) {
@@ -245,10 +245,6 @@ class DevicePermissionPolicy : SchemePolicy() {
         flagMask: Int,
         flagValues: Int
     ): Boolean {
-        if (!isDeviceAwarePermission(permissionName)) {
-            Slog.w(LOG_TAG, "$permissionName is not a device aware permission.")
-            return false
-        }
         val oldFlags =
             newState.userStates[userId]!!
                 .appIdDevicePermissionFlags[appId]
@@ -295,20 +291,8 @@ class DevicePermissionPolicy : SchemePolicy() {
         synchronized(listenersLock) { listeners = listeners + listener }
     }
 
-    private fun isDeviceAwarePermission(permissionName: String): Boolean =
-        DEVICE_AWARE_PERMISSIONS.contains(permissionName)
-
     companion object {
         private val LOG_TAG = DevicePermissionPolicy::class.java.simpleName
-
-        /** These permissions are supported for virtual devices. */
-        // TODO: b/298661870 - Use new API to get the list of device aware permissions.
-        val DEVICE_AWARE_PERMISSIONS =
-            if (Flags.deviceAwarePermissionApisEnabled()) {
-                setOf(Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO)
-            } else {
-                emptySet<String>()
-            }
     }
 
     /** Listener for permission flags changes. */
