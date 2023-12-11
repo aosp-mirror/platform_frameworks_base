@@ -401,7 +401,7 @@ class ProcessRecord implements WindowProcessListener {
     /**
      * All about the process state info (proc state, oom adj score) in this process.
      */
-    final ProcessStateRecord mState;
+    ProcessStateRecord mState;
 
     /**
      * All about the state info of the optimizer when the process is cached.

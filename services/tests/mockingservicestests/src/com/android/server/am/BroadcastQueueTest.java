@@ -334,6 +334,7 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         final boolean dead = (behavior == ProcessBehavior.DEAD);
 
         final ProcessRecord r = spy(new ProcessRecord(mAms, ai, processName, ai.uid));
+        r.mState = spy(r.mState);
         r.setPid(mNextPid.getAndIncrement());
         mActiveProcesses.add(r);
 
@@ -788,8 +789,8 @@ public class BroadcastQueueTest extends BaseBroadcastQueueTest {
         }) {
             // Confirm expected OOM adjustments; we were invoked once to upgrade
             // and once to downgrade
-            assertEquals(String.valueOf(receiverApp), ActivityManager.PROCESS_STATE_RECEIVER,
-                    receiverApp.mState.getReportedProcState());
+            verify(receiverApp.mState, times(1).description(String.valueOf(receiverApp)))
+                    .setReportedProcState(ActivityManager.PROCESS_STATE_RECEIVER);
             verify(mAms, times(2)).enqueueOomAdjTargetLocked(eq(receiverApp));
 
             if ((mImpl == Impl.DEFAULT) && (receiverApp == receiverBlueApp)) {
