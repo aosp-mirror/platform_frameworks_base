@@ -352,7 +352,7 @@ final class DeletePackageHelper {
     @GuardedBy("mPm.mInstallLock")
     public boolean deletePackageLIF(@NonNull String packageName, UserHandle user,
             boolean deleteCodeAndResources, @NonNull int[] allUserHandles, int flags,
-            PackageRemovedInfo outInfo, boolean writeSettings) {
+            @NonNull PackageRemovedInfo outInfo, boolean writeSettings) {
         final DeletePackageAction action;
         synchronized (mPm.mLock) {
             final PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
@@ -392,8 +392,8 @@ final class DeletePackageHelper {
      * deleted, {@code null} otherwise.
      */
     @Nullable
-    public static DeletePackageAction mayDeletePackageLocked(
-            PackageRemovedInfo outInfo, PackageSetting ps, @Nullable PackageSetting disabledPs,
+    public static DeletePackageAction mayDeletePackageLocked(@NonNull PackageRemovedInfo outInfo,
+            PackageSetting ps, @Nullable PackageSetting disabledPs,
             int flags, UserHandle user) {
         if (ps == null) {
             return null;
@@ -442,12 +442,18 @@ final class DeletePackageHelper {
         }
 
         final int userId = user == null ? UserHandle.USER_ALL : user.getIdentifier();
-        if (outInfo != null) {
-            // Remember which users are affected, before the installed states are modified
-            outInfo.mRemovedUsers = (systemApp || userId == UserHandle.USER_ALL)
-                    ? ps.queryUsersInstalledOrHasData(allUserHandles)
-                    : new int[]{userId};
-        }
+        // Remember which users are affected, before the installed states are modified
+        outInfo.mRemovedUsers = (systemApp || userId == UserHandle.USER_ALL)
+                ? ps.queryUsersInstalledOrHasData(allUserHandles)
+                : new int[]{userId};
+        outInfo.populateBroadcastUsers(ps);
+        outInfo.mDataRemoved = (flags & PackageManager.DELETE_KEEP_DATA) == 0;
+        outInfo.mRemovedPackage = ps.getPackageName();
+        outInfo.mInstallerPackageName = ps.getInstallSource().mInstallerPackageName;
+        outInfo.mIsStaticSharedLib =
+                ps.getPkg() != null && ps.getPkg().getStaticSharedLibraryName() != null;
+        outInfo.mIsExternal = ps.isExternalStorage();
+        outInfo.mRemovedPackageVersionCode = ps.getVersionCode();
 
         if ((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)
                 && userId != UserHandle.USER_ALL) {
@@ -485,7 +491,8 @@ final class DeletePackageHelper {
                 }
             }
             if (clearPackageStateAndReturn) {
-                mRemovePackageHelper.clearPackageStateForUserLIF(ps, userId, outInfo, flags);
+                mRemovePackageHelper.clearPackageStateForUserLIF(ps, userId, flags);
+                outInfo.mRemovedAppId = ps.getAppId();
                 mPm.scheduleWritePackageRestrictions(user);
                 return;
             }
@@ -511,12 +518,8 @@ final class DeletePackageHelper {
 
         // If the package removed had SUSPEND_APPS, unset any restrictions that might have been in
         // place for all affected users.
-        int[] affectedUserIds = (outInfo != null) ? outInfo.mRemovedUsers : null;
-        if (affectedUserIds == null) {
-            affectedUserIds = mPm.resolveUserIds(userId);
-        }
         final Computer snapshot = mPm.snapshotComputer();
-        for (final int affectedUserId : affectedUserIds) {
+        for (final int affectedUserId : outInfo.mRemovedUsers) {
             if (hadSuspendAppsPermission.get(affectedUserId)) {
                 mPm.unsuspendForSuspendingPackage(snapshot, packageName, affectedUserId);
                 mPm.removeAllDistractingPackageRestrictions(snapshot, affectedUserId);
@@ -524,24 +527,20 @@ final class DeletePackageHelper {
         }
 
         // Take a note whether we deleted the package for all users
-        if (outInfo != null) {
-            synchronized (mPm.mLock) {
-                outInfo.mRemovedForAllUsers = mPm.mPackages.get(ps.getPackageName()) == null;
-            }
+        synchronized (mPm.mLock) {
+            outInfo.mRemovedForAllUsers = mPm.mPackages.get(ps.getPackageName()) == null;
         }
     }
 
     @GuardedBy("mPm.mInstallLock")
     private void deleteInstalledPackageLIF(PackageSetting ps,
             boolean deleteCodeAndResources, int flags, @NonNull int[] allUserHandles,
-            PackageRemovedInfo outInfo, boolean writeSettings) {
+            @NonNull PackageRemovedInfo outInfo, boolean writeSettings) {
         synchronized (mPm.mLock) {
-            if (outInfo != null) {
-                outInfo.mUid = ps.getAppId();
-                outInfo.mBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
-                        mPm.snapshotComputer(), ps, allUserHandles,
-                        mPm.mSettings.getPackagesLocked());
-            }
+            outInfo.mUid = ps.getAppId();
+            outInfo.mBroadcastAllowList = mPm.mAppsFilter.getVisibilityAllowList(
+                    mPm.snapshotComputer(), ps, allUserHandles,
+                    mPm.mSettings.getPackagesLocked());
         }
 
         // Delete package data from internal structures and also remove data if flag is set
@@ -549,7 +548,7 @@ final class DeletePackageHelper {
                 ps, allUserHandles, outInfo, flags, writeSettings);
 
         // Delete application code and resources only for parent packages
-        if (deleteCodeAndResources && (outInfo != null)) {
+        if (deleteCodeAndResources) {
             outInfo.mArgs = new InstallArgs(
                     ps.getPathString(), getAppDexInstructionSets(
                             ps.getPrimaryCpuAbiLegacy(), ps.getSecondaryCpuAbiLegacy()));
@@ -621,7 +620,7 @@ final class DeletePackageHelper {
         int flags = action.mFlags;
         final PackageSetting deletedPs = action.mDeletingPs;
         final PackageRemovedInfo outInfo = action.mRemovedInfo;
-        final boolean applyUserRestrictions = outInfo != null && (outInfo.mOrigUsers != null);
+        final boolean applyUserRestrictions = outInfo.mOrigUsers != null;
         final AndroidPackage deletedPkg = deletedPs.getPkg();
         // Confirm if the system package has been updated
         // An updated system app can be deleted. This will also have to restore
@@ -644,10 +643,8 @@ final class DeletePackageHelper {
             }
         }
 
-        if (outInfo != null) {
-            // Delete the updated package
-            outInfo.mIsRemovedPackageSystemUpdate = true;
-        }
+        // Delete the updated package
+        outInfo.mIsRemovedPackageSystemUpdate = true;
 
         if (disabledPs.getVersionCode() < deletedPs.getVersionCode()
                 || disabledPs.getAppId() != deletedPs.getAppId()) {
