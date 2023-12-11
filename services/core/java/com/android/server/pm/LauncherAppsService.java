@@ -1571,6 +1571,30 @@ public class LauncherAppsService extends SystemService {
         }
 
         @Override
+        public List<String> getPreInstalledSystemPackages(UserHandle user) {
+            // Only system launchers, which have access to recents should have access to this API.
+            // TODO(b/303803157): Update access control for this API to default Launcher app.
+            if (!mActivityTaskManagerInternal.isCallerRecents(Binder.getCallingUid())) {
+                throw new SecurityException("Caller is not the recents app");
+            }
+            if (!canAccessProfile(user.getIdentifier(),
+                    "Can't access preinstalled packages for another user")) {
+                return null;
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                String userType = mUm.getUserInfo(user.getIdentifier()).userType;
+                Set<String> preInstalledPackages = mUm.getPreInstallableSystemPackages(userType);
+                if (preInstalledPackages == null) {
+                    return new ArrayList<>();
+                }
+                return List.copyOf(preInstalledPackages);
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
         public void startActivityAsUser(IApplicationThread caller, String callingPackage,
                 String callingFeatureId, ComponentName component, Rect sourceBounds,
                 Bundle opts, UserHandle user) throws RemoteException {

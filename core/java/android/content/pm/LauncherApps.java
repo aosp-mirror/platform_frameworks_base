@@ -800,6 +800,29 @@ public class LauncherApps {
     }
 
     /**
+     * Returns the list of the system packages that are installed at user creation.
+     *
+     * <p>An empty list denotes that all system packages are installed for that user at creation.
+     * This behaviour is inherited from the underlining UserManager API.
+     *
+     * @param userHandle the user for which installed system packages are required.
+     * @return {@link List} of {@link String}, representing the package name of the installed
+     *        package. Can be empty but not null.
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_ALLOW_PRIVATE_PROFILE)
+    public List<String> getPreInstalledSystemPackages(@NonNull UserHandle userHandle) {
+        if (DEBUG) {
+            Log.i(TAG, "getPreInstalledSystemPackages for user: " + userHandle);
+        }
+        try {
+            return mService.getPreInstalledSystemPackages(userHandle);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Returns the activity info for a given intent and user handle, if it resolves. Otherwise it
      * returns null.
      *
