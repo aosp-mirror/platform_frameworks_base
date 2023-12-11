@@ -165,7 +165,7 @@ public class PackageArchiver {
         Computer snapshot = mPm.snapshotComputer();
         int userId = userHandle.getIdentifier();
         int binderUid = Binder.getCallingUid();
-        if (!PackageManagerServiceUtils.isRootOrShell(binderUid)) {
+        if (!PackageManagerServiceUtils.isSystemOrRootOrShell(binderUid)) {
             verifyCaller(snapshot.getPackageUid(callerPackageName, 0, userId), binderUid);
         }
         snapshot.enforceCrossUserPermission(binderUid, userId, true, true,
