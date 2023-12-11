@@ -21,22 +21,29 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class ParcelTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     private static final int WORK_SOURCE_1 = 1000;
     private static final int WORK_SOURCE_2 = 1002;
     private static final String INTERFACE_TOKEN_1 = "IBinder interface token";
     private static final String INTERFACE_TOKEN_2 = "Another IBinder interface token";
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testIsForRpc() {
         Parcel p = Parcel.obtain();
         assertEquals(false, p.isForRpc());
@@ -44,6 +51,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCallingWorkSourceUidAfterWrite() {
         Parcel p = Parcel.obtain();
         // Method does not throw if replaceCallingWorkSourceUid is called before requests headers
@@ -64,6 +72,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCallingWorkSourceUidAfterEnforce() {
         Parcel p = Parcel.obtain();
         p.writeInterfaceToken(INTERFACE_TOKEN_1);
@@ -81,6 +90,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testParcelWithMultipleHeaders() {
         Parcel p = Parcel.obtain();
         Binder.setCallingWorkSourceUid(WORK_SOURCE_1);
@@ -122,6 +132,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenSameData() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
@@ -138,6 +149,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenSameDataWithBinder() {
         Binder binder = new Binder();
         Parcel pA = Parcel.obtain();
@@ -157,6 +169,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenDifferentData() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
@@ -173,6 +186,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenLimitOutOfBounds_throws() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
@@ -199,6 +213,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenLengthZero() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
@@ -217,6 +232,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenNegativeLength_throws() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
@@ -232,6 +248,7 @@ public class ParcelTest {
     }
 
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenNegativeOffset_throws() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
@@ -297,6 +314,7 @@ public class ParcelTest {
      * and 1M length for complex objects are allowed.
      */
     @Test
+    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testAllocations_whenWithinLimit() {
         Binder.setIsDirectlyHandlingTransactionOverride(true);
         Parcel p = Parcel.obtain();

@@ -16,11 +16,8 @@
 
 package com.android.internal.os;
 
-import static androidx.test.InstrumentationRegistry.getContext;
-
 import static com.google.common.truth.Truth.assertThat;
 
-import android.content.Context;
 import android.os.FileUtils;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -31,6 +28,7 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 @RunWith(AndroidJUnit4.class)
 public class CpuScalingPolicyReaderTest {
@@ -38,7 +36,7 @@ public class CpuScalingPolicyReaderTest {
 
     @Before
     public void setup() throws IOException {
-        File testDir = getContext().getDir("test", Context.MODE_PRIVATE);
+        File testDir = Files.createTempDirectory("CpuScalingPolicyReaderTest").toFile();
         FileUtils.deleteContents(testDir);
 
         File policy0 = new File(testDir, "policy0");

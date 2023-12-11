@@ -22,6 +22,8 @@ import static org.junit.Assert.assertTrue;
 
 import android.os.Process;
 import android.os.SystemClock;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
@@ -29,6 +31,7 @@ import androidx.test.filters.LargeTest;
 import com.android.internal.os.KernelCpuThreadReader.ProcessCpuUsage;
 import com.android.internal.os.KernelCpuThreadReader.ThreadCpuUsage;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -47,7 +50,10 @@ import java.util.stream.Collectors;
  */
 @RunWith(AndroidJUnit4.class)
 @LargeTest
+@IgnoreUnderRavenwood(reason = "Needs kernel support")
 public class KernelCpuThreadReaderEndToEndTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private static final int TIMED_NUM_SAMPLES = 5;
     private static final int TIMED_START_MILLIS = 500;

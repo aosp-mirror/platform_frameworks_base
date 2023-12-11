@@ -21,6 +21,7 @@ import android.os.SystemClock;
 /**
  * A wrapper for SystemClock, intended for mocking in unit tests.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public abstract class Clock {
     /** Elapsed Realtime, see SystemClock.elapsedRealtime() */
     public long elapsedRealtime() {

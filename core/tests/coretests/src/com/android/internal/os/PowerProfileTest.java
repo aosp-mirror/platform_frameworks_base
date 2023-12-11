@@ -27,6 +27,8 @@ import android.annotation.XmlRes;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -38,6 +40,7 @@ import com.android.internal.util.XmlUtils;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -50,7 +53,10 @@ import org.junit.runner.RunWith;
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = PowerProfile.class)
 public class PowerProfileTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     static final String TAG_TEST_MODEM = "test-modem";
     static final String ATTR_NAME = "name";

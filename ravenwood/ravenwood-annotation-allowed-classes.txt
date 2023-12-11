@@ -27,6 +27,8 @@ android.util.Xml
 android.os.BatteryConsumer
 android.os.Binder
 android.os.Binder$IdentitySupplier
+android.os.Broadcaster
+android.os.BundleMerger
 android.os.FileUtils
 android.os.FileUtils$MemoryPipe
 android.os.Handler
@@ -36,12 +38,15 @@ android.os.IBinder
 android.os.Looper
 android.os.Message
 android.os.MessageQueue
+android.os.PackageTagsList
 android.os.Parcel
 android.os.Parcelable
 android.os.Process
 android.os.SystemClock
 android.os.ThreadLocalWorkSource
+android.os.TimestampedValue
 android.os.UserHandle
+android.os.WorkSource
 
 android.content.ClipData
 android.content.ClipData$Item
@@ -95,8 +100,6 @@ android.content.ContentProvider
 
 com.android.server.LocalServices
 
-com.android.internal.os.SomeArgs
-
 com.android.internal.util.BitUtils
 com.android.internal.util.BitwiseInputStream
 com.android.internal.util.BitwiseOutputStream
@@ -117,6 +120,23 @@ com.android.internal.util.ProcFileReader
 com.android.internal.util.QuickSelect
 com.android.internal.util.RingBuffer
 com.android.internal.util.StringPool
+
+com.android.internal.os.BinderCallHeavyHitterWatcher
+com.android.internal.os.BinderDeathDispatcher
+com.android.internal.os.BinderfsStatsReader
+com.android.internal.os.BinderLatencyBuckets
+com.android.internal.os.CachedDeviceState
+com.android.internal.os.Clock
+com.android.internal.os.CpuScalingPolicies
+com.android.internal.os.CpuScalingPolicyReader
+com.android.internal.os.KernelCpuThreadReader
+com.android.internal.os.LoggingPrintStream
+com.android.internal.os.LooperStats
+com.android.internal.os.MonotonicClock
+com.android.internal.os.ProcLocksReader
+com.android.internal.os.ProcStatsUtil
+com.android.internal.os.SomeArgs
+com.android.internal.os.StoragedUidIoStatsReader
 
 com.google.android.collect.Lists
 com.google.android.collect.Maps

@@ -40,6 +40,7 @@ import java.nio.charset.StandardCharsets;
  * A clock that is similar to SystemClock#elapsedRealtime(), except that it is not reset
  * on reboot, but keeps going.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class MonotonicClock {
     private static final String TAG = "MonotonicClock";
 
