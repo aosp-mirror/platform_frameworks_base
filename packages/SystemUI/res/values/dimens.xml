@@ -151,6 +151,8 @@
     <dimen name="status_bar_icon_size_sp">@*android:dimen/status_bar_icon_size_sp</dimen>
     <!-- Original dp height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
+    <dimen name="status_bar_bindable_icon_size">20sp</dimen>
+    <dimen name="status_bar_bindable_icon_padding">2sp</dimen>
 
     <!-- Default horizontal drawable padding for status bar icons. -->
     <dimen name="status_bar_horizontal_padding">2.5sp</dimen>

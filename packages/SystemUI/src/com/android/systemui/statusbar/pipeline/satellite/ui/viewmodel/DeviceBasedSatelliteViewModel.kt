@@ -23,7 +23,6 @@ import com.android.systemui.statusbar.pipeline.satellite.ui.model.SatelliteIconM
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -53,16 +52,17 @@ constructor(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
-    val icon: Flow<Icon?> =
+    val icon: StateFlow<Icon?> =
         combine(
-            shouldShowIcon,
-            interactor.connectionState,
-            interactor.signalStrength,
-        ) { shouldShow, state, signalStrength ->
-            if (shouldShow) {
-                SatelliteIconModel.fromConnectionState(state, signalStrength)
-            } else {
-                null
+                shouldShowIcon,
+                interactor.connectionState,
+                interactor.signalStrength,
+            ) { shouldShow, state, signalStrength ->
+                if (shouldShow) {
+                    SatelliteIconModel.fromConnectionState(state, signalStrength)
+                } else {
+                    null
+                }
             }
-        }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 }
