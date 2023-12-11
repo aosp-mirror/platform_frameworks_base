@@ -5241,14 +5241,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public String getSuspendingPackage(String packageName, int userId) {
-            final int callingUid = Binder.getCallingUid();
-            final Computer snapshot = snapshot();
-            // This will do visibility checks as well.
-            if (!snapshot.isPackageSuspendedForUser(packageName, userId)) {
+            try {
+                final int callingUid = Binder.getCallingUid();
+                final Computer snapshot = snapshot();
+                // This will do visibility checks as well.
+                if (!snapshot.isPackageSuspendedForUser(packageName, userId)) {
+                    return null;
+                }
+                return mSuspendPackageHelper.getSuspendingPackage(snapshot, packageName, userId,
+                        callingUid);
+            } catch (PackageManager.NameNotFoundException e) {
                 return null;
             }
-            return mSuspendPackageHelper.getSuspendingPackage(snapshot, packageName, userId,
-                    callingUid);
         }
 
         @Override

@@ -753,13 +753,14 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     }
 
     @Override
-    public boolean isPackageQuarantined(@NonNull String packageName,
-            @UserIdInt int userId) {
+    public boolean isPackageQuarantined(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException {
         return snapshot().isPackageQuarantinedForUser(packageName, userId);
     }
 
     @Override
-    public boolean isPackageStopped(@NonNull String packageName, @UserIdInt int userId) {
+    public boolean isPackageStopped(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException {
         return snapshot().isPackageStoppedForUser(packageName, userId);
     }
 

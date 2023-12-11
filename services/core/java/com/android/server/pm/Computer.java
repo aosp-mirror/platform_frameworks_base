@@ -508,12 +508,15 @@ public interface Computer extends PackageDataSnapshot {
 
     boolean getApplicationHiddenSettingAsUser(@NonNull String packageName, @UserIdInt int userId);
 
-    boolean isPackageSuspendedForUser(@NonNull String packageName, @UserIdInt int userId);
+    boolean isPackageSuspendedForUser(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
 
-    boolean isPackageQuarantinedForUser(@NonNull String packageName, @UserIdInt int userId);
+    boolean isPackageQuarantinedForUser(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
 
     /** Check if the package is in a stopped state for a given user. */
-    boolean isPackageStoppedForUser(@NonNull String packageName, @UserIdInt int userId);
+    boolean isPackageStoppedForUser(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
 
     boolean isSuspendingAnyPackages(@NonNull String suspendingPackage, @UserIdInt int userId);
 

@@ -4978,31 +4978,34 @@ public class ComputerEngine implements Computer {
         }
     }
 
-    private PackageUserStateInternal getUserStageOrDefaultForUser(@NonNull String packageName,
-            int userId) {
+    private PackageUserStateInternal getUserStateOrDefaultForUser(@NonNull String packageName,
+            int userId) throws PackageManager.NameNotFoundException {
         final int callingUid = Binder.getCallingUid();
         enforceCrossUserPermission(callingUid, userId, true /* requireFullPermission */,
                 false /* checkShell */, "when asking about packages for user " + userId);
         final PackageStateInternal ps = mSettings.getPackage(packageName);
         if (ps == null || shouldFilterApplicationIncludingUninstalled(ps, callingUid, userId)) {
-            throw new IllegalArgumentException("Unknown target package: " + packageName);
+            throw new PackageManager.NameNotFoundException(packageName);
         }
         return ps.getUserStateOrDefault(userId);
     }
 
     @Override
-    public boolean isPackageSuspendedForUser(@NonNull String packageName, int userId) {
-        return getUserStageOrDefaultForUser(packageName, userId).isSuspended();
+    public boolean isPackageSuspendedForUser(@NonNull String packageName, int userId)
+            throws PackageManager.NameNotFoundException {
+        return getUserStateOrDefaultForUser(packageName, userId).isSuspended();
     }
 
     @Override
-    public boolean isPackageQuarantinedForUser(@NonNull String packageName, @UserIdInt int userId) {
-        return getUserStageOrDefaultForUser(packageName, userId).isQuarantined();
+    public boolean isPackageQuarantinedForUser(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException {
+        return getUserStateOrDefaultForUser(packageName, userId).isQuarantined();
     }
 
     @Override
-    public boolean isPackageStoppedForUser(@NonNull String packageName, @UserIdInt int userId) {
-        return getUserStageOrDefaultForUser(packageName, userId).isStopped();
+    public boolean isPackageStoppedForUser(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException {
+        return getUserStateOrDefaultForUser(packageName, userId).isStopped();
     }
 
     @Override

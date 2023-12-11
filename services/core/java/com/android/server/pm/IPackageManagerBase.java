@@ -950,20 +950,32 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
     @Deprecated
     public final boolean isPackageSuspendedForUser(@NonNull String packageName,
             @UserIdInt int userId) {
-        return snapshot().isPackageSuspendedForUser(packageName, userId);
+        try {
+            return snapshot().isPackageSuspendedForUser(packageName, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalArgumentException("Unknown target package: " + packageName);
+        }
     }
 
     @Override
     @Deprecated
     public final boolean isPackageQuarantinedForUser(@NonNull String packageName,
             @UserIdInt int userId) {
-        return snapshot().isPackageQuarantinedForUser(packageName, userId);
+        try {
+            return snapshot().isPackageQuarantinedForUser(packageName, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalArgumentException("Unknown target package: " + packageName);
+        }
     }
 
     @Override
     public final boolean isPackageStoppedForUser(@NonNull String packageName,
             @UserIdInt int userId) {
-        return snapshot().isPackageStoppedForUser(packageName, userId);
+        try {
+            return snapshot().isPackageStoppedForUser(packageName, userId);
+        } catch (PackageManager.NameNotFoundException e) {
+            throw new IllegalArgumentException("Unknown target package: " + packageName);
+        }
     }
 
     @Override
