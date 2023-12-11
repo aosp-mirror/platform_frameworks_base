@@ -575,6 +575,7 @@ applications that come with the platform
         <permission name="android.permission.SET_WALLPAPER_COMPONENT"/>
         <permission name="android.permission.BIND_WALLPAPER"/>
         <permission name="android.permission.CUSTOMIZE_SYSTEM_UI"/>
+        <permission name="android.permission.SET_WALLPAPER_DIM_AMOUNT"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.dynsystem">
