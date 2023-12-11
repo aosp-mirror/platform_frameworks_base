@@ -241,14 +241,6 @@ public class ParsingPackageUtils {
 
     public static final int PARSE_CHATTY = 1 << 31;
 
-    /** The total maximum number of activities, services, providers and activity-aliases */
-    private static final int MAX_NUM_COMPONENTS = 30000;
-    private static final String MAX_NUM_COMPONENTS_ERR_MSG =
-            "Total number of components has exceeded the maximum number: " + MAX_NUM_COMPONENTS;
-
-    /** The maximum permission name length. */
-    private static final int MAX_PERMISSION_NAME_LENGTH = 512;
-
     @IntDef(flag = true, prefix = { "PARSE_" }, value = {
             PARSE_CHATTY,
             PARSE_COLLECT_CERTIFICATES,
@@ -904,18 +896,9 @@ public class ParsingPackageUtils {
             if (result.isError()) {
                 return input.error(result);
             }
-
-            if (hasTooManyComponents(pkg)) {
-                return input.error(MAX_NUM_COMPONENTS_ERR_MSG);
-            }
         }
 
         return input.success(pkg);
-    }
-
-    private static boolean hasTooManyComponents(ParsingPackage pkg) {
-        return (pkg.getActivities().size() + pkg.getServices().size() + pkg.getProviders().size()
-                + pkg.getReceivers().size()) > MAX_NUM_COMPONENTS;
     }
 
     /**
@@ -1360,11 +1343,6 @@ public class ParsingPackageUtils {
             // that may change.
             String name = sa.getNonResourceString(
                     R.styleable.AndroidManifestUsesPermission_name);
-            if (TextUtils.length(name) > MAX_PERMISSION_NAME_LENGTH) {
-                return input.error(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
-                        "The name in the <uses-permission> is greater than "
-                                + MAX_PERMISSION_NAME_LENGTH);
-            }
 
             int minSdkVersion =  parseMinOrMaxSdkVersion(sa,
                     R.styleable.AndroidManifestUsesPermission_minSdkVersion,
@@ -2276,9 +2254,6 @@ public class ParsingPackageUtils {
 
             if (result.isError()) {
                 return input.error(result);
-            }
-            if (hasTooManyComponents(pkg)) {
-                return input.error(MAX_NUM_COMPONENTS_ERR_MSG);
             }
         }
 
