@@ -100,6 +100,22 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
         }
 
     @Test
+    fun satelliteManagerThrows_doesNotCrash() =
+        testScope.runTest {
+            setupDefaultRepo()
+
+            whenever(satelliteManager.registerForNtnSignalStrengthChanged(any(), any()))
+                .thenThrow(SatelliteException(13))
+
+            val conn by collectLastValue(underTest.connectionState)
+            val strength by collectLastValue(underTest.signalStrength)
+
+            // Flows have not emitted, we haven't crashed
+            assertThat(conn).isNull()
+            assertThat(strength).isNull()
+        }
+
+    @Test
     fun connectionState_mapsFromSatelliteModemState() =
         testScope.runTest {
             setupDefaultRepo()

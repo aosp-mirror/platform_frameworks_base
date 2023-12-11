@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.pipeline.satellite.data.prod
 import android.os.OutcomeReceiver
 import android.telephony.satellite.NtnSignalStrengthCallback
 import android.telephony.satellite.SatelliteManager
+import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_SUCCESS
 import android.telephony.satellite.SatelliteModemStateCallback
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
@@ -184,9 +185,17 @@ constructor(
                     trySend(SatelliteConnectionState.fromModemState(state))
                 }
 
-                sm.registerForSatelliteModemStateChanged(bgDispatcher.asExecutor(), cb)
+                var registered = false
 
-                awaitClose { sm.unregisterForSatelliteModemStateChanged(cb) }
+                try {
+                    val res =
+                        sm.registerForSatelliteModemStateChanged(bgDispatcher.asExecutor(), cb)
+                    registered = res == SATELLITE_RESULT_SUCCESS
+                } catch (e: Exception) {
+                    // Logging is in next commit
+                }
+
+                awaitClose { if (registered) sm.unregisterForSatelliteModemStateChanged(cb) }
             }
             .flowOn(bgDispatcher)
 
@@ -200,9 +209,15 @@ constructor(
                     trySend(signalStrength.level)
                 }
 
-                sm.registerForNtnSignalStrengthChanged(bgDispatcher.asExecutor(), cb)
+                var registered = false
+                try {
+                    sm.registerForNtnSignalStrengthChanged(bgDispatcher.asExecutor(), cb)
+                    registered = true
+                } catch (e: Exception) {
+                    // Logging is in next commit
+                }
 
-                awaitClose { sm.unregisterForNtnSignalStrengthChanged(cb) }
+                awaitClose { if (registered) sm.unregisterForNtnSignalStrengthChanged(cb) }
             }
             .flowOn(bgDispatcher)
 
