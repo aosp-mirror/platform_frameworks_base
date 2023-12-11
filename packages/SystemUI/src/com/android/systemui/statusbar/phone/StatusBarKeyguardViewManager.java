@@ -36,6 +36,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
+import android.view.WindowInsetsController;
 import android.window.BackEvent;
 import android.window.OnBackAnimationCallback;
 import android.window.OnBackInvokedDispatcher;
@@ -859,10 +860,19 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
     }
 
+    private void setRootViewAnimationDisabled(boolean disabled) {
+        ViewGroup windowRootView = mNotificationShadeWindowController.getWindowRootView();
+        if (windowRootView != null) {
+            WindowInsetsController insetsController = windowRootView.getWindowInsetsController();
+            if (insetsController != null) {
+                insetsController.setAnimationsDisabled(disabled);
+            }
+        }
+    }
+
     @Override
     public void onStartedWakingUp() {
-        mNotificationShadeWindowController.getWindowRootView().getWindowInsetsController()
-                .setAnimationsDisabled(false);
+        setRootViewAnimationDisabled(false);
         NavigationBarView navBarView = mCentralSurfaces.getNavigationBarView();
         if (navBarView != null) {
             navBarView.forEachView(view ->
@@ -875,8 +885,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void onStartedGoingToSleep() {
-        mNotificationShadeWindowController.getWindowRootView().getWindowInsetsController()
-                .setAnimationsDisabled(true);
+        setRootViewAnimationDisabled(true);
         NavigationBarView navBarView = mCentralSurfaces.getNavigationBarView();
         if (navBarView != null) {
             navBarView.forEachView(view ->
