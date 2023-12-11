@@ -46,6 +46,7 @@ class PriorityNestedScrollConnectionTest {
             canStartPostScroll = { _, _ -> canStartPostScroll },
             canStartPostFling = { canStartPostFling },
             canContinueScroll = { canContinueScroll },
+            canScrollOnFling = false,
             onStart = { isStarted = true },
             onScroll = {
                 lastScroll = it
