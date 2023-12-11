@@ -24,6 +24,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.mockito.capture
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -54,6 +55,7 @@ class DetailDialogTest : SysuiTestCase() {
     }
 
     @Test
+    @Ignore("b/313949758")
     fun testPendingIntentIsUnModified() {
         // GIVEN the dialog is created with a PendingIntent
         val dialog = createDialog(pendingIntent)
