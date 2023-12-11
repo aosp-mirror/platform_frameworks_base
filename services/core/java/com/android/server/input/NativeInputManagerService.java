@@ -251,6 +251,11 @@ interface NativeInputManagerService {
      */
     void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
 
+    /**
+     * Notify if Accessibility sticky keys is enabled/disabled from InputSettings.
+     */
+    void setAccessibilityStickyKeysEnabled(boolean enabled);
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -508,5 +513,8 @@ interface NativeInputManagerService {
 
         @Override
         public native void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
+
+        @Override
+        public native void setAccessibilityStickyKeysEnabled(boolean enabled);
     }
 }

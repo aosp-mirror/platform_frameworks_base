@@ -7801,6 +7801,15 @@ public final class Settings {
         public static final String ACCESSIBILITY_BOUNCE_KEYS = "accessibility_bounce_keys";
 
         /**
+         * Whether to enable sticky keys for Physical Keyboard accessibility.
+         *
+         * This is a boolean value that determines if Sticky keys feature is enabled.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_STICKY_KEYS = "accessibility_sticky_keys";
+
+        /**
          * Whether stylus button presses are disabled. This is a boolean that
          * determines if stylus buttons are ignored.
          *

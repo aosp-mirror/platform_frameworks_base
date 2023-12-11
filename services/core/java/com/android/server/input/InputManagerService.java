@@ -3511,6 +3511,13 @@ public class InputManagerService extends IInputManager.Stub
         mNative.setAccessibilityBounceKeysThreshold(thresholdTimeMs);
     }
 
+    /**
+     * Sets whether Accessibility sticky keys is enabled.
+     */
+    public void setAccessibilityStickyKeysEnabled(boolean enabled) {
+        mNative.setAccessibilityStickyKeysEnabled(enabled);
+    }
+
     interface KeyboardBacklightControllerInterface {
         default void incrementKeyboardBacklight(int deviceId) {}
         default void decrementKeyboardBacklight(int deviceId) {}
