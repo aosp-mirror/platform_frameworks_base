@@ -769,6 +769,9 @@ public class LauncherAppsService extends SystemService {
         @NonNull
         private List<LauncherActivityInfoInternal> generateLauncherActivitiesForArchivedApp(
                 @Nullable String packageName, UserHandle user) {
+            if (!canAccessProfile(user.getIdentifier(), "Cannot retrieve activities")) {
+                return List.of();
+            }
             List<ApplicationInfo> applicationInfoList =
                     (packageName == null)
                             ? getApplicationInfoListForAllArchivedApps(user)
@@ -827,7 +830,7 @@ public class LauncherAppsService extends SystemService {
         private List<ApplicationInfo> getApplicationInfoListForAllArchivedApps(UserHandle user) {
             final int callingUid = injectBinderCallingUid();
             List<ApplicationInfo> installedApplicationInfoList =
-                    mPackageManagerInternal.getInstalledApplications(
+                    mPackageManagerInternal.getInstalledApplicationsCrossUser(
                             PackageManager.MATCH_ARCHIVED_PACKAGES,
                             user.getIdentifier(),
                             callingUid);
@@ -845,11 +848,12 @@ public class LauncherAppsService extends SystemService {
         private List<ApplicationInfo> getApplicationInfoForArchivedApp(
                 @NonNull String packageName, UserHandle user) {
             final int callingUid = injectBinderCallingUid();
-            ApplicationInfo applicationInfo = mPackageManagerInternal.getApplicationInfo(
-                    packageName,
-                    PackageManager.MATCH_ARCHIVED_PACKAGES,
-                    callingUid,
-                    user.getIdentifier());
+            ApplicationInfo applicationInfo = Binder.withCleanCallingIdentity(() ->
+                    mPackageManagerInternal.getApplicationInfo(
+                            packageName,
+                            PackageManager.MATCH_ARCHIVED_PACKAGES,
+                            callingUid,
+                            user.getIdentifier()));
             if (applicationInfo == null || !applicationInfo.isArchived) {
                 return Collections.EMPTY_LIST;
             }

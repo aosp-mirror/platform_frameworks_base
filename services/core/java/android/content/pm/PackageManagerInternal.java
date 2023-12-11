@@ -222,6 +222,14 @@ public abstract class PackageManagerInternal {
             int callingUid);
 
     /**
+     * Like {@link #getInstalledApplications}, but allows the fetching of apps
+     * cross user.
+     */
+    public abstract List<ApplicationInfo> getInstalledApplicationsCrossUser(
+            @PackageManager.ApplicationInfoFlagsBits long flags, @UserIdInt int userId,
+            int callingUid);
+
+    /**
      * Retrieve launcher extras for a suspended package provided to the system in
      * {@link PackageManager#setPackagesSuspended(String[], boolean, PersistableBundle,
      * PersistableBundle, String)}.

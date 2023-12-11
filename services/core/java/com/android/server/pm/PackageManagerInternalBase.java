@@ -97,7 +97,16 @@ abstract class PackageManagerInternalBase extends PackageManagerInternal {
     @Deprecated
     public final List<ApplicationInfo> getInstalledApplications(
             @PackageManager.ApplicationInfoFlagsBits long flags, int userId, int callingUid) {
-        return snapshot().getInstalledApplications(flags, userId, callingUid);
+        return snapshot().getInstalledApplications(flags, userId, callingUid,
+                /* forceAllowCrossUser= */ false);
+    }
+
+    @Override
+    @Deprecated
+    public final List<ApplicationInfo> getInstalledApplicationsCrossUser(
+            @PackageManager.ApplicationInfoFlagsBits long flags, int userId, int callingUid) {
+        return snapshot().getInstalledApplications(flags, userId, callingUid,
+                /* forceAllowCrossUser= */ true);
     }
 
     @Override
