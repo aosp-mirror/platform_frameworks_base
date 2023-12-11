@@ -25,8 +25,8 @@ import android.os.RemoteException;
 import android.provider.Settings;
 import android.view.Display;
 import android.view.accessibility.IMagnificationConnection;
+import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
 import com.android.server.accessibility.AccessibilityTraceManager;
@@ -49,7 +49,7 @@ public class MagnificationConnectionWrapperTest {
     @Mock
     private AccessibilityTraceManager mTrace;
     @Mock
-    private IWindowMagnificationConnectionCallback mCallback;
+    private IMagnificationConnectionCallback mCallback;
     @Mock
     private MagnificationAnimationCallback mAnimationCallback;
 

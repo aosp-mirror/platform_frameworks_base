@@ -22,8 +22,8 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.accessibility.IMagnificationConnection;
+import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
 import com.android.systemui.dagger.qualifiers.Main;
 
@@ -36,7 +36,7 @@ class MagnificationConnectionImpl extends IMagnificationConnection.Stub {
 
     private static final String TAG = "WindowMagnificationConnectionImpl";
 
-    private IWindowMagnificationConnectionCallback mConnectionCallback;
+    private IMagnificationConnectionCallback mConnectionCallback;
     private final Magnification mMagnification;
     private final Handler mHandler;
 
@@ -105,7 +105,7 @@ class MagnificationConnectionImpl extends IMagnificationConnection.Stub {
     }
 
     @Override
-    public void setConnectionCallback(IWindowMagnificationConnectionCallback callback) {
+    public void setConnectionCallback(IMagnificationConnectionCallback callback) {
         mConnectionCallback = callback;
     }
 

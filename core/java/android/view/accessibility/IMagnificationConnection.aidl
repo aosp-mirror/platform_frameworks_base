@@ -18,7 +18,7 @@ package android.view.accessibility;
 
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.view.accessibility.IWindowMagnificationConnectionCallback;
+import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
 
 /**
@@ -110,11 +110,11 @@ oneway interface IMagnificationConnection {
     void removeMagnificationSettingsPanel(int displayId);
 
     /**
-     * Sets {@link IWindowMagnificationConnectionCallback} to receive the request or the callback.
+     * Sets {@link IMagnificationConnectionCallback} to receive the request or the callback.
      *
      * @param callback the interface to be called.
      */
-    void setConnectionCallback(in IWindowMagnificationConnectionCallback callback);
+    void setConnectionCallback(in IMagnificationConnectionCallback callback);
 
     /**
      * Notify System UI the magnification scale on the specified display for userId is changed.

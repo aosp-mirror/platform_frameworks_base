@@ -44,7 +44,7 @@ import android.testing.TestableLooper;
 import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
-import android.view.accessibility.IWindowMagnificationConnectionCallback;
+import android.view.accessibility.IMagnificationConnectionCallback;
 
 import androidx.test.filters.SmallTest;
 
@@ -75,7 +75,7 @@ public class MagnificationTest extends SysuiTestCase {
     @Mock
     private SysUiState mSysUiState;
     @Mock
-    private IWindowMagnificationConnectionCallback mConnectionCallback;
+    private IMagnificationConnectionCallback mConnectionCallback;
     @Mock
     private OverviewProxyService mOverviewProxyService;
     @Mock
