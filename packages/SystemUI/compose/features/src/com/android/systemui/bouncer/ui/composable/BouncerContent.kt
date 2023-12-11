@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -311,15 +310,21 @@ private fun BesideUserSwitcherLayout(
 
     Row(
         modifier =
-            modifier.pointerInput(Unit) {
-                detectTapGestures(
-                    onDoubleTap = { offset ->
-                        // Depending on where the user double tapped, switch the elements such that
-                        // the endContent is closer to the side that was double tapped.
-                        setSwapped(offset.x < size.width / 2)
-                    }
-                )
-            },
+            modifier
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onDoubleTap = { offset ->
+                            // Depending on where the user double tapped, switch the elements such
+                            // that the non-swapped element is closer to the side that was double
+                            // tapped.
+                            setSwapped(offset.x < size.width / 2)
+                        }
+                    )
+                }
+                .padding(
+                    top = if (isHeightExpanded) 128.dp else 96.dp,
+                    bottom = if (isHeightExpanded) 128.dp else 48.dp,
+                ),
     ) {
         val animatedOffset by
             animateFloatAsState(
@@ -359,20 +364,11 @@ private fun BesideUserSwitcherLayout(
 
         UserSwitcher(
             viewModel = viewModel,
-            modifier = Modifier.weight(1f).align(Alignment.CenterVertically).swappable(),
+            modifier = Modifier.weight(1f).swappable(),
         )
 
         FoldAware(
-            modifier =
-                Modifier.weight(1f)
-                    .padding(
-                        if (isHeightExpanded) {
-                            PaddingValues(vertical = 128.dp)
-                        } else {
-                            PaddingValues(top = 94.dp, bottom = 48.dp)
-                        }
-                    )
-                    .swappable(inversed = true),
+            modifier = Modifier.weight(1f).swappable(inversed = true),
             viewModel = viewModel,
             aboveFold = {
                 Column(
