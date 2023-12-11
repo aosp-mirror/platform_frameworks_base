@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -42,10 +43,14 @@ import android.hardware.display.ColorDisplayManager;
 import android.os.PowerManager;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.service.notification.ZenDeviceEffects;
+import android.service.notification.ZenModeConfig;
 import android.testing.TestableContext;
 
 import androidx.test.InstrumentationRegistry;
-import androidx.test.runner.AndroidJUnit4;
+
+import com.google.testing.junit.testparameterinjector.TestParameter;
+import com.google.testing.junit.testparameterinjector.TestParameterInjector;
+import com.google.testing.junit.testparameterinjector.TestParameters;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -55,7 +60,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@RunWith(AndroidJUnit4.class)
+@RunWith(TestParameterInjector.class)
 public class DefaultDeviceEffectsApplierTest {
 
     @Rule
@@ -67,6 +72,27 @@ public class DefaultDeviceEffectsApplierTest {
     @Mock ColorDisplayManager mColorDisplayManager;
     @Mock UiModeManager mUiModeManager;
     @Mock WallpaperManager mWallpaperManager;
+
+    private enum ChangeOrigin {
+        ORIGIN_UNKNOWN(ZenModeConfig.UPDATE_ORIGIN_UNKNOWN),
+        ORIGIN_INIT(ZenModeConfig.UPDATE_ORIGIN_INIT),
+        ORIGIN_INIT_USER(ZenModeConfig.UPDATE_ORIGIN_INIT_USER),
+        ORIGIN_USER(ZenModeConfig.UPDATE_ORIGIN_USER),
+        ORIGIN_APP(ZenModeConfig.UPDATE_ORIGIN_APP),
+        ORIGIN_SYSTEM_OR_SYSTEMUI(ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI),
+        ORIGIN_RESTORE_BACKUP(ZenModeConfig.UPDATE_ORIGIN_RESTORE_BACKUP);
+
+        private final int mValue;
+
+        ChangeOrigin(@ZenModeConfig.ConfigChangeOrigin int value) {
+            mValue = value;
+        }
+
+        @ZenModeConfig.ConfigChangeOrigin
+        public int value() {
+            return mValue;
+        }
+    }
 
     @Before
     public void setUp() {
@@ -174,7 +200,7 @@ public class DefaultDeviceEffectsApplierTest {
     }
 
     @Test
-    public void apply_darkThemeFromApp_appliedOnScreenOff() {
+    public void apply_nightModeFromApp_appliedOnScreenOff() {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
         ArgumentCaptor<BroadcastReceiver> broadcastReceiverCaptor =
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
@@ -203,13 +229,14 @@ public class DefaultDeviceEffectsApplierTest {
     }
 
     @Test
-    public void apply_darkThemeFromAppWithScreenOff_appliedImmediately() {
+    public void apply_nightModeWithScreenOff_appliedImmediately(
+            @TestParameter ChangeOrigin origin) {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 
         when(mPowerManager.isInteractive()).thenReturn(false);
 
         mApplier.apply(new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build(),
-                UPDATE_ORIGIN_APP);
+                origin.value());
 
         // Effect was applied, and no broadcast receiver was registered.
         verify(mUiModeManager).setNightModeActivatedForCustomMode(
@@ -218,17 +245,37 @@ public class DefaultDeviceEffectsApplierTest {
     }
 
     @Test
-    public void testDeviceEffects_darkThemeFromUser_appliedImmediately() {
+    @TestParameters({"{origin: ORIGIN_USER}", "{origin: ORIGIN_INIT}", "{origin: ORIGIN_INIT_USER}",
+            "{origin: ORIGIN_SYSTEM_OR_SYSTEMUI}"})
+    public void apply_nightModeWithScreenOn_appliedImmediatelyBasedOnOrigin(ChangeOrigin origin) {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
 
         when(mPowerManager.isInteractive()).thenReturn(true);
 
         mApplier.apply(new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build(),
-                UPDATE_ORIGIN_USER);
+                origin.value());
 
         // Effect was applied, and no broadcast receiver was registered.
         verify(mUiModeManager).setNightModeActivatedForCustomMode(
                 eq(MODE_NIGHT_CUSTOM_TYPE_BEDTIME), eq(true));
         verify(mContext, never()).registerReceiver(any(), any(), anyInt());
+    }
+
+    @Test
+    @TestParameters({"{origin: ORIGIN_APP}", "{origin: ORIGIN_RESTORE_BACKUP}",
+            "{origin: ORIGIN_UNKNOWN}"})
+    public void apply_nightModeWithScreenOn_willBeAppliedLaterBasedOnOrigin(ChangeOrigin origin) {
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
+
+        when(mPowerManager.isInteractive()).thenReturn(true);
+
+        mApplier.apply(new ZenDeviceEffects.Builder().setShouldUseNightMode(true).build(),
+                origin.value());
+
+        // Effect was not applied, will be on next screen-off.
+        verifyZeroInteractions(mUiModeManager);
+        verify(mContext).registerReceiver(any(),
+                argThat(filter -> Intent.ACTION_SCREEN_OFF.equals(filter.getAction(0))),
+                anyInt());
     }
 }
