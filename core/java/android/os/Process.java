@@ -21,6 +21,7 @@ import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UptimeMillisLong;
@@ -978,13 +979,8 @@ public class Process {
                 || (uid >= FIRST_APP_ZYGOTE_ISOLATED_UID && uid <= LAST_APP_ZYGOTE_ISOLATED_UID);
     }
 
-    /**
-     * Returns whether the provided UID belongs to a SDK sandbox process.
-     *
-     * @hide
-     */
-    @SystemApi(client = MODULE_LIBRARIES)
-    @TestApi
+    /** Returns whether the provided UID belongs to an  sdk_sandbox process(@see https://developer.android.com/design-for-safety/privacy-sandbox/sdk-runtime). */
+    @SuppressLint("UnflaggedApi") // promoting from @SystemApi.
     @android.ravenwood.annotation.RavenwoodKeep
     public static final boolean isSdkSandboxUid(int uid) {
         uid = UserHandle.getAppId(uid);
@@ -992,15 +988,19 @@ public class Process {
     }
 
     /**
+     * Returns the app uid corresponding to an sdk sandbox uid.
      *
-     * Returns the app process corresponding to an sdk sandbox process.
+     * @param uid the sdk_sandbox uid
+     * @return the app uid for the given sdk_sandbox uid
      *
-     * @hide
+     * @throws IllegalArgumentException if input is not an SdkSandboxUid
      */
-    @SystemApi(client = MODULE_LIBRARIES)
-    @TestApi
+    @SuppressLint("UnflaggedApi") // promoting from @SystemApi.
     @android.ravenwood.annotation.RavenwoodKeep
     public static final int getAppUidForSdkSandboxUid(int uid) {
+        if (!isSdkSandboxUid(uid)) {
+            throw new IllegalArgumentException("Input UID is not an SDK sandbox UID");
+        }
         return uid - (FIRST_SDK_SANDBOX_UID - FIRST_APPLICATION_UID);
     }
 

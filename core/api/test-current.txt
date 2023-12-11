@@ -2337,9 +2337,7 @@ package android.os {
   }
 
   public class Process {
-    method public static final int getAppUidForSdkSandboxUid(int);
     method public static final int getThreadScheduler(int) throws java.lang.IllegalArgumentException;
-    method public static final boolean isSdkSandboxUid(int);
     method public static final int toSdkSandboxUid(int);
     field public static final int FIRST_APP_ZYGOTE_ISOLATED_UID = 90000; // 0x15f90
     field public static final int FIRST_ISOLATED_UID = 99000; // 0x182b8
