@@ -51,6 +51,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /** An hint service implementation that runs in System Server process. */
@@ -521,7 +522,11 @@ public final class HintManagerService extends SystemService {
                 if (mHalSessionPtr == 0) return;
                 mNativeWrapper.halCloseHintSession(mHalSessionPtr);
                 mHalSessionPtr = 0;
-                mToken.unlinkToDeath(this, 0);
+                try {
+                    mToken.unlinkToDeath(this, 0);
+                } catch (NoSuchElementException ignored) {
+                    Slogf.d(TAG, "Death link does not exist for session with UID " + mUid);
+                }
                 ArrayMap<IBinder, ArraySet<AppHintSession>> tokenMap = mActiveSessions.get(mUid);
                 if (tokenMap == null) {
                     Slogf.w(TAG, "UID %d is not present in active session map", mUid);
