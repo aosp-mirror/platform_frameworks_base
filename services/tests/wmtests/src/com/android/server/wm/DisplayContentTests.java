@@ -993,7 +993,9 @@ public class DisplayContentTests extends WindowTestsBase {
         dc.getDisplayPolicy().getDecorInsetsInfo(ROTATION_0, dc.mBaseDisplayHeight,
                 dc.mBaseDisplayWidth).mConfigFrame.set(0, 0, 1000, 990);
         dc.computeScreenConfiguration(config, ROTATION_0);
+        dc.onRequestedOverrideConfigurationChanged(config);
         assertEquals(Configuration.ORIENTATION_LANDSCAPE, config.orientation);
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE, dc.getNaturalOrientation());
     }
 
     @Test
