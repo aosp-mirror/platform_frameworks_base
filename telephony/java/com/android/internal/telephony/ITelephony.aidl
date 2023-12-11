@@ -3159,4 +3159,37 @@ interface ITelephony {
      * @return {@code true} if the operation is successful, {@code false} otherwise.
      */
     boolean setShouldSendDatagramToModemInDemoMode(boolean shouldSendToModemInDemoMode);
+
+    /**
+     * Enable or disable notifications sent for cellular identifier disclosure events.
+     *
+     * Disclosure events are defined as instances where a device has sent a cellular identifier
+     * on the Non-access stratum (NAS) before a security context is established. As a result the
+     * identifier is sent in the clear, which has privacy implications for the user.
+     *
+     * <p>Requires permission: android.Manifest.MODIFY_PHONE_STATE</p>
+     *
+     * @param enabled if notifications about disclosure events should be enabled
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support this feature.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+        + "android.Manifest.permission.MODIFY_PHONE_STATE)")
+    void enableCellularIdentifierDisclosureNotifications(boolean enable);
+
+    /**
+     * Get whether or not cellular identifier disclosure notifications are enabled.
+     *
+     * <p>Requires permission: android.Manifest.READ_PRIVILEGED_PHONE_STATE</p>
+     *
+     * @throws IllegalStateException if the Telephony process is not currently available
+     * @throws SecurityException if the caller does not have the required privileges
+     * @throws UnsupportedOperationException if the modem does not support this feature.
+     * @hide
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+        + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
+    boolean isCellularIdentifierDisclosureNotificationEnabled();
 }
