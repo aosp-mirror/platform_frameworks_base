@@ -36,6 +36,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.app.usage.UsageStatsManager;
+import android.companion.virtual.VirtualDeviceManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -7307,6 +7308,12 @@ public class AppOpsManager {
 
          * The default impl is to fallback onto {@link #onOpChanged(String, String)
          *
+         * <p> Implement this method and not
+         * {@link #onOpChanged(String, String, int, String)} if
+         * callbacks are
+         * required only on op state changes for the default device
+         * {@link VirtualDeviceManager#PERSISTENT_DEVICE_ID_DEFAULT}.
+         *
          * @param op The Op that changed.
          * @param packageName Package of the app whose Op changed.
          * @param userId User Space of the app whose Op changed.
@@ -7314,6 +7321,31 @@ public class AppOpsManager {
          */
         default void onOpChanged(@NonNull String op, @NonNull String packageName,  int userId) {
             onOpChanged(op, packageName);
+        }
+
+        /**
+         * Similar to {@link #onOpChanged(String, String, int)} but includes the device for which
+         * the op mode has changed.
+         *
+         * <p> Implement this method if callbacks are required on all devices.
+         * If not implemented explicitly, the default implementation will notify for op changes
+         * on the default device {@link VirtualDeviceManager#PERSISTENT_DEVICE_ID_DEFAULT} only.
+         *
+         * <p> If implemented, {@link #onOpChanged(String, String, int)}
+         * will not be called automatically.
+         *
+         * @param op The Op that changed.
+         * @param packageName Package of the app whose Op changed.
+         * @param userId User id of the app whose Op changed.
+         * @param persistentDeviceId persistent device id whose Op changed.
+         */
+        @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        default void onOpChanged(@NonNull String op, @NonNull String packageName, int userId,
+                @NonNull String persistentDeviceId) {
+            if (Objects.equals(persistentDeviceId,
+                    VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT)) {
+                onOpChanged(op, packageName, userId);
+            }
         }
     }
 
@@ -7334,6 +7366,12 @@ public class AppOpsManager {
         /**
          * Called when the active state of an app-op changes.
          *
+         * <p> Implement this method and not
+         * {@link #onOpActiveChanged(String, int, String, String, int, boolean, int, int)} if
+         * callbacks are
+         * required only on op state changes for the default device
+         * {@link Context#DEVICE_ID_DEFAULT}.
+         *
          * @param op The operation that changed.
          * @param uid The UID performing the operation.
          * @param packageName The package performing the operation.
@@ -7349,6 +7387,37 @@ public class AppOpsManager {
                 int attributionFlags, int attributionChainId) {
             onOpActiveChanged(op, uid, packageName, active);
         }
+
+        /**
+         * Similar to {@link #onOpActiveChanged(String, int, String, String, boolean, int, int)},
+         * but also includes the virtual device id of the op is now active or inactive.
+         *
+         * <p> Implement this method if callbacks are required on all devices.
+         * If not implemented explicitly, the default implementation will notify for op state
+         * changes on the default device {@link Context#DEVICE_ID_DEFAULT} only.
+         *
+         * <p> If implemented,
+         * {@link #onOpActiveChanged(String, int, String, String, boolean, int, int)}
+         * will not be called automatically.
+         *
+         * @param op The operation that changed.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param attributionTag The operation's attribution tag.
+         * @param virtualDeviceId the virtual device id whose operation has changed
+         * @param active Whether the operation became active or inactive.
+         * @param attributionFlags the attribution flags for this operation.
+         * @param attributionChainId the unique id of the attribution chain this op is a part of.
+         */
+        @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        default void onOpActiveChanged(@NonNull String op, int uid, @NonNull String packageName,
+                @Nullable String attributionTag, int virtualDeviceId, boolean active,
+                @AttributionFlags int attributionFlags, int attributionChainId) {
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                onOpActiveChanged(op, uid, packageName, attributionTag, active, attributionFlags,
+                        attributionChainId);
+            }
+        }
     }
 
     /**
@@ -7361,6 +7430,10 @@ public class AppOpsManager {
         /**
          * Called when an app-op is noted.
          *
+         * <p> Implement this method and not
+         * {@link #onOpNoted(String, int, String, String, int, int, int)} if callbacks are
+         * required only on op notes for the default device {@link Context#DEVICE_ID_DEFAULT}.
+         *
          * @param op The operation that was noted.
          * @param uid The UID performing the operation.
          * @param packageName The package performing the operation.
@@ -7370,6 +7443,34 @@ public class AppOpsManager {
          */
         void onOpNoted(@NonNull String op, int uid, @NonNull String packageName,
                 @Nullable String attributionTag, @OpFlags int flags, @Mode int result);
+
+        /**
+         * Similar to {@link #onOpNoted(String, int, String, String, int, int, int)},
+         * but also includes the virtual device id of the op is now active or inactive.
+         *
+         * <p> Implement this method if callbacks are required for op notes on all devices.
+         * If not implemented explicitly, the default implementation will notify for the
+         * default device {@link Context#DEVICE_ID_DEFAULT} only.
+         *
+         * <p> If implemented, {@link #onOpNoted(String, int, String, String, int, int)}
+         * will not be called automatically.
+         *
+         * @param op The operation that was noted.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param attributionTag The attribution tag performing the operation.
+         * @param virtualDeviceId the device that noted the operation
+         * @param flags The flags of this op
+         * @param result The result of the note.
+         */
+        @FlaggedApi(android.permission.flags.Flags.FLAG_DEVICE_AWARE_PERMISSION_APIS_ENABLED)
+        default void onOpNoted(@NonNull String op, int uid, @NonNull String packageName,
+                @Nullable String attributionTag, int virtualDeviceId, @OpFlags int flags,
+                @Mode int result) {
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                onOpNoted(op, uid, packageName, attributionTag, flags, result);
+            }
+        }
     }
 
     /**
@@ -7408,6 +7509,9 @@ public class AppOpsManager {
     public static class OnOpChangedInternalListener implements OnOpChangedListener {
         public void onOpChanged(String op, String packageName) { }
         public void onOpChanged(int op, String packageName) { }
+        public void onOpChanged(int op, String packageName, String persistentDeviceId) {
+            onOpChanged(op, packageName);
+        }
     }
 
     /**
@@ -7418,6 +7522,8 @@ public class AppOpsManager {
     public interface OnOpActiveChangedInternalListener extends OnOpActiveChangedListener {
         default void onOpActiveChanged(String op, int uid, String packageName, boolean active) { }
         default void onOpActiveChanged(int op, int uid, String packageName, boolean active) { }
+        default void onOpActiveChanged(int op, int uid, String packageName, int virtualDeviceId,
+                boolean active) { }
     }
 
     /**
@@ -7471,6 +7577,12 @@ public class AppOpsManager {
         /**
          * Called when an op was started.
          *
+         * <p> Implement this method and not
+         * {@link #onOpStarted(int, int, String, String, int, int, int, int, int, int)} if
+         * callbacks are
+         * required only on op starts for the default device
+         * {@link Context#DEVICE_ID_DEFAULT}.
+         *
          * Note: This is only for op starts. It is not called when an op is noted or stopped.
          * By default, unless this method is overridden, no code will be executed for resume
          * events.
@@ -7489,6 +7601,37 @@ public class AppOpsManager {
                 @AttributionFlags int attributionFlags, int attributionChainId) {
             if (startType != START_TYPE_RESUMED) {
                 onOpStarted(op, uid, packageName, attributionTag, flags, result);
+            }
+        }
+
+        /**
+         * Similar to {@link #onOpStarted(int, int, String, String, int, int)},
+         * but also includes the virtual device id that started the op.
+         *
+         * <p> Implement this method if callbacks are required on all devices.
+         * If not implemented explicitly, the default implementation will notify for op starts on
+         * the default device {@link Context#DEVICE_ID_DEFAULT} only.
+         *
+         * <p> If implemented, {@link #onOpStarted(int, int, String, String, int, int)}
+         * will not be called automatically.
+         *
+         * @param op The op code.
+         * @param uid The UID performing the operation.
+         * @param packageName The package performing the operation.
+         * @param attributionTag The attribution tag performing the operation.
+         * @param virtualDeviceId the device that started the operation
+         * @param flags The flags of this op.
+         * @param result The result of the start.
+         * @param startType The start type of this start event. Either failed, resumed, or started.
+         * @param attributionFlags The location of this started op in an attribution chain.
+         */
+        default void onOpStarted(int op, int uid, @NonNull String packageName,
+             @Nullable String attributionTag, int virtualDeviceId, @OpFlags int flags,
+             @Mode int result, @StartedType int startType,
+             @AttributionFlags int attributionFlags, int attributionChainId) {
+            if (virtualDeviceId == Context.DEVICE_ID_DEFAULT) {
+                onOpStarted(op, uid, packageName, attributionTag, flags, result, startType,
+                        attributionFlags, attributionChainId);
             }
         }
     }
@@ -8015,14 +8158,16 @@ public class AppOpsManager {
             IAppOpsCallback cb = mModeWatchers.get(callback);
             if (cb == null) {
                 cb = new IAppOpsCallback.Stub() {
-                    public void opChanged(int op, int uid, String packageName) {
+                    public void opChanged(int op, int uid, String packageName,
+                            String persistentDeviceId) {
                         if (callback instanceof OnOpChangedInternalListener) {
-                            ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName);
+                            ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName,
+                                persistentDeviceId);
                         }
                         if (sAppOpInfos[op].name != null) {
 
                             callback.onOpChanged(sAppOpInfos[op].name, packageName,
-                                    UserHandle.getUserId(uid));
+                                    UserHandle.getUserId(uid), persistentDeviceId);
                         }
                     }
                 };
@@ -8103,16 +8248,17 @@ public class AppOpsManager {
             cb = new IAppOpsActiveCallback.Stub() {
                 @Override
                 public void opActiveChanged(int op, int uid, String packageName,
-                        String attributionTag, boolean active, @AttributionFlags
-                        int attributionFlags, int attributionChainId) {
+                        String attributionTag, int virtualDeviceId, boolean active,
+                        @AttributionFlags int attributionFlags, int attributionChainId) {
                     executor.execute(() -> {
                         if (callback instanceof OnOpActiveChangedInternalListener) {
                             ((OnOpActiveChangedInternalListener) callback).onOpActiveChanged(op,
-                                    uid, packageName, active);
+                                    uid, packageName, virtualDeviceId, active);
                         }
                         if (sAppOpInfos[op].name != null) {
                             callback.onOpActiveChanged(sAppOpInfos[op].name, uid, packageName,
-                                    attributionTag, active, attributionFlags, attributionChainId);
+                                    attributionTag, virtualDeviceId, active, attributionFlags,
+                                    attributionChainId);
                         }
                     });
                 }
@@ -8181,10 +8327,10 @@ public class AppOpsManager {
              cb = new IAppOpsStartedCallback.Stub() {
                  @Override
                  public void opStarted(int op, int uid, String packageName, String attributionTag,
-                         int flags, int mode, int startType, int attributionFlags,
-                         int attributionChainId) {
-                     callback.onOpStarted(op, uid, packageName, attributionTag, flags, mode,
-                             startType, attributionFlags, attributionChainId);
+                         int virtualDeviceId, int flags, int mode, int startType,
+                         int attributionFlags, int attributionChainId) {
+                     callback.onOpStarted(op, uid, packageName, attributionTag, virtualDeviceId,
+                             flags, mode, startType, attributionFlags, attributionChainId);
                  }
              };
              mStartedWatchers.put(callback, cb);
@@ -8352,13 +8498,13 @@ public class AppOpsManager {
             cb = new IAppOpsNotedCallback.Stub() {
                 @Override
                 public void opNoted(int op, int uid, String packageName, String attributionTag,
-                        int flags, int mode) {
+                        int virtualDeviceId, int flags, int mode) {
                     final long identity = Binder.clearCallingIdentity();
                     try {
                         executor.execute(() -> {
                             if (sAppOpInfos[op].name != null) {
                                 listener.onOpNoted(sAppOpInfos[op].name, uid, packageName,
-                                        attributionTag,
+                                        attributionTag, virtualDeviceId,
                                         flags, mode);
                             }
                         });

@@ -227,7 +227,7 @@ public class InternalResourceService extends SystemService {
 
     private final IAppOpsCallback mApbListener = new IAppOpsCallback.Stub() {
         @Override
-        public void opChanged(int op, int uid, String packageName) {
+        public void opChanged(int op, int uid, String packageName, String persistentDeviceId) {
             boolean restricted = false;
             try {
                 restricted = mAppOpsService.checkOperation(

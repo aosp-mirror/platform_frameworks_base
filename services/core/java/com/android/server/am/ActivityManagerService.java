@@ -2100,7 +2100,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Start watching app ops after we and the package manager are up and running.
         mAppOpsService.startWatchingMode(AppOpsManager.OP_RUN_IN_BACKGROUND, null,
                 new IAppOpsCallback.Stub() {
-                    @Override public void opChanged(int op, int uid, String packageName) {
+                    @Override public void opChanged(int op, int uid, String packageName,
+                            String persistentDeviceId) {
                         if (op == AppOpsManager.OP_RUN_IN_BACKGROUND && packageName != null) {
                             if (getAppOpsManager().checkOpNoThrow(op, uid, packageName)
                                     != AppOpsManager.MODE_ALLOWED) {
@@ -2114,7 +2115,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAppOpsService.startWatchingActive(cameraOp, new IAppOpsActiveCallback.Stub() {
             @Override
             public void opActiveChanged(int op, int uid, String packageName, String attributionTag,
-                    boolean active, @AttributionFlags int attributionFlags,
+                    int virtualDeviceId, boolean active, @AttributionFlags int attributionFlags,
                     int attributionChainId) {
                 cameraActiveChanged(uid, active);
             }

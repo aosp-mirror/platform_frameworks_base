@@ -125,6 +125,7 @@ import android.app.PendingIntent;
 import android.app.compat.CompatChanges;
 import android.app.tare.EconomyManager;
 import android.app.usage.UsageStatsManagerInternal;
+import android.companion.virtual.VirtualDeviceManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -2980,7 +2981,8 @@ public final class AlarmManagerServiceTest {
         mService.mLastOpScheduleExactAlarm.put(TEST_CALLING_UID, MODE_ALLOWED);
         mockScheduleExactAlarmStatePreT(true, MODE_ERRORED);
 
-        mIAppOpsCallback.opChanged(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID, TEST_CALLING_PACKAGE);
+        mIAppOpsCallback.opChanged(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID, TEST_CALLING_PACKAGE,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
         assertAndHandleMessageSync(REMOVE_EXACT_ALARMS);
         verify(mService).removeExactAlarmsOnPermissionRevoked(TEST_CALLING_UID,
                 TEST_CALLING_PACKAGE, true);
@@ -2993,7 +2995,8 @@ public final class AlarmManagerServiceTest {
         mService.mLastOpScheduleExactAlarm.put(TEST_CALLING_UID, MODE_ALLOWED);
         mockScheduleExactAlarmStatePreT(true, MODE_ERRORED);
 
-        mIAppOpsCallback.opChanged(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID, TEST_CALLING_PACKAGE);
+        mIAppOpsCallback.opChanged(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID, TEST_CALLING_PACKAGE,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
 
         verify(mService.mHandler, never()).sendMessageAtTime(
                 argThat(m -> m.what == REMOVE_EXACT_ALARMS), anyLong());
@@ -3008,7 +3011,8 @@ public final class AlarmManagerServiceTest {
 
         mService.mLastOpScheduleExactAlarm.put(TEST_CALLING_UID, MODE_ERRORED);
         mockScheduleExactAlarmStatePreT(true, MODE_ALLOWED);
-        mIAppOpsCallback.opChanged(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID, TEST_CALLING_PACKAGE);
+        mIAppOpsCallback.opChanged(OP_SCHEDULE_EXACT_ALARM, TEST_CALLING_UID, TEST_CALLING_PACKAGE,
+                VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT);
 
         final ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
         final ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
