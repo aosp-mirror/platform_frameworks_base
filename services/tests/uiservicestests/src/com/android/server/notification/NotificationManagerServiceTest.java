@@ -209,6 +209,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.permission.PermissionManager;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
@@ -8975,6 +8976,42 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mockZenModeHelper).addAutomaticZenRule(
                 eq("another.package"), eq(rule), eq(ZenModeConfig.UPDATE_ORIGIN_APP),
                 anyString(), anyInt());  // doesn't count as a system/systemui call
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void testAddAutomaticZenRule_typeManagedCanBeUsedByDeviceOwners() throws Exception {
+        mService.setCallerIsNormalPackage();
+        mService.setZenHelper(mock(ZenModeHelper.class));
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri"))
+                .setType(AutomaticZenRule.TYPE_MANAGED)
+                .setOwner(new ComponentName("pkg", "cls"))
+                .build();
+        when(mDevicePolicyManager.isActiveDeviceOwner(anyInt())).thenReturn(true);
+
+        mBinderService.addAutomaticZenRule(rule, "pkg");
+        // No exception!
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void testAddAutomaticZenRule_typeManagedCannotBeUsedByRegularApps() throws Exception {
+        mService.setCallerIsNormalPackage();
+        mService.setZenHelper(mock(ZenModeHelper.class));
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri"))
+                .setType(AutomaticZenRule.TYPE_MANAGED)
+                .setOwner(new ComponentName("pkg", "cls"))
+                .build();
+        when(mDevicePolicyManager.isActiveDeviceOwner(anyInt())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mBinderService.addAutomaticZenRule(rule, "pkg"));
     }
 
     @Test
