@@ -15,9 +15,16 @@
  */
 package com.android.server.inputmethod;
 
+import static com.android.server.inputmethod.ClientController.ClientControllerCallback;
+import static com.android.server.inputmethod.ClientController.ClientState;
+
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManagerInternal;
@@ -38,6 +45,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 // This test is designed to run on both device and host (Ravenwood) side.
 public final class ClientControllerTest {
@@ -58,9 +67,6 @@ public final class ClientControllerTest {
     @Mock
     private IRemoteInputConnection mConnection;
 
-    @Mock
-    private IBinder.DeathRecipient mDeathRecipient;
-
     private Handler mHandler;
 
     private ClientController mController;
@@ -68,9 +74,10 @@ public final class ClientControllerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mClient.asBinder()).thenReturn((IBinder) mClient);
+
         mHandler = new Handler(Looper.getMainLooper());
         mController = new ClientController(mMockPackageManagerInternal);
-        when(mClient.asBinder()).thenReturn((IBinder) mClient);
     }
 
     @Test
@@ -80,18 +87,77 @@ public final class ClientControllerTest {
         var invoker = IInputMethodClientInvoker.create(mClient, mHandler);
 
         synchronized (ImfLock.class) {
-            mController.addClient(invoker, mConnection, ANY_DISPLAY_ID, mDeathRecipient,
-                    ANY_CALLER_UID, ANY_CALLER_PID);
+            mController.addClient(invoker, mConnection, ANY_DISPLAY_ID, ANY_CALLER_UID,
+                    ANY_CALLER_PID);
 
             SecurityException thrown = assertThrows(SecurityException.class,
                     () -> {
                         synchronized (ImfLock.class) {
                             mController.addClient(invoker, mConnection, ANY_DISPLAY_ID,
-                                    mDeathRecipient, ANY_CALLER_UID, ANY_CALLER_PID);
+                                    ANY_CALLER_UID, ANY_CALLER_PID);
                         }
                     });
             assertThat(thrown.getMessage()).isEqualTo(
                     "uid=1/pid=1/displayId=0 is already registered");
+        }
+    }
+
+    @Test
+    // TODO(b/314150112): Enable host side mode for this test once b/315544364 is fixed.
+    @IgnoreUnderRavenwood(blockedBy = {InputBinding.class, IInputMethodClientInvoker.class})
+    public void testAddClient() throws Exception {
+        synchronized (ImfLock.class) {
+            var invoker = IInputMethodClientInvoker.create(mClient, mHandler);
+            var added = mController.addClient(invoker, mConnection, ANY_DISPLAY_ID, ANY_CALLER_UID,
+                    ANY_CALLER_PID);
+
+            verify(invoker.asBinder()).linkToDeath(any(IBinder.DeathRecipient.class), eq(0));
+            assertThat(mController.mClients).containsEntry(invoker.asBinder(), added);
+        }
+    }
+
+    @Test
+    // TODO(b/314150112): Enable host side mode for this test once b/315544364 is fixed.
+    @IgnoreUnderRavenwood(blockedBy = {InputBinding.class, IInputMethodClientInvoker.class})
+    public void testRemoveClient() {
+        var callback = new TestClientControllerCallback();
+        ClientState added;
+        synchronized (ImfLock.class) {
+            mController.addClientControllerCallback(callback);
+
+            var invoker = IInputMethodClientInvoker.create(mClient, mHandler);
+            added = mController.addClient(invoker, mConnection, ANY_DISPLAY_ID, ANY_CALLER_UID,
+                    ANY_CALLER_PID);
+            assertThat(mController.mClients).containsEntry(invoker.asBinder(), added);
+            assertThat(mController.removeClient(mClient)).isTrue();
+        }
+
+        // Test callback
+        var removed = callback.waitForRemovedClient(5, TimeUnit.SECONDS);
+        assertThat(removed).isSameInstanceAs(added);
+    }
+
+    private static class TestClientControllerCallback implements ClientControllerCallback {
+
+        private final CountDownLatch mLatch = new CountDownLatch(1);
+
+        private ClientState mRemoved;
+
+        @Override
+        public void onClientRemoved(ClientState removed) {
+            mRemoved = removed;
+            mLatch.countDown();
+        }
+
+        ClientState waitForRemovedClient(long timeout, TimeUnit unit) {
+            try {
+                assertWithMessage("ClientController callback wasn't called on user removed").that(
+                        mLatch.await(timeout, unit)).isTrue();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("Unexpected thread interruption", e);
+            }
+            return mRemoved;
         }
     }
 }
