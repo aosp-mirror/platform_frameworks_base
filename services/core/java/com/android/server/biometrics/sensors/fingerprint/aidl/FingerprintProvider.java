@@ -46,6 +46,7 @@ import android.hardware.fingerprint.ISidefpsController;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
@@ -101,6 +102,8 @@ import java.util.stream.Collectors;
  */
 @SuppressWarnings("deprecation")
 public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvider {
+
+    private static final String TAG = "FingerprintProvider";
 
     private boolean mTestHalEnabled;
 
@@ -172,7 +175,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             boolean resetLockoutRequiresHardwareAuthToken) {
         this(context, biometricStateCallback, authenticationStateListeners, props, halInstanceName,
                 lockoutResetDispatcher, gestureAvailabilityDispatcher, biometricContext,
-                null /* daemon */, resetLockoutRequiresHardwareAuthToken,
+                null /* daemon */, getHandler(), resetLockoutRequiresHardwareAuthToken,
                 false /* testHalEnabled */);
     }
 
@@ -184,6 +187,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             @NonNull BiometricContext biometricContext,
             @Nullable IFingerprint daemon,
+            @NonNull Handler handler,
             boolean resetLockoutRequiresHardwareAuthToken,
             boolean testHalEnabled) {
         mContext = context;
@@ -191,7 +195,11 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
         mAuthenticationStateListeners = authenticationStateListeners;
         mHalInstanceName = halInstanceName;
         mFingerprintSensors = new SensorList<>(ActivityManager.getService());
-        mHandler = new Handler(Looper.getMainLooper());
+        if (Flags.deHidl()) {
+            mHandler = handler;
+        } else {
+            mHandler = new Handler(Looper.getMainLooper());
+        }
         mLockoutResetDispatcher = lockoutResetDispatcher;
         mActivityTaskManager = ActivityTaskManager.getInstance();
         mTaskStackListener = new BiometricTaskStackListener();
@@ -202,6 +210,13 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
         initAuthenticationBroadcastReceiver();
         initSensors(resetLockoutRequiresHardwareAuthToken, props, gestureAvailabilityDispatcher);
+    }
+
+    @NonNull
+    private static Handler getHandler() {
+        HandlerThread handlerThread = new HandlerThread(TAG);
+        handlerThread.start();
+        return new Handler(handlerThread.getLooper());
     }
 
     private void initAuthenticationBroadcastReceiver() {
@@ -262,11 +277,9 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                                                                 location.sensorLocationY,
                                                                 location.sensorRadius))
                                                 .collect(Collectors.toList()));
-                final Sensor sensor = new Sensor(getTag() + "/" + sensorId, this, mContext,
-                        mHandler, internalProp, mLockoutResetDispatcher,
-                        gestureAvailabilityDispatcher, mBiometricContext);
-                sensor.init(gestureAvailabilityDispatcher,
-                        mLockoutResetDispatcher);
+                final Sensor sensor = new Sensor(this, mContext, mHandler, internalProp,
+                        mBiometricContext);
+                sensor.init(gestureAvailabilityDispatcher, mLockoutResetDispatcher);
                 final int sessionUserId =
                         sensor.getLazySession().get() == null ? UserHandle.USER_NULL :
                                 sensor.getLazySession().get().getUserId();
@@ -286,10 +299,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
             boolean resetLockoutRequiresHardwareAuthToken) {
         final int sensorId = prop.commonProps.sensorId;
-        final Sensor sensor = new HidlToAidlSensorAdapter(getTag() + "/"
-                + sensorId, this, mContext, mHandler,
-                prop, mLockoutResetDispatcher, gestureAvailabilityDispatcher,
-                mBiometricContext, resetLockoutRequiresHardwareAuthToken,
+        final Sensor sensor = new HidlToAidlSensorAdapter(this, mContext, mHandler, prop,
+                mLockoutResetDispatcher, mBiometricContext, resetLockoutRequiresHardwareAuthToken,
                 () -> scheduleInternalCleanup(sensorId, ActivityManager.getCurrentUser(),
                         null /* callback */));
         sensor.init(gestureAvailabilityDispatcher, mLockoutResetDispatcher);
@@ -307,14 +318,11 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
 
     private void addAidlSensors(@NonNull SensorProps prop,
             @NonNull GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
-            List<SensorLocationInternal> workaroundLocations,
+            @NonNull List<SensorLocationInternal> workaroundLocations,
             boolean resetLockoutRequiresHardwareAuthToken) {
         final int sensorId = prop.commonProps.sensorId;
-        final Sensor sensor = new Sensor(getTag() + "/" + sensorId,
-                this, mContext, mHandler,
-                prop, mLockoutResetDispatcher, gestureAvailabilityDispatcher,
-                mBiometricContext, workaroundLocations,
-                resetLockoutRequiresHardwareAuthToken);
+        final Sensor sensor = new Sensor(this, mContext, mHandler, prop, mBiometricContext,
+                workaroundLocations, resetLockoutRequiresHardwareAuthToken);
         sensor.init(gestureAvailabilityDispatcher, mLockoutResetDispatcher);
         final int sessionUserId = sensor.getLazySession().get() == null ? UserHandle.USER_NULL :
                 sensor.getLazySession().get().getUserId();
@@ -329,7 +337,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
     }
 
     private String getTag() {
-        return "FingerprintProvider/" + mHalInstanceName;
+        return TAG + "/" + mHalInstanceName;
     }
 
     boolean hasHalInstance() {

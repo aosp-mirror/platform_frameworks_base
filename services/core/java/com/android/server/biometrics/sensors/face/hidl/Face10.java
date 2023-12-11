@@ -120,7 +120,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     @NonNull private final FaceSensorPropertiesInternal mSensorProperties;
     @NonNull private final BiometricStateCallback mBiometricStateCallback;
     @NonNull private final Context mContext;
-    @NonNull private final BiometricScheduler mScheduler;
+    @NonNull private final BiometricScheduler<IBiometricsFace, AidlSession> mScheduler;
     @NonNull private final Handler mHandler;
     @NonNull private final Supplier<IBiometricsFace> mLazyDaemon;
     @NonNull private final LockoutHalImpl mLockoutTracker;
@@ -163,14 +163,15 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
         private final int mSensorId;
         @NonNull private final Context mContext;
         @NonNull private final Handler mHandler;
-        @NonNull private final BiometricScheduler mScheduler;
+        @NonNull private final BiometricScheduler<IBiometricsFace, AidlSession> mScheduler;
         @Nullable private Callback mCallback;
         @NonNull private final LockoutHalImpl mLockoutTracker;
         @NonNull private final LockoutResetDispatcher mLockoutResetDispatcher;
 
 
         HalResultController(int sensorId, @NonNull Context context, @NonNull Handler handler,
-                @NonNull BiometricScheduler scheduler, @NonNull LockoutHalImpl lockoutTracker,
+                @NonNull BiometricScheduler<IBiometricsFace, AidlSession> scheduler,
+                @NonNull LockoutHalImpl lockoutTracker,
                 @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
             mSensorId = sensorId;
             mContext = context;
@@ -352,7 +353,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             @NonNull FaceSensorPropertiesInternal sensorProps,
             @NonNull LockoutResetDispatcher lockoutResetDispatcher,
             @NonNull Handler handler,
-            @NonNull BiometricScheduler scheduler,
+            @NonNull BiometricScheduler<IBiometricsFace, AidlSession> scheduler,
             @NonNull BiometricContext biometricContext) {
         mSensorProperties = sensorProps;
         mContext = context;
@@ -395,7 +396,8 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             @NonNull LockoutResetDispatcher lockoutResetDispatcher) {
         final Handler handler = new Handler(Looper.getMainLooper());
         return new Face10(context, biometricStateCallback, sensorProps, lockoutResetDispatcher,
-                handler, new BiometricScheduler(TAG, BiometricScheduler.SENSOR_TYPE_FACE,
+                handler, new BiometricScheduler<>(
+                        BiometricScheduler.SENSOR_TYPE_FACE,
                         null /* gestureAvailabilityTracker */),
                 BiometricContext.getInstance(context));
     }
