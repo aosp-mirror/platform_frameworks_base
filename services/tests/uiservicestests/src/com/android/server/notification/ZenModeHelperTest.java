@@ -112,6 +112,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -211,7 +212,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     private static final ZenDeviceEffects NO_EFFECTS = new ZenDeviceEffects.Builder().build();
 
     @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(
+            SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT);
 
     ConditionProviders mConditionProviders;
     @Mock NotificationManager mNotificationManager;
@@ -3372,6 +3374,29 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_MODES_API)
+    public void removeAutomaticZenRule_propagatesOriginToEffectsApplier() {
+        mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
+        reset(mDeviceEffectsApplier);
+
+        String ruleId = addRuleWithEffects(new ZenDeviceEffects.Builder()
+                .setShouldSuppressAmbientDisplay(true)
+                .setShouldDimWallpaper(true)
+                .build());
+        mZenModeHelper.setAutomaticZenRuleState(ruleId, CONDITION_TRUE, UPDATE_ORIGIN_APP,
+                CUSTOM_PKG_UID);
+        mTestableLooper.processAllMessages();
+        verify(mDeviceEffectsApplier).apply(any(), eq(UPDATE_ORIGIN_APP));
+
+        // Now delete the (currently active!) rule. For example, assume this is done from settings.
+        mZenModeHelper.removeAutomaticZenRule(ruleId, UPDATE_ORIGIN_USER, "remove",
+                Process.SYSTEM_UID);
+        mTestableLooper.processAllMessages();
+
+        verify(mDeviceEffectsApplier).apply(eq(NO_EFFECTS), eq(UPDATE_ORIGIN_USER));
+    }
+
+    @Test
     public void testDeviceEffects_applied() {
         mSetFlagsRule.enableFlags(android.app.Flags.FLAG_MODES_API);
         mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
@@ -3511,8 +3536,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         AutomaticZenRule rule = new AutomaticZenRule.Builder("Test", CONDITION_ID)
                 .setDeviceEffects(effects)
                 .build();
-        return mZenModeHelper.addAutomaticZenRule("pkg", rule, UPDATE_ORIGIN_APP, "",
-                CUSTOM_PKG_UID);
+        return mZenModeHelper.addAutomaticZenRule(mContext.getPackageName(), rule,
+                UPDATE_ORIGIN_APP, "reasons", CUSTOM_PKG_UID);
     }
 
     @Test
@@ -3619,7 +3644,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         Policy policy = new Policy(PRIORITY_CATEGORY_CALLS | PRIORITY_CATEGORY_CONVERSATIONS,
                 PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED,
                 Policy.getAllSuppressedVisualEffects(), CONVERSATION_SENDERS_IMPORTANT);
-        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID, policy);
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID, policy,
+                UPDATE_ORIGIN_APP);
 
         ZenPolicy expectedZenPolicy = new ZenPolicy.Builder()
                 .disallowAllSounds()
@@ -3643,13 +3669,14 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 PRIORITY_SENDERS_CONTACTS, PRIORITY_SENDERS_STARRED,
                 Policy.getAllSuppressedVisualEffects(), CONVERSATION_SENDERS_IMPORTANT);
         mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID,
-                original);
+                original, UPDATE_ORIGIN_APP);
 
         // Change priorityCallSenders: contacts -> starred.
         Policy updated = new Policy(PRIORITY_CATEGORY_CALLS | PRIORITY_CATEGORY_CONVERSATIONS,
                 PRIORITY_SENDERS_STARRED, PRIORITY_SENDERS_STARRED,
                 Policy.getAllSuppressedVisualEffects(), CONVERSATION_SENDERS_IMPORTANT);
-        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID, updated);
+        mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID, updated,
+                UPDATE_ORIGIN_APP);
 
         ZenPolicy expectedZenPolicy = new ZenPolicy.Builder()
                 .disallowAllSounds()
@@ -3671,7 +3698,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         withoutWtfCrash(
                 () -> mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME,
-                        CUSTOM_PKG_UID, new Policy(0, 0, 0)));
+                        CUSTOM_PKG_UID, new Policy(0, 0, 0), UPDATE_ORIGIN_APP));
 
         assertThat(mZenModeHelper.mConfig.automaticRules).isEmpty();
     }
@@ -3684,7 +3711,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 Policy.getAllSuppressedVisualEffects(), STATE_FALSE,
                 CONVERSATION_SENDERS_IMPORTANT);
         mZenModeHelper.applyGlobalPolicyAsImplicitZenRule(CUSTOM_PKG_NAME, CUSTOM_PKG_UID,
-                writtenPolicy);
+                writtenPolicy, UPDATE_ORIGIN_APP);
 
         Policy readPolicy = mZenModeHelper.getNotificationPolicyFromImplicitZenRule(
                 CUSTOM_PKG_NAME);

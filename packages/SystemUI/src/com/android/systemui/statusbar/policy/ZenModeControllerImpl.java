@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.app.AlarmManager;
+import android.app.Flags;
 import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -191,7 +192,11 @@ public class ZenModeControllerImpl implements ZenModeController, Dumpable {
 
     @Override
     public void setZen(int zen, Uri conditionId, String reason) {
-        mNoMan.setZenMode(zen, conditionId, reason);
+        if (Flags.modesApi()) {
+            mNoMan.setZenMode(zen, conditionId, reason, /* fromUser= */ true);
+        } else {
+            mNoMan.setZenMode(zen, conditionId, reason);
+        }
     }
 
     @Override
