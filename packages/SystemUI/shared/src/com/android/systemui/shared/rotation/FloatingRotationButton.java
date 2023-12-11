@@ -16,8 +16,6 @@
 
 package com.android.systemui.shared.rotation;
 
-import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
-
 import android.annotation.DimenRes;
 import android.annotation.IdRes;
 import android.annotation.LayoutRes;
@@ -89,8 +87,7 @@ public class FloatingRotationButton implements RotationButton {
             @DimenRes int roundedContentPadding, @DimenRes int taskbarLeftMargin,
             @DimenRes int taskbarBottomMargin, @DimenRes int buttonDiameter,
             @DimenRes int rippleMaxWidth, @BoolRes int floatingRotationBtnPositionLeftResource) {
-        mContext = context.createWindowContext(context.getDisplay(), TYPE_NAVIGATION_BAR_PANEL,
-                null);
+        mContext = context;
         mWindowManager = mContext.getSystemService(WindowManager.class);
         mKeyButtonContainer = (ViewGroup) LayoutInflater.from(mContext).inflate(layout, null);
         mKeyButtonView = mKeyButtonContainer.findViewById(keyButtonId);
