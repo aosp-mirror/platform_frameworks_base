@@ -343,6 +343,28 @@ public class Parcel_host {
         p.mPos += length;
         p.updateSize();
     }
+    public static int nativeCompareData(long thisNativePtr, long otherNativePtr) {
+        var a = getInstance(thisNativePtr);
+        var b = getInstance(otherNativePtr);
+        if ((a.mSize == b.mSize) && Arrays.equals(a.mBuffer, b.mBuffer)) {
+            return 0;
+        } else {
+            return -1;
+        }
+    }
+    public static boolean nativeCompareDataInRange(
+            long ptrA, int offsetA, long ptrB, int offsetB, int length) {
+        var a = getInstance(ptrA);
+        var b = getInstance(ptrB);
+        if (offsetA < 0 || offsetA + length > a.mSize) {
+            throw new IllegalArgumentException();
+        }
+        if (offsetB < 0 || offsetB + length > b.mSize) {
+            throw new IllegalArgumentException();
+        }
+        return Arrays.equals(Arrays.copyOfRange(a.mBuffer, offsetA, offsetA + length),
+                Arrays.copyOfRange(b.mBuffer, offsetB, offsetB + length));
+    }
     public static void nativeAppendFrom(
             long thisNativePtr, long otherNativePtr, int srcOffset, int length) {
         var dst = getInstance(thisNativePtr);

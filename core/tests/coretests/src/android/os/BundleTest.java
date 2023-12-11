@@ -197,7 +197,6 @@ public class BundleTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void kindofEquals_bothParcelled_same() {
         Bundle bundle1 = new Bundle();
         bundle1.putString("StringKey", "S");
@@ -215,7 +214,6 @@ public class BundleTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void kindofEquals_bothParcelled_different() {
         Bundle bundle1 = new Bundle();
         bundle1.putString("StringKey", "S");
@@ -247,7 +245,6 @@ public class BundleTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void kindofEquals_lazyValues() {
         Parcelable p1 = new CustomParcelable(13, "Tiramisu");
         Parcelable p2 = new CustomParcelable(13, "Tiramisu");
@@ -281,7 +278,6 @@ public class BundleTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void kindofEquals_lazyValuesWithIdenticalParcels_returnsTrue() {
         Parcelable p1 = new CustomParcelable(13, "Tiramisu");
         Parcelable p2 = new CustomParcelable(13, "Tiramisu");
