@@ -20,11 +20,13 @@ import static com.google.common.truth.Truth.assertThat;
 
 import android.annotation.NonNull;
 import android.app.backup.BackupHelper;
+import android.app.backup.BackupHelperWithLogger;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.ArraySet;
 
 import static org.mockito.Mockito.when;
@@ -32,7 +34,10 @@ import static org.mockito.Mockito.when;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.backup.Flags;
+
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -55,6 +60,9 @@ public class SystemBackupAgentTest {
     @Mock
     private PackageManager mPackageManagerMock;
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -71,7 +79,7 @@ public class SystemBackupAgentTest {
 
         mSystemBackupAgent.onCreate(userHandle, /* backupDestination= */ 0);
 
-        assertThat(mSystemBackupAgent.mAddedHelpers)
+        assertThat(mSystemBackupAgent.mAddedHelpersKey)
                 .containsExactly(
                         "account_sync_settings",
                         "preferred_activities",
@@ -96,7 +104,7 @@ public class SystemBackupAgentTest {
 
         mSystemBackupAgent.onCreate(userHandle, /* backupDestination= */ 0);
 
-        assertThat(mSystemBackupAgent.mAddedHelpers)
+        assertThat(mSystemBackupAgent.mAddedHelpersKey)
                 .containsExactly(
                         "account_sync_settings",
                         "preferred_activities",
@@ -118,7 +126,7 @@ public class SystemBackupAgentTest {
 
         mSystemBackupAgent.onCreate(userHandle, /* backupDestination= */ 0);
 
-        assertThat(mSystemBackupAgent.mAddedHelpers)
+        assertThat(mSystemBackupAgent.mAddedHelpersKey)
                 .containsExactly(
                         "account_sync_settings",
                         "notifications",
@@ -134,7 +142,7 @@ public class SystemBackupAgentTest {
 
         mSystemBackupAgent.onCreate(userHandle, /* backupDestination= */ 0);
 
-        assertThat(mSystemBackupAgent.mAddedHelpers)
+        assertThat(mSystemBackupAgent.mAddedHelpersKey)
                 .containsExactly(
                         "account_sync_settings",
                         "preferred_activities",
@@ -147,12 +155,42 @@ public class SystemBackupAgentTest {
                         "companion");
     }
 
+    @Test
+    public void onAddHelperIfEligibleForUser_flagIsOff_helpersHaveNoLogger() {
+        UserHandle userHandle = new UserHandle(UserHandle.USER_SYSTEM);
+        when(mUserManagerMock.isProfile()).thenReturn(false);
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_METRICS_SYSTEM_BACKUP_AGENTS);
+
+        mSystemBackupAgent.onCreate(userHandle, /* backupDestination= */ 0);
+
+        for (BackupHelperWithLogger helper:mSystemBackupAgent.mAddedHelpers){
+            assertThat(helper.isLoggerSet()).isFalse();
+        }
+    }
+
+    @Test
+    public void onAddHelperIfEligibleForUser_flagIsOn_helpersHaveLogger() {
+        UserHandle userHandle = new UserHandle(UserHandle.USER_SYSTEM);
+        when(mUserManagerMock.isProfile()).thenReturn(false);
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_METRICS_SYSTEM_BACKUP_AGENTS);
+
+        mSystemBackupAgent.onCreate(userHandle, /* backupDestination= */ 0);
+
+        for (BackupHelperWithLogger helper:mSystemBackupAgent.mAddedHelpers){
+            assertThat(helper.isLoggerSet()).isTrue();
+        }
+    }
+
     private class TestableSystemBackupAgent extends SystemBackupAgent {
-        final Set<String> mAddedHelpers = new ArraySet<>();
+        final Set<String> mAddedHelpersKey = new ArraySet<>();
+        final Set<BackupHelperWithLogger> mAddedHelpers = new ArraySet<>();
 
         @Override
         public void addHelper(String keyPrefix, BackupHelper helper) {
-            mAddedHelpers.add(keyPrefix);
+            mAddedHelpersKey.add(keyPrefix);
+            if (helper instanceof BackupHelperWithLogger) {
+                mAddedHelpers.add((BackupHelperWithLogger) helper);
+            }
         }
 
         @Override
