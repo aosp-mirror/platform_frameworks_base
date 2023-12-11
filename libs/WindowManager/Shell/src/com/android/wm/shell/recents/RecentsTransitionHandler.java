@@ -995,16 +995,10 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     t.show(mOpeningTasks.get(i).mTaskSurface);
                 }
                 for (int i = 0; i < mPausingTasks.size(); ++i) {
-                    if (!sendUserLeaveHint && mPausingTasks.get(i).isLeaf()) {
-                        // This means recents is not *actually* finishing, so of course we gotta
-                        // do special stuff in WMCore to accommodate.
-                        wct.setDoNotPip(mPausingTasks.get(i).mToken);
-                    }
-                    // Since we will reparent out of the leashes, pre-emptively hide the child
-                    // surface to match the leash. Otherwise, there will be a flicker before the
-                    // visibility gets committed in Core when using split-screen (in splitscreen,
-                    // the leaf-tasks are not "independent" so aren't hidden by normal setup).
-                    t.hide(mPausingTasks.get(i).mTaskSurface);
+                    cleanUpPausingOrClosingTask(mPausingTasks.get(i), wct, t, sendUserLeaveHint);
+                }
+                for (int i = 0; i < mClosingTasks.size(); ++i) {
+                    cleanUpPausingOrClosingTask(mClosingTasks.get(i), wct, t, sendUserLeaveHint);
                 }
                 if (mPipTransaction != null && sendUserLeaveHint) {
                     SurfaceControl pipLeash = null;
@@ -1051,6 +1045,20 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
                     Slog.e(TAG, "Failed to report transition finished", e);
                 }
             }
+        }
+
+        private void cleanUpPausingOrClosingTask(TaskState task, WindowContainerTransaction wct,
+                SurfaceControl.Transaction finishTransaction, boolean sendUserLeaveHint) {
+            if (!sendUserLeaveHint && task.isLeaf()) {
+                // This means recents is not *actually* finishing, so of course we gotta
+                // do special stuff in WMCore to accommodate.
+                wct.setDoNotPip(task.mToken);
+            }
+            // Since we will reparent out of the leashes, pre-emptively hide the child
+            // surface to match the leash. Otherwise, there will be a flicker before the
+            // visibility gets committed in Core when using split-screen (in splitscreen,
+            // the leaf-tasks are not "independent" so aren't hidden by normal setup).
+            finishTransaction.hide(task.mTaskSurface);
         }
 
         @Override
