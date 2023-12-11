@@ -843,7 +843,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 // We don't want to perform a redundant launch of the same record while ensuring
                 // configurations and trying to resume top activity of focused root task.
                 mRootWindowContainer.ensureVisibilityAndConfig(r, r.getDisplayId(),
-                        false /* markFrozenIfConfigChanged */, true /* deferResume */);
+                        true /* deferResume */);
             }
 
             if (mKeyguardController.checkKeyguardVisibility(r) && r.allowMoveToFront()) {
