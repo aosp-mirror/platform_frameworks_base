@@ -455,7 +455,7 @@ public class VirtualDeviceManagerService extends SystemService {
                     cameraAccessController, mPendingTrampolineCallback, activityListener,
                     soundEffectListener, runningAppsChangedCallback, params);
             if (Flags.expressMetrics()) {
-                Counter.logIncrement("virtual_devices.virtual_devices_created_count");
+                Counter.logIncrement("virtual_devices.value_virtual_devices_created_count");
             }
 
             synchronized (mVirtualDeviceManagerLock) {
