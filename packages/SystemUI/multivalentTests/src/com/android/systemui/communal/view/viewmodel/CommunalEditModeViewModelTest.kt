@@ -109,7 +109,7 @@ class CommunalEditModeViewModelTest : SysuiTestCase() {
             whenever(target.smartspaceTargetId).thenReturn("target")
             whenever(target.featureType).thenReturn(SmartspaceTarget.FEATURE_TIMER)
             whenever(target.remoteViews).thenReturn(Mockito.mock(RemoteViews::class.java))
-            smartspaceRepository.setLockscreenSmartspaceTargets(listOf(target))
+            smartspaceRepository.setCommunalSmartspaceTargets(listOf(target))
 
             // Media playing.
             mediaRepository.mediaPlaying.value = true

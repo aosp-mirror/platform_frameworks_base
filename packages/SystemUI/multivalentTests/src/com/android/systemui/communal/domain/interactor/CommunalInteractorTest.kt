@@ -161,7 +161,7 @@ class CommunalInteractorTest : SysuiTestCase() {
             whenever(target1.remoteViews).thenReturn(mock(RemoteViews::class.java))
 
             val targets = listOf(target1, target2, target3)
-            smartspaceRepository.setLockscreenSmartspaceTargets(targets)
+            smartspaceRepository.setCommunalSmartspaceTargets(targets)
 
             val smartspaceContent by collectLastValue(underTest.smartspaceContent)
             assertThat(smartspaceContent?.size).isEqualTo(1)
