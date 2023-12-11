@@ -73,37 +73,37 @@ enum class NestedScrollBehavior(val canStartOnPostFling: Boolean) {
 internal fun Modifier.nestedScrollToScene(
     layoutImpl: SceneTransitionLayoutImpl,
     orientation: Orientation,
-    startBehavior: NestedScrollBehavior,
-    endBehavior: NestedScrollBehavior,
+    topOrLeftBehavior: NestedScrollBehavior,
+    bottomOrRightBehavior: NestedScrollBehavior,
 ) =
     this then
         NestedScrollToSceneElement(
             layoutImpl = layoutImpl,
             orientation = orientation,
-            startBehavior = startBehavior,
-            endBehavior = endBehavior,
+            topOrLeftBehavior = topOrLeftBehavior,
+            bottomOrRightBehavior = bottomOrRightBehavior,
         )
 
 private data class NestedScrollToSceneElement(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val orientation: Orientation,
-    private val startBehavior: NestedScrollBehavior,
-    private val endBehavior: NestedScrollBehavior,
+    private val topOrLeftBehavior: NestedScrollBehavior,
+    private val bottomOrRightBehavior: NestedScrollBehavior,
 ) : ModifierNodeElement<NestedScrollToSceneNode>() {
     override fun create() =
         NestedScrollToSceneNode(
             layoutImpl = layoutImpl,
             orientation = orientation,
-            startBehavior = startBehavior,
-            endBehavior = endBehavior,
+            topOrLeftBehavior = topOrLeftBehavior,
+            bottomOrRightBehavior = bottomOrRightBehavior,
         )
 
     override fun update(node: NestedScrollToSceneNode) {
         node.update(
             layoutImpl = layoutImpl,
             orientation = orientation,
-            startBehavior = startBehavior,
-            endBehavior = endBehavior,
+            topOrLeftBehavior = topOrLeftBehavior,
+            bottomOrRightBehavior = bottomOrRightBehavior,
         )
     }
 
@@ -111,23 +111,23 @@ private data class NestedScrollToSceneElement(
         name = "nestedScrollToScene"
         properties["layoutImpl"] = layoutImpl
         properties["orientation"] = orientation
-        properties["startBehavior"] = startBehavior
-        properties["endBehavior"] = endBehavior
+        properties["topOrLeftBehavior"] = topOrLeftBehavior
+        properties["bottomOrRightBehavior"] = bottomOrRightBehavior
     }
 }
 
 private class NestedScrollToSceneNode(
     layoutImpl: SceneTransitionLayoutImpl,
     orientation: Orientation,
-    startBehavior: NestedScrollBehavior,
-    endBehavior: NestedScrollBehavior,
+    topOrLeftBehavior: NestedScrollBehavior,
+    bottomOrRightBehavior: NestedScrollBehavior,
 ) : DelegatingNode() {
     private var priorityNestedScrollConnection: PriorityNestedScrollConnection =
         scenePriorityNestedScrollConnection(
             layoutImpl = layoutImpl,
             orientation = orientation,
-            startBehavior = startBehavior,
-            endBehavior = endBehavior,
+            topOrLeftBehavior = topOrLeftBehavior,
+            bottomOrRightBehavior = bottomOrRightBehavior,
         )
 
     private var nestedScrollNode: DelegatableNode =
@@ -148,8 +148,8 @@ private class NestedScrollToSceneNode(
     fun update(
         layoutImpl: SceneTransitionLayoutImpl,
         orientation: Orientation,
-        startBehavior: NestedScrollBehavior,
-        endBehavior: NestedScrollBehavior,
+        topOrLeftBehavior: NestedScrollBehavior,
+        bottomOrRightBehavior: NestedScrollBehavior,
     ) {
         // Clean up the old nested scroll connection
         priorityNestedScrollConnection.reset()
@@ -160,8 +160,8 @@ private class NestedScrollToSceneNode(
             scenePriorityNestedScrollConnection(
                 layoutImpl = layoutImpl,
                 orientation = orientation,
-                startBehavior = startBehavior,
-                endBehavior = endBehavior,
+                topOrLeftBehavior = topOrLeftBehavior,
+                bottomOrRightBehavior = bottomOrRightBehavior,
             )
         nestedScrollNode =
             nestedScrollModifierNode(
@@ -175,12 +175,12 @@ private class NestedScrollToSceneNode(
 private fun scenePriorityNestedScrollConnection(
     layoutImpl: SceneTransitionLayoutImpl,
     orientation: Orientation,
-    startBehavior: NestedScrollBehavior,
-    endBehavior: NestedScrollBehavior,
+    topOrLeftBehavior: NestedScrollBehavior,
+    bottomOrRightBehavior: NestedScrollBehavior,
 ) =
     SceneNestedScrollHandler(
             gestureHandler = layoutImpl.gestureHandler(orientation = orientation),
-            startBehavior = startBehavior,
-            endBehavior = endBehavior,
+            topOrLeftBehavior = topOrLeftBehavior,
+            bottomOrRightBehavior = bottomOrRightBehavior,
         )
         .connection

@@ -494,9 +494,9 @@ private class SceneDraggableHandler(
 }
 
 internal class SceneNestedScrollHandler(
-    private val gestureHandler: SceneGestureHandler,
-    private val startBehavior: NestedScrollBehavior,
-    private val endBehavior: NestedScrollBehavior,
+        private val gestureHandler: SceneGestureHandler,
+        private val topOrLeftBehavior: NestedScrollBehavior,
+        private val bottomOrRightBehavior: NestedScrollBehavior,
 ) : NestedScrollHandler {
     override val connection: PriorityNestedScrollConnection = nestedScrollConnection()
 
@@ -565,8 +565,8 @@ internal class SceneNestedScrollHandler(
             canStartPostScroll = { offsetAvailable, offsetBeforeStart ->
                 val behavior: NestedScrollBehavior =
                     when {
-                        offsetAvailable > 0f -> startBehavior
-                        offsetAvailable < 0f -> endBehavior
+                        offsetAvailable > 0f -> topOrLeftBehavior
+                        offsetAvailable < 0f -> bottomOrRightBehavior
                         else -> return@PriorityNestedScrollConnection false
                     }
 
@@ -594,8 +594,8 @@ internal class SceneNestedScrollHandler(
             canStartPostFling = { velocityAvailable ->
                 val behavior: NestedScrollBehavior =
                     when {
-                        velocityAvailable > 0f -> startBehavior
-                        velocityAvailable < 0f -> endBehavior
+                        velocityAvailable > 0f -> topOrLeftBehavior
+                        velocityAvailable < 0f -> bottomOrRightBehavior
                         else -> return@PriorityNestedScrollConnection false
                     }
 
