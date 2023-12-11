@@ -29,4 +29,8 @@ sealed class CommunalSceneKey(
     override fun toString(): String {
         return loggingName
     }
+
+    companion object {
+        val DEFAULT = Blank
+    }
 }
