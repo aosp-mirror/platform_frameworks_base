@@ -2888,7 +2888,7 @@ public class Intent implements Parcelable, Cloneable {
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
      * <p>
-     * Starting in {@link Build.VERSION_CODES#VANILLA_ICE_CREAM Android V}, an extra timestamp
+     * Starting in Android V, an extra timestamp
      * {@link #EXTRA_TIME} is included with this broadcast to indicate the exact time the package
      * was restarted, in {@link SystemClock#elapsedRealtime() elapsed realtime}.
      * </p>
