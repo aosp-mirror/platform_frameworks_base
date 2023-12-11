@@ -26,6 +26,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.BatteryStatsHistoryIterator;
+import com.android.internal.os.MonotonicClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -76,7 +77,8 @@ public class BatteryStatsHistoryIteratorTest {
     public void unconstrainedIteration() {
         prepareHistory();
 
-        final BatteryStatsHistoryIterator iterator = mBatteryStats.iterateBatteryStatsHistory(0, 0);
+        final BatteryStatsHistoryIterator iterator =
+                mBatteryStats.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
 
         BatteryStats.HistoryItem item;
 
@@ -114,9 +116,10 @@ public class BatteryStatsHistoryIteratorTest {
         prepareHistory();
 
         // Initial time is 1000_000
-        assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(0, 0),
+        assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED),
                 1000_000L, 1000_000L, 2000_000L, 3000_000L, 3001_000L);
-        assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(2000_000, 0),
+        assertIncludedEvents(
+                mBatteryStats.iterateBatteryStatsHistory(2000_000, MonotonicClock.UNDEFINED),
                 2000_000L, 3000_000L, 3001_000L);
         assertIncludedEvents(mBatteryStats.iterateBatteryStatsHistory(0, 3000_000L),
                 1000_000L, 1000_000L, 2000_000L);
@@ -177,7 +180,8 @@ public class BatteryStatsHistoryIteratorTest {
                     mMockClock.realtime, mMockClock.uptime);
         }
 
-        final BatteryStatsHistoryIterator iterator = mBatteryStats.iterateBatteryStatsHistory(0, 0);
+        final BatteryStatsHistoryIterator iterator =
+                mBatteryStats.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
 
         BatteryStats.HistoryItem item;
         assertThat(item = iterator.next()).isNotNull();
@@ -244,7 +248,8 @@ public class BatteryStatsHistoryIteratorTest {
 
         mExternalStatsSync.updateCpuStats(300, 7_100_000, 4_100_000);
 
-        final BatteryStatsHistoryIterator iterator = mBatteryStats.iterateBatteryStatsHistory(0, 0);
+        final BatteryStatsHistoryIterator iterator =
+                mBatteryStats.iterateBatteryStatsHistory(0, MonotonicClock.UNDEFINED);
 
         BatteryStats.HistoryItem item;
         assertThat(item = iterator.next()).isNotNull();

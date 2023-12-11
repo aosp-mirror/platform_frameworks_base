@@ -126,18 +126,15 @@ public class BatteryUsageStatsProvider {
      */
     public List<BatteryUsageStats> getBatteryUsageStats(BatteryStatsImpl stats,
             List<BatteryUsageStatsQuery> queries) {
-        if (mPowerStatsExporterEnabled) {
-            stats.collectPowerStatsSamples();
-        }
-
         ArrayList<BatteryUsageStats> results = new ArrayList<>(queries.size());
         synchronized (stats) {
             stats.prepareForDumpLocked();
-            final long currentTimeMillis = mClock.currentTimeMillis();
-            for (int i = 0; i < queries.size(); i++) {
-                results.add(getBatteryUsageStats(stats, queries.get(i), currentTimeMillis));
-            }
         }
+        final long currentTimeMillis = mClock.currentTimeMillis();
+        for (int i = 0; i < queries.size(); i++) {
+            results.add(getBatteryUsageStats(stats, queries.get(i), currentTimeMillis));
+        }
+
         return results;
     }
 

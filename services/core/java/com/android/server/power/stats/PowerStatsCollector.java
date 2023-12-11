@@ -300,7 +300,7 @@ public abstract class PowerStatsCollector {
     }
 
     @SuppressWarnings("GuardedBy")  // Field is volatile
-    private void collectAndDeliverStats() {
+    public void collectAndDeliverStats() {
         PowerStats stats = collectStats();
         if (stats == null) {
             return;

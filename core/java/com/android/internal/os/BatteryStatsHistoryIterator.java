@@ -49,7 +49,7 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
             long endTimeMs) {
         mBatteryStatsHistory = history;
         mStartTimeMs = startTimeMs;
-        mEndTimeMs = (endTimeMs != 0) ? endTimeMs : Long.MAX_VALUE;
+        mEndTimeMs = (endTimeMs != MonotonicClock.UNDEFINED) ? endTimeMs : Long.MAX_VALUE;
         mHistoryItem.clear();
     }
 
