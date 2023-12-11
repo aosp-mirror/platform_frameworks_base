@@ -73,6 +73,7 @@ public class SecureSettings {
         Settings.Secure.TTS_ENABLED_PLUGINS,
         Settings.Secure.TTS_DEFAULT_LOCALE,
         Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
+        Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS,
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global
         Settings.Secure.WIFI_NUM_OPEN_NETWORKS_KEPT,                        // moved to global
