@@ -1225,12 +1225,10 @@ public abstract class PackageManager {
     public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
 
     /**
-     * @deprecated Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
+     * Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
      *
      * @hide
      */
-    @SuppressLint("UnflaggedApi") // Just adding the @Deprecated annotation
-    @Deprecated
     @SystemApi
     public static final int MATCH_CLONE_PROFILE = 0x20000000;
 
