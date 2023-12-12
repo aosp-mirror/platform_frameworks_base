@@ -252,7 +252,6 @@ import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
-
 /**
  * The top of a view hierarchy, implementing the needed protocol between View
  * and the WindowManager.  This is for the most part an internal implementation
@@ -12163,7 +12162,8 @@ public final class ViewRootImpl implements ViewParent,
                 || motionEventAction == MotionEvent.ACTION_UP;
         boolean undesiredType = windowType == TYPE_INPUT_METHOD;
         // use toolkitSetFrameRate flag to gate the change
-        return desiredAction && !undesiredType && sToolkitSetFrameRateReadOnlyFlagValue;
+        return desiredAction && !undesiredType && sToolkitSetFrameRateReadOnlyFlagValue
+                && getFrameRateBoostOnTouchEnabled();
     }
 
     /**
@@ -12236,6 +12236,15 @@ public final class ViewRootImpl implements ViewParent,
     @VisibleForTesting
     public boolean getIsFrameRateBoosting() {
         return mIsFrameRateBoosting;
+    }
+
+    /**
+     * Get the value of mFrameRateBoostOnTouchEnabled
+     * Can be used to checked if touch boost is enabled. The default value is true.
+     */
+    @VisibleForTesting
+    public boolean getFrameRateBoostOnTouchEnabled() {
+        return mWindowAttributes.getFrameRateBoostOnTouchEnabled();
     }
 
     private void boostFrameRate(int boostTimeOut) {

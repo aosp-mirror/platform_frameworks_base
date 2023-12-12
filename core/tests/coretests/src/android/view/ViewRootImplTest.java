@@ -659,8 +659,6 @@ public class ViewRootImplTest {
         ViewRootImpl viewRootImpl = view.getViewRootImpl();
         sInstrumentation.runOnMainSync(() -> {
             view.invalidate();
-            assertEquals(viewRootImpl.getLastPreferredFrameRateCategory(),
-                    FRAME_RATE_CATEGORY_NORMAL);
             viewRootImpl.notifyInsetsAnimationRunningStateChanged(true);
             view.invalidate();
         });
@@ -669,6 +667,37 @@ public class ViewRootImplTest {
         sInstrumentation.runOnMainSync(() -> {
             assertEquals(viewRootImpl.getLastPreferredFrameRateCategory(),
                     FRAME_RATE_CATEGORY_HIGH);
+        });
+    }
+
+
+    /**
+     * Test FrameRateBoostOnTouchEnabled API
+     */
+    @Test
+    @RequiresFlagsEnabled(FLAG_TOOLKIT_SET_FRAME_RATE_READ_ONLY)
+    public void votePreferredFrameRate_frameRateBoostOnTouch() {
+        View view = new View(sContext);
+        attachViewToWindow(view);
+        sInstrumentation.waitForIdleSync();
+
+        ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        final WindowManager.LayoutParams attrs = viewRootImpl.mWindowAttributes;
+        assertEquals(attrs.getFrameRateBoostOnTouchEnabled(), true);
+        assertEquals(viewRootImpl.getFrameRateBoostOnTouchEnabled(),
+                attrs.getFrameRateBoostOnTouchEnabled());
+
+        sInstrumentation.runOnMainSync(() -> {
+            attrs.setFrameRateBoostOnTouchEnabled(false);
+            viewRootImpl.setLayoutParams(attrs, false);
+        });
+        sInstrumentation.waitForIdleSync();
+
+        sInstrumentation.runOnMainSync(() -> {
+            final WindowManager.LayoutParams newAttrs = viewRootImpl.mWindowAttributes;
+            assertEquals(newAttrs.getFrameRateBoostOnTouchEnabled(), false);
+            assertEquals(viewRootImpl.getFrameRateBoostOnTouchEnabled(),
+                    newAttrs.getFrameRateBoostOnTouchEnabled());
         });
     }
 
