@@ -2085,7 +2085,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 app.makeActive(mSystemThread.getApplicationThread(), mProcessStats);
                 app.mProfile.addHostingComponentType(HOSTING_COMPONENT_TYPE_SYSTEM);
                 addPidLocked(app);
-                mOomAdjuster.onProcessBeginLocked(app);
                 updateLruProcessLocked(app, false, null);
                 updateOomAdjLocked(OOM_ADJ_REASON_SYSTEM_INIT);
             }
@@ -4624,7 +4623,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         EventLogTags.writeAmProcBound(app.userId, pid, app.processName);
 
         synchronized (mProcLock) {
-            mOomAdjuster.onProcessBeginLocked(app);
             mOomAdjuster.setAttachingProcessStatesLSP(app);
             clearProcessForegroundLocked(app);
             app.setDebugging(false);
@@ -7104,7 +7102,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     sdkSandboxClientAppPackage,
                     new HostingRecord(HostingRecord.HOSTING_TYPE_ADDED_APPLICATION,
                             customProcess != null ? customProcess : info.processName));
-            mOomAdjuster.onProcessBeginLocked(app);
             updateLruProcessLocked(app, false, null);
             updateOomAdjLocked(app, OOM_ADJ_REASON_PROCESS_BEGIN);
         }

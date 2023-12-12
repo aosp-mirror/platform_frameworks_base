@@ -621,6 +621,34 @@ class ProcessRecord implements WindowProcessListener {
         mWindowProcessController = new WindowProcessController(
                 mService.mActivityTaskManager, info, processName, uid, userId, this, this);
         mPkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.longVersionCode));
+        updateProcessRecordNodes(this);
+    }
+
+    /**
+     * Helper function to let test cases update the pointers.
+     */
+    @VisibleForTesting
+    static void updateProcessRecordNodes(@NonNull ProcessRecord app) {
+        if (app.mService.mConstants.ENABLE_NEW_OOMADJ) {
+            for (int i = 0; i < app.mLinkedNodes.length; i++) {
+                app.mLinkedNodes[i] = new ProcessRecordNode(app);
+            }
+        }
+    }
+
+    /**
+     * Perform cleanups if the process record is going to be discarded in an early
+     * stage of the process lifecycle, specifically when the process has not even
+     * attached itself to the system_server.
+     */
+    @GuardedBy("mService")
+    void doEarlyCleanupIfNecessaryLocked() {
+        if (getThread() == null) {
+            // It's not even attached, make sure we unlink its process nodes.
+            mService.mOomAdjuster.onProcessEndLocked(this);
+        } else {
+            // Let the binder died callback handle the cleanup.
+        }
     }
 
     void resetCrashingOnRestart() {

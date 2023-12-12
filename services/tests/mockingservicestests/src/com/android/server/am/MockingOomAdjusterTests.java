@@ -114,7 +114,9 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -258,25 +260,40 @@ public class MockingOomAdjusterTests {
         ArrayList<ProcessRecord> lru = sService.mProcessList.getLruProcessesLOSP();
         lru.clear();
         Collections.addAll(lru, apps);
-        for (ProcessRecord app : apps) {
-            sService.mOomAdjuster.onProcessBeginLocked(app);
-        }
     }
 
     /**
      * Run updateOomAdjLocked().
+     * - If there is no process specified, run updateOomAdjLocked(int) on existing lru
      * - If there's only one process, then it calls updateOomAdjLocked(ProcessRecord, int).
      * - Otherwise, sets the processes to the LRU and run updateOomAdjLocked(int).
      */
     @SuppressWarnings("GuardedBy")
     private void updateOomAdj(ProcessRecord... apps) {
-        if (apps.length == 1) {
-            sService.mOomAdjuster.onProcessBeginLocked(apps[0]);
-            sService.mOomAdjuster.updateOomAdjLocked(apps[0], OOM_ADJ_REASON_NONE);
-        } else {
-            setProcessesToLru(apps);
+        if (apps.length == 0) {
+            updateProcessRecordNodes(sService.mProcessList.getLruProcessesLOSP());
             sService.mOomAdjuster.updateOomAdjLocked(OOM_ADJ_REASON_NONE);
-            sService.mProcessList.getLruProcessesLOSP().clear();
+        } else {
+            updateProcessRecordNodes(Arrays.asList(apps));
+            if (apps.length == 1) {
+                sService.mOomAdjuster.updateOomAdjLocked(apps[0], OOM_ADJ_REASON_NONE);
+            } else {
+                setProcessesToLru(apps);
+                sService.mOomAdjuster.updateOomAdjLocked(OOM_ADJ_REASON_NONE);
+                sService.mProcessList.getLruProcessesLOSP().clear();
+            }
+        }
+    }
+
+    /**
+     * Fix up the pointers in the {@link ProcessRecordNode#mApp}:
+     * because we used the mokito spy objects all over the tests here, but the internal
+     * pointers in the {@link ProcessRecordNode#mApp} actually point to the real object.
+     * This needs to be fixed up here.
+     */
+    private void updateProcessRecordNodes(List<ProcessRecord> apps) {
+        for (ProcessRecord app : apps) {
+            ProcessRecord.updateProcessRecordNodes(app);
         }
     }
 
@@ -613,7 +630,6 @@ public class MockingOomAdjusterTests {
             s.lastTopAlmostPerceptibleBindRequestUptimeMs = nowUptime;
             s.getConnections().clear();
             app.mServices.updateHasTopStartedAlmostPerceptibleServices();
-            sService.mOomAdjuster.onProcessBeginLocked(system);
             sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
             updateOomAdj(app);
 
@@ -636,7 +652,6 @@ public class MockingOomAdjusterTests {
             s.lastTopAlmostPerceptibleBindRequestUptimeMs =
                     nowUptime - 2 * sService.mConstants.mServiceBindAlmostPerceptibleTimeoutMs;
             app.mServices.updateHasTopStartedAlmostPerceptibleServices();
-            sService.mOomAdjuster.onProcessBeginLocked(system);
             sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
             updateOomAdj(app);
 
@@ -660,7 +675,6 @@ public class MockingOomAdjusterTests {
                     nowUptime - 2 * sService.mConstants.mServiceBindAlmostPerceptibleTimeoutMs;
             s.getConnections().clear();
             app.mServices.updateHasTopStartedAlmostPerceptibleServices();
-            sService.mOomAdjuster.onProcessBeginLocked(system);
             sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
             updateOomAdj(app);
 
@@ -679,7 +693,6 @@ public class MockingOomAdjusterTests {
                 MOCKAPP2_PROCESSNAME, MOCKAPP2_PACKAGENAME, true));
         system.mState.setMaxAdj(PERSISTENT_PROC_ADJ);
         system.mState.setHasTopUi(true);
-        sService.mOomAdjuster.onProcessBeginLocked(system);
         // Simulate the system starting and binding to a service in the app.
         ServiceRecord s = bindService(app, system,
                 null, Context.BIND_ALMOST_PERCEPTIBLE, mock(IBinder.class));
@@ -1532,7 +1545,7 @@ public class MockingOomAdjusterTests {
 
         client2.mServices.setHasForegroundServices(false, 0, /* hasNoneType=*/false);
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
-        sService.mOomAdjuster.updateOomAdjLocked(client2, OOM_ADJ_REASON_NONE);
+        updateOomAdj(client2);
 
         assertEquals(PROCESS_STATE_CACHED_EMPTY, client2.mState.getSetProcState());
         assertEquals(PROCESS_STATE_CACHED_EMPTY, client.mState.getSetProcState());
@@ -2018,7 +2031,6 @@ public class MockingOomAdjusterTests {
         app.setPendingFinishAttach(true);
         app.mState.setHasForegroundActivities(false);
 
-        sService.mOomAdjuster.onProcessBeginLocked(app);
         sService.mOomAdjuster.setAttachingProcessStatesLSP(app);
         updateOomAdj(app);
 
@@ -2035,7 +2047,6 @@ public class MockingOomAdjusterTests {
         app.mState.setHasForegroundActivities(true);
         doReturn(app).when(sService).getTopApp();
 
-        sService.mOomAdjuster.onProcessBeginLocked(app);
         sService.mOomAdjuster.setAttachingProcessStatesLSP(app);
         updateOomAdj(app);
 
@@ -2106,7 +2117,7 @@ public class MockingOomAdjusterTests {
             setServiceMap(s3, MOCKAPP5_UID, cn3);
             setServiceMap(c2s, MOCKAPP3_UID, cn4);
             app2UidRecord.setIdle(false);
-            sService.mOomAdjuster.updateOomAdjLocked(OOM_ADJ_REASON_NONE);
+            updateOomAdj();
 
             assertProcStates(app1, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                     SCHED_GROUP_DEFAULT);
@@ -2470,8 +2481,6 @@ public class MockingOomAdjusterTests {
         lru.clear();
         lru.add(app2);
         lru.add(app);
-        sService.mOomAdjuster.onProcessBeginLocked(app2);
-        sService.mOomAdjuster.onProcessBeginLocked(app);
 
         final ComponentName cn = ComponentName.unflattenFromString(
                 MOCKAPP_PACKAGENAME + "/.TestService");
@@ -2506,7 +2515,7 @@ public class MockingOomAdjusterTests {
         app2.mState.setHasShownUi(false);
 
         sService.mWakefulness.set(PowerManagerInternal.WAKEFULNESS_AWAKE);
-        sService.mOomAdjuster.updateOomAdjLocked(OOM_ADJ_REASON_NONE);
+        updateOomAdj();
 
         assertProcStates(app, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-ui-services");
         assertProcStates(app2, true, PROCESS_STATE_SERVICE, cachedAdj2, "cch-started-services");
@@ -2515,7 +2524,7 @@ public class MockingOomAdjusterTests {
         app.mState.setAdjType(null);
         app.mState.setSetAdj(UNKNOWN_ADJ);
         app.mState.setHasShownUi(false);
-        sService.mOomAdjuster.updateOomAdjLocked(OOM_ADJ_REASON_NONE);
+        updateOomAdj();
 
         assertProcStates(app, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
 
@@ -2524,7 +2533,7 @@ public class MockingOomAdjusterTests {
         app.mState.setAdjType(null);
         app.mState.setSetAdj(UNKNOWN_ADJ);
         s.lastActivity = now - sService.mConstants.MAX_SERVICE_INACTIVITY - 1;
-        sService.mOomAdjuster.updateOomAdjLocked(OOM_ADJ_REASON_NONE);
+        updateOomAdj();
 
         assertProcStates(app, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
 
@@ -2542,7 +2551,7 @@ public class MockingOomAdjusterTests {
         s.lastActivity = now;
 
         app.mServices.startService(s);
-        sService.mOomAdjuster.updateOomAdjLocked(OOM_ADJ_REASON_NONE);
+        updateOomAdj();
 
         assertProcStates(app, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
         assertProcStates(app2, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
@@ -2553,7 +2562,7 @@ public class MockingOomAdjusterTests {
         app.mState.setSetAdj(UNKNOWN_ADJ);
         app.mState.setHasShownUi(false);
         s.lastActivity = now - sService.mConstants.MAX_SERVICE_INACTIVITY - 1;
-        sService.mOomAdjuster.updateOomAdjLocked(OOM_ADJ_REASON_NONE);
+        updateOomAdj();
 
         assertProcStates(app, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
         assertProcStates(app2, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
@@ -2561,7 +2570,7 @@ public class MockingOomAdjusterTests {
         doReturn(userOther).when(sService.mUserController).getCurrentUserId();
         sService.mOomAdjuster.handleUserSwitchedLocked();
 
-        sService.mOomAdjuster.updateOomAdjLocked(OOM_ADJ_REASON_NONE);
+        updateOomAdj();
         assertProcStates(app, true, PROCESS_STATE_SERVICE, cachedAdj1, "cch-started-services");
         assertProcStates(app2, false, PROCESS_STATE_SERVICE, SERVICE_ADJ, "started-services");
     }
@@ -2584,7 +2593,7 @@ public class MockingOomAdjusterTests {
         app.mServices.updateHasAboveClientLocked();
         assertFalse(app.mServices.hasAboveClient());
 
-        sService.mOomAdjuster.updateOomAdjLocked(app, OOM_ADJ_REASON_NONE);
+        updateOomAdj(app);
         assertEquals(FOREGROUND_APP_ADJ, app.mState.getSetAdj());
     }
 

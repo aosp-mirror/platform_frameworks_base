@@ -2153,6 +2153,7 @@ public final class ProcessList {
                     mService.forceStopPackageLocked(app.info.packageName,
                             UserHandle.getAppId(app.uid),
                             false, false, true, false, false, false, app.userId, "start failure");
+                    app.doEarlyCleanupIfNecessaryLocked();
                 }
             }
         };
@@ -2782,6 +2783,7 @@ public final class ProcessList {
             }
             noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
                     ApplicationExitInfo.SUBREASON_INVALID_START, reason);
+            app.doEarlyCleanupIfNecessaryLocked();
             return false;
         }
         mService.mBatteryStatsService.noteProcessStart(app.processName, app.info.uid);
