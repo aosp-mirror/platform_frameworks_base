@@ -10258,6 +10258,31 @@ public class CarrierConfigManager {
     @FlaggedApi(Flags.FLAG_DATA_ONLY_CELLULAR_SERVICE)
     public static final String KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY =
             "cellular_service_capabilities_int_array";
+   /**
+     * Transition delay from BT to Cellular on Wear.
+     * Specifies delay when transitioning away from BT.
+     * This minimizes the duration of the netTransitionWakelock held by ConnectivityService
+     * whenever the primary/default network disappears, while still allowing some amount of time
+     * for BT to reconnect before we enable cell.
+     *
+     * If set as -1 then value from resources will be used
+     *
+     * @hide
+     */
+    public static final String KEY_WEAR_CONNECTIVITY_BT_TO_CELL_DELAY_MS_INT =
+            "proxy_connectivity_delay_cell";
+
+    /**
+     * Transition delay from BT to Cellular on Wear.
+     * If wifi connected it extends delay that has been started for BT to Cellular transition
+     * to avoid Wifi thrashing turning Cell radio and causing higher battery drain.
+     *
+     * If set as -1 then value from resources will be used
+     *
+     * @hide
+     */
+    public static final String KEY_WEAR_CONNECTIVITY_EXTEND_BT_TO_CELL_DELAY_ON_WIFI_MS_INT =
+            "wifi_connectivity_extend_cell_delay";
 
     /** The default value for every variable. */
     private static final PersistableBundle sDefaults;
@@ -11054,6 +11079,8 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_CARRIER_SERVICE_NAME_STRING_ARRAY, new String[0]);
         sDefaults.putStringArray(KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY, new String[0]);
         sDefaults.putIntArray(KEY_CELLULAR_SERVICE_CAPABILITIES_INT_ARRAY, new int[]{1, 2, 3});
+        sDefaults.putInt(KEY_WEAR_CONNECTIVITY_BT_TO_CELL_DELAY_MS_INT, -1);
+        sDefaults.putInt(KEY_WEAR_CONNECTIVITY_EXTEND_BT_TO_CELL_DELAY_ON_WIFI_MS_INT, -1);
     }
 
     /**
