@@ -21,9 +21,11 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresFeature;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
@@ -49,6 +51,7 @@ import java.util.concurrent.Executor;
  *
  * @see ImsRcsManager#getUceAdapter() for information on creating an instance of this class.
  */
+@RequiresFeature(PackageManager.FEATURE_TELEPHONY_IMS)
 public class RcsUceAdapter {
     private static final String TAG = "RcsUceAdapter";
 
@@ -585,6 +588,8 @@ public class RcsUceAdapter {
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -682,6 +687,8 @@ public class RcsUceAdapter {
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -759,6 +766,8 @@ public class RcsUceAdapter {
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -800,6 +809,8 @@ public class RcsUceAdapter {
      * the {@link ImsService} associated with the subscription is not available. This can happen if
      * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
      * reason.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -845,6 +856,8 @@ public class RcsUceAdapter {
      * the {@link ImsService} associated with the subscription is not available. This can happen if
      * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
      * reason.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -901,6 +914,8 @@ public class RcsUceAdapter {
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public boolean isUceSettingEnabled() throws ImsException {
@@ -954,6 +969,8 @@ public class RcsUceAdapter {
      * {@link RcsUceAdapter} is valid, but the ImsService associated with the subscription is not
      * available. This can happen if the ImsService has crashed, for example, or if the subscription
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi

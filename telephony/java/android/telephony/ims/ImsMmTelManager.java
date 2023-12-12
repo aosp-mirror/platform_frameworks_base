@@ -669,6 +669,8 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_AVAILABLE_BOOL
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @return true if the user's setting for advanced calling is enabled, false otherwise.
      */
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
@@ -717,6 +719,8 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see #isAdvancedCallingSettingEnabled()
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
@@ -755,6 +759,8 @@ public class ImsMmTelManager implements RegistrationManager {
      * @param capability The IMS MmTel capability to query.
      * @return {@code true} if the MmTel IMS capability is capable for this subscription, false
      *         otherwise.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -783,6 +789,8 @@ public class ImsMmTelManager implements RegistrationManager {
      * @param capability The IMS MmTel capability to query.
      * @return {@code true} if the MmTel IMS capability is available for this subscription, false
      *         otherwise.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @hide
      */
     @SystemApi
@@ -876,6 +884,8 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @return true if the user’s “Video Calling” setting is currently enabled.
      */
     @RequiresPermission(anyOf = {
@@ -907,6 +917,8 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @see #isVtSettingEnabled()
      * @hide
      */
@@ -950,6 +962,8 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      */
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
     @RequiresPermission(anyOf = {
@@ -980,6 +994,8 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @param isEnabled true if the user's setting for Voice over WiFi is enabled, false otherwise=
      * @see #isVoWiFiSettingEnabled()
      * @hide
@@ -1038,6 +1054,8 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @throws ImsException if the IMS service associated with this subscription is not available or
      * the IMS service is not available.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @return true if the user's setting for Voice over Cross SIM is enabled and false if it is not
      */
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
@@ -1082,6 +1100,8 @@ public class ImsMmTelManager implements RegistrationManager {
      * </ul>
      * @throws ImsException if the IMS service associated with this subscription is not available or
      * the IMS service is not available.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @param isEnabled true if the user's setting for Voice over Cross SIM is enabled,
      *                 false otherwise
      * @see #isCrossSimCallingEnabled()
@@ -1123,6 +1143,8 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @return true if the user's setting for Voice over WiFi while roaming is enabled, false
      * if disabled.
      */
@@ -1157,6 +1179,8 @@ public class ImsMmTelManager implements RegistrationManager {
      *     false otherwise.
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @see #isVoWiFiRoamingSettingEnabled()
      * @hide
      */
@@ -1194,6 +1218,8 @@ public class ImsMmTelManager implements RegistrationManager {
      * - {@link #WIFI_MODE_WIFI_PREFERRED}
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @see #setVoWiFiSettingEnabled(boolean)
      * @hide
      */
@@ -1237,6 +1263,8 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @return The Voice over WiFi Mode preference set by the user, which can be one of the
      * following:
      * - {@link #WIFI_MODE_WIFI_ONLY}
@@ -1276,6 +1304,8 @@ public class ImsMmTelManager implements RegistrationManager {
      * - {@link #WIFI_MODE_WIFI_PREFERRED}
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @see #getVoWiFiModeSetting()
      * @hide
      */
@@ -1312,6 +1342,8 @@ public class ImsMmTelManager implements RegistrationManager {
      *     - {@link #WIFI_MODE_WIFI_PREFERRED}
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @see #setVoWiFiRoamingSettingEnabled(boolean)
      * @hide
      */
@@ -1348,6 +1380,8 @@ public class ImsMmTelManager implements RegistrationManager {
      *     - {@link #WIFI_MODE_WIFI_PREFERRED}
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @see #getVoWiFiRoamingModeSetting()
      * @hide
      */
@@ -1382,6 +1416,8 @@ public class ImsMmTelManager implements RegistrationManager {
      * settings.
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @param isEnabled if true RTT should be enabled during calls made on this subscription.
      * @hide
      */
@@ -1425,6 +1461,8 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
+     * @throws UnsupportedOperationException If the device does not have
+     *          {@link PackageManager#FEATURE_TELEPHONY_IMS}.
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
      */
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
