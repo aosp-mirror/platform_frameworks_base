@@ -283,6 +283,72 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
     }
 
     @Test
+    fun getSuspendingPackagePrecedence() {
+        val launcherExtras = PersistableBundle()
+        launcherExtras.putString(TEST_PACKAGE_2, TEST_PACKAGE_2)
+        val targetPackages = arrayOf(TEST_PACKAGE_2)
+        // Suspend.
+        var failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
+                targetPackages, true /* suspended */, null /* appExtras */, launcherExtras,
+                null /* dialogInfo */, DEVICE_OWNER_PACKAGE, TEST_USER_ID, deviceOwnerUid,
+                false /* quarantined */)
+        assertThat(failedNames).isEmpty()
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(DEVICE_OWNER_PACKAGE)
+
+        // Suspend by system.
+        failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
+                targetPackages, true /* suspended */, null /* appExtras */, launcherExtras,
+                null /* dialogInfo */, PLATFORM_PACKAGE_NAME, TEST_USER_ID, deviceOwnerUid,
+                false /* quarantined */)
+        assertThat(failedNames).isEmpty()
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(PLATFORM_PACKAGE_NAME)
+
+        // QAS by package1.
+        failedNames = suspendPackageHelper.setPackagesSuspended(pms.snapshotComputer(),
+                targetPackages, true /* suspended */, null /* appExtras */, launcherExtras,
+                null /* dialogInfo */, TEST_PACKAGE_1, TEST_USER_ID, deviceOwnerUid,
+                true /* quarantined */)
+        assertThat(failedNames).isEmpty()
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(TEST_PACKAGE_1)
+
+        // Un-QAS by package1.
+        suspendPackageHelper.removeSuspensionsBySuspendingPackage(pms.snapshotComputer(),
+                targetPackages, { suspendingPackage -> suspendingPackage == TEST_PACKAGE_1 },
+                TEST_USER_ID)
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(PLATFORM_PACKAGE_NAME)
+
+        // Un-suspend by system.
+        suspendPackageHelper.removeSuspensionsBySuspendingPackage(pms.snapshotComputer(),
+                targetPackages, { suspendingPackage -> suspendingPackage == PLATFORM_PACKAGE_NAME },
+                TEST_USER_ID)
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isEqualTo(DEVICE_OWNER_PACKAGE)
+
+        // Unsuspend.
+        suspendPackageHelper.removeSuspensionsBySuspendingPackage(pms.snapshotComputer(),
+                targetPackages, { suspendingPackage -> suspendingPackage == DEVICE_OWNER_PACKAGE },
+                TEST_USER_ID)
+        testHandler.flush()
+
+        assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
+                TEST_PACKAGE_2, TEST_USER_ID, deviceOwnerUid)).isNull()
+    }
+
+    @Test
     fun getSuspendedDialogInfo() {
         val dialogInfo = SuspendDialogInfo.Builder()
             .setTitle(TEST_PACKAGE_1).build()
