@@ -2423,6 +2423,14 @@ public class GameManagerServiceTests {
                             }
                         }));
 
+        when(mSysPropsMock.getInt(
+                ArgumentMatchers.eq(PROPERTY_RO_SURFACEFLINGER_GAME_DEFAULT_FRAME_RATE),
+                anyInt())).thenReturn(60);
+        when(mSysPropsMock.getBoolean(
+                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
+                ArgumentMatchers.eq(true))).thenReturn(true);
+        gameManagerService.onBootCompleted();
+
         // Set up a game in the foreground.
         String[] packages = {mPackageName};
         when(mMockPackageManager.getPackagesForUid(DEFAULT_PACKAGE_UID)).thenReturn(packages);
@@ -2430,12 +2438,6 @@ public class GameManagerServiceTests {
                 DEFAULT_PACKAGE_UID, ActivityManager.PROCESS_STATE_TOP, 0, 0);
 
         // Toggle game default frame rate on.
-        when(mSysPropsMock.getInt(
-                ArgumentMatchers.eq(PROPERTY_RO_SURFACEFLINGER_GAME_DEFAULT_FRAME_RATE),
-                anyInt())).thenReturn(60);
-        when(mSysPropsMock.getBoolean(
-                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
-                ArgumentMatchers.eq(true))).thenReturn(true);
         gameManagerService.toggleGameDefaultFrameRate(true);
 
         // Verify that:
