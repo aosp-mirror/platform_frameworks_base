@@ -22,8 +22,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import com.android.packageinstaller.v2.model.InstallRepository
-import com.android.packageinstaller.v2.model.installstagedata.InstallStage
-import com.android.packageinstaller.v2.model.installstagedata.InstallStaging
+import com.android.packageinstaller.v2.model.InstallStage
+import com.android.packageinstaller.v2.model.InstallStaging
 
 class InstallViewModel(application: Application, val repository: InstallRepository) :
     AndroidViewModel(application) {

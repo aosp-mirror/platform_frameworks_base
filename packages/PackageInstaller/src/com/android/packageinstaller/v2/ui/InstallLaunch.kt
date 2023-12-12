@@ -37,12 +37,12 @@ import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
 import com.android.packageinstaller.R
 import com.android.packageinstaller.v2.model.InstallRepository
-import com.android.packageinstaller.v2.model.installstagedata.InstallAborted
-import com.android.packageinstaller.v2.model.installstagedata.InstallFailed
-import com.android.packageinstaller.v2.model.installstagedata.InstallInstalling
-import com.android.packageinstaller.v2.model.installstagedata.InstallStage
-import com.android.packageinstaller.v2.model.installstagedata.InstallSuccess
-import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired
+import com.android.packageinstaller.v2.model.InstallAborted
+import com.android.packageinstaller.v2.model.InstallFailed
+import com.android.packageinstaller.v2.model.InstallInstalling
+import com.android.packageinstaller.v2.model.InstallStage
+import com.android.packageinstaller.v2.model.InstallSuccess
+import com.android.packageinstaller.v2.model.InstallUserActionRequired
 import com.android.packageinstaller.v2.ui.fragments.AnonymousSourceFragment
 import com.android.packageinstaller.v2.ui.fragments.ExternalSourcesBlockedFragment
 import com.android.packageinstaller.v2.ui.fragments.InstallConfirmationFragment
@@ -185,7 +185,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
     private fun showPolicyRestrictionDialog(aborted: InstallAborted) {
         val restriction = aborted.message
         val adminSupportIntent = aborted.resultIntent
-        val shouldFinish: Boolean
+        var shouldFinish: Boolean = false
 
         // If the given restriction is set by an admin, display information about the
         // admin enforcing the restriction for the affected user. If not enforced by the admin,
@@ -204,7 +204,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
             val blockedByPolicyDialog = createDevicePolicyRestrictionDialog(restriction)
             // Don't finish the package installer app since the next dialog
             // will be shown by this app
-            shouldFinish = false
+            shouldFinish = blockedByPolicyDialog != null
             showDialogInner(blockedByPolicyDialog)
         }
         setResult(Activity.RESULT_CANCELED, null, shouldFinish)
@@ -216,7 +216,7 @@ class InstallLaunch : FragmentActivity(), InstallActionListener {
      * @param restriction The restriction to create the dialog for
      * @return The dialog
      */
-    private fun createDevicePolicyRestrictionDialog(restriction: String): DialogFragment? {
+    private fun createDevicePolicyRestrictionDialog(restriction: String?): DialogFragment? {
         if (localLOGV) {
             Log.i(LOG_TAG, "createDialog($restriction)")
         }

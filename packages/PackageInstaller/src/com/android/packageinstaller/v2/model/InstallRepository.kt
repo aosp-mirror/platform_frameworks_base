@@ -43,6 +43,13 @@ import com.android.packageinstaller.R
 import com.android.packageinstaller.common.EventResultPersister
 import com.android.packageinstaller.common.EventResultPersister.OutOfIdsException
 import com.android.packageinstaller.common.InstallEventReceiver
+import com.android.packageinstaller.v2.model.InstallAborted.Companion.ABORT_REASON_DONE
+import com.android.packageinstaller.v2.model.InstallAborted.Companion.ABORT_REASON_INTERNAL_ERROR
+import com.android.packageinstaller.v2.model.InstallAborted.Companion.ABORT_REASON_POLICY
+import com.android.packageinstaller.v2.model.InstallAborted.Companion.DLG_PACKAGE_ERROR
+import com.android.packageinstaller.v2.model.InstallUserActionRequired.Companion.USER_ACTION_REASON_ANONYMOUS_SOURCE
+import com.android.packageinstaller.v2.model.InstallUserActionRequired.Companion.USER_ACTION_REASON_INSTALL_CONFIRMATION
+import com.android.packageinstaller.v2.model.InstallUserActionRequired.Companion.USER_ACTION_REASON_UNKNOWN_SOURCE
 import com.android.packageinstaller.v2.model.PackageUtil.canPackageQuery
 import com.android.packageinstaller.v2.model.PackageUtil.generateStubPackageInfo
 import com.android.packageinstaller.v2.model.PackageUtil.getAppSnippet
@@ -51,21 +58,6 @@ import com.android.packageinstaller.v2.model.PackageUtil.getPackageNameForUid
 import com.android.packageinstaller.v2.model.PackageUtil.isCallerSessionOwner
 import com.android.packageinstaller.v2.model.PackageUtil.isInstallPermissionGrantedOrRequested
 import com.android.packageinstaller.v2.model.PackageUtil.isPermissionGranted
-import com.android.packageinstaller.v2.model.installstagedata.InstallAborted
-import com.android.packageinstaller.v2.model.installstagedata.InstallAborted.Companion.ABORT_REASON_DONE
-import com.android.packageinstaller.v2.model.installstagedata.InstallAborted.Companion.ABORT_REASON_INTERNAL_ERROR
-import com.android.packageinstaller.v2.model.installstagedata.InstallAborted.Companion.ABORT_REASON_POLICY
-import com.android.packageinstaller.v2.model.installstagedata.InstallAborted.Companion.DLG_PACKAGE_ERROR
-import com.android.packageinstaller.v2.model.installstagedata.InstallFailed
-import com.android.packageinstaller.v2.model.installstagedata.InstallInstalling
-import com.android.packageinstaller.v2.model.installstagedata.InstallReady
-import com.android.packageinstaller.v2.model.installstagedata.InstallStage
-import com.android.packageinstaller.v2.model.installstagedata.InstallStaging
-import com.android.packageinstaller.v2.model.installstagedata.InstallSuccess
-import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired
-import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired.Companion.USER_ACTION_REASON_ANONYMOUS_SOURCE
-import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired.Companion.USER_ACTION_REASON_INSTALL_CONFIRMATION
-import com.android.packageinstaller.v2.model.installstagedata.InstallUserActionRequired.Companion.USER_ACTION_REASON_UNKNOWN_SOURCE
 import java.io.File
 import java.io.IOException
 
