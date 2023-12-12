@@ -33,6 +33,7 @@ import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.RequiresNoPermission;
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.StatsManager;
 import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothActivityEnergyInfo;
@@ -427,13 +428,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mPowerStatsStore = new PowerStatsStore(systemDir, mHandler, aggregatedPowerStatsConfig);
         mPowerStatsAggregator = new PowerStatsAggregator(aggregatedPowerStatsConfig,
                 mStats.getHistory());
-        final long aggregatedPowerStatsSpanDuration = context.getResources().getInteger(
-                com.android.internal.R.integer.config_aggregatedPowerStatsSpanDuration);
-        final long powerStatsAggregationPeriod = context.getResources().getInteger(
-                com.android.internal.R.integer.config_powerStatsAggregationPeriod);
-        mPowerStatsScheduler = new PowerStatsScheduler(context, mPowerStatsAggregator,
-                aggregatedPowerStatsSpanDuration, powerStatsAggregationPeriod, mPowerStatsStore,
-                Clock.SYSTEM_CLOCK, mMonotonicClock, mHandler, mStats);
+        mPowerStatsScheduler = createPowerStatsScheduler(mContext);
         PowerStatsExporter powerStatsExporter =
                 new PowerStatsExporter(mPowerStatsStore, mPowerStatsAggregator);
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context,
@@ -443,6 +438,23 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mDumpHelper = new BatteryStatsDumpHelperImpl(mBatteryUsageStatsProvider);
         mCpuWakeupStats = new CpuWakeupStats(context, R.xml.irq_device_map, mHandler);
         mConfigFile = new AtomicFile(new File(systemDir, "battery_usage_stats_config"));
+    }
+
+    private PowerStatsScheduler createPowerStatsScheduler(Context context) {
+        final long aggregatedPowerStatsSpanDuration = context.getResources().getInteger(
+                com.android.internal.R.integer.config_aggregatedPowerStatsSpanDuration);
+        final long powerStatsAggregationPeriod = context.getResources().getInteger(
+                com.android.internal.R.integer.config_powerStatsAggregationPeriod);
+        PowerStatsScheduler.AlarmScheduler alarmScheduler =
+                (triggerAtMillis, tag, onAlarmListener, aHandler) -> {
+                    AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
+                    alarmManager.set(AlarmManager.ELAPSED_REALTIME, triggerAtMillis, tag,
+                            onAlarmListener, aHandler);
+                };
+        return new PowerStatsScheduler(mStats::schedulePowerStatsSampleCollection,
+                mPowerStatsAggregator, aggregatedPowerStatsSpanDuration,
+                powerStatsAggregationPeriod, mPowerStatsStore, alarmScheduler, Clock.SYSTEM_CLOCK,
+                mMonotonicClock, () -> mStats.getHistory().getStartTime(), mHandler);
     }
 
     private AggregatedPowerStatsConfig getAggregatedPowerStatsConfig() {

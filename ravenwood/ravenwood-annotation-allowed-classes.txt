@@ -1,8 +1,16 @@
 # Only classes listed here can use the Ravenwood annotations.
 
 com.android.internal.util.ArrayUtils
+com.android.internal.os.BatteryStatsHistory
+com.android.internal.os.BatteryStatsHistory$TraceDelegate
+com.android.internal.os.BatteryStatsHistory$VarintParceler
+com.android.internal.os.BatteryStatsHistoryIterator
+com.android.internal.os.Clock
 com.android.internal.os.LongArrayMultiStateCounter
 com.android.internal.os.LongArrayMultiStateCounter$LongArrayContainer
+com.android.internal.os.MonotonicClock
+com.android.internal.os.PowerStats
+com.android.internal.os.PowerStats$Descriptor
 
 android.util.AtomicFile
 android.util.DataUnit
@@ -25,10 +33,15 @@ android.util.TimeUtils
 android.util.Xml
 
 android.os.BatteryConsumer
+android.os.BatteryStats$HistoryItem
+android.os.BatteryStats$HistoryStepDetails
+android.os.BatteryStats$HistoryTag
+android.os.BatteryStats$ProcessStateChange
 android.os.Binder
 android.os.Binder$IdentitySupplier
 android.os.Broadcaster
 android.os.BundleMerger
+android.os.ConditionVariable
 android.os.FileUtils
 android.os.FileUtils$MemoryPipe
 android.os.Handler
