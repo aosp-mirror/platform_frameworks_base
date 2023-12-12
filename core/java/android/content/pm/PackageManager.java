@@ -6302,6 +6302,11 @@ public abstract class PackageManager {
     /**
      * Check whether a particular package has been granted a particular
      * permission.
+     * <p>
+     * <strong>Note: </strong>This API returns the underlying permission state
+     * as-is and is mostly intended for permission managing system apps. To
+     * perform an access check for a certain app, please use the
+     * {@link Context#checkPermission} APIs instead.
      *
      * @param permName The name of the permission you are checking for.
      * @param packageName The name of the package you are checking against.
