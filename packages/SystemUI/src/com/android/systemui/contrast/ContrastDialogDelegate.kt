@@ -35,23 +35,22 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /** Dialog to select contrast options */
-class ContrastDialogDelegate @Inject constructor(
-    private val sysuiDialogFactory : SystemUIDialog.Factory,
+class ContrastDialogDelegate
+@Inject
+constructor(
+    private val sysuiDialogFactory: SystemUIDialog.Factory,
     @Main private val mainExecutor: Executor,
     private val uiModeManager: UiModeManager,
     private val userTracker: UserTracker,
     private val secureSettings: SecureSettings,
 ) : SystemUIDialog.Delegate, UiModeManager.ContrastChangeListener {
 
-    override fun createDialog(): SystemUIDialog {
-        return sysuiDialogFactory.create(this)
-    }
-
     @VisibleForTesting lateinit var contrastButtons: Map<Int, FrameLayout>
     lateinit var dialogView: View
     @VisibleForTesting var initialContrast: Float = fromContrastLevel(CONTRAST_LEVEL_STANDARD)
 
-    override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
+    override fun createDialog(): SystemUIDialog {
+        val dialog = sysuiDialogFactory.create(this)
         dialogView = dialog.layoutInflater.inflate(R.layout.contrast_dialog, null)
         with(dialog) {
             setView(dialogView)
@@ -67,12 +66,16 @@ class ContrastDialogDelegate @Inject constructor(
             }
             setPositiveButton(com.android.settingslib.R.string.done) { _, _ -> dialog.dismiss() }
         }
+
+        return dialog
+    }
+
+    override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
         contrastButtons =
             mapOf(
-                CONTRAST_LEVEL_STANDARD to dialogView.requireViewById(
-                    R.id.contrast_button_standard),
-                CONTRAST_LEVEL_MEDIUM to dialogView.requireViewById(R.id.contrast_button_medium),
-                CONTRAST_LEVEL_HIGH to dialogView.requireViewById(R.id.contrast_button_high)
+                CONTRAST_LEVEL_STANDARD to dialog.requireViewById(R.id.contrast_button_standard),
+                CONTRAST_LEVEL_MEDIUM to dialog.requireViewById(R.id.contrast_button_medium),
+                CONTRAST_LEVEL_HIGH to dialog.requireViewById(R.id.contrast_button_high)
             )
 
         contrastButtons.forEach { (contrastLevel, contrastButton) ->
