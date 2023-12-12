@@ -194,7 +194,8 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
             addAndStartAction(new RequestActiveSourceAction(this, new IHdmiControlCallback.Stub() {
                 @Override
                 public void onComplete(int result) {
-                    if (result != HdmiControlManager.RESULT_SUCCESS) {
+                    if (!mService.getLocalActiveSource().isValid()
+                            && result != HdmiControlManager.RESULT_SUCCESS) {
                         mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
                                 getDeviceInfo().getLogicalAddress(),
                                 getDeviceInfo().getPhysicalAddress()));

@@ -1731,6 +1731,26 @@ public class HdmiCecLocalDeviceTvTest {
     }
 
     @Test
+    public void requestActiveSourceActionComplete_validLocalActiveSource_doNotSendActiveSource() {
+        HdmiCecMessage requestActiveSource =
+                HdmiCecMessageBuilder.buildRequestActiveSource(ADDR_TV);
+        HdmiCecMessage activeSourceFromTv =
+                HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        mHdmiControlService.getHdmiCecNetwork().clearLocalDevices();
+        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(requestActiveSource);
+        mHdmiControlService.setActiveSource(mTvLogicalAddress, mTvPhysicalAddress,
+                "HdmiCecLocalDeviceTvTest");
+        mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(HdmiConfig.TIMEOUT_MS * 2);
+        mTestLooper.dispatchAll();
+
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(activeSourceFromTv);
+    }
+
+    @Test
     public void newDeviceConnectedIfOnlyOneGiveOsdNameSent() {
         mHdmiControlService.getHdmiCecNetwork().clearDeviceList();
         assertThat(mHdmiControlService.getHdmiCecNetwork().getDeviceInfoList(false))
