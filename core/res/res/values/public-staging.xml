@@ -117,6 +117,8 @@
     <public name="isVirtualDeviceOnly"/>
     <!-- @FlaggedApi("android.content.pm.sdk_lib_independence") -->
     <public name="optional"/>
+    <!-- @FlaggedApi("android.media.tv.flags.enable_ad_service_fw") -->
+    <public name="adServiceTypes" />
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">
