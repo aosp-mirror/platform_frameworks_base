@@ -119,6 +119,8 @@
     <public name="optional"/>
     <!-- @FlaggedApi("android.media.tv.flags.enable_ad_service_fw") -->
     <public name="adServiceTypes" />
+    <!-- @FlaggedApi("android.multiuser.enable_system_user_only_for_services_and_providers") -->
+    <public name="systemUserOnly"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01bc0000">
