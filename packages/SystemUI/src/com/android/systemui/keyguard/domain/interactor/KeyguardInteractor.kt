@@ -318,6 +318,10 @@ constructor(
         repository.ambientIndicationVisible.value = isVisible
     }
 
+    fun keyguardDoneAnimationsFinished() {
+        repository.keyguardDoneAnimationsFinished()
+    }
+
     companion object {
         private const val TAG = "KeyguardInteractor"
     }

@@ -52,6 +52,7 @@ import com.android.systemui.keyguard.WindowManagerLockscreenVisibilityManager;
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardDataQuickAffordanceModule;
 import com.android.systemui.keyguard.data.repository.KeyguardFaceAuthModule;
 import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
@@ -154,7 +155,8 @@ public class KeyguardModule {
             Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel,
             SystemPropertiesHelper systemPropertiesHelper,
             Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager,
-            SelectedUserInteractor selectedUserInteractor) {
+            SelectedUserInteractor selectedUserInteractor,
+            KeyguardInteractor keyguardInteractor) {
         return new KeyguardViewMediator(
                 context,
                 uiEventLogger,
@@ -199,7 +201,8 @@ public class KeyguardModule {
                 dreamingToLockscreenTransitionViewModel,
                 systemPropertiesHelper,
                 wmLockscreenVisibilityManager,
-                selectedUserInteractor);
+                selectedUserInteractor,
+                keyguardInteractor);
     }
 
     /** */

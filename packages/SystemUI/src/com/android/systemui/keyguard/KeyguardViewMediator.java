@@ -141,6 +141,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.flags.SystemPropertiesHelper;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.keyguard.ui.viewmodel.DreamingToLockscreenTransitionViewModel;
 import com.android.systemui.log.SessionTracker;
@@ -1319,6 +1320,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private DeviceConfigProxy mDeviceConfig;
     private DozeParameters mDozeParameters;
     private SelectedUserInteractor mSelectedUserInteractor;
+    private KeyguardInteractor mKeyguardInteractor;
 
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardStateController.Callback mKeyguardStateControllerCallback =
@@ -1400,7 +1402,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             Lazy<DreamingToLockscreenTransitionViewModel> dreamingToLockscreenTransitionViewModel,
             SystemPropertiesHelper systemPropertiesHelper,
             Lazy<WindowManagerLockscreenVisibilityManager> wmLockscreenVisibilityManager,
-            SelectedUserInteractor selectedUserInteractor) {
+            SelectedUserInteractor selectedUserInteractor,
+            KeyguardInteractor keyguardInteractor) {
         mContext = context;
         mUserTracker = userTracker;
         mFalsingCollector = falsingCollector;
@@ -1441,6 +1444,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 }));
         mDozeParameters = dozeParameters;
         mSelectedUserInteractor = selectedUserInteractor;
+        mKeyguardInteractor = keyguardInteractor;
 
         mStatusBarStateController = statusBarStateController;
         statusBarStateController.addCallback(this);
@@ -2618,6 +2622,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         setPendingLock(false); // user may have authenticated during the screen off animation
 
         handleHide();
+        mKeyguardInteractor.keyguardDoneAnimationsFinished();
         mUpdateMonitor.clearFingerprintRecognizedWhenKeyguardDone(currentUser);
         Trace.endSection();
     }
