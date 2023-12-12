@@ -301,11 +301,13 @@ public final class NotificationAttentionHelper {
                     mContext.getContentResolver(),
                     Settings.System.NOTIFICATION_COOLDOWN_ALL, DEFAULT_NOTIFICATION_COOLDOWN_ALL,
                     UserHandle.USER_CURRENT) != 0;
-                mNotificationCooldownVibrateUnlocked = Settings.System.getIntForUser(
-                    mContext.getContentResolver(),
-                    Settings.System.NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
-                    DEFAULT_NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
-                    UserHandle.USER_CURRENT) != 0;
+                if (Flags.vibrateWhileUnlocked()) {
+                    mNotificationCooldownVibrateUnlocked = Settings.System.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.System.NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
+                        DEFAULT_NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
+                        UserHandle.USER_CURRENT) != 0;
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Failed to read Settings: " + e);
             }
@@ -1364,12 +1366,14 @@ public final class NotificationAttentionHelper {
                             DEFAULT_NOTIFICATION_COOLDOWN_ALL, UserHandle.USER_CURRENT)
                             != 0;
                 }
-                if (NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED_URI.equals(uri)) {
-                    mNotificationCooldownVibrateUnlocked = Settings.System.getIntForUser(
+                if (Flags.vibrateWhileUnlocked()) {
+                    if (NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED_URI.equals(uri)) {
+                        mNotificationCooldownVibrateUnlocked = Settings.System.getIntForUser(
                             mContext.getContentResolver(),
                             Settings.System.NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
                             DEFAULT_NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED,
                             UserHandle.USER_CURRENT) != 0;
+                    }
                 }
             }
         }

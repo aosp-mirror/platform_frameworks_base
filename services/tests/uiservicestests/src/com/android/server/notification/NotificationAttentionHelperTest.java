@@ -2107,6 +2107,7 @@ public class NotificationAttentionHelperTest extends UiServiceTestCase {
     @Test
     public void testBuzzOnlyOnScreenUnlock_politeNotif() throws Exception {
         mSetFlagsRule.enableFlags(Flags.FLAG_POLITE_NOTIFICATIONS);
+        mSetFlagsRule.enableFlags(Flags.FLAG_VIBRATE_WHILE_UNLOCKED);
         TestableFlagResolver flagResolver = new TestableFlagResolver();
 
         // When NOTIFICATION_COOLDOWN_VIBRATE_UNLOCKED setting is enabled
