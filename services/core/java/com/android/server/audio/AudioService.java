@@ -37,7 +37,6 @@ import static android.os.Process.INVALID_UID;
 import static android.provider.Settings.Secure.VOLUME_HUSH_MUTE;
 import static android.provider.Settings.Secure.VOLUME_HUSH_OFF;
 import static android.provider.Settings.Secure.VOLUME_HUSH_VIBRATE;
-
 import static com.android.server.audio.SoundDoseHelper.ACTION_CHECK_MUSIC_ACTIVE;
 import static com.android.server.utils.EventLogger.Event.ALOGE;
 import static com.android.server.utils.EventLogger.Event.ALOGI;
@@ -73,7 +72,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -263,6 +261,8 @@ public class AudioService extends IAudioService.Stub
     private final SettingsAdapter mSettings;
     private final AudioPolicyFacade mAudioPolicy;
 
+    private final MusicFxHelper mMusicFxHelper;
+
     /** Debug audio mode */
     protected static final boolean DEBUG_MODE = false;
 
@@ -403,8 +403,14 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_CONFIGURATION_CHANGED = 54;
     private static final int MSG_BROADCAST_MASTER_MUTE = 55;
 
-    /** Messages handled by the {@link SoundDoseHelper}. */
+    /**
+     * Messages handled by the {@link SoundDoseHelper}, do not exceed
+     * {@link MUSICFX_HELPER_MSG_START}.
+     */
     /*package*/ static final int SAFE_MEDIA_VOLUME_MSG_START = 1000;
+
+    /** Messages handled by the {@link MusicFxHelper}. */
+    /*package*/ static final int MUSICFX_HELPER_MSG_START = 1100;
 
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
@@ -1268,6 +1274,8 @@ public class AudioService extends IAudioService.Stub
                 0 /* arg1 */, 0 /* arg2 */, null /* obj */, 0 /* delay */);
         queueMsgUnderWakeLock(mAudioHandler, MSG_INIT_SPATIALIZER,
                 0 /* arg1 */, 0 /* arg2 */, null /* obj */, 0 /* delay */);
+
+        mMusicFxHelper = new MusicFxHelper(mContext, mAudioHandler);
     }
 
     private void initVolumeStreamStates() {
@@ -9409,11 +9417,21 @@ public class AudioService extends IAudioService.Stub
                     onConfigurationChanged();
                     break;
 
+                case MusicFxHelper.MSG_EFFECT_CLIENT_GONE:
+                    mMusicFxHelper.handleMessage(msg);
+                    break;
+
+                case SoundDoseHelper.MSG_CONFIGURE_SAFE_MEDIA:
+                case SoundDoseHelper.MSG_CONFIGURE_SAFE_MEDIA_FORCED:
+                case SoundDoseHelper.MSG_PERSIST_SAFE_VOLUME_STATE:
+                case SoundDoseHelper.MSG_PERSIST_MUSIC_ACTIVE_MS:
+                case SoundDoseHelper.MSG_PERSIST_CSD_VALUES:
+                case SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION:
+                    mSoundDoseHelper.handleMessage(msg);
+                    break;
+
                 default:
-                    if (msg.what >= SAFE_MEDIA_VOLUME_MSG_START) {
-                        // msg could be for the SoundDoseHelper
-                        mSoundDoseHelper.handleMessage(msg);
-                    }
+                    Log.e(TAG, "Unsupported msgId " + msg.what);
             }
         }
     }
@@ -9648,7 +9666,7 @@ public class AudioService extends IAudioService.Stub
                 }
             } else if (action.equals(AudioEffect.ACTION_OPEN_AUDIO_EFFECT_CONTROL_SESSION) ||
                     action.equals(AudioEffect.ACTION_CLOSE_AUDIO_EFFECT_CONTROL_SESSION)) {
-                handleAudioEffectBroadcast(context, intent);
+                mMusicFxHelper.handleAudioEffectBroadcast(context, intent);
             } else if (action.equals(Intent.ACTION_PACKAGES_SUSPENDED)) {
                 final int[] suspendedUids = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
                 final String[] suspendedPackages =
@@ -9702,27 +9720,6 @@ public class AudioService extends IAudioService.Stub
             }
         }
     } // end class AudioServiceUserRestrictionsListener
-
-    private void handleAudioEffectBroadcast(Context context, Intent intent) {
-        String target = intent.getPackage();
-        if (target != null) {
-            Log.w(TAG, "effect broadcast already targeted to " + target);
-            return;
-        }
-        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
-        // TODO this should target a user-selected panel
-        List<ResolveInfo> ril = context.getPackageManager().queryBroadcastReceivers(
-                intent, 0 /* flags */);
-        if (ril != null && ril.size() != 0) {
-            ResolveInfo ri = ril.get(0);
-            if (ri != null && ri.activityInfo != null && ri.activityInfo.packageName != null) {
-                intent.setPackage(ri.activityInfo.packageName);
-                context.sendBroadcastAsUser(intent, UserHandle.ALL);
-                return;
-            }
-        }
-        Log.w(TAG, "couldn't find receiver package for effect intent");
-    }
 
     private void killBackgroundUserProcessesWithRecordAudioPermission(UserInfo oldUser) {
         PackageManager pm = mContext.getPackageManager();
