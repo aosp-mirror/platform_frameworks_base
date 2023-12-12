@@ -18,6 +18,7 @@ package com.android.wm.shell.unfold;
 
 import static android.view.WindowManager.KEYGUARD_VISIBILITY_TRANSIT_FLAGS;
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH;
 
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_TRANSITIONS;
 
@@ -245,23 +246,29 @@ public class UnfoldTransitionHandler implements TransitionHandler, UnfoldListene
     public boolean shouldPlayUnfoldAnimation(@NonNull TransitionInfo transitionInfo) {
         // Unfold animation won't play when animations are disabled
         if (!ValueAnimator.areAnimatorsEnabled()) return false;
+        // Only handle transitions that are marked as physical display switch
+        // See PhysicalDisplaySwitchTransitionLauncher for the conditions
+        if ((transitionInfo.getFlags() & TRANSIT_FLAG_PHYSICAL_DISPLAY_SWITCH) == 0) return false;
 
         for (int i = 0; i < transitionInfo.getChanges().size(); i++) {
             final TransitionInfo.Change change = transitionInfo.getChanges().get(i);
-            if ((change.getFlags() & TransitionInfo.FLAG_IS_DISPLAY) != 0) {
-                if (change.getEndAbsBounds() == null || change.getStartAbsBounds() == null) {
-                    continue;
-                }
+            // We are interested only in display container changes
+            if ((change.getFlags() & TransitionInfo.FLAG_IS_DISPLAY) == 0) {
+                continue;
+            }
 
-                // Handle only unfolding, currently we don't have an animation when folding
-                final int afterArea =
-                        change.getEndAbsBounds().width() * change.getEndAbsBounds().height();
-                final int beforeArea = change.getStartAbsBounds().width()
-                        * change.getStartAbsBounds().height();
+            // Handle only unfolding, currently we don't have an animation when folding
+            if (change.getEndAbsBounds() == null || change.getStartAbsBounds() == null) {
+                continue;
+            }
 
-                if (afterArea > beforeArea) {
-                    return true;
-                }
+            final int afterArea =
+                    change.getEndAbsBounds().width() * change.getEndAbsBounds().height();
+            final int beforeArea = change.getStartAbsBounds().width()
+                    * change.getStartAbsBounds().height();
+
+            if (afterArea > beforeArea) {
+                return true;
             }
         }
 
