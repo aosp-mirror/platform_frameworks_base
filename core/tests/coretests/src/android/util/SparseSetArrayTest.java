@@ -37,6 +37,7 @@ public class SparseSetArrayTest {
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     @Test
+    @IgnoreUnderRavenwood(reason = "Flaky test, b/315872700")
     public void testAddAll() {
         final SparseSetArray<Integer> sparseSetArray = new SparseSetArray<>();
 
