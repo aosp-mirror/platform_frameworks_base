@@ -2205,9 +2205,6 @@ public class Notification implements Parcelable
 
         private void visitUris(@NonNull Consumer<Uri> visitor) {
             visitIconUri(visitor, getIcon());
-            if (actionIntent != null) {
-                actionIntent.visitUris(visitor);
-            }
         }
 
         @Override
@@ -2901,21 +2898,6 @@ public class Notification implements Parcelable
             }
         }
 
-        // allPendingIntents should contain all associated intents after parcelling, but it may also
-        // contain intents added by the app to extras for their own purposes. We only care about
-        // checking the intents known and used by system_server, to avoid the confused deputy issue.
-        List<PendingIntent> pendingIntents = Arrays.asList(contentIntent, deleteIntent,
-                fullScreenIntent);
-        for (PendingIntent intent : pendingIntents) {
-            if (intent != null) {
-                intent.visitUris(visitor);
-            }
-        }
-
-        if (mBubbleMetadata != null) {
-            mBubbleMetadata.visitUris(visitor);
-        }
-
         if (extras != null) {
             visitIconUri(visitor, extras.getParcelable(EXTRA_LARGE_ICON_BIG, Icon.class));
             visitIconUri(visitor, extras.getParcelable(EXTRA_PICTURE_ICON, Icon.class));
@@ -2987,28 +2969,15 @@ public class Notification implements Parcelable
                 callPerson.visitUris(visitor);
             }
             visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
+        }
 
-            // Extras for MediaStyle.
-            PendingIntent deviceIntent = extras.getParcelable(EXTRA_MEDIA_REMOTE_INTENT,
-                    PendingIntent.class);
-            if (deviceIntent != null) {
-                deviceIntent.visitUris(visitor);
-            }
+        if (mBubbleMetadata != null) {
+            visitIconUri(visitor, mBubbleMetadata.getIcon());
+        }
 
-            if (extras.containsKey(WearableExtender.EXTRA_WEARABLE_EXTENSIONS)) {
-                WearableExtender extender = new WearableExtender(this);
-                extender.visitUris(visitor);
-            }
-
-            if (extras.containsKey(TvExtender.EXTRA_TV_EXTENDER)) {
-                TvExtender extender = new TvExtender(this);
-                extender.visitUris(visitor);
-            }
-
-            if (extras.containsKey(CarExtender.EXTRA_CAR_EXTENDER)) {
-                CarExtender extender = new CarExtender(this);
-                extender.visitUris(visitor);
-            }
+        if (extras != null && extras.containsKey(WearableExtender.EXTRA_WEARABLE_EXTENSIONS)) {
+            WearableExtender extender = new WearableExtender(this);
+            extender.visitUris(visitor);
         }
     }
 
@@ -10589,16 +10558,6 @@ public class Notification implements Parcelable
             }
         }
 
-        private void visitUris(@NonNull Consumer<Uri> visitor) {
-            visitIconUri(visitor, getIcon());
-            if (mPendingIntent != null) {
-                mPendingIntent.visitUris(visitor);
-            }
-            if (mDeleteIntent != null) {
-                mDeleteIntent.visitUris(visitor);
-            }
-        }
-
         /**
          * Builder to construct a {@link BubbleMetadata} object.
          */
@@ -11797,9 +11756,6 @@ public class Notification implements Parcelable
         }
 
         private void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mDisplayIntent != null) {
-                mDisplayIntent.visitUris(visitor);
-            }
             for (Action action : mActions) {
                 action.visitUris(visitor);
             }
@@ -11952,17 +11908,10 @@ public class Notification implements Parcelable
 
         /**
          * Returns the unread conversation conveyed by this notification.
-         *
          * @see #setUnreadConversation(UnreadConversation)
          */
         public UnreadConversation getUnreadConversation() {
             return mUnreadConversation;
-        }
-
-        private void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mUnreadConversation != null) {
-                mUnreadConversation.visitUris(visitor);
-            }
         }
 
         /**
@@ -12116,16 +12065,7 @@ public class Notification implements Parcelable
                         onRead,
                         participants, b.getLong(KEY_TIMESTAMP));
             }
-
-            private void visitUris(@NonNull Consumer<Uri> visitor) {
-                if (mReadPendingIntent != null) {
-                    mReadPendingIntent.visitUris(visitor);
-                }
-                if (mReplyPendingIntent != null) {
-                    mReplyPendingIntent.visitUris(visitor);
-                }
-            }
-        }
+        };
 
         /**
          * Builder class for {@link CarExtender.UnreadConversation} objects.
@@ -12447,15 +12387,6 @@ public class Notification implements Parcelable
          */
         public boolean isSuppressShowOverApps() {
             return mSuppressShowOverApps;
-        }
-
-        private void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mContentIntent != null) {
-                mContentIntent.visitUris(visitor);
-            }
-            if (mDeleteIntent != null) {
-                mDeleteIntent.visitUris(visitor);
-            }
         }
     }
 

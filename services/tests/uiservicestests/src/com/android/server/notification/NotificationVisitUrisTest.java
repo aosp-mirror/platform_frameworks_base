@@ -146,10 +146,6 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
                     .put(Notification.Action.Builder.class, "extend")
                     // Overwrites icon supplied to constructor.
                     .put(Notification.BubbleMetadata.Builder.class, "setIcon")
-                    // Overwrites intent supplied to constructor.
-                    .put(Notification.BubbleMetadata.Builder.class, "setIntent")
-                    // Overwrites intent supplied to constructor.
-                    .put(Notification.BubbleMetadata.Builder.class, "setDeleteIntent")
                     // Discards previously-added actions.
                     .put(RemoteViews.class, "mergeRemoteViews")
                     .build();
@@ -684,14 +680,14 @@ public class NotificationVisitUrisTest extends UiServiceTestCase {
             }
 
             if (clazz == Intent.class) {
-                return new Intent("action", generateUri(where.plus(Intent.class)));
+                // TODO(b/281044385): Are Intent Uris (new Intent(String,Uri)) relevant?
+                return new Intent("action");
             }
 
             if (clazz == PendingIntent.class) {
-                // PendingIntent can have an Intent with a Uri.
-                Uri intentUri = generateUri(where.plus(PendingIntent.class));
-                return PendingIntent.getActivity(mContext, 0,
-                        new Intent("action", intentUri),
+                // PendingIntent can have an Intent with a Uri but those are inaccessible and
+                // not inspected.
+                return PendingIntent.getActivity(mContext, 0, new Intent("action"),
                         PendingIntent.FLAG_IMMUTABLE);
             }
 
