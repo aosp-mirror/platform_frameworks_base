@@ -6884,8 +6884,8 @@ public class Activity extends ContextThemeWrapper
      * application package was involved.
      *
      * <p>If called while inside the handling of {@link #onNewIntent}, this function will
-     * return the referrer that submitted that new intent to the activity.  Otherwise, it
-     * always returns the referrer of the original Intent.</p>
+     * return the referrer that submitted that new intent to the activity only after
+     * {@link #setIntent(Intent)} is called with the provided intent.</p>
      *
      * <p>Note that this is <em>not</em> a security feature -- you can not trust the
      * referrer information, applications can spoof it.</p>
