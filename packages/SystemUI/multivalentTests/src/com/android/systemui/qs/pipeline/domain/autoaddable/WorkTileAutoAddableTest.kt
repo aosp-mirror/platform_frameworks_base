@@ -25,6 +25,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.qs.pipeline.data.model.RestoreData
+import com.android.systemui.qs.pipeline.data.model.RestoreProcessor
+import com.android.systemui.qs.pipeline.data.model.workTileRestoreProcessor
 import com.android.systemui.qs.pipeline.domain.model.AutoAddSignal
 import com.android.systemui.qs.pipeline.domain.model.AutoAddTracking
 import com.android.systemui.qs.pipeline.shared.TileSpec
@@ -32,16 +37,21 @@ import com.android.systemui.qs.tiles.WorkModeTile
 import com.android.systemui.settings.FakeUserTracker
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class WorkTileAutoAddableTest : SysuiTestCase() {
+
+    private val kosmos = Kosmos()
+
+    private val restoreProcessor: RestoreProcessor
+        get() = kosmos.workTileRestoreProcessor
 
     private lateinit var userTracker: FakeUserTracker
 
@@ -49,8 +59,6 @@ class WorkTileAutoAddableTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        MockitoAnnotations.initMocks(this)
-
         userTracker =
             FakeUserTracker(
                 _userId = USER_INFO_0.id,
@@ -58,7 +66,7 @@ class WorkTileAutoAddableTest : SysuiTestCase() {
                 _userProfiles = listOf(USER_INFO_0)
             )
 
-        underTest = WorkTileAutoAddable(userTracker)
+        underTest = WorkTileAutoAddable(userTracker, kosmos.workTileRestoreProcessor)
     }
 
     @Test
@@ -114,10 +122,80 @@ class WorkTileAutoAddableTest : SysuiTestCase() {
         assertThat(underTest.autoAddTracking).isEqualTo(AutoAddTracking.Always)
     }
 
+    @Test
+    fun restoreDataWithWorkTile_noCurrentManagedProfile_triggersRemove() = runTest {
+        val userId = 0
+        val signal by collectLastValue(underTest.autoAddSignal(userId))
+        runCurrent()
+
+        val restoreData = createRestoreWithWorkTile(userId)
+
+        restoreProcessor.postProcessRestore(restoreData)
+
+        assertThat(signal!!).isEqualTo(AutoAddSignal.RemoveTracking(SPEC))
+    }
+
+    @Test
+    fun restoreDataWithWorkTile_currentlyManagedProfile_doesntTriggerRemove() = runTest {
+        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK), selectedUserIndex = 0)
+        val userId = 0
+        val signals by collectValues(underTest.autoAddSignal(userId))
+        runCurrent()
+
+        val restoreData = createRestoreWithWorkTile(userId)
+
+        restoreProcessor.postProcessRestore(restoreData)
+
+        assertThat(signals).doesNotContain(AutoAddSignal.RemoveTracking(SPEC))
+    }
+
+    @Test
+    fun restoreDataWithoutWorkTile_noManagedProfile_doesntTriggerRemove() = runTest {
+        val userId = 0
+        val signals by collectValues(underTest.autoAddSignal(userId))
+        runCurrent()
+
+        val restoreData = createRestoreWithoutWorkTile(userId)
+
+        restoreProcessor.postProcessRestore(restoreData)
+
+        assertThat(signals).doesNotContain(AutoAddSignal.RemoveTracking(SPEC))
+    }
+
+    @Test
+    fun restoreDataWithoutWorkTile_managedProfile_doesntTriggerRemove() = runTest {
+        userTracker.set(listOf(USER_INFO_0, USER_INFO_WORK), selectedUserIndex = 0)
+        val userId = 0
+        val signals by collectValues(underTest.autoAddSignal(userId))
+        runCurrent()
+
+        val restoreData = createRestoreWithoutWorkTile(userId)
+
+        restoreProcessor.postProcessRestore(restoreData)
+
+        assertThat(signals).doesNotContain(AutoAddSignal.RemoveTracking(SPEC))
+    }
+
     companion object {
         private val SPEC = TileSpec.create(WorkModeTile.TILE_SPEC)
         private val USER_INFO_0 = UserInfo(0, "", FLAG_PRIMARY or FLAG_FULL)
         private val USER_INFO_1 = UserInfo(1, "", FLAG_FULL)
         private val USER_INFO_WORK = UserInfo(10, "", FLAG_PROFILE or FLAG_MANAGED_PROFILE)
+
+        private fun createRestoreWithWorkTile(userId: Int): RestoreData {
+            return RestoreData(
+                listOf(TileSpec.create("a"), SPEC, TileSpec.create("b")),
+                setOf(SPEC),
+                userId,
+            )
+        }
+
+        private fun createRestoreWithoutWorkTile(userId: Int): RestoreData {
+            return RestoreData(
+                listOf(TileSpec.create("a"), TileSpec.create("b")),
+                emptySet(),
+                userId,
+            )
+        }
     }
 }
