@@ -180,7 +180,9 @@ constructor(
                     goneToAodTransitionViewModel
                         .enterFromTopTranslationY(enterFromTopAmount)
                         .onStart { emit(0f) },
-                    occludedToLockscreenTransitionViewModel.lockscreenTranslationY,
+                    occludedToLockscreenTransitionViewModel.lockscreenTranslationY.onStart {
+                        emit(0f)
+                    },
                 ) {
                     keyguardTransitionY,
                     burnInTranslationY,
@@ -193,6 +195,7 @@ constructor(
                         occludedToLockscreenTransitionTranslationY
                 }
             }
+            .distinctUntilChanged()
 
     val translationX: Flow<Float> = burnIn().map { it.translationX.toFloat() }
 
