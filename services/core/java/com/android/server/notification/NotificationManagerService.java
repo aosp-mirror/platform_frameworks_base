@@ -119,6 +119,7 @@ import static android.service.notification.NotificationListenerService.Ranking.R
 import static android.service.notification.NotificationListenerService.Ranking.RANKING_UNCHANGED;
 import static android.service.notification.NotificationListenerService.TRIM_FULL;
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
+import static android.view.contentprotection.flags.Flags.rapidClearNotificationsByListenerAppOpEnabled;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
@@ -413,6 +414,12 @@ public class NotificationManagerService extends SystemService {
     static final int FINISH_TOKEN_TIMEOUT = 11 * 1000;
 
     static final long SNOOZE_UNTIL_UNSPECIFIED = -1;
+
+    /**
+     *  The threshold, in milliseconds, to determine whether a notification has been
+     * cleared too quickly.
+     */
+    private static final int NOTIFICATION_RAPID_CLEAR_THRESHOLD_MS = 5000;
 
     static final int INVALID_UID = -1;
     static final String ROOT_PKG = "root";
@@ -4817,9 +4824,12 @@ public class NotificationManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final long identity = Binder.clearCallingIdentity();
+            boolean notificationsRapidlyCleared = false;
+            final String pkg;
             try {
                 synchronized (mNotificationLock) {
                     final ManagedServiceInfo info = mListeners.checkServiceTokenLocked(token);
+                    pkg = info.component.getPackageName();
 
                     // Cancellation reason. If the token comes from assistant, label the
                     // cancellation as coming from the assistant; default to LISTENER_CANCEL.
@@ -4838,11 +4848,19 @@ public class NotificationManagerService extends SystemService {
                                     !mUserProfiles.isCurrentProfile(userId)) {
                                 continue;
                             }
+                            notificationsRapidlyCleared = notificationsRapidlyCleared
+                                    || isNotificationRecent(r);
                             cancelNotificationFromListenerLocked(info, callingUid, callingPid,
                                     r.getSbn().getPackageName(), r.getSbn().getTag(),
                                     r.getSbn().getId(), userId, reason);
                         }
                     } else {
+                        for (NotificationRecord notificationRecord : mNotificationList) {
+                            if (isNotificationRecent(notificationRecord)) {
+                                notificationsRapidlyCleared = true;
+                                break;
+                            }
+                        }
                         if (lifetimeExtensionRefactor()) {
                             cancelAllLocked(callingUid, callingPid, info.userid,
                                     REASON_LISTENER_CANCEL_ALL, info, info.supportsProfiles(),
@@ -4855,9 +4873,21 @@ public class NotificationManagerService extends SystemService {
                         }
                     }
                 }
+                if (notificationsRapidlyCleared) {
+                    mAppOps.noteOpNoThrow(AppOpsManager.OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER,
+                            callingUid, pkg, /* attributionTag= */ null, /* message= */ null);
+                }
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
+        }
+
+        private boolean isNotificationRecent(@NonNull NotificationRecord notificationRecord) {
+            if (!rapidClearNotificationsByListenerAppOpEnabled()) {
+                return false;
+            }
+            return notificationRecord.getFreshnessMs(System.currentTimeMillis())
+                    < NOTIFICATION_RAPID_CLEAR_THRESHOLD_MS;
         }
 
         /**
@@ -5334,14 +5364,7 @@ public class NotificationManagerService extends SystemService {
 
         @Override
         public String addAutomaticZenRule(AutomaticZenRule automaticZenRule, String pkg) {
-            Objects.requireNonNull(automaticZenRule, "automaticZenRule is null");
-            Objects.requireNonNull(automaticZenRule.getName(), "Name is null");
-            if (automaticZenRule.getOwner() == null
-                    && automaticZenRule.getConfigurationActivity() == null) {
-                throw new NullPointerException(
-                        "Rule must have a conditionproviderservice and/or configuration activity");
-            }
-            Objects.requireNonNull(automaticZenRule.getConditionId(), "ConditionId is null");
+            validateAutomaticZenRule(automaticZenRule);
             checkCallerIsSameApp(pkg);
             if (automaticZenRule.getZenPolicy() != null
                     && automaticZenRule.getInterruptionFilter() != INTERRUPTION_FILTER_PRIORITY) {
@@ -5368,16 +5391,8 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
-        public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule)
-                throws RemoteException {
-            Objects.requireNonNull(automaticZenRule, "automaticZenRule is null");
-            Objects.requireNonNull(automaticZenRule.getName(), "Name is null");
-            if (automaticZenRule.getOwner() == null
-                    && automaticZenRule.getConfigurationActivity() == null) {
-                throw new NullPointerException(
-                        "Rule must have a conditionproviderservice and/or configuration activity");
-            }
-            Objects.requireNonNull(automaticZenRule.getConditionId(), "ConditionId is null");
+        public boolean updateAutomaticZenRule(String id, AutomaticZenRule automaticZenRule) {
+            validateAutomaticZenRule(automaticZenRule);
             enforcePolicyAccess(Binder.getCallingUid(), "updateAutomaticZenRule");
 
             // TODO: b/308670715: Distinguish origin properly (e.g. USER if updating a rule
@@ -5386,6 +5401,29 @@ public class NotificationManagerService extends SystemService {
                     isCallerSystemOrSystemUi() ? ZenModeConfig.UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI
                             : ZenModeConfig.UPDATE_ORIGIN_APP,
                     "updateAutomaticZenRule", Binder.getCallingUid());
+        }
+
+        private void validateAutomaticZenRule(AutomaticZenRule rule) {
+            Objects.requireNonNull(rule, "automaticZenRule is null");
+            Objects.requireNonNull(rule.getName(), "Name is null");
+            if (rule.getOwner() == null
+                    && rule.getConfigurationActivity() == null) {
+                throw new NullPointerException(
+                        "Rule must have a conditionproviderservice and/or configuration activity");
+            }
+            Objects.requireNonNull(rule.getConditionId(), "ConditionId is null");
+
+            if (android.app.Flags.modesApi()) {
+                if (rule.getType() == AutomaticZenRule.TYPE_MANAGED) {
+                    int uid = Binder.getCallingUid();
+                    boolean isDeviceOwner = Binder.withCleanCallingIdentity(
+                            () -> mDpm.isActiveDeviceOwner(uid));
+                    if (!isDeviceOwner) {
+                        throw new IllegalArgumentException(
+                                "Only Device Owners can use AutomaticZenRules with TYPE_MANAGED");
+                    }
+                }
+            }
         }
 
         @Override

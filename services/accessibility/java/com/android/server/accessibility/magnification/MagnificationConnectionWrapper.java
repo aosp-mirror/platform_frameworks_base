@@ -17,8 +17,8 @@
 package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION_CALLBACK;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_REMOTE_MAGNIFICATION_ANIMATION_CALLBACK;
-import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK;
 import static android.os.IBinder.DeathRecipient;
 
 import android.annotation.NonNull;
@@ -26,8 +26,8 @@ import android.annotation.Nullable;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.accessibility.IMagnificationConnection;
+import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
 import com.android.server.accessibility.AccessibilityTraceManager;
@@ -217,13 +217,13 @@ class MagnificationConnectionWrapper {
         return true;
     }
 
-    boolean setConnectionCallback(IWindowMagnificationConnectionCallback connectionCallback) {
+    boolean setConnectionCallback(IMagnificationConnectionCallback connectionCallback) {
         if (mTrace.isA11yTracingEnabledForTypes(
                 FLAGS_MAGNIFICATION_CONNECTION
-                | FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                | FLAGS_MAGNIFICATION_CONNECTION_CALLBACK)) {
             mTrace.logTrace(TAG + ".setConnectionCallback",
                     FLAGS_MAGNIFICATION_CONNECTION
-                    | FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                    | FLAGS_MAGNIFICATION_CONNECTION_CALLBACK,
                     "callback=" + connectionCallback);
         }
         try {

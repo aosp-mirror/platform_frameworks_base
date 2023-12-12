@@ -7791,6 +7791,16 @@ public final class Settings {
         public static final String SHOW_IME_WITH_HARD_KEYBOARD = "show_ime_with_hard_keyboard";
 
         /**
+         * Whether to enable bounce keys for Physical Keyboard accessibility.
+         *
+         * If set to non-zero value, any key press on physical keyboard within the provided
+         * threshold duration (in milliseconds) of the same key, will be ignored.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_BOUNCE_KEYS = "accessibility_bounce_keys";
+
+        /**
          * Whether stylus button presses are disabled. This is a boolean that
          * determines if stylus buttons are ignored.
          *
@@ -8289,6 +8299,17 @@ public final class Settings {
          */
         @Readable
         public static final String ACCESSIBILITY_BUTTON_TARGETS = "accessibility_button_targets";
+
+        /**
+         * Setting specifying the accessibility services, accessibility shortcut targets,
+         * or features to be toggled via a tile in the quick settings panel.
+         *
+         * <p> This is a colon-separated string list which contains the flattened
+         * {@link ComponentName} and the class name of a system class implementing a supported
+         * accessibility feature.
+         * @hide
+         */
+        public static final String ACCESSIBILITY_QS_TARGETS = "accessibility_qs_targets";
 
         /**
          * The system class name of magnification controller which is a target to be toggled via
@@ -12126,6 +12147,7 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_CHANGER);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
             CLONE_TO_MANAGED_PROFILE.add(SHOW_IME_WITH_HARD_KEYBOARD);
+            CLONE_TO_MANAGED_PROFILE.add(ACCESSIBILITY_BOUNCE_KEYS);
             CLONE_TO_MANAGED_PROFILE.add(NOTIFICATION_BUBBLES);
         }
 

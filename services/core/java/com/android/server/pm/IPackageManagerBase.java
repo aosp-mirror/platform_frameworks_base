@@ -476,7 +476,8 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
             @PackageManager.ApplicationInfoFlagsBits long flags, int userId) {
         final int callingUid = Binder.getCallingUid();
         return new ParceledListSlice<>(
-                snapshot().getInstalledApplications(flags, userId, callingUid));
+                snapshot().getInstalledApplications(flags, userId, callingUid,
+                        /* forceAllowCrossUser= */ false));
     }
 
     @Override

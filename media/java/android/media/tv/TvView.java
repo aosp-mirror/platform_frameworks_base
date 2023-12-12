@@ -37,6 +37,7 @@ import android.media.PlaybackParams;
 import android.media.tv.TvInputManager.Session;
 import android.media.tv.TvInputManager.Session.FinishedInputEventCallback;
 import android.media.tv.TvInputManager.SessionCallback;
+import android.media.tv.interactive.TvInteractiveAppService;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -643,6 +644,35 @@ public class TvView extends ViewGroup {
         }
     }
 
+    /**
+     * Stops playback of the Audio, Video, and CC streams, but continue filtering the metadata.
+     *
+     * <p>The metadata that will continue to be filtered includes the PSI
+     * (Program specific information) and SI (Service Information), part of ISO/IEC 13818-1.
+     *
+     * <p> Note that this is different form {@link #timeShiftPause()} as this completely drops
+     * the stream, making it impossible to resume from this position again.
+     * @hide
+     */
+    public void stopPlayback(@TvInteractiveAppService.PlaybackCommandStopMode int mode) {
+        if (mSession != null) {
+            mSession.stopPlayback(mode);
+        }
+    }
+
+    /**
+     * Starts playback of the Audio, Video, and CC streams.
+     *
+     * <p> Note that this is different form {@link #timeShiftResume()} as this is intended to be
+     * used after stopping playback. This is used to restart playback from the current position
+     * in the live broadcast.
+     * @hide
+     */
+    public void startPlayback() {
+        if (mSession != null) {
+            mSession.startPlayback();
+        }
+    }
 
     /**
      * Sends TV messages to the session for testing purposes

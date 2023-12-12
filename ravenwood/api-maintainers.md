@@ -71,3 +71,24 @@ public class MyStruct {
 The “replace” strategy described above is quite powerful, and can be used in creative ways to sidestep tricky underlying dependencies that aren’t ready yet.
 
 For example, consider a constructor or static initializer that relies on unsupported functionality from another team.  By factoring the unsupported logic into a dedicated method, that method can then be replaced under Ravenwood to offer baseline functionality.
+
+## Strategies for JNI
+
+At the moment, JNI isn't yet supported under Ravenwood, but you may still want to support APIs that are partially implemented with JNI.  The current approach is to use the “replace” strategy to offer a pure-Java alternative implementation for any JNI-provided logic.
+
+Since this approach requires potentially complex re-implementation, it should only be considered for core infrastructure that is critical to unblocking widespread testing use-cases.  Other less-common usages of JNI should instead wait for offical JNI support in the Ravenwood environment.
+
+When a pure-Java implementation grows too large or complex to host within the original class, the `@RavenwoodNativeSubstitutionClass` annotation can be used to host it in a separate source file:
+
+```
+@RavenwoodKeepWholeClass
+@RavenwoodNativeSubstitutionClass("com.android.hoststubgen.nativesubstitution.MyComplexClass_host")
+public class MyComplexClass {
+    private static native void nativeDoThing(long nativePtr);
+...
+
+public class MyComplexClass_host {
+    public static void nativeDoThing(long nativePtr) {
+        // ...
+    }
+```

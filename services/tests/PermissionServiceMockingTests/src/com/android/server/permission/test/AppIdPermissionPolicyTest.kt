@@ -30,7 +30,7 @@ import org.junit.Test
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
-class AppIdPermissionPolicyTest : BaseAppIdPermissionPolicyTest() {
+class AppIdPermissionPolicyTest : BasePermissionPolicyTest() {
     @Test
     fun testOnAppIdRemoved_appIdIsRemoved_permissionFlagsCleared() {
         val parsedPermission = mockParsedPermission(PERMISSION_NAME_0, PACKAGE_NAME_0)

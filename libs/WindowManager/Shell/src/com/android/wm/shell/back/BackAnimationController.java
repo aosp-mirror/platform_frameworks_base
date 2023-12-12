@@ -17,6 +17,7 @@
 package com.android.wm.shell.back;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_HOME;
+import static com.android.window.flags.Flags.predictiveBackSystemAnimations;
 import static com.android.wm.shell.common.ExecutorUtils.executeRemoteCallWithTaskPermission;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 import static com.android.wm.shell.sysui.ShellSharedConstants.KEY_EXTRA_SHELL_BACK_ANIMATION;
@@ -221,6 +222,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
 
     private void onInit() {
         setupAnimationDeveloperSettingsObserver(mContentResolver, mBgHandler);
+        updateEnableAnimationFromFlags();
         createAdapter();
         mShellController.addExternalInterface(KEY_EXTRA_SHELL_BACK_ANIMATION,
                 this::createExternalInterface, this);
@@ -229,26 +231,37 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private void setupAnimationDeveloperSettingsObserver(
             @NonNull ContentResolver contentResolver,
             @NonNull @ShellBackgroundThread final Handler backgroundHandler) {
+        if (predictiveBackSystemAnimations()) {
+            ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Back animation aconfig flag is enabled, therefore "
+                    + "developer settings flag is ignored and no content observer registered");
+            return;
+        }
         ContentObserver settingsObserver = new ContentObserver(backgroundHandler) {
             @Override
             public void onChange(boolean selfChange, Uri uri) {
-                updateEnableAnimationFromSetting();
+                updateEnableAnimationFromFlags();
             }
         };
         contentResolver.registerContentObserver(
                 Global.getUriFor(Global.ENABLE_BACK_ANIMATION),
                 false, settingsObserver, UserHandle.USER_SYSTEM
         );
-        updateEnableAnimationFromSetting();
     }
 
+    /**
+     * Updates {@link BackAnimationController#mEnableAnimations} based on the current values of the
+     * aconfig flag and the developer settings flag
+     */
     @ShellBackgroundThread
-    private void updateEnableAnimationFromSetting() {
-        int settingValue = Global.getInt(mContext.getContentResolver(),
-                Global.ENABLE_BACK_ANIMATION, SETTING_VALUE_OFF);
-        boolean isEnabled = settingValue == SETTING_VALUE_ON;
+    private void updateEnableAnimationFromFlags() {
+        boolean isEnabled = predictiveBackSystemAnimations() || isDeveloperSettingEnabled();
         mEnableAnimations.set(isEnabled);
         ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Back animation enabled=%s", isEnabled);
+    }
+
+    private boolean isDeveloperSettingEnabled() {
+        return Global.getInt(mContext.getContentResolver(),
+                Global.ENABLE_BACK_ANIMATION, SETTING_VALUE_OFF) == SETTING_VALUE_ON;
     }
 
     public BackAnimation getBackAnimationImpl() {

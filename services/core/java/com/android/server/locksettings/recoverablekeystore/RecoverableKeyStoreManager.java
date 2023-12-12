@@ -82,6 +82,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -272,9 +273,10 @@ public class RecoverableKeyStoreManager {
         CertPath certPath;
         X509Certificate rootCert =
                 mTestCertHelper.getRootCertificate(rootCertificateAlias);
+        Date validationDate = mTestCertHelper.getValidationDate(rootCertificateAlias);
         try {
             Log.d(TAG, "Getting and validating a random endpoint certificate");
-            certPath = certXml.getRandomEndpointCert(rootCert);
+            certPath = certXml.getRandomEndpointCert(rootCert, validationDate);
         } catch (CertValidationException e) {
             Log.e(TAG, "Invalid endpoint cert", e);
             throw new ServiceSpecificException(ERROR_INVALID_CERTIFICATE, e.getMessage());
@@ -348,10 +350,11 @@ public class RecoverableKeyStoreManager {
 
         X509Certificate rootCert =
                 mTestCertHelper.getRootCertificate(rootCertificateAlias);
+        Date validationDate = mTestCertHelper.getValidationDate(rootCertificateAlias);
         try {
-            sigXml.verifyFileSignature(rootCert, recoveryServiceCertFile);
+            sigXml.verifyFileSignature(rootCert, recoveryServiceCertFile, validationDate);
         } catch (CertValidationException e) {
-            Log.d(TAG, "The signature over the cert file is invalid."
+            Log.e(TAG, "The signature over the cert file is invalid."
                     + " Cert: " + HexDump.toHexString(recoveryServiceCertFile)
                     + " Sig: " + HexDump.toHexString(recoveryServiceSigFile));
             throw new ServiceSpecificException(ERROR_INVALID_CERTIFICATE, e.getMessage());
@@ -601,8 +604,9 @@ public class RecoverableKeyStoreManager {
         }
 
         try {
-            CertUtils.validateCertPath(
-                    mTestCertHelper.getRootCertificate(rootCertificateAlias), certPath);
+            Date validationDate = mTestCertHelper.getValidationDate(rootCertificateAlias);
+            CertUtils.validateCertPath(mTestCertHelper.getRootCertificate(rootCertificateAlias),
+                    certPath, validationDate);
         } catch (CertValidationException e) {
             Log.e(TAG, "Failed to validate the given cert path", e);
             throw new ServiceSpecificException(ERROR_INVALID_CERTIFICATE, e.getMessage());

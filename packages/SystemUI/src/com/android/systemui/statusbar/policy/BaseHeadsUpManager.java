@@ -38,6 +38,7 @@ import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag;
 import com.android.systemui.util.ListenerSet;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
@@ -87,9 +88,10 @@ public abstract class BaseHeadsUpManager extends AlertingNotificationManager imp
             @Main Handler handler,
             GlobalSettings globalSettings,
             SystemClock systemClock,
+            @Main DelayableExecutor executor,
             AccessibilityManagerWrapper accessibilityManagerWrapper,
             UiEventLogger uiEventLogger) {
-        super(logger, handler, systemClock);
+        super(logger, systemClock, executor);
         mContext = context;
         mAccessibilityMgr = accessibilityManagerWrapper;
         mUiEventLogger = uiEventLogger;

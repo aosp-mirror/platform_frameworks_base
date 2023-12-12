@@ -20,9 +20,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.filters.SmallTest;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 
 /**
@@ -35,7 +39,10 @@ import org.junit.Test;
  *  atest FrameworksCoreTests:PropertyInvalidatedCacheTests
  */
 @SmallTest
+@IgnoreUnderRavenwood(blockedBy = PropertyInvalidatedCache.class)
 public class PropertyInvalidatedCacheTests {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     // Configuration for creating caches
     private static final String MODULE = PropertyInvalidatedCache.MODULE_TEST;

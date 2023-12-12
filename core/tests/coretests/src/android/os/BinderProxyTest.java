@@ -16,19 +16,34 @@
 
 package android.os;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.test.AndroidTestCase;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
+import androidx.test.InstrumentationRegistry;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.MediumTest;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-public class BinderProxyTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = PowerManager.class)
+public class BinderProxyTest {
     private static class CountingListener implements Binder.ProxyTransactListener {
         int mStartedCount;
         int mEndedCount;
@@ -43,17 +58,22 @@ public class BinderProxyTest extends AndroidTestCase {
         }
     };
 
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
+    private Context mContext;
     private PowerManager mPowerManager;
 
     /**
      * Setup any common data for the upcoming tests.
      */
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
+        mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
         mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
     }
 
+    @Test
     @MediumTest
     public void testNoListener() throws Exception {
         CountingListener listener = new CountingListener();
@@ -66,6 +86,7 @@ public class BinderProxyTest extends AndroidTestCase {
         assertEquals(0, listener.mEndedCount);
     }
 
+    @Test
     @MediumTest
     public void testListener() throws Exception {
         CountingListener listener = new CountingListener();
@@ -77,6 +98,7 @@ public class BinderProxyTest extends AndroidTestCase {
         assertEquals(1, listener.mEndedCount);
     }
 
+    @Test
     @MediumTest
     public void testSessionPropagated() throws Exception {
         Binder.setProxyTransactListener(new Binder.ProxyTransactListener() {
@@ -95,6 +117,7 @@ public class BinderProxyTest extends AndroidTestCase {
 
     private IBinder mRemoteBinder = null;
 
+    @Test
     @MediumTest
     public void testGetExtension() throws Exception {
         final CountDownLatch bindLatch = new CountDownLatch(1);

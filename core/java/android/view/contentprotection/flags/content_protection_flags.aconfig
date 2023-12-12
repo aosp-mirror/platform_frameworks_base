@@ -27,3 +27,10 @@ flag {
     description: "If true, an appop is logged on creation of accessibility overlays."
     bug: "289081465"
 }
+
+flag {
+    name: "rapid_clear_notifications_by_listener_app_op_enabled"
+    namespace: "content_protection"
+    description: "If true, an appop is logged when a notification is rapidly cleared by a notification listener."
+    bug: "289080543"
+}

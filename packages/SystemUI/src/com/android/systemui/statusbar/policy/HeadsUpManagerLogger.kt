@@ -66,6 +66,26 @@ class HeadsUpManagerLogger @Inject constructor(
         })
     }
 
+    fun logAutoRemoveScheduled(entry: NotificationEntry, delayMillis: Long, reason: String) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            long1 = delayMillis
+            str2 = reason
+        }, {
+            "schedule auto remove of $str1 in $long1 ms reason: $str2"
+        })
+    }
+
+    fun logAutoRemoveRescheduled(entry: NotificationEntry, delayMillis: Long, reason: String) {
+        buffer.log(TAG, INFO, {
+            str1 = entry.logKey
+            long1 = delayMillis
+            str2 = reason
+        }, {
+            "reschedule auto remove of $str1 in $long1 ms reason: $str2"
+        })
+    }
+
     fun logAutoRemoveCanceled(entry: NotificationEntry, reason: String?) {
         buffer.log(TAG, INFO, {
             str1 = entry.logKey

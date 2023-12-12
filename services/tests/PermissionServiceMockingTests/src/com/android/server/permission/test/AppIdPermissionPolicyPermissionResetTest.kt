@@ -29,7 +29,7 @@ import org.junit.runners.Parameterized
  * and resetRuntimePermissions() in AppIdPermissionPolicy
  */
 @RunWith(Parameterized::class)
-class AppIdPermissionPolicyPermissionResetTest : BaseAppIdPermissionPolicyTest() {
+class AppIdPermissionPolicyPermissionResetTest : BasePermissionPolicyTest() {
     @Parameterized.Parameter(0) lateinit var action: Action
 
     @Test

@@ -44,11 +44,18 @@ flag {
   bug: "294925498"
 }
 
-
 flag {
     name: "wallpaper_offset_async"
     namespace: "windowing_frontend"
     description: "Do not synchronise the wallpaper offset"
     bug: "293248754"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "predictive_back_system_animations"
+    namespace: "systemui"
+    description: "Predictive back for system animations"
+    bug: "309545085"
     is_fixed_read_only: true
 }

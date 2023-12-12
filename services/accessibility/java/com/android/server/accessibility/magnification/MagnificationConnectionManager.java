@@ -17,7 +17,7 @@
 package com.android.server.accessibility.magnification;
 
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION;
-import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK;
+import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATION_CONNECTION_CALLBACK;
 import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
 import static com.android.server.accessibility.AccessibilityManagerService.INVALID_SERVICE_ID;
@@ -43,7 +43,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.MotionEvent;
 import android.view.accessibility.IMagnificationConnection;
-import android.view.accessibility.IWindowMagnificationConnectionCallback;
+import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
 import com.android.internal.accessibility.common.MagnificationConstants;
@@ -922,16 +922,16 @@ public class MagnificationConnectionManager implements
         disableWindowMagnification(displayId, true);
     }
 
-    private class ConnectionCallback extends IWindowMagnificationConnectionCallback.Stub implements
+    private class ConnectionCallback extends IMagnificationConnectionCallback.Stub implements
             IBinder.DeathRecipient {
         private boolean mExpiredDeathRecipient = false;
 
         @Override
         public void onWindowMagnifierBoundsChanged(int displayId, Rect bounds) {
             if (mTrace.isA11yTracingEnabledForTypes(
-                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                    FLAGS_MAGNIFICATION_CONNECTION_CALLBACK)) {
                 mTrace.logTrace(TAG + "ConnectionCallback.onWindowMagnifierBoundsChanged",
-                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        FLAGS_MAGNIFICATION_CONNECTION_CALLBACK,
                         "displayId=" + displayId + ";bounds=" + bounds);
             }
             synchronized (mLock) {
@@ -951,9 +951,9 @@ public class MagnificationConnectionManager implements
         public void onChangeMagnificationMode(int displayId, int magnificationMode)
                 throws RemoteException {
             if (mTrace.isA11yTracingEnabledForTypes(
-                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                    FLAGS_MAGNIFICATION_CONNECTION_CALLBACK)) {
                 mTrace.logTrace(TAG + "ConnectionCallback.onChangeMagnificationMode",
-                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        FLAGS_MAGNIFICATION_CONNECTION_CALLBACK,
                         "displayId=" + displayId + ";mode=" + magnificationMode);
             }
             mCallback.onChangeMagnificationMode(displayId, magnificationMode);
@@ -962,9 +962,9 @@ public class MagnificationConnectionManager implements
         @Override
         public void onSourceBoundsChanged(int displayId, Rect sourceBounds) {
             if (mTrace.isA11yTracingEnabledForTypes(
-                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                    FLAGS_MAGNIFICATION_CONNECTION_CALLBACK)) {
                 mTrace.logTrace(TAG + "ConnectionCallback.onSourceBoundsChanged",
-                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        FLAGS_MAGNIFICATION_CONNECTION_CALLBACK,
                         "displayId=" + displayId + ";source=" + sourceBounds);
             }
             synchronized (mLock) {
@@ -980,9 +980,9 @@ public class MagnificationConnectionManager implements
         @Override
         public void onPerformScaleAction(int displayId, float scale, boolean updatePersistence) {
             if (mTrace.isA11yTracingEnabledForTypes(
-                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                    FLAGS_MAGNIFICATION_CONNECTION_CALLBACK)) {
                 mTrace.logTrace(TAG + "ConnectionCallback.onPerformScaleAction",
-                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        FLAGS_MAGNIFICATION_CONNECTION_CALLBACK,
                         "displayId=" + displayId + ";scale=" + scale
                                 + ";updatePersistence=" + updatePersistence);
             }
@@ -992,9 +992,9 @@ public class MagnificationConnectionManager implements
         @Override
         public void onAccessibilityActionPerformed(int displayId) {
             if (mTrace.isA11yTracingEnabledForTypes(
-                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                    FLAGS_MAGNIFICATION_CONNECTION_CALLBACK)) {
                 mTrace.logTrace(TAG + "ConnectionCallback.onAccessibilityActionPerformed",
-                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        FLAGS_MAGNIFICATION_CONNECTION_CALLBACK,
                         "displayId=" + displayId);
             }
             mCallback.onAccessibilityActionPerformed(displayId);
@@ -1003,9 +1003,9 @@ public class MagnificationConnectionManager implements
         @Override
         public void onMove(int displayId) {
             if (mTrace.isA11yTracingEnabledForTypes(
-                    FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK)) {
+                    FLAGS_MAGNIFICATION_CONNECTION_CALLBACK)) {
                 mTrace.logTrace(TAG + "ConnectionCallback.onMove",
-                        FLAGS_WINDOW_MAGNIFICATION_CONNECTION_CALLBACK,
+                        FLAGS_MAGNIFICATION_CONNECTION_CALLBACK,
                         "displayId=" + displayId);
             }
             setTrackingTypingFocusEnabled(displayId, false);

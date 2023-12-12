@@ -73,6 +73,7 @@ public class SecureSettings {
         Settings.Secure.TTS_ENABLED_PLUGINS,
         Settings.Secure.TTS_DEFAULT_LOCALE,
         Settings.Secure.SHOW_IME_WITH_HARD_KEYBOARD,
+        Settings.Secure.ACCESSIBILITY_BOUNCE_KEYS,
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_NOTIFICATION_ON,            // moved to global
         Settings.Secure.WIFI_NETWORKS_AVAILABLE_REPEAT_DELAY,               // moved to global
         Settings.Secure.WIFI_NUM_OPEN_NETWORKS_KEPT,                        // moved to global
@@ -105,6 +106,9 @@ public class SecureSettings {
         Settings.Secure.CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
         Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
         Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
+        // ACCESSIBILITY_QS_TARGETS needs to be restored after ENABLED_ACCESSIBILITY_SERVICES
+        // but before QS_TILES
+        Settings.Secure.ACCESSIBILITY_QS_TARGETS,
         Settings.Secure.QS_TILES,
         Settings.Secure.QS_AUTO_ADDED_TILES,
         Settings.Secure.CONTROLS_ENABLED,

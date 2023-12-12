@@ -396,6 +396,7 @@ public class Binder implements IBinder {
      * This is Test API which will be used to override output of isDirectlyHandlingTransactionNative
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public static void setIsDirectlyHandlingTransactionOverride(boolean isInTransaction) {
         sIsHandlingBinderTransaction = isInTransaction;
     }
@@ -1068,6 +1069,7 @@ public class Binder implements IBinder {
      *
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public @Nullable String getTransactionName(int transactionCode) {
         return null;
     }
@@ -1076,6 +1078,7 @@ public class Binder implements IBinder {
      * @hide
      */
     @VisibleForTesting
+    @android.ravenwood.annotation.RavenwoodKeep
     public final @Nullable String getTransactionTraceName(int transactionCode) {
         final boolean isInterfaceUserDefined = getMaxTransactionId() == 0;
         if (mTransactionTraceNames == null) {
@@ -1113,6 +1116,7 @@ public class Binder implements IBinder {
         return transactionTraceName;
     }
 
+    @android.ravenwood.annotation.RavenwoodKeep
     private @NonNull String getSimpleDescriptor() {
         String descriptor = mDescriptor;
         if (descriptor == null) {
@@ -1132,6 +1136,7 @@ public class Binder implements IBinder {
      * @return The highest user-defined transaction id of all transactions.
      * @hide
      */
+    @android.ravenwood.annotation.RavenwoodKeep
     public int getMaxTransactionId() {
         return 0;
     }

@@ -52,8 +52,8 @@ import android.provider.Settings;
 import android.test.mock.MockContentResolver;
 import android.view.InputDevice;
 import android.view.MotionEvent;
+import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnectionCallback;
 import android.view.accessibility.MagnificationAnimationCallback;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -146,7 +146,7 @@ public class MagnificationConnectionManagerTest {
         assertTrue(mMagnificationConnectionManager.isConnected());
         verify(mMockConnection.asBinder()).linkToDeath(any(IBinder.DeathRecipient.class), eq(0));
         verify(mMockConnection.getConnection()).setConnectionCallback(
-                any(IWindowMagnificationConnectionCallback.class));
+                any(IMagnificationConnectionCallback.class));
     }
 
     @Test
