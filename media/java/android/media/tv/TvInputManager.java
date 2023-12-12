@@ -3302,30 +3302,6 @@ public final class TvInputManager {
             }
         }
 
-        void stopPlayback(int mode) {
-            if (mToken == null) {
-                Log.w(TAG, "The session has been already released");
-                return;
-            }
-            try {
-                mService.stopPlayback(mToken, mode, mUserId);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
-        void startPlayback() {
-            if (mToken == null) {
-                Log.w(TAG, "The session has been already released");
-                return;
-            }
-            try {
-                mService.startPlayback(mToken, mUserId);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-
         /**
          * Sends TV messages to the service for testing purposes
          */
