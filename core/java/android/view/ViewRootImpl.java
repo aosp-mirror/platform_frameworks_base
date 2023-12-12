@@ -76,13 +76,8 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_E
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_OPTIMIZE_MEASURE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
-import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
-import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
-import static android.view.WindowManager.LayoutParams.TYPE_DRAWN_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
-import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
-import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
@@ -12097,11 +12092,9 @@ public final class ViewRootImpl implements ViewParent,
         boolean desiredAction = motionEventAction == MotionEvent.ACTION_DOWN
                 || motionEventAction == MotionEvent.ACTION_MOVE
                 || motionEventAction == MotionEvent.ACTION_UP;
-        boolean desiredType = windowType == TYPE_BASE_APPLICATION || windowType == TYPE_APPLICATION
-                || windowType == TYPE_APPLICATION_STARTING || windowType == TYPE_DRAWN_APPLICATION
-                || windowType == TYPE_NOTIFICATION_SHADE || windowType == TYPE_STATUS_BAR;
+        boolean undesiredType = windowType == TYPE_INPUT_METHOD;
         // use toolkitSetFrameRate flag to gate the change
-        return desiredAction && desiredType && sToolkitSetFrameRateReadOnlyFlagValue;
+        return desiredAction && !undesiredType && sToolkitSetFrameRateReadOnlyFlagValue;
     }
 
     /**
