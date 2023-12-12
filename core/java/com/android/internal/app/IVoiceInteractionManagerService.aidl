@@ -397,5 +397,5 @@ interface IVoiceInteractionManagerService {
       * sandboxed detection (from trusted process).
       */
       @EnforcePermission("MANAGE_HOTWORD_DETECTION")
-      void setIsReceiveSandboxedTrainingDataAllowed(boolean allowed);
+      void setShouldReceiveSandboxedTrainingData(boolean allowed);
 }
