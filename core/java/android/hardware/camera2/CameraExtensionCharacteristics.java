@@ -40,7 +40,6 @@ import android.os.ConditionVariable;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.util.FeatureFlagUtils;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
@@ -722,6 +721,7 @@ public final class CameraExtensionCharacteristics {
                 switch(format) {
                     case ImageFormat.YUV_420_888:
                     case ImageFormat.JPEG:
+                    case ImageFormat.JPEG_R:
                         break;
                     default:
                         throw new IllegalArgumentException("Unsupported format: " + format);
