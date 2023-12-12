@@ -39,13 +39,14 @@ import com.android.settingslib.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
-
 /**
- * LocalBluetoothLeBroadcastAssistant provides an interface between the Settings app
- * and the functionality of the local {@link BluetoothLeBroadcastAssistant}.
- * Use the {@link BluetoothLeBroadcastAssistant.Callback} to get the result callback.
+ * LocalBluetoothLeBroadcastAssistant provides an interface between the Settings app and the
+ * functionality of the local {@link BluetoothLeBroadcastAssistant}. Use the {@link
+ * BluetoothLeBroadcastAssistant.Callback} to get the result callback.
  */
 public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile {
     private static final String TAG = "LocalBluetoothLeBroadcastAssistant";
@@ -62,58 +63,76 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
     private BluetoothLeBroadcastMetadata mBluetoothLeBroadcastMetadata;
     private BluetoothLeBroadcastMetadata.Builder mBuilder;
     private boolean mIsProfileReady;
+    // Cached assistant callbacks being register before service is connected.
+    private final Map<BluetoothLeBroadcastAssistant.Callback, Executor> mCachedCallbackExecutorMap =
+            new ConcurrentHashMap<>();
 
-    private final ServiceListener mServiceListener = new ServiceListener() {
-        @Override
-        public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (DEBUG) {
-                Log.d(TAG, "Bluetooth service connected");
-            }
-            mService = (BluetoothLeBroadcastAssistant) proxy;
-            // We just bound to the service, so refresh the UI for any connected LeAudio devices.
-            List<BluetoothDevice> deviceList = mService.getConnectedDevices();
-            while (!deviceList.isEmpty()) {
-                BluetoothDevice nextDevice = deviceList.remove(0);
-                CachedBluetoothDevice device = mDeviceManager.findDevice(nextDevice);
-                // we may add a new device here, but generally this should not happen
-                if (device == null) {
+    private final ServiceListener mServiceListener =
+            new ServiceListener() {
+                @Override
+                public void onServiceConnected(int profile, BluetoothProfile proxy) {
                     if (DEBUG) {
-                        Log.d(TAG, "LocalBluetoothLeBroadcastAssistant found new device: "
-                                + nextDevice);
+                        Log.d(TAG, "Bluetooth service connected");
                     }
-                    device = mDeviceManager.addDevice(nextDevice);
+                    mService = (BluetoothLeBroadcastAssistant) proxy;
+                    // We just bound to the service, so refresh the UI for any connected LeAudio
+                    // devices.
+                    List<BluetoothDevice> deviceList = mService.getConnectedDevices();
+                    while (!deviceList.isEmpty()) {
+                        BluetoothDevice nextDevice = deviceList.remove(0);
+                        CachedBluetoothDevice device = mDeviceManager.findDevice(nextDevice);
+                        // we may add a new device here, but generally this should not happen
+                        if (device == null) {
+                            if (DEBUG) {
+                                Log.d(
+                                        TAG,
+                                        "LocalBluetoothLeBroadcastAssistant found new device: "
+                                                + nextDevice);
+                            }
+                            device = mDeviceManager.addDevice(nextDevice);
+                        }
+                        device.onProfileStateChanged(
+                                LocalBluetoothLeBroadcastAssistant.this,
+                                BluetoothProfile.STATE_CONNECTED);
+                        device.refresh();
+                    }
+
+                    mProfileManager.callServiceConnectedListeners();
+                    mIsProfileReady = true;
+                    if (DEBUG) {
+                        Log.d(
+                                TAG,
+                                "onServiceConnected, register mCachedCallbackExecutorMap = "
+                                        + mCachedCallbackExecutorMap);
+                    }
+                    mCachedCallbackExecutorMap.forEach(
+                            (callback, executor) -> registerServiceCallBack(executor, callback));
                 }
-                device.onProfileStateChanged(LocalBluetoothLeBroadcastAssistant.this,
-                        BluetoothProfile.STATE_CONNECTED);
-                device.refresh();
-            }
 
-            mProfileManager.callServiceConnectedListeners();
-            mIsProfileReady = true;
-        }
+                @Override
+                public void onServiceDisconnected(int profile) {
+                    if (profile != BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT) {
+                        Log.d(TAG, "The profile is not LE_AUDIO_BROADCAST_ASSISTANT");
+                        return;
+                    }
+                    if (DEBUG) {
+                        Log.d(TAG, "Bluetooth service disconnected");
+                    }
+                    mProfileManager.callServiceDisconnectedListeners();
+                    mIsProfileReady = false;
+                    mCachedCallbackExecutorMap.clear();
+                }
+            };
 
-        @Override
-        public void onServiceDisconnected(int profile) {
-            if (profile != BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT) {
-                Log.d(TAG, "The profile is not LE_AUDIO_BROADCAST_ASSISTANT");
-                return;
-            }
-            if (DEBUG) {
-                Log.d(TAG, "Bluetooth service disconnected");
-            }
-            mProfileManager.callServiceDisconnectedListeners();
-            mIsProfileReady = false;
-        }
-    };
-
-    public LocalBluetoothLeBroadcastAssistant(Context context,
+    public LocalBluetoothLeBroadcastAssistant(
+            Context context,
             CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
         mProfileManager = profileManager;
         mDeviceManager = deviceManager;
-        BluetoothAdapter.getDefaultAdapter().
-                getProfileProxy(context, mServiceListener,
-                        BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
+        BluetoothAdapter.getDefaultAdapter()
+                .getProfileProxy(
+                        context, mServiceListener, BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT);
         mBuilder = new BluetoothLeBroadcastMetadata.Builder();
     }
 
@@ -123,11 +142,11 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
      * @param sink Broadcast Sink to which the Broadcast Source should be added
      * @param metadata Broadcast Source metadata to be added to the Broadcast Sink
      * @param isGroupOp {@code true} if Application wants to perform this operation for all
-     *                  coordinated set members throughout this session. Otherwise, caller
-     *                  would have to add, modify, and remove individual set members.
+     *     coordinated set members throughout this session. Otherwise, caller would have to add,
+     *     modify, and remove individual set members.
      */
-    public void addSource(BluetoothDevice sink, BluetoothLeBroadcastMetadata metadata,
-            boolean isGroupOp) {
+    public void addSource(
+            BluetoothDevice sink, BluetoothLeBroadcastMetadata metadata, boolean isGroupOp) {
         if (mService == null) {
             Log.d(TAG, "The BluetoothLeBroadcastAssistant is null");
             return;
@@ -140,36 +159,55 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
      * the qr code string.
      *
      * @param sink Broadcast Sink to which the Broadcast Source should be added
-     * @param sourceAddressType hardware MAC Address of the device. See
-     *                          {@link BluetoothDevice.AddressType}.
+     * @param sourceAddressType hardware MAC Address of the device. See {@link
+     *     BluetoothDevice.AddressType}.
      * @param presentationDelayMicros presentation delay of this Broadcast Source in microseconds.
      * @param sourceAdvertisingSid 1-byte long Advertising_SID of the Broadcast Source.
      * @param broadcastId 3-byte long Broadcast_ID of the Broadcast Source.
-     * @param paSyncInterval Periodic Advertising Sync interval of the broadcast Source,
-     *                       {@link BluetoothLeBroadcastMetadata#PA_SYNC_INTERVAL_UNKNOWN} if
-     *                       unknown.
+     * @param paSyncInterval Periodic Advertising Sync interval of the broadcast Source, {@link
+     *     BluetoothLeBroadcastMetadata#PA_SYNC_INTERVAL_UNKNOWN} if unknown.
      * @param isEncrypted whether the Broadcast Source is encrypted.
      * @param broadcastCode Broadcast Code for this Broadcast Source, null if code is not required.
      * @param sourceDevice source advertiser address.
      * @param isGroupOp {@code true} if Application wants to perform this operation for all
-     *                  coordinated set members throughout this session. Otherwise, caller
-     *                  would have to add, modify, and remove individual set members.
+     *     coordinated set members throughout this session. Otherwise, caller would have to add,
+     *     modify, and remove individual set members.
      */
-    public void addSource(@NonNull BluetoothDevice sink, int sourceAddressType,
-            int presentationDelayMicros, int sourceAdvertisingSid, int broadcastId,
-            int paSyncInterval, boolean isEncrypted, byte[] broadcastCode,
-            BluetoothDevice sourceDevice, boolean isGroupOp) {
+    public void addSource(
+            @NonNull BluetoothDevice sink,
+            int sourceAddressType,
+            int presentationDelayMicros,
+            int sourceAdvertisingSid,
+            int broadcastId,
+            int paSyncInterval,
+            boolean isEncrypted,
+            byte[] broadcastCode,
+            BluetoothDevice sourceDevice,
+            boolean isGroupOp) {
         if (DEBUG) {
             Log.d(TAG, "addSource()");
         }
-        buildMetadata(sourceAddressType, presentationDelayMicros, sourceAdvertisingSid, broadcastId,
-                paSyncInterval, isEncrypted, broadcastCode, sourceDevice);
+        buildMetadata(
+                sourceAddressType,
+                presentationDelayMicros,
+                sourceAdvertisingSid,
+                broadcastId,
+                paSyncInterval,
+                isEncrypted,
+                broadcastCode,
+                sourceDevice);
         addSource(sink, mBluetoothLeBroadcastMetadata, isGroupOp);
     }
 
-    private void buildMetadata(int sourceAddressType, int presentationDelayMicros,
-            int sourceAdvertisingSid, int broadcastId, int paSyncInterval, boolean isEncrypted,
-            byte[] broadcastCode, BluetoothDevice sourceDevice) {
+    private void buildMetadata(
+            int sourceAddressType,
+            int presentationDelayMicros,
+            int sourceAdvertisingSid,
+            int broadcastId,
+            int paSyncInterval,
+            boolean isEncrypted,
+            byte[] broadcastCode,
+            BluetoothDevice sourceDevice) {
         mBluetoothLeBroadcastMetadata =
                 mBuilder.setSourceDevice(sourceDevice, sourceAddressType)
                         .setSourceAdvertisingSid(sourceAdvertisingSid)
@@ -223,10 +261,10 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
     /**
      * Stops an ongoing search for nearby Broadcast Sources.
      *
-     * On success, {@link BluetoothLeBroadcastAssistant.Callback#onSearchStopped(int)} will be
-     * called with reason code {@link BluetoothStatusCodes#REASON_LOCAL_APP_REQUEST}.
-     * On failure, {@link BluetoothLeBroadcastAssistant.Callback#onSearchStopFailed(int)} will be
-     * called with reason code
+     * <p>On success, {@link BluetoothLeBroadcastAssistant.Callback#onSearchStopped(int)} will be
+     * called with reason code {@link BluetoothStatusCodes#REASON_LOCAL_APP_REQUEST}. On failure,
+     * {@link BluetoothLeBroadcastAssistant.Callback#onSearchStopFailed(int)} will be called with
+     * reason code
      *
      * @throws IllegalStateException if callback was not registered
      */
@@ -245,8 +283,8 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
      * Get information about all Broadcast Sources that a Broadcast Sink knows about.
      *
      * @param sink Broadcast Sink from which to get all Broadcast Sources
-     * @return the list of Broadcast Receive State {@link BluetoothLeBroadcastReceiveState}
-     *         stored in the Broadcast Sink
+     * @return the list of Broadcast Receive State {@link BluetoothLeBroadcastReceiveState} stored
+     *     in the Broadcast Sink
      * @throws NullPointerException when <var>sink</var> is null
      */
     public @NonNull List<BluetoothLeBroadcastReceiveState> getAllSources(
@@ -261,24 +299,50 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
         return mService.getAllSources(sink);
     }
 
-    public void registerServiceCallBack(@NonNull @CallbackExecutor Executor executor,
+    /**
+     * Register Broadcast Assistant Callbacks to track its state and receivers
+     *
+     * @param executor Executor object for callback
+     * @param callback Callback object to be registered
+     */
+    public void registerServiceCallBack(
+            @NonNull @CallbackExecutor Executor executor,
             @NonNull BluetoothLeBroadcastAssistant.Callback callback) {
         if (mService == null) {
-            Log.d(TAG, "The BluetoothLeBroadcast is null.");
+            Log.d(
+                    TAG,
+                    "registerServiceCallBack failed, the BluetoothLeBroadcastAssistant is null.");
+            mCachedCallbackExecutorMap.putIfAbsent(callback, executor);
             return;
         }
 
-        mService.registerCallback(executor, callback);
+        try {
+            mService.registerCallback(executor, callback);
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "registerServiceCallBack failed. " + e.getMessage());
+        }
     }
 
+    /**
+     * Unregister previously registered Broadcast Assistant Callbacks
+     *
+     * @param callback Callback object to be unregistered
+     */
     public void unregisterServiceCallBack(
             @NonNull BluetoothLeBroadcastAssistant.Callback callback) {
+        mCachedCallbackExecutorMap.remove(callback);
         if (mService == null) {
-            Log.d(TAG, "The BluetoothLeBroadcast is null.");
+            Log.d(
+                    TAG,
+                    "unregisterServiceCallBack failed, the BluetoothLeBroadcastAssistant is null.");
             return;
         }
 
-        mService.unregisterCallback(callback);
+        try {
+            mService.unregisterCallback(callback);
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "unregisterServiceCallBack failed. " + e.getMessage());
+        }
     }
 
     public boolean isProfileReady() {
@@ -310,9 +374,11 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
             return new ArrayList<BluetoothDevice>(0);
         }
         return mService.getDevicesMatchingConnectionStates(
-                new int[]{BluetoothProfile.STATE_CONNECTED,
-                        BluetoothProfile.STATE_CONNECTING,
-                        BluetoothProfile.STATE_DISCONNECTING});
+                new int[] {
+                    BluetoothProfile.STATE_CONNECTED,
+                    BluetoothProfile.STATE_CONNECTING,
+                    BluetoothProfile.STATE_DISCONNECTING
+                });
     }
 
     public boolean isEnabled(BluetoothDevice device) {
@@ -373,9 +439,8 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
         }
         if (mService != null) {
             try {
-                BluetoothAdapter.getDefaultAdapter().closeProfileProxy(
-                        BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT,
-                        mService);
+                BluetoothAdapter.getDefaultAdapter()
+                        .closeProfileProxy(BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT, mService);
                 mService = null;
             } catch (Throwable t) {
                 Log.w(TAG, "Error cleaning up LeAudio proxy", t);
