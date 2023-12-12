@@ -122,7 +122,6 @@ import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.accessibility.AccessibilityNodeInfo;
-import android.window.ITrustedPresentationListener;
 import android.window.TaskFpsCallback;
 import android.window.TrustedPresentationThresholds;
 

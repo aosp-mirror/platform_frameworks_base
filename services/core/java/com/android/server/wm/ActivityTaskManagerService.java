@@ -3695,6 +3695,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         boolean originallyFromClient = fromClient
                 && (!r.isState(PAUSING) || params.isAutoEnterEnabled());
 
+        // If PiP2 flag is on and client-request to enter PiP came via onUserLeaveHint(),
+        // we request a direct transition from Shell to TRANSIT_PIP_LEGACY to get the startWct
+        // with the right entry bounds.
+        if (isPip2ExperimentEnabled() && !originallyFromClient && !params.isAutoEnterEnabled()) {
+            final Transition legacyEnterPipTransition = new Transition(TRANSIT_PIP,
+                    0 /* flags */, getTransitionController(),
+                    mWindowManager.mSyncEngine);
+            legacyEnterPipTransition.setPipActivity(r);
+            getTransitionController().startCollectOrQueue(legacyEnterPipTransition, (deferred) -> {
+                getTransitionController().requestStartTransition(legacyEnterPipTransition,
+                        r.getTask(), null /* remoteTransition */, null /* displayChange */);
+            });
+            return true;
+        }
+
         // Create a transition only for this pip entry if it is coming from the app without the
         // system requesting that the app enter-pip. If the system requested it, that means it
         // should be part of that transition if possible.
