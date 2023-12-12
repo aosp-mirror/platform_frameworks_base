@@ -22,6 +22,7 @@ import android.provider.Settings
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -39,6 +40,8 @@ import com.android.systemui.util.time.FakeSystemClock
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mock
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.verify
@@ -73,13 +76,20 @@ class ContrastDialogDelegateTest : SysuiTestCase() {
         if (Looper.myLooper() == null) Looper.prepare()
 
         mContrastDialogDelegate =
-                ContrastDialogDelegate(
-                        sysuiDialogFactory,
-                        mainExecutor,
-                        mockUiModeManager,
-                        mockUserTracker,
-                        mockSecureSettings
-                )
+            ContrastDialogDelegate(
+                sysuiDialogFactory,
+                mainExecutor,
+                mockUiModeManager,
+                mockUserTracker,
+                mockSecureSettings
+            )
+
+        mContrastDialogDelegate.createDialog()
+        val viewCaptor = ArgumentCaptor.forClass(View::class.java)
+        verify(sysuiDialog).setView(viewCaptor.capture())
+        whenever(sysuiDialog.requireViewById(anyInt()) as View?).then {
+            viewCaptor.value.requireViewById(it.getArgument(0))
+        }
     }
 
     @Test
