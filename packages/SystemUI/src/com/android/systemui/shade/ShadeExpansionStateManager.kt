@@ -32,6 +32,7 @@ import javax.inject.Inject
  * TODO(b/200063118): Make this class the one source of truth for the state of panel expansion.
  */
 @SysUISingleton
+@Deprecated("Use ShadeInteractor instead")
 class ShadeExpansionStateManager @Inject constructor() {
 
     private val expansionListeners = CopyOnWriteArrayList<ShadeExpansionListener>()
@@ -49,6 +50,7 @@ class ShadeExpansionStateManager @Inject constructor() {
      *
      * @see #addExpansionListener
      */
+    @Deprecated("Use ShadeInteractor instead")
     fun addExpansionListener(listener: ShadeExpansionListener): ShadeExpansionChangeEvent {
         expansionListeners.add(listener)
         return ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
@@ -60,6 +62,7 @@ class ShadeExpansionStateManager @Inject constructor() {
     }
 
     /** Adds a listener that will be notified when the panel state has changed. */
+    @Deprecated("Use ShadeInteractor instead")
     fun addStateListener(listener: ShadeStateListener) {
         stateListeners.add(listener)
     }
