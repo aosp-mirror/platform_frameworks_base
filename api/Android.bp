@@ -31,12 +31,10 @@ bootstrap_go_package {
         "blueprint",
         "soong",
         "soong-android",
-        "soong-bp2build",
         "soong-genrule",
         "soong-java",
     ],
     srcs: ["api.go"],
-    testSrcs: ["api_test.go"],
     pluginFor: ["soong_build"],
 }
 
