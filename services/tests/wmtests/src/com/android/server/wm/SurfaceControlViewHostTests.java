@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.server.wm.CtsWindowInfoUtils.dumpWindowsOnScreen;
+import static android.server.wm.CtsWindowInfoUtils.assertAndDumpWindowState;
 import static android.server.wm.CtsWindowInfoUtils.waitForWindowFocus;
 import static android.server.wm.CtsWindowInfoUtils.waitForWindowVisible;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -129,37 +129,22 @@ public class SurfaceControlViewHostTests {
             mScvh2.setView(mView2, lp2);
         });
 
-        boolean wasVisible = waitForWindowVisible(mView1);
-        if (!wasVisible) {
-            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows");
-        }
-        assertTrue("Failed to wait for view1", wasVisible);
-
-        wasVisible = waitForWindowVisible(mView2);
-        if (!wasVisible) {
-            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-not visible");
-        }
-        assertTrue("Failed to wait for view2", wasVisible);
+        assertAndDumpWindowState(TAG, "Failed to wait for view1", waitForWindowVisible(mView1));
+        assertAndDumpWindowState(TAG, "Failed to wait for view2", waitForWindowVisible(mView2));
 
         IWindow window = IWindow.Stub.asInterface(mSurfaceView.getWindowToken());
 
         WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
                 mScvh1.getInputTransferToken(), true);
 
-        boolean gainedFocus = waitForWindowFocus(mView1, true);
-        if (!gainedFocus) {
-            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-view1 not focus");
-        }
-        assertTrue("Failed to gain focus for view1", gainedFocus);
+        assertAndDumpWindowState(TAG, "Failed to wait for view1 focus",
+                waitForWindowFocus(mView1, true));
 
         WindowManagerGlobal.getWindowSession().grantEmbeddedWindowFocus(window,
                 mScvh2.getInputTransferToken(), true);
 
-        gainedFocus = waitForWindowFocus(mView2, true);
-        if (!gainedFocus) {
-            dumpWindowsOnScreen(TAG, "requestFocusWithMultipleWindows-view2 not focus");
-        }
-        assertTrue("Failed to gain focus for view2", gainedFocus);
+        assertAndDumpWindowState(TAG, "Failed to wait for view2 focus",
+                waitForWindowFocus(mView2, true));
     }
 
     private static class TestWindowlessWindowManager extends WindowlessWindowManager {
