@@ -25,6 +25,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.Manifest;
 import android.annotation.BytesLong;
 import android.annotation.CallbackExecutor;
+import android.annotation.CurrentTimeMillisLong;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.LongDef;
@@ -18706,49 +18707,91 @@ public class TelephonyManager {
      * call diagnostic data
      * @hide
      */
-    public static class EmergencyCallDiagnosticParams {
+    @SystemApi
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
+    public static final class EmergencyCallDiagnosticParams {
+        public static final class Builder {
+            private boolean mCollectTelecomDumpSys;
+            private boolean mCollectTelephonyDumpsys;
 
-       private boolean mCollectTelecomDumpSys;
-       private boolean mCollectTelephonyDumpsys;
-       private boolean mCollectLogcat;
+            // If this is set to a value other than -1L, then the logcat collection is enabled.
+            // Logcat lines with this time or greater are collected how much is collected is
+            // dependent on internal implementation. Time represented as milliseconds since boot.
+            private long mLogcatStartTimeMillis = sUnsetLogcatStartTime;
 
-        //logcat lines with this time or greater are collected
-        //how much is collected is dependent on internal implementation.
-        //Time represented as milliseconds since January 1, 1970 UTC
+            /**
+             * Allows enabling of telecom dumpsys collection.
+             * @param collectTelecomDumpsys Determines whether telecom dumpsys should be collected.
+             * @return Builder instance corresponding to the configured call diagnostic params.
+             */
+            public @NonNull Builder setTelecomDumpSysCollectionEnabled(
+                    boolean collectTelecomDumpsys) {
+                mCollectTelecomDumpSys = collectTelecomDumpsys;
+                return this;
+            }
+
+            /**
+             * Allows enabling of telephony dumpsys collection.
+             * @param collectTelephonyDumpsys Determines if telephony dumpsys should be collected.
+             * @return Builder instance corresponding to the configured call diagnostic params.
+             */
+            public @NonNull Builder setTelephonyDumpSysCollectionEnabled(
+                    boolean collectTelephonyDumpsys) {
+                mCollectTelephonyDumpsys = collectTelephonyDumpsys;
+                return this;
+            }
+
+            /**
+             * Allows enabling of logcat (system,radio) collection.
+             * @param startTimeMillis Enables logcat collection as of the indicated timestamp.
+             * @return Builder instance corresponding to the configured call diagnostic params.
+             */
+            public @NonNull Builder setLogcatCollectionStartTimeMillis(
+                    @CurrentTimeMillisLong long startTimeMillis) {
+                mLogcatStartTimeMillis = startTimeMillis;
+                return this;
+            }
+
+            /**
+             * Build the EmergencyCallDiagnosticParams from the provided Builder config.
+             * @return {@link EmergencyCallDiagnosticParams} instance from provided builder.
+             */
+            public @NonNull EmergencyCallDiagnosticParams build() {
+                return new EmergencyCallDiagnosticParams(mCollectTelecomDumpSys,
+                        mCollectTelephonyDumpsys, mLogcatStartTimeMillis);
+            }
+        }
+
+        private boolean mCollectTelecomDumpSys;
+        private boolean mCollectTelephonyDumpsys;
+        private boolean mCollectLogcat;
         private long mLogcatStartTimeMillis;
 
+        private static long sUnsetLogcatStartTime = -1L;
+
+        private EmergencyCallDiagnosticParams(boolean collectTelecomDumpSys,
+                boolean collectTelephonyDumpsys, long logcatStartTimeMillis) {
+            mCollectTelecomDumpSys = collectTelecomDumpSys;
+            mCollectTelephonyDumpsys = collectTelephonyDumpsys;
+            mLogcatStartTimeMillis = logcatStartTimeMillis;
+            mCollectLogcat = logcatStartTimeMillis != sUnsetLogcatStartTime;
+        }
 
         public boolean isTelecomDumpSysCollectionEnabled() {
             return mCollectTelecomDumpSys;
-        }
-
-        public void setTelecomDumpSysCollection(boolean collectTelecomDumpSys) {
-            mCollectTelecomDumpSys = collectTelecomDumpSys;
         }
 
         public boolean isTelephonyDumpSysCollectionEnabled() {
             return mCollectTelephonyDumpsys;
         }
 
-        public void setTelephonyDumpSysCollection(boolean collectTelephonyDumpsys) {
-            mCollectTelephonyDumpsys = collectTelephonyDumpsys;
-        }
-
         public boolean isLogcatCollectionEnabled() {
             return mCollectLogcat;
         }
 
-        public long getLogcatStartTime()
+        public long getLogcatCollectionStartTimeMillis()
         {
             return mLogcatStartTimeMillis;
-        }
-
-        public void setLogcatCollection(boolean collectLogcat, long startTimeMillis) {
-            mCollectLogcat = collectLogcat;
-            if(mCollectLogcat)
-            {
-                mLogcatStartTimeMillis = startTimeMillis;
-            }
         }
 
         @Override
@@ -18766,11 +18809,12 @@ public class TelephonyManager {
      * Request telephony to persist state for debugging emergency call failures.
      *
      * @param dropboxTag Tag to use when persisting data to dropbox service.
-     *
-     * @see params Parameters controlling what is collected
+     * @param params Parameters controlling what is collected.
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(com.android.server.telecom.flags.Flags.FLAG_TELECOM_RESOLVE_HIDDEN_DEPENDENCIES)
     @RequiresPermission(android.Manifest.permission.DUMP)
     public void persistEmergencyCallDiagnosticData(@NonNull String dropboxTag,
             @NonNull EmergencyCallDiagnosticParams params) {
@@ -18783,7 +18827,7 @@ public class TelephonyManager {
             if (telephony != null) {
                 telephony.persistEmergencyCallDiagnosticData(dropboxTag,
                         params.isLogcatCollectionEnabled(),
-                        params.getLogcatStartTime(),
+                        params.getLogcatCollectionStartTimeMillis(),
                         params.isTelecomDumpSysCollectionEnabled(),
                         params.isTelephonyDumpSysCollectionEnabled());
             }
