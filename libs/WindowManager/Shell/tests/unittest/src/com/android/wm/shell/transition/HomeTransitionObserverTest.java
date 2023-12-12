@@ -40,12 +40,12 @@ import android.os.RemoteException;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionInfo.TransitionMode;
-import android.window.WindowOrganizer;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
@@ -68,7 +68,7 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class HomeTransitionObserverTest extends ShellTestCase {
 
-    private final WindowOrganizer mOrganizer = mock(WindowOrganizer.class);
+    private final ShellTaskOrganizer mOrganizer = mock(ShellTaskOrganizer.class);
     private final TransactionPool mTransactionPool = mock(TransactionPool.class);
     private final Context mContext =
             InstrumentationRegistry.getInstrumentation().getTargetContext();
