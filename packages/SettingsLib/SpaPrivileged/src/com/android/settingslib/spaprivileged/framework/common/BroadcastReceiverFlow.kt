@@ -20,12 +20,16 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
+
+private const val TAG = "BroadcastReceiverFlow"
 
 /**
  * A [BroadcastReceiver] flow for the given [intentFilter].
@@ -39,4 +43,6 @@ fun Context.broadcastReceiverFlow(intentFilter: IntentFilter): Flow<Intent> = ca
     registerReceiver(broadcastReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED)
 
     awaitClose { unregisterReceiver(broadcastReceiver) }
+}.catch { e ->
+    Log.e(TAG, "Error while broadcastReceiverFlow", e)
 }.conflate().flowOn(Dispatchers.Default)
