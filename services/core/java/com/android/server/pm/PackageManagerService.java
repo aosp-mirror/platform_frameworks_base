@@ -3044,6 +3044,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
     }
 
+    @NonNull
     int[] resolveUserIds(int userId) {
         return (userId == UserHandle.USER_ALL) ? mUserManager.getUserIds() : new int[] { userId };
     }
