@@ -20,6 +20,7 @@ import static android.accessibilityservice.util.AccessibilityUtils.getFilteredHt
 import static android.accessibilityservice.util.AccessibilityUtils.loadSafeAnimatedImage;
 import static android.content.pm.PackageManager.FEATURE_FINGERPRINT;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
@@ -53,6 +54,7 @@ import android.view.InputDevice;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.accessibility.Flags;
 
 import com.android.internal.R;
 import com.android.internal.compat.IPlatformCompat;
@@ -630,7 +632,8 @@ public class AccessibilityServiceInfo implements Parcelable {
             InputDevice.SOURCE_TOUCH_NAVIGATION,
             InputDevice.SOURCE_ROTARY_ENCODER,
             InputDevice.SOURCE_JOYSTICK,
-            InputDevice.SOURCE_SENSOR
+            InputDevice.SOURCE_SENSOR,
+            InputDevice.SOURCE_TOUCHSCREEN
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface MotionEventSources {}
@@ -641,6 +644,8 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     @MotionEventSources
     private int mMotionEventSources = 0;
+
+    private int mObservedMotionEventSources = 0;
 
     /**
      * Creates a new instance.
@@ -817,6 +822,9 @@ public class AccessibilityServiceInfo implements Parcelable {
         mInteractiveUiTimeout = other.mInteractiveUiTimeout;
         flags = other.flags;
         mMotionEventSources = other.mMotionEventSources;
+        if (Flags.motionEventObserving()) {
+            setObservedMotionEventSources(other.mObservedMotionEventSources);
+        }
         // NOTE: Ensure that only properties that are safe to be modified by the service itself
         // are included here (regardless of hidden setters, etc.).
     }
@@ -1024,16 +1032,75 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public void setMotionEventSources(@MotionEventSources int motionEventSources) {
         mMotionEventSources = motionEventSources;
+        mObservedMotionEventSources = 0;
+    }
+
+    /**
+     * Sets the bit mask of {@link android.view.InputDevice} sources that the accessibility service
+     * wants to observe generic {@link android.view.MotionEvent}s from if it has already requested
+     * to listen to them using {@link #setMotionEventSources(int)}. Events from these sources will
+     * be sent to the rest of the input pipeline without being consumed by accessibility services.
+     * This service will still be able to see them.
+     *
+     * <p><strong>Note:</strong> you will need to call this function every time you call {@link
+     * #setMotionEventSources(int)}. Calling {@link #setMotionEventSources(int)} clears the list of
+     * observed motion event sources for this service.
+     *
+     * <p><strong>Note:</strong> {@link android.view.InputDevice} sources contain source class bits
+     * that complicate bitwise flag removal operations. To remove a specific source you should
+     * rebuild the entire value using bitwise OR operations on the individual source constants.
+     *
+     * <p>Including an {@link android.view.InputDevice} source that does not send {@link
+     * android.view.MotionEvent}s is effectively a no-op for that source, since you will not receive
+     * any events from that source.
+     *
+     * <p><strong>Note:</strong> Calling this function with a source that has not been listened to
+     * using {@link #setMotionEventSources(int)} will throw an exception.
+     *
+     * @see AccessibilityService#onMotionEvent
+     * @see #MotionEventSources
+     * @see #setMotionEventSources(int)
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MOTION_EVENT_OBSERVING)
+    @TestApi
+    public void setObservedMotionEventSources(int observedMotionEventSources) {
+        // Confirm that any sources requested here have already been requested for listening.
+        if ((observedMotionEventSources & ~mMotionEventSources) != 0) {
+            String message =
+                    String.format(
+                            "Requested motion event sources for listening = 0x%x but requested"
+                                    + " motion event sources for observing = 0x%x.",
+                            mMotionEventSources, observedMotionEventSources);
+            throw new IllegalArgumentException(message);
+        }
+        mObservedMotionEventSources = observedMotionEventSources;
+    }
+
+    /**
+     * Returns the bit mask of {@link android.view.InputDevice} sources that the accessibility
+     * service wants to observe generic {@link android.view.MotionEvent}s from if it has already
+     * requested to listen to them using {@link #setMotionEventSources(int)}. Events from these
+     * sources will be sent to the rest of the input pipeline without being consumed by
+     * accessibility services. This service will still be able to see them.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_MOTION_EVENT_OBSERVING)
+    @MotionEventSources
+    @TestApi
+    public int getObservedMotionEventSources() {
+        return mObservedMotionEventSources;
     }
 
     /**
      * The localized summary of the accessibility service.
-     * <p>
-     *    <strong>Statically set from
-     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
-     * </p>
-     * @return The localized summary if available, and {@code null} if a summary
-     * has not been provided.
+     *
+     * <p><strong>Statically set from {@link AccessibilityService#SERVICE_META_DATA
+     * meta-data}.</strong>
+     *
+     * @return The localized summary if available, and {@code null} if a summary has not been
+     *     provided.
      */
     public CharSequence loadSummary(PackageManager packageManager) {
         if (mSummaryResId == 0) {
@@ -1260,6 +1327,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeString(mTileServiceName);
         parcel.writeInt(mIntroResId);
         parcel.writeInt(mMotionEventSources);
+        parcel.writeInt(mObservedMotionEventSources);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -1285,6 +1353,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         mTileServiceName = parcel.readString();
         mIntroResId = parcel.readInt();
         mMotionEventSources = parcel.readInt();
+        // use the setter here because it throws an exception for invalid values.
+        setObservedMotionEventSources(parcel.readInt());
     }
 
     @Override

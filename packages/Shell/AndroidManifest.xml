@@ -879,6 +879,9 @@
 
     <uses-permission android:name="android.permission.GET_BINDING_UID_IMPORTANCE" />
 
+    <!-- Permissions required for CTS test - CtsAccessibilityServiceTestCases-->
+    <uses-permission android:name="android.permission.ACCESSIBILITY_MOTION_EVENT_OBSERVING" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
