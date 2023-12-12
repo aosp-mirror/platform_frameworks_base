@@ -22,7 +22,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
 import com.android.packageinstaller.v2.model.UninstallRepository
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage
+import com.android.packageinstaller.v2.model.UninstallStage
 
 class UninstallViewModel(application: Application, val repository: UninstallRepository) :
     AndroidViewModel(application) {

@@ -28,13 +28,13 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModelProvider
+import com.android.packageinstaller.v2.model.UninstallAborted
+import com.android.packageinstaller.v2.model.UninstallFailed
 import com.android.packageinstaller.v2.model.UninstallRepository
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallFailed
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallSuccess
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUninstalling
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUserActionRequired
+import com.android.packageinstaller.v2.model.UninstallStage
+import com.android.packageinstaller.v2.model.UninstallSuccess
+import com.android.packageinstaller.v2.model.UninstallUninstalling
+import com.android.packageinstaller.v2.model.UninstallUserActionRequired
 import com.android.packageinstaller.v2.ui.fragments.UninstallConfirmationFragment
 import com.android.packageinstaller.v2.ui.fragments.UninstallErrorFragment
 import com.android.packageinstaller.v2.ui.fragments.UninstallUninstallingFragment
@@ -117,8 +117,10 @@ class UninstallLaunch : FragmentActivity(), UninstallActionListener {
 
             UninstallStage.STAGE_FAILED -> {
                 val failed = uninstallStage as UninstallFailed
-                if (!failed.returnResult()) {
-                    notificationManager!!.notify(failed.uninstallId, failed.uninstallNotification)
+                if (!failed.returnResult) {
+                    notificationManager!!.notify(
+                        failed.uninstallNotificationId!!, failed.uninstallNotification
+                    )
                 }
                 setResult(failed.activityResultCode, failed.resultIntent, true)
             }

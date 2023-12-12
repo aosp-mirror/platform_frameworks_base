@@ -50,13 +50,6 @@ import com.android.packageinstaller.v2.model.PackageUtil.getMaxTargetSdkVersionF
 import com.android.packageinstaller.v2.model.PackageUtil.getPackageNameForUid
 import com.android.packageinstaller.v2.model.PackageUtil.isPermissionGranted
 import com.android.packageinstaller.v2.model.PackageUtil.isProfileOfOrSame
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallAborted
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallFailed
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallReady
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallStage
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallSuccess
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUninstalling
-import com.android.packageinstaller.v2.model.uninstallstagedata.UninstallUserActionRequired
 
 class UninstallRepository(private val context: Context) {
 
