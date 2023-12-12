@@ -120,17 +120,13 @@ private fun shouldComposeMovableElement(
     scene: SceneKey,
     element: Element,
 ): Boolean {
-    val transitionState = layoutImpl.state.transitionState
-
-    // If we are idle, there is only one [scene] that is composed so we can compose our movable
-    // content here.
-    if (transitionState is TransitionState.Idle) {
-        check(transitionState.currentScene == scene)
-        return true
-    }
-
-    val fromScene = (transitionState as TransitionState.Transition).fromScene
-    val toScene = transitionState.toScene
+    val transition =
+        layoutImpl.state.currentTransition
+        // If we are idle, there is only one [scene] that is composed so we can compose our
+        // movable content here.
+        ?: return true
+    val fromScene = transition.fromScene
+    val toScene = transition.toScene
 
     val fromReady = layoutImpl.isSceneReady(fromScene)
     val toReady = layoutImpl.isSceneReady(toScene)
@@ -181,10 +177,10 @@ private fun shouldComposeMovableElement(
 
     return shouldDrawOrComposeSharedElement(
         layoutImpl,
-        transitionState,
+        transition,
         scene,
         element.key,
-        sharedElementTransformation(layoutImpl, transitionState, element.key),
+        sharedElementTransformation(layoutImpl.state, transition, element.key),
     )
 }
 

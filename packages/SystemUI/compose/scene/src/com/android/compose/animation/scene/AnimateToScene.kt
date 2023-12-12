@@ -28,11 +28,11 @@ import kotlinx.coroutines.launch
  * the currently running transition, if there is one.
  */
 internal fun CoroutineScope.animateToScene(
-    layoutImpl: SceneTransitionLayoutImpl,
+    layoutState: SceneTransitionLayoutStateImpl,
     target: SceneKey,
 ) {
-    val state = layoutImpl.state.transitionState
-    if (state.currentScene == target) {
+    val transitionState = layoutState.transitionState
+    if (transitionState.currentScene == target) {
         // This can happen in 3 different situations, for which there isn't anything else to do:
         //  1. There is no ongoing transition and [target] is already the current scene.
         //  2. The user is swiping to [target] from another scene and released their pointer such
@@ -44,44 +44,47 @@ internal fun CoroutineScope.animateToScene(
         return
     }
 
-    when (state) {
-        is TransitionState.Idle -> animate(layoutImpl, target)
+    when (transitionState) {
+        is TransitionState.Idle -> animate(layoutState, target)
         is TransitionState.Transition -> {
             // A transition is currently running: first check whether `transition.toScene` or
             // `transition.fromScene` is the same as our target scene, in which case the transition
             // can be accelerated or reversed to end up in the target state.
 
-            if (state.toScene == target) {
+            if (transitionState.toScene == target) {
                 // The user is currently swiping to [target] but didn't release their pointer yet:
                 // animate the progress to `1`.
 
-                check(state.fromScene == state.currentScene)
-                val progress = state.progress
+                check(transitionState.fromScene == transitionState.currentScene)
+                val progress = transitionState.progress
                 if ((1f - progress).absoluteValue < ProgressVisibilityThreshold) {
-                    // The transition is already finished (progress ~= 1): no need to animate.
-                    layoutImpl.state.transitionState = TransitionState.Idle(state.currentScene)
+                    // The transition is already finished (progress ~= 1): no need to animate. We
+                    // finish the current transition early to make sure that the current state
+                    // change is committed.
+                    layoutState.finishTransition(transitionState, transitionState.currentScene)
                 } else {
                     // The transition is in progress: start the canned animation at the same
                     // progress as it was in.
                     // TODO(b/290184746): Also take the current velocity into account.
-                    animate(layoutImpl, target, startProgress = progress)
+                    animate(layoutState, target, startProgress = progress)
                 }
 
                 return
             }
 
-            if (state.fromScene == target) {
+            if (transitionState.fromScene == target) {
                 // There is a transition from [target] to another scene: simply animate the same
                 // transition progress to `0`.
 
-                check(state.toScene == state.currentScene)
-                val progress = state.progress
+                check(transitionState.toScene == transitionState.currentScene)
+                val progress = transitionState.progress
                 if (progress.absoluteValue < ProgressVisibilityThreshold) {
-                    // The transition is at progress ~= 0: no need to animate.
-                    layoutImpl.state.transitionState = TransitionState.Idle(state.currentScene)
+                    // The transition is at progress ~= 0: no need to animate.We finish the current
+                    // transition early to make sure that the current state change is committed.
+                    layoutState.finishTransition(transitionState, transitionState.currentScene)
                 } else {
                     // TODO(b/290184746): Also take the current velocity into account.
-                    animate(layoutImpl, target, startProgress = progress, reversed = true)
+                    animate(layoutState, target, startProgress = progress, reversed = true)
                 }
 
                 return
@@ -89,26 +92,21 @@ internal fun CoroutineScope.animateToScene(
 
             // Generic interruption; the current transition is neither from or to [target].
             // TODO(b/290930950): Better handle interruptions here.
-            animate(layoutImpl, target)
+            animate(layoutState, target)
         }
     }
 }
 
 private fun CoroutineScope.animate(
-    layoutImpl: SceneTransitionLayoutImpl,
+    layoutState: SceneTransitionLayoutStateImpl,
     target: SceneKey,
     startProgress: Float = 0f,
     reversed: Boolean = false,
 ) {
-    val fromScene = layoutImpl.state.transitionState.currentScene
+    val fromScene = layoutState.transitionState.currentScene
     val isUserInput =
-        (layoutImpl.state.transitionState as? TransitionState.Transition)?.isInitiatedByUserInput
+        (layoutState.transitionState as? TransitionState.Transition)?.isInitiatedByUserInput
             ?: false
-
-    val animationSpec = layoutImpl.transitions.transitionSpec(fromScene, target).spec
-    val visibilityThreshold =
-        (animationSpec as? SpringSpec)?.visibilityThreshold ?: ProgressVisibilityThreshold
-    val animatable = Animatable(startProgress, visibilityThreshold = visibilityThreshold)
 
     val targetProgress = if (reversed) 0f else 1f
     val transition =
@@ -119,7 +117,6 @@ private fun CoroutineScope.animate(
                 currentScene = target,
                 isInitiatedByUserInput = isUserInput,
                 isUserInputOngoing = false,
-                animatable = animatable,
             )
         } else {
             OneOffTransition(
@@ -128,21 +125,27 @@ private fun CoroutineScope.animate(
                 currentScene = target,
                 isInitiatedByUserInput = isUserInput,
                 isUserInputOngoing = false,
-                animatable = animatable,
             )
         }
 
-    // Change the current layout state to use this new transition.
-    layoutImpl.state.transitionState = transition
+    // Change the current layout state to start this new transition. This will compute the
+    // TransformationSpec associated to this transition, which we need to initialize the Animatable
+    // that will actually animate it.
+    layoutState.startTransition(transition)
+
+    // The transformation now contains the spec that we should use to instantiate the Animatable.
+    val animationSpec = layoutState.transformationSpec.progressSpec
+    val visibilityThreshold =
+        (animationSpec as? SpringSpec)?.visibilityThreshold ?: ProgressVisibilityThreshold
+    val animatable =
+        Animatable(startProgress, visibilityThreshold = visibilityThreshold).also {
+            transition.animatable = it
+        }
 
     // Animate the progress to its target value.
     launch {
         animatable.animateTo(targetProgress, animationSpec)
-
-        // Unless some other external state change happened, the state should now be idle.
-        if (layoutImpl.state.transitionState == transition) {
-            layoutImpl.state.transitionState = TransitionState.Idle(target)
-        }
+        layoutState.finishTransition(transition, target)
     }
 }
 
@@ -152,8 +155,16 @@ private class OneOffTransition(
     override val currentScene: SceneKey,
     override val isInitiatedByUserInput: Boolean,
     override val isUserInputOngoing: Boolean,
-    private val animatable: Animatable<Float, AnimationVector1D>,
 ) : TransitionState.Transition(fromScene, toScene) {
+    /**
+     * The animatable used to animate this transition.
+     *
+     * Note: This is lateinit because we need to first create this Transition object so that
+     * [SceneTransitionLayoutState] can compute the transformations and animation spec associated to
+     * it, which is need to initialize this Animatable.
+     */
+    lateinit var animatable: Animatable<Float, AnimationVector1D>
+
     override val progress: Float
         get() = animatable.value
 }

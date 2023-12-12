@@ -22,13 +22,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -40,36 +35,40 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.channels.Channel
 
 @Stable
 internal class SceneTransitionLayoutImpl(
-    onChangeScene: (SceneKey) -> Unit,
+    internal val state: SceneTransitionLayoutStateImpl,
+    internal var onChangeScene: (SceneKey) -> Unit,
+    internal var density: Density,
+    internal var edgeDetector: EdgeDetector,
+    internal var transitionInterceptionThreshold: Float,
     builder: SceneTransitionLayoutScope.() -> Unit,
-    transitions: SceneTransitions,
-    internal val state: SceneTransitionLayoutState,
-    density: Density,
-    edgeDetector: EdgeDetector,
-    transitionInterceptionThreshold: Float,
     coroutineScope: CoroutineScope,
 ) {
-    internal val scenes = SnapshotStateMap<SceneKey, Scene>()
+    internal val scenes = mutableMapOf<SceneKey, Scene>()
+
+    /**
+     * The map of [Element]s.
+     *
+     * Note that this map is *mutated* directly during composition, so it is a [SnapshotStateMap] to
+     * make sure that mutations are reverted if composition is cancelled.
+     */
     internal val elements = SnapshotStateMap<ElementKey, Element>()
 
-    /** The scenes that are "ready", i.e. they were composed and fully laid-out at least once. */
+    /**
+     * The scenes that are "ready", i.e. they were composed and fully laid-out at least once.
+     *
+     * Note that this map is *read* during composition, so it is a [SnapshotStateMap] to make sure
+     * that we recompose when modifications are made to this map.
+     */
     private val readyScenes = SnapshotStateMap<SceneKey, Boolean>()
-
-    internal var onChangeScene by mutableStateOf(onChangeScene)
-    internal var transitions by mutableStateOf(transitions)
-    internal var density: Density by mutableStateOf(density)
-    internal var edgeDetector by mutableStateOf(edgeDetector)
-    internal var transitionInterceptionThreshold by mutableStateOf(transitionInterceptionThreshold)
 
     private val horizontalGestureHandler: SceneGestureHandler
     private val verticalGestureHandler: SceneGestureHandler
 
     init {
-        setScenes(builder)
+        updateScenes(builder)
 
         // SceneGestureHandler must wait for the scenes to be initialized, in order to access the
         // current scene (required for SwipeTransition).
@@ -98,7 +97,7 @@ internal class SceneTransitionLayoutImpl(
         return scenes[key] ?: error("Scene $key is not configured")
     }
 
-    internal fun setScenes(builder: SceneTransitionLayoutScope.() -> Unit) {
+    internal fun updateScenes(builder: SceneTransitionLayoutScope.() -> Unit) {
         // Keep a reference of the current scenes. After processing [builder], the scenes that were
         // not configured will be removed.
         val scenesToRemove = scenes.keys.toMutableSet()
@@ -141,20 +140,6 @@ internal class SceneTransitionLayoutImpl(
     }
 
     @Composable
-    internal fun setCurrentScene(key: SceneKey) {
-        val channel = remember { Channel<SceneKey>(Channel.CONFLATED) }
-        SideEffect { channel.trySend(key) }
-        LaunchedEffect(channel) {
-            for (newKey in channel) {
-                // Inspired by AnimateAsState.kt: let's poll the last value to avoid being one frame
-                // late.
-                val newKey = channel.tryReceive().getOrNull() ?: newKey
-                animateToScene(this@SceneTransitionLayoutImpl, newKey)
-            }
-        }
-    }
-
-    @Composable
     @OptIn(ExperimentalComposeUiApi::class)
     internal fun Content(modifier: Modifier) {
         Box(
@@ -171,14 +156,14 @@ internal class SceneTransitionLayoutImpl(
 
                     val width: Int
                     val height: Int
-                    val state = state.transitionState
-                    if (state !is TransitionState.Transition) {
+                    val transition = state.currentTransition
+                    if (transition == null) {
                         width = placeable.width
                         height = placeable.height
                     } else {
                         // Interpolate the size.
-                        val fromSize = scene(state.fromScene).targetSize
-                        val toSize = scene(state.toScene).targetSize
+                        val fromSize = scene(transition.fromScene).targetSize
+                        val toSize = scene(transition.toScene).targetSize
 
                         // Optimization: make sure we don't read state.progress if fromSize ==
                         // toSize to avoid running this code every frame when the layout size does
@@ -187,7 +172,7 @@ internal class SceneTransitionLayoutImpl(
                             width = fromSize.width
                             height = fromSize.height
                         } else {
-                            val size = lerp(fromSize, toSize, state.progress)
+                            val size = lerp(fromSize, toSize, transition.progress)
                             width = size.width.coerceAtLeast(0)
                             height = size.height.coerceAtLeast(0)
                         }
@@ -228,13 +213,12 @@ internal class SceneTransitionLayoutImpl(
 
                             scene.Content(
                                 Modifier.drawWithContent {
-                                    when (val state = state.transitionState) {
-                                        is TransitionState.Idle -> drawContent()
-                                        is TransitionState.Transition -> {
-                                            // Don't draw scenes that are not ready yet.
-                                            if (readyScenes.containsKey(key)) {
-                                                drawContent()
-                                            }
+                                    if (state.currentTransition == null) {
+                                        drawContent()
+                                    } else {
+                                        // Don't draw scenes that are not ready yet.
+                                        if (readyScenes.containsKey(key)) {
+                                            drawContent()
                                         }
                                     }
                                 }
