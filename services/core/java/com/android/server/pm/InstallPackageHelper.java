@@ -2450,9 +2450,9 @@ final class InstallPackageHelper {
             // Hardcode previousAppId to 0 to disable any data migration (http://b/221088088)
             mAppDataHelper.prepareAppDataPostCommitLIF(ps, 0, installRequest.getNewUsers());
             if (installRequest.isClearCodeCache()) {
-                mAppDataHelper.clearAppDataLeafLIF(packageName, ps.getVolumeUuid(),
-                        UserHandle.USER_ALL, FLAG_STORAGE_DE | FLAG_STORAGE_CE
-                        | FLAG_STORAGE_EXTERNAL | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
+                mAppDataHelper.clearAppDataLIF(ps.getPkg(), UserHandle.USER_ALL,
+                        FLAG_STORAGE_DE | FLAG_STORAGE_CE | FLAG_STORAGE_EXTERNAL
+                                | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
             }
             if (installRequest.isInstallReplace() && pkg != null) {
                 mDexManager.notifyPackageUpdated(packageName,
