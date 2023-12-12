@@ -433,11 +433,14 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (mStorage.hasChildProfileLock(profileUserId)) {
             return;
         }
+        final UserInfo parent = mUserManager.getProfileParent(profileUserId);
+        if (parent == null) {
+            return;
+        }
         // If parent does not have a screen lock, simply clear credential from the profile,
         // to maintain the invariant that unified profile should always have the same secure state
         // as its parent.
-        final int parentId = mUserManager.getProfileParent(profileUserId).id;
-        if (!isUserSecure(parentId) && !profileUserPassword.isNone()) {
+        if (!isUserSecure(parent.id) && !profileUserPassword.isNone()) {
             Slogf.i(TAG, "Clearing password for profile user %d to match parent", profileUserId);
             setLockCredentialInternal(LockscreenCredential.createNone(), profileUserPassword,
                     profileUserId, /* isLockTiedToParent= */ true);
@@ -448,7 +451,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         // This can only happen during an upgrade path where SID is yet to be
         // generated when the user unlocks for the first time.
         try {
-            parentSid = getGateKeeperService().getSecureUserId(parentId);
+            parentSid = getGateKeeperService().getSecureUserId(parent.id);
             if (parentSid == 0) {
                 return;
             }
@@ -459,7 +462,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         try (LockscreenCredential unifiedProfilePassword = generateRandomProfilePassword()) {
             setLockCredentialInternal(unifiedProfilePassword, profileUserPassword, profileUserId,
                     /* isLockTiedToParent= */ true);
-            tieProfileLockToParent(profileUserId, parentId, unifiedProfilePassword);
+            tieProfileLockToParent(profileUserId, parent.id, unifiedProfilePassword);
             mManagedProfilePasswordCache.storePassword(profileUserId, unifiedProfilePassword,
                     parentSid);
         }
