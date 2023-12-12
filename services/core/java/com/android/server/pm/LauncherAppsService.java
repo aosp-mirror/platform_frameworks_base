@@ -819,7 +819,7 @@ public class LauncherAppsService extends SystemService {
             return new LauncherActivityInfoInternal(
                     activityInfo,
                     new IncrementalStatesInfo(
-                            false /* isLoading */, 1 /* progress */, 0 /* loadingCompletedTime */),
+                            false /* isLoading */, 0 /* progress */, 0 /* loadingCompletedTime */),
                     user);
         }
 
