@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs.tiles.base.interactor
+package android.graphics.drawable
 
-import android.annotation.WorkerThread
+import android.graphics.Canvas
+import android.graphics.ColorFilter
+import android.graphics.PixelFormat
 
-interface QSTileUserActionInteractor<DATA_TYPE> {
-    /**
-     * Processes user input based on [QSTileInput.userId], [QSTileInput.action], and
-     * [QSTileInput.data]. It's guaranteed that [QSTileInput.userId] is the same as the id passed to
-     * [QSTileDataInteractor] to get [QSTileInput.data].
-     *
-     * It's safe to run long running computations inside this function.
-     */
-    @WorkerThread suspend fun handleInput(input: QSTileInput<DATA_TYPE>)
+/**
+ * Stub drawable that does nothing. It's to be used in tests as a mock drawable and checked for the
+ * same instance
+ */
+class TestStubDrawable : Drawable() {
+
+    override fun draw(canvas: Canvas) = Unit
+    override fun setAlpha(alpha: Int) = Unit
+    override fun setColorFilter(colorFilter: ColorFilter?) = Unit
+    override fun getOpacity(): Int = PixelFormat.UNKNOWN
+
+    override fun equals(other: Any?): Boolean = this === other
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.impl.saver.domain
 
+import android.graphics.drawable.TestStubDrawable
 import android.widget.Switch
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -37,7 +38,17 @@ class DataSaverTileMapperTest : SysuiTestCase() {
     private val dataSaverTileConfig = kosmos.qsDataSaverTileConfig
 
     // Using lazy (versus =) to make sure we override the right context -- see b/311612168
-    private val mapper by lazy { DataSaverTileMapper(context.orCreateTestableResources.resources) }
+    private val mapper by lazy {
+        DataSaverTileMapper(
+            context.orCreateTestableResources
+                .apply {
+                    addOverride(R.drawable.qs_data_saver_icon_off, TestStubDrawable())
+                    addOverride(R.drawable.qs_data_saver_icon_on, TestStubDrawable())
+                }
+                .resources,
+            context.theme
+        )
+    }
 
     @Test
     fun activeStateMatchesEnabledModel() {
@@ -80,7 +91,7 @@ class DataSaverTileMapperTest : SysuiTestCase() {
             else context.resources.getStringArray(R.array.tile_states_saver)[0]
 
         return QSTileState(
-            { Icon.Resource(iconRes, null) },
+            { Icon.Loaded(context.getDrawable(iconRes)!!, null) },
             label,
             activationState,
             secondaryLabel,
