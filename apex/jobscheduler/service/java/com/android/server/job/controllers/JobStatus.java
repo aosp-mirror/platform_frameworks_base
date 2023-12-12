@@ -106,11 +106,8 @@ public final class JobStatus {
     public static final long NO_LATEST_RUNTIME = Long.MAX_VALUE;
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static final int CONSTRAINT_CHARGING = JobInfo.CONSTRAINT_FLAG_CHARGING; // 1 < 0
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static final int CONSTRAINT_IDLE = JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE;  // 1 << 2
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public static final int CONSTRAINT_BATTERY_NOT_LOW =
             JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW; // 1 << 1
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
@@ -2194,7 +2191,7 @@ public final class JobStatus {
      * @return Whether or not this job would be ready to run if it had the specified constraint
      * granted, based on its requirements.
      */
-    boolean wouldBeReadyWithConstraint(int constraint) {
+    public boolean wouldBeReadyWithConstraint(int constraint) {
         return readinessStatusWithConstraint(constraint, true);
     }
 

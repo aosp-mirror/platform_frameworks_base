@@ -2511,6 +2511,7 @@ public final class QuotaController extends StateController {
                     + " to bucketIndex " + bucketIndex);
         }
         List<JobStatus> restrictedChanges = new ArrayList<>();
+        ArraySet<JobStatus> exemptedChanges = new ArraySet<>();
         synchronized (mLock) {
             ShrinkableDebits debits = mEJStats.get(userId, packageName);
             if (debits != null) {
@@ -2530,6 +2531,10 @@ public final class QuotaController extends StateController {
                         && bucketIndex != js.getStandbyBucket()) {
                     restrictedChanges.add(js);
                 }
+                if ((bucketIndex == EXEMPTED_INDEX || js.getStandbyBucket() == EXEMPTED_INDEX)
+                        && bucketIndex != js.getStandbyBucket()) {
+                    exemptedChanges.add(js);
+                }
                 js.setStandbyBucket(bucketIndex);
             }
             Timer timer = mPkgTimers.get(userId, packageName);
@@ -2543,6 +2548,9 @@ public final class QuotaController extends StateController {
             mStateChangedListener.onControllerStateChanged(
                     maybeUpdateConstraintForPkgLocked(
                             sElapsedRealtimeClock.millis(), userId, packageName));
+        }
+        if (exemptedChanges.size() > 0) {
+            mStateChangedListener.onExemptedBucketChanged(exemptedChanges);
         }
         if (restrictedChanges.size() > 0) {
             mStateChangedListener.onRestrictedBucketChanged(restrictedChanges);

@@ -62,6 +62,12 @@ public interface StateChangedListener {
 
     /**
      * Called when these jobs are added or removed from the
+     * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_EXEMPTED} bucket.
+     */
+    void onExemptedBucketChanged(@NonNull ArraySet<JobStatus> jobs);
+
+    /**
+     * Called when these jobs are added or removed from the
      * {@link android.app.usage.UsageStatsManager#STANDBY_BUCKET_RESTRICTED} bucket.
      */
     void onRestrictedBucketChanged(@NonNull List<JobStatus> jobs);
