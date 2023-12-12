@@ -17,7 +17,9 @@ package com.android.systemui.statusbar.notification.icon.ui.viewbinder
 
 import android.graphics.Color
 import android.graphics.Rect
+import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.annotation.ColorInt
 import androidx.collection.ArrayMap
@@ -220,7 +222,7 @@ object NotificationIconContainerViewBinder {
         notifyBindingFailures: (Collection<String>) -> Unit,
         viewStore: IconViewStore,
         bindIcon: suspend (iconKey: String, view: StatusBarIconView) -> Unit = { _, _ -> },
-    ): Unit = coroutineScope {
+    ) {
         val iconSizeFlow: Flow<Int> =
             configuration.getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_icon_size_sp,
@@ -235,6 +237,21 @@ object NotificationIconContainerViewBinder {
                 ->
                 FrameLayout.LayoutParams(iconSize + 2 * iconHPadding, statusBarHeight)
             }
+        try {
+            bindIcons(view, layoutParams, notifyBindingFailures, viewStore, bindIcon)
+        } finally {
+            // Detach everything so that child SBIVs don't hold onto a reference to the container.
+            view.detachAllIcons()
+        }
+    }
+
+    private suspend fun Flow<NotificationIconsViewData>.bindIcons(
+        view: NotificationIconContainer,
+        layoutParams: Flow<FrameLayout.LayoutParams>,
+        notifyBindingFailures: (Collection<String>) -> Unit,
+        viewStore: IconViewStore,
+        bindIcon: suspend (iconKey: String, view: StatusBarIconView) -> Unit,
+    ): Unit = coroutineScope {
         val failedBindings = mutableSetOf<String>()
         val boundViewsByNotifKey = ArrayMap<String, Pair<StatusBarIconView, Job>>()
         var prevIcons = NotificationIconsViewData()
@@ -266,9 +283,17 @@ object NotificationIconContainerViewBinder {
                         continue
                     }
                     failedBindings.remove(notifKey)
-                    // The view might still be transiently added if it was just removed and added
-                    // again
-                    view.removeTransientView(sbiv)
+                    (sbiv.parent as? ViewGroup)?.run {
+                        if (this !== view) {
+                            Log.wtf(TAG, "StatusBarIconView($notifKey) has an unexpected parent")
+                        }
+                        // If the container was re-inflated and re-bound, then SBIVs might still be
+                        // attached to the prior view.
+                        removeView(sbiv)
+                        // The view might still be transiently added if it was just removed and
+                        // added again.
+                        removeTransientView(sbiv)
+                    }
                     view.addView(sbiv, idx)
                     boundViewsByNotifKey.remove(notifKey)?.second?.cancel()
                     boundViewsByNotifKey[notifKey] =
@@ -351,7 +376,8 @@ object NotificationIconContainerViewBinder {
         fun iconView(key: String): StatusBarIconView?
     }
 
-    @ColorInt private val DEFAULT_AOD_ICON_COLOR = Color.WHITE
+    @ColorInt private const val DEFAULT_AOD_ICON_COLOR = Color.WHITE
+    private const val TAG =  "NotifIconContainerViewBinder"
 }
 
 /** [IconViewStore] for the [com.android.systemui.statusbar.NotificationShelf] */
