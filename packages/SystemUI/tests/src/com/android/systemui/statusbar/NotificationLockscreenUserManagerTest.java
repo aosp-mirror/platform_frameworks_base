@@ -515,6 +515,29 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testDevicePolicyDoesNotAllowNotifications_deviceOwnerSetsForUserAll() {
+        // User allows them
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);
+        mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mSecondaryUser.id);
+        changeSetting(LOCK_SCREEN_SHOW_NOTIFICATIONS);
+
+        // DevicePolicy hides notifs on lockscreen
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mCurrentUser.id))
+                .thenReturn(KEYGUARD_DISABLE_SECURE_NOTIFICATIONS);
+        when(mDevicePolicyManager.getKeyguardDisabledFeatures(null, mSecondaryUser.id))
+                .thenReturn(KEYGUARD_DISABLE_SECURE_NOTIFICATIONS);
+
+        BroadcastReceiver.PendingResult pr = new BroadcastReceiver.PendingResult(
+                0, null, null, 0, true, false, null, USER_ALL, 0);
+        mLockscreenUserManager.mAllUsersReceiver.setPendingResult(pr);
+        mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
+                new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
+
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mCurrentUser.id));
+        assertFalse(mLockscreenUserManager.userAllowsNotificationsInPublic(mSecondaryUser.id));
+    }
+
+    @Test
     public void testDevicePolicyDoesNotAllowNotifications_userAll() {
         // User allows them
         mSettings.putIntForUser(LOCK_SCREEN_SHOW_NOTIFICATIONS, 1, mCurrentUser.id);

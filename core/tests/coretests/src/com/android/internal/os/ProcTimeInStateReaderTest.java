@@ -20,15 +20,16 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import android.content.Context;
 import android.os.FileUtils;
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -39,14 +40,16 @@ import java.nio.file.Path;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@IgnoreUnderRavenwood(blockedBy = ProcTimeInStateReader.class)
 public class ProcTimeInStateReaderTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private File mProcDirectory;
 
     @Before
-    public void setUp() {
-        Context context = InstrumentationRegistry.getContext();
-        mProcDirectory = context.getDir("proc", Context.MODE_PRIVATE);
+    public void setUp() throws Exception {
+        mProcDirectory = Files.createTempDirectory("ProcTimeInStateReaderTest").toFile();
     }
 
     @After

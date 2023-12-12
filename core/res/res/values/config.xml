@@ -6856,4 +6856,7 @@
     <!-- Whether the View-based scroll haptic feedback implementation is enabled for
          {@link InputDevice#SOURCE_ROTARY_ENCODER}s. -->
     <bool name="config_viewBasedRotaryEncoderHapticsEnabled">false</bool>
+
+    <!-- Whether the media player is shown on the quick settings -->
+    <bool name="config_quickSettingsShowMediaPlayer">true</bool>
 </resources>

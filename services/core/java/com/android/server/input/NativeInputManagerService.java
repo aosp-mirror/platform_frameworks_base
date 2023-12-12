@@ -246,6 +246,11 @@ interface NativeInputManagerService {
      */
     void sysfsNodeChanged(String sysfsNodePath);
 
+    /**
+     * Notify if Accessibility bounce keys threshold is changed from InputSettings.
+     */
+    void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
+
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
         /** Pointer to native input manager service object, used by native code. */
@@ -500,5 +505,8 @@ interface NativeInputManagerService {
 
         @Override
         public native void sysfsNodeChanged(String sysfsNodePath);
+
+        @Override
+        public native void setAccessibilityBounceKeysThreshold(int thresholdTimeMs);
     }
 }

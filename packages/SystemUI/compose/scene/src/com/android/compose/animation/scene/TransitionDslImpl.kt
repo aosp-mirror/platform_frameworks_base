@@ -178,7 +178,12 @@ internal class TransitionBuilderImpl : TransitionBuilder {
         transformation(DrawScale(matcher, scaleX, scaleY, pivot))
     }
 
-    override fun anchoredSize(matcher: ElementMatcher, anchor: ElementKey) {
-        transformation(AnchoredSize(matcher, anchor))
+    override fun anchoredSize(
+        matcher: ElementMatcher,
+        anchor: ElementKey,
+        anchorWidth: Boolean,
+        anchorHeight: Boolean,
+    ) {
+        transformation(AnchoredSize(matcher, anchor, anchorWidth, anchorHeight))
     }
 }

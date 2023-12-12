@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.policy;
 import static android.app.Notification.FLAG_FSI_REQUESTED_BUT_DENIED;
 
 import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+import static com.android.systemui.util.concurrency.MockExecutorHandlerKt.mockExecutorHandler;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -41,7 +42,6 @@ import android.app.Person;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Region;
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
@@ -56,11 +56,10 @@ import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AlertingNotificationManagerTest;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.GlobalSettings;
 import com.android.systemui.util.time.SystemClock;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,7 +76,6 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
 
     private static final int TEST_TOUCH_ACCEPTANCE_TIME = 200;
     private static final int TEST_A11Y_AUTO_DISMISS_TIME = 1_000;
-    private static final int TEST_A11Y_TIMEOUT_TIME = 3_000;
 
     private UiEventLoggerFake mUiEventLoggerFake = new UiEventLoggerFake();
     private final HeadsUpManagerLogger mLogger = spy(new HeadsUpManagerLogger(logcatLogBuffer()));
@@ -87,25 +85,18 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
         assertThat(TEST_MINIMUM_DISPLAY_TIME).isLessThan(TEST_AUTO_DISMISS_TIME);
         assertThat(TEST_AUTO_DISMISS_TIME).isLessThan(TEST_STICKY_AUTO_DISMISS_TIME);
         assertThat(TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(TEST_A11Y_AUTO_DISMISS_TIME);
-
-        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_AUTO_DISMISS_TIME).isLessThan(
-                TEST_TIMEOUT_TIME);
-        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_STICKY_AUTO_DISMISS_TIME).isLessThan(
-                TEST_TIMEOUT_TIME);
-        assertThat(TEST_TOUCH_ACCEPTANCE_TIME + TEST_A11Y_AUTO_DISMISS_TIME).isLessThan(
-                TEST_A11Y_TIMEOUT_TIME);
     }
 
     private final class TestableHeadsUpManager extends BaseHeadsUpManager {
         TestableHeadsUpManager(Context context,
                 HeadsUpManagerLogger logger,
-                Handler handler,
+                DelayableExecutor executor,
                 GlobalSettings globalSettings,
                 SystemClock systemClock,
                 AccessibilityManagerWrapper accessibilityManagerWrapper,
                 UiEventLogger uiEventLogger) {
-            super(context, logger, handler, globalSettings, systemClock,
-                    accessibilityManagerWrapper, uiEventLogger);
+            super(context, logger, mockExecutorHandler(executor), globalSettings, systemClock,
+                    executor, accessibilityManagerWrapper, uiEventLogger);
             mTouchAcceptanceDelay = TEST_TOUCH_ACCEPTANCE_TIME;
             mMinimumDisplayTime = TEST_MINIMUM_DISPLAY_TIME;
             mAutoDismissTime = TEST_AUTO_DISMISS_TIME;
@@ -183,7 +174,7 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
     }
 
     private BaseHeadsUpManager createHeadsUpManager() {
-        return new TestableHeadsUpManager(mContext, mLogger, mTestHandler, mGlobalSettings,
+        return new TestableHeadsUpManager(mContext, mLogger, mExecutor, mGlobalSettings,
                 mSystemClock, mAccessibilityMgr, mUiEventLoggerFake);
     }
 
@@ -233,18 +224,6 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
         }
     }
 
-
-    @Before
-    @Override
-    public void setUp() {
-        super.setUp();
-    }
-
-    @After
-    @Override
-    public void tearDown() {
-        super.tearDown();
-    }
 
     @Test
     public void testHunRemovedLogging() {
@@ -305,10 +284,9 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
         useAccessibilityTimeout(false);
 
         hum.showNotification(entry);
+        mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME / 2 + TEST_AUTO_DISMISS_TIME);
 
-        final int pastJustAutoDismissMillis =
-                TEST_TOUCH_ACCEPTANCE_TIME / 2 + TEST_AUTO_DISMISS_TIME;
-        verifyAlertingAtTime(hum, entry, true, pastJustAutoDismissMillis, "just auto dismiss");
+        assertTrue(hum.isAlerting(entry.getKey()));
     }
 
 
@@ -319,10 +297,10 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
         useAccessibilityTimeout(false);
 
         hum.showNotification(entry);
+        mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME
+                + (TEST_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2);
 
-        final int pastDefaultTimeoutMillis = TEST_TOUCH_ACCEPTANCE_TIME
-                + (TEST_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2;
-        verifyAlertingAtTime(hum, entry, false, pastDefaultTimeoutMillis, "default timeout");
+        assertFalse(hum.isAlerting(entry.getKey()));
     }
 
 
@@ -333,10 +311,10 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
         useAccessibilityTimeout(false);
 
         hum.showNotification(entry);
+        mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME
+                + (TEST_AUTO_DISMISS_TIME + TEST_STICKY_AUTO_DISMISS_TIME) / 2);
 
-        final int pastDefaultTimeoutMillis = TEST_TOUCH_ACCEPTANCE_TIME
-                + (TEST_AUTO_DISMISS_TIME + TEST_STICKY_AUTO_DISMISS_TIME) / 2;
-        verifyAlertingAtTime(hum, entry, true, pastDefaultTimeoutMillis, "default timeout");
+        assertTrue(hum.isAlerting(entry.getKey()));
     }
 
 
@@ -347,18 +325,9 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
         useAccessibilityTimeout(false);
 
         hum.showNotification(entry);
+        mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME + 2 * TEST_A11Y_AUTO_DISMISS_TIME);
 
-        final int pastLongestAutoDismissMillis =
-                TEST_TOUCH_ACCEPTANCE_TIME + 2 * TEST_A11Y_AUTO_DISMISS_TIME;
-        final Boolean[] wasAlerting = {null};
-        final Runnable checkAlerting =
-                () -> wasAlerting[0] = hum.isAlerting(entry.getKey());
-        mTestHandler.postDelayed(checkAlerting, pastLongestAutoDismissMillis);
-        TestableLooper.get(this).processMessages(1);
-
-        assertTrue("Should still be alerting past longest auto-dismiss", wasAlerting[0]);
-        assertTrue("Should still be alerting after processing",
-                hum.isAlerting(entry.getKey()));
+        assertTrue(hum.isAlerting(entry.getKey()));
     }
 
 
@@ -369,10 +338,10 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
         useAccessibilityTimeout(true);
 
         hum.showNotification(entry);
+        mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME
+                + (TEST_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2);
 
-        final int pastDefaultTimeoutMillis = TEST_TOUCH_ACCEPTANCE_TIME
-                + (TEST_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2;
-        verifyAlertingAtTime(hum, entry, true, pastDefaultTimeoutMillis, "default timeout");
+        assertTrue(hum.isAlerting(entry.getKey()));
     }
 
 
@@ -383,10 +352,10 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
         useAccessibilityTimeout(true);
 
         hum.showNotification(entry);
+        mSystemClock.advanceTime(TEST_TOUCH_ACCEPTANCE_TIME
+                + (TEST_STICKY_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2);
 
-        final int pastStickyTimeoutMillis = TEST_TOUCH_ACCEPTANCE_TIME
-                + (TEST_STICKY_AUTO_DISMISS_TIME + TEST_A11Y_AUTO_DISMISS_TIME) / 2;
-        verifyAlertingAtTime(hum, entry, true, pastStickyTimeoutMillis, "sticky timeout");
+        assertTrue(hum.isAlerting(entry.getKey()));
     }
 
 
@@ -398,18 +367,14 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
 
         hum.showNotification(entry);
 
-        // Try to remove but defer, since the notification has not been shown long enough.
         final boolean removedImmediately = hum.removeNotification(
-                entry.getKey(), false /* releaseImmediately */);
+                entry.getKey(), /* releaseImmediately = */ false);
+        assertFalse(removedImmediately);
+        assertTrue(hum.isAlerting(entry.getKey()));
 
-        assertFalse("HUN should not be removed before minimum display time", removedImmediately);
-        assertTrue("HUN should still be alerting before minimum display time",
-                hum.isAlerting(entry.getKey()));
+        mSystemClock.advanceTime((TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2);
 
-        final int pastMinimumDisplayTimeMillis =
-                (TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2;
-        verifyAlertingAtTime(hum, entry, false, pastMinimumDisplayTimeMillis,
-                "minimum display time");
+        assertFalse(hum.isAlerting(entry.getKey()));
     }
 
 
@@ -420,32 +385,13 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
         useAccessibilityTimeout(false);
 
         hum.showNotification(entry);
+        mSystemClock.advanceTime((TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2);
 
-        // After the minimum display time:
-        // 1. Check whether the notification is still alerting.
-        // 2. Try to remove it and check whether the remove succeeded.
-        // 3. Check whether it is still alerting after trying to remove it.
-        final Boolean[] livedPastMinimumDisplayTime = {null};
-        final Boolean[] removedAfterMinimumDisplayTime = {null};
-        final Boolean[] livedPastRemoveAfterMinimumDisplayTime = {null};
-        final Runnable pastMinimumDisplayTimeRunnable = () -> {
-            livedPastMinimumDisplayTime[0] = hum.isAlerting(entry.getKey());
-            removedAfterMinimumDisplayTime[0] = hum.removeNotification(
-                    entry.getKey(), /* releaseImmediately = */ false);
-            livedPastRemoveAfterMinimumDisplayTime[0] = hum.isAlerting(entry.getKey());
-        };
-        final int pastMinimumDisplayTimeMillis =
-                (TEST_MINIMUM_DISPLAY_TIME + TEST_AUTO_DISMISS_TIME) / 2;
-        mTestHandler.postDelayed(pastMinimumDisplayTimeRunnable, pastMinimumDisplayTimeMillis);
-        // Wait until the minimum display time has passed before attempting removal.
-        TestableLooper.get(this).processMessages(1);
+        assertTrue(hum.isAlerting(entry.getKey()));
 
-        assertTrue("HUN should live past minimum display time",
-                livedPastMinimumDisplayTime[0]);
-        assertTrue("HUN should be removed immediately past minimum display time",
-                removedAfterMinimumDisplayTime[0]);
-        assertFalse("HUN should not live after being removed past minimum display time",
-                livedPastRemoveAfterMinimumDisplayTime[0]);
+        final boolean removedImmediately = hum.removeNotification(
+                entry.getKey(), /* releaseImmediately = */ false);
+        assertTrue(removedImmediately);
         assertFalse(hum.isAlerting(entry.getKey()));
     }
 
@@ -457,10 +403,8 @@ public class BaseHeadsUpManagerTest extends AlertingNotificationManagerTest {
 
         hum.showNotification(entry);
 
-        // Remove forcibly with releaseImmediately = true.
         final boolean removedImmediately = hum.removeNotification(
                 entry.getKey(), /* releaseImmediately = */ true);
-
         assertTrue(removedImmediately);
         assertFalse(hum.isAlerting(entry.getKey()));
     }

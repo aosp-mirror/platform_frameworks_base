@@ -32,8 +32,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.Display;
 import android.view.accessibility.IMagnificationConnection;
+import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +53,7 @@ class MockMagnificationConnection {
     private boolean mHasPendingCallback = false;
     private boolean mWindowMagnificationEnabled = false;
     private IBinder.DeathRecipient mDeathRecipient;
-    private IWindowMagnificationConnectionCallback mIMirrorWindowCallback;
+    private IMagnificationConnectionCallback mIMagnificationCallback;
 
     private Rect mMirrorWindowFrame = new Rect(0, 0, 500, 500);
     private float mScale = 2.0f;
@@ -74,10 +74,10 @@ class MockMagnificationConnection {
         mBinder = mock(Binder.class);
         when(mConnection.asBinder()).thenReturn(mBinder);
         doAnswer((invocation) -> {
-            mIMirrorWindowCallback = invocation.getArgument(0);
+            mIMagnificationCallback = invocation.getArgument(0);
             return null;
         }).when(mConnection).setConnectionCallback(
-                any(IWindowMagnificationConnectionCallback.class));
+                any(IMagnificationConnectionCallback.class));
 
         doAnswer((invocation) -> {
             mDeathRecipient = invocation.getArgument(0);
@@ -166,8 +166,8 @@ class MockMagnificationConnection {
         return mDeathRecipient;
     }
 
-    IWindowMagnificationConnectionCallback getConnectionCallback() {
-        return mIMirrorWindowCallback;
+    IMagnificationConnectionCallback getConnectionCallback() {
+        return mIMagnificationCallback;
     }
 
     Rect getMirrorWindowFrame() {
@@ -185,10 +185,10 @@ class MockMagnificationConnection {
         if (!mHasPendingCallback) {
             throw new IllegalStateException("There is no any pending callbacks");
         }
-        if (mWindowMagnificationEnabled && mIMirrorWindowCallback != null) {
-            mIMirrorWindowCallback.onWindowMagnifierBoundsChanged(TEST_DISPLAY,
+        if (mWindowMagnificationEnabled && mIMagnificationCallback != null) {
+            mIMagnificationCallback.onWindowMagnifierBoundsChanged(TEST_DISPLAY,
                     mMirrorWindowFrame);
-            mIMirrorWindowCallback.onSourceBoundsChanged(TEST_DISPLAY,
+            mIMagnificationCallback.onSourceBoundsChanged(TEST_DISPLAY,
                     mSourceBounds);
         }
         sendAnimationEndCallbackIfNeeded(success);

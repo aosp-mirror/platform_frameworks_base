@@ -38,7 +38,7 @@ import org.junit.runners.Parameterized
  * AppIdPermissionPolicyPermissionStatesTest because these concepts don't apply to onUserAdded().
  */
 @RunWith(Parameterized::class)
-class AppIdPermissionPolicyPermissionDefinitionsTest : BaseAppIdPermissionPolicyTest() {
+class AppIdPermissionPolicyPermissionDefinitionsTest : BasePermissionPolicyTest() {
     @Parameterized.Parameter(0) lateinit var action: Action
 
     @Test

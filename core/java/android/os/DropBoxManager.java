@@ -81,10 +81,8 @@ public class DropBoxManager {
 
     /**
      * Broadcast Action: This is broadcast when a new entry is added in the dropbox.
-     * For apps targeting {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM} and later, you
-     * must hold the {@link android.Manifest.permission#READ_DROPBOX_DATA} permission
-     * in order to receive this broadcast. For apps targeting Android versions lower
-     * than {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}, you must hold
+     * For apps targeting 35 and later, For apps targeting Android versions lower
+     * than 35, you must hold
      * {@link android.Manifest.permission#READ_LOGS}.
      * This broadcast can be rate limited for low priority entries
      *
@@ -385,11 +383,8 @@ public class DropBoxManager {
     /**
      * Gets the next entry from the drop box <em>after</em> the specified time.
      * You must always call {@link Entry#close()} on the return value!
-     * {@link android.Manifest.permission#READ_DROPBOX_DATA} permission is
-     * required for apps targeting {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}
-     * and later. {@link android.Manifest.permission#READ_LOGS} permission is
-     * required for apps targeting Android versions lower than
-     * {@link android.os.Build.VERSION_CODES#VANILLA_ICE_CREAM}.
+     * {@link android.Manifest.permission#READ_LOGS} permission is
+     * required for apps targeting Android versions lower than 35.
      *
      * @param tag of entry to look for, null for all tags
      * @param msec time of the last entry seen

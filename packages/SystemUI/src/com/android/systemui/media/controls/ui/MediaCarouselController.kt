@@ -40,6 +40,7 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
@@ -76,6 +77,7 @@ import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TreeMap
+import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlinx.coroutines.CoroutineScope
@@ -102,6 +104,7 @@ constructor(
     private val activityStarter: ActivityStarter,
     private val systemClock: SystemClock,
     @Main executor: DelayableExecutor,
+    @Background private val bgExecutor: Executor,
     private val mediaManager: MediaDataManager,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager,
@@ -1030,7 +1033,7 @@ constructor(
             desiredHostState?.let {
                 if (this.desiredLocation != desiredLocation) {
                     // Only log an event when location changes
-                    logger.logCarouselPosition(desiredLocation)
+                    bgExecutor.execute { logger.logCarouselPosition(desiredLocation) }
                 }
 
                 // This is a hosting view, let's remeasure our players

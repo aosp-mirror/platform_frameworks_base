@@ -34,8 +34,8 @@ import android.testing.TestableLooper;
 import android.view.Display;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IMagnificationConnection;
+import android.view.accessibility.IMagnificationConnectionCallback;
 import android.view.accessibility.IRemoteMagnificationAnimationCallback;
-import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
 import androidx.test.filters.SmallTest;
 
@@ -67,7 +67,7 @@ public class IMagnificationConnectionTest extends SysuiTestCase {
     @Mock
     private CommandQueue mCommandQueue;
     @Mock
-    private IWindowMagnificationConnectionCallback mConnectionCallback;
+    private IMagnificationConnectionCallback mConnectionCallback;
     @Mock
     private WindowMagnificationController mWindowMagnificationController;
     @Mock

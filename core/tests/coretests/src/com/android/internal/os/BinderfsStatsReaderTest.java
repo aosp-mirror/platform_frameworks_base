@@ -20,11 +20,9 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import android.content.Context;
 import android.os.FileUtils;
 import android.util.IntArray;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -102,9 +100,8 @@ public class BinderfsStatsReaderTest {
     private boolean mHasError;
 
     @Before
-    public void setUp() {
-        Context context = InstrumentationRegistry.getContext();
-        mStatsDirectory = context.getDir("binder_logs", Context.MODE_PRIVATE);
+    public void setUp() throws Exception {
+        mStatsDirectory = Files.createTempDirectory("BinderfsStatsReaderTest").toFile();
         mFreezerBinderAsyncThreshold = 1024;
         mValidPids = IntArray.fromArray(new int[]{14505, 14461, 542, 540}, 4);
         mStatsPids = new IntArray();

@@ -83,17 +83,19 @@ public class Utils {
 
     /**
      * Allow the media player to be shown in the QS area, controlled by 2 flags.
-     * Off by default, but can be disabled by setting to 0
+     * On by default, but can be disabled by setting either flag to 0/false.
      */
     public static boolean useQsMediaPlayer(Context context) {
-        // TODO(b/192412820): Replace SHOW_MEDIA_ON_QUICK_SETTINGS with compile-time value
         // Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS can't be toggled at runtime, so simply
         // cache the first result we fetch and use that going forward. Do this to avoid unnecessary
         // binder calls which may happen on the critical path.
         if (sUseQsMediaPlayer == null) {
-            int flag = Settings.Global.getInt(context.getContentResolver(),
+            // TODO(b/192412820): Consolidate SHOW_MEDIA_ON_QUICK_SETTINGS into compile-time value.
+            final int settingsFlag = Settings.Global.getInt(context.getContentResolver(),
                     Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1);
-            sUseQsMediaPlayer = flag > 0;
+            final boolean configFlag = context.getResources()
+                    .getBoolean(com.android.internal.R.bool.config_quickSettingsShowMediaPlayer);
+            sUseQsMediaPlayer = settingsFlag > 0 && configFlag;
         }
         return sUseQsMediaPlayer;
     }

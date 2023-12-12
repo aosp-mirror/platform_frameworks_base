@@ -16,17 +16,25 @@
 
 package android.os;
 
+import static org.junit.Assert.assertEquals;
+
+import android.platform.test.annotations.IgnoreUnderRavenwood;
+import android.platform.test.ravenwood.RavenwoodRule;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
-import static org.junit.Assert.assertEquals;
-
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@IgnoreUnderRavenwood(reason = "JNI")
 public class WorkSourceParcelTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule();
+
     /**
      * END_OF_PARCEL_MARKER is added at the end of Parcel on native or java side on write and
      * then read on java or native side on read. This way we can ensure that no extra data
@@ -41,8 +49,11 @@ public class WorkSourceParcelTest {
             String[] names, int parcelEndMarker);
 
     static {
-        System.loadLibrary("worksourceparceltest_jni");
+        if (!RavenwoodRule.isUnderRavenwood()) {
+            System.loadLibrary("worksourceparceltest_jni");
+        }
     }
+
     /**
      * Confirm that we can pass WorkSource from native to Java.
      */

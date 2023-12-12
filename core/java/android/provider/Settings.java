@@ -7791,6 +7791,16 @@ public final class Settings {
         public static final String SHOW_IME_WITH_HARD_KEYBOARD = "show_ime_with_hard_keyboard";
 
         /**
+         * Whether to enable bounce keys for Physical Keyboard accessibility.
+         *
+         * If set to non-zero value, any key press on physical keyboard within the provided
+         * threshold duration (in milliseconds) of the same key, will be ignored.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_BOUNCE_KEYS = "accessibility_bounce_keys";
+
+        /**
          * Whether stylus button presses are disabled. This is a boolean that
          * determines if stylus buttons are ignored.
          *
@@ -12126,6 +12136,7 @@ public final class Settings {
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_CHANGER);
             CLONE_TO_MANAGED_PROFILE.add(LOCATION_MODE);
             CLONE_TO_MANAGED_PROFILE.add(SHOW_IME_WITH_HARD_KEYBOARD);
+            CLONE_TO_MANAGED_PROFILE.add(ACCESSIBILITY_BOUNCE_KEYS);
             CLONE_TO_MANAGED_PROFILE.add(NOTIFICATION_BUBBLES);
         }
 

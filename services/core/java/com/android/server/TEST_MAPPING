@@ -110,6 +110,9 @@
         },
         {
             "name": "FrameworksNetTests"
+        },
+        {
+            "name": "CtsSuspendAppsTestCases"
         }
     ],
     "presubmit-large": [
@@ -148,9 +151,6 @@
         // these tests need to establish SLO baseline, see go/test-mapping-slo-guide
         {
             "name": "CtsPackageManagerTestCases"
-        },
-        {
-            "name": "CtsSuspendAppsTestCases"
         },
         {
             "name": "FrameworksServicesTests",

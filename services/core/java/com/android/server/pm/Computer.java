@@ -477,7 +477,7 @@ public interface Computer extends PackageDataSnapshot {
     @NonNull
     List<ApplicationInfo> getInstalledApplications(
             @PackageManager.ApplicationInfoFlagsBits long flags, @UserIdInt int userId,
-            int callingUid);
+            int callingUid, boolean forceAllowCrossUser);
 
     @Nullable
     ProviderInfo resolveContentProvider(@NonNull String name,

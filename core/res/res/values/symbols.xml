@@ -5298,4 +5298,6 @@
   <java-symbol type="array" name="config_tvExternalInputLoggingDeviceBrandNames" />
   <java-symbol type="bool" name="config_viewRotaryEncoderHapticScrollFedbackEnabled" />
   <java-symbol type="bool" name="config_viewBasedRotaryEncoderHapticsEnabled" />
+
+  <java-symbol type="bool" name="config_quickSettingsShowMediaPlayer" />
 </resources>

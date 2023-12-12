@@ -247,7 +247,7 @@ public class SplashscreenContentDrawer {
         }
         params.layoutInDisplayCutoutMode = a.getInt(
                 R.styleable.Window_windowLayoutInDisplayCutoutMode,
-                params.layoutInDisplayCutoutMode);
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS);
         params.windowAnimations = a.getResourceId(R.styleable.Window_windowAnimationStyle, 0);
         a.recycle();
 

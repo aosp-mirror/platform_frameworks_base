@@ -209,6 +209,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
 import android.permission.PermissionManager;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
@@ -620,8 +621,10 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 });
 
         // TODO (b/291907312): remove feature flag
+        mSetFlagsRule.enableFlags(android.app.Flags.FLAG_VISIT_RISKY_URIS);
+        mSetFlagsRule.disableFlags(android.app.Flags.FLAG_LIFETIME_EXTENSION_REFACTOR);
         mSetFlagsRule.disableFlags(Flags.FLAG_REFACTOR_ATTENTION_HELPER,
-                Flags.FLAG_POLITE_NOTIFICATIONS);
+                Flags.FLAG_POLITE_NOTIFICATIONS, android.app.Flags.FLAG_MODES_API);
         initNMS();
     }
 
@@ -968,6 +971,12 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         }
         StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 8, "tag", mUid, 0,
                 nb.build(), UserHandle.getUserHandleForUid(mUid), null, 0);
+        return new NotificationRecord(mContext, sbn, channel);
+    }
+
+    private NotificationRecord generateNotificationRecord(NotificationChannel channel,
+            long postTime) {
+        final StatusBarNotification sbn = generateSbn(PKG, mUid, postTime, 0);
         return new NotificationRecord(mContext, sbn, channel);
     }
 
@@ -6265,15 +6274,21 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(visitor, times(1)).accept(eq(personIcon3.getUri()));
     }
 
+    private PendingIntent getPendingIntentWithUri(Uri uri) {
+        return PendingIntent.getActivity(mContext, 0,
+                new Intent("action", uri),
+                PendingIntent.FLAG_IMMUTABLE);
+    }
+
     @Test
-    public void testVisitUris_callStyle() {
+    public void testVisitUris_callStyle_ongoingCall() {
         Icon personIcon = Icon.createWithContentUri("content://media/person");
         Icon verificationIcon = Icon.createWithContentUri("content://media/verification");
         Person callingPerson = new Person.Builder().setName("Someone")
                 .setIcon(personIcon)
                 .build();
-        PendingIntent hangUpIntent = PendingIntent.getActivity(mContext, 0, new Intent(),
-                PendingIntent.FLAG_IMMUTABLE);
+        Uri hangUpUri = Uri.parse("content://intent/hangup");
+        PendingIntent hangUpIntent = getPendingIntentWithUri(hangUpUri);
         Notification n = new Notification.Builder(mContext, "a")
                 .setStyle(Notification.CallStyle.forOngoingCall(callingPerson, hangUpIntent)
                         .setVerificationIcon(verificationIcon))
@@ -6286,6 +6301,35 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         verify(visitor, times(1)).accept(eq(personIcon.getUri()));
         verify(visitor, times(1)).accept(eq(verificationIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(hangUpUri));
+    }
+
+    @Test
+    public void testVisitUris_callStyle_incomingCall() {
+        Icon personIcon = Icon.createWithContentUri("content://media/person");
+        Icon verificationIcon = Icon.createWithContentUri("content://media/verification");
+        Person callingPerson = new Person.Builder().setName("Someone")
+                .setIcon(personIcon)
+                .build();
+        Uri answerUri = Uri.parse("content://intent/answer");
+        PendingIntent answerIntent = getPendingIntentWithUri(answerUri);
+        Uri declineUri = Uri.parse("content://intent/decline");
+        PendingIntent declineIntent = getPendingIntentWithUri(declineUri);
+        Notification n = new Notification.Builder(mContext, "a")
+                .setStyle(Notification.CallStyle.forIncomingCall(callingPerson, declineIntent,
+                                answerIntent)
+                        .setVerificationIcon(verificationIcon))
+                .setContentTitle("Calling...")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .build();
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+
+        verify(visitor, times(1)).accept(eq(personIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(verificationIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(answerIntent.getIntent().getData()));
+        verify(visitor, times(1)).accept(eq(declineUri));
     }
 
     @Test
@@ -6337,20 +6381,74 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     public void testVisitUris_wearableExtender() {
         Icon actionIcon = Icon.createWithContentUri("content://media/action");
         Icon wearActionIcon = Icon.createWithContentUri("content://media/wearAction");
-        PendingIntent intent = PendingIntent.getActivity(mContext, 0, new Intent(),
-                PendingIntent.FLAG_IMMUTABLE);
+        Uri displayIntentUri = Uri.parse("content://intent/display");
+        PendingIntent displayIntent = getPendingIntentWithUri(displayIntentUri);
+        Uri actionIntentUri = Uri.parse("content://intent/action");
+        PendingIntent actionIntent = getPendingIntentWithUri(actionIntentUri);
+        Uri wearActionIntentUri = Uri.parse("content://intent/wear");
+        PendingIntent wearActionIntent = getPendingIntentWithUri(wearActionIntentUri);
         Notification n = new Notification.Builder(mContext, "a")
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
-                .addAction(new Notification.Action.Builder(actionIcon, "Hey!", intent).build())
-                .extend(new Notification.WearableExtender().addAction(
-                        new Notification.Action.Builder(wearActionIcon, "Wear!", intent).build()))
+                .addAction(
+                        new Notification.Action.Builder(actionIcon, "Hey!", actionIntent).build())
+                .extend(new Notification.WearableExtender()
+                        .setDisplayIntent(displayIntent)
+                        .addAction(new Notification.Action.Builder(wearActionIcon, "Wear!",
+                                wearActionIntent)
+                                .build()))
                 .build();
 
         Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
         n.visitUris(visitor);
 
         verify(visitor).accept(eq(actionIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(actionIntentUri));
         verify(visitor).accept(eq(wearActionIcon.getUri()));
+        verify(visitor, times(1)).accept(eq(wearActionIntentUri));
+    }
+
+    @Test
+    public void testVisitUris_tvExtender() {
+        Uri contentIntentUri = Uri.parse("content://intent/content");
+        PendingIntent contentIntent = getPendingIntentWithUri(contentIntentUri);
+        Uri deleteIntentUri = Uri.parse("content://intent/delete");
+        PendingIntent deleteIntent = getPendingIntentWithUri(deleteIntentUri);
+        Notification n = new Notification.Builder(mContext, "a")
+                .extend(
+                        new Notification.TvExtender()
+                                .setContentIntent(contentIntent)
+                                .setDeleteIntent(deleteIntent))
+                .build();
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+
+        verify(visitor, times(1)).accept(eq(contentIntentUri));
+        verify(visitor, times(1)).accept(eq(deleteIntentUri));
+    }
+
+    @Test
+    public void testVisitUris_carExtender() {
+        final String testParticipant = "testParticipant";
+        Uri readPendingIntentUri = Uri.parse("content://intent/read");
+        PendingIntent readPendingIntent = getPendingIntentWithUri(readPendingIntentUri);
+        Uri replyPendingIntentUri = Uri.parse("content://intent/reply");
+        PendingIntent replyPendingIntent = getPendingIntentWithUri(replyPendingIntentUri);
+        final RemoteInput testRemoteInput = new RemoteInput.Builder("key").build();
+
+        Notification n = new Notification.Builder(mContext, "a")
+                .extend(new Notification.CarExtender().setUnreadConversation(
+                        new Notification.CarExtender.Builder(testParticipant)
+                                .setReadPendingIntent(readPendingIntent)
+                                .setReplyAction(replyPendingIntent, testRemoteInput)
+                                .build()))
+                .build();
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        n.visitUris(visitor);
+
+        verify(visitor, times(1)).accept(eq(readPendingIntentUri));
+        verify(visitor, times(1)).accept(eq(replyPendingIntentUri));
     }
 
     @Test
@@ -8975,6 +9073,42 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mockZenModeHelper).addAutomaticZenRule(
                 eq("another.package"), eq(rule), eq(ZenModeConfig.UPDATE_ORIGIN_APP),
                 anyString(), anyInt());  // doesn't count as a system/systemui call
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void testAddAutomaticZenRule_typeManagedCanBeUsedByDeviceOwners() throws Exception {
+        mService.setCallerIsNormalPackage();
+        mService.setZenHelper(mock(ZenModeHelper.class));
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri"))
+                .setType(AutomaticZenRule.TYPE_MANAGED)
+                .setOwner(new ComponentName("pkg", "cls"))
+                .build();
+        when(mDevicePolicyManager.isActiveDeviceOwner(anyInt())).thenReturn(true);
+
+        mBinderService.addAutomaticZenRule(rule, "pkg");
+        // No exception!
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_MODES_API)
+    public void testAddAutomaticZenRule_typeManagedCannotBeUsedByRegularApps() throws Exception {
+        mService.setCallerIsNormalPackage();
+        mService.setZenHelper(mock(ZenModeHelper.class));
+        when(mConditionProviders.isPackageOrComponentAllowed(anyString(), anyInt()))
+                .thenReturn(true);
+
+        AutomaticZenRule rule = new AutomaticZenRule.Builder("rule", Uri.parse("uri"))
+                .setType(AutomaticZenRule.TYPE_MANAGED)
+                .setOwner(new ComponentName("pkg", "cls"))
+                .build();
+        when(mDevicePolicyManager.isActiveDeviceOwner(anyInt())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> mBinderService.addAutomaticZenRule(rule, "pkg"));
     }
 
     @Test
@@ -13310,6 +13444,175 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         mService.fixNotification(n, PKG, "tag", 9, 0, mUid, NOT_FOREGROUND_SERVICE, true);
 
         assertThat(n.flags & FLAG_LIFETIME_EXTENDED_BY_DIRECT_REPLY).isEqualTo(0);
+    }
+
+    @Test
+    public void cancelNotificationsFromListener_rapidClear_oldNew_cancelOne()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(android.view.contentprotection.flags.Flags
+                .FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED);
+
+        // Create recent notification.
+        final NotificationRecord nr1 = generateNotificationRecord(mTestNotificationChannel,
+                System.currentTimeMillis());
+        mService.addNotification(nr1);
+
+        // Create old notification.
+        final NotificationRecord nr2 = generateNotificationRecord(mTestNotificationChannel, 0);
+        mService.addNotification(nr2);
+
+        // Cancel specific notifications via listener.
+        String[] keys = {nr1.getSbn().getKey(), nr2.getSbn().getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+
+        // Notifications should not be active anymore.
+        StatusBarNotification[] notifications = mBinderService.getActiveNotifications(PKG);
+        assertThat(notifications).isEmpty();
+        assertEquals(0, mService.getNotificationRecordCount());
+        // Ensure cancel event is logged.
+        verify(mAppOpsManager).noteOpNoThrow(
+                AppOpsManager.OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER, mUid, PKG, null, null);
+    }
+
+    @Test
+    public void cancelNotificationsFromListener_rapidClear_old_cancelOne() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.view.contentprotection.flags.Flags
+                .FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED);
+
+        // Create old notifications.
+        final NotificationRecord nr1 = generateNotificationRecord(mTestNotificationChannel, 0);
+        mService.addNotification(nr1);
+
+        final NotificationRecord nr2 = generateNotificationRecord(mTestNotificationChannel, 0);
+        mService.addNotification(nr2);
+
+        // Cancel specific notifications via listener.
+        String[] keys = {nr1.getSbn().getKey(), nr2.getSbn().getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+
+        // Notifications should not be active anymore.
+        StatusBarNotification[] notifications = mBinderService.getActiveNotifications(PKG);
+        assertThat(notifications).isEmpty();
+        assertEquals(0, mService.getNotificationRecordCount());
+        // Ensure cancel event is not logged.
+        verify(mAppOpsManager, never()).noteOpNoThrow(
+                eq(AppOpsManager.OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER), anyInt(), anyString(),
+                any(), any());
+    }
+
+    @Test
+    public void cancelNotificationsFromListener_rapidClear_oldNew_cancelOne_flagDisabled()
+            throws RemoteException {
+        mSetFlagsRule.disableFlags(android.view.contentprotection.flags.Flags
+                .FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED);
+
+        // Create recent notification.
+        final NotificationRecord nr1 = generateNotificationRecord(mTestNotificationChannel,
+                System.currentTimeMillis());
+        mService.addNotification(nr1);
+
+        // Create old notification.
+        final NotificationRecord nr2 = generateNotificationRecord(mTestNotificationChannel, 0);
+        mService.addNotification(nr2);
+
+        // Cancel specific notifications via listener.
+        String[] keys = {nr1.getSbn().getKey(), nr2.getSbn().getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+
+        // Notifications should not be active anymore.
+        StatusBarNotification[] notifications = mBinderService.getActiveNotifications(PKG);
+        assertThat(notifications).isEmpty();
+        assertEquals(0, mService.getNotificationRecordCount());
+        // Ensure cancel event is not logged due to flag being disabled.
+        verify(mAppOpsManager, never()).noteOpNoThrow(
+                eq(AppOpsManager.OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER), anyInt(), anyString(),
+                any(), any());
+    }
+
+    @Test
+    public void cancelNotificationsFromListener_rapidClear_oldNew_cancelAll()
+            throws RemoteException {
+        mSetFlagsRule.enableFlags(android.view.contentprotection.flags.Flags
+                .FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED);
+
+        // Create recent notification.
+        final NotificationRecord nr1 = generateNotificationRecord(mTestNotificationChannel,
+                System.currentTimeMillis());
+        mService.addNotification(nr1);
+
+        // Create old notification.
+        final NotificationRecord nr2 = generateNotificationRecord(mTestNotificationChannel, 0);
+        mService.addNotification(nr2);
+
+        // Cancel all notifications via listener.
+        mService.getBinderService().cancelNotificationsFromListener(null, null);
+        waitForIdle();
+
+        // Notifications should not be active anymore.
+        StatusBarNotification[] notifications = mBinderService.getActiveNotifications(PKG);
+        assertThat(notifications).isEmpty();
+        assertEquals(0, mService.getNotificationRecordCount());
+        // Ensure cancel event is logged.
+        verify(mAppOpsManager).noteOpNoThrow(
+                AppOpsManager.OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER, mUid, PKG, null, null);
+    }
+
+    @Test
+    public void cancelNotificationsFromListener_rapidClear_old_cancelAll() throws RemoteException {
+        mSetFlagsRule.enableFlags(android.view.contentprotection.flags.Flags
+                .FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED);
+
+        // Create old notifications.
+        final NotificationRecord nr1 = generateNotificationRecord(mTestNotificationChannel, 0);
+        mService.addNotification(nr1);
+
+        final NotificationRecord nr2 = generateNotificationRecord(mTestNotificationChannel, 0);
+        mService.addNotification(nr2);
+
+        // Cancel all notifications via listener.
+        mService.getBinderService().cancelNotificationsFromListener(null, null);
+        waitForIdle();
+
+        // Notifications should not be active anymore.
+        StatusBarNotification[] notifications = mBinderService.getActiveNotifications(PKG);
+        assertThat(notifications).isEmpty();
+        assertEquals(0, mService.getNotificationRecordCount());
+        // Ensure cancel event is not logged.
+        verify(mAppOpsManager, never()).noteOpNoThrow(
+                eq(AppOpsManager.OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER), anyInt(), anyString(),
+                any(), any());
+    }
+
+    @Test
+    public void cancelNotificationsFromListener_rapidClear_oldNew_cancelAll_flagDisabled()
+            throws RemoteException {
+        mSetFlagsRule.disableFlags(android.view.contentprotection.flags.Flags
+                .FLAG_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER_APP_OP_ENABLED);
+
+        // Create recent notification.
+        final NotificationRecord nr1 = generateNotificationRecord(mTestNotificationChannel,
+                System.currentTimeMillis());
+        mService.addNotification(nr1);
+
+        // Create old notification.
+        final NotificationRecord nr2 = generateNotificationRecord(mTestNotificationChannel, 0);
+        mService.addNotification(nr2);
+
+        // Cancel all notifications via listener.
+        mService.getBinderService().cancelNotificationsFromListener(null, null);
+        waitForIdle();
+
+        // Notifications should not be active anymore.
+        StatusBarNotification[] notifications = mBinderService.getActiveNotifications(PKG);
+        assertThat(notifications).isEmpty();
+        assertEquals(0, mService.getNotificationRecordCount());
+        // Ensure cancel event is not logged due to flag being disabled.
+        verify(mAppOpsManager, never()).noteOpNoThrow(
+                eq(AppOpsManager.OP_RAPID_CLEAR_NOTIFICATIONS_BY_LISTENER), anyInt(), anyString(),
+                any(), any());
     }
 
     private NotificationRecord createAndPostNotification(Notification.Builder nb, String testName)

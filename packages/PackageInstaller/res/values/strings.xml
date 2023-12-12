@@ -85,6 +85,8 @@
 
     <!-- [CHAR LIMIT=15] -->
     <string name="ok">OK</string>
+    <!-- Confirmation text label for button to archive an application. Archiving means uninstalling the app without deleting user's personal data and replacing the app with a stub app with minimum size. So, the user can unarchive the app later and not lose any personal data. -->
+    <string name="archive">Archive</string>
     <!-- [CHAR LIMIT=30] -->
     <string name="update_anyway">Update anyway</string>
     <!-- [CHAR LIMIT=15] -->
@@ -114,6 +116,16 @@
     <string name="uninstall_activity_text"><xliff:g id="activity_name">%1$s</xliff:g> is part of the following app:</string>
     <!--  [CHAR LIMIT=none] -->
     <string name="uninstall_application_text">Do you want to uninstall this app?</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="archive_application_text">Your personal data will be saved</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="archive_application_text_all_users">Archive this app for all users? Your personal data will be saved</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="archive_application_text_current_user_work_profile">Archive this app on your work profile? Your personal data will be saved</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="archive_application_text_user">Archive this app for <xliff:g id="username">%1$s</xliff:g>? Your personal data will be saved</string>
+    <!--  [CHAR LIMIT=none] -->
+    <string name="archive_application_text_current_user_private_profile">Do you want to archive this app from your private space? Your personal data will be saved</string>
     <!--  [CHAR LIMIT=none] -->
     <string name="uninstall_application_text_all_users">Do you want to uninstall this app for <b>all</b>
         users?  The application and its data will be removed from <b>all</b> users on the device.</string>
@@ -239,6 +251,8 @@
 
     <!-- Label for cloned app in uninstall dialogue [CHAR LIMIT=40] -->
     <string name="cloned_app_label"><xliff:g id="package_label">%1$s</xliff:g> Clone</string>
+    <!-- Label for archiving an app in uninstall dialogue -->
+    <string name="archiving_app_label">Archive <xliff:g id="package_label">%1$s</xliff:g>?</string>
 
     <!-- Label for button to continue install of an app whose source cannot be identified [CHAR LIMIT=40] -->
     <string name="anonymous_source_continue">Continue</string>

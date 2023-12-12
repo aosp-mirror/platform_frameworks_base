@@ -54,6 +54,7 @@ import com.android.systemui.statusbar.notification.collection.provider.OnReorder
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
@@ -124,6 +125,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Captor lateinit var settingsObserverCaptor: ArgumentCaptor<ContentObserver>
 
     private val clock = FakeSystemClock()
+    private lateinit var bgExecutor: FakeExecutor
     private lateinit var mediaCarouselController: MediaCarouselController
 
     @Before
@@ -131,6 +133,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         context.resources.configuration.setLocales(LocaleList(Locale.US, Locale.UK))
         transitionRepository = FakeKeyguardTransitionRepository()
+        bgExecutor = FakeExecutor(clock)
         mediaCarouselController =
             MediaCarouselController(
                 context,
@@ -140,6 +143,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 activityStarter,
                 clock,
                 executor,
+                bgExecutor,
                 mediaDataManager,
                 configurationController,
                 falsingManager,
@@ -458,6 +462,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaHostState,
             animate = false
         )
+        bgExecutor.runAllReady()
         verify(logger).logCarouselPosition(LOCATION_QS)
     }
 
@@ -468,6 +473,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaHostState,
             animate = false
         )
+        bgExecutor.runAllReady()
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_QQS)
     }
 
@@ -478,6 +484,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaHostState,
             animate = false
         )
+        bgExecutor.runAllReady()
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_LOCKSCREEN)
     }
 
@@ -488,6 +495,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             mediaHostState,
             animate = false
         )
+        bgExecutor.runAllReady()
         verify(logger).logCarouselPosition(MediaHierarchyManager.LOCATION_DREAM_OVERLAY)
     }
 

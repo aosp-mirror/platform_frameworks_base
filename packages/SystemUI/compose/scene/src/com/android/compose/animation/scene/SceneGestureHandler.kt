@@ -604,6 +604,7 @@ internal class SceneNestedScrollHandler(
                 behavior.canStartOnPostFling && hasNextScene(velocityAvailable)
             },
             canContinueScroll = { true },
+            canScrollOnFling = false,
             onStart = { offsetAvailable ->
                 gestureHandler.gestureWithPriority = this
                 gestureHandler.onDragStarted(
