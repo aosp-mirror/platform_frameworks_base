@@ -23,7 +23,7 @@
         android:layout_marginTop="@dimen/keyguard_lock_padding"
         android:importantForAccessibility="no"
         android:ellipsize="marquee"
-        android:focusable="false"
+        android:focusable="true"
         android:gravity="center"
         android:singleLine="true" />
 </merge>
