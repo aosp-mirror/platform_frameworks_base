@@ -465,9 +465,7 @@ public final class Parcel {
     private static native byte[] nativeMarshall(long nativePtr);
     private static native void nativeUnmarshall(
             long nativePtr, byte[] data, int offset, int length);
-    @RavenwoodThrow
     private static native int nativeCompareData(long thisNativePtr, long otherNativePtr);
-    @RavenwoodThrow
     private static native boolean nativeCompareDataInRange(
             long ptrA, int offsetA, long ptrB, int offsetB, int length);
     private static native void nativeAppendFrom(

@@ -132,7 +132,6 @@ public class ParcelTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenSameData() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
@@ -169,7 +168,6 @@ public class ParcelTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenDifferentData() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
@@ -186,7 +184,6 @@ public class ParcelTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenLimitOutOfBounds_throws() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
@@ -213,7 +210,6 @@ public class ParcelTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenLengthZero() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
@@ -232,7 +228,6 @@ public class ParcelTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenNegativeLength_throws() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
@@ -248,7 +243,6 @@ public class ParcelTest {
     }
 
     @Test
-    @IgnoreUnderRavenwood(blockedBy = Parcel.class)
     public void testCompareDataInRange_whenNegativeOffset_throws() {
         Parcel pA = Parcel.obtain();
         int iA = pA.dataPosition();
