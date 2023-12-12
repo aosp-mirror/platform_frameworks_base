@@ -76,6 +76,10 @@ constructor(
                     Intent(applicationContext, WidgetPickerActivity::class.java)
                 )
             },
+            onEditDone = {
+                // TODO(b/315154364): in a separate change, lock the device and transition to GH
+                finish()
+            }
         )
     }
 }
