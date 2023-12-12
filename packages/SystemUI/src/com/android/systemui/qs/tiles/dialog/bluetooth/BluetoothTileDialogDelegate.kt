@@ -37,11 +37,13 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.util.time.SystemClock
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -52,19 +54,24 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 
 /** Dialog for showing active, connected and saved bluetooth devices. */
-@SysUISingleton
-internal class BluetoothTileDialog
-constructor(
-    private val bluetoothToggleInitialValue: Boolean,
-    private val initialUiProperties: BluetoothTileDialogViewModel.UiProperties,
-    private val cachedContentHeight: Int,
-    private val bluetoothTileDialogCallback: BluetoothTileDialogCallback,
+class BluetoothTileDialogDelegate
+@AssistedInject
+internal constructor(
+    @Assisted private val context: Context,
+    @Assisted private val initialUiProperties: BluetoothTileDialogViewModel.UiProperties,
+    @Assisted private val cachedContentHeight: Int,
+    @Assisted private val bluetoothToggleInitialValue: Boolean,
+    @Assisted private val bluetoothTileDialogCallback: BluetoothTileDialogCallback,
+    @Assisted private val dismissListener: Runnable,
     @Main private val mainDispatcher: CoroutineDispatcher,
     private val systemClock: SystemClock,
     private val uiEventLogger: UiEventLogger,
     private val logger: BluetoothTileDialogLogger,
-    context: Context,
-) : SystemUIDialog(context, DEFAULT_THEME, DEFAULT_DISMISS_ON_DEVICE_LOCK) {
+    private val systemuiDialogFactory: SystemUIDialog.Factory,
+    mainLayoutInflater: LayoutInflater,
+) : SystemUIDialog.Delegate {
+
+    private val layoutInflater = mainLayoutInflater.cloneInContext(context)
 
     private val mutableBluetoothStateToggle: MutableStateFlow<Boolean> =
         MutableStateFlow(bluetoothToggleInitialValue)
@@ -91,78 +98,72 @@ constructor(
 
     private var lastItemRow: Int = -1
 
-    private lateinit var toggleView: Switch
-    private lateinit var subtitleTextView: TextView
-    private lateinit var autoOnToggle: Switch
-    private lateinit var autoOnToggleView: View
-    private lateinit var doneButton: View
-    private lateinit var seeAllButton: View
-    private lateinit var pairNewDeviceButton: View
-    private lateinit var deviceListView: RecyclerView
-    private lateinit var scrollViewContent: View
-    private lateinit var progressBarAnimation: ProgressBar
-    private lateinit var progressBarBackground: View
+    @AssistedFactory
+    internal interface Factory {
+        fun create(
+            context: Context,
+            initialUiProperties: BluetoothTileDialogViewModel.UiProperties,
+            cachedContentHeight: Int,
+            bluetoothEnabled: Boolean,
+            dialogCallback: BluetoothTileDialogCallback,
+            dimissListener: Runnable
+        ): BluetoothTileDialogDelegate
+    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun createDialog(): SystemUIDialog {
+        val dialog = systemuiDialogFactory.create(this, context)
+
+        return dialog
+    }
+
+    override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
+        SystemUIDialog.registerDismissListener(dialog, dismissListener)
         uiEventLogger.log(BluetoothTileDialogUiEvent.BLUETOOTH_TILE_DIALOG_SHOWN)
 
-        LayoutInflater.from(context).inflate(R.layout.bluetooth_tile_dialog, null).apply {
+        layoutInflater.inflate(R.layout.bluetooth_tile_dialog, null).apply {
             accessibilityPaneTitle = context.getText(R.string.accessibility_desc_quick_settings)
-            setContentView(this)
+            dialog.setContentView(this)
         }
 
-        toggleView = requireViewById(R.id.bluetooth_toggle)
-        subtitleTextView = requireViewById(R.id.bluetooth_tile_dialog_subtitle) as TextView
-        autoOnToggle = requireViewById(R.id.bluetooth_auto_on_toggle)
-        autoOnToggleView = requireViewById(R.id.bluetooth_auto_on_toggle_layout)
-        doneButton = requireViewById(R.id.done_button)
-        seeAllButton = requireViewById(R.id.see_all_button)
-        pairNewDeviceButton = requireViewById(R.id.pair_new_device_button)
-        deviceListView = requireViewById<RecyclerView>(R.id.device_list)
+        setupToggle(dialog)
+        setupRecyclerView(dialog)
 
-        setupToggle()
-        setupRecyclerView()
-
-        subtitleTextView.text = context.getString(initialUiProperties.subTitleResId)
-        doneButton.setOnClickListener { dismiss() }
-        seeAllButton.setOnClickListener { bluetoothTileDialogCallback.onSeeAllClicked(it) }
-        pairNewDeviceButton.setOnClickListener {
+        getSubtitleTextView(dialog).text = context.getString(initialUiProperties.subTitleResId)
+        dialog.requireViewById<View>(R.id.done_button).setOnClickListener { dialog.dismiss() }
+        getSeeAllButton(dialog).setOnClickListener {
+            bluetoothTileDialogCallback.onSeeAllClicked(it)
+        }
+        getPairNewDeviceButton(dialog).setOnClickListener {
             bluetoothTileDialogCallback.onPairNewDeviceClicked(it)
         }
-        requireViewById<View>(R.id.scroll_view).apply {
-            scrollViewContent = this
+        getScrollViewContent(dialog).apply {
             minimumHeight =
                 resources.getDimensionPixelSize(initialUiProperties.scrollViewMinHeightResId)
             layoutParams.height = maxOf(cachedContentHeight, minimumHeight)
         }
-        progressBarAnimation = requireViewById(R.id.bluetooth_tile_dialog_progress_animation)
-        progressBarBackground = requireViewById(R.id.bluetooth_tile_dialog_progress_background)
     }
 
-    override fun start() {
+    override fun onStart(dialog: SystemUIDialog) {
         lastUiUpdateMs = systemClock.elapsedRealtime()
     }
 
-    override fun dismiss() {
-        if (::scrollViewContent.isInitialized) {
-            mutableContentHeight.tryEmit(scrollViewContent.measuredHeight)
-        }
-        super.dismiss()
+    override fun onStop(dialog: SystemUIDialog) {
+        mutableContentHeight.tryEmit(getScrollViewContent(dialog).measuredHeight)
     }
 
-    internal suspend fun animateProgressBar(animate: Boolean) {
+    internal suspend fun animateProgressBar(dialog: SystemUIDialog, animate: Boolean) {
         withContext(mainDispatcher) {
             if (animate) {
-                showProgressBar()
+                showProgressBar(dialog)
             } else {
                 delay(PROGRESS_BAR_ANIMATION_DURATION_MS)
-                hideProgressBar()
+                hideProgressBar(dialog)
             }
         }
     }
 
     internal suspend fun onDeviceItemUpdated(
+        dialog: SystemUIDialog,
         deviceItem: List<DeviceItem>,
         showSeeAll: Boolean,
         showPairNewDevice: Boolean
@@ -176,10 +177,11 @@ constructor(
             }
             if (isActive) {
                 deviceItemAdapter.refreshDeviceItemList(deviceItem) {
-                    seeAllButton.visibility = if (showSeeAll) VISIBLE else GONE
-                    pairNewDeviceButton.visibility = if (showPairNewDevice) VISIBLE else GONE
+                    getSeeAllButton(dialog).visibility = if (showSeeAll) VISIBLE else GONE
+                    getPairNewDeviceButton(dialog).visibility =
+                        if (showPairNewDevice) VISIBLE else GONE
                     // Update the height after data is updated
-                    scrollViewContent.layoutParams.height = WRAP_CONTENT
+                    getScrollViewContent(dialog).layoutParams.height = WRAP_CONTENT
                     lastUiUpdateMs = systemClock.elapsedRealtime()
                     lastItemRow = itemRow
                     logger.logDeviceUiUpdate(lastUiUpdateMs - start)
@@ -189,29 +191,29 @@ constructor(
     }
 
     internal fun onBluetoothStateUpdated(
+        dialog: SystemUIDialog,
         isEnabled: Boolean,
         uiProperties: BluetoothTileDialogViewModel.UiProperties
     ) {
-        toggleView.apply {
+        getToggleView(dialog).apply {
             isChecked = isEnabled
             setEnabled(true)
             alpha = ENABLED_ALPHA
         }
-        subtitleTextView.text = context.getString(uiProperties.subTitleResId)
-        autoOnToggleView.visibility = uiProperties.autoOnToggleVisibility
+        getSubtitleTextView(dialog).text = context.getString(uiProperties.subTitleResId)
+        getAutoOnToggleView(dialog).visibility = uiProperties.autoOnToggleVisibility
     }
 
-    internal fun onBluetoothAutoOnUpdated(isEnabled: Boolean) {
-        if (::autoOnToggle.isInitialized) {
-            autoOnToggle.apply {
-                isChecked = isEnabled
-                setEnabled(true)
-                alpha = ENABLED_ALPHA
-            }
+    internal fun onBluetoothAutoOnUpdated(dialog: SystemUIDialog, isEnabled: Boolean) {
+        getAutoOnToggle(dialog).apply {
+            isChecked = isEnabled
+            setEnabled(true)
+            alpha = ENABLED_ALPHA
         }
     }
 
-    private fun setupToggle() {
+    private fun setupToggle(dialog: SystemUIDialog) {
+        val toggleView = getToggleView(dialog)
         toggleView.isChecked = bluetoothToggleInitialValue
         toggleView.setOnCheckedChangeListener { view, isChecked ->
             mutableBluetoothStateToggle.value = isChecked
@@ -223,8 +225,8 @@ constructor(
             uiEventLogger.log(BluetoothTileDialogUiEvent.BLUETOOTH_TOGGLE_CLICKED)
         }
 
-        autoOnToggleView.visibility = initialUiProperties.autoOnToggleVisibility
-        autoOnToggle.setOnCheckedChangeListener { view, isChecked ->
+        getAutoOnToggleView(dialog).visibility = initialUiProperties.autoOnToggleVisibility
+        getAutoOnToggle(dialog).setOnCheckedChangeListener { view, isChecked ->
             mutableBluetoothAutoOnToggle.value = isChecked
             view.apply {
                 isEnabled = false
@@ -234,30 +236,66 @@ constructor(
         }
     }
 
-    private fun setupRecyclerView() {
-        deviceListView.apply {
+    private fun getToggleView(dialog: SystemUIDialog): Switch {
+        return dialog.requireViewById(R.id.bluetooth_toggle)
+    }
+
+    private fun getSubtitleTextView(dialog: SystemUIDialog): TextView {
+        return dialog.requireViewById(R.id.bluetooth_tile_dialog_subtitle)
+    }
+
+    private fun getSeeAllButton(dialog: SystemUIDialog): View {
+        return dialog.requireViewById(R.id.see_all_button)
+    }
+
+    private fun getPairNewDeviceButton(dialog: SystemUIDialog): View {
+        return dialog.requireViewById(R.id.pair_new_device_button)
+    }
+
+    private fun getDeviceListView(dialog: SystemUIDialog): RecyclerView {
+        return dialog.requireViewById(R.id.device_list)
+    }
+
+    private fun getAutoOnToggle(dialog: SystemUIDialog): Switch {
+        return dialog.requireViewById(R.id.bluetooth_auto_on_toggle)
+    }
+
+    private fun getAutoOnToggleView(dialog: SystemUIDialog): View {
+        return dialog.requireViewById(R.id.bluetooth_auto_on_toggle_layout)
+    }
+
+    private fun getProgressBarAnimation(dialog: SystemUIDialog): ProgressBar {
+        return dialog.requireViewById(R.id.bluetooth_tile_dialog_progress_animation)
+    }
+
+    private fun getProgressBarBackground(dialog: SystemUIDialog): View {
+        return dialog.requireViewById(R.id.bluetooth_tile_dialog_progress_animation)
+    }
+
+    private fun getScrollViewContent(dialog: SystemUIDialog): View {
+        return dialog.requireViewById(R.id.scroll_view)
+    }
+
+    private fun setupRecyclerView(dialog: SystemUIDialog) {
+        getDeviceListView(dialog).apply {
             layoutManager = LinearLayoutManager(context)
             adapter = deviceItemAdapter
         }
     }
 
-    private fun showProgressBar() {
-        if (
-            ::progressBarAnimation.isInitialized &&
-                ::progressBarBackground.isInitialized &&
-                progressBarAnimation.visibility != VISIBLE
-        ) {
+    private fun showProgressBar(dialog: SystemUIDialog) {
+        val progressBarAnimation = getProgressBarAnimation(dialog)
+        val progressBarBackground = getProgressBarBackground(dialog)
+        if (progressBarAnimation.visibility != VISIBLE) {
             progressBarAnimation.visibility = VISIBLE
             progressBarBackground.visibility = INVISIBLE
         }
     }
 
-    private fun hideProgressBar() {
-        if (
-            ::progressBarAnimation.isInitialized &&
-                ::progressBarBackground.isInitialized &&
-                progressBarAnimation.visibility != INVISIBLE
-        ) {
+    private fun hideProgressBar(dialog: SystemUIDialog) {
+        val progressBarAnimation = getProgressBarAnimation(dialog)
+        val progressBarBackground = getProgressBarBackground(dialog)
+        if (progressBarAnimation.visibility != INVISIBLE) {
             progressBarAnimation.visibility = INVISIBLE
             progressBarBackground.visibility = VISIBLE
         }
@@ -295,9 +333,7 @@ constructor(
         private val asyncListDiffer = AsyncListDiffer(this, diffUtilCallback)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): DeviceItemViewHolder {
-            val view =
-                LayoutInflater.from(parent.context)
-                    .inflate(R.layout.bluetooth_device_item, parent, false)
+            val view = layoutInflater.inflate(R.layout.bluetooth_device_item, parent, false)
             return DeviceItemViewHolder(view)
         }
 
