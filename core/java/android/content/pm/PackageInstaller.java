@@ -2693,6 +2693,8 @@ public class PackageInstaller {
         /** @hide */
         public long rollbackLifetimeMillis = 0;
         /** {@hide} */
+        public int rollbackImpactLevel = PackageManager.ROLLBACK_USER_IMPACT_LOW;
+        /** {@hide} */
         public boolean forceQueryableOverride;
         /** {@hide} */
         public int requireUserAction = USER_ACTION_UNSPECIFIED;
@@ -2749,6 +2751,7 @@ public class PackageInstaller {
             }
             rollbackDataPolicy = source.readInt();
             rollbackLifetimeMillis = source.readLong();
+            rollbackImpactLevel = source.readInt();
             requireUserAction = source.readInt();
             packageSource = source.readInt();
             applicationEnabledSettingPersistent = source.readBoolean();
@@ -2783,6 +2786,7 @@ public class PackageInstaller {
             ret.dataLoaderParams = dataLoaderParams;
             ret.rollbackDataPolicy = rollbackDataPolicy;
             ret.rollbackLifetimeMillis = rollbackLifetimeMillis;
+            ret.rollbackImpactLevel = rollbackImpactLevel;
             ret.requireUserAction = requireUserAction;
             ret.packageSource = packageSource;
             ret.applicationEnabledSettingPersistent = applicationEnabledSettingPersistent;
@@ -3118,6 +3122,28 @@ public class PackageInstaller {
                         "Can't set rollbackLifetimeMillis when rollback is not enabled");
             }
             rollbackLifetimeMillis = lifetimeMillis;
+        }
+
+        /**
+         * rollbackImpactLevel is a measure of impact a rollback has on the user. This can take one
+         * of 3 values:
+         * <ul>
+         *     <li>{@link PackageManager#ROLLBACK_USER_IMPACT_LOW} (default)</li>
+         *     <li>{@link PackageManager#ROLLBACK_USER_IMPACT_HIGH} (1)</li>
+         *     <li>{@link PackageManager#ROLLBACK_USER_IMPACT_ONLY_MANUAL} (2)</li>
+         * </ul>
+         *
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS)
+        @FlaggedApi(Flags.FLAG_RECOVERABILITY_DETECTION)
+        public void setRollbackImpactLevel(@PackageManager.RollbackImpactLevel int impactLevel) {
+            if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) == 0) {
+                throw new IllegalArgumentException(
+                        "Can't set rollbackImpactLevel when rollback is not enabled");
+            }
+            rollbackImpactLevel = impactLevel;
         }
 
         /**
@@ -3493,6 +3519,7 @@ public class PackageInstaller {
             pw.printPair("dataLoaderParams", dataLoaderParams);
             pw.printPair("rollbackDataPolicy", rollbackDataPolicy);
             pw.printPair("rollbackLifetimeMillis", rollbackLifetimeMillis);
+            pw.printPair("rollbackImpactLevel", rollbackImpactLevel);
             pw.printPair("applicationEnabledSettingPersistent",
                     applicationEnabledSettingPersistent);
             pw.printHexPair("developmentInstallFlags", developmentInstallFlags);
@@ -3536,6 +3563,7 @@ public class PackageInstaller {
             }
             dest.writeInt(rollbackDataPolicy);
             dest.writeLong(rollbackLifetimeMillis);
+            dest.writeInt(rollbackImpactLevel);
             dest.writeInt(requireUserAction);
             dest.writeInt(packageSource);
             dest.writeBoolean(applicationEnabledSettingPersistent);
@@ -3734,6 +3762,9 @@ public class PackageInstaller {
         public long rollbackLifetimeMillis;
 
         /** {@hide} */
+        public int rollbackImpactLevel;
+
+        /** {@hide} */
         public int requireUserAction;
 
         /** {@hide} */
@@ -3801,6 +3832,7 @@ public class PackageInstaller {
             isPreapprovalRequested = source.readBoolean();
             rollbackDataPolicy = source.readInt();
             rollbackLifetimeMillis = source.readLong();
+            rollbackImpactLevel = source.readInt();
             createdMillis = source.readLong();
             requireUserAction = source.readInt();
             installerUid = source.readInt();
@@ -4438,6 +4470,7 @@ public class PackageInstaller {
             dest.writeBoolean(isPreapprovalRequested);
             dest.writeInt(rollbackDataPolicy);
             dest.writeLong(rollbackLifetimeMillis);
+            dest.writeInt(rollbackImpactLevel);
             dest.writeLong(createdMillis);
             dest.writeInt(requireUserAction);
             dest.writeInt(installerUid);

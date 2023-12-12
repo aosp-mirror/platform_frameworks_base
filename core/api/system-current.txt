@@ -3956,6 +3956,7 @@ package android.content.pm {
     method public void setInstallAsInstantApp(boolean);
     method public void setInstallAsVirtualPreload();
     method public void setRequestDowngrade(boolean);
+    method @FlaggedApi("android.content.pm.recoverability_detection") @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void setRollbackImpactLevel(int);
     method @FlaggedApi("android.content.pm.rollback_lifetime") @RequiresPermission(android.Manifest.permission.MANAGE_ROLLBACKS) public void setRollbackLifetimeMillis(long);
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setStaged();
   }
@@ -4124,6 +4125,9 @@ package android.content.pm {
     field public static final int ROLLBACK_DATA_POLICY_RESTORE = 0; // 0x0
     field public static final int ROLLBACK_DATA_POLICY_RETAIN = 2; // 0x2
     field public static final int ROLLBACK_DATA_POLICY_WIPE = 1; // 0x1
+    field @FlaggedApi("android.content.pm.recoverability_detection") public static final int ROLLBACK_USER_IMPACT_HIGH = 1; // 0x1
+    field @FlaggedApi("android.content.pm.recoverability_detection") public static final int ROLLBACK_USER_IMPACT_LOW = 0; // 0x0
+    field @FlaggedApi("android.content.pm.recoverability_detection") public static final int ROLLBACK_USER_IMPACT_ONLY_MANUAL = 2; // 0x2
     field public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_HIDDEN = 0; // 0x0
     field public static final int SYSTEM_APP_STATE_HIDDEN_UNTIL_INSTALLED_VISIBLE = 1; // 0x1
     field public static final int SYSTEM_APP_STATE_INSTALLED = 2; // 0x2
