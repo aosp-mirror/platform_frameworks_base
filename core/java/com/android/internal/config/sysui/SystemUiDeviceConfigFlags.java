@@ -519,24 +519,6 @@ public final class SystemUiDeviceConfigFlags {
     public static final String TASK_MANAGER_SHOW_FOOTER_DOT = "task_manager_show_footer_dot";
 
     /**
-     * (boolean) Whether to enable the adapter conversion in RemoteViews
-     */
-    public static final String REMOTEVIEWS_ADAPTER_CONVERSION =
-            "CursorControlFeature__remoteviews_adapter_conversion";
-
-    /**
-     * The key name used in app core settings for {@link #REMOTEVIEWS_ADAPTER_CONVERSION}
-     */
-    public static final String KEY_REMOTEVIEWS_ADAPTER_CONVERSION =
-            "systemui__remoteviews_adapter_conversion";
-
-    /**
-     * Default value for whether the adapter conversion is enabled or not. This is set for
-     * RemoteViews and should not be a common practice.
-     */
-    public static final boolean REMOTEVIEWS_ADAPTER_CONVERSION_DEFAULT = false;
-
-    /**
      * (boolean) Whether the task manager should show a stop button if the app is allowlisted
      * by the user.
      */
