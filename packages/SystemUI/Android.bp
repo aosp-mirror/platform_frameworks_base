@@ -204,6 +204,7 @@ android_library {
         "lottie",
         "LowLightDreamLib",
         "motion_tool_lib",
+        "notification_flags_lib",
     ],
     libs: [
         "keepanno-annotations",
@@ -328,6 +329,7 @@ android_library {
         "androidx.compose.ui_ui",
         "flag-junit",
         "platform-test-annotations",
+        "notification_flags_lib",
     ],
 }
 

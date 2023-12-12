@@ -16,6 +16,12 @@
 
 package com.android.systemui.flags
 
+import com.android.server.notification.Flags.FLAG_CROSS_APP_POLITE_NOTIFICATIONS
+import com.android.server.notification.Flags.FLAG_POLITE_NOTIFICATIONS
+import com.android.server.notification.Flags.FLAG_VIBRATE_WHILE_UNLOCKED
+import com.android.server.notification.Flags.crossAppPoliteNotifications
+import com.android.server.notification.Flags.politeNotifications
+import com.android.server.notification.Flags.vibrateWhileUnlocked
 import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
 import com.android.systemui.Flags.keyguardBottomAreaRefactor
 import com.android.systemui.dagger.SysUISingleton
@@ -36,5 +42,14 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         val keyguardBottomAreaRefactor = FlagToken(
                 FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR, keyguardBottomAreaRefactor())
         KeyguardShadeMigrationNssl.token dependsOn keyguardBottomAreaRefactor
+
+        val crossAppPoliteNotifToken =
+                FlagToken(FLAG_CROSS_APP_POLITE_NOTIFICATIONS, crossAppPoliteNotifications())
+        val politeNotifToken = FlagToken(FLAG_POLITE_NOTIFICATIONS, politeNotifications())
+        crossAppPoliteNotifToken dependsOn politeNotifToken
+
+        val vibrateWhileUnlockedToken =
+                FlagToken(FLAG_VIBRATE_WHILE_UNLOCKED, vibrateWhileUnlocked())
+        vibrateWhileUnlockedToken dependsOn politeNotifToken
     }
 }
