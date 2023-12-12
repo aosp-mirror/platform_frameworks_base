@@ -159,11 +159,28 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
         }
     }
 
+    private boolean shouldTriggerRepairLocked() {
+        if (mCurrentWebViewPackage == null) {
+            return true;
+        }
+        WebViewProviderInfo defaultProvider = getDefaultWebViewPackage();
+        if (mCurrentWebViewPackage.packageName.equals(defaultProvider.packageName)) {
+            List<UserPackage> userPackages =
+                    mSystemInterface.getPackageInfoForProviderAllUsers(
+                            mContext, defaultProvider);
+            return !isInstalledAndEnabledForAllUsers(userPackages);
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public void prepareWebViewInSystemServer() {
         try {
+            boolean repairNeeded = true;
             synchronized (mLock) {
                 mCurrentWebViewPackage = findPreferredWebViewPackage();
+                repairNeeded = shouldTriggerRepairLocked();
                 String userSetting = mSystemInterface.getUserChosenWebViewProvider(mContext);
                 if (userSetting != null
                         && !userSetting.equals(mCurrentWebViewPackage.packageName)) {
@@ -177,25 +194,24 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
                 }
                 onWebViewProviderChanged(mCurrentWebViewPackage);
             }
+
+            if (repairNeeded) {
+                // We didn't find a valid WebView implementation. Try explicitly re-enabling the
+                // default package for all users in case it was disabled, even if we already did the
+                // one-time migration before. If this actually changes the state, we will see the
+                // PackageManager broadcast shortly and try again.
+                WebViewProviderInfo defaultProvider = getDefaultWebViewPackage();
+                Slog.w(
+                        TAG,
+                        "No provider available for all users, trying to enable "
+                                + defaultProvider.packageName);
+                mSystemInterface.enablePackageForAllUsers(
+                        mContext, defaultProvider.packageName, true);
+            }
+
         } catch (Throwable t) {
             // Log and discard errors at this stage as we must not crash the system server.
             Slog.e(TAG, "error preparing webview provider from system server", t);
-        }
-
-        if (getCurrentWebViewPackage() == null) {
-            // We didn't find a valid WebView implementation. Try explicitly re-enabling the
-            // fallback package for all users in case it was disabled, even if we already did the
-            // one-time migration before. If this actually changes the state, we will see the
-            // PackageManager broadcast shortly and try again.
-            WebViewProviderInfo[] webviewProviders = mSystemInterface.getWebViewPackages();
-            WebViewProviderInfo fallbackProvider = getFallbackProvider(webviewProviders);
-            if (fallbackProvider != null) {
-                Slog.w(TAG, "No valid provider, trying to enable " + fallbackProvider.packageName);
-                mSystemInterface.enablePackageForAllUsers(mContext, fallbackProvider.packageName,
-                                                          true);
-            } else {
-                Slog.e(TAG, "No valid provider and no fallback available.");
-            }
         }
     }
 
@@ -421,47 +437,58 @@ class WebViewUpdateServiceImpl2 implements WebViewUpdateServiceInterface {
 
     /**
      * Returns either the package info of the WebView provider determined in the following way:
-     * If the user has chosen a provider then use that if it is valid,
-     * otherwise use the first package in the webview priority list that is valid.
-     *
+     * If the user has chosen a provider then use that if it is valid, enabled and installed
+     * for all users, otherwise use the default provider.
      */
     private PackageInfo findPreferredWebViewPackage() throws WebViewPackageMissingException {
-        ProviderAndPackageInfo[] providers = getValidWebViewPackagesAndInfos();
-
-        String userChosenProvider = mSystemInterface.getUserChosenWebViewProvider(mContext);
-
         // If the user has chosen provider, use that (if it's installed and enabled for all
         // users).
-        for (ProviderAndPackageInfo providerAndPackage : providers) {
-            if (providerAndPackage.provider.packageName.equals(userChosenProvider)) {
-                // userPackages can contain null objects.
-                List<UserPackage> userPackages =
-                        mSystemInterface.getPackageInfoForProviderAllUsers(mContext,
-                                providerAndPackage.provider);
-                if (isInstalledAndEnabledForAllUsers(userPackages)) {
-                    return providerAndPackage.packageInfo;
+        String userChosenPackageName = mSystemInterface.getUserChosenWebViewProvider(mContext);
+        WebViewProviderInfo userChosenProvider =
+                getWebViewProviderForPackage(userChosenPackageName);
+        if (userChosenProvider != null) {
+            try {
+                PackageInfo packageInfo =
+                        mSystemInterface.getPackageInfoForProvider(userChosenProvider);
+                if (validityResult(userChosenProvider, packageInfo) == VALIDITY_OK) {
+                    List<UserPackage> userPackages =
+                            mSystemInterface.getPackageInfoForProviderAllUsers(
+                                    mContext, userChosenProvider);
+                    if (isInstalledAndEnabledForAllUsers(userPackages)) {
+                        return packageInfo;
+                    }
                 }
+            } catch (NameNotFoundException e) {
+                Slog.w(TAG, "User chosen WebView package (" + userChosenPackageName
+                        + ") not found");
             }
         }
 
-        // User did not choose, or the choice failed; use the most stable provider that is
-        // installed and enabled for all users, and available by default (not through
-        // user choice).
-        for (ProviderAndPackageInfo providerAndPackage : providers) {
-            if (providerAndPackage.provider.availableByDefault) {
-                // userPackages can contain null objects.
-                List<UserPackage> userPackages =
-                        mSystemInterface.getPackageInfoForProviderAllUsers(mContext,
-                                providerAndPackage.provider);
-                if (isInstalledAndEnabledForAllUsers(userPackages)) {
-                    return providerAndPackage.packageInfo;
-                }
+        // User did not choose, or the choice failed; return the default provider even if it is not
+        // installed or enabled for all users.
+        WebViewProviderInfo defaultProvider = getDefaultWebViewPackage();
+        try {
+            PackageInfo packageInfo = mSystemInterface.getPackageInfoForProvider(defaultProvider);
+            if (validityResult(defaultProvider, packageInfo) == VALIDITY_OK) {
+                return packageInfo;
             }
+        } catch (NameNotFoundException e) {
+            Slog.w(TAG, "Default WebView package (" + defaultProvider.packageName + ") not found");
         }
 
         // This should never happen during normal operation (only with modified system images).
         mAnyWebViewInstalled = false;
         throw new WebViewPackageMissingException("Could not find a loadable WebView package");
+    }
+
+    private WebViewProviderInfo getWebViewProviderForPackage(String packageName) {
+        WebViewProviderInfo[] allProviders = getWebViewPackages();
+        for (int n = 0; n < allProviders.length; n++) {
+            if (allProviders[n].packageName.equals(packageName)) {
+                return allProviders[n];
+            }
+        }
+        return null;
     }
 
     /**

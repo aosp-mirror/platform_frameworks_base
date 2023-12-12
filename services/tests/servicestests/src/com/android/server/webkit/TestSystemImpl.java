@@ -85,7 +85,7 @@ public class TestSystemImpl implements SystemInterface {
     private void enablePackageForUser(String packageName, boolean enable, int userId) {
         Map<Integer, PackageInfo> userPackages = mPackages.get(packageName);
         if (userPackages == null) {
-            throw new IllegalArgumentException("There is no package called " + packageName);
+            return;
         }
         PackageInfo packageInfo = userPackages.get(userId);
         packageInfo.applicationInfo.enabled = enable;
