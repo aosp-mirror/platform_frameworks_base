@@ -1906,6 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"সপ্তাহান্ত"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ইভেন্ট"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ঘুমানোর সময়"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"চালু আছে"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"বন্ধ আছে"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> কিছু সাউন্ডকে মিউট করে দিচ্ছে"</string>
@@ -2341,8 +2343,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"ডিসপ্লে মিরর করা যাচ্ছে না"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"অন্য কোনও কেবল ব্যবহার করে আবার চেষ্টা করুন"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"আপনার ডিভাইস খুব গরম হয়ে আছে এবং সেটি ঠাণ্ডা না হওয়া পর্যন্ত ডিসপ্লে মিরর করা যাবে না"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"কেবল, ডিসপ্লের সাথে কাজ নাও করতে পারে"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"আপনার USB-C কেবল, ডিসপ্লেতে সঠিকভাবে কানেক্ট নাও হতে পারে"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen চালু করা আছে"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"কন্টেন্ট দেখানোর জন্য <xliff:g id="APP_NAME">%1$s</xliff:g> দুটি ডিসপ্লে ব্যবহার করছে"</string>

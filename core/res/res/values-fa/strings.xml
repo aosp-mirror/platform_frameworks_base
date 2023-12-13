@@ -1906,6 +1906,8 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"آخر هفته"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"رویداد"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"خوابیدن"</string>
+    <!-- no translation found for zen_mode_implicit_trigger_description (5714956693073007111) -->
+    <skip />
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"روشن"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"خاموش"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> درحال قطع کردن بعضی از صداهاست"</string>
@@ -2341,8 +2343,6 @@
     <string name="connected_display_unavailable_notification_title" msgid="5265409360902073556">"بازتاب دادن به نمایشگر ممکن نبود"</string>
     <string name="connected_display_unavailable_notification_content" msgid="3845903313751217516">"از کابل دیگری استفاده کنید و دوباره امتحان کنید"</string>
     <string name="connected_display_thermally_unavailable_notification_content" msgid="9205758199439955949">"دستگاه بسیار گرم است و تا زمانی‌که خنک نشود نمی‌تواند محتوا را در نمایشگر بازتاب دهد."</string>
-    <string name="connected_display_cable_dont_support_displays_notification_title" msgid="8477183783847392465">"شاید کابل از نمایشگر پشتیبانی نکند"</string>
-    <string name="connected_display_cable_dont_support_displays_notification_content" msgid="8080498819171483973">"‏کابل USB-C شما ممکن است به‌درستی به نمایشگرها وصل نشود"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"‫Dual screen"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‏‫Dual Screen روشن است"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"‫<xliff:g id="APP_NAME">%1$s</xliff:g> از هر دو نمایشگر برای نمایش محتوا استفاده می‌کند"</string>
