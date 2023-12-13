@@ -25,6 +25,7 @@ import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.LegacyFlickerTest
 import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.activityembedding.ActivityEmbeddingTestBase
 import com.android.server.wm.flicker.helpers.ActivityEmbeddingAppHelper
@@ -142,7 +143,7 @@ class SecondaryActivityEnterPipTest(flicker: LegacyFlickerTest) :
     }
 
     /** During the transition Secondary Activity shrinks to the bottom right corner. */
-    @Presubmit
+    @FlakyTest(bugId = 315605409)
     @Test
     fun secondaryLayerShrinks() {
         flicker.assertLayers {
