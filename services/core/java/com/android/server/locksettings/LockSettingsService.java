@@ -209,7 +209,7 @@ import javax.crypto.spec.GCMParameterSpec;
  *   <li>Protect each user's data using their SP.  For example, use the SP to encrypt/decrypt the
  *   user's credential-encrypted (CE) key for file-based encryption (FBE).</li>
  *
- *   <li>Generate, protect, and use profile passwords for managed profiles.</li>
+ *   <li>Generate, protect, and use unified profile passwords.</li>
  *
  *   <li>Support unlocking the SP by alternative means: resume-on-reboot (reboot escrow) for easier
  *   OTA updates, and escrow tokens when set up by the Device Policy Controller (DPC).</li>
@@ -287,7 +287,7 @@ public class LockSettingsService extends ILockSettings.Stub {
 
     private final java.security.KeyStore mJavaKeyStore;
     private final RecoverableKeyStoreManager mRecoverableKeyStoreManager;
-    private ManagedProfilePasswordCache mManagedProfilePasswordCache;
+    private final UnifiedProfilePasswordCache mUnifiedProfilePasswordCache;
 
     private final RebootEscrowManager mRebootEscrowManager;
 
@@ -404,7 +404,8 @@ public class LockSettingsService extends ILockSettings.Stub {
         for (int i = 0; i < newPasswordChars.length; i++) {
             newPassword[i] = (byte) newPasswordChars[i];
         }
-        LockscreenCredential credential = LockscreenCredential.createManagedPassword(newPassword);
+        LockscreenCredential credential =
+                LockscreenCredential.createUnifiedProfilePassword(newPassword);
         Arrays.fill(newPasswordChars, '\u0000');
         Arrays.fill(newPassword, (byte) 0);
         Arrays.fill(randomLockSeed, (byte) 0);
@@ -424,7 +425,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         if (!isCredentialSharableWithParent(profileUserId)) {
             return;
         }
-        // Do not tie profile when work challenge is enabled
+        // Do not tie profile when separate challenge is enabled
         if (getSeparateProfileChallengeEnabledInternal(profileUserId)) {
             return;
         }
@@ -462,7 +463,7 @@ public class LockSettingsService extends ILockSettings.Stub {
             setLockCredentialInternal(unifiedProfilePassword, profileUserPassword, profileUserId,
                     /* isLockTiedToParent= */ true);
             tieProfileLockToParent(profileUserId, parent.id, unifiedProfilePassword);
-            mManagedProfilePasswordCache.storePassword(profileUserId, unifiedProfilePassword,
+            mUnifiedProfilePasswordCache.storePassword(profileUserId, unifiedProfilePassword,
                     parentSid);
         }
     }
@@ -620,9 +621,9 @@ public class LockSettingsService extends ILockSettings.Stub {
             }
         }
 
-        public @NonNull ManagedProfilePasswordCache getManagedProfilePasswordCache(
+        public @NonNull UnifiedProfilePasswordCache getUnifiedProfilePasswordCache(
                 java.security.KeyStore ks) {
-            return new ManagedProfilePasswordCache(ks);
+            return new UnifiedProfilePasswordCache(ks);
         }
 
         public boolean isHeadlessSystemUserMode() {
@@ -665,7 +666,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mGatekeeperPasswords = new LongSparseArray<>();
 
         mSpManager = injector.getSyntheticPasswordManager(mStorage);
-        mManagedProfilePasswordCache = injector.getManagedProfilePasswordCache(mJavaKeyStore);
+        mUnifiedProfilePasswordCache = injector.getUnifiedProfilePasswordCache(mJavaKeyStore);
         mBiometricDeferredQueue = new BiometricDeferredQueue(mSpManager, mHandler);
 
         mRebootEscrowManager = injector.getRebootEscrowManager(new RebootEscrowCallbacks(),
@@ -689,8 +690,8 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
-     * If the account is credential-encrypted, show notification requesting the user to unlock the
-     * device.
+     * If the user is a managed profile whose credential-encrypted storage is locked, show a
+     * notification requesting the user to unlock the device.
      */
     private void maybeShowEncryptionNotificationForUser(@UserIdInt int userId, String reason) {
         final UserInfo user = mUserManager.getUserInfo(userId);
@@ -846,7 +847,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                // Hide notification first, as tie managed profile lock takes time
+                // Hide notification first, as tie profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
 
                 if (isCredentialSharableWithParent(userId)) {
@@ -1458,13 +1459,13 @@ public class LockSettingsService extends ILockSettings.Stub {
 
         cipher.init(Cipher.DECRYPT_MODE, decryptionKey, new GCMParameterSpec(128, iv));
         decryptionResult = cipher.doFinal(encryptedPassword);
-        LockscreenCredential credential = LockscreenCredential.createManagedPassword(
+        LockscreenCredential credential = LockscreenCredential.createUnifiedProfilePassword(
                 decryptionResult);
         Arrays.fill(decryptionResult, (byte) 0);
         try {
             long parentSid = getGateKeeperService().getSecureUserId(
                     mUserManager.getProfileParent(userId).id);
-            mManagedProfilePasswordCache.storePassword(userId, credential, parentSid);
+            mUnifiedProfilePasswordCache.storePassword(userId, credential, parentSid);
         } catch (RemoteException e) {
             Slogf.w(TAG, "Failed to talk to GateKeeper service", e);
         }
@@ -1550,7 +1551,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                         // so it goes into the cache
                         getDecryptedPasswordForTiedProfile(profile.id);
                     } catch (GeneralSecurityException | IOException e) {
-                        Slog.d(TAG, "Cache work profile password failed", e);
+                        Slog.d(TAG, "Cache unified profile password failed", e);
                     }
                 }
             }
@@ -1604,19 +1605,19 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     /**
-     * Synchronize all profile's work challenge of the given user if it's unified: tie or clear them
+     * Synchronize all profile's challenge of the given user if it's unified: tie or clear them
      * depending on the parent user's secure state.
      *
-     * When clearing tied work challenges, a pre-computed password table for profiles are required,
-     * since changing password for profiles requires existing password, and existing passwords can
-     * only be computed before the parent user's password is cleared.
+     * When clearing tied challenges, a pre-computed password table for profiles are required, since
+     * changing password for profiles requires existing password, and existing passwords can only be
+     * computed before the parent user's password is cleared.
      *
      * Strictly this is a recursive function, since setLockCredentialInternal ends up calling this
      * method again on profiles. However the recursion is guaranteed to terminate as this method
      * terminates when the user is a profile that shares lock credentials with parent.
      * (e.g. managed and clone profile).
      */
-    private void synchronizeUnifiedWorkChallengeForProfiles(int userId,
+    private void synchronizeUnifiedChallengeForProfiles(int userId,
             Map<Integer, LockscreenCredential> profilePasswordMap) {
         if (isCredentialSharableWithParent(userId)) {
             return;
@@ -1635,7 +1636,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                     tieProfileLockIfNecessary(profileUserId,
                             LockscreenCredential.createNone());
                 } else {
-                    // We use cached work profile password computed before clearing the parent's
+                    // We use cached profile password computed before clearing the parent's
                     // credential, otherwise they get lost
                     if (profilePasswordMap != null
                             && profilePasswordMap.containsKey(profileUserId)) {
@@ -1777,7 +1778,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 notifyPasswordChanged(credential, userId);
             }
             if (isCredentialSharableWithParent(userId)) {
-                // Make sure the profile doesn't get locked straight after setting work challenge.
+                // Make sure the profile doesn't get locked straight after setting challenge.
                 setDeviceUnlockedForUser(userId);
             }
             notifySeparateProfileChallengeChanged(userId);
@@ -2368,7 +2369,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         try {
-            // Unlock work profile, and work profile with unified lock must use password only
+            // Unlock profile with unified lock
             return doVerifyCredential(getDecryptedPasswordForTiedProfile(userId),
                     userId, null /* progressCallback */, flags);
         } catch (UnrecoverableKeyException | InvalidKeyException | KeyStoreException
@@ -2492,7 +2493,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mStrongAuth.removeUser(userId);
 
         AndroidKeyStoreMaintenance.onUserRemoved(userId);
-        mManagedProfilePasswordCache.removePassword(userId);
+        mUnifiedProfilePasswordCache.removePassword(userId);
 
         gateKeeperClearSecureUserId(userId);
         removeKeystoreProfileKey(userId);
@@ -2982,7 +2983,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 credential, sp, userId);
         final Map<Integer, LockscreenCredential> profilePasswords;
         if (!credential.isNone()) {
-            // not needed by synchronizeUnifiedWorkChallengeForProfiles()
+            // not needed by synchronizeUnifiedChallengeForProfiles()
             profilePasswords = null;
 
             if (!mSpManager.hasSidForUser(userId)) {
@@ -2993,8 +2994,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 }
             }
         } else {
-            // Cache all profile password if they use unified work challenge. This will later be
-            // used to clear the profile's password in synchronizeUnifiedWorkChallengeForProfiles()
+            // Cache all profile password if they use unified challenge. This will later be used to
+            // clear the profile's password in synchronizeUnifiedChallengeForProfiles().
             profilePasswords = getDecryptedPasswordsForAllTiedProfiles(userId);
 
             mSpManager.clearSidForUser(userId);
@@ -3010,10 +3011,10 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
         setCurrentLskfBasedProtectorId(newProtectorId, userId);
         LockPatternUtils.invalidateCredentialTypeCache();
-        synchronizeUnifiedWorkChallengeForProfiles(userId, profilePasswords);
+        synchronizeUnifiedChallengeForProfiles(userId, profilePasswords);
 
         setUserPasswordMetrics(credential, userId);
-        mManagedProfilePasswordCache.removePassword(userId);
+        mUnifiedProfilePasswordCache.removePassword(userId);
         if (savedCredentialType != CREDENTIAL_TYPE_NONE) {
             mSpManager.destroyAllWeakTokenBasedProtectors(userId);
         }
@@ -3114,7 +3115,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 try {
                     currentCredential = getDecryptedPasswordForTiedProfile(userId);
                 } catch (Exception e) {
-                    Slog.e(TAG, "Failed to get work profile credential", e);
+                    Slog.e(TAG, "Failed to get unified profile password", e);
                     return null;
                 }
             }
@@ -3284,7 +3285,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public boolean tryUnlockWithCachedUnifiedChallenge(int userId) {
         checkPasswordReadPermission();
-        try (LockscreenCredential cred = mManagedProfilePasswordCache.retrievePassword(userId)) {
+        try (LockscreenCredential cred = mUnifiedProfilePasswordCache.retrievePassword(userId)) {
             if (cred == null) {
                 return false;
             }
@@ -3296,7 +3297,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     @Override
     public void removeCachedUnifiedChallenge(int userId) {
         checkWritePermission();
-        mManagedProfilePasswordCache.removePassword(userId);
+        mUnifiedProfilePasswordCache.removePassword(userId);
     }
 
     static String timestampToString(long timestamp) {

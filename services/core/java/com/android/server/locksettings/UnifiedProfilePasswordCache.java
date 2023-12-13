@@ -43,30 +43,31 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 
 /**
- * Caches *unified* work challenge for managed profiles. The cached credential is encrypted using
- * a keystore key auth-bound to the parent user's lockscreen credential, similar to how unified
- * work challenge is normally secured.
- *
- * <p> The cache is filled whenever the managed profile's unified challenge is created or derived
- * (as part of the parent user's credential verification flow). It's removed when the profile is
- * deleted or a (separate) lockscreen credential is explicitly set on the profile. There is also
- * an ADB command to evict the cache "cmd lock_settings remove-cache --user X", to assist
- * development and testing.
-
- * <p> The encrypted credential is stored in-memory only so the cache does not persist across
- * reboots.
+ * An in-memory cache for unified profile passwords.  A "unified profile password" is the random
+ * password that the system automatically generates and manages for each profile that uses a unified
+ * challenge and where the parent user has a secure lock screen.
+ * <p>
+ * Each password in this cache is encrypted by a Keystore key that is auth-bound to the parent user.
+ * This is very similar to how the password is protected on-disk, but the in-memory cache uses a
+ * much longer timeout on the keys: 7 days instead of 30 seconds.  This enables use cases like
+ * unpausing work apps without requiring authentication as frequently.
+ * <p>
+ * Unified profile passwords are cached when they are created, or when they are decrypted as part of
+ * the parent user's LSKF verification flow.  They are removed when the profile is deleted or when a
+ * separate challenge is explicitly set on the profile.  There is also an ADB command to evict a
+ * cached password, "locksettings remove-cache --user X", to assist development and testing.
  */
 @VisibleForTesting // public visibility is needed for Mockito
-public class ManagedProfilePasswordCache {
+public class UnifiedProfilePasswordCache {
 
-    private static final String TAG = "ManagedProfilePasswordCache";
+    private static final String TAG = "UnifiedProfilePasswordCache";
     private static final int KEY_LENGTH = 256;
     private static final int CACHE_TIMEOUT_SECONDS = (int) TimeUnit.DAYS.toSeconds(7);
 
     private final SparseArray<byte[]> mEncryptedPasswords = new SparseArray<>();
     private final KeyStore mKeyStore;
 
-    public ManagedProfilePasswordCache(KeyStore keyStore) {
+    public UnifiedProfilePasswordCache(KeyStore keyStore) {
         mKeyStore = keyStore;
     }
 
@@ -151,7 +152,8 @@ public class ManagedProfilePasswordCache {
                 Slog.d(TAG, "Cannot decrypt", e);
                 return null;
             }
-            LockscreenCredential result = LockscreenCredential.createManagedPassword(credential);
+            LockscreenCredential result =
+                    LockscreenCredential.createUnifiedProfilePassword(credential);
             Arrays.fill(credential, (byte) 0);
             return result;
         }
