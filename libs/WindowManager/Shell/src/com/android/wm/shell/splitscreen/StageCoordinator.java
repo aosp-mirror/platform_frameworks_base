@@ -1666,7 +1666,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void finishEnterSplitScreen(SurfaceControl.Transaction finishT) {
-        mSplitLayout.update(finishT);
+        mSplitLayout.update(finishT, true /* resetImePosition */);
         mMainStage.getSplitDecorManager().inflate(mContext, mMainStage.mRootLeash,
                 getMainStageBounds());
         mSideStage.getSplitDecorManager().inflate(mContext, mSideStage.mRootLeash,
@@ -1860,9 +1860,10 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 && mSplitLayout.updateConfiguration(mRootTaskInfo.configuration)
                 && mMainStage.isActive()) {
             // Clear the divider remote animating flag as the divider will be re-rendered to apply
-            // the new rotation config.
+            // the new rotation config.  Don't reset the IME state since those updates are not in
+            // sync with task info changes.
             mIsDividerRemoteAnimating = false;
-            mSplitLayout.update(null /* t */);
+            mSplitLayout.update(null /* t */, false /* resetImePosition */);
             onLayoutSizeChanged(mSplitLayout);
         }
     }
@@ -2325,7 +2326,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
      */
     public void updateSurfaces(SurfaceControl.Transaction transaction) {
         updateSurfaceBounds(mSplitLayout, transaction, /* applyResizingOffset */ false);
-        mSplitLayout.update(transaction);
+        mSplitLayout.update(transaction, true /* resetImePosition */);
     }
 
     private void onDisplayChange(int displayId, int fromRotation, int toRotation,
@@ -2598,7 +2599,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 final TransitionInfo.Change change = info.getChanges().get(iC);
                 if (change.getMode() == TRANSIT_CHANGE
                         && (change.getFlags() & FLAG_IS_DISPLAY) != 0) {
-                    mSplitLayout.update(startTransaction);
+                    // Don't reset the IME state since those updates are not in sync with the
+                    // display change transition
+                    mSplitLayout.update(startTransaction, false /* resetImePosition */);
                 }
 
                 if (mMixedHandler.isEnteringPip(change, transitType)) {
@@ -2699,7 +2702,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     startTransaction, finishTransaction, finishCallback)) {
                 if (mSplitTransitions.isPendingResize(transition)) {
                     // Only need to update in resize because divider exist before transition.
-                    mSplitLayout.update(startTransaction);
+                    mSplitLayout.update(startTransaction, true /* resetImePosition */);
                     startTransaction.apply();
                 }
                 return true;
