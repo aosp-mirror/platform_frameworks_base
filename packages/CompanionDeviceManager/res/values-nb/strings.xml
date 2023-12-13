@@ -54,21 +54,34 @@
     <string name="permission_microphone" msgid="2152206421428732949">"Mikrofon"</string>
     <string name="permission_call_logs" msgid="5546761417694586041">"Samtalelogger"</string>
     <string name="permission_nearby_devices" msgid="7530973297737123481">"Enheter i nærheten"</string>
+    <string name="permission_media_routing_control" msgid="5498639511586715253">"Bytt medieutgang"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Bilder og medier"</string>
-    <string name="permission_notification" msgid="693762568127741203">"Varsler"</string>
+    <!-- no translation found for permission_notifications (4099418516590632909) -->
+    <skip />
     <string name="permission_app_streaming" msgid="6009695219091526422">"Apper"</string>
     <string name="permission_nearby_device_streaming" msgid="1023325519477349499">"Strømming"</string>
-    <string name="permission_phone_summary" msgid="6684396967861278044">"Kan ringe ut og administrere anrop"</string>
-    <string name="permission_call_logs_summary" msgid="6186103394658755022">"Kan lese og skrive samtaleloggen"</string>
-    <string name="permission_sms_summary" msgid="3508442683678912017">"Kan sende og lese SMS-meldinger"</string>
-    <string name="permission_contacts_summary" msgid="675861979475628708">"Kan bruke kontaktene dine"</string>
-    <string name="permission_calendar_summary" msgid="6460000922511766226">"Kan bruke kalenderen din"</string>
-    <string name="permission_microphone_summary" msgid="3692091540613093394">"Kan ta opp lyd"</string>
-    <string name="permission_nearby_devices_summary" msgid="931940524460876655">"Kan finne, koble til og fastslå den relative posisjonen til enheter i nærheten"</string>
-    <string name="permission_notification_summary" msgid="884075314530071011">"Kan lese alle varsler, inkludert informasjon som kontakter, meldinger og bilder"</string>
+    <!-- no translation found for permission_phone_summary (8246321093970051702) -->
+    <skip />
+    <!-- no translation found for permission_call_logs_summary (7545243592757693321) -->
+    <skip />
+    <!-- no translation found for permission_sms_summary (8499509535410068616) -->
+    <skip />
+    <!-- no translation found for permission_contacts_summary (2840800622763086808) -->
+    <skip />
+    <!-- no translation found for permission_calendar_summary (8430353935747336165) -->
+    <skip />
+    <!-- no translation found for permission_microphone_summary (4862628553869973259) -->
+    <skip />
+    <!-- no translation found for permission_nearby_devices_summary (1306752848196464817) -->
+    <skip />
+    <!-- no translation found for permission_notification_listener_access_summary (7856071768185367749) -->
+    <skip />
+    <!-- no translation found for permission_notifications_summary (2272810466047367030) -->
+    <skip />
     <string name="permission_app_streaming_summary" msgid="606923325679670624">"Strøm appene på telefonen"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
     <string name="permission_nearby_device_streaming_summary" msgid="8280824871197081246">"Strøm apper og andre systemfunksjoner fra telefonen"</string>
+    <string name="permission_media_routing_control_summary" msgid="2714631092321412250">"Se en liste over tilgjengelige enheter, og kontroller hvilken enhet som strømmer eller caster lyd eller video fra andre apper"</string>
     <string name="device_type" product="default" msgid="8268703872070046263">"telefon"</string>
     <string name="device_type" product="tablet" msgid="5038791954983067774">"nettbrett"</string>
 </resources>
