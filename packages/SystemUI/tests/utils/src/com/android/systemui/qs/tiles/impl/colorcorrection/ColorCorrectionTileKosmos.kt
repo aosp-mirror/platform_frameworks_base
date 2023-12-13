@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.accessibility
+package com.android.systemui.qs.tiles.impl.colorcorrection
 
-import com.android.systemui.accessibility.data.repository.ColorCorrectionRepository
-import com.android.systemui.accessibility.data.repository.ColorCorrectionRepositoryImpl
 import com.android.systemui.accessibility.qs.QSAccessibilityModule
-import dagger.Binds
-import dagger.Module
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.qs.qsEventLogger
 
-@Module(includes = [QSAccessibilityModule::class])
-interface AccessibilityModule {
-    @Binds
-    abstract fun colorCorrectionRepository(
-        impl: ColorCorrectionRepositoryImpl
-    ): ColorCorrectionRepository
-}
+val Kosmos.qsColorCorrectionTileConfig by
+    Kosmos.Fixture { QSAccessibilityModule.provideColorCorrectionTileConfig(qsEventLogger) }
