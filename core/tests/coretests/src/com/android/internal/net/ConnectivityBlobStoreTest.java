@@ -82,4 +82,51 @@ public class ConnectivityBlobStoreTest {
         assertTrue(connectivityBlobStore.put(TEST_NAME, newBlob));
         assertArrayEquals(newBlob, connectivityBlobStore.get(TEST_NAME));
     }
+
+    @Test
+    public void testRemove() throws Exception {
+        final ConnectivityBlobStore connectivityBlobStore = createConnectivityBlobStore();
+        assertNull(connectivityBlobStore.get(TEST_NAME));
+        assertFalse(connectivityBlobStore.remove(TEST_NAME));
+
+        assertTrue(connectivityBlobStore.put(TEST_NAME, TEST_BLOB));
+        assertArrayEquals(TEST_BLOB, connectivityBlobStore.get(TEST_NAME));
+
+        assertTrue(connectivityBlobStore.remove(TEST_NAME));
+        assertNull(connectivityBlobStore.get(TEST_NAME));
+
+        // Removing again returns false
+        assertFalse(connectivityBlobStore.remove(TEST_NAME));
+    }
+
+    @Test
+    public void testMultipleNames() throws Exception {
+        final String name1 = TEST_NAME + "1";
+        final String name2 = TEST_NAME + "2";
+        final ConnectivityBlobStore connectivityBlobStore = createConnectivityBlobStore();
+
+        assertNull(connectivityBlobStore.get(name1));
+        assertNull(connectivityBlobStore.get(name2));
+        assertFalse(connectivityBlobStore.remove(name1));
+        assertFalse(connectivityBlobStore.remove(name2));
+
+        assertTrue(connectivityBlobStore.put(name1, TEST_BLOB));
+        assertTrue(connectivityBlobStore.put(name2, TEST_BLOB));
+        assertArrayEquals(TEST_BLOB, connectivityBlobStore.get(name1));
+        assertArrayEquals(TEST_BLOB, connectivityBlobStore.get(name2));
+
+        // Replace the blob for name1 only.
+        final byte[] newBlob = new byte[] {(byte) 16, (byte) 21};
+        assertTrue(connectivityBlobStore.put(name1, newBlob));
+        assertArrayEquals(newBlob, connectivityBlobStore.get(name1));
+
+        assertTrue(connectivityBlobStore.remove(name1));
+        assertNull(connectivityBlobStore.get(name1));
+        assertArrayEquals(TEST_BLOB, connectivityBlobStore.get(name2));
+
+        assertFalse(connectivityBlobStore.remove(name1));
+        assertTrue(connectivityBlobStore.remove(name2));
+        assertNull(connectivityBlobStore.get(name2));
+        assertFalse(connectivityBlobStore.remove(name2));
+    }
 }
