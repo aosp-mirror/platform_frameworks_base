@@ -754,9 +754,9 @@ public class PersistentDataBlockService extends SystemService {
         }
     };
 
-    private PersistentDataBlockManagerInternal mInternalService =
-            new PersistentDataBlockManagerInternal() {
+    private InternalService mInternalService = new InternalService();
 
+    private class InternalService implements PersistentDataBlockManagerInternal {
         @Override
         public void setFrpCredentialHandle(byte[] handle) {
             writeInternal(handle, getFrpCredentialDataOffset(), MAX_FRP_CREDENTIAL_HANDLE_SIZE);
