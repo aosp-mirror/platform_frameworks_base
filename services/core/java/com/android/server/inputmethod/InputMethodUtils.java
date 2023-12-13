@@ -50,6 +50,7 @@ import com.android.server.textservices.TextServicesManagerInternal;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -952,24 +953,35 @@ final class InputMethodUtils {
         final String enabledInputMethodsStr = TextUtils.nullIfEmpty(
                 SecureSettingsWrapper.getString(Settings.Secure.ENABLED_INPUT_METHODS, null,
                         userId));
-        if (enabledInputMethodsStr == null) {
-            return List.of();
+        final ArrayList<String> result = new ArrayList<>();
+        splitEnabledImeStr(enabledInputMethodsStr, result::add);
+        return result;
+    }
+
+    /**
+     * Split enabled IME string ({@link Settings.Secure#ENABLED_INPUT_METHODS}) into IME IDs.
+     *
+     * @param text a text formatted with {@link Settings.Secure#ENABLED_INPUT_METHODS}.
+     * @param consumer {@link Consumer} called back when a new IME ID is found.
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
+    static void splitEnabledImeStr(@Nullable String text, @NonNull Consumer<String> consumer) {
+        if (TextUtils.isEmpty(text)) {
+            return;
         }
         final TextUtils.SimpleStringSplitter inputMethodSplitter =
                 new TextUtils.SimpleStringSplitter(INPUT_METHOD_SEPARATOR);
         final TextUtils.SimpleStringSplitter subtypeSplitter =
                 new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR);
-        inputMethodSplitter.setString(enabledInputMethodsStr);
-        final ArrayList<String> result = new ArrayList<>();
+        inputMethodSplitter.setString(text);
         while (inputMethodSplitter.hasNext()) {
             String nextImsStr = inputMethodSplitter.next();
             subtypeSplitter.setString(nextImsStr);
             if (subtypeSplitter.hasNext()) {
                 // The first element is ime id.
-                result.add(subtypeSplitter.next());
+                consumer.accept(subtypeSplitter.next());
             }
         }
-        return result;
     }
 
     /**
