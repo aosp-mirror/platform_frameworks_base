@@ -271,6 +271,10 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     public void writeSyncLocked() {
     }
 
+    public void setHandler(Handler handler) {
+        mHandler = handler;
+    }
+
     public static class DummyExternalStatsSync implements ExternalStatsSync {
         public int flags = 0;
 
@@ -315,4 +319,3 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
         }
     }
 }
-
