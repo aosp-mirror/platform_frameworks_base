@@ -39,14 +39,14 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.component.ParsedActivityUtils;
 import com.android.internal.pm.pkg.component.ParsedComponent;
 import com.android.internal.pm.pkg.component.ParsedIntentInfo;
 import com.android.internal.pm.pkg.component.ParsedPermission;
+import com.android.internal.pm.pkg.component.ParsedPermissionUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedActivityUtils;
-import com.android.server.pm.pkg.component.ParsedPermissionUtils;
 import com.android.server.pm.test.service.server.R;
 
 import com.google.common.truth.Expect;

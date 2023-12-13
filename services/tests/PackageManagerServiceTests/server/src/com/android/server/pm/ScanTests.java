@@ -50,13 +50,13 @@ import android.os.UserHandle;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.pkg.component.ParsedUsesPermissionImpl;
 import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.parsing.PackageInfoUtils;
-import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.pkg.AndroidPackage;
-import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 
 import org.hamcrest.BaseMatcher;
@@ -376,7 +376,7 @@ public class ScanTests {
         // Create the ParsedPackage for the apex
         final ParsedPackage basicPackage =
                 ((ParsedPackage) new PackageImpl(DUMMY_PACKAGE_NAME, codePath, codePath,
-                        mock(TypedArray.class), false)
+                        mock(TypedArray.class), false, null)
                         .setVolumeUuid(UUID_ONE.toString())
                         .hideAsParsed())
                         .setVersionCodeMajor(1)
@@ -595,7 +595,7 @@ public class ScanTests {
         // TODO(b/135203078): Make this use PackageImpl.forParsing and separate the steps
         return (ParsingPackage) ((ParsedPackage) new PackageImpl(packageName,
                 "/data/tmp/randompath/base.apk", createCodePath(packageName),
-                mock(TypedArray.class), false)
+                mock(TypedArray.class), false, null)
                 .setVolumeUuid(UUID_ONE.toString())
                 .addUsesStaticLibrary("some.static.library", 234L, new String[]{"testCert1"})
                 .addUsesStaticLibrary("some.other.static.library", 456L, new String[]{"testCert2"})

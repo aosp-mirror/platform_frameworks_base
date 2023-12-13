@@ -21,17 +21,17 @@ import android.os.Environment
 import android.os.SystemProperties.PROP_VALUE_MAX
 import android.platform.test.annotations.Postsubmit
 import com.android.internal.R
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils
 import com.android.server.pm.PackageManagerService
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils
 import com.google.common.truth.Truth.assertThat
+import java.io.ByteArrayInputStream
+import java.io.File
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.fail
 import org.junit.Test
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
-import java.io.ByteArrayInputStream
-import java.io.File
 
 @Postsubmit
 class AndroidPackageParsingValidationTest {

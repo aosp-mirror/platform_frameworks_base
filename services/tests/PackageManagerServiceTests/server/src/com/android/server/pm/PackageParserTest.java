@@ -15,7 +15,7 @@
  */
 package com.android.server.pm;
 
-import static com.android.server.pm.permission.CompatibilityPermissionInfo.COMPAT_PERMS;
+import static com.android.internal.pm.permission.CompatibilityPermissionInfo.COMPAT_PERMS;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
@@ -58,17 +58,28 @@ import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.pm.parsing.pkg.PackageImpl;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
+import com.android.internal.pm.permission.CompatibilityPermissionInfo;
 import com.android.internal.pm.pkg.component.ParsedActivity;
+import com.android.internal.pm.pkg.component.ParsedActivityImpl;
 import com.android.internal.pm.pkg.component.ParsedApexSystemService;
 import com.android.internal.pm.pkg.component.ParsedComponent;
 import com.android.internal.pm.pkg.component.ParsedInstrumentation;
+import com.android.internal.pm.pkg.component.ParsedInstrumentationImpl;
 import com.android.internal.pm.pkg.component.ParsedIntentInfo;
+import com.android.internal.pm.pkg.component.ParsedIntentInfoImpl;
 import com.android.internal.pm.pkg.component.ParsedPermission;
 import com.android.internal.pm.pkg.component.ParsedPermissionGroup;
+import com.android.internal.pm.pkg.component.ParsedPermissionGroupImpl;
+import com.android.internal.pm.pkg.component.ParsedPermissionImpl;
+import com.android.internal.pm.pkg.component.ParsedPermissionUtils;
 import com.android.internal.pm.pkg.component.ParsedProvider;
+import com.android.internal.pm.pkg.component.ParsedProviderImpl;
 import com.android.internal.pm.pkg.component.ParsedService;
+import com.android.internal.pm.pkg.component.ParsedServiceImpl;
 import com.android.internal.pm.pkg.component.ParsedUsesPermission;
+import com.android.internal.pm.pkg.component.ParsedUsesPermissionImpl;
 import com.android.internal.pm.pkg.parsing.ParsingPackage;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.parsing.PackageCacher;
@@ -76,19 +87,8 @@ import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.TestPackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
-import com.android.server.pm.parsing.pkg.PackageImpl;
-import com.android.server.pm.permission.CompatibilityPermissionInfo;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageUserStateInternal;
-import com.android.server.pm.pkg.component.ParsedActivityImpl;
-import com.android.server.pm.pkg.component.ParsedInstrumentationImpl;
-import com.android.server.pm.pkg.component.ParsedIntentInfoImpl;
-import com.android.server.pm.pkg.component.ParsedPermissionGroupImpl;
-import com.android.server.pm.pkg.component.ParsedPermissionImpl;
-import com.android.server.pm.pkg.component.ParsedPermissionUtils;
-import com.android.server.pm.pkg.component.ParsedProviderImpl;
-import com.android.server.pm.pkg.component.ParsedServiceImpl;
-import com.android.server.pm.pkg.component.ParsedUsesPermissionImpl;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -724,6 +724,16 @@ public class PackageParserTest {
                 @Override
                 public boolean hasFeature(String feature) {
                     return false;
+                }
+
+                @Override
+                public Set<String> getHiddenApiWhitelistedApps() {
+                    return new ArraySet<>();
+                }
+
+                @Override
+                public Set<String> getInstallConstraintsAllowlist() {
+                    return new ArraySet<>();
                 }
             });
             if (cacheDir != null) {

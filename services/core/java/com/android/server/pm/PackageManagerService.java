@@ -185,6 +185,7 @@ import com.android.internal.pm.parsing.pkg.AndroidPackageInternal;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.component.ParsedInstrumentation;
 import com.android.internal.pm.pkg.component.ParsedMainComponent;
+import com.android.internal.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.internal.telephony.CarrierAppUtils;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
@@ -238,7 +239,6 @@ import com.android.server.pm.pkg.SharedUserApi;
 import com.android.server.pm.pkg.mutate.PackageStateMutator;
 import com.android.server.pm.pkg.mutate.PackageStateWrite;
 import com.android.server.pm.pkg.mutate.PackageUserStateWrite;
-import com.android.server.pm.pkg.parsing.ParsingPackageUtils;
 import com.android.server.pm.resolution.ComponentResolver;
 import com.android.server.pm.resolution.ComponentResolverApi;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
@@ -2012,6 +2012,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             @Override
             public boolean hasFeature(String feature) {
                 return PackageManagerService.this.hasSystemFeature(feature, 0);
+            }
+
+            @Override
+            public Set<String> getHiddenApiWhitelistedApps() {
+                return SystemConfig.getInstance().getHiddenApiWhitelistedApps();
+            }
+
+            @Override
+            public Set<String> getInstallConstraintsAllowlist() {
+                return SystemConfig.getInstance().getInstallConstraintsAllowlist();
             }
         };
 
