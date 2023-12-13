@@ -3537,11 +3537,11 @@
         <attr name="preferKeepClear" format="boolean" />
 
         <!-- <p>Whether or not the auto handwriting initiation is enabled in this View.
-             <p>For a view with active {@link android.view.inputmethod.InputConnection},
-             if auto handwriting initiation is enabled stylus movement within its view boundary
+             <p>For a view with an active {@link android.view.inputmethod.InputConnection},
+             if auto handwriting initiation is enabled, stylus movement within its view boundary
              will automatically trigger the handwriting mode.
-             <p>This is true by default.
-             See {@link android.view.View#setAutoHandwritingEnabled}. -->
+             See {@link android.view.View#setAutoHandwritingEnabled}.
+             <p>The default value of this flag is configurable by the device manufacturer. -->
         <attr name="autoHandwritingEnabled" format="boolean" />
 
         <!-- <p>The amount of offset that is applied to the left edge of the view's stylus

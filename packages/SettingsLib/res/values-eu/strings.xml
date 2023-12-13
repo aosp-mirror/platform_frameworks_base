@@ -115,9 +115,9 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"Kalitate handiko audioa: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Kalitate handiko audioa"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Audifonoak"</string>
-    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"Kontsumo txikiko Bluetooth bidezko audioa"</string>
+    <string name="bluetooth_profile_le_audio" msgid="1725521360076451751">"Kontsumo txikiko audioa"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Audifonoetara konektatuta"</string>
-    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE audio-ra konektatuta"</string>
+    <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Kontsumo txikiko audiora konektatuta"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Euskarriaren audiora konektatuta"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Telefonoaren audiora konektatuta"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Fitxategi-transferentziako zerbitzarira konektatuta"</string>
@@ -196,7 +196,7 @@
     <string name="tts_status_not_supported" msgid="2702997696245523743">"Ez da <xliff:g id="LOCALE">%1$s</xliff:g> onartzen"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"Egiaztatzen…"</string>
     <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> motorraren ezarpenak"</string>
-    <string name="tts_engine_settings_button" msgid="477155276199968948">"Abiarazi motorraren ezarpenak"</string>
+    <string name="tts_engine_settings_button" msgid="477155276199968948">"Exekutatu motorraren ezarpenak"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Motor hobetsia"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"Orokorrak"</string>
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Berrezarri ahots-tonua"</string>
@@ -364,7 +364,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Araztu GPU gainidazketa"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Desgaitu HW gainjartzeak"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Erabili beti GPUa pantaila-muntaietarako"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"Simulatu kolore-eremua"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"Simulatu kolore-espazioa"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Gaitu OpenGL aztarnak"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Desgaitu USB bidez audioa bideratzeko aukera"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Desgaitu USB bidezko audio-gailuetara automatikoki bideratzeko aukera"</string>
@@ -398,7 +398,7 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Behartu aplikazioak onartzera kanpoko memorian"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Aplikazioek kanpoko memorian idatz dezakete, ezarritako balioak kontuan izan gabe"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Behartu jardueren tamaina doitu ahal izatera"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Eman aukera jarduera guztien tamaina doitzeko, hainbat leihotan erabili ahal izan daitezen, ezarritako balioak kontuan izan gabe"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Eman aukera jarduera guztien tamaina doitzeko, leiho batean baino gehiagotan erabili ahal izan daitezen, ezarritako balioak kontuan izan gabe"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Gaitu estilo libreko leihoak"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Onartu estilo libreko leiho esperimentalak"</string>
     <string name="desktop_mode" msgid="2389067840550544462">"Ordenagailuetarako modua"</string>
@@ -438,7 +438,7 @@
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Erabili sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Desgaituta"</string>
     <string name="daltonizer_mode_monochromacy" msgid="362060873835885014">"Ikusmen-monokromia"</string>
-    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Daltonismoa (gorri-berdeak)"</string>
+    <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"Deuteranomalia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanopia (gorri-berdeak)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomalia (urdin-horia)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Koloreen zuzenketa"</string>

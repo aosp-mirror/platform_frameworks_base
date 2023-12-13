@@ -480,7 +480,7 @@
     <string name="sound_settings" msgid="8874581353127418308">"Suara &amp; getaran"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Setelan"</string>
     <string name="csd_lowered_title" product="default" msgid="2464112924151691129">"Volume diturunkan ke level yang lebih aman"</string>
-    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Volume headphone tinggi selama lebih lama dari yang direkomendasikan"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="1250251883692996888">"Volume headphone tinggi untuk waktu lebih lama dari yang direkomendasikan"</string>
     <string name="csd_500_system_lowered_text" product="default" msgid="7414943302186884124">"Volume headphone telah melampaui batas aman untuk minggu ini"</string>
     <string name="csd_button_keep_listening" product="default" msgid="4093794049149286784">"Terus dengarkan"</string>
     <string name="csd_button_lower_volume" product="default" msgid="5347210412376264579">"Turunkan volume"</string>
@@ -695,7 +695,7 @@
     <string name="switch_bar_off" msgid="5669805115416379556">"Nonaktif"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Tidak tersedia"</string>
     <string name="accessibility_tile_disabled_by_policy_action_description" msgid="6958422730461646926">"pelajari lebih lanjut"</string>
-    <string name="nav_bar" msgid="4642708685386136807">"Bilah navigasi"</string>
+    <string name="nav_bar" msgid="4642708685386136807">"Menu navigasi"</string>
     <string name="nav_bar_layout" msgid="4716392484772899544">"Tata letak"</string>
     <string name="left_nav_bar_button_type" msgid="2634852842345192790">"Jenis tombol ekstra kiri"</string>
     <string name="right_nav_bar_button_type" msgid="4472566498647364715">"Jenis tombol ekstra kanan"</string>

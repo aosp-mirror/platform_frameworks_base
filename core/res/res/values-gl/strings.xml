@@ -1884,8 +1884,8 @@
     <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{Durante 1 hora}other{Durante # horas}}"</string>
     <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{Durante 1 h}other{Durante # h}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Ata: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_until" msgid="2250286190237669079">"Ata as <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
-    <string name="zen_mode_alarm" msgid="7046911727540499275">"Ata as <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
+    <string name="zen_mode_until" msgid="2250286190237669079">"Ata: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
+    <string name="zen_mode_alarm" msgid="7046911727540499275">"Ata: <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (próxima alarma)"</string>
     <string name="zen_mode_forever" msgid="740585666364912448">"Ata a desactivación"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Ata que desactives o modo Non molestar"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"O deseño do teclado estableceuse en <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Toca para cambialo."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Configuráronse varios teclados físicos"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Toca para ver os teclados"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Privado"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"Clonado"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"Traballo"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"Traballo 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"Traballo 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"Proba"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"Compartido"</string>
 </resources>

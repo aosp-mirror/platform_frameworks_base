@@ -447,6 +447,7 @@ public final class MediaSession {
      * but it must be released if your activity or service is being destroyed.
      */
     public void release() {
+        setCallback(null);
         try {
             mBinder.destroySession();
         } catch (RemoteException e) {

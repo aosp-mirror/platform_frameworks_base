@@ -166,7 +166,7 @@
     <string name="httpErrorTimeout" msgid="7446272815190334204">"زمان اتصال به سرور تمام شده است."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"این صفحه دارای تعداد بسیار زیادی تغییر مسیر سرور است."</string>
     <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"‏پروتکل پشتیبانی نمی‌‎شود."</string>
-    <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"اتصال امن ایجاد نشد."</string>
+    <string name="httpErrorFailedSslHandshake" msgid="546319061228876290">"اتصال ایمن ایجاد نشد."</string>
     <string name="httpErrorBadUrl" msgid="754447723314832538">"به‌دلیل نامعتبر بودن نشانی اینترنتی، صفحه باز نمی‌شود."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"دسترسی به فایل انجام نشد."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"فایل درخواستی پیدا نشد."</string>
@@ -1129,9 +1129,9 @@
     <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# ساعت}one{# ساعت}other{# ساعت}}"</string>
     <string name="duration_days_relative_future" msgid="8870658635774250746">"{count,plural, =1{# روز}one{# روز}other{# روز}}"</string>
     <string name="duration_years_relative_future" msgid="8855853883925918380">"{count,plural, =1{# سال}one{# سال}other{# سال}}"</string>
-    <string name="VideoView_error_title" msgid="5750686717225068016">"مشکل در ویدئو"</string>
-    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"متأسفیم، این ویدئو برای پخش جریانی با این دستگاه معتبر نیست."</string>
-    <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"پخش این ویدئو ممکن نیست."</string>
+    <string name="VideoView_error_title" msgid="5750686717225068016">"مشکل در ویدیو"</string>
+    <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"متأسفیم، این ویدیو برای پخش جریانی با این دستگاه معتبر نیست."</string>
+    <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"پخش این ویدیو ممکن نیست."</string>
     <string name="VideoView_error_button" msgid="5138809446603764272">"تأیید"</string>
     <string name="relative_time" msgid="8572030016028033243">"<xliff:g id="DATE">%1$s</xliff:g>، <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="8365974533050605886">"ظهر"</string>
@@ -2333,10 +2333,17 @@
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"رفتن به تنظیمات"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"خاموش کردن"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"‫<xliff:g id="DEVICE_NAME">%s</xliff:g> پیکربندی شد"</string>
-    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"طرح‌بندی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
-    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"طرح‌بندی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
-    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"طرح‌بندی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
-    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"صفحه‌کلید روی این طرح‌بندی‌ها تنظیم شد: <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g>… برای تغییر ضربه بزنید"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"جانمایی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"جانمایی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"جانمایی صفحه‌کلید روی <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g> تنظیم شد. برای تغییر دادن، ضربه بزنید."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"جانمایی صفحه‌کلید چنین تنظیم شد: <xliff:g id="LAYOUT_1">%1$s</xliff:g>، <xliff:g id="LAYOUT_2">%2$s</xliff:g>، <xliff:g id="LAYOUT_3">%3$s</xliff:g>… برای تغییر ضربه بزنید"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"صفحه‌کلیدهای فیزیکی پیکربندی شدند"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"برای مشاهده صفحه‌کلیدها ضربه بزنید"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"خصوصی"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"مشابه‌سازی"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"کار"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"کار ۲"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"کار ۳"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"آزمایش"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"عمومی"</string>
 </resources>

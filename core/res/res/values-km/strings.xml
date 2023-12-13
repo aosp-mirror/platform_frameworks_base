@@ -2339,4 +2339,11 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… សូមចុចដើម្បីប្ដូរ។"</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"បានកំណត់រចនាសម្ព័ន្ធ​ក្ដារចុចរូបវន្ត"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ចុចដើម្បីមើលក្ដារចុច"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"ឯកជន"</string>
+    <string name="profile_label_clone" msgid="769106052210954285">"ក្លូន"</string>
+    <string name="profile_label_work" msgid="3495359133038584618">"ការងារ"</string>
+    <string name="profile_label_work_2" msgid="4691533661598632135">"ការងារទី 2"</string>
+    <string name="profile_label_work_3" msgid="4834572253956798917">"ការងារទី 3"</string>
+    <string name="profile_label_test" msgid="9168641926186071947">"ការធ្វើ​តេស្ត"</string>
+    <string name="profile_label_communal" msgid="8743921499944800427">"ទូទៅ"</string>
 </resources>
