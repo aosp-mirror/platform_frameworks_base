@@ -156,10 +156,9 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
                 if (customUserManager.isUserOfType(USER_TYPE_PROFILE_MANAGED)
                         && customUserManager.isSameProfileGroup(dialogInfo.user, myUserHandle)) {
                     messageBuilder.append(isArchive
-                            ? getString(R.string.archive_application_text_current_user_work_profile,
-                                    userName) : getString(
-                            R.string.uninstall_application_text_current_user_work_profile,
-                            userName));
+                            ? getString(R.string.archive_application_text_current_user_work_profile)
+                            : getString(
+                                    R.string.uninstall_application_text_current_user_work_profile));
                 } else if (customUserManager.isUserOfType(USER_TYPE_PROFILE_CLONE)
                         && customUserManager.isSameProfileGroup(dialogInfo.user, myUserHandle)) {
                     mIsClonedApp = true;
@@ -168,11 +167,11 @@ public class UninstallAlertDialogFragment extends DialogFragment implements
                 } else if (Flags.allowPrivateProfile()
                         && customUserManager.isPrivateProfile()
                         && customUserManager.isSameProfileGroup(dialogInfo.user, myUserHandle)) {
-                    messageBuilder.append(isArchive ? getString(
-                            R.string.archive_application_text_current_user_private_profile,
-                            userName) : getString(
-                            R.string.uninstall_application_text_current_user_private_profile,
-                            userName));
+                    messageBuilder.append(
+                            isArchive ? getString(
+                                    R.string.archive_application_text_current_user_private_profile)
+                            : getString(
+                                R.string.uninstall_application_text_current_user_private_profile));
                 } else if (isArchive) {
                     messageBuilder.append(
                             getString(R.string.archive_application_text_user, userName));
