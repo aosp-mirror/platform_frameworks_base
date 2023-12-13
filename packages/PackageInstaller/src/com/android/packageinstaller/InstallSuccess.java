@@ -17,7 +17,6 @@
 package com.android.packageinstaller;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -111,11 +110,7 @@ public class InstallSuccess extends AlertActivity {
         Button launchButton = mAlert.getButton(DialogInterface.BUTTON_POSITIVE);
         if (enabled) {
             launchButton.setOnClickListener(view -> {
-                try {
-                    startActivity(mLaunchIntent);
-                } catch (ActivityNotFoundException | SecurityException e) {
-                    Log.e(LOG_TAG, "Could not start activity", e);
-                }
+                setResult(Activity.RESULT_OK, mLaunchIntent);
                 finish();
             });
         } else {

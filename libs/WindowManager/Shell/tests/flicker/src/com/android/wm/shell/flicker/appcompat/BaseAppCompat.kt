@@ -17,28 +17,29 @@
 package com.android.wm.shell.flicker.appcompat
 
 import android.content.Context
-import android.system.helpers.CommandsHelper
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import com.android.server.wm.flicker.helpers.setRotation
+import android.tools.device.flicker.legacy.FlickerTestData
+import android.tools.device.flicker.legacy.LegacyFlickerTest
 import com.android.server.wm.flicker.helpers.LetterboxAppHelper
-import android.tools.device.flicker.legacy.FlickerTestFactory
-import android.tools.device.flicker.legacy.IFlickerTestData
+import com.android.server.wm.flicker.helpers.setRotation
 import com.android.wm.shell.flicker.BaseTest
-import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
-import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
-import com.android.wm.shell.flicker.layerKeepVisible
-import org.junit.After
+import com.android.wm.shell.flicker.utils.appWindowIsVisibleAtEnd
+import com.android.wm.shell.flicker.utils.appWindowIsVisibleAtStart
+import com.android.wm.shell.flicker.utils.appWindowKeepVisible
+import com.android.wm.shell.flicker.utils.layerKeepVisible
+
 import org.junit.Assume
 import org.junit.Before
-import org.junit.runners.Parameterized
+import org.junit.Rule
 
-abstract class BaseAppCompat(flicker: FlickerTest) : BaseTest(flicker) {
+abstract class BaseAppCompat(flicker: LegacyFlickerTest) : BaseTest(flicker) {
     protected val context: Context = instrumentation.context
     protected val letterboxApp = LetterboxAppHelper(instrumentation)
-    lateinit var cmdHelper: CommandsHelper
-    private lateinit var letterboxStyle: HashMap<String, String>
+
+    @JvmField
+    @Rule
+    val letterboxRule: LetterboxRule = LetterboxRule()
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
@@ -48,62 +49,17 @@ abstract class BaseAppCompat(flicker: FlickerTest) : BaseTest(flicker) {
                 letterboxApp.launchViaIntent(wmHelper)
                 setEndRotation()
             }
-            teardown {
-                letterboxApp.exit(wmHelper)
-            }
+            teardown { letterboxApp.exit(wmHelper) }
         }
 
     @Before
     fun before() {
-        cmdHelper = CommandsHelper.getInstance(instrumentation)
-        Assume.assumeTrue(tapl.isTablet && isIgnoreOrientationRequest())
-        letterboxStyle = mapLetterboxStyle()
-        setLetterboxEducationEnabled(false)
+        Assume.assumeTrue(tapl.isTablet && letterboxRule.isIgnoreOrientationRequest)
     }
 
-    @After
-    fun after() {
-        resetLetterboxEducationEnabled()
-    }
+    fun FlickerTestData.setStartRotation() = setRotation(flicker.scenario.startRotation)
 
-    private fun mapLetterboxStyle(): HashMap<String, String> {
-        val res = cmdHelper.executeShellCommand("wm get-letterbox-style")
-        val lines = res.lines()
-        val map = HashMap<String, String>()
-        for (line in lines) {
-            val keyValuePair = line.split(":")
-            if (keyValuePair.size == 2) {
-                val key = keyValuePair[0].trim()
-                map[key] = keyValuePair[1].trim()
-            }
-        }
-        return map
-    }
-
-    private fun getLetterboxStyle(): HashMap<String, String> {
-        if (!::letterboxStyle.isInitialized) {
-            letterboxStyle = mapLetterboxStyle()
-        }
-        return letterboxStyle
-    }
-
-    private fun resetLetterboxEducationEnabled() {
-        val enabled = getLetterboxStyle().getValue("Is education enabled")
-        cmdHelper.executeShellCommand("wm set-letterbox-style --isEducationEnabled $enabled")
-    }
-
-    private fun setLetterboxEducationEnabled(enabled: Boolean) {
-        cmdHelper.executeShellCommand("wm set-letterbox-style --isEducationEnabled $enabled")
-    }
-
-    private fun isIgnoreOrientationRequest(): Boolean {
-        val res = cmdHelper.executeShellCommand("wm get-ignore-orientation-request")
-        return res != null && res.contains("true")
-    }
-
-    fun IFlickerTestData.setStartRotation() = setRotation(flicker.scenario.startRotation)
-
-    fun IFlickerTestData.setEndRotation() = setRotation(flicker.scenario.endRotation)
+    fun FlickerTestData.setEndRotation() = setRotation(flicker.scenario.endRotation)
 
     /** Checks that app entering letterboxed state have rounded corners */
     fun assertLetterboxAppAtStartHasRoundedCorners() {
@@ -118,7 +74,7 @@ abstract class BaseAppCompat(flicker: FlickerTest) : BaseTest(flicker) {
 
     /** Only run on tests with config_letterboxActivityCornersRadius != 0 in devices */
     private fun assumeLetterboxRoundedCornersEnabled() {
-        Assume.assumeTrue(getLetterboxStyle().getValue("Corner radius") != "0")
+        Assume.assumeTrue(letterboxRule.hasCornerRadius)
     }
 
     fun assertLetterboxAppVisibleAtStartAndEnd() {
@@ -126,25 +82,21 @@ abstract class BaseAppCompat(flicker: FlickerTest) : BaseTest(flicker) {
         flicker.appWindowIsVisibleAtEnd(letterboxApp)
     }
 
+    fun assertLetterboxAppKeepVisible() {
+        assertLetterboxAppWindowKeepVisible()
+        assertLetterboxAppLayerKeepVisible()
+    }
+
     fun assertAppLetterboxedAtEnd() =
-            flicker.assertLayersEnd { isVisible(ComponentNameMatcher.LETTERBOX) }
+        flicker.assertLayersEnd { isVisible(ComponentNameMatcher.LETTERBOX) }
 
     fun assertAppLetterboxedAtStart() =
-            flicker.assertLayersStart { isVisible(ComponentNameMatcher.LETTERBOX) }
+        flicker.assertLayersStart { isVisible(ComponentNameMatcher.LETTERBOX) }
+
+    fun assertAppStaysLetterboxed() =
+        flicker.assertLayers { isVisible(ComponentNameMatcher.LETTERBOX) }
 
     fun assertLetterboxAppLayerKeepVisible() = flicker.layerKeepVisible(letterboxApp)
 
-    companion object {
-        /**
-         * Creates the test configurations.
-         *
-         * See [FlickerTestFactory.rotationTests] for configuring screen orientation and
-         * navigation modes.
-         */
-        @Parameterized.Parameters(name = "{0}")
-        @JvmStatic
-        fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.rotationTests()
-        }
-    }
+    fun assertLetterboxAppWindowKeepVisible() = flicker.appWindowKeepVisible(letterboxApp)
 }

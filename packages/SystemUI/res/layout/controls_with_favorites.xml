@@ -20,7 +20,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/controls_header_menu_size"
         android:paddingHorizontal="@dimen/controls_header_horizontal_padding"
         android:layout_marginBottom="@dimen/controls_header_bottom_margin"
         android:orientation="horizontal">
@@ -85,10 +85,11 @@
         android:layout_weight="1"
         android:clipChildren="true"
         android:orientation="vertical"
-        android:paddingHorizontal="16dp"
+        android:padding="@dimen/controls_content_padding"
+        android:background="@drawable/controls_panel_background"
         android:scrollbars="none">
 
-        <include layout="@layout/global_actions_controls_list_view" />
+        <include layout="@layout/controls_list_view" />
 
     </ScrollView>
 

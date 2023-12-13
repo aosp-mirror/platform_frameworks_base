@@ -17,27 +17,43 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.LightRevealScrimRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.statusbar.LightRevealEffect
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
 @ExperimentalCoroutinesApi
 @SysUISingleton
 class LightRevealScrimInteractor
 @Inject
 constructor(
-    transitionRepository: KeyguardTransitionRepository,
-    transitionInteractor: KeyguardTransitionInteractor,
-    lightRevealScrimRepository: LightRevealScrimRepository,
+    private val transitionInteractor: KeyguardTransitionInteractor,
+    private val lightRevealScrimRepository: LightRevealScrimRepository,
+    @Application private val scope: CoroutineScope,
 ) {
+
+    init {
+        listenForStartedKeyguardTransitionStep()
+    }
+
+    private fun listenForStartedKeyguardTransitionStep() {
+        scope.launch {
+            transitionInteractor.startedKeyguardTransitionStep.collect {
+                if (willTransitionChangeEndState(it)) {
+                    lightRevealScrimRepository.startRevealAmountAnimator(
+                        willBeRevealedInState(it.to)
+                    )
+                }
+            }
+        }
+    }
 
     /**
      * Whenever a keyguard transition starts, sample the latest reveal effect from the repository
@@ -54,17 +70,7 @@ constructor(
             lightRevealScrimRepository.revealEffect
         )
 
-    /**
-     * The reveal amount to use for the light reveal scrim, which is derived from the keyguard
-     * transition steps.
-     */
-    val revealAmount: Flow<Float> =
-        transitionRepository.transitions
-            // Only listen to transitions that change the reveal amount.
-            .filter { willTransitionAffectRevealAmount(it) }
-            // Use the transition amount as the reveal amount, inverting it if we're transitioning
-            // to a non-revealed (hidden) state.
-            .map { step -> if (willBeRevealedInState(step.to)) step.value else 1f - step.value }
+    val revealAmount = lightRevealScrimRepository.revealAmount
 
     companion object {
 
@@ -72,7 +78,7 @@ constructor(
          * Whether the transition requires a change in the reveal amount of the light reveal scrim.
          * If not, we don't care about the transition and don't need to listen to it.
          */
-        fun willTransitionAffectRevealAmount(transition: TransitionStep): Boolean {
+        fun willTransitionChangeEndState(transition: TransitionStep): Boolean {
             return willBeRevealedInState(transition.from) != willBeRevealedInState(transition.to)
         }
 
@@ -86,6 +92,7 @@ constructor(
                 KeyguardState.DOZING -> false
                 KeyguardState.AOD -> false
                 KeyguardState.DREAMING -> true
+                KeyguardState.DREAMING_LOCKSCREEN_HOSTED -> true
                 KeyguardState.ALTERNATE_BOUNCER -> true
                 KeyguardState.PRIMARY_BOUNCER -> true
                 KeyguardState.LOCKSCREEN -> true

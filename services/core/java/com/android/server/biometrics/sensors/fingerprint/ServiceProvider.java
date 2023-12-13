@@ -28,7 +28,6 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
 import android.hardware.fingerprint.ISidefpsController;
-import android.hardware.fingerprint.IUdfpsOverlay;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.IBinder;
 
@@ -130,15 +129,9 @@ public interface ServiceProvider extends
 
     void onPointerUp(long requestId, int sensorId, PointerContext pc);
 
-    void onUiReady(long requestId, int sensorId);
+    void onUdfpsUiEvent(@FingerprintManager.UdfpsUiEvent int event, long requestId, int sensorId);
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
-
-    /**
-     * Sets udfps overlay
-     * @param controller udfps overlay
-     */
-    void setUdfpsOverlay(@NonNull IUdfpsOverlay controller);
 
     void onPowerPressed();
 
@@ -157,4 +150,11 @@ public interface ServiceProvider extends
      * @param sensorId sensor ID of the associated operation
      */
     default void scheduleWatchdog(int sensorId) {}
+
+    /**
+     * Simulate fingerprint down touch event for virtual HAL
+     * @param userId user ID
+     * @param sensorId sensor ID
+     */
+    default void simulateVhalFingerDown(int userId, int sensorId) {};
 }

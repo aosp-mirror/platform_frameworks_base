@@ -61,6 +61,7 @@ public class SystemSettings {
         Settings.System.TTY_MODE,
         Settings.System.MASTER_MONO,
         Settings.System.MASTER_BALANCE,
+        Settings.System.FOLD_LOCK_BEHAVIOR,
         Settings.System.SOUND_EFFECTS_ENABLED,
         Settings.System.HAPTIC_FEEDBACK_ENABLED,
         Settings.System.POWER_SOUNDS_ENABLED,       // moved to global

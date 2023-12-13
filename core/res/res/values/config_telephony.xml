@@ -67,6 +67,15 @@
     <bool name="auto_data_switch_ping_test_before_switch">true</bool>
     <java-symbol type="bool" name="auto_data_switch_ping_test_before_switch" />
 
+    <!-- Define the tolerated gap of score for auto data switch decision, larger than which the
+         device will switch to the SIM with higher score. The score is used in conjunction with the
+         score table defined in
+         CarrierConfigManager#KEY_AUTO_DATA_SWITCH_RAT_SIGNAL_SCORE_STRING_ARRAY.
+         If 0, the device always switch to the higher score SIM.
+         If < 0, the network type and signal strength based auto switch is disabled. -->
+    <integer name="auto_data_switch_score_tolerance">3000</integer>
+    <java-symbol type="integer" name="auto_data_switch_score_tolerance" />
+
     <!-- Boolean indicating whether the Iwlan data service supports persistence of iwlan ipsec
          tunnels across service restart. If iwlan tunnels are not persisted across restart,
          Framework will clean up dangling data connections when service restarts -->
@@ -142,6 +151,23 @@
     <integer name="config_timeout_to_receive_delivered_ack_millis">300000</integer>
     <java-symbol type="integer" name="config_timeout_to_receive_delivered_ack_millis" />
 
+    <!-- Telephony config for services supported by satellite providers. The format of each config
+         string in the array is as follows: "PLMN_1:service_1,service_2,..."
+         where PLMN is the satellite PLMN of a provider and service is an integer with the
+         following value:
+            1 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VOICE}
+            2 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_DATA}
+            3 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_SMS}
+            4 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_VIDEO}
+            5 = {@link android.telephony.NetworkRegistrationInfo#SERVICE_TYPE_EMERGENCY}
+         Example of a config string: "10011:2,3"
+
+         The PLMNs not configured in this array will be ignored and will not be used for satellite
+         scanning. -->
+    <string-array name="config_satellite_services_supported_by_providers" translatable="false">
+    </string-array>
+    <java-symbol type="array" name="config_satellite_services_supported_by_providers" />
+
     <!-- Whether enhanced IWLAN handover check is enabled. If enabled, telephony frameworks
          will not perform handover if the target transport is out of service, or VoPS not
          supported. The network will be torn down on the source transport, and will be
@@ -168,8 +194,9 @@
     <bool name="ignore_emergency_number_routing_from_db">false</bool>
     <java-symbol type="bool" name="ignore_emergency_number_routing_from_db" />
 
-    <!-- Whether "Virtual DSDA", i.e. in-call IMS connectivity can be provided on both subs with
-         only single logical modem, by using its data connection in addition to cellular IMS. -->
-    <bool name="config_enable_virtual_dsda">false</bool>
-    <java-symbol type="bool" name="config_enable_virtual_dsda" />
+    <!-- Boolean indicating whether allow sending null to modem to clear the previous initial attach
+         data profile -->
+    <bool name="allow_clear_initial_attach_data_profile">false</bool>
+    <java-symbol type="bool" name="allow_clear_initial_attach_data_profile" />
+
 </resources>

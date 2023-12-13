@@ -144,7 +144,7 @@
                         android:visibility="gone"
                         android:duplicateParentState="true"
                         android:clickable="false"
-                        android:text="@string/consent_no" />
+                        android:text="@string/consent_cancel" />
 
                 </LinearLayout>
 

@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.view.SurfaceControl;
@@ -69,8 +70,10 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private final Rect mTmpRect = new Rect();
     private final Rect mTmpRootRect = new Rect();
     private final int[] mTmpLocation = new int[2];
+    private final Rect mBoundsOnScreen = new Rect();
     private final TaskViewTaskController mTaskViewTaskController;
     private Region mObscuredTouchRegion;
+    private Insets mCaptionInsets;
 
     public TaskView(Context context, TaskViewTaskController taskViewTaskController) {
         super(context, null, 0, 0, true /* disableBackgroundLayer */);
@@ -169,6 +172,25 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     /**
+     * Sets a region of the task to inset to allow for a caption bar. Currently only top insets
+     * are supported.
+     * <p>
+     * This region will be factored in as an area of taskview that is not touchable activity
+     * content (i.e. you don't need to additionally set {@link #setObscuredTouchRect(Rect)} for
+     * the caption area).
+     *
+     * @param captionInsets the insets to apply to task view.
+     */
+    public void setCaptionInsets(Insets captionInsets) {
+        mCaptionInsets = captionInsets;
+        if (captionInsets == null) {
+            // If captions are null we can set them now; otherwise they'll get set in
+            // onComputeInternalInsets.
+            mTaskViewTaskController.setCaptionInsets(null);
+        }
+    }
+
+    /**
      * Call when view position or size has changed. Do not call when animating.
      */
     public void onLocationChanged() {
@@ -230,6 +252,15 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         getLocationInWindow(mTmpLocation);
         mTmpRect.set(mTmpLocation[0], mTmpLocation[1],
                 mTmpLocation[0] + getWidth(), mTmpLocation[1] + getHeight());
+        if (mCaptionInsets != null) {
+            mTmpRect.inset(mCaptionInsets);
+            getBoundsOnScreen(mBoundsOnScreen);
+            mTaskViewTaskController.setCaptionInsets(new Rect(
+                    mBoundsOnScreen.left,
+                    mBoundsOnScreen.top,
+                    mBoundsOnScreen.right + getWidth(),
+                    mBoundsOnScreen.top + mCaptionInsets.top));
+        }
         inoutInfo.touchableRegion.op(mTmpRect, Region.Op.DIFFERENCE);
 
         if (mObscuredTouchRegion != null) {

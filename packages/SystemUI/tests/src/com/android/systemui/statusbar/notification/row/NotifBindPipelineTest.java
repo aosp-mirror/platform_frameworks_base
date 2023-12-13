@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.dump.LogBufferHelperKt.logcatLogBuffer;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -61,7 +63,7 @@ public class NotifBindPipelineTest extends SysuiTestCase {
 
         mBindPipeline = new NotifBindPipeline(
                 collection,
-                mock(NotifBindPipelineLogger.class),
+                new NotifBindPipelineLogger(logcatLogBuffer()),
                 TestableLooper.get(this).getLooper());
         mBindPipeline.setStage(mStage);
 

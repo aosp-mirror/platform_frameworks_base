@@ -352,6 +352,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mLockSettingsService.deleteRepairModePersistentDataIfNeeded();
             } else if (phase == PHASE_BOOT_COMPLETED) {
                 mLockSettingsService.loadEscrowData();
+                mLockSettingsService.deleteRepairModePersistentDataIfNeeded();
             }
         }
 
@@ -1429,7 +1430,7 @@ public class LockSettingsService extends ILockSettings.Stub {
     }
 
     private void unlockKeystore(int userId, SyntheticPassword sp) {
-        Authorization.onLockScreenEvent(false, userId, sp.deriveKeyStorePassword(), null);
+        Authorization.onDeviceUnlocked(userId, sp.deriveKeyStorePassword());
     }
 
     @VisibleForTesting /** Note: this method is overridden in unit tests */

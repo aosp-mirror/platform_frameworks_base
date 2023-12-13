@@ -54,7 +54,7 @@ import javax.inject.Provider;
  * Application class for SystemUI.
  */
 public class SystemUIApplication extends Application implements
-        SystemUIAppComponentFactory.ContextInitializer {
+        SystemUIAppComponentFactoryBase.ContextInitializer {
 
     public static final String TAG = "SystemUIService";
     private static final boolean DEBUG = false;
@@ -66,7 +66,7 @@ public class SystemUIApplication extends Application implements
      */
     private CoreStartable[] mServices;
     private boolean mServicesStarted;
-    private SystemUIAppComponentFactory.ContextAvailableCallback mContextAvailableCallback;
+    private SystemUIAppComponentFactoryBase.ContextAvailableCallback mContextAvailableCallback;
     private SysUIComponent mSysUIComponent;
     private SystemUIInitializer mInitializer;
 
@@ -254,11 +254,16 @@ public class SystemUIApplication extends Application implements
         }
 
         for (i = 0; i < mServices.length; i++) {
+            CoreStartable service = mServices[i];
             if (mBootCompleteCache.isBootComplete()) {
-                notifyBootCompleted(mServices[i]);
+                notifyBootCompleted(service);
             }
 
-            dumpManager.registerDumpable(mServices[i].getClass().getName(), mServices[i]);
+            if (service.isDumpCritical()) {
+                dumpManager.registerCriticalDumpable(service.getClass().getName(), service);
+            } else {
+                dumpManager.registerNormalDumpable(service.getClass().getName(), service);
+            }
         }
         mSysUIComponent.getInitController().executePostInitTasks();
         log.traceEnd();
@@ -366,7 +371,7 @@ public class SystemUIApplication extends Application implements
 
     @Override
     public void setContextAvailableCallback(
-            SystemUIAppComponentFactory.ContextAvailableCallback callback) {
+            SystemUIAppComponentFactoryBase.ContextAvailableCallback callback) {
         mContextAvailableCallback = callback;
     }
 

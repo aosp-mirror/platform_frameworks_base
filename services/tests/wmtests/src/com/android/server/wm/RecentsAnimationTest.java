@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityManager.PROCESS_STATE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
@@ -148,8 +149,9 @@ public class RecentsAnimationTest extends WindowTestsBase {
                 anyInt() /* startFlags */, any() /* profilerInfo */);
 
         // Assume its process is alive because the caller should be the recents service.
-        mSystemServicesTestRule.addProcess(aInfo.packageName, aInfo.processName, 12345 /* pid */,
-                aInfo.applicationInfo.uid);
+        final WindowProcessController proc = mSystemServicesTestRule.addProcess(aInfo.packageName,
+                aInfo.processName, 12345 /* pid */, aInfo.applicationInfo.uid);
+        proc.setCurrentProcState(PROCESS_STATE_HOME);
 
         Intent recentsIntent = new Intent().setComponent(mRecentsComponent);
         // Null animation indicates to preload.

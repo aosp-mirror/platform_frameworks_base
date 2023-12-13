@@ -49,7 +49,7 @@ class QSFragmentDisableFlagsLoggerTest : SysuiTestCase() {
         buffer.dump(PrintWriter(stringWriter), tailLength = 0)
         val actualString = stringWriter.toString()
         val expectedLogString = disableFlagsLogger.getDisableFlagsString(
-            old = null, new = state, newAfterLocalModification = state
+            new = state, newAfterLocalModification = state
         )
 
         assertThat(actualString).contains(expectedLogString)

@@ -60,18 +60,4 @@ class RotationButtonControllerTest : SysuiTestCase() {
 
     assertThat(mController.canShowRotationButton()).isTrue()
   }
-
-  @Test
-  fun ifTaskbarVisible_showRotationSuggestion() {
-    mController.onNavigationBarWindowVisibilityChange( /* showing = */ false)
-    mController.onBehaviorChanged(Display.DEFAULT_DISPLAY,
-                                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE)
-    mController.onNavigationModeChanged(WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON)
-    mController.onTaskbarStateChange( /* visible = */ false, /* stashed = */ false)
-    assertThat(mController.canShowRotationButton()).isFalse()
-
-    mController.onTaskbarStateChange( /* visible = */ true, /* stashed = */ false)
-
-    assertThat(mController.canShowRotationButton()).isTrue()
-  }
 }

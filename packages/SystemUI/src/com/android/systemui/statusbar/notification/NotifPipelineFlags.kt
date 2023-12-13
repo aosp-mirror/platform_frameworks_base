@@ -16,27 +16,15 @@
 
 package com.android.systemui.statusbar.notification
 
-import android.content.Context
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.FlagResolver
-import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags.NotificationFlags
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import javax.inject.Inject
 
-class NotifPipelineFlags @Inject constructor(
-    val context: Context,
-    val featureFlags: FeatureFlags,
-    val sysPropFlags: FlagResolver,
+class NotifPipelineFlags
+@Inject
+constructor(
+    private val featureFlags: FeatureFlags
 ) {
     fun isDevLoggingEnabled(): Boolean =
         featureFlags.isEnabled(Flags.NOTIFICATION_PIPELINE_DEVELOPER_LOGGING)
-
-    fun allowDismissOngoing(): Boolean =
-            sysPropFlags.isEnabled(NotificationFlags.ALLOW_DISMISS_ONGOING)
-
-    fun isOtpRedactionEnabled(): Boolean =
-            sysPropFlags.isEnabled(NotificationFlags.OTP_REDACTION)
-
-    val isNoHunForOldWhenEnabled: Boolean
-        get() = featureFlags.isEnabled(Flags.NO_HUN_FOR_OLD_WHEN)
 }

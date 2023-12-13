@@ -110,7 +110,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
             mWindowMagnification.mMagnificationSettingsControllerCallback
                     .onSettingsPanelVisibilityChanged(TEST_DISPLAY, /* shown= */ true);
             return null;
-        }).when(mMagnificationSettingsController).showMagnificationSettings();
+        }).when(mMagnificationSettingsController).toggleSettingsPanelVisibility();
         doAnswer(invocation -> {
             mWindowMagnification.mMagnificationSettingsControllerCallback
                     .onSettingsPanelVisibilityChanged(TEST_DISPLAY, /* shown= */ false);
@@ -163,13 +163,15 @@ public class WindowMagnificationTest extends SysuiTestCase {
     @Test
     public void onPerformScaleAction_enabled_notifyCallback() throws RemoteException {
         final float newScale = 4.0f;
+        final boolean updatePersistence = true;
         mCommandQueue.requestWindowMagnificationConnection(true);
         waitForIdleSync();
 
         mWindowMagnification.mWindowMagnifierCallback
-                .onPerformScaleAction(TEST_DISPLAY, newScale);
+                .onPerformScaleAction(TEST_DISPLAY, newScale, updatePersistence);
 
-        verify(mConnectionCallback).onPerformScaleAction(TEST_DISPLAY, newScale);
+        verify(mConnectionCallback).onPerformScaleAction(
+                eq(TEST_DISPLAY), eq(newScale), eq(updatePersistence));
     }
 
     @Test
@@ -198,7 +200,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mWindowMagnification.mWindowMagnifierCallback.onClickSettingsButton(TEST_DISPLAY);
         waitForIdleSync();
 
-        verify(mMagnificationSettingsController).showMagnificationSettings();
+        verify(mMagnificationSettingsController).toggleSettingsPanelVisibility();
         verify(mA11yLogger).log(
                 eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_OPENED));
     }
@@ -249,10 +251,12 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mCommandQueue.requestWindowMagnificationConnection(true);
         waitForIdleSync();
         final float scale = 3.0f;
+        final boolean updatePersistence = false;
         mWindowMagnification.mMagnificationSettingsControllerCallback.onMagnifierScale(
-                TEST_DISPLAY, scale);
+                TEST_DISPLAY, scale, updatePersistence);
 
-        verify(mConnectionCallback).onPerformScaleAction(eq(TEST_DISPLAY), eq(scale));
+        verify(mConnectionCallback).onPerformScaleAction(
+                eq(TEST_DISPLAY), eq(scale), eq(updatePersistence));
     }
 
     @Test

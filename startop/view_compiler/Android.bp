@@ -40,7 +40,7 @@ cc_defaults {
         "libziparchive",
         "libz",
     ],
-    cppflags: ["-std=c++17"],
+    cpp_std: "gnu++2b",
     target: {
         android: {
             shared_libs: [
@@ -80,7 +80,7 @@ cc_binary {
         "libgflags",
         "libviewcompiler",
     ],
-    host_supported: true
+    host_supported: true,
 }
 
 cc_test_host {

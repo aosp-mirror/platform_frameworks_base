@@ -24,10 +24,12 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -43,14 +45,13 @@ import android.hardware.lights.LightsRequest;
 import android.os.Handler;
 import android.os.Looper;
 import android.permission.PermissionManager;
-import android.util.ArraySet;
+import android.testing.TestableLooper;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.R;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -62,22 +63,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class CameraPrivacyLightControllerTest {
+    private int[] mDefaultColors = {0, 1, 2};
+    private int[] mDefaultAlsThresholdsLux = {10, 50};
+    private int mDefaultAlsAveragingIntervalMillis = 5000;
 
-    private int mDayColor = 1;
-    private int mNightColor = 0;
-    private int mCameraPrivacyLightAlsAveragingIntervalMillis = 5000;
-    private int mCameraPrivacyLightAlsNightThreshold = (int) getLightSensorValue(15);
+    private TestableLooper mTestableLooper;
 
     private MockitoSession mMockitoSession;
-
-    @Mock
-    private Context mContext;
-
-    @Mock
-    private Resources mResources;
 
     @Mock
     private LightsManager mLightsManager;
@@ -103,10 +99,63 @@ public class CameraPrivacyLightControllerTest {
     private ArgumentCaptor<SensorEventListener> mLightSensorListenerCaptor =
             ArgumentCaptor.forClass(SensorEventListener.class);
 
-    private Set<String> mExemptedPackages = new ArraySet<>();
-    private List<Light> mLights = new ArrayList<>();
+    private Set<String> mExemptedPackages;
+    private List<Light> mLights;
 
     private int mNextLightId = 1;
+
+    public CameraPrivacyLightController prepareDefaultCameraPrivacyLightController() {
+        return prepareDefaultCameraPrivacyLightController(List.of(getNextLight(true)));
+    }
+
+    public CameraPrivacyLightController prepareDefaultCameraPrivacyLightController(
+            List<Light> lights) {
+        return prepareCameraPrivacyLightController(lights, Set.of(), true, mDefaultColors,
+                mDefaultAlsThresholdsLux, mDefaultAlsAveragingIntervalMillis);
+    }
+
+    public CameraPrivacyLightController prepareCameraPrivacyLightController(List<Light> lights,
+            Set<String> exemptedPackages, boolean hasLightSensor, int[] lightColors,
+            int[] alsThresholds, int averagingInterval) {
+        Looper looper = Looper.myLooper();
+        if (looper == null) {
+            Looper.prepare();
+            looper = Looper.myLooper();
+        }
+        if (mTestableLooper == null) {
+            try {
+                mTestableLooper = new TestableLooper(looper);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        Context context = mock(Context.class);
+        Resources resources = mock(Resources.class);
+        doReturn(resources).when(context).getResources();
+        doReturn(lightColors).when(resources).getIntArray(R.array.config_cameraPrivacyLightColors);
+        doReturn(alsThresholds).when(resources)
+                .getIntArray(R.array.config_cameraPrivacyLightAlsLuxThresholds);
+        doReturn(averagingInterval).when(resources)
+                .getInteger(R.integer.config_cameraPrivacyLightAlsAveragingIntervalMillis);
+
+        doReturn(mLightsManager).when(context).getSystemService(LightsManager.class);
+        doReturn(mAppOpsManager).when(context).getSystemService(AppOpsManager.class);
+        doReturn(mSensorManager).when(context).getSystemService(SensorManager.class);
+
+        mLights = lights;
+        mExemptedPackages = exemptedPackages;
+        doReturn(mLights).when(mLightsManager).getLights();
+        doReturn(mLightsSession).when(mLightsManager).openSession(anyInt());
+        if (!hasLightSensor) {
+            mLightSensor = null;
+        }
+        doReturn(mLightSensor).when(mSensorManager).getDefaultSensor(Sensor.TYPE_LIGHT);
+        doReturn(exemptedPackages)
+                .when(() -> PermissionManager.getIndicatorExemptedPackages(any()));
+
+        return new CameraPrivacyLightController(context, looper);
+    }
 
     @Before
     public void setUp() {
@@ -115,49 +164,33 @@ public class CameraPrivacyLightControllerTest {
                 .strictness(Strictness.WARN)
                 .spyStatic(PermissionManager.class)
                 .startMocking();
-
-        doReturn(mDayColor).when(mContext).getColor(R.color.camera_privacy_light_day);
-        doReturn(mNightColor).when(mContext).getColor(R.color.camera_privacy_light_night);
-
-        doReturn(mResources).when(mContext).getResources();
-        doReturn(mCameraPrivacyLightAlsAveragingIntervalMillis).when(mResources)
-                .getInteger(R.integer.config_cameraPrivacyLightAlsAveragingIntervalMillis);
-        doReturn(mCameraPrivacyLightAlsNightThreshold).when(mResources)
-                .getInteger(R.integer.config_cameraPrivacyLightAlsNightThreshold);
-
-        doReturn(mLightsManager).when(mContext).getSystemService(LightsManager.class);
-        doReturn(mAppOpsManager).when(mContext).getSystemService(AppOpsManager.class);
-        doReturn(mSensorManager).when(mContext).getSystemService(SensorManager.class);
-
-        doReturn(mLights).when(mLightsManager).getLights();
-        doReturn(mLightsSession).when(mLightsManager).openSession(anyInt());
-        doReturn(mLightSensor).when(mSensorManager).getDefaultSensor(Sensor.TYPE_LIGHT);
-
-        doReturn(mExemptedPackages)
-                .when(() -> PermissionManager.getIndicatorExemptedPackages(any()));
     }
 
     @After
     public void tearDown() {
-        mExemptedPackages.clear();
-        mLights.clear();
-
         mMockitoSession.finishMocking();
     }
 
     @Test
+    public void testNoInteractionsWithServicesIfNoColorsSpecified() {
+        prepareCameraPrivacyLightController(List.of(getNextLight(true)), Collections.EMPTY_SET,
+                true, new int[0], mDefaultAlsThresholdsLux, mDefaultAlsAveragingIntervalMillis);
+
+        verifyZeroInteractions(mLightsManager);
+        verifyZeroInteractions(mAppOpsManager);
+        verifyZeroInteractions(mSensorManager);
+    }
+
+    @Test
     public void testAppsOpsListenerNotRegisteredWithoutCameraLights() {
-        mLights.add(getNextLight(false));
-        createCameraPrivacyLightController();
+        prepareDefaultCameraPrivacyLightController(List.of(getNextLight(false)));
 
         verify(mAppOpsManager, times(0)).startWatchingActive(any(), any(), any());
     }
 
     @Test
     public void testAppsOpsListenerRegisteredWithCameraLight() {
-        mLights.add(getNextLight(true));
-
-        createCameraPrivacyLightController();
+        prepareDefaultCameraPrivacyLightController();
 
         verify(mAppOpsManager, times(1)).startWatchingActive(any(), any(), any());
     }
@@ -165,11 +198,12 @@ public class CameraPrivacyLightControllerTest {
     @Test
     public void testAllCameraLightsAreRequestedOnOpActive() {
         Random r = new Random(0);
+        List<Light> lights = new ArrayList<>();
         for (int i = 0; i < 30; i++) {
-            mLights.add(getNextLight(r.nextBoolean()));
+            lights.add(getNextLight(r.nextBoolean()));
         }
 
-        createCameraPrivacyLightController();
+        prepareDefaultCameraPrivacyLightController(lights);
 
         // Verify no session has been opened at this point.
         verify(mLightsManager, times(0)).openSession(anyInt());
@@ -181,8 +215,6 @@ public class CameraPrivacyLightControllerTest {
         verify(mLightsManager, times(1)).openSession(anyInt());
 
         verify(mLightsSession).requestLights(mLightsRequestCaptor.capture());
-        assertEquals("requestLights() not invoked exactly once",
-                1, mLightsRequestCaptor.getAllValues().size());
 
         List<Integer> expectedCameraLightIds = mLights.stream()
                 .filter(l -> l.getType() == Light.LIGHT_TYPE_CAMERA)
@@ -199,40 +231,25 @@ public class CameraPrivacyLightControllerTest {
 
     @Test
     public void testWillOnlyOpenOnceWhenTwoPackagesStartOp() {
-        mLights.add(getNextLight(true));
-
-        createCameraPrivacyLightController();
-
-        verify(mAppOpsManager).startWatchingActive(any(), any(), mAppOpsListenerCaptor.capture());
-
-        AppOpsManager.OnOpActiveChangedListener listener = mAppOpsListenerCaptor.getValue();
-        listener.onOpActiveChanged(OPSTR_CAMERA, 10101, "pkg1", true);
+        prepareDefaultCameraPrivacyLightController();
+        notifyCamOpChanged(10101, "pkg1", true);
         verify(mLightsManager, times(1)).openSession(anyInt());
-        listener.onOpActiveChanged(OPSTR_CAMERA, 10102, "pkg2", true);
+        notifyCamOpChanged(10102, "pkg2", true);
         verify(mLightsManager, times(1)).openSession(anyInt());
     }
 
     @Test
     public void testWillCloseOnFinishOp() {
-        mLights.add(getNextLight(true));
-
-        createCameraPrivacyLightController();
-
-        verify(mAppOpsManager).startWatchingActive(any(), any(), mAppOpsListenerCaptor.capture());
-
-        AppOpsManager.OnOpActiveChangedListener listener = mAppOpsListenerCaptor.getValue();
-        listener.onOpActiveChanged(OPSTR_CAMERA, 10101, "pkg1", true);
-
+        prepareDefaultCameraPrivacyLightController();
+        notifyCamOpChanged(10101, "pkg1", true);
         verify(mLightsSession, times(0)).close();
-        listener.onOpActiveChanged(OPSTR_CAMERA, 10101, "pkg1", false);
+        notifyCamOpChanged(10101, "pkg1", false);
         verify(mLightsSession, times(1)).close();
     }
 
     @Test
     public void testWillCloseOnFinishOpForAllPackages() {
-        mLights.add(getNextLight(true));
-
-        createCameraPrivacyLightController();
+        prepareDefaultCameraPrivacyLightController();
 
         int numUids = 100;
         List<Integer> uids = new ArrayList<>(numUids);
@@ -240,64 +257,52 @@ public class CameraPrivacyLightControllerTest {
             uids.add(10001 + i);
         }
 
-        verify(mAppOpsManager).startWatchingActive(any(), any(), mAppOpsListenerCaptor.capture());
-
-        AppOpsManager.OnOpActiveChangedListener listener = mAppOpsListenerCaptor.getValue();
-
         for (int i = 0; i < numUids; i++) {
-            listener.onOpActiveChanged(OPSTR_CAMERA, uids.get(i), "pkg" + (int) uids.get(i), true);
+            notifyCamOpChanged(uids.get(i), "pkg" + (int) uids.get(i), true);
         }
 
         // Change the order which their ops are finished
         Collections.shuffle(uids, new Random(0));
 
         for (int i = 0; i < numUids - 1; i++) {
-            listener.onOpActiveChanged(OPSTR_CAMERA, uids.get(i), "pkg" + (int) uids.get(i), false);
+            notifyCamOpChanged(uids.get(i), "pkg" + (int) uids.get(i), false);
         }
 
         verify(mLightsSession, times(0)).close();
         int lastUid = uids.get(numUids - 1);
-        listener.onOpActiveChanged(OPSTR_CAMERA, lastUid, "pkg" + lastUid, false);
+        notifyCamOpChanged(lastUid, "pkg" + lastUid, false);
         verify(mLightsSession, times(1)).close();
     }
 
     @Test
     public void testWontOpenForExemptedPackage() {
-        mLights.add(getNextLight(true));
-        mExemptedPackages.add("pkg1");
+        String exemptPackage = "pkg1";
+        prepareCameraPrivacyLightController(List.of(getNextLight(true)),
+                Set.of(exemptPackage), true, mDefaultColors, mDefaultAlsThresholdsLux,
+                mDefaultAlsAveragingIntervalMillis);
 
-        createCameraPrivacyLightController();
-
-        verify(mAppOpsManager).startWatchingActive(any(), any(), mAppOpsListenerCaptor.capture());
-
-        AppOpsManager.OnOpActiveChangedListener listener = mAppOpsListenerCaptor.getValue();
-        listener.onOpActiveChanged(OPSTR_CAMERA, 10101, "pkg1", true);
+        notifyCamOpChanged(10101, exemptPackage, true);
         verify(mLightsManager, times(0)).openSession(anyInt());
     }
 
     @Test
     public void testNoLightSensor() {
-        mLights.add(getNextLight(true));
-        doReturn(null).when(mSensorManager).getDefaultSensor(Sensor.TYPE_LIGHT);
-
-        createCameraPrivacyLightController();
+        prepareCameraPrivacyLightController(List.of(getNextLight(true)),
+                Set.of(), true, mDefaultColors, mDefaultAlsThresholdsLux,
+                mDefaultAlsAveragingIntervalMillis);
 
         openCamera();
 
         verify(mLightsSession).requestLights(mLightsRequestCaptor.capture());
         LightsRequest lightsRequest = mLightsRequestCaptor.getValue();
         for (LightState lightState : lightsRequest.getLightStates()) {
-            assertEquals(mDayColor, lightState.getColor());
+            assertEquals(mDefaultColors[mDefaultColors.length - 1], lightState.getColor());
         }
     }
 
     @Test
     public void testALSListenerNotRegisteredUntilCameraIsOpened() {
-        mLights.add(getNextLight(true));
-        Sensor sensor = mock(Sensor.class);
-        doReturn(sensor).when(mSensorManager).getDefaultSensor(Sensor.TYPE_LIGHT);
-
-        CameraPrivacyLightController cplc = createCameraPrivacyLightController();
+        prepareDefaultCameraPrivacyLightController();
 
         verify(mSensorManager, never()).registerListener(any(SensorEventListener.class),
                 any(Sensor.class), anyInt(), any(Handler.class));
@@ -307,113 +312,44 @@ public class CameraPrivacyLightControllerTest {
         verify(mSensorManager, times(1)).registerListener(mLightSensorListenerCaptor.capture(),
                 any(Sensor.class), anyInt(), any(Handler.class));
 
-        mAppOpsListenerCaptor.getValue().onOpActiveChanged(OPSTR_CAMERA, 10001, "pkg", false);
+        notifyCamOpChanged(10001, "pkg", false);
         verify(mSensorManager, times(1)).unregisterListener(mLightSensorListenerCaptor.getValue());
     }
 
-    @Ignore
     @Test
-    public void testDayColor() {
-        testBrightnessToColor(20, mDayColor);
-    }
-
-    @Ignore
-    @Test
-    public void testNightColor() {
-        testBrightnessToColor(10, mNightColor);
-    }
-
-    private void testBrightnessToColor(int brightnessValue, int color) {
-        mLights.add(getNextLight(true));
-        Sensor sensor = mock(Sensor.class);
-        doReturn(sensor).when(mSensorManager).getDefaultSensor(Sensor.TYPE_LIGHT);
-
-        CameraPrivacyLightController cplc = createCameraPrivacyLightController();
+    public void testAlsThresholds() {
+        CameraPrivacyLightController cplc = prepareDefaultCameraPrivacyLightController();
+        long elapsedTime = 0;
         cplc.setElapsedRealTime(0);
-
         openCamera();
+        for (int i = 0; i < mDefaultColors.length; i++) {
+            int expectedColor = mDefaultColors[i];
+            int alsLuxValue = i
+                    == mDefaultAlsThresholdsLux.length
+                    ? mDefaultAlsThresholdsLux[i - 1] : mDefaultAlsThresholdsLux[i] - 1;
 
-        verify(mSensorManager).registerListener(mLightSensorListenerCaptor.capture(),
-                any(Sensor.class), anyInt(), any(Handler.class));
-        SensorEventListener sensorListener = mLightSensorListenerCaptor.getValue();
-        float[] sensorEventValues = new float[1];
-        SensorEvent sensorEvent = new SensorEvent(sensor, 0, 0, sensorEventValues);
+            notifySensorEvent(cplc, elapsedTime, alsLuxValue);
+            elapsedTime += mDefaultAlsAveragingIntervalMillis + 1;
+            notifySensorEvent(cplc, elapsedTime, alsLuxValue);
 
-        sensorEventValues[0] = getLightSensorValue(brightnessValue);
-        sensorListener.onSensorChanged(sensorEvent);
-
-        verify(mLightsSession, atLeastOnce()).requestLights(mLightsRequestCaptor.capture());
-        for (LightState lightState : mLightsRequestCaptor.getValue().getLightStates()) {
-            assertEquals(color, lightState.getColor());
+            verify(mLightsSession, atLeastOnce()).requestLights(mLightsRequestCaptor.capture());
+            for (LightState lightState : mLightsRequestCaptor.getValue().getLightStates()) {
+                assertEquals(expectedColor, lightState.getColor());
+            }
         }
     }
 
-    @Ignore
-    @Test
-    public void testDayToNightTransistion() {
-        mLights.add(getNextLight(true));
-        Sensor sensor = mock(Sensor.class);
-        doReturn(sensor).when(mSensorManager).getDefaultSensor(Sensor.TYPE_LIGHT);
-
-        CameraPrivacyLightController cplc = createCameraPrivacyLightController();
-        cplc.setElapsedRealTime(0);
-
-        openCamera();
-        // There will be an initial call at brightness 0
-        verify(mLightsSession, times(1)).requestLights(any(LightsRequest.class));
-
-        verify(mSensorManager).registerListener(mLightSensorListenerCaptor.capture(),
-                any(Sensor.class), anyInt(), any(Handler.class));
-        SensorEventListener sensorListener = mLightSensorListenerCaptor.getValue();
-
-        onSensorEvent(cplc, sensorListener, sensor, 0, 20);
-
-        // 5 sec avg = 20
-        onSensorEvent(cplc, sensorListener, sensor, 5000, 30);
-
-        verify(mLightsSession, times(2)).requestLights(mLightsRequestCaptor.capture());
-        for (LightState lightState : mLightsRequestCaptor.getValue().getLightStates()) {
-            assertEquals(mDayColor, lightState.getColor());
-        }
-
-        // 5 sec avg = 22
-
-        onSensorEvent(cplc, sensorListener, sensor, 6000, 10);
-
-        // 5 sec avg = 18
-
-        onSensorEvent(cplc, sensorListener, sensor, 8000, 5);
-
-        // Should have always been day
-        verify(mLightsSession, times(2)).requestLights(mLightsRequestCaptor.capture());
-        for (LightState lightState : mLightsRequestCaptor.getValue().getLightStates()) {
-            assertEquals(mDayColor, lightState.getColor());
-        }
-
-        // 5 sec avg = 12
-
-        onSensorEvent(cplc, sensorListener, sensor, 10000, 5);
-
-        // Should now be night
-        verify(mLightsSession, times(3)).requestLights(mLightsRequestCaptor.capture());
-        for (LightState lightState : mLightsRequestCaptor.getValue().getLightStates()) {
-            assertEquals(mNightColor, lightState.getColor());
-        }
+    private void notifyCamOpChanged(int uid, String pkg, boolean active) {
+        verify(mAppOpsManager).startWatchingActive(any(), any(), mAppOpsListenerCaptor.capture());
+        mAppOpsListenerCaptor.getValue().onOpActiveChanged(OPSTR_CAMERA, uid, pkg, active);
     }
 
-    private void onSensorEvent(CameraPrivacyLightController cplc,
-            SensorEventListener sensorListener, Sensor sensor, long timestamp, int value) {
+    private void notifySensorEvent(CameraPrivacyLightController cplc, long timestamp, int value) {
         cplc.setElapsedRealTime(timestamp);
-        sensorListener.onSensorChanged(new SensorEvent(sensor, 0, timestamp,
-                new float[] {getLightSensorValue(value)}));
-    }
-
-    // Use the test thread so that the test is deterministic
-    private CameraPrivacyLightController createCameraPrivacyLightController() {
-        if (Looper.myLooper() == null) {
-            Looper.prepare();
-        }
-        return new CameraPrivacyLightController(mContext, Looper.myLooper());
+        verify(mSensorManager, atLeastOnce()).registerListener(mLightSensorListenerCaptor.capture(),
+                        eq(mLightSensor), anyInt(), any());
+        mLightSensorListenerCaptor.getValue().onSensorChanged(new SensorEvent(mLightSensor, 0,
+                TimeUnit.MILLISECONDS.toNanos(timestamp), new float[] {value}));
     }
 
     private Light getNextLight(boolean cameraType) {
@@ -425,10 +361,6 @@ public class CameraPrivacyLightControllerTest {
         }
         doReturn(mNextLightId++).when(light).getId();
         return light;
-    }
-
-    private float getLightSensorValue(int i) {
-        return (float) Math.exp(i / CameraPrivacyLightController.LIGHT_VALUE_MULTIPLIER);
     }
 
     private void openCamera() {

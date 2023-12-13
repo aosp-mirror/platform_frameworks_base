@@ -65,6 +65,7 @@ import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
+import com.android.wm.shell.common.LaunchAdjacentController;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
@@ -107,6 +108,8 @@ public class StageCoordinatorTests extends ShellTestCase {
     private DisplayInsetsController mDisplayInsetsController;
     @Mock
     private TransactionPool mTransactionPool;
+    @Mock
+    private LaunchAdjacentController mLaunchAdjacentController;
 
     private final Rect mBounds1 = new Rect(10, 20, 30, 40);
     private final Rect mBounds2 = new Rect(5, 10, 15, 20);
@@ -130,7 +133,7 @@ public class StageCoordinatorTests extends ShellTestCase {
         mStageCoordinator = spy(new StageCoordinator(mContext, DEFAULT_DISPLAY, mSyncQueue,
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
-                mMainExecutor, Optional.empty()));
+                mMainExecutor, Optional.empty(), mLaunchAdjacentController, Optional.empty()));
         mDividerLeash = new SurfaceControl.Builder(mSurfaceSession).setName("fakeDivider").build();
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
@@ -344,12 +347,19 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testExitSplitScreenAfterFolded() {
-        when(mMainStage.isActive()).thenReturn(true);
+    public void testExitSplitScreenAfterFoldedAndWakeUp() {
         when(mMainStage.isFocused()).thenReturn(true);
         when(mMainStage.getTopVisibleChildTaskId()).thenReturn(INVALID_TASK_ID);
+        mSideStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().setVisible(true).build();
+        mMainStage.mRootTaskInfo = new TestRunningTaskInfoBuilder().setVisible(true).build();
+        when(mStageCoordinator.isSplitActive()).thenReturn(true);
+        when(mStageCoordinator.isSplitScreenVisible()).thenReturn(true);
 
         mStageCoordinator.onFoldedStateChanged(true);
+
+        assertEquals(mStageCoordinator.mTopStageAfterFoldDismiss, STAGE_TYPE_MAIN);
+
+        mStageCoordinator.onFinishedWakingUp();
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             verify(mTaskOrganizer).startNewTransition(eq(TRANSIT_SPLIT_DISMISS), notNull());

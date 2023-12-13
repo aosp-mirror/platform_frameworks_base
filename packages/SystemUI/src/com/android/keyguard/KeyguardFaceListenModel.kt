@@ -27,6 +27,7 @@ data class KeyguardFaceListenModel(
     override var userId: Int = 0,
     override var listening: Boolean = false,
     // keep sorted
+    var allowedDisplayStateWhileAwake: Boolean = false,
     var alternateBouncerShowing: Boolean = false,
     var authInterruptActive: Boolean = false,
     var biometricSettingEnabledForUser: Boolean = false,
@@ -57,6 +58,8 @@ data class KeyguardFaceListenModel(
             userId.toString(),
             listening.toString(),
             // keep sorted
+            allowedDisplayStateWhileAwake.toString(),
+            alternateBouncerShowing.toString(),
             authInterruptActive.toString(),
             biometricSettingEnabledForUser.toString(),
             bouncerFullyShown.toString(),
@@ -74,7 +77,6 @@ data class KeyguardFaceListenModel(
             supportsDetect.toString(),
             switchingUser.toString(),
             systemUser.toString(),
-            alternateBouncerShowing.toString(),
             udfpsFingerDown.toString(),
             userNotTrustedOrDetectionIsNeeded.toString(),
         )
@@ -96,7 +98,9 @@ data class KeyguardFaceListenModel(
                 userId = model.userId
                 listening = model.listening
                 // keep sorted
+                allowedDisplayStateWhileAwake = model.allowedDisplayStateWhileAwake
                 alternateBouncerShowing = model.alternateBouncerShowing
+                authInterruptActive = model.authInterruptActive
                 biometricSettingEnabledForUser = model.biometricSettingEnabledForUser
                 bouncerFullyShown = model.bouncerFullyShown
                 faceAndFpNotAuthenticated = model.faceAndFpNotAuthenticated
@@ -105,7 +109,6 @@ data class KeyguardFaceListenModel(
                 faceLockedOut = model.faceLockedOut
                 goingToSleep = model.goingToSleep
                 keyguardAwake = model.keyguardAwake
-                goingToSleep = model.goingToSleep
                 keyguardGoingAway = model.keyguardGoingAway
                 listeningForFaceAssistant = model.listeningForFaceAssistant
                 occludingAppRequestingFaceAuth = model.occludingAppRequestingFaceAuth
@@ -140,6 +143,8 @@ data class KeyguardFaceListenModel(
                 "userId",
                 "listening",
                 // keep sorted
+                "allowedDisplayStateWhileAwake",
+                "alternateBouncerShowing",
                 "authInterruptActive",
                 "biometricSettingEnabledForUser",
                 "bouncerFullyShown",
@@ -157,7 +162,6 @@ data class KeyguardFaceListenModel(
                 "supportsDetect",
                 "switchingUser",
                 "systemUser",
-                "udfpsBouncerShowing",
                 "udfpsFingerDown",
                 "userNotTrustedOrDetectionIsNeeded",
             )

@@ -27,6 +27,7 @@ import android.view.RemoteAnimationTarget;
 import android.window.RemoteTransition;
 
 import com.android.wm.shell.splitscreen.ISplitScreenListener;
+import com.android.wm.shell.splitscreen.ISplitSelectListener;
 
 /**
  * Interface that is exposed to remote callers to manipulate the splitscreen feature.
@@ -42,6 +43,16 @@ interface ISplitScreen {
      * Unregisters a split screen listener.
      */
     oneway void unregisterSplitScreenListener(in ISplitScreenListener listener) = 2;
+
+    /**
+     * Registers a split select listener.
+     */
+    oneway void registerSplitSelectListener(in ISplitSelectListener listener) = 20;
+
+    /**
+     * Unregisters a split select listener.
+     */
+    oneway void unregisterSplitSelectListener(in ISplitSelectListener listener) = 21;
 
     /**
      * Removes a task from the side stage.
@@ -148,4 +159,4 @@ interface ISplitScreen {
      */
     RemoteAnimationTarget[] onStartingSplitLegacy(in RemoteAnimationTarget[] appTargets) = 14;
 }
-// Last id = 19
+// Last id = 21

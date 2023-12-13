@@ -26,6 +26,7 @@ import android.view.ViewOutlineProvider
 import androidx.core.view.GestureDetectorCompat
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
+import com.android.internal.annotations.VisibleForTesting
 import com.android.settingslib.Utils
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
@@ -148,7 +149,8 @@ class MediaCarouselScrollHandler(
         }
 
     /** The touch listener for the scroll view */
-    private val touchListener =
+    @VisibleForTesting
+    val touchListener =
         object : Gefingerpoken {
             override fun onTouchEvent(motionEvent: MotionEvent?) = onTouch(motionEvent!!)
             override fun onInterceptTouchEvent(ev: MotionEvent?) = onInterceptTouch(ev!!)
@@ -284,15 +286,14 @@ class MediaCarouselScrollHandler(
         } else if (isUp || motionEvent.action == MotionEvent.ACTION_CANCEL) {
             // It's an up and the fling didn't take it above
             val relativePos = scrollView.relativeScrollX % playerWidthPlusPadding
-            val scrollXAmount: Int
-            if (relativePos > playerWidthPlusPadding / 2) {
-                scrollXAmount = playerWidthPlusPadding - relativePos
-            } else {
-                scrollXAmount = -1 * relativePos
-            }
+            val scrollXAmount: Int =
+                if (isRtl xor (relativePos > playerWidthPlusPadding / 2)) {
+                    playerWidthPlusPadding - relativePos
+                } else {
+                    -1 * relativePos
+                }
             if (scrollXAmount != 0) {
-                val dx = if (isRtl) -scrollXAmount else scrollXAmount
-                val newScrollX = scrollView.relativeScrollX + dx
+                val newScrollX = scrollView.relativeScrollX + scrollXAmount
                 // Delay the scrolling since scrollView calls springback which cancels
                 // the animation again..
                 mainExecutor.execute { scrollView.smoothScrollTo(newScrollX, scrollView.scrollY) }

@@ -241,7 +241,8 @@ public class BatteryUsageStatsPulledTest {
         final BatteryUsageStats.Builder builder =
                 new BatteryUsageStats.Builder(new String[]{"CustomConsumer1", "CustomConsumer2"},
                         /* includePowerModels */ true,
-                        /* includeProcessStats */true)
+                        /* includeProcessStats */ true,
+                        /* minConsumedPowerThreshold */ 0)
                         .setDischargePercentage(20)
                         .setDischargedPowerRange(1000, 2000)
                         .setDischargeDurationMs(1234)
@@ -325,7 +326,7 @@ public class BatteryUsageStatsPulledTest {
     @Test
     public void testLargeAtomTruncated() {
         final BatteryUsageStats.Builder builder =
-                new BatteryUsageStats.Builder(new String[0], true, false);
+                new BatteryUsageStats.Builder(new String[0], true, false, 0);
         // If not truncated, this BatteryUsageStats object would generate a proto buffer
         // significantly larger than 50 Kb
         for (int i = 0; i < 3000; i++) {

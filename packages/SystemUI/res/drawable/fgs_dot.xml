@@ -19,5 +19,5 @@
     android:shape="oval"
     android:width="12dp"
     android:height="12dp">
-    <solid android:color="?androidprv:attr/colorAccentTertiary" />
+    <solid android:color="?attr/tertiary" />
 </shape>

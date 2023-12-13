@@ -16,6 +16,8 @@
 
 package com.android.systemui.log
 
+import com.android.systemui.log.core.LogLevel
+
 /** Production version of [LogcatEchoTracker] that isn't configurable. */
 class LogcatEchoTrackerProd : LogcatEchoTracker {
     override val logInBackgroundThread = false

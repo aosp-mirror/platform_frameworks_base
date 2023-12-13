@@ -116,8 +116,9 @@ public final class AggregateBatteryConsumer extends BatteryConsumer {
      * Builder for DeviceBatteryConsumer.
      */
     public static final class Builder extends BaseBuilder<AggregateBatteryConsumer.Builder> {
-        public Builder(BatteryConsumer.BatteryConsumerData data, int scope) {
-            super(data, CONSUMER_TYPE_AGGREGATE);
+        public Builder(BatteryConsumer.BatteryConsumerData data, int scope,
+                double minConsumedPowerThreshold) {
+            super(data, CONSUMER_TYPE_AGGREGATE, minConsumedPowerThreshold);
             data.putInt(COLUMN_INDEX_SCOPE, scope);
         }
 

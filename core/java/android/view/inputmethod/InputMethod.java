@@ -17,6 +17,7 @@
 package android.view.inputmethod;
 
 import android.annotation.DurationMillisLong;
+import android.annotation.IntDef;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -36,6 +37,8 @@ import com.android.internal.inputmethod.IInputMethod;
 import com.android.internal.inputmethod.InlineSuggestionsRequestInfo;
 import com.android.internal.inputmethod.InputMethodNavButtonFlags;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 
 /**
@@ -269,6 +272,14 @@ public interface InputMethod {
      */
     @MainThread
     public void revokeSession(InputMethodSession session);
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "SHOW_" }, value = {
+            SHOW_EXPLICIT,
+            SHOW_FORCED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ShowFlags {}
     
     /**
      * Flag for {@link #showSoftInput}: this show has been explicitly
@@ -288,8 +299,6 @@ public interface InputMethod {
     /**
      * Request that any soft input part of the input method be shown to the user.
      *
-     * @param flags Provides additional information about the show request.
-     * Currently may be 0 or have the bit {@link #SHOW_EXPLICIT} set.
      * @param resultReceiver The client requesting the show may wish to
      * be told the impact of their request, which should be supplied here.
      * The result code should be
@@ -304,7 +313,7 @@ public interface InputMethod {
      * @hide
      */
     @MainThread
-    public default void showSoftInputWithToken(int flags, ResultReceiver resultReceiver,
+    public default void showSoftInputWithToken(@ShowFlags int flags, ResultReceiver resultReceiver,
             IBinder showInputToken, @Nullable ImeTracker.Token statsToken) {
         showSoftInput(flags, resultReceiver);
     }
@@ -312,8 +321,6 @@ public interface InputMethod {
     /**
      * Request that any soft input part of the input method be shown to the user.
      * 
-     * @param flags Provides additional information about the show request.
-     * Currently may be 0 or have the bit {@link #SHOW_EXPLICIT} set.
      * @param resultReceiver The client requesting the show may wish to
      * be told the impact of their request, which should be supplied here.
      * The result code should be
@@ -323,11 +330,12 @@ public interface InputMethod {
      * {@link InputMethodManager#RESULT_HIDDEN InputMethodManager.RESULT_HIDDEN}.
      */
     @MainThread
-    public void showSoftInput(int flags, ResultReceiver resultReceiver);
+    public void showSoftInput(@ShowFlags int flags, ResultReceiver resultReceiver);
 
     /**
      * Request that any soft input part of the input method be hidden from the user.
-     * @param flags Provides additional information about the show request.
+     *
+     * @param flags Provides additional information about the hide request.
      * Currently always 0.
      * @param resultReceiver The client requesting the show may wish to
      * be told the impact of their request, which should be supplied here.
@@ -350,7 +358,8 @@ public interface InputMethod {
 
     /**
      * Request that any soft input part of the input method be hidden from the user.
-     * @param flags Provides additional information about the show request.
+     *
+     * @param flags Provides additional information about the hide request.
      * Currently always 0.
      * @param resultReceiver The client requesting the show may wish to
      * be told the impact of their request, which should be supplied here.

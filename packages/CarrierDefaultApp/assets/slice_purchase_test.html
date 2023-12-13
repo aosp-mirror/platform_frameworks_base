@@ -20,7 +20,7 @@
     <meta charset="UTF-8">
     <meta name="description" content="
     This is a HTML page that calls and verifies responses from the @JavascriptInterface functions of
-    SlicePurchaseWebInterface. Test slice purchase application behavior using ADB shell commands and
+    DataBoostWebServiceFlow. Test slice purchase application behavior using ADB shell commands and
     the APIs below:
 
     FROM TERMINAL:
@@ -65,8 +65,8 @@
     <p id="requested_capability"></p>
 
     <h2>Notify purchase successful</h2>
-    <button type="button" onclick="testNotifyPurchaseSuccessful(60000)">
-        Notify purchase successful for 1 minute
+    <button type="button" onclick="testNotifyPurchaseSuccessful()">
+        Notify purchase successful
     </button>
     <p id="purchase_successful"></p>
 
@@ -75,5 +75,13 @@
         Notify purchase failed
     </button>
     <p id="purchase_failed"></p>
+
+    <h2>Dismiss flow</h2>
+    <button type="button" onclick="testDismissFlow()">
+        Dismiss flow
+    </button>
+    <p id="dismiss_flow"></p>
+
+    <h2>Test <a href="http://www.google.com">hyperlink</a></h2>
 </body>
 </html>

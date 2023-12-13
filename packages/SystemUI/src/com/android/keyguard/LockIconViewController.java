@@ -24,6 +24,8 @@ import static com.android.keyguard.LockIconView.ICON_LOCK;
 import static com.android.keyguard.LockIconView.ICON_UNLOCK;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import static com.android.systemui.flags.Flags.DOZING_MIGRATION_1;
+import static com.android.systemui.flags.Flags.LOCKSCREEN_WALLPAPER_DREAM_ENABLED;
+import static com.android.systemui.flags.Flags.ONE_WAY_HAPTICS_API_MIGRATION;
 import static com.android.systemui.util.kotlin.JavaAdapterKt.collectFlow;
 
 import android.content.res.Configuration;
@@ -38,6 +40,7 @@ import android.os.VibrationAttributes;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -56,13 +59,14 @@ import com.android.systemui.R;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.biometrics.UdfpsController;
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.keyguard.shared.model.TransitionStep;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -123,6 +127,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private int mActivePointerId = -1;
 
     private boolean mIsDozing;
+    private boolean mIsActiveDreamLockscreenHosted;
     private boolean mIsBouncerShowing;
     private boolean mRunningFPS;
     private boolean mCanDismissLockScreen;
@@ -163,6 +168,13 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         updateBurnInOffsets();
         updateVisibility();
     };
+
+    @VisibleForTesting
+    final Consumer<Boolean> mIsActiveDreamLockscreenHostedCallback =
+            (Boolean isLockscreenHosted) -> {
+                mIsActiveDreamLockscreenHosted = isLockscreenHosted;
+                updateVisibility();
+            };
 
     @Inject
     public LockIconViewController(
@@ -222,6 +234,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             collectFlow(mView, mTransitionInteractor.getDozeAmountTransition(),
                     mDozeTransitionCallback);
             collectFlow(mView, mKeyguardInteractor.isDozing(), mIsDozingCallback);
+        }
+
+        if (mFeatureFlags.isEnabled(LOCKSCREEN_WALLPAPER_DREAM_ENABLED)) {
+            collectFlow(mView, mKeyguardInteractor.isActiveDreamLockscreenHosted(),
+                    mIsActiveDreamLockscreenHostedCallback);
         }
     }
 
@@ -284,6 +301,11 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
 
     private void updateVisibility() {
         if (!mIsKeyguardShowing && !mIsDozing) {
+            mView.setVisibility(View.INVISIBLE);
+            return;
+        }
+
+        if (mIsKeyguardShowing && mIsActiveDreamLockscreenHosted) {
             mView.setVisibility(View.INVISIBLE);
             return;
         }
@@ -397,15 +419,20 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
     private void updateLockIconLocation() {
         final float scaleFactor = mAuthController.getScaleFactor();
         final int scaledPadding = (int) (mDefaultPaddingPx * scaleFactor);
-        if (mUdfpsSupported) {
-            mView.setCenterLocation(mAuthController.getUdfpsLocation(),
-                    mAuthController.getUdfpsRadius(), scaledPadding);
+        if (mFeatureFlags.isEnabled(Flags.MIGRATE_LOCK_ICON)) {
+            mView.getLockIcon().setPadding(scaledPadding, scaledPadding, scaledPadding,
+                    scaledPadding);
         } else {
-            mView.setCenterLocation(
-                    new Point((int) mWidthPixels / 2,
-                            (int) (mHeightPixels
-                                    - ((mBottomPaddingPx + sLockIconRadiusPx) * scaleFactor))),
+            if (mUdfpsSupported) {
+                mView.setCenterLocation(mAuthController.getUdfpsLocation(),
+                        mAuthController.getUdfpsRadius(), scaledPadding);
+            } else {
+                mView.setCenterLocation(
+                        new Point((int) mWidthPixels / 2,
+                                (int) (mHeightPixels
+                                        - ((mBottomPaddingPx + sLockIconRadiusPx) * scaleFactor))),
                         sLockIconRadiusPx * scaleFactor, scaledPadding);
+            }
         }
     }
 
@@ -433,6 +460,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
         pw.println(" mInterpolatedDarkAmount: " + mInterpolatedDarkAmount);
         pw.println(" mSensorTouchLocation: " + mSensorTouchLocation);
         pw.println(" mDefaultPaddingPx: " + mDefaultPaddingPx);
+        pw.println(" mIsActiveDreamLockscreenHosted: " + mIsActiveDreamLockscreenHosted);
 
         if (mView != null) {
             mView.dump(pw, args);
@@ -587,12 +615,7 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_HOVER_ENTER:
                 if (!mDownDetected && mAccessibilityManager.isTouchExplorationEnabled()) {
-                    mVibrator.vibrate(
-                            Process.myUid(),
-                            getContext().getOpPackageName(),
-                            UdfpsController.EFFECT_CLICK,
-                            "lock-icon-down",
-                            TOUCH_VIBRATION_ATTRIBUTES);
+                    vibrateOnTouchExploration();
                 }
 
                 // The pointer that causes ACTION_DOWN is always at index 0.
@@ -673,13 +696,8 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             mOnGestureDetectedRunnable.run();
         }
 
-        // play device entry haptic (same as biometric success haptic)
-        mVibrator.vibrate(
-                Process.myUid(),
-                getContext().getOpPackageName(),
-                UdfpsController.EFFECT_CLICK,
-                "lock-screen-lock-icon-longpress",
-                TOUCH_VIBRATION_ATTRIBUTES);
+        // play device entry haptic (consistent with UDFPS controller longpress)
+        vibrateOnLongPress();
 
         mKeyguardViewController.showPrimaryBouncer(/* scrim */ true);
     }
@@ -725,6 +743,37 @@ public class LockIconViewController extends ViewController<LockIconView> impleme
             updateIsUdfpsEnrolled();
             updateConfiguration();
         });
+    }
+
+    @VisibleForTesting
+    void vibrateOnTouchExploration() {
+        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+            mVibrator.performHapticFeedback(
+                    mView,
+                    HapticFeedbackConstants.CONTEXT_CLICK
+            );
+        } else {
+            mVibrator.vibrate(
+                    Process.myUid(),
+                    getContext().getOpPackageName(),
+                    UdfpsController.EFFECT_CLICK,
+                    "lock-icon-down",
+                    TOUCH_VIBRATION_ATTRIBUTES);
+        }
+    }
+
+    @VisibleForTesting
+    void vibrateOnLongPress() {
+        if (mFeatureFlags.isEnabled(ONE_WAY_HAPTICS_API_MIGRATION)) {
+            mVibrator.performHapticFeedback(mView, UdfpsController.LONG_PRESS);
+        } else {
+            mVibrator.vibrate(
+                    Process.myUid(),
+                    getContext().getOpPackageName(),
+                    UdfpsController.EFFECT_CLICK,
+                    "lock-screen-lock-icon-longpress",
+                    TOUCH_VIBRATION_ATTRIBUTES);
+        }
     }
 
     private final AuthController.Callback mAuthControllerCallback = new AuthController.Callback() {

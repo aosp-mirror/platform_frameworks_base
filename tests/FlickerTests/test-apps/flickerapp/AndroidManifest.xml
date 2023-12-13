@@ -22,7 +22,9 @@
     <application android:allowBackup="false"
                  android:supportsRtl="true">
         <uses-library android:name="androidx.window.extensions" android:required="false"/>
-
+        <property
+            android:name="android.window.PROPERTY_ACTIVITY_EMBEDDING_SPLITS_ENABLED"
+            android:value="true" />
         <activity android:name=".SimpleActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SimpleActivity"
                   android:theme="@style/CutoutShortEdges"
@@ -99,6 +101,24 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".LaunchTransparentActivity"
+                  android:resizeableActivity="false"
+                  android:screenOrientation="portrait"
+                  android:theme="@android:style/Theme"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchTransparentActivity"
+                  android:label="LaunchTransparentActivity"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".TransparentActivity"
+                  android:theme="@style/TransparentTheme"
+                  android:taskAffinity="com.android.server.wm.flicker.testapp.TransparentActivity"
+                  android:label="TransparentActivity"
+                  android:exported="false">
         </activity>
         <activity android:name=".LaunchNewActivity"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.LaunchNewActivity"
@@ -191,8 +211,31 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".ActivityEmbeddingTrampolineActivity"
+            android:label="ActivityEmbedding Trampoline"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false">
+        </activity>
+        <activity
             android:name=".ActivityEmbeddingSecondaryActivity"
             android:label="ActivityEmbedding Secondary"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:supportsPictureInPicture="true"
+            android:exported="false"/>
+        <activity
+            android:name=".ActivityEmbeddingThirdActivity"
+            android:label="ActivityEmbedding Third"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
+            android:theme="@style/CutoutShortEdges"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"
+            android:exported="false"/>
+        <activity
+            android:name=".ActivityEmbeddingAlwaysExpandActivity"
+            android:label="ActivityEmbedding AlwaysExpand"
             android:taskAffinity="com.android.server.wm.flicker.testapp.ActivityEmbedding"
             android:theme="@style/CutoutShortEdges"
             android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout"

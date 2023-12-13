@@ -29,6 +29,7 @@ import static com.android.inputmethod.stresstest.ImeStressTestUtil.callOnMainSyn
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.getWindowAndSoftInputFlagParameters;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.hasUnfocusableWindowFlags;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.isImeShown;
+import static com.android.inputmethod.stresstest.ImeStressTestUtil.requestFocusAndVerify;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyImeAlwaysHiddenWithWindowFlagSet;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyImeIsAlwaysHidden;
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.verifyWindowAndViewFocus;
@@ -37,6 +38,9 @@ import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUnt
 import static com.android.inputmethod.stresstest.ImeStressTestUtil.waitOnMainUntilImeIsShown;
 
 import static com.google.common.truth.Truth.assertThat;
+
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 import android.app.Instrumentation;
 import android.content.Intent;
@@ -96,7 +100,8 @@ public final class ImeOpenCloseStressTest {
         Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity activity = TestActivity.start(intent);
         // Request focus after app starts to avoid triggering auto-show behavior.
-        mInstrumentation.runOnMainSync(activity::requestFocus);
+        requestFocusAndVerify(activity);
+
         // Test only once if window flags set to save time.
         int iterNum = hasUnfocusableWindowFlags(activity) ? 1 : NUM_TEST_ITERATIONS;
         for (int i = 0; i < iterNum; i++) {
@@ -106,21 +111,19 @@ public final class ImeOpenCloseStressTest {
             verifyShowBehavior(activity);
 
             callOnMainSync(activity::hideImeWithInputMethodManager);
-
             verifyHideBehavior(activity);
         }
     }
 
     @Test
     public void testShowHideWithInputMethodManager_waitingAnimationEnd() {
+        assumeFalse("Has unfocusable window flags", hasUnfocusableWindowFlags(mWindowFocusFlags));
+
         Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity activity = TestActivity.start(intent);
         // Request focus after app starts to avoid triggering auto-show behavior.
-        mInstrumentation.runOnMainSync(activity::requestFocus);
+        requestFocusAndVerify(activity);
 
-        if (hasUnfocusableWindowFlags(activity)) {
-            return; // Skip to save time.
-        }
         activity.enableAnimationMonitoring();
         EditText editText = activity.getEditText();
         for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
@@ -128,12 +131,12 @@ public final class ImeOpenCloseStressTest {
             Log.i(TAG, msgPrefix + "start");
             callOnMainSync(activity::showImeWithInputMethodManager);
             waitOnMainUntil(
-                    msgPrefix + "IME should be visible",
+                    msgPrefix + "IME should have been shown",
                     () -> !activity.isAnimating() && isImeShown(editText));
 
             callOnMainSync(activity::hideImeWithInputMethodManager);
             waitOnMainUntil(
-                    msgPrefix + "IME should be hidden",
+                    msgPrefix + "IME should have been hidden",
                     () -> !activity.isAnimating() && !isImeShown(editText));
         }
     }
@@ -141,13 +144,13 @@ public final class ImeOpenCloseStressTest {
     @Test
     public void testShowHideWithInputMethodManager_intervalAfterHide() {
         // Regression test for b/221483132
+        assumeFalse("Has unfocusable window flags", hasUnfocusableWindowFlags(mWindowFocusFlags));
+
         Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity activity = TestActivity.start(intent);
         // Request focus after app starts to avoid triggering auto-show behavior.
-        mInstrumentation.runOnMainSync(activity::requestFocus);
-        if (hasUnfocusableWindowFlags(activity)) {
-            return; // Skip to save time.
-        }
+        requestFocusAndVerify(activity);
+
         // Intervals = 10, 20, 30, ..., 100, 150, 200, ...
         List<Integer> intervals = new ArrayList<>();
         for (int i = 10; i < 100; i += 10) intervals.add(i);
@@ -165,14 +168,12 @@ public final class ImeOpenCloseStressTest {
 
     @Test
     public void testShowHideWithInputMethodManager_inSameFrame() {
+        assumeFalse("Has unfocusable window flags", hasUnfocusableWindowFlags(mWindowFocusFlags));
         Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity activity = TestActivity.start(intent);
         // Request focus after app starts to avoid triggering auto-show behavior.
-        mInstrumentation.runOnMainSync(activity::requestFocus);
+        requestFocusAndVerify(activity);
 
-        if (hasUnfocusableWindowFlags(activity)) {
-            return; // Skip to save time.
-        }
         // hidden -> show -> hide
         mInstrumentation.runOnMainSync(
                 () -> {
@@ -256,13 +257,12 @@ public final class ImeOpenCloseStressTest {
 
     @Test
     public void testShowHideWithWindowInsetsController_waitingVisibilityChange() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            return;
-        }
+        assumeTrue("Is at least Android R", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R);
         Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity activity = TestActivity.start(intent);
         // Request focus after app starts to avoid triggering auto-show behavior.
-        mInstrumentation.runOnMainSync(activity::requestFocus);
+        requestFocusAndVerify(activity);
+
         // Test only once if window flags set to save time.
         int iterNum = hasUnfocusableWindowFlags(activity) ? 1 : NUM_TEST_ITERATIONS;
         for (int i = 0; i < iterNum; i++) {
@@ -277,17 +277,13 @@ public final class ImeOpenCloseStressTest {
 
     @Test
     public void testShowHideWithWindowInsetsController_waitingAnimationEnd() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            return;
-        }
+        assumeTrue("Is at least Android R", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R);
+        assumeFalse("Has unfocusable window flags", hasUnfocusableWindowFlags(mWindowFocusFlags));
         Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity activity = TestActivity.start(intent);
         // Request focus after app starts to avoid triggering auto-show behavior.
-        mInstrumentation.runOnMainSync(activity::requestFocus);
+        requestFocusAndVerify(activity);
 
-        if (hasUnfocusableWindowFlags(activity)) {
-            return; // Skip to save time.
-        }
         activity.enableAnimationMonitoring();
         EditText editText = activity.getEditText();
         for (int i = 0; i < NUM_TEST_ITERATIONS; i++) {
@@ -295,29 +291,25 @@ public final class ImeOpenCloseStressTest {
             Log.i(TAG, msgPrefix + "start");
             mInstrumentation.runOnMainSync(activity::showImeWithWindowInsetsController);
             waitOnMainUntil(
-                    msgPrefix + "IME should be visible",
+                    msgPrefix + "IME should have been shown",
                     () -> !activity.isAnimating() && isImeShown(editText));
 
             mInstrumentation.runOnMainSync(activity::hideImeWithWindowInsetsController);
             waitOnMainUntil(
-                    msgPrefix + "IME should be hidden",
+                    msgPrefix + "IME should have been hidden",
                     () -> !activity.isAnimating() && !isImeShown(editText));
         }
     }
 
     @Test
     public void testShowHideWithWindowInsetsController_intervalAfterHide() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            return;
-        }
+        assumeTrue("Is at least Android R", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R);
+        assumeFalse("Has unfocusable window flags", hasUnfocusableWindowFlags(mWindowFocusFlags));
         Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity activity = TestActivity.start(intent);
         // Request focus after app starts to avoid triggering auto-show behavior.
-        mInstrumentation.runOnMainSync(activity::requestFocus);
+        requestFocusAndVerify(activity);
 
-        if (hasUnfocusableWindowFlags(activity)) {
-            return; // Skip to save time.
-        }
         // Intervals = 10, 20, 30, ..., 100, 150, 200, ...
         List<Integer> intervals = new ArrayList<>();
         for (int i = 10; i < 100; i += 10) intervals.add(i);
@@ -335,17 +327,13 @@ public final class ImeOpenCloseStressTest {
 
     @Test
     public void testShowHideWithWindowInsetsController_inSameFrame() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            return;
-        }
+        assumeTrue("Is at least Android R", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R);
+        assumeFalse("Has unfocusable window flags", hasUnfocusableWindowFlags(mWindowFocusFlags));
         Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity activity = TestActivity.start(intent);
         // Request focus after app starts to avoid triggering auto-show behavior.
-        mInstrumentation.runOnMainSync(activity::requestFocus);
+        requestFocusAndVerify(activity);
 
-        if (hasUnfocusableWindowFlags(activity)) {
-            return; // Skip to save time.
-        }
         // hidden -> show -> hide
         mInstrumentation.runOnMainSync(
                 () -> {
@@ -377,9 +365,7 @@ public final class ImeOpenCloseStressTest {
 
     @Test
     public void testShowWithWindowInsetsController_onCreate_requestFocus() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            return;
-        }
+        assumeTrue("Is at least Android R", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R);
         // Show with InputMethodManager at onCreate()
         Intent intent =
                 createIntent(
@@ -394,10 +380,8 @@ public final class ImeOpenCloseStressTest {
 
     @Test
     public void testShowWithWindowInsetsController_onCreate_notRequestFocus() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            return;
-        }
-        // Show and hide with InputMethodManager at onCreate()
+        assumeTrue("Is at least Android R", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R);
+        // Show and hide with WindowInsetsController at onCreate()
         Intent intent =
                 createIntent(
                         mWindowFocusFlags,
@@ -411,10 +395,8 @@ public final class ImeOpenCloseStressTest {
 
     @Test
     public void testShowWithWindowInsetsController_afterStart_notRequestFocus() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            return;
-        }
-        // Show and hide with InputMethodManager at onCreate()
+        assumeTrue("Is at least Android R", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R);
+        // Show and hide with WindowInsetsController at onCreate()
         Intent intent = createIntent(mWindowFocusFlags, mSoftInputFlags, Collections.emptyList());
         TestActivity activity = TestActivity.start(intent);
         mInstrumentation.runOnMainSync(activity::showImeWithWindowInsetsController);
@@ -425,7 +407,8 @@ public final class ImeOpenCloseStressTest {
 
     /**
      * Test IME hidden by calling show and hide IME consecutively with
-     * {@link android.view.WindowInsetsController} APIs in {@link android.app.Activity#onCreate}.
+     * {@link android.view.WindowInsetsController} APIs in
+     * {@link android.app.Activity#onCreate}.
      *
      * <p> Note for developers: Use {@link WindowManager.LayoutParams#SOFT_INPUT_STATE_UNCHANGED}
      * window flag to avoid some softInputMode visibility flags may take presence over
@@ -436,13 +419,11 @@ public final class ImeOpenCloseStressTest {
      */
     @Test
     public void testHideWithWindowInsetsController_onCreate_requestFocus() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-            return;
-        }
+        assumeTrue("Is at least Android R", Build.VERSION.SDK_INT >= Build.VERSION_CODES.R);
         if (mSoftInputFlags != SOFT_INPUT_STATE_UNCHANGED) {
             return;
         }
-        // Show and hide with InputMethodManager at onCreate()
+        // Show and hide with WindowInsetsController at onCreate()
         Intent intent =
                 createIntent(
                         mWindowFocusFlags,

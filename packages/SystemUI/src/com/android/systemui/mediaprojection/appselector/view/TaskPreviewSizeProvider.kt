@@ -21,6 +21,8 @@ import android.content.res.Configuration
 import android.graphics.Rect
 import android.view.WindowInsets.Type
 import android.view.WindowManager
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import com.android.systemui.mediaprojection.appselector.MediaProjectionAppSelectorScope
 import com.android.systemui.mediaprojection.appselector.view.TaskPreviewSizeProvider.TaskPreviewSizeListener
 import com.android.systemui.shared.recents.utilities.Utilities.isLargeScreen
@@ -35,16 +37,20 @@ class TaskPreviewSizeProvider
 constructor(
     private val context: Context,
     private val windowManager: WindowManager,
-    configurationController: ConfigurationController
-) : CallbackController<TaskPreviewSizeListener>, ConfigurationListener {
+    private val configurationController: ConfigurationController,
+) : CallbackController<TaskPreviewSizeListener>, ConfigurationListener, DefaultLifecycleObserver {
 
     /** Returns the size of the task preview on the screen in pixels */
     val size: Rect = calculateSize()
 
     private val listeners = arrayListOf<TaskPreviewSizeListener>()
 
-    init {
+    override fun onCreate(owner: LifecycleOwner) {
         configurationController.addCallback(this)
+    }
+
+    override fun onDestroy(owner: LifecycleOwner) {
+        configurationController.removeCallback(this)
     }
 
     override fun onConfigChanged(newConfig: Configuration) {

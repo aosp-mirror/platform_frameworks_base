@@ -22,6 +22,7 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.view.Display.DEFAULT_DISPLAY
+import com.android.wm.shell.MockToken
 import com.android.wm.shell.TestRunningTaskInfoBuilder
 
 class DesktopTestHelpers {

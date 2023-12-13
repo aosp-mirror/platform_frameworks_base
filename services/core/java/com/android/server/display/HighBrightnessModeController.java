@@ -16,6 +16,7 @@
 
 package com.android.server.display;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.display.BrightnessInfo;
@@ -75,6 +76,8 @@ class HighBrightnessModeController {
     private final Injector mInjector;
 
     private HdrListener mHdrListener;
+
+    @Nullable
     private HighBrightnessModeData mHbmData;
     private HdrBrightnessDeviceConfig mHdrBrightnessCfg;
     private IBinder mRegisteredDisplayToken;
@@ -107,7 +110,9 @@ class HighBrightnessModeController {
      * If HBM is currently running, this is the start time and set of all events,
      * for the current HBM session.
      */
-    private HighBrightnessModeMetadata mHighBrightnessModeMetadata = null;
+    @Nullable
+    private HighBrightnessModeMetadata mHighBrightnessModeMetadata;
+
     HighBrightnessModeController(Handler handler, int width, int height, IBinder displayToken,
             String displayUniqueId, float brightnessMin, float brightnessMax,
             HighBrightnessModeData hbmData, HdrBrightnessDeviceConfig hdrBrightnessCfg,
@@ -310,23 +315,29 @@ class HighBrightnessModeController {
         pw.println("  mBrightnessMax=" + mBrightnessMax);
         pw.println("  remainingTime=" + calculateRemainingTime(mClock.uptimeMillis()));
         pw.println("  mIsTimeAvailable= " + mIsTimeAvailable);
-        pw.println("  mRunningStartTimeMillis="
-                + TimeUtils.formatUptime(mHighBrightnessModeMetadata.getRunningStartTimeMillis()));
         pw.println("  mIsBlockedByLowPowerMode=" + mIsBlockedByLowPowerMode);
         pw.println("  width*height=" + mWidth + "*" + mHeight);
-        pw.println("  mEvents=");
-        final long currentTime = mClock.uptimeMillis();
-        long lastStartTime = currentTime;
-        long runningStartTimeMillis = mHighBrightnessModeMetadata.getRunningStartTimeMillis();
-        if (runningStartTimeMillis != -1) {
-            lastStartTime = dumpHbmEvent(pw, new HbmEvent(runningStartTimeMillis, currentTime));
-        }
-        for (HbmEvent event : mHighBrightnessModeMetadata.getHbmEventQueue()) {
-            if (lastStartTime > event.getEndTimeMillis()) {
-                pw.println("    event: [normal brightness]: "
-                        + TimeUtils.formatDuration(lastStartTime - event.getEndTimeMillis()));
+
+        if (mHighBrightnessModeMetadata != null) {
+            pw.println("  mRunningStartTimeMillis="
+                    + TimeUtils.formatUptime(
+                    mHighBrightnessModeMetadata.getRunningStartTimeMillis()));
+            pw.println("  mEvents=");
+            final long currentTime = mClock.uptimeMillis();
+            long lastStartTime = currentTime;
+            long runningStartTimeMillis = mHighBrightnessModeMetadata.getRunningStartTimeMillis();
+            if (runningStartTimeMillis != -1) {
+                lastStartTime = dumpHbmEvent(pw, new HbmEvent(runningStartTimeMillis, currentTime));
             }
-            lastStartTime = dumpHbmEvent(pw, event);
+            for (HbmEvent event : mHighBrightnessModeMetadata.getHbmEventQueue()) {
+                if (lastStartTime > event.getEndTimeMillis()) {
+                    pw.println("    event: [normal brightness]: "
+                            + TimeUtils.formatDuration(lastStartTime - event.getEndTimeMillis()));
+                }
+                lastStartTime = dumpHbmEvent(pw, event);
+            }
+        } else {
+            pw.println("  mHighBrightnessModeMetadata=null");
         }
     }
 
@@ -353,7 +364,7 @@ class HighBrightnessModeController {
     }
 
     private boolean deviceSupportsHbm() {
-        return mHbmData != null;
+        return mHbmData != null && mHighBrightnessModeMetadata != null;
     }
 
     private long calculateRemainingTime(long currentTime) {

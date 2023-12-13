@@ -152,6 +152,50 @@ public class FgsLoggerTest {
     }
 
     @Test
+    public void testApiStartStopFgs() throws InterruptedException {
+        ServiceRecord record = ServiceRecord.newEmptyInstanceForTest(null);
+        record.foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
+
+        mFgsLogger.logForegroundServiceApiEventBegin(FOREGROUND_SERVICE_API_TYPE_CAMERA,
+                1, 1, "aPackageHasNoName");
+        Thread.sleep(2000);
+
+        resetAndVerifyZeroInteractions();
+
+        mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1);
+
+        resetAndVerifyZeroInteractions();
+
+        mFgsLogger.logForegroundServiceStart(1, 1, record);
+
+        resetAndVerifyZeroInteractions();
+    }
+
+    @Test
+    public void testFgsStartStopApiStartStop() throws InterruptedException {
+        ServiceRecord record = ServiceRecord.newEmptyInstanceForTest(null);
+        record.foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
+
+        mFgsLogger.logForegroundServiceStart(1, 1, record);
+
+        resetAndVerifyZeroInteractions();
+
+        mFgsLogger.logForegroundServiceStop(1, record);
+
+        resetAndVerifyZeroInteractions();
+
+        mFgsLogger.logForegroundServiceApiEventBegin(FOREGROUND_SERVICE_API_TYPE_CAMERA,
+                1, 1, "aPackageHasNoName");
+        Thread.sleep(2000);
+
+        resetAndVerifyZeroInteractions();
+
+        mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1);
+
+        resetAndVerifyZeroInteractions();
+    }
+
+    @Test
     public void testMultipleStartStopApis() throws InterruptedException {
         ServiceRecord record = ServiceRecord.newEmptyInstanceForTest(null);
         record.foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;

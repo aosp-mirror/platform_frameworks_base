@@ -23,6 +23,7 @@ import android.content.ComponentName
 import android.util.Log
 import com.android.dream.lowlight.dagger.LowLightDreamModule
 import com.android.dream.lowlight.dagger.qualifiers.Application
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
@@ -103,6 +104,11 @@ class LowLightDreamManager @Inject constructor(
                 )
             } catch (ex: TimeoutCancellationException) {
                 Log.e(TAG, "timed out while waiting for low light animation", ex)
+            } catch (ex: CancellationException) {
+                Log.w(TAG, "low light transition animation cancelled")
+                // Catch the cancellation so that we still set the system dream component if the
+                // animation is cancelled, such as by a user tapping to wake as the transition to
+                // low light happens.
             }
             dreamManager.setSystemDreamComponent(
                 if (shouldEnterLowLight) lowLightDreamComponent else null

@@ -16,8 +16,6 @@
 
 package com.android.internal.app.procstats;
 
-import static com.android.internal.app.procstats.ProcessStats.STATE_TOP;
-
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -108,7 +106,8 @@ public class ProcessStatsTest extends TestCase {
         ProcessState processState =
                 processStats.getProcessStateLocked(
                         APP_1_PACKAGE_NAME, APP_1_UID, APP_1_VERSION, APP_1_PROCESS_NAME);
-        processState.setCombinedState(STATE_TOP, NOW_MS);
+        processState.setState(ActivityManager.PROCESS_STATE_TOP, ProcessStats.ADJ_MEM_FACTOR_NORMAL,
+                NOW_MS, /* pkgList */ null);
         processState.commitStateTime(NOW_MS + TimeUnit.SECONDS.toMillis(DURATION_SECS));
         processStats.dumpProcessState(FrameworkStatsLog.PROCESS_STATE, mStatsEventOutput);
         verify(mStatsEventOutput)
@@ -154,6 +153,38 @@ public class ProcessStatsTest extends TestCase {
                         eq(0),
                         eq(0),
                         eq(0),
+                        eq(0));
+    }
+
+    @SmallTest
+    public void testDumpFrozenDuration() throws Exception {
+        ProcessStats processStats = new ProcessStats();
+        ProcessState processState =
+                processStats.getProcessStateLocked(
+                        APP_1_PACKAGE_NAME, APP_1_UID, APP_1_VERSION, APP_1_PROCESS_NAME);
+        processState.setState(ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE,
+                ProcessStats.ADJ_MEM_FACTOR_NORMAL, NOW_MS, /* pkgList */ null);
+        processState.onProcessFrozen(NOW_MS   + 1 * TimeUnit.SECONDS.toMillis(DURATION_SECS),
+            /* pkgList */ null);
+        processState.onProcessUnfrozen(NOW_MS + 2 * TimeUnit.SECONDS.toMillis(DURATION_SECS),
+            /* pkgList */ null);
+        processState.commitStateTime(NOW_MS   + 3 * TimeUnit.SECONDS.toMillis(DURATION_SECS));
+        processStats.dumpProcessState(FrameworkStatsLog.PROCESS_STATE, mStatsEventOutput);
+        verify(mStatsEventOutput)
+                .write(
+                        eq(FrameworkStatsLog.PROCESS_STATE),
+                        eq(APP_1_UID),
+                        eq(APP_1_PROCESS_NAME),
+                        anyInt(),
+                        anyInt(),
+                        eq(0),
+                        eq(0),
+                        eq(0),
+                        eq(0),
+                        eq(2 * DURATION_SECS),  // bound_fgs
+                        eq(0),
+                        eq(0),
+                        eq(DURATION_SECS),  // frozen
                         eq(0));
     }
 

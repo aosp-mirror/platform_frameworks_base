@@ -17,10 +17,10 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.app.animation.Interpolators.EMPHASIZED_ACCELERATE
+import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GONE_DURATION
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
-import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.model.ScrimAlpha
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.statusbar.SysuiStatusBarStateController
@@ -62,6 +62,23 @@ constructor(
                     0f
                 } else {
                     1f - it
+                }
+            },
+        )
+
+    /** Lockscreen alpha */
+    val lockscreenAlpha: Flow<Float> =
+        transitionAnimation.createFlow(
+            duration = 50.milliseconds,
+            onStart = {
+                leaveShadeOpen = statusBarStateController.leaveOpenOnKeyguardHide()
+                willRunDismissFromKeyguard = primaryBouncerInteractor.willRunDismissFromKeyguard()
+            },
+            onStep = {
+                if (willRunDismissFromKeyguard || leaveShadeOpen) {
+                    1f
+                } else {
+                    0f
                 }
             },
         )

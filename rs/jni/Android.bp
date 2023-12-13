@@ -22,6 +22,7 @@ package {
 cc_library_shared {
     name: "librs_jni",
 
+    cpp_std: "gnu++2b",
     srcs: ["android_renderscript_RenderScript.cpp"],
 
     shared_libs: [

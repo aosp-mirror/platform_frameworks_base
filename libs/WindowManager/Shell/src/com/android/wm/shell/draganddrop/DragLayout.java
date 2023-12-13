@@ -35,7 +35,6 @@ import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.StatusBarManager;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -53,14 +52,13 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
-import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.util.ArrayList;
 
 /**
- * Coordinates the visible drop targets for the current drag.
+ * Coordinates the visible drop targets for the current drag within a single display.
  */
 public class DragLayout extends LinearLayout {
 
@@ -86,6 +84,7 @@ public class DragLayout extends LinearLayout {
 
     private boolean mIsShowing;
     private boolean mHasDropped;
+    private DragSession mSession;
 
     @SuppressLint("WrongConstant")
     public DragLayout(Context context, SplitScreenController splitScreenController,
@@ -182,16 +181,19 @@ public class DragLayout extends LinearLayout {
         return mHasDropped;
     }
 
-    public void prepare(DisplayLayout displayLayout, ClipData initialData,
-            InstanceId loggerSessionId) {
-        mPolicy.start(displayLayout, initialData, loggerSessionId);
+    /**
+     * Called when a new drag is started.
+     */
+    public void prepare(DragSession session, InstanceId loggerSessionId) {
+        mPolicy.start(session, loggerSessionId);
+        mSession = session;
         mHasDropped = false;
         mCurrentTarget = null;
 
         boolean alreadyInSplit = mSplitScreenController != null
                 && mSplitScreenController.isSplitScreenVisible();
         if (!alreadyInSplit) {
-            ActivityManager.RunningTaskInfo taskInfo1 = mPolicy.getLatestRunningTask();
+            ActivityManager.RunningTaskInfo taskInfo1 = mSession.runningTaskInfo;
             if (taskInfo1 != null) {
                 final int activityType = taskInfo1.getActivityType();
                 if (activityType == ACTIVITY_TYPE_STANDARD) {
@@ -356,7 +358,16 @@ public class DragLayout extends LinearLayout {
      */
     public void hide(DragEvent event, Runnable hideCompleteCallback) {
         mIsShowing = false;
-        animateSplitContainers(false, hideCompleteCallback);
+        animateSplitContainers(false, () -> {
+            if (hideCompleteCallback != null) {
+                hideCompleteCallback.run();
+            }
+            switch (event.getAction()) {
+                case DragEvent.ACTION_DROP:
+                case DragEvent.ACTION_DRAG_ENDED:
+                    mSession = null;
+            }
+        });
         // Reset the state if we previously force-ignore the bottom margin
         mDropZoneView1.setForceIgnoreBottomMargin(false);
         mDropZoneView2.setForceIgnoreBottomMargin(false);

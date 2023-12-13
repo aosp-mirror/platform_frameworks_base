@@ -21,8 +21,8 @@ import android.platform.test.annotations.Presubmit
 import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
-import android.tools.device.flicker.legacy.FlickerTest
-import android.tools.device.flicker.legacy.FlickerTestFactory
+import android.tools.device.flicker.legacy.LegacyFlickerTest
+import android.tools.device.flicker.legacy.LegacyFlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import org.junit.FixMethodOrder
@@ -34,7 +34,7 @@ import org.junit.runners.Parameterized
 /**
  * Test opening an app and cycling through app rotations
  *
- * Currently runs:
+ * Currently, runs:
  * ```
  *      0 -> 90 degrees
  *      90 -> 0 degrees
@@ -85,7 +85,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-open class ChangeAppRotationTest(flicker: FlickerTest) : RotationTransition(flicker) {
+open class ChangeAppRotationTest(flicker: LegacyFlickerTest) : RotationTransition(flicker) {
     override val testApp = SimpleAppHelper(instrumentation)
     override val transition: FlickerBuilder.() -> Unit
         get() = {
@@ -140,13 +140,11 @@ open class ChangeAppRotationTest(flicker: FlickerTest) : RotationTransition(flic
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.rotationTests] for configuring screen orientation and navigation
-         * modes.
+         * See [LegacyFlickerTestFactory.rotationTests] for configuring screen orientation and
+         * navigation modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
-        fun getParams(): Collection<FlickerTest> {
-            return FlickerTestFactory.rotationTests()
-        }
+        fun getParams() = LegacyFlickerTestFactory.rotationTests()
     }
 }

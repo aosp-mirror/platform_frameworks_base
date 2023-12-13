@@ -29,6 +29,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_UNSPECIFIED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_APPEARING;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -358,6 +359,15 @@ public final class TransitionInfo implements Parcelable {
      */
     public void addChange(@NonNull Change change) {
         mChanges.add(change);
+    }
+
+    /**
+     * Whether this transition contains any changes to the window hierarchy,
+     * including keyguard visibility.
+     */
+    public boolean hasChangesOrSideEffects() {
+        return !mChanges.isEmpty() || isKeyguardGoingAway()
+                || (mFlags & TRANSIT_FLAG_KEYGUARD_APPEARING) != 0;
     }
 
     /**

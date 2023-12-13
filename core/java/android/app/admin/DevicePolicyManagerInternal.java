@@ -250,6 +250,16 @@ public abstract class DevicePolicyManagerInternal {
     public abstract ComponentName getProfileOwnerAsUser(@UserIdInt int userId);
 
     /**
+     * Returns the device owner component for the device, or {@code null} if there is not one.
+     *
+     * @deprecated added temporarily to support Android Role permission granting.
+     * Please contact Android Enterprise Device Policy team before calling this function.
+     */
+    @Deprecated
+    @Nullable
+    public abstract ComponentName getDeviceOwnerComponent(boolean callingUserOnly);
+
+    /**
      * Returns the user id of the device owner, or {@link UserHandle#USER_NULL} if there is not one.
      */
     @UserIdInt

@@ -81,9 +81,6 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
 
     protected final Handler mHandler;
 
-    private float mMinSwipeProgress = 0f;
-    private float mMaxSwipeProgress = 1f;
-
     private final SpringConfig mSnapBackSpringConfig =
             new SpringConfig(SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
@@ -227,18 +224,11 @@ public class SwipeHelper implements Gefingerpoken, Dumpable {
         return v.getMeasuredWidth();
     }
 
-    public void setMinSwipeProgress(float minSwipeProgress) {
-        mMinSwipeProgress = minSwipeProgress;
-    }
-
-    public void setMaxSwipeProgress(float maxSwipeProgress) {
-        mMaxSwipeProgress = maxSwipeProgress;
-    }
-
     private float getSwipeProgressForOffset(View view, float translation) {
+        if (translation == 0) return 0;
         float viewSize = getSize(view);
         float result = Math.abs(translation / viewSize);
-        return Math.min(Math.max(mMinSwipeProgress, result), mMaxSwipeProgress);
+        return Math.min(Math.max(0, result), 1);
     }
 
     /**

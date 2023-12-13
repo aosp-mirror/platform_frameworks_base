@@ -22,6 +22,7 @@ import android.service.quicksettings.Tile
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.text.TextUtils
+import android.view.ContextThemeWrapper
 import android.view.View
 import android.view.accessibility.AccessibilityNodeInfo
 import android.widget.TextView
@@ -386,7 +387,11 @@ class QSTileViewImplTest : SysuiTestCase() {
         context: Context,
         icon: QSIconView,
         collapsed: Boolean
-    ) : QSTileViewImpl(context, icon, collapsed) {
+    ) : QSTileViewImpl(
+            ContextThemeWrapper(context, R.style.Theme_SystemUI_QuickSettings),
+            icon,
+            collapsed
+    ) {
         fun changeState(state: QSTile.State) {
             handleStateChanged(state)
         }

@@ -40,6 +40,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.testing.AndroidTestingRunner;
@@ -214,6 +215,20 @@ public class TaskViewTest extends ShellTestCase {
         assumeFalse(Transitions.ENABLE_SHELL_TRANSITIONS);
         SurfaceHolder sh = mock(SurfaceHolder.class);
         mTaskView.surfaceCreated(sh);
+        mTaskView.surfaceDestroyed(sh);
+
+        verify(mViewListener, never()).onTaskVisibilityChanged(anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testSurfaceDestroyed_withTask_shouldNotHideTask_legacyTransitions() {
+        assumeFalse(Transitions.ENABLE_SHELL_TRANSITIONS);
+        mTaskViewTaskController.setHideTaskWithSurface(false);
+
+        SurfaceHolder sh = mock(SurfaceHolder.class);
+        mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
+        mTaskView.surfaceCreated(sh);
+        reset(mViewListener);
         mTaskView.surfaceDestroyed(sh);
 
         verify(mViewListener, never()).onTaskVisibilityChanged(anyInt(), anyBoolean());
@@ -562,5 +577,73 @@ public class TaskViewTest extends ShellTestCase {
 
         mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
         verify(mTaskViewTaskController, never()).cleanUpPendingTask();
+    }
+
+    @Test
+    public void testSetCaptionInsets_noTaskInitially() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        Rect insets = new Rect(0, 400, 0, 0);
+        mTaskView.setCaptionInsets(Insets.of(insets));
+        mTaskView.onComputeInternalInsets(new ViewTreeObserver.InternalInsetsInfo());
+
+        verify(mTaskViewTaskController).applyCaptionInsetsIfNeeded();
+        verify(mOrganizer, never()).applyTransaction(any());
+
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+        reset(mOrganizer);
+        reset(mTaskViewTaskController);
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+        mTaskView.onComputeInternalInsets(new ViewTreeObserver.InternalInsetsInfo());
+
+        verify(mTaskViewTaskController).applyCaptionInsetsIfNeeded();
+        verify(mOrganizer).applyTransaction(any());
+    }
+
+    @Test
+    public void testSetCaptionInsets_withTask() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+        reset(mTaskViewTaskController);
+        reset(mOrganizer);
+
+        Rect insets = new Rect(0, 400, 0, 0);
+        mTaskView.setCaptionInsets(Insets.of(insets));
+        mTaskView.onComputeInternalInsets(new ViewTreeObserver.InternalInsetsInfo());
+        verify(mTaskViewTaskController).applyCaptionInsetsIfNeeded();
+        verify(mOrganizer).applyTransaction(any());
+    }
+
+    @Test
+    public void testReleaseInOnTaskRemoval_noNPE() {
+        mTaskViewTaskController = spy(new TaskViewTaskController(mContext, mOrganizer,
+                mTaskViewTransitions, mSyncQueue));
+        mTaskView = new TaskView(mContext, mTaskViewTaskController);
+        mTaskView.setListener(mExecutor, new TaskView.Listener() {
+            @Override
+            public void onTaskRemovalStarted(int taskId) {
+                mTaskView.release();
+            }
+        });
+
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+
+        assertThat(mTaskViewTaskController.getTaskInfo()).isEqualTo(mTaskInfo);
+
+        mTaskViewTaskController.prepareCloseAnimation();
+
+        assertThat(mTaskViewTaskController.getTaskInfo()).isNull();
     }
 }

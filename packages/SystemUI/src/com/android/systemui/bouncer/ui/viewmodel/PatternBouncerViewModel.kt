@@ -18,7 +18,7 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import android.content.Context
 import android.util.TypedValue
-import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
+import com.android.systemui.authentication.shared.model.AuthenticationPatternCoordinate
 import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import kotlin.math.max
 import kotlin.math.min
@@ -31,11 +31,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /** Holds UI state and handles user input for the pattern bouncer UI. */
 class PatternBouncerViewModel(
     private val applicationContext: Context,
-    applicationScope: CoroutineScope,
+    private val applicationScope: CoroutineScope,
     private val interactor: BouncerInteractor,
     isInputEnabled: StateFlow<Boolean>,
 ) :
@@ -68,14 +69,7 @@ class PatternBouncerViewModel(
     val dots: StateFlow<List<PatternDotViewModel>> = _dots.asStateFlow()
 
     /** Whether the pattern itself should be rendered visibly. */
-    val isPatternVisible: StateFlow<Boolean> =
-        interactor.authenticationMethod
-            .map { authMethod -> isPatternVisible(authMethod) }
-            .stateIn(
-                scope = applicationScope,
-                started = SharingStarted.Eagerly,
-                initialValue = isPatternVisible(interactor.authenticationMethod.value),
-            )
+    val isPatternVisible: StateFlow<Boolean> = interactor.isPatternVisible
 
     /** Notifies that the UI has been shown to the user. */
     fun onShown() {
@@ -153,19 +147,16 @@ class PatternBouncerViewModel(
 
     /** Notifies that the user has ended the drag gesture across the dot grid. */
     fun onDragEnd() {
-        val isSuccessfullyAuthenticated =
-            interactor.authenticate(_selectedDots.value.map { it.toCoordinate() })
-        if (!isSuccessfullyAuthenticated) {
-            showFailureAnimation()
-        }
-
+        val pattern = _selectedDots.value.map { it.toCoordinate() }
         _dots.value = defaultDots()
         _currentDot.value = null
         _selectedDots.value = linkedSetOf()
-    }
 
-    private fun isPatternVisible(authMethodModel: AuthenticationMethodModel): Boolean {
-        return (authMethodModel as? AuthenticationMethodModel.Pattern)?.isPatternVisible ?: false
+        applicationScope.launch {
+            if (interactor.authenticate(pattern) != true) {
+                showFailureAnimation()
+            }
+        }
     }
 
     private fun defaultDots(): List<PatternDotViewModel> {
@@ -202,8 +193,8 @@ data class PatternDotViewModel(
     val x: Int,
     val y: Int,
 ) {
-    fun toCoordinate(): AuthenticationMethodModel.Pattern.PatternCoordinate {
-        return AuthenticationMethodModel.Pattern.PatternCoordinate(
+    fun toCoordinate(): AuthenticationPatternCoordinate {
+        return AuthenticationPatternCoordinate(
             x = x,
             y = y,
         )

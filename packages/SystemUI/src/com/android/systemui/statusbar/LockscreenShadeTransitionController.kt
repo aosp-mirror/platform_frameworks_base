@@ -6,7 +6,6 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
 import android.os.PowerManager
-import android.os.SystemClock
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import android.view.MotionEvent
@@ -30,8 +29,10 @@ import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.shade.data.repository.ShadeRepository
+import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -76,6 +77,8 @@ class LockscreenShadeTransitionController @Inject constructor(
     dumpManager: DumpManager,
     qsTransitionControllerFactory: LockscreenShadeQsTransitionController.Factory,
     private val shadeRepository: ShadeRepository,
+    private val shadeInteractor: ShadeInteractor,
+    private val powerInteractor: PowerInteractor,
 ) : Dumpable {
     private var pulseHeight: Float = 0f
     @get:VisibleForTesting
@@ -278,11 +281,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         // Bind the click listener of the shelf to go to the full shade
         notificationShelfController.setOnClickListener {
             if (statusBarStateController.state == StatusBarState.KEYGUARD) {
-                centralSurfaces.wakeUpIfDozing(
-                        SystemClock.uptimeMillis(),
-                        "SHADE_CLICK",
-                        PowerManager.WAKE_REASON_GESTURE,
-                )
+                powerInteractor.wakeUpIfDozing("SHADE_CLICK", PowerManager.WAKE_REASON_GESTURE)
                 goToLockedShade(it)
             }
         }
@@ -561,7 +560,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         animationHandler: ((Long) -> Unit)? = null,
         cancelAction: Runnable? = null
     ) {
-        if (centralSurfaces.isShadeDisabled) {
+        if (!shadeInteractor.isShadeEnabled.value) {
             cancelAction?.run()
             logger.logShadeDisabledOnGoToLockedShade()
             return

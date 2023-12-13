@@ -7,17 +7,16 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeCommandQueue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractorFactory
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.util.mockito.any
 import com.android.systemui.utils.GlobalWindowManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -60,20 +59,20 @@ class ResourceTrimmerTest : SysuiTestCase() {
         keyguardRepository.setDozeAmount(0f)
         keyguardRepository.setKeyguardGoingAway(false)
 
-        val keyguardInteractor =
-            KeyguardInteractor(
-                keyguardRepository,
-                FakeCommandQueue(),
-                featureFlags,
-                FakeKeyguardBouncerRepository()
+        val withDeps =
+            KeyguardInteractorFactory.create(
+                repository = keyguardRepository,
+                featureFlags = featureFlags,
             )
+        val keyguardInteractor = withDeps.keyguardInteractor
         resourceTrimmer =
             ResourceTrimmer(
                 keyguardInteractor,
-                KeyguardTransitionInteractor(
-                    keyguardTransitionRepository,
-                    testScope.backgroundScope
-                ),
+                KeyguardTransitionInteractorFactory.create(
+                        scope = TestScope().backgroundScope,
+                        repository = keyguardTransitionRepository,
+                    )
+                    .keyguardTransitionInteractor,
                 globalWindowManager,
                 testScope.backgroundScope,
                 testDispatcher,
@@ -227,6 +226,9 @@ class ResourceTrimmerTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionStep(
                 TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
             )
-            verifyNoMoreInteractions(globalWindowManager)
+            // Memory hidden should still be called.
+            verify(globalWindowManager, times(1))
+                .trimMemory(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN)
+            verify(globalWindowManager, times(0)).trimCaches(any())
         }
 }

@@ -191,20 +191,22 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     static final long NOTIFY_NODES_DISAPPEAR_NOW_SENDS_TREE_EVENTS = 258825825L;
 
     /** @hide */
-    @IntDef(prefix = { "FLUSH_REASON_" }, value = {
-            FLUSH_REASON_FULL,
-            FLUSH_REASON_VIEW_ROOT_ENTERED,
-            FLUSH_REASON_SESSION_STARTED,
-            FLUSH_REASON_SESSION_FINISHED,
-            FLUSH_REASON_IDLE_TIMEOUT,
-            FLUSH_REASON_TEXT_CHANGE_TIMEOUT,
-            FLUSH_REASON_SESSION_CONNECTED,
-            FLUSH_REASON_FORCE_FLUSH,
-            FLUSH_REASON_VIEW_TREE_APPEARING,
-            FLUSH_REASON_VIEW_TREE_APPEARED
-    })
+    @IntDef(
+            prefix = {"FLUSH_REASON_"},
+            value = {
+                FLUSH_REASON_FULL,
+                FLUSH_REASON_VIEW_ROOT_ENTERED,
+                FLUSH_REASON_SESSION_STARTED,
+                FLUSH_REASON_SESSION_FINISHED,
+                FLUSH_REASON_IDLE_TIMEOUT,
+                FLUSH_REASON_TEXT_CHANGE_TIMEOUT,
+                FLUSH_REASON_SESSION_CONNECTED,
+                FLUSH_REASON_FORCE_FLUSH,
+                FLUSH_REASON_VIEW_TREE_APPEARING,
+                FLUSH_REASON_VIEW_TREE_APPEARED
+            })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface FlushReason{}
+    public @interface FlushReason {}
 
     private final Object mLock = new Object();
 
@@ -686,7 +688,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
             case FLUSH_REASON_VIEW_TREE_APPEARED:
                 return "VIEW_TREE_APPEARED";
             default:
-                return "UNKOWN-" + reason;
+                return "UNKNOWN-" + reason;
         }
     }
 

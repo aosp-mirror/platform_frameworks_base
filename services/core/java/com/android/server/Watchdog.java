@@ -120,6 +120,7 @@ public class Watchdog implements Dumpable {
         "/system/bin/mediaserver",
         "/system/bin/netd",
         "/system/bin/sdcard",
+        "/system/bin/servicemanager",
         "/system/bin/surfaceflinger",
         "/system/bin/vold",
         "media.extractor", // system/bin/mediaextractor
@@ -935,7 +936,7 @@ public class Watchdog implements Dumpable {
                         mActivity.addErrorToDropBox(
                                 dropboxTag, null, "system_server", null, null, null,
                                 null, report.toString(), stack, null, null, null,
-                                errorId);
+                                errorId, null);
                     }
                 }
             };

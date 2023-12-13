@@ -247,7 +247,7 @@ class WallpaperController {
                 resources.getBoolean(
                         com.android.internal.R.bool.config_offsetWallpaperToCenterOfLargestDisplay);
         mIsLockscreenLiveWallpaperEnabled =
-                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", false);
+                SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", true);
     }
 
     void resetLargestDisplay(Display display) {
@@ -308,52 +308,10 @@ class WallpaperController {
         }
     }
 
-    private boolean shouldWallpaperBeVisible(WindowState wallpaperTarget) {
-        if (DEBUG_WALLPAPER) {
-            Slog.v(TAG, "Wallpaper vis: target " + wallpaperTarget + " prev="
-                    + mPrevWallpaperTarget);
-        }
-        return wallpaperTarget != null || mPrevWallpaperTarget != null;
-    }
-
     boolean isWallpaperTargetAnimating() {
         return mWallpaperTarget != null && mWallpaperTarget.isAnimating(TRANSITION | PARENTS)
                 && (mWallpaperTarget.mActivityRecord == null
                         || !mWallpaperTarget.mActivityRecord.isWaitingForTransitionStart());
-    }
-
-    void updateWallpaperVisibility() {
-        final boolean visible = shouldWallpaperBeVisible(mWallpaperTarget);
-
-        for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
-            final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.setVisibility(visible);
-        }
-    }
-
-    /**
-     * Make one wallpaper visible, according to {@attr showHome}.
-     * This is called during the keyguard unlocking transition
-     * (see {@link KeyguardController#keyguardGoingAway(int, int)}),
-     * or when a keyguard unlock is cancelled (see {@link KeyguardController})
-     */
-    public void showWallpaperInTransition(boolean showHome) {
-        updateWallpaperWindowsTarget(mFindResults);
-
-        if (!mFindResults.hasTopShowWhenLockedWallpaper()) {
-            Slog.w(TAG, "There is no wallpaper for the lock screen");
-            return;
-        }
-        WindowState hideWhenLocked = mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper;
-        WindowState showWhenLocked = mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper;
-        if (!mFindResults.hasTopHideWhenLockedWallpaper()) {
-            // Shared wallpaper, ensure its visibility
-            showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindows(true);
-        } else {
-            // Separate lock and home wallpapers: show the correct wallpaper in transition
-            hideWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(showHome);
-            showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(!showHome);
-        }
     }
 
     void hideDeferredWallpapersIfNeededLegacy() {
@@ -801,11 +759,20 @@ class WallpaperController {
         result.setWallpaperTarget(wallpaperTarget);
     }
 
+    public void updateWallpaperTokens(boolean keyguardLocked) {
+        if (DEBUG_WALLPAPER) {
+            Slog.v(TAG, "Wallpaper vis: target " + mWallpaperTarget + " prev="
+                    + mPrevWallpaperTarget);
+        }
+        updateWallpaperTokens(mWallpaperTarget != null || mPrevWallpaperTarget != null,
+                keyguardLocked);
+    }
+
     /**
      * Change the visibility of the top wallpaper to {@param visibility} and hide all the others.
      */
-    private void updateWallpaperTokens(boolean visibility, boolean locked) {
-        WindowState topWallpaper = mFindResults.getTopWallpaper(locked);
+    private void updateWallpaperTokens(boolean visibility, boolean keyguardLocked) {
+        WindowState topWallpaper = mFindResults.getTopWallpaper(keyguardLocked);
         WallpaperWindowToken topWallpaperToken =
                 topWallpaper == null ? null : topWallpaper.mToken.asWallpaperToken();
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
@@ -848,10 +815,7 @@ class WallpaperController {
             }
         }
 
-        if (!mDisplayContent.isKeyguardGoingAway() || !mIsLockscreenLiveWallpaperEnabled) {
-            // When keyguard goes away, KeyguardController handles the visibility
-            updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
-        }
+        updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
 
         if (DEBUG_WALLPAPER) {
             Slog.v(TAG, "adjustWallpaperWindows: wallpaper visibility " + visible

@@ -44,6 +44,7 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
     private var expandedView: BubbleExpandedView?
+    private var bubbleBarExpandedView: BubbleBarExpandedView? = null
     private var overflowBtn: BadgedImageView?
 
     init {
@@ -53,19 +54,26 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
     }
 
     /** Call before use and again if cleanUpExpandedState was called. */
-    fun initialize(controller: BubbleController) {
-        createExpandedView()
-        getExpandedView()?.initialize(controller, controller.stackView, true /* isOverflow */)
+    fun initialize(controller: BubbleController, forBubbleBar: Boolean) {
+        if (forBubbleBar) {
+            createBubbleBarExpandedView().initialize(controller, true /* isOverflow */)
+        } else {
+            createExpandedView()
+                .initialize(controller, controller.stackView, true /* isOverflow */)
+        }
     }
 
     fun cleanUpExpandedState() {
         expandedView?.cleanUpExpandedState()
         expandedView = null
+        bubbleBarExpandedView?.cleanUpExpandedState()
+        bubbleBarExpandedView = null
     }
 
     fun update() {
         updateResources()
         getExpandedView()?.applyThemeAttrs()
+        getBubbleBarExpandedView()?.applyThemeAttrs()
         // Apply inset and new style to fresh icon drawable.
         getIconView()?.setIconImageResource(R.drawable.bubble_ic_overflow_button)
         updateBtnTheme()
@@ -151,25 +159,38 @@ class BubbleOverflow(private val context: Context, private val positioner: Bubbl
         overflowBtn?.updateDotVisibility(true /* animate */)
     }
 
-    fun createExpandedView(): BubbleExpandedView? {
-        expandedView =
+    /** Creates the expanded view for bubbles showing in the stack view. */
+    private fun createExpandedView(): BubbleExpandedView {
+        val view =
             inflater.inflate(
                 R.layout.bubble_expanded_view,
                 null /* root */,
                 false /* attachToRoot */
             ) as BubbleExpandedView
-        expandedView?.applyThemeAttrs()
+        view.applyThemeAttrs()
+        expandedView = view
         updateResources()
-        return expandedView
+        return view
     }
 
     override fun getExpandedView(): BubbleExpandedView? {
         return expandedView
     }
 
-    override fun getBubbleBarExpandedView(): BubbleBarExpandedView? {
-        return null
+    /** Creates the expanded view for bubbles showing in the bubble bar. */
+    private fun createBubbleBarExpandedView(): BubbleBarExpandedView {
+        val view =
+            inflater.inflate(
+                R.layout.bubble_bar_expanded_view,
+                null, /* root */
+                false /* attachToRoot*/
+            ) as BubbleBarExpandedView
+        view.applyThemeAttrs()
+        bubbleBarExpandedView = view
+        return view
     }
+
+    override fun getBubbleBarExpandedView(): BubbleBarExpandedView? = bubbleBarExpandedView
 
     override fun getDotColor(): Int {
         return dotColor

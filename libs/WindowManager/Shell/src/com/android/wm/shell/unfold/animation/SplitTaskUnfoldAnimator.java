@@ -50,10 +50,10 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.unfold.UnfoldAnimationController;
 import com.android.wm.shell.unfold.UnfoldBackgroundController;
 
+import dagger.Lazy;
+
 import java.util.Optional;
 import java.util.concurrent.Executor;
-
-import dagger.Lazy;
 
 /**
  * This helper class contains logic that calculates scaling and cropping parameters
@@ -149,7 +149,7 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
         for (int i = state.sourceSize() - 1; i >= 0; i--) {
             final InsetsSource source = state.sourceAt(i);
             if (source.getType() == WindowInsets.Type.navigationBars()
-                    && source.insetsRoundedCornerFrame()) {
+                    && source.hasFlags(InsetsSource.FLAG_INSETS_ROUNDED_CORNER)) {
                 return source;
             }
         }
@@ -270,7 +270,6 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
     @Override
     public void prepareStartTransaction(Transaction transaction) {
         mUnfoldBackgroundController.ensureBackground(transaction);
-        mSplitScreenController.get().get().updateSplitScreenSurfaces(transaction);
     }
 
     @Override

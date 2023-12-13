@@ -322,6 +322,21 @@ interface IAudioService {
     @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
     boolean isCsdEnabled();
 
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean isCsdAsAFeatureAvailable();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    boolean isCsdAsAFeatureEnabled();
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    oneway void setCsdAsAFeatureEnabled(boolean csdToggleValue);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    oneway void setBluetoothAudioDeviceCategory(in String address, boolean isBle, int deviceType);
+
+    @EnforcePermission("MODIFY_AUDIO_SETTINGS_PRIVILEGED")
+    int getBluetoothAudioDeviceCategory(in String address, boolean isBle);
+
     int setHdmiSystemAudioSupported(boolean on);
 
     boolean isHdmiSystemAudioSupported();

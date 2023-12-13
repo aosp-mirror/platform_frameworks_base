@@ -21,27 +21,29 @@ import android.hardware.biometrics.BiometricAuthenticator.Modality
 import android.hardware.biometrics.BiometricSourceType
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
-import com.android.systemui.Dumpable
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dump.DumpManager
-import java.io.PrintWriter
+import com.android.systemui.keyguard.shared.model.AcquiredFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.ErrorFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FailFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.FingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.HelpFingerprintAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
 /** Encapsulates state about device entry fingerprint auth mechanism. */
 interface DeviceEntryFingerprintAuthRepository {
     /** Whether the device entry fingerprint auth is locked out. */
-    val isLockedOut: StateFlow<Boolean>
+    val isLockedOut: Flow<Boolean>
 
     /**
      * Whether the fingerprint sensor is currently listening, this doesn't mean that the user is
@@ -53,6 +55,9 @@ interface DeviceEntryFingerprintAuthRepository {
      * Fingerprint sensor type present on the device, null if fingerprint sensor is not available.
      */
     val availableFpSensorType: Flow<BiometricType?>
+
+    /** Provide the current status of fingerprint authentication. */
+    val authenticationStatus: Flow<FingerprintAuthenticationStatus>
 }
 
 /**
@@ -69,16 +74,7 @@ constructor(
     val authController: AuthController,
     val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     @Application scope: CoroutineScope,
-    dumpManager: DumpManager,
-) : DeviceEntryFingerprintAuthRepository, Dumpable {
-
-    init {
-        dumpManager.registerDumpable(this)
-    }
-
-    override fun dump(pw: PrintWriter, args: Array<String?>) {
-        pw.println("isLockedOut=${isLockedOut.value}")
-    }
+) : DeviceEntryFingerprintAuthRepository {
 
     override val availableFpSensorType: Flow<BiometricType?>
         get() {
@@ -114,7 +110,7 @@ constructor(
         else if (authController.isRearFpsSupported) BiometricType.REAR_FINGERPRINT else null
     }
 
-    override val isLockedOut: StateFlow<Boolean> =
+    override val isLockedOut: Flow<Boolean> =
         conflatedCallbackFlow {
                 val sendLockoutUpdate =
                     fun() {
@@ -138,7 +134,7 @@ constructor(
                 sendLockoutUpdate()
                 awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
             }
-            .stateIn(scope, started = SharingStarted.Eagerly, initialValue = false)
+            .stateIn(scope, started = SharingStarted.WhileSubscribed(), initialValue = false)
 
     override val isRunning: Flow<Boolean>
         get() = conflatedCallbackFlow {
@@ -163,6 +159,93 @@ constructor(
                 TAG,
                 "Initial fingerprint running state"
             )
+            awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
+        }
+
+    override val authenticationStatus: Flow<FingerprintAuthenticationStatus>
+        get() = conflatedCallbackFlow {
+            val callback =
+                object : KeyguardUpdateMonitorCallback() {
+                    override fun onBiometricAuthenticated(
+                        userId: Int,
+                        biometricSourceType: BiometricSourceType,
+                        isStrongBiometric: Boolean,
+                    ) {
+
+                        sendUpdateIfFingerprint(
+                            biometricSourceType,
+                            SuccessFingerprintAuthenticationStatus(
+                                userId,
+                                isStrongBiometric,
+                            ),
+                        )
+                    }
+
+                    override fun onBiometricError(
+                        msgId: Int,
+                        errString: String?,
+                        biometricSourceType: BiometricSourceType,
+                    ) {
+                        sendUpdateIfFingerprint(
+                            biometricSourceType,
+                            ErrorFingerprintAuthenticationStatus(
+                                msgId,
+                                errString,
+                            ),
+                        )
+                    }
+
+                    override fun onBiometricHelp(
+                        msgId: Int,
+                        helpString: String?,
+                        biometricSourceType: BiometricSourceType,
+                    ) {
+                        sendUpdateIfFingerprint(
+                            biometricSourceType,
+                            HelpFingerprintAuthenticationStatus(
+                                msgId,
+                                helpString,
+                            ),
+                        )
+                    }
+
+                    override fun onBiometricAuthFailed(
+                        biometricSourceType: BiometricSourceType,
+                    ) {
+                        sendUpdateIfFingerprint(
+                            biometricSourceType,
+                            FailFingerprintAuthenticationStatus,
+                        )
+                    }
+
+                    override fun onBiometricAcquired(
+                        biometricSourceType: BiometricSourceType,
+                        acquireInfo: Int,
+                    ) {
+                        sendUpdateIfFingerprint(
+                            biometricSourceType,
+                            AcquiredFingerprintAuthenticationStatus(
+                                acquireInfo,
+                            ),
+                        )
+                    }
+
+                    private fun sendUpdateIfFingerprint(
+                        biometricSourceType: BiometricSourceType,
+                        authenticationStatus: FingerprintAuthenticationStatus
+                    ) {
+                        if (biometricSourceType != BiometricSourceType.FINGERPRINT) {
+                            return
+                        }
+
+                        trySendWithFailureLogging(
+                            authenticationStatus,
+                            TAG,
+                            "new fingerprint authentication status"
+                        )
+                    }
+                }
+            keyguardUpdateMonitor.registerCallback(callback)
             awaitClose { keyguardUpdateMonitor.removeCallback(callback) }
         }
 

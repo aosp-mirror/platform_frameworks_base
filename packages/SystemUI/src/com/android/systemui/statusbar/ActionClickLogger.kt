@@ -19,7 +19,7 @@ package com.android.systemui.statusbar
 import android.app.PendingIntent
 import com.android.systemui.log.dagger.NotifInteractionLog
 import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
+import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import javax.inject.Inject
 
@@ -31,56 +31,68 @@ class ActionClickLogger @Inject constructor(
 ) {
     fun logInitialClick(
         entry: NotificationEntry?,
+        index: Integer?,
         pendingIntent: PendingIntent
     ) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = entry?.key
             str2 = entry?.ranking?.channel?.id
-            str3 = pendingIntent.intent.toString()
+            str3 = pendingIntent.toString()
+            int1 = index?.toInt() ?: Int.MIN_VALUE
         }, {
-            "ACTION CLICK $str1 (channel=$str2) for pending intent $str3"
+            "ACTION CLICK $str1 (channel=$str2) for pending intent $str3 at index $int1"
         })
     }
 
     fun logRemoteInputWasHandled(
-        entry: NotificationEntry?
+        entry: NotificationEntry?,
+        index: Int?
     ) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = entry?.key
+            int1 = index ?: Int.MIN_VALUE
         }, {
-            "  [Action click] Triggered remote input (for $str1))"
+            "  [Action click] Triggered remote input (for $str1) at index $int1"
         })
     }
 
     fun logStartingIntentWithDefaultHandler(
         entry: NotificationEntry?,
-        pendingIntent: PendingIntent
+        pendingIntent: PendingIntent,
+        index: Int?
     ) {
         buffer.log(TAG, LogLevel.DEBUG, {
             str1 = entry?.key
-            str2 = pendingIntent.intent.toString()
+            str2 = pendingIntent.toString()
+            int1 = index ?: Int.MIN_VALUE
         }, {
-            "  [Action click] Launching intent $str2 via default handler (for $str1)"
+            "  [Action click] Launching intent $str2 via default handler (for $str1 at index $int1)"
         })
     }
 
     fun logWaitingToCloseKeyguard(
-        pendingIntent: PendingIntent
+        pendingIntent: PendingIntent,
+        index: Int?
     ) {
         buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = pendingIntent.intent.toString()
+            str1 = pendingIntent.toString()
+            int1 = index ?: Int.MIN_VALUE
         }, {
-            "  [Action click] Intent $str1 launches an activity, dismissing keyguard first..."
+            "  [Action click] Intent $str1 at index $int1 launches an activity, dismissing " +
+                    "keyguard first..."
         })
     }
 
     fun logKeyguardGone(
-        pendingIntent: PendingIntent
+        pendingIntent: PendingIntent,
+        index: Int?
     ) {
         buffer.log(TAG, LogLevel.DEBUG, {
-            str1 = pendingIntent.intent.toString()
+            str1 = pendingIntent.toString()
+            int1 = index ?: Int.MIN_VALUE
         }, {
-            "  [Action click] Keyguard dismissed, calling default handler for intent $str1"
+            "  [Action click] Keyguard dismissed, calling default handler for intent $str1 at " +
+                    "index $int1"
         })
     }
 }

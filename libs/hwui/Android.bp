@@ -66,14 +66,6 @@ cc_defaults {
         "external/skia/src/core",
     ],
 
-    product_variables: {
-        eng: {
-            lto: {
-                never: true,
-            },
-        },
-    },
-
     target: {
         android: {
             include_dirs: [
@@ -718,6 +710,7 @@ cc_test {
         "tests/unit/EglManagerTests.cpp",
         "tests/unit/FatVectorTests.cpp",
         "tests/unit/GraphicsStatsServiceTests.cpp",
+        "tests/unit/HintSessionWrapperTests.cpp",
         "tests/unit/JankTrackerTests.cpp",
         "tests/unit/FrameMetricsReporterTests.cpp",
         "tests/unit/LayerUpdateQueueTests.cpp",

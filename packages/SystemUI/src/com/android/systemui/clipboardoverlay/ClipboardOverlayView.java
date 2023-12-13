@@ -254,6 +254,10 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
                 });
     }
 
+    View getPreview() {
+        return mClipboardPreview;
+    }
+
     void showImagePreview(@Nullable Bitmap thumbnail) {
         if (thumbnail == null) {
             mHiddenPreview.setText(mContext.getString(R.string.clipboard_text_hidden));
@@ -366,6 +370,19 @@ public class ClipboardOverlayView extends DraggableConstraintLayout {
             }
         });
         return enterAnim;
+    }
+
+    Animator getFadeOutAnimation() {
+        ValueAnimator alphaAnim = ValueAnimator.ofFloat(1, 0);
+        alphaAnim.addUpdateListener(animation -> {
+            float alpha = (float) animation.getAnimatedValue();
+            mActionContainer.setAlpha(alpha);
+            mActionContainerBackground.setAlpha(alpha);
+            mPreviewBorder.setAlpha(alpha);
+            mDismissButton.setAlpha(alpha);
+        });
+        alphaAnim.setDuration(300);
+        return alphaAnim;
     }
 
     Animator getExitAnimation() {

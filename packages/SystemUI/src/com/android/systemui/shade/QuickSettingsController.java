@@ -68,6 +68,7 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.classifier.Classifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
@@ -78,6 +79,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.shade.data.repository.ShadeRepository;
+import com.android.systemui.shade.domain.interactor.ShadeInteractor;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -97,10 +99,10 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.LargeScreenUtils;
+import com.android.systemui.util.kotlin.JavaAdapter;
 
 import dagger.Lazy;
 
@@ -111,7 +113,7 @@ import javax.inject.Inject;
 /** Handles QuickSettings touch handling, expansion and animation state
  * TODO (b/264460656) make this dumpable
  */
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 public class QuickSettingsController implements Dumpable {
     public static final String TAG = "QuickSettingsController";
 
@@ -153,6 +155,8 @@ public class QuickSettingsController implements Dumpable {
     private final FeatureFlags mFeatureFlags;
     private final InteractionJankMonitor mInteractionJankMonitor;
     private final ShadeRepository mShadeRepository;
+    private final ShadeInteractor mShadeInteractor;
+    private final JavaAdapter mJavaAdapter;
     private final FalsingManager mFalsingManager;
     private final AccessibilityManager mAccessibilityManager;
     private final MetricsLogger mMetricsLogger;
@@ -229,7 +233,6 @@ public class QuickSettingsController implements Dumpable {
     private int mMaxExpansionHeight;
     /** Expansion fraction of the notification shade */
     private float mShadeExpandedFraction;
-    private int mPeekHeight;
     private float mLastOverscroll;
     private boolean mExpansionFromOverscroll;
     private boolean mExpansionEnabledPolicy = true;
@@ -342,6 +345,8 @@ public class QuickSettingsController implements Dumpable {
             DumpManager dumpManager,
             KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
             ShadeRepository shadeRepository,
+            ShadeInteractor shadeInteractor,
+            JavaAdapter javaAdapter,
             CastController castController
     ) {
         mPanelViewControllerLazy = panelViewControllerLazy;
@@ -387,6 +392,8 @@ public class QuickSettingsController implements Dumpable {
         mFeatureFlags = featureFlags;
         mInteractionJankMonitor = interactionJankMonitor;
         mShadeRepository = shadeRepository;
+        mShadeInteractor = shadeInteractor;
+        mJavaAdapter = javaAdapter;
 
         mLockscreenShadeTransitionController.addCallback(new LockscreenShadeTransitionCallback());
         dumpManager.registerDumpable(this);
@@ -421,7 +428,6 @@ public class QuickSettingsController implements Dumpable {
         final ViewConfiguration configuration = ViewConfiguration.get(this.mPanelView.getContext());
         mTouchSlop = configuration.getScaledTouchSlop();
         mSlopMultiplier = configuration.getScaledAmbiguousGestureMultiplier();
-        mPeekHeight = mResources.getDimensionPixelSize(R.dimen.qs_peek_height);
         mStatusBarMinHeight = SystemBarUtils.getStatusBarHeight(mPanelView.getContext());
         mScrimCornerRadius = mResources.getDimensionPixelSize(
                 R.dimen.notification_scrim_corner_radius);
@@ -459,7 +465,13 @@ public class QuickSettingsController implements Dumpable {
     }
 
     // TODO (b/265054088): move this and others to a CoreStartable
-    void initNotificationStackScrollLayoutController() {
+    void init() {
+        initNotificationStackScrollLayoutController();
+        mJavaAdapter.alwaysCollectFlow(
+                mShadeInteractor.isExpandToQsEnabled(), this::setExpansionEnabledPolicy);
+    }
+
+    private void initNotificationStackScrollLayoutController() {
         mNotificationStackScrollLayoutController.setOverscrollTopChangedListener(
                 new NsslOverscrollTopChangedListener());
         mNotificationStackScrollLayoutController.setOnStackYChanged(this::onStackYChanged);
@@ -486,12 +498,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     int getHeaderHeight() {
-        return mQs.getHeader().getHeight();
-    }
-
-    /** Returns the padding of the stackscroller when unlocked */
-    int getUnlockedStackScrollerPadding() {
-        return (mQs != null ? mQs.getHeader().getHeight() : 0) + mPeekHeight;
+        return isQsFragmentCreated() ? mQs.getHeader().getHeight() : 0;
     }
 
     private boolean isRemoteInputActiveWithKeyboardUp() {
@@ -780,7 +787,12 @@ public class QuickSettingsController implements Dumpable {
 
     /** update Qs height state */
     public void setExpansionHeight(float height) {
-        checkCorrectSplitShadeState(height);
+        // TODO(b/277909752): remove below log when bug is fixed
+        if (mSplitShadeEnabled && mShadeExpandedFraction == 1.0f && height == 0) {
+            Log.wtf(TAG,
+                    "setting QS height to 0 in split shade while shade is open(ing). "
+                            + "Value of mExpandImmediate = " + mExpandImmediate);
+        }
         int maxHeight = getMaxExpansionHeight();
         height = Math.min(Math.max(
                 height, getMinExpansionHeight()), maxHeight);
@@ -799,14 +811,6 @@ public class QuickSettingsController implements Dumpable {
 
         if (mExpansionHeightListener != null) {
             mExpansionHeightListener.onQsSetExpansionHeightCalled(getFullyExpanded());
-        }
-    }
-
-    /** TODO(b/269742565) Remove this logging */
-    private void checkCorrectSplitShadeState(float height) {
-        if (mSplitShadeEnabled && height == 0
-                && mPanelViewControllerLazy.get().isShadeFullyExpanded()) {
-            Log.wtfStack(TAG, "qsExpansion set to 0 while split shade is expanding or open");
         }
     }
 
@@ -892,7 +896,7 @@ public class QuickSettingsController implements Dumpable {
     }
 
     /** */
-    public void setExpansionEnabledPolicy(boolean expansionEnabledPolicy) {
+    private void setExpansionEnabledPolicy(boolean expansionEnabledPolicy) {
         mExpansionEnabledPolicy = expansionEnabledPolicy;
         if (mQs != null) {
             mQs.setHeaderClickable(isExpansionEnabled());
@@ -935,7 +939,6 @@ public class QuickSettingsController implements Dumpable {
         return mShadeExpandedHeight;
     }
 
-    @VisibleForTesting
     void setExpandImmediate(boolean expandImmediate) {
         if (expandImmediate != mExpandImmediate) {
             mShadeLog.logQsExpandImmediateChanged(expandImmediate);
@@ -1215,14 +1218,15 @@ public class QuickSettingsController implements Dumpable {
         if (mIsFullWidth) {
             clipStatusView = qsVisible;
             float screenCornerRadius =
-                    !mSplitShadeEnabled || mRecordingController.isRecording()
-                            || mCastController.hasConnectedCastDevice()
+                    mRecordingController.isRecording() || mCastController.hasConnectedCastDevice()
                             ? 0 : mScreenCornerRadius;
             radius = (int) MathUtils.lerp(screenCornerRadius, mScrimCornerRadius,
                     Math.min(top / (float) mScrimCornerRadius, 1f));
 
-            float bottomRadius = mExpanded ? screenCornerRadius :
-                    calculateBottomCornerRadius(screenCornerRadius);
+            float bottomRadius = mSplitShadeEnabled ? screenCornerRadius : 0;
+            if (!mExpanded) {
+                bottomRadius = calculateBottomCornerRadius(bottomRadius);
+            }
             mScrimController.setNotificationBottomRadius(bottomRadius);
         }
         if (isQsFragmentCreated()) {
@@ -1888,7 +1892,7 @@ public class QuickSettingsController implements Dumpable {
                 target = getMaxExpansionHeight();
                 break;
             case FLING_COLLAPSE:
-                if (mSplitShadeEnabled) { // TODO:(b/269742565) remove below log
+                if (mSplitShadeEnabled) {
                     Log.wtfStack(TAG, "FLING_COLLAPSE called in split shade");
                 }
                 setExpandImmediate(false);
@@ -2084,8 +2088,6 @@ public class QuickSettingsController implements Dumpable {
         ipw.println(mMaxExpansionHeight);
         ipw.print("mShadeExpandedFraction=");
         ipw.println(mShadeExpandedFraction);
-        ipw.print("mPeekHeight=");
-        ipw.println(mPeekHeight);
         ipw.print("mLastOverscroll=");
         ipw.println(mLastOverscroll);
         ipw.print("mExpansionFromOverscroll=");

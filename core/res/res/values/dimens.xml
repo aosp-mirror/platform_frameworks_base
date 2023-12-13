@@ -95,8 +95,10 @@
     <dimen name="navigation_bar_height_landscape_car_mode">96dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen in car mode -->
     <dimen name="navigation_bar_width_car_mode">96dp</dimen>
-    <!-- Height of notification icons in the status bar -->
+    <!-- Original dp height of notification icons in the status bar  -->
     <dimen name="status_bar_icon_size">22dip</dimen>
+    <!-- New sp height of notification icons in the status bar  -->
+    <dimen name="status_bar_icon_size_sp">22sp</dimen>
     <!-- Desired size of system icons in status bar. -->
     <dimen name="status_bar_system_icon_size">15dp</dimen>
     <!-- Intrinsic size of most system icons in status bar. This is the default value that
@@ -869,7 +871,7 @@
     <dimen name="autofill_dataset_picker_max_height">90%</dimen>
 
     <!-- Autofill save dialog padding -->
-    <dimen name="autofill_save_outer_top_margin">24dp</dimen>
+    <dimen name="autofill_save_outer_margin">24dp</dimen>
     <dimen name="autofill_save_outer_top_padding">16dp</dimen>
     <dimen name="autofill_elevation">32dp</dimen>
     <dimen name="autofill_save_inner_padding">16dp</dimen>
@@ -879,6 +881,9 @@
     <dimen name="autofill_save_scroll_view_top_margin">16dp</dimen>
     <dimen name="autofill_save_button_bar_padding">16dp</dimen>
     <dimen name="autofill_dialog_corner_radius">24dp</dimen>
+
+    <!-- How much extra space should be left around the autofill dialog -->
+    <dimen name="autofill_dialog_offset">72dp</dimen>
 
     <!-- Max height of the the autofill save custom subtitle as a fraction of the screen width/height -->
     <dimen name="autofill_save_custom_subtitle_max_height">20%</dimen>

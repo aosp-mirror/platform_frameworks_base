@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Stream;
 
 /**
  * CachedBluetoothDevice represents a remote Bluetooth device. It contains
@@ -356,11 +357,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         connectDevice();
     }
 
-    public HearingAidInfo getHearingAidInfo() {
-        return mHearingAidInfo;
-    }
-
-    public void setHearingAidInfo(HearingAidInfo hearingAidInfo) {
+    void setHearingAidInfo(HearingAidInfo hearingAidInfo) {
         mHearingAidInfo = hearingAidInfo;
     }
 
@@ -583,7 +580,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public void setName(String name) {
         // Prevent getName() to be set to null if setName(null) is called
-        if (name == null || TextUtils.equals(name, getName())) {
+        if (TextUtils.isEmpty(name) || TextUtils.equals(name, getName())) {
             return;
         }
         mDevice.setAlias(name);
@@ -655,6 +652,20 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     public int getBatteryLevel() {
         return mDevice.getBatteryLevel();
     }
+
+    /**
+     * Get the lowest battery level from remote device and its member devices
+     * @return battery level in percentage [0-100] or
+     * {@link BluetoothDevice#BATTERY_LEVEL_UNKNOWN}
+     */
+    public int getMinBatteryLevelWithMemberDevices() {
+        return Stream.concat(Stream.of(this), mMemberDevices.stream())
+                .mapToInt(cachedDevice -> cachedDevice.getBatteryLevel())
+                .filter(batteryLevel -> batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN)
+                .min()
+                .orElse(BluetoothDevice.BATTERY_LEVEL_UNKNOWN);
+    }
+
 
     void refresh() {
         ThreadUtils.postOnBackgroundThread(() -> {
@@ -732,6 +743,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     void onAudioModeChanged() {
         dispatchAttributesChanged();
     }
+
+    /**
+     * Notify that the audio category has changed.
+     */
+    public void onAudioDeviceCategoryChanged() {
+        dispatchAttributesChanged();
+    }
+
     /**
      * Get the device status as active or non-active per Bluetooth profile.
      *
@@ -1143,7 +1162,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         // BluetoothDevice.BATTERY_LEVEL_BLUETOOTH_OFF, or BluetoothDevice.BATTERY_LEVEL_UNKNOWN,
         // any other value should be a framework bug. Thus assume here that if value is greater
         // than BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must be valid
-        final int batteryLevel = getBatteryLevel();
+        final int batteryLevel = getMinBatteryLevelWithMemberDevices();
         if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
             // TODO: name com.android.settingslib.bluetooth.Utils something different
             batteryLevelPercentageString =
@@ -1318,7 +1337,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         // BluetoothDevice.BATTERY_LEVEL_BLUETOOTH_OFF, or BluetoothDevice.BATTERY_LEVEL_UNKNOWN,
         // any other value should be a framework bug. Thus assume here that if value is greater
         // than BluetoothDevice.BATTERY_LEVEL_UNKNOWN, it must be valid
-        final int batteryLevel = getBatteryLevel();
+        final int batteryLevel = getMinBatteryLevelWithMemberDevices();
         if (batteryLevel > BluetoothDevice.BATTERY_LEVEL_UNKNOWN) {
             // TODO: name com.android.settingslib.bluetooth.Utils something different
             batteryLevelPercentageString =
@@ -1522,10 +1541,15 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      *                      list.
      */
     public void switchMemberDeviceContent(CachedBluetoothDevice newMainDevice) {
-        // Backup from main device
+        // Remove the sub device from mMemberDevices first to prevent hash mismatch problem due
+        // to mDevice switch
+        removeMemberDevice(newMainDevice);
+
+        // Backup from current main device
         final BluetoothDevice tmpDevice = mDevice;
         final short tmpRssi = mRssi;
         final boolean tmpJustDiscovered = mJustDiscovered;
+
         // Set main device from sub device
         release();
         mDevice = newMainDevice.mDevice;
@@ -1539,6 +1563,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         newMainDevice.mRssi = tmpRssi;
         newMainDevice.mJustDiscovered = tmpJustDiscovered;
         newMainDevice.fillData();
+
+        // Add the sub device back into mMemberDevices with correct hash
+        addMemberDevice(newMainDevice);
     }
 
     /**

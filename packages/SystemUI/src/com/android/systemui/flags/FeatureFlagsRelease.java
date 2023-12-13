@@ -67,7 +67,7 @@ public class FeatureFlagsRelease implements FeatureFlags {
                         }
                     } else if (mStringCache.containsKey(flag.getName())) {
                         String newValue = value == null ? "" : value;
-                        if (mStringCache.get(flag.getName()) != newValue) {
+                        if (!mStringCache.get(flag.getName()).equals(newValue)) {
                             shouldRestart = true;
                         }
                     } else if (mIntCache.containsKey(flag.getName())) {
@@ -185,14 +185,12 @@ public class FeatureFlagsRelease implements FeatureFlags {
         return mStringCache.get(name);
     }
 
-    @NonNull
     @Override
     public int getInt(@NonNull IntFlag flag) {
         // Fill the cache.
         return getIntInternal(flag.getName(), flag.getDefault());
     }
 
-    @NonNull
     @Override
     public int getInt(@NonNull ResourceIntFlag flag) {
         // Fill the cache.

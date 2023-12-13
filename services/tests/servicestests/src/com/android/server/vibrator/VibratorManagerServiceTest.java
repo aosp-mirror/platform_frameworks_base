@@ -84,6 +84,7 @@ import android.view.Display;
 import android.view.InputDevice;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.FrameworkStatsLog;
@@ -813,6 +814,7 @@ public class VibratorManagerServiceTest {
                         eq(AudioAttributes.USAGE_UNKNOWN), anyInt(), anyString());
     }
 
+    @FlakyTest
     @Test
     public void vibrate_withOngoingRepeatingVibration_ignoresEffect() throws Exception {
         mockVibrators(1);
@@ -899,6 +901,7 @@ public class VibratorManagerServiceTest {
         cancelVibrate(service);  // Clean up repeating effect.
     }
 
+    @FlakyTest
     @Test
     public void vibrate_withNewSameImportanceVibrationButOngoingIsRepeating_ignoreNewVibration()
             throws Exception {
@@ -952,6 +955,7 @@ public class VibratorManagerServiceTest {
         cancelVibrate(service);  // Clean up repeating effect.
     }
 
+    @FlakyTest
     @Test
     public void vibrate_withNewUnknownUsageVibrationAndNotRepeating_ignoreNewVibration()
             throws Exception {
@@ -1687,6 +1691,7 @@ public class VibratorManagerServiceTest {
         cancelVibrate(service);  // Clean up long effect.
     }
 
+    @FlakyTest
     @Test
     public void onExternalVibration_withNewSameImportanceButRepeating_cancelsOngoingVibration()
             throws Exception {

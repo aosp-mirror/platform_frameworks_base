@@ -6916,13 +6916,167 @@ public class AudioManager {
 
     /**
      * @hide
-     * Returns whether CSD is enabled and supported by the HAL on this device.
+     * Returns whether CSD is enabled and supported by the current active audio module HAL.
+     * This method will return {@code false) for setups in which CSD as a feature is available
+     * (see {@link AudioManager#isCsdAsAFeatureAvailable()}) and not enabled (see
+     * {@link AudioManager#isCsdAsAFeatureEnabled()}).
      */
     @TestApi
     @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
     public boolean isCsdEnabled() {
         try {
             return getService().isCsdEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns whether CSD as a feature can be manipulated by a client. This method
+     * returns {@code true} in countries where there isn't a safe hearing regulation
+     * enforced.
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean isCsdAsAFeatureAvailable() {
+        try {
+            return getService().isCsdAsAFeatureAvailable();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Returns {@code true} if the client has enabled CSD. This function should only
+     * be called if {@link AudioManager#isCsdAsAFeatureAvailable()} returns {@code true}.
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public boolean isCsdAsAFeatureEnabled() {
+        try {
+            return getService().isCsdAsAFeatureEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Enables/disables the CSD feature. This function should only be called if
+     * {@link AudioManager#isCsdAsAFeatureAvailable()} returns {@code true}.
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setCsdAsAFeatureEnabled(boolean csdToggleValue) {
+        try {
+            getService().setCsdAsAFeatureEnabled(csdToggleValue);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Describes an audio device that has not been categorized with a specific
+     * audio type.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_UNKNOWN = 0;
+
+    /**
+     * @hide
+     * Describes an audio device which is categorized as something different.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_OTHER = 1;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as speakers.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_SPEAKER = 2;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as headphones.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_HEADPHONES = 3;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as car-kit.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_CARKIT = 4;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as watch.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_WATCH = 5;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as hearing aid.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_HEARING_AID = 6;
+
+    /**
+     * @hide
+     * Describes an audio device which was categorized as receiver.
+     */
+    public static final int AUDIO_DEVICE_CATEGORY_RECEIVER = 7;
+
+    /** @hide */
+    @IntDef(flag = false, prefix = "AUDIO_DEVICE_CATEGORY", value = {
+            AUDIO_DEVICE_CATEGORY_UNKNOWN,
+            AUDIO_DEVICE_CATEGORY_OTHER,
+            AUDIO_DEVICE_CATEGORY_SPEAKER,
+            AUDIO_DEVICE_CATEGORY_HEADPHONES,
+            AUDIO_DEVICE_CATEGORY_CARKIT,
+            AUDIO_DEVICE_CATEGORY_WATCH,
+            AUDIO_DEVICE_CATEGORY_HEARING_AID,
+            AUDIO_DEVICE_CATEGORY_RECEIVER }
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AudioDeviceCategory {}
+
+    /** @hide */
+    public static String audioDeviceCategoryToString(int audioDeviceCategory) {
+        switch (audioDeviceCategory) {
+            case AUDIO_DEVICE_CATEGORY_UNKNOWN: return "AUDIO_DEVICE_CATEGORY_UNKNOWN";
+            case AUDIO_DEVICE_CATEGORY_OTHER: return "AUDIO_DEVICE_CATEGORY_OTHER";
+            case AUDIO_DEVICE_CATEGORY_SPEAKER: return "AUDIO_DEVICE_CATEGORY_SPEAKER";
+            case AUDIO_DEVICE_CATEGORY_HEADPHONES: return "AUDIO_DEVICE_CATEGORY_HEADPHONES";
+            case AUDIO_DEVICE_CATEGORY_CARKIT: return "AUDIO_DEVICE_CATEGORY_CARKIT";
+            case AUDIO_DEVICE_CATEGORY_WATCH: return "AUDIO_DEVICE_CATEGORY_WATCH";
+            case AUDIO_DEVICE_CATEGORY_HEARING_AID: return "AUDIO_DEVICE_CATEGORY_HEARING_AID";
+            case AUDIO_DEVICE_CATEGORY_RECEIVER: return "AUDIO_DEVICE_CATEGORY_RECEIVER";
+            default:
+                return new StringBuilder("unknown AudioDeviceCategory ").append(
+                        audioDeviceCategory).toString();
+        }
+    }
+
+    /**
+     * @hide
+     * Sets the audio device type of a Bluetooth device given its MAC address
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    public void setBluetoothAudioDeviceCategory(@NonNull String address, boolean isBle,
+            @AudioDeviceCategory int btAudioDeviceType) {
+        try {
+            getService().setBluetoothAudioDeviceCategory(address, isBle, btAudioDeviceType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * Gets the audio device type of a Bluetooth device given its MAC address
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS_PRIVILEGED)
+    @AudioDeviceCategory
+    public int getBluetoothAudioDeviceCategory(@NonNull String address, boolean isBle) {
+        try {
+            return getService().getBluetoothAudioDeviceCategory(address, isBle);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

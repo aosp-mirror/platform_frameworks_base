@@ -106,7 +106,7 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
     @Test
     public void testRequestImeVisibility_showExplicit() {
         initImeTargetWindowState(mWindowToken);
-        boolean res = mComputer.onImeShowFlags(null, 0 /* show explicit */);
+        boolean res = mComputer.onImeShowFlags(null, 0 /* showFlags */);
         mComputer.requestImeVisibility(mWindowToken, res);
 
         final ImeTargetWindowState state = mComputer.getWindowStateOrNull(mWindowToken);
@@ -116,6 +116,34 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
         assertThat(state.isRequestedImeVisible()).isTrue();
 
         assertThat(mComputer.mRequestedShowExplicitly).isTrue();
+    }
+
+    /**
+     * This checks that the state after an explicit show request does not get reset during
+     * a subsequent implicit show request, without an intermediary hide request.
+     */
+    @Test
+    public void testRequestImeVisibility_showExplicit_thenShowImplicit() {
+        initImeTargetWindowState(mWindowToken);
+        mComputer.onImeShowFlags(null, 0 /* showFlags */);
+        assertThat(mComputer.mRequestedShowExplicitly).isTrue();
+
+        mComputer.onImeShowFlags(null, InputMethodManager.SHOW_IMPLICIT);
+        assertThat(mComputer.mRequestedShowExplicitly).isTrue();
+    }
+
+    /**
+     * This checks that the state after a forced show request does not get reset during
+     * a subsequent explicit show request, without an intermediary hide request.
+     */
+    @Test
+    public void testRequestImeVisibility_showForced_thenShowExplicit() {
+        initImeTargetWindowState(mWindowToken);
+        mComputer.onImeShowFlags(null, InputMethodManager.SHOW_FORCED);
+        assertThat(mComputer.mShowForced).isTrue();
+
+        mComputer.onImeShowFlags(null, 0 /* showFlags */);
+        assertThat(mComputer.mShowForced).isTrue();
     }
 
     @Test
