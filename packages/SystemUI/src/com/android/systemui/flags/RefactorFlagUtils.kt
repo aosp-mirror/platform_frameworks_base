@@ -79,6 +79,22 @@ object RefactorFlagUtils {
         check(!isEnabled) { "Legacy code path not supported when $flagName is enabled." }
 
     /**
+     * Called to ensure the new code is only run when the flag is enabled. This will throw an
+     * exception if the flag is disabled to ensure that the refactor author catches issues in
+     * testing.
+     *
+     * Example usage:
+     * ```
+     * public void setSomeNewController(SomeController someController) {
+     *     SomeRefactor.assertInNewMode();
+     *     mSomeController = someController;
+     * }
+     * ````
+     */
+    inline fun assertInNewMode(isEnabled: Boolean, flagName: Any) =
+        check(isEnabled) { "New code path not supported when $flagName is disabled." }
+
+    /**
      * This will [Log.wtf] with the given message, assuming [ASSERT_TAG] is loggable at that level.
      * This means an engineer can prevent this from crashing by running the command:
      * ```
