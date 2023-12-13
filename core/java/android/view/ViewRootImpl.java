@@ -530,8 +530,6 @@ public final class ViewRootImpl implements ViewParent,
     // Set to true to stop input during an Activity Transition.
     boolean mPausedForTransition = false;
 
-    boolean mLastInCompatMode = false;
-
     SurfaceHolder.Callback2 mSurfaceHolderCallback;
     BaseSurfaceHolder mSurfaceHolder;
     boolean mIsCreating;
@@ -1362,11 +1360,6 @@ public final class ViewRootImpl implements ViewParent,
                 }
                 if (DEBUG_LAYOUT) Log.d(mTag, "WindowLayout in setView:" + attrs);
 
-                if (!compatibilityInfo.supportsScreen()) {
-                    attrs.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-                    mLastInCompatMode = true;
-                }
-
                 mSoftInputMode = attrs.softInputMode;
                 mWindowAttributesChanged = true;
                 mAttachInfo.mRootView = view;
@@ -1900,10 +1893,6 @@ public final class ViewRootImpl implements ViewParent,
             // Keep track of the actual window flags supplied by the client.
             mClientWindowLayoutFlags = attrs.flags;
 
-            // Preserve compatible window flag if exists.
-            final int compatibleWindowFlag = mWindowAttributes.privateFlags
-                    & WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-
             // Preserve system UI visibility.
             final int systemUiVisibility = mWindowAttributes.systemUiVisibility;
             final int subtreeSystemUiVisibility = mWindowAttributes.subtreeSystemUiVisibility;
@@ -1935,8 +1924,7 @@ public final class ViewRootImpl implements ViewParent,
             mWindowAttributes.subtreeSystemUiVisibility = subtreeSystemUiVisibility;
             mWindowAttributes.insetsFlags.appearance = appearance;
             mWindowAttributes.insetsFlags.behavior = behavior;
-            mWindowAttributes.privateFlags |= compatibleWindowFlag
-                    | appearanceAndBehaviorPrivateFlags;
+            mWindowAttributes.privateFlags |= appearanceAndBehaviorPrivateFlags;
 
             if (mWindowAttributes.preservePreviousSurfaceInsets) {
                 // Restore old surface insets.
@@ -3137,21 +3125,6 @@ public final class ViewRootImpl implements ViewParent,
         final boolean shouldOptimizeMeasure = shouldOptimizeMeasure(lp);
 
         WindowManager.LayoutParams params = null;
-        CompatibilityInfo compatibilityInfo =
-                mDisplay.getDisplayAdjustments().getCompatibilityInfo();
-        if (compatibilityInfo.supportsScreen() == mLastInCompatMode) {
-            params = lp;
-            mFullRedrawNeeded = true;
-            mLayoutRequested = true;
-            if (mLastInCompatMode) {
-                params.privateFlags &= ~WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-                mLastInCompatMode = false;
-            } else {
-                params.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-                mLastInCompatMode = true;
-            }
-        }
-
         Rect frame = mWinFrame;
         if (mFirst) {
             mFullRedrawNeeded = true;

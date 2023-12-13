@@ -906,7 +906,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                 }
                 mService.getPackageManagerInternalLocked().notifyPackageUse(
                         r.intent.getComponent().getPackageName(), NOTIFY_PACKAGE_USE_ACTIVITY);
-                r.forceNewConfig = false;
                 mService.getAppWarningsLocked().onStartActivity(r);
 
                 // Because we could be starting an Activity in the system process this may not go

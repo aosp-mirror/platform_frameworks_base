@@ -512,7 +512,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private final DisplayMetrics mCompatDisplayMetrics = new DisplayMetrics();
 
-    /** The desired scaling factor for compatible apps. */
+    /**
+     * The desired scaling factor for compatible apps. It limits the size of the window to be
+     * original size ([320x480] x density). Used to scale window for applications running under
+     * legacy compatibility mode.
+     */
     float mCompatibleScreenScale;
 
     /** @see #getCurrentOverrideConfigurationChanges */

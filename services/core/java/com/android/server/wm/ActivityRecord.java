@@ -563,7 +563,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean idle;           // has the activity gone idle?
     boolean hasBeenLaunched;// has this activity ever been launched?
     boolean immersive;      // immersive mode (don't interrupt if possible)
-    boolean forceNewConfig; // force re-create with new config next time
     boolean supportsEnterPipOnTaskSwitch;  // This flag is set by the system to indicate that the
         // activity can enter picture in picture while pausing (only when switching to another task)
     // The PiP params used when deferring the entering of picture-in-picture.
@@ -9592,7 +9591,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // configurations because there are cases (like moving a task to the root pinned task) where
         // the combine configurations are equal, but would otherwise differ in the override config
         mTmpConfig.setTo(mLastReportedConfiguration.getMergedConfiguration());
-        if (getConfiguration().equals(mTmpConfig) && !forceNewConfig && !displayChanged) {
+        if (getConfiguration().equals(mTmpConfig) && !displayChanged) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration & display "
                     + "unchanged in %s", this);
             return true;
@@ -9619,7 +9618,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return true;
         }
 
-        if (changes == 0 && !forceNewConfig) {
+        if (changes == 0) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration no differences in %s",
                     this);
             // There are no significant differences, so we won't relaunch but should still deliver
@@ -9641,7 +9640,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // pick that up next time it starts.
         if (!attachedToProcess()) {
             ProtoLog.v(WM_DEBUG_CONFIGURATION, "Configuration doesn't matter not running %s", this);
-            forceNewConfig = false;
             return true;
         }
 
@@ -9651,11 +9649,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Integer.toHexString(changes), Integer.toHexString(info.getRealConfigChanged()),
                 mLastReportedConfiguration);
 
-        if (shouldRelaunchLocked(changes, mTmpConfig) || forceNewConfig) {
+        if (shouldRelaunchLocked(changes, mTmpConfig)) {
             // Aha, the activity isn't handling the change, so DIE DIE DIE.
             configChangeFlags |= changes;
             startFreezingScreenLocked(globalChanges);
-            forceNewConfig = false;
             // Do not preserve window if it is freezing screen because the original window won't be
             // able to update drawn state that causes freeze timeout.
             preserveWindow &= isResizeOnlyChange(changes) && !mFreezingScreen;
@@ -9875,7 +9872,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         try {
             ProtoLog.i(WM_DEBUG_STATES, "Moving to %s Relaunching %s callers=%s" ,
                     (andResume ? "RESUMED" : "PAUSED"), this, Debug.getCallers(6));
-            forceNewConfig = false;
             final ClientTransactionItem callbackItem = ActivityRelaunchItem.obtain(token,
                     pendingResults, pendingNewIntents, configChangeFlags,
                     new MergedConfiguration(getProcessGlobalConfiguration(),
