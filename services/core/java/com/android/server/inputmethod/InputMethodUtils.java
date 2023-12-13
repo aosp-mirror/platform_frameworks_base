@@ -33,6 +33,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.IntArray;
 import android.util.Pair;
 import android.util.Printer;
@@ -50,6 +51,7 @@ import com.android.server.textservices.TextServicesManagerInternal;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -982,6 +984,35 @@ final class InputMethodUtils {
                 consumer.accept(subtypeSplitter.next());
             }
         }
+    }
+
+    /**
+     * Concat given IME IDs with an existing enabled IME
+     * ({@link Settings.Secure#ENABLED_INPUT_METHODS}).
+     *
+     * @param existingEnabledImeId an existing {@link Settings.Secure#ENABLED_INPUT_METHODS} to
+     *                             which {@code imeIDs} will be added.
+     * @param imeIds an array of IME IDs to be added. For IME IDs that are already seen in
+     *               {@code existingEnabledImeId} will be skipped.
+     * @return a new enabled IME ID string that can be stored in
+     *         {@link Settings.Secure#ENABLED_INPUT_METHODS}.
+     */
+    @NonNull
+    static String concatEnabledImeIds(@NonNull String existingEnabledImeId,
+            @NonNull String... imeIds) {
+        final ArraySet<String> alreadyEnabledIds = new ArraySet<>();
+        final StringJoiner joiner = new StringJoiner(Character.toString(INPUT_METHOD_SEPARATOR));
+        if (!TextUtils.isEmpty(existingEnabledImeId)) {
+            splitEnabledImeStr(existingEnabledImeId, alreadyEnabledIds::add);
+            joiner.add(existingEnabledImeId);
+        }
+        for (String id : imeIds) {
+            if (!alreadyEnabledIds.contains(id)) {
+                joiner.add(id);
+                alreadyEnabledIds.add(id);
+            }
+        }
+        return joiner.toString();
     }
 
     /**

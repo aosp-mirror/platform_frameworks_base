@@ -1365,6 +1365,28 @@ public class InputMethodUtilsTest {
     }
 
     @Test
+    public void testConcatEnabledImeIds() {
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds("")).isEmpty();
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds("", "com.android/.ime1"))
+                .isEqualTo("com.android/.ime1");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1", "com.android/.ime1"))
+                .isEqualTo("com.android/.ime1");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1", "com.android/.ime2"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1", "com.android/.ime2", "com.android/.ime3"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2:com.android/.ime3");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1:com.android/.ime2", "com.android/.ime1"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2");
+        Truth.assertThat(InputMethodUtils.concatEnabledImeIds(
+                        "com.android/.ime1:com.android/.ime2", "com.android/.ime3"))
+                .isEqualTo("com.android/.ime1:com.android/.ime2:com.android/.ime3");
+    }
+
+    @Test
     public void updateEnabledImeStringTest() {
         // No change cases
         verifyUpdateEnabledImeString(
