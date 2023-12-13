@@ -1828,7 +1828,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     /* system_measured_source_download_bytes */0,
                     /* system_measured_source_upload_bytes */ 0,
                     /* system_measured_calling_download_bytes */0,
-                    /* system_measured_calling_upload_bytes */ 0);
+                    /* system_measured_calling_upload_bytes */ 0,
+                    jobStatus.getJob().getIntervalMillis(),
+                    jobStatus.getJob().getFlexMillis());
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -2269,7 +2271,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                     /* system_measured_source_download_bytes */ 0,
                     /* system_measured_source_upload_bytes */ 0,
                     /* system_measured_calling_download_bytes */0,
-                    /* system_measured_calling_upload_bytes */ 0);
+                    /* system_measured_calling_upload_bytes */ 0,
+                    cancelled.getJob().getIntervalMillis(),
+                    cancelled.getJob().getFlexMillis());
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
