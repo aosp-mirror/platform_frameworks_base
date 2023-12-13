@@ -82,6 +82,7 @@ sealed interface QSTileViewModelFactory<T> {
                 qsTileLogger,
                 systemClock,
                 backgroundDispatcher,
+                component.coroutineScope(),
             )
         }
     }
@@ -101,6 +102,7 @@ sealed interface QSTileViewModelFactory<T> {
         private val qsTileConfigProvider: QSTileConfigProvider,
         private val systemClock: SystemClock,
         @Background private val backgroundDispatcher: CoroutineDispatcher,
+        private val coroutineScopeFactory: QSTileCoroutineScopeFactory,
     ) : QSTileViewModelFactory<T> {
 
         /**
@@ -130,6 +132,7 @@ sealed interface QSTileViewModelFactory<T> {
                 qsTileLogger,
                 systemClock,
                 backgroundDispatcher,
+                coroutineScopeFactory.create(),
             )
     }
 }
