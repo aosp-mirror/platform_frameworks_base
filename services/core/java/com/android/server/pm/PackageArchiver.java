@@ -323,6 +323,7 @@ public class PackageArchiver {
         PackageStateInternal ps = getPackageState(packageName, snapshot,
                 Binder.getCallingUid(), userId);
         verifyNotSystemApp(ps.getFlags());
+        verifyInstalled(ps, userId);
         String responsibleInstallerPackage = getResponsibleInstallerPackage(ps);
         verifyInstaller(responsibleInstallerPackage, userId);
         ApplicationInfo installerInfo = snapshot.getApplicationInfo(
@@ -476,6 +477,14 @@ public class PackageArchiver {
         }
     }
 
+    private void verifyInstalled(PackageStateInternal ps, int userId)
+            throws PackageManager.NameNotFoundException {
+        if (!ps.getUserStateOrDefault(userId).isInstalled()) {
+            throw new PackageManager.NameNotFoundException(
+                    TextUtils.formatSimple("%s is not installed.", ps.getPackageName()));
+        }
+    }
+
     /**
      * Returns true if the app is archivable.
      */
@@ -519,11 +528,11 @@ public class PackageArchiver {
     /**
      * Returns true if user has opted the app out of archiving through system settings.
      */
-    // TODO(b/304256918) Switch this to a separate OP code for archiving.
     private boolean isAppOptedOutOfArchiving(String packageName, int uid) {
         return Binder.withCleanCallingIdentity(() ->
-                getAppOpsManager().checkOp(AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
-                        uid, packageName) == MODE_IGNORED);
+                getAppOpsManager().checkOpNoThrow(
+                        AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, uid, packageName)
+                        == MODE_IGNORED);
     }
 
     private void verifyOptOutStatus(String packageName, int uid)
