@@ -172,6 +172,25 @@ class TestPhoneWindowManager {
     private HandlerThread mHandlerThread;
     private Handler mHandler;
 
+    private boolean mIsTalkBackEnabled;
+
+    class TestTalkbackShortcutController extends TalkbackShortcutController {
+        TestTalkbackShortcutController(Context context) {
+            super(context);
+        }
+
+        @Override
+        boolean toggleTalkback(int currentUserId) {
+            mIsTalkBackEnabled = !mIsTalkBackEnabled;
+            return mIsTalkBackEnabled;
+        }
+
+        @Override
+        boolean isTalkBackShortcutGestureEnabled() {
+            return true;
+        }
+    }
+
     private class TestInjector extends PhoneWindowManager.Injector {
         TestInjector(Context context, WindowManagerPolicy.WindowManagerFuncs funcs) {
             super(context, funcs, mTestLooper.getLooper());
@@ -196,6 +215,10 @@ class TestPhoneWindowManager {
 
         PhoneWindowManager.ButtonOverridePermissionChecker getButtonOverridePermissionChecker() {
             return mButtonOverridePermissionChecker;
+        }
+
+        TalkbackShortcutController getTalkbackShortcutController() {
+            return new TestTalkbackShortcutController(mContext);
         }
     }
 
