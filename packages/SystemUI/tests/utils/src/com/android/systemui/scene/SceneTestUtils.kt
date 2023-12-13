@@ -91,7 +91,6 @@ import com.android.systemui.telephony.data.repository.FakeTelephonyRepository
 import com.android.systemui.telephony.data.repository.TelephonyRepository
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
 import com.android.systemui.user.data.repository.FakeUserRepository
-import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.user.domain.interactor.SelectedUserInteractor
 import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserViewModel
@@ -174,7 +173,7 @@ class SceneTestUtils(
             mobileConnectionsRepository = mobileConnectionsRepository,
         )
 
-    val userRepository: UserRepository by lazy {
+    val userRepository: FakeUserRepository by lazy {
         FakeUserRepository().apply {
             val users = listOf(UserInfo(/* id=  */ 0, "name", /* flags= */ 0))
             setUserInfos(users)
@@ -236,9 +235,6 @@ class SceneTestUtils(
         return AuthenticationInteractor(
             applicationScope = applicationScope(),
             repository = repository,
-            backgroundDispatcher = testDispatcher,
-            userRepository = userRepository,
-            clock = mock { whenever(elapsedRealtime()).thenAnswer { testScope.currentTime } }
         )
     }
 
@@ -274,7 +270,6 @@ class SceneTestUtils(
             repository = bouncerRepository,
             authenticationInteractor = authenticationInteractor,
             keyguardFaceAuthInteractor = keyguardFaceAuthInteractor,
-            flags = sceneContainerFlags,
             falsingInteractor = falsingInteractor(),
             powerInteractor = powerInteractor(),
             simBouncerInteractor = simBouncerInteractor,
@@ -312,6 +307,7 @@ class SceneTestUtils(
             userSwitcherMenu = flowOf(createMenuActions()),
             actionButtonInteractor = actionButtonInteractor,
             simBouncerInteractor = simBouncerInteractor,
+            clock = mock { whenever(elapsedRealtime()).thenAnswer { testScope.currentTime } },
         )
     }
 

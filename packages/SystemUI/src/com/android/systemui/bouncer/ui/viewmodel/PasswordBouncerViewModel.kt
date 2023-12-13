@@ -56,13 +56,11 @@ class PasswordBouncerViewModel(
 
     /** Whether the UI should request focus on the text field element. */
     val isTextFieldFocusRequested =
-        combine(interactor.lockout, isTextFieldFocused) { throttling, hasFocus ->
-                throttling == null && !hasFocus
-            }
+        combine(isInputEnabled, isTextFieldFocused) { hasInput, hasFocus -> hasInput && !hasFocus }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(),
-                initialValue = interactor.lockout.value == null && !isTextFieldFocused.value,
+                initialValue = isInputEnabled.value && !isTextFieldFocused.value,
             )
 
     override fun onHidden() {
@@ -104,7 +102,7 @@ class PasswordBouncerViewModel(
      * hidden.
      */
     suspend fun onImeVisibilityChanged(isVisible: Boolean) {
-        if (isImeVisible && !isVisible && interactor.lockout.value == null) {
+        if (isImeVisible && !isVisible && isInputEnabled.value) {
             interactor.onImeHiddenByUser()
         }
 

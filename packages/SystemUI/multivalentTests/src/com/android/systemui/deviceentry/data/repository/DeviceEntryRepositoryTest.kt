@@ -99,7 +99,7 @@ class DeviceEntryRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun reportSuccessfulAuthentication_shouldUpdateIsUnlocked() =
+    fun reportSuccessfulAuthentication_updatesIsUnlocked() =
         testScope.runTest {
             val isUnlocked by collectLastValue(underTest.isUnlocked)
             assertThat(isUnlocked).isFalse()
