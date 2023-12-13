@@ -20,7 +20,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSess
 import static com.android.server.app.GameManagerService.CANCEL_GAME_LOADING_MODE;
 import static com.android.server.app.GameManagerService.Injector;
 import static com.android.server.app.GameManagerService.LOADING_BOOST_MAX_DURATION;
-import static com.android.server.app.GameManagerService.PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED;
+import static com.android.server.app.GameManagerService.PROPERTY_DEBUG_GFX_GAME_DEFAULT_FRAME_RATE_DISABLED;
 import static com.android.server.app.GameManagerService.PROPERTY_RO_SURFACEFLINGER_GAME_DEFAULT_FRAME_RATE;
 import static com.android.server.app.GameManagerService.SET_GAME_STATE;
 import static com.android.server.app.GameManagerService.WRITE_DELAY_MILLIS;
@@ -2427,8 +2427,8 @@ public class GameManagerServiceTests {
                 ArgumentMatchers.eq(PROPERTY_RO_SURFACEFLINGER_GAME_DEFAULT_FRAME_RATE),
                 anyInt())).thenReturn(60);
         when(mSysPropsMock.getBoolean(
-                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
-                ArgumentMatchers.eq(true))).thenReturn(true);
+                ArgumentMatchers.eq(PROPERTY_DEBUG_GFX_GAME_DEFAULT_FRAME_RATE_DISABLED),
+                ArgumentMatchers.eq(false))).thenReturn(false);
         gameManagerService.onBootCompleted();
 
         // Set up a game in the foreground.
@@ -2441,11 +2441,7 @@ public class GameManagerServiceTests {
         gameManagerService.toggleGameDefaultFrameRate(true);
 
         // Verify that:
-        // 1) The system property is set correctly
-        // 2) setDefaultFrameRateOverride is called with correct arguments
-        Mockito.verify(mSysPropsMock).set(
-                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
-                ArgumentMatchers.eq("true"));
+        // setDefaultFrameRateOverride is called with correct arguments
         Mockito.verify(gameManagerService, times(1))
                 .setGameDefaultFrameRateOverride(ArgumentMatchers.eq(DEFAULT_PACKAGE_UID),
                                                  ArgumentMatchers.eq(60.0f));
@@ -2461,17 +2457,10 @@ public class GameManagerServiceTests {
                 somePackageId, ActivityManager.PROCESS_STATE_TOP, 0, 0);
 
         // Toggle game default frame rate off.
-        when(mSysPropsMock.getBoolean(
-                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
-                ArgumentMatchers.eq(true))).thenReturn(false);
         gameManagerService.toggleGameDefaultFrameRate(false);
 
         // Verify that:
-        // 1) The system property is set correctly
-        // 2) setDefaultFrameRateOverride is called with correct arguments
-        Mockito.verify(mSysPropsMock).set(
-                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
-                ArgumentMatchers.eq("false"));
+        // setDefaultFrameRateOverride is called with correct arguments
         Mockito.verify(gameManagerService).setGameDefaultFrameRateOverride(
                 ArgumentMatchers.eq(DEFAULT_PACKAGE_UID), ArgumentMatchers.eq(0.0f));
         Mockito.verify(gameManagerService).setGameDefaultFrameRateOverride(
@@ -2504,18 +2493,11 @@ public class GameManagerServiceTests {
         when(mSysPropsMock.getInt(
                 ArgumentMatchers.eq(PROPERTY_RO_SURFACEFLINGER_GAME_DEFAULT_FRAME_RATE),
                 anyInt())).thenReturn(60);
-        when(mSysPropsMock.getBoolean(
-                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
-                ArgumentMatchers.eq(true))).thenReturn(true);
 
         gameManagerService.toggleGameDefaultFrameRate(true);
 
         // Verify that:
-        // 1) System property is never set
-        // 2) setGameDefaultFrameRateOverride() should never be called if the flag is disabled.
-        Mockito.verify(mSysPropsMock, never()).set(
-                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
-                anyString());
+        // setGameDefaultFrameRateOverride() should never be called if the flag is disabled.
         Mockito.verify(gameManagerService, never())
                 .setGameDefaultFrameRateOverride(anyInt(), anyFloat());
 
@@ -2529,17 +2511,10 @@ public class GameManagerServiceTests {
                 somePackageId, ActivityManager.PROCESS_STATE_TOP, 0, 0);
         gameManagerService.mUidObserver.onUidStateChanged(
                 somePackageId, ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0, 0);
-        when(mSysPropsMock.getBoolean(
-                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
-                ArgumentMatchers.eq(true))).thenReturn(false);
 
         gameManagerService.toggleGameDefaultFrameRate(false);
         // Verify that:
-        // 1) System property is never set
-        // 2) setGameDefaultFrameRateOverride() should never be called if the flag is disabled.
-        Mockito.verify(mSysPropsMock, never()).set(
-                ArgumentMatchers.eq(PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED),
-                anyString());
+        // setGameDefaultFrameRateOverride() should never be called if the flag is disabled.
         Mockito.verify(gameManagerService, never())
                 .setGameDefaultFrameRateOverride(anyInt(), anyFloat());
     }

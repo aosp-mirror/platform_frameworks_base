@@ -142,8 +142,8 @@ public final class GameManagerService extends IGameManagerService.Stub {
     static final int WRITE_GAME_MODE_INTERVENTION_LIST_FILE = 6;
     static final int WRITE_DELAY_MILLIS = 10 * 1000;  // 10 seconds
     static final int LOADING_BOOST_MAX_DURATION = 5 * 1000;  // 5 seconds
-    static final String PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED =
-            "persist.graphics.game_default_frame_rate.enabled";
+    static final String PROPERTY_DEBUG_GFX_GAME_DEFAULT_FRAME_RATE_DISABLED =
+            "debug.graphics.game_default_frame_rate.disabled";
     static final String PROPERTY_RO_SURFACEFLINGER_GAME_DEFAULT_FRAME_RATE =
             "ro.surface_flinger.game_default_frame_rate_override";
 
@@ -2211,17 +2211,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
         nativeSetGameDefaultFrameRateOverride(uid, frameRate);
     }
 
-    private float getGameDefaultFrameRate() {
-        final boolean isGameDefaultFrameRateEnabled;
+    private float getGameDefaultFrameRate(boolean isEnabled) {
         float gameDefaultFrameRate = 0.0f;
-        synchronized (mLock) {
-            isGameDefaultFrameRateEnabled =
-                    mSysProps.getBoolean(
-                            PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED, true);
-        }
         if (gameDefaultFrameRate()) {
-            gameDefaultFrameRate = isGameDefaultFrameRateEnabled
-                    ? mGameDefaultFrameRateValue : 0.0f;
+            gameDefaultFrameRate = isEnabled ? mGameDefaultFrameRateValue : 0.0f;
         }
         return gameDefaultFrameRate;
     }
@@ -2237,24 +2230,23 @@ public final class GameManagerService extends IGameManagerService.Stub {
     }
 
     private void toggleGameDefaultFrameRateUnchecked(boolean isEnabled) {
-        // Update system properties.
         // Here we only need to immediately update games that are in the foreground.
         // We will update game default frame rate when a game comes into foreground in
         // MyUidObserver.
         synchronized (mLock) {
             if (isEnabled) {
                 mSysProps.set(
-                        PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED, "true");
+                        PROPERTY_DEBUG_GFX_GAME_DEFAULT_FRAME_RATE_DISABLED, "false");
             } else {
                 mSysProps.set(
-                        PROPERTY_PERSISTENT_GFX_GAME_DEFAULT_FRAME_RATE_ENABLED, "false");
+                        PROPERTY_DEBUG_GFX_GAME_DEFAULT_FRAME_RATE_DISABLED, "true");
             }
         }
 
         // Update all foreground games' frame rate.
         synchronized (mUidObserverLock) {
             for (int uid : mForegroundGameUids) {
-                setGameDefaultFrameRateOverride(uid, getGameDefaultFrameRate());
+                setGameDefaultFrameRateOverride(uid, getGameDefaultFrameRate(isEnabled));
             }
         }
     }
@@ -2296,7 +2288,11 @@ public final class GameManagerService extends IGameManagerService.Stub {
                     Slog.v(TAG, "Game power mode ON (process state was changed to foreground)");
                     mPowerManagerInternal.setPowerMode(Mode.GAME, true);
                 }
-                setGameDefaultFrameRateOverride(uid, getGameDefaultFrameRate());
+                final boolean isGameDefaultFrameRateDisabled =
+                        mSysProps.getBoolean(
+                                PROPERTY_DEBUG_GFX_GAME_DEFAULT_FRAME_RATE_DISABLED, false);
+                setGameDefaultFrameRateOverride(uid,
+                        getGameDefaultFrameRate(!isGameDefaultFrameRateDisabled));
                 mForegroundGameUids.add(uid);
             }
         }
