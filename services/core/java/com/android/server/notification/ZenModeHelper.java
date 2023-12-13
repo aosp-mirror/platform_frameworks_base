@@ -627,6 +627,7 @@ public class ZenModeHelper {
             try {
                 ApplicationInfo applicationInfo = mPm.getApplicationInfo(pkg, 0);
                 rule.name = applicationInfo.loadLabel(mPm).toString();
+                rule.iconResName = drawableResIdToResName(pkg, applicationInfo.icon);
             } catch (PackageManager.NameNotFoundException e) {
                 // Should not happen, since it's the app calling us (?)
                 Log.w(TAG, "Package not found for creating implicit zen rule");
@@ -634,6 +635,9 @@ public class ZenModeHelper {
             }
         });
 
+        rule.type = AutomaticZenRule.TYPE_OTHER;
+        rule.triggerDescription = mContext.getString(R.string.zen_mode_implicit_trigger_description,
+                rule.name);
         rule.condition = null;
         rule.conditionId = new Uri.Builder()
                 .scheme(Condition.SCHEME)
