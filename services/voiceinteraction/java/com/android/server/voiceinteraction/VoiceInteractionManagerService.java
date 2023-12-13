@@ -2273,9 +2273,9 @@ public class VoiceInteractionManagerService extends SystemService {
 
         private boolean isCallerPreinstalledAssistant() {
             return mImpl != null
-                    && mImpl.mInfo.getServiceInfo().applicationInfo.uid == Binder.getCallingUid()
-                    && (mImpl.mInfo.getServiceInfo().applicationInfo.isSystemApp()
-                    || mImpl.mInfo.getServiceInfo().applicationInfo.isUpdatedSystemApp());
+                    && mImpl.getApplicationInfo().uid == Binder.getCallingUid()
+                    && (mImpl.getApplicationInfo().isSystemApp()
+                    || mImpl.getApplicationInfo().isUpdatedSystemApp());
         }
 
         private void setImplLocked(VoiceInteractionManagerServiceImpl impl) {

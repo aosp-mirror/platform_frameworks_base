@@ -1508,8 +1508,14 @@ public class SubscriptionManager {
     public void addOnSubscriptionsChangedListener(OnSubscriptionsChangedListener listener) {
         if (listener == null) return;
 
-        addOnSubscriptionsChangedListener(
-                new HandlerExecutor(new Handler(listener.getCreatorLooper())), listener);
+        Looper looper = listener.getCreatorLooper();
+        if (looper == null) {
+            throw new RuntimeException(
+                    "Can't create handler inside thread " + Thread.currentThread()
+                    + " that has not called Looper.prepare()");
+        }
+
+        addOnSubscriptionsChangedListener(new HandlerExecutor(new Handler(looper)), listener);
     }
 
     /**

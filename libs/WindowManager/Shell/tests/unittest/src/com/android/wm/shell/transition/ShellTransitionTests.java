@@ -87,7 +87,6 @@ import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
-import android.window.WindowOrganizer;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -98,6 +97,7 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.internal.R;
 import com.android.internal.policy.TransitionAnimation;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
+import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
@@ -130,7 +130,7 @@ import java.util.function.Function;
 @RunWith(AndroidJUnit4.class)
 public class ShellTransitionTests extends ShellTestCase {
 
-    private final WindowOrganizer mOrganizer = mock(WindowOrganizer.class);
+    private final ShellTaskOrganizer mOrganizer = mock(ShellTaskOrganizer.class);
     private final TransactionPool mTransactionPool = mock(TransactionPool.class);
     private final Context mContext =
             InstrumentationRegistry.getInstrumentation().getTargetContext();

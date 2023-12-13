@@ -29,6 +29,8 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static kotlinx.coroutines.flow.FlowKt.emptyFlow;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -97,6 +99,7 @@ import com.android.systemui.bouncer.data.repository.FakeKeyguardBouncerRepositor
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository;
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor;
+import com.android.systemui.deviceentry.domain.interactor.DeviceEntryUdfpsInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.FakeFeatureFlagsClassic;
@@ -465,6 +468,10 @@ public class BubblesTest extends SysuiTestCase {
         ResourcesSplitShadeStateController splitShadeStateController =
                 new ResourcesSplitShadeStateController();
 
+        DeviceEntryUdfpsInteractor deviceEntryUdfpsInteractor =
+                mock(DeviceEntryUdfpsInteractor.class);
+        when(deviceEntryUdfpsInteractor.isUdfpsSupported()).thenReturn(emptyFlow());
+
         mShadeInteractor =
                 new ShadeInteractorImpl(
                         mTestScope.getBackgroundScope(),
@@ -481,7 +488,9 @@ public class BubblesTest extends SysuiTestCase {
                                 new SharedNotificationContainerInteractor(
                                         configurationRepository,
                                         mContext,
-                                        splitShadeStateController),
+                                        splitShadeStateController,
+                                        keyguardInteractor,
+                                        deviceEntryUdfpsInteractor),
                                 shadeRepository
                         )
                 );

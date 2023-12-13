@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.impl.alarm.domain
 
 import android.app.AlarmManager
+import android.graphics.drawable.TestStubDrawable
 import android.widget.Switch
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -40,7 +41,14 @@ class AlarmTileMapperTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val alarmTileConfig = kosmos.qsAlarmTileConfig
     // Using lazy (versus =) to make sure we override the right context -- see b/311612168
-    private val mapper by lazy { AlarmTileMapper(context.orCreateTestableResources.resources) }
+    private val mapper by lazy {
+        AlarmTileMapper(
+            context.orCreateTestableResources
+                .apply { addOverride(R.drawable.ic_alarm, TestStubDrawable()) }
+                .resources,
+            context.theme
+        )
+    }
 
     @Test
     fun notAlarmSet() {
@@ -100,7 +108,7 @@ class AlarmTileMapperTest : SysuiTestCase() {
     ): QSTileState {
         val label = context.getString(R.string.status_bar_alarm)
         return QSTileState(
-            { Icon.Resource(R.drawable.ic_alarm, null) },
+            { Icon.Loaded(context.getDrawable(R.drawable.ic_alarm)!!, null) },
             label,
             activationState,
             secondaryLabel,

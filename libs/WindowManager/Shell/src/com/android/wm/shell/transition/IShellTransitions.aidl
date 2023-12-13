@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.transition;
 
+import android.view.SurfaceControl;
 import android.window.RemoteTransition;
 import android.window.TransitionFilter;
 
@@ -42,6 +43,13 @@ interface IShellTransitions {
      */
     IBinder getShellApplyToken() = 3;
 
-    /** Set listener that will receive callbacks about transitions involving home activity */
+    /**
+     * Set listener that will receive callbacks about transitions involving home activity.
+     */
     oneway void setHomeTransitionListener(in IHomeTransitionListener listener) = 4;
+
+    /**
+     * Returns a container surface for the home root task.
+     */
+    SurfaceControl getHomeTaskOverlayContainer() = 5;
 }

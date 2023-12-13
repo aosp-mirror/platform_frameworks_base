@@ -59,6 +59,17 @@ fun assertLogsWtf(
 ): TerribleFailureLog =
     assertLogsWtf(message = message, allowMultiple = allowMultiple) { loggingRunnable.run() }
 
+fun assertLogsWtfs(
+    message: String = "Expected Log.wtf to be called once or more",
+    loggingBlock: () -> Unit,
+): TerribleFailureLog = assertLogsWtf(message, allowMultiple = true, loggingBlock)
+
+@JvmOverloads
+fun assertLogsWtfs(
+    message: String = "Expected Log.wtf to be called once or more",
+    loggingRunnable: Runnable,
+): TerribleFailureLog = assertLogsWtfs(message) { loggingRunnable.run() }
+
 /** The data passed to [TerribleFailureHandler.onTerribleFailure] */
 data class TerribleFailureLog(
     val tag: String,

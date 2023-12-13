@@ -3,6 +3,20 @@ package {
     default_applicable_licenses: ["frameworks_base_license"],
 }
 
+filegroup {
+    name: "power_stats_ravenwood_tests",
+    srcs: [
+        "src/com/android/server/power/stats/AggregatedPowerStatsProcessorTest.java",
+        "src/com/android/server/power/stats/AggregatedPowerStatsTest.java",
+        "src/com/android/server/power/stats/MultiStateStatsTest.java",
+        "src/com/android/server/power/stats/PowerStatsAggregatorTest.java",
+        "src/com/android/server/power/stats/PowerStatsCollectorTest.java",
+        "src/com/android/server/power/stats/PowerStatsSchedulerTest.java",
+        "src/com/android/server/power/stats/PowerStatsStoreTest.java",
+        "src/com/android/server/power/stats/PowerStatsUidResolverTest.java",
+    ],
+}
+
 android_test {
     name: "PowerStatsTests",
 
@@ -12,8 +26,7 @@ android_test {
     ],
 
     exclude_srcs: [
-        "src/com/android/server/power/stats/MultiStateStatsTest.java",
-        "src/com/android/server/power/stats/PowerStatsStoreTest.java",
+        ":power_stats_ravenwood_tests",
     ],
 
     static_libs: [
@@ -65,10 +78,12 @@ android_ravenwood_test {
         "modules-utils-binary-xml",
         "androidx.annotation_annotation",
         "androidx.test.rules",
+        "truth",
+        "mockito_ravenwood",
     ],
     srcs: [
-        "src/com/android/server/power/stats/MultiStateStatsTest.java",
-        "src/com/android/server/power/stats/PowerStatsStoreTest.java",
+        ":power_stats_ravenwood_tests",
+        "src/com/android/server/power/stats/MockClock.java",
     ],
     auto_gen_config: true,
 }

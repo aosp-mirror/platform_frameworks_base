@@ -152,7 +152,6 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private static final String GAME_MODE_INTERVENTION_LIST_FILE_NAME =
             "game_mode_intervention.list";
 
-
     private final Context mContext;
     private final Object mLock = new Object();
     private final Object mDeviceConfigLock = new Object();
@@ -184,6 +183,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
     @GuardedBy("mUidObserverLock")
     private final Set<Integer> mForegroundGameUids = new HashSet<>();
     private final GameManagerServiceSystemPropertiesWrapper mSysProps;
+    private float mGameDefaultFrameRateValue;
 
     @VisibleForTesting
     static class Injector {
@@ -1559,6 +1559,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
         mPowerManagerInternal.setPowerMode(Mode.GAME_LOADING, false);
         Slog.v(TAG, "Game power mode OFF (game manager service start/restart)");
         mPowerManagerInternal.setPowerMode(Mode.GAME, false);
+
+        mGameDefaultFrameRateValue = (float) mSysProps.getInt(
+                PROPERTY_RO_SURFACEFLINGER_GAME_DEFAULT_FRAME_RATE, 60);
+        Slog.v(TAG, "Game Default Frame Rate : " + mGameDefaultFrameRateValue);
     }
 
     private void sendUserMessage(int userId, int what, String eventForLog, int delayMillis) {
@@ -2217,8 +2221,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
         }
         if (gameDefaultFrameRate()) {
             gameDefaultFrameRate = isGameDefaultFrameRateEnabled
-                    ? (float) mSysProps.getInt(
-                            PROPERTY_RO_SURFACEFLINGER_GAME_DEFAULT_FRAME_RATE, 0) : 0.0f;
+                    ? mGameDefaultFrameRateValue : 0.0f;
         }
         return gameDefaultFrameRate;
     }

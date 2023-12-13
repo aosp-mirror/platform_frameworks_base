@@ -79,14 +79,6 @@ cc_defaults {
         "external/skia/src/core",
     ],
 
-    product_variables: {
-        eng: {
-            lto: {
-                never: true,
-            },
-        },
-    },
-
     target: {
         android: {
             include_dirs: [

@@ -22,12 +22,10 @@ public class RavenwoodRuleImpl {
     }
 
     public static void init(RavenwoodRule rule) {
-        // Must be provided by impl to reference runtime internals
-        throw new UnsupportedOperationException();
+        // No-op when running on a real device
     }
 
     public static void reset(RavenwoodRule rule) {
-        // Must be provided by impl to reference runtime internals
-        throw new UnsupportedOperationException();
+        // No-op when running on a real device
     }
 }

@@ -16,6 +16,7 @@
 
 package android.widget;
 
+import static android.appwidget.flags.Flags.remoteAdapterConversion;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
 
 import android.annotation.AttrRes;
@@ -36,7 +37,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
-import android.app.AppGlobals;
 import android.app.Application;
 import android.app.LoadedApk;
 import android.app.PendingIntent;
@@ -108,7 +108,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.android.internal.R;
-import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.IRemoteViewsFactory;
 
@@ -1015,11 +1014,6 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_PENDING_INTENT_TEMPLATE_TAG;
         }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mPendingIntentTemplate.visitUris(visitor);
-        }
     }
 
     /**
@@ -1434,7 +1428,9 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mIntent.visitUris(visitor);
+            // TODO(b/281044385): Maybe visit intent URIs. This may require adding a dedicated
+            //  visitUris method in the Intent class, since it can contain other intents. Otherwise,
+            //  the basic thing to do here would be just visitor.accept(intent.getData()).
         }
     }
 
@@ -1514,7 +1510,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mResponse.visitUris(visitor);
+            // TODO(b/281044385): Maybe visit intent URIs in the RemoteResponse.
         }
     }
 
@@ -1562,11 +1558,6 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_ON_STYLUS_HANDWRITING_RESPONSE_TAG;
-        }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mPendingIntent.visitUris(visitor);
         }
     }
 
@@ -1641,7 +1632,7 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void visitUris(@NonNull Consumer<Uri> visitor) {
-            mResponse.visitUris(visitor);
+            // TODO(b/281044385): Maybe visit intent URIs in the RemoteResponse.
         }
     }
 
@@ -2201,10 +2192,6 @@ public class RemoteViews implements Parcelable, Filter {
                 case ICON:
                     final Icon icon = (Icon) getParameterValue(null);
                     if (icon != null) visitIconUri(icon, visitor);
-                    break;
-                case INTENT:
-                    final Intent intent = (Intent) getParameterValue(null);
-                    if (intent != null) intent.visitUris(visitor);
                     break;
                 // TODO(b/281044385): Should we do anything about type BUNDLE?
             }
@@ -4962,21 +4949,11 @@ public class RemoteViews implements Parcelable, Filter {
      */
     @Deprecated
     public void setRemoteAdapter(@IdRes int viewId, Intent intent) {
-        if (isAdapterConversionEnabled()) {
+        if (remoteAdapterConversion()) {
             addAction(new SetRemoteCollectionItemListAdapterAction(viewId, intent));
-            return;
+        } else {
+            addAction(new SetRemoteViewsAdapterIntent(viewId, intent));
         }
-        addAction(new SetRemoteViewsAdapterIntent(viewId, intent));
-    }
-
-    /**
-     * @hide
-     * @return True if the remote adapter conversion is enabled
-     */
-    public static boolean isAdapterConversionEnabled() {
-        return AppGlobals.getIntCoreSetting(
-                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION,
-                SystemUiDeviceConfigFlags.REMOTEVIEWS_ADAPTER_CONVERSION_DEFAULT ? 1 : 0) != 0;
     }
 
     /**
@@ -6993,20 +6970,6 @@ public class RemoteViews implements Parcelable, Filter {
             int[] viewIds = parcel.createIntArray();
             mViewIds = viewIds == null ? null : IntArray.wrap(viewIds);
             mElementNames = parcel.createStringArrayList();
-        }
-
-        /**
-         * See {@link RemoteViews#visitUris(Consumer)}.
-         *
-         * @hide
-         */
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mPendingIntent != null) {
-                mPendingIntent.visitUris(visitor);
-            }
-            if (mFillIntent != null) {
-                mFillIntent.visitUris(visitor);
-            }
         }
 
         private void handleViewInteraction(

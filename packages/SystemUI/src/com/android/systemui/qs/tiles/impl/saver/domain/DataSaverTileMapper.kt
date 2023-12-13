@@ -27,20 +27,28 @@ import com.android.systemui.res.R
 import javax.inject.Inject
 
 /** Maps [DataSaverTileModel] to [QSTileState]. */
-class DataSaverTileMapper @Inject constructor(@Main private val resources: Resources) :
-    QSTileDataToStateMapper<DataSaverTileModel> {
+class DataSaverTileMapper
+@Inject
+constructor(
+    @Main private val resources: Resources,
+    private val theme: Resources.Theme,
+) : QSTileDataToStateMapper<DataSaverTileModel> {
     override fun map(config: QSTileConfig, data: DataSaverTileModel): QSTileState =
-        QSTileState.build(resources, config.uiConfig) {
+        QSTileState.build(resources, theme, config.uiConfig) {
             with(data) {
+                val iconRes: Int
                 if (isEnabled) {
                     activationState = QSTileState.ActivationState.ACTIVE
-                    icon = { Icon.Resource(R.drawable.qs_data_saver_icon_on, null) }
+                    iconRes = R.drawable.qs_data_saver_icon_on
                     secondaryLabel = resources.getStringArray(R.array.tile_states_saver)[2]
                 } else {
                     activationState = QSTileState.ActivationState.INACTIVE
-                    icon = { Icon.Resource(R.drawable.qs_data_saver_icon_off, null) }
+                    iconRes = R.drawable.qs_data_saver_icon_off
                     secondaryLabel = resources.getStringArray(R.array.tile_states_saver)[1]
                 }
+                val loadedIcon =
+                    Icon.Loaded(resources.getDrawable(iconRes, theme), contentDescription = null)
+                icon = { loadedIcon }
                 contentDescription = label
                 supportedActions =
                     setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)

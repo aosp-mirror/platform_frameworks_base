@@ -126,6 +126,12 @@
           "exclude-annotation": "org.junit.Ignore"
         }
       ]
+    },
+    {
+      "name": "vts_treble_vintf_framework_test"
+    },
+    {
+      "name": "vts_treble_vintf_vendor_test"
     }
   ],
   "postsubmit-ravenwood": [

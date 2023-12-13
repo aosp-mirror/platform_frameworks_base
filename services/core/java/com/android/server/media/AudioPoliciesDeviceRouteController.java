@@ -330,8 +330,11 @@ import java.util.Objects;
                 TextUtils.isEmpty(address)
                         ? null
                         : mBluetoothRouteController.getRouteIdForBluetoothAddress(address);
-        return createMediaRoute2Info(
-                routeId, audioDeviceInfo.getType(), audioDeviceInfo.getProductName(), address);
+        // We use the name from the port instead AudioDeviceInfo#getProductName because the latter
+        // replaces empty names with the name of the device (example: Pixel 8). In that case we want
+        // to derive a name ourselves from the type instead.
+        String deviceName = audioDeviceInfo.getPort().name();
+        return createMediaRoute2Info(routeId, audioDeviceInfo.getType(), deviceName, address);
     }
 
     /**
@@ -339,8 +342,8 @@ import java.util.Objects;
      *
      * @param routeId A route id, or null to use an id pre-defined for the given {@code type}.
      * @param audioDeviceInfoType The type as obtained from {@link AudioDeviceInfo#getType}.
-     * @param productName The product name as obtained from {@link
-     *     AudioDeviceInfo#getProductName()}, or null to use a predefined name for the given {@code
+     * @param deviceName A human readable name to populate the route's {@link
+     *     MediaRoute2Info#getName name}, or null to use a predefined name for the given {@code
      *     type}.
      * @param address The type as obtained from {@link AudioDeviceInfo#getAddress()} or {@link
      *     BluetoothDevice#getAddress()}.
@@ -350,7 +353,7 @@ import java.util.Objects;
     private MediaRoute2Info createMediaRoute2Info(
             @Nullable String routeId,
             int audioDeviceInfoType,
-            @Nullable CharSequence productName,
+            @Nullable CharSequence deviceName,
             @Nullable String address) {
         SystemRouteInfo systemRouteInfo =
                 AUDIO_DEVICE_INFO_TYPE_TO_ROUTE_INFO.get(audioDeviceInfoType);
@@ -359,7 +362,7 @@ import java.util.Objects;
             // earpiece.
             return null;
         }
-        CharSequence humanReadableName = productName;
+        CharSequence humanReadableName = deviceName;
         if (TextUtils.isEmpty(humanReadableName)) {
             humanReadableName = mContext.getResources().getText(systemRouteInfo.mNameResource);
         }

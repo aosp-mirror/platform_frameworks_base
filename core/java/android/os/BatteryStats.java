@@ -1657,6 +1657,7 @@ public abstract class BatteryStats {
      */
     public abstract CpuScalingPolicies getCpuScalingPolicies();
 
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class HistoryTag {
         public static final int HISTORY_TAG_POOL_OVERFLOW = -1;
 
@@ -1713,6 +1714,7 @@ public abstract class BatteryStats {
      * Optional detailed information that can go into a history step.  This is typically
      * generated each time the battery level changes.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public final static class HistoryStepDetails {
         // Time (in 1/100 second) spent in user space and the kernel since the last step.
         public int userTime;
@@ -1797,6 +1799,7 @@ public abstract class BatteryStats {
     /**
      * An extension to the history item describing a proc state change for a UID.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class ProcessStateChange {
         public int uid;
         public @BatteryConsumer.ProcessState int processState;
@@ -1850,6 +1853,7 @@ public abstract class BatteryStats {
     /**
      * Battery history record.
      */
+    @android.ravenwood.annotation.RavenwoodKeepWholeClass
     public static final class HistoryItem {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         public HistoryItem next;

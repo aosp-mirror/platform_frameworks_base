@@ -40,6 +40,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
@@ -538,6 +539,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
 
     public boolean supportsLocalVoiceInteraction() {
         return mInfo.getSupportsLocalInteraction();
+    }
+
+    public ApplicationInfo getApplicationInfo() {
+        return mInfo.getServiceInfo().applicationInfo;
     }
 
     public void startListeningVisibleActivityChangedLocked(@NonNull IBinder token) {

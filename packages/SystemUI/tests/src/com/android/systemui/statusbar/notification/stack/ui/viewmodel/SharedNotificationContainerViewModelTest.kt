@@ -332,8 +332,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     fun maxNotificationsOnLockscreen() =
         testScope.runTest {
             var notificationCount = 10
-            val maxNotifications by
-                collectLastValue(underTest.getMaxNotifications { notificationCount })
+            val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> notificationCount }
+            val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
 
             showLockscreen()
 
@@ -355,8 +355,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     fun maxNotificationsOnLockscreen_DoesNotUpdateWhenUserInteracting() =
         testScope.runTest {
             var notificationCount = 10
-            val maxNotifications by
-                collectLastValue(underTest.getMaxNotifications { notificationCount })
+            val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> notificationCount }
+            val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
 
             showLockscreen()
 
@@ -390,7 +390,8 @@ class SharedNotificationContainerViewModelTest : SysuiTestCase() {
     @Test
     fun maxNotificationsOnShade() =
         testScope.runTest {
-            val maxNotifications by collectLastValue(underTest.getMaxNotifications { 10 })
+            val calculateSpace = { space: Float, useExtraShelfSpace: Boolean -> 10 }
+            val maxNotifications by collectLastValue(underTest.getMaxNotifications(calculateSpace))
 
             // Show lockscreen with shade expanded
             showLockscreenWithShadeExpanded()

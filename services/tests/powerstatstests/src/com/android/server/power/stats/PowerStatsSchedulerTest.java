@@ -24,26 +24,26 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.platform.test.ravenwood.RavenwoodRule;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.os.MonotonicClock;
-import com.android.internal.os.PowerProfile;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -51,39 +51,46 @@ import java.util.function.Consumer;
 
 @RunWith(AndroidJUnit4.class)
 public class PowerStatsSchedulerTest {
+    @Rule
+    public final RavenwoodRule mRavenwood = new RavenwoodRule.Builder()
+            .setProvideMainThread(true)
+            .build();
+
     private PowerStatsStore mPowerStatsStore;
     private Handler mHandler;
     private MockClock mClock = new MockClock();
     private MonotonicClock mMonotonicClock = new MonotonicClock(0, mClock);
-    private MockBatteryStatsImpl mBatteryStats;
     private PowerStatsScheduler mPowerStatsScheduler;
-    private PowerProfile mPowerProfile;
     private PowerStatsAggregator mPowerStatsAggregator;
     private AggregatedPowerStatsConfig mAggregatedPowerStatsConfig;
+    private List<Long> mScheduledAlarms = new ArrayList<>();
+    private boolean mPowerStatsCollectionOccurred;
+
+    private static final int START_REALTIME = 7654321;
 
     @Before
     @SuppressWarnings("GuardedBy")
-    public void setup() {
-        final Context context = InstrumentationRegistry.getContext();
-
+    public void setup() throws IOException {
         TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
 
         mClock.currentTime = Instant.parse("2023-01-02T03:04:05.00Z").toEpochMilli();
-        mClock.realtime = 7654321;
+        mClock.realtime = START_REALTIME;
 
         HandlerThread bgThread = new HandlerThread("bg thread");
         bgThread.start();
-        File systemDir = context.getCacheDir();
         mHandler = new Handler(bgThread.getLooper());
         mAggregatedPowerStatsConfig = new AggregatedPowerStatsConfig();
-        mPowerStatsStore = new PowerStatsStore(systemDir, mHandler, mAggregatedPowerStatsConfig);
-        mPowerProfile = mock(PowerProfile.class);
-        when(mPowerProfile.getAveragePower(PowerProfile.POWER_FLASHLIGHT)).thenReturn(1000000.0);
-        mBatteryStats = new MockBatteryStatsImpl(mClock).setPowerProfile(mPowerProfile);
+        mPowerStatsStore = new PowerStatsStore(
+                Files.createTempDirectory("PowerStatsSchedulerTest").toFile(),
+                mHandler, mAggregatedPowerStatsConfig);
         mPowerStatsAggregator = mock(PowerStatsAggregator.class);
-        mPowerStatsScheduler = new PowerStatsScheduler(context, mPowerStatsAggregator,
-                TimeUnit.MINUTES.toMillis(30), TimeUnit.HOURS.toMillis(1), mPowerStatsStore, mClock,
-                mMonotonicClock, mHandler, mBatteryStats);
+        mPowerStatsScheduler = new PowerStatsScheduler(
+                () -> mPowerStatsCollectionOccurred = true,
+                mPowerStatsAggregator, TimeUnit.MINUTES.toMillis(30), TimeUnit.HOURS.toMillis(1),
+                mPowerStatsStore,
+                ((triggerAtMillis, tag, onAlarmListener, handler) ->
+                        mScheduledAlarms.add(triggerAtMillis)),
+                mClock, mMonotonicClock, () -> 12345L, mHandler);
     }
 
     @Test
@@ -113,7 +120,7 @@ public class PowerStatsSchedulerTest {
             long endTimeWallClock =
                     mClock.currentTime - (mMonotonicClock.monotonicTime() - endTime);
 
-            assertThat(startTime).isEqualTo(7654321 + 123);
+            assertThat(startTime).isEqualTo(START_REALTIME + 123);
             assertThat(endTime - startTime).isAtLeast(TimeUnit.MINUTES.toMillis(30));
             assertThat(Instant.ofEpochMilli(endTimeWallClock))
                     .isEqualTo(Instant.parse("2023-01-02T04:00:00Z"));
@@ -142,10 +149,14 @@ public class PowerStatsSchedulerTest {
         }).when(mPowerStatsAggregator).aggregatePowerStats(anyLong(), anyLong(),
                 any(Consumer.class));
 
-        mPowerStatsScheduler.schedulePowerStatsAggregation();
+        mPowerStatsScheduler.start(/*enabled*/ true);
         ConditionVariable done = new ConditionVariable();
         mHandler.post(done::open);
         done.block();
+
+        assertThat(mPowerStatsCollectionOccurred).isTrue();
+        assertThat(mScheduledAlarms).containsExactly(
+                START_REALTIME + TimeUnit.MINUTES.toMillis(90) + TimeUnit.HOURS.toMillis(1));
 
         verify(mPowerStatsAggregator, times(2))
                 .aggregatePowerStats(anyLong(), anyLong(), any(Consumer.class));
@@ -155,7 +166,7 @@ public class PowerStatsSchedulerTest {
         // Skip the first entry, which was placed in the store at the beginning of this test
         PowerStatsSpan.TimeFrame timeFrame1 = contents.get(1).getTimeFrames().get(0);
         PowerStatsSpan.TimeFrame timeFrame2 = contents.get(2).getTimeFrames().get(0);
-        assertThat(timeFrame1.startMonotonicTime).isEqualTo(7654321 + 123);
+        assertThat(timeFrame1.startMonotonicTime).isEqualTo(START_REALTIME + 123);
         assertThat(timeFrame2.startMonotonicTime)
                 .isEqualTo(timeFrame1.startMonotonicTime + timeFrame1.duration);
         assertThat(Instant.ofEpochMilli(timeFrame2.startTime))

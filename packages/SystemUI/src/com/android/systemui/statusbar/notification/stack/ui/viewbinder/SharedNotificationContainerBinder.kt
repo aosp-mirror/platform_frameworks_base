@@ -101,12 +101,13 @@ object SharedNotificationContainerBinder {
 
                     launch {
                         viewModel
-                            .getMaxNotifications { space ->
+                            .getMaxNotifications { space, extraShelfSpace ->
+                                val shelfHeight = controller.getShelfHeight().toFloat()
                                 notificationStackSizeCalculator.computeMaxKeyguardNotifications(
                                     controller.getView(),
                                     space,
-                                    0f, // Vertical space for shelf is already accounted for
-                                    controller.getShelfHeight().toFloat(),
+                                    if (extraShelfSpace) shelfHeight else 0f,
+                                    shelfHeight,
                                 )
                             }
                             .collect { controller.setMaxDisplayedNotifications(it) }

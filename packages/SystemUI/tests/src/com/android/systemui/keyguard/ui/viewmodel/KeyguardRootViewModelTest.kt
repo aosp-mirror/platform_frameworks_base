@@ -184,6 +184,13 @@ class KeyguardRootViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    fun translationYInitialValueIsZero() =
+        testScope.runTest {
+            val translationY by collectLastValue(underTest.translationY)
+            assertThat(translationY).isEqualTo(0)
+        }
+
+    @Test
     fun translationAndScaleFromBurnInNotDozing() =
         testScope.runTest {
             val translationX by collectLastValue(underTest.translationX)

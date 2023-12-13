@@ -27,13 +27,13 @@ import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTE
 
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState;
 import static com.android.companiondevicemanager.CompanionDeviceDiscoveryService.DiscoveryState.FINISHED_TIMEOUT;
-import static com.android.companiondevicemanager.CompanionDeviceResources.PERMISSION_TYPES;
-import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILES_NAME;
-import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_ICON;
-import static com.android.companiondevicemanager.CompanionDeviceResources.SUMMARIES;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_PERMISSIONS;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_NAMES;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_ICONS;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_SUMMARIES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUPPORTED_PROFILES;
 import static com.android.companiondevicemanager.CompanionDeviceResources.SUPPORTED_SELF_MANAGED_PROFILES;
-import static com.android.companiondevicemanager.CompanionDeviceResources.TITLES;
+import static com.android.companiondevicemanager.CompanionDeviceResources.PROFILE_TITLES;
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 import static com.android.companiondevicemanager.Utils.getIcon;
@@ -482,7 +482,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             return;
         }
 
-        title = getHtmlFromResources(this, TITLES.get(deviceProfile), deviceName);
+        title = getHtmlFromResources(this, PROFILE_TITLES.get(deviceProfile), deviceName);
         setupPermissionList(deviceProfile);
 
         // Summary is not needed for selfManaged dialog.
@@ -525,7 +525,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
         mSelectedDevice = requireNonNull(deviceFilterPairs.get(0));
 
-        final Drawable profileIcon = getIcon(this, PROFILE_ICON.get(deviceProfile));
+        final Drawable profileIcon = getIcon(this, PROFILE_ICONS.get(deviceProfile));
 
         updatePermissionUi();
 
@@ -545,14 +545,14 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             throw new RuntimeException("Unsupported profile " + deviceProfile);
         }
 
-        profileIcon = getIcon(this, PROFILE_ICON.get(deviceProfile));
+        profileIcon = getIcon(this, PROFILE_ICONS.get(deviceProfile));
 
         if (deviceProfile == null) {
             title = getHtmlFromResources(this, R.string.chooser_title_non_profile, appLabel);
             mButtonNotAllowMultipleDevices.setText(R.string.consent_no);
         } else {
             title = getHtmlFromResources(this,
-                    R.string.chooser_title, getString(PROFILES_NAME.get(deviceProfile)));
+                    R.string.chooser_title, getString(PROFILE_NAMES.get(deviceProfile)));
         }
 
         mDeviceAdapter = new DeviceListAdapter(this, this::onDeviceClicked);
@@ -609,10 +609,10 @@ public class CompanionDeviceActivity extends FragmentActivity implements
 
     private void updatePermissionUi() {
         final String deviceProfile = mRequest.getDeviceProfile();
-        final int summaryResourceId = SUMMARIES.get(deviceProfile);
+        final int summaryResourceId = PROFILE_SUMMARIES.get(deviceProfile);
         final String remoteDeviceName = mSelectedDevice.getDisplayName();
         final Spanned title = getHtmlFromResources(
-                this, TITLES.get(deviceProfile), mAppLabel, remoteDeviceName);
+                this, PROFILE_TITLES.get(deviceProfile), mAppLabel, remoteDeviceName);
         final Spanned summary;
 
         // No need to show permission consent dialog if it is a isSkipPrompt(true)
@@ -680,7 +680,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     // and when mPermissionListRecyclerView is fully populated.
     // Lastly, disable the Allow and Don't allow buttons.
     private void setupPermissionList(String deviceProfile) {
-        final List<Integer> permissionTypes = new ArrayList<>(PERMISSION_TYPES.get(deviceProfile));
+        final List<Integer> permissionTypes = new ArrayList<>(
+                PROFILE_PERMISSIONS.get(deviceProfile));
         mPermissionListAdapter.setPermissionType(permissionTypes);
         mPermissionListRecyclerView.setAdapter(mPermissionListAdapter);
         mPermissionListRecyclerView.setLayoutManager(mPermissionsLayoutManager);

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.tiles.impl.location.domain
 
+import android.graphics.drawable.TestStubDrawable
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -36,7 +37,17 @@ class LocationTileMapperTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val qsTileConfig = kosmos.qsLocationTileConfig
 
-    private val mapper by lazy { LocationTileMapper(context.orCreateTestableResources.resources) }
+    private val mapper by lazy {
+        LocationTileMapper(
+            context.orCreateTestableResources
+                .apply {
+                    addOverride(R.drawable.qs_location_icon_off, TestStubDrawable())
+                    addOverride(R.drawable.qs_location_icon_on, TestStubDrawable())
+                }
+                .resources,
+            context.theme
+        )
+    }
 
     @Test
     fun mapsDisabledDataToInactiveState() {
@@ -56,20 +67,18 @@ class LocationTileMapperTest : SysuiTestCase() {
 
     @Test
     fun mapsEnabledDataToOnIconState() {
-        val expectedIcon = Icon.Resource(R.drawable.qs_location_icon_on, null)
-
         val tileState: QSTileState = mapper.map(qsTileConfig, LocationTileModel(true))
 
+        val expectedIcon = Icon.Loaded(context.getDrawable(R.drawable.qs_location_icon_on)!!, null)
         val actualIcon = tileState.icon()
         Truth.assertThat(actualIcon).isEqualTo(expectedIcon)
     }
 
     @Test
     fun mapsDisabledDataToOffIconState() {
-        val expectedIcon = Icon.Resource(R.drawable.qs_location_icon_off, null)
-
         val tileState: QSTileState = mapper.map(qsTileConfig, LocationTileModel(false))
 
+        val expectedIcon = Icon.Loaded(context.getDrawable(R.drawable.qs_location_icon_off)!!, null)
         val actualIcon = tileState.icon()
         Truth.assertThat(actualIcon).isEqualTo(expectedIcon)
     }

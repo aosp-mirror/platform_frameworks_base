@@ -9381,7 +9381,7 @@ public class DevicePolicyManager {
     @Deprecated
     @SystemApi
     @RequiresPermission(MANAGE_DEVICE_ADMINS)
-    public boolean setActiveProfileOwner(@NonNull ComponentName admin, @Deprecated String ownerName)
+    public boolean setActiveProfileOwner(@NonNull ComponentName admin, String ownerName)
             throws IllegalArgumentException {
         throwIfParentInstance("setActiveProfileOwner");
         if (mService != null) {

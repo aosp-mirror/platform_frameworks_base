@@ -1225,12 +1225,10 @@ public abstract class PackageManager {
     public static final int MATCH_DEBUG_TRIAGED_MISSING = MATCH_DIRECT_BOOT_AUTO;
 
     /**
-     * @deprecated Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
+     * Use {@link #MATCH_CLONE_PROFILE_LONG} instead.
      *
      * @hide
      */
-    @SuppressLint("UnflaggedApi") // Just adding the @Deprecated annotation
-    @Deprecated
     @SystemApi
     public static final int MATCH_CLONE_PROFILE = 0x20000000;
 
@@ -6302,6 +6300,11 @@ public abstract class PackageManager {
     /**
      * Check whether a particular package has been granted a particular
      * permission.
+     * <p>
+     * <strong>Note: </strong>This API returns the underlying permission state
+     * as-is and is mostly intended for permission managing system apps. To
+     * perform an access check for a certain app, please use the
+     * {@link Context#checkPermission} APIs instead.
      *
      * @param permName The name of the permission you are checking for.
      * @param packageName The name of the package you are checking against.

@@ -4126,7 +4126,7 @@ final class InstallPackageHelper {
                         null /* request */)) {
                     mDeletePackageHelper.deletePackageLIF(
                             parsedPackage.getPackageName(), null, true,
-                            mPm.mUserManager.getUserIds(), 0, null, false);
+                            mPm.mUserManager.getUserIds(), 0, new PackageRemovedInfo(), false);
                 }
             } else if (newPkgVersionGreater || newSharedUserSetting) {
                 // The application on /system is newer than the application on /data.

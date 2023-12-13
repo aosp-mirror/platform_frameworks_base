@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.impl.flashlight.domain
 
 import android.content.res.Resources
+import android.content.res.Resources.Theme
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
@@ -27,18 +28,25 @@ import com.android.systemui.res.R
 import javax.inject.Inject
 
 /** Maps [FlashlightTileModel] to [QSTileState]. */
-class FlashlightMapper @Inject constructor(@Main private val resources: Resources) :
-    QSTileDataToStateMapper<FlashlightTileModel> {
+class FlashlightMapper
+@Inject
+constructor(
+    @Main private val resources: Resources,
+    private val theme: Theme,
+) : QSTileDataToStateMapper<FlashlightTileModel> {
 
     override fun map(config: QSTileConfig, data: FlashlightTileModel): QSTileState =
-        QSTileState.build(resources, config.uiConfig) {
+        QSTileState.build(resources, theme, config.uiConfig) {
             val icon =
-                Icon.Resource(
-                    if (data.isEnabled) {
-                        R.drawable.qs_flashlight_icon_on
-                    } else {
-                        R.drawable.qs_flashlight_icon_off
-                    },
+                Icon.Loaded(
+                    resources.getDrawable(
+                        if (data.isEnabled) {
+                            R.drawable.qs_flashlight_icon_on
+                        } else {
+                            R.drawable.qs_flashlight_icon_off
+                        },
+                        theme,
+                    ),
                     contentDescription = null
                 )
             this.icon = { icon }
