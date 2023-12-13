@@ -48,6 +48,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCATION;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_LOCK_TASK;
+import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MICROPHONE;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MOBILE_NETWORK;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_MODIFY_USERS;
@@ -443,6 +444,7 @@ import android.security.keystore.KeyGenParameterSpec;
 import android.security.keystore.ParcelableKeyGenParameterSpec;
 import android.stats.devicepolicy.DevicePolicyEnums;
 import android.telecom.TelecomManager;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
@@ -22299,6 +22301,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_LOCK,
             MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
             MANAGE_DEVICE_POLICY_LOCK_TASK,
+            MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS,
             MANAGE_DEVICE_POLICY_MICROPHONE,
             MANAGE_DEVICE_POLICY_MOBILE_NETWORK,
             MANAGE_DEVICE_POLICY_MODIFY_USERS,
@@ -22379,7 +22382,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_LOCATION,
                     MANAGE_DEVICE_POLICY_LOCK,
                     MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
-                    MANAGE_DEVICE_POLICY_CERTIFICATES,
+                    MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS,
                     MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION,
                     MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
                     MANAGE_DEVICE_POLICY_PACKAGE_STATE,
@@ -23967,5 +23970,33 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         } catch (Exception e) {
             Slogf.d(LOG_TAG, "Unable to get stacktrace");
         }
+    }
+
+    @Override
+    public int[] getSubscriptionIds(String callerPackageName) {
+        final CallerIdentity caller = getCallerIdentity(callerPackageName);
+        enforceCanQuery(
+                MANAGE_DEVICE_POLICY_MANAGED_SUBSCRIPTIONS,
+                caller.getPackageName(),
+                caller.getUserId());
+        return getSubscriptionIdsInternal(callerPackageName).toArray();
+    }
+
+    private IntArray getSubscriptionIdsInternal(String callerPackageName) {
+        SubscriptionManager subscriptionManager =
+                mContext.getSystemService(SubscriptionManager.class);
+        return mInjector.binderWithCleanCallingIdentity(() -> {
+            IntArray adminOwnedSubscriptions = new IntArray();
+            List<SubscriptionInfo> subs = subscriptionManager.getAvailableSubscriptionInfoList();
+            int subCount = (subs != null) ? subs.size() : 0;
+            for (int i = 0; i < subCount; i++) {
+                SubscriptionInfo sub = subs.get(i);
+                if (sub.getGroupOwner()
+                        .equals(callerPackageName)) {
+                    adminOwnedSubscriptions.add(sub.getSubscriptionId());
+                }
+            }
+            return adminOwnedSubscriptions;
+        });
     }
 }
