@@ -1426,14 +1426,19 @@ public abstract class PackageManagerInternal {
 
     /**
      * Checks if package is quarantined for a specific user.
+     *
+     * @throws PackageManager.NameNotFoundException if the package is not found
      */
-    public abstract boolean isPackageQuarantined(@NonNull String packageName,
-            @UserIdInt int userId);
+    public abstract boolean isPackageQuarantined(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
 
     /**
      * Checks if package is stopped for a specific user.
+     *
+     * @throws PackageManager.NameNotFoundException if the package is not found
      */
-    public abstract boolean isPackageStopped(@NonNull String packageName, @UserIdInt int userId);
+    public abstract boolean isPackageStopped(@NonNull String packageName, @UserIdInt int userId)
+            throws PackageManager.NameNotFoundException;
 
     /**
      * Sends the PACKAGE_RESTARTED broadcast.
