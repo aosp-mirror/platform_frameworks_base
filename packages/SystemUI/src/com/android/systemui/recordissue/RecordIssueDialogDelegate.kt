@@ -17,6 +17,9 @@
 package com.android.systemui.recordissue
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.BroadcastOptions
+import android.app.PendingIntent
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -28,10 +31,14 @@ import android.widget.Button
 import android.widget.PopupMenu
 import android.widget.Switch
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.RecordingService
+import com.android.systemui.screenrecord.ScreenRecordingAudioSource
+import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.SystemUIDialog
 
 class RecordIssueDialogDelegate(
     private val factory: SystemUIDialog.Factory,
+    private val userContextProvider: UserContextProvider,
     private val onStarted: Runnable
 ) : SystemUIDialog.Delegate {
 
@@ -46,6 +53,9 @@ class RecordIssueDialogDelegate(
             setNegativeButton(R.string.cancel) { _, _ -> dismiss() }
             setPositiveButton(R.string.qs_record_issue_start) { _, _ ->
                 onStarted.run()
+                if (screenRecordSwitch.isChecked) {
+                    requestScreenCapture()
+                }
                 dismiss()
             }
         }
@@ -85,4 +95,19 @@ class RecordIssueDialogDelegate(
             show()
         }
     }
+
+    private fun requestScreenCapture() =
+        PendingIntent.getForegroundService(
+                userContextProvider.userContext,
+                RecordingService.REQUEST_CODE,
+                RecordingService.getStartIntent(
+                    userContextProvider.userContext,
+                    Activity.RESULT_OK,
+                    ScreenRecordingAudioSource.NONE.ordinal,
+                    false,
+                    null
+                ),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            .send(BroadcastOptions.makeBasic().apply { isInteractive = true }.toBundle())
 }
