@@ -32685,6 +32685,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 == PFLAG4_IMPORTANT_FOR_CREDENTIAL_MANAGER);
     }
 
+    // TODO(316208691): Revive following removed API docs.
+    // @see EditorInfo#setStylusHandwritingEnabled(boolean)
     /**
      * Set whether this view enables automatic handwriting initiation.
      *
@@ -32706,7 +32708,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @see android.view.inputmethod.InputMethodManager#startStylusHandwriting(View)
      * @param enabled whether auto handwriting initiation is enabled for this view.
      * @attr ref android.R.styleable#View_autoHandwritingEnabled
-     * @see EditorInfo#setStylusHandwritingEnabled(boolean)
      */
     public void setAutoHandwritingEnabled(boolean enabled) {
         if (enabled) {

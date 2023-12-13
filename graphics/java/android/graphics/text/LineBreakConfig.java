@@ -354,12 +354,12 @@ public final class LineBreakConfig implements Parcelable {
             return this;
         }
 
+        // TODO(316208691): Revive following removed API docs.
+        // Note: different from {@link #merge(LineBreakConfig)} if this function is called with
+        // {@link #LINE_BREAK_STYLE_UNSPECIFIED}, the line break style is reset to
+        // {@link #LINE_BREAK_STYLE_UNSPECIFIED}.
         /**
          * Sets the line-break style.
-         *
-         * Note: different from {@link #merge(LineBreakConfig)} if this function is called with
-         * {@link #LINE_BREAK_STYLE_UNSPECIFIED}, the line break style is reset to
-         * {@link #LINE_BREAK_STYLE_UNSPECIFIED}.
          *
          * @see <a href="https://unicode.org/reports/tr35/#UnicodeLineBreakStyleIdentifier">
          *     Unicode Line Break Style Identifier</a>
@@ -374,12 +374,12 @@ public final class LineBreakConfig implements Parcelable {
             return this;
         }
 
+        // TODO(316208691): Revive following removed API docs.
+        // Note: different from {@link #merge(LineBreakConfig)} method, if this function is called
+        // with {@link #LINE_BREAK_WORD_STYLE_UNSPECIFIED}, the line break style is reset to
+        // {@link #LINE_BREAK_WORD_STYLE_UNSPECIFIED}.
         /**
          * Sets the line-break word style.
-         *
-         * Note: different from {@link #merge(LineBreakConfig)} method, if this function is called
-         * with {@link #LINE_BREAK_WORD_STYLE_UNSPECIFIED}, the line break style is reset to
-         * {@link #LINE_BREAK_WORD_STYLE_UNSPECIFIED}.
          *
          * @see <a href="https://unicode.org/reports/tr35/#UnicodeLineBreakWordIdentifier">
          *     Unicode Line Break Word Identifier</a>
