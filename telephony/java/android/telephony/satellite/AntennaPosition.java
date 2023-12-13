@@ -35,10 +35,10 @@ import java.util.Objects;
 @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
 public final class AntennaPosition implements Parcelable {
     /** Antenna direction used for satellite communication. */
-    @NonNull AntennaDirection mAntennaDirection;
+    @NonNull private AntennaDirection mAntennaDirection;
 
     /** Enum corresponding to device hold position to be used by the end user. */
-    @SatelliteManager.DeviceHoldPosition int mSuggestedHoldPosition;
+    @SatelliteManager.DeviceHoldPosition private int mSuggestedHoldPosition;
 
     /**
      * @hide

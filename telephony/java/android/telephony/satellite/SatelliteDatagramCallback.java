@@ -22,10 +22,15 @@ import android.annotation.SystemApi;
 
 import com.android.internal.telephony.flags.Flags;
 
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
  * A callback class for listening to satellite datagrams.
+ * {@link SatelliteDatagramCallback} is registered to telephony when an app which invokes
+ * {@link SatelliteManager#registerForSatelliteDatagram(Executor, SatelliteDatagramCallback)},
+ * and {@link #onSatelliteDatagramReceived(long, SatelliteDatagram, int, Consumer)} will be invoked
+ * when a new datagram is received from satellite.
  *
  * @hide
  */
