@@ -4505,13 +4505,13 @@ public class AudioService extends IAudioService.Stub
 
     private void dumpFlags(PrintWriter pw) {
         pw.println("\nFun with Flags: ");
-        pw.println("\tandroid.media.audio.Flags.autoPublicVolumeApiHardening:"
+        pw.println("\tandroid.media.audio.autoPublicVolumeApiHardening:"
                 + autoPublicVolumeApiHardening());
-        pw.println("\tandroid.media.audio.Flags.focusFreezeTestApi:"
+        pw.println("\tandroid.media.audio.focusFreezeTestApi:"
                 + focusFreezeTestApi());
-        pw.println("\tcom.android.media.audio.Flags.bluetoothMacAddressAnonymization:"
+        pw.println("\tcom.android.media.audio.bluetoothMacAddressAnonymization:"
                 + bluetoothMacAddressAnonymization());
-        pw.println("\tcom.android.media.audio.Flags.disablePrescaleAbsoluteVolume:"
+        pw.println("\tcom.android.media.audio.disablePrescaleAbsoluteVolume:"
                 + disablePrescaleAbsoluteVolume());
     }
 
