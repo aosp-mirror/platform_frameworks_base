@@ -257,6 +257,7 @@ public final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (isAlreadyActiveSource(targetDevice, targetAddress, callback)) {
             return;
         }
+        removeAction(RequestActiveSourceAction.class);
         if (targetAddress == Constants.ADDR_INTERNAL) {
             handleSelectInternalSource();
             // Switching to internal source is always successful even when CEC control is disabled.
