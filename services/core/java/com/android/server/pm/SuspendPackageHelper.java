@@ -418,11 +418,24 @@ public final class SuspendPackageHelper {
         }
 
         String suspendingPackage = null;
+        String suspendedBySystem = null;
+        String qasPackage = null;
         for (int i = 0; i < userState.getSuspendParams().size(); i++) {
             suspendingPackage = userState.getSuspendParams().keyAt(i);
+            var suspendParams = userState.getSuspendParams().valueAt(i);
             if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
-                return suspendingPackage;
+                suspendedBySystem = suspendingPackage;
             }
+            if (suspendParams.isQuarantined() && qasPackage == null) {
+                qasPackage = suspendingPackage;
+            }
+        }
+        // Precedence: quarantined, then system, then suspending.
+        if (qasPackage != null) {
+            return qasPackage;
+        }
+        if (suspendedBySystem != null) {
+            return suspendedBySystem;
         }
         return suspendingPackage;
     }
