@@ -80,8 +80,6 @@ public class VcnManager {
      * <p>The VCN will only migrate to a Carrier WiFi network that has a signal strength greater
      * than, or equal to this threshold.
      *
-     * <p>WARNING: The VCN does not listen for changes to this key made after VCN startup.
-     *
      * @hide
      */
     @NonNull
@@ -93,8 +91,6 @@ public class VcnManager {
      *
      * <p>If the VCN's selected Carrier WiFi network has a signal strength less than this threshold,
      * the VCN will attempt to migrate away from the Carrier WiFi network.
-     *
-     * <p>WARNING: The VCN does not listen for changes to this key made after VCN startup.
      *
      * @hide
      */
@@ -119,6 +115,15 @@ public class VcnManager {
     @NonNull
     public static final String VCN_NETWORK_SELECTION_IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_KEY =
             "vcn_network_selection_ipsec_packet_loss_percent_threshold";
+
+    /**
+     * Key for the list of timeouts in minute to stop penalizing an underlying network candidate
+     *
+     * @hide
+     */
+    @NonNull
+    public static final String VCN_NETWORK_SELECTION_PENALTY_TIMEOUT_MINUTES_LIST_KEY =
+            "vcn_network_selection_penalty_timeout_minutes_list";
 
     // TODO: Add separate signal strength thresholds for 2.4 GHz and 5GHz
 
@@ -168,6 +173,7 @@ public class VcnManager {
                 VCN_NETWORK_SELECTION_WIFI_EXIT_RSSI_THRESHOLD_KEY,
                 VCN_NETWORK_SELECTION_POLL_IPSEC_STATE_INTERVAL_SECONDS_KEY,
                 VCN_NETWORK_SELECTION_IPSEC_PACKET_LOSS_PERCENT_THRESHOLD_KEY,
+                VCN_NETWORK_SELECTION_PENALTY_TIMEOUT_MINUTES_LIST_KEY,
                 VCN_RESTRICTED_TRANSPORTS_INT_ARRAY_KEY,
                 VCN_SAFE_MODE_TIMEOUT_SECONDS_KEY,
                 VCN_TUNNEL_AGGREGATION_SA_COUNT_MAX_KEY,

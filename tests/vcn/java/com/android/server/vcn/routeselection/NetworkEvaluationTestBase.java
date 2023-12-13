@@ -26,6 +26,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.net.IpSecConfig;
+import android.net.IpSecTransform;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -140,5 +142,9 @@ public abstract class NetworkEvaluationTestBase {
                         mock(IThermalService.class),
                         mock(Handler.class));
         setupSystemService(mContext, mPowerManager, Context.POWER_SERVICE, PowerManager.class);
+    }
+
+    protected IpSecTransform makeDummyIpSecTransform() throws Exception {
+        return new IpSecTransform(mContext, new IpSecConfig());
     }
 }
