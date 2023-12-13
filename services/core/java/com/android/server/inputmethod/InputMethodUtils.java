@@ -353,15 +353,6 @@ final class InputMethodUtils {
                     new TextUtils.SimpleStringSplitter(INPUT_METHOD_SUBTYPE_SEPARATOR));
         }
 
-        List<String> getEnabledInputMethodNames() {
-            List<String> result = new ArrayList<>();
-            for (Pair<String, ArrayList<String>> pair :
-                    getEnabledInputMethodsAndSubtypeListLocked()) {
-                result.add(pair.first);
-            }
-            return result;
-        }
-
         void appendAndPutEnabledInputMethodLocked(String id) {
             if (TextUtils.isEmpty(mEnabledInputMethodsStrCache)) {
                 // Add in the newly enabled input method.
