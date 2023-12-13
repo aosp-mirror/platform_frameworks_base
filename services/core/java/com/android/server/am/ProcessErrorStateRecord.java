@@ -51,11 +51,11 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.modules.expresslog.Counter;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.anr.AnrLatencyTracker;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.expresslog.Counter;
 import com.android.server.ResourcePressureUtil;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
@@ -297,6 +297,11 @@ class ProcessErrorStateRecord {
 
         ArrayList<Integer> firstPids = new ArrayList<>(5);
         SparseBooleanArray lastPids = new SparseBooleanArray(20);
+
+        if (mApp.isDebugging()) {
+            Slog.i(TAG, "Skipping debugged app ANR: " + this + " " + annotation);
+            return;
+        }
 
         mApp.getWindowProcessController().appEarlyNotResponding(annotation, () -> {
             latencyTracker.waitingOnAMSLockStarted();
