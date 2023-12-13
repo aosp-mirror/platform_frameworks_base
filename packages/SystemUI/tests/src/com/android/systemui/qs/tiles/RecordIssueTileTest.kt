@@ -30,8 +30,8 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.recordissue.RecordIssueDialogDelegate
 import com.android.systemui.res.R
-import com.android.systemui.settings.UserContextProvider
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -65,9 +65,9 @@ class RecordIssueTileTest : SysuiTestCase() {
     @Mock private lateinit var keyguardDismissUtil: KeyguardDismissUtil
     @Mock private lateinit var keyguardStateController: KeyguardStateController
     @Mock private lateinit var dialogLauncherAnimator: DialogLaunchAnimator
-    @Mock private lateinit var dialogFactory: SystemUIDialog.Factory
+    @Mock private lateinit var delegateFactory: RecordIssueDialogDelegate.Factory
+    @Mock private lateinit var dialogDelegate: RecordIssueDialogDelegate
     @Mock private lateinit var dialog: SystemUIDialog
-    @Mock private lateinit var userContextProvider: UserContextProvider
 
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: RecordIssueTile
@@ -76,7 +76,8 @@ class RecordIssueTileTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         whenever(host.context).thenReturn(mContext)
-        whenever(dialogFactory.create(any())).thenReturn(dialog)
+        whenever(delegateFactory.create(any())).thenReturn(dialogDelegate)
+        whenever(dialogDelegate.createDialog()).thenReturn(dialog)
 
         testableLooper = TestableLooper.get(this)
         tile =
@@ -93,8 +94,7 @@ class RecordIssueTileTest : SysuiTestCase() {
                 keyguardDismissUtil,
                 keyguardStateController,
                 dialogLauncherAnimator,
-                dialogFactory,
-                userContextProvider,
+                delegateFactory,
             )
     }
 
