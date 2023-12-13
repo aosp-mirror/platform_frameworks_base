@@ -44,6 +44,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Бул колдонуучу белгисиз колдонмолорду орното албайт"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Бул колдонуучу колдонмолорду орното албайт"</string>
     <string name="ok" msgid="7871959885003339302">"ЖАРАЙТ"</string>
+    <!-- no translation found for archive (4447791830199354721) -->
+    <skip />
     <string name="update_anyway" msgid="8792432341346261969">"Баары бир жаңыртылсын"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Колд. башкаруу"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Бош орун жок"</string>
@@ -58,6 +60,16 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Жаңыртууну чыгарып салуу"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> төмөнкү колдонмонун бөлүгү:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Бул колдонмону чыгарып саласызбы?"</string>
+    <!-- no translation found for archive_application_text (8482325710714386348) -->
+    <skip />
+    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
+    <skip />
+    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
+    <skip />
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Бул колдонмо "<b>"бардык"</b>" колдонуучулардан алынып салынсынбы? Бул колдонмо жана анын дайындары бул түзмөктүн "<b>"бардык"</b>" колдонуучуларынан өчүрүлөт."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Бул колдонмону <xliff:g id="USERNAME">%1$s</xliff:g> үчүн чыгарып саласызбы?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Бул колдонмону жумуш профилиңизден чыгарып саласызбы?"</string>
@@ -86,8 +98,6 @@
     <string name="manage_users" msgid="1243995386982560813">"Колдонуучуларды башкаруу"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосун чыгарып салуу мүмкүн эмес."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Таңгакты талдоодо маселе келип чыкты."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Орнотуу/чыгарып салуу аракеттери Android Wear\'де колдоого алынбайт."</string>
     <string name="message_staging" msgid="8032722385658438567">"Күтө туруңуз…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Белгисиз"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Коопсуздук максатында, планшетиңизге бул булактан колдонмолорду орнотууга болбойт. Бул параметрди каалаган убакта жөндөөлөрдөн өзгөртө аласыз."</string>
@@ -98,6 +108,8 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Планшетиңиз жана жеке дайын-даректериңиз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам планшетиңизге кандайдыр бир зыян келтирилсе же дайын-даректериңизды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Сыналгыңыз жана жеке дайын-даректериңиз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам сыналгыңызга кандайдыр бир зыян келтирилсе же дайын-даректериңизды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> клону"</string>
+    <!-- no translation found for archiving_app_label (1127085259724124725) -->
+    <skip />
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Улантуу"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Параметрлер"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Тагынма колдонмолорду орнотуу/чыгаруу"</string>
@@ -116,8 +128,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Аракет талап кылынат"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Бул колдонмону калыбына келтирүү үчүн кийинки кадамдарды аткарыңыз"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> өчүрүлгөн"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Бул колдонмону калыбына келтирүү үчүн Параметрлерден <xliff:g id="INSTALLERNAME">%1$s</xliff:g> кызматын иштетиңиз"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> орнотулду"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Бул колдонмону калыбына келтирүү үчүн <xliff:g id="INSTALLERNAME">%1$s</xliff:g> кызматын орнотуп алышыңыз керек"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Улантуу"</string>

@@ -44,6 +44,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"या वापरकर्त्याद्वारे अज्ञात अ‍ॅप्स इंस्टॉल केली जाऊ शकत नाहीत"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"या वापरकर्त्याला अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही"</string>
     <string name="ok" msgid="7871959885003339302">"ओके"</string>
+    <!-- no translation found for archive (4447791830199354721) -->
+    <skip />
     <string name="update_anyway" msgid="8792432341346261969">"तरीही अपडेट करा"</string>
     <string name="manage_applications" msgid="5400164782453975580">"अ‍ॅप्स व्यवस्थापन"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"जागा संपली"</string>
@@ -58,6 +60,16 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"अपडेट अनइंस्टॉल करा"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> खालील ॲपचा भाग आहे:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"तुम्हाला हे अ‍ॅप अनइंस्टॉल करायचे आहे का?"</string>
+    <!-- no translation found for archive_application_text (8482325710714386348) -->
+    <skip />
+    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
+    <skip />
+    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
+    <skip />
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"तुम्हाला हे अ‍ॅप "<b>"सर्व"</b>" वापरकर्त्यांसाठी अनइंस्टॉल करायचे आहे का? अ‍ॅप्लिकेशन आणि त्याचा डेटा डिव्हाइसवरील "<b>"सर्व"</b>" वापरकर्त्यांकडून काढला जाईल."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"तुम्हाला <xliff:g id="USERNAME">%1$s</xliff:g> वापरकर्त्यासाठी हे अ‍ॅप अनइंस्टॉल करायचे आहे का?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"तुम्हाला तुमच्या कार्य प्रोफाइलमधून हे ॲप अनइंस्टॉल करायचे आहे का?"</string>
@@ -86,8 +98,6 @@
     <string name="manage_users" msgid="1243995386982560813">"वापरकर्त्यांना व्यवस्‍थापित करा"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> अनइंस्टॉल केले जाऊ शकले नाही."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"पॅकेज पार्स करण्यात समस्या आली."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"इंस्टॉल करा/अनइंस्टॉल करा क्रिया Wear वर सपोर्ट करत नाहीत."</string>
     <string name="message_staging" msgid="8032722385658438567">"अ‍ॅप सुरुवातीच्या स्थितीत आहे…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"अज्ञात"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"तुमच्या सुरक्षिततेसाठी, तुमच्या टॅबलेटला सध्या या स्रोतावरील अज्ञात अ‍ॅप्स इंस्टॉल करण्याची अनुमती नाही. तुम्ही हे सेटिंग्‍ज मध्‍ये बदलू शकता."</string>
@@ -98,6 +108,8 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"तुमचा टॅबलेट आणि वैयक्तिक डेटा अज्ञात अ‍ॅप्‍सकडून होणार्‍या अटॅकमुळे अधिक असुरक्षित आहे. हे अ‍ॅप इंस्टॉल करून, तुम्‍ही सहमती देता की ते वापरल्‍याने तुमच्‍या टॅबलेटचे कोणत्‍याही प्रकारे होणारे नुकसान किंवा डेटा हानीसाठी तुम्‍ही जबाबदार आहात."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"तुमचा टीव्‍ही आणि वैयक्तिक डेटा अज्ञात अ‍ॅप्‍सकडून होणार्‍या अटॅकमुळे अधिक असुरक्षित आहे. हे अ‍ॅप इंस्टॉल करून, तुम्ही सहमती देता की ते वापरल्‍याने तुमच्‍या टीव्‍हीचे कोणत्‍याही प्रकारे होणारे नुकसान किंवा डेटा हानीसाठी तुम्‍ही जबाबदार आहात."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> क्लोन केलेले"</string>
+    <!-- no translation found for archiving_app_label (1127085259724124725) -->
+    <skip />
     <string name="anonymous_source_continue" msgid="4375745439457209366">"सुरू ठेवा"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"सेटिंग्ज"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"wear अ‍ॅप्स इंस्टॉल/अनइंस्टॉल करत आहे"</string>
@@ -116,8 +128,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"कृती आवश्यक आहे"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"हे अ‍ॅप रिस्टोअर करण्यासाठी पुढील पायऱ्या फॉलो करा"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> बंद केले आहे"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"हे अ‍ॅप रिस्टोअर करण्यासाठी, सेटिंग्ज मध्ये <xliff:g id="INSTALLERNAME">%1$s</xliff:g> सुरू करा"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> अनइंस्टॉल केले आहे"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"हे अ‍ॅप रिस्टोअर करण्यासाठी, तुम्हाला <xliff:g id="INSTALLERNAME">%1$s</xliff:g> इंस्टॉल करावे लागेल"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"पुढे सुरू ठेवा"</string>

@@ -44,6 +44,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Ten użytkownik nie może instalować nieznanych aplikacji"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Ten użytkownik nie może instalować aplikacji"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <!-- no translation found for archive (4447791830199354721) -->
+    <skip />
     <string name="update_anyway" msgid="8792432341346261969">"Zaktualizuj mimo to"</string>
     <string name="manage_applications" msgid="5400164782453975580">"Zarządzaj aplikacjami"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Brak miejsca"</string>
@@ -58,6 +60,16 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Odinstaluj aktualizację"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> jest częścią następującej aplikacji:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Odinstalować tę aplikację?"</string>
+    <!-- no translation found for archive_application_text (8482325710714386348) -->
+    <skip />
+    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
+    <skip />
+    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
+    <skip />
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Chcesz odinstalować tę aplikację dla "<b>"wszystkich"</b>" użytkowników? Ta aplikacja i jej dane zostaną usunięte dla "<b>"wszystkich"</b>" użytkowników na urządzeniu."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"Chcesz odinstalować tę aplikację dla użytkownika <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"Czy chcesz odinstalować tę aplikację z profilu służbowego?"</string>
@@ -86,8 +98,6 @@
     <string name="manage_users" msgid="1243995386982560813">"Zarządzaj użytkownikami"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"Nie można odinstalować aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Podczas analizowania pakietu wystąpił problem."</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear nie obsługuje instalowania ani odinstalowywania."</string>
     <string name="message_staging" msgid="8032722385658438567">"Przygotowuję aplikację…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"Inny"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"Ze względów bezpieczeństwa na Twoim tablecie nie można obecnie instalować nieznanych aplikacji z tego źródła. Możesz to zmienić w Ustawieniach."</string>
@@ -98,6 +108,8 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Dane na tablecie i prywatne są bardziej narażone na atak nieznanych aplikacji. Instalując tę aplikację, bierzesz na siebie odpowiedzialność za ewentualne uszkodzenie tabletu lub utratę danych w wyniku jej używania."</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Dane na telewizorze i prywatne są bardziej narażone na atak nieznanych aplikacji. Instalując tę aplikację, bierzesz na siebie odpowiedzialność za ewentualne uszkodzenie telewizora lub utratę danych w wyniku jej używania."</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"Klon aplikacji <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
+    <!-- no translation found for archiving_app_label (1127085259724124725) -->
+    <skip />
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Dalej"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Ustawienia"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instalacja/usuwanie aplikacji na Wear"</string>
@@ -116,8 +128,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"Wymagane działanie"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"Aby przywrócić tę aplikację, wykonaj następne czynności"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"Aplikacja <xliff:g id="INSTALLERNAME">%1$s</xliff:g> jest wyłączona"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"Aby przywrócić tę aplikację, włącz aplikację <xliff:g id="INSTALLERNAME">%1$s</xliff:g> w Ustawieniach"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"Aplikacja <xliff:g id="INSTALLERNAME">%1$s</xliff:g> jest odinstalowana"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"Aby przywrócić tę aplikację, musisz zainstalować aplikację <xliff:g id="INSTALLERNAME">%1$s</xliff:g>"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"Dalej"</string>

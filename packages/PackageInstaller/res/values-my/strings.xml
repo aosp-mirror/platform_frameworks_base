@@ -44,6 +44,8 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"အရင်းအမြစ်မသိသော အက်ပ်များကို ဤအသုံးပြုသူက ထည့်သွင်းခွင့်မရှိပါ"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ဤအသုံးပြုသူသည် အက်ပ်များကို ထည့်သွင်းခွင့်မရှိပါ"</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <!-- no translation found for archive (4447791830199354721) -->
+    <skip />
     <string name="update_anyway" msgid="8792432341346261969">"ဘာဖြစ်ဖြစ် အပ်ဒိတ်လုပ်ရန်"</string>
     <string name="manage_applications" msgid="5400164782453975580">"အက်ပ်စီမံခြင်း"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"နေရာလွတ်မရှိပါ"</string>
@@ -58,6 +60,16 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"အပ်ဒိတ်ကို ဖယ်ရှားရန်"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> သည် အောက်ပါအက်ပ်၏ တစ်စိတ်တစ်ဒေသဖြစ်သည်−"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"ဤအက်ပ်ကို ဖယ်ရှားလိုပါသလား။"</string>
+    <!-- no translation found for archive_application_text (8482325710714386348) -->
+    <skip />
+    <!-- no translation found for archive_application_text_all_users (3151229641681672580) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_work_profile (1450487362134779752) -->
+    <skip />
+    <!-- no translation found for archive_application_text_user (2586558895535581451) -->
+    <skip />
+    <!-- no translation found for archive_application_text_current_user_private_profile (1958423158655599132) -->
+    <skip />
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ဤအပလီကေးရှင်းကို အသုံးပြုသူ "<b>"အားလုံး"</b>" အတွက် ဖယ်ရှားလိုပါသလား။ ဤအပလီကေးရှင်းနှင့် သက်ဆိုင်ရာ အချက်အလက်များ အားလုံးကို "<b>" က "</b>" စက်အသုံးပြုသူများအတွက် ဖယ်ရှားလိုက်ပါမည်။"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"သင်သည် အသုံးပြုသူ <xliff:g id="USERNAME">%1$s</xliff:g> အတွက် ဤအကောင့်ကို ဖယ်ရှားလိုပါသလား။"</string>
     <string name="uninstall_application_text_current_user_work_profile" msgid="8788387739022366193">"သင့်အလုပ်ပရိုဖိုင်ကနေ ဤအက်ပ်ကို ဖယ်ရှားလိုတာ သေချာပါသလား။"</string>
@@ -86,8 +98,6 @@
     <string name="manage_users" msgid="1243995386982560813">"အသုံးပြုသူများအား စီမံရန်"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ဖယ်ရှား၍ မရပါ"</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"ပက်ကေ့ဂျ်ကို ခွဲခြမ်းစိတ်ဖြာနေစဉ် ပြဿနာရှိနေသည်။"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear ပေါ်တွင် ထည့်သွင်းခြင်း/ဖယ်ရှားခြင်းများကို ပံ့ပိုးမထားပါ။"</string>
     <string name="message_staging" msgid="8032722385658438567">"အက်ပ်ကို ပြင်ဆင်နေသည်…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"အမည်မသိ"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="7067510047443133095">"လုံခြုံရေးအရ ဤရင်းမြစ်မှရယူထားသည့် အမျိုးအမည်မသိသောအက်ပ်များကို သင့်တက်ဘလက်တွင် လောလောဆယ် ထည့်သွင်းခွင့်မရှိပါ။ ၎င်းကို ‘ဆက်တင်များ’ တွင် ပြောင်းနိုင်ပါသည်။"</string>
@@ -98,6 +108,8 @@
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"သင်၏ တက်ဘလက်နှင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များသည် အမျိုးအမည် မသိသောအက်ပ်များ၏ တိုက်ခိုက်ခြင်းကို ပိုမိုခံရနိုင်ပါသည်။ ဤအက်ပ်ကို ထည့်သွင်းအသုံးပြုခြင်းအားဖြင့် ဖြစ်ပေါ်လာနိုင်သော တက်ဘလက်ပျက်စီးမှု သို့မဟုတ် ဒေတာဆုံးရှုံးမှုများအတွက် သင့်ထံ၌သာ တာဝန်ရှိကြောင်း သဘောတူရာရောက်ပါသည်။"</string>
     <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"သင်၏ TV နှင့် ကိုယ်ရေးကိုယ်တာ အချက်အလက်များသည် အမျိုးအမည် မသိသောအက်ပ်များ၏ တိုက်ခိုက်ခြင်းကို ပိုမိုခံရနိုင်ပါသည်။ ဤအက်ပ်ကို ထည့်သွင်းအသုံးပြုခြင်းအားဖြင့် ဖြစ်ပေါ်လာနိုင်သော TV ပျက်စီးမှု သို့မဟုတ် ဒေတာဆုံးရှုံးမှုများအတွက် သင့်ထံ၌သာ တာဝန်ရှိကြောင်း သဘောတူရာရောက်ပါသည်။"</string>
     <string name="cloned_app_label" msgid="7503612829833756160">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ပုံတူပွား"</string>
+    <!-- no translation found for archiving_app_label (1127085259724124725) -->
+    <skip />
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ရှေ့ဆက်ရန်"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ဆက်တင်များ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"wear အက်ပ်ကိုထည့်သွင်းခြင်း/ဖယ်ရှားခြင်း"</string>
@@ -116,8 +128,7 @@
     <string name="unarchive_action_required_title" msgid="4971245740162604619">"လုပ်ဆောင်ချက် လိုအပ်သည်"</string>
     <string name="unarchive_action_required_body" msgid="1679431572983989231">"ဤအက်ပ်ကို ပြန်ယူရန် နောက်အဆင့်များအတိုင်း လုပ်ဆောင်ပါ"</string>
     <string name="unarchive_error_installer_disabled_title" msgid="4815715617014985605">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ကို ပိတ်ထားသည်"</string>
-    <!-- no translation found for unarchive_error_installer_disabled_body (4820821285907011729) -->
-    <skip />
+    <string name="unarchive_error_installer_disabled_body" msgid="4820821285907011729">"ဤအက်ပ်ကို ပြန်ယူရန် ဆက်တင်များတွင် <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ဖွင့်ပါ"</string>
     <string name="unarchive_error_installer_uninstalled_title" msgid="3748354109176326489">"<xliff:g id="INSTALLERNAME">%1$s</xliff:g> ကို ဖယ်ရှားထားသည်"</string>
     <string name="unarchive_error_installer_uninstalled_body" msgid="944733542444183204">"ဤအက်ပ်ကို ပြန်ယူရန် <xliff:g id="INSTALLERNAME">%1$s</xliff:g> ကို ထည့်သွင်းရမည်"</string>
     <string name="unarchive_action_required_continue" msgid="5711202111224184257">"ရှေ့ဆက်ရန်"</string>
